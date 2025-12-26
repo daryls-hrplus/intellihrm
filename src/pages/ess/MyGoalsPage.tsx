@@ -42,6 +42,8 @@ import {
   Clock,
   FileEdit,
   ScrollText,
+  Star,
+  Send,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -57,8 +59,13 @@ import { GoalMilestonesManager } from "@/components/performance/GoalMilestonesMa
 import { CheckInHistoryTimeline } from "@/components/performance/CheckInHistoryTimeline";
 import { GoalAdjustmentDialog } from "@/components/performance/goals/GoalAdjustmentDialog";
 import { GoalAuditTrail } from "@/components/performance/goals/GoalAuditTrail";
+import { RatingAcknowledgmentDialog } from "@/components/performance/RatingAcknowledgmentDialog";
+import { RatingDisputeDialog } from "@/components/performance/RatingDisputeDialog";
+import { RatingVisibilityTimeline } from "@/components/performance/RatingVisibilityTimeline";
 import { useGoalCheckIns, GoalCheckIn } from "@/hooks/useGoalCheckIns";
 import { usePendingAdjustments } from "@/hooks/usePendingAdjustments";
+import { useGoalRatingSubmissions } from "@/hooks/useGoalRatingSubmissions";
+import type { GoalRatingSubmission } from "@/types/goalRatings";
 import { toast } from "sonner";
 import { useLanguage } from "@/hooks/useLanguage";
 
@@ -113,9 +120,18 @@ export default function MyGoalsPage() {
   const [adjustmentDialogOpen, setAdjustmentDialogOpen] = useState(false);
   const [auditTrailDialogOpen, setAuditTrailDialogOpen] = useState(false);
   
+  // Rating acknowledgment dialogs
+  const [acknowledgmentDialogOpen, setAcknowledgmentDialogOpen] = useState(false);
+  const [disputeDialogOpen, setDisputeDialogOpen] = useState(false);
+  const [selectedSubmission, setSelectedSubmission] = useState<GoalRatingSubmission | null>(null);
+  const [pendingAcknowledgments, setPendingAcknowledgments] = useState<GoalRatingSubmission[]>([]);
+  
   const { getOverdueCheckIns, getRequestedCheckIns } = useGoalCheckIns();
   const [pendingCheckIns, setPendingCheckIns] = useState<Record<string, { dueDate: string | null; daysToDue: number | null }>>({});
   const [requestedCheckIns, setRequestedCheckIns] = useState<GoalCheckIn[]>([]);
+  
+  // Rating submissions hook
+  const { fetchSubmissionsByStatus } = useGoalRatingSubmissions({ companyId: company?.id || "" });
 
   const fetchGoals = async () => {
     if (!user?.id) return;
@@ -141,7 +157,21 @@ export default function MyGoalsPage() {
     fetchGoals();
     fetchPendingCheckIns();
     fetchRequestedCheckIns();
-  }, [user?.id]);
+    fetchPendingAcknowledgments();
+  }, [user?.id, company?.id]);
+  
+  const fetchPendingAcknowledgments = async () => {
+    if (!user?.id || !company?.id) return;
+    
+    try {
+      const submissions = await fetchSubmissionsByStatus("released");
+      // Filter to only show submissions for the current user's goals
+      const userSubmissions = submissions.filter(s => s.employee_id === user.id);
+      setPendingAcknowledgments(userSubmissions);
+    } catch (error) {
+      console.error("Error fetching pending acknowledgments:", error);
+    }
+  };
   
   const fetchPendingCheckIns = async () => {
     if (!user?.id) return;
@@ -373,6 +403,72 @@ export default function MyGoalsPage() {
         {/* Analytics Dashboard */}
         {showAnalytics && goals.length > 0 && (
           <GoalsAnalyticsDashboard goals={goals} compact />
+        )}
+        
+        {/* Pending Rating Acknowledgments */}
+        {pendingAcknowledgments.length > 0 && (
+          <Card className="border-primary/50 bg-primary/5">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="p-2 rounded-full bg-primary/10">
+                    <Star className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      Pending Rating Acknowledgments
+                      <Badge variant="outline" className="border-primary text-primary">
+                        {pendingAcknowledgments.length}
+                      </Badge>
+                    </CardTitle>
+                    <p className="text-sm text-muted-foreground">
+                      Your manager has released ratings awaiting your acknowledgment
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="space-y-3">
+                {pendingAcknowledgments.map((submission) => {
+                  const goal = goals.find(g => g.id === submission.goal_id);
+                  return (
+                    <div 
+                      key={submission.id}
+                      className="flex items-center justify-between gap-4 p-4 rounded-lg border bg-background"
+                    >
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-medium truncate">{goal?.title || "Goal"}</h4>
+                        <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
+                          <span className="flex items-center gap-1">
+                            <Star className="h-3 w-3 text-warning" />
+                            Final Score: <strong className="text-foreground">{submission.final_score?.toFixed(1) || "-"}</strong>
+                          </span>
+                          {submission.released_at && (
+                            <span className="flex items-center gap-1">
+                              <Send className="h-3 w-3" />
+                              Released {formatDateForDisplay(submission.released_at, "MMM d")}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <Button 
+                        size="sm"
+                        onClick={() => {
+                          setSelectedSubmission(submission);
+                          setSelectedGoal(goal || null);
+                          setAcknowledgmentDialogOpen(true);
+                        }}
+                      >
+                        <CheckCircle className="h-4 w-4 mr-1" />
+                        Acknowledge
+                      </Button>
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
         )}
         
         {/* Action Required Section - Manager-Requested Check-ins */}
@@ -880,6 +976,42 @@ export default function MyGoalsPage() {
           employees={user ? [{ id: user.id, full_name: "Me" }] : []}
           onSuccess={fetchGoals}
         />
+        
+        {/* Rating Acknowledgment Dialog */}
+        {selectedSubmission && selectedGoal && (
+          <RatingAcknowledgmentDialog
+            open={acknowledgmentDialogOpen}
+            onOpenChange={setAcknowledgmentDialogOpen}
+            submission={selectedSubmission}
+            goalTitle={selectedGoal.title}
+            companyId={company?.id || ""}
+            currentUserId={user?.id || ""}
+            allowDispute={true}
+            onSuccess={() => {
+              fetchPendingAcknowledgments();
+              setSelectedSubmission(null);
+            }}
+            onDispute={() => {
+              setDisputeDialogOpen(true);
+            }}
+          />
+        )}
+        
+        {/* Rating Dispute Dialog */}
+        {selectedSubmission && selectedGoal && (
+          <RatingDisputeDialog
+            open={disputeDialogOpen}
+            onOpenChange={setDisputeDialogOpen}
+            submissionId={selectedSubmission.id}
+            goalTitle={selectedGoal.title}
+            companyId={company?.id || ""}
+            onSuccess={() => {
+              fetchPendingAcknowledgments();
+              setSelectedSubmission(null);
+              setDisputeDialogOpen(false);
+            }}
+          />
+        )}
       </div>
     </AppLayout>
   );
