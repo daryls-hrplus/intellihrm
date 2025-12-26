@@ -54,6 +54,7 @@ import { GoalDependencyGraph } from "@/components/performance/GoalDependencyGrap
 import { GoalRiskDashboard } from "@/components/performance/GoalRiskDashboard";
 import { ManagerCheckInPrompt } from "@/components/performance/ManagerCheckInPrompt";
 import { GoalCheckInDialog } from "@/components/performance/GoalCheckInDialog";
+import { PendingAdjustmentsList } from "@/components/performance/PendingAdjustmentsList";
 import { useGoalApprovals } from "@/hooks/useGoalApprovals";
 import { useAuditLog } from "@/hooks/useAuditLog";
 import { useLanguage } from "@/hooks/useLanguage";
