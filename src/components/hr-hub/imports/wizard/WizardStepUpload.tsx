@@ -122,11 +122,11 @@ export function WizardStepUpload({
 
       onValidationComplete(data, parsedData);
 
-      if (data.basicErrorCount === 0 && data.aiErrorCount === 0) {
+      if (data.errorCount === 0 && data.warningCount === 0) {
         toast.success("All validations passed!");
-      } else if (data.basicErrorCount > 0) {
-        toast.warning(`Found ${data.basicErrorCount} issues that need attention`);
-      } else {
+      } else if (data.errorCount > 0) {
+        toast.warning(`Found ${data.errorCount} issues that need attention`);
+      } else if (data.warningCount > 0) {
         toast.info("AI found some suggestions to review");
       }
     } catch (error: any) {
@@ -173,7 +173,11 @@ export function WizardStepUpload({
       ) : null;
     }
 
-    const { totalRows, validRowCount, basicErrorCount, aiErrorCount, basicIssues, aiIssues } = validationResult;
+    const { totalRows, validRows, errorCount, warningCount, issues, aiInsights } = validationResult;
+    
+    // Split issues by severity
+    const errorIssues = issues?.filter((i: any) => i.severity === 'error') || [];
+    const warningIssues = issues?.filter((i: any) => i.severity === 'warning') || [];
 
     return (
       <div className="space-y-4">
@@ -181,32 +185,32 @@ export function WizardStepUpload({
         <div className="grid grid-cols-4 gap-3">
           <Card>
             <CardContent className="p-3 text-center">
-              <p className="text-2xl font-bold">{totalRows}</p>
+              <p className="text-2xl font-bold">{totalRows || 0}</p>
               <p className="text-xs text-muted-foreground">Total Rows</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-3 text-center">
-              <p className="text-2xl font-bold text-green-600">{validRowCount}</p>
+              <p className="text-2xl font-bold text-green-600">{validRows || 0}</p>
               <p className="text-xs text-muted-foreground">Valid</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-3 text-center">
-              <p className="text-2xl font-bold text-destructive">{basicErrorCount}</p>
+              <p className="text-2xl font-bold text-destructive">{errorCount || 0}</p>
               <p className="text-xs text-muted-foreground">Errors</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-3 text-center">
-              <p className="text-2xl font-bold text-yellow-600">{aiErrorCount}</p>
+              <p className="text-2xl font-bold text-yellow-600">{warningCount || 0}</p>
               <p className="text-xs text-muted-foreground">AI Warnings</p>
             </CardContent>
           </Card>
         </div>
 
         {/* Status */}
-        {basicErrorCount === 0 && aiErrorCount === 0 ? (
+        {errorCount === 0 && warningCount === 0 ? (
           <Alert className="bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800">
             <CheckCircle2 className="h-4 w-4 text-green-600" />
             <AlertTitle className="text-green-800 dark:text-green-200">Validation Passed</AlertTitle>
@@ -214,32 +218,52 @@ export function WizardStepUpload({
               All {totalRows} rows are valid and ready for import.
             </AlertDescription>
           </Alert>
-        ) : basicErrorCount > 0 ? (
+        ) : errorCount > 0 ? (
           <Alert variant="destructive">
             <XCircle className="h-4 w-4" />
             <AlertTitle>Validation Issues Found</AlertTitle>
             <AlertDescription>
-              {basicErrorCount} row(s) have errors that must be fixed before import.
+              {errorCount} row(s) have errors that must be fixed before import.
             </AlertDescription>
           </Alert>
-        ) : (
+        ) : warningCount > 0 ? (
           <Alert>
             <AlertTriangle className="h-4 w-4" />
             <AlertTitle>AI Suggestions</AlertTitle>
             <AlertDescription>
-              {aiErrorCount} potential issues found. Review before importing.
+              {warningCount} potential issues found. Review before importing.
             </AlertDescription>
           </Alert>
+        ) : null}
+
+        {/* AI Insights */}
+        {aiInsights?.length > 0 && (
+          <Card>
+            <CardContent className="p-4">
+              <h4 className="font-medium mb-3 flex items-center gap-2">
+                <Sparkles className="h-4 w-4 text-primary" />
+                AI Insights
+              </h4>
+              <ul className="space-y-1 text-sm text-muted-foreground">
+                {aiInsights.map((insight: string, i: number) => (
+                  <li key={i} className="flex items-start gap-2">
+                    <span>•</span>
+                    <span>{insight}</span>
+                  </li>
+                ))}
+              </ul>
+            </CardContent>
+          </Card>
         )}
 
         {/* Issue Details */}
-        {(basicIssues?.length > 0 || aiIssues?.length > 0) && (
+        {(errorIssues.length > 0 || warningIssues.length > 0) && (
           <Card>
             <CardContent className="p-4">
               <h4 className="font-medium mb-3">Issues Detected</h4>
               <ScrollArea className="max-h-[200px]">
                 <div className="space-y-2">
-                  {basicIssues?.slice(0, 10).map((issue: any, i: number) => (
+                  {errorIssues.slice(0, 10).map((issue: any, i: number) => (
                     <div key={i} className="flex items-start gap-2 text-sm p-2 bg-destructive/10 rounded">
                       <XCircle className="h-4 w-4 text-destructive shrink-0 mt-0.5" />
                       <div>
@@ -247,7 +271,7 @@ export function WizardStepUpload({
                         <span className="mx-2">·</span>
                         <code className="text-xs bg-muted px-1">{issue.field}</code>
                         <span className="mx-2">·</span>
-                        <span className="text-muted-foreground">{issue.issue}</span>
+                        <span className="text-muted-foreground">{issue.message || issue.issue}</span>
                         {issue.suggestion && (
                           <p className="text-xs text-muted-foreground mt-1">
                             💡 {issue.suggestion}
@@ -256,13 +280,13 @@ export function WizardStepUpload({
                       </div>
                     </div>
                   ))}
-                  {aiIssues?.slice(0, 5).map((issue: any, i: number) => (
+                  {warningIssues.slice(0, 5).map((issue: any, i: number) => (
                     <div key={`ai-${i}`} className="flex items-start gap-2 text-sm p-2 bg-yellow-500/10 rounded">
                       <Sparkles className="h-4 w-4 text-yellow-600 shrink-0 mt-0.5" />
                       <div>
                         <span className="font-medium">Row {issue.row}</span>
                         <span className="mx-2">·</span>
-                        <span className="text-muted-foreground">{issue.issue}</span>
+                        <span className="text-muted-foreground">{issue.message || issue.issue}</span>
                         {issue.suggestion && (
                           <p className="text-xs text-muted-foreground mt-1">
                             💡 {issue.suggestion}

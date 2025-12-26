@@ -43,8 +43,9 @@ export function WizardStepReview({
   const [editedValues, setEditedValues] = useState<Record<string, any>>({});
 
   const data = parsedData || [];
-  const issues = validationResult?.basicIssues || [];
-  const aiIssues = validationResult?.aiIssues || [];
+  const allIssues = validationResult?.issues || [];
+  const errorIssues = allIssues.filter((i: any) => i.severity === 'error');
+  const warningIssues = allIssues.filter((i: any) => i.severity === 'warning');
 
   // Get all unique headers from data
   const headers = useMemo(() => {
@@ -55,12 +56,12 @@ export function WizardStepReview({
   // Create a map of row -> field -> issue for quick lookup
   const issueMap = useMemo(() => {
     const map: Record<number, Record<string, any>> = {};
-    [...issues, ...aiIssues].forEach((issue: any) => {
+    allIssues.forEach((issue: any) => {
       if (!map[issue.row]) map[issue.row] = {};
-      map[issue.row][issue.field] = issue;
+      map[issue.row][issue.field] = { ...issue, issue: issue.message || issue.issue };
     });
     return map;
-  }, [issues, aiIssues]);
+  }, [allIssues]);
 
   // Filter data based on search and error filter
   const filteredData = useMemo(() => {
@@ -129,18 +130,18 @@ export function WizardStepReview({
         <div className="flex items-center gap-4">
           <Badge variant="secondary" className="gap-1">
             <CheckCircle2 className="h-3 w-3" />
-            {validationResult?.validRowCount || 0} valid
+            {validationResult?.validRows || 0} valid
           </Badge>
-          {validationResult?.basicErrorCount > 0 && (
+          {validationResult?.errorCount > 0 && (
             <Badge variant="destructive" className="gap-1">
               <XCircle className="h-3 w-3" />
-              {validationResult.basicErrorCount} errors
+              {validationResult.errorCount} errors
             </Badge>
           )}
-          {validationResult?.aiErrorCount > 0 && (
+          {validationResult?.warningCount > 0 && (
             <Badge variant="outline" className="gap-1 text-yellow-600">
               <AlertTriangle className="h-3 w-3" />
-              {validationResult.aiErrorCount} warnings
+              {validationResult.warningCount} warnings
             </Badge>
           )}
         </div>
@@ -288,11 +289,11 @@ export function WizardStepReview({
         </div>
       </div>
 
-      {validationResult?.basicErrorCount > 0 && (
+      {validationResult?.errorCount > 0 && (
         <Alert variant="destructive">
           <AlertTriangle className="h-4 w-4" />
           <AlertDescription>
-            You have {validationResult.basicErrorCount} error(s) that should be fixed before importing. 
+            You have {validationResult.errorCount} error(s) that should be fixed before importing. 
             Only valid rows will be imported.
           </AlertDescription>
         </Alert>
