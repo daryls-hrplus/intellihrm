@@ -15,6 +15,7 @@ import {
 
 // Import wizard step components
 import { WizardStepWelcome } from "./wizard/WizardStepWelcome";
+import { WizardStepCompensationModel, CompensationModel, getRequiredImportsForModel } from "./wizard/WizardStepCompensationModel";
 import { WizardStepSelectType } from "./wizard/WizardStepSelectType";
 import { WizardStepTemplate } from "./wizard/WizardStepTemplate";
 import { WizardStepUpload } from "./wizard/WizardStepUpload";
@@ -24,6 +25,7 @@ import { WizardStepCommit } from "./wizard/WizardStepCommit";
 export interface WizardState {
   importType: string | null;
   companyId: string | null;
+  compensationModel: CompensationModel | null;
   file: File | null;
   parsedData: any[] | null;
   validationResult: any | null;
@@ -41,6 +43,7 @@ interface ImportWizardProps {
 
 const WIZARD_STEPS = [
   { title: "Welcome", description: "Overview" },
+  { title: "Compensation", description: "Pay model" },
   { title: "Select Type", description: "Choose data" },
   { title: "Template", description: "Download" },
   { title: "Upload", description: "Validate" },
@@ -54,6 +57,7 @@ export function ImportWizard({ companyId, onComplete, onCancel }: ImportWizardPr
   const [state, setState] = useState<WizardState>({
     importType: null,
     companyId: companyId || null,
+    compensationModel: null,
     file: null,
     parsedData: null,
     validationResult: null,
@@ -84,16 +88,18 @@ export function ImportWizard({ companyId, onComplete, onCancel }: ImportWizardPr
     switch (currentStep) {
       case 0: // Welcome
         return true;
-      case 1: // Select Type
+      case 1: // Compensation Model
+        return !!state.compensationModel;
+      case 2: // Select Type
         return !!state.importType;
-      case 2: // Template
+      case 3: // Template
         return true;
-      case 3: // Upload
+      case 4: // Upload
         return !!state.validationResult && !state.isValidating;
-      case 4: // Review
+      case 5: // Review
         return !!state.validationResult && 
           (state.validationResult.errorCount === 0 || state.validationResult.validRows > 0);
-      case 5: // Commit
+      case 6: // Commit
         return state.committedCount > 0;
       default:
         return false;
@@ -136,19 +142,28 @@ export function ImportWizard({ companyId, onComplete, onCancel }: ImportWizardPr
         return <WizardStepWelcome />;
       case 1:
         return (
-          <WizardStepSelectType
-            selectedType={state.importType}
-            onSelectType={(type) => updateState({ importType: type })}
-            companyId={state.companyId}
+          <WizardStepCompensationModel
+            selectedModel={state.compensationModel}
+            onSelectModel={(model) => updateState({ compensationModel: model })}
           />
         );
       case 2:
         return (
-          <WizardStepTemplate
-            importType={state.importType!}
+          <WizardStepSelectType
+            selectedType={state.importType}
+            onSelectType={(type) => updateState({ importType: type })}
+            companyId={state.companyId}
+            compensationModel={state.compensationModel}
           />
         );
       case 3:
+        return (
+          <WizardStepTemplate
+            importType={state.importType!}
+            compensationModel={state.compensationModel}
+          />
+        );
+      case 4:
         return (
           <WizardStepUpload
             importType={state.importType!}
@@ -163,7 +178,7 @@ export function ImportWizard({ companyId, onComplete, onCancel }: ImportWizardPr
             onValidationStart={() => updateState({ isValidating: true })}
           />
         );
-      case 4:
+      case 5:
         return (
           <WizardStepReview
             importType={state.importType!}
@@ -172,7 +187,7 @@ export function ImportWizard({ companyId, onComplete, onCancel }: ImportWizardPr
             onDataChange={(data) => updateState({ parsedData: data })}
           />
         );
-      case 5:
+      case 6:
         return (
           <WizardStepCommit
             importType={state.importType!}
@@ -182,6 +197,7 @@ export function ImportWizard({ companyId, onComplete, onCancel }: ImportWizardPr
             batchId={state.batchId}
             isCommitting={state.isCommitting}
             committedCount={state.committedCount}
+            compensationModel={state.compensationModel}
             onBatchCreated={(batchId) => updateState({ batchId })}
             onCommitStart={() => updateState({ isCommitting: true })}
             onCommitComplete={(count) => updateState({ isCommitting: false, committedCount: count })}

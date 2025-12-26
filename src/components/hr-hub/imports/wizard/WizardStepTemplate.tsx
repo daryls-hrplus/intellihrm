@@ -9,9 +9,11 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { toast } from "sonner";
+import { CompensationModel } from "./WizardStepCompensationModel";
 
 interface WizardStepTemplateProps {
   importType: string;
+  compensationModel?: CompensationModel | null;
 }
 
 interface TemplateField {
@@ -165,6 +167,85 @@ const TEMPLATE_CONFIGS: Record<string, {
   },
 };
 
+// Compensation-specific templates
+const COMPENSATION_TEMPLATE_CONFIGS: Record<string, { 
+  headers: string[]; 
+  fields: TemplateField[];
+  examples: string[][];
+  tips: string[];
+}> = {
+  salary_grades: {
+    headers: ["company_code", "grade_code", "grade_name", "description", "min_salary", "mid_salary", "max_salary", "currency", "start_date", "end_date", "is_active"],
+    fields: [
+      { name: "company_code", required: true, description: "Company code", example: "COMP001" },
+      { name: "grade_code", required: true, description: "Unique grade code", example: "G5" },
+      { name: "grade_name", required: true, description: "Grade display name", example: "Senior Level" },
+      { name: "description", required: false, description: "Grade description", example: "Senior professional roles" },
+      { name: "min_salary", required: false, description: "Minimum salary for grade", example: "50000" },
+      { name: "mid_salary", required: false, description: "Midpoint salary", example: "65000" },
+      { name: "max_salary", required: false, description: "Maximum salary for grade", example: "80000" },
+      { name: "currency", required: false, description: "Currency code (ISO)", example: "USD" },
+      { name: "start_date", required: false, description: "Effective start date (YYYY-MM-DD)", example: "2024-01-01" },
+      { name: "end_date", required: false, description: "End date (optional)", example: "" },
+      { name: "is_active", required: false, description: "Active status", example: "true" },
+    ],
+    examples: [
+      ["COMP001", "G1", "Entry Level", "Entry-level positions", "30000", "35000", "40000", "USD", "2024-01-01", "", "true"],
+      ["COMP001", "G5", "Senior Level", "Senior professional roles", "50000", "65000", "80000", "USD", "2024-01-01", "", "true"],
+    ],
+    tips: [
+      "Import salary grades BEFORE positions",
+      "Company code must match an existing company",
+      "Salary values should be annual amounts",
+      "Grade codes should be unique within a company",
+    ],
+  },
+  pay_spines: {
+    headers: ["company_code", "spine_code", "spine_name", "description", "effective_date", "end_date", "currency", "is_active"],
+    fields: [
+      { name: "company_code", required: true, description: "Company code", example: "COMP001" },
+      { name: "spine_code", required: true, description: "Unique pay spine code", example: "ADMIN" },
+      { name: "spine_name", required: true, description: "Pay spine display name", example: "Administrative Scale" },
+      { name: "description", required: false, description: "Spine description", example: "Pay scale for admin staff" },
+      { name: "effective_date", required: false, description: "Effective start date (YYYY-MM-DD)", example: "2024-01-01" },
+      { name: "end_date", required: false, description: "End date (optional)", example: "" },
+      { name: "currency", required: false, description: "Currency code (ISO)", example: "USD" },
+      { name: "is_active", required: false, description: "Active status", example: "true" },
+    ],
+    examples: [
+      ["COMP001", "ADMIN", "Administrative Scale", "Pay scale for admin staff", "2024-01-01", "", "USD", "true"],
+      ["COMP001", "TECH", "Technical Scale", "Pay scale for technical staff", "2024-01-01", "", "USD", "true"],
+    ],
+    tips: [
+      "Import pay spines BEFORE spinal points",
+      "Each pay spine represents a complete pay scale",
+      "Spine codes should be unique within a company",
+    ],
+  },
+  spinal_points: {
+    headers: ["spine_code", "point_number", "annual_salary", "hourly_rate", "effective_date", "end_date", "notes"],
+    fields: [
+      { name: "spine_code", required: true, description: "Parent pay spine code", example: "ADMIN" },
+      { name: "point_number", required: true, description: "Point number on the spine", example: "1" },
+      { name: "annual_salary", required: false, description: "Annual salary at this point", example: "35000" },
+      { name: "hourly_rate", required: false, description: "Hourly rate (if applicable)", example: "" },
+      { name: "effective_date", required: false, description: "Effective start date (YYYY-MM-DD)", example: "2024-01-01" },
+      { name: "end_date", required: false, description: "End date (optional)", example: "" },
+      { name: "notes", required: false, description: "Additional notes", example: "" },
+    ],
+    examples: [
+      ["ADMIN", "1", "35000", "", "2024-01-01", "", "Entry point"],
+      ["ADMIN", "2", "37000", "", "2024-01-01", "", ""],
+      ["ADMIN", "3", "39000", "", "2024-01-01", "", ""],
+    ],
+    tips: [
+      "Pay spine must exist before importing points",
+      "Point numbers should be sequential within each spine",
+      "Provide either annual_salary or hourly_rate",
+    ],
+  },
+};
+
 // Default template for types not explicitly configured
 const DEFAULT_TEMPLATE = {
   headers: ["code", "name", "description", "is_active"],
@@ -178,10 +259,10 @@ const DEFAULT_TEMPLATE = {
   tips: ["Ensure codes are unique", "Use consistent naming conventions"],
 };
 
-export function WizardStepTemplate({ importType }: WizardStepTemplateProps) {
+export function WizardStepTemplate({ importType, compensationModel }: WizardStepTemplateProps) {
   // Handle prefixed import types
   const baseType = importType.replace("company_structure_", "");
-  const config = TEMPLATE_CONFIGS[baseType] || DEFAULT_TEMPLATE;
+  const config = TEMPLATE_CONFIGS[baseType] || COMPENSATION_TEMPLATE_CONFIGS[baseType] || DEFAULT_TEMPLATE;
 
   const downloadTemplate = () => {
     const csvContent = [

@@ -20,6 +20,10 @@ import {
   FileWarning
 } from "lucide-react";
 import { transformPositionsData, generateFailureReport } from "./positionsTransformer";
+import { transformSalaryGradesData, generateSalaryGradesFailureReport } from "./salaryGradesTransformer";
+import { transformPaySpinesData, generatePaySpinesFailureReport } from "./paySpinesTransformer";
+import { transformSpinalPointsData, generateSpinalPointsFailureReport } from "./spinalPointsTransformer";
+import { CompensationModel } from "./WizardStepCompensationModel";
 
 interface WizardStepCommitProps {
   importType: string;
@@ -29,6 +33,7 @@ interface WizardStepCommitProps {
   batchId: string | null;
   isCommitting: boolean;
   committedCount: number;
+  compensationModel?: CompensationModel | null;
   onBatchCreated: (batchId: string) => void;
   onCommitStart: () => void;
   onCommitComplete: (count: number) => void;
@@ -44,6 +49,9 @@ const IMPORT_TYPE_LABELS: Record<string, string> = {
   positions: "Positions",
   employees: "Employees",
   new_hires: "New Hires",
+  salary_grades: "Salary Grades",
+  pay_spines: "Pay Spines",
+  spinal_points: "Spinal Points",
 };
 
 interface ImportFailure {
@@ -60,6 +68,7 @@ export function WizardStepCommit({
   batchId,
   isCommitting,
   committedCount,
+  compensationModel,
   onBatchCreated,
   onCommitStart,
   onCommitComplete,
@@ -140,7 +149,7 @@ export function WizardStepCommit({
       const allWarnings: Array<{ rowIndex: number; field: string; message: string }> = [];
       const importedIds: string[] = [];
 
-      // Use specialized transformer for positions
+      // Use specialized transformers based on import type
       if (importType === "positions") {
         setProgress(30);
         const transformResult = await transformPositionsData(validData, companyId);
@@ -151,7 +160,6 @@ export function WizardStepCommit({
         
         setProgress(50);
 
-        // Insert transformed data in batches
         if (transformResult.transformed.length > 0) {
           const batchSize = 50;
           for (let i = 0; i < transformResult.transformed.length; i += batchSize) {
@@ -163,23 +171,86 @@ export function WizardStepCommit({
               .select("id");
 
             if (insertError) {
-              // All rows in this batch failed
               batch.forEach((_, idx) => {
-                allErrors.push({
-                  rowIndex: i + idx,
-                  row: validData[i + idx],
-                  error: insertError.message,
-                });
+                allErrors.push({ rowIndex: i + idx, row: validData[i + idx], error: insertError.message });
               });
               failedCount += batch.length;
             } else {
               successCount += batch.length;
               importedIds.push(...(insertData?.map((d) => d.id) || []));
             }
-
             setProgress(50 + Math.round((i / transformResult.transformed.length) * 40));
           }
         }
+      } else if (importType === "salary_grades") {
+        setProgress(30);
+        const transformResult = await transformSalaryGradesData(validData, companyId);
+        allErrors.push(...transformResult.errors);
+        allWarnings.push(...transformResult.warnings);
+        failedCount = transformResult.errors.length;
+        setProgress(50);
+
+        if (transformResult.transformed.length > 0) {
+          const { data: insertData, error: insertError } = await supabase
+            .from("salary_grades")
+            .insert(transformResult.transformed)
+            .select("id");
+
+          if (insertError) {
+            allErrors.push({ rowIndex: 0, row: {}, error: insertError.message });
+            failedCount = transformResult.transformed.length;
+          } else {
+            successCount = transformResult.transformed.length;
+            importedIds.push(...(insertData?.map((d) => d.id) || []));
+          }
+        }
+        setProgress(90);
+      } else if (importType === "pay_spines") {
+        setProgress(30);
+        const transformResult = await transformPaySpinesData(validData, companyId);
+        allErrors.push(...transformResult.errors);
+        allWarnings.push(...transformResult.warnings);
+        failedCount = transformResult.errors.length;
+        setProgress(50);
+
+        if (transformResult.transformed.length > 0) {
+          const { data: insertData, error: insertError } = await supabase
+            .from("pay_spines")
+            .insert(transformResult.transformed)
+            .select("id");
+
+          if (insertError) {
+            allErrors.push({ rowIndex: 0, row: {}, error: insertError.message });
+            failedCount = transformResult.transformed.length;
+          } else {
+            successCount = transformResult.transformed.length;
+            importedIds.push(...(insertData?.map((d) => d.id) || []));
+          }
+        }
+        setProgress(90);
+      } else if (importType === "spinal_points") {
+        setProgress(30);
+        const transformResult = await transformSpinalPointsData(validData, companyId);
+        allErrors.push(...transformResult.errors);
+        allWarnings.push(...transformResult.warnings);
+        failedCount = transformResult.errors.length;
+        setProgress(50);
+
+        if (transformResult.transformed.length > 0) {
+          const { data: insertData, error: insertError } = await supabase
+            .from("spinal_points")
+            .insert(transformResult.transformed)
+            .select("id");
+
+          if (insertError) {
+            allErrors.push({ rowIndex: 0, row: {}, error: insertError.message });
+            failedCount = transformResult.transformed.length;
+          } else {
+            successCount = transformResult.transformed.length;
+            importedIds.push(...(insertData?.map((d) => d.id) || []));
+          }
+        }
+        setProgress(90);
       } else {
         // Original logic for other import types
         const batchSize = 50;
