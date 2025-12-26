@@ -5,10 +5,15 @@ import { PerformanceAnalyticsDashboard } from "@/components/performance/Performa
 import { LeaveCompanyFilter, useLeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
 import { DepartmentFilter, useDepartmentFilter } from "@/components/filters/DepartmentFilter";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BarChart3, ChevronLeft } from "lucide-react";
+import { BarChart3, ChevronLeft, TrendingUp, CheckCircle, Network, Users } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { useLanguage } from "@/hooks/useLanguage";
 import { AIModuleReportBuilder } from "@/components/shared/AIModuleReportBuilder";
+import { CompletionRatesTrend } from "@/components/performance/insights/CompletionRatesTrend";
+import { GoalQualityReport } from "@/components/performance/insights/GoalQualityReport";
+import { AlignmentCascadeChart } from "@/components/performance/insights/AlignmentCascadeChart";
+import { EmployeeWorkloadHeatmap } from "@/components/performance/insights/EmployeeWorkloadHeatmap";
+import { OverloadedEmployeesList } from "@/components/performance/insights/OverloadedEmployeesList";
 
 export default function PerformanceAnalyticsPage() {
   const { t } = useLanguage();
@@ -57,15 +62,73 @@ export default function PerformanceAnalyticsPage() {
           </div>
         </div>
 
-        <Tabs defaultValue="charts" className="space-y-4">
-          <TabsList>
-            <TabsTrigger value="charts">{t("common.charts")}</TabsTrigger>
+        <Tabs defaultValue="overview" className="space-y-4">
+          <TabsList className="flex-wrap h-auto gap-1">
+            <TabsTrigger value="overview" className="gap-1.5">
+              <BarChart3 className="h-4 w-4" />
+              {t("common.overview")}
+            </TabsTrigger>
+            <TabsTrigger value="completion" className="gap-1.5">
+              <TrendingUp className="h-4 w-4" />
+              {t("performance.insights.completionRates")}
+            </TabsTrigger>
+            <TabsTrigger value="quality" className="gap-1.5">
+              <CheckCircle className="h-4 w-4" />
+              {t("performance.insights.goalQuality")}
+            </TabsTrigger>
+            <TabsTrigger value="alignment" className="gap-1.5">
+              <Network className="h-4 w-4" />
+              {t("performance.insights.alignment")}
+            </TabsTrigger>
+            <TabsTrigger value="workload" className="gap-1.5">
+              <Users className="h-4 w-4" />
+              {t("performance.insights.workload")}
+            </TabsTrigger>
             <TabsTrigger value="ai-banded">{t("reports.aiBandedReports")}</TabsTrigger>
             <TabsTrigger value="ai-bi">{t("reports.aiBIReports")}</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="charts">
+          <TabsContent value="overview">
             {selectedCompanyId && <PerformanceAnalyticsDashboard companyId={selectedCompanyId} />}
+          </TabsContent>
+
+          <TabsContent value="completion">
+            {selectedCompanyId && (
+              <CompletionRatesTrend 
+                companyId={selectedCompanyId !== "all" ? selectedCompanyId : undefined} 
+              />
+            )}
+          </TabsContent>
+
+          <TabsContent value="quality">
+            {selectedCompanyId && (
+              <GoalQualityReport 
+                companyId={selectedCompanyId !== "all" ? selectedCompanyId : undefined} 
+              />
+            )}
+          </TabsContent>
+
+          <TabsContent value="alignment">
+            {selectedCompanyId && (
+              <AlignmentCascadeChart 
+                companyId={selectedCompanyId !== "all" ? selectedCompanyId : undefined} 
+              />
+            )}
+          </TabsContent>
+
+          <TabsContent value="workload" className="space-y-6">
+            {selectedCompanyId && (
+              <>
+                <EmployeeWorkloadHeatmap 
+                  companyId={selectedCompanyId !== "all" ? selectedCompanyId : undefined}
+                  departmentId={selectedDepartmentId !== "all" ? selectedDepartmentId : undefined}
+                />
+                <OverloadedEmployeesList 
+                  companyId={selectedCompanyId !== "all" ? selectedCompanyId : undefined}
+                  departmentId={selectedDepartmentId !== "all" ? selectedDepartmentId : undefined}
+                />
+              </>
+            )}
           </TabsContent>
 
           <TabsContent value="ai-banded">

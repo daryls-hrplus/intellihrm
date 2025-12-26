@@ -6503,6 +6503,12 @@
       "analytics": "Analytics",
       "analyticsDesc": "Performance insights and trends"
     },
+    "insights": {
+      "completionRates": "Completion Rates",
+      "goalQuality": "Goal Quality",
+      "alignment": "Alignment",
+      "workload": "Workload"
+    },
     "stats": {
       "activeGoals": "Active Goals",
       "pendingReviews": "Pending Reviews",
