@@ -53,6 +53,9 @@ import {
   ChevronDown,
   Flag,
   History,
+  Lock,
+  FileEdit,
+  ClipboardList,
 } from "lucide-react";
 import {
   parseExtendedAttributes,
@@ -80,6 +83,10 @@ import { GoalDependencyManager } from "./GoalDependencyManager";
 import { GoalCheckInDialog } from "./GoalCheckInDialog";
 import { GoalMilestonesManager } from "./GoalMilestonesManager";
 import { CheckInHistoryTimeline } from "./CheckInHistoryTimeline";
+import { GoalLockDialog } from "./goals/GoalLockDialog";
+import { GoalAdjustmentDialog } from "./goals/GoalAdjustmentDialog";
+import { GoalAuditTrail } from "./goals/GoalAuditTrail";
+import { useGoalAdjustments } from "@/hooks/useGoalAdjustments";
 
 type GoalStatus = 'draft' | 'active' | 'in_progress' | 'completed' | 'cancelled' | 'overdue';
 type GoalType = 'okr_objective' | 'okr_key_result' | 'smart_goal';
@@ -160,9 +167,16 @@ export function EnhancedGoalCard({
   const [checkInDialogOpen, setCheckInDialogOpen] = useState(false);
   const [milestonesDialogOpen, setMilestonesDialogOpen] = useState(false);
   const [historyDialogOpen, setHistoryDialogOpen] = useState(false);
+  const [lockDialogOpen, setLockDialogOpen] = useState(false);
+  const [adjustmentDialogOpen, setAdjustmentDialogOpen] = useState(false);
+  const [auditTrailDialogOpen, setAuditTrailDialogOpen] = useState(false);
   const [subMetricsExpanded, setSubMetricsExpanded] = useState(false);
   const [subMetricProgress, setSubMetricProgress] = useState<{ name: string; progress: number; weight: number }[]>([]);
   const [hasSubMetrics, setHasSubMetrics] = useState(false);
+
+  // Fetch lock info for the goal
+  const { lockInfo } = useGoalAdjustments(goal.id);
+  const isLocked = lockInfo?.is_locked ?? false;
 
   const isOverdue = goal.due_date && isPast(new Date(goal.due_date)) && goal.status !== "completed";
   const daysUntilDue = goal.due_date ? differenceInDays(new Date(goal.due_date), new Date()) : null;
@@ -248,13 +262,25 @@ export function EnhancedGoalCard({
   };
 
   return (
-    <Card className={`transition-all hover:shadow-md ${isOverdue ? "border-warning/50" : ""} ${isAtRisk && !isOverdue ? "border-warning/30" : ""}`}>
+    <Card className={`transition-all hover:shadow-md ${isOverdue ? "border-warning/50" : ""} ${isAtRisk && !isOverdue ? "border-warning/30" : ""} ${isLocked ? "border-muted-foreground/50 opacity-90" : ""}`}>
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
               <LevelIcon className="h-4 w-4 text-muted-foreground flex-shrink-0" />
               <CardTitle className="text-base truncate">{goal.title}</CardTitle>
+              {isLocked && (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <Lock className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Goal is locked{lockInfo?.lock_reason ? `: ${lockInfo.lock_reason}` : ""}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
               {isMandatory && (
                 <span title="Mandatory/Compliance Goal">
                   <ShieldAlert className="h-4 w-4 text-warning flex-shrink-0" />
@@ -398,6 +424,19 @@ export function EnhancedGoalCard({
                     <DropdownMenuItem onClick={() => setHistoryDialogOpen(true)}>
                       <History className="mr-2 h-4 w-4" />
                       Progress History
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => setAuditTrailDialogOpen(true)}>
+                      <ClipboardList className="mr-2 h-4 w-4" />
+                      Audit Trail
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setAdjustmentDialogOpen(true)} disabled={isLocked}>
+                      <FileEdit className="mr-2 h-4 w-4" />
+                      Record Adjustment
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setLockDialogOpen(true)}>
+                      <Lock className="mr-2 h-4 w-4" />
+                      {isLocked ? "Unlock Goal" : "Lock Goal"}
                     </DropdownMenuItem>
                   </>
                 )}
@@ -628,6 +667,32 @@ export function EnhancedGoalCard({
             <DialogTitle>Progress History - {goal.title}</DialogTitle>
           </DialogHeader>
           <CheckInHistoryTimeline goalId={goal.id} showChart={true} />
+        </DialogContent>
+      </Dialog>
+
+      {/* Goal Lock Dialog */}
+      <GoalLockDialog
+        goalId={goal.id}
+        goalTitle={goal.title}
+        open={lockDialogOpen}
+        onOpenChange={setLockDialogOpen}
+      />
+
+      {/* Goal Adjustment Dialog */}
+      <GoalAdjustmentDialog
+        goalId={goal.id}
+        goalTitle={goal.title}
+        open={adjustmentDialogOpen}
+        onOpenChange={setAdjustmentDialogOpen}
+      />
+
+      {/* Audit Trail Dialog */}
+      <Dialog open={auditTrailDialogOpen} onOpenChange={setAuditTrailDialogOpen}>
+        <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Audit Trail - {goal.title}</DialogTitle>
+          </DialogHeader>
+          <GoalAuditTrail goalId={goal.id} />
         </DialogContent>
       </Dialog>
     </Card>
