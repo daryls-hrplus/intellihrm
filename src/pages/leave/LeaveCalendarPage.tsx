@@ -108,7 +108,6 @@ export default function LeaveCalendarPage() {
         setLeaveEvents([]);
       } else if (data) {
         let events: LeaveEvent[] = data
-          .filter((r: any) => r.profiles?.department_id)
           .map((r: any) => ({
             id: r.id,
             employee_id: r.employee_id,
@@ -118,7 +117,7 @@ export default function LeaveCalendarPage() {
             start_date: r.start_date,
             end_date: r.end_date,
             status: r.status,
-            department_id: r.profiles?.department_id,
+            department_id: r.profiles?.department_id || null,
           }));
 
         // Filter by department if selected
