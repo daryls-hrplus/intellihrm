@@ -22,6 +22,8 @@ import {
   ChevronRight,
   Globe,
   Filter,
+  Sparkles,
+  Wand2,
 } from "lucide-react";
 import { generateTranslationRecords, getTranslationStats } from "@/lib/translationImporter";
 import { Button } from "@/components/ui/button";
@@ -46,8 +48,10 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { supabase } from "@/integrations/supabase/client";
 
 const ITEMS_PER_PAGE = 20;
+const AI_BATCH_SIZE = 20; // Process translations in batches
 
 const emptyTranslation: TranslationInput = {
   translation_key: "",
@@ -75,6 +79,7 @@ export default function TranslationsPage() {
     deleteTranslation,
     bulkImport,
     getMissingCounts,
+    fetchTranslations,
   } = useDatabaseTranslations();
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -92,6 +97,11 @@ export default function TranslationsPage() {
   // Inline editing state
   const [editingInlineId, setEditingInlineId] = useState<string | null>(null);
   const [inlineValue, setInlineValue] = useState("");
+  
+  // AI translation state
+  const [isAITranslating, setIsAITranslating] = useState(false);
+  const [aiProgress, setAiProgress] = useState({ current: 0, total: 0 });
+  const [showAIDialog, setShowAIDialog] = useState(false);
 
   const missingCounts = useMemo(() => getMissingCounts(), [getMissingCounts]);
 
@@ -274,6 +284,113 @@ export default function TranslationsPage() {
     }
   };
 
+  // Get missing translations for the selected language
+  const missingTranslations = useMemo(() => {
+    if (selectedLanguage === "en") return [];
+    return translations.filter(t => {
+      const value = t[selectedLanguage as keyof Translation];
+      return !value || value === "";
+    });
+  }, [translations, selectedLanguage]);
+
+  // AI Translation handler
+  const handleAITranslate = async () => {
+    if (selectedLanguage === "en") {
+      toast({
+        title: "Cannot translate",
+        description: "English is the source language. Select another language to translate.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (missingTranslations.length === 0) {
+      toast({
+        title: "All translated",
+        description: `All translations are complete for ${currentLang?.nativeName}`,
+      });
+      return;
+    }
+
+    setShowAIDialog(true);
+  };
+
+  const executeAITranslation = async () => {
+    setShowAIDialog(false);
+    setIsAITranslating(true);
+    setAiProgress({ current: 0, total: missingTranslations.length });
+
+    const targetLang = supportedLanguages.find(l => l.code === selectedLanguage);
+    let successCount = 0;
+    let errorCount = 0;
+
+    try {
+      // Process in batches
+      for (let i = 0; i < missingTranslations.length; i += AI_BATCH_SIZE) {
+        const batch = missingTranslations.slice(i, i + AI_BATCH_SIZE);
+        
+        const { data, error } = await supabase.functions.invoke('ai-translate', {
+          body: {
+            translations: batch.map(t => ({
+              id: t.id,
+              key: t.translation_key,
+              sourceText: t.en,
+            })),
+            targetLanguage: selectedLanguage,
+            targetLanguageName: targetLang?.name || selectedLanguage,
+          },
+        });
+
+        if (error) {
+          console.error('AI translation error:', error);
+          errorCount += batch.length;
+          continue;
+        }
+
+        if (data?.translations) {
+          // Update each translation in the database
+          for (const item of data.translations) {
+            try {
+              await updateTranslation(item.id, { [selectedLanguage]: item.translation });
+              successCount++;
+            } catch (updateErr) {
+              console.error('Update error:', updateErr);
+              errorCount++;
+            }
+          }
+        }
+
+        setAiProgress({ current: Math.min(i + AI_BATCH_SIZE, missingTranslations.length), total: missingTranslations.length });
+      }
+
+      // Refresh the translations
+      await fetchTranslations();
+
+      if (successCount > 0) {
+        toast({
+          title: "AI Translation Complete",
+          description: `Successfully translated ${successCount} items to ${targetLang?.nativeName}${errorCount > 0 ? `. ${errorCount} failed.` : ''}`,
+        });
+      } else {
+        toast({
+          title: "Translation failed",
+          description: "No translations were completed. Please try again.",
+          variant: "destructive",
+        });
+      }
+    } catch (err: any) {
+      console.error('AI translation error:', err);
+      toast({
+        title: "Translation failed",
+        description: err.message || "Failed to complete AI translation",
+        variant: "destructive",
+      });
+    } finally {
+      setIsAITranslating(false);
+      setAiProgress({ current: 0, total: 0 });
+    }
+  };
+
   const currentLang = supportedLanguages.find(l => l.code === selectedLanguage);
 
   return (
@@ -296,7 +413,26 @@ export default function TranslationsPage() {
               Manage i18n translations • {translations.length} keys across {supportedLanguages.length} languages
             </p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
+            {selectedLanguage !== "en" && missingTranslations.length > 0 && (
+              <Button 
+                onClick={handleAITranslate}
+                disabled={isAITranslating}
+                className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"
+              >
+                {isAITranslating ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Translating {aiProgress.current}/{aiProgress.total}...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="h-4 w-4 mr-2" />
+                    AI Translate ({missingTranslations.length} missing)
+                  </>
+                )}
+              </Button>
+            )}
             <Button variant="outline" onClick={() => setShowImportDialog(true)}>
               <FileJson className="h-4 w-4 mr-2" />
               Import
@@ -788,6 +924,70 @@ export default function TranslationsPage() {
                   Import {importStats.total} Translations
                 </>
               )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* AI Translation Confirmation Dialog */}
+      <Dialog open={showAIDialog} onOpenChange={setShowAIDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Wand2 className="h-5 w-5 text-primary" />
+              AI Translation
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="py-4 space-y-4">
+            <div className="flex items-center gap-3 p-4 rounded-lg bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-950/30 dark:to-indigo-950/30 border">
+              <Sparkles className="h-8 w-8 text-purple-600" />
+              <div>
+                <h4 className="font-medium">Auto-translate with AI</h4>
+                <p className="text-sm text-muted-foreground">
+                  Use AI to translate {missingTranslations.length} missing entries to {currentLang?.nativeName}
+                </p>
+              </div>
+            </div>
+            
+            <div className="rounded-lg border border-border bg-muted/50 p-4 space-y-3">
+              <h4 className="font-medium text-sm">What will happen:</h4>
+              <ul className="text-sm text-muted-foreground space-y-2">
+                <li className="flex items-start gap-2">
+                  <Check className="h-4 w-4 text-success mt-0.5 shrink-0" />
+                  AI will translate each English text to {currentLang?.nativeName}
+                </li>
+                <li className="flex items-start gap-2">
+                  <Check className="h-4 w-4 text-success mt-0.5 shrink-0" />
+                  Translations will be saved automatically to the database
+                </li>
+                <li className="flex items-start gap-2">
+                  <Check className="h-4 w-4 text-success mt-0.5 shrink-0" />
+                  You can edit any translation afterward if needed
+                </li>
+              </ul>
+            </div>
+
+            <div className="rounded-lg border border-amber-200 bg-amber-50 dark:border-amber-900 dark:bg-amber-950/30 p-3">
+              <div className="flex items-start gap-2">
+                <AlertCircle className="h-4 w-4 text-amber-600 mt-0.5" />
+                <p className="text-sm text-amber-800 dark:text-amber-200">
+                  AI translations should be reviewed for accuracy, especially for specialized terms or context-specific text.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAIDialog(false)}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={executeAITranslation}
+              className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"
+            >
+              <Sparkles className="h-4 w-4 mr-2" />
+              Start AI Translation
             </Button>
           </DialogFooter>
         </DialogContent>
