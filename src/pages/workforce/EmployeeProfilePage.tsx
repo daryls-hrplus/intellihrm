@@ -35,6 +35,7 @@ import {
   EmployeeProfessionalHistoryTab,
 } from "@/components/employee/professional";
 import { EmployeeImmigrationTab } from "@/components/employee/immigration";
+import { EmployeeGovernmentIds } from "@/components/employee/EmployeeGovernmentIds";
 
 import {
   ArrowLeft,
@@ -62,6 +63,7 @@ import {
   Pencil,
   FileSignature,
   Plane,
+  IdCard,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
@@ -103,6 +105,7 @@ export default function EmployeeProfilePage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { t } = useLanguage();
   const [employee, setEmployee] = useState<EmployeeProfile | null>(null);
+  const [companyCountryCode, setCompanyCountryCode] = useState<string | undefined>();
   const [loading, setLoading] = useState(true);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const { logView } = useAuditLog();
@@ -152,7 +155,7 @@ export default function EmployeeProfilePage() {
         return;
       }
 
-      // Fetch positions
+      // Fetch positions with company country
       const { data: positions, error: positionsError } = await supabase
         .from('employee_positions')
         .select(`
@@ -166,7 +169,8 @@ export default function EmployeeProfilePage() {
             departments:department_id (
               name,
               companies:company_id (
-                name
+                name,
+                country
               )
             )
           ),
@@ -189,6 +193,11 @@ export default function EmployeeProfilePage() {
         assignment_type: ep.assignment_type,
         pay_group_name: ep.pay_groups?.name || null,
       }));
+
+      // Get company country code from primary position
+      const primaryPosition = (positions || []).find((ep: any) => ep.is_primary && ep.is_active);
+      const countryCode = primaryPosition?.positions?.departments?.companies?.country;
+      setCompanyCountryCode(countryCode || undefined);
 
       setEmployee({
         id: profile.id,
@@ -376,6 +385,7 @@ export default function EmployeeProfilePage() {
             <TabsTrigger value="competencies"><Award className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.competencies")}</TabsTrigger>
             <TabsTrigger value="contact-info"><Contact className="h-4 w-4 mr-1" />Contact Info</TabsTrigger>
             <TabsTrigger value="documents"><FileText className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.documents")}</TabsTrigger>
+            <TabsTrigger value="government-ids"><IdCard className="h-4 w-4 mr-1" />Government IDs</TabsTrigger>
             <TabsTrigger value="immigration"><Plane className="h-4 w-4 mr-1" />Immigration</TabsTrigger>
             <TabsTrigger value="interests"><Sparkles className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.interests")}</TabsTrigger>
             <TabsTrigger value="languages"><Globe className="h-4 w-4 mr-1" />Languages</TabsTrigger>
@@ -409,6 +419,17 @@ export default function EmployeeProfilePage() {
 
           <TabsContent value="documents" className="mt-6">
             <EmployeeDocumentsTab employeeId={employee.id} />
+          </TabsContent>
+
+          <TabsContent value="government-ids" className="mt-6">
+            <Card>
+              <CardContent className="pt-6">
+                <EmployeeGovernmentIds 
+                  employeeId={employee.id} 
+                  companyCountryCode={companyCountryCode} 
+                />
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="interests" className="mt-6">
