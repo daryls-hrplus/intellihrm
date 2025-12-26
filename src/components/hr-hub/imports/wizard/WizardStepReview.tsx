@@ -396,7 +396,7 @@ export function WizardStepReview({
                       key={row._id}
                       className={`${hasRowIssue ? "bg-destructive/5" : ""} ${displayIndex % 2 === 0 && !hasRowIssue ? "bg-muted/20" : ""}`}
                     >
-                      <TableCell className="w-[60px] min-w-[60px] font-mono text-xs text-muted-foreground text-center border-r sticky left-0 z-10 bg-inherit">
+                      <TableCell className="w-[60px] min-w-[60px] font-mono text-xs text-muted-foreground text-center border-r sticky left-0 z-10 bg-background">
                         {rowNum}
                       </TableCell>
                       {headers.map((header) => {
@@ -434,7 +434,7 @@ export function WizardStepReview({
                           </TableCell>
                         );
                       })}
-                      <TableCell className="w-[120px] min-w-[120px] sticky right-0 z-10 bg-inherit border-l">
+                      <TableCell className="w-[120px] min-w-[120px] sticky right-0 z-10 bg-background border-l text-center">
                         {isEditing ? (
                           <div className="flex items-center justify-center gap-1">
                             <Button
@@ -451,15 +451,17 @@ export function WizardStepReview({
                             </Button>
                           </div>
                         ) : (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleEdit(row)}
-                            className="h-8 gap-1"
-                          >
-                            <Pencil className="h-3 w-3" />
-                            Edit
-                          </Button>
+                          <div className="flex justify-center">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleEdit(row)}
+                              className="h-8 gap-1"
+                            >
+                              <Pencil className="h-3 w-3" />
+                              Edit
+                            </Button>
+                          </div>
                         )}
                       </TableCell>
                     </TableRow>
