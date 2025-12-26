@@ -3654,6 +3654,263 @@ export type Database = {
           },
         ]
       }
+      calibration_adjustments: {
+        Row: {
+          adjusted_at: string | null
+          adjusted_by: string | null
+          adjustment_category: string | null
+          adjustment_reason: string | null
+          ai_bias_flags: Json | null
+          ai_confidence: number | null
+          ai_reasoning: string | null
+          ai_suggested: boolean | null
+          ai_suggestion_score: number | null
+          applied_at: string | null
+          calibrated_box_position: string | null
+          calibrated_score: number | null
+          company_id: string
+          created_at: string | null
+          employee_id: string
+          id: string
+          original_box_position: string | null
+          original_score: number | null
+          reverted_at: string | null
+          reverted_by: string | null
+          session_id: string
+          status: string | null
+          submission_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          adjusted_at?: string | null
+          adjusted_by?: string | null
+          adjustment_category?: string | null
+          adjustment_reason?: string | null
+          ai_bias_flags?: Json | null
+          ai_confidence?: number | null
+          ai_reasoning?: string | null
+          ai_suggested?: boolean | null
+          ai_suggestion_score?: number | null
+          applied_at?: string | null
+          calibrated_box_position?: string | null
+          calibrated_score?: number | null
+          company_id: string
+          created_at?: string | null
+          employee_id: string
+          id?: string
+          original_box_position?: string | null
+          original_score?: number | null
+          reverted_at?: string | null
+          reverted_by?: string | null
+          session_id: string
+          status?: string | null
+          submission_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          adjusted_at?: string | null
+          adjusted_by?: string | null
+          adjustment_category?: string | null
+          adjustment_reason?: string | null
+          ai_bias_flags?: Json | null
+          ai_confidence?: number | null
+          ai_reasoning?: string | null
+          ai_suggested?: boolean | null
+          ai_suggestion_score?: number | null
+          applied_at?: string | null
+          calibrated_box_position?: string | null
+          calibrated_score?: number | null
+          company_id?: string
+          created_at?: string | null
+          employee_id?: string
+          id?: string
+          original_box_position?: string | null
+          original_score?: number | null
+          reverted_at?: string | null
+          reverted_by?: string | null
+          session_id?: string
+          status?: string | null
+          submission_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "calibration_adjustments_adjusted_by_fkey"
+            columns: ["adjusted_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "calibration_adjustments_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "calibration_adjustments_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "calibration_adjustments_reverted_by_fkey"
+            columns: ["reverted_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "calibration_adjustments_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "calibration_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "calibration_adjustments_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "goal_rating_submissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      calibration_ai_analyses: {
+        Row: {
+          analysis_type: string
+          analyzed_at: string | null
+          analyzed_by: string | null
+          anomalies_detected: number | null
+          bias_alerts: number | null
+          company_id: string
+          confidence_score: number | null
+          created_at: string | null
+          distribution_analysis: Json | null
+          equity_analysis: Json | null
+          id: string
+          model_used: string | null
+          overall_health_score: number | null
+          session_id: string
+          suggested_adjustments: Json | null
+          summary_narrative: string | null
+          tokens_used: number | null
+        }
+        Insert: {
+          analysis_type: string
+          analyzed_at?: string | null
+          analyzed_by?: string | null
+          anomalies_detected?: number | null
+          bias_alerts?: number | null
+          company_id: string
+          confidence_score?: number | null
+          created_at?: string | null
+          distribution_analysis?: Json | null
+          equity_analysis?: Json | null
+          id?: string
+          model_used?: string | null
+          overall_health_score?: number | null
+          session_id: string
+          suggested_adjustments?: Json | null
+          summary_narrative?: string | null
+          tokens_used?: number | null
+        }
+        Update: {
+          analysis_type?: string
+          analyzed_at?: string | null
+          analyzed_by?: string | null
+          anomalies_detected?: number | null
+          bias_alerts?: number | null
+          company_id?: string
+          confidence_score?: number | null
+          created_at?: string | null
+          distribution_analysis?: Json | null
+          equity_analysis?: Json | null
+          id?: string
+          model_used?: string | null
+          overall_health_score?: number | null
+          session_id?: string
+          suggested_adjustments?: Json | null
+          summary_narrative?: string | null
+          tokens_used?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "calibration_ai_analyses_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "calibration_ai_analyses_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "calibration_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      calibration_participants: {
+        Row: {
+          company_id: string
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          joined_at: string | null
+          role: string
+          session_id: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          joined_at?: string | null
+          role?: string
+          session_id: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          joined_at?: string | null
+          role?: string
+          session_id?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "calibration_participants_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "calibration_participants_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "calibration_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "calibration_participants_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       calibration_sessions: {
         Row: {
           appraisal_cycle_id: string | null
@@ -17819,6 +18076,7 @@ export type Database = {
           acknowledged_by: string | null
           acknowledgment_comments: string | null
           calculated_score: number | null
+          calibration_session_id: string | null
           company_id: string
           created_at: string | null
           dispute_category: string | null
@@ -17852,6 +18110,7 @@ export type Database = {
           acknowledged_by?: string | null
           acknowledgment_comments?: string | null
           calculated_score?: number | null
+          calibration_session_id?: string | null
           company_id: string
           created_at?: string | null
           dispute_category?: string | null
@@ -17885,6 +18144,7 @@ export type Database = {
           acknowledged_by?: string | null
           acknowledgment_comments?: string | null
           calculated_score?: number | null
+          calibration_session_id?: string | null
           company_id?: string
           created_at?: string | null
           dispute_category?: string | null
@@ -17919,6 +18179,13 @@ export type Database = {
             columns: ["acknowledged_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "goal_rating_submissions_calibration_session_id_fkey"
+            columns: ["calibration_session_id"]
+            isOneToOne: false
+            referencedRelation: "calibration_sessions"
             referencedColumns: ["id"]
           },
           {
