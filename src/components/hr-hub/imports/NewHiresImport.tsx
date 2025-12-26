@@ -69,7 +69,17 @@ export function NewHiresImport() {
   });
 
   const downloadTemplate = () => {
-    const csv = [TEMPLATE.headers.join(","), TEMPLATE.example.join(",")].join("\n");
+    // Create required indicators row
+    const requiredRow = TEMPLATE.headers.map(header => {
+      const fieldSchema = TEMPLATE.schema[header as keyof typeof TEMPLATE.schema];
+      return fieldSchema?.required ? "REQUIRED" : "optional";
+    });
+    
+    const csv = [
+      TEMPLATE.headers.join(","),
+      requiredRow.join(","),
+      TEMPLATE.example.join(","),
+    ].join("\n");
 
     const blob = new Blob([csv], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
