@@ -258,6 +258,8 @@ export default function WorkforceDashboardPage() {
         allModules.assignments,
         allModules.transactions,
         allModules.qualifications,
+        allModules.onboarding,
+        allModules.offboarding,
       ]),
     },
     {
@@ -283,13 +285,6 @@ export default function WorkforceDashboardPage() {
         allModules.headcountRequests,
         allModules.headcountAnalytics,
         allModules.headcountForecast,
-      ]),
-    },
-    {
-      titleKey: "Employee Lifecycle",
-      items: filterByAccess([
-        allModules.onboarding,
-        allModules.offboarding,
       ]),
     },
     {
