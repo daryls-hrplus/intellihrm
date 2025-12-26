@@ -5051,6 +5051,76 @@ export type Database = {
           },
         ]
       }
+      company_government_ids: {
+        Row: {
+          company_id: string
+          created_at: string
+          expiry_date: string | null
+          government_id_type_id: string
+          id: string
+          id_number: string
+          is_verified: boolean
+          issue_date: string | null
+          issuing_authority: string | null
+          notes: string | null
+          updated_at: string
+          verified_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          expiry_date?: string | null
+          government_id_type_id: string
+          id?: string
+          id_number: string
+          is_verified?: boolean
+          issue_date?: string | null
+          issuing_authority?: string | null
+          notes?: string | null
+          updated_at?: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          expiry_date?: string | null
+          government_id_type_id?: string
+          id?: string
+          id_number?: string
+          is_verified?: boolean
+          issue_date?: string | null
+          issuing_authority?: string | null
+          notes?: string | null
+          updated_at?: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_government_ids_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_government_ids_government_id_type_id_fkey"
+            columns: ["government_id_type_id"]
+            isOneToOne: false
+            referencedRelation: "government_id_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_government_ids_verified_by_fkey"
+            columns: ["verified_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       company_groups: {
         Row: {
           base_currency_id: string | null
