@@ -66,15 +66,61 @@ function buildLanguageResource(
   return unflattenObject(flat);
 }
 
-const LANGUAGES: SupportedLanguage[] = ['en', 'ar', 'es', 'fr', 'nl', 'pt', 'de', 'ru', 'zh'];
+/**
+ * Fetch active company languages from the database
+ */
+async function fetchActiveCompanyLanguages(): Promise<SupportedLanguage[]> {
+  try {
+    const { data, error } = await supabase
+      .from('companies')
+      .select('first_language, second_language')
+      .eq('is_active', true);
+
+    if (error) {
+      console.error('Error fetching company languages:', error);
+      return ['en'];
+    }
+
+    if (!data || data.length === 0) {
+      return ['en'];
+    }
+
+    // Collect unique language codes from all active companies
+    const languageCodes = new Set<SupportedLanguage>();
+    languageCodes.add('en'); // Always include English as fallback
+    
+    data.forEach((company) => {
+      if (company.first_language) {
+        languageCodes.add(company.first_language as SupportedLanguage);
+      }
+      if (company.second_language) {
+        languageCodes.add(company.second_language as SupportedLanguage);
+      }
+    });
+
+    return Array.from(languageCodes);
+  } catch (err) {
+    console.error('Error in fetchActiveCompanyLanguages:', err);
+    return ['en'];
+  }
+}
 
 export function useTranslationsLoader() {
   const [isLoaded, setIsLoaded] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [activeLanguages, setActiveLanguages] = useState<SupportedLanguage[]>(['en']);
 
   const loadTranslations = useCallback(async () => {
     try {
-      // Fetch all translations in batches to overcome the 1000 row limit
+      // First, get active company languages
+      const companyLanguages = await fetchActiveCompanyLanguages();
+      setActiveLanguages(companyLanguages);
+
+      // Build the select query for only the needed language columns
+      const languageColumns = companyLanguages.join(', ');
+      const selectQuery = `translation_key, ${languageColumns}`;
+
+      // Fetch translations in batches to overcome the 1000 row limit
       const allTranslations: TranslationRow[] = [];
       const batchSize = 1000;
       let offset = 0;
@@ -83,13 +129,13 @@ export function useTranslationsLoader() {
       while (hasMore) {
         const { data, error: fetchError } = await supabase
           .from('translations')
-          .select('translation_key, en, ar, es, fr, nl, pt, de, ru, zh')
+          .select(selectQuery)
           .range(offset, offset + batchSize - 1);
 
         if (fetchError) throw fetchError;
 
         if (data && data.length > 0) {
-          allTranslations.push(...data);
+          allTranslations.push(...(data as unknown as TranslationRow[]));
           offset += batchSize;
           hasMore = data.length === batchSize;
         } else {
@@ -104,13 +150,13 @@ export function useTranslationsLoader() {
         return;
       }
 
-      // Build and add resources for each language
-      LANGUAGES.forEach((langCode) => {
+      // Build and add resources only for active company languages
+      companyLanguages.forEach((langCode) => {
         const resource = buildLanguageResource(allTranslations, langCode);
         i18n.addResourceBundle(langCode, 'translation', resource, true, true);
       });
 
-      console.log(`Loaded ${allTranslations.length} translations from database`);
+      console.log(`Loaded ${allTranslations.length} translations for ${companyLanguages.length} languages: ${companyLanguages.join(', ')}`);
       setIsLoaded(true);
       setError(null);
     } catch (err) {
