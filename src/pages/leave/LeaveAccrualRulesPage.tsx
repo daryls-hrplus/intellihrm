@@ -41,9 +41,19 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
-import { Plus, TrendingUp, Play, RefreshCw } from "lucide-react";
+import { Plus, TrendingUp, Play, RefreshCw, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export default function LeaveAccrualRulesPage() {
   const queryClient = useQueryClient();
@@ -51,8 +61,10 @@ export default function LeaveAccrualRulesPage() {
   const { company, isAdmin, hasRole } = useAuth();
   const isAdminOrHR = isAdmin || hasRole('hr_manager');
   const { selectedCompanyId, setSelectedCompanyId } = useLeaveCompanyFilter();
-  const { leaveTypes, accrualRules, loadingAccrualRules, createAccrualRule } = useLeaveManagement(selectedCompanyId);
+  const { leaveTypes, accrualRules, loadingAccrualRules, createAccrualRule, updateAccrualRule, deleteAccrualRule } = useLeaveManagement(selectedCompanyId);
   const [isOpen, setIsOpen] = useState(false);
+  const [editingRule, setEditingRule] = useState<LeaveAccrualRule | null>(null);
+  const [deleteRuleId, setDeleteRuleId] = useState<string | null>(null);
   const [isRunningAccrual, setIsRunningAccrual] = useState(false);
   const [formData, setFormData] = useState({
     leave_type_id: "",
@@ -86,19 +98,64 @@ export default function LeaveAccrualRulesPage() {
     });
   };
 
+  const handleEdit = (rule: LeaveAccrualRule) => {
+    setEditingRule(rule);
+    setFormData({
+      leave_type_id: rule.leave_type_id,
+      name: rule.name,
+      description: rule.description || "",
+      accrual_frequency: rule.accrual_frequency as "daily" | "monthly" | "annually" | "bi_weekly" | "weekly",
+      accrual_amount: rule.accrual_amount,
+      years_of_service_min: rule.years_of_service_min,
+      years_of_service_max: rule.years_of_service_max,
+      employee_status: rule.employee_status || "",
+      employee_type: rule.employee_type || "",
+      priority: rule.priority,
+      start_date: rule.start_date,
+      end_date: rule.end_date || "",
+    });
+    setIsOpen(true);
+  };
+
   const handleSubmit = async () => {
     if (!selectedCompanyId || !formData.leave_type_id) return;
 
-    await createAccrualRule.mutateAsync({
-      ...formData,
-      company_id: selectedCompanyId,
-      years_of_service_max: formData.years_of_service_max || undefined,
-      employee_status: formData.employee_status || undefined,
-      employee_type: formData.employee_type || undefined,
-      end_date: formData.end_date || undefined,
-    });
+    if (editingRule) {
+      await updateAccrualRule.mutateAsync({
+        id: editingRule.id,
+        ...formData,
+        years_of_service_max: formData.years_of_service_max || undefined,
+        employee_status: formData.employee_status || undefined,
+        employee_type: formData.employee_type || undefined,
+        end_date: formData.end_date || undefined,
+      });
+    } else {
+      await createAccrualRule.mutateAsync({
+        ...formData,
+        company_id: selectedCompanyId,
+        years_of_service_max: formData.years_of_service_max || undefined,
+        employee_status: formData.employee_status || undefined,
+        employee_type: formData.employee_type || undefined,
+        end_date: formData.end_date || undefined,
+      });
+    }
     setIsOpen(false);
+    setEditingRule(null);
     resetForm();
+  };
+
+  const handleDelete = async () => {
+    if (!deleteRuleId) return;
+    await deleteAccrualRule.mutateAsync(deleteRuleId);
+    setDeleteRuleId(null);
+  };
+
+  const handleDialogClose = (open: boolean) => {
+    setIsOpen(open);
+    if (!open) {
+      setEditingRule(null);
+      resetForm();
+    }
   };
 
   const handleRunAccrual = async (accrualType: "daily" | "monthly") => {
@@ -182,7 +239,7 @@ export default function LeaveAccrualRulesPage() {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-            <Dialog open={isOpen} onOpenChange={(open) => { setIsOpen(open); if (!open) resetForm(); }}>
+            <Dialog open={isOpen} onOpenChange={handleDialogClose}>
             <DialogTrigger asChild>
               <Button>
                 <Plus className="mr-2 h-4 w-4" />
@@ -191,7 +248,7 @@ export default function LeaveAccrualRulesPage() {
             </DialogTrigger>
             <DialogContent className="max-w-2xl">
               <DialogHeader>
-                <DialogTitle>{t("leave.accrualRules.addRule")}</DialogTitle>
+                <DialogTitle>{editingRule ? t("leave.accrualRules.editRule") : t("leave.accrualRules.addRule")}</DialogTitle>
               </DialogHeader>
               <div className="grid gap-4 py-4">
                 <div className="grid grid-cols-2 gap-4">
@@ -344,11 +401,11 @@ export default function LeaveAccrualRulesPage() {
                 </div>
 
                 <div className="flex justify-end gap-2 pt-4">
-                  <Button variant="outline" onClick={() => { setIsOpen(false); resetForm(); }}>
+                  <Button variant="outline" onClick={() => handleDialogClose(false)}>
                     {t("leave.common.cancel")}
                   </Button>
                   <Button onClick={handleSubmit} disabled={!formData.name || !formData.leave_type_id}>
-                    {t("leave.common.create")}
+                    {editingRule ? t("leave.common.save") : t("leave.common.create")}
                   </Button>
                 </div>
               </div>
@@ -369,18 +426,19 @@ export default function LeaveAccrualRulesPage() {
                 <TableHead>{t("leave.accrualRules.validityPeriod")}</TableHead>
                 <TableHead>{t("leave.accrualRules.priority")}</TableHead>
                 <TableHead>{t("leave.common.status")}</TableHead>
+                <TableHead className="w-[70px]">{t("leave.common.actions")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {loadingAccrualRules ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
                     {t("leave.accrualRules.loading")}
                   </TableCell>
                 </TableRow>
               ) : accrualRules.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
                     {t("leave.accrualRules.noRules")}
                   </TableCell>
                 </TableRow>
@@ -413,12 +471,51 @@ export default function LeaveAccrualRulesPage() {
                         {rule.is_active ? t("leave.common.active") : t("leave.common.inactive")}
                       </Badge>
                     </TableCell>
+                    <TableCell>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-8 w-8">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => handleEdit(rule)}>
+                            <Pencil className="mr-2 h-4 w-4" />
+                            {t("leave.common.edit")}
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            onClick={() => setDeleteRuleId(rule.id)}
+                            className="text-destructive"
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            {t("leave.common.delete")}
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
                   </TableRow>
                 ))
               )}
             </TableBody>
           </Table>
         </div>
+
+        <AlertDialog open={!!deleteRuleId} onOpenChange={(open) => !open && setDeleteRuleId(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>{t("leave.accrualRules.deleteConfirmTitle")}</AlertDialogTitle>
+              <AlertDialogDescription>
+                {t("leave.accrualRules.deleteConfirmDescription")}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>{t("leave.common.cancel")}</AlertDialogCancel>
+              <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                {t("leave.common.delete")}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </AppLayout>
   );
