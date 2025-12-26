@@ -30,7 +30,9 @@ import {
 } from "lucide-react";
 import { CompanyBranchLocations } from "@/components/admin/CompanyBranchLocations";
 import { CompanyFiscalYearsManager } from "@/components/admin/CompanyFiscalYearsManager";
+import { CompanyGovernmentIds } from "@/components/admin/CompanyGovernmentIds";
 import { CountrySelect } from "@/components/ui/country-select";
+import { IdCard } from "lucide-react";
 
 interface Company {
   id: string;
@@ -137,6 +139,7 @@ export default function AdminCompaniesPage() {
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [branchDialogCompany, setBranchDialogCompany] = useState<Company | null>(null);
   const [fiscalYearsDialogCompany, setFiscalYearsDialogCompany] = useState<Company | null>(null);
+  const [governmentIdsDialogCompany, setGovernmentIdsDialogCompany] = useState<Company | null>(null);
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
@@ -675,6 +678,16 @@ export default function AdminCompaniesPage() {
                           </button>
                           <button
                             onClick={() => {
+                              setGovernmentIdsDialogCompany(company);
+                              setOpenDropdown(null);
+                            }}
+                            className="flex w-full items-center gap-2 px-3 py-2 text-sm text-card-foreground hover:bg-muted"
+                          >
+                            <IdCard className="h-4 w-4" />
+                            Government IDs
+                          </button>
+                          <button
+                            onClick={() => {
                               navigate(`/workforce/org-structure?company=${company.id}`);
                               setOpenDropdown(null);
                             }}
@@ -1092,6 +1105,13 @@ export default function AdminCompaniesPage() {
           onClose={() => setFiscalYearsDialogCompany(null)}
         />
       )}
+
+      {/* Government IDs Dialog */}
+      <CompanyGovernmentIds
+        company={governmentIdsDialogCompany || { id: "", name: "", code: "", country: null }}
+        open={!!governmentIdsDialogCompany}
+        onOpenChange={(open) => !open && setGovernmentIdsDialogCompany(null)}
+      />
     </AppLayout>
   );
 }
