@@ -212,6 +212,15 @@
     "aiBandedReports": "AI Banded Reports",
     "aiBIReports": "AI BI Reports"
   },
+  "employee": {
+    "employmentStatuses": {
+      "onProbation": "On Probation",
+      "temporary": "Temporary",
+      "permanent": "Permanent",
+      "contract": "Contract",
+      "partTime": "Part Time"
+    }
+  },
   "ai": {
     "assistantTitle": "AI Assistant",
     "welcomeMessage": "Hello! I'm your HR assistant. How can I help you today?",
@@ -1076,8 +1085,8 @@
       "amountPlaceholder": "Amount per period",
       "minYearsOfService": "Min Years of Service",
       "maxYearsOfService": "Max Years of Service",
-      "employeeStatus": "Employee Status (Optional)",
-      "employeeStatusPlaceholder": "e.g., Full-Time",
+      "employmentStatus": "Employment Status (Optional)",
+      "allEmploymentStatuses": "All Employment Statuses",
       "employeeType": "Employee Type (Optional)",
       "employeeTypePlaceholder": "e.g., Permanent",
       "startDate": "Start Date",

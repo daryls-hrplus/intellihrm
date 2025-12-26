@@ -376,13 +376,23 @@ export default function LeaveAccrualRulesPage() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="employee_status">{t("leave.accrualRules.employeeStatus")}</Label>
-                    <Input
-                      id="employee_status"
-                      value={formData.employee_status}
-                      onChange={(e) => setFormData({ ...formData, employee_status: e.target.value })}
-                      placeholder={t("leave.accrualRules.employeeStatusPlaceholder")}
-                    />
+                    <Label htmlFor="employee_status">{t("leave.accrualRules.employmentStatus")}</Label>
+                    <Select
+                      value={formData.employee_status || "all"}
+                      onValueChange={(value) => setFormData({ ...formData, employee_status: value === "all" ? "" : value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder={t("leave.accrualRules.allEmploymentStatuses")} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">{t("leave.accrualRules.allEmploymentStatuses")}</SelectItem>
+                        <SelectItem value="on_probation">{t("employee.employmentStatuses.onProbation")}</SelectItem>
+                        <SelectItem value="temporary">{t("employee.employmentStatuses.temporary")}</SelectItem>
+                        <SelectItem value="permanent">{t("employee.employmentStatuses.permanent")}</SelectItem>
+                        <SelectItem value="contract">{t("employee.employmentStatuses.contract")}</SelectItem>
+                        <SelectItem value="part_time">{t("employee.employmentStatuses.partTime")}</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="employee_type">{t("leave.accrualRules.employeeType")}</Label>
