@@ -152,7 +152,7 @@ export function WizardStepCommit({
       // Use specialized transformers based on import type
       if (importType === "positions") {
         setProgress(30);
-        const transformResult = await transformPositionsData(validData, companyId);
+        const transformResult = await transformPositionsData(validData, companyId, compensationModel);
         
         allErrors.push(...transformResult.errors);
         allWarnings.push(...transformResult.warnings);
