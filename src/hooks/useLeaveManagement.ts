@@ -24,6 +24,7 @@ export interface LeaveType {
   is_active: boolean;
   accrues_leave_while_on: boolean;
   gender_applicability: "all" | "male" | "female";
+  leave_year_basis: "calendar" | "anniversary" | null;
   start_date: string;
   end_date: string | null;
   created_at: string;
