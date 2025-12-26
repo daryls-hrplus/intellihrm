@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -21,7 +21,8 @@ import {
   Save,
   X,
   Search,
-  Filter
+  Filter,
+  PartyPopper
 } from "lucide-react";
 
 interface WizardStepReviewProps {
@@ -44,8 +45,9 @@ export function WizardStepReview({
 
   const data = parsedData || [];
   const allIssues = validationResult?.issues || [];
-  const errorIssues = allIssues.filter((i: any) => i.severity === 'error');
-  const warningIssues = allIssues.filter((i: any) => i.severity === 'warning');
+  const errorCount = validationResult?.errorCount || 0;
+  const warningCount = validationResult?.warningCount || 0;
+  const hasIssues = errorCount > 0 || warningCount > 0;
 
   // Get all unique headers from data
   const headers = useMemo(() => {
@@ -125,23 +127,33 @@ export function WizardStepReview({
         </p>
       </div>
 
+      {/* Success Message when no issues */}
+      {!hasIssues && (
+        <Alert className="border-green-500/50 bg-green-500/10">
+          <PartyPopper className="h-4 w-4 text-green-600" />
+          <AlertDescription className="text-green-700 dark:text-green-400">
+            All {validationResult?.validRows || data.length} rows passed validation. Your data is ready to import!
+          </AlertDescription>
+        </Alert>
+      )}
+
       {/* Summary */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
+      <div className="flex items-center justify-between flex-wrap gap-4">
+        <div className="flex items-center gap-4 flex-wrap">
           <Badge variant="secondary" className="gap-1">
             <CheckCircle2 className="h-3 w-3" />
             {validationResult?.validRows || 0} valid
           </Badge>
-          {validationResult?.errorCount > 0 && (
+          {errorCount > 0 && (
             <Badge variant="destructive" className="gap-1">
               <XCircle className="h-3 w-3" />
-              {validationResult.errorCount} errors
+              {errorCount} errors
             </Badge>
           )}
-          {validationResult?.warningCount > 0 && (
+          {warningCount > 0 && (
             <Badge variant="outline" className="gap-1 text-yellow-600">
               <AlertTriangle className="h-3 w-3" />
-              {validationResult.warningCount} warnings
+              {warningCount} warnings
             </Badge>
           )}
         </div>
@@ -155,145 +167,172 @@ export function WizardStepReview({
               className="pl-9 w-[200px]"
             />
           </div>
-          <Button
-            variant={showErrorsOnly ? "default" : "outline"}
-            size="sm"
-            onClick={() => setShowErrorsOnly(!showErrorsOnly)}
-          >
-            <Filter className="h-4 w-4 mr-1" />
-            Errors Only
-          </Button>
+          {hasIssues && (
+            <Button
+              variant={showErrorsOnly ? "default" : "outline"}
+              size="sm"
+              onClick={() => setShowErrorsOnly(!showErrorsOnly)}
+            >
+              <Filter className="h-4 w-4 mr-1" />
+              Errors Only
+            </Button>
+          )}
         </div>
       </div>
 
       {/* Data Table */}
       <Card>
         <CardContent className="p-0">
-          <ScrollArea className="h-[400px]">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[60px] sticky top-0 bg-background">Row</TableHead>
-                  {headers.map((header) => (
-                    <TableHead key={header} className="sticky top-0 bg-background">
-                      {header}
-                    </TableHead>
-                  ))}
-                  <TableHead className="w-[100px] sticky top-0 bg-background">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredData.map((row, displayIndex) => {
-                  const originalIndex = data.findIndex((d) => 
-                    headers.every((h) => d[h] === row[h])
-                  );
-                  const rowNum = row._rowIndex;
-                  const hasIssue = !!issueMap[rowNum];
-                  const isEditing = editingRow === originalIndex;
+          <div className="relative">
+            {/* Fixed Header */}
+            <div className="sticky top-0 z-10 bg-background border-b">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[60px] min-w-[60px] bg-muted/50 font-semibold">Row</TableHead>
+                    {headers.map((header) => (
+                      <TableHead 
+                        key={header} 
+                        className="min-w-[120px] whitespace-nowrap bg-muted/50 font-semibold"
+                      >
+                        {header}
+                      </TableHead>
+                    ))}
+                    <TableHead className="w-[80px] min-w-[80px] bg-muted/50 font-semibold">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+              </Table>
+            </div>
+            
+            {/* Scrollable Body */}
+            <ScrollArea className="h-[350px]">
+              <Table>
+                <TableBody>
+                  {filteredData.map((row, displayIndex) => {
+                    const originalIndex = data.findIndex((d) => 
+                      headers.every((h) => d[h] === row[h])
+                    );
+                    const rowNum = row._rowIndex;
+                    const hasRowIssue = !!issueMap[rowNum];
+                    const isEditing = editingRow === originalIndex;
 
-                  return (
-                    <TableRow
-                      key={displayIndex}
-                      className={hasIssue ? "bg-destructive/5" : ""}
-                    >
-                      <TableCell className="font-mono text-xs text-muted-foreground">
-                        {rowNum}
-                      </TableCell>
-                      {headers.map((header) => {
-                        const cellStatus = getCellStatus(rowNum, header);
-                        const issue = issueMap[rowNum]?.[header];
+                    return (
+                      <TableRow
+                        key={displayIndex}
+                        className={`
+                          ${hasRowIssue ? "bg-destructive/5" : ""}
+                          ${displayIndex % 2 === 0 && !hasRowIssue ? "bg-muted/20" : ""}
+                        `}
+                      >
+                        <TableCell className="w-[60px] min-w-[60px] font-mono text-xs text-muted-foreground border-r">
+                          {rowNum}
+                        </TableCell>
+                        {headers.map((header) => {
+                          const cellStatus = getCellStatus(rowNum, header);
+                          const issue = issueMap[rowNum]?.[header];
 
-                        return (
-                          <TableCell
-                            key={header}
-                            className={`
-                              ${cellStatus === "error" ? "bg-destructive/20" : ""}
-                              ${cellStatus === "warning" ? "bg-yellow-500/20" : ""}
-                            `}
-                          >
-                            {isEditing ? (
-                              <Input
-                                value={editedValues[header] || ""}
-                                onChange={(e) =>
-                                  setEditedValues((prev) => ({
-                                    ...prev,
-                                    [header]: e.target.value,
-                                  }))
-                                }
-                                className="h-8 text-sm"
-                              />
-                            ) : (
-                              <div className="relative group">
-                                <span className="font-mono text-sm">{row[header]}</span>
-                                {issue && (
-                                  <div className="hidden group-hover:block absolute z-10 bg-popover border rounded-md shadow-lg p-2 text-xs max-w-[200px] top-full left-0 mt-1">
-                                    <p className="font-medium">{issue.issue}</p>
-                                    {issue.suggestion && (
-                                      <p className="text-muted-foreground mt-1">
-                                        💡 {issue.suggestion}
-                                      </p>
-                                    )}
-                                  </div>
-                                )}
-                              </div>
-                            )}
-                          </TableCell>
-                        );
-                      })}
-                      <TableCell>
-                        {isEditing ? (
-                          <div className="flex items-center gap-1">
+                          return (
+                            <TableCell
+                              key={header}
+                              className={`
+                                min-w-[120px] border-r
+                                ${cellStatus === "error" ? "bg-destructive/20" : ""}
+                                ${cellStatus === "warning" ? "bg-yellow-500/20" : ""}
+                              `}
+                            >
+                              {isEditing ? (
+                                <Input
+                                  value={editedValues[header] || ""}
+                                  onChange={(e) =>
+                                    setEditedValues((prev) => ({
+                                      ...prev,
+                                      [header]: e.target.value,
+                                    }))
+                                  }
+                                  className="h-8 text-sm min-w-[100px]"
+                                />
+                              ) : (
+                                <div className="relative group">
+                                  <span className="font-mono text-sm whitespace-nowrap">{row[header]}</span>
+                                  {issue && (
+                                    <div className="hidden group-hover:block absolute z-20 bg-popover border rounded-md shadow-lg p-2 text-xs max-w-[200px] top-full left-0 mt-1">
+                                      <p className="font-medium">{issue.issue}</p>
+                                      {issue.suggestion && (
+                                        <p className="text-muted-foreground mt-1">
+                                          💡 {issue.suggestion}
+                                        </p>
+                                      )}
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                            </TableCell>
+                          );
+                        })}
+                        <TableCell className="w-[80px] min-w-[80px]">
+                          {isEditing ? (
+                            <div className="flex items-center gap-1">
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => handleSave(originalIndex)}
+                                className="h-7 w-7 p-0"
+                              >
+                                <Save className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={handleCancel}
+                                className="h-7 w-7 p-0"
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          ) : (
                             <Button
                               size="sm"
                               variant="ghost"
-                              onClick={() => handleSave(originalIndex)}
+                              onClick={() => handleEdit(originalIndex, row)}
+                              className="h-7 w-7 p-0"
                             >
-                              <Save className="h-4 w-4" />
+                              <Edit2 className="h-4 w-4" />
                             </Button>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={handleCancel}
-                            >
-                              <X className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        ) : (
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => handleEdit(originalIndex, row)}
-                          >
-                            <Edit2 className="h-4 w-4" />
-                          </Button>
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </ScrollArea>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </ScrollArea>
+          </div>
         </CardContent>
       </Card>
 
-      {/* Legend */}
-      <div className="flex items-center gap-4 text-sm text-muted-foreground">
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-4 bg-destructive/20 rounded" />
-          <span>Error (must fix)</span>
+      {/* Legend - Only show when there are issues */}
+      {hasIssues && (
+        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+          {errorCount > 0 && (
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 bg-destructive/20 rounded border border-destructive/30" />
+              <span>Error (must fix)</span>
+            </div>
+          )}
+          {warningCount > 0 && (
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 bg-yellow-500/20 rounded border border-yellow-500/30" />
+              <span>Warning (review)</span>
+            </div>
+          )}
         </div>
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-4 bg-yellow-500/20 rounded" />
-          <span>Warning (review)</span>
-        </div>
-      </div>
+      )}
 
-      {validationResult?.errorCount > 0 && (
+      {errorCount > 0 && (
         <Alert variant="destructive">
           <AlertTriangle className="h-4 w-4" />
           <AlertDescription>
-            You have {validationResult.errorCount} error(s) that should be fixed before importing. 
+            You have {errorCount} error(s) that should be fixed before importing. 
             Only valid rows will be imported.
           </AlertDescription>
         </Alert>
