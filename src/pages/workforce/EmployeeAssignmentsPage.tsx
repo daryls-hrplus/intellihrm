@@ -922,12 +922,12 @@ export default function EmployeeAssignmentsPage() {
               {/* Pay Group Selection */}
               <div className="space-y-2">
                 <Label htmlFor="payGroup">{t("workforce.payGroup", "Pay Group")}</Label>
-                <Select value={formPayGroupId} onValueChange={setFormPayGroupId}>
+                <Select value={formPayGroupId || "__none__"} onValueChange={(v) => setFormPayGroupId(v === "__none__" ? "" : v)}>
                   <SelectTrigger>
                     <SelectValue placeholder={t("workforce.selectPayGroup", "Select pay group")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">{t("common.none", "None")}</SelectItem>
+                    <SelectItem value="__none__">{t("common.none", "None")}</SelectItem>
                     {payGroups.map((pg) => (
                       <SelectItem key={pg.id} value={pg.id}>
                         {pg.name} ({pg.pay_frequency})
@@ -943,12 +943,12 @@ export default function EmployeeAssignmentsPage() {
                spinalPoints.length > 0 && (
                 <div className="space-y-2">
                   <Label htmlFor="spinalPoint">{t("workforce.spinalPoint", "Spinal Point")}</Label>
-                  <Select value={formSpinalPointId} onValueChange={setFormSpinalPointId}>
+                  <Select value={formSpinalPointId || "__none__"} onValueChange={(v) => setFormSpinalPointId(v === "__none__" ? "" : v)}>
                     <SelectTrigger>
                       <SelectValue placeholder={t("workforce.selectSpinalPoint", "Select spinal point")} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">{t("common.none", "None")}</SelectItem>
+                      <SelectItem value="__none__">{t("common.none", "None")}</SelectItem>
                       {spinalPoints.map((sp) => (
                         <SelectItem key={sp.id} value={sp.id}>
                           Point {sp.point_number} - {new Intl.NumberFormat("en-US", { style: "currency", currency: formCompCurrency || "USD" }).format(sp.annual_salary)}/yr
