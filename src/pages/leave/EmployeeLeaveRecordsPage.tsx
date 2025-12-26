@@ -21,6 +21,11 @@ import {
   Send,
   MoreHorizontal,
   Calendar,
+  Plus,
+  Pencil,
+  Trash2,
+  User,
+  Building2,
 } from "lucide-react";
 import { formatDateForDisplay } from "@/utils/dateUtils";
 import {
@@ -49,6 +54,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -59,20 +65,40 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
+import { LeaveRecordDialog } from "@/components/leave/LeaveRecordDialog";
 
 const ITEMS_PER_PAGE = 20;
 
 export default function EmployeeLeaveRecordsPage() {
   const { t } = useLanguage();
   const { selectedCompanyId, setSelectedCompanyId } = useLeaveCompanyFilter();
-  const { allLeaveRequests, loadingAllRequests, leaveTypes, updateLeaveRequestStatus } = useLeaveManagement(selectedCompanyId);
+  const { 
+    allLeaveRequests, 
+    loadingAllRequests, 
+    leaveTypes, 
+    updateLeaveRequestStatus,
+    createLeaveRequest,
+    updateLeaveRequest,
+    deleteLeaveRequest,
+  } = useLeaveManagement(selectedCompanyId);
 
   // Filters
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [dateRangeFilter, setDateRangeFilter] = useState<string>("all");
+  const [sourceFilter, setSourceFilter] = useState<string>("all");
 
   // Selection for bulk actions
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -85,6 +111,12 @@ export default function EmployeeLeaveRecordsPage() {
   const [reviewNotes, setReviewNotes] = useState("");
   const [actionType, setActionType] = useState<"approve" | "reject" | "post" | null>(null);
   const [isBulkPosting, setIsBulkPosting] = useState(false);
+  
+  // CRUD dialog states
+  const [isRecordDialogOpen, setIsRecordDialogOpen] = useState(false);
+  const [editingRequest, setEditingRequest] = useState<LeaveRequest | null>(null);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [requestToDelete, setRequestToDelete] = useState<LeaveRequest | null>(null);
 
   // Filter logic
   const filteredRequests = useMemo(() => {
@@ -110,6 +142,11 @@ export default function EmployeeLeaveRecordsPage() {
       result = result.filter(r => r.leave_type_id === typeFilter);
     }
 
+    // Source filter
+    if (sourceFilter !== "all") {
+      result = result.filter(r => r.source === sourceFilter);
+    }
+
     // Date range filter
     if (dateRangeFilter !== "all") {
       const now = new Date();
@@ -133,7 +170,7 @@ export default function EmployeeLeaveRecordsPage() {
     }
 
     return result;
-  }, [allLeaveRequests, searchTerm, statusFilter, typeFilter, dateRangeFilter]);
+  }, [allLeaveRequests, searchTerm, statusFilter, typeFilter, dateRangeFilter, sourceFilter]);
 
   // Pagination
   const totalPages = Math.ceil(filteredRequests.length / ITEMS_PER_PAGE);
@@ -196,6 +233,70 @@ export default function EmployeeLeaveRecordsPage() {
     }
   };
 
+  // CRUD handlers
+  const handleAddRecord = () => {
+    setEditingRequest(null);
+    setIsRecordDialogOpen(true);
+  };
+
+  const handleEditRecord = (request: LeaveRequest) => {
+    setEditingRequest(request);
+    setIsRecordDialogOpen(true);
+  };
+
+  const handleDeleteRecord = (request: LeaveRequest) => {
+    setRequestToDelete(request);
+    setDeleteConfirmOpen(true);
+  };
+
+  const handleSaveRecord = async (data: Partial<LeaveRequest>) => {
+    try {
+      if (editingRequest) {
+        await updateLeaveRequest.mutateAsync({ id: editingRequest.id, ...data });
+      } else {
+        // Generate request number
+        const requestNumber = `LR-${Date.now().toString(36).toUpperCase()}`;
+        await createLeaveRequest.mutateAsync({
+          ...data,
+          request_number: requestNumber,
+          source: "hr_admin",
+        });
+      }
+      setIsRecordDialogOpen(false);
+      setEditingRequest(null);
+    } catch (error) {
+      // Error handled by mutation
+    }
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!requestToDelete) return;
+    try {
+      await deleteLeaveRequest.mutateAsync(requestToDelete.id);
+      setDeleteConfirmOpen(false);
+      setRequestToDelete(null);
+    } catch (error) {
+      // Error handled by mutation
+    }
+  };
+
+  const getSourceBadge = (source: string | undefined) => {
+    if (source === "hr_admin") {
+      return (
+        <Badge variant="secondary" className="flex items-center gap-1 w-fit">
+          <Building2 className="h-3 w-3" />
+          HR Admin
+        </Badge>
+      );
+    }
+    return (
+      <Badge variant="outline" className="flex items-center gap-1 w-fit">
+        <User className="h-3 w-3" />
+        ESS
+      </Badge>
+    );
+  };
+
   const getStatusBadge = (status: string) => {
     const variants: Record<string, { variant: "default" | "secondary" | "destructive" | "outline"; icon: React.ReactNode }> = {
       pending: { variant: "outline", icon: <Clock className="h-3 w-3 mr-1" /> },
@@ -246,6 +347,10 @@ export default function EmployeeLeaveRecordsPage() {
               selectedCompanyId={selectedCompanyId}
               onCompanyChange={setSelectedCompanyId}
             />
+            <Button onClick={handleAddRecord}>
+              <Plus className="mr-2 h-4 w-4" />
+              {t("leave.employeeRecords.addRecord", "Add Record")}
+            </Button>
             <Button variant="outline" onClick={handleExport}>
               <Download className="mr-2 h-4 w-4" />
               {t("common.export", "Export")}
@@ -304,6 +409,16 @@ export default function EmployeeLeaveRecordsPage() {
               <SelectItem value="this_year">{t("common.thisYear", "This Year")}</SelectItem>
             </SelectContent>
           </Select>
+          <Select value={sourceFilter} onValueChange={setSourceFilter}>
+            <SelectTrigger className="w-[130px]">
+              <SelectValue placeholder={t("leave.source", "Source")} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{t("common.all", "All")}</SelectItem>
+              <SelectItem value="ess">ESS</SelectItem>
+              <SelectItem value="hr_admin">HR Admin</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Bulk Actions */}
@@ -342,6 +457,7 @@ export default function EmployeeLeaveRecordsPage() {
                 <TableHead>{t("leave.employeeRecords.dates", "Dates")}</TableHead>
                 <TableHead>{t("leave.employeeRecords.duration", "Duration")}</TableHead>
                 <TableHead>{t("leave.common.status", "Status")}</TableHead>
+                <TableHead>{t("leave.source", "Source")}</TableHead>
                 <TableHead>{t("leave.employeeRecords.submitted", "Submitted")}</TableHead>
                 <TableHead className="w-[100px]">{t("common.actions", "Actions")}</TableHead>
               </TableRow>
@@ -349,13 +465,13 @@ export default function EmployeeLeaveRecordsPage() {
             <TableBody>
               {loadingAllRequests ? (
                 <TableRow>
-                  <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={10} className="text-center py-8 text-muted-foreground">
                     {t("common.loading", "Loading...")}
                   </TableCell>
                 </TableRow>
               ) : paginatedRequests.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={10} className="text-center py-8 text-muted-foreground">
                     {t("leave.employeeRecords.noRecords", "No leave records found")}
                   </TableCell>
                 </TableRow>
@@ -397,6 +513,7 @@ export default function EmployeeLeaveRecordsPage() {
                       {request.duration} {request.leave_type?.accrual_unit || "days"}
                     </TableCell>
                     <TableCell>{getStatusBadge(request.status)}</TableCell>
+                    <TableCell>{getSourceBadge(request.source)}</TableCell>
                     <TableCell className="text-muted-foreground">
                       {request.submitted_at
                         ? formatDateForDisplay(request.submitted_at, "MMM d, yyyy")
@@ -417,8 +534,13 @@ export default function EmployeeLeaveRecordsPage() {
                             <Eye className="mr-2 h-4 w-4" />
                             {t("common.view", "View Details")}
                           </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleEditRecord(request)}>
+                            <Pencil className="mr-2 h-4 w-4" />
+                            {t("common.edit", "Edit")}
+                          </DropdownMenuItem>
                           {request.status === "pending" && (
                             <>
+                              <DropdownMenuSeparator />
                               <DropdownMenuItem onClick={() => {
                                 setSelectedRequest(request);
                                 setActionType("approve");
@@ -444,6 +566,14 @@ export default function EmployeeLeaveRecordsPage() {
                               {t("leave.post", "Post to Balance")}
                             </DropdownMenuItem>
                           )}
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem 
+                            onClick={() => handleDeleteRecord(request)}
+                            className="text-destructive focus:text-destructive"
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            {t("common.delete", "Delete")}
+                          </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>
@@ -617,6 +747,38 @@ export default function EmployeeLeaveRecordsPage() {
             </div>
           </DialogContent>
         </Dialog>
+
+        {/* Add/Edit Leave Record Dialog */}
+        <LeaveRecordDialog
+          open={isRecordDialogOpen}
+          onOpenChange={setIsRecordDialogOpen}
+          request={editingRequest}
+          leaveTypes={leaveTypes}
+          companyId={selectedCompanyId}
+          onSave={handleSaveRecord}
+          isSaving={createLeaveRequest.isPending || updateLeaveRequest.isPending}
+        />
+
+        {/* Delete Confirmation Dialog */}
+        <AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>{t("leave.employeeRecords.deleteConfirmTitle", "Delete Leave Record")}</AlertDialogTitle>
+              <AlertDialogDescription>
+                {t("leave.employeeRecords.deleteConfirmMessage", "Are you sure you want to delete this leave record? This action cannot be undone.")}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>{t("common.cancel", "Cancel")}</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleConfirmDelete}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                {deleteLeaveRequest.isPending ? t("common.deleting", "Deleting...") : t("common.delete", "Delete")}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </AppLayout>
   );

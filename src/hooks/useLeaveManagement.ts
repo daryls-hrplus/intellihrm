@@ -132,6 +132,7 @@ export interface LeaveRequest {
   reviewed_at: string | null;
   review_notes: string | null;
   workflow_instance_id: string | null;
+  source: "ess" | "hr_admin";
   created_at: string;
   updated_at: string;
   leave_type?: LeaveType;
@@ -537,8 +538,9 @@ export function useLeaveManagement(companyId?: string, leaveYearId?: string) {
         .from("leave_requests")
         .insert([{
           ...request,
-          employee_id: user?.id,
+          employee_id: request.employee_id || user?.id,
           submitted_at: new Date().toISOString(),
+          source: request.source || 'ess',
         } as any])
         .select()
         .single();
@@ -547,10 +549,55 @@ export function useLeaveManagement(companyId?: string, leaveYearId?: string) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["leave-requests"] });
+      queryClient.invalidateQueries({ queryKey: ["all-leave-requests"] });
       toast.success("Leave request submitted successfully");
     },
     onError: (error: Error) => {
       toast.error(`Failed to submit leave request: ${error.message}`);
+    },
+  });
+
+  // Update leave request (for HR Admin editing)
+  const updateLeaveRequest = useMutation({
+    mutationFn: async ({ id, ...updates }: Partial<LeaveRequest> & { id: string }) => {
+      const { data, error } = await supabase
+        .from("leave_requests")
+        .update({
+          ...updates,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", id)
+        .select()
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["leave-requests"] });
+      queryClient.invalidateQueries({ queryKey: ["all-leave-requests"] });
+      toast.success("Leave request updated successfully");
+    },
+    onError: (error: Error) => {
+      toast.error(`Failed to update leave request: ${error.message}`);
+    },
+  });
+
+  // Delete leave request
+  const deleteLeaveRequest = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from("leave_requests")
+        .delete()
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["leave-requests"] });
+      queryClient.invalidateQueries({ queryKey: ["all-leave-requests"] });
+      toast.success("Leave request deleted successfully");
+    },
+    onError: (error: Error) => {
+      toast.error(`Failed to delete leave request: ${error.message}`);
     },
   });
 
@@ -699,6 +746,8 @@ export function useLeaveManagement(companyId?: string, leaveYearId?: string) {
     deleteAccrualRule,
     createRolloverRule,
     createLeaveRequest,
+    updateLeaveRequest,
+    deleteLeaveRequest,
     updateLeaveRequestStatus,
     createHoliday,
     createCountryHoliday,
