@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { TranslationsProvider } from "@/components/TranslationsProvider";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { EnablementAccessGuard } from "@/components/auth/EnablementAccessGuard";
 import Index from "./pages/Index";
@@ -480,11 +481,12 @@ import { ProtectedLayout } from "@/components/layout/ProtectedLayout";
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <AuthProvider>
-          <Routes>
+      <TranslationsProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <AuthProvider>
+            <Routes>
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/auth/mfa" element={<MFAChallengePage />} />
             <Route path="/unauthorized" element={<UnauthorizedPage />} />
@@ -3665,6 +3667,7 @@ const App = () => (
           </Routes>
         </AuthProvider>
       </BrowserRouter>
+      </TranslationsProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );
