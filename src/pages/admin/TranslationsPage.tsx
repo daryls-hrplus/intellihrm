@@ -343,6 +343,30 @@ export default function TranslationsPage() {
 
         if (error) {
           console.error('AI translation error:', error);
+          
+          // Check for specific error types
+          if (error.message?.includes('402') || error.message?.includes('credits exhausted')) {
+            toast({
+              title: "AI Credits Exhausted",
+              description: "Please add funds to your Lovable workspace to continue using AI translations.",
+              variant: "destructive",
+            });
+            setIsAITranslating(false);
+            setAiProgress({ current: 0, total: 0 });
+            return;
+          }
+          
+          if (error.message?.includes('429') || error.message?.includes('Rate limit')) {
+            toast({
+              title: "Rate Limited",
+              description: "Too many requests. Please wait a moment and try again.",
+              variant: "destructive",
+            });
+            setIsAITranslating(false);
+            setAiProgress({ current: 0, total: 0 });
+            return;
+          }
+          
           errorCount += batch.length;
           continue;
         }
