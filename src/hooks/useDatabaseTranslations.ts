@@ -30,14 +30,33 @@ export function useDatabaseTranslations() {
   const fetchTranslations = useCallback(async () => {
     try {
       setIsLoading(true);
-      const { data, error: fetchError } = await supabase
-        .from('translations')
-        .select('*')
-        .order('category')
-        .order('translation_key');
+      
+      // Fetch all translations in batches to overcome the 1000 row limit
+      const allTranslations: Translation[] = [];
+      const batchSize = 1000;
+      let offset = 0;
+      let hasMore = true;
 
-      if (fetchError) throw fetchError;
-      setTranslations(data || []);
+      while (hasMore) {
+        const { data, error: fetchError } = await supabase
+          .from('translations')
+          .select('*')
+          .order('category')
+          .order('translation_key')
+          .range(offset, offset + batchSize - 1);
+
+        if (fetchError) throw fetchError;
+        
+        if (data && data.length > 0) {
+          allTranslations.push(...data);
+          offset += batchSize;
+          hasMore = data.length === batchSize;
+        } else {
+          hasMore = false;
+        }
+      }
+
+      setTranslations(allTranslations);
       setError(null);
     } catch (err) {
       console.error('Error fetching translations:', err);
