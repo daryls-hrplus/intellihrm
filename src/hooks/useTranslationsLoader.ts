@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import i18n from '@/i18n/config';
 import type { SupportedLanguage } from '@/i18n/config';
@@ -20,7 +20,6 @@ type NestedObject = { [key: string]: string | NestedObject };
 
 /**
  * Convert flat dot-notation keys to nested object structure
- * e.g., { "common.save": "Save" } -> { common: { save: "Save" } }
  */
 function unflattenObject(flat: Record<string, string>): NestedObject {
   const result: NestedObject = {};
@@ -54,11 +53,9 @@ function buildLanguageResource(
 
   translations.forEach((row) => {
     const value = row[langCode as keyof TranslationRow];
-    // Use the translation value, or fall back to English if missing
     if (typeof value === 'string' && value.trim() !== '') {
       flat[row.translation_key] = value;
     } else if (langCode !== 'en' && row.en) {
-      // Fallback to English for non-English languages
       flat[row.translation_key] = row.en;
     }
   });
@@ -66,61 +63,45 @@ function buildLanguageResource(
   return unflattenObject(flat);
 }
 
-/**
- * Fetch active company languages from the database
- */
-async function fetchActiveCompanyLanguages(): Promise<SupportedLanguage[]> {
-  try {
-    const { data, error } = await supabase
-      .from('companies')
-      .select('first_language, second_language')
-      .eq('is_active', true);
-
-    if (error) {
-      console.error('Error fetching company languages:', error);
-      return ['en'];
-    }
-
-    if (!data || data.length === 0) {
-      return ['en'];
-    }
-
-    // Collect unique language codes from all active companies
-    const languageCodes = new Set<SupportedLanguage>();
-    languageCodes.add('en'); // Always include English as fallback
-    
-    data.forEach((company) => {
-      if (company.first_language) {
-        languageCodes.add(company.first_language as SupportedLanguage);
-      }
-      if (company.second_language) {
-        languageCodes.add(company.second_language as SupportedLanguage);
-      }
-    });
-
-    return Array.from(languageCodes);
-  } catch (err) {
-    console.error('Error in fetchActiveCompanyLanguages:', err);
-    return ['en'];
-  }
-}
-
 export function useTranslationsLoader() {
   const [isLoaded, setIsLoaded] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [activeLanguages, setActiveLanguages] = useState<SupportedLanguage[]>(['en']);
+  const loadingRef = useRef(false);
 
   const loadTranslations = useCallback(async () => {
+    // Prevent concurrent loads
+    if (loadingRef.current) return;
+    loadingRef.current = true;
+
     try {
-      // First, get active company languages
-      const companyLanguages = await fetchActiveCompanyLanguages();
-      setActiveLanguages(companyLanguages);
+      // Fetch active company languages
+      const { data: companies, error: companyError } = await supabase
+        .from('companies')
+        .select('first_language, second_language')
+        .eq('is_active', true);
+
+      let companyLanguages: SupportedLanguage[] = ['en'];
+      
+      if (!companyError && companies && companies.length > 0) {
+        const languageCodes = new Set<SupportedLanguage>();
+        languageCodes.add('en');
+        
+        companies.forEach((company) => {
+          if (company.first_language) {
+            languageCodes.add(company.first_language as SupportedLanguage);
+          }
+          if (company.second_language) {
+            languageCodes.add(company.second_language as SupportedLanguage);
+          }
+        });
+        
+        companyLanguages = Array.from(languageCodes);
+      }
 
       // Build the select query for only the needed language columns
-      const languageColumns = companyLanguages.join(', ');
-      const selectQuery = `translation_key, ${languageColumns}`;
+      const selectQuery = `translation_key, ${companyLanguages.join(', ')}`;
 
-      // Fetch translations in batches to overcome the 1000 row limit
+      // Fetch translations in batches
       const allTranslations: TranslationRow[] = [];
       const batchSize = 1000;
       let offset = 0;
@@ -143,10 +124,10 @@ export function useTranslationsLoader() {
         }
       }
 
-      // If no translations in database, keep using the static files
       if (allTranslations.length === 0) {
         console.log('No translations in database, using static files');
         setIsLoaded(true);
+        loadingRef.current = false;
         return;
       }
 
@@ -162,12 +143,12 @@ export function useTranslationsLoader() {
     } catch (err) {
       console.error('Error loading translations from database:', err);
       setError('Failed to load translations');
-      // Still mark as loaded so the app can use static fallbacks
       setIsLoaded(true);
+    } finally {
+      loadingRef.current = false;
     }
   }, []);
 
-  // Subscribe to real-time updates
   useEffect(() => {
     loadTranslations();
 
@@ -181,7 +162,6 @@ export function useTranslationsLoader() {
           table: 'translations',
         },
         () => {
-          // Reload all translations when any change occurs
           console.log('Translation change detected, reloading...');
           loadTranslations();
         }
