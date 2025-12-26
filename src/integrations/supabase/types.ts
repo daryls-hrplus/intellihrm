@@ -8333,6 +8333,72 @@ export type Database = {
           },
         ]
       }
+      employee_government_ids: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          employee_id: string
+          expiry_date: string | null
+          government_id_type_id: string
+          id: string
+          id_number: string
+          is_verified: boolean | null
+          issue_date: string | null
+          issuing_authority: string | null
+          notes: string | null
+          updated_at: string
+          verified_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          employee_id: string
+          expiry_date?: string | null
+          government_id_type_id: string
+          id?: string
+          id_number: string
+          is_verified?: boolean | null
+          issue_date?: string | null
+          issuing_authority?: string | null
+          notes?: string | null
+          updated_at?: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          employee_id?: string
+          expiry_date?: string | null
+          government_id_type_id?: string
+          id?: string
+          id_number?: string
+          is_verified?: boolean | null
+          issue_date?: string | null
+          issuing_authority?: string | null
+          notes?: string | null
+          updated_at?: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_government_ids_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_government_ids_government_id_type_id_fkey"
+            columns: ["government_id_type_id"]
+            isOneToOne: false
+            referencedRelation: "government_id_types"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       employee_interests: {
         Row: {
           category: string | null
@@ -17905,6 +17971,60 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      government_id_types: {
+        Row: {
+          code: string
+          country_code: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          display_order: number | null
+          id: string
+          is_active: boolean
+          is_employee_type: boolean
+          is_employer_type: boolean
+          is_mandatory: boolean
+          name: string
+          updated_at: string
+          validation_message: string | null
+          validation_pattern: string | null
+        }
+        Insert: {
+          code: string
+          country_code: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          is_active?: boolean
+          is_employee_type?: boolean
+          is_employer_type?: boolean
+          is_mandatory?: boolean
+          name: string
+          updated_at?: string
+          validation_message?: string | null
+          validation_pattern?: string | null
+        }
+        Update: {
+          code?: string
+          country_code?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          is_active?: boolean
+          is_employee_type?: boolean
+          is_employer_type?: boolean
+          is_mandatory?: boolean
+          name?: string
+          updated_at?: string
+          validation_message?: string | null
+          validation_pattern?: string | null
+        }
+        Relationships: []
       }
       grievance_documents: {
         Row: {
@@ -31346,6 +31466,7 @@ export type Database = {
           last_hire_date: string | null
           last_login_at: string | null
           locked_until: string | null
+          nationality: string | null
           preferred_language: string | null
           section_id: string | null
           seniority_date: string | null
@@ -31375,6 +31496,7 @@ export type Database = {
           last_hire_date?: string | null
           last_login_at?: string | null
           locked_until?: string | null
+          nationality?: string | null
           preferred_language?: string | null
           section_id?: string | null
           seniority_date?: string | null
@@ -31404,6 +31526,7 @@ export type Database = {
           last_hire_date?: string | null
           last_login_at?: string | null
           locked_until?: string | null
+          nationality?: string | null
           preferred_language?: string | null
           section_id?: string | null
           seniority_date?: string | null

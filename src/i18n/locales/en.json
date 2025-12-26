@@ -4813,6 +4813,8 @@
     "orgStructureDesc": "Manage company org structure and hierarchy",
     "lookupValues": "Lookup Values",
     "lookupValuesDesc": "Manage system lookup values and codes",
+    "governmentIdTypes": "Government ID Types",
+    "governmentIdTypesDesc": "Manage employee/employer ID types by country",
     "intranetAdmin": {
       "title": "Intranet Admin",
       "description": "Manage announcements, gallery, and blog",
