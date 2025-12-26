@@ -140,6 +140,8 @@ import CompensatoryTimePage from "./pages/leave/CompensatoryTimePage";
 import CompTimePoliciesPage from "./pages/leave/CompTimePoliciesPage";
 import LeaveCalendarPage from "./pages/leave/LeaveCalendarPage";
 import LeaveBalanceAdjustmentsPage from "./pages/leave/LeaveBalanceAdjustmentsPage";
+import EmployeeLeaveRecordsPage from "./pages/leave/EmployeeLeaveRecordsPage";
+import EmployeeLeaveBalancesPage from "./pages/leave/EmployeeLeaveBalancesPage";
 
 // Compensation pages
 import CompensationDashboardPage from "./pages/compensation/CompensationDashboardPage";
@@ -1615,6 +1617,22 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <LeaveDashboardPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/leave/employee-records"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <EmployeeLeaveRecordsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/leave/employee-balances"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <EmployeeLeaveBalancesPage />
                 </ProtectedRoute>
               }
             />
