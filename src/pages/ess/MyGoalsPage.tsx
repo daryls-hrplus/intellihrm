@@ -62,6 +62,7 @@ import { GoalAuditTrail } from "@/components/performance/goals/GoalAuditTrail";
 import { RatingAcknowledgmentDialog } from "@/components/performance/RatingAcknowledgmentDialog";
 import { RatingDisputeDialog } from "@/components/performance/RatingDisputeDialog";
 import { RatingVisibilityTimeline } from "@/components/performance/RatingVisibilityTimeline";
+import { PersonalInsightsCard } from "@/components/performance/insights/PersonalInsightsCard";
 import { useGoalCheckIns, GoalCheckIn } from "@/hooks/useGoalCheckIns";
 import { usePendingAdjustments } from "@/hooks/usePendingAdjustments";
 import { useGoalRatingSubmissions } from "@/hooks/useGoalRatingSubmissions";
@@ -399,6 +400,11 @@ export default function MyGoalsPage() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Personal Insights Card */}
+        {user?.id && company?.id && (
+          <PersonalInsightsCard employeeId={user.id} companyId={company.id} />
+        )}
 
         {/* Analytics Dashboard */}
         {showAnalytics && goals.length > 0 && (
