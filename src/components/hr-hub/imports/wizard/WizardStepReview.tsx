@@ -17,14 +17,13 @@ import {
   CheckCircle2, 
   XCircle, 
   AlertTriangle,
-  Edit2,
+  Pencil,
   Save,
   X,
   Search,
   Filter,
   PartyPopper,
   Download,
-  Copy
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -40,13 +39,10 @@ const FIELD_VALIDATION_RULES: Record<string, Record<string, {
   required?: boolean; 
   type?: "email" | "date" | "number"; 
   maxLength?: number;
-  pattern?: RegExp;
 }>> = {
   companies: {
     code: { required: true, maxLength: 50 },
     name: { required: true, maxLength: 255 },
-    currency: { maxLength: 3 },
-    country: { maxLength: 2 },
   },
   departments: {
     code: { required: true, maxLength: 50 },
@@ -65,7 +61,6 @@ const FIELD_VALIDATION_RULES: Record<string, Record<string, {
     company_code: { required: true },
     department_code: { required: true },
     job_code: { required: true },
-    headcount: { type: "number" },
   },
   new_hires: {
     email: { required: true, type: "email" },
@@ -73,7 +68,6 @@ const FIELD_VALIDATION_RULES: Record<string, Record<string, {
     last_name: { required: true, maxLength: 100 },
     position_number: { required: true },
     department_code: { required: true },
-    hire_date: { type: "date" },
   },
 };
 
@@ -95,7 +89,7 @@ export function WizardStepReview({
     return parsedData.map((row, index) => ({
       ...row,
       _id: `row_${index}`,
-      _rowIndex: index + 2, // +2 because row 1 is header
+      _rowIndex: index + 2,
     }));
   }, [parsedData]);
 
@@ -187,7 +181,6 @@ export function WizardStepReview({
 
   const handleEdit = useCallback((row: any) => {
     setEditingRowId(row._id);
-    // Copy all non-internal fields
     const values: Record<string, any> = {};
     Object.entries(row).forEach(([key, val]) => {
       if (!key.startsWith("_")) {
@@ -204,7 +197,6 @@ export function WizardStepReview({
       [field]: value,
     }));
 
-    // Real-time validation
     const error = validateField(field, value);
     setEditValidationErrors((prev) => {
       const newErrors = { ...prev };
@@ -220,11 +212,9 @@ export function WizardStepReview({
   const handleSave = useCallback(() => {
     if (!parsedData || !editingRowId) return;
 
-    // Find the original index by matching _id
     const originalIndex = dataWithIds.findIndex(d => d._id === editingRowId);
     if (originalIndex === -1) return;
 
-    // Check for validation errors
     if (Object.keys(editValidationErrors).length > 0) {
       toast.error("Please fix validation errors before saving");
       return;
@@ -263,7 +253,6 @@ export function WizardStepReview({
       return;
     }
 
-    // Add validation status column
     const exportHeaders = [...headers, "validation_status", "validation_issues"];
     
     const csvRows = [
@@ -380,123 +369,113 @@ export function WizardStepReview({
 
       {/* Data Table */}
       <Card>
-        <CardContent className="p-0">
-          <ScrollArea className="h-[400px]">
-            <div className="min-w-max">
-              <Table>
-                <TableHeader className="sticky top-0 z-10 bg-background">
-                  <TableRow>
-                    <TableHead className="w-[60px] min-w-[60px] bg-muted font-semibold text-center sticky left-0 z-20">Row</TableHead>
-                    {headers.map((header) => (
-                      <TableHead 
-                        key={header} 
-                        className="min-w-[120px] whitespace-nowrap bg-muted font-semibold"
-                      >
-                        {header}
-                      </TableHead>
-                    ))}
-                    <TableHead className="w-[80px] min-w-[80px] bg-muted font-semibold sticky right-0 z-20">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredData.map((row, displayIndex) => {
-                    const rowNum = row._rowIndex;
-                    const hasRowIssue = !!issueMap[rowNum];
-                    const isEditing = editingRowId === row._id;
+        <CardContent className="p-0 overflow-hidden">
+          <div className="overflow-auto max-h-[400px]">
+            <Table>
+              <TableHeader className="sticky top-0 bg-muted z-10">
+                <TableRow>
+                  <TableHead className="w-[60px] min-w-[60px] font-semibold text-center bg-muted">Row</TableHead>
+                  {headers.map((header) => (
+                    <TableHead 
+                      key={header} 
+                      className="min-w-[120px] whitespace-nowrap font-semibold bg-muted"
+                    >
+                      {header}
+                    </TableHead>
+                  ))}
+                  <TableHead className="w-[100px] min-w-[100px] font-semibold bg-muted text-center">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredData.map((row, displayIndex) => {
+                  const rowNum = row._rowIndex;
+                  const hasRowIssue = !!issueMap[rowNum];
+                  const isEditing = editingRowId === row._id;
 
-                    return (
-                      <TableRow
-                        key={row._id}
-                        className={`
-                          ${hasRowIssue ? "bg-destructive/5" : ""}
-                          ${displayIndex % 2 === 0 && !hasRowIssue ? "bg-muted/20" : ""}
-                        `}
-                      >
-                        <TableCell className="w-[60px] min-w-[60px] font-mono text-xs text-muted-foreground border-r sticky left-0 bg-background z-10">
-                          {rowNum}
-                        </TableCell>
-                        {headers.map((header) => {
-                          const cellStatus = getCellStatus(rowNum, header);
-                          const issue = issueMap[rowNum]?.[header];
-                          const editError = editValidationErrors[header];
+                  return (
+                    <TableRow
+                      key={row._id}
+                      className={`${hasRowIssue ? "bg-destructive/5" : ""} ${displayIndex % 2 === 0 && !hasRowIssue ? "bg-muted/20" : ""}`}
+                    >
+                      <TableCell className="w-[60px] min-w-[60px] font-mono text-xs text-muted-foreground text-center border-r">
+                        {rowNum}
+                      </TableCell>
+                      {headers.map((header) => {
+                        const cellStatus = getCellStatus(rowNum, header);
+                        const issue = issueMap[rowNum]?.[header];
+                        const editError = editValidationErrors[header];
 
-                          return (
-                            <TableCell
-                              key={header}
-                              className={`
-                                min-w-[120px] border-r
-                                ${cellStatus === "error" ? "bg-destructive/20" : ""}
-                                ${cellStatus === "warning" ? "bg-yellow-500/20" : ""}
-                              `}
-                            >
-                              {isEditing ? (
-                                <div className="space-y-1">
-                                  <Input
-                                    value={editedValues[header] || ""}
-                                    onChange={(e) => handleFieldChange(header, e.target.value)}
-                                    className={`h-8 text-sm min-w-[100px] ${editError ? "border-destructive" : ""}`}
-                                  />
-                                  {editError && (
-                                    <p className="text-xs text-destructive">{editError}</p>
-                                  )}
-                                </div>
-                              ) : (
-                                <div className="relative group">
-                                  <span className="font-mono text-sm whitespace-nowrap">{row[header]}</span>
-                                  {issue && (
-                                    <div className="hidden group-hover:block absolute z-20 bg-popover border rounded-md shadow-lg p-2 text-xs max-w-[200px] top-full left-0 mt-1">
-                                      <p className="font-medium">{issue.issue}</p>
-                                      {issue.suggestion && (
-                                        <p className="text-muted-foreground mt-1">
-                                          💡 {issue.suggestion}
-                                        </p>
-                                      )}
-                                    </div>
-                                  )}
-                                </div>
-                              )}
-                            </TableCell>
-                          );
-                        })}
-                        <TableCell className="w-[80px] min-w-[80px] sticky right-0 bg-background z-10">
-                          {isEditing ? (
-                            <div className="flex items-center gap-1">
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                onClick={handleSave}
-                                className="h-7 w-7 p-0"
-                                disabled={Object.keys(editValidationErrors).length > 0}
-                              >
-                                <Save className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                onClick={handleCancel}
-                                className="h-7 w-7 p-0"
-                              >
-                                <X className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          ) : (
+                        return (
+                          <TableCell
+                            key={header}
+                            className={`min-w-[120px] border-r ${cellStatus === "error" ? "bg-destructive/20" : ""} ${cellStatus === "warning" ? "bg-yellow-500/20" : ""}`}
+                          >
+                            {isEditing ? (
+                              <div className="space-y-1">
+                                <Input
+                                  value={editedValues[header] || ""}
+                                  onChange={(e) => handleFieldChange(header, e.target.value)}
+                                  className={`h-8 text-sm min-w-[100px] ${editError ? "border-destructive" : ""}`}
+                                />
+                                {editError && (
+                                  <p className="text-xs text-destructive">{editError}</p>
+                                )}
+                              </div>
+                            ) : (
+                              <div className="relative group">
+                                <span className="font-mono text-sm whitespace-nowrap">{row[header]}</span>
+                                {issue && (
+                                  <div className="hidden group-hover:block absolute z-20 bg-popover border rounded-md shadow-lg p-2 text-xs max-w-[200px] top-full left-0 mt-1">
+                                    <p className="font-medium">{issue.issue}</p>
+                                    {issue.suggestion && (
+                                      <p className="text-muted-foreground mt-1">💡 {issue.suggestion}</p>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                          </TableCell>
+                        );
+                      })}
+                      <TableCell className="w-[100px] min-w-[100px] text-center">
+                        {isEditing ? (
+                          <div className="flex items-center justify-center gap-1">
                             <Button
                               size="sm"
                               variant="ghost"
-                              onClick={() => handleEdit(row)}
-                              className="h-7 w-7 p-0"
+                              onClick={handleSave}
+                              className="h-8 w-8 p-0"
+                              disabled={Object.keys(editValidationErrors).length > 0}
                             >
-                              <Edit2 className="h-4 w-4" />
+                              <Save className="h-4 w-4" />
                             </Button>
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            </div>
-          </ScrollArea>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={handleCancel}
+                              className="h-8 w-8 p-0"
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ) : (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleEdit(row)}
+                            className="h-8 gap-1"
+                          >
+                            <Pencil className="h-3 w-3" />
+                            Edit
+                          </Button>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </div>
         </CardContent>
       </Card>
 
@@ -527,6 +506,14 @@ export function WizardStepReview({
           </AlertDescription>
         </Alert>
       )}
+
+      {/* Re-upload hint */}
+      <Alert>
+        <AlertTriangle className="h-4 w-4" />
+        <AlertDescription>
+          To re-import a fixed file, click <strong>Back</strong> to return to the Upload step and upload your corrected CSV.
+        </AlertDescription>
+      </Alert>
     </div>
   );
 }
