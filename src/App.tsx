@@ -142,6 +142,7 @@ import LeaveCalendarPage from "./pages/leave/LeaveCalendarPage";
 import LeaveBalanceAdjustmentsPage from "./pages/leave/LeaveBalanceAdjustmentsPage";
 import EmployeeLeaveRecordsPage from "./pages/leave/EmployeeLeaveRecordsPage";
 import EmployeeLeaveBalancesPage from "./pages/leave/EmployeeLeaveBalancesPage";
+import LeaveYearsPage from "./pages/leave/LeaveYearsPage";
 
 // Compensation pages
 import CompensationDashboardPage from "./pages/compensation/CompensationDashboardPage";

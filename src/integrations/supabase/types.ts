@@ -24182,6 +24182,7 @@ export type Database = {
           id: string
           last_accrual_date: string | null
           leave_type_id: string
+          leave_year_id: string | null
           opening_balance: number
           updated_at: string
           used_amount: number
@@ -24197,6 +24198,7 @@ export type Database = {
           id?: string
           last_accrual_date?: string | null
           leave_type_id: string
+          leave_year_id?: string | null
           opening_balance?: number
           updated_at?: string
           used_amount?: number
@@ -24212,6 +24214,7 @@ export type Database = {
           id?: string
           last_accrual_date?: string | null
           leave_type_id?: string
+          leave_year_id?: string | null
           opening_balance?: number
           updated_at?: string
           used_amount?: number
@@ -24230,6 +24233,13 @@ export type Database = {
             columns: ["leave_type_id"]
             isOneToOne: false
             referencedRelation: "leave_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leave_balances_leave_year_id_fkey"
+            columns: ["leave_year_id"]
+            isOneToOne: false
+            referencedRelation: "leave_years"
             referencedColumns: ["id"]
           },
         ]
@@ -24814,6 +24824,69 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "leave_types_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      leave_years: {
+        Row: {
+          closed_at: string | null
+          closed_by: string | null
+          code: string
+          company_id: string
+          created_at: string
+          end_date: string
+          id: string
+          is_closed: boolean
+          is_current: boolean
+          name: string
+          notes: string | null
+          start_date: string
+          updated_at: string
+        }
+        Insert: {
+          closed_at?: string | null
+          closed_by?: string | null
+          code: string
+          company_id: string
+          created_at?: string
+          end_date: string
+          id?: string
+          is_closed?: boolean
+          is_current?: boolean
+          name: string
+          notes?: string | null
+          start_date: string
+          updated_at?: string
+        }
+        Update: {
+          closed_at?: string | null
+          closed_by?: string | null
+          code?: string
+          company_id?: string
+          created_at?: string
+          end_date?: string
+          id?: string
+          is_closed?: boolean
+          is_current?: boolean
+          name?: string
+          notes?: string | null
+          start_date?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leave_years_closed_by_fkey"
+            columns: ["closed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leave_years_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
