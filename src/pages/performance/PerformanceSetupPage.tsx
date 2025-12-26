@@ -22,6 +22,8 @@ import { TalentApprovalWorkflowManager } from "@/components/performance/setup/Ta
 import { Feedback360ConfigSection } from "@/components/performance/setup/Feedback360ConfigSection";
 import { GoalCyclesManager } from "@/components/performance/setup/GoalCyclesManager";
 import { GoalLockingRulesManager } from "@/components/performance/setup/GoalLockingRulesManager";
+import { GoalRatingConfigurationDialog } from "@/components/performance/GoalRatingConfigurationDialog";
+import { useGoalRatingConfiguration } from "@/hooks/useGoalRatingConfiguration";
 import { 
   Settings, 
   Star, 
@@ -37,6 +39,7 @@ import {
   Layers,
   MessageSquare,
   Clock,
+  Scale,
 } from "lucide-react";
 import { CheckInCadenceConfig } from "@/components/performance/setup/CheckInCadenceConfig";
 
@@ -308,6 +311,10 @@ export default function PerformanceSetupPage() {
                     <Clock className="h-4 w-4" />
                     Check-in Cadence
                   </TabsTrigger>
+                  <TabsTrigger value="rating-config" className="flex items-center gap-2">
+                    <Scale className="h-4 w-4" />
+                    Rating Config
+                  </TabsTrigger>
                 </TabsList>
                 <TabsContent value="goal-cycles" className="mt-4">
                   <GoalCyclesManager companyId={selectedCompany} />
@@ -320,6 +327,9 @@ export default function PerformanceSetupPage() {
                 </TabsContent>
                 <TabsContent value="check-in-cadence" className="mt-4">
                   <CheckInCadenceConfig companyId={selectedCompany} />
+                </TabsContent>
+                <TabsContent value="rating-config" className="mt-4">
+                  <RatingConfigurationContent companyId={selectedCompany} />
                 </TabsContent>
               </Tabs>
             </TabsContent>
@@ -849,5 +859,95 @@ function RecognitionCategoryDialog({ open, onOpenChange, companyId, editingCateg
         </DialogFooter>
       </DialogContent>
     </Dialog>
+  );
+}
+
+// Rating Configuration Content Component
+function RatingConfigurationContent({ companyId }: { companyId: string }) {
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const { configuration, isLoading, hasConfiguration, refetch } = useGoalRatingConfiguration({ companyId });
+  
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Scale className="h-5 w-5" />
+            Goal Rating Configuration
+          </div>
+          <Button onClick={() => setDialogOpen(true)}>
+            {hasConfiguration ? <Edit className="mr-2 h-4 w-4" /> : <Plus className="mr-2 h-4 w-4" />}
+            {hasConfiguration ? "Edit" : "Configure"}
+          </Button>
+        </CardTitle>
+        <CardDescription>
+          Configure how goal ratings are calculated, weighted, and displayed to employees
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <div className="space-y-4">
+            <Skeleton className="h-8 w-full" />
+            <Skeleton className="h-8 w-3/4" />
+            <Skeleton className="h-8 w-1/2" />
+          </div>
+        ) : hasConfiguration && configuration ? (
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="p-4 rounded-lg bg-muted/50">
+                <div className="text-sm text-muted-foreground">Calculation Method</div>
+                <div className="font-medium capitalize">{configuration.calculation_method?.replace(/_/g, " ") || "Average"}</div>
+              </div>
+              <div className="p-4 rounded-lg bg-muted/50">
+                <div className="text-sm text-muted-foreground">Self-Rating Weight</div>
+                <div className="font-medium">{configuration.self_rating_weight || 0}%</div>
+              </div>
+              <div className="p-4 rounded-lg bg-muted/50">
+                <div className="text-sm text-muted-foreground">Manager Weight</div>
+                <div className="font-medium">{configuration.manager_rating_weight || 100}%</div>
+              </div>
+              <div className="p-4 rounded-lg bg-muted/50">
+                <div className="text-sm text-muted-foreground">Progress Weight</div>
+                <div className="font-medium">{configuration.progress_weight || 0}%</div>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              <div className="p-4 rounded-lg border">
+                <div className="text-sm text-muted-foreground">Visibility Timing</div>
+                <div className="font-medium capitalize">{configuration.hide_ratings_until?.replace(/_/g, " ") || "After Acknowledgment"}</div>
+              </div>
+              <div className="p-4 rounded-lg border">
+                <div className="text-sm text-muted-foreground">Disputes</div>
+                <div className="font-medium">{configuration.allow_dispute ? "Allowed" : "Not Allowed"}</div>
+              </div>
+              <div className="p-4 rounded-lg border">
+                <div className="text-sm text-muted-foreground">Acknowledgment Deadline</div>
+                <div className="font-medium">{configuration.acknowledgment_deadline_days || 7} days</div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
+            <Scale className="h-12 w-12 mb-4 opacity-50" />
+            <p className="text-lg font-medium">No Rating Configuration</p>
+            <p className="text-sm">Configure rating calculation and visibility settings</p>
+            <Button className="mt-4" onClick={() => setDialogOpen(true)}>
+              <Plus className="mr-2 h-4 w-4" />
+              Create Configuration
+            </Button>
+          </div>
+        )}
+      </CardContent>
+      
+      <GoalRatingConfigurationDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        companyId={companyId}
+        onSuccess={() => {
+          setDialogOpen(false);
+          refetch();
+        }}
+      />
+    </Card>
   );
 }

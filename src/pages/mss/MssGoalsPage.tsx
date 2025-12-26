@@ -25,6 +25,9 @@ import {
   Lock,
   Unlock,
   X,
+  Star,
+  Send,
+  AlertTriangle,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -43,8 +46,12 @@ import { RequestCheckInDialog } from "@/components/performance/RequestCheckInDia
 import { GoalAdjustmentDialog } from "@/components/performance/goals/GoalAdjustmentDialog";
 import { GoalAuditTrail } from "@/components/performance/goals/GoalAuditTrail";
 import { GoalLockDialog } from "@/components/performance/goals/GoalLockDialog";
+import { EnhancedGoalRatingDialog } from "@/components/performance/EnhancedGoalRatingDialog";
+import { DisputeResolutionPanel } from "@/components/performance/DisputeResolutionPanel";
 import { usePendingAdjustments } from "@/hooks/usePendingAdjustments";
 import { useGoalAdjustments } from "@/hooks/useGoalAdjustments";
+import { useGoalRatingSubmissions } from "@/hooks/useGoalRatingSubmissions";
+import type { GoalRatingSubmission } from "@/types/goalRatings";
 import { GoalCheckIn } from "@/hooks/useGoalCheckIns";
 import { format, isPast } from "date-fns";
 import { formatDateForDisplay, getTodayString } from "@/utils/dateUtils";
@@ -138,8 +145,16 @@ const statusColors: Record<GoalStatus, string> = {
   const [auditTrailDialogOpen, setAuditTrailDialogOpen] = useState(false);
   const [lockDialogOpen, setLockDialogOpen] = useState(false);
   
+  // Rating dialogs
+  const [ratingDialogOpen, setRatingDialogOpen] = useState(false);
+  const [pendingRatings, setPendingRatings] = useState<GoalRatingSubmission[]>([]);
+  const [readyToRelease, setReadyToRelease] = useState<GoalRatingSubmission[]>([]);
+  
   // Pending adjustments for manager approval
   const { pendingAdjustments, pendingCount, approveAdjustment, rejectAdjustment } = usePendingAdjustments(company?.id);
+  
+  // Rating submissions hook
+  const { fetchSubmissionsByStatus, releaseRating } = useGoalRatingSubmissions({ companyId: company?.id || "" });
 
   useEffect(() => {
     if (user?.id) {
@@ -154,11 +169,28 @@ const statusColors: Record<GoalStatus, string> = {
         fetchDirectReports(),
         fetchTeamGoals(),
         fetchCompletedGoals(),
+        fetchRatingSubmissions(),
       ]);
     } catch (error) {
       console.error("Error fetching goals data:", error);
     } finally {
       setLoading(false);
+    }
+  };
+  
+  const fetchRatingSubmissions = async () => {
+    if (!user?.id || !company?.id) return;
+    
+    try {
+      // Fetch submissions awaiting manager rating
+      const pending = await fetchSubmissionsByStatus("self_submitted", user.id);
+      setPendingRatings(pending);
+      
+      // Fetch submissions ready to release
+      const ready = await fetchSubmissionsByStatus("manager_submitted", user.id);
+      setReadyToRelease(ready);
+    } catch (error) {
+      console.error("Error fetching rating submissions:", error);
     }
   };
 
@@ -518,7 +550,7 @@ const statusColors: Record<GoalStatus, string> = {
         )}
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList>
+          <TabsList className="flex-wrap h-auto">
             <TabsTrigger value="team-goals" className="gap-2">
               <Target className="h-4 w-4" />
               Active Goals
@@ -527,6 +559,28 @@ const statusColors: Record<GoalStatus, string> = {
                   {filteredGoals.length}
                 </Badge>
               )}
+            </TabsTrigger>
+            <TabsTrigger value="pending-ratings" className="gap-2">
+              <Star className="h-4 w-4" />
+              Pending Ratings
+              {pendingRatings.length > 0 && (
+                <Badge variant="destructive" className="ml-1">
+                  {pendingRatings.length}
+                </Badge>
+              )}
+            </TabsTrigger>
+            <TabsTrigger value="ready-release" className="gap-2">
+              <Send className="h-4 w-4" />
+              Ready to Release
+              {readyToRelease.length > 0 && (
+                <Badge variant="outline" className="ml-1 border-primary text-primary">
+                  {readyToRelease.length}
+                </Badge>
+              )}
+            </TabsTrigger>
+            <TabsTrigger value="disputes" className="gap-2">
+              <AlertTriangle className="h-4 w-4" />
+              Disputes
             </TabsTrigger>
             <TabsTrigger value="pending-adjustments" className="gap-2">
               <FileEdit className="h-4 w-4" />
@@ -614,7 +668,104 @@ const statusColors: Record<GoalStatus, string> = {
             </div>
           </TabsContent>
 
-          {/* Pending Adjustments Tab (Manager approval workflow) */}
+          {/* Pending Ratings Tab */}
+          <TabsContent value="pending-ratings" className="mt-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Star className="h-5 w-5" />
+                  Goals Awaiting Your Rating
+                </CardTitle>
+                <CardDescription>
+                  Employees have submitted self-ratings for these goals
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {pendingRatings.length > 0 ? (
+                  <div className="space-y-3">
+                    {pendingRatings.map((submission) => (
+                      <div key={submission.id} className="flex items-center justify-between p-4 rounded-lg border">
+                        <div>
+                          <p className="font-medium">Goal ID: {submission.goal_id.slice(0, 8)}...</p>
+                          <p className="text-sm text-muted-foreground">
+                            Self Rating: {submission.self_rating || "-"} / 5
+                          </p>
+                        </div>
+                        <Button size="sm" onClick={() => {
+                          const goal = teamGoals.find(g => g.id === submission.goal_id);
+                          if (goal) {
+                            setSelectedGoal(goal);
+                            setRatingDialogOpen(true);
+                          }
+                        }}>
+                          <Star className="h-4 w-4 mr-1" />
+                          Rate
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Star className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>No goals awaiting your rating</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Ready to Release Tab */}
+          <TabsContent value="ready-release" className="mt-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Send className="h-5 w-5" />
+                  Ready to Release
+                </CardTitle>
+                <CardDescription>
+                  Ratings you've completed that can be released to employees
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {readyToRelease.length > 0 ? (
+                  <div className="space-y-3">
+                    {readyToRelease.map((submission) => (
+                      <div key={submission.id} className="flex items-center justify-between p-4 rounded-lg border">
+                        <div>
+                          <p className="font-medium">Goal ID: {submission.goal_id.slice(0, 8)}...</p>
+                          <p className="text-sm text-muted-foreground">
+                            Final Score: {submission.final_score?.toFixed(1) || "-"} / 5
+                          </p>
+                        </div>
+                        <Button size="sm" onClick={async () => {
+                          const { error } = await releaseRating(submission.id, user?.id || "");
+                          if (!error) {
+                            toast.success("Rating released to employee");
+                            fetchData();
+                          }
+                        }}>
+                          <Send className="h-4 w-4 mr-1" />
+                          Release
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Send className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>No ratings ready to release</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Disputes Tab */}
+          <TabsContent value="disputes" className="mt-6">
+            {company?.id && <DisputeResolutionPanel companyId={company.id} onResolved={fetchData} />}
+          </TabsContent>
+
+          {/* Pending Adjustments Tab */}
           <TabsContent value="pending-adjustments" className="mt-6">
             <Card>
               <CardHeader>
