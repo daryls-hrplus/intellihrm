@@ -92,7 +92,7 @@ export function ImportWizard({ companyId, onComplete, onCancel }: ImportWizardPr
         return !!state.validationResult && !state.isValidating;
       case 4: // Review
         return !!state.validationResult && 
-          (state.validationResult.basicErrorCount === 0 || state.validationResult.validRowCount > 0);
+          (state.validationResult.errorCount === 0 || state.validationResult.validRows > 0);
       case 5: // Commit
         return state.committedCount > 0;
       default:
