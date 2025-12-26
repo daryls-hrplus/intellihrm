@@ -185,3 +185,6 @@ verify_jwt = false
 
 [functions.sync-feature-registry]
 verify_jwt = false
+
+[functions.validate-import-data]
+verify_jwt = false

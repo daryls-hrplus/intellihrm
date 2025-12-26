@@ -88,6 +88,10 @@ export function useImportValidation({ importType, companyId }: UseImportValidati
     data: Record<string, string>[],
     schema: Record<string, { required?: boolean; type?: string; maxLength?: number; pattern?: RegExp; values?: string[] }>
   ): ValidationResult => {
+    // Update state immediately
+    setParsedData(data);
+    setIsValidating(true);
+    
     const issues: ValidationIssue[] = [];
     let errorCount = 0;
     let warningCount = 0;
@@ -202,7 +206,7 @@ export function useImportValidation({ importType, companyId }: UseImportValidati
 
     const validRows = data.length - new Set(issues.filter(i => i.severity === "error").map(i => i.row)).size;
 
-    return {
+    const result: ValidationResult = {
       isValid: errorCount === 0,
       totalRows: data.length,
       validRows,
@@ -210,6 +214,12 @@ export function useImportValidation({ importType, companyId }: UseImportValidati
       warningCount,
       issues,
     };
+
+    // Update state with validation result
+    setValidationResult(result);
+    setIsValidating(false);
+
+    return result;
   };
 
   const generateReport = (result: ValidationResult): string => {

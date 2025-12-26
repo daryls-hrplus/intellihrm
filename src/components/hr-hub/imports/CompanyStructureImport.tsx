@@ -94,6 +94,7 @@ export function CompanyStructureImport() {
     validationResult,
     parsedData,
     parseCSV,
+    validateWithAI,
     performBasicValidation,
     downloadReport,
     reset,
@@ -143,8 +144,15 @@ export function CompanyStructureImport() {
         return;
       }
 
+      console.log(`Parsed ${data.length} rows from ${selectedFile.name}`);
+      toast.info(`Parsing ${data.length} rows from file...`);
+
       const template = TEMPLATES[selectedType];
-      performBasicValidation(data, template.schema);
+      
+      // Try AI validation first, falls back to basic validation
+      await validateWithAI(data, template.schema);
+      
+      toast.success(`Validated ${data.length} rows successfully`);
     } catch (error) {
       console.error("Error parsing file:", error);
       toast.error("Failed to parse file");
