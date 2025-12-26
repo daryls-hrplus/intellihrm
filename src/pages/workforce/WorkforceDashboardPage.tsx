@@ -271,7 +271,6 @@ export default function WorkforceDashboardPage() {
         allModules.responsibilities,
         allModules.positions,
         allModules.orgChart,
-        allModules.vacancies,
       ]),
     },
     {
@@ -290,6 +289,7 @@ export default function WorkforceDashboardPage() {
     {
       titleKey: "Analytics & Planning",
       items: filterByAccess([
+        allModules.vacancies,
         allModules.orgChanges,
         allModules.forecasting,
         allModules.analytics,
