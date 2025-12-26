@@ -19,6 +19,7 @@ import {
   Edit,
   TrendingUp,
   TrendingDown,
+  Calendar,
 } from "lucide-react";
 import {
   Table,
@@ -67,6 +68,7 @@ interface BalanceWithEmployee {
   employee_id: string;
   leave_type_id: string;
   year: number;
+  leave_year_id: string | null;
   opening_balance: number;
   accrued_amount: number;
   used_amount: number;
@@ -80,6 +82,14 @@ interface BalanceWithEmployee {
     color: string;
     accrual_unit: string;
   };
+  leave_year?: {
+    id: string;
+    name: string;
+    code: string;
+    start_date: string;
+    end_date: string;
+    is_current: boolean;
+  };
   employee?: {
     id: string;
     full_name: string;
@@ -90,7 +100,17 @@ interface BalanceWithEmployee {
 export default function EmployeeLeaveBalancesPage() {
   const { t } = useLanguage();
   const { selectedCompanyId, setSelectedCompanyId } = useLeaveCompanyFilter();
-  const { allLeaveBalances, loadingAllBalances, leaveTypes } = useLeaveManagement(selectedCompanyId);
+  
+  // Leave year filter
+  const [selectedLeaveYearId, setSelectedLeaveYearId] = useState<string>("current");
+  
+  const { allLeaveBalances, loadingAllBalances, leaveTypes, leaveYears, loadingLeaveYears } = useLeaveManagement(
+    selectedCompanyId,
+    selectedLeaveYearId === "current" ? undefined : selectedLeaveYearId
+  );
+
+  // Get current leave year ID for "current" selection
+  const currentLeaveYear = leaveYears.find(ly => ly.is_current);
 
   // Filters
   const [searchTerm, setSearchTerm] = useState("");
@@ -266,11 +286,35 @@ export default function EmployeeLeaveBalancesPage() {
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <LeaveCompanyFilter
               selectedCompanyId={selectedCompanyId}
               onCompanyChange={setSelectedCompanyId}
             />
+            <Select value={selectedLeaveYearId} onValueChange={setSelectedLeaveYearId}>
+              <SelectTrigger className="w-[200px]">
+                <Calendar className="mr-2 h-4 w-4" />
+                <SelectValue placeholder={t("leave.employeeBalances.selectLeaveYear", "Select Leave Year")} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="current">
+                  <span className="font-medium">{t("leave.employeeBalances.currentYear", "Current Year")}</span>
+                </SelectItem>
+                {leaveYears.map((ly) => (
+                  <SelectItem key={ly.id} value={ly.id}>
+                    <div className="flex items-center gap-2">
+                      {ly.name}
+                      {ly.is_current && (
+                        <Badge variant="secondary" className="text-xs">Current</Badge>
+                      )}
+                      {ly.is_closed && (
+                        <Badge variant="outline" className="text-xs">Closed</Badge>
+                      )}
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <Button variant="outline" onClick={handleExport}>
               <Download className="mr-2 h-4 w-4" />
               {t("common.export", "Export")}

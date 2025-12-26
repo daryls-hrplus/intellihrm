@@ -79,11 +79,28 @@ export interface LeaveBalanceRecalculation {
   notes: string | null;
 }
 
+export interface LeaveYear {
+  id: string;
+  company_id: string;
+  name: string;
+  code: string;
+  start_date: string;
+  end_date: string;
+  is_current: boolean;
+  is_closed: boolean;
+  closed_at: string | null;
+  closed_by: string | null;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface LeaveBalance {
   id: string;
   employee_id: string;
   leave_type_id: string;
   year: number;
+  leave_year_id: string | null;
   opening_balance: number;
   accrued_amount: number;
   used_amount: number;
@@ -92,6 +109,7 @@ export interface LeaveBalance {
   current_balance: number;
   last_accrual_date: string | null;
   leave_type?: LeaveType;
+  leave_year?: LeaveYear;
 }
 
 export interface LeaveRequest {
@@ -147,7 +165,7 @@ export interface CountryHoliday {
   updated_at: string;
 }
 
-export function useLeaveManagement(companyId?: string) {
+export function useLeaveManagement(companyId?: string, leaveYearId?: string) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const currentYear = new Date().getFullYear();
@@ -169,6 +187,25 @@ export function useLeaveManagement(companyId?: string) {
       const { data, error } = await query;
       if (error) throw error;
       return data as LeaveType[];
+    },
+  });
+
+  // Fetch leave years
+  const { data: leaveYears = [], isLoading: loadingLeaveYears } = useQuery({
+    queryKey: ["leave-years", companyId],
+    queryFn: async () => {
+      let query = supabase
+        .from("leave_years")
+        .select("*")
+        .order("start_date", { ascending: false });
+
+      if (companyId) {
+        query = query.eq("company_id", companyId);
+      }
+
+      const { data, error } = await query;
+      if (error) throw error;
+      return data as LeaveYear[];
     },
   });
 
@@ -213,16 +250,22 @@ export function useLeaveManagement(companyId?: string) {
 
   // Fetch employee leave balances (for current user)
   const { data: leaveBalances = [], isLoading: loadingBalances, refetch: refetchBalances } = useQuery({
-    queryKey: ["leave-balances", user?.id, currentYear],
+    queryKey: ["leave-balances", user?.id, leaveYearId || currentYear],
     queryFn: async () => {
       if (!user?.id) return [];
 
-      const { data, error } = await supabase
+      let query = supabase
         .from("leave_balances")
-        .select("*, leave_type:leave_types(*)")
-        .eq("employee_id", user.id)
-        .eq("year", currentYear);
+        .select("*, leave_type:leave_types(*), leave_year:leave_years(*)")
+        .eq("employee_id", user.id);
 
+      if (leaveYearId) {
+        query = query.eq("leave_year_id", leaveYearId);
+      } else {
+        query = query.eq("year", currentYear);
+      }
+
+      const { data, error } = await query;
       if (error) throw error;
       return data as LeaveBalance[];
     },
@@ -231,14 +274,20 @@ export function useLeaveManagement(companyId?: string) {
 
   // Fetch all leave balances across all employees (for admin view)
   const { data: allLeaveBalances = [], isLoading: loadingAllBalances, refetch: refetchAllBalances } = useQuery({
-    queryKey: ["all-leave-balances", companyId, currentYear],
+    queryKey: ["all-leave-balances", companyId, leaveYearId || currentYear],
     queryFn: async () => {
       // First get all leave balances
-      const { data: balances, error: balancesError } = await supabase
+      let balancesQuery = supabase
         .from("leave_balances")
-        .select("*, leave_type:leave_types(*)")
-        .eq("year", currentYear);
+        .select("*, leave_type:leave_types(*), leave_year:leave_years(*)");
 
+      if (leaveYearId) {
+        balancesQuery = balancesQuery.eq("leave_year_id", leaveYearId);
+      } else {
+        balancesQuery = balancesQuery.eq("year", currentYear);
+      }
+
+      const { data: balances, error: balancesError } = await balancesQuery;
       if (balancesError) throw balancesError;
 
       // Then get all profiles to join
@@ -580,6 +629,7 @@ export function useLeaveManagement(companyId?: string) {
   return {
     // Data
     leaveTypes,
+    leaveYears,
     accrualRules,
     rolloverRules,
     leaveBalances,
@@ -589,8 +639,9 @@ export function useLeaveManagement(companyId?: string) {
     holidays,
     countryHolidays,
     // Loading states
-    isLoading: loadingTypes || loadingAccrualRules || loadingRolloverRules || loadingBalances || loadingRequests || loadingHolidays || loadingAllRequests || loadingCountryHolidays || loadingAllBalances,
+    isLoading: loadingTypes || loadingLeaveYears || loadingAccrualRules || loadingRolloverRules || loadingBalances || loadingRequests || loadingHolidays || loadingAllRequests || loadingCountryHolidays || loadingAllBalances,
     loadingTypes,
+    loadingLeaveYears,
     loadingAccrualRules,
     loadingRolloverRules,
     loadingBalances,
