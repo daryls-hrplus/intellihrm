@@ -40,6 +40,7 @@ interface ImportBatch {
   errors: any;
   warnings: any;
   imported_by: string;
+  imported_record_ids: any;
   created_at: string;
   validated_at: string | null;
   committed_at: string | null;

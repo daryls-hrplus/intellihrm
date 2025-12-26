@@ -126,7 +126,8 @@ export function WizardStepSelectType({ selectedType, onSelectType, companyId }: 
 
     for (const table of tables) {
       try {
-        let query = supabase.from(table).select("id", { count: "exact", head: true });
+        // Use type assertion to bypass deep type instantiation
+        let query = (supabase.from(table as any) as any).select("id", { count: "exact", head: true });
         if (companyId && table !== "companies") {
           query = query.eq("company_id", companyId);
         }
