@@ -200,3 +200,6 @@ verify_jwt = false
 
 [functions.ai-translate]
 verify_jwt = false
+
+[functions.process-translation-queue]
+verify_jwt = false
