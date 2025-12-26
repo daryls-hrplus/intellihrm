@@ -4815,6 +4815,21 @@
     "lookupValuesDesc": "Manage system lookup values and codes",
     "governmentIdTypes": "Government ID Types",
     "governmentIdTypesDesc": "Manage employee/employer ID types by country",
+    "dataImport": {
+      "title": "Data Import",
+      "subtitle": "Import organizational data using CSV templates with AI-powered validation",
+      "shortDesc": "Bulk import company structure, positions, and employees",
+      "selectType": "Select Import Type",
+      "selectTypeDesc": "Choose the type of data you want to import and download the template",
+      "companyStructure": "Company Structure",
+      "companyStructureDesc": "Import companies, departments, divisions, sections, and jobs",
+      "positions": "Positions",
+      "positionsDesc": "Import position definitions by company",
+      "employees": "Employees",
+      "employeesDesc": "Import employee basic information and create accounts",
+      "newHires": "New Hires",
+      "newHiresDesc": "Import new hire transactions with position assignments"
+    },
     "intranetAdmin": {
       "title": "Intranet Admin",
       "description": "Manage announcements, gallery, and blog",
