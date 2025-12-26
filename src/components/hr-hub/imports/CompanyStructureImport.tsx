@@ -71,14 +71,13 @@ const TEMPLATES = {
     },
   },
   jobs: {
-    headers: ["company_code", "job_family_code", "code", "title", "description", "min_salary", "max_salary", "start_date", "end_date"],
-    example: ["COMP001", "HR", "HR001", "HR Manager", "Manages HR operations", "50000", "80000", "2024-01-01", ""],
+    headers: ["company_code", "job_family_code", "code", "name", "description", "job_level", "job_grade", "start_date", "end_date"],
+    example: ["COMP001", "HR", "HR001", "HR Manager", "Manages HR operations", "Manager", "GR5", "2024-01-01", ""],
     schema: {
       company_code: { required: true },
+      job_family_code: { required: true },
       code: { required: true, maxLength: 50 },
-      title: { required: true, maxLength: 255 },
-      min_salary: { required: false, type: "number" },
-      max_salary: { required: false, type: "number" },
+      name: { required: true, maxLength: 255 },
       start_date: { required: true, type: "date" },
     },
   },
@@ -249,26 +248,24 @@ export function CompanyStructureImport() {
             const companyId = companyLookup.get(row.company_code?.toUpperCase());
             if (!companyId) throw new Error(`Company not found: ${row.company_code}`);
 
-            // Get job family if specified
-            let jobFamilyId = null;
-            if (row.job_family_code) {
-              const { data: jf } = await supabase
-                .from("job_families")
-                .select("id")
-                .eq("company_id", companyId)
-                .eq("code", row.job_family_code)
-                .maybeSingle();
-              jobFamilyId = jf?.id;
-            }
+            // Get job family - required
+            const { data: jf } = await supabase
+              .from("job_families")
+              .select("id")
+              .eq("company_id", companyId)
+              .eq("code", row.job_family_code)
+              .maybeSingle();
+            
+            if (!jf) throw new Error(`Job family not found: ${row.job_family_code}`);
 
             const { error } = await supabase.from("jobs").insert({
               company_id: companyId,
-              job_family_id: jobFamilyId as string | null,
+              job_family_id: jf.id,
               code: row.code,
-              title: row.title,
+              name: row.name,
               description: row.description || null,
-              min_salary: row.min_salary ? Number(row.min_salary) : null,
-              max_salary: row.max_salary ? Number(row.max_salary) : null,
+              job_level: row.job_level || null,
+              job_grade: row.job_grade || null,
               start_date: row.start_date,
               end_date: row.end_date || null,
               is_active: true,

@@ -411,6 +411,7 @@ import ComplianceTrackerPage from "./pages/hr-hub/ComplianceTrackerPage";
 import HRRemindersPage from "./pages/hr-hub/HRRemindersPage";
 import SOPManagementPage from "./pages/hr-hub/SOPManagementPage";
 import GovernmentIdTypesPage from "./pages/hr-hub/GovernmentIdTypesPage";
+import HRDataImportPage from "./pages/hr-hub/HRDataImportPage";
 
 // Admin Reminders
 import AdminRemindersPage from "./pages/admin/AdminRemindersPage";
@@ -3250,8 +3251,15 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="/hr-hub/data-import"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <HRDataImportPage />
+                </ProtectedRoute>
+              }
+            />
 
-            {/* Document Downloads */}
             <Route
               path="/documents/staff-loan-design"
               element={
