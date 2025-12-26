@@ -59,7 +59,7 @@ export function PositionsImport() {
     validationResult,
     parsedData,
     parseCSV,
-    performBasicValidation,
+    validateWithAI,
     downloadReport,
     reset,
   } = useImportValidation({
@@ -106,7 +106,11 @@ export function PositionsImport() {
         return;
       }
 
-      performBasicValidation(data, TEMPLATE.schema);
+      console.log(`Parsed ${data.length} rows from ${selectedFile.name}`);
+      toast.info(`Parsing ${data.length} rows from file...`);
+
+      await validateWithAI(data, TEMPLATE.schema);
+      toast.success(`Validated ${data.length} rows successfully`);
     } catch (error) {
       console.error("Error parsing file:", error);
       toast.error("Failed to parse file");
