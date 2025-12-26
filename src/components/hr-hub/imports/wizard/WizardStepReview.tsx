@@ -381,30 +381,23 @@ export function WizardStepReview({
       {/* Data Table */}
       <Card>
         <CardContent className="p-0">
-          <div className="relative">
-            {/* Fixed Header */}
-            <div className="sticky top-0 z-10 bg-background border-b">
+          <ScrollArea className="h-[400px]">
+            <div className="min-w-max">
               <Table>
-                <TableHeader>
+                <TableHeader className="sticky top-0 z-10 bg-background">
                   <TableRow>
-                    <TableHead className="w-[70px] min-w-[70px] bg-muted/50 font-semibold text-center">Row</TableHead>
+                    <TableHead className="w-[60px] min-w-[60px] bg-muted font-semibold text-center sticky left-0 z-20">Row</TableHead>
                     {headers.map((header) => (
                       <TableHead 
                         key={header} 
-                        className="min-w-[120px] whitespace-nowrap bg-muted/50 font-semibold"
+                        className="min-w-[120px] whitespace-nowrap bg-muted font-semibold"
                       >
                         {header}
                       </TableHead>
                     ))}
-                    <TableHead className="w-[80px] min-w-[80px] bg-muted/50 font-semibold">Actions</TableHead>
+                    <TableHead className="w-[80px] min-w-[80px] bg-muted font-semibold sticky right-0 z-20">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
-              </Table>
-            </div>
-            
-            {/* Scrollable Body */}
-            <ScrollArea className="h-[350px]">
-              <Table>
                 <TableBody>
                   {filteredData.map((row, displayIndex) => {
                     const rowNum = row._rowIndex;
@@ -419,7 +412,7 @@ export function WizardStepReview({
                           ${displayIndex % 2 === 0 && !hasRowIssue ? "bg-muted/20" : ""}
                         `}
                       >
-                        <TableCell className="w-[60px] min-w-[60px] font-mono text-xs text-muted-foreground border-r">
+                        <TableCell className="w-[60px] min-w-[60px] font-mono text-xs text-muted-foreground border-r sticky left-0 bg-background z-10">
                           {rowNum}
                         </TableCell>
                         {headers.map((header) => {
@@ -465,7 +458,7 @@ export function WizardStepReview({
                             </TableCell>
                           );
                         })}
-                        <TableCell className="w-[80px] min-w-[80px]">
+                        <TableCell className="w-[80px] min-w-[80px] sticky right-0 bg-background z-10">
                           {isEditing ? (
                             <div className="flex items-center gap-1">
                               <Button
@@ -502,8 +495,8 @@ export function WizardStepReview({
                   })}
                 </TableBody>
               </Table>
-            </ScrollArea>
-          </div>
+            </div>
+          </ScrollArea>
         </CardContent>
       </Card>
 
