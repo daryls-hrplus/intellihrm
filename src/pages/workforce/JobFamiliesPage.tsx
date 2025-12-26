@@ -52,24 +52,9 @@ interface Company {
   code: string;
 }
 
-interface Division {
-  id: string;
-  name: string;
-  code: string;
-}
-
-interface Department {
-  id: string;
-  name: string;
-  code: string;
-  company_division_id: string | null;
-}
-
 interface JobFamily {
   id: string;
   company_id: string;
-  company_division_id: string | null;
-  department_id: string;
   name: string;
   code: string;
   description: string | null;
@@ -77,8 +62,6 @@ interface JobFamily {
   start_date: string;
   end_date: string | null;
   created_at: string;
-  departments?: { name: string; code: string };
-  company_divisions?: { name: string; code: string } | null;
 }
 
 const emptyForm = {
@@ -86,8 +69,6 @@ const emptyForm = {
   code: "",
   description: "",
   company_id: "",
-  company_division_id: "",
-  department_id: "",
   is_active: true,
   start_date: getTodayString(),
   end_date: "",
@@ -97,8 +78,6 @@ export default function JobFamiliesPage() {
   const { t } = useLanguage();
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
-  const [divisions, setDivisions] = useState<Division[]>([]);
-  const [departments, setDepartments] = useState<Department[]>([]);
   const [jobFamilies, setJobFamilies] = useState<JobFamily[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -128,40 +107,15 @@ export default function JobFamiliesPage() {
 
   useEffect(() => {
     if (selectedCompanyId) {
-      fetchDivisionsAndDepartments();
       fetchJobFamilies();
     }
   }, [selectedCompanyId]);
-
-  const fetchDivisionsAndDepartments = async () => {
-    const [divisionsRes, departmentsRes] = await Promise.all([
-      supabase
-        .from("company_divisions")
-        .select("id, name, code")
-        .eq("company_id", selectedCompanyId)
-        .eq("is_active", true)
-        .order("name"),
-      supabase
-        .from("departments")
-        .select("id, name, code, company_division_id")
-        .eq("company_id", selectedCompanyId)
-        .eq("is_active", true)
-        .order("name"),
-    ]);
-
-    setDivisions(divisionsRes.data || []);
-    setDepartments(departmentsRes.data || []);
-  };
 
   const fetchJobFamilies = async () => {
     setIsLoading(true);
     const { data, error } = await supabase
       .from("job_families")
-      .select(`
-        *,
-        departments(name, code),
-        company_divisions(name, code)
-      `)
+      .select("*")
       .eq("company_id", selectedCompanyId)
       .order("name");
 
@@ -181,8 +135,6 @@ export default function JobFamiliesPage() {
         code: jobFamily.code,
         description: jobFamily.description || "",
         company_id: jobFamily.company_id,
-        company_division_id: jobFamily.company_division_id || "",
-        department_id: jobFamily.department_id,
         is_active: jobFamily.is_active,
         start_date: jobFamily.start_date,
         end_date: jobFamily.end_date || "",
@@ -203,16 +155,10 @@ export default function JobFamiliesPage() {
       toast.error(t("workforce.jobFamilies.companyRequired"));
       return;
     }
-    if (!formData.department_id) {
-      toast.error(t("workforce.jobFamilies.departmentRequired"));
-      return;
-    }
 
     setIsSaving(true);
     const payload = {
       company_id: formData.company_id,
-      company_division_id: formData.company_division_id || null,
-      department_id: formData.department_id,
       name: formData.name.trim(),
       code: formData.code.trim().toUpperCase(),
       description: formData.description.trim() || null,
@@ -290,15 +236,6 @@ export default function JobFamiliesPage() {
     }
     setDeleteDialogOpen(false);
   };
-
-  // Get divisions and departments for form based on selected company in form
-  const formDivisions = formData.company_id === selectedCompanyId ? divisions : [];
-  const formDepartments = formData.company_id === selectedCompanyId ? departments : [];
-  
-  // Filter departments by selected division
-  const filteredDepartments = formData.company_division_id
-    ? formDepartments.filter((d) => d.company_division_id === formData.company_division_id)
-    : formDepartments;
 
   const filteredJobFamilies = jobFamilies.filter(
     (jf) =>
@@ -378,8 +315,7 @@ export default function JobFamiliesPage() {
                   <TableRow>
                     <TableHead>{t("common.code")}</TableHead>
                     <TableHead>{t("common.name")}</TableHead>
-                    <TableHead>{t("workforce.division")}</TableHead>
-                    <TableHead>{t("workforce.departments")}</TableHead>
+                    <TableHead>{t("common.description")}</TableHead>
                     <TableHead>{t("common.startDate")}</TableHead>
                     <TableHead>{t("common.endDate")}</TableHead>
                     <TableHead>{t("common.status")}</TableHead>
@@ -389,7 +325,7 @@ export default function JobFamiliesPage() {
                 <TableBody>
                   {filteredJobFamilies.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
+                      <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
                         {t("workforce.jobFamilies.noJobFamiliesFound")}
                       </TableCell>
                     </TableRow>
@@ -398,10 +334,9 @@ export default function JobFamiliesPage() {
                       <TableRow key={jf.id}>
                         <TableCell className="font-mono">{jf.code}</TableCell>
                         <TableCell className="font-medium">{jf.name}</TableCell>
-                        <TableCell className="text-muted-foreground">
-                          {jf.company_divisions?.name || "-"}
+                        <TableCell className="text-muted-foreground max-w-[200px] truncate">
+                          {jf.description || "-"}
                         </TableCell>
-                        <TableCell>{jf.departments?.name || "-"}</TableCell>
                         <TableCell>{formatDateForDisplay(jf.start_date, "MMM d, yyyy")}</TableCell>
                         <TableCell>
                           {jf.end_date ? formatDateForDisplay(jf.end_date, "MMM d, yyyy") : "-"}
@@ -483,9 +418,7 @@ export default function JobFamiliesPage() {
               <Label>{t("common.company")} *</Label>
               <Select
                 value={formData.company_id}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, company_id: value, company_division_id: "", department_id: "" })
-                }
+                onValueChange={(value) => setFormData({ ...formData, company_id: value })}
               >
                 <SelectTrigger>
                   <SelectValue placeholder={t("workforce.selectCompany")} />
@@ -500,56 +433,16 @@ export default function JobFamiliesPage() {
               </Select>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>{t("workforce.division")} ({t("common.optional")})</Label>
-                <Select
-                  value={formData.company_division_id || "__none__"}
-                  onValueChange={(value) =>
-                    setFormData({ ...formData, company_division_id: value === "__none__" ? "" : value, department_id: "" })
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder={t("workforce.selectDivision")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="__none__">{t("common.none")}</SelectItem>
-                    {formDivisions.map((div) => (
-                      <SelectItem key={div.id} value={div.id}>
-                        {div.name} ({div.code})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>{t("workforce.departments")} *</Label>
-                <Select
-                  value={formData.department_id}
-                  onValueChange={(value) => setFormData({ ...formData, department_id: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder={t("workforce.selectDepartment")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {filteredDepartments.map((dept) => (
-                      <SelectItem key={dept.id} value={dept.id}>
-                        {dept.name} ({dept.code})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
             <div className="space-y-2">
               <Label>{t("common.description")}</Label>
               <Textarea
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 rows={3}
+                placeholder={t("workforce.jobFamilies.descriptionPlaceholder")}
               />
             </div>
+
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>{t("common.startDate")} *</Label>
@@ -568,6 +461,7 @@ export default function JobFamiliesPage() {
                 />
               </div>
             </div>
+
             <div className="flex items-center gap-2">
               <Switch
                 checked={formData.is_active}
