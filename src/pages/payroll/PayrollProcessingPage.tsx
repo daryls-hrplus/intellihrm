@@ -788,13 +788,21 @@ export default function PayrollProcessingPage() {
         {/* Company and Pay Group Filters */}
         <Card>
           <CardContent className="pt-6">
-            <PayrollFilters
-              selectedCompanyId={selectedCompanyId}
-              onCompanyChange={setSelectedCompanyId}
-              selectedPayGroupId={selectedPayGroupId}
-              onPayGroupChange={setSelectedPayGroupId}
-              showPayGroupFilter={true}
-            />
+            <div className="flex items-center gap-4 flex-wrap">
+              <PayrollFilters
+                selectedCompanyId={selectedCompanyId}
+                onCompanyChange={setSelectedCompanyId}
+                selectedPayGroupId={selectedPayGroupId}
+                onPayGroupChange={setSelectedPayGroupId}
+                showPayGroupFilter={true}
+              />
+              {selectedPayGroupId && selectedPayGroupId !== "all" && isMultiCurrencyEnabled && (
+                <Badge variant="outline" className="border-primary/50 bg-primary/10 text-primary gap-1.5">
+                  <Globe className="h-3.5 w-3.5" />
+                  Multi-Currency Enabled
+                </Badge>
+              )}
+            </div>
           </CardContent>
         </Card>
 
