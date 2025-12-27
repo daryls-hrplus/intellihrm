@@ -609,12 +609,12 @@ export default function EmployeeAssignmentsPage() {
                       <TableHead>{t("workforce.employee")}</TableHead>
                       <TableHead>{t("workforce.position")}</TableHead>
                       <TableHead>{t("workforce.department")}</TableHead>
+                      <TableHead>{t("workforce.assignmentType", "Assignment Type")}</TableHead>
                       <TableHead>{t("workforce.rateType", "Rate Type")}</TableHead>
                       <TableHead>{t("workforce.compensation", "Compensation")}</TableHead>
                       <TableHead>{t("common.startDate")}</TableHead>
                       <TableHead>{t("common.endDate")}</TableHead>
                       <TableHead>{t("common.status")}</TableHead>
-                      <TableHead>{t("workforce.assignmentType", "Assignment Type")}</TableHead>
                       {isAdmin && <TableHead className="text-right">{t("common.actions")}</TableHead>}
                     </TableRow>
                   </TableHeader>
@@ -634,6 +634,14 @@ export default function EmployeeAssignmentsPage() {
                           </div>
                         </TableCell>
                         <TableCell>{assignment.position?.department?.name}</TableCell>
+                        <TableCell>
+                          <Badge 
+                            variant="outline" 
+                            className={assignment.assignment_type === "primary" ? "bg-primary/10" : "bg-muted"}
+                          >
+                            {assignment.assignment_type ? t(`workforce.assignmentTypes.${assignment.assignment_type}`, assignment.assignment_type.charAt(0).toUpperCase() + assignment.assignment_type.slice(1)) : "-"}
+                          </Badge>
+                        </TableCell>
                         <TableCell>
                           <div className="flex flex-col gap-0.5">
                             <Badge 
@@ -688,14 +696,6 @@ export default function EmployeeAssignmentsPage() {
                         <TableCell>
                           <Badge variant={assignment.is_active ? "default" : "secondary"}>
                             {assignment.is_active ? t("common.active") : t("common.inactive")}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Badge 
-                            variant="outline" 
-                            className={assignment.assignment_type === "primary" ? "bg-primary/10" : "bg-muted"}
-                          >
-                            {assignment.assignment_type ? t(`workforce.assignmentTypes.${assignment.assignment_type}`, assignment.assignment_type.charAt(0).toUpperCase() + assignment.assignment_type.slice(1)) : "-"}
                           </Badge>
                         </TableCell>
                         {isAdmin && (

@@ -65,7 +65,7 @@ export function EmployeePositionCompensationDrilldown({
         setPositionRateInfo(positionData as PositionRateInfo);
       }
 
-      // Fetch employee compensation for this employee
+      // Fetch employee compensation for this employee AND position (assignment-specific)
       const { data: employeeComp, error: empError } = await supabase
         .from("employee_compensation")
         .select(`
@@ -79,6 +79,7 @@ export function EmployeePositionCompensationDrilldown({
           pay_element:pay_elements!employee_compensation_pay_element_id_fkey(id, code, name)
         `)
         .eq("employee_id", employeeId)
+        .eq("position_id", positionId)
         .eq("is_active", true);
 
       if (empError) throw empError;
@@ -187,7 +188,7 @@ export function EmployeePositionCompensationDrilldown({
   if (compensationItems.length === 0) {
     return (
       <div className="py-4 text-center text-sm text-muted-foreground">
-        No compensation records found for this employee.
+        No compensation records found for this assignment.
       </div>
     );
   }
@@ -196,7 +197,7 @@ export function EmployeePositionCompensationDrilldown({
     <div className="bg-muted/30 rounded-md p-3">
       <div className="flex items-center justify-between mb-3">
         <h5 className="text-sm font-medium text-muted-foreground">
-          Compensation Comparison (Employee vs Position)
+          Assignment Compensation (Employee vs Position)
         </h5>
         {positionRateInfo && (
           <Badge 
