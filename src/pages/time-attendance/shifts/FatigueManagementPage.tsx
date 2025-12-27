@@ -45,7 +45,7 @@ export default function FatigueManagementPage() {
   const breadcrumbItems = [
     { label: t("nav.timeAttendance"), href: "/time-attendance" },
     { label: t("timeAttendance.modules.shifts.title"), href: "/time-attendance/shifts" },
-    { label: t("timeAttendance.shifts.fatigue") }
+    { label: t("timeAttendance.shifts.fatigueLabel") }
   ];
 
   return (
@@ -56,7 +56,7 @@ export default function FatigueManagementPage() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <AlertTriangle className="h-6 w-6 text-red-600" />
-            <h1 className="text-2xl font-bold">{t("timeAttendance.shifts.fatigue")}</h1>
+            <h1 className="text-2xl font-bold">{t("timeAttendance.shifts.fatigueLabel")}</h1>
           </div>
           <Select value={selectedCompany} onValueChange={setSelectedCompany}>
             <SelectTrigger className="w-64">
@@ -73,7 +73,7 @@ export default function FatigueManagementPage() {
         {selectedCompany && (
           <Card>
             <CardHeader>
-              <CardTitle>{t("timeAttendance.shifts.fatigue")}</CardTitle>
+              <CardTitle>{t("timeAttendance.shifts.fatigueLabel")}</CardTitle>
             </CardHeader>
             <CardContent>
               <FatigueManagementTab companyId={selectedCompany} />
