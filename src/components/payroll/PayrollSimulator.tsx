@@ -1351,51 +1351,6 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId, payGroupI
             </div>
           </div>
           
-          {/* Position-level Proration Details */}
-          {result.positionProrations && result.positionProrations.length > 0 && (
-            <div className="space-y-2">
-              <p className="text-sm font-medium text-muted-foreground">Position Compensation Breakdown</p>
-              <div className="space-y-2">
-                {result.positionProrations.map((pos, idx) => (
-                  <div 
-                    key={idx} 
-                    className={`p-3 rounded-lg border ${pos.isProrated ? 'bg-amber-500/10 border-amber-500/20' : 'bg-muted/30'}`}
-                  >
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="font-medium">{pos.title}</span>
-                      {pos.isProrated && (
-                        <Badge variant="outline" className="text-amber-600 border-amber-500/50">
-                          Prorated
-                        </Badge>
-                      )}
-                    </div>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
-                      <div>
-                        <p className="text-muted-foreground text-xs">Full Amount</p>
-                        <p className="font-medium">{result.salary.currency} {formatCurrency(pos.fullAmount)}</p>
-                      </div>
-                      <div>
-                        <p className="text-muted-foreground text-xs">Period Amount</p>
-                        <p className="font-medium text-primary">{result.salary.currency} {formatCurrency(pos.proratedAmount)}</p>
-                      </div>
-                      {pos.isProrated && (
-                        <>
-                          <div>
-                            <p className="text-muted-foreground text-xs">Days Worked</p>
-                            <p className="font-medium">{pos.daysWorked} / {pos.totalDays}</p>
-                          </div>
-                          <div>
-                            <p className="text-muted-foreground text-xs">Factor</p>
-                            <p className="font-medium">{(pos.factor * 100).toFixed(1)}%</p>
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
           
           {/* Overall Proration Summary */}
           {result.proration?.isProrated && (
@@ -1442,72 +1397,32 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId, payGroupI
               </TableRow>
             </TableHeader>
             <TableBody>
-              {/* Grouped by Position when position-based compensation is used */}
-              {result.positionProrations?.length ? (
-                <>
-                  <TableRow className="bg-muted/30">
-                    <TableCell colSpan={4} className="font-medium">
-                      Position earnings
-                    </TableCell>
-                  </TableRow>
-                  {result.positionProrations.map((pos, idx) => (
-                    <TableRow key={`pos-sal-${idx}`}>
-                      <TableCell>
-                        <div className="flex flex-col">
-                          <span className="flex items-center gap-2">
-                            Base Salary
-                            <span className="text-xs text-primary">(Base)</span>
-                          </span>
-                          <span className="text-xs text-muted-foreground">{pos.title}</span>
-                          {pos.isProrated && (
-                            <Badge variant="outline" className="w-fit mt-0.5 text-xs bg-warning/20 text-warning border-warning/30">
-                              Prorated
-                            </Badge>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-right font-mono text-sm tabular-nums">
-                        {formatCurrency(pos.fullAmount)}
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className="font-mono text-xs">
-                          {result.localCurrencyCode}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-right font-mono text-sm font-medium tabular-nums">
-                        {formatCurrency(pos.proratedAmount)}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </>
-              ) : (
-                <TableRow>
-                  <TableCell>
-                    <div className="flex flex-col">
-                      <span className="flex items-center gap-2">
-                        Base Salary
-                        <span className="text-xs text-primary">(Base)</span>
-                      </span>
-                      {result.proration?.isProrated && (
-                        <Badge variant="outline" className="w-fit mt-0.5 text-xs bg-warning/20 text-warning border-warning/30">
-                          Prorated
-                        </Badge>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-right font-mono text-sm tabular-nums">
-                    {formatCurrency(result.proration?.fullPeriodSalary ?? result.earnings.regular_pay)}
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="outline" className="font-mono text-xs">
-                      {result.localCurrencyCode}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right font-mono text-sm font-medium tabular-nums">
-                    {formatCurrency(result.earnings.regular_pay)}
-                  </TableCell>
-                </TableRow>
-              )}
+              <TableRow>
+                <TableCell>
+                  <div className="flex flex-col">
+                    <span className="flex items-center gap-2">
+                      Base Salary
+                      <span className="text-xs text-primary">(Base)</span>
+                    </span>
+                    {result.proration?.isProrated && (
+                      <Badge variant="outline" className="w-fit mt-0.5 text-xs bg-warning/20 text-warning border-warning/30">
+                        Prorated
+                      </Badge>
+                    )}
+                  </div>
+                </TableCell>
+                <TableCell className="text-right font-mono text-sm tabular-nums">
+                  {formatCurrency(result.proration?.fullPeriodSalary ?? result.earnings.regular_pay)}
+                </TableCell>
+                <TableCell>
+                  <Badge variant="outline" className="font-mono text-xs">
+                    {result.localCurrencyCode}
+                  </Badge>
+                </TableCell>
+                <TableCell className="text-right font-mono text-sm font-medium tabular-nums">
+                  {formatCurrency(result.earnings.regular_pay)}
+                </TableCell>
+              </TableRow>
 
               {result.earnings.overtime_hours > 0 && (
                 <TableRow>
@@ -1536,7 +1451,7 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId, payGroupI
               {result.earnings.additional_comp.length > 0 && (
                 <TableRow className="bg-muted/30">
                   <TableCell colSpan={4} className="font-medium">
-                    Other earnings
+                    Compensation
                   </TableCell>
                 </TableRow>
               )}
