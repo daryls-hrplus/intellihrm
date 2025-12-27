@@ -194,22 +194,56 @@ export async function generateRetroactiveCalculations(
 /**
  * Fetch pending (unprocessed) retro amounts for employees in a pay group.
  * These are calculations that have been generated but not yet included in a payroll run.
+ * Respects targeting options: run type, target period, and auto_include flag.
  */
 export async function fetchPendingRetroAmounts(
-  payGroupId: string
+  payGroupId: string,
+  options?: {
+    runType?: string;
+    payPeriodId?: string;
+    includeManual?: boolean; // If true, include configs with auto_include=false
+  }
 ): Promise<PendingRetroAmount[]> {
   try {
     // Get approved configs for this pay group with unprocessed calculations
-    const { data: configs } = await supabase
+    let configQuery = supabase
       .from("retroactive_pay_configs")
-      .select("id, config_name")
+      .select("id, config_name, target_run_types, target_pay_period_id, auto_include")
       .eq("pay_group_id", payGroupId)
       .eq("status", "approved");
+    
+    // Filter by auto_include unless explicitly including manual
+    if (!options?.includeManual) {
+      configQuery = configQuery.eq("auto_include", true);
+    }
+    
+    const { data: configs } = await configQuery;
 
     if (!configs || configs.length === 0) return [];
+    
+    // Filter configs based on targeting options
+    const filteredConfigs = configs.filter((c: any) => {
+      // Check run type if provided
+      if (options?.runType && c.target_run_types) {
+        if (!c.target_run_types.includes(options.runType)) {
+          return false;
+        }
+      }
+      
+      // Check target period if config has one
+      if (c.target_pay_period_id) {
+        if (!options?.payPeriodId || c.target_pay_period_id !== options.payPeriodId) {
+          return false;
+        }
+      }
+      
+      return true;
+    });
+    
+    if (filteredConfigs.length === 0) return [];
 
-    const configIds = configs.map(c => c.id);
-    const configNameMap = new Map(configs.map(c => [c.id, c.config_name]));
+    const configIds = filteredConfigs.map((c: any) => c.id);
+    const configNameMap = new Map(filteredConfigs.map((c: any) => [c.id, c.config_name]));
 
     // Fetch unprocessed calculations
     const { data: calculations, error } = await supabase
@@ -256,11 +290,17 @@ export async function fetchPendingRetroAmounts(
 }
 
 /**
- * Fetch pending retro amounts for a specific employee
+ * Fetch pending retro amounts for a specific employee.
+ * Respects targeting options: run type, target period, and auto_include flag.
  */
 export async function fetchEmployeePendingRetro(
   employeeId: string,
-  payGroupId: string
+  payGroupId: string,
+  options?: {
+    runType?: string;
+    payPeriodId?: string;
+    includeManual?: boolean;
+  }
 ): Promise<{
   total: number;
   items: Array<{
@@ -271,16 +311,39 @@ export async function fetchEmployeePendingRetro(
   }>;
 }> {
   try {
-    const { data: configs } = await supabase
+    let configQuery = supabase
       .from("retroactive_pay_configs")
-      .select("id, config_name")
+      .select("id, config_name, target_run_types, target_pay_period_id, auto_include")
       .eq("pay_group_id", payGroupId)
       .eq("status", "approved");
+    
+    if (!options?.includeManual) {
+      configQuery = configQuery.eq("auto_include", true);
+    }
+    
+    const { data: configs } = await configQuery;
 
     if (!configs || configs.length === 0) return { total: 0, items: [] };
+    
+    // Filter configs based on targeting options
+    const filteredConfigs = configs.filter((c: any) => {
+      if (options?.runType && c.target_run_types) {
+        if (!c.target_run_types.includes(options.runType)) {
+          return false;
+        }
+      }
+      if (c.target_pay_period_id) {
+        if (!options?.payPeriodId || c.target_pay_period_id !== options.payPeriodId) {
+          return false;
+        }
+      }
+      return true;
+    });
+    
+    if (filteredConfigs.length === 0) return { total: 0, items: [] };
 
-    const configIds = configs.map(c => c.id);
-    const configNameMap = new Map(configs.map(c => [c.id, c.config_name]));
+    const configIds = filteredConfigs.map((c: any) => c.id);
+    const configNameMap = new Map(filteredConfigs.map((c: any) => [c.id, c.config_name]));
 
     const { data: calculations } = await supabase
       .from("retroactive_pay_calculations")
