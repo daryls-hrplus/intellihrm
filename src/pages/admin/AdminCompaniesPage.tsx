@@ -33,9 +33,10 @@ import { CompanyBranchLocations } from "@/components/admin/CompanyBranchLocation
 import { CompanyFiscalYearsManager } from "@/components/admin/CompanyFiscalYearsManager";
 import { CompanyGovernmentIds } from "@/components/admin/CompanyGovernmentIds";
 import { CountrySelect } from "@/components/ui/country-select";
-import { IdCard } from "lucide-react";
+import { IdCard, DollarSign } from "lucide-react";
 import { supportedLanguages } from "@/i18n";
 import { getLanguagesForCountry } from "@/lib/countryLanguageMapping";
+import { useCurrencies, type Currency } from "@/hooks/useCurrencies";
 
 interface Company {
   id: string;
@@ -132,6 +133,7 @@ const industries = [
 
 export default function AdminCompaniesPage() {
   const navigate = useNavigate();
+  const { currencies } = useCurrencies();
   const [companies, setCompanies] = useState<Company[]>([]);
   const [groups, setGroups] = useState<CompanyGroup[]>([]);
   const [divisions, setDivisions] = useState<Division[]>([]);
@@ -141,6 +143,7 @@ export default function AdminCompaniesPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCompany, setEditingCompany] = useState<Company | null>(null);
   const [formData, setFormData] = useState<CompanyFormData>(emptyFormData);
+  const [formLocalCurrencyId, setFormLocalCurrencyId] = useState<string>("");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSaving, setIsSaving] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
@@ -154,6 +157,27 @@ export default function AdminCompaniesPage() {
   const { toast } = useToast();
   const { logView } = useAuditLog();
   const hasLoggedView = useRef(false);
+
+  // Fetch default currency for a country from country_fiscal_years
+  const fetchCurrencyForCountry = async (countryName: string): Promise<string | null> => {
+    try {
+      const { data, error } = await supabase
+        .from("country_fiscal_years")
+        .select("currency_code")
+        .eq("country_name", countryName)
+        .eq("is_active", true)
+        .limit(1)
+        .maybeSingle();
+
+      if (error || !data) return null;
+
+      // Find currency by code
+      const currency = currencies.find(c => c.code === data.currency_code);
+      return currency?.id || null;
+    } catch {
+      return null;
+    }
+  };
 
   useEffect(() => {
     fetchCompanies();
@@ -268,10 +292,12 @@ export default function AdminCompaniesPage() {
         first_language: (company as any).first_language || "en",
         second_language: (company as any).second_language || "",
       });
+      setFormLocalCurrencyId(company.local_currency_id || "");
       setLogoPreview(company.logo_url);
     } else {
       setEditingCompany(null);
       setFormData(emptyFormData);
+      setFormLocalCurrencyId("");
       setLogoPreview(null);
     }
     setLogoFile(null);
@@ -283,6 +309,7 @@ export default function AdminCompaniesPage() {
     setIsModalOpen(false);
     setEditingCompany(null);
     setFormData(emptyFormData);
+    setFormLocalCurrencyId("");
     setErrors({});
     setLogoFile(null);
     setLogoPreview(null);
@@ -397,6 +424,7 @@ export default function AdminCompaniesPage() {
           website: formData.website || null,
           group_id: formData.group_id || null,
           division_id: formData.division_id || null,
+          local_currency_id: formLocalCurrencyId || null,
           logo_url: logoUrl,
           first_language: formData.first_language || "en",
           second_language: formData.second_language || null,
@@ -426,6 +454,7 @@ export default function AdminCompaniesPage() {
           website: formData.website || null,
           group_id: formData.group_id || null,
           division_id: formData.division_id || null,
+          local_currency_id: formLocalCurrencyId || null,
           first_language: formData.first_language || "en",
           second_language: formData.second_language || null,
         };
@@ -1030,7 +1059,7 @@ export default function AdminCompaniesPage() {
                   <label className="text-sm font-medium text-foreground">Country</label>
                   <CountrySelect
                     value={formData.country}
-                    onChange={(value) => {
+                    onChange={async (value) => {
                       // Auto-select languages based on country
                       const languages = getLanguagesForCountry(value);
                       setFormData({ 
@@ -1039,6 +1068,12 @@ export default function AdminCompaniesPage() {
                         first_language: languages.first,
                         second_language: languages.second || "",
                       });
+                      
+                      // Auto-select currency based on country
+                      const currencyId = await fetchCurrencyForCountry(value);
+                      if (currencyId) {
+                        setFormLocalCurrencyId(currencyId);
+                      }
                     }}
                     valueType="name"
                     placeholder="Select country"
@@ -1056,6 +1091,29 @@ export default function AdminCompaniesPage() {
                     className="h-10 w-full rounded-lg border border-input bg-background px-3 text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
+              </div>
+
+              {/* Local Currency */}
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <DollarSign className="h-4 w-4 text-muted-foreground" />
+                  <label className="text-sm font-medium text-foreground">Local Currency</label>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Auto-selected based on country. This currency is used as the default for employee compensation.
+                </p>
+                <select
+                  value={formLocalCurrencyId}
+                  onChange={(e) => setFormLocalCurrencyId(e.target.value)}
+                  className="h-10 w-full rounded-lg border border-input bg-background px-3 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                >
+                  <option value="">Select currency</option>
+                  {currencies.map((currency) => (
+                    <option key={currency.id} value={currency.id}>
+                      {currency.code} - {currency.name} ({currency.symbol})
+                    </option>
+                  ))}
+                </select>
               </div>
 
               {/* Language Settings */}
