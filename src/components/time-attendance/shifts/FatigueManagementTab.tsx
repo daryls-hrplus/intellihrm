@@ -69,13 +69,16 @@ export function FatigueManagementTab({ companyId }: FatigueManagementTabProps) {
     setOverrideReason("");
   };
 
-  const ruleTypeLabels: Record<string, string> = {
-    max_consecutive_shifts: "Max Consecutive Shifts",
-    min_rest_between_shifts: "Min Rest Between Shifts",
-    max_hours_per_day: "Max Hours Per Day",
-    max_hours_per_week: "Max Hours Per Week",
-    max_hours_per_period: "Max Hours Per Period",
-    mandatory_break: "Mandatory Break",
+  const getRuleTypeLabel = (ruleType: string) => {
+    const labels: Record<string, string> = {
+      max_consecutive_shifts: t("timeAttendance.shifts.fatigue.maxConsecutiveShifts"),
+      min_rest_between_shifts: t("timeAttendance.shifts.fatigue.minRestBetweenShifts"),
+      max_hours_per_day: t("timeAttendance.shifts.fatigue.maxHoursPerDay"),
+      max_hours_per_week: t("timeAttendance.shifts.fatigue.maxHoursPerWeek"),
+      max_hours_per_period: t("timeAttendance.shifts.fatigue.maxHoursPerPeriod"),
+      mandatory_break: t("timeAttendance.shifts.fatigue.mandatoryBreak"),
+    };
+    return labels[ruleType] || ruleType;
   };
 
   const getSeverityBadge = (severity: string) => {
@@ -119,49 +122,49 @@ export function FatigueManagementTab({ companyId }: FatigueManagementTabProps) {
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Create Fatigue Rule</DialogTitle>
+              <DialogTitle>{t("timeAttendance.shifts.fatigue.createFatigueRule")}</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Rule Name</Label>
-                  <Input value={formData.name} onChange={e => setFormData(p => ({ ...p, name: e.target.value }))} placeholder="e.g., Max 6 Consecutive Days" />
+                  <Label>{t("timeAttendance.shifts.fatigue.ruleName")}</Label>
+                  <Input value={formData.name} onChange={e => setFormData(p => ({ ...p, name: e.target.value }))} placeholder={t("timeAttendance.shifts.fatigue.ruleNamePlaceholder")} />
                 </div>
                 <div className="space-y-2">
-                  <Label>Code</Label>
-                  <Input value={formData.code} onChange={e => setFormData(p => ({ ...p, code: e.target.value.toUpperCase() }))} placeholder="e.g., FAT-001" />
+                  <Label>{t("timeAttendance.shifts.fatigue.code")}</Label>
+                  <Input value={formData.code} onChange={e => setFormData(p => ({ ...p, code: e.target.value.toUpperCase() }))} placeholder={t("timeAttendance.shifts.fatigue.codePlaceholder")} />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label>Rule Type</Label>
+                <Label>{t("timeAttendance.shifts.fatigue.ruleType")}</Label>
                 <Select value={formData.rule_type} onValueChange={v => setFormData(p => ({ ...p, rule_type: v }))}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="max_consecutive_shifts">Max Consecutive Shifts</SelectItem>
-                    <SelectItem value="min_rest_between_shifts">Min Rest Between Shifts</SelectItem>
-                    <SelectItem value="max_hours_per_day">Max Hours Per Day</SelectItem>
-                    <SelectItem value="max_hours_per_week">Max Hours Per Week</SelectItem>
-                    <SelectItem value="max_hours_per_period">Max Hours Per Period</SelectItem>
-                    <SelectItem value="mandatory_break">Mandatory Break</SelectItem>
+                    <SelectItem value="max_consecutive_shifts">{t("timeAttendance.shifts.fatigue.maxConsecutiveShifts")}</SelectItem>
+                    <SelectItem value="min_rest_between_shifts">{t("timeAttendance.shifts.fatigue.minRestBetweenShifts")}</SelectItem>
+                    <SelectItem value="max_hours_per_day">{t("timeAttendance.shifts.fatigue.maxHoursPerDay")}</SelectItem>
+                    <SelectItem value="max_hours_per_week">{t("timeAttendance.shifts.fatigue.maxHoursPerWeek")}</SelectItem>
+                    <SelectItem value="max_hours_per_period">{t("timeAttendance.shifts.fatigue.maxHoursPerPeriod")}</SelectItem>
+                    <SelectItem value="mandatory_break">{t("timeAttendance.shifts.fatigue.mandatoryBreak")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Threshold Value</Label>
+                  <Label>{t("timeAttendance.shifts.fatigue.thresholdValue")}</Label>
                   <Input type="number" min={1} value={formData.threshold_value} onChange={e => setFormData(p => ({ ...p, threshold_value: parseFloat(e.target.value) || 0 }))} />
                 </div>
                 <div className="space-y-2">
-                  <Label>Unit</Label>
+                  <Label>{t("timeAttendance.shifts.fatigue.unit")}</Label>
                   <Select value={formData.threshold_unit} onValueChange={v => setFormData(p => ({ ...p, threshold_unit: v }))}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="hours">Hours</SelectItem>
-                      <SelectItem value="days">Days</SelectItem>
-                      <SelectItem value="shifts">Shifts</SelectItem>
-                      <SelectItem value="minutes">Minutes</SelectItem>
+                      <SelectItem value="hours">{t("timeAttendance.shifts.fatigue.hours")}</SelectItem>
+                      <SelectItem value="days">{t("timeAttendance.shifts.fatigue.days")}</SelectItem>
+                      <SelectItem value="shifts">{t("timeAttendance.shifts.fatigue.shifts")}</SelectItem>
+                      <SelectItem value="minutes">{t("timeAttendance.shifts.fatigue.minutes")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -169,38 +172,38 @@ export function FatigueManagementTab({ companyId }: FatigueManagementTabProps) {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Applies To</Label>
+                  <Label>{t("timeAttendance.shifts.fatigue.appliesTo")}</Label>
                   <Select value={formData.applies_to} onValueChange={v => setFormData(p => ({ ...p, applies_to: v }))}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">All Employees</SelectItem>
-                      <SelectItem value="department">Specific Department</SelectItem>
-                      <SelectItem value="role">Specific Role</SelectItem>
-                      <SelectItem value="shift_type">Specific Shift Type</SelectItem>
+                      <SelectItem value="all">{t("timeAttendance.shifts.fatigue.allEmployees")}</SelectItem>
+                      <SelectItem value="department">{t("timeAttendance.shifts.fatigue.specificDepartment")}</SelectItem>
+                      <SelectItem value="role">{t("timeAttendance.shifts.fatigue.specificRole")}</SelectItem>
+                      <SelectItem value="shift_type">{t("timeAttendance.shifts.fatigue.specificShiftType")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label>Severity</Label>
+                  <Label>{t("timeAttendance.shifts.fatigue.severity")}</Label>
                   <Select value={formData.severity} onValueChange={v => setFormData(p => ({ ...p, severity: v }))}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="info">Info (Log only)</SelectItem>
-                      <SelectItem value="warning">Warning (Alert)</SelectItem>
-                      <SelectItem value="block">Block (Prevent)</SelectItem>
+                      <SelectItem value="info">{t("timeAttendance.shifts.fatigue.infoLogOnly")}</SelectItem>
+                      <SelectItem value="warning">{t("timeAttendance.shifts.fatigue.warningAlert")}</SelectItem>
+                      <SelectItem value="block">{t("timeAttendance.shifts.fatigue.blockPrevent")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label>Description</Label>
-                <Textarea value={formData.description} onChange={e => setFormData(p => ({ ...p, description: e.target.value }))} placeholder="Describe the rule and its purpose..." />
+                <Label>{t("common.description")}</Label>
+                <Textarea value={formData.description} onChange={e => setFormData(p => ({ ...p, description: e.target.value }))} placeholder={t("timeAttendance.shifts.fatigue.descriptionPlaceholder")} />
               </div>
 
               <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
-                <Button onClick={handleCreateRule} disabled={!formData.name || !formData.code}>Create Rule</Button>
+                <Button variant="outline" onClick={() => setDialogOpen(false)}>{t("common.cancel")}</Button>
+                <Button onClick={handleCreateRule} disabled={!formData.name || !formData.code}>{t("timeAttendance.shifts.fatigue.createRule")}</Button>
               </div>
             </div>
           </DialogContent>
@@ -217,7 +220,7 @@ export function FatigueManagementTab({ companyId }: FatigueManagementTabProps) {
               </div>
               <div>
                 <div className="text-2xl font-bold">{rules.filter(r => r.is_active).length}</div>
-                <div className="text-sm text-muted-foreground">Active Rules</div>
+                <div className="text-sm text-muted-foreground">{t("timeAttendance.shifts.fatigue.activeRules")}</div>
               </div>
             </div>
           </CardContent>
@@ -230,7 +233,7 @@ export function FatigueManagementTab({ companyId }: FatigueManagementTabProps) {
               </div>
               <div>
                 <div className="text-2xl font-bold">{activeViolations.length}</div>
-                <div className="text-sm text-muted-foreground">Active Violations</div>
+                <div className="text-sm text-muted-foreground">{t("timeAttendance.shifts.fatigue.activeViolations")}</div>
               </div>
             </div>
           </CardContent>
@@ -243,7 +246,7 @@ export function FatigueManagementTab({ companyId }: FatigueManagementTabProps) {
               </div>
               <div>
                 <div className="text-2xl font-bold">{resolvedViolations.length}</div>
-                <div className="text-sm text-muted-foreground">Resolved</div>
+                <div className="text-sm text-muted-foreground">{t("timeAttendance.shifts.fatigue.resolved")}</div>
               </div>
             </div>
           </CardContent>
@@ -254,7 +257,7 @@ export function FatigueManagementTab({ companyId }: FatigueManagementTabProps) {
         {/* Rules */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Fatigue Rules</CardTitle>
+            <CardTitle className="text-base">{t("timeAttendance.shifts.fatigue.fatigueRules")}</CardTitle>
           </CardHeader>
           <CardContent>
             {isLoading ? (
@@ -269,7 +272,7 @@ export function FatigueManagementTab({ companyId }: FatigueManagementTabProps) {
                       <div>
                         <div className="font-medium">{rule.name}</div>
                         <div className="text-sm text-muted-foreground">
-                          {ruleTypeLabels[rule.rule_type]} • {rule.threshold_value} {rule.threshold_unit}
+                          {getRuleTypeLabel(rule.rule_type)} • {rule.threshold_value} {rule.threshold_unit}
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
@@ -293,7 +296,7 @@ export function FatigueManagementTab({ companyId }: FatigueManagementTabProps) {
         {/* Violations */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Recent Violations</CardTitle>
+            <CardTitle className="text-base">{t("timeAttendance.shifts.fatigue.recentViolations")}</CardTitle>
           </CardHeader>
           <CardContent>
             {activeViolations.length === 0 ? (
@@ -302,10 +305,10 @@ export function FatigueManagementTab({ companyId }: FatigueManagementTabProps) {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Employee</TableHead>
-                    <TableHead>Rule</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Actions</TableHead>
+                    <TableHead>{t("timeAttendance.shifts.fatigue.employee")}</TableHead>
+                    <TableHead>{t("timeAttendance.shifts.fatigue.rule")}</TableHead>
+                    <TableHead>{t("timeAttendance.shifts.fatigue.date")}</TableHead>
+                    <TableHead>{t("timeAttendance.shifts.fatigue.actions")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -351,20 +354,20 @@ export function FatigueManagementTab({ companyId }: FatigueManagementTabProps) {
       <Dialog open={overrideDialogOpen} onOpenChange={setOverrideDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Override Violation</DialogTitle>
+            <DialogTitle>{t("timeAttendance.shifts.fatigue.overrideViolation")}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label>Override Reason</Label>
+              <Label>{t("timeAttendance.shifts.fatigue.overrideReason")}</Label>
               <Textarea 
                 value={overrideReason} 
                 onChange={e => setOverrideReason(e.target.value)} 
-                placeholder="Provide justification for overriding this violation..."
+                placeholder={t("timeAttendance.shifts.fatigue.overridePlaceholder")}
               />
             </div>
             <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setOverrideDialogOpen(false)}>Cancel</Button>
-              <Button onClick={handleOverride} disabled={!overrideReason}>Approve Override</Button>
+              <Button variant="outline" onClick={() => setOverrideDialogOpen(false)}>{t("common.cancel")}</Button>
+              <Button onClick={handleOverride} disabled={!overrideReason}>{t("timeAttendance.shifts.fatigue.approveOverride")}</Button>
             </div>
           </div>
         </DialogContent>
