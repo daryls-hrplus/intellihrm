@@ -20,7 +20,7 @@ import {
   getProrationMethodCode,
   type ProrationResult 
 } from "@/utils/payroll/prorationCalculator";
-import { usePayGroupMultiCurrency } from "@/hooks/useMultiCurrencyPayroll";
+import { usePayGroupMultiCurrency, useEmployeeCurrencyPreference, calculateNetPaySplit, NetPaySplit } from "@/hooks/useMultiCurrencyPayroll";
 import { useCurrencies, Currency } from "@/hooks/useCurrencies";
 import { useCompanyLocalCurrency } from "@/hooks/useCurrencies";
 
@@ -196,6 +196,9 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId, payGroupI
   
   // Fetch company local currency
   const { data: companyLocalCurrency, isLoading: localCurrencyLoading } = useCompanyLocalCurrency(companyId);
+  
+  // Fetch employee currency preferences
+  const { data: employeeCurrencyPreference } = useEmployeeCurrencyPreference(employeeId, companyId);
 
   const calculateStatutoryDeductions = (
     taxableIncome: number,
@@ -1821,6 +1824,77 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId, payGroupI
         </div>
         <p className="text-sm text-muted-foreground mt-1">Amount to be paid in {result.localCurrencyCode}</p>
       </div>
+
+      {/* Employee Requested Net Pay Distribution */}
+      {employeeCurrencyPreference && (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Globe className="h-4 w-4" />
+              Requested Net Pay Distribution
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {(() => {
+              const netPaySplit = calculateNetPaySplit(
+                result.net_pay,
+                localCurrencyId || '',
+                employeeCurrencyPreference,
+                confirmedRatesMap
+              );
+              
+              return (
+                <div className="space-y-3">
+                  <div className="text-sm text-muted-foreground mb-3">
+                    Employee requested: <span className="font-medium capitalize">{employeeCurrencyPreference.split_method.replace('_', ' ')}</span>
+                    {employeeCurrencyPreference.split_method === 'percentage' && employeeCurrencyPreference.secondary_currency_percentage && (
+                      <span> — {100 - employeeCurrencyPreference.secondary_currency_percentage}% primary, {employeeCurrencyPreference.secondary_currency_percentage}% secondary</span>
+                    )}
+                    {employeeCurrencyPreference.split_method === 'fixed_amount' && employeeCurrencyPreference.secondary_currency_fixed_amount && (
+                      <span> — Fixed {formatCurrency(employeeCurrencyPreference.secondary_currency_fixed_amount)} to secondary</span>
+                    )}
+                  </div>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Currency</TableHead>
+                        <TableHead className="text-right">Amount</TableHead>
+                        <TableHead className="text-right">Exchange Rate</TableHead>
+                        <TableHead className="text-right">Local Equivalent</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {netPaySplit.map((split, idx) => (
+                        <TableRow key={idx}>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <Badge variant={split.is_primary ? "default" : "secondary"} className="font-mono text-xs">
+                                {split.currency?.code || 'Unknown'}
+                              </Badge>
+                              <span className="text-sm text-muted-foreground">
+                                {split.is_primary ? '(Primary)' : '(Secondary)'}
+                              </span>
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-right font-mono tabular-nums">
+                            {formatCurrency(split.amount)}
+                          </TableCell>
+                          <TableCell className="text-right font-mono text-sm text-muted-foreground tabular-nums">
+                            {split.exchange_rate_used ? split.exchange_rate_used.toFixed(4) : '—'}
+                          </TableCell>
+                          <TableCell className="text-right font-mono tabular-nums">
+                            {split.local_currency_equivalent !== null ? formatCurrency(split.local_currency_equivalent) : '—'}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              );
+            })()}
+          </CardContent>
+        </Card>
+      )}
 
       <Button onClick={runSimulation} disabled={isCalculating} className="w-full gap-2">
         <RefreshCw className={`h-4 w-4 ${isCalculating ? 'animate-spin' : ''}`} />
