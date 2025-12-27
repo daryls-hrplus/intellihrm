@@ -39,6 +39,9 @@ import { GoalAlignmentManager } from "./GoalAlignmentManager";
 import { GoalVisibilitySettings } from "./GoalVisibilitySettings";
 import { ProgressRollupConfig } from "./ProgressRollupConfig";
 import { useGoalSubMetrics, GoalSubMetricValue } from "@/hooks/useGoalSubMetrics";
+import { AIMetricSuggestionPanel } from "./goals/AIMetricSuggestionPanel";
+import { GoalDuplicateWarningDialog } from "./goals/GoalDuplicateWarningDialog";
+import { useGoalAIAnalyzer } from "@/hooks/performance/useGoalAIAnalyzer";
 
 type GoalStatus = 'draft' | 'active' | 'in_progress' | 'completed' | 'cancelled' | 'overdue';
 type DbGoalLevel = 'company' | 'department' | 'team' | 'individual';
@@ -178,6 +181,11 @@ export function GoalDialog({
   const [formData, setFormData] = useState<FormData>(getInitialFormData(user?.id));
   const [showWeightWarning, setShowWeightWarning] = useState(false);
   const [currentEmployeeWeight, setCurrentEmployeeWeight] = useState(0);
+  
+  // Duplicate detection state
+  const [showDuplicateWarning, setShowDuplicateWarning] = useState(false);
+  const [similarGoals, setSimilarGoals] = useState<any[]>([]);
+  const { detectDuplicates } = useGoalAIAnalyzer();
   
   const { validateEmployeeWeights, refetch: refetchWeights } = useGoalWeights(companyId);
 
@@ -342,6 +350,59 @@ export function GoalDialog({
     }
   };
 
+  // Check for duplicates before saving
+  const checkForDuplicates = async (): Promise<boolean> => {
+    if (goal) return true; // Skip duplicate check for edits
+    if (!companyId || !formData.title.trim()) return true;
+
+    try {
+      // Fetch existing goals
+      const { data: existingGoals } = await supabase
+        .from("performance_goals")
+        .select("id, title, description, employee_id")
+        .eq("company_id", companyId)
+        .in("status", ["draft", "active", "in_progress"]);
+
+      if (!existingGoals?.length) return true;
+
+      const result = await detectDuplicates(
+        { id: "", title: formData.title, description: formData.description, company_id: companyId },
+        existingGoals.map(g => ({ id: g.id, title: g.title, description: g.description || undefined, company_id: companyId }))
+      );
+
+      if (result?.has_duplicates && result.similar_goals && result.similar_goals.length > 0) {
+        // Find goals with high similarity
+        const highSimilarity = result.similar_goals.filter(d => d.similarity_percentage >= 70);
+        if (highSimilarity.length > 0) {
+          setSimilarGoals(highSimilarity.map(d => ({
+            title: d.title,
+            similarity: d.similarity_percentage,
+            reason: d.reason,
+            recommendation: d.recommendation,
+          })));
+          setShowDuplicateWarning(true);
+          return false;
+        }
+      }
+
+      return true;
+    } catch (error) {
+      console.error("Error checking duplicates:", error);
+      return true; // Allow save on error
+    }
+  };
+
+  // Handler for template selection from AI suggestions
+  const handleAITemplateSelect = (templateId: string, suggestedTarget?: string, unit?: string) => {
+    setFormData(prev => ({
+      ...prev,
+      metric_template_id: templateId,
+      target_value: suggestedTarget || prev.target_value,
+      unit_of_measure: unit || prev.unit_of_measure,
+    }));
+    toast.success("Template applied from AI suggestion");
+  };
+
   const handleSubmit = async () => {
     if (!companyId || !user?.id) return;
 
@@ -501,6 +562,11 @@ export function GoalDialog({
 
   const handleNext = async () => {
     if (currentStep < WIZARD_STEPS.length - 1) {
+      // Check for duplicates when leaving definition step (step 1)
+      if (currentStep === 1 && !goal) {
+        const noDuplicates = await checkForDuplicates();
+        if (!noDuplicates) return; // Will show duplicate warning dialog
+      }
       setCurrentStep(currentStep + 1);
     } else {
       // On final step, check weight validation first
@@ -514,6 +580,11 @@ export function GoalDialog({
   const handleProceedWithWarning = () => {
     setShowWeightWarning(false);
     handleSubmit();
+  };
+
+  const handleProceedWithDuplicates = () => {
+    setShowDuplicateWarning(false);
+    setCurrentStep(currentStep + 1);
   };
 
   const handleBack = () => {
@@ -630,36 +701,48 @@ export function GoalDialog({
                 )}
 
                 {currentStep === 2 && (
-                  <StepMetrics
-                    goalType={formData.goal_type}
-                    formData={{
-                      weighting: formData.weighting,
-                      unit_of_measure: formData.unit_of_measure,
-                      target_value: formData.target_value,
-                      current_value: formData.current_value,
-                      measurement_type: formData.measurement_type,
-                      threshold_value: formData.threshold_value,
-                      stretch_value: formData.stretch_value,
-                      threshold_percentage: formData.threshold_percentage,
-                      stretch_percentage: formData.stretch_percentage,
-                      is_inverse: formData.is_inverse,
-                      is_mandatory: formData.is_mandatory,
-                      compliance_category: formData.compliance_category,
-                      is_weight_required: formData.is_weight_required,
-                      inherited_weight_portion: formData.inherited_weight_portion,
-                      metric_template_id: formData.metric_template_id,
-                    }}
-                    onChange={(updates) => setFormData({ ...formData, ...updates })}
-                    parentGoalWeight={parentGoalWeight}
-                    companyId={companyId}
-                    employeeId={formData.goal_level === "individual" ? (formData.employee_id || user?.id) : undefined}
-                    existingGoalId={goal?.id}
-                    subMetrics={subMetrics}
-                    onSubMetricUpdate={updateSubMetric}
-                    onInitializeSubMetrics={handleInitializeSubMetrics}
-                    compositeProgress={compositeProgress}
-                    subMetricProgress={subMetricProgress}
-                  />
+                  <div className="space-y-4">
+                    {/* AI Metric Suggestions */}
+                    {companyId && formData.title && (
+                      <AIMetricSuggestionPanel
+                        goalTitle={formData.title}
+                        goalDescription={formData.description}
+                        companyId={companyId}
+                        onSelectTemplate={handleAITemplateSelect}
+                      />
+                    )}
+                    
+                    <StepMetrics
+                      goalType={formData.goal_type}
+                      formData={{
+                        weighting: formData.weighting,
+                        unit_of_measure: formData.unit_of_measure,
+                        target_value: formData.target_value,
+                        current_value: formData.current_value,
+                        measurement_type: formData.measurement_type,
+                        threshold_value: formData.threshold_value,
+                        stretch_value: formData.stretch_value,
+                        threshold_percentage: formData.threshold_percentage,
+                        stretch_percentage: formData.stretch_percentage,
+                        is_inverse: formData.is_inverse,
+                        is_mandatory: formData.is_mandatory,
+                        compliance_category: formData.compliance_category,
+                        is_weight_required: formData.is_weight_required,
+                        inherited_weight_portion: formData.inherited_weight_portion,
+                        metric_template_id: formData.metric_template_id,
+                      }}
+                      onChange={(updates) => setFormData({ ...formData, ...updates })}
+                      parentGoalWeight={parentGoalWeight}
+                      companyId={companyId}
+                      employeeId={formData.goal_level === "individual" ? (formData.employee_id || user?.id) : undefined}
+                      existingGoalId={goal?.id}
+                      subMetrics={subMetrics}
+                      onSubMetricUpdate={updateSubMetric}
+                      onInitializeSubMetrics={handleInitializeSubMetrics}
+                      compositeProgress={compositeProgress}
+                      subMetricProgress={subMetricProgress}
+                    />
+                  </div>
                 )}
 
                 {currentStep === 3 && (
@@ -802,36 +885,48 @@ export function GoalDialog({
               )}
 
               {currentStep === 2 && (
-                <StepMetrics
-                  goalType={formData.goal_type}
-                  formData={{
-                    weighting: formData.weighting,
-                    unit_of_measure: formData.unit_of_measure,
-                    target_value: formData.target_value,
-                    current_value: formData.current_value,
-                    measurement_type: formData.measurement_type,
-                    threshold_value: formData.threshold_value,
-                    stretch_value: formData.stretch_value,
-                    threshold_percentage: formData.threshold_percentage,
-                    stretch_percentage: formData.stretch_percentage,
-                    is_inverse: formData.is_inverse,
-                    is_mandatory: formData.is_mandatory,
-                    compliance_category: formData.compliance_category,
-                    is_weight_required: formData.is_weight_required,
-                    inherited_weight_portion: formData.inherited_weight_portion,
-                    metric_template_id: formData.metric_template_id,
-                  }}
-                  onChange={(updates) => setFormData({ ...formData, ...updates })}
-                  parentGoalWeight={parentGoalWeight}
-                  companyId={companyId}
-                  employeeId={formData.goal_level === "individual" ? (formData.employee_id || user?.id) : undefined}
-                  existingGoalId={goal?.id}
-                  subMetrics={subMetrics}
-                  onSubMetricUpdate={updateSubMetric}
-                  onInitializeSubMetrics={handleInitializeSubMetrics}
-                  compositeProgress={compositeProgress}
-                  subMetricProgress={subMetricProgress}
-                />
+                <div className="space-y-4">
+                  {/* AI Metric Suggestions */}
+                  {companyId && formData.title && (
+                    <AIMetricSuggestionPanel
+                      goalTitle={formData.title}
+                      goalDescription={formData.description}
+                      companyId={companyId}
+                      onSelectTemplate={handleAITemplateSelect}
+                    />
+                  )}
+                  
+                  <StepMetrics
+                    goalType={formData.goal_type}
+                    formData={{
+                      weighting: formData.weighting,
+                      unit_of_measure: formData.unit_of_measure,
+                      target_value: formData.target_value,
+                      current_value: formData.current_value,
+                      measurement_type: formData.measurement_type,
+                      threshold_value: formData.threshold_value,
+                      stretch_value: formData.stretch_value,
+                      threshold_percentage: formData.threshold_percentage,
+                      stretch_percentage: formData.stretch_percentage,
+                      is_inverse: formData.is_inverse,
+                      is_mandatory: formData.is_mandatory,
+                      compliance_category: formData.compliance_category,
+                      is_weight_required: formData.is_weight_required,
+                      inherited_weight_portion: formData.inherited_weight_portion,
+                      metric_template_id: formData.metric_template_id,
+                    }}
+                    onChange={(updates) => setFormData({ ...formData, ...updates })}
+                    parentGoalWeight={parentGoalWeight}
+                    companyId={companyId}
+                    employeeId={formData.goal_level === "individual" ? (formData.employee_id || user?.id) : undefined}
+                    existingGoalId={goal?.id}
+                    subMetrics={subMetrics}
+                    onSubMetricUpdate={updateSubMetric}
+                    onInitializeSubMetrics={handleInitializeSubMetrics}
+                    compositeProgress={compositeProgress}
+                    subMetricProgress={subMetricProgress}
+                  />
+                </div>
               )}
 
               {currentStep === 3 && (
@@ -892,6 +987,14 @@ export function GoalDialog({
           </>
         )}
       </DialogContent>
+
+      {/* Duplicate Warning Dialog */}
+      <GoalDuplicateWarningDialog
+        open={showDuplicateWarning}
+        onOpenChange={setShowDuplicateWarning}
+        similarGoals={similarGoals}
+        onProceed={handleProceedWithDuplicates}
+      />
     </Dialog>
   );
 }
