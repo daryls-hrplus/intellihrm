@@ -662,17 +662,59 @@ export function usePayroll() {
         .single();
       
       const countryCode = company?.country || 'US';
+      const localCurrencyId = company?.local_currency_id;
       
       // Get currency code from local_currency_id
       let currency = 'USD';
-      if (company?.local_currency_id) {
+      if (localCurrencyId) {
         const { data: currencyData } = await supabase
           .from("currencies")
           .select("code")
-          .eq("id", company.local_currency_id)
+          .eq("id", localCurrencyId)
           .single();
         currency = currencyData?.code || 'USD';
       }
+      
+      // Fetch stored exchange rates for this payroll run (for multi-currency conversion)
+      const { data: payrollExchangeRates } = await supabase
+        .from("payroll_run_exchange_rates")
+        .select("from_currency_id, to_currency_id, exchange_rate")
+        .eq("payroll_run_id", payrollRunId);
+      
+      // Build a map for quick exchange rate lookup: "fromId->toId" => rate
+      const exchangeRateMap = new Map<string, number>();
+      for (const rate of payrollExchangeRates || []) {
+        const key = `${rate.from_currency_id}->${rate.to_currency_id}`;
+        exchangeRateMap.set(key, Number(rate.exchange_rate));
+        // Also store the inverse rate for reverse conversions
+        if (Number(rate.exchange_rate) > 0) {
+          const inverseKey = `${rate.to_currency_id}->${rate.from_currency_id}`;
+          exchangeRateMap.set(inverseKey, 1 / Number(rate.exchange_rate));
+        }
+      }
+      
+      // Helper function to convert amount from one currency to local currency
+      const convertToLocalCurrency = (amount: number, fromCurrencyId: string | null): { 
+        localAmount: number; 
+        exchangeRateUsed: number | null;
+        wasConverted: boolean;
+      } => {
+        // If no from currency or same as local, no conversion needed
+        if (!fromCurrencyId || !localCurrencyId || fromCurrencyId === localCurrencyId) {
+          return { localAmount: amount, exchangeRateUsed: null, wasConverted: false };
+        }
+        
+        const key = `${fromCurrencyId}->${localCurrencyId}`;
+        const rate = exchangeRateMap.get(key);
+        
+        if (rate && rate > 0) {
+          return { localAmount: amount * rate, exchangeRateUsed: rate, wasConverted: true };
+        }
+        
+        // No rate found - return amount as-is (will log warning)
+        console.warn(`No exchange rate found for ${fromCurrencyId} -> ${localCurrencyId}`);
+        return { localAmount: amount, exchangeRateUsed: null, wasConverted: false };
+      };
       
       // Get pay period info for monday count
       const { data: payPeriod } = await supabase
@@ -836,6 +878,9 @@ export function usePayroll() {
           job_title?: string;
           effective_start?: string;
           effective_end?: string;
+          original_currency_id?: string;
+          original_amount?: number;
+          exchange_rate_used?: number;
         }[] = [];
         const allowancesBreakdown: { name: string; amount: number; is_taxable: boolean }[] = [];
         
@@ -912,6 +957,12 @@ export function usePayroll() {
               }
             }
             
+            // Apply currency conversion if compensation is in foreign currency
+            const compCurrencyId = comp.currency_id;
+            const originalAmount = calculatedAmount;
+            const { localAmount, exchangeRateUsed, wasConverted } = convertToLocalCurrency(calculatedAmount, compCurrencyId);
+            calculatedAmount = localAmount;
+            
             grossPay += calculatedAmount;
             
             const payElementName = (comp.pay_elements as any)?.name || 'Compensation';
@@ -930,6 +981,9 @@ export function usePayroll() {
               job_title: jobTitle,
               effective_start: comp.start_date || undefined,
               effective_end: comp.end_date || undefined,
+              original_currency_id: wasConverted ? compCurrencyId : undefined,
+              original_amount: wasConverted ? originalAmount : undefined,
+              exchange_rate_used: wasConverted ? exchangeRateUsed ?? undefined : undefined,
             });
             
             // Base salary (SAL code) goes to regular_pay
@@ -988,6 +1042,24 @@ export function usePayroll() {
               }
             }
             
+            // Apply currency conversion if position compensation is in foreign currency
+            // Note: Position uses compensation_currency (text field) - need to look up currency ID
+            const posCurrencyCode = pos.compensation_currency;
+            let posCurrencyId: string | null = null;
+            if (posCurrencyCode && posCurrencyCode !== currency) {
+              // Look up currency ID by code
+              const { data: currencyLookup } = await supabase
+                .from("currencies")
+                .select("id")
+                .eq("code", posCurrencyCode)
+                .single();
+              posCurrencyId = currencyLookup?.id || null;
+            }
+            
+            const originalAmount = proratedAmount;
+            const { localAmount, exchangeRateUsed, wasConverted } = convertToLocalCurrency(proratedAmount, posCurrencyId);
+            proratedAmount = localAmount;
+            
             grossPay += proratedAmount;
             regularPay += proratedAmount;
             
@@ -1001,6 +1073,9 @@ export function usePayroll() {
               job_title: (pos.position as any)?.title || '',
               effective_start: pos.start_date || undefined,
               effective_end: pos.end_date || undefined,
+              original_currency_id: wasConverted ? posCurrencyId ?? undefined : undefined,
+              original_amount: wasConverted ? originalAmount : undefined,
+              exchange_rate_used: wasConverted ? exchangeRateUsed ?? undefined : undefined,
             });
           }
         }
@@ -1194,7 +1269,7 @@ export function usePayroll() {
         if (insertError) throw insertError;
       }
       
-      // Update run totals with completion time
+      // Update run totals with completion time and local currency
       await supabase.from("payroll_runs").update({
         status: 'calculated',
         total_gross_pay: totalGross,
@@ -1205,6 +1280,7 @@ export function usePayroll() {
         total_employer_contributions: totalEmployerBenefits,
         employee_count: employeePayrolls.length,
         currency: currency,
+        local_currency_id: localCurrencyId,
         calculated_at: new Date().toISOString(),
       }).eq("id", payrollRunId);
       
