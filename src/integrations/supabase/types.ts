@@ -19304,6 +19304,7 @@ export type Database = {
       goal_skill_requirements: {
         Row: {
           ai_confidence: number | null
+          capability_id: string | null
           company_id: string
           created_at: string
           goal_id: string
@@ -19317,6 +19318,7 @@ export type Database = {
         }
         Insert: {
           ai_confidence?: number | null
+          capability_id?: string | null
           company_id: string
           created_at?: string
           goal_id: string
@@ -19330,6 +19332,7 @@ export type Database = {
         }
         Update: {
           ai_confidence?: number | null
+          capability_id?: string | null
           company_id?: string
           created_at?: string
           goal_id?: string
@@ -19342,6 +19345,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "goal_skill_requirements_capability_id_fkey"
+            columns: ["capability_id"]
+            isOneToOne: false
+            referencedRelation: "capabilities"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "goal_skill_requirements_company_id_fkey"
             columns: ["company_id"]
