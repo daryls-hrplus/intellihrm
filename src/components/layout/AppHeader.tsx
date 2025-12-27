@@ -24,14 +24,21 @@ import {
 } from "@/components/ui/tooltip";
 import defaultGroupLogo from "@/assets/default-group-logo.png";
 import defaultCompanyLogo from "@/assets/default-company-logo.png";
+import { MessagesOverlayPanel } from "@/components/overlays/MessagesOverlayPanel";
+import { IntranetOverlayPanel } from "@/components/overlays/IntranetOverlayPanel";
+import { HelpPanel } from "@/components/tours/HelpPanel";
+import { useTourContext } from "@/components/tours/TourProvider";
 
 export function AppHeader() {
   const { t } = useTranslation();
   const { isAdmin, profile, user, company } = useAuth();
+  const { openHelpPanel } = useTourContext();
   const [pendingCount, setPendingCount] = useState(0);
   const [unreadMessages, setUnreadMessages] = useState(0);
   const [intranetCount, setIntranetCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
+  const [isMessagesOpen, setIsMessagesOpen] = useState(false);
+  const [isIntranetOpen, setIsIntranetOpen] = useState(false);
   
   const groupLogoUrl = company?.company_group?.logo_url || (company?.company_group ? defaultGroupLogo : null);
   const companyLogoUrl = company?.logo_url || defaultCompanyLogo;
@@ -220,19 +227,22 @@ export function AppHeader() {
       {/* Intranet Button */}
       <Tooltip>
         <TooltipTrigger asChild>
-          <NavLink to="/intranet">
-            <Button variant="ghost" size="icon" className="relative">
-              <Newspaper className="h-5 w-5" />
-              {intranetCount > 0 && (
-                <Badge
-                  variant="default"
-                  className="absolute -top-1 -right-1 h-5 min-w-[20px] px-1 text-[10px] font-bold"
-                >
-                  {intranetCount > 9 ? "9+" : intranetCount}
-                </Badge>
-              )}
-            </Button>
-          </NavLink>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="relative"
+            onClick={() => setIsIntranetOpen(true)}
+          >
+            <Newspaper className="h-5 w-5" />
+            {intranetCount > 0 && (
+              <Badge
+                variant="default"
+                className="absolute -top-1 -right-1 h-5 min-w-[20px] px-1 text-[10px] font-bold"
+              >
+                {intranetCount > 9 ? "9+" : intranetCount}
+              </Badge>
+            )}
+          </Button>
         </TooltipTrigger>
         <TooltipContent>{t("navigation.intranet")}</TooltipContent>
       </Tooltip>
@@ -250,11 +260,9 @@ export function AppHeader() {
       {/* Help Center Button */}
       <Tooltip>
         <TooltipTrigger asChild>
-          <NavLink to="/help">
-            <Button variant="ghost" size="icon">
-              <HelpCircle className="h-5 w-5" />
-            </Button>
-          </NavLink>
+          <Button variant="ghost" size="icon" onClick={openHelpPanel}>
+            <HelpCircle className="h-5 w-5" />
+          </Button>
         </TooltipTrigger>
         <TooltipContent>{t("navigation.helpCenter")}</TooltipContent>
       </Tooltip>
@@ -262,19 +270,22 @@ export function AppHeader() {
       {/* Messages Button */}
       <Tooltip>
         <TooltipTrigger asChild>
-          <NavLink to="/messages">
-            <Button variant="ghost" size="icon" className="relative">
-              <MessageSquare className="h-5 w-5" />
-              {unreadMessages > 0 && (
-                <Badge
-                  variant="destructive"
-                  className="absolute -top-1 -right-1 h-5 min-w-[20px] px-1 text-[10px] font-bold"
-                >
-                  {unreadMessages > 99 ? "99+" : unreadMessages}
-                </Badge>
-              )}
-            </Button>
-          </NavLink>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="relative"
+            onClick={() => setIsMessagesOpen(true)}
+          >
+            <MessageSquare className="h-5 w-5" />
+            {unreadMessages > 0 && (
+              <Badge
+                variant="destructive"
+                className="absolute -top-1 -right-1 h-5 min-w-[20px] px-1 text-[10px] font-bold"
+              >
+                {unreadMessages > 99 ? "99+" : unreadMessages}
+              </Badge>
+            )}
+          </Button>
         </TooltipTrigger>
         <TooltipContent>{t("navigation.messages")}</TooltipContent>
       </Tooltip>
@@ -330,6 +341,16 @@ export function AppHeader() {
         </Popover>
       )}
       </div>
+
+      {/* Overlay Panels */}
+      <MessagesOverlayPanel 
+        isOpen={isMessagesOpen} 
+        onClose={() => setIsMessagesOpen(false)} 
+      />
+      <IntranetOverlayPanel 
+        isOpen={isIntranetOpen} 
+        onClose={() => setIsIntranetOpen(false)} 
+      />
     </div>
   );
 }
