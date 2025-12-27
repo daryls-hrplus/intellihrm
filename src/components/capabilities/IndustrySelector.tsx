@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -21,6 +20,24 @@ import {
   Search,
   RefreshCw,
   Loader2,
+  Wheat,
+  Plane,
+  Car,
+  Briefcase,
+  Zap,
+  Film,
+  Hotel,
+  Shield,
+  Scale,
+  Truck,
+  Ship,
+  Pickaxe,
+  HeartHandshake,
+  Fuel,
+  FlaskConical,
+  Laptop,
+  Radio,
+  Lightbulb,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
@@ -32,10 +49,15 @@ interface DynamicOccupation {
   description?: string;
 }
 
-interface Industry {
+interface MasterIndustry {
+  id: string;
   code: string;
   name: string;
-  icon: string;
+  name_en: string | null;
+  description: string | null;
+  icon_name: string | null;
+  display_order: number;
+  is_active: boolean;
 }
 
 interface IndustrySelectorProps {
@@ -57,21 +79,25 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   UtensilsCrossed,
   Leaf,
   Building2,
+  Wheat,
+  Plane,
+  Car,
+  Briefcase,
+  Zap,
+  Film,
+  Hotel,
+  Shield,
+  Scale,
+  Truck,
+  Ship,
+  Pickaxe,
+  HeartHandshake,
+  Fuel,
+  FlaskConical,
+  Laptop,
+  Radio,
+  Lightbulb,
 };
-
-// Static industry definitions with their names for ESCO search
-const INDUSTRIES: Industry[] = [
-  { code: "healthcare", name: "Healthcare", icon: "Heart" },
-  { code: "ict", name: "ICT", icon: "Monitor" },
-  { code: "finance", name: "Finance", icon: "Landmark" },
-  { code: "retail", name: "Retail", icon: "ShoppingCart" },
-  { code: "manufacturing", name: "Manufacturing", icon: "Factory" },
-  { code: "construction", name: "Construction", icon: "Building" },
-  { code: "education", name: "Education", icon: "GraduationCap" },
-  { code: "hospitality", name: "Hospitality", icon: "UtensilsCrossed" },
-  { code: "agriculture", name: "Agriculture", icon: "Leaf" },
-  { code: "public_admin", name: "Public Administration", icon: "Building2" },
-];
 
 export function IndustrySelector({
   selectedIndustry,
@@ -80,11 +106,18 @@ export function IndustrySelector({
   onOccupationToggle,
   onSelectAllOccupations,
 }: IndustrySelectorProps) {
+  const [industries, setIndustries] = useState<MasterIndustry[]>([]);
+  const [loadingIndustries, setLoadingIndustries] = useState(true);
   const [occupations, setOccupations] = useState<DynamicOccupation[]>([]);
   const [loadingOccupations, setLoadingOccupations] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [customSearchResults, setCustomSearchResults] = useState<DynamicOccupation[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+
+  // Load industries from master_industries table
+  useEffect(() => {
+    loadIndustries();
+  }, []);
 
   // Load occupations dynamically when industry changes
   useEffect(() => {
@@ -95,11 +128,30 @@ export function IndustrySelector({
     }
   }, [selectedIndustry]);
 
+  const loadIndustries = async () => {
+    setLoadingIndustries(true);
+    try {
+      const { data, error } = await supabase
+        .from('master_industries')
+        .select('*')
+        .eq('is_active', true)
+        .order('display_order');
+
+      if (error) throw error;
+      setIndustries(data || []);
+    } catch (err) {
+      console.error("Failed to load industries:", err);
+      toast.error("Failed to load industries");
+    } finally {
+      setLoadingIndustries(false);
+    }
+  };
+
   const loadOccupationsForIndustry = async (industryCode: string) => {
     setLoadingOccupations(true);
     setOccupations([]);
     
-    const industry = INDUSTRIES.find(i => i.code === industryCode);
+    const industry = industries.find(i => i.code === industryCode);
     if (!industry) {
       setLoadingOccupations(false);
       return;
@@ -172,7 +224,7 @@ export function IndustrySelector({
     }
   };
 
-  const currentIndustry = INDUSTRIES.find((i) => i.code === selectedIndustry);
+  const currentIndustry = industries.find((i) => i.code === selectedIndustry);
   const displayOccupations = customSearchResults.length > 0 ? customSearchResults : occupations;
 
   return (
@@ -182,45 +234,53 @@ export function IndustrySelector({
         <h3 className="text-sm font-medium mb-3 text-muted-foreground">
           Select your industry sector
         </h3>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-          {INDUSTRIES.map((industry) => {
-            const Icon = iconMap[industry.icon] || Building;
-            const isSelected = selectedIndustry === industry.code;
+        {loadingIndustries ? (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+            {Array.from({ length: 10 }).map((_, i) => (
+              <Skeleton key={i} className="h-24 rounded-lg" />
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+            {industries.map((industry) => {
+              const Icon = iconMap[industry.icon_name || ''] || Building;
+              const isSelected = selectedIndustry === industry.code;
 
-            return (
-              <Card
-                key={industry.code}
-                className={cn(
-                  "cursor-pointer transition-all hover:shadow-md",
-                  isSelected
-                    ? "ring-2 ring-primary border-primary bg-primary/5"
-                    : "hover:border-primary/50"
-                )}
-                onClick={() => {
-                  onIndustrySelect(industry.code);
-                  setCustomSearchResults([]);
-                  setSearchQuery("");
-                }}
-              >
-                <CardContent className="p-4 text-center">
-                  <div
-                    className={cn(
-                      "mx-auto w-10 h-10 rounded-full flex items-center justify-center mb-2",
-                      isSelected
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-muted"
-                    )}
-                  >
-                    <Icon className="h-5 w-5" />
-                  </div>
-                  <p className="text-sm font-medium line-clamp-2">
-                    {industry.name}
-                  </p>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
+              return (
+                <Card
+                  key={industry.code}
+                  className={cn(
+                    "cursor-pointer transition-all hover:shadow-md",
+                    isSelected
+                      ? "ring-2 ring-primary border-primary bg-primary/5"
+                      : "hover:border-primary/50"
+                  )}
+                  onClick={() => {
+                    onIndustrySelect(industry.code);
+                    setCustomSearchResults([]);
+                    setSearchQuery("");
+                  }}
+                >
+                  <CardContent className="p-4 text-center">
+                    <div
+                      className={cn(
+                        "mx-auto w-10 h-10 rounded-full flex items-center justify-center mb-2",
+                        isSelected
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-muted"
+                      )}
+                    >
+                      <Icon className="h-5 w-5" />
+                    </div>
+                    <p className="text-sm font-medium line-clamp-2">
+                      {industry.name}
+                    </p>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* Occupation Selection */}
