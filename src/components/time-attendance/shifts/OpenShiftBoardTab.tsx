@@ -122,62 +122,62 @@ export function OpenShiftBoardTab({ companyId }: OpenShiftBoardTabProps) {
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Shift Type</Label>
+                  <Label>{t("timeAttendance.shifts.open.shiftType")}</Label>
                   <Select value={formData.shift_id} onValueChange={handleShiftSelect}>
-                    <SelectTrigger><SelectValue placeholder="Select shift" /></SelectTrigger>
+                    <SelectTrigger><SelectValue placeholder={t("timeAttendance.shifts.open.selectShift")} /></SelectTrigger>
                     <SelectContent>
                       {shifts.map(s => <SelectItem key={s.id} value={s.id}>{s.name} ({s.code})</SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label>Date</Label>
+                  <Label>{t("timeAttendance.shifts.open.date")}</Label>
                   <Input type="date" value={formData.shift_date} onChange={e => setFormData(p => ({ ...p, shift_date: e.target.value }))} />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Start Time</Label>
+                  <Label>{t("timeAttendance.shifts.open.startTime")}</Label>
                   <Input type="time" value={formData.start_time} onChange={e => setFormData(p => ({ ...p, start_time: e.target.value }))} />
                 </div>
                 <div className="space-y-2">
-                  <Label>End Time</Label>
+                  <Label>{t("timeAttendance.shifts.open.endTime")}</Label>
                   <Input type="time" value={formData.end_time} onChange={e => setFormData(p => ({ ...p, end_time: e.target.value }))} />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Positions Available</Label>
+                  <Label>{t("timeAttendance.shifts.open.positionsAvailable")}</Label>
                   <Input type="number" min={1} value={formData.positions_available} onChange={e => setFormData(p => ({ ...p, positions_available: parseInt(e.target.value) || 1 }))} />
                 </div>
                 <div className="space-y-2">
-                  <Label>Premium Rate (%)</Label>
+                  <Label>{t("timeAttendance.shifts.open.premiumRate")}</Label>
                   <Input type="number" placeholder="e.g., 10" value={formData.premium_rate} onChange={e => setFormData(p => ({ ...p, premium_rate: e.target.value }))} />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Department</Label>
-                  <Select value={formData.department_id} onValueChange={v => setFormData(p => ({ ...p, department_id: v }))}>
-                    <SelectTrigger><SelectValue placeholder="Optional" /></SelectTrigger>
+                  <Label>{t("timeAttendance.shifts.open.department")}</Label>
+                  <Select value={formData.department_id || "_all"} onValueChange={v => setFormData(p => ({ ...p, department_id: v === "_all" ? "" : v }))}>
+                    <SelectTrigger><SelectValue placeholder={t("timeAttendance.shifts.open.optional")} /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All departments</SelectItem>
+                      <SelectItem value="_all">{t("timeAttendance.shifts.open.allDepartments")}</SelectItem>
                       {departments.map(d => <SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label>Location</Label>
-                  <Input placeholder="e.g., Main Office" value={formData.location_name} onChange={e => setFormData(p => ({ ...p, location_name: e.target.value }))} />
+                  <Label>{t("timeAttendance.shifts.open.location")}</Label>
+                  <Input placeholder={t("timeAttendance.shifts.open.locationPlaceholder")} value={formData.location_name} onChange={e => setFormData(p => ({ ...p, location_name: e.target.value }))} />
                 </div>
               </div>
               <div className="space-y-2">
-                <Label>Notes</Label>
-                <Textarea value={formData.notes} onChange={e => setFormData(p => ({ ...p, notes: e.target.value }))} placeholder="Additional details..." />
+                <Label>{t("timeAttendance.shifts.open.notes")}</Label>
+                <Textarea value={formData.notes} onChange={e => setFormData(p => ({ ...p, notes: e.target.value }))} placeholder={t("timeAttendance.shifts.open.additionalDetails")} />
               </div>
               <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
-                <Button onClick={handleSubmit} disabled={!formData.shift_id}>Post Shift</Button>
+                <Button variant="outline" onClick={() => setDialogOpen(false)}>{t("common.cancel")}</Button>
+                <Button onClick={handleSubmit} disabled={!formData.shift_id}>{t("timeAttendance.shifts.open.postShift")}</Button>
               </div>
             </div>
           </DialogContent>
@@ -197,7 +197,7 @@ export function OpenShiftBoardTab({ companyId }: OpenShiftBoardTabProps) {
                   <div className="flex items-start justify-between">
                     <div>
                       <CardTitle className="text-base" style={{ color: shift.shift?.color }}>
-                        {shift.shift?.name || "Unknown Shift"}
+                        {shift.shift?.name || t("timeAttendance.shifts.open.unknownShift")}
                       </CardTitle>
                       <CardDescription>
                         {formatDateForDisplay(shift.shift_date)} • {shift.start_time} - {shift.end_time}
@@ -211,7 +211,7 @@ export function OpenShiftBoardTab({ companyId }: OpenShiftBoardTabProps) {
                 <CardContent className="space-y-3">
                   <div className="flex items-center gap-2 text-sm">
                     <Users className="h-4 w-4 text-muted-foreground" />
-                    <span>{shift.positions_filled} / {shift.positions_available} filled</span>
+                    <span>{shift.positions_filled} / {shift.positions_available} {t("timeAttendance.shifts.open.filled")}</span>
                   </div>
                   {shift.department?.name && (
                     <div className="text-sm text-muted-foreground">{shift.department.name}</div>
@@ -223,7 +223,7 @@ export function OpenShiftBoardTab({ companyId }: OpenShiftBoardTabProps) {
                   {/* Claims */}
                   {shift.claims && shift.claims.length > 0 && (
                     <div className="border-t pt-3 mt-3">
-                      <div className="text-sm font-medium mb-2">Claims ({shift.claims.length})</div>
+                      <div className="text-sm font-medium mb-2">{t("timeAttendance.shifts.open.claims")} ({shift.claims.length})</div>
                       {shift.claims.filter(c => c.status === "pending").map(claim => (
                         <div key={claim.id} className="flex items-center justify-between py-1">
                           <span className="text-sm">{claim.employee?.full_name}</span>
@@ -243,7 +243,7 @@ export function OpenShiftBoardTab({ companyId }: OpenShiftBoardTabProps) {
                   <div className="flex gap-2 pt-2">
                     <Button size="sm" variant="outline" className="flex-1" onClick={() => claimOpenShift(shift.id)}>
                       <Hand className="h-4 w-4 mr-1" />
-                      Claim
+                      {t("timeAttendance.shifts.open.claim")}
                     </Button>
                     <Button size="sm" variant="ghost" onClick={() => cancelOpenShift(shift.id)}>
                       <X className="h-4 w-4" />
@@ -263,7 +263,7 @@ export function OpenShiftBoardTab({ companyId }: OpenShiftBoardTabProps) {
           {/* Closed Shifts */}
           {otherShifts.length > 0 && (
             <div className="mt-8">
-              <h4 className="font-medium mb-4 text-muted-foreground">Past / Filled Shifts</h4>
+              <h4 className="font-medium mb-4 text-muted-foreground">{t("timeAttendance.shifts.open.pastFilledShifts")}</h4>
               <div className="grid gap-2">
                 {otherShifts.slice(0, 5).map(shift => (
                   <div key={shift.id} className="flex items-center justify-between p-3 border rounded-lg bg-muted/50">
