@@ -79,30 +79,52 @@ interface SimulationResult {
     additional_comp: Array<{
       name: string;
       base_amount: number;
-      amount: number; // included in gross pay
+      amount: number; // included in gross pay (in local currency)
       is_prorated: boolean;
       proration_factor?: number;
       position_title?: string;
       effective_start?: string | null;
       effective_end?: string | null;
+      original_amount?: number;
+      original_currency?: string;
+      exchange_rate_used?: number;
     }>;
     allowances: Array<{
       name: string;
       base_amount: number;
-      amount: number; // included in gross pay
+      amount: number; // included in gross pay (in local currency)
       is_taxable: boolean;
       is_bik: boolean;
+      original_amount?: number;
+      original_currency?: string;
+      exchange_rate_used?: number;
     }>;
     total_gross: number;
   };
   deductions: {
-    pretax: Array<{ name: string; amount: number; type: string }>;
+    pretax: Array<{ 
+      name: string; 
+      amount: number; 
+      type: string;
+      original_amount?: number;
+      original_currency?: string;
+      exchange_rate_used?: number;
+    }>;
     statutory: StatutoryDeduction[];
-    posttax: Array<{ name: string; amount: number; type: string }>;
+    posttax: Array<{ 
+      name: string; 
+      amount: number; 
+      type: string;
+      original_amount?: number;
+      original_currency?: string;
+      exchange_rate_used?: number;
+    }>;
     total_deductions: number;
   };
   net_pay: number;
   rules_applied: Array<{ name: string; type: string; multiplier: number }>;
+  localCurrencyCode: string;
+  hasMultiCurrency: boolean;
 }
 
 interface StatutoryRateBand {
@@ -776,7 +798,9 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
           total_deductions: totalDeductions
         },
         net_pay: netPay,
-        rules_applied: Array.from(rulesApplied.values())
+        rules_applied: Array.from(rulesApplied.values()),
+        localCurrencyCode: baseCompCurrency,
+        hasMultiCurrency: false // Simulator uses single currency for now
       });
 
       if (periodBaseSalary === 0 && additionalCompList.length === 0) {
@@ -975,8 +999,8 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
             <TableHeader>
               <TableRow>
                 <TableHead>Earning</TableHead>
-                <TableHead className="text-right">Base</TableHead>
-                <TableHead className="text-right">Included</TableHead>
+                <TableHead className="text-right">Base ({result.localCurrencyCode})</TableHead>
+                <TableHead className="text-right">Included ({result.localCurrencyCode})</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -998,11 +1022,11 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
                           </Badge>
                         )}
                       </TableCell>
-                      <TableCell className="text-right">
-                        {result.salary.currency} {formatCurrency(pos.fullAmount)}
+                      <TableCell className="text-right tabular-nums">
+                        {formatCurrency(pos.fullAmount)}
                       </TableCell>
-                      <TableCell className="text-right">
-                        {result.salary.currency} {formatCurrency(pos.proratedAmount)}
+                      <TableCell className="text-right tabular-nums">
+                        {formatCurrency(pos.proratedAmount)}
                       </TableCell>
                     </TableRow>
                   ))}
@@ -1010,12 +1034,11 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
               ) : (
                 <TableRow>
                   <TableCell>Base Salary ({result.salary.frequency})</TableCell>
-                  <TableCell className="text-right">
-                    {result.salary.currency}{" "}
+                  <TableCell className="text-right tabular-nums">
                     {formatCurrency(result.proration?.fullPeriodSalary ?? result.earnings.regular_pay)}
                   </TableCell>
-                  <TableCell className="text-right">
-                    {result.salary.currency} {formatCurrency(result.earnings.regular_pay)}
+                  <TableCell className="text-right tabular-nums">
+                    {formatCurrency(result.earnings.regular_pay)}
                   </TableCell>
                 </TableRow>
               )}
@@ -1023,14 +1046,13 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
               {result.earnings.overtime_hours > 0 && (
                 <TableRow>
                   <TableCell>
-                    Overtime ({result.earnings.overtime_hours}h @ {result.salary.currency}{" "}
-                    {formatCurrency(result.salary.hourly_rate)} × 1.5)
+                    Overtime ({result.earnings.overtime_hours}h @ {formatCurrency(result.salary.hourly_rate)}/hr × 1.5)
                   </TableCell>
-                  <TableCell className="text-right">
-                    {result.salary.currency} {formatCurrency(result.earnings.overtime_pay)}
+                  <TableCell className="text-right tabular-nums">
+                    {formatCurrency(result.earnings.overtime_pay)}
                   </TableCell>
-                  <TableCell className="text-right">
-                    {result.salary.currency} {formatCurrency(result.earnings.overtime_pay)}
+                  <TableCell className="text-right tabular-nums">
+                    {formatCurrency(result.earnings.overtime_pay)}
                   </TableCell>
                 </TableRow>
               )}
@@ -1059,11 +1081,11 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
                       </p>
                     )}
                   </TableCell>
-                  <TableCell className="text-right">
-                    {result.salary.currency} {formatCurrency(comp.base_amount)}
+                  <TableCell className="text-right tabular-nums">
+                    {formatCurrency(comp.base_amount)}
                   </TableCell>
-                  <TableCell className="text-right">
-                    {result.salary.currency} {formatCurrency(comp.amount)}
+                  <TableCell className="text-right tabular-nums">
+                    {formatCurrency(comp.amount)}
                   </TableCell>
                 </TableRow>
               ))}
@@ -1090,22 +1112,22 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
                       </Badge>
                     )}
                   </TableCell>
-                  <TableCell className="text-right">
-                    {result.salary.currency} {formatCurrency(allowance.base_amount)}
+                  <TableCell className="text-right tabular-nums">
+                    {formatCurrency(allowance.base_amount)}
                   </TableCell>
-                  <TableCell className="text-right">
-                    {result.salary.currency} {formatCurrency(allowance.amount)}
+                  <TableCell className="text-right tabular-nums">
+                    {formatCurrency(allowance.amount)}
                   </TableCell>
                 </TableRow>
               ))}
 
               <TableRow className="font-medium bg-muted/50">
                 <TableCell>Total Gross Pay</TableCell>
-                <TableCell className="text-right">
-                  {result.salary.currency} {formatCurrency(baseGrossTotal)}
+                <TableCell className="text-right tabular-nums">
+                  {formatCurrency(baseGrossTotal)}
                 </TableCell>
-                <TableCell className="text-right">
-                  {result.salary.currency} {formatCurrency(result.earnings.total_gross)}
+                <TableCell className="text-right tabular-nums font-bold text-success">
+                  {formatCurrency(result.earnings.total_gross)}
                 </TableCell>
               </TableRow>
             </TableBody>
@@ -1120,18 +1142,24 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
         </CardHeader>
         <CardContent className="py-0">
           <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Deduction</TableHead>
+                <TableHead className="text-right">Amount ({result.localCurrencyCode})</TableHead>
+              </TableRow>
+            </TableHeader>
             <TableBody>
               {result.deductions.pretax.length > 0 && (
                 <>
                   <TableRow>
-                    <TableCell colSpan={2} className="text-sm text-muted-foreground font-medium">
+                    <TableCell colSpan={2} className="text-sm text-muted-foreground font-medium bg-muted/30">
                       Pre-tax Deductions
                     </TableCell>
                   </TableRow>
                   {result.deductions.pretax.map((d, idx) => (
                     <TableRow key={idx}>
                       <TableCell className="pl-6">{d.name}</TableCell>
-                      <TableCell className="text-right text-destructive">-{result.salary.currency} {formatCurrency(d.amount)}</TableCell>
+                      <TableCell className="text-right text-destructive tabular-nums">({formatCurrency(d.amount)})</TableCell>
                     </TableRow>
                   ))}
                 </>
@@ -1140,7 +1168,7 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
               {result.deductions.statutory.length > 0 && (
                 <>
                   <TableRow>
-                    <TableCell colSpan={2} className="text-sm text-muted-foreground font-medium">
+                    <TableCell colSpan={2} className="text-sm text-muted-foreground font-medium bg-muted/30">
                       Statutory Deductions
                     </TableCell>
                   </TableRow>
@@ -1159,12 +1187,12 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
                         </div>
                         {d.ytd_info && (
                           <div className="text-xs text-muted-foreground mt-1">
-                            YTD Taxable: {result.salary.currency} {formatCurrency(d.ytd_info.ytd_taxable_before)} → {result.salary.currency} {formatCurrency(d.ytd_info.ytd_taxable_after)} | 
-                            YTD Tax: {result.salary.currency} {formatCurrency(d.ytd_info.ytd_tax_before)} → {result.salary.currency} {formatCurrency(d.ytd_info.ytd_tax_after)}
+                            YTD Taxable: {formatCurrency(d.ytd_info.ytd_taxable_before)} → {formatCurrency(d.ytd_info.ytd_taxable_after)} | 
+                            YTD Tax: {formatCurrency(d.ytd_info.ytd_tax_before)} → {formatCurrency(d.ytd_info.ytd_tax_after)}
                           </div>
                         )}
                       </TableCell>
-                      <TableCell className="text-right text-destructive align-top">-{result.salary.currency} {formatCurrency(d.employee_amount)}</TableCell>
+                      <TableCell className="text-right text-destructive align-top tabular-nums">({formatCurrency(d.employee_amount)})</TableCell>
                     </TableRow>
                   ))}
                 </>
@@ -1181,14 +1209,14 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
               {result.deductions.posttax.length > 0 && (
                 <>
                   <TableRow>
-                    <TableCell colSpan={2} className="text-sm text-muted-foreground font-medium">
+                    <TableCell colSpan={2} className="text-sm text-muted-foreground font-medium bg-muted/30">
                       Post-tax Deductions
                     </TableCell>
                   </TableRow>
                   {result.deductions.posttax.map((d, idx) => (
                     <TableRow key={idx}>
                       <TableCell className="pl-6">{d.name}</TableCell>
-                      <TableCell className="text-right text-destructive">-{result.salary.currency} {formatCurrency(d.amount)}</TableCell>
+                      <TableCell className="text-right text-destructive tabular-nums">({formatCurrency(d.amount)})</TableCell>
                     </TableRow>
                   ))}
                 </>
@@ -1196,7 +1224,7 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
 
               <TableRow className="font-medium bg-muted/50">
                 <TableCell>Total Deductions</TableCell>
-                <TableCell className="text-right text-destructive">-{result.salary.currency} {formatCurrency(result.deductions.total_deductions)}</TableCell>
+                <TableCell className="text-right text-destructive tabular-nums font-bold">({formatCurrency(result.deductions.total_deductions)})</TableCell>
               </TableRow>
             </TableBody>
           </Table>
@@ -1204,9 +1232,12 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
       </Card>
 
       {/* Net Pay */}
-      <div className="p-4 bg-primary/10 rounded-lg flex justify-between items-center">
-        <span className="text-lg font-medium">Net Pay</span>
-        <span className="text-2xl font-bold text-primary">{result.salary.currency} {formatCurrency(result.net_pay)}</span>
+      <div className="p-6 bg-success/10 border-2 border-success rounded-lg flex justify-between items-center">
+        <div>
+          <span className="text-lg font-semibold">Net Pay</span>
+          <p className="text-sm text-muted-foreground">Amount to be paid</p>
+        </div>
+        <span className="text-3xl font-bold text-success tabular-nums">{result.localCurrencyCode} {formatCurrency(result.net_pay)}</span>
       </div>
 
       <Button onClick={runSimulation} disabled={isCalculating} className="w-full gap-2">
