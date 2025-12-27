@@ -1129,6 +1129,7 @@ export default function EmployeeCompensationPage() {
                           <TableRow>
                             <TableHead>{t("compensation.employeeCompensation.payElement")}</TableHead>
                             <TableHead className="text-right">{t("compensation.employeeCompensation.amount")}</TableHead>
+                            <TableHead>{t("compensation.currency", "Currency")}</TableHead>
                             <TableHead>{t("compensation.employeeCompensation.frequencyLabel")}</TableHead>
                             <TableHead className="text-right">{t("compensation.employeeCompensation.monthlyEquivalent", "Monthly Equiv.")}</TableHead>
                             <TableHead>{t("compensation.employeeCompensation.effectiveDates")}</TableHead>
@@ -1175,6 +1176,11 @@ export default function EmployeeCompensationPage() {
                                       </div>
                                     );
                                   })()}
+                                </TableCell>
+                                <TableCell>
+                                  <Badge variant="outline" className="font-mono">
+                                    {item.currency || "—"}
+                                  </Badge>
                                 </TableCell>
                                 <TableCell className="capitalize">{item.frequency}</TableCell>
                                 <TableCell className="text-right font-mono text-muted-foreground">
