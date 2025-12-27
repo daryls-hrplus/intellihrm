@@ -25,18 +25,27 @@ function unflattenObject(flat: Record<string, string>): NestedObject {
   const result: NestedObject = {};
 
   for (const key in flat) {
+    if (!Object.prototype.hasOwnProperty.call(flat, key)) continue;
+    
     const parts = key.split('.');
     let current: NestedObject = result;
 
     for (let i = 0; i < parts.length - 1; i++) {
       const part = parts[i];
-      if (!(part in current)) {
+      if (!(part in current) || typeof current[part] !== 'object') {
         current[part] = {};
       }
-      current = current[part] as NestedObject;
+      // Create a new reference to avoid modifying frozen objects
+      const next = current[part];
+      if (typeof next === 'object' && next !== null) {
+        current = next as NestedObject;
+      }
     }
 
-    current[parts[parts.length - 1]] = flat[key];
+    const lastPart = parts[parts.length - 1];
+    if (lastPart) {
+      current[lastPart] = flat[key];
+    }
   }
 
   return result;
