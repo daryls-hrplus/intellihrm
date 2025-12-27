@@ -54,7 +54,7 @@ interface ExtendedPayrollRun extends PayrollRun {
   recalculation_approved_at?: string | null;
 }
 
-// Net Pay component with currency preference split
+// Net Pay component with currency preference split - displays payment distribution
 function NetPayWithCurrencySplit({
   selectedEmployee,
   localCurrencyCode,
