@@ -138,7 +138,7 @@ export default function PayrollDashboardPage() {
   const sections: ModuleSection[] = [
     {
       titleKey: "Processing",
-      items: filterByAccess([allModules.processing, allModules.offCycle, allModules.payPeriods, allModules.salaryOvertime, allModules.regularDeductions, allModules.expenseClaims, allModules.tipPools, allModules.retroactivePay, allModules.openingBalances]),
+      items: filterByAccess([allModules.processing, allModules.offCycle, allModules.payPeriods, allModules.salaryOvertime, allModules.regularDeductions, allModules.expenseClaims, allModules.tipPools, allModules.retroactivePay, allModules.openingBalances, allModules.yearEndClosing]),
     },
     {
       titleKey: "Configuration",
@@ -150,7 +150,7 @@ export default function PayrollDashboardPage() {
     },
     {
       titleKey: "Reporting & Analytics",
-      items: filterByAccess([allModules.reports, allModules.yearEnd, allModules.yearEndClosing, allModules.archiveSettings]),
+      items: filterByAccess([allModules.reports, allModules.yearEnd, allModules.archiveSettings]),
     },
   ];
 
