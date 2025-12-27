@@ -43,6 +43,7 @@ import {
   CapabilityType,
   CapabilityCategory,
   CapabilityStatus,
+  CapabilityFilters,
   CreateCapabilityInput,
 } from "@/hooks/useCapabilities";
 import { CapabilityCard } from "@/components/capabilities/CapabilityCard";
