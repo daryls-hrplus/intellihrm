@@ -60,7 +60,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { NavLink } from "react-router-dom";
 import { format } from "date-fns";
 import { getTodayString } from "@/utils/dateUtils";
-import { JobCompetenciesManager } from "@/components/workforce/JobCompetenciesManager";
+// JobCompetenciesManager removed - consolidated into JobCapabilityRequirementsManager
 import { JobResponsibilitiesManager } from "@/components/workforce/JobResponsibilitiesManager";
 import { JobGoalsManager } from "@/components/workforce/JobGoalsManager";
 import { JobCapabilityRequirementsManager } from "@/components/workforce/JobCapabilityRequirementsManager";
@@ -855,21 +855,14 @@ export default function JobsPage() {
                     {expandedJobId === job.id && (
                       <TableRow>
                         <TableCell colSpan={10} className="bg-muted/30 p-4">
-                          <Tabs defaultValue="skills" className="w-full">
+                          <Tabs defaultValue="skills-competencies" className="w-full">
                             <TabsList>
-                              <TabsTrigger value="skills">Skills</TabsTrigger>
-                              <TabsTrigger value="competencies">Competencies</TabsTrigger>
+                              <TabsTrigger value="skills-competencies">Skills & Competencies</TabsTrigger>
                               <TabsTrigger value="responsibilities">Responsibilities</TabsTrigger>
                               <TabsTrigger value="goals">Goals</TabsTrigger>
                             </TabsList>
-                            <TabsContent value="skills" className="mt-4">
+                            <TabsContent value="skills-competencies" className="mt-4">
                               <JobCapabilityRequirementsManager 
-                                jobId={job.id} 
-                                companyId={job.company_id} 
-                              />
-                            </TabsContent>
-                            <TabsContent value="competencies" className="mt-4">
-                              <JobCompetenciesManager 
                                 jobId={job.id} 
                                 companyId={job.company_id} 
                               />

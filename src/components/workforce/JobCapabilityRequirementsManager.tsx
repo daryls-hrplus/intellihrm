@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,15 +20,24 @@ import {
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Plus, Trash2, Loader2, Zap } from "lucide-react";
+import { Plus, Trash2, Loader2, Zap, Info, Filter } from "lucide-react";
 import { getTodayString, formatDateForDisplay } from "@/utils/dateUtils";
 
 interface JobCapabilityRequirement {
@@ -63,6 +72,8 @@ interface JobCapabilityRequirementsManagerProps {
   companyId: string;
 }
 
+type FilterType = "all" | "SKILL" | "COMPETENCY";
+
 const PROFICIENCY_LEVELS = [
   { value: 1, label: "Level 1 - Novice" },
   { value: 2, label: "Level 2 - Beginner" },
@@ -75,6 +86,13 @@ const getProficiencyLabel = (level: number): string => {
   return PROFICIENCY_LEVELS.find(p => p.value === level)?.label || `Level ${level}`;
 };
 
+const getTypeBadgeStyles = (type: string) => {
+  if (type === "SKILL") {
+    return "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 border-blue-200 dark:border-blue-800";
+  }
+  return "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400 border-purple-200 dark:border-purple-800";
+};
+
 export function JobCapabilityRequirementsManager({ 
   jobId, 
   companyId 
@@ -84,6 +102,7 @@ export function JobCapabilityRequirementsManager({
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [typeFilter, setTypeFilter] = useState<FilterType>("all");
   const [formData, setFormData] = useState({
     capability_id: "",
     required_proficiency_level: "3",
@@ -126,6 +145,7 @@ export function JobCapabilityRequirementsManager({
       .select("id, name, code, type, category")
       .eq("status", "active")
       .or(`company_id.eq.${companyId},company_id.is.null`)
+      .order("type")
       .order("name");
 
     if (error) {
@@ -134,6 +154,19 @@ export function JobCapabilityRequirementsManager({
       setCapabilities(data || []);
     }
   };
+
+  // Group capabilities by type for the dropdown
+  const groupedCapabilities = useMemo(() => {
+    const skills = capabilities.filter(c => c.type === "SKILL");
+    const competencies = capabilities.filter(c => c.type === "COMPETENCY");
+    return { skills, competencies };
+  }, [capabilities]);
+
+  // Filter requirements based on selected type
+  const filteredRequirements = useMemo(() => {
+    if (typeFilter === "all") return requirements;
+    return requirements.filter(r => r.skills_competencies?.type === typeFilter);
+  }, [requirements, typeFilter]);
 
   const handleOpenDialog = () => {
     setFormData({
@@ -240,26 +273,84 @@ export function JobCapabilityRequirementsManager({
 
   const selectedCapability = capabilities.find(c => c.id === formData.capability_id);
 
+  // Count by type for filter badges
+  const skillsCount = requirements.filter(r => r.skills_competencies?.type === "SKILL").length;
+  const competenciesCount = requirements.filter(r => r.skills_competencies?.type === "COMPETENCY").length;
+
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      {/* Info callout explaining the difference */}
+      <Alert className="bg-muted/50 border-muted-foreground/20">
+        <Info className="h-4 w-4" />
+        <AlertDescription className="text-sm">
+          <strong>Skills</strong> are specific, teachable abilities (e.g., Excel, SQL, Project Management). 
+          <strong className="ml-1">Competencies</strong> are broader behavioral capabilities (e.g., Leadership, Problem-Solving, Communication).
+        </AlertDescription>
+      </Alert>
+
+      <div className="flex items-center justify-between flex-wrap gap-2">
         <div className="flex items-center gap-2">
           <Zap className="h-5 w-5 text-primary" />
           <h3 className="font-semibold">Required Skills & Competencies</h3>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Info className="h-4 w-4 text-muted-foreground cursor-help" />
+              </TooltipTrigger>
+              <TooltipContent className="max-w-xs">
+                <p>Define the skills and competencies required for this job role, along with the expected proficiency level and importance weighting.</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
           <Badge variant="outline">Total Weight: {totalWeight}%</Badge>
         </div>
         <Button size="sm" onClick={handleOpenDialog} disabled={capabilities.length === 0}>
           <Plus className="mr-2 h-4 w-4" />
-          Add Skill/Competency
+          Add Requirement
         </Button>
+      </div>
+
+      {/* Type Filter buttons */}
+      <div className="flex items-center gap-2 flex-wrap">
+        <Filter className="h-4 w-4 text-muted-foreground" />
+        <span className="text-sm text-muted-foreground">Filter:</span>
+        <div className="flex gap-1">
+          <Button
+            variant={typeFilter === "all" ? "default" : "outline"}
+            size="sm"
+            onClick={() => setTypeFilter("all")}
+            className="h-7 text-xs"
+          >
+            All ({requirements.length})
+          </Button>
+          <Button
+            variant={typeFilter === "SKILL" ? "default" : "outline"}
+            size="sm"
+            onClick={() => setTypeFilter("SKILL")}
+            className="h-7 text-xs"
+          >
+            <span className="w-2 h-2 rounded-full bg-blue-500 mr-1.5" />
+            Skills ({skillsCount})
+          </Button>
+          <Button
+            variant={typeFilter === "COMPETENCY" ? "default" : "outline"}
+            size="sm"
+            onClick={() => setTypeFilter("COMPETENCY")}
+            className="h-7 text-xs"
+          >
+            <span className="w-2 h-2 rounded-full bg-purple-500 mr-1.5" />
+            Competencies ({competenciesCount})
+          </Button>
+        </div>
       </div>
 
       <div className="rounded-lg border">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Skill/Competency</TableHead>
+              <TableHead>Name</TableHead>
               <TableHead>Type</TableHead>
+              <TableHead>Category</TableHead>
               <TableHead>Required Level</TableHead>
               <TableHead className="w-[100px]">Weight %</TableHead>
               <TableHead>Start Date</TableHead>
@@ -271,26 +362,37 @@ export function JobCapabilityRequirementsManager({
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={8} className="text-center py-4">
+                <TableCell colSpan={9} className="text-center py-4">
                   <Loader2 className="h-5 w-5 animate-spin mx-auto" />
                 </TableCell>
               </TableRow>
-            ) : requirements.length === 0 ? (
+            ) : filteredRequirements.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={8} className="text-center py-4 text-muted-foreground">
-                  No capability requirements defined for this job
+                <TableCell colSpan={9} className="text-center py-4 text-muted-foreground">
+                  {requirements.length === 0 
+                    ? "No capability requirements defined for this job" 
+                    : "No matching requirements for the selected filter"}
                 </TableCell>
               </TableRow>
             ) : (
-              requirements.map((req) => (
+              filteredRequirements.map((req) => (
                 <TableRow key={req.id}>
                   <TableCell className="font-medium">
-                    {req.skills_competencies?.name} ({req.skills_competencies?.code})
+                    {req.skills_competencies?.name}
+                    <span className="text-muted-foreground ml-1">({req.skills_competencies?.code})</span>
                   </TableCell>
                   <TableCell>
-                    <Badge variant="secondary" className="capitalize">
-                      {req.skills_competencies?.type?.toLowerCase()}
+                    <Badge 
+                      variant="outline" 
+                      className={getTypeBadgeStyles(req.skills_competencies?.type || "")}
+                    >
+                      {req.skills_competencies?.type === "SKILL" ? "Skill" : "Competency"}
                     </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <span className="capitalize text-muted-foreground">
+                      {req.skills_competencies?.category}
+                    </span>
                   </TableCell>
                   <TableCell>
                     <Badge variant="outline">
@@ -328,7 +430,7 @@ export function JobCapabilityRequirementsManager({
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add Skill/Competency Requirement</DialogTitle>
+            <DialogTitle>Add Skill or Competency Requirement</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
@@ -343,16 +445,48 @@ export function JobCapabilityRequirementsManager({
                   <SelectValue placeholder="Select skill or competency" />
                 </SelectTrigger>
                 <SelectContent>
-                  {capabilities.map((c) => (
-                    <SelectItem key={c.id} value={c.id}>
-                      <div className="flex items-center gap-2">
-                        <span>{c.name} ({c.code})</span>
-                        <Badge variant="outline" className="text-xs capitalize">
-                          {c.type.toLowerCase()}
-                        </Badge>
-                      </div>
-                    </SelectItem>
-                  ))}
+                  {groupedCapabilities.skills.length > 0 && (
+                    <SelectGroup>
+                      <SelectLabel className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-blue-500" />
+                        Skills
+                      </SelectLabel>
+                      {groupedCapabilities.skills.map((c) => (
+                        <SelectItem key={c.id} value={c.id}>
+                          <div className="flex items-center gap-2">
+                            <span>{c.name} ({c.code})</span>
+                            <Badge 
+                              variant="outline" 
+                              className={`text-xs ${getTypeBadgeStyles(c.type)}`}
+                            >
+                              Skill
+                            </Badge>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  )}
+                  {groupedCapabilities.competencies.length > 0 && (
+                    <SelectGroup>
+                      <SelectLabel className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-purple-500" />
+                        Competencies
+                      </SelectLabel>
+                      {groupedCapabilities.competencies.map((c) => (
+                        <SelectItem key={c.id} value={c.id}>
+                          <div className="flex items-center gap-2">
+                            <span>{c.name} ({c.code})</span>
+                            <Badge 
+                              variant="outline" 
+                              className={`text-xs ${getTypeBadgeStyles(c.type)}`}
+                            >
+                              Competency
+                            </Badge>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  )}
                 </SelectContent>
               </Select>
               {selectedCapability && (
