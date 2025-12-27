@@ -622,10 +622,10 @@ export default function ShiftManagementPage() {
 
   // Navigation cards for sub-pages - First 4 are Shifts, Rounding Rules, Payment Rules, Shift Assignments
   const navigationCards = [
-    { title: t("timeAttendance.shifts.shiftsTab"), description: t("timeAttendance.shifts.shiftsTabDescription") || "Manage shift definitions", href: "/time-attendance/shifts/list", icon: Clock, color: "bg-primary/20 text-primary" },
-    { title: t("timeAttendance.shifts.roundingRules"), description: t("timeAttendance.shifts.roundingRulesDescription") || "Configure time rounding", href: "/time-attendance/shifts/rounding-rules", icon: Timer, color: "bg-secondary/20 text-secondary" },
-    { title: t("timeAttendance.shifts.paymentRules"), description: t("timeAttendance.shifts.paymentRulesDescription") || "Define payment calculations", href: "/time-attendance/shifts/payment-rules", icon: DollarSign, color: "bg-success/20 text-success" },
-    { title: t("timeAttendance.shifts.assignments"), description: t("timeAttendance.shifts.assignmentsDescription") || "Assign employees to shifts", href: "/time-attendance/shifts/assignments", icon: Users, color: "bg-warning/20 text-warning" },
+    { title: t("timeAttendance.shifts.shiftsTab"), description: "Define and manage work shift schedules", href: "/time-attendance/shifts/list", icon: Clock, color: "bg-primary/20 text-primary" },
+    { title: t("timeAttendance.shifts.roundingRules"), description: "Configure clock-in and clock-out rounding policies", href: "/time-attendance/shifts/rounding-rules", icon: Timer, color: "bg-secondary/20 text-secondary" },
+    { title: t("timeAttendance.shifts.paymentRules"), description: "Set up overtime, night shift, and premium pay rules", href: "/time-attendance/shifts/payment-rules", icon: DollarSign, color: "bg-success/20 text-success" },
+    { title: t("timeAttendance.shifts.assignments"), description: "Assign employees to their work shifts", href: "/time-attendance/shifts/assignments", icon: Users, color: "bg-warning/20 text-warning" },
     { title: t("timeAttendance.shifts.calendar"), description: t("timeAttendance.shifts.calendarDescription"), href: "/time-attendance/shifts/calendar", icon: Calendar, color: "bg-blue-500/20 text-blue-600" },
     { title: t("timeAttendance.shifts.swapRequests"), description: t("timeAttendance.shifts.swapRequestsDescription"), href: "/time-attendance/shifts/swap-requests", icon: ArrowLeftRight, color: "bg-purple-500/20 text-purple-600" },
     { title: t("timeAttendance.shifts.openShifts"), description: t("timeAttendance.shifts.openShiftsDescription"), href: "/time-attendance/shifts/open-shifts", icon: Megaphone, color: "bg-pink-500/20 text-pink-600" },
