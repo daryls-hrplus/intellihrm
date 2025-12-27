@@ -895,7 +895,15 @@ export function usePayroll() {
           original_amount?: number;
           exchange_rate_used?: number;
         }[] = [];
-        const allowancesBreakdown: { name: string; amount: number; is_taxable: boolean }[] = [];
+        const allowancesBreakdown: { 
+          name: string; 
+          amount: number; 
+          is_taxable: boolean;
+          original_amount?: number;
+          original_currency?: string;
+          original_currency_id?: string | null;
+          exchange_rate_used?: number;
+        }[] = [];
         
         if (employeeComp && employeeComp.length > 0) {
           // Use employee compensation with proration - matching simulator logic
@@ -1101,17 +1109,25 @@ export function usePayroll() {
         // Add period allowances
         const { data: allowances } = await supabase
           .from("employee_period_allowances")
-          .select("amount, allowance_name, is_taxable")
+          .select("amount, allowance_name, is_taxable, currency")
           .eq("employee_id", emp.employee_id)
           .eq("pay_period_id", payPeriodId);
         
         for (const a of allowances || []) {
-          const amount = a.amount || 0;
-          grossPay += amount;
+          const originalAmount = a.amount || 0;
+          // Look up currency_id from the currency code text
+          const allowanceCurrencyId = a.currency ? currencyCodeToIdMap.get(String(a.currency).toUpperCase()) || null : null;
+          const { localAmount, exchangeRateUsed, wasConverted } = convertToLocalCurrency(originalAmount, allowanceCurrencyId);
+          
+          grossPay += localAmount;
           allowancesBreakdown.push({
             name: a.allowance_name || 'Allowance',
-            amount,
-            is_taxable: a.is_taxable ?? true
+            amount: localAmount,
+            is_taxable: a.is_taxable ?? true,
+            original_amount: wasConverted ? originalAmount : undefined,
+            original_currency: wasConverted ? a.currency : undefined,
+            original_currency_id: wasConverted ? allowanceCurrencyId : undefined,
+            exchange_rate_used: wasConverted ? exchangeRateUsed : undefined,
           });
         }
         
