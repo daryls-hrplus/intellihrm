@@ -728,7 +728,7 @@ export default function EmployeeAssignmentsPage() {
 
         {/* Create/Edit Dialog */}
         <Dialog open={dialogOpen} onOpenChange={(open) => { setDialogOpen(open); if (!open) resetForm(); }}>
-          <DialogContent className="max-w-lg">
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>{editingAssignment ? t("workforce.editAssignment") : t("workforce.newAssignment")}</DialogTitle>
               <DialogDescription>
@@ -737,56 +737,58 @@ export default function EmployeeAssignmentsPage() {
             </DialogHeader>
 
             <div className="space-y-4 py-4">
-              <div className="space-y-2">
-                <Label htmlFor="employee">{t("workforce.employee")} *</Label>
-                <Select value={formEmployeeId} onValueChange={setFormEmployeeId}>
-                  <SelectTrigger>
-                    <SelectValue placeholder={t("workforce.selectEmployee")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {employees.map((emp) => (
-                      <SelectItem key={emp.id} value={emp.id}>
-                        {emp.full_name || emp.email}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="employee">{t("workforce.employee")} *</Label>
+                  <Select value={formEmployeeId} onValueChange={setFormEmployeeId}>
+                    <SelectTrigger>
+                      <SelectValue placeholder={t("workforce.selectEmployee")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {employees.map((emp) => (
+                        <SelectItem key={emp.id} value={emp.id}>
+                          {emp.full_name || emp.email}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="position">{t("workforce.position")} *</Label>
+                  <Select value={formPositionId} onValueChange={handlePositionChange}>
+                    <SelectTrigger>
+                      <SelectValue placeholder={t("workforce.selectPosition")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {filteredPositionsForForm.map((pos) => (
+                        <SelectItem key={pos.id} value={pos.id}>
+                          {pos.title} ({pos.code})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="position">{t("workforce.position")} *</Label>
-                <Select value={formPositionId} onValueChange={handlePositionChange}>
-                  <SelectTrigger>
-                    <SelectValue placeholder={t("workforce.selectPosition")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {filteredPositionsForForm.map((pos) => (
-                      <SelectItem key={pos.id} value={pos.id}>
-                        {pos.title} ({pos.code})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              <div className="grid gap-4 md:grid-cols-3">
+                {/* Assignment Type */}
+                <div className="space-y-2">
+                  <Label htmlFor="assignmentType">{t("workforce.assignmentType", "Assignment Type")}</Label>
+                  <Select value={formAssignmentType} onValueChange={setFormAssignmentType}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {ASSIGNMENT_TYPES.map((type) => (
+                        <SelectItem key={type.value} value={type.value}>
+                          {t(`workforce.assignmentTypes.${type.value}`, type.label)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-              {/* Assignment Type */}
-              <div className="space-y-2">
-                <Label htmlFor="assignmentType">{t("workforce.assignmentType", "Assignment Type")}</Label>
-                <Select value={formAssignmentType} onValueChange={setFormAssignmentType}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {ASSIGNMENT_TYPES.map((type) => (
-                      <SelectItem key={type.value} value={type.value}>
-                        {t(`workforce.assignmentTypes.${type.value}`, type.label)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="grid gap-4 grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="startDate">{t("common.startDate")} *</Label>
                   <Input
