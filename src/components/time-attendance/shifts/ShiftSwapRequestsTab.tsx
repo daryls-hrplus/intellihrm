@@ -104,54 +104,54 @@ export function ShiftSwapRequestsTab({ companyId }: ShiftSwapRequestsTabProps) {
                 <div className="space-y-2">
                   <Label>{t("timeAttendance.shifts.swap.requester")}</Label>
                   <Select value={formData.requester_id} onValueChange={v => setFormData(p => ({ ...p, requester_id: v, requester_shift_assignment_id: "" }))}>
-                    <SelectTrigger><SelectValue placeholder="Select employee" /></SelectTrigger>
+                    <SelectTrigger><SelectValue placeholder={t("timeAttendance.shifts.swap.selectEmployee")} /></SelectTrigger>
                     <SelectContent>
                       {employees.map(e => <SelectItem key={e.id} value={e.id}>{e.full_name}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label>Requester's Shift</Label>
+                  <Label>{t("timeAttendance.shifts.swap.requesterShift")}</Label>
                   <Select value={formData.requester_shift_assignment_id} onValueChange={v => setFormData(p => ({ ...p, requester_shift_assignment_id: v }))}>
-                    <SelectTrigger><SelectValue placeholder="Select shift" /></SelectTrigger>
+                    <SelectTrigger><SelectValue placeholder={t("timeAttendance.shifts.swap.selectShift")} /></SelectTrigger>
                     <SelectContent>
-                      {requesterAssignments.map(a => <SelectItem key={a.id} value={a.id}>{a.shift?.name || "Unknown"}</SelectItem>)}
+                      {requesterAssignments.map(a => <SelectItem key={a.id} value={a.id}>{a.shift?.name || t("common.unknown")}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Swap With (Optional)</Label>
-                  <Select value={formData.target_employee_id} onValueChange={v => setFormData(p => ({ ...p, target_employee_id: v, target_shift_assignment_id: "" }))}>
-                    <SelectTrigger><SelectValue placeholder="Any available" /></SelectTrigger>
+                  <Label>{t("timeAttendance.shifts.swap.swapWith")}</Label>
+                  <Select value={formData.target_employee_id || "_any"} onValueChange={v => setFormData(p => ({ ...p, target_employee_id: v === "_any" ? "" : v, target_shift_assignment_id: "" }))}>
+                    <SelectTrigger><SelectValue placeholder={t("timeAttendance.shifts.swap.anyAvailable")} /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Any available</SelectItem>
+                      <SelectItem value="_any">{t("timeAttendance.shifts.swap.anyAvailable")}</SelectItem>
                       {employees.filter(e => e.id !== formData.requester_id).map(e => <SelectItem key={e.id} value={e.id}>{e.full_name}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label>Target's Shift</Label>
+                  <Label>{t("timeAttendance.shifts.swap.targetShift")}</Label>
                   <Select value={formData.target_shift_assignment_id} onValueChange={v => setFormData(p => ({ ...p, target_shift_assignment_id: v }))} disabled={!formData.target_employee_id}>
-                    <SelectTrigger><SelectValue placeholder="Select shift" /></SelectTrigger>
+                    <SelectTrigger><SelectValue placeholder={t("timeAttendance.shifts.swap.selectShift")} /></SelectTrigger>
                     <SelectContent>
-                      {targetAssignments.map(a => <SelectItem key={a.id} value={a.id}>{a.shift?.name || "Unknown"}</SelectItem>)}
+                      {targetAssignments.map(a => <SelectItem key={a.id} value={a.id}>{a.shift?.name || t("common.unknown")}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>
               </div>
               <div className="space-y-2">
-                <Label>Swap Date</Label>
+                <Label>{t("timeAttendance.shifts.swap.swapDate")}</Label>
                 <Input type="date" value={formData.swap_date} onChange={e => setFormData(p => ({ ...p, swap_date: e.target.value }))} />
               </div>
               <div className="space-y-2">
-                <Label>Reason</Label>
-                <Textarea value={formData.reason} onChange={e => setFormData(p => ({ ...p, reason: e.target.value }))} placeholder="Why do you need to swap?" />
+                <Label>{t("timeAttendance.shifts.swap.reason")}</Label>
+                <Textarea value={formData.reason} onChange={e => setFormData(p => ({ ...p, reason: e.target.value }))} placeholder={t("timeAttendance.shifts.swap.whySwap")} />
               </div>
               <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
-                <Button onClick={handleSubmit} disabled={!formData.requester_id || !formData.requester_shift_assignment_id}>Submit Request</Button>
+                <Button variant="outline" onClick={() => setDialogOpen(false)}>{t("common.cancel")}</Button>
+                <Button onClick={handleSubmit} disabled={!formData.requester_id || !formData.requester_shift_assignment_id}>{t("timeAttendance.shifts.swap.submitRequest")}</Button>
               </div>
             </div>
           </DialogContent>
@@ -166,21 +166,21 @@ export function ShiftSwapRequestsTab({ companyId }: ShiftSwapRequestsTabProps) {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Requester</TableHead>
-                <TableHead>Their Shift</TableHead>
-                <TableHead>Swap With</TableHead>
-                <TableHead>Their Shift</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Actions</TableHead>
+                <TableHead>{t("timeAttendance.shifts.swap.requester")}</TableHead>
+                <TableHead>{t("timeAttendance.shifts.swap.theirShift")}</TableHead>
+                <TableHead>{t("timeAttendance.shifts.swap.swapWith")}</TableHead>
+                <TableHead>{t("timeAttendance.shifts.swap.theirShift")}</TableHead>
+                <TableHead>{t("timeAttendance.shifts.swap.date")}</TableHead>
+                <TableHead>{t("common.status")}</TableHead>
+                <TableHead>{t("common.actions")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {swapRequests.map(req => (
                 <TableRow key={req.id}>
-                  <TableCell>{req.requester?.full_name || "Unknown"}</TableCell>
+                  <TableCell>{req.requester?.full_name || t("common.unknown")}</TableCell>
                   <TableCell>{req.requester_assignment?.shift?.name || "-"}</TableCell>
-                  <TableCell>{req.target_employee?.full_name || "Open"}</TableCell>
+                  <TableCell>{req.target_employee?.full_name || t("timeAttendance.shifts.swap.open")}</TableCell>
                   <TableCell>{req.target_assignment?.shift?.name || "-"}</TableCell>
                   <TableCell>{formatDateForDisplay(req.swap_date)}</TableCell>
                   <TableCell>{getStatusBadge(req.status)}</TableCell>
@@ -197,7 +197,7 @@ export function ShiftSwapRequestsTab({ companyId }: ShiftSwapRequestsTabProps) {
                     )}
                     {req.status === "accepted" && (
                       <Button size="sm" variant="outline" onClick={() => updateSwapRequestStatus(req.id, "approved", undefined, true)}>
-                        <Clock className="h-4 w-4 mr-1" /> Approve
+                        <Clock className="h-4 w-4 mr-1" /> {t("timeAttendance.shifts.swap.approve")}
                       </Button>
                     )}
                   </TableCell>

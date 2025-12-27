@@ -2555,7 +2555,27 @@
       "primaryShift": "Primary Shift",
       "primary": "Primary",
       "secondary": "Secondary",
-      "noAssignments": "No shift assignments found"
+      "noAssignments": "No shift assignments found",
+      "swap": {
+        "title": "Shift Swap Requests",
+        "requestSwap": "Request Swap",
+        "requester": "Requester",
+        "requesterShift": "Requester's Shift",
+        "swapWith": "Swap With (Optional)",
+        "targetShift": "Target's Shift",
+        "swapDate": "Swap Date",
+        "reason": "Reason",
+        "whySwap": "Why do you need to swap?",
+        "anyAvailable": "Any available",
+        "selectEmployee": "Select employee",
+        "selectShift": "Select shift",
+        "submitRequest": "Submit Request",
+        "noRequests": "No swap requests found",
+        "theirShift": "Their Shift",
+        "date": "Date",
+        "open": "Open",
+        "approve": "Approve"
+      }
     },
     "geofencing": {
       "title": "Geofence Management",
