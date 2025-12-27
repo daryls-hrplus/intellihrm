@@ -19,9 +19,7 @@ interface CreateOverpaymentDialogProps {
 
 interface Employee {
   id: string;
-  first_name: string | null;
-  last_name: string | null;
-  employee_id: string | null;
+  full_name: string | null;
 }
 
 const OVERPAYMENT_REASONS = [
@@ -73,9 +71,9 @@ export function CreateOverpaymentDialog({
     
     const { data, error } = await supabase
       .from("profiles")
-      .select("id, first_name, last_name, employee_id")
+      .select("id, full_name")
       .eq("company_id", companyId)
-      .order("first_name");
+      .order("full_name");
 
     if (error) {
       toast.error("Failed to load employees");
@@ -182,7 +180,7 @@ export function CreateOverpaymentDialog({
               <SelectContent>
                 {employees.map(emp => (
                   <SelectItem key={emp.id} value={emp.id}>
-                    {emp.first_name} {emp.last_name} {emp.employee_id && `(${emp.employee_id})`}
+                    {emp.full_name || "Unnamed"}
                   </SelectItem>
                 ))}
               </SelectContent>

@@ -80,9 +80,7 @@ export default function OverpaymentRecoveryPage() {
 
   const filteredRecords = records.filter(record => {
     const matchesSearch = 
-      record.employee?.first_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      record.employee?.last_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      record.employee?.employee_id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      record.employee?.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       record.reason.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesStatus = statusFilter === "all" || record.status === statusFilter;
@@ -249,13 +247,8 @@ export default function OverpaymentRecoveryPage() {
                       onClick={() => setSelectedRecord(record)}
                     >
                       <TableCell>
-                        <div>
-                          <div className="font-medium">
-                            {record.employee?.first_name} {record.employee?.last_name}
-                          </div>
-                          <div className="text-xs text-muted-foreground">
-                            {record.employee?.employee_id}
-                          </div>
+                        <div className="font-medium">
+                          {record.employee?.full_name || "Unknown"}
                         </div>
                       </TableCell>
                       <TableCell>

@@ -135,10 +135,7 @@ export function OverpaymentDetailSheet({
                     </div>
                     <div>
                       <p className="font-semibold">
-                        {record.employee?.first_name} {record.employee?.last_name}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        {record.employee?.employee_id || "No ID"}
+                        {record.employee?.full_name || "Unknown Employee"}
                       </p>
                     </div>
                     <Badge variant={statusConfig[record.status]?.variant} className="ml-auto">
@@ -260,7 +257,7 @@ export function OverpaymentDetailSheet({
                             <p className="text-xs text-muted-foreground">
                               {format(new Date(item.created_at), "MMM d, yyyy h:mm a")}
                               {item.changed_by_profile && (
-                                <> by {item.changed_by_profile.first_name} {item.changed_by_profile.last_name}</>
+                                <> by {item.changed_by_profile.full_name}</>
                               )}
                             </p>
                           </div>
@@ -287,7 +284,9 @@ export function OverpaymentDetailSheet({
                           <div>
                             <p className="font-medium">{formatCurrency(payment.amount)}</p>
                             <p className="text-xs text-muted-foreground">
-                              {payment.pay_period?.period_name || format(new Date(payment.payment_date), "MMM d, yyyy")}
+                              {payment.pay_period?.period_start 
+                                ? format(new Date(payment.pay_period.period_start), "MMM d, yyyy")
+                                : format(new Date(payment.payment_date), "MMM d, yyyy")}
                             </p>
                           </div>
                           <Badge variant="outline" className="text-xs capitalize">
