@@ -998,9 +998,10 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Earning</TableHead>
-                <TableHead className="text-right">Base ({result.localCurrencyCode})</TableHead>
-                <TableHead className="text-right">Included ({result.localCurrencyCode})</TableHead>
+                <TableHead>Pay Element</TableHead>
+                <TableHead className="text-right">Original</TableHead>
+                <TableHead>Currency</TableHead>
+                <TableHead className="text-right">Local Amount ({result.localCurrencyCode})</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -1008,24 +1009,35 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
               {result.positionProrations?.length ? (
                 <>
                   <TableRow className="bg-muted/30">
-                    <TableCell colSpan={3} className="font-medium">
+                    <TableCell colSpan={4} className="font-medium">
                       Position earnings
                     </TableCell>
                   </TableRow>
                   {result.positionProrations.map((pos, idx) => (
                     <TableRow key={`pos-sal-${idx}`}>
-                      <TableCell className="flex items-center gap-2">
-                        Base Salary — {pos.title} ({result.salary.frequency})
-                        {pos.isProrated && (
-                          <Badge variant="outline" className="text-xs">
-                            Prorated
-                          </Badge>
-                        )}
+                      <TableCell>
+                        <div className="flex flex-col">
+                          <span className="flex items-center gap-2">
+                            Base Salary
+                            <span className="text-xs text-primary">(Base)</span>
+                          </span>
+                          <span className="text-xs text-muted-foreground">{pos.title}</span>
+                          {pos.isProrated && (
+                            <Badge variant="outline" className="w-fit mt-0.5 text-xs bg-warning/20 text-warning border-warning/30">
+                              Prorated
+                            </Badge>
+                          )}
+                        </div>
                       </TableCell>
-                      <TableCell className="text-right tabular-nums">
+                      <TableCell className="text-right font-mono text-sm tabular-nums">
                         {formatCurrency(pos.fullAmount)}
                       </TableCell>
-                      <TableCell className="text-right tabular-nums">
+                      <TableCell>
+                        <Badge variant="outline" className="font-mono text-xs">
+                          {result.localCurrencyCode}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right font-mono text-sm font-medium tabular-nums">
                         {formatCurrency(pos.proratedAmount)}
                       </TableCell>
                     </TableRow>
@@ -1033,11 +1045,28 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
                 </>
               ) : (
                 <TableRow>
-                  <TableCell>Base Salary ({result.salary.frequency})</TableCell>
-                  <TableCell className="text-right tabular-nums">
+                  <TableCell>
+                    <div className="flex flex-col">
+                      <span className="flex items-center gap-2">
+                        Base Salary
+                        <span className="text-xs text-primary">(Base)</span>
+                      </span>
+                      {result.proration?.isProrated && (
+                        <Badge variant="outline" className="w-fit mt-0.5 text-xs bg-warning/20 text-warning border-warning/30">
+                          Prorated
+                        </Badge>
+                      )}
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-right font-mono text-sm tabular-nums">
                     {formatCurrency(result.proration?.fullPeriodSalary ?? result.earnings.regular_pay)}
                   </TableCell>
-                  <TableCell className="text-right tabular-nums">
+                  <TableCell>
+                    <Badge variant="outline" className="font-mono text-xs">
+                      {result.localCurrencyCode}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-right font-mono text-sm font-medium tabular-nums">
                     {formatCurrency(result.earnings.regular_pay)}
                   </TableCell>
                 </TableRow>
@@ -1046,12 +1075,22 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
               {result.earnings.overtime_hours > 0 && (
                 <TableRow>
                   <TableCell>
-                    Overtime ({result.earnings.overtime_hours}h @ {formatCurrency(result.salary.hourly_rate)}/hr × 1.5)
+                    <div className="flex flex-col">
+                      <span>Overtime</span>
+                      <span className="text-xs text-muted-foreground">
+                        {result.earnings.overtime_hours}h @ {formatCurrency(result.salary.hourly_rate)}/hr × 1.5
+                      </span>
+                    </div>
                   </TableCell>
-                  <TableCell className="text-right tabular-nums">
+                  <TableCell className="text-right font-mono text-sm tabular-nums">
                     {formatCurrency(result.earnings.overtime_pay)}
                   </TableCell>
-                  <TableCell className="text-right tabular-nums">
+                  <TableCell>
+                    <Badge variant="outline" className="font-mono text-xs">
+                      {result.localCurrencyCode}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-right font-mono text-sm font-medium tabular-nums">
                     {formatCurrency(result.earnings.overtime_pay)}
                   </TableCell>
                 </TableRow>
@@ -1059,74 +1098,111 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
 
               {result.earnings.additional_comp.length > 0 && (
                 <TableRow className="bg-muted/30">
-                  <TableCell colSpan={3} className="font-medium">
+                  <TableCell colSpan={4} className="font-medium">
                     Other earnings
                   </TableCell>
                 </TableRow>
               )}
-              {result.earnings.additional_comp.map((comp, idx) => (
-                <TableRow key={`comp-${idx}`}>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      {comp.name}
-                      {comp.is_prorated && (
-                        <Badge variant="outline" className="text-xs">
-                          Prorated
-                        </Badge>
+              {result.earnings.additional_comp.map((comp, idx) => {
+                const hasConversion = comp.original_currency && comp.original_amount !== undefined;
+                const originalCurrencyCode = hasConversion ? comp.original_currency : result.localCurrencyCode;
+                const originalAmount = hasConversion ? comp.original_amount : comp.amount;
+                
+                return (
+                  <TableRow key={`comp-${idx}`}>
+                    <TableCell>
+                      <div className="flex flex-col">
+                        <span>{comp.name}</span>
+                        {comp.position_title && (
+                          <span className="text-xs text-muted-foreground">{comp.position_title}</span>
+                        )}
+                        {comp.is_prorated && (
+                          <Badge variant="outline" className="w-fit mt-0.5 text-xs bg-warning/20 text-warning border-warning/30">
+                            Prorated
+                          </Badge>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-right font-mono text-sm tabular-nums">
+                      {formatCurrency(originalAmount || comp.base_amount)}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className="font-mono text-xs">
+                        {originalCurrencyCode}
+                      </Badge>
+                      {hasConversion && comp.exchange_rate_used && (
+                        <div className="text-xs text-muted-foreground mt-0.5">
+                          @ {comp.exchange_rate_used.toFixed(4)}
+                        </div>
                       )}
-                    </div>
-                    {comp.is_prorated && comp.effective_start && (
-                      <p className="text-xs text-muted-foreground mt-0.5">
-                        {format(parseISO(comp.effective_start), 'MMM d')} - {comp.effective_end ? format(parseISO(comp.effective_end), 'MMM d, yyyy') : 'Period End'}
-                      </p>
-                    )}
-                  </TableCell>
-                  <TableCell className="text-right tabular-nums">
-                    {formatCurrency(comp.base_amount)}
-                  </TableCell>
-                  <TableCell className="text-right tabular-nums">
-                    {formatCurrency(comp.amount)}
-                  </TableCell>
-                </TableRow>
-              ))}
+                    </TableCell>
+                    <TableCell className="text-right font-mono text-sm font-medium tabular-nums">
+                      {formatCurrency(comp.amount)}
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
 
               {result.earnings.allowances.length > 0 && (
                 <TableRow className="bg-muted/30">
-                  <TableCell colSpan={3} className="font-medium">
+                  <TableCell colSpan={4} className="font-medium">
                     Allowances
                   </TableCell>
                 </TableRow>
               )}
-              {result.earnings.allowances.map((allowance, idx) => (
-                <TableRow key={`allow-${idx}`}>
-                  <TableCell className="flex items-center gap-2">
-                    {allowance.name}
-                    {allowance.is_bik && (
-                      <Badge variant="secondary" className="text-xs">
-                        BIK
+              {result.earnings.allowances.map((allowance, idx) => {
+                const hasConversion = allowance.original_currency && allowance.original_amount !== undefined;
+                const originalCurrencyCode = hasConversion ? allowance.original_currency : result.localCurrencyCode;
+                const originalAmount = hasConversion ? allowance.original_amount : allowance.amount;
+                
+                return (
+                  <TableRow key={`allow-${idx}`}>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        {allowance.name}
+                        {allowance.is_bik && (
+                          <Badge variant="secondary" className="text-xs">
+                            BIK
+                          </Badge>
+                        )}
+                        {!allowance.is_taxable && (
+                          <Badge variant="outline" className="text-xs">
+                            Non-taxable
+                          </Badge>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-right font-mono text-sm tabular-nums">
+                      {formatCurrency(originalAmount || allowance.base_amount)}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className="font-mono text-xs">
+                        {originalCurrencyCode}
                       </Badge>
-                    )}
-                    {!allowance.is_taxable && (
-                      <Badge variant="outline" className="text-xs">
-                        Non-taxable
-                      </Badge>
-                    )}
-                  </TableCell>
-                  <TableCell className="text-right tabular-nums">
-                    {formatCurrency(allowance.base_amount)}
-                  </TableCell>
-                  <TableCell className="text-right tabular-nums">
-                    {formatCurrency(allowance.amount)}
-                  </TableCell>
-                </TableRow>
-              ))}
+                      {hasConversion && allowance.exchange_rate_used && (
+                        <div className="text-xs text-muted-foreground mt-0.5">
+                          @ {allowance.exchange_rate_used.toFixed(4)}
+                        </div>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-right font-mono text-sm font-medium tabular-nums">
+                      {formatCurrency(allowance.amount)}
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
 
               <TableRow className="font-medium bg-muted/50">
                 <TableCell>Total Gross Pay</TableCell>
                 <TableCell className="text-right tabular-nums">
                   {formatCurrency(baseGrossTotal)}
                 </TableCell>
-                <TableCell className="text-right tabular-nums font-bold text-success">
+                <TableCell>
+                  <Badge variant="outline" className="font-mono text-xs">
+                    {result.localCurrencyCode}
+                  </Badge>
+                </TableCell>
+                <TableCell className="text-right font-mono font-bold text-success tabular-nums">
                   {formatCurrency(result.earnings.total_gross)}
                 </TableCell>
               </TableRow>
@@ -1145,30 +1221,56 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
             <TableHeader>
               <TableRow>
                 <TableHead>Deduction</TableHead>
-                <TableHead className="text-right">Amount ({result.localCurrencyCode})</TableHead>
+                <TableHead className="text-right">Original</TableHead>
+                <TableHead>Currency</TableHead>
+                <TableHead className="text-right">Local Amount ({result.localCurrencyCode})</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {result.deductions.pretax.length > 0 && (
                 <>
                   <TableRow>
-                    <TableCell colSpan={2} className="text-sm text-muted-foreground font-medium bg-muted/30">
+                    <TableCell colSpan={4} className="text-sm text-muted-foreground font-medium bg-muted/30">
                       Pre-tax Deductions
                     </TableCell>
                   </TableRow>
-                  {result.deductions.pretax.map((d, idx) => (
-                    <TableRow key={idx}>
-                      <TableCell className="pl-6">{d.name}</TableCell>
-                      <TableCell className="text-right text-destructive tabular-nums">({formatCurrency(d.amount)})</TableCell>
-                    </TableRow>
-                  ))}
+                  {result.deductions.pretax.map((d, idx) => {
+                    const hasConversion = d.original_currency && d.original_amount !== undefined;
+                    const originalCurrencyCode = hasConversion ? d.original_currency : result.localCurrencyCode;
+                    const originalAmount = hasConversion ? d.original_amount : d.amount;
+                    
+                    return (
+                      <TableRow key={idx}>
+                        <TableCell className="pl-6">
+                          <span>{d.name}</span>
+                          <span className="ml-1 text-xs text-primary">(Pre-tax)</span>
+                        </TableCell>
+                        <TableCell className="text-right font-mono text-sm text-destructive tabular-nums">
+                          -{formatCurrency(originalAmount)}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline" className="font-mono text-xs">
+                            {originalCurrencyCode}
+                          </Badge>
+                          {hasConversion && d.exchange_rate_used && (
+                            <div className="text-xs text-muted-foreground mt-0.5">
+                              @ {d.exchange_rate_used.toFixed(4)}
+                            </div>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-right font-mono text-sm font-medium text-destructive tabular-nums">
+                          -{formatCurrency(d.amount)}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </>
               )}
               
               {result.deductions.statutory.length > 0 && (
                 <>
                   <TableRow>
-                    <TableCell colSpan={2} className="text-sm text-muted-foreground font-medium bg-muted/30">
+                    <TableCell colSpan={4} className="text-sm text-muted-foreground font-medium bg-muted/30">
                       Statutory Deductions
                     </TableCell>
                   </TableRow>
@@ -1192,7 +1294,17 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
                           </div>
                         )}
                       </TableCell>
-                      <TableCell className="text-right text-destructive align-top tabular-nums">({formatCurrency(d.employee_amount)})</TableCell>
+                      <TableCell className="text-right font-mono text-sm text-destructive tabular-nums">
+                        -{formatCurrency(d.employee_amount)}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className="font-mono text-xs">
+                          {result.localCurrencyCode}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right font-mono text-sm font-medium text-destructive align-top tabular-nums">
+                        -{formatCurrency(d.employee_amount)}
+                      </TableCell>
                     </TableRow>
                   ))}
                 </>
@@ -1200,7 +1312,7 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
 
               {result.deductions.statutory.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={2} className="text-sm text-muted-foreground italic">
+                  <TableCell colSpan={4} className="text-sm text-muted-foreground italic">
                     No statutory deductions configured for this territory
                   </TableCell>
                 </TableRow>
@@ -1209,22 +1321,53 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
               {result.deductions.posttax.length > 0 && (
                 <>
                   <TableRow>
-                    <TableCell colSpan={2} className="text-sm text-muted-foreground font-medium bg-muted/30">
+                    <TableCell colSpan={4} className="text-sm text-muted-foreground font-medium bg-muted/30">
                       Post-tax Deductions
                     </TableCell>
                   </TableRow>
-                  {result.deductions.posttax.map((d, idx) => (
-                    <TableRow key={idx}>
-                      <TableCell className="pl-6">{d.name}</TableCell>
-                      <TableCell className="text-right text-destructive tabular-nums">({formatCurrency(d.amount)})</TableCell>
-                    </TableRow>
-                  ))}
+                  {result.deductions.posttax.map((d, idx) => {
+                    const hasConversion = d.original_currency && d.original_amount !== undefined;
+                    const originalCurrencyCode = hasConversion ? d.original_currency : result.localCurrencyCode;
+                    const originalAmount = hasConversion ? d.original_amount : d.amount;
+                    
+                    return (
+                      <TableRow key={idx}>
+                        <TableCell className="pl-6">{d.name}</TableCell>
+                        <TableCell className="text-right font-mono text-sm text-destructive tabular-nums">
+                          -{formatCurrency(originalAmount)}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline" className="font-mono text-xs">
+                            {originalCurrencyCode}
+                          </Badge>
+                          {hasConversion && d.exchange_rate_used && (
+                            <div className="text-xs text-muted-foreground mt-0.5">
+                              @ {d.exchange_rate_used.toFixed(4)}
+                            </div>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-right font-mono text-sm font-medium text-destructive tabular-nums">
+                          -{formatCurrency(d.amount)}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </>
               )}
 
               <TableRow className="font-medium bg-muted/50">
                 <TableCell>Total Deductions</TableCell>
-                <TableCell className="text-right text-destructive tabular-nums font-bold">({formatCurrency(result.deductions.total_deductions)})</TableCell>
+                <TableCell className="text-right font-mono text-destructive tabular-nums">
+                  -{formatCurrency(result.deductions.total_deductions)}
+                </TableCell>
+                <TableCell>
+                  <Badge variant="outline" className="font-mono text-xs">
+                    {result.localCurrencyCode}
+                  </Badge>
+                </TableCell>
+                <TableCell className="text-right font-mono text-destructive tabular-nums font-bold">
+                  -{formatCurrency(result.deductions.total_deductions)}
+                </TableCell>
               </TableRow>
             </TableBody>
           </Table>
@@ -1232,12 +1375,17 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
       </Card>
 
       {/* Net Pay */}
-      <div className="p-6 bg-success/10 border-2 border-success rounded-lg flex justify-between items-center">
-        <div>
-          <span className="text-lg font-semibold">Net Pay</span>
-          <p className="text-sm text-muted-foreground">Amount to be paid</p>
+      <div className="bg-success/10 rounded-lg p-4">
+        <div className="flex justify-between items-center">
+          <span className="font-semibold text-lg">Net Pay</span>
+          <div className="text-right">
+            <span className="font-bold text-2xl text-success tabular-nums">{formatCurrency(result.net_pay)}</span>
+            <Badge variant="outline" className="ml-2 font-mono text-xs">
+              {result.localCurrencyCode}
+            </Badge>
+          </div>
         </div>
-        <span className="text-3xl font-bold text-success tabular-nums">{result.localCurrencyCode} {formatCurrency(result.net_pay)}</span>
+        <p className="text-sm text-muted-foreground mt-1">Amount to be paid in {result.localCurrencyCode}</p>
       </div>
 
       <Button onClick={runSimulation} disabled={isCalculating} className="w-full gap-2">
