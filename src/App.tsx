@@ -98,6 +98,7 @@ import JobFamiliesPage from "./pages/workforce/JobFamiliesPage";
 import JobsPage from "./pages/workforce/JobsPage";
 import CompetenciesPage from "./pages/workforce/CompetenciesPage";
 import ResponsibilitiesPage from "./pages/workforce/ResponsibilitiesPage";
+import CapabilityRegistryPage from "./pages/workforce/CapabilityRegistryPage";
 import OffboardingPage from "./pages/workforce/OffboardingPage";
 import WorkforceAnalyticsPage from "./pages/workforce/WorkforceAnalyticsPage";
 import QualificationsPage from "./pages/workforce/QualificationsPage";
@@ -1495,6 +1496,14 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
                   <CompetenciesPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/workforce/capabilities"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <CapabilityRegistryPage />
                 </ProtectedRoute>
               }
             />
