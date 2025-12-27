@@ -224,9 +224,10 @@ export default function PayrollProcessingPage() {
         .from('employee_compensation')
         .select(`
           currency_id,
-          position:employee_positions!inner(pay_group_id)
+          employee_positions!inner(pay_group_id)
         `)
         .eq('is_active', true)
+        .eq('employee_positions.pay_group_id', selectedPayGroupId)
         .not('currency_id', 'is', null);
       
       // Find unique foreign currencies (not local)
@@ -237,12 +238,14 @@ export default function PayrollProcessingPage() {
         }
       });
       
+      // Only show dialog if there are foreign currencies
       if (foreignIds.size > 0) {
         setForeignCurrencyIds(Array.from(foreignIds));
         setRunForExchangeRates(run);
         setExchangeRateDialogOpen(true);
         return; // Wait for user to confirm exchange rates
       }
+      // If no foreign currencies but multi-currency is enabled, just proceed
     }
     
     // Proceed with calculation
