@@ -1424,10 +1424,93 @@ export default function PayrollProcessingPage() {
 
                 {/* Net Pay */}
                 <div className="bg-success/10 rounded-lg p-4">
-                  <div className="flex justify-between items-center">
+                  <div className="flex justify-between items-center mb-3">
                     <span className="font-semibold text-lg">{t("payroll.processing.netPay")}</span>
                     <span className="font-bold text-2xl text-success">{formatCurrency(selectedEmployee.net_pay, localCurrencyCode)}</span>
                   </div>
+                  
+                  {/* Currency Breakdown */}
+                  {(() => {
+                    const calcDetails = selectedEmployee.calculation_details as any;
+                    const earnings = calcDetails?.earnings || [];
+                    const allowances = calcDetails?.allowances || [];
+                    const periodDeductions = calcDetails?.period_deductions || [];
+                    
+                    // Calculate original currency totals for earnings
+                    const currencyTotals = new Map<string, { originalAmount: number; localAmount: number; currencyCode: string }>();
+                    
+                    // Process earnings
+                    earnings.forEach((e: any) => {
+                      if (e.original_currency_id && e.original_amount !== undefined) {
+                        const currencyCode = currencyCodeMap.get(e.original_currency_id) || 'USD';
+                        const existing = currencyTotals.get(currencyCode) || { originalAmount: 0, localAmount: 0, currencyCode };
+                        existing.originalAmount += e.original_amount;
+                        existing.localAmount += e.amount;
+                        currencyTotals.set(currencyCode, existing);
+                      }
+                    });
+                    
+                    // Process allowances
+                    allowances.forEach((a: any) => {
+                      if (a.original_currency_id && a.original_amount !== undefined) {
+                        const currencyCode = a.original_currency || currencyCodeMap.get(a.original_currency_id) || 'USD';
+                        const existing = currencyTotals.get(currencyCode) || { originalAmount: 0, localAmount: 0, currencyCode };
+                        existing.originalAmount += a.original_amount;
+                        existing.localAmount += a.amount;
+                        currencyTotals.set(currencyCode, existing);
+                      }
+                    });
+                    
+                    // Process deductions (subtract from totals)
+                    periodDeductions.forEach((d: any) => {
+                      if (d.original_currency_id && d.original_amount !== undefined) {
+                        const currencyCode = d.original_currency || currencyCodeMap.get(d.original_currency_id) || 'USD';
+                        const existing = currencyTotals.get(currencyCode) || { originalAmount: 0, localAmount: 0, currencyCode };
+                        existing.originalAmount -= d.original_amount;
+                        existing.localAmount -= d.amount;
+                        currencyTotals.set(currencyCode, existing);
+                      }
+                    });
+                    
+                    // Calculate amount in local currency (TTD) that wasn't converted
+                    const totalConvertedLocal = Array.from(currencyTotals.values()).reduce((sum, t) => sum + t.localAmount, 0);
+                    const localOnlyAmount = selectedEmployee.net_pay - totalConvertedLocal;
+                    
+                    if (currencyTotals.size === 0) {
+                      return null; // No foreign currencies, don't show breakdown
+                    }
+                    
+                    return (
+                      <div className="border-t border-success/30 pt-3 space-y-2">
+                        <p className="text-xs text-muted-foreground uppercase">{t("payroll.processing.currencyBreakdown", "Currency Breakdown")}</p>
+                        
+                        {/* Local currency portion (not converted) */}
+                        {Math.abs(localOnlyAmount) > 0.01 && (
+                          <div className="flex justify-between text-sm">
+                            <span className="text-muted-foreground">
+                              {localCurrencyCode} {t("payroll.processing.localPortion", "(local)")}
+                            </span>
+                            <span className="font-mono">{formatCurrency(localOnlyAmount, localCurrencyCode)}</span>
+                          </div>
+                        )}
+                        
+                        {/* Foreign currency portions */}
+                        {Array.from(currencyTotals.entries()).map(([code, totals]) => (
+                          <div key={code} className="flex justify-between text-sm">
+                            <span className="text-muted-foreground">
+                              {code} → {localCurrencyCode}
+                            </span>
+                            <div className="text-right">
+                              <span className="font-mono text-xs text-muted-foreground mr-2">
+                                ({formatCurrency(totals.originalAmount, code)})
+                              </span>
+                              <span className="font-mono">{formatCurrency(totals.localAmount, localCurrencyCode)}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    );
+                  })()}
                 </div>
 
                 {/* Employer Contributions */}
