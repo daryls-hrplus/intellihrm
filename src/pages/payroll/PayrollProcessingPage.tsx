@@ -102,10 +102,14 @@ export default function PayrollProcessingPage() {
   // Multi-currency state
   const [exchangeRateDialogOpen, setExchangeRateDialogOpen] = useState(false);
   const [runForExchangeRates, setRunForExchangeRates] = useState<ExtendedPayrollRun | null>(null);
+  const [pendingRateAction, setPendingRateAction] = useState<{
+    type: 'calculate' | 'recalculate';
+    run: ExtendedPayrollRun;
+  } | null>(null);
   const [foreignCurrencyIds, setForeignCurrencyIds] = useState<string[]>([]);
   const [companyLocalCurrencyId, setCompanyLocalCurrencyId] = useState<string | null>(null);
   const [groupBaseCurrencyId, setGroupBaseCurrencyId] = useState<string | null>(null);
-  
+
   // Check if pay group has multi-currency enabled
   const { data: payGroupSettings } = usePayGroupMultiCurrency(
     selectedPayGroupId !== "all" ? selectedPayGroupId : undefined
@@ -132,15 +136,57 @@ export default function PayrollProcessingPage() {
     const loadTemplateAndCompany = async () => {
       if (!selectedCompanyId) return;
       
+      const resolveLocalCurrencyId = async (countryCode: string) => {
+        const { data: fiscal } = await supabase
+          .from('country_fiscal_years')
+          .select('currency_code')
+          .eq('country_code', countryCode)
+          .eq('is_active', true)
+          .maybeSingle();
+
+        if (!fiscal?.currency_code) return null;
+
+        const { data: currency } = await supabase
+          .from('currencies')
+          .select('id')
+          .eq('code', fiscal.currency_code)
+          .eq('is_active', true)
+          .maybeSingle();
+
+        return currency?.id ?? null;
+      };
+
       const [template, companyData] = await Promise.all([
         fetchDefaultTemplate(selectedCompanyId),
-        supabase.from('companies').select('name, address, logo_url, local_currency_id, group_id').eq('id', selectedCompanyId).single()
+        supabase
+          .from('companies')
+          .select('name, address, logo_url, local_currency_id, group_id, country')
+          .eq('id', selectedCompanyId)
+          .single()
       ]);
       
       setPayslipTemplate(template);
       if (companyData.data) {
-        setCompanyInfo(companyData.data);
-        setCompanyLocalCurrencyId(companyData.data.local_currency_id);
+        setCompanyInfo({
+          name: companyData.data.name,
+          address: companyData.data.address ?? undefined,
+          logo_url: companyData.data.logo_url ?? undefined,
+        });
+
+        // Ensure company local currency is set (defaulted from country config)
+        let localCurrencyId = companyData.data.local_currency_id as string | null;
+        if (!localCurrencyId && companyData.data.country) {
+          const resolved = await resolveLocalCurrencyId(companyData.data.country);
+          if (resolved) {
+            localCurrencyId = resolved;
+            await supabase
+              .from('companies')
+              .update({ local_currency_id: resolved })
+              .eq('id', selectedCompanyId);
+          }
+        }
+
+        setCompanyLocalCurrencyId(localCurrencyId);
         
         // Fetch group base currency if company is in a group
         if (companyData.data.group_id) {
@@ -207,6 +253,70 @@ export default function PayrollProcessingPage() {
     }
   };
 
+  const maybeOpenExchangeRateDialog = async (
+    run: ExtendedPayrollRun,
+    action: 'calculate' | 'recalculate'
+  ) => {
+    if (!isMultiCurrencyEnabled) return false;
+
+    const localCurrencyId = companyLocalCurrencyId;
+    if (!localCurrencyId) {
+      toast.error("Company local currency is not configured. Please set it on the Company record.");
+      return true; // block action
+    }
+
+    // Get employees in this pay group
+    const { data: employeePositions } = await supabase
+      .from('employee_positions')
+      .select('employee_id')
+      .eq('pay_group_id', run.pay_group_id)
+      .eq('is_active', true);
+
+    const employeeIds = Array.from(
+      new Set((employeePositions || []).map((ep) => ep.employee_id).filter(Boolean))
+    );
+
+    // If there are no employees, no need to collect rates
+    if (employeeIds.length === 0) return false;
+
+    // Build a currency code -> id map so we can handle legacy employee_compensation.currency
+    const [{ data: currencyRows }, { data: compensations }] = await Promise.all([
+      supabase.from('currencies').select('id, code').eq('is_active', true),
+      supabase
+        .from('employee_compensation')
+        .select('currency_id, currency')
+        .eq('is_active', true)
+        .in('employee_id', employeeIds)
+    ]);
+
+    const codeToId = new Map<string, string>();
+    (currencyRows || []).forEach((c) => {
+      if (c?.code && c?.id) codeToId.set(String(c.code).toUpperCase(), c.id);
+    });
+
+    // Find unique foreign currencies (not local)
+    const foreignIds = new Set<string>();
+    (compensations || []).forEach((c: any) => {
+      const idFromCode = c.currency ? codeToId.get(String(c.currency).toUpperCase()) : undefined;
+      const effectiveCurrencyId: string | undefined = c.currency_id || idFromCode;
+
+      if (effectiveCurrencyId && effectiveCurrencyId !== localCurrencyId) {
+        foreignIds.add(effectiveCurrencyId);
+      }
+    });
+
+    const needsBaseRate = !!(groupBaseCurrencyId && groupBaseCurrencyId !== localCurrencyId);
+    const needsDialog = foreignIds.size > 0 || needsBaseRate;
+
+    if (!needsDialog) return false;
+
+    setForeignCurrencyIds(Array.from(foreignIds));
+    setRunForExchangeRates(run);
+    setPendingRateAction({ type: action, run });
+    setExchangeRateDialogOpen(true);
+    return true;
+  };
+
   const handleCalculate = async (run: ExtendedPayrollRun) => {
     if (!selectedCompanyId || !selectedPayGroupId) return;
     
@@ -216,37 +326,9 @@ export default function PayrollProcessingPage() {
       showPayrollLockMessage(lockingRun);
       return;
     }
-    
-    // If multi-currency is enabled, check for foreign currencies and show rate selection dialog
-    if (isMultiCurrencyEnabled && companyLocalCurrencyId) {
-      // Fetch currencies used in employee compensations for this pay group
-      const { data: compensations } = await supabase
-        .from('employee_compensation')
-        .select(`
-          currency_id,
-          employee_positions!inner(pay_group_id)
-        `)
-        .eq('is_active', true)
-        .eq('employee_positions.pay_group_id', selectedPayGroupId)
-        .not('currency_id', 'is', null);
-      
-      // Find unique foreign currencies (not local)
-      const foreignIds = new Set<string>();
-      compensations?.forEach(c => {
-        if (c.currency_id && c.currency_id !== companyLocalCurrencyId) {
-          foreignIds.add(c.currency_id);
-        }
-      });
-      
-      // Only show dialog if there are foreign currencies
-      if (foreignIds.size > 0) {
-        setForeignCurrencyIds(Array.from(foreignIds));
-        setRunForExchangeRates(run);
-        setExchangeRateDialogOpen(true);
-        return; // Wait for user to confirm exchange rates
-      }
-      // If no foreign currencies but multi-currency is enabled, just proceed
-    }
+
+    const blockedByRates = await maybeOpenExchangeRateDialog(run, 'calculate');
+    if (blockedByRates) return;
     
     // Proceed with calculation
     await proceedWithCalculation(run);
@@ -262,10 +344,35 @@ export default function PayrollProcessingPage() {
     }
   };
 
+  const proceedWithRecalculation = async (run: ExtendedPayrollRun) => {
+    if (!selectedCompanyId) return;
+
+    const runId = run.id;
+
+    const success = await recalculatePayroll(
+      run.id,
+      selectedCompanyId,
+      run.pay_period_id,
+      run.pay_group_id
+    );
+
+    if (success) {
+      await loadData();
+      await refreshExpandedEmployees(runId);
+    }
+  };
+
   const handleExchangeRatesConfirmed = async () => {
-    if (runForExchangeRates) {
-      await proceedWithCalculation(runForExchangeRates);
-      setRunForExchangeRates(null);
+    if (!pendingRateAction) return;
+
+    const action = pendingRateAction;
+    setPendingRateAction(null);
+    setRunForExchangeRates(null);
+
+    if (action.type === 'calculate') {
+      await proceedWithCalculation(action.run);
+    } else {
+      await proceedWithRecalculation(action.run);
     }
   };
 
@@ -306,7 +413,14 @@ export default function PayrollProcessingPage() {
       await approveRecalculation(runToRecalc.id);
     }
 
-    // Use the run's pay_group_id, not the filter selection
+    // If multi-currency is enabled, allow user to lock exchange rates first
+    const blockedByRates = await maybeOpenExchangeRateDialog(runToRecalc, 'recalculate');
+    if (blockedByRates) {
+      setRecalcConfirmOpen(false);
+      setRunToRecalc(null);
+      return;
+    }
+
     const success = await recalculatePayroll(
       runToRecalc.id,
       selectedCompanyId,

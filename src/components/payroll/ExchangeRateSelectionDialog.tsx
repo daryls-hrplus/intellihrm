@@ -51,7 +51,8 @@ export function ExchangeRateSelectionDialog({
 
   // Build list of required currency pairs
   useEffect(() => {
-    if (!open || !localCurrencyId || foreignCurrencyIds.length === 0) return;
+    if (!open || !localCurrencyId) return;
+    if (foreignCurrencyIds.length === 0 && (!baseCurrencyId || baseCurrencyId === localCurrencyId)) return;
     
     const requiredPairs: RateEntry[] = [];
     const localCurrency = currencies.find(c => c.id === localCurrencyId);
