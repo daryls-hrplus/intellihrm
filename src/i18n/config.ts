@@ -1,7 +1,9 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
+import DatabaseBackend from './databaseBackend';
 
+// Import JSON translations as fallback
 import enTranslations from './locales/en.json';
 import arTranslations from './locales/ar.json';
 import esTranslations from './locales/es.json';
@@ -27,9 +29,11 @@ export const supportedLanguages = [
 export type SupportedLanguage = typeof supportedLanguages[number]['code'];
 
 i18n
+  .use(DatabaseBackend) // Database backend (primary source)
   .use(LanguageDetector)
   .use(initReactI18next)
   .init({
+    // JSON files as fallback resources
     resources: {
       en: { translation: enTranslations },
       ar: { translation: arTranslations },
@@ -42,7 +46,10 @@ i18n
       zh: { translation: zhTranslations },
     },
     fallbackLng: 'en',
-
+    
+    // Backend configuration
+    partialBundledLanguages: true, // Allow backend to partially override bundled resources
+    
     // Ensure regional variants like "en-US" resolve to supported base languages ("en")
     supportedLngs: supportedLanguages.map((l) => l.code),
     nonExplicitSupportedLngs: true,
@@ -60,3 +67,6 @@ i18n
   });
 
 export default i18n;
+
+// Re-export cache utilities
+export { clearTranslationCache, refreshTranslationsFromDB } from './databaseBackend';
