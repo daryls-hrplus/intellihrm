@@ -52,11 +52,19 @@ interface RegularDeduction {
   profiles?: { full_name: string };
 }
 
+interface Currency {
+  id: string;
+  code: string;
+  name: string;
+  symbol: string;
+}
+
 export default function EmployeeRegularDeductionsPage() {
   const { t } = useTranslation();
   const [companies, setCompanies] = useState<Company[]>([]);
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [deductions, setDeductions] = useState<RegularDeduction[]>([]);
+  const [currencies, setCurrencies] = useState<Currency[]>([]);
   const [selectedCompany, setSelectedCompany] = useState<string>("");
   const [selectedEmployee, setSelectedEmployee] = useState<string>("");
   const [searchTerm, setSearchTerm] = useState("");
@@ -85,7 +93,20 @@ export default function EmployeeRegularDeductionsPage() {
 
   useEffect(() => {
     loadCompanies();
+    loadCurrencies();
   }, []);
+
+  const loadCurrencies = async () => {
+    const { data, error } = await supabase
+      .from('currencies')
+      .select('id, code, name, symbol')
+      .eq('is_active', true)
+      .order('code');
+    
+    if (!error && data) {
+      setCurrencies(data);
+    }
+  };
 
   useEffect(() => {
     if (selectedCompany) {
@@ -598,11 +619,11 @@ export default function EmployeeRegularDeductionsPage() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="USD">USD</SelectItem>
-                      <SelectItem value="EUR">EUR</SelectItem>
-                      <SelectItem value="GBP">GBP</SelectItem>
-                      <SelectItem value="CAD">CAD</SelectItem>
-                      <SelectItem value="TTD">TTD</SelectItem>
+                      {currencies.map((currency) => (
+                        <SelectItem key={currency.id} value={currency.code}>
+                          {currency.code} - {currency.name}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
