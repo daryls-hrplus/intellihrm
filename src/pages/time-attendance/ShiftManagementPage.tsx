@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
@@ -126,6 +126,14 @@ export default function ShiftManagementPage() {
   const [selectedCompany, setSelectedCompany] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("");
+  const contentAnchorRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!activeTab) return;
+    requestAnimationFrame(() => {
+      contentAnchorRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }, [activeTab]);
   
   // Shifts
   const [shifts, setShifts] = useState<Shift[]>([]);
@@ -716,201 +724,242 @@ export default function ShiftManagementPage() {
 
         {/* Module Cards Grid */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          <Card 
-            className={`cursor-pointer transition-all hover:shadow-md hover:border-primary/50 ${activeTab === 'calendar' ? 'border-primary ring-2 ring-primary/20' : ''}`}
-            onClick={() => setActiveTab('calendar')}
-          >
-            <CardContent className="flex items-center gap-4 p-4">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/20">
-                <Calendar className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <p className="font-medium">{t("timeAttendance.shifts.calendar")}</p>
-                <p className="text-sm text-muted-foreground">{t("timeAttendance.shifts.calendarDescription") || "View shift calendar"}</p>
-              </div>
-            </CardContent>
+          <Card className={`transition-all hover:shadow-md hover:border-primary/50 ${activeTab === 'calendar' ? 'border-primary ring-2 ring-primary/20' : ''}`}>
+            <button
+              type="button"
+              className="w-full text-left cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 rounded-lg"
+              onClick={() => setActiveTab('calendar')}
+            >
+              <CardContent className="flex items-center gap-4 p-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/20">
+                  <Calendar className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <p className="font-medium">{t("timeAttendance.shifts.calendar")}</p>
+                  <p className="text-sm text-muted-foreground">{t("timeAttendance.shifts.calendarDescription") || "View shift calendar"}</p>
+                </div>
+              </CardContent>
+            </button>
           </Card>
 
-          <Card 
-            className={`cursor-pointer transition-all hover:shadow-md hover:border-primary/50 ${activeTab === 'shifts' ? 'border-primary ring-2 ring-primary/20' : ''}`}
-            onClick={() => setActiveTab('shifts')}
-          >
-            <CardContent className="flex items-center gap-4 p-4">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-500/20">
-                <Clock className="h-5 w-5 text-blue-600" />
-              </div>
-              <div>
-                <p className="font-medium">{t("timeAttendance.shifts.shiftsTab")}</p>
-                <p className="text-sm text-muted-foreground">{shifts.filter(s => s.is_active).length} {t("common.active").toLowerCase()}</p>
-              </div>
-            </CardContent>
+          <Card className={`transition-all hover:shadow-md hover:border-primary/50 ${activeTab === 'shifts' ? 'border-primary ring-2 ring-primary/20' : ''}`}>
+            <button
+              type="button"
+              className="w-full text-left cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 rounded-lg"
+              onClick={() => setActiveTab('shifts')}
+            >
+              <CardContent className="flex items-center gap-4 p-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-500/20">
+                  <Clock className="h-5 w-5 text-blue-600" />
+                </div>
+                <div>
+                  <p className="font-medium">{t("timeAttendance.shifts.shiftsTab")}</p>
+                  <p className="text-sm text-muted-foreground">{shifts.filter(s => s.is_active).length} {t("common.active").toLowerCase()}</p>
+                </div>
+              </CardContent>
+            </button>
           </Card>
 
-          <Card 
-            className={`cursor-pointer transition-all hover:shadow-md hover:border-primary/50 ${activeTab === 'rounding' ? 'border-primary ring-2 ring-primary/20' : ''}`}
-            onClick={() => setActiveTab('rounding')}
-          >
-            <CardContent className="flex items-center gap-4 p-4">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-orange-500/20">
-                <Timer className="h-5 w-5 text-orange-600" />
-              </div>
-              <div>
-                <p className="font-medium">{t("timeAttendance.shifts.roundingRules")}</p>
-                <p className="text-sm text-muted-foreground">{roundingRules.filter(r => r.is_active).length} {t("common.active").toLowerCase()}</p>
-              </div>
-            </CardContent>
+          <Card className={`transition-all hover:shadow-md hover:border-primary/50 ${activeTab === 'rounding' ? 'border-primary ring-2 ring-primary/20' : ''}`}>
+            <button
+              type="button"
+              className="w-full text-left cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 rounded-lg"
+              onClick={() => setActiveTab('rounding')}
+            >
+              <CardContent className="flex items-center gap-4 p-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-orange-500/20">
+                  <Timer className="h-5 w-5 text-orange-600" />
+                </div>
+                <div>
+                  <p className="font-medium">{t("timeAttendance.shifts.roundingRules")}</p>
+                  <p className="text-sm text-muted-foreground">{roundingRules.filter(r => r.is_active).length} {t("common.active").toLowerCase()}</p>
+                </div>
+              </CardContent>
+            </button>
           </Card>
 
-          <Card 
-            className={`cursor-pointer transition-all hover:shadow-md hover:border-primary/50 ${activeTab === 'payment' ? 'border-primary ring-2 ring-primary/20' : ''}`}
-            onClick={() => setActiveTab('payment')}
-          >
-            <CardContent className="flex items-center gap-4 p-4">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-500/20">
-                <DollarSign className="h-5 w-5 text-green-600" />
-              </div>
-              <div>
-                <p className="font-medium">{t("timeAttendance.shifts.paymentRules")}</p>
-                <p className="text-sm text-muted-foreground">{paymentRules.filter(r => r.is_active).length} {t("common.active").toLowerCase()}</p>
-              </div>
-            </CardContent>
+          <Card className={`transition-all hover:shadow-md hover:border-primary/50 ${activeTab === 'payment' ? 'border-primary ring-2 ring-primary/20' : ''}`}>
+            <button
+              type="button"
+              className="w-full text-left cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 rounded-lg"
+              onClick={() => setActiveTab('payment')}
+            >
+              <CardContent className="flex items-center gap-4 p-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-500/20">
+                  <DollarSign className="h-5 w-5 text-green-600" />
+                </div>
+                <div>
+                  <p className="font-medium">{t("timeAttendance.shifts.paymentRules")}</p>
+                  <p className="text-sm text-muted-foreground">{paymentRules.filter(r => r.is_active).length} {t("common.active").toLowerCase()}</p>
+                </div>
+              </CardContent>
+            </button>
           </Card>
 
-          <Card 
-            className={`cursor-pointer transition-all hover:shadow-md hover:border-primary/50 ${activeTab === 'assignments' ? 'border-primary ring-2 ring-primary/20' : ''}`}
-            onClick={() => setActiveTab('assignments')}
-          >
-            <CardContent className="flex items-center gap-4 p-4">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-yellow-500/20">
-                <Users className="h-5 w-5 text-yellow-600" />
-              </div>
-              <div>
-                <p className="font-medium">{t("timeAttendance.shifts.assignments")}</p>
-                <p className="text-sm text-muted-foreground">{assignments.length} {t("common.total").toLowerCase()}</p>
-              </div>
-            </CardContent>
+          <Card className={`transition-all hover:shadow-md hover:border-primary/50 ${activeTab === 'assignments' ? 'border-primary ring-2 ring-primary/20' : ''}`}>
+            <button
+              type="button"
+              className="w-full text-left cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 rounded-lg"
+              onClick={() => setActiveTab('assignments')}
+            >
+              <CardContent className="flex items-center gap-4 p-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-yellow-500/20">
+                  <Users className="h-5 w-5 text-yellow-600" />
+                </div>
+                <div>
+                  <p className="font-medium">{t("timeAttendance.shifts.assignments")}</p>
+                  <p className="text-sm text-muted-foreground">{assignments.length} {t("common.total").toLowerCase()}</p>
+                </div>
+              </CardContent>
+            </button>
           </Card>
 
-          <Card 
-            className={`cursor-pointer transition-all hover:shadow-md hover:border-primary/50 ${activeTab === 'swaps' ? 'border-primary ring-2 ring-primary/20' : ''}`}
-            onClick={() => setActiveTab('swaps')}
-          >
-            <CardContent className="flex items-center gap-4 p-4">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-500/20">
-                <ArrowLeftRight className="h-5 w-5 text-purple-600" />
-              </div>
-              <div>
-                <p className="font-medium">{t("timeAttendance.shifts.swapRequests")}</p>
-                <p className="text-sm text-muted-foreground">{t("timeAttendance.shifts.swapRequestsDescription") || "Manage swap requests"}</p>
-              </div>
-            </CardContent>
+          <Card className={`transition-all hover:shadow-md hover:border-primary/50 ${activeTab === 'swaps' ? 'border-primary ring-2 ring-primary/20' : ''}`}>
+            <button
+              type="button"
+              className="w-full text-left cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 rounded-lg"
+              onClick={() => setActiveTab('swaps')}
+            >
+              <CardContent className="flex items-center gap-4 p-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-500/20">
+                  <ArrowLeftRight className="h-5 w-5 text-purple-600" />
+                </div>
+                <div>
+                  <p className="font-medium">{t("timeAttendance.shifts.swapRequests")}</p>
+                  <p className="text-sm text-muted-foreground">{t("timeAttendance.shifts.swapRequestsDescription") || "Manage swap requests"}</p>
+                </div>
+              </CardContent>
+            </button>
           </Card>
 
-          <Card 
-            className={`cursor-pointer transition-all hover:shadow-md hover:border-primary/50 ${activeTab === 'openShifts' ? 'border-primary ring-2 ring-primary/20' : ''}`}
-            onClick={() => setActiveTab('openShifts')}
-          >
-            <CardContent className="flex items-center gap-4 p-4">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-pink-500/20">
-                <Megaphone className="h-5 w-5 text-pink-600" />
-              </div>
-              <div>
-                <p className="font-medium">{t("timeAttendance.shifts.openShifts")}</p>
-                <p className="text-sm text-muted-foreground">{t("timeAttendance.shifts.openShiftsDescription") || "View open shifts"}</p>
-              </div>
-            </CardContent>
+          <Card className={`transition-all hover:shadow-md hover:border-primary/50 ${activeTab === 'openShifts' ? 'border-primary ring-2 ring-primary/20' : ''}`}>
+            <button
+              type="button"
+              className="w-full text-left cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 rounded-lg"
+              onClick={() => setActiveTab('openShifts')}
+            >
+              <CardContent className="flex items-center gap-4 p-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-pink-500/20">
+                  <Megaphone className="h-5 w-5 text-pink-600" />
+                </div>
+                <div>
+                  <p className="font-medium">{t("timeAttendance.shifts.openShifts")}</p>
+                  <p className="text-sm text-muted-foreground">{t("timeAttendance.shifts.openShiftsDescription") || "View open shifts"}</p>
+                </div>
+              </CardContent>
+            </button>
           </Card>
 
-          <Card 
-            className={`cursor-pointer transition-all hover:shadow-md hover:border-primary/50 ${activeTab === 'templates' ? 'border-primary ring-2 ring-primary/20' : ''}`}
-            onClick={() => setActiveTab('templates')}
-          >
-            <CardContent className="flex items-center gap-4 p-4">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-cyan-500/20">
-                <Copy className="h-5 w-5 text-cyan-600" />
-              </div>
-              <div>
-                <p className="font-medium">{t("timeAttendance.shifts.templates")}</p>
-                <p className="text-sm text-muted-foreground">{t("timeAttendance.shifts.templatesDescription") || "Shift templates"}</p>
-              </div>
-            </CardContent>
+          <Card className={`transition-all hover:shadow-md hover:border-primary/50 ${activeTab === 'templates' ? 'border-primary ring-2 ring-primary/20' : ''}`}>
+            <button
+              type="button"
+              className="w-full text-left cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 rounded-lg"
+              onClick={() => setActiveTab('templates')}
+            >
+              <CardContent className="flex items-center gap-4 p-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-cyan-500/20">
+                  <Copy className="h-5 w-5 text-cyan-600" />
+                </div>
+                <div>
+                  <p className="font-medium">{t("timeAttendance.shifts.templates")}</p>
+                  <p className="text-sm text-muted-foreground">{t("timeAttendance.shifts.templatesDescription") || "Shift templates"}</p>
+                </div>
+              </CardContent>
+            </button>
           </Card>
 
-          <Card 
-            className={`cursor-pointer transition-all hover:shadow-md hover:border-primary/50 ${activeTab === 'rotations' ? 'border-primary ring-2 ring-primary/20' : ''}`}
-            onClick={() => setActiveTab('rotations')}
-          >
-            <CardContent className="flex items-center gap-4 p-4">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-500/20">
-                <RotateCcw className="h-5 w-5 text-indigo-600" />
-              </div>
-              <div>
-                <p className="font-medium">{t("timeAttendance.shifts.rotations")}</p>
-                <p className="text-sm text-muted-foreground">{t("timeAttendance.shifts.rotationsDescription") || "Rotation patterns"}</p>
-              </div>
-            </CardContent>
+          <Card className={`transition-all hover:shadow-md hover:border-primary/50 ${activeTab === 'rotations' ? 'border-primary ring-2 ring-primary/20' : ''}`}>
+            <button
+              type="button"
+              className="w-full text-left cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 rounded-lg"
+              onClick={() => setActiveTab('rotations')}
+            >
+              <CardContent className="flex items-center gap-4 p-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-500/20">
+                  <RotateCcw className="h-5 w-5 text-indigo-600" />
+                </div>
+                <div>
+                  <p className="font-medium">{t("timeAttendance.shifts.rotations")}</p>
+                  <p className="text-sm text-muted-foreground">{t("timeAttendance.shifts.rotationsDescription") || "Rotation patterns"}</p>
+                </div>
+              </CardContent>
+            </button>
           </Card>
 
-          <Card 
-            className={`cursor-pointer transition-all hover:shadow-md hover:border-primary/50 ${activeTab === 'fatigue' ? 'border-primary ring-2 ring-primary/20' : ''}`}
-            onClick={() => setActiveTab('fatigue')}
-          >
-            <CardContent className="flex items-center gap-4 p-4">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-red-500/20">
-                <AlertTriangle className="h-5 w-5 text-red-600" />
-              </div>
-              <div>
-                <p className="font-medium">{t("timeAttendance.shifts.fatigue")}</p>
-                <p className="text-sm text-muted-foreground">{t("timeAttendance.shifts.fatigueDescription") || "Fatigue management"}</p>
-              </div>
-            </CardContent>
+          <Card className={`transition-all hover:shadow-md hover:border-primary/50 ${activeTab === 'fatigue' ? 'border-primary ring-2 ring-primary/20' : ''}`}>
+            <button
+              type="button"
+              className="w-full text-left cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 rounded-lg"
+              onClick={() => setActiveTab('fatigue')}
+            >
+              <CardContent className="flex items-center gap-4 p-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-red-500/20">
+                  <AlertTriangle className="h-5 w-5 text-red-600" />
+                </div>
+                <div>
+                  <p className="font-medium">{t("timeAttendance.shifts.fatigue")}</p>
+                  <p className="text-sm text-muted-foreground">{t("timeAttendance.shifts.fatigueDescription") || "Fatigue management"}</p>
+                </div>
+              </CardContent>
+            </button>
           </Card>
 
-          <Card 
-            className={`cursor-pointer transition-all hover:shadow-md hover:border-primary/50 ${activeTab === 'coverage' ? 'border-primary ring-2 ring-primary/20' : ''}`}
-            onClick={() => setActiveTab('coverage')}
-          >
-            <CardContent className="flex items-center gap-4 p-4">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-teal-500/20">
-                <BarChart3 className="h-5 w-5 text-teal-600" />
-              </div>
-              <div>
-                <p className="font-medium">{t("timeAttendance.shifts.coverage")}</p>
-                <p className="text-sm text-muted-foreground">{t("timeAttendance.shifts.coverageDescription") || "Coverage analysis"}</p>
-              </div>
-            </CardContent>
+          <Card className={`transition-all hover:shadow-md hover:border-primary/50 ${activeTab === 'coverage' ? 'border-primary ring-2 ring-primary/20' : ''}`}>
+            <button
+              type="button"
+              className="w-full text-left cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 rounded-lg"
+              onClick={() => setActiveTab('coverage')}
+            >
+              <CardContent className="flex items-center gap-4 p-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-teal-500/20">
+                  <BarChart3 className="h-5 w-5 text-teal-600" />
+                </div>
+                <div>
+                  <p className="font-medium">{t("timeAttendance.shifts.coverage")}</p>
+                  <p className="text-sm text-muted-foreground">{t("timeAttendance.shifts.coverageDescription") || "Coverage analysis"}</p>
+                </div>
+              </CardContent>
+            </button>
           </Card>
 
-          <Card 
-            className={`cursor-pointer transition-all hover:shadow-md hover:border-primary/50 ${activeTab === 'bidding' ? 'border-primary ring-2 ring-primary/20' : ''}`}
-            onClick={() => setActiveTab('bidding')}
-          >
-            <CardContent className="flex items-center gap-4 p-4">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-500/20">
-                <Gavel className="h-5 w-5 text-amber-600" />
-              </div>
-              <div>
-                <p className="font-medium">{t("timeAttendance.shifts.bidding")}</p>
-                <p className="text-sm text-muted-foreground">{t("timeAttendance.shifts.biddingDescription") || "Shift bidding"}</p>
-              </div>
-            </CardContent>
+          <Card className={`transition-all hover:shadow-md hover:border-primary/50 ${activeTab === 'bidding' ? 'border-primary ring-2 ring-primary/20' : ''}`}>
+            <button
+              type="button"
+              className="w-full text-left cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 rounded-lg"
+              onClick={() => setActiveTab('bidding')}
+            >
+              <CardContent className="flex items-center gap-4 p-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-500/20">
+                  <Gavel className="h-5 w-5 text-amber-600" />
+                </div>
+                <div>
+                  <p className="font-medium">{t("timeAttendance.shifts.bidding")}</p>
+                  <p className="text-sm text-muted-foreground">{t("timeAttendance.shifts.biddingDescription") || "Shift bidding"}</p>
+                </div>
+              </CardContent>
+            </button>
           </Card>
 
-          <Card 
-            className={`cursor-pointer transition-all hover:shadow-md hover:border-primary/50 ${activeTab === 'aiScheduler' ? 'border-primary ring-2 ring-primary/20' : ''}`}
-            onClick={() => setActiveTab('aiScheduler')}
-          >
-            <CardContent className="flex items-center gap-4 p-4">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-violet-500/20">
-                <Sparkles className="h-5 w-5 text-violet-600" />
-              </div>
-              <div>
-                <p className="font-medium">{t("timeAttendance.shifts.aiScheduler")}</p>
-                <p className="text-sm text-muted-foreground">{t("timeAttendance.shifts.aiSchedulerDescription") || "AI-powered scheduling"}</p>
-              </div>
-            </CardContent>
+          <Card className={`transition-all hover:shadow-md hover:border-primary/50 ${activeTab === 'aiScheduler' ? 'border-primary ring-2 ring-primary/20' : ''}`}>
+            <button
+              type="button"
+              className="w-full text-left cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 rounded-lg"
+              onClick={() => setActiveTab('aiScheduler')}
+            >
+              <CardContent className="flex items-center gap-4 p-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-violet-500/20">
+                  <Sparkles className="h-5 w-5 text-violet-600" />
+                </div>
+                <div>
+                  <p className="font-medium">{t("timeAttendance.shifts.aiScheduler")}</p>
+                  <p className="text-sm text-muted-foreground">{t("timeAttendance.shifts.aiSchedulerDescription") || "AI-powered scheduling"}</p>
+                </div>
+              </CardContent>
+            </button>
           </Card>
         </div>
+
+        <div ref={contentAnchorRef} className="scroll-mt-24" />
 
         {/* Content Section */}
         {activeTab === 'calendar' && (
