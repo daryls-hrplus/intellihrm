@@ -2485,6 +2485,7 @@
     "shifts": {
       "title": "Shift Management",
       "subtitle": "Configure shifts, rounding rules, and pay differentials",
+      "activeShifts": "Active Shifts",
       "shiftsTab": "Shifts",
       "roundingRules": "Rounding Rules",
       "paymentRules": "Payment Rules",
