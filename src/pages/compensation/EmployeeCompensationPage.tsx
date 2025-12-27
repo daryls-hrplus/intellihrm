@@ -1317,7 +1317,13 @@ export default function EmployeeCompensationPage() {
                   <SelectContent>
                     {employeePositions.map((ep) => (
                       <SelectItem key={ep.position_id} value={ep.position_id}>
-                        {ep.position?.title} ({ep.position?.code}) {ep.is_primary && "★"}
+                        <span className="flex items-center gap-2">
+                          <span>{ep.position?.title} ({ep.position?.code})</span>
+                          <Badge variant="outline" className={ep.assignment_type === "primary" ? "bg-primary/10 text-primary" : "bg-muted"}>
+                            {ep.assignment_type ? t(`workforce.assignmentTypes.${ep.assignment_type}`, ep.assignment_type.charAt(0).toUpperCase() + ep.assignment_type.slice(1)) : "Primary"}
+                          </Badge>
+                          {ep.is_primary && <span className="text-primary">★</span>}
+                        </span>
                       </SelectItem>
                     ))}
                   </SelectContent>
