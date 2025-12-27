@@ -11430,6 +11430,70 @@ export type Database = {
           },
         ]
       }
+      employee_rotation_assignments: {
+        Row: {
+          company_id: string
+          created_at: string
+          cycle_start_offset: number
+          employee_id: string
+          end_date: string | null
+          id: string
+          is_active: boolean
+          notes: string | null
+          rotation_pattern_id: string
+          start_date: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          cycle_start_offset?: number
+          employee_id: string
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          notes?: string | null
+          rotation_pattern_id: string
+          start_date: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          cycle_start_offset?: number
+          employee_id?: string
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          notes?: string | null
+          rotation_pattern_id?: string
+          start_date?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_rotation_assignments_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_rotation_assignments_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_rotation_assignments_rotation_pattern_id_fkey"
+            columns: ["rotation_pattern_id"]
+            isOneToOne: false
+            referencedRelation: "shift_rotation_patterns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       employee_schedules: {
         Row: {
           created_at: string
@@ -15912,6 +15976,152 @@ export type Database = {
             columns: ["training_request_id"]
             isOneToOne: false
             referencedRelation: "training_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fatigue_management_rules: {
+        Row: {
+          applies_to: string
+          applies_to_id: string | null
+          code: string
+          company_id: string
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          rule_type: string
+          severity: string
+          threshold_unit: string
+          threshold_value: number
+          updated_at: string
+        }
+        Insert: {
+          applies_to?: string
+          applies_to_id?: string | null
+          code: string
+          company_id: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          rule_type: string
+          severity?: string
+          threshold_unit?: string
+          threshold_value: number
+          updated_at?: string
+        }
+        Update: {
+          applies_to?: string
+          applies_to_id?: string | null
+          code?: string
+          company_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          rule_type?: string
+          severity?: string
+          threshold_unit?: string
+          threshold_value?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fatigue_management_rules_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fatigue_violations: {
+        Row: {
+          acknowledged_at: string | null
+          acknowledged_by: string | null
+          actual_value: number
+          company_id: string
+          created_at: string
+          details: Json | null
+          employee_id: string
+          id: string
+          override_approved_by: string | null
+          override_reason: string | null
+          rule_id: string
+          severity: string
+          threshold_value: number
+          violation_date: string
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          actual_value: number
+          company_id: string
+          created_at?: string
+          details?: Json | null
+          employee_id: string
+          id?: string
+          override_approved_by?: string | null
+          override_reason?: string | null
+          rule_id: string
+          severity: string
+          threshold_value: number
+          violation_date: string
+        }
+        Update: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          actual_value?: number
+          company_id?: string
+          created_at?: string
+          details?: Json | null
+          employee_id?: string
+          id?: string
+          override_approved_by?: string | null
+          override_reason?: string | null
+          rule_id?: string
+          severity?: string
+          threshold_value?: number
+          violation_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fatigue_violations_acknowledged_by_fkey"
+            columns: ["acknowledged_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fatigue_violations_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fatigue_violations_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fatigue_violations_override_approved_by_fkey"
+            columns: ["override_approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fatigue_violations_rule_id_fkey"
+            columns: ["rule_id"]
+            isOneToOne: false
+            referencedRelation: "fatigue_management_rules"
             referencedColumns: ["id"]
           },
         ]
@@ -30548,6 +30758,162 @@ export type Database = {
           },
         ]
       }
+      open_shift_claims: {
+        Row: {
+          created_at: string
+          employee_id: string
+          id: string
+          notes: string | null
+          open_shift_id: string
+          review_notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          employee_id: string
+          id?: string
+          notes?: string | null
+          open_shift_id: string
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          employee_id?: string
+          id?: string
+          notes?: string | null
+          open_shift_id?: string
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "open_shift_claims_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "open_shift_claims_open_shift_id_fkey"
+            columns: ["open_shift_id"]
+            isOneToOne: false
+            referencedRelation: "open_shifts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "open_shift_claims_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      open_shifts: {
+        Row: {
+          company_id: string
+          created_at: string
+          department_id: string | null
+          end_time: string
+          expires_at: string | null
+          hourly_rate_override: number | null
+          id: string
+          location_name: string | null
+          notes: string | null
+          positions_available: number
+          positions_filled: number
+          posted_by: string | null
+          premium_rate: number | null
+          required_skills: string[] | null
+          shift_date: string
+          shift_id: string
+          start_time: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          department_id?: string | null
+          end_time: string
+          expires_at?: string | null
+          hourly_rate_override?: number | null
+          id?: string
+          location_name?: string | null
+          notes?: string | null
+          positions_available?: number
+          positions_filled?: number
+          posted_by?: string | null
+          premium_rate?: number | null
+          required_skills?: string[] | null
+          shift_date: string
+          shift_id: string
+          start_time: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          department_id?: string | null
+          end_time?: string
+          expires_at?: string | null
+          hourly_rate_override?: number | null
+          id?: string
+          location_name?: string | null
+          notes?: string | null
+          positions_available?: number
+          positions_filled?: number
+          posted_by?: string | null
+          premium_rate?: number | null
+          required_skills?: string[] | null
+          shift_date?: string
+          shift_id?: string
+          start_time?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "open_shifts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "open_shifts_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "open_shifts_posted_by_fkey"
+            columns: ["posted_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "open_shifts_shift_id_fkey"
+            columns: ["shift_id"]
+            isOneToOne: false
+            referencedRelation: "shifts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       opening_balance_imports: {
         Row: {
           company_id: string
@@ -37902,6 +38268,425 @@ export type Database = {
           },
         ]
       }
+      shift_bidding_periods: {
+        Row: {
+          allocation_method: string
+          bidding_closes_at: string
+          bidding_opens_at: string
+          company_id: string
+          created_at: string
+          created_by: string | null
+          department_id: string | null
+          description: string | null
+          id: string
+          name: string
+          schedule_end_date: string
+          schedule_start_date: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          allocation_method?: string
+          bidding_closes_at: string
+          bidding_opens_at: string
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          department_id?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          schedule_end_date: string
+          schedule_start_date: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          allocation_method?: string
+          bidding_closes_at?: string
+          bidding_opens_at?: string
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          department_id?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          schedule_end_date?: string
+          schedule_start_date?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shift_bidding_periods_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shift_bidding_periods_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shift_bidding_periods_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shift_bids: {
+        Row: {
+          allocated_at: string | null
+          bidding_period_id: string
+          created_at: string
+          employee_id: string
+          id: string
+          notes: string | null
+          preference_rank: number
+          shift_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          allocated_at?: string | null
+          bidding_period_id: string
+          created_at?: string
+          employee_id: string
+          id?: string
+          notes?: string | null
+          preference_rank?: number
+          shift_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          allocated_at?: string | null
+          bidding_period_id?: string
+          created_at?: string
+          employee_id?: string
+          id?: string
+          notes?: string | null
+          preference_rank?: number
+          shift_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shift_bids_bidding_period_id_fkey"
+            columns: ["bidding_period_id"]
+            isOneToOne: false
+            referencedRelation: "shift_bidding_periods"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shift_bids_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shift_bids_shift_id_fkey"
+            columns: ["shift_id"]
+            isOneToOne: false
+            referencedRelation: "shifts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shift_cost_projections: {
+        Row: {
+          company_id: string
+          created_at: string
+          currency: string
+          department_id: string | null
+          headcount: number
+          id: string
+          overtime_cost: number
+          overtime_hours: number
+          premium_cost: number
+          premium_hours: number
+          projection_date: string
+          regular_cost: number
+          regular_hours: number
+          shift_id: string | null
+          total_cost: number
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          currency?: string
+          department_id?: string | null
+          headcount?: number
+          id?: string
+          overtime_cost?: number
+          overtime_hours?: number
+          premium_cost?: number
+          premium_hours?: number
+          projection_date: string
+          regular_cost?: number
+          regular_hours?: number
+          shift_id?: string | null
+          total_cost?: number
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          currency?: string
+          department_id?: string | null
+          headcount?: number
+          id?: string
+          overtime_cost?: number
+          overtime_hours?: number
+          premium_cost?: number
+          premium_hours?: number
+          projection_date?: string
+          regular_cost?: number
+          regular_hours?: number
+          shift_id?: string | null
+          total_cost?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shift_cost_projections_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shift_cost_projections_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shift_cost_projections_shift_id_fkey"
+            columns: ["shift_id"]
+            isOneToOne: false
+            referencedRelation: "shifts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shift_coverage_snapshots: {
+        Row: {
+          actual_headcount: number | null
+          company_id: string
+          coverage_percentage: number | null
+          created_at: string
+          department_id: string | null
+          id: string
+          labor_cost_actual: number | null
+          labor_cost_scheduled: number | null
+          notes: string | null
+          overstaffed_hours: number | null
+          required_headcount: number
+          scheduled_headcount: number
+          shift_id: string | null
+          snapshot_date: string
+          understaffed_hours: number | null
+        }
+        Insert: {
+          actual_headcount?: number | null
+          company_id: string
+          coverage_percentage?: number | null
+          created_at?: string
+          department_id?: string | null
+          id?: string
+          labor_cost_actual?: number | null
+          labor_cost_scheduled?: number | null
+          notes?: string | null
+          overstaffed_hours?: number | null
+          required_headcount?: number
+          scheduled_headcount?: number
+          shift_id?: string | null
+          snapshot_date: string
+          understaffed_hours?: number | null
+        }
+        Update: {
+          actual_headcount?: number | null
+          company_id?: string
+          coverage_percentage?: number | null
+          created_at?: string
+          department_id?: string | null
+          id?: string
+          labor_cost_actual?: number | null
+          labor_cost_scheduled?: number | null
+          notes?: string | null
+          overstaffed_hours?: number | null
+          required_headcount?: number
+          scheduled_headcount?: number
+          shift_id?: string | null
+          snapshot_date?: string
+          understaffed_hours?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shift_coverage_snapshots_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shift_coverage_snapshots_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shift_coverage_snapshots_shift_id_fkey"
+            columns: ["shift_id"]
+            isOneToOne: false
+            referencedRelation: "shifts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shift_demand_forecasts: {
+        Row: {
+          actual_demand: number | null
+          company_id: string
+          confidence_level: number | null
+          created_at: string
+          department_id: string | null
+          forecast_date: string
+          id: string
+          model_version: string | null
+          predicted_demand: number
+          prediction_factors: Json | null
+          shift_id: string | null
+          updated_at: string
+          variance: number | null
+        }
+        Insert: {
+          actual_demand?: number | null
+          company_id: string
+          confidence_level?: number | null
+          created_at?: string
+          department_id?: string | null
+          forecast_date: string
+          id?: string
+          model_version?: string | null
+          predicted_demand: number
+          prediction_factors?: Json | null
+          shift_id?: string | null
+          updated_at?: string
+          variance?: number | null
+        }
+        Update: {
+          actual_demand?: number | null
+          company_id?: string
+          confidence_level?: number | null
+          created_at?: string
+          department_id?: string | null
+          forecast_date?: string
+          id?: string
+          model_version?: string | null
+          predicted_demand?: number
+          prediction_factors?: Json | null
+          shift_id?: string | null
+          updated_at?: string
+          variance?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shift_demand_forecasts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shift_demand_forecasts_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shift_demand_forecasts_shift_id_fkey"
+            columns: ["shift_id"]
+            isOneToOne: false
+            referencedRelation: "shifts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shift_notifications: {
+        Row: {
+          company_id: string
+          created_at: string
+          employee_id: string
+          id: string
+          is_read: boolean
+          message: string
+          notification_type: string
+          read_at: string | null
+          related_entity_id: string | null
+          related_entity_type: string | null
+          sent_via: string[] | null
+          title: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          employee_id: string
+          id?: string
+          is_read?: boolean
+          message: string
+          notification_type: string
+          read_at?: string | null
+          related_entity_id?: string | null
+          related_entity_type?: string | null
+          sent_via?: string[] | null
+          title: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          employee_id?: string
+          id?: string
+          is_read?: boolean
+          message?: string
+          notification_type?: string
+          read_at?: string | null
+          related_entity_id?: string | null
+          related_entity_type?: string | null
+          sent_via?: string[] | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shift_notifications_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shift_notifications_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       shift_payment_rules: {
         Row: {
           amount: number
@@ -37986,6 +38771,59 @@ export type Database = {
           },
         ]
       }
+      shift_rotation_patterns: {
+        Row: {
+          code: string
+          color: string | null
+          company_id: string
+          created_at: string
+          cycle_length_days: number
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          pattern_definition: Json
+          pattern_type: string
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          color?: string | null
+          company_id: string
+          created_at?: string
+          cycle_length_days?: number
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          pattern_definition?: Json
+          pattern_type?: string
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          color?: string | null
+          company_id?: string
+          created_at?: string
+          cycle_length_days?: number
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          pattern_definition?: Json
+          pattern_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shift_rotation_patterns_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       shift_rounding_rules: {
         Row: {
           apply_to_overtime: boolean | null
@@ -38054,6 +38892,212 @@ export type Database = {
             columns: ["shift_id"]
             isOneToOne: false
             referencedRelation: "shifts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shift_swap_requests: {
+        Row: {
+          company_id: string
+          created_at: string
+          id: string
+          manager_id: string | null
+          manager_notes: string | null
+          manager_reviewed_at: string | null
+          reason: string | null
+          requester_id: string
+          requester_shift_assignment_id: string
+          status: string
+          swap_date: string
+          target_employee_id: string | null
+          target_responded_at: string | null
+          target_response: string | null
+          target_shift_assignment_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          id?: string
+          manager_id?: string | null
+          manager_notes?: string | null
+          manager_reviewed_at?: string | null
+          reason?: string | null
+          requester_id: string
+          requester_shift_assignment_id: string
+          status?: string
+          swap_date: string
+          target_employee_id?: string | null
+          target_responded_at?: string | null
+          target_response?: string | null
+          target_shift_assignment_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          id?: string
+          manager_id?: string | null
+          manager_notes?: string | null
+          manager_reviewed_at?: string | null
+          reason?: string | null
+          requester_id?: string
+          requester_shift_assignment_id?: string
+          status?: string
+          swap_date?: string
+          target_employee_id?: string | null
+          target_responded_at?: string | null
+          target_response?: string | null
+          target_shift_assignment_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shift_swap_requests_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shift_swap_requests_manager_id_fkey"
+            columns: ["manager_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shift_swap_requests_requester_id_fkey"
+            columns: ["requester_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shift_swap_requests_requester_shift_assignment_id_fkey"
+            columns: ["requester_shift_assignment_id"]
+            isOneToOne: false
+            referencedRelation: "employee_shift_assignments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shift_swap_requests_target_employee_id_fkey"
+            columns: ["target_employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shift_swap_requests_target_shift_assignment_id_fkey"
+            columns: ["target_shift_assignment_id"]
+            isOneToOne: false
+            referencedRelation: "employee_shift_assignments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shift_template_entries: {
+        Row: {
+          created_at: string
+          day_offset: number
+          employee_count: number
+          id: string
+          notes: string | null
+          shift_id: string
+          template_id: string
+        }
+        Insert: {
+          created_at?: string
+          day_offset?: number
+          employee_count?: number
+          id?: string
+          notes?: string | null
+          shift_id: string
+          template_id: string
+        }
+        Update: {
+          created_at?: string
+          day_offset?: number
+          employee_count?: number
+          id?: string
+          notes?: string | null
+          shift_id?: string
+          template_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shift_template_entries_shift_id_fkey"
+            columns: ["shift_id"]
+            isOneToOne: false
+            referencedRelation: "shifts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shift_template_entries_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "shift_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shift_templates: {
+        Row: {
+          company_id: string
+          created_at: string
+          created_by: string | null
+          department_id: string | null
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          template_type: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          department_id?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          template_type?: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          department_id?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          template_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shift_templates_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shift_templates_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shift_templates_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
             referencedColumns: ["id"]
           },
         ]
