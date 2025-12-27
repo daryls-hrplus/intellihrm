@@ -13,7 +13,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
 import { Plus, Edit, Trash2, Upload, FileText, Check, X, DollarSign } from "lucide-react";
 import { getTodayString, formatDateForDisplay } from "@/utils/dateUtils";
-import { useCurrencies, formatCurrency } from "@/hooks/useCurrencies";
+import { formatCurrency } from "@/hooks/useCurrencies";
+import { useCompanyCurrencyList } from "@/hooks/useCompanyCurrencies";
 
 interface LeaveBuyout {
   id: string;
@@ -66,8 +67,8 @@ interface PayPeriod {
 
 export default function LeaveBalanceBuyoutPage() {
   const { t } = useTranslation();
-  const { currencies } = useCurrencies();
   const [selectedCompany, setSelectedCompany] = useState<string>("");
+  const { currencies } = useCompanyCurrencyList(selectedCompany || undefined);
   const [companies, setCompanies] = useState<{ id: string; name: string }[]>([]);
   const [buyouts, setBuyouts] = useState<LeaveBuyout[]>([]);
   const [employees, setEmployees] = useState<Employee[]>([]);

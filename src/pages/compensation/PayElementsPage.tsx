@@ -36,7 +36,7 @@ import { useCompensation, PayElement, LookupValue } from "@/hooks/useCompensatio
 import { supabase } from "@/integrations/supabase/client";
 import { useTranslation } from "react-i18next";
 import { getTodayString } from "@/utils/dateUtils";
-import { useCurrencies, Currency } from "@/hooks/useCurrencies";
+import { useCompanyCurrencyList } from "@/hooks/useCompanyCurrencies";
 
 interface Company {
   id: string;
@@ -64,8 +64,8 @@ export default function PayElementsPage() {
   const [editing, setEditing] = useState<PayElement | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   
-  // Load currencies
-  const { currencies } = useCurrencies();
+  // Load currencies linked to the selected company
+  const { currencies, hasCompanyCurrencies } = useCompanyCurrencyList(selectedCompanyId);
 
   // Form state
   const [formCode, setFormCode] = useState("");
@@ -432,7 +432,9 @@ export default function PayElementsPage() {
                     </SelectContent>
                   </Select>
                   <p className="text-xs text-muted-foreground">
-                    Currency for this pay element (leave blank for company default)
+                    {hasCompanyCurrencies 
+                      ? "Showing currencies configured for this company"
+                      : "No company currencies configured - showing all currencies"}
                   </p>
                 </div>
                 <div className="space-y-2">

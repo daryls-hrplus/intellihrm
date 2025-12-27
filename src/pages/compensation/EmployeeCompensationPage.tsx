@@ -42,7 +42,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
-import { useCurrencies } from "@/hooks/useCurrencies";
+import { useCompanyCurrencyList } from "@/hooks/useCompanyCurrencies";
 
 interface Company {
   id: string;
@@ -141,10 +141,10 @@ interface EmployeeCompensation {
 export default function EmployeeCompensationPage() {
   const { t } = useTranslation();
   const { user } = useAuth();
-  const { currencies } = useCurrencies();
+  const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
+  const { currencies } = useCompanyCurrencyList(selectedCompanyId || undefined);
 
   const [companies, setCompanies] = useState<Company[]>([]);
-  const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
   const [selectedDepartmentId, setSelectedDepartmentId] = useState<string>("");
   const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>("");
   const [departments, setDepartments] = useState<{id: string; name: string; code: string}[]>([]);
