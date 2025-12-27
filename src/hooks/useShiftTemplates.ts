@@ -18,7 +18,6 @@ export interface ShiftTemplate {
 
 export interface ShiftTemplateEntry {
   id: string;
-  template_id: string;
   shift_id: string;
   day_offset: number;
   employee_count: number;

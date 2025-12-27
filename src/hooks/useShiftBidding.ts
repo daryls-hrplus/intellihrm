@@ -22,7 +22,6 @@ export interface ShiftBiddingPeriod {
 
 export interface ShiftBid {
   id: string;
-  bidding_period_id: string;
   employee_id: string;
   shift_id: string;
   preference_rank: number;

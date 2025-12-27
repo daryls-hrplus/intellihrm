@@ -71,7 +71,7 @@ export function useFatigueManagement(companyId: string | null) {
         .from("fatigue_violations")
         .select(`
           *,
-          employee:profiles(full_name),
+          employee:profiles!fatigue_violations_employee_id_fkey(full_name),
           rule:fatigue_management_rules(name, code)
         `)
         .eq("company_id", companyId)
@@ -79,7 +79,7 @@ export function useFatigueManagement(companyId: string | null) {
         .limit(100);
 
       if (error) throw error;
-      setViolations(data || []);
+      setViolations((data || []) as unknown as FatigueViolation[]);
     } catch (error) {
       console.error("Error fetching violations:", error);
     }
