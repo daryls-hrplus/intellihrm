@@ -45,7 +45,7 @@ export default function RotationPatternsPage() {
   const breadcrumbItems = [
     { label: t("nav.timeAttendance"), href: "/time-attendance" },
     { label: t("timeAttendance.modules.shifts.title"), href: "/time-attendance/shifts" },
-    { label: t("timeAttendance.shifts.rotations") }
+    { label: t("timeAttendance.shifts.rotationsLabel") }
   ];
 
   return (
@@ -56,7 +56,7 @@ export default function RotationPatternsPage() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <RotateCcw className="h-6 w-6 text-indigo-600" />
-            <h1 className="text-2xl font-bold">{t("timeAttendance.shifts.rotations")}</h1>
+            <h1 className="text-2xl font-bold">{t("timeAttendance.shifts.rotationsLabel")}</h1>
           </div>
           <Select value={selectedCompany} onValueChange={setSelectedCompany}>
             <SelectTrigger className="w-64">
@@ -73,7 +73,7 @@ export default function RotationPatternsPage() {
         {selectedCompany && (
           <Card>
             <CardHeader>
-              <CardTitle>{t("timeAttendance.shifts.rotations")}</CardTitle>
+              <CardTitle>{t("timeAttendance.shifts.rotationsLabel")}</CardTitle>
             </CardHeader>
             <CardContent>
               <RotationPatternsTab companyId={selectedCompany} />

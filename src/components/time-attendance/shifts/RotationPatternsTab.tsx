@@ -130,12 +130,12 @@ export function RotationPatternsTab({ companyId }: RotationPatternsTabProps) {
           </DialogTrigger>
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Create Rotation Pattern</DialogTitle>
+              <DialogTitle>{t("timeAttendance.shifts.rotations.createRotationPattern")}</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
               {/* Quick Presets */}
               <div className="space-y-2">
-                <Label>Quick Presets</Label>
+                <Label>{t("timeAttendance.shifts.rotations.quickPresets")}</Label>
                 <div className="flex flex-wrap gap-2">
                   {presets.map(preset => (
                     <Button 
@@ -152,54 +152,56 @@ export function RotationPatternsTab({ companyId }: RotationPatternsTabProps) {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Pattern Name</Label>
-                  <Input value={formData.name} onChange={e => setFormData(p => ({ ...p, name: e.target.value }))} placeholder="e.g., 4x4 Rotation" />
+                  <Label>{t("timeAttendance.shifts.rotations.patternName")}</Label>
+                  <Input value={formData.name} onChange={e => setFormData(p => ({ ...p, name: e.target.value }))} placeholder={t("timeAttendance.shifts.rotations.patternNamePlaceholder")} />
                 </div>
                 <div className="space-y-2">
-                  <Label>Code</Label>
-                  <Input value={formData.code} onChange={e => setFormData(p => ({ ...p, code: e.target.value.toUpperCase() }))} placeholder="e.g., ROT-4X4" />
+                  <Label>{t("common.code")}</Label>
+                  <Input value={formData.code} onChange={e => setFormData(p => ({ ...p, code: e.target.value.toUpperCase() }))} placeholder={t("timeAttendance.shifts.rotations.codePlaceholder")} />
                 </div>
               </div>
 
               <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-2">
-                  <Label>Pattern Type</Label>
+                  <Label>{t("timeAttendance.shifts.rotations.patternType")}</Label>
                   <Select value={formData.pattern_type} onValueChange={v => setFormData(p => ({ ...p, pattern_type: v }))}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="fixed">Fixed</SelectItem>
-                      <SelectItem value="rotating">Rotating</SelectItem>
-                      <SelectItem value="flexible">Flexible</SelectItem>
+                      <SelectItem value="fixed">{t("timeAttendance.shifts.rotations.fixed")}</SelectItem>
+                      <SelectItem value="rotating">{t("timeAttendance.shifts.rotations.rotating")}</SelectItem>
+                      <SelectItem value="flexible">{t("timeAttendance.shifts.rotations.flexible")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label>Cycle Length (days)</Label>
+                  <Label>{t("timeAttendance.shifts.rotations.cycleLengthDays")}</Label>
                   <Input type="number" min={1} max={56} value={formData.cycle_length_days} onChange={e => setFormData(p => ({ ...p, cycle_length_days: parseInt(e.target.value) || 7 }))} />
                 </div>
                 <div className="space-y-2">
-                  <Label>Color</Label>
+                  <Label>{t("common.color")}</Label>
                   <Input type="color" value={formData.color} onChange={e => setFormData(p => ({ ...p, color: e.target.value }))} className="h-10" />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label>Description</Label>
-                <Textarea value={formData.description} onChange={e => setFormData(p => ({ ...p, description: e.target.value }))} placeholder="Describe the rotation pattern..." />
+                <Label>{t("common.description")}</Label>
+                <Textarea value={formData.description} onChange={e => setFormData(p => ({ ...p, description: e.target.value }))} placeholder={t("timeAttendance.shifts.rotations.shiftSequence")} />
               </div>
 
               {/* Pattern Days Grid */}
               <div className="space-y-2">
-                <Label>Pattern Definition</Label>
+                <Label>{t("timeAttendance.shifts.rotations.patternDefinition")}</Label>
                 <div className="grid grid-cols-7 gap-2">
                   {patternDays.map((day, index) => (
                     <div key={index} className="space-y-1">
-                      <div className="text-xs text-center font-medium">Day {index + 1}</div>
+                      <div className="text-xs text-center font-medium">{t("timeAttendance.shifts.rotations.day")} {index + 1}</div>
                       <Select 
-                        value={day.is_off ? "off" : (day.shift_id || "")} 
+                        value={day.is_off ? "off" : (day.shift_id || "_empty")} 
                         onValueChange={v => {
                           if (v === "off") {
                             updatePatternDay(index, null, true);
+                          } else if (v === "_empty") {
+                            updatePatternDay(index, null, false);
                           } else {
                             updatePatternDay(index, v, false);
                           }
@@ -209,7 +211,8 @@ export function RotationPatternsTab({ companyId }: RotationPatternsTabProps) {
                           <SelectValue placeholder="-" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="off">OFF</SelectItem>
+                          <SelectItem value="_empty">-</SelectItem>
+                          <SelectItem value="off">{t("timeAttendance.shifts.rotations.off")}</SelectItem>
                           {shifts.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
                         </SelectContent>
                       </Select>
@@ -219,8 +222,8 @@ export function RotationPatternsTab({ companyId }: RotationPatternsTabProps) {
               </div>
 
               <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
-                <Button onClick={handleCreatePattern} disabled={!formData.name || !formData.code}>Create Pattern</Button>
+                <Button variant="outline" onClick={() => setDialogOpen(false)}>{t("common.cancel")}</Button>
+                <Button onClick={handleCreatePattern} disabled={!formData.name || !formData.code}>{t("timeAttendance.shifts.rotations.createPattern")}</Button>
               </div>
             </div>
           </DialogContent>
@@ -231,7 +234,7 @@ export function RotationPatternsTab({ companyId }: RotationPatternsTabProps) {
         {/* Patterns List */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Patterns</CardTitle>
+            <CardTitle className="text-base">{t("timeAttendance.shifts.rotations.patternsList")}</CardTitle>
           </CardHeader>
           <CardContent>
             {isLoading ? (
@@ -252,12 +255,12 @@ export function RotationPatternsTab({ companyId }: RotationPatternsTabProps) {
                         <div>
                           <div className="font-medium">{pattern.name}</div>
                           <div className="text-sm text-muted-foreground">
-                            {pattern.code} • {pattern.cycle_length_days} days • {pattern.pattern_type}
+                            {pattern.code} • {pattern.cycle_length_days} {t("timeAttendance.shifts.rotations.day").toLowerCase()}s • {pattern.pattern_type}
                           </div>
                         </div>
                       </div>
                       <Badge variant={pattern.is_active ? "default" : "secondary"}>
-                        {pattern.is_active ? "Active" : "Inactive"}
+                        {pattern.is_active ? t("timeAttendance.shifts.rotations.active") : t("timeAttendance.shifts.rotations.inactive")}
                       </Badge>
                     </div>
                     {pattern.pattern_definition.length > 0 && (
@@ -285,7 +288,7 @@ export function RotationPatternsTab({ companyId }: RotationPatternsTabProps) {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-base">
-              {currentPattern ? `${currentPattern.name} Assignments` : "Select a Pattern"}
+              {currentPattern ? `${currentPattern.name} ${t("timeAttendance.shifts.rotations.assignments")}` : t("timeAttendance.shifts.rotations.selectPattern")}
             </CardTitle>
             {currentPattern && (
               <div className="flex gap-2">
@@ -293,18 +296,18 @@ export function RotationPatternsTab({ companyId }: RotationPatternsTabProps) {
                   <DialogTrigger asChild>
                     <Button size="sm" variant="outline">
                       <UserPlus className="h-4 w-4 mr-1" />
-                      Assign
+                      {t("timeAttendance.shifts.rotations.assign")}
                     </Button>
                   </DialogTrigger>
                   <DialogContent>
                     <DialogHeader>
-                      <DialogTitle>Assign Employee to Rotation</DialogTitle>
+                      <DialogTitle>{t("timeAttendance.shifts.rotations.assignEmployee")}</DialogTitle>
                     </DialogHeader>
                     <div className="space-y-4">
                       <div className="space-y-2">
-                        <Label>Employee</Label>
+                        <Label>{t("timeAttendance.shifts.rotations.employee")}</Label>
                         <Select value={assignData.employee_id} onValueChange={v => setAssignData(p => ({ ...p, employee_id: v }))}>
-                          <SelectTrigger><SelectValue placeholder="Select employee" /></SelectTrigger>
+                          <SelectTrigger><SelectValue placeholder={t("timeAttendance.shifts.rotations.selectEmployee")} /></SelectTrigger>
                           <SelectContent>
                             {employees.map(e => <SelectItem key={e.id} value={e.id}>{e.full_name}</SelectItem>)}
                           </SelectContent>
@@ -312,22 +315,22 @@ export function RotationPatternsTab({ companyId }: RotationPatternsTabProps) {
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
-                          <Label>Start Date</Label>
+                          <Label>{t("timeAttendance.shifts.rotations.startDate")}</Label>
                           <Input type="date" value={assignData.start_date} onChange={e => setAssignData(p => ({ ...p, start_date: e.target.value }))} />
                         </div>
                         <div className="space-y-2">
-                          <Label>End Date (optional)</Label>
+                          <Label>{t("timeAttendance.shifts.rotations.endDateOptional")}</Label>
                           <Input type="date" value={assignData.end_date} onChange={e => setAssignData(p => ({ ...p, end_date: e.target.value }))} />
                         </div>
                       </div>
                       <div className="space-y-2">
-                        <Label>Cycle Start Offset (days)</Label>
+                        <Label>{t("timeAttendance.shifts.rotations.cycleStartOffset")}</Label>
                         <Input type="number" min={0} value={assignData.cycle_start_offset} onChange={e => setAssignData(p => ({ ...p, cycle_start_offset: parseInt(e.target.value) || 0 }))} />
-                        <p className="text-xs text-muted-foreground">Use to stagger employees in the rotation</p>
+                        <p className="text-xs text-muted-foreground">{t("timeAttendance.shifts.rotations.staggerHint")}</p>
                       </div>
                       <div className="flex justify-end gap-2">
-                        <Button variant="outline" onClick={() => setAssignDialogOpen(false)}>Cancel</Button>
-                        <Button onClick={handleAssign} disabled={!assignData.employee_id}>Assign</Button>
+                        <Button variant="outline" onClick={() => setAssignDialogOpen(false)}>{t("common.cancel")}</Button>
+                        <Button onClick={handleAssign} disabled={!assignData.employee_id}>{t("timeAttendance.shifts.rotations.assign")}</Button>
                       </div>
                     </div>
                   </DialogContent>
@@ -340,7 +343,7 @@ export function RotationPatternsTab({ companyId }: RotationPatternsTabProps) {
           </CardHeader>
           <CardContent>
             {!currentPattern ? (
-              <div className="text-center py-8 text-muted-foreground">{t("timeAttendance.shifts.rotations.noPatterns")}</div>
+              <div className="text-center py-8 text-muted-foreground">{t("timeAttendance.shifts.rotations.selectPattern")}</div>
             ) : patternAssignments.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">{t("timeAttendance.shifts.rotations.noAssignments")}</div>
             ) : (
@@ -360,7 +363,7 @@ export function RotationPatternsTab({ companyId }: RotationPatternsTabProps) {
                     </div>
                     <div className="flex items-center gap-2">
                       <Badge variant={assignment.is_active ? "default" : "outline"}>
-                        {assignment.is_active ? "Active" : "Ended"}
+                        {assignment.is_active ? t("timeAttendance.shifts.rotations.active") : t("timeAttendance.shifts.rotations.ended")}
                       </Badge>
                       <Button size="sm" variant="ghost" onClick={() => removeAssignment(assignment.id)}>
                         <Trash2 className="h-4 w-4 text-destructive" />
