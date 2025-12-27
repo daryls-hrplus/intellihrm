@@ -3,6 +3,7 @@
 // Core hooks
 export { useCapabilities, useEmployeeCapabilities } from './useCapabilities';
 export { useCapabilityAIAnalyzer } from './useCapabilityAIAnalyzer';
+export { useMasterLibrary } from './useMasterLibrary';
 
 // Integration hooks
 export { useGoalCapabilityIntegration } from './useGoalCapabilityIntegration';

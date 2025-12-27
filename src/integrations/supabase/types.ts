@@ -28364,6 +28364,382 @@ export type Database = {
           },
         ]
       }
+      master_competencies_library: {
+        Row: {
+          alternative_labels: string[] | null
+          category: string | null
+          competency_name: string
+          competency_name_en: string | null
+          competency_type: string
+          created_at: string | null
+          description: string | null
+          description_en: string | null
+          external_id: string | null
+          id: string
+          industry_tags: string[] | null
+          is_active: boolean | null
+          proficiency_levels: Json | null
+          search_vector: unknown
+          source: string | null
+          subcategory: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          alternative_labels?: string[] | null
+          category?: string | null
+          competency_name: string
+          competency_name_en?: string | null
+          competency_type: string
+          created_at?: string | null
+          description?: string | null
+          description_en?: string | null
+          external_id?: string | null
+          id?: string
+          industry_tags?: string[] | null
+          is_active?: boolean | null
+          proficiency_levels?: Json | null
+          search_vector?: unknown
+          source?: string | null
+          subcategory?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          alternative_labels?: string[] | null
+          category?: string | null
+          competency_name?: string
+          competency_name_en?: string | null
+          competency_type?: string
+          created_at?: string | null
+          description?: string | null
+          description_en?: string | null
+          external_id?: string | null
+          id?: string
+          industry_tags?: string[] | null
+          is_active?: boolean | null
+          proficiency_levels?: Json | null
+          search_vector?: unknown
+          source?: string | null
+          subcategory?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      master_industries: {
+        Row: {
+          code: string
+          created_at: string | null
+          description: string | null
+          display_order: number | null
+          icon_name: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          name_en: string | null
+          parent_industry_id: string | null
+          search_vector: unknown
+          updated_at: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          icon_name?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          name_en?: string | null
+          parent_industry_id?: string | null
+          search_vector?: unknown
+          updated_at?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          icon_name?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          name_en?: string | null
+          parent_industry_id?: string | null
+          search_vector?: unknown
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "master_industries_parent_industry_id_fkey"
+            columns: ["parent_industry_id"]
+            isOneToOne: false
+            referencedRelation: "master_industries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      master_industry_skills: {
+        Row: {
+          created_at: string | null
+          id: string
+          industry_id: string
+          relevance_score: number | null
+          skill_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          industry_id: string
+          relevance_score?: number | null
+          skill_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          industry_id?: string
+          relevance_score?: number | null
+          skill_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "master_industry_skills_industry_id_fkey"
+            columns: ["industry_id"]
+            isOneToOne: false
+            referencedRelation: "master_industries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "master_industry_skills_skill_id_fkey"
+            columns: ["skill_id"]
+            isOneToOne: false
+            referencedRelation: "master_skills_library"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      master_occupation_competencies: {
+        Row: {
+          competency_id: string
+          created_at: string | null
+          id: string
+          importance: string | null
+          occupation_id: string
+          proficiency_level: number | null
+        }
+        Insert: {
+          competency_id: string
+          created_at?: string | null
+          id?: string
+          importance?: string | null
+          occupation_id: string
+          proficiency_level?: number | null
+        }
+        Update: {
+          competency_id?: string
+          created_at?: string | null
+          id?: string
+          importance?: string | null
+          occupation_id?: string
+          proficiency_level?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "master_occupation_competencies_competency_id_fkey"
+            columns: ["competency_id"]
+            isOneToOne: false
+            referencedRelation: "master_competencies_library"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "master_occupation_competencies_occupation_id_fkey"
+            columns: ["occupation_id"]
+            isOneToOne: false
+            referencedRelation: "master_occupations_library"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      master_occupation_skills: {
+        Row: {
+          created_at: string | null
+          id: string
+          importance: string | null
+          occupation_id: string
+          proficiency_level: number | null
+          skill_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          importance?: string | null
+          occupation_id: string
+          proficiency_level?: number | null
+          skill_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          importance?: string | null
+          occupation_id?: string
+          proficiency_level?: number | null
+          skill_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "master_occupation_skills_occupation_id_fkey"
+            columns: ["occupation_id"]
+            isOneToOne: false
+            referencedRelation: "master_occupations_library"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "master_occupation_skills_skill_id_fkey"
+            columns: ["skill_id"]
+            isOneToOne: false
+            referencedRelation: "master_skills_library"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      master_occupations_library: {
+        Row: {
+          alternative_labels: string[] | null
+          created_at: string | null
+          description: string | null
+          description_en: string | null
+          esco_uri: string | null
+          external_id: string | null
+          id: string
+          industry_id: string | null
+          is_active: boolean | null
+          isco_code: string | null
+          job_family: string | null
+          job_level: string | null
+          occupation_name: string
+          occupation_name_en: string | null
+          search_vector: unknown
+          source: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          alternative_labels?: string[] | null
+          created_at?: string | null
+          description?: string | null
+          description_en?: string | null
+          esco_uri?: string | null
+          external_id?: string | null
+          id?: string
+          industry_id?: string | null
+          is_active?: boolean | null
+          isco_code?: string | null
+          job_family?: string | null
+          job_level?: string | null
+          occupation_name: string
+          occupation_name_en?: string | null
+          search_vector?: unknown
+          source?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          alternative_labels?: string[] | null
+          created_at?: string | null
+          description?: string | null
+          description_en?: string | null
+          esco_uri?: string | null
+          external_id?: string | null
+          id?: string
+          industry_id?: string | null
+          is_active?: boolean | null
+          isco_code?: string | null
+          job_family?: string | null
+          job_level?: string | null
+          occupation_name?: string
+          occupation_name_en?: string | null
+          search_vector?: unknown
+          source?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "master_occupations_library_industry_id_fkey"
+            columns: ["industry_id"]
+            isOneToOne: false
+            referencedRelation: "master_industries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      master_skills_library: {
+        Row: {
+          alternative_labels: string[] | null
+          category: string | null
+          created_at: string | null
+          description: string | null
+          description_en: string | null
+          esco_uri: string | null
+          external_id: string | null
+          id: string
+          industry_tags: string[] | null
+          is_active: boolean | null
+          is_digital_skill: boolean | null
+          is_green_skill: boolean | null
+          reuse_level: string | null
+          search_vector: unknown
+          skill_level: string | null
+          skill_name: string
+          skill_name_en: string | null
+          skill_type: string
+          source: string | null
+          subcategory: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          alternative_labels?: string[] | null
+          category?: string | null
+          created_at?: string | null
+          description?: string | null
+          description_en?: string | null
+          esco_uri?: string | null
+          external_id?: string | null
+          id?: string
+          industry_tags?: string[] | null
+          is_active?: boolean | null
+          is_digital_skill?: boolean | null
+          is_green_skill?: boolean | null
+          reuse_level?: string | null
+          search_vector?: unknown
+          skill_level?: string | null
+          skill_name: string
+          skill_name_en?: string | null
+          skill_type: string
+          source?: string | null
+          subcategory?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          alternative_labels?: string[] | null
+          category?: string | null
+          created_at?: string | null
+          description?: string | null
+          description_en?: string | null
+          esco_uri?: string | null
+          external_id?: string | null
+          id?: string
+          industry_tags?: string[] | null
+          is_active?: boolean | null
+          is_digital_skill?: boolean | null
+          is_green_skill?: boolean | null
+          reuse_level?: string | null
+          search_vector?: unknown
+          skill_level?: string | null
+          skill_name?: string
+          skill_name_en?: string | null
+          skill_type?: string
+          source?: string | null
+          subcategory?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       mentorship_pairings: {
         Row: {
           created_at: string
