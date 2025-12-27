@@ -11,6 +11,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Plus, DollarSign, Trash2, Pencil } from "lucide-react";
+import { useCompanyCurrencyList } from "@/hooks/useCompanyCurrencies";
 
 interface AllowancesSectionProps {
   companyId: string;
@@ -30,15 +31,9 @@ interface Allowance {
   notes: string | null;
 }
 
-interface Currency {
-  id: string;
-  code: string;
-  name: string;
-}
-
 export function AllowancesSection({ companyId, employeeId, payPeriodId }: AllowancesSectionProps) {
   const [allowances, setAllowances] = useState<Allowance[]>([]);
-  const [currencies, setCurrencies] = useState<Currency[]>([]);
+  const { currencies } = useCompanyCurrencyList(companyId);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -72,21 +67,8 @@ export function AllowancesSection({ companyId, employeeId, payPeriodId }: Allowa
     setIsLoading(false);
   };
 
-  const loadCurrencies = async () => {
-    const { data, error } = await supabase
-      .from('currencies')
-      .select('id, code, name')
-      .eq('is_active', true)
-      .order('code');
-    
-    if (!error && data) {
-      setCurrencies(data);
-    }
-  };
-
   useEffect(() => {
     loadAllowances();
-    loadCurrencies();
   }, [employeeId, payPeriodId]);
 
   const resetForm = () => {

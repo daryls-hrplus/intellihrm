@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2, Building2 } from "lucide-react";
 import { getTodayString } from "@/utils/dateUtils";
+import { useCompanyCurrencyList } from "@/hooks/useCompanyCurrencies";
 
 interface BankAccount {
   id: string;
@@ -42,20 +43,15 @@ interface BankFormData {
   end_date: string;
 }
 
-interface Currency {
-  id: string;
-  code: string;
-  name: string;
-  symbol: string | null;
-}
-
 interface EmployeeBankAccountsTabProps {
   employeeId: string;
+  companyId?: string;
 }
 
-export function EmployeeBankAccountsTab({ employeeId }: EmployeeBankAccountsTabProps) {
+export function EmployeeBankAccountsTab({ employeeId, companyId: propCompanyId }: EmployeeBankAccountsTabProps) {
   const [accounts, setAccounts] = useState<BankAccount[]>([]);
-  const [currencies, setCurrencies] = useState<Currency[]>([]);
+  const [employeeCompanyId, setEmployeeCompanyId] = useState<string | undefined>(propCompanyId);
+  const { currencies } = useCompanyCurrencyList(employeeCompanyId);
   const [isLoading, setIsLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingAccount, setEditingAccount] = useState<BankAccount | null>(null);
@@ -76,15 +72,17 @@ export function EmployeeBankAccountsTab({ employeeId }: EmployeeBankAccountsTabP
     },
   });
 
-  const fetchCurrencies = async () => {
-    const { data, error } = await supabase
-      .from("currencies")
-      .select("*")
-      .eq("is_active", true)
-      .order("code");
-
-    if (!error && data) {
-      setCurrencies(data);
+  // Fetch employee's company if not provided via props
+  const fetchEmployeeCompany = async () => {
+    if (propCompanyId) return;
+    const { data } = await supabase
+      .from("profiles")
+      .select("company_id")
+      .eq("id", employeeId)
+      .single();
+    
+    if (data?.company_id) {
+      setEmployeeCompanyId(data.company_id);
     }
   };
 
@@ -105,9 +103,9 @@ export function EmployeeBankAccountsTab({ employeeId }: EmployeeBankAccountsTabP
   };
 
   useEffect(() => {
-    fetchCurrencies();
+    fetchEmployeeCompany();
     fetchAccounts();
-  }, [employeeId]);
+  }, [employeeId, propCompanyId]);
 
   const handleSubmit = async (data: BankFormData) => {
     try {
