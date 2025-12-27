@@ -125,7 +125,7 @@ export default function ShiftManagementPage() {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedCompany, setSelectedCompany] = useState<string>("");
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("calendar");
+  const [activeTab, setActiveTab] = useState("");
   
   // Shifts
   const [shifts, setShifts] = useState<Shift[]>([]);
