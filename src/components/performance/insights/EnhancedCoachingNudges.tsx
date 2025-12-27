@@ -83,13 +83,12 @@ export function EnhancedCoachingNudges({
       await supabase.from("goal_coaching_nudges").insert({
         company_id: companyId,
         manager_id: managerId,
-        employee_id: employeeId,
         nudge_type: nudge.nudge_type,
-        nudge_title: nudge.title,
-        nudge_message: nudge.message,
+        title: nudge.title,
+        message: nudge.message,
         priority: nudge.priority,
         suggested_action: nudge.suggested_action,
-        is_dismissed: true,
+        status: "dismissed",
         dismissed_at: new Date().toISOString(),
       });
     } catch (error) {
