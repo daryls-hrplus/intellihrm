@@ -386,6 +386,7 @@ export default function PayPeriodPayrollEntriesPage() {
               companyId={selectedCompany}
               employeeId={selectedEmployee}
               payPeriodId={selectedPayPeriod}
+              payGroupId={selectedPayGroup}
             />
           )}
         </DialogContent>
