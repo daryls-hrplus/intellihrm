@@ -5299,6 +5299,54 @@ export type Database = {
           },
         ]
       }
+      company_currencies: {
+        Row: {
+          company_id: string
+          created_at: string
+          currency_id: string
+          id: string
+          is_active: boolean | null
+          is_default: boolean | null
+          sort_order: number | null
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          currency_id: string
+          id?: string
+          is_active?: boolean | null
+          is_default?: boolean | null
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          currency_id?: string
+          id?: string
+          is_active?: boolean | null
+          is_default?: boolean | null
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_currencies_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_currencies_currency_id_fkey"
+            columns: ["currency_id"]
+            isOneToOne: false
+            referencedRelation: "currencies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       company_divisions: {
         Row: {
           code: string
