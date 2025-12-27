@@ -202,7 +202,7 @@ export function SkillsQuickStartWizard({
         for (const [skillId, skill] of allSkills) {
           // Check if already exists
           const { data: existing } = await supabase
-            .from('capability_definitions')
+            .from('skills_competencies')
             .select('id')
             .eq('company_id', companyId)
             .eq('name', skill.skill_name)
@@ -216,15 +216,15 @@ export function SkillsQuickStartWizard({
 
           // Insert new skill
           const { error: insertError } = await supabase
-            .from('capability_definitions')
-            .insert({
+            .from('skills_competencies')
+            .insert([{
               company_id: companyId,
-              type: 'SKILL',
+              type: 'SKILL' as const,
               name: skill.skill_name,
               code: skill.skill_name.toUpperCase().replace(/[^A-Z0-9]/g, '_').substring(0, 20),
               description: skill.description,
-              category: mapCategory(skill.category),
-              status: 'active',
+              category: mapCategory(skill.category) as 'technical' | 'leadership' | 'functional' | 'behavioral' | 'core',
+              status: 'active' as const,
               version: 1,
               effective_from: new Date().toISOString().split('T')[0],
               created_by: user.id,
@@ -233,7 +233,7 @@ export function SkillsQuickStartWizard({
                 master_skill_id: skillId,
                 original_source: skill.source,
               }
-            });
+            }]);
 
           if (insertError) {
             allErrors.push(`Skill "${skill.skill_name}": ${insertError.message}`);
@@ -249,7 +249,7 @@ export function SkillsQuickStartWizard({
 
           // Check if already exists
           const { data: existing } = await supabase
-            .from('capability_definitions')
+            .from('skills_competencies')
             .select('id')
             .eq('company_id', companyId)
             .eq('name', competency.competency_name)
@@ -263,15 +263,15 @@ export function SkillsQuickStartWizard({
 
           // Insert new competency
           const { error: insertError } = await supabase
-            .from('capability_definitions')
-            .insert({
+            .from('skills_competencies')
+            .insert([{
               company_id: companyId,
-              type: 'COMPETENCY',
+              type: 'COMPETENCY' as const,
               name: competency.competency_name,
               code: competency.competency_name.toUpperCase().replace(/[^A-Z0-9]/g, '_').substring(0, 20),
               description: competency.description,
-              category: mapCategory(competency.category),
-              status: 'active',
+              category: mapCategory(competency.category) as 'technical' | 'leadership' | 'functional' | 'behavioral' | 'core',
+              status: 'active' as const,
               version: 1,
               effective_from: new Date().toISOString().split('T')[0],
               created_by: user.id,
@@ -280,7 +280,7 @@ export function SkillsQuickStartWizard({
                 master_competency_id: comp.competency_id,
                 original_source: competency.source,
               }
-            });
+            }]);
 
           if (insertError) {
             allErrors.push(`Competency "${competency.competency_name}": ${insertError.message}`);
