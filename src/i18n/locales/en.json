@@ -2516,7 +2516,16 @@
       "appliesTo": "Applies To",
       "taxable": "Taxable",
       "priority": "Priority",
-      "noPaymentRules": "No payment rules created yet"
+      "noPaymentRules": "No payment rules created yet",
+      "calendar": "Calendar",
+      "swapRequests": "Swap Requests",
+      "openShifts": "Open Shifts",
+      "templates": "Templates",
+      "rotations": "Rotations",
+      "fatigue": "Fatigue",
+      "coverage": "Coverage",
+      "bidding": "Bidding",
+      "aiScheduler": "AI Scheduler"
     },
     "geofencing": {
       "title": "Geofence Management",
