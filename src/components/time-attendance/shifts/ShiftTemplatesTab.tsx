@@ -110,40 +110,40 @@ export function ShiftTemplatesTab({ companyId }: ShiftTemplatesTabProps) {
             </DialogHeader>
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label>Template Name</Label>
-                <Input value={formData.name} onChange={e => setFormData(p => ({ ...p, name: e.target.value }))} placeholder="e.g., Standard Week" />
+                <Label>{t("timeAttendance.shifts.templates.templateName")}</Label>
+                <Input value={formData.name} onChange={e => setFormData(p => ({ ...p, name: e.target.value }))} placeholder={t("timeAttendance.shifts.templates.templateNamePlaceholder")} />
               </div>
               <div className="space-y-2">
-                <Label>Description</Label>
+                <Label>{t("common.description")}</Label>
                 <Textarea value={formData.description} onChange={e => setFormData(p => ({ ...p, description: e.target.value }))} />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Template Type</Label>
+                  <Label>{t("timeAttendance.shifts.templates.templateType")}</Label>
                   <Select value={formData.template_type} onValueChange={v => setFormData(p => ({ ...p, template_type: v }))}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="daily">Daily</SelectItem>
-                      <SelectItem value="weekly">Weekly</SelectItem>
-                      <SelectItem value="biweekly">Bi-Weekly</SelectItem>
-                      <SelectItem value="monthly">Monthly</SelectItem>
+                      <SelectItem value="daily">{t("timeAttendance.shifts.templates.daily")}</SelectItem>
+                      <SelectItem value="weekly">{t("timeAttendance.shifts.templates.weekly")}</SelectItem>
+                      <SelectItem value="biweekly">{t("timeAttendance.shifts.templates.biweekly")}</SelectItem>
+                      <SelectItem value="monthly">{t("timeAttendance.shifts.templates.monthly")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label>Department</Label>
-                  <Select value={formData.department_id} onValueChange={v => setFormData(p => ({ ...p, department_id: v }))}>
-                    <SelectTrigger><SelectValue placeholder="All departments" /></SelectTrigger>
+                  <Label>{t("common.department")}</Label>
+                  <Select value={formData.department_id || "_all"} onValueChange={v => setFormData(p => ({ ...p, department_id: v === "_all" ? "" : v }))}>
+                    <SelectTrigger><SelectValue placeholder={t("timeAttendance.shifts.templates.allDepartments")} /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All departments</SelectItem>
+                      <SelectItem value="_all">{t("timeAttendance.shifts.templates.allDepartments")}</SelectItem>
                       {departments.map(d => <SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>
               </div>
               <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
-                <Button onClick={handleCreateTemplate} disabled={!formData.name}>Create</Button>
+                <Button variant="outline" onClick={() => setDialogOpen(false)}>{t("common.cancel")}</Button>
+                <Button onClick={handleCreateTemplate} disabled={!formData.name}>{t("common.create")}</Button>
               </div>
             </div>
           </DialogContent>
@@ -154,7 +154,7 @@ export function ShiftTemplatesTab({ companyId }: ShiftTemplatesTabProps) {
         {/* Templates List */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Templates</CardTitle>
+            <CardTitle className="text-base">{t("timeAttendance.shifts.templates.templatesList")}</CardTitle>
           </CardHeader>
           <CardContent>
             {isLoading ? (
@@ -173,12 +173,12 @@ export function ShiftTemplatesTab({ companyId }: ShiftTemplatesTabProps) {
                       <div>
                         <div className="font-medium">{template.name}</div>
                         <div className="text-sm text-muted-foreground">
-                          {template.template_type} • {template.entries?.length || 0} shifts
+                          {template.template_type} • {template.entries?.length || 0} {t("timeAttendance.shifts.templates.shifts")}
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
                         <Badge variant={template.is_active ? "default" : "secondary"}>
-                          {template.is_active ? "Active" : "Inactive"}
+                          {template.is_active ? t("timeAttendance.shifts.templates.active") : t("timeAttendance.shifts.templates.inactive")}
                         </Badge>
                         <Switch 
                           checked={template.is_active} 
@@ -198,7 +198,7 @@ export function ShiftTemplatesTab({ companyId }: ShiftTemplatesTabProps) {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-base">
-              {currentTemplate ? currentTemplate.name : "Select a Template"}
+              {currentTemplate ? currentTemplate.name : t("timeAttendance.shifts.templates.selectTemplate")}
             </CardTitle>
             {currentTemplate && (
               <div className="flex gap-2">
@@ -206,18 +206,18 @@ export function ShiftTemplatesTab({ companyId }: ShiftTemplatesTabProps) {
                   <DialogTrigger asChild>
                     <Button size="sm" variant="outline">
                       <Plus className="h-4 w-4 mr-1" />
-                      Add Shift
+                      {t("timeAttendance.shifts.templates.addShift")}
                     </Button>
                   </DialogTrigger>
                   <DialogContent>
                     <DialogHeader>
-                      <DialogTitle>Add Shift to Template</DialogTitle>
+                      <DialogTitle>{t("timeAttendance.shifts.templates.addShiftToTemplate")}</DialogTitle>
                     </DialogHeader>
                     <div className="space-y-4">
                       <div className="space-y-2">
-                        <Label>Shift</Label>
+                        <Label>{t("timeAttendance.shifts.templates.shift")}</Label>
                         <Select value={entryData.shift_id} onValueChange={v => setEntryData(p => ({ ...p, shift_id: v }))}>
-                          <SelectTrigger><SelectValue placeholder="Select shift" /></SelectTrigger>
+                          <SelectTrigger><SelectValue placeholder={t("timeAttendance.shifts.templates.selectShift")} /></SelectTrigger>
                           <SelectContent>
                             {shifts.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
                           </SelectContent>
@@ -225,17 +225,17 @@ export function ShiftTemplatesTab({ companyId }: ShiftTemplatesTabProps) {
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
-                          <Label>Day Offset</Label>
+                          <Label>{t("timeAttendance.shifts.templates.dayOffset")}</Label>
                           <Input type="number" min={0} value={entryData.day_offset} onChange={e => setEntryData(p => ({ ...p, day_offset: parseInt(e.target.value) || 0 }))} />
                         </div>
                         <div className="space-y-2">
-                          <Label>Headcount</Label>
+                          <Label>{t("timeAttendance.shifts.templates.headcount")}</Label>
                           <Input type="number" min={1} value={entryData.employee_count} onChange={e => setEntryData(p => ({ ...p, employee_count: parseInt(e.target.value) || 1 }))} />
                         </div>
                       </div>
                       <div className="flex justify-end gap-2">
-                        <Button variant="outline" onClick={() => setEntryDialogOpen(false)}>Cancel</Button>
-                        <Button onClick={handleAddEntry} disabled={!entryData.shift_id}>Add</Button>
+                        <Button variant="outline" onClick={() => setEntryDialogOpen(false)}>{t("common.cancel")}</Button>
+                        <Button onClick={handleAddEntry} disabled={!entryData.shift_id}>{t("common.add")}</Button>
                       </div>
                     </div>
                   </DialogContent>
@@ -248,17 +248,17 @@ export function ShiftTemplatesTab({ companyId }: ShiftTemplatesTabProps) {
           </CardHeader>
           <CardContent>
             {!currentTemplate ? (
-              <div className="text-center py-8 text-muted-foreground">Select a template to view details</div>
+              <div className="text-center py-8 text-muted-foreground">{t("timeAttendance.shifts.templates.selectTemplateDetails")}</div>
             ) : currentTemplate.entries?.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">No shifts in this template</div>
+              <div className="text-center py-8 text-muted-foreground">{t("timeAttendance.shifts.templates.noShiftsInTemplate")}</div>
             ) : (
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Day</TableHead>
-                    <TableHead>Shift</TableHead>
-                    <TableHead>Time</TableHead>
-                    <TableHead>Staff</TableHead>
+                    <TableHead>{t("timeAttendance.shifts.templates.day")}</TableHead>
+                    <TableHead>{t("timeAttendance.shifts.templates.shift")}</TableHead>
+                    <TableHead>{t("timeAttendance.shifts.templates.time")}</TableHead>
+                    <TableHead>{t("timeAttendance.shifts.templates.staff")}</TableHead>
                     <TableHead></TableHead>
                   </TableRow>
                 </TableHeader>
