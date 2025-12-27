@@ -1371,17 +1371,54 @@ export default function PayrollProcessingPage() {
                         <div className="border-t border-destructive/20 mt-2 pt-2">
                           <p className="text-xs text-muted-foreground uppercase mb-1">{t("payroll.processing.otherDeductions")}</p>
                         </div>
-                        {((selectedEmployee.calculation_details as any)?.period_deductions || []).map((deduction: any, idx: number) => (
-                          <div key={idx} className="flex justify-between py-1">
-                            <span className="text-muted-foreground">
-                              {deduction.name}
-                              {deduction.is_pretax && (
-                                <span className="ml-1 text-xs text-primary">(Pre-tax)</span>
-                              )}
-                            </span>
-                            <span className="font-medium text-destructive">-{formatCurrency(deduction.amount || 0, localCurrencyCode)}</span>
-                          </div>
-                        ))}
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead className="text-xs">{t("payroll.processing.deduction", "Deduction")}</TableHead>
+                              <TableHead className="text-xs text-right">{t("payroll.processing.originalAmount", "Original")}</TableHead>
+                              <TableHead className="text-xs">{t("payroll.processing.currency", "Currency")}</TableHead>
+                              <TableHead className="text-xs text-right">{t("payroll.processing.localAmount", "Local Amount")} ({localCurrencyCode})</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {((selectedEmployee.calculation_details as any)?.period_deductions || []).map((deduction: any, idx: number) => {
+                              const hasConversion = deduction.original_currency_id && deduction.original_amount !== undefined && deduction.was_converted;
+                              const originalCurrencyCode = hasConversion 
+                                ? (deduction.original_currency || currencyCodeMap.get(deduction.original_currency_id) || '—')
+                                : localCurrencyCode;
+                              const originalAmount = hasConversion ? deduction.original_amount : deduction.amount;
+                              
+                              return (
+                                <TableRow key={idx}>
+                                  <TableCell className="py-2">
+                                    <span className="text-sm">
+                                      {deduction.name}
+                                      {deduction.is_pretax && (
+                                        <span className="ml-1 text-xs text-primary">(Pre-tax)</span>
+                                      )}
+                                    </span>
+                                  </TableCell>
+                                  <TableCell className="text-right font-mono text-sm text-destructive">
+                                    -{formatCurrency(originalAmount || 0, originalCurrencyCode)}
+                                  </TableCell>
+                                  <TableCell>
+                                    <Badge variant="outline" className="font-mono text-xs">
+                                      {originalCurrencyCode}
+                                    </Badge>
+                                    {hasConversion && deduction.exchange_rate_used && (
+                                      <div className="text-xs text-muted-foreground mt-0.5">
+                                        @ {deduction.exchange_rate_used.toFixed(4)}
+                                      </div>
+                                    )}
+                                  </TableCell>
+                                  <TableCell className="text-right font-mono text-sm font-medium text-destructive">
+                                    -{formatCurrency(deduction.amount || 0, localCurrencyCode)}
+                                  </TableCell>
+                                </TableRow>
+                              );
+                            })}
+                          </TableBody>
+                        </Table>
                       </>
                     )}
 
