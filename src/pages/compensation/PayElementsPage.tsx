@@ -415,12 +415,15 @@ export default function PayElementsPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Default Currency</Label>
-                  <Select value={formCurrencyId} onValueChange={setFormCurrencyId}>
+                  <Select 
+                    value={formCurrencyId || "company_default"} 
+                    onValueChange={(val) => setFormCurrencyId(val === "company_default" ? "" : val)}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Company default" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Company Default</SelectItem>
+                      <SelectItem value="company_default">Company Default</SelectItem>
                       {currencies.map((c) => (
                         <SelectItem key={c.id} value={c.id}>
                           {c.code} - {c.name}
