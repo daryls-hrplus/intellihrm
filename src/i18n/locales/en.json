@@ -2593,6 +2593,7 @@
       },
       "templatesDescription": "Create reusable shift templates",
       "rotationsLabel": "Rotations",
+      "rotationsDescription": "Define shift sequences for rotating schedules",
       "rotations": {
         "title": "Rotation Patterns",
         "shiftSequence": "Define shift sequences for rotating schedules",
