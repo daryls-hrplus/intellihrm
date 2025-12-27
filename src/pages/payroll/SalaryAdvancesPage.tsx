@@ -14,6 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useSalaryAdvances, SalaryAdvance } from "@/hooks/useSalaryAdvances";
+import { SalaryAdvancePayrollQueue } from "@/components/payroll/SalaryAdvancePayrollQueue";
 import { formatDateForDisplay, getTodayString } from "@/utils/dateUtils";
 import { 
   DollarSign, 
@@ -26,7 +27,8 @@ import {
   User,
   FileText,
   TrendingUp,
-  AlertCircle
+  AlertCircle,
+  Wallet
 } from "lucide-react";
 
 interface Company {
@@ -402,6 +404,10 @@ export default function SalaryAdvancesPage() {
               <AlertCircle className="h-4 w-4" />
               {t("payroll.salaryAdvances.advanceTypes", "Advance Types")}
             </TabsTrigger>
+            <TabsTrigger value="payroll-queue" className="flex items-center gap-2">
+              <Wallet className="h-4 w-4" />
+              {t("payroll.salaryAdvances.payrollQueue", "Payroll Queue")}
+            </TabsTrigger>
           </TabsList>
 
           {/* Pending Tab */}
@@ -719,6 +725,11 @@ export default function SalaryAdvancesPage() {
                 )}
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Payroll Queue Tab */}
+          <TabsContent value="payroll-queue">
+            <SalaryAdvancePayrollQueue companyId={selectedCompany || null} />
           </TabsContent>
         </Tabs>
 

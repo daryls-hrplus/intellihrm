@@ -38023,6 +38023,120 @@ export type Database = {
           },
         ]
       }
+      salary_advance_payroll_queue: {
+        Row: {
+          advance_id: string
+          approved_amount: number | null
+          company_id: string
+          created_at: string | null
+          employee_id: string
+          exclusion_reason: string | null
+          id: string
+          pay_period_id: string | null
+          payroll_line_item_id: string | null
+          payroll_run_id: string | null
+          repayment_id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          scheduled_amount: number
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          advance_id: string
+          approved_amount?: number | null
+          company_id: string
+          created_at?: string | null
+          employee_id: string
+          exclusion_reason?: string | null
+          id?: string
+          pay_period_id?: string | null
+          payroll_line_item_id?: string | null
+          payroll_run_id?: string | null
+          repayment_id: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          scheduled_amount: number
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          advance_id?: string
+          approved_amount?: number | null
+          company_id?: string
+          created_at?: string | null
+          employee_id?: string
+          exclusion_reason?: string | null
+          id?: string
+          pay_period_id?: string | null
+          payroll_line_item_id?: string | null
+          payroll_run_id?: string | null
+          repayment_id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          scheduled_amount?: number
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "salary_advance_payroll_queue_advance_id_fkey"
+            columns: ["advance_id"]
+            isOneToOne: false
+            referencedRelation: "salary_advances"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "salary_advance_payroll_queue_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "salary_advance_payroll_queue_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "salary_advance_payroll_queue_pay_period_id_fkey"
+            columns: ["pay_period_id"]
+            isOneToOne: false
+            referencedRelation: "pay_periods"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "salary_advance_payroll_queue_payroll_line_item_id_fkey"
+            columns: ["payroll_line_item_id"]
+            isOneToOne: false
+            referencedRelation: "payroll_line_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "salary_advance_payroll_queue_payroll_run_id_fkey"
+            columns: ["payroll_run_id"]
+            isOneToOne: false
+            referencedRelation: "payroll_runs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "salary_advance_payroll_queue_repayment_id_fkey"
+            columns: ["repayment_id"]
+            isOneToOne: false
+            referencedRelation: "salary_advance_repayments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "salary_advance_payroll_queue_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       salary_advance_repayments: {
         Row: {
           created_at: string | null
