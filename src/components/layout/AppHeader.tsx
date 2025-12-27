@@ -26,13 +26,10 @@ import defaultGroupLogo from "@/assets/default-group-logo.png";
 import defaultCompanyLogo from "@/assets/default-company-logo.png";
 import { MessagesOverlayPanel } from "@/components/overlays/MessagesOverlayPanel";
 import { IntranetOverlayPanel } from "@/components/overlays/IntranetOverlayPanel";
-import { HelpPanel } from "@/components/tours/HelpPanel";
-import { useTourContext } from "@/components/tours/TourProvider";
 
 export function AppHeader() {
   const { t } = useTranslation();
   const { isAdmin, profile, user, company } = useAuth();
-  const { openHelpPanel } = useTourContext();
   const [pendingCount, setPendingCount] = useState(0);
   const [unreadMessages, setUnreadMessages] = useState(0);
   const [intranetCount, setIntranetCount] = useState(0);
@@ -260,9 +257,11 @@ export function AppHeader() {
       {/* Help Center Button */}
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button variant="ghost" size="icon" onClick={openHelpPanel}>
-            <HelpCircle className="h-5 w-5" />
-          </Button>
+          <NavLink to="/help">
+            <Button variant="ghost" size="icon">
+              <HelpCircle className="h-5 w-5" />
+            </Button>
+          </NavLink>
         </TooltipTrigger>
         <TooltipContent>{t("navigation.helpCenter")}</TooltipContent>
       </Tooltip>
