@@ -1118,12 +1118,29 @@ export function usePayroll() {
         // Add period deductions (non-statutory)
         const { data: periodDeductions } = await supabase
           .from("employee_period_deductions")
-          .select("amount, is_pretax")
+          .select("amount, is_pretax, currency, deduction_name")
           .eq("employee_id", emp.employee_id)
           .eq("pay_period_id", payPeriodId);
         
-        const totalPeriodDeductions = (periodDeductions || []).reduce((sum: number, d: any) => sum + (d.amount || 0), 0);
-        const totalPretaxDeductions = (periodDeductions || []).reduce(
+        // Convert each period deduction to local currency
+        const convertedPeriodDeductions = (periodDeductions || []).map((d: any) => {
+          const deductionAmount = d.amount || 0;
+          // Look up currency_id from the currency code text
+          const deductionCurrencyId = d.currency ? currencyCodeToIdMap.get(String(d.currency).toUpperCase()) || null : null;
+          const { localAmount, exchangeRateUsed, wasConverted } = convertToLocalCurrency(deductionAmount, deductionCurrencyId);
+          return {
+            ...d,
+            original_amount: deductionAmount,
+            original_currency: d.currency,
+            original_currency_id: deductionCurrencyId,
+            amount: localAmount,
+            exchange_rate_used: wasConverted ? exchangeRateUsed : undefined,
+            was_converted: wasConverted
+          };
+        });
+        
+        const totalPeriodDeductions = convertedPeriodDeductions.reduce((sum: number, d: any) => sum + (d.amount || 0), 0);
+        const totalPretaxDeductions = convertedPeriodDeductions.reduce(
           (sum: number, d: any) => sum + (d.is_pretax ? (d.amount || 0) : 0),
           0
         );
@@ -1261,10 +1278,15 @@ export function usePayroll() {
                 employer_amount: d.employerAmount,
                 method: d.calculationMethod
               })) : [],
-            period_deductions: (periodDeductions || []).map((d: any) => ({
+            period_deductions: convertedPeriodDeductions.map((d: any) => ({
               name: d.deduction_name || 'Deduction',
               amount: d.amount || 0,
-              is_pretax: d.is_pretax
+              is_pretax: d.is_pretax,
+              original_amount: d.original_amount,
+              original_currency: d.original_currency,
+              original_currency_id: d.original_currency_id,
+              exchange_rate_used: d.exchange_rate_used,
+              was_converted: d.was_converted
             })),
             taxable_income: taxableIncome,
             pretax_deductions: totalPretaxDeductions,

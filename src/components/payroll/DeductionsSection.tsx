@@ -31,8 +31,15 @@ interface Deduction {
   account_number: string | null;
 }
 
+interface Currency {
+  id: string;
+  code: string;
+  name: string;
+}
+
 export function DeductionsSection({ companyId, employeeId, payPeriodId }: DeductionsSectionProps) {
   const [deductions, setDeductions] = useState<Deduction[]>([]);
+  const [currencies, setCurrencies] = useState<Currency[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -51,6 +58,7 @@ export function DeductionsSection({ companyId, employeeId, payPeriodId }: Deduct
 
   useEffect(() => {
     loadDeductions();
+    loadCurrencies();
   }, [employeeId, payPeriodId]);
 
   const loadDeductions = async () => {
@@ -69,6 +77,18 @@ export function DeductionsSection({ companyId, employeeId, payPeriodId }: Deduct
     }
     setDeductions(data || []);
     setIsLoading(false);
+  };
+
+  const loadCurrencies = async () => {
+    const { data, error } = await supabase
+      .from('currencies')
+      .select('id, code, name')
+      .eq('is_active', true)
+      .order('code');
+    
+    if (!error && data) {
+      setCurrencies(data);
+    }
   };
 
   const resetForm = () => {
@@ -297,10 +317,16 @@ export function DeductionsSection({ companyId, employeeId, payPeriodId }: Deduct
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="USD">USD</SelectItem>
-                      <SelectItem value="EUR">EUR</SelectItem>
-                      <SelectItem value="GBP">GBP</SelectItem>
-                      <SelectItem value="CAD">CAD</SelectItem>
+                      {currencies.length > 0 ? (
+                        currencies.map(cur => (
+                          <SelectItem key={cur.id} value={cur.code}>{cur.code} - {cur.name}</SelectItem>
+                        ))
+                      ) : (
+                        <>
+                          <SelectItem value="USD">USD</SelectItem>
+                          <SelectItem value="TTD">TTD</SelectItem>
+                        </>
+                      )}
                     </SelectContent>
                   </Select>
                 </div>
