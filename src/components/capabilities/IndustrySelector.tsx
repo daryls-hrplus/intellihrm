@@ -119,14 +119,14 @@ export function IndustrySelector({
     loadIndustries();
   }, []);
 
-  // Load occupations dynamically when industry changes
+  // Load occupations dynamically when industry changes (and when industries finish loading)
   useEffect(() => {
-    if (selectedIndustry) {
+    if (selectedIndustry && industries.length > 0) {
       loadOccupationsForIndustry(selectedIndustry);
     } else {
       setOccupations([]);
     }
-  }, [selectedIndustry]);
+  }, [selectedIndustry, industries]);
 
   const loadIndustries = async () => {
     setLoadingIndustries(true);

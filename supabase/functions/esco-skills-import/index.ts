@@ -564,27 +564,153 @@ serve(async (req) => {
       case "search_industry_occupations": {
         // Dynamic search for occupations by industry keywords
         const { industryName, language = "en", limit = 25 } = params;
-        
-        // Map industry names to relevant search terms
+
+        const normalize = (value: string) =>
+          (value || "")
+            .toLowerCase()
+            .replace(/&/g, " ")
+            .replace(/[^a-z0-9\s]/g, " ")
+            .replace(/\s+/g, " ")
+            .trim();
+
+        const normalizedIndustry = normalize(industryName);
+
+        // Map (normalized) industry names to relevant occupation-search keywords
         const industryKeywords: Record<string, string[]> = {
-          "Healthcare": ["nurse", "doctor", "pharmacist", "medical", "healthcare", "therapist", "surgeon", "dentist", "paramedic", "midwife"],
-          "ICT": ["software", "developer", "programmer", "IT", "data", "network", "systems", "web", "cloud", "cybersecurity", "analyst"],
-          "Finance": ["accountant", "financial", "banker", "auditor", "analyst", "investment", "tax", "actuary", "treasurer", "controller"],
-          "Retail": ["sales", "retail", "store", "customer", "merchandiser", "cashier", "buyer", "manager"],
-          "Manufacturing": ["machine", "operator", "engineer", "technician", "production", "quality", "welder", "assembler", "maintenance"],
-          "Construction": ["construction", "builder", "carpenter", "electrician", "plumber", "architect", "surveyor", "mason", "roofer"],
-          "Education": ["teacher", "lecturer", "professor", "educator", "instructor", "tutor", "trainer", "counselor"],
-          "Hospitality": ["chef", "cook", "waiter", "hotel", "hospitality", "bartender", "receptionist", "housekeeper", "concierge"],
-          "Agriculture": ["farmer", "agricultural", "agronomist", "harvester", "veterinary", "horticulture", "fishery"],
-          "Public Administration": ["public", "government", "administrator", "policy", "civil", "officer", "inspector", "regulator"]
+          // Common categories
+          healthcare: [
+            "nurse",
+            "doctor",
+            "pharmacist",
+            "medical",
+            "healthcare",
+            "therapist",
+            "surgeon",
+            "dentist",
+            "paramedic",
+            "midwife",
+          ],
+          ict: [
+            "software",
+            "developer",
+            "programmer",
+            "information technology",
+            "data analyst",
+            "network",
+            "systems",
+            "cloud",
+            "cybersecurity",
+          ],
+          finance: [
+            "accountant",
+            "financial",
+            "banker",
+            "auditor",
+            "analyst",
+            "investment",
+            "tax",
+            "actuary",
+          ],
+          retail: [
+            "sales",
+            "retail",
+            "store manager",
+            "customer service",
+            "merchandiser",
+            "cashier",
+            "buyer",
+          ],
+          manufacturing: [
+            "machine operator",
+            "engineer",
+            "technician",
+            "production",
+            "quality",
+            "welder",
+            "assembler",
+            "maintenance",
+          ],
+          construction: [
+            "construction",
+            "builder",
+            "carpenter",
+            "electrician",
+            "plumber",
+            "architect",
+            "surveyor",
+            "mason",
+          ],
+          education: [
+            "teacher",
+            "lecturer",
+            "professor",
+            "educator",
+            "instructor",
+            "tutor",
+            "trainer",
+          ],
+          hospitality: [
+            "chef",
+            "cook",
+            "waiter",
+            "hotel",
+            "hospitality",
+            "bartender",
+            "receptionist",
+            "housekeeper",
+          ],
+          agriculture: [
+            "farmer",
+            "agricultural",
+            "agronomist",
+            "harvester",
+            "horticulture",
+            "fishery",
+          ],
+          "public administration": [
+            "government",
+            "administrator",
+            "policy",
+            "civil servant",
+            "officer",
+            "inspector",
+            "regulator",
+          ],
+
+          // Master industry names (seeded) – keep these lightweight; generic fallback will handle most.
+          "technology software": [
+            "software",
+            "developer",
+            "data",
+            "IT",
+            "cloud",
+            "cybersecurity",
+          ],
+          telecommunications: ["telecommunications", "telecom", "network", "radio", "installer"],
+          "oil gas": ["oil", "gas", "petroleum", "drilling", "pipeline", "refinery"],
+          pharmaceutical: ["pharmaceutical", "pharmacist", "laboratory", "chemist", "clinical"],
+          utilities: ["utilities", "water", "electricity", "power", "waste", "treatment"],
         };
-        
-        const keywords = industryKeywords[industryName] || [industryName.toLowerCase()];
+
+        const stopwords = new Set(["and", "of", "the", "for", "with", "services", "service"]);
+        const tokenKeywords = normalizedIndustry
+          ? normalizedIndustry
+              .split(" ")
+              .map((t) => t.trim())
+              .filter((t) => t && !stopwords.has(t))
+          : [];
+
+        const mapped = normalizedIndustry ? industryKeywords[normalizedIndustry] : undefined;
+
+        const keywords = Array.from(
+          new Set([...(mapped || []), ...tokenKeywords, normalizedIndustry].filter(Boolean))
+        );
+
         const allOccupations: EscoOccupation[] = [];
         const seenUris = new Set<string>();
-        
-        // Search for each keyword
-        for (const keyword of keywords.slice(0, 5)) { // Limit to 5 keywords to avoid rate limiting
+
+        // Search for each keyword (limit to 5 to avoid rate limiting)
+        for (const keyword of keywords.slice(0, 5)) {
           try {
             const result = await searchOccupations(keyword, language, 10, 0);
             for (const occ of result.occupations || []) {
@@ -598,13 +724,16 @@ serve(async (req) => {
             console.error(`[ESCO Import] Search failed for keyword "${keyword}":`, err);
           }
         }
-        
-        return new Response(JSON.stringify({ 
-          occupations: allOccupations.slice(0, limit),
-          total: allOccupations.length
-        }), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+
+        return new Response(
+          JSON.stringify({
+            occupations: allOccupations.slice(0, limit),
+            total: allOccupations.length,
+          }),
+          {
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          }
+        );
       }
 
       case "get_industry_occupations": {
