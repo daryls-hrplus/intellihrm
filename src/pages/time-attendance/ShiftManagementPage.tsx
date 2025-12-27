@@ -620,9 +620,13 @@ export default function ShiftManagementPage() {
     { label: t("timeAttendance.modules.shifts.title") }
   ];
 
-  // Navigation cards for sub-pages
+  // Navigation cards for sub-pages - First 4 are Shifts, Rounding Rules, Payment Rules, Shift Assignments
   const navigationCards = [
-    { title: t("timeAttendance.shifts.calendar"), description: t("timeAttendance.shifts.calendarDescription"), href: "/time-attendance/shifts/calendar", icon: Calendar, color: "bg-primary/20 text-primary" },
+    { title: t("timeAttendance.shifts.shiftsTab"), description: t("timeAttendance.shifts.shiftsTabDescription") || "Manage shift definitions", href: "/time-attendance/shifts/list", icon: Clock, color: "bg-primary/20 text-primary" },
+    { title: t("timeAttendance.shifts.roundingRules"), description: t("timeAttendance.shifts.roundingRulesDescription") || "Configure time rounding", href: "/time-attendance/shifts/rounding-rules", icon: Timer, color: "bg-secondary/20 text-secondary" },
+    { title: t("timeAttendance.shifts.paymentRules"), description: t("timeAttendance.shifts.paymentRulesDescription") || "Define payment calculations", href: "/time-attendance/shifts/payment-rules", icon: DollarSign, color: "bg-success/20 text-success" },
+    { title: t("timeAttendance.shifts.assignments"), description: t("timeAttendance.shifts.assignmentsDescription") || "Assign employees to shifts", href: "/time-attendance/shifts/assignments", icon: Users, color: "bg-warning/20 text-warning" },
+    { title: t("timeAttendance.shifts.calendar"), description: t("timeAttendance.shifts.calendarDescription"), href: "/time-attendance/shifts/calendar", icon: Calendar, color: "bg-blue-500/20 text-blue-600" },
     { title: t("timeAttendance.shifts.swapRequests"), description: t("timeAttendance.shifts.swapRequestsDescription"), href: "/time-attendance/shifts/swap-requests", icon: ArrowLeftRight, color: "bg-purple-500/20 text-purple-600" },
     { title: t("timeAttendance.shifts.openShifts"), description: t("timeAttendance.shifts.openShiftsDescription"), href: "/time-attendance/shifts/open-shifts", icon: Megaphone, color: "bg-pink-500/20 text-pink-600" },
     { title: t("timeAttendance.shifts.templates"), description: t("timeAttendance.shifts.templatesDescription"), href: "/time-attendance/shifts/templates", icon: Copy, color: "bg-cyan-500/20 text-cyan-600" },
