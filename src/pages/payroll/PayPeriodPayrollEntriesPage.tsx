@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Calculator, FileText } from "lucide-react";
+import { Calculator, FileText, Globe } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { WorkRecordsSection } from "@/components/payroll/WorkRecordsSection";
 import { AllowancesSection } from "@/components/payroll/AllowancesSection";
@@ -14,6 +15,7 @@ import { DeductionsSection } from "@/components/payroll/DeductionsSection";
 import { RegularDeductionsSection } from "@/components/payroll/RegularDeductionsSection";
 import { PayrollSimulator } from "@/components/payroll/PayrollSimulator";
 import { SalarySummarySection } from "@/components/payroll/SalarySummarySection";
+import { usePayGroupMultiCurrency } from "@/hooks/useMultiCurrencyPayroll";
 import { useTranslation } from "react-i18next";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
@@ -67,6 +69,10 @@ export default function PayPeriodPayrollEntriesPage() {
   
   const [showSimulator, setShowSimulator] = useState(false);
   const [deductionsKey, setDeductionsKey] = useState(0);
+
+  // Check if pay group has multi-currency enabled
+  const { data: payGroupSettings } = usePayGroupMultiCurrency(selectedPayGroup || undefined);
+  const isMultiCurrencyEnabled = payGroupSettings?.enable_multi_currency || false;
 
   useEffect(() => {
     loadCompanies();
@@ -247,7 +253,15 @@ export default function PayPeriodPayrollEntriesPage() {
             </div>
 
             <div className="space-y-2">
-              <Label>{t("payroll.salaryOvertime.payGroup")}</Label>
+              <Label className="flex items-center gap-2">
+                {t("payroll.salaryOvertime.payGroup")}
+                {selectedPayGroup && isMultiCurrencyEnabled && (
+                  <Badge variant="outline" className="border-primary/50 bg-primary/10 text-primary gap-1 text-xs">
+                    <Globe className="h-3 w-3" />
+                    Multi-Currency
+                  </Badge>
+                )}
+              </Label>
               <Select 
                 value={selectedPayGroup} 
                 onValueChange={setSelectedPayGroup}
