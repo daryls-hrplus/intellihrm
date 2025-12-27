@@ -1508,6 +1508,14 @@ const App = () => (
               }
             />
             <Route
+              path="/workforce/capability-registry"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <CapabilityRegistryPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/workforce/responsibilities"
               element={
                 <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
