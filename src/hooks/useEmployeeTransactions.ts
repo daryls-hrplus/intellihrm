@@ -284,6 +284,9 @@ export function useEmployeeTransactions() {
 
       // For ACTING transactions, also create an employee_positions record
       if (data.acting_position_id && data.employee_id) {
+        // If requires workflow, create position as inactive until approval
+        const isActivePosition = !data.requires_workflow;
+        
         const employeePositionData = {
           employee_id: data.employee_id,
           position_id: data.acting_position_id,
@@ -295,7 +298,7 @@ export function useEmployeeTransactions() {
           compensation_currency: "USD",
           compensation_frequency: "monthly",
           benefits_profile: {},
-          is_active: true,
+          is_active: isActivePosition,
         };
 
         const { error: positionError } = await supabase
@@ -304,7 +307,40 @@ export function useEmployeeTransactions() {
 
         if (positionError) {
           console.error("Failed to create employee position for acting assignment:", positionError);
-          // Don't fail the transaction, just log the error
+        }
+        
+        // If there's an acting allowance, create compensation record
+        if (data.acting_allowance && data.acting_allowance > 0) {
+          // Get the acting allowance pay element
+          const { data: actingElement } = await supabase
+            .from("pay_elements")
+            .select("id")
+            .eq("code", "ACTING_ALLOWANCE")
+            .eq("is_active", true)
+            .maybeSingle();
+          
+          if (actingElement) {
+            const compensationData = {
+              employee_id: data.employee_id,
+              pay_element_id: actingElement.id,
+              amount: data.acting_allowance,
+              frequency: "monthly",
+              start_date: data.requires_workflow ? null : (data.acting_start_date || data.effective_date),
+              end_date: data.acting_end_date || null,
+              is_active: true,
+              source_transaction_id: newTransaction.id,
+              approval_status: data.requires_workflow ? "pending" : "approved",
+              pending_effective_date: data.requires_workflow ? (data.acting_start_date || data.effective_date) : null,
+            };
+
+            const { error: compError } = await supabase
+              .from("employee_compensation")
+              .insert(compensationData as any);
+
+            if (compError) {
+              console.error("Failed to create acting allowance compensation:", compError);
+            }
+          }
         }
       }
 

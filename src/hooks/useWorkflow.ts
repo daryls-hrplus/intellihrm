@@ -513,6 +513,42 @@ export function useWorkflow() {
               rejection_reason: newStatus === "rejected" ? options?.comment : null,
             })
             .eq("id", instance.reference_id);
+        } else if (instance.reference_type === "employee_transactions") {
+          // Update the transaction status
+          await supabase
+            .from("employee_transactions")
+            .update({
+              status: newStatus === "approved" ? "approved" : "rejected",
+            })
+            .eq("id", instance.reference_id);
+          
+          // Handle compensation approval/rejection for employee transactions
+          if (newStatus === "approved") {
+            // Import and call the approval-triggered retro pay service
+            try {
+              const { generateApprovalTriggeredRetroPay } = await import("@/utils/payroll/approvalRetroPayService");
+              const result = await generateApprovalTriggeredRetroPay(
+                instance.reference_id,
+                completedAt || new Date().toISOString(),
+                user.id
+              );
+              
+              if (result.success && result.configId) {
+                toast.info(`Retroactive pay config created for ${result.periodCount} periods. Total: $${result.totalAmount?.toFixed(2)}`);
+              }
+            } catch (retroError) {
+              console.error("Failed to generate approval-triggered retro pay:", retroError);
+              // Don't fail the workflow approval, just log the error
+            }
+          } else if (newStatus === "rejected") {
+            // Reject pending compensation
+            try {
+              const { rejectPendingCompensation } = await import("@/utils/payroll/approvalRetroPayService");
+              await rejectPendingCompensation(instance.reference_id);
+            } catch (rejectError) {
+              console.error("Failed to reject pending compensation:", rejectError);
+            }
+          }
         }
       }
 

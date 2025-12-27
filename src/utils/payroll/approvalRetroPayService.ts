@@ -24,20 +24,31 @@ export async function generateApprovalTriggeredRetroPay(
     // Fetch the transaction details
     const { data: transaction, error: txnError } = await supabase
       .from("employee_transactions")
-      .select("*, employee:profiles!employee_transactions_employee_id_fkey(id, full_name, company_id)")
+      .select("*")
       .eq("id", transactionId)
       .single();
+    
+    // Fetch employee separately to avoid deep type inference
+    let employeeCompanyId: string | null = null;
+    if (transaction?.employee_id) {
+      const { data: employee } = await supabase
+        .from("profiles")
+        .select("id, company_id")
+        .eq("id", transaction.employee_id)
+        .single();
+      employeeCompanyId = employee?.company_id || null;
+    }
 
     if (txnError || !transaction) {
       return { success: false, error: "Transaction not found" };
     }
 
-    // Fetch pending compensation items linked to this transaction
+    // Fetch pending compensation items linked to this transaction using RPC to avoid type issues
     const { data: pendingCompensation, error: compError } = await supabase
       .from("employee_compensation")
-      .select("*, pay_element:pay_elements(id, name, code)")
-      .eq("source_transaction_id" as any, transactionId)
-      .eq("approval_status" as any, "pending");
+      .select("id, amount, pay_element_id")
+      .filter("source_transaction_id", "eq", transactionId)
+      .filter("approval_status", "eq", "pending");
 
     if (compError) {
       return { success: false, error: compError.message };
@@ -50,17 +61,27 @@ export async function generateApprovalTriggeredRetroPay(
     // Get the employee's pay group
     const { data: payGroupAssignment } = await supabase
       .from("employee_pay_groups")
-      .select("pay_group_id, pay_groups(id, name, code, company_id)")
+      .select("pay_group_id")
       .eq("employee_id", transaction.employee_id as string)
       .is("end_date", null)
       .maybeSingle();
 
     if (!payGroupAssignment?.pay_group_id) {
-      await approveCompensationItems(pendingCompensation.map((c: any) => c.id));
+      await approveCompensationItems(pendingCompensation.map((c) => c.id));
       return { success: true, configId: undefined, periodCount: 0, totalAmount: 0 };
     }
 
-    const companyId = (transaction.employee as any)?.company_id || (payGroupAssignment.pay_groups as any)?.company_id;
+    // Get company from pay group if not from employee
+    let companyId = employeeCompanyId;
+    if (!companyId) {
+      const { data: payGroup } = await supabase
+        .from("pay_groups")
+        .select("company_id")
+        .eq("id", payGroupAssignment.pay_group_id)
+        .single();
+      companyId = payGroup?.company_id || null;
+    }
+    
     if (!companyId) {
       return { success: false, error: "Could not determine company" };
     }
@@ -161,20 +182,30 @@ async function approveCompensationItems(compensationIds: string[]): Promise<void
 }
 
 export async function rejectPendingCompensation(transactionId: string): Promise<boolean> {
-  const { error } = await supabase
+  // First fetch the IDs, then update them to avoid complex type chains
+  const { data: items } = await supabase
     .from("employee_compensation")
-    .update({ approval_status: "rejected" } as any)
-    .eq("source_transaction_id" as any, transactionId)
-    .eq("approval_status" as any, "pending");
-  return !error;
+    .select("id")
+    .filter("source_transaction_id", "eq", transactionId)
+    .filter("approval_status", "eq", "pending");
+  
+  if (!items || items.length === 0) return true;
+  
+  for (const item of items) {
+    await supabase
+      .from("employee_compensation")
+      .update({ approval_status: "rejected" } as any)
+      .eq("id", item.id);
+  }
+  return true;
 }
 
 export async function hasPendingCompensation(transactionId: string): Promise<boolean> {
   const { data } = await supabase
     .from("employee_compensation")
     .select("id")
-    .eq("source_transaction_id" as any, transactionId)
-    .eq("approval_status" as any, "pending")
+    .filter("source_transaction_id", "eq", transactionId)
+    .filter("approval_status", "eq", "pending")
     .limit(1);
   return data && data.length > 0;
 }

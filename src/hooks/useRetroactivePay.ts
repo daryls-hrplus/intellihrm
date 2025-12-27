@@ -18,6 +18,10 @@ export interface RetroactivePayConfig {
   created_by: string | null;
   created_at: string;
   updated_at: string;
+  // Approval-triggered fields
+  source_transaction_id: string | null;
+  is_approval_triggered: boolean;
+  approval_date: string | null;
   pay_group?: {
     id: string;
     name: string;
@@ -28,6 +32,11 @@ export interface RetroactivePayConfig {
     period_number: string;
     period_start: string;
     period_end: string;
+  };
+  source_transaction?: {
+    id: string;
+    transaction_number: string;
+    effective_date: string;
   };
 }
 
