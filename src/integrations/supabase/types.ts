@@ -38023,6 +38023,285 @@ export type Database = {
           },
         ]
       }
+      salary_advance_repayments: {
+        Row: {
+          created_at: string | null
+          due_date: string
+          id: string
+          interest_amount: number | null
+          notes: string | null
+          paid_amount: number | null
+          paid_date: string | null
+          payment_method: string | null
+          payroll_run_id: string | null
+          period_number: number
+          principal_amount: number | null
+          salary_advance_id: string
+          scheduled_amount: number
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          due_date: string
+          id?: string
+          interest_amount?: number | null
+          notes?: string | null
+          paid_amount?: number | null
+          paid_date?: string | null
+          payment_method?: string | null
+          payroll_run_id?: string | null
+          period_number: number
+          principal_amount?: number | null
+          salary_advance_id: string
+          scheduled_amount: number
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          due_date?: string
+          id?: string
+          interest_amount?: number | null
+          notes?: string | null
+          paid_amount?: number | null
+          paid_date?: string | null
+          payment_method?: string | null
+          payroll_run_id?: string | null
+          period_number?: number
+          principal_amount?: number | null
+          salary_advance_id?: string
+          scheduled_amount?: number
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "salary_advance_repayments_payroll_run_id_fkey"
+            columns: ["payroll_run_id"]
+            isOneToOne: false
+            referencedRelation: "payroll_runs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "salary_advance_repayments_salary_advance_id_fkey"
+            columns: ["salary_advance_id"]
+            isOneToOne: false
+            referencedRelation: "salary_advances"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      salary_advance_types: {
+        Row: {
+          code: string
+          company_id: string | null
+          created_at: string | null
+          description: string | null
+          eligible_after_months: number | null
+          id: string
+          interest_rate: number | null
+          is_active: boolean | null
+          max_amount: number | null
+          max_per_year: number | null
+          max_percentage_of_salary: number | null
+          max_repayment_periods: number | null
+          min_repayment_periods: number | null
+          name: string
+          requires_approval: boolean | null
+          updated_at: string | null
+          waiting_period_days: number | null
+        }
+        Insert: {
+          code: string
+          company_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          eligible_after_months?: number | null
+          id?: string
+          interest_rate?: number | null
+          is_active?: boolean | null
+          max_amount?: number | null
+          max_per_year?: number | null
+          max_percentage_of_salary?: number | null
+          max_repayment_periods?: number | null
+          min_repayment_periods?: number | null
+          name: string
+          requires_approval?: boolean | null
+          updated_at?: string | null
+          waiting_period_days?: number | null
+        }
+        Update: {
+          code?: string
+          company_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          eligible_after_months?: number | null
+          id?: string
+          interest_rate?: number | null
+          is_active?: boolean | null
+          max_amount?: number | null
+          max_per_year?: number | null
+          max_percentage_of_salary?: number | null
+          max_repayment_periods?: number | null
+          min_repayment_periods?: number | null
+          name?: string
+          requires_approval?: boolean | null
+          updated_at?: string | null
+          waiting_period_days?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "salary_advance_types_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      salary_advances: {
+        Row: {
+          advance_number: string | null
+          advance_type_id: string | null
+          approved_amount: number | null
+          approved_at: string | null
+          approved_by: string | null
+          company_id: string
+          completed_at: string | null
+          created_at: string | null
+          currency: string | null
+          disbursed_at: string | null
+          disbursed_by: string | null
+          disbursement_method: string | null
+          disbursement_reference: string | null
+          employee_id: string
+          id: string
+          interest_rate: number | null
+          notes: string | null
+          outstanding_balance: number | null
+          reason: string | null
+          rejected_at: string | null
+          rejected_by: string | null
+          rejection_reason: string | null
+          repayment_amount_per_period: number | null
+          repayment_periods: number | null
+          repayment_start_date: string | null
+          requested_amount: number
+          requested_at: string | null
+          status: string | null
+          total_repayment_amount: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          advance_number?: string | null
+          advance_type_id?: string | null
+          approved_amount?: number | null
+          approved_at?: string | null
+          approved_by?: string | null
+          company_id: string
+          completed_at?: string | null
+          created_at?: string | null
+          currency?: string | null
+          disbursed_at?: string | null
+          disbursed_by?: string | null
+          disbursement_method?: string | null
+          disbursement_reference?: string | null
+          employee_id: string
+          id?: string
+          interest_rate?: number | null
+          notes?: string | null
+          outstanding_balance?: number | null
+          reason?: string | null
+          rejected_at?: string | null
+          rejected_by?: string | null
+          rejection_reason?: string | null
+          repayment_amount_per_period?: number | null
+          repayment_periods?: number | null
+          repayment_start_date?: string | null
+          requested_amount: number
+          requested_at?: string | null
+          status?: string | null
+          total_repayment_amount?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          advance_number?: string | null
+          advance_type_id?: string | null
+          approved_amount?: number | null
+          approved_at?: string | null
+          approved_by?: string | null
+          company_id?: string
+          completed_at?: string | null
+          created_at?: string | null
+          currency?: string | null
+          disbursed_at?: string | null
+          disbursed_by?: string | null
+          disbursement_method?: string | null
+          disbursement_reference?: string | null
+          employee_id?: string
+          id?: string
+          interest_rate?: number | null
+          notes?: string | null
+          outstanding_balance?: number | null
+          reason?: string | null
+          rejected_at?: string | null
+          rejected_by?: string | null
+          rejection_reason?: string | null
+          repayment_amount_per_period?: number | null
+          repayment_periods?: number | null
+          repayment_start_date?: string | null
+          requested_amount?: number
+          requested_at?: string | null
+          status?: string | null
+          total_repayment_amount?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "salary_advances_advance_type_id_fkey"
+            columns: ["advance_type_id"]
+            isOneToOne: false
+            referencedRelation: "salary_advance_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "salary_advances_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "salary_advances_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "salary_advances_disbursed_by_fkey"
+            columns: ["disbursed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "salary_advances_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "salary_advances_rejected_by_fkey"
+            columns: ["rejected_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       salary_grade_spinal_ranges: {
         Row: {
           created_at: string
