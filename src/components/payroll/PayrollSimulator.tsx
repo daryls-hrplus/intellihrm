@@ -1441,6 +1441,13 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId, payGroupI
                         {comp.position_title && (
                           <span className="text-xs text-muted-foreground">{comp.position_title}</span>
                         )}
+                        {(comp.effective_start || comp.effective_end) && (
+                          <span className="text-xs text-muted-foreground">
+                            {comp.effective_start ? format(parseISO(comp.effective_start), 'MMM d, yyyy') : 'Start'} 
+                            {' → '}
+                            {comp.effective_end ? format(parseISO(comp.effective_end), 'MMM d, yyyy') : 'Ongoing'}
+                          </span>
+                        )}
                         {comp.is_prorated && (
                           <Badge variant="outline" className="w-fit mt-0.5 text-xs bg-warning/20 text-warning border-warning/30">
                             Prorated
