@@ -3,6 +3,29 @@ import { PayslipTemplate } from "@/hooks/usePayslipTemplates";
 import { Payslip } from "@/hooks/usePayroll";
 import { Separator } from "@/components/ui/separator";
 
+interface MultiCurrencyItem {
+  name: string; 
+  amount: number; 
+  ytd?: number;
+  job_title?: string;
+  is_prorated?: boolean;
+  effective_start?: string;
+  effective_end?: string;
+  // Multi-currency fields
+  original_amount?: number;
+  original_currency_code?: string;
+  exchange_rate?: number;
+}
+
+interface NetPaySplit {
+  currency_code: string;
+  amount: number;
+  exchange_rate?: number;
+  local_equivalent?: number;
+  is_primary?: boolean;
+  percentage?: number;
+}
+
 interface PayslipDocumentProps {
   payslip: Payslip;
   template: PayslipTemplate | null;
@@ -20,17 +43,9 @@ interface PayslipDocumentProps {
     logo_url?: string;
   };
   lineItems?: {
-    earnings: Array<{ 
-      name: string; 
-      amount: number; 
-      ytd?: number;
-      job_title?: string;
-      is_prorated?: boolean;
-      effective_start?: string;
-      effective_end?: string;
-    }>;
-    deductions: Array<{ name: string; amount: number; ytd?: number }>;
-    taxes: Array<{ name: string; amount: number; ytd?: number }>;
+    earnings: Array<MultiCurrencyItem>;
+    deductions: Array<MultiCurrencyItem>;
+    taxes: Array<MultiCurrencyItem>;
     employer: Array<{ name: string; amount: number }>;
   };
   ytdTotals?: {
@@ -38,6 +53,8 @@ interface PayslipDocumentProps {
     deductions: number;
     net: number;
   };
+  netPaySplit?: NetPaySplit[];
+  localCurrencyCode?: string;
 }
 
 export function PayslipDocument({
@@ -47,6 +64,8 @@ export function PayslipDocument({
   company,
   lineItems,
   ytdTotals,
+  netPaySplit,
+  localCurrencyCode,
 }: PayslipDocumentProps) {
   const formatCurrency = (amount: number, currency: string = 'USD') => {
     return new Intl.NumberFormat('en-US', {
@@ -61,6 +80,11 @@ export function PayslipDocument({
       .map(word => word.charAt(0).toUpperCase())
       .join('');
   };
+  
+  // Check if any multi-currency data exists
+  const hasMultiCurrencyEarnings = lineItems?.earnings?.some(e => e.original_currency_code && e.original_currency_code !== payslip.currency);
+  const hasMultiCurrencyDeductions = lineItems?.deductions?.some(d => d.original_currency_code && d.original_currency_code !== payslip.currency);
+  const hasNetPaySplit = netPaySplit && netPaySplit.length > 1;
 
   // Default template values if none provided
   const t = template || {
@@ -192,18 +216,19 @@ export function PayslipDocument({
       {/* Earnings Section */}
       <div className="rounded" style={{ padding: 0 }}>
         <h3 className="font-semibold mb-2 text-xs uppercase tracking-wide" style={{ color: t.primary_color }}>Earnings</h3>
-        <table className="w-full text-xs border-collapse" style={{ tableLayout: 'fixed' }}>
-          <colgroup>
-            <col style={{ width: t.show_ytd_totals ? 'calc(100% - 360px)' : 'calc(100% - 180px)' }} />
-            <col style={{ width: '180px' }} />
-            <col style={{ width: '180px', display: t.show_ytd_totals ? undefined : 'none' }} />
-          </colgroup>
+        <table className="w-full text-xs border-collapse">
           <thead>
             <tr className="border-b-2 border-border">
               <th className="text-left py-1.5 font-semibold text-foreground">Description</th>
-              <th className="text-right py-1.5 font-semibold text-foreground pr-2">Current</th>
+              {hasMultiCurrencyEarnings && (
+                <>
+                  <th className="text-right py-1.5 font-semibold text-foreground pr-2">Original</th>
+                  <th className="text-center py-1.5 font-semibold text-foreground">Rate</th>
+                </>
+              )}
+              <th className="text-right py-1.5 font-semibold text-foreground pr-2">{localCurrencyCode || payslip.currency}</th>
               {t.show_ytd_totals && (
-                <th className="text-right py-1.5 font-semibold text-foreground pr-2">Year to Date</th>
+                <th className="text-right py-1.5 font-semibold text-foreground pr-2">YTD</th>
               )}
             </tr>
           </thead>
@@ -211,6 +236,7 @@ export function PayslipDocument({
             {lineItems?.earnings && lineItems.earnings.length > 0 ? (
               lineItems.earnings.map((item, idx) => {
                 const ytdTotal = (item.ytd || 0) + item.amount;
+                const isConverted = item.original_currency_code && item.original_currency_code !== payslip.currency;
                 return (
                   <tr key={idx} className="border-b border-border/40">
                     <td className="py-2">
@@ -235,6 +261,26 @@ export function PayslipDocument({
                         )}
                       </div>
                     </td>
+                    {hasMultiCurrencyEarnings && (
+                      <>
+                        <td className="text-right py-2 tabular-nums pr-2">
+                          {isConverted && item.original_amount !== undefined ? (
+                            <span className="text-muted-foreground">
+                              {formatCurrency(item.original_amount, item.original_currency_code)}
+                            </span>
+                          ) : (
+                            <span className="text-muted-foreground">-</span>
+                          )}
+                        </td>
+                        <td className="text-center py-2 tabular-nums text-[10px] text-muted-foreground">
+                          {isConverted && item.exchange_rate ? (
+                            <span>@ {item.exchange_rate.toFixed(4)}</span>
+                          ) : (
+                            <span>-</span>
+                          )}
+                        </td>
+                      </>
+                    )}
                     <td className="text-right py-2 font-medium tabular-nums pr-2">{formatCurrency(item.amount, payslip.currency)}</td>
                     {t.show_ytd_totals && (
                       <td className="text-right py-2 tabular-nums text-muted-foreground pr-2">{formatCurrency(ytdTotal, payslip.currency)}</td>
@@ -245,6 +291,12 @@ export function PayslipDocument({
             ) : (
               <tr className="border-b border-border/40">
                 <td className="py-2">Gross Pay</td>
+                {hasMultiCurrencyEarnings && (
+                  <>
+                    <td className="text-right py-2 pr-2">-</td>
+                    <td className="text-center py-2">-</td>
+                  </>
+                )}
                 <td className="text-right py-2 font-medium tabular-nums pr-2">{formatCurrency(payslip.gross_pay, payslip.currency)}</td>
                 {t.show_ytd_totals && (
                   <td className="text-right py-2 tabular-nums text-muted-foreground pr-2">{formatCurrency(payslip.gross_pay, payslip.currency)}</td>
@@ -255,6 +307,12 @@ export function PayslipDocument({
           <tfoot>
             <tr className="border-t-2 border-border bg-muted/30">
               <td className="py-2 font-bold">Total Earnings</td>
+              {hasMultiCurrencyEarnings && (
+                <>
+                  <td className="text-right py-2 pr-2"></td>
+                  <td className="text-center py-2"></td>
+                </>
+              )}
               <td className="text-right py-2 font-bold tabular-nums pr-2" style={{ color: t.accent_color }}>{formatCurrency(payslip.gross_pay, payslip.currency)}</td>
               {t.show_ytd_totals && (
                 <td className="text-right py-2 font-bold tabular-nums pr-2" style={{ color: t.accent_color }}>{formatCurrency((ytdTotals?.gross || 0) + payslip.gross_pay, payslip.currency)}</td>
@@ -267,18 +325,19 @@ export function PayslipDocument({
       {/* Deductions Section */}
       <div className="rounded" style={{ padding: 0 }}>
         <h3 className="font-semibold mb-2 text-xs uppercase tracking-wide" style={{ color: t.primary_color }}>Deductions</h3>
-        <table className="w-full text-xs border-collapse" style={{ tableLayout: 'fixed' }}>
-          <colgroup>
-            <col style={{ width: t.show_ytd_totals ? 'calc(100% - 360px)' : 'calc(100% - 180px)' }} />
-            <col style={{ width: '180px' }} />
-            <col style={{ width: '180px', display: t.show_ytd_totals ? undefined : 'none' }} />
-          </colgroup>
+        <table className="w-full text-xs border-collapse">
           <thead>
             <tr className="border-b-2 border-border">
               <th className="text-left py-1.5 font-semibold text-foreground">Description</th>
-              <th className="text-right py-1.5 font-semibold text-foreground pr-2">Current</th>
+              {hasMultiCurrencyDeductions && (
+                <>
+                  <th className="text-right py-1.5 font-semibold text-foreground pr-2">Original</th>
+                  <th className="text-center py-1.5 font-semibold text-foreground">Rate</th>
+                </>
+              )}
+              <th className="text-right py-1.5 font-semibold text-foreground pr-2">{localCurrencyCode || payslip.currency}</th>
               {t.show_ytd_totals && (
-                <th className="text-right py-1.5 font-semibold text-foreground pr-2">Year to Date</th>
+                <th className="text-right py-1.5 font-semibold text-foreground pr-2">YTD</th>
               )}
             </tr>
           </thead>
@@ -287,15 +346,34 @@ export function PayslipDocument({
             {lineItems?.taxes && lineItems.taxes.length > 0 && (
               <>
                 <tr>
-                  <td colSpan={t.show_ytd_totals ? 3 : 2} className="pt-2 pb-1">
+                  <td colSpan={hasMultiCurrencyDeductions ? (t.show_ytd_totals ? 5 : 4) : (t.show_ytd_totals ? 3 : 2)} className="pt-2 pb-1">
                     <span className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">Statutory Deductions</span>
                   </td>
                 </tr>
                 {lineItems.taxes.map((item, idx) => {
                   const ytdTotal = (item.ytd || 0) + item.amount;
+                  const isConverted = item.original_currency_code && item.original_currency_code !== payslip.currency;
                   return (
                     <tr key={`tax-${idx}`} className="border-b border-border/40">
                       <td className="py-2 pl-3">{item.name}</td>
+                      {hasMultiCurrencyDeductions && (
+                        <>
+                          <td className="text-right py-2 tabular-nums pr-2">
+                            {isConverted && item.original_amount !== undefined ? (
+                              <span className="text-muted-foreground">({formatCurrency(item.original_amount, item.original_currency_code)})</span>
+                            ) : (
+                              <span className="text-muted-foreground">-</span>
+                            )}
+                          </td>
+                          <td className="text-center py-2 tabular-nums text-[10px] text-muted-foreground">
+                            {isConverted && item.exchange_rate ? (
+                              <span>@ {item.exchange_rate.toFixed(4)}</span>
+                            ) : (
+                              <span>-</span>
+                            )}
+                          </td>
+                        </>
+                      )}
                       <td className="text-right py-2 font-medium tabular-nums text-destructive pr-2">({formatCurrency(item.amount, payslip.currency)})</td>
                       {t.show_ytd_totals && (
                         <td className="text-right py-2 tabular-nums text-muted-foreground pr-2">({formatCurrency(ytdTotal, payslip.currency)})</td>
@@ -310,15 +388,34 @@ export function PayslipDocument({
             {lineItems?.deductions && lineItems.deductions.length > 0 && (
               <>
                 <tr>
-                  <td colSpan={t.show_ytd_totals ? 3 : 2} className="pt-2 pb-1">
+                  <td colSpan={hasMultiCurrencyDeductions ? (t.show_ytd_totals ? 5 : 4) : (t.show_ytd_totals ? 3 : 2)} className="pt-2 pb-1">
                     <span className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">Other Deductions</span>
                   </td>
                 </tr>
                 {lineItems.deductions.map((item, idx) => {
                   const ytdTotal = (item.ytd || 0) + item.amount;
+                  const isConverted = item.original_currency_code && item.original_currency_code !== payslip.currency;
                   return (
                     <tr key={`ded-${idx}`} className="border-b border-border/40">
                       <td className="py-2 pl-3">{item.name}</td>
+                      {hasMultiCurrencyDeductions && (
+                        <>
+                          <td className="text-right py-2 tabular-nums pr-2">
+                            {isConverted && item.original_amount !== undefined ? (
+                              <span className="text-muted-foreground">({formatCurrency(item.original_amount, item.original_currency_code)})</span>
+                            ) : (
+                              <span className="text-muted-foreground">-</span>
+                            )}
+                          </td>
+                          <td className="text-center py-2 tabular-nums text-[10px] text-muted-foreground">
+                            {isConverted && item.exchange_rate ? (
+                              <span>@ {item.exchange_rate.toFixed(4)}</span>
+                            ) : (
+                              <span>-</span>
+                            )}
+                          </td>
+                        </>
+                      )}
                       <td className="text-right py-2 font-medium tabular-nums text-destructive pr-2">({formatCurrency(item.amount, payslip.currency)})</td>
                       {t.show_ytd_totals && (
                         <td className="text-right py-2 tabular-nums text-muted-foreground pr-2">({formatCurrency(ytdTotal, payslip.currency)})</td>
@@ -333,6 +430,12 @@ export function PayslipDocument({
             {(!lineItems?.taxes?.length && !lineItems?.deductions?.length) && (
               <tr className="border-b border-border/40">
                 <td className="py-2">Total Deductions</td>
+                {hasMultiCurrencyDeductions && (
+                  <>
+                    <td className="text-right py-2 pr-2">-</td>
+                    <td className="text-center py-2">-</td>
+                  </>
+                )}
                 <td className="text-right py-2 font-medium tabular-nums text-destructive pr-2">({formatCurrency(payslip.total_deductions, payslip.currency)})</td>
                 {t.show_ytd_totals && (
                   <td className="text-right py-2 tabular-nums text-muted-foreground pr-2">({formatCurrency(payslip.total_deductions, payslip.currency)})</td>
@@ -343,6 +446,12 @@ export function PayslipDocument({
           <tfoot>
             <tr className="border-t-2 border-border bg-muted/30">
               <td className="py-2 font-bold">Total Deductions</td>
+              {hasMultiCurrencyDeductions && (
+                <>
+                  <td className="text-right py-2 pr-2"></td>
+                  <td className="text-center py-2"></td>
+                </>
+              )}
               <td className="text-right py-2 font-bold tabular-nums text-destructive pr-2">({formatCurrency(payslip.total_deductions, payslip.currency)})</td>
               {t.show_ytd_totals && (
                 <td className="text-right py-2 font-bold tabular-nums text-destructive pr-2">({formatCurrency((ytdTotals?.deductions || 0) + payslip.total_deductions, payslip.currency)})</td>
@@ -353,35 +462,57 @@ export function PayslipDocument({
       </div>
 
       {/* Net Pay */}
-      <div className={`rounded-lg ${style.accent}`} style={{ borderColor: t.accent_color, borderWidth: '2px', padding: 0 }}>
-        <table className="w-full text-xs border-collapse" style={{ tableLayout: 'fixed' }}>
-          <colgroup>
-            <col style={{ width: t.show_ytd_totals ? 'calc(100% - 360px)' : 'calc(100% - 180px)' }} />
-            <col style={{ width: '180px' }} />
-            <col style={{ width: '180px', display: t.show_ytd_totals ? undefined : 'none' }} />
-          </colgroup>
-          <tbody>
-            <tr>
-              <td className="align-middle py-2.5 pl-3">
-                <h3 className="text-lg font-bold" style={{ color: t.accent_color }}>NET PAY</h3>
-                <p className="text-[10px] text-muted-foreground">Amount credited to your account</p>
-              </td>
-              <td className="text-right align-middle py-2.5 pr-2">
-                <p className="text-xl font-bold tabular-nums" style={{ color: t.accent_color }}>
-                  {formatCurrency(payslip.net_pay, payslip.currency)}
-                </p>
-              </td>
-              {t.show_ytd_totals && (
-                <td className="text-right align-middle py-2.5 pr-2">
-                  <p className="text-[9px] text-muted-foreground uppercase tracking-wide mb-0.5">Year to Date</p>
-                  <p className="text-lg font-bold tabular-nums" style={{ color: t.accent_color }}>
-                    {formatCurrency((ytdTotals?.net || 0) + payslip.net_pay, payslip.currency)}
-                  </p>
-                </td>
-              )}
-            </tr>
-          </tbody>
-        </table>
+      <div className={`rounded-lg ${style.accent}`} style={{ borderColor: t.accent_color, borderWidth: '2px', padding: '12px' }}>
+        <div className="flex justify-between items-center mb-2">
+          <div>
+            <h3 className="text-lg font-bold" style={{ color: t.accent_color }}>NET PAY</h3>
+            <p className="text-[10px] text-muted-foreground">Amount credited to your account</p>
+          </div>
+          <div className="text-right">
+            <p className="text-xl font-bold tabular-nums" style={{ color: t.accent_color }}>
+              {formatCurrency(payslip.net_pay, payslip.currency)}
+            </p>
+            {t.show_ytd_totals && (
+              <p className="text-xs text-muted-foreground">
+                YTD: {formatCurrency((ytdTotals?.net || 0) + payslip.net_pay, payslip.currency)}
+              </p>
+            )}
+          </div>
+        </div>
+        
+        {/* Payment Distribution (Multi-currency split) */}
+        {hasNetPaySplit && netPaySplit && (
+          <div className="border-t border-border/50 pt-2 mt-2">
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wide mb-2">Payment Distribution</p>
+            <div className="space-y-1">
+              {netPaySplit.map((split, idx) => {
+                const isLocal = split.currency_code === (localCurrencyCode || payslip.currency);
+                return (
+                  <div key={idx} className="flex justify-between items-center text-xs">
+                    <span className="text-muted-foreground">
+                      {split.currency_code}
+                      {split.is_primary && <span className="ml-1">(Primary)</span>}
+                      {!split.is_primary && split.percentage && <span className="ml-1">({split.percentage}%)</span>}
+                    </span>
+                    <div className="text-right">
+                      {!isLocal && split.exchange_rate && split.exchange_rate !== 1 && (
+                        <span className="text-[10px] text-muted-foreground mr-2">@ {split.exchange_rate.toFixed(4)}</span>
+                      )}
+                      <span className="font-medium tabular-nums" style={{ color: t.accent_color }}>
+                        {formatCurrency(split.amount, split.currency_code)}
+                      </span>
+                      {!isLocal && split.local_equivalent && (
+                        <span className="text-[10px] text-muted-foreground ml-1">
+                          ({formatCurrency(split.local_equivalent, localCurrencyCode || payslip.currency)})
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Footer */}

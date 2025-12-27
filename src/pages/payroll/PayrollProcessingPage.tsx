@@ -1204,10 +1204,16 @@ export default function PayrollProcessingPage() {
                       is_prorated: e.is_prorated,
                       effective_start: e.effective_start,
                       effective_end: e.effective_end,
+                      original_amount: e.original_amount,
+                      original_currency_code: e.original_currency_id ? currencyCodeMap.get(e.original_currency_id) : undefined,
+                      exchange_rate: e.exchange_rate_used,
                     })),
                     deductions: (calcDetails?.period_deductions || []).map((d: any) => ({ 
                       name: d.name, 
-                      amount: d.amount 
+                      amount: d.amount,
+                      original_amount: d.original_amount,
+                      original_currency_code: d.original_currency_id ? currencyCodeMap.get(d.original_currency_id) : undefined,
+                      exchange_rate: d.exchange_rate_used,
                     })),
                     taxes: (calcDetails?.statutory_deductions || []).map((t: any) => ({ 
                       name: t.name, 
@@ -1235,6 +1241,7 @@ export default function PayrollProcessingPage() {
                       }}
                       company={companyInfo || undefined}
                       lineItems={lineItems}
+                      localCurrencyCode={localCurrencyCode}
                     />
                   );
                   
