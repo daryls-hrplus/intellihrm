@@ -379,19 +379,19 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId, payGroupI
     const [{ data: allowances }, { data: deductions }] = await Promise.all([
       supabase
         .from('employee_period_allowances')
-        .select('currency_id')
+        .select('payout_currency_id, currency')
         .eq('employee_id', employeeId)
         .eq('pay_period_id', payPeriodId),
       supabase
         .from('employee_period_deductions')
-        .select('currency_id')
+        .select('payout_currency_id, currency')
         .eq('employee_id', employeeId)
-        .eq('pay_period_id', payPeriodId)
+        .eq('pay_period_id', payPeriodId),
     ]);
 
     // Find unique foreign currencies
     const foreignIds = new Set<string>();
-    
+
     (compensations || []).forEach((c: any) => {
       const idFromCode = c.currency ? codeToId.get(String(c.currency).toUpperCase()) : undefined;
       const effectiveCurrencyId: string | undefined = c.currency_id || idFromCode;
@@ -402,14 +402,20 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId, payGroupI
     });
 
     (allowances || []).forEach((a: any) => {
-      if (a.currency_id && a.currency_id !== localCurrId) {
-        foreignIds.add(a.currency_id);
+      const idFromCode = a.currency ? codeToId.get(String(a.currency).toUpperCase()) : undefined;
+      const effectiveCurrencyId: string | undefined = a.payout_currency_id || idFromCode;
+
+      if (effectiveCurrencyId && effectiveCurrencyId !== localCurrId) {
+        foreignIds.add(effectiveCurrencyId);
       }
     });
 
     (deductions || []).forEach((d: any) => {
-      if (d.currency_id && d.currency_id !== localCurrId) {
-        foreignIds.add(d.currency_id);
+      const idFromCode = d.currency ? codeToId.get(String(d.currency).toUpperCase()) : undefined;
+      const effectiveCurrencyId: string | undefined = d.payout_currency_id || idFromCode;
+
+      if (effectiveCurrencyId && effectiveCurrencyId !== localCurrId) {
+        foreignIds.add(effectiveCurrencyId);
       }
     });
 
@@ -827,7 +833,38 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId, payGroupI
       const regularPay = periodBaseSalary;
       const overtimePay = overtimeHours * hourlyRate * 1.5;
 
-      // All employee compensation items are treated as additional comp (includes base salary items)
+      // Currency helpers for multi-currency simulation
+      const localCurrIdForCalc = localCurrencyId || companyLocalCurrency?.id || null;
+
+      const resolveCurrencyId = (currencyCode?: string | null, currencyId?: string | null) => {
+        if (currencyId) return currencyId;
+        if (!currencyCode) return undefined;
+        return currencies.find(
+          (c) => c.code.toUpperCase() === String(currencyCode).toUpperCase(),
+        )?.id;
+      };
+
+      const resolveCurrencyCode = (currencyId?: string | null, fallbackCode?: string | null) => {
+        if (fallbackCode) return String(fallbackCode).toUpperCase();
+        if (!currencyId) return undefined;
+        return currencies.find((c) => c.id === currencyId)?.code;
+      };
+
+      const convertToLocal = (amount: number, fromCurrencyId?: string) => {
+        if (!localCurrIdForCalc || !fromCurrencyId) {
+          return { localAmount: amount, rateUsed: undefined as number | undefined };
+        }
+        if (fromCurrencyId === localCurrIdForCalc) {
+          return { localAmount: amount, rateUsed: undefined as number | undefined };
+        }
+        const rate = exchangeRatesMap.get(`${fromCurrencyId}_${localCurrIdForCalc}`);
+        if (!rate || rate <= 0) {
+          return { localAmount: amount, rateUsed: undefined as number | undefined };
+        }
+        return { localAmount: amount * rate, rateUsed: rate };
+      };
+
+      // All employee compensation items are treated as additional comp
       const remainingEmployeeComp = employeeCompList;
 
       const additionalCompList = remainingEmployeeComp.map((c) => {
@@ -874,7 +911,7 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId, payGroupI
         }
 
         const prorationMethodCode = getProrationMethodCode(
-          (c.pay_elements as any)?.proration_method?.code
+          (c.pay_elements as any)?.proration_method?.code,
         );
 
         let calculatedAmount = basePeriodAmount;
@@ -900,39 +937,75 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId, payGroupI
           }
         }
 
+        const fromCurrencyId = resolveCurrencyId(c.currency, c.currency_id);
+        const { localAmount, rateUsed } = convertToLocal(calculatedAmount, fromCurrencyId);
+
         return {
           name: (c.pay_elements as any)?.name || 'Compensation',
           base_amount: basePeriodAmount,
-          amount: calculatedAmount,
+          amount: localAmount,
           is_prorated: isProrated,
           proration_factor: prorationFactor,
           position_title: (c.positions as any)?.title || 'Unassigned Position',
           effective_start: c.start_date,
           effective_end: c.end_date || payPeriod?.period_end,
+          original_amount: calculatedAmount,
+          original_currency: resolveCurrencyCode(fromCurrencyId, c.currency),
+          exchange_rate_used: rateUsed,
         };
       });
 
       const totalAdditionalComp = additionalCompList.reduce((sum, c) => sum + c.amount, 0);
 
-      const allowanceList = (allowances || []).map((a) => ({
-        name: a.allowance_name,
-        base_amount: a.amount,
-        amount: a.amount,
-        is_taxable: a.is_taxable,
-        is_bik: a.is_benefit_in_kind,
-      }));
+      const allowanceList = (allowances || []).map((a: any) => {
+        const fromCurrencyId = resolveCurrencyId(a.currency, a.payout_currency_id);
+        const { localAmount, rateUsed } = convertToLocal(a.amount, fromCurrencyId);
+
+        return {
+          name: a.allowance_name,
+          base_amount: a.amount,
+          amount: localAmount,
+          is_taxable: a.is_taxable,
+          is_bik: a.is_benefit_in_kind,
+          original_amount: a.amount,
+          original_currency: resolveCurrencyCode(fromCurrencyId, a.currency),
+          exchange_rate_used: rateUsed,
+        };
+      });
 
       const totalAllowances = allowanceList.reduce((sum, a) => sum + a.amount, 0);
       const totalGross = regularPay + overtimePay + totalAdditionalComp + totalAllowances;
 
-      // Calculate deductions
+      // Calculate deductions (convert to local for totals, preserve original for display)
       const pretaxDeductions = (deductions || [])
-        .filter(d => d.is_pretax)
-        .map(d => ({ name: d.deduction_name, amount: d.amount, type: d.deduction_type || 'other' }));
-      
+        .filter((d: any) => d.is_pretax)
+        .map((d: any) => {
+          const fromCurrencyId = resolveCurrencyId(d.currency, d.payout_currency_id);
+          const { localAmount, rateUsed } = convertToLocal(d.amount, fromCurrencyId);
+          return {
+            name: d.deduction_name,
+            amount: localAmount,
+            type: d.deduction_type || 'other',
+            original_amount: d.amount,
+            original_currency: resolveCurrencyCode(fromCurrencyId, d.currency),
+            exchange_rate_used: rateUsed,
+          };
+        });
+
       const posttaxDeductions = (deductions || [])
-        .filter(d => !d.is_pretax)
-        .map(d => ({ name: d.deduction_name, amount: d.amount, type: d.deduction_type || 'other' }));
+        .filter((d: any) => !d.is_pretax)
+        .map((d: any) => {
+          const fromCurrencyId = resolveCurrencyId(d.currency, d.payout_currency_id);
+          const { localAmount, rateUsed } = convertToLocal(d.amount, fromCurrencyId);
+          return {
+            name: d.deduction_name,
+            amount: localAmount,
+            type: d.deduction_type || 'other',
+            original_amount: d.amount,
+            original_currency: resolveCurrencyCode(fromCurrencyId, d.currency),
+            exchange_rate_used: rateUsed,
+          };
+        });
 
       const totalPretax = pretaxDeductions.reduce((sum, d) => sum + d.amount, 0);
       const taxableIncome = totalGross - totalPretax;
