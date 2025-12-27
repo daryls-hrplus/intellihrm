@@ -44,6 +44,7 @@ import { FatigueManagementTab } from "@/components/time-attendance/shifts/Fatigu
 import { ShiftCoverageTab } from "@/components/time-attendance/shifts/ShiftCoverageTab";
 import { ShiftBiddingTab } from "@/components/time-attendance/shifts/ShiftBiddingTab";
 import { ShiftCalendarTab } from "@/components/time-attendance/shifts/ShiftCalendarTab";
+import { AISchedulerTab } from "@/components/time-attendance/shifts/AISchedulerTab";
 
 interface Company {
   id: string;

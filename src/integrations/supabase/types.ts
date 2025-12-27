@@ -858,6 +858,183 @@ export type Database = {
           },
         ]
       }
+      ai_schedule_recommendations: {
+        Row: {
+          alternative_employees: Json | null
+          confidence_score: number | null
+          created_at: string
+          employee_id: string
+          end_time: string | null
+          id: string
+          is_accepted: boolean | null
+          reasoning: string | null
+          recommended_date: string
+          rejection_reason: string | null
+          schedule_run_id: string
+          shift_id: string
+          start_time: string | null
+        }
+        Insert: {
+          alternative_employees?: Json | null
+          confidence_score?: number | null
+          created_at?: string
+          employee_id: string
+          end_time?: string | null
+          id?: string
+          is_accepted?: boolean | null
+          reasoning?: string | null
+          recommended_date: string
+          rejection_reason?: string | null
+          schedule_run_id: string
+          shift_id: string
+          start_time?: string | null
+        }
+        Update: {
+          alternative_employees?: Json | null
+          confidence_score?: number | null
+          created_at?: string
+          employee_id?: string
+          end_time?: string | null
+          id?: string
+          is_accepted?: boolean | null
+          reasoning?: string | null
+          recommended_date?: string
+          rejection_reason?: string | null
+          schedule_run_id?: string
+          shift_id?: string
+          start_time?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_schedule_recommendations_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_schedule_recommendations_schedule_run_id_fkey"
+            columns: ["schedule_run_id"]
+            isOneToOne: false
+            referencedRelation: "ai_schedule_runs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_schedule_recommendations_shift_id_fkey"
+            columns: ["shift_id"]
+            isOneToOne: false
+            referencedRelation: "shifts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_schedule_runs: {
+        Row: {
+          ai_model_used: string | null
+          ai_response_raw: Json | null
+          applied_at: string | null
+          applied_by: string | null
+          company_id: string
+          completed_at: string | null
+          constraint_violations: number | null
+          cost_estimate: number | null
+          coverage_score: number | null
+          created_at: string
+          created_by: string | null
+          department_id: string | null
+          error_message: string | null
+          id: string
+          input_parameters: Json | null
+          optimization_goal: string
+          preference_score: number | null
+          schedule_end_date: string
+          schedule_start_date: string
+          started_at: string | null
+          status: string
+          total_recommendations: number | null
+          updated_at: string
+        }
+        Insert: {
+          ai_model_used?: string | null
+          ai_response_raw?: Json | null
+          applied_at?: string | null
+          applied_by?: string | null
+          company_id: string
+          completed_at?: string | null
+          constraint_violations?: number | null
+          cost_estimate?: number | null
+          coverage_score?: number | null
+          created_at?: string
+          created_by?: string | null
+          department_id?: string | null
+          error_message?: string | null
+          id?: string
+          input_parameters?: Json | null
+          optimization_goal?: string
+          preference_score?: number | null
+          schedule_end_date: string
+          schedule_start_date: string
+          started_at?: string | null
+          status?: string
+          total_recommendations?: number | null
+          updated_at?: string
+        }
+        Update: {
+          ai_model_used?: string | null
+          ai_response_raw?: Json | null
+          applied_at?: string | null
+          applied_by?: string | null
+          company_id?: string
+          completed_at?: string | null
+          constraint_violations?: number | null
+          cost_estimate?: number | null
+          coverage_score?: number | null
+          created_at?: string
+          created_by?: string | null
+          department_id?: string | null
+          error_message?: string | null
+          id?: string
+          input_parameters?: Json | null
+          optimization_goal?: string
+          preference_score?: number | null
+          schedule_end_date?: string
+          schedule_start_date?: string
+          started_at?: string | null
+          status?: string
+          total_recommendations?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_schedule_runs_applied_by_fkey"
+            columns: ["applied_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_schedule_runs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_schedule_runs_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_schedule_runs_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ai_scheduled_job_runs: {
         Row: {
           companies_processed: number | null
@@ -907,6 +1084,76 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "ai_scheduled_job_runs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_scheduling_constraints: {
+        Row: {
+          applies_to_department_id: string | null
+          applies_to_shift_id: string | null
+          company_id: string
+          constraint_name: string
+          constraint_type: string
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          is_hard_constraint: boolean
+          parameters: Json
+          priority: number
+          updated_at: string
+        }
+        Insert: {
+          applies_to_department_id?: string | null
+          applies_to_shift_id?: string | null
+          company_id: string
+          constraint_name: string
+          constraint_type: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          is_hard_constraint?: boolean
+          parameters?: Json
+          priority?: number
+          updated_at?: string
+        }
+        Update: {
+          applies_to_department_id?: string | null
+          applies_to_shift_id?: string | null
+          company_id?: string
+          constraint_name?: string
+          constraint_type?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          is_hard_constraint?: boolean
+          parameters?: Json
+          priority?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_scheduling_constraints_applies_to_department_id_fkey"
+            columns: ["applies_to_department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_scheduling_constraints_applies_to_shift_id_fkey"
+            columns: ["applies_to_shift_id"]
+            isOneToOne: false
+            referencedRelation: "shifts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_scheduling_constraints_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
@@ -11541,6 +11788,69 @@ export type Database = {
             columns: ["schedule_id"]
             isOneToOne: false
             referencedRelation: "work_schedules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      employee_scheduling_preferences: {
+        Row: {
+          avoided_days: number[] | null
+          company_id: string
+          created_at: string
+          employee_id: string
+          id: string
+          max_consecutive_days: number | null
+          max_hours_per_week: number | null
+          min_hours_per_week: number | null
+          notes: string | null
+          preferred_days: number[] | null
+          preferred_shift_ids: string[] | null
+          prefers_consistent_schedule: boolean | null
+          updated_at: string
+        }
+        Insert: {
+          avoided_days?: number[] | null
+          company_id: string
+          created_at?: string
+          employee_id: string
+          id?: string
+          max_consecutive_days?: number | null
+          max_hours_per_week?: number | null
+          min_hours_per_week?: number | null
+          notes?: string | null
+          preferred_days?: number[] | null
+          preferred_shift_ids?: string[] | null
+          prefers_consistent_schedule?: boolean | null
+          updated_at?: string
+        }
+        Update: {
+          avoided_days?: number[] | null
+          company_id?: string
+          created_at?: string
+          employee_id?: string
+          id?: string
+          max_consecutive_days?: number | null
+          max_hours_per_week?: number | null
+          min_hours_per_week?: number | null
+          notes?: string | null
+          preferred_days?: number[] | null
+          preferred_shift_ids?: string[] | null
+          prefers_consistent_schedule?: boolean | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_scheduling_preferences_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_scheduling_preferences_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]

@@ -218,3 +218,6 @@ verify_jwt = false
 
 [functions.esco-skills-import]
 verify_jwt = false
+
+[functions.ai-shift-scheduler]
+verify_jwt = false
