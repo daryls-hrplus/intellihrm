@@ -28,6 +28,7 @@ import {
   CalendarRange,
   Coins,
   History,
+  Banknote,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -131,6 +132,7 @@ export default function PayrollDashboardPage() {
     statutoryTaxRelief: { title: "Statutory Tax Relief", description: "Configure social security deductions that reduce taxable income", icon: Calculator, href: "/payroll/statutory-tax-relief", color: "bg-lime-500/10 text-lime-600", tabCode: "statutory_tax_relief" },
     taxReliefSchemes: { title: "Tax Relief Schemes", description: "Personal reliefs, savings, housing, education & youth incentives", icon: Receipt, href: "/payroll/tax-relief-schemes", color: "bg-sky-500/10 text-sky-600", tabCode: "tax_relief_schemes" },
     retroactivePay: { title: "Retroactive Pay", description: "Configure and generate back pay adjustments by pay group", icon: History, href: "/payroll/retroactive-pay", color: "bg-fuchsia-500/10 text-fuchsia-600", tabCode: "retroactive_pay" },
+    salaryAdvances: { title: t("payroll.salaryAdvances.title", "Salary Advances"), description: t("payroll.salaryAdvances.description", "Manage employee salary advance requests"), icon: Banknote, href: "/payroll/salary-advances", color: "bg-emerald-500/10 text-emerald-600", tabCode: "salary_advances" },
   };
 
   const filterByAccess = (modules: typeof allModules[keyof typeof allModules][]) =>
@@ -139,7 +141,7 @@ export default function PayrollDashboardPage() {
   const sections: ModuleSection[] = [
     {
       titleKey: "Processing",
-      items: filterByAccess([allModules.processing, allModules.offCycle, allModules.payPeriods, allModules.salaryOvertime, allModules.regularDeductions, allModules.overpaymentRecovery, allModules.expenseClaims, allModules.tipPools, allModules.retroactivePay, allModules.openingBalances, allModules.yearEndClosing]),
+      items: filterByAccess([allModules.processing, allModules.offCycle, allModules.payPeriods, allModules.salaryOvertime, allModules.regularDeductions, allModules.overpaymentRecovery, allModules.salaryAdvances, allModules.expenseClaims, allModules.tipPools, allModules.retroactivePay, allModules.openingBalances, allModules.yearEndClosing]),
     },
     {
       titleKey: "Configuration",
