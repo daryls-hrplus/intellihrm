@@ -11,6 +11,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Plus, MinusCircle, Trash2, Pencil, Building2 } from "lucide-react";
+import { useCompanyCurrencyList } from "@/hooks/useCompanyCurrencies";
 
 interface DeductionsSectionProps {
   companyId: string;
@@ -31,15 +32,9 @@ interface Deduction {
   account_number: string | null;
 }
 
-interface Currency {
-  id: string;
-  code: string;
-  name: string;
-}
-
 export function DeductionsSection({ companyId, employeeId, payPeriodId }: DeductionsSectionProps) {
   const [deductions, setDeductions] = useState<Deduction[]>([]);
-  const [currencies, setCurrencies] = useState<Currency[]>([]);
+  const { currencies } = useCompanyCurrencyList(companyId);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -58,7 +53,6 @@ export function DeductionsSection({ companyId, employeeId, payPeriodId }: Deduct
 
   useEffect(() => {
     loadDeductions();
-    loadCurrencies();
   }, [employeeId, payPeriodId]);
 
   const loadDeductions = async () => {
@@ -77,18 +71,6 @@ export function DeductionsSection({ companyId, employeeId, payPeriodId }: Deduct
     }
     setDeductions(data || []);
     setIsLoading(false);
-  };
-
-  const loadCurrencies = async () => {
-    const { data, error } = await supabase
-      .from('currencies')
-      .select('id, code, name')
-      .eq('is_active', true)
-      .order('code');
-    
-    if (!error && data) {
-      setCurrencies(data);
-    }
   };
 
   const resetForm = () => {

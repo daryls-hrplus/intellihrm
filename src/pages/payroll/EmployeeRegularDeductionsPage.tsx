@@ -15,6 +15,7 @@ import { useTranslation } from "react-i18next";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { formatDateForDisplay, getTodayString } from "@/utils/dateUtils";
+import { useCompanyCurrencyList } from "@/hooks/useCompanyCurrencies";
 
 interface Company {
   id: string;
@@ -64,8 +65,8 @@ export default function EmployeeRegularDeductionsPage() {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [deductions, setDeductions] = useState<RegularDeduction[]>([]);
-  const [currencies, setCurrencies] = useState<Currency[]>([]);
   const [selectedCompany, setSelectedCompany] = useState<string>("");
+  const { currencies } = useCompanyCurrencyList(selectedCompany || undefined);
   const [selectedEmployee, setSelectedEmployee] = useState<string>("");
   const [searchTerm, setSearchTerm] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -93,20 +94,7 @@ export default function EmployeeRegularDeductionsPage() {
 
   useEffect(() => {
     loadCompanies();
-    loadCurrencies();
   }, []);
-
-  const loadCurrencies = async () => {
-    const { data, error } = await supabase
-      .from('currencies')
-      .select('id, code, name, symbol')
-      .eq('is_active', true)
-      .order('code');
-    
-    if (!error && data) {
-      setCurrencies(data);
-    }
-  };
 
   useEffect(() => {
     if (selectedCompany) {
