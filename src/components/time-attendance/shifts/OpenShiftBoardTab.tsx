@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -17,6 +18,7 @@ interface OpenShiftBoardTabProps {
 }
 
 export function OpenShiftBoardTab({ companyId }: OpenShiftBoardTabProps) {
+  const { t } = useTranslation();
   const { openShifts, isLoading, createOpenShift, claimOpenShift, reviewClaim, cancelOpenShift } = useOpenShifts(companyId);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [shifts, setShifts] = useState<{ id: string; name: string; code: string; start_time: string; end_time: string }[]>([]);
@@ -102,20 +104,20 @@ export function OpenShiftBoardTab({ companyId }: OpenShiftBoardTabProps) {
         <div>
           <h3 className="text-lg font-semibold flex items-center gap-2">
             <Briefcase className="h-5 w-5" />
-            Open Shift Board
+            {t("timeAttendance.shifts.open.title")}
           </h3>
-          <p className="text-sm text-muted-foreground">Post shifts for employees to claim</p>
+          <p className="text-sm text-muted-foreground">{t("timeAttendance.shifts.open.postShift")}</p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
             <Button size="sm">
               <Plus className="h-4 w-4 mr-2" />
-              Post Open Shift
+              {t("timeAttendance.shifts.open.postShift")}
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-lg">
             <DialogHeader>
-              <DialogTitle>Post Open Shift</DialogTitle>
+              <DialogTitle>{t("timeAttendance.shifts.open.postShift")}</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
@@ -183,7 +185,7 @@ export function OpenShiftBoardTab({ companyId }: OpenShiftBoardTabProps) {
       </div>
 
       {isLoading ? (
-        <div className="text-center py-8 text-muted-foreground">Loading...</div>
+        <div className="text-center py-8 text-muted-foreground">{t("common.loading")}</div>
       ) : (
         <>
           {/* Active Open Shifts */}
@@ -254,7 +256,7 @@ export function OpenShiftBoardTab({ companyId }: OpenShiftBoardTabProps) {
 
           {activeShifts.length === 0 && (
             <div className="text-center py-8 text-muted-foreground border rounded-lg">
-              No open shifts available
+              {t("timeAttendance.shifts.open.noOpenShifts")}
             </div>
           )}
 

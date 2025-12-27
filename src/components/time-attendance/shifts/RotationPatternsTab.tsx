@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -17,6 +18,7 @@ interface RotationPatternsTabProps {
 }
 
 export function RotationPatternsTab({ companyId }: RotationPatternsTabProps) {
+  const { t } = useTranslation();
   const { patterns, assignments, isLoading, createPattern, deletePattern, assignEmployeeToPattern, removeAssignment } = useRotationPatterns(companyId);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [assignDialogOpen, setAssignDialogOpen] = useState(false);
@@ -115,15 +117,15 @@ export function RotationPatternsTab({ companyId }: RotationPatternsTabProps) {
         <div>
           <h3 className="text-lg font-semibold flex items-center gap-2">
             <RotateCcw className="h-5 w-5" />
-            Rotation Patterns
+            {t("timeAttendance.shifts.rotations.title")}
           </h3>
-          <p className="text-sm text-muted-foreground">Define shift rotation schedules</p>
+          <p className="text-sm text-muted-foreground">{t("timeAttendance.shifts.rotations.shiftSequence")}</p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
             <Button size="sm">
               <Plus className="h-4 w-4 mr-2" />
-              New Pattern
+              {t("timeAttendance.shifts.rotations.createPattern")}
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -233,9 +235,9 @@ export function RotationPatternsTab({ companyId }: RotationPatternsTabProps) {
           </CardHeader>
           <CardContent>
             {isLoading ? (
-              <div className="text-center py-4 text-muted-foreground">Loading...</div>
+              <div className="text-center py-4 text-muted-foreground">{t("common.loading")}</div>
             ) : patterns.length === 0 ? (
-              <div className="text-center py-4 text-muted-foreground">No rotation patterns defined</div>
+              <div className="text-center py-4 text-muted-foreground">{t("timeAttendance.shifts.rotations.noPatterns")}</div>
             ) : (
               <div className="space-y-2">
                 {patterns.map(pattern => (
@@ -338,9 +340,9 @@ export function RotationPatternsTab({ companyId }: RotationPatternsTabProps) {
           </CardHeader>
           <CardContent>
             {!currentPattern ? (
-              <div className="text-center py-8 text-muted-foreground">Select a pattern to view assignments</div>
+              <div className="text-center py-8 text-muted-foreground">{t("timeAttendance.shifts.rotations.noPatterns")}</div>
             ) : patternAssignments.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">No employees assigned to this rotation</div>
+              <div className="text-center py-8 text-muted-foreground">{t("timeAttendance.shifts.rotations.noAssignments")}</div>
             ) : (
               <div className="space-y-2">
                 {patternAssignments.map(assignment => (

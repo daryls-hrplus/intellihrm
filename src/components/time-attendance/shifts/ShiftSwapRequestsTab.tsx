@@ -86,23 +86,23 @@ export function ShiftSwapRequestsTab({ companyId }: ShiftSwapRequestsTabProps) {
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="flex items-center gap-2">
           <ArrowLeftRight className="h-5 w-5" />
-          Shift Swap Requests
+          {t("timeAttendance.shifts.swap.title")}
         </CardTitle>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
             <Button size="sm">
               <Plus className="h-4 w-4 mr-2" />
-              New Request
+              {t("timeAttendance.shifts.swap.requestSwap")}
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-lg">
             <DialogHeader>
-              <DialogTitle>Create Swap Request</DialogTitle>
+              <DialogTitle>{t("timeAttendance.shifts.swap.requestSwap")}</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Requester</Label>
+                  <Label>{t("timeAttendance.shifts.swap.requester")}</Label>
                   <Select value={formData.requester_id} onValueChange={v => setFormData(p => ({ ...p, requester_id: v, requester_shift_assignment_id: "" }))}>
                     <SelectTrigger><SelectValue placeholder="Select employee" /></SelectTrigger>
                     <SelectContent>
@@ -159,9 +159,9 @@ export function ShiftSwapRequestsTab({ companyId }: ShiftSwapRequestsTabProps) {
       </CardHeader>
       <CardContent>
         {isLoading ? (
-          <div className="text-center py-8 text-muted-foreground">Loading...</div>
+          <div className="text-center py-8 text-muted-foreground">{t("common.loading")}</div>
         ) : swapRequests.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">No swap requests found</div>
+          <div className="text-center py-8 text-muted-foreground">{t("timeAttendance.shifts.swap.noRequests")}</div>
         ) : (
           <Table>
             <TableHeader>

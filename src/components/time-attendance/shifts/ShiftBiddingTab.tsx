@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -18,6 +19,7 @@ interface ShiftBiddingTabProps {
 }
 
 export function ShiftBiddingTab({ companyId }: ShiftBiddingTabProps) {
+  const { t } = useTranslation();
   const { biddingPeriods, isLoading, createBiddingPeriod, updateBiddingPeriodStatus, submitBid, withdrawBid, allocateBids } = useShiftBidding(companyId);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [bidDialogOpen, setBidDialogOpen] = useState(false);
@@ -122,20 +124,20 @@ export function ShiftBiddingTab({ companyId }: ShiftBiddingTabProps) {
         <div>
           <h3 className="text-lg font-semibold flex items-center gap-2">
             <Gavel className="h-5 w-5" />
-            Shift Bidding
+            {t("timeAttendance.shifts.bidding.title")}
           </h3>
-          <p className="text-sm text-muted-foreground">Seniority-based shift preference selection</p>
+          <p className="text-sm text-muted-foreground">{t("timeAttendance.shifts.bidding.seniorityBased")}</p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
             <Button size="sm">
               <Plus className="h-4 w-4 mr-2" />
-              New Bidding Period
+              {t("timeAttendance.shifts.bidding.createPeriod")}
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-lg">
             <DialogHeader>
-              <DialogTitle>Create Bidding Period</DialogTitle>
+              <DialogTitle>{t("timeAttendance.shifts.bidding.createPeriod")}</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
               <div className="space-y-2">
@@ -297,9 +299,9 @@ export function ShiftBiddingTab({ companyId }: ShiftBiddingTabProps) {
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <div className="text-center py-4 text-muted-foreground">Loading...</div>
+            <div className="text-center py-4 text-muted-foreground">{t("common.loading")}</div>
           ) : biddingPeriods.length === 0 ? (
-            <div className="text-center py-4 text-muted-foreground">No bidding periods created</div>
+            <div className="text-center py-4 text-muted-foreground">{t("timeAttendance.shifts.bidding.noPeriods")}</div>
           ) : (
             <Table>
               <TableHeader>
@@ -360,7 +362,7 @@ export function ShiftBiddingTab({ companyId }: ShiftBiddingTabProps) {
           </CardHeader>
           <CardContent>
             {!currentPeriod.bids || currentPeriod.bids.length === 0 ? (
-              <div className="text-center py-4 text-muted-foreground">No bids submitted yet</div>
+              <div className="text-center py-4 text-muted-foreground">{t("timeAttendance.shifts.bidding.noBids")}</div>
             ) : (
               <Table>
                 <TableHeader>
