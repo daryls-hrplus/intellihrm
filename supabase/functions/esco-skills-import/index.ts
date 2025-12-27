@@ -37,7 +37,7 @@ interface SearchResult {
 let lastRequestTime = 0;
 const MIN_REQUEST_INTERVAL = 200; // 200ms between requests
 
-async function rateLimitedFetch(url: string): Promise<Response> {
+async function rateLimitedFetch(url: string, throwOnError: boolean = true): Promise<Response> {
   const now = Date.now();
   const elapsed = now - lastRequestTime;
   if (elapsed < MIN_REQUEST_INTERVAL) {
@@ -52,7 +52,7 @@ async function rateLimitedFetch(url: string): Promise<Response> {
     },
   });
   
-  if (!response.ok) {
+  if (!response.ok && throwOnError) {
     console.error(`[ESCO API] Error: ${response.status} ${response.statusText}`);
     throw new Error(`ESCO API error: ${response.status} ${response.statusText}`);
   }
@@ -140,9 +140,15 @@ async function getSkillDetails(uri: string, language: string = "en"): Promise<Es
 async function getOccupationSkills(
   occupationUri: string,
   language: string = "en"
-): Promise<EscoSkill[]> {
+): Promise<{ skills: EscoSkill[]; notFound: boolean }> {
   const url = `${ESCO_API_BASE}/resource/occupation?uri=${encodeURIComponent(occupationUri)}&language=${language}`;
-  const response = await rateLimitedFetch(url);
+  const response = await rateLimitedFetch(url, false); // Don't throw on error
+  
+  if (!response.ok) {
+    console.log(`[ESCO API] Occupation not found: ${occupationUri} (${response.status})`);
+    return { skills: [], notFound: true };
+  }
+  
   const data = await response.json();
   
   const skills: EscoSkill[] = [];
@@ -171,7 +177,7 @@ async function getOccupationSkills(
   
   console.log(`[ESCO API] Occupation skills: ${skills.length} (${essentialSkills.length} essential, ${optionalSkills.length} optional)`);
   
-  return skills;
+  return { skills, notFound: false };
 }
 
 async function checkDuplicates(
@@ -414,7 +420,7 @@ serve(async (req) => {
       case "get_occupation_skills": {
         const { occupationUri, language = "en" } = params;
         const result = await getOccupationSkills(occupationUri, language);
-        return new Response(JSON.stringify({ skills: result }), {
+        return new Response(JSON.stringify({ skills: result.skills }), {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
@@ -482,85 +488,123 @@ serve(async (req) => {
           );
         }
         
-        let actualOccupationUri = occupationUri;
-        let actualOccupationLabel = occupationLabel || sourceOccupation?.label || "";
+        const actualOccupationLabel = occupationLabel || sourceOccupation?.label || "";
         
-        // If the URI doesn't work, try searching for the occupation by name
-        try {
-          const skills = await getOccupationSkills(actualOccupationUri, language);
-          
-          if (skills.length === 0) {
-            return new Response(
-              JSON.stringify({ imported: 0, skipped: 0, errors: ["No skills found for occupation"] }),
-              { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-            );
-          }
-          
-          // Import the skills
+        // First try the provided URI
+        const { skills, notFound } = await getOccupationSkills(occupationUri, language);
+        
+        if (!notFound && skills.length > 0) {
+          // URI worked, import the skills
           const result = await importSkills(
             supabaseClient,
             skills,
             companyId,
             userId,
             language,
-            sourceOccupation || { uri: actualOccupationUri, label: actualOccupationLabel }
+            sourceOccupation || { uri: occupationUri, label: actualOccupationLabel }
           );
           
           return new Response(JSON.stringify(result), {
             headers: { ...corsHeaders, "Content-Type": "application/json" },
           });
-        } catch (err) {
-          // If direct URI fails, try searching by occupation name
-          console.log(`[ESCO Import] Direct URI failed, searching by name: ${actualOccupationLabel}`);
-          
-          if (!actualOccupationLabel) {
-            return new Response(
-              JSON.stringify({ error: "Occupation not found in ESCO API", imported: 0, skipped: 0, errors: ["Occupation URI not valid and no label provided for search"] }),
-              { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-            );
-          }
-          
-          // Search for the occupation by name
-          const searchResult = await searchOccupations(actualOccupationLabel, language, 5, 0);
-          
-          if (!searchResult.occupations || searchResult.occupations.length === 0) {
-            return new Response(
-              JSON.stringify({ error: `No occupation found matching "${actualOccupationLabel}"`, imported: 0, skipped: 0, errors: [`Occupation "${actualOccupationLabel}" not found in ESCO`] }),
-              { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-            );
-          }
-          
-          // Use the first (best match) result
-          const matchedOccupation = searchResult.occupations[0];
-          console.log(`[ESCO Import] Found occupation: ${matchedOccupation.title} (${matchedOccupation.uri})`);
-          
-          // Now get skills for this occupation
-          const skills = await getOccupationSkills(matchedOccupation.uri, language);
-          
-          if (skills.length === 0) {
-            return new Response(
-              JSON.stringify({ imported: 0, skipped: 0, errors: [`No skills found for occupation "${matchedOccupation.title}"`] }),
-              { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-            );
-          }
-          
-          // Import the skills
-          const result = await importSkills(
-            supabaseClient,
-            skills,
-            companyId,
-            userId,
-            language,
-            { uri: matchedOccupation.uri, label: matchedOccupation.title }
-          );
-          
-          return new Response(JSON.stringify({
-            ...result,
-            matchedOccupation: { uri: matchedOccupation.uri, title: matchedOccupation.title }
-          }), {
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          });
         }
+        
+        // URI didn't work or returned no skills - search by occupation name
+        console.log(`[ESCO Import] Direct URI failed or empty, searching by name: ${actualOccupationLabel}`);
+        
+        if (!actualOccupationLabel) {
+          return new Response(
+            JSON.stringify({ error: "Occupation not found in ESCO API", imported: 0, skipped: 0, errors: ["Occupation URI not valid and no label provided for search"] }),
+            { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+        
+        // Search for the occupation by name
+        const searchResult = await searchOccupations(actualOccupationLabel, language, 5, 0);
+        
+        if (!searchResult.occupations || searchResult.occupations.length === 0) {
+          return new Response(
+            JSON.stringify({ error: `No occupation found matching "${actualOccupationLabel}"`, imported: 0, skipped: 0, errors: [`Occupation "${actualOccupationLabel}" not found in ESCO`] }),
+            { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+        
+        // Use the first (best match) result
+        const matchedOccupation = searchResult.occupations[0];
+        console.log(`[ESCO Import] Found occupation: ${matchedOccupation.title} (${matchedOccupation.uri})`);
+        
+        // Now get skills for this occupation
+        const matchedSkillsResult = await getOccupationSkills(matchedOccupation.uri, language);
+        
+        if (matchedSkillsResult.skills.length === 0) {
+          return new Response(
+            JSON.stringify({ imported: 0, skipped: 0, errors: [`No skills found for occupation "${matchedOccupation.title}"`] }),
+            { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+        
+        // Import the skills
+        const result = await importSkills(
+          supabaseClient,
+          matchedSkillsResult.skills,
+          companyId,
+          userId,
+          language,
+          { uri: matchedOccupation.uri, label: matchedOccupation.title }
+        );
+        
+        return new Response(JSON.stringify({
+          ...result,
+          matchedOccupation: { uri: matchedOccupation.uri, title: matchedOccupation.title }
+        }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      
+      case "search_industry_occupations": {
+        // Dynamic search for occupations by industry keywords
+        const { industryName, language = "en", limit = 25 } = params;
+        
+        // Map industry names to relevant search terms
+        const industryKeywords: Record<string, string[]> = {
+          "Healthcare": ["nurse", "doctor", "pharmacist", "medical", "healthcare", "therapist", "surgeon", "dentist", "paramedic", "midwife"],
+          "ICT": ["software", "developer", "programmer", "IT", "data", "network", "systems", "web", "cloud", "cybersecurity", "analyst"],
+          "Finance": ["accountant", "financial", "banker", "auditor", "analyst", "investment", "tax", "actuary", "treasurer", "controller"],
+          "Retail": ["sales", "retail", "store", "customer", "merchandiser", "cashier", "buyer", "manager"],
+          "Manufacturing": ["machine", "operator", "engineer", "technician", "production", "quality", "welder", "assembler", "maintenance"],
+          "Construction": ["construction", "builder", "carpenter", "electrician", "plumber", "architect", "surveyor", "mason", "roofer"],
+          "Education": ["teacher", "lecturer", "professor", "educator", "instructor", "tutor", "trainer", "counselor"],
+          "Hospitality": ["chef", "cook", "waiter", "hotel", "hospitality", "bartender", "receptionist", "housekeeper", "concierge"],
+          "Agriculture": ["farmer", "agricultural", "agronomist", "harvester", "veterinary", "horticulture", "fishery"],
+          "Public Administration": ["public", "government", "administrator", "policy", "civil", "officer", "inspector", "regulator"]
+        };
+        
+        const keywords = industryKeywords[industryName] || [industryName.toLowerCase()];
+        const allOccupations: EscoOccupation[] = [];
+        const seenUris = new Set<string>();
+        
+        // Search for each keyword
+        for (const keyword of keywords.slice(0, 5)) { // Limit to 5 keywords to avoid rate limiting
+          try {
+            const result = await searchOccupations(keyword, language, 10, 0);
+            for (const occ of result.occupations || []) {
+              if (!seenUris.has(occ.uri)) {
+                seenUris.add(occ.uri);
+                allOccupations.push(occ);
+              }
+            }
+            if (allOccupations.length >= limit) break;
+          } catch (err) {
+            console.error(`[ESCO Import] Search failed for keyword "${keyword}":`, err);
+          }
+        }
+        
+        return new Response(JSON.stringify({ 
+          occupations: allOccupations.slice(0, limit),
+          total: allOccupations.length
+        }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
       }
 
       case "get_industry_occupations": {

@@ -56,18 +56,25 @@ export function SkillsQuickStartWizard({
   const [step, setStep] = useState<WizardStep>("welcome");
   const [selectedIndustry, setSelectedIndustry] = useState<string | null>(null);
   const [selectedOccupations, setSelectedOccupations] = useState<string[]>([]);
+  const [occupationLabels, setOccupationLabels] = useState<Record<string, string>>({});
   const [progress, setProgress] = useState<ImportProgress | null>(null);
 
-  const handleOccupationToggle = (occupationUri: string) => {
+  const handleOccupationToggle = (occupationUri: string, occupationLabel?: string) => {
     setSelectedOccupations((prev) =>
       prev.includes(occupationUri)
         ? prev.filter((uri) => uri !== occupationUri)
         : [...prev, occupationUri]
     );
+    if (occupationLabel) {
+      setOccupationLabels((prev) => ({ ...prev, [occupationUri]: occupationLabel }));
+    }
   };
 
-  const handleSelectAllOccupations = (occupationUris: string[]) => {
-    setSelectedOccupations(occupationUris);
+  const handleSelectAllOccupations = (occupations: { uri: string; label: string }[]) => {
+    setSelectedOccupations(occupations.map(o => o.uri));
+    const labels: Record<string, string> = {};
+    occupations.forEach(o => { labels[o.uri] = o.label; });
+    setOccupationLabels((prev) => ({ ...prev, ...labels }));
   };
 
   const handleStartImport = async () => {
@@ -89,15 +96,9 @@ export function SkillsQuickStartWizard({
 
     for (let i = 0; i < selectedOccupations.length; i++) {
       const occupationUri = selectedOccupations[i];
-
-      // Get occupation label from mapping
-      const { data: mapping } = await supabase
-        .from("industry_occupation_mappings")
-        .select("occupation_label")
-        .eq("occupation_uri", occupationUri)
-        .single();
-
-      const occupationLabel = mapping?.occupation_label || "Unknown";
+      
+      // Get occupation label from local state (set during dynamic loading)
+      const occupationLabel = occupationLabels[occupationUri] || "Unknown";
 
       setProgress((prev) =>
         prev
