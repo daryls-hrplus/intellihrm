@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -18,6 +19,7 @@ interface FatigueManagementTabProps {
 }
 
 export function FatigueManagementTab({ companyId }: FatigueManagementTabProps) {
+  const { t } = useTranslation();
   const { rules, violations, isLoading, createRule, updateRule, deleteRule, acknowledgeViolation, overrideViolation } = useFatigueManagement(companyId);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [overrideDialogOpen, setOverrideDialogOpen] = useState(false);
@@ -104,15 +106,15 @@ export function FatigueManagementTab({ companyId }: FatigueManagementTabProps) {
         <div>
           <h3 className="text-lg font-semibold flex items-center gap-2">
             <Shield className="h-5 w-5" />
-            Fatigue Management
+            {t("timeAttendance.shifts.fatigue.title")}
           </h3>
-          <p className="text-sm text-muted-foreground">Configure rest rules and monitor violations</p>
+          <p className="text-sm text-muted-foreground">{t("timeAttendance.shifts.fatigue.minRestBetween")}</p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
             <Button size="sm">
               <Plus className="h-4 w-4 mr-2" />
-              New Rule
+              {t("timeAttendance.shifts.fatigue.createRule")}
             </Button>
           </DialogTrigger>
           <DialogContent>
@@ -256,9 +258,9 @@ export function FatigueManagementTab({ companyId }: FatigueManagementTabProps) {
           </CardHeader>
           <CardContent>
             {isLoading ? (
-              <div className="text-center py-4 text-muted-foreground">Loading...</div>
+              <div className="text-center py-4 text-muted-foreground">{t("common.loading")}</div>
             ) : rules.length === 0 ? (
-              <div className="text-center py-4 text-muted-foreground">No rules configured</div>
+              <div className="text-center py-4 text-muted-foreground">{t("timeAttendance.shifts.fatigue.noRules")}</div>
             ) : (
               <div className="space-y-2">
                 {rules.map(rule => (
@@ -295,7 +297,7 @@ export function FatigueManagementTab({ companyId }: FatigueManagementTabProps) {
           </CardHeader>
           <CardContent>
             {activeViolations.length === 0 ? (
-              <div className="text-center py-4 text-muted-foreground">No active violations</div>
+              <div className="text-center py-4 text-muted-foreground">{t("timeAttendance.shifts.fatigue.noViolations")}</div>
             ) : (
               <Table>
                 <TableHeader>

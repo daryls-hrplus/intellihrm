@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -12,6 +13,7 @@ interface ShiftCoverageTabProps {
 }
 
 export function ShiftCoverageTab({ companyId }: ShiftCoverageTabProps) {
+  const { t } = useTranslation();
   const { 
     coverageSnapshots, 
     costProjections, 
@@ -60,9 +62,9 @@ export function ShiftCoverageTab({ companyId }: ShiftCoverageTabProps) {
       <div>
         <h3 className="text-lg font-semibold flex items-center gap-2">
           <BarChart3 className="h-5 w-5" />
-          Coverage Analysis & Forecasting
+          {t("timeAttendance.shifts.coverage.title")}
         </h3>
-        <p className="text-sm text-muted-foreground">Monitor staffing levels and labor costs</p>
+        <p className="text-sm text-muted-foreground">{t("timeAttendance.shifts.coverage.demandForecasts")}</p>
       </div>
 
       {/* Key Metrics */}

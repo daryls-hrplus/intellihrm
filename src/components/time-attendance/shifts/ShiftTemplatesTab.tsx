@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -18,6 +19,7 @@ interface ShiftTemplatesTabProps {
 }
 
 export function ShiftTemplatesTab({ companyId }: ShiftTemplatesTabProps) {
+  const { t } = useTranslation();
   const { templates, isLoading, createTemplate, addTemplateEntry, removeTemplateEntry, deleteTemplate, toggleTemplateActive } = useShiftTemplates(companyId);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [entryDialogOpen, setEntryDialogOpen] = useState(false);
@@ -91,20 +93,20 @@ export function ShiftTemplatesTab({ companyId }: ShiftTemplatesTabProps) {
         <div>
           <h3 className="text-lg font-semibold flex items-center gap-2">
             <LayoutTemplate className="h-5 w-5" />
-            Shift Templates
+            {t("timeAttendance.shifts.templates.title")}
           </h3>
-          <p className="text-sm text-muted-foreground">Create reusable schedule templates</p>
+          <p className="text-sm text-muted-foreground">{t("timeAttendance.shifts.templates.weeklyTemplate")}</p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
             <Button size="sm">
               <Plus className="h-4 w-4 mr-2" />
-              New Template
+              {t("timeAttendance.shifts.templates.createTemplate")}
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Create Template</DialogTitle>
+              <DialogTitle>{t("timeAttendance.shifts.templates.createTemplate")}</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
               <div className="space-y-2">
@@ -156,9 +158,9 @@ export function ShiftTemplatesTab({ companyId }: ShiftTemplatesTabProps) {
           </CardHeader>
           <CardContent>
             {isLoading ? (
-              <div className="text-center py-4 text-muted-foreground">Loading...</div>
+              <div className="text-center py-4 text-muted-foreground">{t("common.loading")}</div>
             ) : templates.length === 0 ? (
-              <div className="text-center py-4 text-muted-foreground">No templates created</div>
+              <div className="text-center py-4 text-muted-foreground">{t("timeAttendance.shifts.templates.noTemplates")}</div>
             ) : (
               <div className="space-y-2">
                 {templates.map(template => (
