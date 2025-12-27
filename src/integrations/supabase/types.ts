@@ -4278,216 +4278,6 @@ export type Database = {
           },
         ]
       }
-      capabilities: {
-        Row: {
-          category: Database["public"]["Enums"]["capability_category"]
-          code: string
-          company_id: string | null
-          created_at: string | null
-          created_by: string | null
-          description: string | null
-          effective_from: string
-          effective_to: string | null
-          external_id: string | null
-          id: string
-          metadata: Json | null
-          name: string
-          owner_role: string | null
-          parent_capability_id: string | null
-          proficiency_scale_id: string | null
-          status: Database["public"]["Enums"]["capability_status"]
-          type: Database["public"]["Enums"]["capability_type"]
-          updated_at: string | null
-          version: number
-        }
-        Insert: {
-          category: Database["public"]["Enums"]["capability_category"]
-          code: string
-          company_id?: string | null
-          created_at?: string | null
-          created_by?: string | null
-          description?: string | null
-          effective_from?: string
-          effective_to?: string | null
-          external_id?: string | null
-          id?: string
-          metadata?: Json | null
-          name: string
-          owner_role?: string | null
-          parent_capability_id?: string | null
-          proficiency_scale_id?: string | null
-          status?: Database["public"]["Enums"]["capability_status"]
-          type: Database["public"]["Enums"]["capability_type"]
-          updated_at?: string | null
-          version?: number
-        }
-        Update: {
-          category?: Database["public"]["Enums"]["capability_category"]
-          code?: string
-          company_id?: string | null
-          created_at?: string | null
-          created_by?: string | null
-          description?: string | null
-          effective_from?: string
-          effective_to?: string | null
-          external_id?: string | null
-          id?: string
-          metadata?: Json | null
-          name?: string
-          owner_role?: string | null
-          parent_capability_id?: string | null
-          proficiency_scale_id?: string | null
-          status?: Database["public"]["Enums"]["capability_status"]
-          type?: Database["public"]["Enums"]["capability_type"]
-          updated_at?: string | null
-          version?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "capabilities_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "companies"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "capabilities_parent_capability_id_fkey"
-            columns: ["parent_capability_id"]
-            isOneToOne: false
-            referencedRelation: "capabilities"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "capabilities_proficiency_scale_id_fkey"
-            columns: ["proficiency_scale_id"]
-            isOneToOne: false
-            referencedRelation: "proficiency_scales"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      capability_change_history: {
-        Row: {
-          approved_at: string | null
-          approved_by: string | null
-          capability_id: string
-          change_reason: string | null
-          change_type: string
-          changed_by: string | null
-          created_at: string | null
-          id: string
-          new_values: Json | null
-          previous_values: Json | null
-        }
-        Insert: {
-          approved_at?: string | null
-          approved_by?: string | null
-          capability_id: string
-          change_reason?: string | null
-          change_type: string
-          changed_by?: string | null
-          created_at?: string | null
-          id?: string
-          new_values?: Json | null
-          previous_values?: Json | null
-        }
-        Update: {
-          approved_at?: string | null
-          approved_by?: string | null
-          capability_id?: string
-          change_reason?: string | null
-          change_type?: string
-          changed_by?: string | null
-          created_at?: string | null
-          id?: string
-          new_values?: Json | null
-          previous_values?: Json | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "capability_change_history_capability_id_fkey"
-            columns: ["capability_id"]
-            isOneToOne: false
-            referencedRelation: "capabilities"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      capability_evidence: {
-        Row: {
-          capability_id: string
-          confidence_score: number | null
-          created_at: string | null
-          effective_from: string
-          employee_id: string
-          evidence_reference: Json | null
-          evidence_source: Database["public"]["Enums"]["evidence_source"]
-          expires_at: string | null
-          id: string
-          notes: string | null
-          proficiency_level: number | null
-          updated_at: string | null
-          validated_at: string | null
-          validated_by: string | null
-          validation_status:
-            | Database["public"]["Enums"]["validation_status"]
-            | null
-        }
-        Insert: {
-          capability_id: string
-          confidence_score?: number | null
-          created_at?: string | null
-          effective_from?: string
-          employee_id: string
-          evidence_reference?: Json | null
-          evidence_source: Database["public"]["Enums"]["evidence_source"]
-          expires_at?: string | null
-          id?: string
-          notes?: string | null
-          proficiency_level?: number | null
-          updated_at?: string | null
-          validated_at?: string | null
-          validated_by?: string | null
-          validation_status?:
-            | Database["public"]["Enums"]["validation_status"]
-            | null
-        }
-        Update: {
-          capability_id?: string
-          confidence_score?: number | null
-          created_at?: string | null
-          effective_from?: string
-          employee_id?: string
-          evidence_reference?: Json | null
-          evidence_source?: Database["public"]["Enums"]["evidence_source"]
-          expires_at?: string | null
-          id?: string
-          notes?: string | null
-          proficiency_level?: number | null
-          updated_at?: string | null
-          validated_at?: string | null
-          validated_by?: string | null
-          validation_status?:
-            | Database["public"]["Enums"]["validation_status"]
-            | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "capability_evidence_capability_id_fkey"
-            columns: ["capability_id"]
-            isOneToOne: false
-            referencedRelation: "capabilities"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "capability_evidence_employee_id_fkey"
-            columns: ["employee_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       career_path_steps: {
         Row: {
           career_path_id: string
@@ -6370,7 +6160,129 @@ export type Database = {
             foreignKeyName: "competency_attributes_capability_id_fkey"
             columns: ["capability_id"]
             isOneToOne: true
-            referencedRelation: "capabilities"
+            referencedRelation: "skills_competencies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      competency_change_history: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          change_reason: string | null
+          change_type: string
+          changed_by: string | null
+          competency_id: string
+          created_at: string | null
+          id: string
+          new_values: Json | null
+          previous_values: Json | null
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          change_reason?: string | null
+          change_type: string
+          changed_by?: string | null
+          competency_id: string
+          created_at?: string | null
+          id?: string
+          new_values?: Json | null
+          previous_values?: Json | null
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          change_reason?: string | null
+          change_type?: string
+          changed_by?: string | null
+          competency_id?: string
+          created_at?: string | null
+          id?: string
+          new_values?: Json | null
+          previous_values?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "competency_change_history_competency_id_fkey"
+            columns: ["competency_id"]
+            isOneToOne: false
+            referencedRelation: "skills_competencies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      competency_evidence: {
+        Row: {
+          competency_id: string
+          confidence_score: number | null
+          created_at: string | null
+          effective_from: string
+          employee_id: string
+          evidence_reference: Json | null
+          evidence_source: Database["public"]["Enums"]["evidence_source"]
+          expires_at: string | null
+          id: string
+          notes: string | null
+          proficiency_level: number | null
+          updated_at: string | null
+          validated_at: string | null
+          validated_by: string | null
+          validation_status:
+            | Database["public"]["Enums"]["validation_status"]
+            | null
+        }
+        Insert: {
+          competency_id: string
+          confidence_score?: number | null
+          created_at?: string | null
+          effective_from?: string
+          employee_id: string
+          evidence_reference?: Json | null
+          evidence_source: Database["public"]["Enums"]["evidence_source"]
+          expires_at?: string | null
+          id?: string
+          notes?: string | null
+          proficiency_level?: number | null
+          updated_at?: string | null
+          validated_at?: string | null
+          validated_by?: string | null
+          validation_status?:
+            | Database["public"]["Enums"]["validation_status"]
+            | null
+        }
+        Update: {
+          competency_id?: string
+          confidence_score?: number | null
+          created_at?: string | null
+          effective_from?: string
+          employee_id?: string
+          evidence_reference?: Json | null
+          evidence_source?: Database["public"]["Enums"]["evidence_source"]
+          expires_at?: string | null
+          id?: string
+          notes?: string | null
+          proficiency_level?: number | null
+          updated_at?: string | null
+          validated_at?: string | null
+          validated_by?: string | null
+          validation_status?:
+            | Database["public"]["Enums"]["validation_status"]
+            | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "competency_evidence_competency_id_fkey"
+            columns: ["competency_id"]
+            isOneToOne: false
+            referencedRelation: "skills_competencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "competency_evidence_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -6555,14 +6467,14 @@ export type Database = {
             foreignKeyName: "competency_skill_mappings_competency_id_fkey"
             columns: ["competency_id"]
             isOneToOne: false
-            referencedRelation: "capabilities"
+            referencedRelation: "skills_competencies"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "competency_skill_mappings_skill_id_fkey"
             columns: ["skill_id"]
             isOneToOne: false
-            referencedRelation: "capabilities"
+            referencedRelation: "skills_competencies"
             referencedColumns: ["id"]
           },
         ]
@@ -19349,7 +19261,7 @@ export type Database = {
             foreignKeyName: "goal_skill_requirements_capability_id_fkey"
             columns: ["capability_id"]
             isOneToOne: false
-            referencedRelation: "capabilities"
+            referencedRelation: "skills_competencies"
             referencedColumns: ["id"]
           },
           {
@@ -37271,7 +37183,95 @@ export type Database = {
             foreignKeyName: "skill_attributes_capability_id_fkey"
             columns: ["capability_id"]
             isOneToOne: true
-            referencedRelation: "capabilities"
+            referencedRelation: "skills_competencies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      skills_competencies: {
+        Row: {
+          category: Database["public"]["Enums"]["capability_category"]
+          code: string
+          company_id: string | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          effective_from: string
+          effective_to: string | null
+          external_id: string | null
+          id: string
+          metadata: Json | null
+          name: string
+          owner_role: string | null
+          parent_capability_id: string | null
+          proficiency_scale_id: string | null
+          status: Database["public"]["Enums"]["capability_status"]
+          type: Database["public"]["Enums"]["capability_type"]
+          updated_at: string | null
+          version: number
+        }
+        Insert: {
+          category: Database["public"]["Enums"]["capability_category"]
+          code: string
+          company_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          effective_from?: string
+          effective_to?: string | null
+          external_id?: string | null
+          id?: string
+          metadata?: Json | null
+          name: string
+          owner_role?: string | null
+          parent_capability_id?: string | null
+          proficiency_scale_id?: string | null
+          status?: Database["public"]["Enums"]["capability_status"]
+          type: Database["public"]["Enums"]["capability_type"]
+          updated_at?: string | null
+          version?: number
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["capability_category"]
+          code?: string
+          company_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          effective_from?: string
+          effective_to?: string | null
+          external_id?: string | null
+          id?: string
+          metadata?: Json | null
+          name?: string
+          owner_role?: string | null
+          parent_capability_id?: string | null
+          proficiency_scale_id?: string | null
+          status?: Database["public"]["Enums"]["capability_status"]
+          type?: Database["public"]["Enums"]["capability_type"]
+          updated_at?: string | null
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "capabilities_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "capabilities_parent_capability_id_fkey"
+            columns: ["parent_capability_id"]
+            isOneToOne: false
+            referencedRelation: "skills_competencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "capabilities_proficiency_scale_id_fkey"
+            columns: ["proficiency_scale_id"]
+            isOneToOne: false
+            referencedRelation: "proficiency_scales"
             referencedColumns: ["id"]
           },
         ]
