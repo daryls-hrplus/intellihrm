@@ -1397,33 +1397,6 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId, payGroupI
               </TableRow>
             </TableHeader>
             <TableBody>
-              <TableRow>
-                <TableCell>
-                  <div className="flex flex-col">
-                    <span className="flex items-center gap-2">
-                      Base Salary
-                      <span className="text-xs text-primary">(Base)</span>
-                    </span>
-                    {result.proration?.isProrated && (
-                      <Badge variant="outline" className="w-fit mt-0.5 text-xs bg-warning/20 text-warning border-warning/30">
-                        Prorated
-                      </Badge>
-                    )}
-                  </div>
-                </TableCell>
-                <TableCell className="text-right font-mono text-sm tabular-nums">
-                  {formatCurrency(result.proration?.fullPeriodSalary ?? result.earnings.regular_pay)}
-                </TableCell>
-                <TableCell>
-                  <Badge variant="outline" className="font-mono text-xs">
-                    {result.localCurrencyCode}
-                  </Badge>
-                </TableCell>
-                <TableCell className="text-right font-mono text-sm font-medium tabular-nums">
-                  {formatCurrency(result.earnings.regular_pay)}
-                </TableCell>
-              </TableRow>
-
               {result.earnings.overtime_hours > 0 && (
                 <TableRow>
                   <TableCell>
