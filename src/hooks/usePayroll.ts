@@ -675,6 +675,19 @@ export function usePayroll() {
         currency = currencyData?.code || 'USD';
       }
       
+      // Fetch all active currencies to build a code->id lookup map
+      const { data: allCurrencies } = await supabase
+        .from("currencies")
+        .select("id, code")
+        .eq("is_active", true);
+      
+      const currencyCodeToIdMap = new Map<string, string>();
+      for (const cur of allCurrencies || []) {
+        if (cur?.code && cur?.id) {
+          currencyCodeToIdMap.set(cur.code.toUpperCase(), cur.id);
+        }
+      }
+      
       // Fetch stored exchange rates for this payroll run (for multi-currency conversion)
       const { data: payrollExchangeRates } = await supabase
         .from("payroll_run_exchange_rates")
@@ -958,7 +971,12 @@ export function usePayroll() {
             }
             
             // Apply currency conversion if compensation is in foreign currency
-            const compCurrencyId = comp.currency_id;
+            // First try currency_id, then fall back to looking up by currency code text
+            let compCurrencyId = comp.currency_id;
+            if (!compCurrencyId && comp.currency) {
+              compCurrencyId = currencyCodeToIdMap.get(String(comp.currency).toUpperCase()) || null;
+            }
+            
             const originalAmount = calculatedAmount;
             const { localAmount, exchangeRateUsed, wasConverted } = convertToLocalCurrency(calculatedAmount, compCurrencyId);
             calculatedAmount = localAmount;
