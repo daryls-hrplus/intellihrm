@@ -24385,6 +24385,66 @@ export type Database = {
           },
         ]
       }
+      job_capability_requirements: {
+        Row: {
+          capability_id: string
+          created_at: string
+          end_date: string | null
+          id: string
+          is_preferred: boolean
+          is_required: boolean
+          job_id: string
+          notes: string | null
+          required_proficiency_level: number
+          start_date: string
+          updated_at: string
+          weighting: number | null
+        }
+        Insert: {
+          capability_id: string
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          is_preferred?: boolean
+          is_required?: boolean
+          job_id: string
+          notes?: string | null
+          required_proficiency_level?: number
+          start_date?: string
+          updated_at?: string
+          weighting?: number | null
+        }
+        Update: {
+          capability_id?: string
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          is_preferred?: boolean
+          is_required?: boolean
+          job_id?: string
+          notes?: string | null
+          required_proficiency_level?: number
+          start_date?: string
+          updated_at?: string
+          weighting?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_capability_requirements_capability_id_fkey"
+            columns: ["capability_id"]
+            isOneToOne: false
+            referencedRelation: "skills_competencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_capability_requirements_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       job_competencies: {
         Row: {
           competency_id: string

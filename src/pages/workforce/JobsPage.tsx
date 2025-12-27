@@ -63,6 +63,7 @@ import { getTodayString } from "@/utils/dateUtils";
 import { JobCompetenciesManager } from "@/components/workforce/JobCompetenciesManager";
 import { JobResponsibilitiesManager } from "@/components/workforce/JobResponsibilitiesManager";
 import { JobGoalsManager } from "@/components/workforce/JobGoalsManager";
+import { JobCapabilityRequirementsManager } from "@/components/workforce/JobCapabilityRequirementsManager";
 import { BulkJobDataImport } from "@/components/workforce/BulkJobDataImport";
 
 interface Job {
@@ -854,12 +855,19 @@ export default function JobsPage() {
                     {expandedJobId === job.id && (
                       <TableRow>
                         <TableCell colSpan={10} className="bg-muted/30 p-4">
-                          <Tabs defaultValue="competencies" className="w-full">
+                          <Tabs defaultValue="skills" className="w-full">
                             <TabsList>
+                              <TabsTrigger value="skills">Skills</TabsTrigger>
                               <TabsTrigger value="competencies">Competencies</TabsTrigger>
                               <TabsTrigger value="responsibilities">Responsibilities</TabsTrigger>
                               <TabsTrigger value="goals">Goals</TabsTrigger>
                             </TabsList>
+                            <TabsContent value="skills" className="mt-4">
+                              <JobCapabilityRequirementsManager 
+                                jobId={job.id} 
+                                companyId={job.company_id} 
+                              />
+                            </TabsContent>
                             <TabsContent value="competencies" className="mt-4">
                               <JobCompetenciesManager 
                                 jobId={job.id} 
