@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
 import { useOverpaymentRecovery, OverpaymentPriority } from "@/hooks/useOverpaymentRecovery";
+import { useCompanyCurrencyList } from "@/hooks/useCompanyCurrencies";
 import { toast } from "sonner";
 
 interface CreateOverpaymentDialogProps {
@@ -41,6 +42,7 @@ export function CreateOverpaymentDialog({
   onSuccess 
 }: CreateOverpaymentDialogProps) {
   const { createRecord } = useOverpaymentRecovery(companyId);
+  const { currencies, defaultCurrency, isLoading: currenciesLoading } = useCompanyCurrencyList(companyId || undefined);
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -53,11 +55,18 @@ export function CreateOverpaymentDialog({
     reason_details: "",
     original_amount: "",
     recovery_amount_per_cycle: "",
-    currency: "USD",
+    currency: "",
     priority: "normal" as OverpaymentPriority,
     notes: "",
     create_linked_deduction: true,
   });
+
+  // Set default currency when loaded
+  useEffect(() => {
+    if (defaultCurrency && !formData.currency) {
+      setFormData(prev => ({ ...prev, currency: defaultCurrency.code }));
+    }
+  }, [defaultCurrency]);
 
   useEffect(() => {
     if (open && companyId) {
@@ -143,7 +152,7 @@ export function CreateOverpaymentDialog({
       reason_details: "",
       original_amount: "",
       recovery_amount_per_cycle: "",
-      currency: "USD",
+      currency: defaultCurrency?.code || "",
       priority: "normal",
       notes: "",
       create_linked_deduction: true,
@@ -278,20 +287,17 @@ export function CreateOverpaymentDialog({
               <Select 
                 value={formData.currency} 
                 onValueChange={(val) => setFormData(prev => ({ ...prev, currency: val }))}
+                disabled={currenciesLoading}
               >
                 <SelectTrigger>
-                  <SelectValue />
+                  <SelectValue placeholder={currenciesLoading ? "Loading..." : "Select currency"} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="USD">USD</SelectItem>
-                  <SelectItem value="EUR">EUR</SelectItem>
-                  <SelectItem value="GBP">GBP</SelectItem>
-                  <SelectItem value="XCD">XCD</SelectItem>
-                  <SelectItem value="JMD">JMD</SelectItem>
-                  <SelectItem value="TTD">TTD</SelectItem>
-                  <SelectItem value="GHS">GHS</SelectItem>
-                  <SelectItem value="NGN">NGN</SelectItem>
-                  <SelectItem value="DOP">DOP</SelectItem>
+                  {currencies.map(currency => (
+                    <SelectItem key={currency.id} value={currency.code}>
+                      {currency.code} - {currency.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
