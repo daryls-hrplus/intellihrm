@@ -28603,6 +28603,7 @@ export type Database = {
       master_occupations_library: {
         Row: {
           alternative_labels: string[] | null
+          competencies_count: number | null
           created_at: string | null
           description: string | null
           description_en: string | null
@@ -28611,17 +28612,20 @@ export type Database = {
           id: string
           industry_id: string | null
           is_active: boolean | null
+          is_cross_cutting: boolean | null
           isco_code: string | null
           job_family: string | null
           job_level: string | null
           occupation_name: string
           occupation_name_en: string | null
           search_vector: unknown
+          skills_count: number | null
           source: string | null
           updated_at: string | null
         }
         Insert: {
           alternative_labels?: string[] | null
+          competencies_count?: number | null
           created_at?: string | null
           description?: string | null
           description_en?: string | null
@@ -28630,17 +28634,20 @@ export type Database = {
           id?: string
           industry_id?: string | null
           is_active?: boolean | null
+          is_cross_cutting?: boolean | null
           isco_code?: string | null
           job_family?: string | null
           job_level?: string | null
           occupation_name: string
           occupation_name_en?: string | null
           search_vector?: unknown
+          skills_count?: number | null
           source?: string | null
           updated_at?: string | null
         }
         Update: {
           alternative_labels?: string[] | null
+          competencies_count?: number | null
           created_at?: string | null
           description?: string | null
           description_en?: string | null
@@ -28649,12 +28656,14 @@ export type Database = {
           id?: string
           industry_id?: string | null
           is_active?: boolean | null
+          is_cross_cutting?: boolean | null
           isco_code?: string | null
           job_family?: string | null
           job_level?: string | null
           occupation_name?: string
           occupation_name_en?: string | null
           search_vector?: unknown
+          skills_count?: number | null
           source?: string | null
           updated_at?: string | null
         }
@@ -28667,6 +28676,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      master_role_aliases: {
+        Row: {
+          alias_role: string
+          canonical_role: string
+          created_at: string | null
+          id: string
+          notes: string | null
+          region: string | null
+        }
+        Insert: {
+          alias_role: string
+          canonical_role: string
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          region?: string | null
+        }
+        Update: {
+          alias_role?: string
+          canonical_role?: string
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          region?: string | null
+        }
+        Relationships: []
       }
       master_skills_library: {
         Row: {
