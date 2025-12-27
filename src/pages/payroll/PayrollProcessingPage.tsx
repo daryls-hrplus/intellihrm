@@ -17,6 +17,8 @@ import { PayrollFilters, usePayrollFilters } from "@/components/payroll/PayrollF
 import { usePayslipTemplates, PayslipTemplate } from "@/hooks/usePayslipTemplates";
 import { PayslipDocument } from "@/components/payroll/PayslipDocument";
 import { BulkPayslipDistribution } from "@/components/payroll/BulkPayslipDistribution";
+import { ExchangeRateSelectionDialog } from "@/components/payroll/ExchangeRateSelectionDialog";
+import { usePayGroupMultiCurrency } from "@/hooks/useMultiCurrencyPayroll";
 import { supabase } from "@/integrations/supabase/client";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/contexts/AuthContext";
@@ -39,6 +41,7 @@ import {
   Printer,
   BookOpen,
   Mail,
+  Globe,
 } from "lucide-react";
 import { formatDateForDisplay } from "@/utils/dateUtils";
 
@@ -95,6 +98,19 @@ export default function PayrollProcessingPage() {
   const [payGroupGLConfigured, setPayGroupGLConfigured] = useState(false);
   const [bulkDistributionOpen, setBulkDistributionOpen] = useState(false);
   const [bulkDistributionRun, setBulkDistributionRun] = useState<ExtendedPayrollRun | null>(null);
+  
+  // Multi-currency state
+  const [exchangeRateDialogOpen, setExchangeRateDialogOpen] = useState(false);
+  const [runForExchangeRates, setRunForExchangeRates] = useState<ExtendedPayrollRun | null>(null);
+  const [foreignCurrencyIds, setForeignCurrencyIds] = useState<string[]>([]);
+  const [companyLocalCurrencyId, setCompanyLocalCurrencyId] = useState<string | null>(null);
+  const [groupBaseCurrencyId, setGroupBaseCurrencyId] = useState<string | null>(null);
+  
+  // Check if pay group has multi-currency enabled
+  const { data: payGroupSettings } = usePayGroupMultiCurrency(
+    selectedPayGroupId !== "all" ? selectedPayGroupId : undefined
+  );
+  const isMultiCurrencyEnabled = payGroupSettings?.enable_multi_currency || false;
 
   const isAdmin = hasRole('admin');
   const isHRManager = hasRole('hr_manager');
@@ -118,12 +134,25 @@ export default function PayrollProcessingPage() {
       
       const [template, companyData] = await Promise.all([
         fetchDefaultTemplate(selectedCompanyId),
-        supabase.from('companies').select('name, address, logo_url').eq('id', selectedCompanyId).single()
+        supabase.from('companies').select('name, address, logo_url, local_currency_id, group_id').eq('id', selectedCompanyId).single()
       ]);
       
       setPayslipTemplate(template);
       if (companyData.data) {
         setCompanyInfo(companyData.data);
+        setCompanyLocalCurrencyId(companyData.data.local_currency_id);
+        
+        // Fetch group base currency if company is in a group
+        if (companyData.data.group_id) {
+          const { data: groupData } = await supabase
+            .from('company_groups')
+            .select('base_currency_id')
+            .eq('id', companyData.data.group_id)
+            .single();
+          if (groupData?.base_currency_id) {
+            setGroupBaseCurrencyId(groupData.base_currency_id);
+          }
+        }
       }
     };
     loadTemplateAndCompany();
@@ -188,10 +217,52 @@ export default function PayrollProcessingPage() {
       return;
     }
     
+    // If multi-currency is enabled, check for foreign currencies and show rate selection dialog
+    if (isMultiCurrencyEnabled && companyLocalCurrencyId) {
+      // Fetch currencies used in employee compensations for this pay group
+      const { data: compensations } = await supabase
+        .from('employee_compensation')
+        .select(`
+          currency_id,
+          position:employee_positions!inner(pay_group_id)
+        `)
+        .eq('is_active', true)
+        .not('currency_id', 'is', null);
+      
+      // Find unique foreign currencies (not local)
+      const foreignIds = new Set<string>();
+      compensations?.forEach(c => {
+        if (c.currency_id && c.currency_id !== companyLocalCurrencyId) {
+          foreignIds.add(c.currency_id);
+        }
+      });
+      
+      if (foreignIds.size > 0) {
+        setForeignCurrencyIds(Array.from(foreignIds));
+        setRunForExchangeRates(run);
+        setExchangeRateDialogOpen(true);
+        return; // Wait for user to confirm exchange rates
+      }
+    }
+    
+    // Proceed with calculation
+    await proceedWithCalculation(run);
+  };
+
+  const proceedWithCalculation = async (run: ExtendedPayrollRun) => {
+    if (!selectedCompanyId || !selectedPayGroupId) return;
+    
     const success = await calculatePayroll(run.id, selectedCompanyId, run.pay_period_id, selectedPayGroupId);
     if (success) {
       await loadData();
       await refreshExpandedEmployees(run.id);
+    }
+  };
+
+  const handleExchangeRatesConfirmed = async () => {
+    if (runForExchangeRates) {
+      await proceedWithCalculation(runForExchangeRates);
+      setRunForExchangeRates(null);
     }
   };
 
@@ -1296,6 +1367,19 @@ export default function PayrollProcessingPage() {
             companyId={selectedCompanyId}
             payslipTemplate={payslipTemplate}
             companyInfo={companyInfo}
+          />
+        )}
+
+        {/* Multi-Currency Exchange Rate Selection */}
+        {runForExchangeRates && companyLocalCurrencyId && (
+          <ExchangeRateSelectionDialog
+            open={exchangeRateDialogOpen}
+            onOpenChange={setExchangeRateDialogOpen}
+            payrollRunId={runForExchangeRates.id}
+            localCurrencyId={companyLocalCurrencyId}
+            baseCurrencyId={groupBaseCurrencyId || undefined}
+            foreignCurrencyIds={foreignCurrencyIds}
+            onRatesConfirmed={handleExchangeRatesConfirmed}
           />
         )}
       </div>

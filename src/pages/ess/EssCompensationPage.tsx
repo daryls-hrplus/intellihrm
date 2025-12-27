@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { DollarSign, TrendingUp, Target, Gem, ChevronRight, History, Receipt } from "lucide-react";
+import { DollarSign, TrendingUp, Target, Gem, ChevronRight, History, Receipt, Globe } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { NavLink } from "@/components/NavLink";
 
@@ -108,6 +108,13 @@ export default function EssCompensationPage() {
       href: "/ess/compensation/compa-ratio",
       icon: Target,
       color: "bg-pink-500/10 text-pink-600",
+    },
+    {
+      title: "Currency Preferences",
+      description: "Manage how your net pay is distributed",
+      href: "/ess/compensation/currency-preferences",
+      icon: Globe,
+      color: "bg-teal-500/10 text-teal-600",
     },
   ];
 

@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { Plus, Pencil, Trash2, Users, ArrowLeft, ShieldCheck, BookOpen } from "lucide-react";
+import { Plus, Pencil, Trash2, Users, ArrowLeft, ShieldCheck, BookOpen, Globe } from "lucide-react";
 import { PayrollCalendarGenerator } from "@/components/payroll/PayrollCalendarGenerator";
 import { toast } from "sonner";
 import { formatDateForDisplay, getTodayString } from "@/utils/dateUtils";
@@ -28,6 +28,7 @@ interface PayGroupFormData {
   is_active: boolean;
   uses_national_insurance: boolean;
   gl_configured: boolean;
+  enable_multi_currency: boolean;
   start_date: string;
   end_date: string;
 }
@@ -48,6 +49,7 @@ export default function PayGroupsPage() {
     is_active: true,
     uses_national_insurance: false,
     gl_configured: false,
+    enable_multi_currency: false,
     start_date: getTodayString(),
     end_date: "",
   });
@@ -80,6 +82,7 @@ export default function PayGroupsPage() {
         is_active: data.is_active,
         uses_national_insurance: data.uses_national_insurance,
         gl_configured: data.gl_configured,
+        enable_multi_currency: data.enable_multi_currency,
         start_date: data.start_date,
         end_date: data.end_date || null,
       };
@@ -130,6 +133,7 @@ export default function PayGroupsPage() {
       is_active: true,
       uses_national_insurance: false,
       gl_configured: false,
+      enable_multi_currency: false,
       start_date: getTodayString(),
       end_date: "",
     });
@@ -146,6 +150,7 @@ export default function PayGroupsPage() {
       is_active: item.is_active,
       uses_national_insurance: item.uses_national_insurance || false,
       gl_configured: item.gl_configured || false,
+      enable_multi_currency: item.enable_multi_currency || false,
       start_date: item.start_date,
       end_date: item.end_date || "",
     });
@@ -219,6 +224,7 @@ export default function PayGroupsPage() {
                   <TableHead>{t("payroll.payGroups.payFrequency")}</TableHead>
                   <TableHead>NI</TableHead>
                   <TableHead>GL</TableHead>
+                  <TableHead>FX</TableHead>
                   <TableHead>{t("common.status")}</TableHead>
                   <TableHead>{t("common.startDate")}</TableHead>
                   <TableHead>{t("common.actions")}</TableHead>
@@ -240,6 +246,11 @@ export default function PayGroupsPage() {
                     <TableCell>
                       {pg.gl_configured && (
                         <BookOpen className="h-4 w-4 text-success" />
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {pg.enable_multi_currency && (
+                        <Globe className="h-4 w-4 text-primary" />
                       )}
                     </TableCell>
                     <TableCell>
@@ -383,6 +394,14 @@ export default function PayGroupsPage() {
                 />
                 <Label>GL Configured</Label>
                 <span className="text-xs text-muted-foreground">(Enables GL posting step before payout)</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch
+                  checked={formData.enable_multi_currency}
+                  onCheckedChange={(checked) => setFormData((prev) => ({ ...prev, enable_multi_currency: checked }))}
+                />
+                <Label>Multi-Currency</Label>
+                <span className="text-xs text-muted-foreground">(Process pay elements in different currencies)</span>
               </div>
             </div>
           </div>
