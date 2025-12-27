@@ -17109,6 +17109,102 @@ export type Database = {
           },
         ]
       }
+      goal_ai_analyses: {
+        Row: {
+          achievability_score: number | null
+          ai_quality_score: number | null
+          ai_reasoning: string | null
+          analyzed_at: string | null
+          clarity_score: number | null
+          company_id: string
+          completion_risk_level: string | null
+          confidence_score: number | null
+          created_at: string
+          goal_id: string
+          id: string
+          improvement_suggestions: Json | null
+          inferred_skills: string[] | null
+          measurability_score: number | null
+          model_used: string | null
+          relevance_score: number | null
+          risk_factors: Json | null
+          similar_goals: Json | null
+          similarity_warning: boolean | null
+          skill_gaps: Json | null
+          specificity_score: number | null
+          suggested_templates: Json | null
+          tokens_used: number | null
+          updated_at: string
+        }
+        Insert: {
+          achievability_score?: number | null
+          ai_quality_score?: number | null
+          ai_reasoning?: string | null
+          analyzed_at?: string | null
+          clarity_score?: number | null
+          company_id: string
+          completion_risk_level?: string | null
+          confidence_score?: number | null
+          created_at?: string
+          goal_id: string
+          id?: string
+          improvement_suggestions?: Json | null
+          inferred_skills?: string[] | null
+          measurability_score?: number | null
+          model_used?: string | null
+          relevance_score?: number | null
+          risk_factors?: Json | null
+          similar_goals?: Json | null
+          similarity_warning?: boolean | null
+          skill_gaps?: Json | null
+          specificity_score?: number | null
+          suggested_templates?: Json | null
+          tokens_used?: number | null
+          updated_at?: string
+        }
+        Update: {
+          achievability_score?: number | null
+          ai_quality_score?: number | null
+          ai_reasoning?: string | null
+          analyzed_at?: string | null
+          clarity_score?: number | null
+          company_id?: string
+          completion_risk_level?: string | null
+          confidence_score?: number | null
+          created_at?: string
+          goal_id?: string
+          id?: string
+          improvement_suggestions?: Json | null
+          inferred_skills?: string[] | null
+          measurability_score?: number | null
+          model_used?: string | null
+          relevance_score?: number | null
+          risk_factors?: Json | null
+          similar_goals?: Json | null
+          similarity_warning?: boolean | null
+          skill_gaps?: Json | null
+          specificity_score?: number | null
+          suggested_templates?: Json | null
+          tokens_used?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "goal_ai_analyses_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "goal_ai_analyses_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "performance_goals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       goal_alignments: {
         Row: {
           alignment_percentage: number | null
@@ -17598,6 +17694,84 @@ export type Database = {
           },
         ]
       }
+      goal_coaching_nudges: {
+        Row: {
+          acted_at: string | null
+          ai_reasoning: string | null
+          company_id: string
+          confidence_score: number | null
+          created_at: string
+          dismissed_at: string | null
+          employee_id: string | null
+          expires_at: string | null
+          goal_id: string | null
+          id: string
+          manager_id: string
+          message: string
+          nudge_type: string
+          priority: string | null
+          status: string | null
+          suggested_action: string | null
+          title: string
+          viewed_at: string | null
+        }
+        Insert: {
+          acted_at?: string | null
+          ai_reasoning?: string | null
+          company_id: string
+          confidence_score?: number | null
+          created_at?: string
+          dismissed_at?: string | null
+          employee_id?: string | null
+          expires_at?: string | null
+          goal_id?: string | null
+          id?: string
+          manager_id: string
+          message: string
+          nudge_type: string
+          priority?: string | null
+          status?: string | null
+          suggested_action?: string | null
+          title: string
+          viewed_at?: string | null
+        }
+        Update: {
+          acted_at?: string | null
+          ai_reasoning?: string | null
+          company_id?: string
+          confidence_score?: number | null
+          created_at?: string
+          dismissed_at?: string | null
+          employee_id?: string | null
+          expires_at?: string | null
+          goal_id?: string | null
+          id?: string
+          manager_id?: string
+          message?: string
+          nudge_type?: string
+          priority?: string | null
+          status?: string | null
+          suggested_action?: string | null
+          title?: string
+          viewed_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "goal_coaching_nudges_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "goal_coaching_nudges_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "performance_goals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       goal_comments: {
         Row: {
           comment: string
@@ -18041,6 +18215,68 @@ export type Database = {
             columns: ["goal_id"]
             isOneToOne: false
             referencedRelation: "performance_goals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      goal_notification_preferences: {
+        Row: {
+          check_in_reminders: boolean | null
+          coaching_suggestions: boolean | null
+          company_id: string
+          created_at: string
+          digest_frequency: string | null
+          email_enabled: boolean | null
+          goal_updates: boolean | null
+          id: string
+          in_app_enabled: boolean | null
+          manager_review_requests: boolean | null
+          overdue_alerts: boolean | null
+          reminder_days_before: number | null
+          risk_alerts: boolean | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          check_in_reminders?: boolean | null
+          coaching_suggestions?: boolean | null
+          company_id: string
+          created_at?: string
+          digest_frequency?: string | null
+          email_enabled?: boolean | null
+          goal_updates?: boolean | null
+          id?: string
+          in_app_enabled?: boolean | null
+          manager_review_requests?: boolean | null
+          overdue_alerts?: boolean | null
+          reminder_days_before?: number | null
+          risk_alerts?: boolean | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          check_in_reminders?: boolean | null
+          coaching_suggestions?: boolean | null
+          company_id?: string
+          created_at?: string
+          digest_frequency?: string | null
+          email_enabled?: boolean | null
+          goal_updates?: boolean | null
+          id?: string
+          in_app_enabled?: boolean | null
+          manager_review_requests?: boolean | null
+          overdue_alerts?: boolean | null
+          reminder_days_before?: number | null
+          risk_alerts?: boolean | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "goal_notification_preferences_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
             referencedColumns: ["id"]
           },
         ]
@@ -18759,6 +18995,63 @@ export type Database = {
           },
           {
             foreignKeyName: "goal_risk_assessments_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "performance_goals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      goal_skill_requirements: {
+        Row: {
+          ai_confidence: number | null
+          company_id: string
+          created_at: string
+          goal_id: string
+          id: string
+          is_gap: boolean | null
+          proficiency_level: string | null
+          recommended_training_ids: string[] | null
+          skill_category: string | null
+          skill_name: string
+          updated_at: string
+        }
+        Insert: {
+          ai_confidence?: number | null
+          company_id: string
+          created_at?: string
+          goal_id: string
+          id?: string
+          is_gap?: boolean | null
+          proficiency_level?: string | null
+          recommended_training_ids?: string[] | null
+          skill_category?: string | null
+          skill_name: string
+          updated_at?: string
+        }
+        Update: {
+          ai_confidence?: number | null
+          company_id?: string
+          created_at?: string
+          goal_id?: string
+          id?: string
+          is_gap?: boolean | null
+          proficiency_level?: string | null
+          recommended_training_ids?: string[] | null
+          skill_category?: string | null
+          skill_name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "goal_skill_requirements_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "goal_skill_requirements_goal_id_fkey"
             columns: ["goal_id"]
             isOneToOne: false
             referencedRelation: "performance_goals"
