@@ -8236,6 +8236,7 @@ export type Database = {
       employee_compensation: {
         Row: {
           amount: number
+          approval_status: string | null
           company_id: string
           created_at: string
           created_by: string | null
@@ -8250,14 +8251,17 @@ export type Database = {
           notes: string | null
           override_reason: string | null
           pay_element_id: string
+          pending_effective_date: string | null
           position_id: string | null
           rate_type: string | null
+          source_transaction_id: string | null
           start_date: string
           updated_at: string
           updated_by: string | null
         }
         Insert: {
           amount: number
+          approval_status?: string | null
           company_id: string
           created_at?: string
           created_by?: string | null
@@ -8272,14 +8276,17 @@ export type Database = {
           notes?: string | null
           override_reason?: string | null
           pay_element_id: string
+          pending_effective_date?: string | null
           position_id?: string | null
           rate_type?: string | null
+          source_transaction_id?: string | null
           start_date?: string
           updated_at?: string
           updated_by?: string | null
         }
         Update: {
           amount?: number
+          approval_status?: string | null
           company_id?: string
           created_at?: string
           created_by?: string | null
@@ -8294,8 +8301,10 @@ export type Database = {
           notes?: string | null
           override_reason?: string | null
           pay_element_id?: string
+          pending_effective_date?: string | null
           position_id?: string | null
           rate_type?: string | null
+          source_transaction_id?: string | null
           start_date?: string
           updated_at?: string
           updated_by?: string | null
@@ -8341,6 +8350,13 @@ export type Database = {
             columns: ["position_id"]
             isOneToOne: false
             referencedRelation: "positions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_compensation_source_transaction_id_fkey"
+            columns: ["source_transaction_id"]
+            isOneToOne: false
+            referencedRelation: "employee_transactions"
             referencedColumns: ["id"]
           },
           {
@@ -36280,6 +36296,7 @@ export type Database = {
       }
       retroactive_pay_configs: {
         Row: {
+          approval_date: string | null
           approved_at: string | null
           approved_by: string | null
           auto_include: boolean
@@ -36291,13 +36308,16 @@ export type Database = {
           effective_end_date: string
           effective_start_date: string
           id: string
+          is_approval_triggered: boolean | null
           pay_group_id: string
+          source_transaction_id: string | null
           status: string
           target_pay_period_id: string | null
           target_run_types: string[] | null
           updated_at: string
         }
         Insert: {
+          approval_date?: string | null
           approved_at?: string | null
           approved_by?: string | null
           auto_include?: boolean
@@ -36309,13 +36329,16 @@ export type Database = {
           effective_end_date: string
           effective_start_date: string
           id?: string
+          is_approval_triggered?: boolean | null
           pay_group_id: string
+          source_transaction_id?: string | null
           status?: string
           target_pay_period_id?: string | null
           target_run_types?: string[] | null
           updated_at?: string
         }
         Update: {
+          approval_date?: string | null
           approved_at?: string | null
           approved_by?: string | null
           auto_include?: boolean
@@ -36327,7 +36350,9 @@ export type Database = {
           effective_end_date?: string
           effective_start_date?: string
           id?: string
+          is_approval_triggered?: boolean | null
           pay_group_id?: string
+          source_transaction_id?: string | null
           status?: string
           target_pay_period_id?: string | null
           target_run_types?: string[] | null
@@ -36360,6 +36385,13 @@ export type Database = {
             columns: ["pay_group_id"]
             isOneToOne: false
             referencedRelation: "pay_groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "retroactive_pay_configs_source_transaction_id_fkey"
+            columns: ["source_transaction_id"]
+            isOneToOne: false
+            referencedRelation: "employee_transactions"
             referencedColumns: ["id"]
           },
           {

@@ -861,6 +861,7 @@ export function usePayroll() {
         
         // First check employee_compensation (overrides position compensation)
         // Filter out compensation items that have ended before this pay period
+        // Fetch compensation - exclude pending items (not yet approved for payment)
         const { data: employeeCompRaw } = await supabase
           .from("employee_compensation")
           .select(`
@@ -873,7 +874,8 @@ export function usePayroll() {
             )
           `)
           .eq("employee_id", emp.employee_id)
-          .eq("is_active", true);
+          .eq("is_active", true)
+          .or("approval_status.is.null,approval_status.eq.approved");
         
         // Filter out compensation items with end_date before the pay period start
         const periodStart = payPeriod?.period_start;
