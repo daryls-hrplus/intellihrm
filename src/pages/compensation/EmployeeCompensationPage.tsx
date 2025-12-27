@@ -892,10 +892,12 @@ export default function EmployeeCompensationPage() {
   };
 
   const frequencyOptions = [
-    { value: "monthly", label: t("compensation.employeeCompensation.frequency.monthly") },
-    { value: "annual", label: t("compensation.employeeCompensation.frequency.annual") },
+    { value: "hourly", label: t("compensation.employeeCompensation.frequency.hourly", "Hourly") },
+    { value: "daily", label: t("compensation.employeeCompensation.frequency.daily", "Daily") },
     { value: "weekly", label: t("compensation.employeeCompensation.frequency.weekly") },
     { value: "bi-weekly", label: t("compensation.employeeCompensation.frequency.biWeekly") },
+    { value: "monthly", label: t("compensation.employeeCompensation.frequency.monthly") },
+    { value: "annual", label: t("compensation.employeeCompensation.frequency.annual") },
     { value: "one-time", label: t("compensation.employeeCompensation.frequency.oneTime") },
   ];
 
