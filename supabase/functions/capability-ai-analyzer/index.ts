@@ -86,7 +86,7 @@ async function inferSkillsFromText(text: string, apiKey: string, supabase: any, 
   let existingCapabilities: { id: string; name: string; code: string }[] = [];
   if (companyId) {
     const { data } = await supabase
-      .from("capabilities")
+      .from("skills_competencies")
       .select("id, name, code")
       .or(`company_id.eq.${companyId},company_id.is.null`)
       .eq("status", "active")
@@ -323,7 +323,7 @@ async function suggestAdjacentSkills(capability: any, apiKey: string, supabase: 
   let existingSkills: string[] = [];
   if (companyId) {
     const { data } = await supabase
-      .from("capabilities")
+      .from("skills_competencies")
       .select("name")
       .or(`company_id.eq.${companyId},company_id.is.null`)
       .eq("status", "active")
@@ -430,13 +430,13 @@ async function analyzeCapabilityGap(employeeId: string, jobProfileId: string, ap
 
   // Fetch employee capabilities
   const { data: employeeEvidence } = await supabase
-    .from("capability_evidence")
+    .from("competency_evidence")
     .select(`
-      capability_id,
+      competency_id,
       proficiency_level,
       confidence_score,
       validation_status,
-      capabilities!inner(id, name, code, type, category)
+      skills_competencies!inner(id, name, code, type, category)
     `)
     .eq("employee_id", employeeId)
     .eq("validation_status", "validated");
@@ -449,19 +449,19 @@ async function analyzeCapabilityGap(employeeId: string, jobProfileId: string, ap
       competency_id,
       required_level,
       is_primary,
-      capabilities!job_competencies_competency_id_fkey(id, name, code, type, category)
+      skills_competencies!job_competencies_competency_id_fkey(id, name, code, type, category)
     `)
     .eq("job_id", jobProfileId);
 
   // Build context for AI analysis
   const employeeSkills = (employeeEvidence || []).map((e: any) => ({
-    name: e.capabilities?.name,
+    name: e.skills_competencies?.name,
     level: e.proficiency_level,
     confidence: e.confidence_score,
   }));
 
   const requirements = (jobRequirements || []).map((r: any) => ({
-    name: r.capabilities?.name,
+    name: r.skills_competencies?.name,
     required_level: r.required_level,
     is_primary: r.is_primary,
   }));

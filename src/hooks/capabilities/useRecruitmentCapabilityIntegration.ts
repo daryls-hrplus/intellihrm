@@ -1,9 +1,5 @@
 import { useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
-import type { Database } from "@/integrations/supabase/types";
-
-type CapabilityRow = Database['public']['Tables']['capabilities']['Row'];
 
 interface CandidateCapabilityMatch {
   candidate_id: string;
@@ -39,7 +35,7 @@ export function useRecruitmentCapabilityIntegration() {
       // Get capability names for gap reporting
       const capIds = requiredCapabilities.map(r => r.capability_id);
       const { data: capabilities } = await supabase
-        .from("capabilities")
+        .from("skills_competencies")
         .select("id, name")
         .in("id", capIds);
 

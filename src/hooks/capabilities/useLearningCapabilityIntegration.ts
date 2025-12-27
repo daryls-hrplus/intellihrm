@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import type { Database } from "@/integrations/supabase/types";
 
-type CapabilityRow = Database['public']['Tables']['capabilities']['Row'];
+type CapabilityRow = Database['public']['Tables']['skills_competencies']['Row'];
 
 interface LearningRecommendation {
   capability: CapabilityRow;
@@ -29,11 +29,11 @@ export function useLearningCapabilityIntegration() {
       const capabilityIds = targetCapabilities.map(t => t.capability_id);
       
       const [capabilitiesRes, evidenceRes] = await Promise.all([
-        supabase.from("capabilities").select("*").in("id", capabilityIds),
-        supabase.from("capability_evidence")
+        supabase.from("skills_competencies").select("*").in("id", capabilityIds),
+        supabase.from("competency_evidence")
           .select("*")
           .eq("employee_id", employeeId)
-          .in("capability_id", capabilityIds)
+          .in("competency_id", capabilityIds)
           .eq("validation_status", "validated")
           .order("effective_from", { ascending: false }),
       ]);
@@ -48,7 +48,7 @@ export function useLearningCapabilityIntegration() {
         const capability = capabilities.find(c => c.id === target.capability_id);
         if (!capability) continue;
 
-        const latestEvidence = evidence.find(e => e.capability_id === target.capability_id);
+        const latestEvidence = evidence.find(e => e.competency_id === target.capability_id);
         const currentLevel = latestEvidence?.proficiency_level || 0;
         const gap = target.target_level - currentLevel;
 
@@ -85,10 +85,10 @@ export function useLearningCapabilityIntegration() {
   ) => {
     try {
       const { data, error } = await supabase
-        .from("capability_evidence")
+        .from("competency_evidence")
         .insert({
           employee_id: employeeId,
-          capability_id: capabilityId,
+          competency_id: capabilityId,
           evidence_source: "training_completion",
           proficiency_level: achievedLevel,
           validation_status: "pending",

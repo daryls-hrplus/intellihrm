@@ -1,9 +1,6 @@
 import { useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import type { Database } from "@/integrations/supabase/types";
-
-type CapabilityRow = Database['public']['Tables']['capabilities']['Row'];
 
 interface SuccessorCapabilityProfile {
   employee_id: string;
@@ -27,10 +24,10 @@ export function useSuccessionCapabilityIntegration() {
       const capabilityIds = requiredCapabilities.map(r => r.capability_id);
 
       const [evidenceRes, profileRes] = await Promise.all([
-        supabase.from("capability_evidence")
+        supabase.from("competency_evidence")
           .select("*")
           .eq("employee_id", successorEmployeeId)
-          .in("capability_id", capabilityIds)
+          .in("competency_id", capabilityIds)
           .eq("validation_status", "validated"),
         supabase.from("profiles")
           .select("id, full_name")
@@ -43,7 +40,7 @@ export function useSuccessionCapabilityIntegration() {
 
       let metCount = 0;
       for (const req of requiredCapabilities) {
-        const emp = evidence.find(e => e.capability_id === req.capability_id);
+        const emp = evidence.find(e => e.competency_id === req.capability_id);
         if (emp && emp.proficiency_level >= req.required_level) {
           metCount++;
         }

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { AlertTriangle, TrendingUp, BookOpen, ChevronRight } from "lucide-react";
 import type { Database } from "@/integrations/supabase/types";
 
-type CapabilityRow = Database['public']['Tables']['capabilities']['Row'];
+type CapabilityRow = Database['public']['Tables']['skills_competencies']['Row'];
 
 interface CapabilityGap {
   capability: CapabilityRow;

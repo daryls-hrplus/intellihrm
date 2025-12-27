@@ -5,20 +5,14 @@ import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { 
-  User, 
-  TrendingUp, 
-  TrendingDown, 
-  Minus,
   Award,
   Target,
-  AlertTriangle,
   ChevronRight,
 } from "lucide-react";
 import { useEmployeeCapabilities } from "@/hooks/capabilities/useCapabilities";
 import type { Database } from "@/integrations/supabase/types";
 
-type CapabilityRow = Database['public']['Tables']['capabilities']['Row'];
-type EvidenceRow = Database['public']['Tables']['capability_evidence']['Row'];
+type CapabilityRow = Database['public']['Tables']['skills_competencies']['Row'];
 
 interface EmployeeCapabilityProfileCardProps {
   employeeId: string;
