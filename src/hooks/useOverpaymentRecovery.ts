@@ -37,9 +37,7 @@ export interface OverpaymentRecord {
   updated_at: string;
   employee?: {
     id: string;
-    first_name: string | null;
-    last_name: string | null;
-    employee_id: string | null;
+    full_name: string | null;
   };
 }
 
@@ -53,8 +51,7 @@ export interface OverpaymentStatusHistory {
   notes: string | null;
   created_at: string;
   changed_by_profile?: {
-    first_name: string | null;
-    last_name: string | null;
+    full_name: string | null;
   };
 }
 
@@ -69,7 +66,8 @@ export interface OverpaymentPayment {
   notes: string | null;
   created_at: string;
   pay_period?: {
-    period_name: string | null;
+    period_start: string | null;
+    period_end: string | null;
   };
 }
 
@@ -112,7 +110,7 @@ export function useOverpaymentRecovery(companyId: string | null) {
         .select(`
           *,
           employee:profiles!overpayment_records_employee_id_fkey(
-            id, first_name, last_name, employee_id
+            id, full_name
           )
         `)
         .eq("company_id", companyId)
@@ -125,7 +123,9 @@ export function useOverpaymentRecovery(companyId: string | null) {
       const { data, error } = await query;
 
       if (error) throw error;
-      setRecords(data || []);
+      // Cast data to our type
+      const typedData = (data || []) as unknown as OverpaymentRecord[];
+      setRecords(typedData);
     } catch (error: any) {
       console.error("Failed to fetch overpayment records:", error);
       toast.error("Failed to load overpayment records");
@@ -229,7 +229,7 @@ export function useOverpaymentRecovery(companyId: string | null) {
       toast.success("Overpayment record created");
       await fetchRecords();
       await fetchSummary();
-      return data;
+      return data as unknown as OverpaymentRecord;
     } catch (error: any) {
       console.error("Failed to create overpayment record:", error);
       toast.error(`Failed to create record: ${error.message}`);
@@ -492,14 +492,14 @@ export function useOverpaymentRecovery(companyId: string | null) {
         .select(`
           *,
           changed_by_profile:profiles!overpayment_status_history_changed_by_fkey(
-            first_name, last_name
+            full_name
           )
         `)
         .eq("overpayment_id", overpaymentId)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      return data || [];
+      return (data || []) as unknown as OverpaymentStatusHistory[];
     } catch (error: any) {
       console.error("Failed to fetch status history:", error);
       return [];
@@ -512,13 +512,13 @@ export function useOverpaymentRecovery(companyId: string | null) {
         .from("overpayment_recovery_payments")
         .select(`
           *,
-          pay_period:pay_periods(period_name)
+          pay_period:pay_periods(period_start, period_end)
         `)
         .eq("overpayment_id", overpaymentId)
         .order("payment_date", { ascending: false });
 
       if (error) throw error;
-      return data || [];
+      return (data || []) as unknown as OverpaymentPayment[];
     } catch (error: any) {
       console.error("Failed to fetch payments:", error);
       return [];

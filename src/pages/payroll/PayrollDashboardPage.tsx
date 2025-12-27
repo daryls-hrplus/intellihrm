@@ -109,6 +109,7 @@ export default function PayrollDashboardPage() {
     yearEnd: { title: t("payroll.modules.yearEnd.title"), description: t("payroll.modules.yearEnd.description"), icon: FileSpreadsheet, href: "/payroll/year-end", color: "bg-destructive/10 text-destructive", tabCode: "year_end" },
     salaryOvertime: { title: "Pay Period Payroll Entries", description: "Manage compensation entries for pay periods", icon: Clock, href: "/payroll/salary-overtime", color: "bg-accent/10 text-accent-foreground", tabCode: "salary_overtime" },
     regularDeductions: { title: "Regular Deductions", description: "Manage recurring employee deductions", icon: Clock, href: "/payroll/regular-deductions", color: "bg-destructive/10 text-destructive", tabCode: "regular_deductions" },
+    overpaymentRecovery: { title: "Overpayment Recovery", description: "Track and manage overpayment recoveries", icon: TrendingUp, href: "/payroll/overpayment-recovery", color: "bg-orange-500/10 text-orange-600", tabCode: "overpayment_recovery" },
     payElements: { title: t("compensation.modules.payElements.title", "Pay Elements"), description: t("compensation.modules.payElements.description", "Define and manage pay element types"), icon: DollarSign, href: "/payroll/pay-elements", color: "bg-success/10 text-success", tabCode: "pay_elements" },
     benefitMapping: { title: t("payroll.modules.benefitMapping.title", "Benefit Payroll Mappings"), description: t("payroll.modules.benefitMapping.description", "Map benefit plans to pay element codes"), icon: LinkIcon, href: "/payroll/benefit-mappings", color: "bg-cyan-500/10 text-cyan-600", tabCode: "benefit_mappings" },
     transactionMapping: { title: "Transaction Payroll Mappings", description: "Map workforce employee transactions to pay elements", icon: LinkIcon, href: "/payroll/transaction-mappings", color: "bg-violet-500/10 text-violet-600", tabCode: "transaction_mappings" },
@@ -138,7 +139,7 @@ export default function PayrollDashboardPage() {
   const sections: ModuleSection[] = [
     {
       titleKey: "Processing",
-      items: filterByAccess([allModules.processing, allModules.offCycle, allModules.payPeriods, allModules.salaryOvertime, allModules.regularDeductions, allModules.expenseClaims, allModules.tipPools, allModules.retroactivePay, allModules.openingBalances, allModules.yearEndClosing]),
+      items: filterByAccess([allModules.processing, allModules.offCycle, allModules.payPeriods, allModules.salaryOvertime, allModules.regularDeductions, allModules.overpaymentRecovery, allModules.expenseClaims, allModules.tipPools, allModules.retroactivePay, allModules.openingBalances, allModules.yearEndClosing]),
     },
     {
       titleKey: "Configuration",

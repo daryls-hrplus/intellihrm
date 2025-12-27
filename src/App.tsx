@@ -311,6 +311,7 @@ import StatutoryDeductionTypesPage from "./pages/payroll/StatutoryDeductionTypes
 import PayslipsPage from "./pages/payroll/PayslipsPage";
 import PayPeriodPayrollEntriesPage from "./pages/payroll/PayPeriodPayrollEntriesPage";
 import EmployeeRegularDeductionsPage from "./pages/payroll/EmployeeRegularDeductionsPage";
+import OverpaymentRecoveryPage from "./pages/payroll/OverpaymentRecoveryPage";
 import LeavePaymentConfigPage from "./pages/payroll/LeavePaymentConfigPage";
 import LeaveBalanceBuyoutPage from "./pages/payroll/LeaveBalanceBuyoutPage";
 import PayslipTemplateConfigPage from "./pages/payroll/PayslipTemplateConfigPage";
@@ -1972,6 +1973,14 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
                   <EmployeeRegularDeductionsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/payroll/overpayment-recovery"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
+                  <OverpaymentRecoveryPage />
                 </ProtectedRoute>
               }
             />
