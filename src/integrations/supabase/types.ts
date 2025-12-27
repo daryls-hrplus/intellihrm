@@ -4278,6 +4278,67 @@ export type Database = {
           },
         ]
       }
+      capability_change_history: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          capability_id: string
+          change_reason: string | null
+          change_type: string
+          changed_by: string | null
+          created_at: string | null
+          id: string
+          new_values: Json | null
+          previous_values: Json | null
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          capability_id: string
+          change_reason?: string | null
+          change_type: string
+          changed_by?: string | null
+          created_at?: string | null
+          id?: string
+          new_values?: Json | null
+          previous_values?: Json | null
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          capability_id?: string
+          change_reason?: string | null
+          change_type?: string
+          changed_by?: string | null
+          created_at?: string | null
+          id?: string
+          new_values?: Json | null
+          previous_values?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "capability_change_history_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "capability_change_history_capability_id_fkey"
+            columns: ["capability_id"]
+            isOneToOne: false
+            referencedRelation: "skills_competencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "capability_change_history_changed_by_fkey"
+            columns: ["changed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       career_path_steps: {
         Row: {
           career_path_id: string

@@ -166,7 +166,7 @@ export default function CapabilityRegistryPage() {
             Workforce
           </NavLink>
           <ChevronLeft className="h-4 w-4 rotate-180" />
-          <span className="text-foreground">Capability Registry</span>
+          <span className="text-foreground">Skills & Competencies</span>
         </div>
 
         {/* Header */}
@@ -176,9 +176,9 @@ export default function CapabilityRegistryPage() {
               <Layers className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight">Capability Registry</h1>
+              <h1 className="text-2xl font-bold tracking-tight">Skills & Competencies</h1>
               <p className="text-muted-foreground">
-                Unified platform for skills and competencies
+                Manage your organization's skills and competencies framework
               </p>
             </div>
           </div>
@@ -256,14 +256,14 @@ export default function CapabilityRegistryPage() {
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle>Capability Registry</CardTitle>
+              <CardTitle>Skills & Competencies</CardTitle>
               <div className="flex items-center gap-4">
                 <div className="relative w-64">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    placeholder="Search capabilities..."
+                    placeholder="Search skills & competencies..."
                     className="pl-9"
                   />
                 </div>
@@ -336,9 +336,9 @@ export default function CapabilityRegistryPage() {
                 ) : capabilities.length === 0 ? (
                   <div className="text-center py-12 text-muted-foreground">
                     <Layers className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                    <p className="text-lg font-medium">No capabilities found</p>
+                    <p className="text-lg font-medium">No skills or competencies found</p>
                     <p className="text-sm">
-                      Create your first {activeTab === "skills" ? "skill" : activeTab === "competencies" ? "competency" : "capability"} to get started.
+                      Create your first {activeTab === "skills" ? "skill" : activeTab === "competencies" ? "competency" : "skill or competency"} to get started.
                     </p>
                     <Button
                       className="mt-4"
@@ -390,7 +390,7 @@ export default function CapabilityRegistryPage() {
       <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Capability</AlertDialogTitle>
+            <AlertDialogTitle>Delete {selectedCapability?.type === 'SKILL' ? 'Skill' : 'Competency'}</AlertDialogTitle>
             <AlertDialogDescription>
               Are you sure you want to delete "{selectedCapability?.name}"? This action
               cannot be undone and will remove all associated data.
