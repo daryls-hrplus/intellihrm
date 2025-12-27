@@ -52,6 +52,7 @@ import {
   Filter,
   Upload,
   History,
+  DollarSign,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -59,6 +60,7 @@ import { getTodayString, formatDateForDisplay } from "@/utils/dateUtils";
 import { useAuth } from "@/contexts/AuthContext";
 import { BulkAssignmentUpload } from "@/components/workforce/BulkAssignmentUpload";
 import { AssignmentHistoryDialog } from "@/components/workforce/AssignmentHistoryDialog";
+import { EmployeePositionCompensationDrilldown } from "@/components/workforce/EmployeePositionCompensationDrilldown";
 import { useTranslation } from "react-i18next";
 
 interface Company {
@@ -175,6 +177,7 @@ export default function EmployeeAssignmentsPage() {
   const [editingAssignment, setEditingAssignment] = useState<EmployeeAssignment | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [compensationDrilldown, setCompensationDrilldown] = useState<{ employeeId: string; positionId: string; employeeName: string; positionTitle: string } | null>(null);
 
   // Form state
   const [formEmployeeId, setFormEmployeeId] = useState("");
@@ -607,6 +610,7 @@ export default function EmployeeAssignmentsPage() {
                       <TableHead>{t("workforce.position")}</TableHead>
                       <TableHead>{t("workforce.department")}</TableHead>
                       <TableHead>{t("workforce.rateType", "Rate Type")}</TableHead>
+                      <TableHead>{t("workforce.compensation", "Compensation")}</TableHead>
                       <TableHead>{t("common.startDate")}</TableHead>
                       <TableHead>{t("common.endDate")}</TableHead>
                       <TableHead>{t("common.status")}</TableHead>
@@ -660,6 +664,22 @@ export default function EmployeeAssignmentsPage() {
                               </span>
                             )}
                           </div>
+                        </TableCell>
+                        <TableCell>
+                          <Button
+                            variant="link"
+                            size="sm"
+                            className="h-auto p-0 text-primary hover:underline"
+                            onClick={() => setCompensationDrilldown({
+                              employeeId: assignment.employee_id,
+                              positionId: assignment.position_id,
+                              employeeName: assignment.employee?.full_name || assignment.employee?.email || "Unknown",
+                              positionTitle: assignment.position?.title || "Unknown"
+                            })}
+                          >
+                            <DollarSign className="h-3 w-3 mr-1" />
+                            {t("workforce.viewCompensation", "View")}
+                          </Button>
                         </TableCell>
                         <TableCell>{formatDateForDisplay(assignment.start_date, "MMM d, yyyy")}</TableCell>
                         <TableCell>
@@ -1001,6 +1021,28 @@ export default function EmployeeAssignmentsPage() {
           employeeId={historyEmployee?.id}
           employeeName={historyEmployee?.name}
         />
+
+        {/* Compensation Drilldown Dialog */}
+        <Dialog open={!!compensationDrilldown} onOpenChange={(open) => { if (!open) setCompensationDrilldown(null); }}>
+          <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>{t("workforce.compensationBreakdown", "Compensation Breakdown")}</DialogTitle>
+              <DialogDescription>
+                {compensationDrilldown && (
+                  <>
+                    {compensationDrilldown.employeeName} - {compensationDrilldown.positionTitle}
+                  </>
+                )}
+              </DialogDescription>
+            </DialogHeader>
+            {compensationDrilldown && (
+              <EmployeePositionCompensationDrilldown
+                employeeId={compensationDrilldown.employeeId}
+                positionId={compensationDrilldown.positionId}
+              />
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
     </AppLayout>
   );
