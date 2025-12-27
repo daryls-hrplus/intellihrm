@@ -63,6 +63,8 @@ import { RatingAcknowledgmentDialog } from "@/components/performance/RatingAckno
 import { RatingDisputeDialog } from "@/components/performance/RatingDisputeDialog";
 import { RatingVisibilityTimeline } from "@/components/performance/RatingVisibilityTimeline";
 import { PersonalInsightsCard } from "@/components/performance/insights/PersonalInsightsCard";
+import { GoalNotificationBell } from "@/components/performance/goals/GoalNotificationBell";
+import { GoalSkillGapCard } from "@/components/performance/goals/GoalSkillGapCard";
 import { useGoalCheckIns, GoalCheckIn } from "@/hooks/useGoalCheckIns";
 import { usePendingAdjustments } from "@/hooks/usePendingAdjustments";
 import { useGoalRatingSubmissions } from "@/hooks/useGoalRatingSubmissions";
@@ -348,6 +350,9 @@ export default function MyGoalsPage() {
             </p>
           </div>
           <div className="flex gap-2">
+            {user?.id && company?.id && (
+              <GoalNotificationBell userId={user.id} companyId={company.id} />
+            )}
             <Button variant="outline" onClick={() => setShowAnalytics(!showAnalytics)}>
               <BarChart3 className="mr-2 h-4 w-4" />
               {showAnalytics ? t("pages.myGoals.hideAnalytics") : t("pages.myGoals.showAnalytics")}

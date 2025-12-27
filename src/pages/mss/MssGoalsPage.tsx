@@ -51,6 +51,9 @@ import { DisputeResolutionPanel } from "@/components/performance/DisputeResoluti
 import { TeamInsightsPanel } from "@/components/performance/insights/TeamInsightsPanel";
 import { EmployeeWorkloadHeatmap } from "@/components/performance/insights/EmployeeWorkloadHeatmap";
 import { GoalQualityReport } from "@/components/performance/insights/GoalQualityReport";
+import { GoalNotificationBell } from "@/components/performance/goals/GoalNotificationBell";
+import { EnhancedCoachingNudges } from "@/components/performance/insights/EnhancedCoachingNudges";
+import { GoalSkillGapCard } from "@/components/performance/goals/GoalSkillGapCard";
 import { usePendingAdjustments } from "@/hooks/usePendingAdjustments";
 import { useGoalAdjustments } from "@/hooks/useGoalAdjustments";
 import { useGoalRatingSubmissions } from "@/hooks/useGoalRatingSubmissions";
@@ -473,6 +476,9 @@ const statusColors: Record<GoalStatus, string> = {
             </div>
           </div>
           <div className="flex gap-2">
+            {user?.id && company?.id && (
+              <GoalNotificationBell userId={user.id} companyId={company.id} />
+            )}
             <Button variant="outline" onClick={() => setShowAnalytics(!showAnalytics)}>
               <BarChart3 className="mr-2 h-4 w-4" />
               {showAnalytics ? "Hide" : "Show"} Analytics
@@ -978,7 +984,16 @@ const statusColors: Record<GoalStatus, string> = {
           </TabsContent>
 
           <TabsContent value="coaching" className="mt-6">
-            <ManagerCoachingPrompts managerId={user?.id} />
+            {company?.id && user?.id && (
+              <EnhancedCoachingNudges 
+                companyId={company.id} 
+                managerId={user.id}
+                maxNudges={10}
+              />
+            )}
+            <div className="mt-6">
+              <ManagerCoachingPrompts managerId={user?.id} />
+            </div>
           </TabsContent>
 
           {/* Team Insights Tab */}
