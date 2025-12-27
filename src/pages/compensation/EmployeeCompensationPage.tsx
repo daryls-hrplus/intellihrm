@@ -48,6 +48,7 @@ interface Company {
   id: string;
   name: string;
   code: string;
+  local_currency_id: string | null;
 }
 
 interface Employee {
@@ -232,7 +233,7 @@ export default function EmployeeCompensationPage() {
 
     const { data } = await supabase
       .from("companies")
-      .select("id, name, code")
+      .select("id, name, code, local_currency_id")
       .eq("is_active", true)
       .order("name");
 
@@ -517,8 +518,15 @@ export default function EmployeeCompensationPage() {
     setFormPositionId("");
     setFormPayElementId("");
     setFormAmount("");
-    setFormCurrency("USD");
-    setFormCurrencyId("");
+    
+    // Set default currency from selected company's local_currency
+    const selectedCompany = companies.find(c => c.id === selectedCompanyId);
+    const companyCurrency = selectedCompany?.local_currency_id 
+      ? currencies.find(c => c.id === selectedCompany.local_currency_id)
+      : null;
+    setFormCurrency(companyCurrency?.code || "USD");
+    setFormCurrencyId(selectedCompany?.local_currency_id || "");
+    
     setFormFrequency("monthly");
     setFormIsOverride(false);
     setFormOverrideReason("");
