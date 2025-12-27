@@ -65,7 +65,7 @@ export default function ShiftsPage() {
   });
 
   const breadcrumbItems = [
-    { label: t("timeAttendance.title"), href: "/time-attendance" },
+    { label: t("navigation.timeAttendance"), href: "/time-attendance" },
     { label: t("timeAttendance.modules.shifts.title"), href: "/time-attendance/shifts" },
     { label: t("timeAttendance.shifts.shiftsTab") }
   ];
