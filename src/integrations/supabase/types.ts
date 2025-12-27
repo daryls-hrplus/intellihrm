@@ -15438,6 +15438,97 @@ export type Database = {
           },
         ]
       }
+      esco_import_log: {
+        Row: {
+          approval_status: string | null
+          approved_at: string | null
+          approved_by: string | null
+          company_id: string | null
+          created_at: string | null
+          duplicate_detected: boolean | null
+          duplicate_of_id: string | null
+          esco_concept_type: string | null
+          esco_preferred_label: string | null
+          esco_skill_type: string | null
+          esco_uri: string
+          id: string
+          import_language: string | null
+          import_status: string | null
+          imported_by: string | null
+          metadata: Json | null
+          skill_competency_id: string | null
+          source_occupation_label: string | null
+          source_occupation_uri: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          approval_status?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          company_id?: string | null
+          created_at?: string | null
+          duplicate_detected?: boolean | null
+          duplicate_of_id?: string | null
+          esco_concept_type?: string | null
+          esco_preferred_label?: string | null
+          esco_skill_type?: string | null
+          esco_uri: string
+          id?: string
+          import_language?: string | null
+          import_status?: string | null
+          imported_by?: string | null
+          metadata?: Json | null
+          skill_competency_id?: string | null
+          source_occupation_label?: string | null
+          source_occupation_uri?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          approval_status?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          company_id?: string | null
+          created_at?: string | null
+          duplicate_detected?: boolean | null
+          duplicate_of_id?: string | null
+          esco_concept_type?: string | null
+          esco_preferred_label?: string | null
+          esco_skill_type?: string | null
+          esco_uri?: string
+          id?: string
+          import_language?: string | null
+          import_status?: string | null
+          imported_by?: string | null
+          metadata?: Json | null
+          skill_competency_id?: string | null
+          source_occupation_label?: string | null
+          source_occupation_uri?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "esco_import_log_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "esco_import_log_duplicate_of_id_fkey"
+            columns: ["duplicate_of_id"]
+            isOneToOne: false
+            referencedRelation: "skills_competencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "esco_import_log_skill_competency_id_fkey"
+            columns: ["skill_competency_id"]
+            isOneToOne: false
+            referencedRelation: "skills_competencies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       exchange_rates: {
         Row: {
           created_at: string
@@ -37319,8 +37410,14 @@ export type Database = {
           description: string | null
           effective_from: string
           effective_to: string | null
+          esco_concept_type: string | null
+          esco_skill_type: string | null
+          esco_uri: string | null
           external_id: string | null
+          external_source: string | null
+          external_sync_status: string | null
           id: string
+          last_external_sync_at: string | null
           metadata: Json | null
           name: string
           owner_role: string | null
@@ -37340,8 +37437,14 @@ export type Database = {
           description?: string | null
           effective_from?: string
           effective_to?: string | null
+          esco_concept_type?: string | null
+          esco_skill_type?: string | null
+          esco_uri?: string | null
           external_id?: string | null
+          external_source?: string | null
+          external_sync_status?: string | null
           id?: string
+          last_external_sync_at?: string | null
           metadata?: Json | null
           name: string
           owner_role?: string | null
@@ -37361,8 +37464,14 @@ export type Database = {
           description?: string | null
           effective_from?: string
           effective_to?: string | null
+          esco_concept_type?: string | null
+          esco_skill_type?: string | null
+          esco_uri?: string | null
           external_id?: string | null
+          external_source?: string | null
+          external_sync_status?: string | null
           id?: string
+          last_external_sync_at?: string | null
           metadata?: Json | null
           name?: string
           owner_role?: string | null
