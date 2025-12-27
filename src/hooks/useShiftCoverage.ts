@@ -49,7 +49,7 @@ export interface DemandForecast {
   shift_id: string | null;
   predicted_demand: number;
   confidence_level: number | null;
-  prediction_factors: Record<string, unknown> | null;
+  prediction_factors: unknown;
   actual_demand: number | null;
   variance: number | null;
   model_version: string | null;
@@ -269,10 +269,16 @@ export function useShiftCoverage(companyId: string | null) {
     try {
       const { data: forecast, error } = await supabase
         .from("shift_demand_forecasts")
-        .insert({
+        .insert([{
           company_id: companyId,
-          ...data,
-        })
+          forecast_date: data.forecast_date,
+          department_id: data.department_id,
+          shift_id: data.shift_id,
+          predicted_demand: data.predicted_demand,
+          confidence_level: data.confidence_level,
+          prediction_factors: data.prediction_factors ? JSON.stringify(data.prediction_factors) : null,
+          model_version: data.model_version,
+        }])
         .select()
         .single();
 

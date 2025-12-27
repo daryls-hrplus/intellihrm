@@ -165,22 +165,20 @@ export function useOpenShifts(companyId: string | null) {
 
       // If approved, increment positions_filled
       if (status === "approved") {
-        const claim = openShifts
-          .flatMap(s => s.claims || [])
-          .find(c => c.id === claimId);
+        // Find which open shift this claim belongs to
+        const openShift = openShifts.find(s => 
+          s.claims?.some(c => c.id === claimId)
+        );
         
-        if (claim) {
-          const shift = openShifts.find(s => s.id === claim.open_shift_id);
-          if (shift) {
-            const newFilled = shift.positions_filled + 1;
-            await supabase
-              .from("open_shifts")
-              .update({ 
-                positions_filled: newFilled,
-                status: newFilled >= shift.positions_available ? "filled" : "open"
-              })
-              .eq("id", shift.id);
-          }
+        if (openShift) {
+          const newFilled = openShift.positions_filled + 1;
+          await supabase
+            .from("open_shifts")
+            .update({ 
+              positions_filled: newFilled,
+              status: newFilled >= openShift.positions_available ? "filled" : "open"
+            })
+            .eq("id", openShift.id);
         }
       }
 

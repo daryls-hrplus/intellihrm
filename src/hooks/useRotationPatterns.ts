@@ -112,16 +112,16 @@ export function useRotationPatterns(companyId: string | null) {
     try {
       const { data: newPattern, error } = await supabase
         .from("shift_rotation_patterns")
-        .insert({
+        .insert([{
           company_id: companyId,
           name: data.name,
           code: data.code,
           description: data.description,
           pattern_type: data.pattern_type,
           cycle_length_days: data.cycle_length_days,
-          pattern_definition: data.pattern_definition as unknown as Record<string, unknown>[],
+          pattern_definition: JSON.stringify(data.pattern_definition),
           color: data.color,
-        })
+        }])
         .select()
         .single();
 
