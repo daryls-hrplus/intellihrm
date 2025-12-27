@@ -1864,12 +1864,14 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId, payGroupI
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {netPaySplit.map((split, idx) => (
+                      {netPaySplit.map((split, idx) => {
+                        const currency = currencies.find(c => c.id === split.currency_id);
+                        return (
                         <TableRow key={idx}>
                           <TableCell>
                             <div className="flex items-center gap-2">
                               <Badge variant={split.is_primary ? "default" : "secondary"} className="font-mono text-xs">
-                                {split.currency?.code || 'Unknown'}
+                                {currency?.code || 'Unknown'}
                               </Badge>
                               <span className="text-sm text-muted-foreground">
                                 {split.is_primary ? '(Primary)' : '(Secondary)'}
@@ -1886,7 +1888,8 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId, payGroupI
                             {split.local_currency_equivalent !== null ? formatCurrency(split.local_currency_equivalent) : '—'}
                           </TableCell>
                         </TableRow>
-                      ))}
+                        );
+                      })}
                     </TableBody>
                   </Table>
                 </div>
