@@ -1359,7 +1359,7 @@ export default function EmployeeCompensationPage() {
                 )}
               </div>
 
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="amount">{t("compensation.employeeCompensation.amount")} *</Label>
                   <Input
@@ -1370,34 +1370,6 @@ export default function EmployeeCompensationPage() {
                     onChange={(e) => setFormAmount(e.target.value)}
                     placeholder="0.00"
                   />
-                </div>
-                <div className="space-y-2">
-                  <Label>{t("compensation.employeeCompensation.currency")}</Label>
-                  <Select value={formCurrency} onValueChange={(val) => {
-                    setFormCurrency(val);
-                    // Find and set currency_id based on code
-                    const curr = currencies.find(c => c.code === val);
-                    setFormCurrencyId(curr?.id || "");
-                  }}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {currencies.length > 0 ? currencies.map((c) => (
-                        <SelectItem key={c.id} value={c.code}>
-                          {c.code} - {c.name}
-                        </SelectItem>
-                      )) : (
-                        <>
-                          <SelectItem value="USD">USD</SelectItem>
-                          <SelectItem value="EUR">EUR</SelectItem>
-                          <SelectItem value="GBP">GBP</SelectItem>
-                          <SelectItem value="CAD">CAD</SelectItem>
-                          <SelectItem value="AUD">AUD</SelectItem>
-                        </>
-                      )}
-                    </SelectContent>
-                  </Select>
                 </div>
                 <div className="space-y-2">
                   <Label>{t("compensation.employeeCompensation.frequencyLabel")}</Label>
@@ -1414,6 +1386,35 @@ export default function EmployeeCompensationPage() {
                     </SelectContent>
                   </Select>
                 </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>{t("compensation.employeeCompensation.currency")}</Label>
+                <Select value={formCurrency} onValueChange={(val) => {
+                  setFormCurrency(val);
+                  // Find and set currency_id based on code
+                  const curr = currencies.find(c => c.code === val);
+                  setFormCurrencyId(curr?.id || "");
+                }}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {currencies.length > 0 ? currencies.map((c) => (
+                      <SelectItem key={c.id} value={c.code}>
+                        {c.code} - {c.name}
+                      </SelectItem>
+                    )) : (
+                      <>
+                        <SelectItem value="USD">USD</SelectItem>
+                        <SelectItem value="EUR">EUR</SelectItem>
+                        <SelectItem value="GBP">GBP</SelectItem>
+                        <SelectItem value="CAD">CAD</SelectItem>
+                        <SelectItem value="AUD">AUD</SelectItem>
+                      </>
+                    )}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
