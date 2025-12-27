@@ -342,6 +342,10 @@ import AttendanceRecordsPage from "./pages/time-attendance/AttendanceRecordsPage
 import SchedulesPage from "./pages/time-attendance/SchedulesPage";
 import OvertimeManagementPage from "./pages/time-attendance/OvertimeManagementPage";
 import ShiftManagementPage from "./pages/time-attendance/ShiftManagementPage";
+import ShiftsPage from "./pages/time-attendance/shifts/ShiftsPage";
+import RoundingRulesPage from "./pages/time-attendance/shifts/RoundingRulesPage";
+import PaymentRulesPage from "./pages/time-attendance/shifts/PaymentRulesPage";
+import ShiftAssignmentsPage from "./pages/time-attendance/shifts/ShiftAssignmentsPage";
 import ShiftCalendarPage from "./pages/time-attendance/shifts/ShiftCalendarPage";
 import ShiftSwapRequestsPage from "./pages/time-attendance/shifts/ShiftSwapRequestsPage";
 import OpenShiftBoardPage from "./pages/time-attendance/shifts/OpenShiftBoardPage";
