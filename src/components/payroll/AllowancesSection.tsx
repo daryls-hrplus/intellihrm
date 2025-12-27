@@ -54,11 +54,6 @@ export function AllowancesSection({ companyId, employeeId, payPeriodId }: Allowa
     notes: ''
   });
 
-  useEffect(() => {
-    loadAllowances();
-    loadCurrencies();
-  }, [employeeId, payPeriodId]);
-
   const loadAllowances = async () => {
     setIsLoading(true);
     const { data, error } = await supabase
@@ -88,6 +83,11 @@ export function AllowancesSection({ companyId, employeeId, payPeriodId }: Allowa
       setCurrencies(data);
     }
   };
+
+  useEffect(() => {
+    loadAllowances();
+    loadCurrencies();
+  }, [employeeId, payPeriodId]);
 
   const resetForm = () => {
     setFormData({
