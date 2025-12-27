@@ -109,6 +109,8 @@ export default function PayrollProcessingPage() {
   const [foreignCurrencyIds, setForeignCurrencyIds] = useState<string[]>([]);
   const [companyLocalCurrencyId, setCompanyLocalCurrencyId] = useState<string | null>(null);
   const [groupBaseCurrencyId, setGroupBaseCurrencyId] = useState<string | null>(null);
+  const [currencyCodeMap, setCurrencyCodeMap] = useState<Map<string, string>>(new Map());
+  const [localCurrencyCode, setLocalCurrencyCode] = useState<string>('USD');
 
   // Check if pay group has multi-currency enabled
   const { data: payGroupSettings } = usePayGroupMultiCurrency(
@@ -156,14 +158,25 @@ export default function PayrollProcessingPage() {
         return currency?.id ?? null;
       };
 
-      const [template, companyData] = await Promise.all([
+      const [template, companyData, currenciesData] = await Promise.all([
         fetchDefaultTemplate(selectedCompanyId),
         supabase
           .from('companies')
           .select('name, address, logo_url, local_currency_id, group_id, country')
           .eq('id', selectedCompanyId)
-          .single()
+          .single(),
+        supabase
+          .from('currencies')
+          .select('id, code')
+          .eq('is_active', true)
       ]);
+      
+      // Build currency ID to code map
+      const codeMap = new Map<string, string>();
+      (currenciesData.data || []).forEach((c: any) => {
+        if (c?.id && c?.code) codeMap.set(c.id, c.code);
+      });
+      setCurrencyCodeMap(codeMap);
       
       setPayslipTemplate(template);
       if (companyData.data) {
@@ -187,7 +200,9 @@ export default function PayrollProcessingPage() {
         }
 
         setCompanyLocalCurrencyId(localCurrencyId);
-        
+        if (localCurrencyId && codeMap.has(localCurrencyId)) {
+          setLocalCurrencyCode(codeMap.get(localCurrencyId) || 'USD');
+        }
         // Fetch group base currency if company is in a group
         if (companyData.data.group_id) {
           const { data: groupData } = await supabase
@@ -1202,80 +1217,106 @@ export default function PayrollProcessingPage() {
                   <h4 className="text-sm font-semibold text-muted-foreground mb-2 uppercase tracking-wide">
                     {t("payroll.processing.earnings", "Earnings")}
                   </h4>
-                  <div className="bg-muted/30 rounded-lg p-4 space-y-2">
+                  <div className="bg-muted/30 rounded-lg p-4">
                     {/* Itemized earnings from calculation_details */}
                     {(selectedEmployee.calculation_details as any)?.earnings?.length > 0 ? (
-                      <>
-                        {((selectedEmployee.calculation_details as any)?.earnings || []).map((earning: any, idx: number) => (
-                          <div key={idx} className="flex justify-between py-1.5 border-b border-border/30 last:border-0">
-                            <div className="flex flex-col">
-                              <span className="text-muted-foreground">
-                                {earning.name}
-                                {earning.type === 'base_salary' && (
-                                  <span className="ml-1 text-xs text-primary">(Base)</span>
-                                )}
-                                {earning.is_prorated && (
-                                  <span className="ml-1 text-xs bg-warning/20 text-warning px-1.5 py-0.5 rounded">Prorated</span>
-                                )}
-                              </span>
-                              {earning.job_title && (
-                                <span className="text-xs text-muted-foreground/70 mt-0.5">
-                                  {earning.job_title}
-                                </span>
-                              )}
-                              {earning.is_prorated && earning.effective_start && (
-                                <span className="text-xs text-muted-foreground/70">
-                                  {new Date(earning.effective_start).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                                  {' - '}
-                                  {earning.effective_end 
-                                    ? new Date(earning.effective_end).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-                                    : 'Period End'}
-                                </span>
-                              )}
-                            </div>
-                            <span className="font-medium">{formatCurrency(earning.amount || 0)}</span>
-                          </div>
-                        ))}
-                      </>
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead className="text-xs">{t("payroll.processing.payElement", "Pay Element")}</TableHead>
+                            <TableHead className="text-xs text-right">{t("payroll.processing.originalAmount", "Original")}</TableHead>
+                            <TableHead className="text-xs">{t("payroll.processing.currency", "Currency")}</TableHead>
+                            <TableHead className="text-xs text-right">{t("payroll.processing.localAmount", "Local Amount")} ({localCurrencyCode})</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {((selectedEmployee.calculation_details as any)?.earnings || []).map((earning: any, idx: number) => {
+                            const hasConversion = earning.original_currency_id && earning.original_amount !== undefined;
+                            const originalCurrencyCode = hasConversion 
+                              ? currencyCodeMap.get(earning.original_currency_id) || '—' 
+                              : localCurrencyCode;
+                            const originalAmount = hasConversion ? earning.original_amount : earning.amount;
+                            
+                            return (
+                              <TableRow key={idx}>
+                                <TableCell className="py-2">
+                                  <div className="flex flex-col">
+                                    <span className="text-sm">
+                                      {earning.name}
+                                      {earning.type === 'base_salary' && (
+                                        <span className="ml-1 text-xs text-primary">(Base)</span>
+                                      )}
+                                    </span>
+                                    {earning.job_title && (
+                                      <span className="text-xs text-muted-foreground">{earning.job_title}</span>
+                                    )}
+                                    {earning.is_prorated && (
+                                      <Badge variant="outline" className="w-fit mt-0.5 text-xs bg-warning/20 text-warning border-warning/30">
+                                        Prorated
+                                      </Badge>
+                                    )}
+                                  </div>
+                                </TableCell>
+                                <TableCell className="text-right font-mono text-sm">
+                                  {formatCurrency(originalAmount || 0, originalCurrencyCode)}
+                                </TableCell>
+                                <TableCell>
+                                  <Badge variant="outline" className="font-mono text-xs">
+                                    {originalCurrencyCode}
+                                  </Badge>
+                                  {hasConversion && earning.exchange_rate_used && (
+                                    <div className="text-xs text-muted-foreground mt-0.5">
+                                      @ {earning.exchange_rate_used.toFixed(4)}
+                                    </div>
+                                  )}
+                                </TableCell>
+                                <TableCell className="text-right font-mono text-sm font-medium">
+                                  {formatCurrency(earning.amount || 0, localCurrencyCode)}
+                                </TableCell>
+                              </TableRow>
+                            );
+                          })}
+                        </TableBody>
+                      </Table>
                     ) : (
-                      <>
+                      <div className="space-y-2">
                         {/* Fallback to summary fields if no itemized data */}
                         <div className="flex justify-between py-1">
                           <span className="text-muted-foreground">{t("payroll.processing.regularPay")}</span>
-                          <span className="font-medium">{formatCurrency(selectedEmployee.regular_pay || 0)}</span>
+                          <span className="font-medium">{formatCurrency(selectedEmployee.regular_pay || 0, localCurrencyCode)}</span>
                         </div>
                         {(selectedEmployee.overtime_pay || 0) > 0 && (
                           <div className="flex justify-between py-1">
                             <span className="text-muted-foreground">{t("payroll.processing.overtimePay")}</span>
-                            <span className="font-medium">{formatCurrency(selectedEmployee.overtime_pay)}</span>
+                            <span className="font-medium">{formatCurrency(selectedEmployee.overtime_pay, localCurrencyCode)}</span>
                           </div>
                         )}
                         {(selectedEmployee.bonus_pay || 0) > 0 && (
                           <div className="flex justify-between py-1">
                             <span className="text-muted-foreground">{t("payroll.processing.bonusPay")}</span>
-                            <span className="font-medium">{formatCurrency(selectedEmployee.bonus_pay)}</span>
+                            <span className="font-medium">{formatCurrency(selectedEmployee.bonus_pay, localCurrencyCode)}</span>
                           </div>
                         )}
                         {(selectedEmployee.commission_pay || 0) > 0 && (
                           <div className="flex justify-between py-1">
                             <span className="text-muted-foreground">{t("payroll.processing.commissionPay", "Commission")}</span>
-                            <span className="font-medium">{formatCurrency(selectedEmployee.commission_pay)}</span>
+                            <span className="font-medium">{formatCurrency(selectedEmployee.commission_pay, localCurrencyCode)}</span>
                           </div>
                         )}
                         {(selectedEmployee.other_earnings || 0) > 0 && (
                           <div className="flex justify-between py-1">
                             <span className="text-muted-foreground">{t("payroll.processing.otherEarnings")}</span>
-                            <span className="font-medium">{formatCurrency(selectedEmployee.other_earnings)}</span>
+                            <span className="font-medium">{formatCurrency(selectedEmployee.other_earnings, localCurrencyCode)}</span>
                           </div>
                         )}
-                      </>
+                      </div>
                     )}
 
                     {/* Allowances */}
                     {((selectedEmployee.calculation_details as any)?.allowances || []).length > 0 && (
                       <>
-                        <div className="border-t border-border mt-2 pt-2">
-                          <p className="text-xs text-muted-foreground mb-1 uppercase">{t("payroll.processing.allowances", "Allowances")}</p>
+                        <div className="border-t border-border mt-3 pt-3">
+                          <p className="text-xs text-muted-foreground mb-2 uppercase">{t("payroll.processing.allowances", "Allowances")}</p>
                         </div>
                         {((selectedEmployee.calculation_details as any)?.allowances || []).map((allowance: any, idx: number) => (
                           <div key={idx} className="flex justify-between py-1">
@@ -1285,15 +1326,15 @@ export default function PayrollProcessingPage() {
                                 <span className="ml-1 text-xs text-success">(Non-taxable)</span>
                               )}
                             </span>
-                            <span className="font-medium">{formatCurrency(allowance.amount || 0)}</span>
+                            <span className="font-medium">{formatCurrency(allowance.amount || 0, localCurrencyCode)}</span>
                           </div>
                         ))}
                       </>
                     )}
 
-                    <div className="flex justify-between py-2 border-t border-border mt-2 pt-2">
+                    <div className="flex justify-between py-2 border-t border-border mt-3 pt-3">
                       <span className="font-semibold">{t("payroll.processing.grossPay")}</span>
-                      <span className="font-bold text-primary">{formatCurrency(selectedEmployee.gross_pay)}</span>
+                      <span className="font-bold text-primary">{formatCurrency(selectedEmployee.gross_pay, localCurrencyCode)}</span>
                     </div>
                   </div>
                 </div>
@@ -1311,7 +1352,7 @@ export default function PayrollProcessingPage() {
                         {((selectedEmployee.calculation_details as any)?.statutory_deductions || []).map((deduction: any, idx: number) => (
                           <div key={idx} className="flex justify-between py-1">
                             <span className="text-muted-foreground">{deduction.name}</span>
-                            <span className="font-medium text-destructive">-{formatCurrency(deduction.employee_amount || 0)}</span>
+                            <span className="font-medium text-destructive">-{formatCurrency(deduction.employee_amount || 0, localCurrencyCode)}</span>
                           </div>
                         ))}
                       </>
@@ -1319,7 +1360,7 @@ export default function PayrollProcessingPage() {
                       (selectedEmployee.tax_deductions || 0) > 0 && (
                         <div className="flex justify-between py-1">
                           <span className="text-muted-foreground">{t("payroll.processing.statutoryTaxes", "Statutory Taxes")}</span>
-                          <span className="font-medium text-destructive">-{formatCurrency(selectedEmployee.tax_deductions)}</span>
+                          <span className="font-medium text-destructive">-{formatCurrency(selectedEmployee.tax_deductions, localCurrencyCode)}</span>
                         </div>
                       )
                     )}
@@ -1338,7 +1379,7 @@ export default function PayrollProcessingPage() {
                                 <span className="ml-1 text-xs text-primary">(Pre-tax)</span>
                               )}
                             </span>
-                            <span className="font-medium text-destructive">-{formatCurrency(deduction.amount || 0)}</span>
+                            <span className="font-medium text-destructive">-{formatCurrency(deduction.amount || 0, localCurrencyCode)}</span>
                           </div>
                         ))}
                       </>
@@ -1350,25 +1391,25 @@ export default function PayrollProcessingPage() {
                         {(selectedEmployee.benefit_deductions || 0) > 0 && (
                           <div className="flex justify-between py-1">
                             <span className="text-muted-foreground">{t("payroll.processing.benefitDeductions", "Benefits")}</span>
-                            <span className="font-medium text-destructive">-{formatCurrency(selectedEmployee.benefit_deductions)}</span>
+                            <span className="font-medium text-destructive">-{formatCurrency(selectedEmployee.benefit_deductions, localCurrencyCode)}</span>
                           </div>
                         )}
                         {(selectedEmployee.retirement_deductions || 0) > 0 && (
                           <div className="flex justify-between py-1">
                             <span className="text-muted-foreground">{t("payroll.processing.retirementDeductions", "Retirement")}</span>
-                            <span className="font-medium text-destructive">-{formatCurrency(selectedEmployee.retirement_deductions)}</span>
+                            <span className="font-medium text-destructive">-{formatCurrency(selectedEmployee.retirement_deductions, localCurrencyCode)}</span>
                           </div>
                         )}
                         {(selectedEmployee.garnishment_deductions || 0) > 0 && (
                           <div className="flex justify-between py-1">
                             <span className="text-muted-foreground">{t("payroll.processing.garnishments", "Garnishments")}</span>
-                            <span className="font-medium text-destructive">-{formatCurrency(selectedEmployee.garnishment_deductions)}</span>
+                            <span className="font-medium text-destructive">-{formatCurrency(selectedEmployee.garnishment_deductions, localCurrencyCode)}</span>
                           </div>
                         )}
                         {(selectedEmployee.other_deductions || 0) > 0 && (
                           <div className="flex justify-between py-1">
                             <span className="text-muted-foreground">{t("payroll.processing.otherDeductions")}</span>
-                            <span className="font-medium text-destructive">-{formatCurrency(selectedEmployee.other_deductions)}</span>
+                            <span className="font-medium text-destructive">-{formatCurrency(selectedEmployee.other_deductions, localCurrencyCode)}</span>
                           </div>
                         )}
                       </>
@@ -1376,7 +1417,7 @@ export default function PayrollProcessingPage() {
 
                     <div className="flex justify-between py-2 border-t border-destructive/20 mt-2 pt-2">
                       <span className="font-semibold">{t("payroll.processing.totalDeductions", "Total Deductions")}</span>
-                      <span className="font-bold text-destructive">-{formatCurrency(selectedEmployee.total_deductions)}</span>
+                      <span className="font-bold text-destructive">-{formatCurrency(selectedEmployee.total_deductions, localCurrencyCode)}</span>
                     </div>
                   </div>
                 </div>
@@ -1385,7 +1426,7 @@ export default function PayrollProcessingPage() {
                 <div className="bg-success/10 rounded-lg p-4">
                   <div className="flex justify-between items-center">
                     <span className="font-semibold text-lg">{t("payroll.processing.netPay")}</span>
-                    <span className="font-bold text-2xl text-success">{formatCurrency(selectedEmployee.net_pay)}</span>
+                    <span className="font-bold text-2xl text-success">{formatCurrency(selectedEmployee.net_pay, localCurrencyCode)}</span>
                   </div>
                 </div>
 
