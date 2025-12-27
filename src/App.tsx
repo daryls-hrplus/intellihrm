@@ -394,6 +394,7 @@ import EssCompensationHistoryPage from "./pages/ess/EssCompensationHistoryPage";
 import EssTotalRewardsPage from "./pages/ess/EssTotalRewardsPage";
 import EssEquityPage from "./pages/ess/EssEquityPage";
 import EssCompaRatioPage from "./pages/ess/EssCompaRatioPage";
+import EssCurrencyPreferencesPage from "./pages/ess/EssCurrencyPreferencesPage";
 import MssCompensationPage from "./pages/mss/MssCompensationPage";
 import MssCompaRatioPage from "./pages/mss/MssCompaRatioPage";
 import MssEquityPage from "./pages/mss/MssEquityPage";
@@ -674,6 +675,14 @@ const App = () => (
               element={
                 <ProtectedRoute moduleCode="ess">
                   <EssEquityPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/ess/compensation/currency-preferences"
+              element={
+                <ProtectedRoute moduleCode="ess">
+                  <EssCurrencyPreferencesPage />
                 </ProtectedRoute>
               }
             />
