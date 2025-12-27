@@ -937,7 +937,7 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId, payGroupI
           }
         }
 
-        const fromCurrencyId = resolveCurrencyId(c.currency, c.currency_id);
+        const fromCurrencyId = resolveCurrencyId(c.currency, undefined);
         const { localAmount, rateUsed } = convertToLocal(calculatedAmount, fromCurrencyId);
 
         return {
