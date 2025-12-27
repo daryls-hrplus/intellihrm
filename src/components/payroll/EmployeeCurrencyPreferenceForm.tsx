@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { useCurrencies } from "@/hooks/useCurrencies";
+import { useCompanyCurrencyList } from "@/hooks/useCompanyCurrencies";
 import { 
   useEmployeeCurrencyPreference, 
   useSaveEmployeeCurrencyPreference,
@@ -24,7 +24,7 @@ export function EmployeeCurrencyPreferenceForm({
   companyId,
   localCurrencyId
 }: EmployeeCurrencyPreferenceFormProps) {
-  const { currencies, isLoading: currenciesLoading } = useCurrencies();
+  const { currencies, isLoading: currenciesLoading } = useCompanyCurrencyList(companyId);
   const { data: existingPref, isLoading: prefLoading } = useEmployeeCurrencyPreference(employeeId, companyId);
   const saveMutation = useSaveEmployeeCurrencyPreference();
   
