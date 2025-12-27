@@ -22,6 +22,7 @@ import {
 } from "@/utils/payroll/prorationCalculator";
 import { usePayGroupMultiCurrency } from "@/hooks/useMultiCurrencyPayroll";
 import { useCurrencies, Currency } from "@/hooks/useCurrencies";
+import { useCompanyLocalCurrency } from "@/hooks/useCurrencies";
 
 interface PayrollSimulatorProps {
   companyId: string;
@@ -191,7 +192,10 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId, payGroupI
   const isMultiCurrencyEnabled = payGroupSettings?.enable_multi_currency || false;
   
   // Fetch currencies
-  const { currencies } = useCurrencies();
+  const { currencies, isLoading: currenciesLoading } = useCurrencies();
+  
+  // Fetch company local currency
+  const { data: companyLocalCurrency, isLoading: localCurrencyLoading } = useCompanyLocalCurrency(companyId);
 
   const calculateStatutoryDeductions = (
     taxableIncome: number,
@@ -336,35 +340,14 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId, payGroupI
       return false; // No need for exchange rates
     }
 
-    // Fetch company local currency
-    const { data: companyData } = await supabase
-      .from('companies')
-      .select('local_currency_id, country')
-      .eq('id', companyId)
-      .single();
-
-    let localCurrId = companyData?.local_currency_id;
-    
-    // If no local currency set, try to resolve from country
-    if (!localCurrId && companyData?.country) {
-      const { data: fiscal } = await supabase
-        .from('country_fiscal_years')
-        .select('currency_code')
-        .eq('country_code', companyData.country)
-        .eq('is_active', true)
-        .maybeSingle();
-
-      if (fiscal?.currency_code) {
-        const { data: currency } = await supabase
-          .from('currencies')
-          .select('id')
-          .eq('code', fiscal.currency_code)
-          .eq('is_active', true)
-          .maybeSingle();
-
-        localCurrId = currency?.id;
-      }
+    // Wait for currencies to be loaded
+    if (currencies.length === 0) {
+      // Not ready yet, don't block but don't proceed either
+      return false;
     }
+
+    // Use pre-fetched company local currency
+    const localCurrId = companyLocalCurrency?.id;
 
     if (!localCurrId) {
       toast.error("Company local currency is not configured. Please set it on the Company record.");
@@ -1053,11 +1036,14 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId, payGroupI
   };
 
   useEffect(() => {
+    // Wait for currencies to load before running simulation
+    if (currenciesLoading || localCurrencyLoading) return;
+    
     // Reset currency check when employee/period changes
     setHasCheckedCurrencies(false);
     setConfirmedRatesMap(new Map());
     runSimulation();
-  }, [employeeId, payPeriodId]);
+  }, [employeeId, payPeriodId, currenciesLoading, localCurrencyLoading]);
 
   // Re-fetch rates when dialog opens
   useEffect(() => {
@@ -1066,7 +1052,8 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId, payGroupI
     }
   }, [selectedRateDate, exchangeRateDialogOpen]);
 
-  if (!result) {
+  // Show loading while dependencies or result are loading
+  if (currenciesLoading || localCurrencyLoading || !result) {
     return (
       <div className="flex items-center justify-center py-8">
         <RefreshCw className="h-6 w-6 animate-spin text-muted-foreground" />
