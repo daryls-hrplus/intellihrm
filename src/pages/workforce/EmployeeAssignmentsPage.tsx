@@ -122,7 +122,6 @@ interface EmployeeAssignment {
   end_date: string | null;
   is_primary: boolean;
   assignment_type: string | null;
-  compensation_amount: number | null;
   compensation_frequency: string | null;
   rate_type: string | null;
   hourly_rate: number | null;
@@ -183,7 +182,6 @@ export default function EmployeeAssignmentsPage() {
   const [formStartDate, setFormStartDate] = useState(getTodayString());
   const [formEndDate, setFormEndDate] = useState("");
   const [formAssignmentType, setFormAssignmentType] = useState("primary");
-  const [formCompAmount, setFormCompAmount] = useState("");
   const [formCompFrequency, setFormCompFrequency] = useState("monthly");
   const [formRateType, setFormRateType] = useState<string>("salaried");
   const [formHourlyRate, setFormHourlyRate] = useState("");
@@ -286,7 +284,6 @@ export default function EmployeeAssignmentsPage() {
     setFormStartDate(getTodayString());
     setFormEndDate("");
     setFormAssignmentType("primary");
-    setFormCompAmount("");
     setFormCompFrequency("monthly");
     setFormRateType("salaried");
     setFormHourlyRate("");
@@ -310,7 +307,6 @@ export default function EmployeeAssignmentsPage() {
     setFormStartDate(assignment.start_date);
     setFormEndDate(assignment.end_date || "");
     setFormAssignmentType(assignment.assignment_type || "primary");
-    setFormCompAmount(assignment.compensation_amount?.toString() || "");
     setFormCompFrequency(assignment.compensation_frequency || "monthly");
     setFormRateType(assignment.rate_type || "salaried");
     setFormHourlyRate(assignment.hourly_rate?.toString() || "");
@@ -374,7 +370,6 @@ export default function EmployeeAssignmentsPage() {
         end_date: formEndDate || null,
         assignment_type: formAssignmentType,
         is_primary: formAssignmentType === "primary",
-        compensation_amount: formCompAmount ? parseFloat(formCompAmount) : null,
         compensation_frequency: formCompFrequency,
         rate_type: formRateType,
         hourly_rate: formHourlyRate ? parseFloat(formHourlyRate) : null,
@@ -443,7 +438,7 @@ export default function EmployeeAssignmentsPage() {
       a.end_date || "",
       a.is_primary ? "Yes" : "No",
       a.is_active ? "Active" : "Inactive",
-      a.compensation_amount ? `${a.compensation_amount}/${a.compensation_frequency}` : ""
+      a.compensation_frequency || ""
     ]);
 
     const csvContent = [headers, ...rows].map(row => row.map(cell => `"${cell}"`).join(",")).join("\n");
@@ -890,19 +885,6 @@ export default function EmployeeAssignmentsPage() {
                 )}
               </div>
 
-              {/* Compensation Override (for salaried) */}
-              {formRateType === "salaried" && (
-                <div className="space-y-2">
-                  <Label htmlFor="compAmount">{t("workforce.compensationAmount")}</Label>
-                  <Input
-                    id="compAmount"
-                    type="number"
-                    placeholder={t("common.amount")}
-                    value={formCompAmount}
-                    onChange={(e) => setFormCompAmount(e.target.value)}
-                  />
-                </div>
-              )}
 
               {/* Pay Group Selection */}
               <div className="space-y-2">
