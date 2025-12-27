@@ -7,6 +7,7 @@ export { CapabilityFormDialog } from './CapabilityFormDialog';
 export { CapabilityGapAnalysisCard } from './CapabilityGapAnalysisCard';
 export { EvidenceValidationPanel } from './EvidenceValidationPanel';
 export { SkillMappingsDialog } from './SkillMappingsDialog';
+export { MasterLibrarySearch } from './MasterLibrarySearch';
 
 // Integration components
 export { GoalCapabilitySelector } from './GoalCapabilitySelector';
