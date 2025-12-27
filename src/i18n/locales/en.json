@@ -2546,7 +2546,16 @@
       "bidding": "Bidding",
       "biddingDescription": "Manage shift bidding periods",
       "aiScheduler": "AI Scheduler",
-      "aiSchedulerDescription": "AI-powered optimal scheduling"
+      "aiSchedulerDescription": "AI-powered optimal scheduling",
+      "createAssignment": "Create Assignment",
+      "assignmentCreated": "Assignment created successfully",
+      "assignmentUpdated": "Assignment updated successfully",
+      "assignmentDeleted": "Assignment deleted successfully",
+      "rotationPattern": "Rotation Pattern",
+      "primaryShift": "Primary Shift",
+      "primary": "Primary",
+      "secondary": "Secondary",
+      "noAssignments": "No shift assignments found"
     },
     "geofencing": {
       "title": "Geofence Management",
