@@ -45,7 +45,7 @@ export default function ShiftTemplatesPage() {
   const breadcrumbItems = [
     { label: t("nav.timeAttendance"), href: "/time-attendance" },
     { label: t("timeAttendance.modules.shifts.title"), href: "/time-attendance/shifts" },
-    { label: t("timeAttendance.shifts.templates") }
+    { label: t("timeAttendance.shifts.templatesLabel") }
   ];
 
   return (
@@ -56,7 +56,7 @@ export default function ShiftTemplatesPage() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Copy className="h-6 w-6 text-cyan-600" />
-            <h1 className="text-2xl font-bold">{t("timeAttendance.shifts.templates")}</h1>
+            <h1 className="text-2xl font-bold">{t("timeAttendance.shifts.templatesLabel")}</h1>
           </div>
           <Select value={selectedCompany} onValueChange={setSelectedCompany}>
             <SelectTrigger className="w-64">
@@ -73,7 +73,7 @@ export default function ShiftTemplatesPage() {
         {selectedCompany && (
           <Card>
             <CardHeader>
-              <CardTitle>{t("timeAttendance.shifts.templates")}</CardTitle>
+              <CardTitle>{t("timeAttendance.shifts.templatesLabel")}</CardTitle>
             </CardHeader>
             <CardContent>
               <ShiftTemplatesTab companyId={selectedCompany} />
