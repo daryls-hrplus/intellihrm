@@ -34,7 +34,8 @@ import {
   AlertTriangle,
   BarChart3,
   Gavel,
-  Calendar
+  Calendar,
+  Sparkles
 } from "lucide-react";
 import { ShiftSwapRequestsTab } from "@/components/time-attendance/shifts/ShiftSwapRequestsTab";
 import { OpenShiftBoardTab } from "@/components/time-attendance/shifts/OpenShiftBoardTab";
@@ -763,6 +764,10 @@ export default function ShiftManagementPage() {
               <Gavel className="h-4 w-4" />
               {t("timeAttendance.shifts.bidding")}
             </TabsTrigger>
+            <TabsTrigger value="aiScheduler" className="flex items-center gap-2">
+              <Sparkles className="h-4 w-4" />
+              {t("timeAttendance.shifts.aiScheduler")}
+            </TabsTrigger>
           </TabsList>
 
           {/* Calendar Tab */}
@@ -1465,6 +1470,11 @@ export default function ShiftManagementPage() {
           {/* Bidding Tab */}
           <TabsContent value="bidding" className="space-y-4">
             <ShiftBiddingTab companyId={selectedCompany} />
+          </TabsContent>
+
+          {/* AI Scheduler Tab */}
+          <TabsContent value="aiScheduler" className="space-y-4">
+            <AISchedulerTab companyId={selectedCompany} />
           </TabsContent>
         </Tabs>
       </div>
