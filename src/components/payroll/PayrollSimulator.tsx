@@ -1052,11 +1052,141 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId, payGroupI
     }
   }, [selectedRateDate, exchangeRateDialogOpen]);
 
-  // Show loading while dependencies or result are loading
-  if (currenciesLoading || localCurrencyLoading || !result) {
+  const exchangeRateDialog = (
+    <Dialog open={exchangeRateDialogOpen} onOpenChange={setExchangeRateDialogOpen}>
+      <DialogContent className="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Globe className="h-5 w-5" />
+            Select Exchange Rates for Simulation
+          </DialogTitle>
+        </DialogHeader>
+
+        <div className="space-y-4">
+          <div className="flex items-center gap-4">
+            <div className="space-y-2">
+              <Label>Rate Date</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-[240px] justify-start text-left font-normal",
+                      !selectedRateDate && "text-muted-foreground",
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {selectedRateDate ? format(selectedRateDate, "PPP") : "Select date"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={selectedRateDate}
+                    onSelect={(date) => date && setSelectedRateDate(date)}
+                    disabled={(date) => date > new Date()}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            <Button
+              variant="outline"
+              onClick={fetchRatesForDate}
+              disabled={loadingRates}
+              className="mt-6"
+            >
+              <RefreshCw className={cn("h-4 w-4 mr-2", loadingRates && "animate-spin")} />
+              Fetch Rates
+            </Button>
+          </div>
+
+          {missingRates.length > 0 && (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                No rates found for: {missingRates.join(", ")}. Please enter manually.
+              </AlertDescription>
+            </Alert>
+          )}
+
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>From Currency</TableHead>
+                <TableHead>To Currency</TableHead>
+                <TableHead>Exchange Rate</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {exchangeRates.map((entry, index) => (
+                <TableRow key={`${entry.fromCurrencyId}-${entry.toCurrencyId}`}>
+                  <TableCell>
+                    <span className="font-medium">{entry.fromCurrency?.code}</span>
+                    <span className="text-muted-foreground ml-2">{entry.fromCurrency?.name}</span>
+                  </TableCell>
+                  <TableCell>
+                    <span className="font-medium">{entry.toCurrency?.code}</span>
+                    <span className="text-muted-foreground ml-2">{entry.toCurrency?.name}</span>
+                  </TableCell>
+                  <TableCell>
+                    <Input
+                      type="number"
+                      step="0.000001"
+                      value={entry.rate || ""}
+                      onChange={(e) => handleRateChange(index, e.target.value)}
+                      className="w-32"
+                      placeholder="0.000000"
+                    />
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+
+          <p className="text-sm text-muted-foreground">
+            These rates will be used for currency conversions in this simulation.
+          </p>
+        </div>
+
+        <DialogFooter>
+          <Button
+            variant="outline"
+            onClick={() => {
+              setExchangeRateDialogOpen(false);
+              setHasCheckedCurrencies(true);
+              // Run with empty rates - amounts won't be converted
+              runSimulationWithRates(new Map());
+            }}
+          >
+            Skip (Use Original Amounts)
+          </Button>
+          <Button onClick={handleConfirmRates} disabled={!allRatesValid}>
+            Confirm Rates & Calculate
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+
+  // Show loading while dependencies are loading
+  if (currenciesLoading || localCurrencyLoading) {
     return (
       <div className="flex items-center justify-center py-8">
         <RefreshCw className="h-6 w-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  // If we're waiting for exchange rates, render the dialog even before results exist
+  if (!result) {
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center justify-center py-8">
+          <RefreshCw className="h-6 w-6 animate-spin text-muted-foreground" />
+        </div>
+        {exchangeRateDialog}
       </div>
     );
   }
@@ -1624,122 +1754,7 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId, payGroupI
         Recalculate
       </Button>
 
-      {/* Exchange Rate Selection Dialog */}
-      <Dialog open={exchangeRateDialogOpen} onOpenChange={setExchangeRateDialogOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Globe className="h-5 w-5" />
-              Select Exchange Rates for Simulation
-            </DialogTitle>
-          </DialogHeader>
-          
-          <div className="space-y-4">
-            <div className="flex items-center gap-4">
-              <div className="space-y-2">
-                <Label>Rate Date</Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-[240px] justify-start text-left font-normal",
-                        !selectedRateDate && "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {selectedRateDate ? format(selectedRateDate, "PPP") : "Select date"}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={selectedRateDate}
-                      onSelect={(date) => date && setSelectedRateDate(date)}
-                      disabled={(date) => date > new Date()}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-              
-              <Button
-                variant="outline"
-                onClick={fetchRatesForDate}
-                disabled={loadingRates}
-                className="mt-6"
-              >
-                <RefreshCw className={cn("h-4 w-4 mr-2", loadingRates && "animate-spin")} />
-                Fetch Rates
-              </Button>
-            </div>
-            
-            {missingRates.length > 0 && (
-              <Alert variant="destructive">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>
-                  No rates found for: {missingRates.join(", ")}. Please enter manually.
-                </AlertDescription>
-              </Alert>
-            )}
-            
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>From Currency</TableHead>
-                  <TableHead>To Currency</TableHead>
-                  <TableHead>Exchange Rate</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {exchangeRates.map((entry, index) => (
-                  <TableRow key={`${entry.fromCurrencyId}-${entry.toCurrencyId}`}>
-                    <TableCell>
-                      <span className="font-medium">{entry.fromCurrency?.code}</span>
-                      <span className="text-muted-foreground ml-2">{entry.fromCurrency?.name}</span>
-                    </TableCell>
-                    <TableCell>
-                      <span className="font-medium">{entry.toCurrency?.code}</span>
-                      <span className="text-muted-foreground ml-2">{entry.toCurrency?.name}</span>
-                    </TableCell>
-                    <TableCell>
-                      <Input
-                        type="number"
-                        step="0.000001"
-                        value={entry.rate || ""}
-                        onChange={(e) => handleRateChange(index, e.target.value)}
-                        className="w-32"
-                        placeholder="0.000000"
-                      />
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-            
-            <p className="text-sm text-muted-foreground">
-              These rates will be used for currency conversions in this simulation.
-            </p>
-          </div>
-          
-          <DialogFooter>
-            <Button variant="outline" onClick={() => {
-              setExchangeRateDialogOpen(false);
-              setHasCheckedCurrencies(true);
-              // Run with empty rates - amounts won't be converted
-              runSimulationWithRates(new Map());
-            }}>
-              Skip (Use Original Amounts)
-            </Button>
-            <Button
-              onClick={handleConfirmRates}
-              disabled={!allRatesValid}
-            >
-              Confirm Rates & Calculate
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {exchangeRateDialog}
     </div>
   );
 }
