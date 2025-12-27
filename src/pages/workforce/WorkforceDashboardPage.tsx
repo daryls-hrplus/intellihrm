@@ -143,10 +143,10 @@ export default function WorkforceDashboardPage() {
       color: "bg-emerald-500/10 text-emerald-500",
       tabCode: "jobs",
     },
-    competencies: {
-      title: t("workforce.modules.competencies.title"),
-      description: t("workforce.modules.competencies.description"),
-      href: "/workforce/competencies",
+    skillsCompetencies: {
+      title: "Skills & Competencies",
+      description: "Manage organizational skills and competency framework",
+      href: "/workforce/capability-registry",
       icon: Target,
       color: "bg-rose-500/10 text-rose-500",
       tabCode: "competencies",
@@ -267,7 +267,7 @@ export default function WorkforceDashboardPage() {
       items: filterByAccess([
         allModules.jobFamilies,
         allModules.jobs,
-        allModules.competencies,
+        allModules.skillsCompetencies,
         allModules.responsibilities,
         allModules.qualifications,
         allModules.positions,
