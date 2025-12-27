@@ -1612,6 +1612,38 @@ const App = () => (
               }
             />
             <Route
+              path="/time-attendance/shifts/list"
+              element={
+                <ProtectedRoute moduleCode="time_attendance">
+                  <ShiftsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/time-attendance/shifts/rounding-rules"
+              element={
+                <ProtectedRoute moduleCode="time_attendance">
+                  <RoundingRulesPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/time-attendance/shifts/payment-rules"
+              element={
+                <ProtectedRoute moduleCode="time_attendance">
+                  <PaymentRulesPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/time-attendance/shifts/assignments"
+              element={
+                <ProtectedRoute moduleCode="time_attendance">
+                  <ShiftAssignmentsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/time-attendance/shifts/calendar"
               element={
                 <ProtectedRoute moduleCode="time_attendance">
