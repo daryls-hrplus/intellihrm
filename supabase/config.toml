@@ -1,5 +1,8 @@
 project_id = "hmdewkkytchwrenqagkw"
 
+[functions.process-goal-checkins]
+verify_jwt = false
+
 [functions.goal-ai-analyzer]
 verify_jwt = false
 
