@@ -5,6 +5,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   Heart,
   Monitor,
@@ -38,15 +39,21 @@ import {
   Laptop,
   Radio,
   Lightbulb,
+  Users,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
-interface DynamicOccupation {
-  uri: string;
-  title: string;
-  description?: string;
+interface MasterOccupation {
+  id: string;
+  occupation_name: string;
+  description: string | null;
+  job_family: string | null;
+  job_level: string | null;
+  is_cross_cutting: boolean | null;
+  skills_count: number | null;
+  competencies_count: number | null;
 }
 
 interface MasterIndustry {
@@ -64,7 +71,7 @@ interface IndustrySelectorProps {
   selectedIndustry: string | null;
   selectedOccupations: string[];
   onIndustrySelect: (industryCode: string) => void;
-  onOccupationToggle: (occupationUri: string, occupationLabel?: string) => void;
+  onOccupationToggle: (occupationId: string, occupationLabel?: string) => void;
   onSelectAllOccupations: (occupations: { uri: string; label: string }[]) => void;
 }
 
@@ -97,6 +104,7 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Laptop,
   Radio,
   Lightbulb,
+  Users,
 };
 
 export function IndustrySelector({
@@ -108,18 +116,19 @@ export function IndustrySelector({
 }: IndustrySelectorProps) {
   const [industries, setIndustries] = useState<MasterIndustry[]>([]);
   const [loadingIndustries, setLoadingIndustries] = useState(true);
-  const [occupations, setOccupations] = useState<DynamicOccupation[]>([]);
+  const [occupations, setOccupations] = useState<MasterOccupation[]>([]);
+  const [crossCuttingOccupations, setCrossCuttingOccupations] = useState<MasterOccupation[]>([]);
   const [loadingOccupations, setLoadingOccupations] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [customSearchResults, setCustomSearchResults] = useState<DynamicOccupation[]>([]);
-  const [isSearching, setIsSearching] = useState(false);
+  const [showCrossCutting, setShowCrossCutting] = useState(true);
 
   // Load industries from master_industries table
   useEffect(() => {
     loadIndustries();
+    loadCrossCuttingOccupations();
   }, []);
 
-  // Load occupations dynamically when industry changes (and when industries finish loading)
+  // Load occupations when industry changes
   useEffect(() => {
     if (selectedIndustry && industries.length > 0) {
       loadOccupationsForIndustry(selectedIndustry);
@@ -147,6 +156,22 @@ export function IndustrySelector({
     }
   };
 
+  const loadCrossCuttingOccupations = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('master_occupations_library')
+        .select('id, occupation_name, description, job_family, job_level, is_cross_cutting, skills_count, competencies_count')
+        .eq('is_active', true)
+        .eq('is_cross_cutting', true)
+        .order('occupation_name');
+
+      if (error) throw error;
+      setCrossCuttingOccupations(data || []);
+    } catch (err) {
+      console.error("Failed to load cross-cutting occupations:", err);
+    }
+  };
+
   const loadOccupationsForIndustry = async (industryCode: string) => {
     setLoadingOccupations(true);
     setOccupations([]);
@@ -158,74 +183,43 @@ export function IndustrySelector({
     }
 
     try {
-      // Call edge function to search ESCO for industry-related occupations
-      const { data, error } = await supabase.functions.invoke("esco-skills-import", {
-        body: {
-          action: "search_industry_occupations",
-          industryName: industry.name,
-          language: "en",
-          limit: 25,
-        },
-      });
+      // Get occupations for this industry from master_occupations_library
+      const { data, error } = await supabase
+        .from('master_occupations_library')
+        .select('id, occupation_name, description, job_family, job_level, is_cross_cutting, skills_count, competencies_count')
+        .eq('industry_id', industry.id)
+        .eq('is_active', true)
+        .order('occupation_name');
 
       if (error) throw error;
-
-      const occupationList = (data?.occupations || []).map((occ: any) => ({
-        uri: occ.uri,
-        title: occ.title,
-        description: occ.description,
-      }));
-
-      setOccupations(occupationList);
+      setOccupations(data || []);
       
-      if (occupationList.length === 0) {
-        toast.info("No occupations found for this industry. Try searching manually.");
+      if ((data || []).length === 0) {
+        toast.info("No specific occupations for this industry. You can select cross-cutting roles below.");
       }
     } catch (err) {
       console.error("Failed to load occupations:", err);
-      toast.error("Failed to load occupations from ESCO API");
+      toast.error("Failed to load occupations");
     } finally {
       setLoadingOccupations(false);
     }
   };
 
-  const handleCustomSearch = async () => {
-    if (!searchQuery.trim()) return;
-    
-    setIsSearching(true);
-    try {
-      const { data, error } = await supabase.functions.invoke("esco-skills-import", {
-        body: {
-          action: "search_occupations",
-          query: searchQuery,
-          language: "en",
-          limit: 15,
-        },
-      });
+  // Filter occupations based on search
+  const filteredOccupations = occupations.filter(occ => 
+    !searchQuery || occ.occupation_name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
-      if (error) throw error;
-
-      const results = (data?.occupations || []).map((occ: any) => ({
-        uri: occ.uri,
-        title: occ.title,
-        description: occ.description,
-      }));
-
-      setCustomSearchResults(results);
-      
-      if (results.length === 0) {
-        toast.info("No occupations found matching your search");
-      }
-    } catch (err) {
-      console.error("Search failed:", err);
-      toast.error("Failed to search ESCO API");
-    } finally {
-      setIsSearching(false);
-    }
-  };
+  const filteredCrossCutting = crossCuttingOccupations.filter(occ =>
+    !searchQuery || occ.occupation_name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const currentIndustry = industries.find((i) => i.code === selectedIndustry);
-  const displayOccupations = customSearchResults.length > 0 ? customSearchResults : occupations;
+
+  // Combine industry-specific and cross-cutting occupations for display
+  const allDisplayOccupations = showCrossCutting 
+    ? [...filteredOccupations, ...filteredCrossCutting]
+    : filteredOccupations;
 
   return (
     <div className="space-y-6">
@@ -257,7 +251,6 @@ export function IndustrySelector({
                   )}
                   onClick={() => {
                     onIndustrySelect(industry.code);
-                    setCustomSearchResults([]);
                     setSearchQuery("");
                   }}
                 >
@@ -292,7 +285,7 @@ export function IndustrySelector({
                 {currentIndustry.name} - Occupations
               </h3>
               <p className="text-sm text-muted-foreground">
-                Select occupations to import their associated skills from ESCO
+                Select occupations to import their associated skills from the HRplus library
               </p>
             </div>
             <div className="flex gap-2">
@@ -305,13 +298,13 @@ export function IndustrySelector({
                 <RefreshCw className={cn("h-4 w-4 mr-1", loadingOccupations && "animate-spin")} />
                 Refresh
               </Button>
-              {displayOccupations.length > 0 && (
+              {allDisplayOccupations.length > 0 && (
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() =>
                     onSelectAllOccupations(
-                      displayOccupations.map((o) => ({ uri: o.uri, label: o.title }))
+                      allDisplayOccupations.map((o) => ({ uri: o.id, label: o.occupation_name }))
                     )
                   }
                 >
@@ -321,32 +314,25 @@ export function IndustrySelector({
             </div>
           </div>
 
-          {/* Custom Search */}
+          {/* Search and Filter */}
           <div className="flex gap-2 mb-4">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search for specific occupations..."
+                placeholder="Search occupations..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleCustomSearch()}
                 className="pl-9"
               />
             </div>
-            <Button onClick={handleCustomSearch} disabled={isSearching || !searchQuery.trim()}>
-              {isSearching ? <Loader2 className="h-4 w-4 animate-spin" /> : "Search"}
+            <Button
+              variant={showCrossCutting ? "secondary" : "outline"}
+              size="sm"
+              onClick={() => setShowCrossCutting(!showCrossCutting)}
+            >
+              <Users className="h-4 w-4 mr-1" />
+              Cross-cutting
             </Button>
-            {customSearchResults.length > 0 && (
-              <Button
-                variant="ghost"
-                onClick={() => {
-                  setCustomSearchResults([]);
-                  setSearchQuery("");
-                }}
-              >
-                Clear
-              </Button>
-            )}
           </div>
 
           {loadingOccupations ? (
@@ -355,60 +341,99 @@ export function IndustrySelector({
                 <Skeleton key={i} className="h-14 rounded-lg" />
               ))}
             </div>
-          ) : displayOccupations.length === 0 ? (
+          ) : allDisplayOccupations.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
-              <p>No occupations loaded yet.</p>
-              <p className="text-sm">Use the search above to find specific occupations.</p>
+              <p>No occupations found.</p>
+              <p className="text-sm">Try enabling cross-cutting roles or selecting a different industry.</p>
             </div>
           ) : (
             <ScrollArea className="h-[300px]">
               <div className="space-y-2">
-                {displayOccupations.map((occupation) => {
-                  const isChecked = selectedOccupations.includes(occupation.uri);
-
-                  return (
-                    <div
-                      key={occupation.uri}
-                      className={cn(
-                        "flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors",
-                        isChecked
-                          ? "bg-primary/10 border-primary"
-                          : "bg-background hover:bg-muted"
-                      )}
-                      onClick={() => onOccupationToggle(occupation.uri, occupation.title)}
-                    >
-                      <Checkbox
-                        checked={isChecked}
-                        onCheckedChange={() =>
-                          onOccupationToggle(occupation.uri, occupation.title)
-                        }
+                {/* Industry-specific occupations */}
+                {filteredOccupations.length > 0 && (
+                  <>
+                    <p className="text-xs font-medium text-muted-foreground px-1 mb-2">
+                      Industry-Specific Roles ({filteredOccupations.length})
+                    </p>
+                    {filteredOccupations.map((occupation) => (
+                      <OccupationItem
+                        key={occupation.id}
+                        occupation={occupation}
+                        isChecked={selectedOccupations.includes(occupation.id)}
+                        onToggle={() => onOccupationToggle(occupation.id, occupation.occupation_name)}
                       />
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-sm">
-                          {occupation.title}
-                        </p>
-                        {occupation.description && (
-                          <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">
-                            {occupation.description}
-                          </p>
-                        )}
-                      </div>
-                      {isChecked && (
-                        <CheckCircle2 className="h-5 w-5 text-primary shrink-0" />
-                      )}
-                    </div>
-                  );
-                })}
+                    ))}
+                  </>
+                )}
+
+                {/* Cross-cutting occupations */}
+                {showCrossCutting && filteredCrossCutting.length > 0 && (
+                  <>
+                    <p className="text-xs font-medium text-muted-foreground px-1 mt-4 mb-2">
+                      Cross-cutting Roles ({filteredCrossCutting.length})
+                    </p>
+                    {filteredCrossCutting.map((occupation) => (
+                      <OccupationItem
+                        key={occupation.id}
+                        occupation={occupation}
+                        isChecked={selectedOccupations.includes(occupation.id)}
+                        onToggle={() => onOccupationToggle(occupation.id, occupation.occupation_name)}
+                        isCrossCutting
+                      />
+                    ))}
+                  </>
+                )}
               </div>
             </ScrollArea>
           )}
+        </div>
+      )}
+    </div>
+  );
+}
 
-          {customSearchResults.length > 0 && (
-            <p className="text-xs text-muted-foreground mt-2">
-              Showing {customSearchResults.length} search results. Clear to see industry occupations.
-            </p>
+function OccupationItem({ 
+  occupation, 
+  isChecked, 
+  onToggle,
+  isCrossCutting = false
+}: { 
+  occupation: MasterOccupation; 
+  isChecked: boolean; 
+  onToggle: () => void;
+  isCrossCutting?: boolean;
+}) {
+  return (
+    <div
+      className={cn(
+        "flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors",
+        isChecked
+          ? "bg-primary/10 border-primary"
+          : "bg-background hover:bg-muted"
+      )}
+      onClick={onToggle}
+    >
+      <Checkbox checked={isChecked} onCheckedChange={onToggle} />
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2">
+          <p className="font-medium text-sm">
+            {occupation.occupation_name}
+          </p>
+          {isCrossCutting && (
+            <Badge variant="outline" className="text-xs">Cross-cutting</Badge>
+          )}
+          {occupation.job_family && (
+            <Badge variant="secondary" className="text-xs">{occupation.job_family}</Badge>
           )}
         </div>
+        {occupation.description && (
+          <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">
+            {occupation.description}
+          </p>
+        )}
+      </div>
+      {isChecked && (
+        <CheckCircle2 className="h-5 w-5 text-primary shrink-0" />
       )}
     </div>
   );

@@ -20,7 +20,7 @@ import {
   Rocket,
   AlertCircle,
   Zap,
-  Globe,
+  Target,
   XCircle,
 } from "lucide-react";
 import { IndustrySelector } from "./IndustrySelector";
@@ -41,7 +41,8 @@ interface ImportProgress {
   current: number;
   total: number;
   currentOccupation: string;
-  imported: number;
+  importedSkills: number;
+  importedCompetencies: number;
   skipped: number;
   errors: string[];
 }
@@ -59,14 +60,14 @@ export function SkillsQuickStartWizard({
   const [occupationLabels, setOccupationLabels] = useState<Record<string, string>>({});
   const [progress, setProgress] = useState<ImportProgress | null>(null);
 
-  const handleOccupationToggle = (occupationUri: string, occupationLabel?: string) => {
+  const handleOccupationToggle = (occupationId: string, occupationLabel?: string) => {
     setSelectedOccupations((prev) =>
-      prev.includes(occupationUri)
-        ? prev.filter((uri) => uri !== occupationUri)
-        : [...prev, occupationUri]
+      prev.includes(occupationId)
+        ? prev.filter((id) => id !== occupationId)
+        : [...prev, occupationId]
     );
     if (occupationLabel) {
-      setOccupationLabels((prev) => ({ ...prev, [occupationUri]: occupationLabel }));
+      setOccupationLabels((prev) => ({ ...prev, [occupationId]: occupationLabel }));
     }
   };
 
@@ -78,27 +79,39 @@ export function SkillsQuickStartWizard({
   };
 
   const handleStartImport = async () => {
-    if (!user || selectedOccupations.length === 0) return;
+    if (!user || selectedOccupations.length === 0 || !companyId) {
+      toast.error("Please select a company and at least one occupation");
+      return;
+    }
 
     setStep("importing");
     setProgress({
       current: 0,
       total: selectedOccupations.length,
       currentOccupation: "",
-      imported: 0,
+      importedSkills: 0,
+      importedCompetencies: 0,
       skipped: 0,
       errors: [],
     });
 
-    let totalImported = 0;
+    let totalImportedSkills = 0;
+    let totalImportedCompetencies = 0;
     let totalSkipped = 0;
     const allErrors: string[] = [];
 
+    // Get the industry ID
+    const { data: industryData } = await supabase
+      .from('master_industries')
+      .select('id')
+      .eq('code', selectedIndustry)
+      .single();
+
+    const industryId = industryData?.id;
+
     for (let i = 0; i < selectedOccupations.length; i++) {
-      const occupationUri = selectedOccupations[i];
-      
-      // Get occupation label from local state (set during dynamic loading)
-      const occupationLabel = occupationLabels[occupationUri] || "Unknown";
+      const occupationId = selectedOccupations[i];
+      const occupationLabel = occupationLabels[occupationId] || "Unknown";
 
       setProgress((prev) =>
         prev
@@ -111,37 +124,171 @@ export function SkillsQuickStartWizard({
       );
 
       try {
-        // Call edge function to bulk import
-        // Pass occupationLabel for fallback search if URI doesn't exist in ESCO
-        const { data, error } = await supabase.functions.invoke(
-          "esco-skills-import",
-          {
-            body: {
-              action: "bulk_import_occupation",
-              occupationUri,
-              occupationLabel, // Used for fallback search by name
-              companyId,
-              userId: user.id,
-              language: "en",
-              sourceOccupation: {
-                uri: occupationUri,
-                label: occupationLabel,
-              },
-            },
+        // 1. Get skills for this occupation from master_occupation_skills
+        const { data: occupationSkills, error: skillsError } = await supabase
+          .from('master_occupation_skills')
+          .select(`
+            skill_id,
+            proficiency_level,
+            master_skills_library (
+              id,
+              skill_name,
+              skill_type,
+              category,
+              description,
+              source,
+              reuse_level
+            )
+          `)
+          .eq('occupation_id', occupationId);
+
+        if (skillsError) throw skillsError;
+
+        // 2. Get competencies for this occupation from master_occupation_competencies
+        const { data: occupationCompetencies, error: compsError } = await supabase
+          .from('master_occupation_competencies')
+          .select(`
+            competency_id,
+            proficiency_level,
+            master_competencies_library (
+              id,
+              competency_name,
+              competency_type,
+              category,
+              description,
+              source
+            )
+          `)
+          .eq('occupation_id', occupationId);
+
+        if (compsError) throw compsError;
+
+        // 3. Also get skills associated with the industry
+        let industrySkills: any[] = [];
+        if (industryId) {
+          const { data: indSkills } = await supabase
+            .from('master_industry_skills')
+            .select(`
+              skill_id,
+              relevance_score,
+              master_skills_library (
+                id,
+                skill_name,
+                skill_type,
+                category,
+                description,
+                source,
+                reuse_level
+              )
+            `)
+            .eq('industry_id', industryId);
+          industrySkills = indSkills || [];
+        }
+
+        // Combine skills from occupation and industry (deduplicate)
+        const allSkills = new Map<string, any>();
+        occupationSkills?.forEach((s: any) => {
+          if (s.master_skills_library) {
+            allSkills.set(s.skill_id, s.master_skills_library);
           }
-        );
+        });
+        industrySkills.forEach((s: any) => {
+          if (s.master_skills_library && !allSkills.has(s.skill_id)) {
+            allSkills.set(s.skill_id, s.master_skills_library);
+          }
+        });
 
-        if (error) throw error;
+        // 4. Import skills to company capabilities table
+        for (const [skillId, skill] of allSkills) {
+          // Check if already exists
+          const { data: existing } = await supabase
+            .from('capability_definitions')
+            .select('id')
+            .eq('company_id', companyId)
+            .eq('name', skill.skill_name)
+            .eq('type', 'SKILL')
+            .maybeSingle();
 
-        if (data?.error) {
-          allErrors.push(`${occupationLabel}: ${data.error}`);
-        } else {
-          totalImported += data?.imported || 0;
-          totalSkipped += data?.skipped || 0;
-          if (data?.errors?.length) {
-            allErrors.push(...data.errors);
+          if (existing) {
+            totalSkipped++;
+            continue;
+          }
+
+          // Insert new skill
+          const { error: insertError } = await supabase
+            .from('capability_definitions')
+            .insert({
+              company_id: companyId,
+              type: 'SKILL',
+              name: skill.skill_name,
+              code: skill.skill_name.toUpperCase().replace(/[^A-Z0-9]/g, '_').substring(0, 20),
+              description: skill.description,
+              category: mapCategory(skill.category),
+              status: 'active',
+              version: 1,
+              effective_from: new Date().toISOString().split('T')[0],
+              created_by: user.id,
+              metadata: {
+                source: 'HRplus Quick Start',
+                master_skill_id: skillId,
+                original_source: skill.source,
+              }
+            });
+
+          if (insertError) {
+            allErrors.push(`Skill "${skill.skill_name}": ${insertError.message}`);
+          } else {
+            totalImportedSkills++;
           }
         }
+
+        // 5. Import competencies to company capabilities table
+        for (const comp of (occupationCompetencies || [])) {
+          if (!comp.master_competencies_library) continue;
+          const competency = comp.master_competencies_library as any;
+
+          // Check if already exists
+          const { data: existing } = await supabase
+            .from('capability_definitions')
+            .select('id')
+            .eq('company_id', companyId)
+            .eq('name', competency.competency_name)
+            .eq('type', 'COMPETENCY')
+            .maybeSingle();
+
+          if (existing) {
+            totalSkipped++;
+            continue;
+          }
+
+          // Insert new competency
+          const { error: insertError } = await supabase
+            .from('capability_definitions')
+            .insert({
+              company_id: companyId,
+              type: 'COMPETENCY',
+              name: competency.competency_name,
+              code: competency.competency_name.toUpperCase().replace(/[^A-Z0-9]/g, '_').substring(0, 20),
+              description: competency.description,
+              category: mapCategory(competency.category),
+              status: 'active',
+              version: 1,
+              effective_from: new Date().toISOString().split('T')[0],
+              created_by: user.id,
+              metadata: {
+                source: 'HRplus Quick Start',
+                master_competency_id: comp.competency_id,
+                original_source: competency.source,
+              }
+            });
+
+          if (insertError) {
+            allErrors.push(`Competency "${competency.competency_name}": ${insertError.message}`);
+          } else {
+            totalImportedCompetencies++;
+          }
+        }
+
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err);
         allErrors.push(`${occupationLabel}: ${msg}`);
@@ -151,18 +298,20 @@ export function SkillsQuickStartWizard({
         prev
           ? {
               ...prev,
-              imported: totalImported,
+              importedSkills: totalImportedSkills,
+              importedCompetencies: totalImportedCompetencies,
               skipped: totalSkipped,
               errors: allErrors,
             }
           : null
       );
 
-      // Small delay to avoid rate limiting
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      // Small delay to avoid overwhelming the database
+      await new Promise((resolve) => setTimeout(resolve, 100));
     }
 
     setStep("complete");
+    toast.success(`Imported ${totalImportedSkills} skills and ${totalImportedCompetencies} competencies`);
   };
 
   const handleClose = () => {
@@ -176,7 +325,17 @@ export function SkillsQuickStartWizard({
     }
   };
 
-  const estimatedSkills = selectedOccupations.length * 40;
+  // Helper to map categories
+  const mapCategory = (category: string): string => {
+    const mapping: Record<string, string> = {
+      'Technical': 'technical',
+      'Functional': 'functional',
+      'Behavioral': 'behavioral',
+      'Leadership': 'leadership',
+      'Compliance': 'core',
+    };
+    return mapping[category] || 'functional';
+  };
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
@@ -187,8 +346,7 @@ export function SkillsQuickStartWizard({
             Skills Quick Start Wizard
           </DialogTitle>
           <DialogDescription>
-            Quickly populate your skills library with industry-standard skills
-            from ESCO
+            Quickly populate your skills library with industry-standard skills from the HRplus library
           </DialogDescription>
         </DialogHeader>
 
@@ -205,23 +363,23 @@ export function SkillsQuickStartWizard({
                 </h2>
                 <p className="text-muted-foreground max-w-md mx-auto">
                   Get started in under 2 minutes by importing pre-curated skills
-                  for your industry from the European Skills, Competences,
-                  Qualifications and Occupations (ESCO) framework.
+                  for your industry from the HRplus library, built for Caribbean
+                  and African enterprises.
                 </p>
               </div>
 
               <div className="grid grid-cols-3 gap-4 max-w-lg mx-auto">
                 <div className="p-4 rounded-lg bg-muted/50">
                   <Zap className="h-6 w-6 text-primary mx-auto mb-2" />
-                  <p className="text-sm font-medium">50-200 Skills</p>
+                  <p className="text-sm font-medium">90+ Skills</p>
                   <p className="text-xs text-muted-foreground">
                     Industry relevant
                   </p>
                 </div>
                 <div className="p-4 rounded-lg bg-muted/50">
-                  <Globe className="h-6 w-6 text-primary mx-auto mb-2" />
-                  <p className="text-sm font-medium">ESCO Standard</p>
-                  <p className="text-xs text-muted-foreground">EU recognized</p>
+                  <Target className="h-6 w-6 text-primary mx-auto mb-2" />
+                  <p className="text-sm font-medium">15 Competencies</p>
+                  <p className="text-xs text-muted-foreground">Core behaviors</p>
                 </div>
                 <div className="p-4 rounded-lg bg-muted/50">
                   <Check className="h-6 w-6 text-primary mx-auto mb-2" />
@@ -260,9 +418,8 @@ export function SkillsQuickStartWizard({
                 <Alert>
                   <AlertCircle className="h-4 w-4" />
                   <AlertDescription>
-                    <strong>{selectedOccupations.length}</strong> occupations
-                    selected - approximately{" "}
-                    <strong>~{estimatedSkills}</strong> skills will be imported.
+                    <strong>{selectedOccupations.length}</strong> occupation(s)
+                    selected - skills and competencies will be imported for your company.
                   </AlertDescription>
                 </Alert>
               )}
@@ -276,7 +433,7 @@ export function SkillsQuickStartWizard({
                   onClick={handleStartImport}
                   disabled={selectedOccupations.length === 0}
                 >
-                  Import Skills
+                  Import Skills & Competencies
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </div>
@@ -287,9 +444,9 @@ export function SkillsQuickStartWizard({
             <div className="py-8 space-y-6">
               <div className="text-center space-y-2">
                 <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto" />
-                <h2 className="text-xl font-bold">Importing Skills...</h2>
+                <h2 className="text-xl font-bold">Importing Skills & Competencies...</h2>
                 <p className="text-muted-foreground">
-                  Please wait while we fetch and import skills from ESCO
+                  Please wait while we import from the HRplus library
                 </p>
               </div>
 
@@ -317,8 +474,12 @@ export function SkillsQuickStartWizard({
 
                 <div className="flex justify-center gap-4 text-sm">
                   <Badge variant="secondary" className="gap-1">
-                    <Check className="h-3 w-3" />
-                    {progress.imported} imported
+                    <Zap className="h-3 w-3" />
+                    {progress.importedSkills} skills
+                  </Badge>
+                  <Badge variant="secondary" className="gap-1">
+                    <Target className="h-3 w-3" />
+                    {progress.importedCompetencies} competencies
                   </Badge>
                   <Badge variant="outline" className="gap-1">
                     {progress.skipped} skipped
@@ -337,17 +498,25 @@ export function SkillsQuickStartWizard({
               <div className="space-y-2">
                 <h2 className="text-2xl font-bold">Import Complete!</h2>
                 <p className="text-muted-foreground">
-                  Your skills library is now ready to use
+                  Your skills & competencies library is now ready to use
                 </p>
               </div>
 
-              <div className="grid grid-cols-2 gap-4 max-w-xs mx-auto">
+              <div className="grid grid-cols-3 gap-4 max-w-md mx-auto">
                 <div className="p-4 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
                   <p className="text-2xl font-bold text-green-600 dark:text-green-400">
-                    {progress.imported}
+                    {progress.importedSkills}
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    Skills Imported
+                    Skills
+                  </p>
+                </div>
+                <div className="p-4 rounded-lg bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800">
+                  <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+                    {progress.importedCompetencies}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Competencies
                   </p>
                 </div>
                 <div className="p-4 rounded-lg bg-muted/50 border">
@@ -377,7 +546,7 @@ export function SkillsQuickStartWizard({
 
               <Button onClick={handleClose} size="lg">
                 <Check className="mr-2 h-4 w-4" />
-                View My Skills
+                View My Skills & Competencies
               </Button>
             </div>
           )}
