@@ -1332,25 +1332,6 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId, payGroupI
         </div>
       ) : (
         <div className="p-4 bg-muted/50 rounded-lg space-y-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-            <div>
-              <p className="text-muted-foreground">Base Salary</p>
-              <p className="font-semibold">{result.salary.currency} {formatCurrency(result.salary.base_salary)}</p>
-            </div>
-            <div>
-              <p className="text-muted-foreground">Hourly Rate</p>
-              <p className="font-semibold">{result.salary.currency} {formatCurrency(result.salary.hourly_rate)}/hr</p>
-            </div>
-            <div>
-              <p className="text-muted-foreground">Currency</p>
-              <p className="font-semibold">{result.salary.currency}</p>
-            </div>
-            <div>
-              <p className="text-muted-foreground">Pay Frequency</p>
-              <p className="font-semibold capitalize">{result.salary.frequency}</p>
-            </div>
-          </div>
-          
           
           {/* Overall Proration Summary */}
           {result.proration?.isProrated && (
