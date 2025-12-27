@@ -32,6 +32,7 @@ import {
   Layers,
   Loader2,
   BarChart3,
+  Sparkles,
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -49,6 +50,8 @@ import {
 import { CapabilityCard } from "@/components/capabilities/CapabilityCard";
 import { CapabilityFormDialog } from "@/components/capabilities/CapabilityFormDialog";
 import { SkillMappingsDialog } from "@/components/capabilities/SkillMappingsDialog";
+import { SkillsQuickStartWizard } from "@/components/capabilities/SkillsQuickStartWizard";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface Company {
   id: string;
@@ -56,6 +59,7 @@ interface Company {
 }
 
 export default function CapabilityRegistryPage() {
+  const { user } = useAuth();
   const {
     capabilities,
     loading,
@@ -68,6 +72,8 @@ export default function CapabilityRegistryPage() {
   const { scales, fetchScales } = useProficiencyScales();
 
   const [companies, setCompanies] = useState<Company[]>([]);
+  const [isQuickStartOpen, setIsQuickStartOpen] = useState(false);
+  const [showQuickStartPrompt, setShowQuickStartPrompt] = useState(false);
   const [activeTab, setActiveTab] = useState<"all" | "skills" | "competencies">("all");
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
@@ -84,6 +90,13 @@ export default function CapabilityRegistryPage() {
     fetchCompanies();
     fetchScales();
   }, [fetchScales]);
+
+  // Show quick start prompt if no capabilities exist
+  useEffect(() => {
+    if (!loading && capabilities.length === 0 && companies.length > 0) {
+      setShowQuickStartPrompt(true);
+    }
+  }, [loading, capabilities.length, companies.length]);
 
   useEffect(() => {
     const filters: CapabilityFilters = {
@@ -183,6 +196,10 @@ export default function CapabilityRegistryPage() {
             </div>
           </div>
           <div className="flex gap-2">
+            <Button variant="outline" onClick={() => setIsQuickStartOpen(true)}>
+              <Sparkles className="mr-2 h-4 w-4" />
+              Quick Start
+            </Button>
             <Button variant="outline" onClick={() => handleAdd("COMPETENCY")}>
               <Target className="mr-2 h-4 w-4" />
               Add Competency
@@ -404,6 +421,19 @@ export default function CapabilityRegistryPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Quick Start Wizard */}
+      <SkillsQuickStartWizard
+        open={isQuickStartOpen || showQuickStartPrompt}
+        onOpenChange={(open) => {
+          setIsQuickStartOpen(open);
+          setShowQuickStartPrompt(false);
+        }}
+        companyId={companies[0]?.id || ""}
+        onComplete={() => {
+          fetchCapabilities({});
+        }}
+      />
     </AppLayout>
   );
 }

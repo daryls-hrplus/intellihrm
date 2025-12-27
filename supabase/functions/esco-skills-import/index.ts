@@ -470,6 +470,57 @@ serve(async (req) => {
         });
       }
 
+      case "bulk_import_occupation": {
+        const { occupationUri, companyId, userId, language = "en", sourceOccupation } = params;
+        
+        // Check guardrails first
+        const guardrailCheck = await checkGuardrails(supabaseClient, companyId, 100);
+        if (!guardrailCheck.allowed) {
+          return new Response(
+            JSON.stringify({ error: guardrailCheck.reason, guardrailViolation: true }),
+            { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+        
+        // Get skills for this occupation from ESCO API
+        const skills = await getOccupationSkills(occupationUri, language);
+        
+        if (skills.length === 0) {
+          return new Response(
+            JSON.stringify({ imported: 0, skipped: 0, errors: ["No skills found for occupation"] }),
+            { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+        
+        // Import the skills
+        const result = await importSkills(
+          supabaseClient,
+          skills,
+          companyId,
+          userId,
+          language,
+          sourceOccupation
+        );
+        
+        return new Response(JSON.stringify(result), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      case "get_industry_occupations": {
+        const { industryCode } = params;
+        const { data, error } = await supabaseClient
+          .from("industry_occupation_mappings")
+          .select("*")
+          .eq("industry_code", industryCode)
+          .order("priority");
+        
+        if (error) throw error;
+        return new Response(JSON.stringify({ occupations: data }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
       default:
         return new Response(
           JSON.stringify({ error: `Unknown action: ${action}` }),
