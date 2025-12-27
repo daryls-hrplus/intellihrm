@@ -1,5 +1,6 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,7 +13,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-// Tabs removed - using card-based navigation
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { getTodayString, formatDateForDisplay } from "@/utils/dateUtils";
@@ -25,7 +25,6 @@ import {
   Moon,
   Timer,
   DollarSign,
-  Settings,
   Users,
   ArrowLeftRight,
   Megaphone,
@@ -37,15 +36,6 @@ import {
   Calendar,
   Sparkles
 } from "lucide-react";
-import { ShiftSwapRequestsTab } from "@/components/time-attendance/shifts/ShiftSwapRequestsTab";
-import { OpenShiftBoardTab } from "@/components/time-attendance/shifts/OpenShiftBoardTab";
-import { ShiftTemplatesTab } from "@/components/time-attendance/shifts/ShiftTemplatesTab";
-import { RotationPatternsTab } from "@/components/time-attendance/shifts/RotationPatternsTab";
-import { FatigueManagementTab } from "@/components/time-attendance/shifts/FatigueManagementTab";
-import { ShiftCoverageTab } from "@/components/time-attendance/shifts/ShiftCoverageTab";
-import { ShiftBiddingTab } from "@/components/time-attendance/shifts/ShiftBiddingTab";
-import { ShiftCalendarTab } from "@/components/time-attendance/shifts/ShiftCalendarTab";
-import { AISchedulerTab } from "@/components/time-attendance/shifts/AISchedulerTab";
 
 interface Company {
   id: string;
@@ -125,15 +115,6 @@ export default function ShiftManagementPage() {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedCompany, setSelectedCompany] = useState<string>("");
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("");
-  const contentAnchorRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    if (!activeTab) return;
-    requestAnimationFrame(() => {
-      contentAnchorRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-    });
-  }, [activeTab]);
   
   // Shifts
   const [shifts, setShifts] = useState<Shift[]>([]);
@@ -587,7 +568,7 @@ export default function ShiftManagementPage() {
       return;
     }
 
-    const { error } = await supabase.from('employee_shift_assignments').insert({
+    const payload = {
       company_id: selectedCompany,
       employee_id: assignmentForm.employee_id,
       shift_id: assignmentForm.shift_id,
@@ -596,7 +577,9 @@ export default function ShiftManagementPage() {
       is_primary: assignmentForm.is_primary,
       rotation_pattern: assignmentForm.rotation_pattern || null,
       notes: assignmentForm.notes || null
-    });
+    };
+
+    const { error } = await supabase.from('employee_shift_assignments').insert(payload);
 
     if (error) {
       toast.error(t("common.error"));
@@ -604,17 +587,9 @@ export default function ShiftManagementPage() {
       return;
     }
 
-    toast.success(t("common.success"));
+    toast.success(t("timeAttendance.shifts.assignmentCreated"));
     setAssignmentDialogOpen(false);
-    setAssignmentForm({
-      employee_id: "",
-      shift_id: "",
-      effective_date: getTodayString(),
-      end_date: "",
-      is_primary: true,
-      rotation_pattern: "",
-      notes: ""
-    });
+    resetAssignmentForm();
     loadAssignments();
   };
 
@@ -624,57 +599,60 @@ export default function ShiftManagementPage() {
       toast.error(t("common.error"));
       return;
     }
-    toast.success(t("common.success"));
+    toast.success(t("timeAttendance.shifts.assignmentDeleted"));
     loadAssignments();
   };
 
-  if (loading) {
-    return (
-      <AppLayout>
-        <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-        </div>
-      </AppLayout>
-    );
-  }
+  const resetAssignmentForm = () => {
+    setAssignmentForm({
+      employee_id: "",
+      shift_id: "",
+      effective_date: getTodayString(),
+      end_date: "",
+      is_primary: true,
+      rotation_pattern: "",
+      notes: ""
+    });
+  };
+
+  const breadcrumbItems = [
+    { label: t("nav.timeAttendance"), href: "/time-attendance" },
+    { label: t("timeAttendance.modules.shifts.title") }
+  ];
+
+  // Navigation cards for sub-pages
+  const navigationCards = [
+    { title: t("timeAttendance.shifts.calendar"), description: t("timeAttendance.shifts.calendarDescription"), href: "/time-attendance/shifts/calendar", icon: Calendar, color: "bg-primary/20 text-primary" },
+    { title: t("timeAttendance.shifts.swapRequests"), description: t("timeAttendance.shifts.swapRequestsDescription"), href: "/time-attendance/shifts/swap-requests", icon: ArrowLeftRight, color: "bg-purple-500/20 text-purple-600" },
+    { title: t("timeAttendance.shifts.openShifts"), description: t("timeAttendance.shifts.openShiftsDescription"), href: "/time-attendance/shifts/open-shifts", icon: Megaphone, color: "bg-pink-500/20 text-pink-600" },
+    { title: t("timeAttendance.shifts.templates"), description: t("timeAttendance.shifts.templatesDescription"), href: "/time-attendance/shifts/templates", icon: Copy, color: "bg-cyan-500/20 text-cyan-600" },
+    { title: t("timeAttendance.shifts.rotations"), description: t("timeAttendance.shifts.rotationsDescription"), href: "/time-attendance/shifts/rotations", icon: RotateCcw, color: "bg-indigo-500/20 text-indigo-600" },
+    { title: t("timeAttendance.shifts.fatigue"), description: t("timeAttendance.shifts.fatigueDescription"), href: "/time-attendance/shifts/fatigue", icon: AlertTriangle, color: "bg-red-500/20 text-red-600" },
+    { title: t("timeAttendance.shifts.coverage"), description: t("timeAttendance.shifts.coverageDescription"), href: "/time-attendance/shifts/coverage", icon: BarChart3, color: "bg-teal-500/20 text-teal-600" },
+    { title: t("timeAttendance.shifts.bidding"), description: t("timeAttendance.shifts.biddingDescription"), href: "/time-attendance/shifts/bidding", icon: Gavel, color: "bg-amber-500/20 text-amber-600" },
+    { title: t("timeAttendance.shifts.aiScheduler"), description: t("timeAttendance.shifts.aiSchedulerDescription"), href: "/time-attendance/shifts/ai-scheduler", icon: Sparkles, color: "bg-violet-500/20 text-violet-600" },
+  ];
 
   return (
     <AppLayout>
       <div className="space-y-6">
-        <Breadcrumbs 
-          items={[
-            { label: t("timeAttendance.title"), href: "/time-attendance" },
-            { label: t("timeAttendance.shifts.title") }
-          ]} 
-        />
-
+        <Breadcrumbs items={breadcrumbItems} />
+        
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
-              <Clock className="h-6 w-6 text-primary" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold tracking-tight text-foreground">
-                {t("timeAttendance.shifts.title")}
-              </h1>
-              <p className="text-muted-foreground">
-                {t("timeAttendance.shifts.subtitle")}
-              </p>
-            </div>
-          </div>
+          <h1 className="text-2xl font-bold">{t("timeAttendance.modules.shifts.title")}</h1>
           <Select value={selectedCompany} onValueChange={setSelectedCompany}>
-            <SelectTrigger className="w-[200px]">
+            <SelectTrigger className="w-64">
               <SelectValue placeholder={t("common.selectCompany")} />
             </SelectTrigger>
             <SelectContent>
-              {companies.map((c) => (
-                <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+              {companies.map((company) => (
+                <SelectItem key={company.id} value={company.id}>{company.name}</SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
 
-        {/* Stats */}
+        {/* Summary Stats */}
         <div className="grid gap-4 md:grid-cols-4">
           <Card>
             <CardContent className="flex items-center gap-4 p-4">
@@ -682,7 +660,7 @@ export default function ShiftManagementPage() {
                 <Clock className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">{t("timeAttendance.shifts.shiftsTab")}</p>
+                <p className="text-sm text-muted-foreground">{t("timeAttendance.shifts.activeShifts")}</p>
                 <p className="text-xl font-semibold">{shifts.filter(s => s.is_active).length}</p>
               </div>
             </CardContent>
@@ -690,7 +668,7 @@ export default function ShiftManagementPage() {
           <Card>
             <CardContent className="flex items-center gap-4 p-4">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary/20">
-                <Timer className="h-5 w-5 text-secondary-foreground" />
+                <Timer className="h-5 w-5 text-secondary" />
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">{t("timeAttendance.shifts.roundingRules")}</p>
@@ -722,1198 +700,679 @@ export default function ShiftManagementPage() {
           </Card>
         </div>
 
-        {/* Module Cards Grid */}
+        {/* Navigation Cards Grid */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          <Card className={`transition-all hover:shadow-md hover:border-primary/50 ${activeTab === 'calendar' ? 'border-primary ring-2 ring-primary/20' : ''}`}>
-            <button
-              type="button"
-              className="w-full text-left cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 rounded-lg"
-              onClick={() => setActiveTab('calendar')}
-            >
-              <CardContent className="flex items-center gap-4 p-4">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/20">
-                  <Calendar className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <p className="font-medium">{t("timeAttendance.shifts.calendar")}</p>
-                  <p className="text-sm text-muted-foreground">{t("timeAttendance.shifts.calendarDescription") || "View shift calendar"}</p>
-                </div>
-              </CardContent>
-            </button>
-          </Card>
-
-          <Card className={`transition-all hover:shadow-md hover:border-primary/50 ${activeTab === 'shifts' ? 'border-primary ring-2 ring-primary/20' : ''}`}>
-            <button
-              type="button"
-              className="w-full text-left cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 rounded-lg"
-              onClick={() => setActiveTab('shifts')}
-            >
-              <CardContent className="flex items-center gap-4 p-4">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-500/20">
-                  <Clock className="h-5 w-5 text-blue-600" />
-                </div>
-                <div>
-                  <p className="font-medium">{t("timeAttendance.shifts.shiftsTab")}</p>
-                  <p className="text-sm text-muted-foreground">{shifts.filter(s => s.is_active).length} {t("common.active").toLowerCase()}</p>
-                </div>
-              </CardContent>
-            </button>
-          </Card>
-
-          <Card className={`transition-all hover:shadow-md hover:border-primary/50 ${activeTab === 'rounding' ? 'border-primary ring-2 ring-primary/20' : ''}`}>
-            <button
-              type="button"
-              className="w-full text-left cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 rounded-lg"
-              onClick={() => setActiveTab('rounding')}
-            >
-              <CardContent className="flex items-center gap-4 p-4">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-orange-500/20">
-                  <Timer className="h-5 w-5 text-orange-600" />
-                </div>
-                <div>
-                  <p className="font-medium">{t("timeAttendance.shifts.roundingRules")}</p>
-                  <p className="text-sm text-muted-foreground">{roundingRules.filter(r => r.is_active).length} {t("common.active").toLowerCase()}</p>
-                </div>
-              </CardContent>
-            </button>
-          </Card>
-
-          <Card className={`transition-all hover:shadow-md hover:border-primary/50 ${activeTab === 'payment' ? 'border-primary ring-2 ring-primary/20' : ''}`}>
-            <button
-              type="button"
-              className="w-full text-left cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 rounded-lg"
-              onClick={() => setActiveTab('payment')}
-            >
-              <CardContent className="flex items-center gap-4 p-4">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-500/20">
-                  <DollarSign className="h-5 w-5 text-green-600" />
-                </div>
-                <div>
-                  <p className="font-medium">{t("timeAttendance.shifts.paymentRules")}</p>
-                  <p className="text-sm text-muted-foreground">{paymentRules.filter(r => r.is_active).length} {t("common.active").toLowerCase()}</p>
-                </div>
-              </CardContent>
-            </button>
-          </Card>
-
-          <Card className={`transition-all hover:shadow-md hover:border-primary/50 ${activeTab === 'assignments' ? 'border-primary ring-2 ring-primary/20' : ''}`}>
-            <button
-              type="button"
-              className="w-full text-left cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 rounded-lg"
-              onClick={() => setActiveTab('assignments')}
-            >
-              <CardContent className="flex items-center gap-4 p-4">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-yellow-500/20">
-                  <Users className="h-5 w-5 text-yellow-600" />
-                </div>
-                <div>
-                  <p className="font-medium">{t("timeAttendance.shifts.assignments")}</p>
-                  <p className="text-sm text-muted-foreground">{assignments.length} {t("common.total").toLowerCase()}</p>
-                </div>
-              </CardContent>
-            </button>
-          </Card>
-
-          <Card className={`transition-all hover:shadow-md hover:border-primary/50 ${activeTab === 'swaps' ? 'border-primary ring-2 ring-primary/20' : ''}`}>
-            <button
-              type="button"
-              className="w-full text-left cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 rounded-lg"
-              onClick={() => setActiveTab('swaps')}
-            >
-              <CardContent className="flex items-center gap-4 p-4">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-500/20">
-                  <ArrowLeftRight className="h-5 w-5 text-purple-600" />
-                </div>
-                <div>
-                  <p className="font-medium">{t("timeAttendance.shifts.swapRequests")}</p>
-                  <p className="text-sm text-muted-foreground">{t("timeAttendance.shifts.swapRequestsDescription") || "Manage swap requests"}</p>
-                </div>
-              </CardContent>
-            </button>
-          </Card>
-
-          <Card className={`transition-all hover:shadow-md hover:border-primary/50 ${activeTab === 'openShifts' ? 'border-primary ring-2 ring-primary/20' : ''}`}>
-            <button
-              type="button"
-              className="w-full text-left cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 rounded-lg"
-              onClick={() => setActiveTab('openShifts')}
-            >
-              <CardContent className="flex items-center gap-4 p-4">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-pink-500/20">
-                  <Megaphone className="h-5 w-5 text-pink-600" />
-                </div>
-                <div>
-                  <p className="font-medium">{t("timeAttendance.shifts.openShifts")}</p>
-                  <p className="text-sm text-muted-foreground">{t("timeAttendance.shifts.openShiftsDescription") || "View open shifts"}</p>
-                </div>
-              </CardContent>
-            </button>
-          </Card>
-
-          <Card className={`transition-all hover:shadow-md hover:border-primary/50 ${activeTab === 'templates' ? 'border-primary ring-2 ring-primary/20' : ''}`}>
-            <button
-              type="button"
-              className="w-full text-left cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 rounded-lg"
-              onClick={() => setActiveTab('templates')}
-            >
-              <CardContent className="flex items-center gap-4 p-4">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-cyan-500/20">
-                  <Copy className="h-5 w-5 text-cyan-600" />
-                </div>
-                <div>
-                  <p className="font-medium">{t("timeAttendance.shifts.templates")}</p>
-                  <p className="text-sm text-muted-foreground">{t("timeAttendance.shifts.templatesDescription") || "Shift templates"}</p>
-                </div>
-              </CardContent>
-            </button>
-          </Card>
-
-          <Card className={`transition-all hover:shadow-md hover:border-primary/50 ${activeTab === 'rotations' ? 'border-primary ring-2 ring-primary/20' : ''}`}>
-            <button
-              type="button"
-              className="w-full text-left cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 rounded-lg"
-              onClick={() => setActiveTab('rotations')}
-            >
-              <CardContent className="flex items-center gap-4 p-4">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-500/20">
-                  <RotateCcw className="h-5 w-5 text-indigo-600" />
-                </div>
-                <div>
-                  <p className="font-medium">{t("timeAttendance.shifts.rotations")}</p>
-                  <p className="text-sm text-muted-foreground">{t("timeAttendance.shifts.rotationsDescription") || "Rotation patterns"}</p>
-                </div>
-              </CardContent>
-            </button>
-          </Card>
-
-          <Card className={`transition-all hover:shadow-md hover:border-primary/50 ${activeTab === 'fatigue' ? 'border-primary ring-2 ring-primary/20' : ''}`}>
-            <button
-              type="button"
-              className="w-full text-left cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 rounded-lg"
-              onClick={() => setActiveTab('fatigue')}
-            >
-              <CardContent className="flex items-center gap-4 p-4">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-red-500/20">
-                  <AlertTriangle className="h-5 w-5 text-red-600" />
-                </div>
-                <div>
-                  <p className="font-medium">{t("timeAttendance.shifts.fatigue")}</p>
-                  <p className="text-sm text-muted-foreground">{t("timeAttendance.shifts.fatigueDescription") || "Fatigue management"}</p>
-                </div>
-              </CardContent>
-            </button>
-          </Card>
-
-          <Card className={`transition-all hover:shadow-md hover:border-primary/50 ${activeTab === 'coverage' ? 'border-primary ring-2 ring-primary/20' : ''}`}>
-            <button
-              type="button"
-              className="w-full text-left cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 rounded-lg"
-              onClick={() => setActiveTab('coverage')}
-            >
-              <CardContent className="flex items-center gap-4 p-4">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-teal-500/20">
-                  <BarChart3 className="h-5 w-5 text-teal-600" />
-                </div>
-                <div>
-                  <p className="font-medium">{t("timeAttendance.shifts.coverage")}</p>
-                  <p className="text-sm text-muted-foreground">{t("timeAttendance.shifts.coverageDescription") || "Coverage analysis"}</p>
-                </div>
-              </CardContent>
-            </button>
-          </Card>
-
-          <Card className={`transition-all hover:shadow-md hover:border-primary/50 ${activeTab === 'bidding' ? 'border-primary ring-2 ring-primary/20' : ''}`}>
-            <button
-              type="button"
-              className="w-full text-left cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 rounded-lg"
-              onClick={() => setActiveTab('bidding')}
-            >
-              <CardContent className="flex items-center gap-4 p-4">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-500/20">
-                  <Gavel className="h-5 w-5 text-amber-600" />
-                </div>
-                <div>
-                  <p className="font-medium">{t("timeAttendance.shifts.bidding")}</p>
-                  <p className="text-sm text-muted-foreground">{t("timeAttendance.shifts.biddingDescription") || "Shift bidding"}</p>
-                </div>
-              </CardContent>
-            </button>
-          </Card>
-
-          <Card className={`transition-all hover:shadow-md hover:border-primary/50 ${activeTab === 'aiScheduler' ? 'border-primary ring-2 ring-primary/20' : ''}`}>
-            <button
-              type="button"
-              className="w-full text-left cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 rounded-lg"
-              onClick={() => setActiveTab('aiScheduler')}
-            >
-              <CardContent className="flex items-center gap-4 p-4">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-violet-500/20">
-                  <Sparkles className="h-5 w-5 text-violet-600" />
-                </div>
-                <div>
-                  <p className="font-medium">{t("timeAttendance.shifts.aiScheduler")}</p>
-                  <p className="text-sm text-muted-foreground">{t("timeAttendance.shifts.aiSchedulerDescription") || "AI-powered scheduling"}</p>
-                </div>
-              </CardContent>
-            </button>
-          </Card>
+          {navigationCards.map((card) => (
+            <Link key={card.href} to={card.href}>
+              <Card className="transition-all hover:shadow-md hover:border-primary/50 cursor-pointer h-full">
+                <CardContent className="flex items-center gap-4 p-4">
+                  <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${card.color}`}>
+                    <card.icon className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="font-medium">{card.title}</p>
+                    <p className="text-sm text-muted-foreground">{card.description}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+          ))}
         </div>
 
-        <div ref={contentAnchorRef} className="scroll-mt-24" />
-
-        {/* Content Section */}
-        {activeTab === 'calendar' && (
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Calendar className="h-5 w-5 text-primary" />
-                <CardTitle>{t("timeAttendance.shifts.calendar")}</CardTitle>
-              </div>
-              <Button variant="ghost" size="sm" onClick={() => setActiveTab('')}>
-                {t("common.close")}
-              </Button>
-            </CardHeader>
-            <CardContent>
-              <ShiftCalendarTab companyId={selectedCompany} />
-            </CardContent>
-          </Card>
-        )}
-
-        {activeTab === 'shifts' && (
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Clock className="h-5 w-5 text-blue-600" />
-                <CardTitle>{t("timeAttendance.shifts.shiftsTab")}</CardTitle>
-              </div>
-              <div className="flex items-center gap-2">
-                <Dialog open={shiftDialogOpen} onOpenChange={setShiftDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button onClick={resetShiftForm}>
-                      <Plus className="h-4 w-4 mr-2" />
-                      {t("timeAttendance.shifts.createShift")}
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-2xl">
-                    <DialogHeader>
-                      <DialogTitle>
-                        {editingShift ? t("common.edit") : t("timeAttendance.shifts.createShift")}
-                      </DialogTitle>
-                    </DialogHeader>
-                    <div className="space-y-4 py-4 max-h-[60vh] overflow-y-auto">
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label>{t("common.name")} *</Label>
-                          <Input 
-                            value={shiftForm.name} 
-                            onChange={(e) => setShiftForm({...shiftForm, name: e.target.value})} 
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label>{t("common.code")} *</Label>
-                          <Input 
-                            value={shiftForm.code} 
-                            onChange={(e) => setShiftForm({...shiftForm, code: e.target.value})} 
-                          />
-                        </div>
-                      </div>
-                      <div className="space-y-2">
-                        <Label>{t("common.description")}</Label>
-                        <Textarea 
-                          value={shiftForm.description} 
-                          onChange={(e) => setShiftForm({...shiftForm, description: e.target.value})} 
-                        />
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label>{t("timeAttendance.schedules.startTime")}</Label>
-                          <Input 
-                            type="time"
-                            value={shiftForm.start_time} 
-                            onChange={(e) => setShiftForm({...shiftForm, start_time: e.target.value})} 
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label>{t("timeAttendance.schedules.endTime")}</Label>
-                          <Input 
-                            type="time"
-                            value={shiftForm.end_time} 
-                            onChange={(e) => setShiftForm({...shiftForm, end_time: e.target.value})} 
-                          />
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label>{t("timeAttendance.schedules.breakDuration")}</Label>
-                          <Input 
-                            type="number"
-                            value={shiftForm.break_duration_minutes} 
-                            onChange={(e) => setShiftForm({...shiftForm, break_duration_minutes: parseInt(e.target.value) || 0})} 
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label>{t("timeAttendance.shifts.minimumHours")}</Label>
-                          <Input 
-                            type="number"
-                            value={shiftForm.minimum_hours} 
-                            onChange={(e) => setShiftForm({...shiftForm, minimum_hours: parseInt(e.target.value) || 0})} 
-                          />
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label>{t("common.startDate")}</Label>
-                          <Input 
-                            type="date"
-                            value={shiftForm.start_date} 
-                            onChange={(e) => setShiftForm({...shiftForm, start_date: e.target.value})} 
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label>{t("common.endDate")}</Label>
-                          <Input 
-                            type="date"
-                            value={shiftForm.end_date} 
-                            onChange={(e) => setShiftForm({...shiftForm, end_date: e.target.value})} 
-                          />
-                        </div>
-                      </div>
-                      <div className="space-y-2">
-                        <Label>{t("timeAttendance.shifts.color")}</Label>
-                        <Input 
-                          type="color"
-                          value={shiftForm.color} 
-                          onChange={(e) => setShiftForm({...shiftForm, color: e.target.value})} 
-                          className="h-10"
-                        />
-                      </div>
-                      <div className="flex flex-col gap-3">
-                        <div className="flex items-center justify-between">
-                          <Label>{t("timeAttendance.shifts.crossesMidnight")}</Label>
-                          <Switch 
-                            checked={shiftForm.crosses_midnight} 
-                            onCheckedChange={(v) => setShiftForm({...shiftForm, crosses_midnight: v})} 
-                          />
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <Label>{t("common.active")}</Label>
-                          <Switch 
-                            checked={shiftForm.is_active} 
-                            onCheckedChange={(v) => setShiftForm({...shiftForm, is_active: v})} 
-                          />
-                        </div>
-                      </div>
-                      <Button onClick={handleSaveShift} className="w-full">{t("common.save")}</Button>
-                    </div>
-                  </DialogContent>
-                </Dialog>
-                <Button variant="ghost" size="sm" onClick={() => setActiveTab('')}>
-                  {t("common.close")}
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-            <div className="flex justify-end">
-              <Dialog open={shiftDialogOpen} onOpenChange={setShiftDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button onClick={resetShiftForm}>
-                    <Plus className="h-4 w-4 mr-2" />
-                    {t("timeAttendance.shifts.createShift")}
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-2xl">
-                  <DialogHeader>
-                    <DialogTitle>
-                      {editingShift ? t("common.edit") : t("timeAttendance.shifts.createShift")}
-                    </DialogTitle>
-                  </DialogHeader>
-                  <div className="space-y-4 py-4 max-h-[60vh] overflow-y-auto">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label>{t("common.name")} *</Label>
-                        <Input 
-                          value={shiftForm.name} 
-                          onChange={(e) => setShiftForm({...shiftForm, name: e.target.value})} 
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>{t("common.code")} *</Label>
-                        <Input 
-                          value={shiftForm.code} 
-                          onChange={(e) => setShiftForm({...shiftForm, code: e.target.value})} 
-                        />
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label>{t("common.description")}</Label>
-                      <Textarea 
-                        value={shiftForm.description} 
-                        onChange={(e) => setShiftForm({...shiftForm, description: e.target.value})} 
-                      />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label>{t("timeAttendance.schedules.startTime")}</Label>
-                        <Input 
-                          type="time"
-                          value={shiftForm.start_time} 
-                          onChange={(e) => setShiftForm({...shiftForm, start_time: e.target.value})} 
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>{t("timeAttendance.schedules.endTime")}</Label>
-                        <Input 
-                          type="time"
-                          value={shiftForm.end_time} 
-                          onChange={(e) => setShiftForm({...shiftForm, end_time: e.target.value})} 
-                        />
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label>{t("timeAttendance.schedules.breakDuration")}</Label>
-                        <Input 
-                          type="number"
-                          value={shiftForm.break_duration_minutes} 
-                          onChange={(e) => setShiftForm({...shiftForm, break_duration_minutes: parseInt(e.target.value) || 0})} 
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>{t("timeAttendance.shifts.minimumHours")}</Label>
-                        <Input 
-                          type="number"
-                          value={shiftForm.minimum_hours} 
-                          onChange={(e) => setShiftForm({...shiftForm, minimum_hours: parseInt(e.target.value) || 0})} 
-                        />
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label>{t("common.startDate")}</Label>
-                        <Input 
-                          type="date"
-                          value={shiftForm.start_date} 
-                          onChange={(e) => setShiftForm({...shiftForm, start_date: e.target.value})} 
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>{t("common.endDate")}</Label>
-                        <Input 
-                          type="date"
-                          value={shiftForm.end_date} 
-                          onChange={(e) => setShiftForm({...shiftForm, end_date: e.target.value})} 
-                        />
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label>{t("timeAttendance.shifts.color")}</Label>
-                      <Input 
-                        type="color"
-                        value={shiftForm.color} 
-                        onChange={(e) => setShiftForm({...shiftForm, color: e.target.value})} 
-                        className="h-10"
-                      />
-                    </div>
-                    <div className="flex flex-col gap-3">
-                      <div className="flex items-center justify-between">
-                        <Label>{t("timeAttendance.shifts.crossesMidnight")}</Label>
-                        <Switch 
-                          checked={shiftForm.crosses_midnight} 
-                          onCheckedChange={(v) => setShiftForm({...shiftForm, crosses_midnight: v})} 
-                        />
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <Label>{t("common.active")}</Label>
-                        <Switch 
-                          checked={shiftForm.is_active} 
-                          onCheckedChange={(v) => setShiftForm({...shiftForm, is_active: v})} 
-                        />
-                      </div>
-                    </div>
-                    <Button onClick={handleSaveShift} className="w-full">{t("common.save")}</Button>
-                  </div>
-                </DialogContent>
-              </Dialog>
+        {/* Shifts Table */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Clock className="h-5 w-5 text-blue-600" />
+              <CardTitle>{t("timeAttendance.shifts.shiftsTab")}</CardTitle>
             </div>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>{t("common.name")}</TableHead>
-                    <TableHead>{t("common.code")}</TableHead>
-                    <TableHead>{t("common.time")}</TableHead>
-                    <TableHead>{t("timeAttendance.schedules.break")}</TableHead>
-                    <TableHead>{t("common.status")}</TableHead>
-                    <TableHead>{t("common.actions")}</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {shifts.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
-                        {t("timeAttendance.shifts.noShifts")}
-                      </TableCell>
-                    </TableRow>
-                  ) : shifts.map((shift) => (
-                    <TableRow key={shift.id}>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <div 
-                            className="w-3 h-3 rounded-full" 
-                            style={{ backgroundColor: shift.color }}
-                          />
-                          <span className="font-medium">{shift.name}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>{shift.code}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-1">
-                          {shift.is_overnight ? <Moon className="h-3 w-3" /> : <Sun className="h-3 w-3" />}
-                          {shift.start_time} - {shift.end_time}
-                        </div>
-                      </TableCell>
-                      <TableCell>{shift.break_duration_minutes} min</TableCell>
-                      <TableCell>
-                        <Badge className={shift.is_active ? "bg-success/20 text-success" : "bg-muted text-muted-foreground"}>
-                          {shift.is_active ? t("common.active") : t("common.inactive")}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex gap-1">
-                          <Button variant="ghost" size="icon" onClick={() => openEditShift(shift)}>
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button variant="ghost" size="icon" onClick={() => handleDeleteShift(shift.id)}>
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        )}
-
-        {activeTab === 'rounding' && (
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Timer className="h-5 w-5 text-orange-600" />
-                <CardTitle>{t("timeAttendance.shifts.roundingRules")}</CardTitle>
-              </div>
-              <div className="flex items-center gap-2">
-                <Dialog open={roundingDialogOpen} onOpenChange={setRoundingDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button onClick={resetRoundingForm}>
-                      <Plus className="h-4 w-4 mr-2" />
-                      {t("timeAttendance.shifts.createRoundingRule")}
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>
-                        {editingRounding ? t("common.edit") : t("timeAttendance.shifts.createRoundingRule")}
-                      </DialogTitle>
-                    </DialogHeader>
-                    <div className="space-y-4 py-4">
-                      <div className="space-y-2">
-                        <Label>{t("common.name")} *</Label>
-                        <Input 
-                          value={roundingForm.name} 
-                          onChange={(e) => setRoundingForm({...roundingForm, name: e.target.value})} 
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>{t("common.description")}</Label>
-                        <Textarea 
-                          value={roundingForm.description} 
-                          onChange={(e) => setRoundingForm({...roundingForm, description: e.target.value})} 
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>{t("timeAttendance.timeTracking.shift")}</Label>
-                        <Select value={roundingForm.shift_id} onValueChange={(v) => setRoundingForm({...roundingForm, shift_id: v})}>
-                          <SelectTrigger>
-                            <SelectValue placeholder={t("common.all")} />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="">{t("common.all")}</SelectItem>
-                            {shifts.map((s) => (
-                              <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label>{t("timeAttendance.shifts.ruleType")}</Label>
-                          <Select value={roundingForm.rule_type} onValueChange={(v) => setRoundingForm({...roundingForm, rule_type: v})}>
-                            <SelectTrigger><SelectValue /></SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="both">Both</SelectItem>
-                              <SelectItem value="clock_in">Clock In</SelectItem>
-                              <SelectItem value="clock_out">Clock Out</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div className="space-y-2">
-                          <Label>{t("timeAttendance.shifts.roundingInterval")}</Label>
-                          <Select 
-                            value={roundingForm.rounding_interval.toString()} 
-                            onValueChange={(v) => setRoundingForm({...roundingForm, rounding_interval: parseInt(v)})}
-                          >
-                            <SelectTrigger><SelectValue /></SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="5">5 min</SelectItem>
-                              <SelectItem value="6">6 min</SelectItem>
-                              <SelectItem value="10">10 min</SelectItem>
-                              <SelectItem value="15">15 min</SelectItem>
-                              <SelectItem value="30">30 min</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label>{t("timeAttendance.shifts.roundingDirection")}</Label>
-                          <Select value={roundingForm.rounding_direction} onValueChange={(v) => setRoundingForm({...roundingForm, rounding_direction: v})}>
-                            <SelectTrigger><SelectValue /></SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="nearest">Nearest</SelectItem>
-                              <SelectItem value="up">Up</SelectItem>
-                              <SelectItem value="down">Down</SelectItem>
-                              <SelectItem value="employer_favor">Employer Favor</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div className="space-y-2">
-                          <Label>{t("timeAttendance.shifts.gracePeriod")} (min)</Label>
-                          <Input 
-                            type="number"
-                            value={roundingForm.grace_period_minutes} 
-                            onChange={(e) => setRoundingForm({...roundingForm, grace_period_minutes: parseInt(e.target.value) || 0})} 
-                          />
-                        </div>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <Label>{t("timeAttendance.shifts.applyToOvertime")}</Label>
-                        <Switch 
-                          checked={roundingForm.apply_to_overtime} 
-                          onCheckedChange={(v) => setRoundingForm({...roundingForm, apply_to_overtime: v})} 
-                        />
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <Label>{t("common.active")}</Label>
-                        <Switch 
-                          checked={roundingForm.is_active} 
-                          onCheckedChange={(v) => setRoundingForm({...roundingForm, is_active: v})} 
-                        />
-                      </div>
-                      <Button onClick={handleSaveRounding} className="w-full">{t("common.save")}</Button>
-                    </div>
-                  </DialogContent>
-                </Dialog>
-                <Button variant="ghost" size="sm" onClick={() => setActiveTab('')}>
-                  {t("common.close")}
+            <Dialog open={shiftDialogOpen} onOpenChange={setShiftDialogOpen}>
+              <DialogTrigger asChild>
+                <Button onClick={resetShiftForm}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  {t("timeAttendance.shifts.createShift")}
                 </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>{t("common.name")}</TableHead>
-                    <TableHead>{t("timeAttendance.timeTracking.shift")}</TableHead>
-                    <TableHead>{t("timeAttendance.shifts.ruleType")}</TableHead>
-                    <TableHead>{t("timeAttendance.shifts.roundingInterval")}</TableHead>
-                    <TableHead>{t("timeAttendance.shifts.roundingDirection")}</TableHead>
-                    <TableHead>{t("common.status")}</TableHead>
-                    <TableHead>{t("common.actions")}</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {roundingRules.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
-                        {t("timeAttendance.shifts.noRoundingRules")}
-                      </TableCell>
-                    </TableRow>
-                  ) : roundingRules.map((rule) => (
-                    <TableRow key={rule.id}>
-                      <TableCell className="font-medium">{rule.name}</TableCell>
-                      <TableCell>{rule.shift?.name || t("common.all")}</TableCell>
-                      <TableCell className="capitalize">{rule.rule_type.replace('_', ' ')}</TableCell>
-                      <TableCell>{rule.rounding_interval} min</TableCell>
-                      <TableCell className="capitalize">{rule.rounding_direction}</TableCell>
-                      <TableCell>
-                        <Badge className={rule.is_active ? "bg-success/20 text-success" : "bg-muted text-muted-foreground"}>
-                          {rule.is_active ? t("common.active") : t("common.inactive")}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex gap-1">
-                          <Button variant="ghost" size="icon" onClick={() => openEditRounding(rule)}>
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button variant="ghost" size="icon" onClick={() => handleDeleteRounding(rule.id)}>
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        )}
-
-        {activeTab === 'payment' && (
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <div className="flex items-center gap-3">
-                <DollarSign className="h-5 w-5 text-green-600" />
-                <CardTitle>{t("timeAttendance.shifts.paymentRules")}</CardTitle>
-              </div>
-              <div className="flex items-center gap-2">
-                <Dialog open={paymentDialogOpen} onOpenChange={setPaymentDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button onClick={resetPaymentForm}>
-                      <Plus className="h-4 w-4 mr-2" />
-                      {t("timeAttendance.shifts.createPaymentRule")}
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>
-                        {editingPayment ? t("common.edit") : t("timeAttendance.shifts.createPaymentRule")}
-                      </DialogTitle>
-                    </DialogHeader>
-                    <div className="space-y-4 py-4 max-h-[60vh] overflow-y-auto">
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label>{t("common.name")} *</Label>
-                          <Input 
-                            value={paymentForm.name} 
-                            onChange={(e) => setPaymentForm({...paymentForm, name: e.target.value})} 
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label>{t("common.code")} *</Label>
-                          <Input 
-                            value={paymentForm.code} 
-                            onChange={(e) => setPaymentForm({...paymentForm, code: e.target.value})} 
-                          />
-                        </div>
-                      </div>
-                      <div className="space-y-2">
-                        <Label>{t("common.description")}</Label>
-                        <Textarea 
-                          value={paymentForm.description} 
-                          onChange={(e) => setPaymentForm({...paymentForm, description: e.target.value})} 
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>{t("timeAttendance.timeTracking.shift")}</Label>
-                        <Select value={paymentForm.shift_id} onValueChange={(v) => setPaymentForm({...paymentForm, shift_id: v})}>
-                          <SelectTrigger>
-                            <SelectValue placeholder={t("common.all")} />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="">{t("common.all")}</SelectItem>
-                            {shifts.map((s) => (
-                              <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label>{t("timeAttendance.shifts.paymentType")}</Label>
-                          <Select value={paymentForm.payment_type} onValueChange={(v) => setPaymentForm({...paymentForm, payment_type: v})}>
-                            <SelectTrigger><SelectValue /></SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="percentage">{t("common.percentage")}</SelectItem>
-                              <SelectItem value="fixed">{t("common.amount")}</SelectItem>
-                              <SelectItem value="hourly">Hourly</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div className="space-y-2">
-                          <Label>{t("timeAttendance.shifts.amount")}</Label>
-                          <Input 
-                            type="number"
-                            value={paymentForm.amount} 
-                            onChange={(e) => setPaymentForm({...paymentForm, amount: parseFloat(e.target.value) || 0})} 
-                          />
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label>{t("timeAttendance.shifts.appliesTo")}</Label>
-                          <Select value={paymentForm.applies_to} onValueChange={(v) => setPaymentForm({...paymentForm, applies_to: v})}>
-                            <SelectTrigger><SelectValue /></SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="all_hours">All Hours</SelectItem>
-                              <SelectItem value="overtime">Overtime Only</SelectItem>
-                              <SelectItem value="night">Night Hours</SelectItem>
-                              <SelectItem value="weekend">Weekend</SelectItem>
-                              <SelectItem value="holiday">Holiday</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div className="space-y-2">
-                          <Label>{t("timeAttendance.shifts.priority")}</Label>
-                          <Input 
-                            type="number"
-                            value={paymentForm.priority} 
-                            onChange={(e) => setPaymentForm({...paymentForm, priority: parseInt(e.target.value) || 0})} 
-                          />
-                        </div>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <Label>{t("timeAttendance.shifts.taxable")}</Label>
-                        <Switch 
-                          checked={paymentForm.is_taxable} 
-                          onCheckedChange={(v) => setPaymentForm({...paymentForm, is_taxable: v})} 
-                        />
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <Label>{t("common.active")}</Label>
-                        <Switch 
-                          checked={paymentForm.is_active} 
-                          onCheckedChange={(v) => setPaymentForm({...paymentForm, is_active: v})} 
-                        />
-                      </div>
-                      <Button onClick={handleSavePayment} className="w-full">{t("common.save")}</Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle>
+                    {editingShift ? t("common.edit") : t("timeAttendance.shifts.createShift")}
+                  </DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4 py-4 max-h-[60vh] overflow-y-auto">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>{t("common.name")} *</Label>
+                      <Input 
+                        value={shiftForm.name} 
+                        onChange={(e) => setShiftForm({...shiftForm, name: e.target.value})} 
+                      />
                     </div>
-                  </DialogContent>
-                </Dialog>
-                <Button variant="ghost" size="sm" onClick={() => setActiveTab('')}>
-                  {t("common.close")}
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>{t("common.name")}</TableHead>
-                    <TableHead>{t("timeAttendance.timeTracking.shift")}</TableHead>
-                    <TableHead>{t("common.type")}</TableHead>
-                    <TableHead>{t("timeAttendance.shifts.amount")}</TableHead>
-                    <TableHead>{t("timeAttendance.shifts.appliesTo")}</TableHead>
-                    <TableHead>{t("common.status")}</TableHead>
-                    <TableHead>{t("common.actions")}</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {paymentRules.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
-                        {t("timeAttendance.shifts.noPaymentRules")}
-                      </TableCell>
-                    </TableRow>
-                  ) : paymentRules.map((rule) => (
-                    <TableRow key={rule.id}>
-                      <TableCell className="font-medium">{rule.name}</TableCell>
-                      <TableCell>{rule.shift?.name || t("common.all")}</TableCell>
-                      <TableCell className="capitalize">{rule.payment_type}</TableCell>
-                      <TableCell>
-                        {rule.payment_type === 'percentage' ? `${rule.amount}%` : `$${rule.amount}`}
-                      </TableCell>
-                      <TableCell className="capitalize">{rule.applies_to.replace('_', ' ')}</TableCell>
-                      <TableCell>
-                        <Badge className={rule.is_active ? "bg-success/20 text-success" : "bg-muted text-muted-foreground"}>
-                          {rule.is_active ? t("common.active") : t("common.inactive")}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex gap-1">
-                          <Button variant="ghost" size="icon" onClick={() => openEditPayment(rule)}>
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button variant="ghost" size="icon" onClick={() => handleDeletePayment(rule.id)}>
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        )}
-
-        {activeTab === 'assignments' && (
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Users className="h-5 w-5 text-yellow-600" />
-                <CardTitle>{t("timeAttendance.shifts.assignments")}</CardTitle>
-              </div>
-              <div className="flex items-center gap-2">
-                <Dialog open={assignmentDialogOpen} onOpenChange={setAssignmentDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button>
-                      <Plus className="h-4 w-4 mr-2" />
-                      {t("timeAttendance.schedules.assignSchedule")}
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>{t("timeAttendance.schedules.assignSchedule")}</DialogTitle>
-                    </DialogHeader>
-                    <div className="space-y-4 py-4">
-                      <div className="space-y-2">
-                        <Label>{t("common.employee")} *</Label>
-                        <Select value={assignmentForm.employee_id} onValueChange={(v) => setAssignmentForm({...assignmentForm, employee_id: v})}>
-                          <SelectTrigger>
-                            <SelectValue placeholder={t("common.selectEmployee")} />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {employees.map((e) => (
-                              <SelectItem key={e.id} value={e.id}>{e.full_name}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="space-y-2">
-                        <Label>{t("timeAttendance.timeTracking.shift")} *</Label>
-                        <Select value={assignmentForm.shift_id} onValueChange={(v) => setAssignmentForm({...assignmentForm, shift_id: v})}>
-                          <SelectTrigger>
-                            <SelectValue placeholder={t("common.select")} />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {shifts.map((s) => (
-                              <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label>{t("common.startDate")}</Label>
-                          <Input 
-                            type="date"
-                            value={assignmentForm.effective_date} 
-                            onChange={(e) => setAssignmentForm({...assignmentForm, effective_date: e.target.value})} 
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label>{t("common.endDate")}</Label>
-                          <Input 
-                            type="date"
-                            value={assignmentForm.end_date} 
-                            onChange={(e) => setAssignmentForm({...assignmentForm, end_date: e.target.value})} 
-                          />
-                        </div>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <Label>{t("timeAttendance.schedules.primary")}</Label>
-                        <Switch 
-                          checked={assignmentForm.is_primary} 
-                          onCheckedChange={(v) => setAssignmentForm({...assignmentForm, is_primary: v})} 
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>{t("common.notes")}</Label>
-                        <Textarea 
-                          value={assignmentForm.notes} 
-                          onChange={(e) => setAssignmentForm({...assignmentForm, notes: e.target.value})} 
-                        />
-                      </div>
-                      <Button onClick={handleSaveAssignment} className="w-full">{t("common.save")}</Button>
+                    <div className="space-y-2">
+                      <Label>{t("common.code")} *</Label>
+                      <Input 
+                        value={shiftForm.code} 
+                        onChange={(e) => setShiftForm({...shiftForm, code: e.target.value})} 
+                      />
                     </div>
-                  </DialogContent>
-                </Dialog>
-                <Button variant="ghost" size="sm" onClick={() => setActiveTab('')}>
-                  {t("common.close")}
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>{t("common.description")}</Label>
+                    <Textarea 
+                      value={shiftForm.description} 
+                      onChange={(e) => setShiftForm({...shiftForm, description: e.target.value})} 
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>{t("timeAttendance.schedules.startTime")}</Label>
+                      <Input 
+                        type="time"
+                        value={shiftForm.start_time} 
+                        onChange={(e) => setShiftForm({...shiftForm, start_time: e.target.value})} 
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>{t("timeAttendance.schedules.endTime")}</Label>
+                      <Input 
+                        type="time"
+                        value={shiftForm.end_time} 
+                        onChange={(e) => setShiftForm({...shiftForm, end_time: e.target.value})} 
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>{t("timeAttendance.schedules.breakDuration")}</Label>
+                      <Input 
+                        type="number"
+                        value={shiftForm.break_duration_minutes} 
+                        onChange={(e) => setShiftForm({...shiftForm, break_duration_minutes: parseInt(e.target.value) || 0})} 
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>{t("timeAttendance.shifts.minimumHours")}</Label>
+                      <Input 
+                        type="number"
+                        value={shiftForm.minimum_hours} 
+                        onChange={(e) => setShiftForm({...shiftForm, minimum_hours: parseInt(e.target.value) || 0})} 
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>{t("common.startDate")}</Label>
+                      <Input 
+                        type="date"
+                        value={shiftForm.start_date} 
+                        onChange={(e) => setShiftForm({...shiftForm, start_date: e.target.value})} 
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>{t("common.endDate")}</Label>
+                      <Input 
+                        type="date"
+                        value={shiftForm.end_date} 
+                        onChange={(e) => setShiftForm({...shiftForm, end_date: e.target.value})} 
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>{t("timeAttendance.shifts.color")}</Label>
+                    <Input 
+                      type="color"
+                      value={shiftForm.color} 
+                      onChange={(e) => setShiftForm({...shiftForm, color: e.target.value})} 
+                      className="h-10"
+                    />
+                  </div>
+                  <div className="flex flex-col gap-3">
+                    <div className="flex items-center justify-between">
+                      <Label>{t("timeAttendance.shifts.crossesMidnight")}</Label>
+                      <Switch 
+                        checked={shiftForm.crosses_midnight} 
+                        onCheckedChange={(v) => setShiftForm({...shiftForm, crosses_midnight: v})} 
+                      />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <Label>{t("common.active")}</Label>
+                      <Switch 
+                        checked={shiftForm.is_active} 
+                        onCheckedChange={(v) => setShiftForm({...shiftForm, is_active: v})} 
+                      />
+                    </div>
+                  </div>
+                  <Button onClick={handleSaveShift} className="w-full">{t("common.save")}</Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>{t("common.name")}</TableHead>
+                  <TableHead>{t("common.code")}</TableHead>
+                  <TableHead>{t("common.time")}</TableHead>
+                  <TableHead>{t("timeAttendance.schedules.break")}</TableHead>
+                  <TableHead>{t("common.status")}</TableHead>
+                  <TableHead>{t("common.actions")}</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {shifts.length === 0 ? (
                   <TableRow>
-                    <TableHead>{t("common.employee")}</TableHead>
-                    <TableHead>{t("timeAttendance.timeTracking.shift")}</TableHead>
-                    <TableHead>{t("common.startDate")}</TableHead>
-                    <TableHead>{t("common.endDate")}</TableHead>
-                    <TableHead>{t("timeAttendance.schedules.primary")}</TableHead>
-                    <TableHead>{t("common.actions")}</TableHead>
+                    <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
+                      {t("timeAttendance.shifts.noShifts")}
+                    </TableCell>
                   </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {assignments.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
-                        {t("timeAttendance.schedules.noAssignments")}
-                      </TableCell>
-                    </TableRow>
-                  ) : assignments.map((assignment) => (
-                    <TableRow key={assignment.id}>
-                      <TableCell className="font-medium">{assignment.profile?.full_name}</TableCell>
-                      <TableCell>
-                        {assignment.shift?.name} ({assignment.shift?.code})
-                      </TableCell>
-                      <TableCell>{formatDateForDisplay(assignment.effective_date, 'MMM d, yyyy')}</TableCell>
-                      <TableCell>{assignment.end_date ? formatDateForDisplay(assignment.end_date, 'MMM d, yyyy') : '-'}</TableCell>
-                      <TableCell>
-                        {assignment.is_primary && (
-                          <Badge className="bg-primary/20 text-primary">{t("timeAttendance.schedules.primary")}</Badge>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <Button variant="ghost" size="icon" onClick={() => handleDeleteAssignment(assignment.id)}>
+                ) : shifts.map((shift) => (
+                  <TableRow key={shift.id}>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <div 
+                          className="w-3 h-3 rounded-full" 
+                          style={{ backgroundColor: shift.color }}
+                        />
+                        <span className="font-medium">{shift.name}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell>{shift.code}</TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1">
+                        {shift.is_overnight ? <Moon className="h-3 w-3" /> : <Sun className="h-3 w-3" />}
+                        {shift.start_time} - {shift.end_time}
+                      </div>
+                    </TableCell>
+                    <TableCell>{shift.break_duration_minutes} min</TableCell>
+                    <TableCell>
+                      <Badge className={shift.is_active ? "bg-success/20 text-success" : "bg-muted text-muted-foreground"}>
+                        {shift.is_active ? t("common.active") : t("common.inactive")}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex gap-1">
+                        <Button variant="ghost" size="icon" onClick={() => openEditShift(shift)}>
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" onClick={() => handleDeleteShift(shift.id)}>
                           <Trash2 className="h-4 w-4" />
                         </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
 
-        {activeTab === 'swaps' && (
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <div className="flex items-center gap-3">
-                <ArrowLeftRight className="h-5 w-5 text-purple-600" />
-                <CardTitle>{t("timeAttendance.shifts.swapRequests")}</CardTitle>
-              </div>
-              <Button variant="ghost" size="sm" onClick={() => setActiveTab('')}>
-                {t("common.close")}
-              </Button>
-            </CardHeader>
-            <CardContent>
-              <ShiftSwapRequestsTab companyId={selectedCompany} />
-            </CardContent>
-          </Card>
-        )}
+        {/* Rounding Rules Table */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Timer className="h-5 w-5 text-orange-600" />
+              <CardTitle>{t("timeAttendance.shifts.roundingRules")}</CardTitle>
+            </div>
+            <Dialog open={roundingDialogOpen} onOpenChange={setRoundingDialogOpen}>
+              <DialogTrigger asChild>
+                <Button onClick={resetRoundingForm}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  {t("timeAttendance.shifts.createRoundingRule")}
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>
+                    {editingRounding ? t("common.edit") : t("timeAttendance.shifts.createRoundingRule")}
+                  </DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <div className="space-y-2">
+                    <Label>{t("common.name")} *</Label>
+                    <Input 
+                      value={roundingForm.name} 
+                      onChange={(e) => setRoundingForm({...roundingForm, name: e.target.value})} 
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>{t("common.description")}</Label>
+                    <Textarea 
+                      value={roundingForm.description} 
+                      onChange={(e) => setRoundingForm({...roundingForm, description: e.target.value})} 
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>{t("timeAttendance.timeTracking.shift")}</Label>
+                    <Select value={roundingForm.shift_id} onValueChange={(v) => setRoundingForm({...roundingForm, shift_id: v})}>
+                      <SelectTrigger>
+                        <SelectValue placeholder={t("common.all")} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">{t("common.all")}</SelectItem>
+                        {shifts.map((s) => (
+                          <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>{t("timeAttendance.shifts.ruleType")}</Label>
+                      <Select value={roundingForm.rule_type} onValueChange={(v) => setRoundingForm({...roundingForm, rule_type: v})}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="both">Both</SelectItem>
+                          <SelectItem value="clock_in">Clock In</SelectItem>
+                          <SelectItem value="clock_out">Clock Out</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>{t("timeAttendance.shifts.roundingInterval")}</Label>
+                      <Select 
+                        value={roundingForm.rounding_interval.toString()} 
+                        onValueChange={(v) => setRoundingForm({...roundingForm, rounding_interval: parseInt(v)})}
+                      >
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="5">5 min</SelectItem>
+                          <SelectItem value="6">6 min</SelectItem>
+                          <SelectItem value="10">10 min</SelectItem>
+                          <SelectItem value="15">15 min</SelectItem>
+                          <SelectItem value="30">30 min</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>{t("timeAttendance.shifts.roundingDirection")}</Label>
+                      <Select value={roundingForm.rounding_direction} onValueChange={(v) => setRoundingForm({...roundingForm, rounding_direction: v})}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="nearest">Nearest</SelectItem>
+                          <SelectItem value="up">Up</SelectItem>
+                          <SelectItem value="down">Down</SelectItem>
+                          <SelectItem value="employer_favor">Employer Favor</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>{t("timeAttendance.shifts.gracePeriod")} (min)</Label>
+                      <Input 
+                        type="number"
+                        value={roundingForm.grace_period_minutes} 
+                        onChange={(e) => setRoundingForm({...roundingForm, grace_period_minutes: parseInt(e.target.value) || 0})} 
+                      />
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <Label>{t("timeAttendance.shifts.applyToOvertime")}</Label>
+                    <Switch 
+                      checked={roundingForm.apply_to_overtime} 
+                      onCheckedChange={(v) => setRoundingForm({...roundingForm, apply_to_overtime: v})} 
+                    />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <Label>{t("common.active")}</Label>
+                    <Switch 
+                      checked={roundingForm.is_active} 
+                      onCheckedChange={(v) => setRoundingForm({...roundingForm, is_active: v})} 
+                    />
+                  </div>
+                  <Button onClick={handleSaveRounding} className="w-full">{t("common.save")}</Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>{t("common.name")}</TableHead>
+                  <TableHead>{t("timeAttendance.timeTracking.shift")}</TableHead>
+                  <TableHead>{t("timeAttendance.shifts.ruleType")}</TableHead>
+                  <TableHead>{t("timeAttendance.shifts.roundingInterval")}</TableHead>
+                  <TableHead>{t("timeAttendance.shifts.roundingDirection")}</TableHead>
+                  <TableHead>{t("common.status")}</TableHead>
+                  <TableHead>{t("common.actions")}</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {roundingRules.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
+                      {t("timeAttendance.shifts.noRoundingRules")}
+                    </TableCell>
+                  </TableRow>
+                ) : roundingRules.map((rule) => (
+                  <TableRow key={rule.id}>
+                    <TableCell className="font-medium">{rule.name}</TableCell>
+                    <TableCell>{rule.shift?.name || t("common.all")}</TableCell>
+                    <TableCell className="capitalize">{rule.rule_type.replace('_', ' ')}</TableCell>
+                    <TableCell>{rule.rounding_interval} min</TableCell>
+                    <TableCell className="capitalize">{rule.rounding_direction}</TableCell>
+                    <TableCell>
+                      <Badge className={rule.is_active ? "bg-success/20 text-success" : "bg-muted text-muted-foreground"}>
+                        {rule.is_active ? t("common.active") : t("common.inactive")}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex gap-1">
+                        <Button variant="ghost" size="icon" onClick={() => openEditRounding(rule)}>
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" onClick={() => handleDeleteRounding(rule.id)}>
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
 
-        {activeTab === 'openShifts' && (
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Megaphone className="h-5 w-5 text-pink-600" />
-                <CardTitle>{t("timeAttendance.shifts.openShifts")}</CardTitle>
-              </div>
-              <Button variant="ghost" size="sm" onClick={() => setActiveTab('')}>
-                {t("common.close")}
-              </Button>
-            </CardHeader>
-            <CardContent>
-              <OpenShiftBoardTab companyId={selectedCompany} />
-            </CardContent>
-          </Card>
-        )}
+        {/* Payment Rules Table */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div className="flex items-center gap-3">
+              <DollarSign className="h-5 w-5 text-green-600" />
+              <CardTitle>{t("timeAttendance.shifts.paymentRules")}</CardTitle>
+            </div>
+            <Dialog open={paymentDialogOpen} onOpenChange={setPaymentDialogOpen}>
+              <DialogTrigger asChild>
+                <Button onClick={resetPaymentForm}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  {t("timeAttendance.shifts.createPaymentRule")}
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle>
+                    {editingPayment ? t("common.edit") : t("timeAttendance.shifts.createPaymentRule")}
+                  </DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4 py-4 max-h-[60vh] overflow-y-auto">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>{t("common.name")} *</Label>
+                      <Input 
+                        value={paymentForm.name} 
+                        onChange={(e) => setPaymentForm({...paymentForm, name: e.target.value})} 
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>{t("common.code")} *</Label>
+                      <Input 
+                        value={paymentForm.code} 
+                        onChange={(e) => setPaymentForm({...paymentForm, code: e.target.value})} 
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>{t("common.description")}</Label>
+                    <Textarea 
+                      value={paymentForm.description} 
+                      onChange={(e) => setPaymentForm({...paymentForm, description: e.target.value})} 
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>{t("timeAttendance.timeTracking.shift")}</Label>
+                    <Select value={paymentForm.shift_id} onValueChange={(v) => setPaymentForm({...paymentForm, shift_id: v})}>
+                      <SelectTrigger>
+                        <SelectValue placeholder={t("common.all")} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">{t("common.all")}</SelectItem>
+                        {shifts.map((s) => (
+                          <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>{t("timeAttendance.shifts.paymentType")}</Label>
+                      <Select value={paymentForm.payment_type} onValueChange={(v) => setPaymentForm({...paymentForm, payment_type: v})}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="percentage">Percentage</SelectItem>
+                          <SelectItem value="fixed">Fixed Amount</SelectItem>
+                          <SelectItem value="per_hour">Per Hour</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>{t("timeAttendance.shifts.amount")}</Label>
+                      <Input 
+                        type="number"
+                        step="0.01"
+                        value={paymentForm.amount} 
+                        onChange={(e) => setPaymentForm({...paymentForm, amount: parseFloat(e.target.value) || 0})} 
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>{t("timeAttendance.shifts.appliesTo")}</Label>
+                      <Select value={paymentForm.applies_to} onValueChange={(v) => setPaymentForm({...paymentForm, applies_to: v})}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all_hours">All Hours</SelectItem>
+                          <SelectItem value="overtime_only">Overtime Only</SelectItem>
+                          <SelectItem value="night_shift">Night Shift</SelectItem>
+                          <SelectItem value="weekend">Weekend</SelectItem>
+                          <SelectItem value="holiday">Holiday</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>{t("common.priority")}</Label>
+                      <Input 
+                        type="number"
+                        value={paymentForm.priority} 
+                        onChange={(e) => setPaymentForm({...paymentForm, priority: parseInt(e.target.value) || 0})} 
+                      />
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <Label>{t("timeAttendance.shifts.isTaxable")}</Label>
+                    <Switch 
+                      checked={paymentForm.is_taxable} 
+                      onCheckedChange={(v) => setPaymentForm({...paymentForm, is_taxable: v})} 
+                    />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <Label>{t("common.active")}</Label>
+                    <Switch 
+                      checked={paymentForm.is_active} 
+                      onCheckedChange={(v) => setPaymentForm({...paymentForm, is_active: v})} 
+                    />
+                  </div>
+                  <Button onClick={handleSavePayment} className="w-full">{t("common.save")}</Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>{t("common.name")}</TableHead>
+                  <TableHead>{t("common.code")}</TableHead>
+                  <TableHead>{t("timeAttendance.shifts.paymentType")}</TableHead>
+                  <TableHead>{t("timeAttendance.shifts.amount")}</TableHead>
+                  <TableHead>{t("timeAttendance.shifts.appliesTo")}</TableHead>
+                  <TableHead>{t("common.status")}</TableHead>
+                  <TableHead>{t("common.actions")}</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {paymentRules.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
+                      {t("timeAttendance.shifts.noPaymentRules")}
+                    </TableCell>
+                  </TableRow>
+                ) : paymentRules.map((rule) => (
+                  <TableRow key={rule.id}>
+                    <TableCell className="font-medium">{rule.name}</TableCell>
+                    <TableCell>{rule.code}</TableCell>
+                    <TableCell className="capitalize">{rule.payment_type.replace('_', ' ')}</TableCell>
+                    <TableCell>
+                      {rule.payment_type === 'percentage' ? `${rule.amount}%` : `$${rule.amount.toFixed(2)}`}
+                    </TableCell>
+                    <TableCell className="capitalize">{rule.applies_to.replace('_', ' ')}</TableCell>
+                    <TableCell>
+                      <Badge className={rule.is_active ? "bg-success/20 text-success" : "bg-muted text-muted-foreground"}>
+                        {rule.is_active ? t("common.active") : t("common.inactive")}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex gap-1">
+                        <Button variant="ghost" size="icon" onClick={() => openEditPayment(rule)}>
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" onClick={() => handleDeletePayment(rule.id)}>
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
 
-        {activeTab === 'templates' && (
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Copy className="h-5 w-5 text-cyan-600" />
-                <CardTitle>{t("timeAttendance.shifts.templates")}</CardTitle>
-              </div>
-              <Button variant="ghost" size="sm" onClick={() => setActiveTab('')}>
-                {t("common.close")}
-              </Button>
-            </CardHeader>
-            <CardContent>
-              <ShiftTemplatesTab companyId={selectedCompany} />
-            </CardContent>
-          </Card>
-        )}
-
-        {activeTab === 'rotations' && (
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <div className="flex items-center gap-3">
-                <RotateCcw className="h-5 w-5 text-indigo-600" />
-                <CardTitle>{t("timeAttendance.shifts.rotations")}</CardTitle>
-              </div>
-              <Button variant="ghost" size="sm" onClick={() => setActiveTab('')}>
-                {t("common.close")}
-              </Button>
-            </CardHeader>
-            <CardContent>
-              <RotationPatternsTab companyId={selectedCompany} />
-            </CardContent>
-          </Card>
-        )}
-
-        {activeTab === 'fatigue' && (
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <div className="flex items-center gap-3">
-                <AlertTriangle className="h-5 w-5 text-red-600" />
-                <CardTitle>{t("timeAttendance.shifts.fatigue")}</CardTitle>
-              </div>
-              <Button variant="ghost" size="sm" onClick={() => setActiveTab('')}>
-                {t("common.close")}
-              </Button>
-            </CardHeader>
-            <CardContent>
-              <FatigueManagementTab companyId={selectedCompany} />
-            </CardContent>
-          </Card>
-        )}
-
-        {activeTab === 'coverage' && (
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <div className="flex items-center gap-3">
-                <BarChart3 className="h-5 w-5 text-teal-600" />
-                <CardTitle>{t("timeAttendance.shifts.coverage")}</CardTitle>
-              </div>
-              <Button variant="ghost" size="sm" onClick={() => setActiveTab('')}>
-                {t("common.close")}
-              </Button>
-            </CardHeader>
-            <CardContent>
-              <ShiftCoverageTab companyId={selectedCompany} />
-            </CardContent>
-          </Card>
-        )}
-
-        {activeTab === 'bidding' && (
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Gavel className="h-5 w-5 text-amber-600" />
-                <CardTitle>{t("timeAttendance.shifts.bidding")}</CardTitle>
-              </div>
-              <Button variant="ghost" size="sm" onClick={() => setActiveTab('')}>
-                {t("common.close")}
-              </Button>
-            </CardHeader>
-            <CardContent>
-              <ShiftBiddingTab companyId={selectedCompany} />
-            </CardContent>
-          </Card>
-        )}
-
-        {activeTab === 'aiScheduler' && (
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Sparkles className="h-5 w-5 text-violet-600" />
-                <CardTitle>{t("timeAttendance.shifts.aiScheduler")}</CardTitle>
-              </div>
-              <Button variant="ghost" size="sm" onClick={() => setActiveTab('')}>
-                {t("common.close")}
-              </Button>
-            </CardHeader>
-            <CardContent>
-              <AISchedulerTab companyId={selectedCompany} />
-            </CardContent>
-          </Card>
-        )}
+        {/* Assignments Table */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Users className="h-5 w-5 text-yellow-600" />
+              <CardTitle>{t("timeAttendance.shifts.assignments")}</CardTitle>
+            </div>
+            <Dialog open={assignmentDialogOpen} onOpenChange={setAssignmentDialogOpen}>
+              <DialogTrigger asChild>
+                <Button>
+                  <Plus className="h-4 w-4 mr-2" />
+                  {t("timeAttendance.schedules.assignSchedule")}
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>{t("timeAttendance.schedules.assignSchedule")}</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <div className="space-y-2">
+                    <Label>{t("common.employee")} *</Label>
+                    <Select value={assignmentForm.employee_id} onValueChange={(v) => setAssignmentForm({...assignmentForm, employee_id: v})}>
+                      <SelectTrigger>
+                        <SelectValue placeholder={t("common.selectEmployee")} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {employees.map((e) => (
+                          <SelectItem key={e.id} value={e.id}>{e.full_name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>{t("timeAttendance.timeTracking.shift")} *</Label>
+                    <Select value={assignmentForm.shift_id} onValueChange={(v) => setAssignmentForm({...assignmentForm, shift_id: v})}>
+                      <SelectTrigger>
+                        <SelectValue placeholder={t("common.select")} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {shifts.map((s) => (
+                          <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>{t("common.startDate")}</Label>
+                      <Input 
+                        type="date"
+                        value={assignmentForm.effective_date} 
+                        onChange={(e) => setAssignmentForm({...assignmentForm, effective_date: e.target.value})} 
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>{t("common.endDate")}</Label>
+                      <Input 
+                        type="date"
+                        value={assignmentForm.end_date} 
+                        onChange={(e) => setAssignmentForm({...assignmentForm, end_date: e.target.value})} 
+                      />
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <Label>{t("timeAttendance.schedules.primary")}</Label>
+                    <Switch 
+                      checked={assignmentForm.is_primary} 
+                      onCheckedChange={(v) => setAssignmentForm({...assignmentForm, is_primary: v})} 
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>{t("common.notes")}</Label>
+                    <Textarea 
+                      value={assignmentForm.notes} 
+                      onChange={(e) => setAssignmentForm({...assignmentForm, notes: e.target.value})} 
+                    />
+                  </div>
+                  <Button onClick={handleSaveAssignment} className="w-full">{t("common.save")}</Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>{t("common.employee")}</TableHead>
+                  <TableHead>{t("timeAttendance.timeTracking.shift")}</TableHead>
+                  <TableHead>{t("common.startDate")}</TableHead>
+                  <TableHead>{t("common.endDate")}</TableHead>
+                  <TableHead>{t("timeAttendance.schedules.primary")}</TableHead>
+                  <TableHead>{t("common.actions")}</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {assignments.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
+                      {t("timeAttendance.schedules.noAssignments")}
+                    </TableCell>
+                  </TableRow>
+                ) : assignments.map((assignment) => (
+                  <TableRow key={assignment.id}>
+                    <TableCell className="font-medium">{assignment.profile?.full_name}</TableCell>
+                    <TableCell>
+                      {assignment.shift?.name} ({assignment.shift?.code})
+                    </TableCell>
+                    <TableCell>{formatDateForDisplay(assignment.effective_date, 'MMM d, yyyy')}</TableCell>
+                    <TableCell>{assignment.end_date ? formatDateForDisplay(assignment.end_date, 'MMM d, yyyy') : '-'}</TableCell>
+                    <TableCell>
+                      {assignment.is_primary && (
+                        <Badge className="bg-primary/20 text-primary">{t("timeAttendance.schedules.primary")}</Badge>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <Button variant="ghost" size="icon" onClick={() => handleDeleteAssignment(assignment.id)}>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
       </div>
     </AppLayout>
   );
