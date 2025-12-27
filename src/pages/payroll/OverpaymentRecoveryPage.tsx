@@ -3,10 +3,13 @@ import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AppLayout } from "@/components/layout/AppLayout";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { 
   Plus, 
   Search, 
@@ -15,14 +18,20 @@ import {
   Clock, 
   CheckCircle2, 
   PauseCircle,
-  ArrowLeft,
-  RefreshCw
+  RefreshCw,
+  Building2,
+  ArrowLeft
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useOverpaymentRecovery, OverpaymentRecord, OverpaymentStatus } from "@/hooks/useOverpaymentRecovery";
 import { CreateOverpaymentDialog } from "@/components/payroll/overpayment/CreateOverpaymentDialog";
 import { OverpaymentDetailSheet } from "@/components/payroll/overpayment/OverpaymentDetailSheet";
 import { format } from "date-fns";
+
+interface Company {
+  id: string;
+  name: string;
+}
 
 const statusConfig: Record<OverpaymentStatus, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
   pending_approval: { label: "Pending Approval", variant: "outline" },
@@ -42,7 +51,8 @@ const priorityConfig = {
 
 export default function OverpaymentRecoveryPage() {
   const navigate = useNavigate();
-  const [companyId, setCompanyId] = useState<string | null>(null);
+  const [companies, setCompanies] = useState<Company[]>([]);
+  const [selectedCompany, setSelectedCompany] = useState<string>("");
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
@@ -59,24 +69,25 @@ export default function OverpaymentRecoveryPage() {
     resumeRecord,
     modifyRecoveryAmount,
     writeOffRecord,
-  } = useOverpaymentRecovery(companyId);
+  } = useOverpaymentRecovery(selectedCompany || null);
 
   useEffect(() => {
-    const loadCompany = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const { data } = await supabase
-          .from("profiles")
-          .select("company_id")
-          .eq("id", user.id)
-          .single();
-        if (data?.company_id) {
-          setCompanyId(data.company_id);
-        }
-      }
-    };
-    loadCompany();
+    loadCompanies();
   }, []);
+
+  const loadCompanies = async () => {
+    const { data, error } = await supabase
+      .from("companies")
+      .select("id, name")
+      .eq("is_active", true)
+      .order("name");
+    
+    if (error) {
+      console.error("Failed to load companies:", error);
+      return;
+    }
+    setCompanies(data || []);
+  };
 
   const filteredRecords = records.filter(record => {
     const matchesSearch = 
@@ -101,29 +112,65 @@ export default function OverpaymentRecoveryPage() {
   };
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => navigate("/payroll")}>
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
+    <AppLayout>
+      <div className="space-y-6">
+        <Breadcrumbs items={[
+          { label: "Payroll", href: "/payroll" },
+          { label: "Overpayment Recovery" }
+        ]} />
+
+        {/* Header */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold">Overpayment Recovery</h1>
             <p className="text-muted-foreground">Track and manage employee overpayment recoveries</p>
           </div>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={handleRefresh} disabled={!selectedCompany}>
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Refresh
+            </Button>
+            <Button onClick={() => setCreateDialogOpen(true)} disabled={!selectedCompany}>
+              <Plus className="h-4 w-4 mr-2" />
+              New Overpayment
+            </Button>
+          </div>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={handleRefresh}>
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Refresh
-          </Button>
-          <Button onClick={() => setCreateDialogOpen(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            New Overpayment
-          </Button>
-        </div>
-      </div>
+
+        {/* Company Filter */}
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-4">
+              <Building2 className="h-5 w-5 text-muted-foreground" />
+              <div className="flex-1 max-w-sm">
+                <Label htmlFor="company" className="sr-only">Company</Label>
+                <Select value={selectedCompany} onValueChange={setSelectedCompany}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a company" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {companies.map(company => (
+                      <SelectItem key={company.id} value={company.id}>
+                        {company.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {!selectedCompany ? (
+          <Card>
+            <CardContent className="py-12">
+              <p className="text-center text-muted-foreground">
+                Please select a company to view overpayment records
+              </p>
+            </CardContent>
+          </Card>
+        ) : (
+          <>
 
       {/* Summary Cards */}
       {summary && (
@@ -285,7 +332,7 @@ export default function OverpaymentRecoveryPage() {
       <CreateOverpaymentDialog
         open={createDialogOpen}
         onOpenChange={setCreateDialogOpen}
-        companyId={companyId}
+        companyId={selectedCompany || null}
         onSuccess={() => {
           setCreateDialogOpen(false);
           handleRefresh();
@@ -302,6 +349,9 @@ export default function OverpaymentRecoveryPage() {
         onModifyAmount={modifyRecoveryAmount}
         onWriteOff={writeOffRecord}
       />
-    </div>
+        </>
+        )}
+      </div>
+    </AppLayout>
   );
 }
