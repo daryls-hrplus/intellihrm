@@ -12,24 +12,30 @@ import { toast } from "sonner";
 interface NotificationPreferences {
   check_in_reminders: boolean;
   overdue_alerts: boolean;
-  risk_changes: boolean;
+  risk_alerts: boolean;
   coaching_suggestions: boolean;
   goal_updates: boolean;
   email_enabled: boolean;
+  in_app_enabled: boolean;
   digest_frequency: string;
 }
 
 const defaultPreferences: NotificationPreferences = {
   check_in_reminders: true,
   overdue_alerts: true,
-  risk_changes: true,
+  risk_alerts: true,
   coaching_suggestions: true,
   goal_updates: false,
   email_enabled: true,
+  in_app_enabled: true,
   digest_frequency: "daily",
 };
 
-export function GoalNotificationPreferences() {
+interface GoalNotificationPreferencesProps {
+  companyId: string;
+}
+
+export function GoalNotificationPreferences({ companyId }: GoalNotificationPreferencesProps) {
   const [preferences, setPreferences] = useState<NotificationPreferences>(defaultPreferences);
   const [isSaving, setIsSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
@@ -63,10 +69,11 @@ export function GoalNotificationPreferences() {
       setPreferences({
         check_in_reminders: data.check_in_reminders ?? true,
         overdue_alerts: data.overdue_alerts ?? true,
-        risk_changes: data.risk_changes ?? true,
+        risk_alerts: data.risk_alerts ?? true,
         coaching_suggestions: data.coaching_suggestions ?? true,
         goal_updates: data.goal_updates ?? false,
         email_enabled: data.email_enabled ?? true,
+        in_app_enabled: data.in_app_enabled ?? true,
         digest_frequency: data.digest_frequency ?? "daily",
       });
     }
@@ -88,6 +95,7 @@ export function GoalNotificationPreferences() {
       const { error } = await supabase.from("goal_notification_preferences").upsert(
         {
           user_id: userId,
+          company_id: companyId,
           ...preferences,
           updated_at: new Date().toISOString(),
         },
@@ -142,9 +150,7 @@ export function GoalNotificationPreferences() {
               <AlertTriangle className="h-4 w-4 text-muted-foreground" />
               <div>
                 <Label htmlFor="overdue_alerts">Overdue Alerts</Label>
-                <p className="text-xs text-muted-foreground">
-                  Get notified when check-ins become overdue
-                </p>
+                <p className="text-xs text-muted-foreground">Get notified when check-ins become overdue</p>
               </div>
             </div>
             <Switch
@@ -158,14 +164,14 @@ export function GoalNotificationPreferences() {
             <div className="flex items-center gap-3">
               <Target className="h-4 w-4 text-muted-foreground" />
               <div>
-                <Label htmlFor="risk_changes">Risk Status Changes</Label>
+                <Label htmlFor="risk_alerts">Risk Status Changes</Label>
                 <p className="text-xs text-muted-foreground">Get notified when goal risk status changes</p>
               </div>
             </div>
             <Switch
-              id="risk_changes"
-              checked={preferences.risk_changes}
-              onCheckedChange={(v) => updatePreference("risk_changes", v)}
+              id="risk_alerts"
+              checked={preferences.risk_alerts}
+              onCheckedChange={(v) => updatePreference("risk_alerts", v)}
             />
           </div>
 
@@ -189,9 +195,7 @@ export function GoalNotificationPreferences() {
               <Target className="h-4 w-4 text-muted-foreground" />
               <div>
                 <Label htmlFor="goal_updates">Goal Updates</Label>
-                <p className="text-xs text-muted-foreground">
-                  Get notified when goals you're involved with are updated
-                </p>
+                <p className="text-xs text-muted-foreground">Get notified when goals you're involved with are updated</p>
               </div>
             </div>
             <Switch
