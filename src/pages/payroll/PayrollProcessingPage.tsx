@@ -1213,18 +1213,29 @@ export default function PayrollProcessingPage() {
                   
                   // Build line items from calculation_details
                   const calcDetails = selectedEmployee.calculation_details as any;
+                  
+                  // Include retroactive pay items as earnings
+                  const retroItems = (calcDetails?.retroactive_pay?.items || []).map((r: any) => ({
+                    name: `Retro: ${r.pay_element_name} (${r.period_count} period${r.period_count !== 1 ? 's' : ''})`,
+                    amount: r.adjustment_amount || 0,
+                    is_retro: true,
+                  }));
+                  
                   const lineItems = {
-                    earnings: (calcDetails?.earnings || []).map((e: any) => ({ 
-                      name: e.name, 
-                      amount: e.amount,
-                      job_title: e.job_title,
-                      is_prorated: e.is_prorated,
-                      effective_start: e.effective_start,
-                      effective_end: e.effective_end,
-                      original_amount: e.original_amount,
-                      original_currency_code: e.original_currency_id ? currencyCodeMap.get(e.original_currency_id) : undefined,
-                      exchange_rate: e.exchange_rate_used,
-                    })),
+                    earnings: [
+                      ...(calcDetails?.earnings || []).map((e: any) => ({ 
+                        name: e.name, 
+                        amount: e.amount,
+                        job_title: e.job_title,
+                        is_prorated: e.is_prorated,
+                        effective_start: e.effective_start,
+                        effective_end: e.effective_end,
+                        original_amount: e.original_amount,
+                        original_currency_code: e.original_currency_id ? currencyCodeMap.get(e.original_currency_id) : undefined,
+                        exchange_rate: e.exchange_rate_used,
+                      })),
+                      ...retroItems,
+                    ],
                     deductions: (calcDetails?.period_deductions || []).map((d: any) => ({ 
                       name: d.name, 
                       amount: d.amount,
@@ -1513,6 +1524,33 @@ export default function PayrollProcessingPage() {
                             <span className="font-medium">{formatCurrency(allowance.amount || 0, localCurrencyCode)}</span>
                           </div>
                         ))}
+                      </>
+                    )}
+
+                    {/* Retroactive Pay */}
+                    {((selectedEmployee.calculation_details as any)?.retroactive_pay?.items || []).length > 0 && (
+                      <>
+                        <div className="border-t border-border mt-3 pt-3">
+                          <p className="text-xs text-muted-foreground mb-2 uppercase flex items-center gap-1">
+                            <Clock className="h-3 w-3" />
+                            {t("payroll.processing.retroactivePay", "Retroactive Pay")}
+                          </p>
+                        </div>
+                        {((selectedEmployee.calculation_details as any)?.retroactive_pay?.items || []).map((retro: any, idx: number) => (
+                          <div key={idx} className="flex justify-between py-1">
+                            <span className="text-muted-foreground">
+                              {retro.pay_element_name}
+                              <span className="ml-1 text-xs text-primary">({retro.period_count} period{retro.period_count !== 1 ? 's' : ''})</span>
+                            </span>
+                            <span className="font-medium text-success">{formatCurrency(retro.adjustment_amount || 0, localCurrencyCode)}</span>
+                          </div>
+                        ))}
+                        <div className="flex justify-between py-1 text-sm">
+                          <span className="text-muted-foreground font-medium">{t("payroll.processing.retroTotal", "Total Retro")}</span>
+                          <span className="font-semibold text-success">
+                            {formatCurrency((selectedEmployee.calculation_details as any)?.retroactive_pay?.total || 0, localCurrencyCode)}
+                          </span>
+                        </div>
                       </>
                     )}
 

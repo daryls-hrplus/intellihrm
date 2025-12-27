@@ -1131,6 +1131,29 @@ export function usePayroll() {
           });
         }
         
+        // Add retroactive pay adjustments (if any pending)
+        let retroactivePayTotal = 0;
+        const retroactiveBreakdown: {
+          config_name: string;
+          pay_element_name: string;
+          adjustment_amount: number;
+          period_count: number;
+        }[] = [];
+        
+        if (payGroupId) {
+          const { fetchEmployeePendingRetro, markRetroAsProcessed } = await import("@/utils/payroll/retroactivePayService");
+          const pendingRetro = await fetchEmployeePendingRetro(emp.employee_id, payGroupId);
+          
+          if (pendingRetro.total > 0) {
+            retroactivePayTotal = pendingRetro.total;
+            retroactiveBreakdown.push(...pendingRetro.items);
+            grossPay += retroactivePayTotal;
+            
+            // Mark these retro calculations as processed
+            await markRetroAsProcessed(emp.employee_id, payGroupId, payrollRunId);
+          }
+        }
+        
         // Add period deductions (non-statutory)
         const { data: periodDeductions } = await supabase
           .from("employee_period_deductions")
@@ -1279,6 +1302,10 @@ export function usePayroll() {
           calculation_details: {
             earnings: earningsBreakdown,
             allowances: allowancesBreakdown,
+            retroactive_pay: retroactiveBreakdown.length > 0 ? {
+              total: retroactivePayTotal,
+              items: retroactiveBreakdown,
+            } : undefined,
             statutory_deductions: statutoryTypes && rateBands ? 
               calculateStatutoryDeductions(
                 taxableIncome,
