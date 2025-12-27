@@ -263,9 +263,18 @@ export function useRetroactivePay() {
     setIsLoading(true);
     setError(null);
     try {
-      // Simplified - just return placeholder for now
-      // Full implementation would query payroll_lines and generate calculations
-      return { success: true, count: 0, totalAdjustment: 0 };
+      const { generateRetroactiveCalculations } = await import("@/utils/payroll/retroactivePayService");
+      const result = await generateRetroactiveCalculations(configId);
+      
+      if (!result.success) {
+        setError(result.error || "Failed to generate calculations");
+      }
+      
+      return { 
+        success: result.success, 
+        count: result.count, 
+        totalAdjustment: result.totalAdjustment 
+      };
     } catch (err: any) {
       setError(err.message);
       return { success: false, count: 0, totalAdjustment: 0 };
