@@ -18,6 +18,7 @@ import { usePayslipTemplates, PayslipTemplate } from "@/hooks/usePayslipTemplate
 import { PayslipDocument } from "@/components/payroll/PayslipDocument";
 import { BulkPayslipDistribution } from "@/components/payroll/BulkPayslipDistribution";
 import { ExchangeRateSelectionDialog } from "@/components/payroll/ExchangeRateSelectionDialog";
+import { PayrollCurrencyRatesCard } from "@/components/payroll/PayrollCurrencyRatesCard";
 import { usePayGroupMultiCurrency, usePayrollRunExchangeRates, calculateNetPaySplit, EmployeeCurrencyPreference } from "@/hooks/useMultiCurrencyPayroll";
 import { supabase } from "@/integrations/supabase/client";
 import { useTranslation } from "react-i18next";
@@ -1034,6 +1035,14 @@ export default function PayrollProcessingPage() {
                                 </div>
                               )}
                             </div>
+                            
+                            {/* Payroll Currency Rates Card */}
+                            {isMultiCurrencyEnabled && (
+                              <div className="mb-4">
+                                <PayrollCurrencyRatesCard payrollRunId={run.id} />
+                              </div>
+                            )}
+                            
                             <Table>
                               <TableHeader>
                                 <TableRow>
