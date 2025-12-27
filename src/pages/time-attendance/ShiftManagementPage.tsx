@@ -26,8 +26,24 @@ import {
   Timer,
   DollarSign,
   Settings,
-  Users
+  Users,
+  ArrowLeftRight,
+  Megaphone,
+  Copy,
+  RotateCcw,
+  AlertTriangle,
+  BarChart3,
+  Gavel,
+  Calendar
 } from "lucide-react";
+import { ShiftSwapRequestsTab } from "@/components/time-attendance/shifts/ShiftSwapRequestsTab";
+import { OpenShiftBoardTab } from "@/components/time-attendance/shifts/OpenShiftBoardTab";
+import { ShiftTemplatesTab } from "@/components/time-attendance/shifts/ShiftTemplatesTab";
+import { RotationPatternsTab } from "@/components/time-attendance/shifts/RotationPatternsTab";
+import { FatigueManagementTab } from "@/components/time-attendance/shifts/FatigueManagementTab";
+import { ShiftCoverageTab } from "@/components/time-attendance/shifts/ShiftCoverageTab";
+import { ShiftBiddingTab } from "@/components/time-attendance/shifts/ShiftBiddingTab";
+import { ShiftCalendarTab } from "@/components/time-attendance/shifts/ShiftCalendarTab";
 
 interface Company {
   id: string;
@@ -107,7 +123,7 @@ export default function ShiftManagementPage() {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedCompany, setSelectedCompany] = useState<string>("");
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("shifts");
+  const [activeTab, setActiveTab] = useState("calendar");
   
   // Shifts
   const [shifts, setShifts] = useState<Shift[]>([]);
@@ -697,7 +713,11 @@ export default function ShiftManagementPage() {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList>
+          <TabsList className="flex flex-wrap h-auto gap-1">
+            <TabsTrigger value="calendar" className="flex items-center gap-2">
+              <Calendar className="h-4 w-4" />
+              {t("timeAttendance.shifts.calendar")}
+            </TabsTrigger>
             <TabsTrigger value="shifts" className="flex items-center gap-2">
               <Clock className="h-4 w-4" />
               {t("timeAttendance.shifts.shiftsTab")}
@@ -714,7 +734,40 @@ export default function ShiftManagementPage() {
               <Users className="h-4 w-4" />
               {t("timeAttendance.shifts.assignments")}
             </TabsTrigger>
+            <TabsTrigger value="swaps" className="flex items-center gap-2">
+              <ArrowLeftRight className="h-4 w-4" />
+              {t("timeAttendance.shifts.swapRequests")}
+            </TabsTrigger>
+            <TabsTrigger value="openShifts" className="flex items-center gap-2">
+              <Megaphone className="h-4 w-4" />
+              {t("timeAttendance.shifts.openShifts")}
+            </TabsTrigger>
+            <TabsTrigger value="templates" className="flex items-center gap-2">
+              <Copy className="h-4 w-4" />
+              {t("timeAttendance.shifts.templates")}
+            </TabsTrigger>
+            <TabsTrigger value="rotations" className="flex items-center gap-2">
+              <RotateCcw className="h-4 w-4" />
+              {t("timeAttendance.shifts.rotations")}
+            </TabsTrigger>
+            <TabsTrigger value="fatigue" className="flex items-center gap-2">
+              <AlertTriangle className="h-4 w-4" />
+              {t("timeAttendance.shifts.fatigue")}
+            </TabsTrigger>
+            <TabsTrigger value="coverage" className="flex items-center gap-2">
+              <BarChart3 className="h-4 w-4" />
+              {t("timeAttendance.shifts.coverage")}
+            </TabsTrigger>
+            <TabsTrigger value="bidding" className="flex items-center gap-2">
+              <Gavel className="h-4 w-4" />
+              {t("timeAttendance.shifts.bidding")}
+            </TabsTrigger>
           </TabsList>
+
+          {/* Calendar Tab */}
+          <TabsContent value="calendar" className="space-y-4">
+            <ShiftCalendarTab companyId={selectedCompany} />
+          </TabsContent>
 
           {/* Shifts Tab */}
           <TabsContent value="shifts" className="space-y-4">
@@ -1376,6 +1429,41 @@ export default function ShiftManagementPage() {
                 </Table>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Swap Requests Tab */}
+          <TabsContent value="swaps" className="space-y-4">
+            <ShiftSwapRequestsTab companyId={selectedCompany} />
+          </TabsContent>
+
+          {/* Open Shifts Tab */}
+          <TabsContent value="openShifts" className="space-y-4">
+            <OpenShiftBoardTab companyId={selectedCompany} />
+          </TabsContent>
+
+          {/* Templates Tab */}
+          <TabsContent value="templates" className="space-y-4">
+            <ShiftTemplatesTab companyId={selectedCompany} />
+          </TabsContent>
+
+          {/* Rotation Patterns Tab */}
+          <TabsContent value="rotations" className="space-y-4">
+            <RotationPatternsTab companyId={selectedCompany} />
+          </TabsContent>
+
+          {/* Fatigue Management Tab */}
+          <TabsContent value="fatigue" className="space-y-4">
+            <FatigueManagementTab companyId={selectedCompany} />
+          </TabsContent>
+
+          {/* Coverage Analysis Tab */}
+          <TabsContent value="coverage" className="space-y-4">
+            <ShiftCoverageTab companyId={selectedCompany} />
+          </TabsContent>
+
+          {/* Bidding Tab */}
+          <TabsContent value="bidding" className="space-y-4">
+            <ShiftBiddingTab companyId={selectedCompany} />
           </TabsContent>
         </Tabs>
       </div>
