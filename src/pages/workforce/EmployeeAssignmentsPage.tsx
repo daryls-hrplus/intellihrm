@@ -123,7 +123,6 @@ interface EmployeeAssignment {
   is_primary: boolean;
   assignment_type: string | null;
   compensation_amount: number | null;
-  compensation_currency: string | null;
   compensation_frequency: string | null;
   rate_type: string | null;
   hourly_rate: number | null;
@@ -185,7 +184,6 @@ export default function EmployeeAssignmentsPage() {
   const [formEndDate, setFormEndDate] = useState("");
   const [formAssignmentType, setFormAssignmentType] = useState("primary");
   const [formCompAmount, setFormCompAmount] = useState("");
-  const [formCompCurrency, setFormCompCurrency] = useState("USD");
   const [formCompFrequency, setFormCompFrequency] = useState("monthly");
   const [formRateType, setFormRateType] = useState<string>("salaried");
   const [formHourlyRate, setFormHourlyRate] = useState("");
@@ -289,7 +287,6 @@ export default function EmployeeAssignmentsPage() {
     setFormEndDate("");
     setFormAssignmentType("primary");
     setFormCompAmount("");
-    setFormCompCurrency("USD");
     setFormCompFrequency("monthly");
     setFormRateType("salaried");
     setFormHourlyRate("");
@@ -314,7 +311,6 @@ export default function EmployeeAssignmentsPage() {
     setFormEndDate(assignment.end_date || "");
     setFormAssignmentType(assignment.assignment_type || "primary");
     setFormCompAmount(assignment.compensation_amount?.toString() || "");
-    setFormCompCurrency(assignment.compensation_currency || "USD");
     setFormCompFrequency(assignment.compensation_frequency || "monthly");
     setFormRateType(assignment.rate_type || "salaried");
     setFormHourlyRate(assignment.hourly_rate?.toString() || "");
@@ -379,7 +375,6 @@ export default function EmployeeAssignmentsPage() {
         assignment_type: formAssignmentType,
         is_primary: formAssignmentType === "primary",
         compensation_amount: formCompAmount ? parseFloat(formCompAmount) : null,
-        compensation_currency: formCompCurrency,
         compensation_frequency: formCompFrequency,
         rate_type: formRateType,
         hourly_rate: formHourlyRate ? parseFloat(formHourlyRate) : null,
@@ -448,7 +443,7 @@ export default function EmployeeAssignmentsPage() {
       a.end_date || "",
       a.is_primary ? "Yes" : "No",
       a.is_active ? "Active" : "Inactive",
-      a.compensation_amount ? `${a.compensation_amount} ${a.compensation_currency}/${a.compensation_frequency}` : ""
+      a.compensation_amount ? `${a.compensation_amount}/${a.compensation_frequency}` : ""
     ]);
 
     const csvContent = [headers, ...rows].map(row => row.map(cell => `"${cell}"`).join(",")).join("\n");
@@ -654,14 +649,19 @@ export default function EmployeeAssignmentsPage() {
                                assignment.rate_type === "daily" ? t("workforce.dailyRate", "Daily") :
                                t("workforce.salaried", "Salaried")}
                             </Badge>
+                            {assignment.compensation_frequency && (
+                              <span className="text-xs text-muted-foreground capitalize">
+                                {assignment.compensation_frequency}
+                              </span>
+                            )}
                             {assignment.rate_type === "hourly" && assignment.hourly_rate && (
                               <span className="text-xs text-muted-foreground">
-                                {new Intl.NumberFormat("en-US", { style: "currency", currency: assignment.compensation_currency || "USD" }).format(assignment.hourly_rate)}/hr
+                                {new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(assignment.hourly_rate)}/hr
                               </span>
                             )}
                             {assignment.rate_type === "daily" && assignment.hourly_rate && (
                               <span className="text-xs text-muted-foreground">
-                                {new Intl.NumberFormat("en-US", { style: "currency", currency: assignment.compensation_currency || "USD" }).format(assignment.hourly_rate)}/day
+                                {new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(assignment.hourly_rate)}/day
                               </span>
                             )}
                           </div>
@@ -828,6 +828,21 @@ export default function EmployeeAssignmentsPage() {
                       </SelectContent>
                     </Select>
                   </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="compFrequency">{t("workforce.frequency")}</Label>
+                    <Select value={formCompFrequency} onValueChange={setFormCompFrequency}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="hourly">{t("workforce.hourly")}</SelectItem>
+                        <SelectItem value="daily">{t("workforce.daily")}</SelectItem>
+                        <SelectItem value="weekly">{t("workforce.weekly")}</SelectItem>
+                        <SelectItem value="monthly">{t("workforce.monthly")}</SelectItem>
+                        <SelectItem value="yearly">{t("workforce.yearly")}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                   {formRateType === "hourly" && (
                     <>
                       <div className="space-y-2">
@@ -877,47 +892,15 @@ export default function EmployeeAssignmentsPage() {
 
               {/* Compensation Override (for salaried) */}
               {formRateType === "salaried" && (
-                <div className="grid gap-4 grid-cols-3">
-                  <div className="space-y-2">
-                    <Label htmlFor="compAmount">{t("workforce.compensationAmount")}</Label>
-                    <Input
-                      id="compAmount"
-                      type="number"
-                      placeholder={t("common.amount")}
-                      value={formCompAmount}
-                      onChange={(e) => setFormCompAmount(e.target.value)}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="compCurrency">{t("workforce.currency")}</Label>
-                    <Select value={formCompCurrency} onValueChange={setFormCompCurrency}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="USD">USD</SelectItem>
-                        <SelectItem value="EUR">EUR</SelectItem>
-                        <SelectItem value="GBP">GBP</SelectItem>
-                        <SelectItem value="SAR">SAR</SelectItem>
-                        <SelectItem value="AED">AED</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="compFrequency">{t("workforce.frequency")}</Label>
-                    <Select value={formCompFrequency} onValueChange={setFormCompFrequency}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="hourly">{t("workforce.hourly")}</SelectItem>
-                        <SelectItem value="daily">{t("workforce.daily")}</SelectItem>
-                        <SelectItem value="weekly">{t("workforce.weekly")}</SelectItem>
-                        <SelectItem value="monthly">{t("workforce.monthly")}</SelectItem>
-                        <SelectItem value="yearly">{t("workforce.yearly")}</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+                <div className="space-y-2">
+                  <Label htmlFor="compAmount">{t("workforce.compensationAmount")}</Label>
+                  <Input
+                    id="compAmount"
+                    type="number"
+                    placeholder={t("common.amount")}
+                    value={formCompAmount}
+                    onChange={(e) => setFormCompAmount(e.target.value)}
+                  />
                 </div>
               )}
 
@@ -953,7 +936,7 @@ export default function EmployeeAssignmentsPage() {
                       <SelectItem value="__none__">{t("common.none", "None")}</SelectItem>
                       {spinalPoints.map((sp) => (
                         <SelectItem key={sp.id} value={sp.id}>
-                          Point {sp.point_number} - {new Intl.NumberFormat("en-US", { style: "currency", currency: formCompCurrency || "USD" }).format(sp.annual_salary)}/yr
+                          Point {sp.point_number} - {new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(sp.annual_salary)}/yr
                         </SelectItem>
                       ))}
                     </SelectContent>
