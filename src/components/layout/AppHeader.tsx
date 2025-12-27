@@ -26,6 +26,7 @@ import defaultGroupLogo from "@/assets/default-group-logo.png";
 import defaultCompanyLogo from "@/assets/default-company-logo.png";
 import { MessagesOverlayPanel } from "@/components/overlays/MessagesOverlayPanel";
 import { IntranetOverlayPanel } from "@/components/overlays/IntranetOverlayPanel";
+import { HelpCenterOverlayPanel } from "@/components/overlays/HelpCenterOverlayPanel";
 
 export function AppHeader() {
   const { t } = useTranslation();
@@ -36,6 +37,7 @@ export function AppHeader() {
   const [isOpen, setIsOpen] = useState(false);
   const [isMessagesOpen, setIsMessagesOpen] = useState(false);
   const [isIntranetOpen, setIsIntranetOpen] = useState(false);
+  const [isHelpOpen, setIsHelpOpen] = useState(false);
   
   const groupLogoUrl = company?.company_group?.logo_url || (company?.company_group ? defaultGroupLogo : null);
   const companyLogoUrl = company?.logo_url || defaultCompanyLogo;
@@ -257,11 +259,13 @@ export function AppHeader() {
       {/* Help Center Button */}
       <Tooltip>
         <TooltipTrigger asChild>
-          <NavLink to="/help">
-            <Button variant="ghost" size="icon">
-              <HelpCircle className="h-5 w-5" />
-            </Button>
-          </NavLink>
+          <Button 
+            variant="ghost" 
+            size="icon"
+            onClick={() => setIsHelpOpen(true)}
+          >
+            <HelpCircle className="h-5 w-5" />
+          </Button>
         </TooltipTrigger>
         <TooltipContent>{t("navigation.helpCenter")}</TooltipContent>
       </Tooltip>
@@ -349,6 +353,10 @@ export function AppHeader() {
       <IntranetOverlayPanel 
         isOpen={isIntranetOpen} 
         onClose={() => setIsIntranetOpen(false)} 
+      />
+      <HelpCenterOverlayPanel 
+        isOpen={isHelpOpen} 
+        onClose={() => setIsHelpOpen(false)} 
       />
     </div>
   );
