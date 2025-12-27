@@ -141,10 +141,10 @@ export function useSalaryAdvances(companyId: string | null) {
   }, [companyId, fetchAdvanceTypes, fetchAdvances]);
 
   // Advance Type CRUD
-  const createAdvanceType = async (data: Partial<SalaryAdvanceType>) => {
+  const createAdvanceType = async (data: Pick<SalaryAdvanceType, 'name' | 'code'> & Partial<Omit<SalaryAdvanceType, 'id' | 'company_id' | 'created_at' | 'updated_at' | 'name' | 'code'>>) => {
     const { error } = await supabase
       .from('salary_advance_types')
-      .insert([{ ...data, company_id: companyId }]);
+      .insert([{ ...data, company_id: companyId! }]);
 
     if (error) {
       toast.error('Failed to create advance type');
@@ -183,10 +183,10 @@ export function useSalaryAdvances(companyId: string | null) {
   };
 
   // Advance CRUD
-  const createAdvance = async (data: Partial<SalaryAdvance>) => {
+  const createAdvance = async (data: Pick<SalaryAdvance, 'employee_id' | 'requested_amount'> & Partial<Omit<SalaryAdvance, 'id' | 'company_id' | 'created_at' | 'updated_at'>>) => {
     const { error } = await supabase
       .from('salary_advances')
-      .insert([{ ...data, company_id: companyId }]);
+      .insert([{ ...data, company_id: companyId! }]);
 
     if (error) {
       toast.error('Failed to create advance request');
