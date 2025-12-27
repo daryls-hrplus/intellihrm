@@ -73,6 +73,14 @@ export function PayslipDocument({
       currency,
     }).format(amount);
   };
+  
+  // Format amount without currency code (just the number with symbol) - for use when column header shows currency
+  const formatAmount = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(amount);
+  };
 
   const getJobInitials = (jobName: string) => {
     return jobName
@@ -287,9 +295,9 @@ export function PayslipDocument({
                         </td>
                       </>
                     )}
-                    <td className="text-right py-2 font-medium tabular-nums pr-2">{formatCurrency(item.amount, payslip.currency)}</td>
+                    <td className="text-right py-2 font-medium tabular-nums pr-2">{formatAmount(item.amount)}</td>
                     {t.show_ytd_totals && (
-                      <td className="text-right py-2 tabular-nums text-muted-foreground pr-2">{formatCurrency(ytdTotal, payslip.currency)}</td>
+                      <td className="text-right py-2 tabular-nums text-muted-foreground pr-2">{formatAmount(ytdTotal)}</td>
                     )}
                   </tr>
                 );
@@ -303,9 +311,9 @@ export function PayslipDocument({
                     <td className="text-center py-2">-</td>
                   </>
                 )}
-                <td className="text-right py-2 font-medium tabular-nums pr-2">{formatCurrency(payslip.gross_pay, payslip.currency)}</td>
+                <td className="text-right py-2 font-medium tabular-nums pr-2">{formatAmount(payslip.gross_pay)}</td>
                 {t.show_ytd_totals && (
-                  <td className="text-right py-2 tabular-nums text-muted-foreground pr-2">{formatCurrency(payslip.gross_pay, payslip.currency)}</td>
+                  <td className="text-right py-2 tabular-nums text-muted-foreground pr-2">{formatAmount(payslip.gross_pay)}</td>
                 )}
               </tr>
             )}
@@ -319,9 +327,9 @@ export function PayslipDocument({
                   <td className="text-center py-2"></td>
                 </>
               )}
-              <td className="text-right py-2 font-bold tabular-nums pr-2" style={{ color: t.accent_color }}>{formatCurrency(payslip.gross_pay, payslip.currency)}</td>
+              <td className="text-right py-2 font-bold tabular-nums pr-2" style={{ color: t.accent_color }}>{formatAmount(payslip.gross_pay)}</td>
               {t.show_ytd_totals && (
-                <td className="text-right py-2 font-bold tabular-nums pr-2" style={{ color: t.accent_color }}>{formatCurrency((ytdTotals?.gross || 0) + payslip.gross_pay, payslip.currency)}</td>
+                <td className="text-right py-2 font-bold tabular-nums pr-2" style={{ color: t.accent_color }}>{formatAmount((ytdTotals?.gross || 0) + payslip.gross_pay)}</td>
               )}
             </tr>
           </tfoot>
@@ -380,9 +388,9 @@ export function PayslipDocument({
                           </td>
                         </>
                       )}
-                      <td className="text-right py-2 font-medium tabular-nums text-destructive pr-2">({formatCurrency(item.amount, payslip.currency)})</td>
+                      <td className="text-right py-2 font-medium tabular-nums text-destructive pr-2">({formatAmount(item.amount)})</td>
                       {t.show_ytd_totals && (
-                        <td className="text-right py-2 tabular-nums text-muted-foreground pr-2">({formatCurrency(ytdTotal, payslip.currency)})</td>
+                        <td className="text-right py-2 tabular-nums text-muted-foreground pr-2">({formatAmount(ytdTotal)})</td>
                       )}
                     </tr>
                   );
@@ -422,9 +430,9 @@ export function PayslipDocument({
                           </td>
                         </>
                       )}
-                      <td className="text-right py-2 font-medium tabular-nums text-destructive pr-2">({formatCurrency(item.amount, payslip.currency)})</td>
+                      <td className="text-right py-2 font-medium tabular-nums text-destructive pr-2">({formatAmount(item.amount)})</td>
                       {t.show_ytd_totals && (
-                        <td className="text-right py-2 tabular-nums text-muted-foreground pr-2">({formatCurrency(ytdTotal, payslip.currency)})</td>
+                        <td className="text-right py-2 tabular-nums text-muted-foreground pr-2">({formatAmount(ytdTotal)})</td>
                       )}
                     </tr>
                   );
@@ -442,9 +450,9 @@ export function PayslipDocument({
                     <td className="text-center py-2">-</td>
                   </>
                 )}
-                <td className="text-right py-2 font-medium tabular-nums text-destructive pr-2">({formatCurrency(payslip.total_deductions, payslip.currency)})</td>
+                <td className="text-right py-2 font-medium tabular-nums text-destructive pr-2">({formatAmount(payslip.total_deductions)})</td>
                 {t.show_ytd_totals && (
-                  <td className="text-right py-2 tabular-nums text-muted-foreground pr-2">({formatCurrency(payslip.total_deductions, payslip.currency)})</td>
+                  <td className="text-right py-2 tabular-nums text-muted-foreground pr-2">({formatAmount(payslip.total_deductions)})</td>
                 )}
               </tr>
             )}
@@ -458,9 +466,9 @@ export function PayslipDocument({
                   <td className="text-center py-2"></td>
                 </>
               )}
-              <td className="text-right py-2 font-bold tabular-nums text-destructive pr-2">({formatCurrency(payslip.total_deductions, payslip.currency)})</td>
+              <td className="text-right py-2 font-bold tabular-nums text-destructive pr-2">({formatAmount(payslip.total_deductions)})</td>
               {t.show_ytd_totals && (
-                <td className="text-right py-2 font-bold tabular-nums text-destructive pr-2">({formatCurrency((ytdTotals?.deductions || 0) + payslip.total_deductions, payslip.currency)})</td>
+                <td className="text-right py-2 font-bold tabular-nums text-destructive pr-2">({formatAmount((ytdTotals?.deductions || 0) + payslip.total_deductions)})</td>
               )}
             </tr>
           </tfoot>
