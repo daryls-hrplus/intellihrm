@@ -215,7 +215,7 @@ export function useCapabilities() {
       toast.error("Failed to create capability");
       return null;
     }
-  }, [user?.id]);
+  }, []);
 
   const updateCapability = useCallback(async (
     id: string,
