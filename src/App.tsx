@@ -342,6 +342,15 @@ import AttendanceRecordsPage from "./pages/time-attendance/AttendanceRecordsPage
 import SchedulesPage from "./pages/time-attendance/SchedulesPage";
 import OvertimeManagementPage from "./pages/time-attendance/OvertimeManagementPage";
 import ShiftManagementPage from "./pages/time-attendance/ShiftManagementPage";
+import ShiftCalendarPage from "./pages/time-attendance/shifts/ShiftCalendarPage";
+import ShiftSwapRequestsPage from "./pages/time-attendance/shifts/ShiftSwapRequestsPage";
+import OpenShiftBoardPage from "./pages/time-attendance/shifts/OpenShiftBoardPage";
+import ShiftTemplatesPage from "./pages/time-attendance/shifts/ShiftTemplatesPage";
+import RotationPatternsPage from "./pages/time-attendance/shifts/RotationPatternsPage";
+import FatigueManagementPage from "./pages/time-attendance/shifts/FatigueManagementPage";
+import ShiftCoveragePage from "./pages/time-attendance/shifts/ShiftCoveragePage";
+import ShiftBiddingPage from "./pages/time-attendance/shifts/ShiftBiddingPage";
+import AISchedulerPage from "./pages/time-attendance/shifts/AISchedulerPage";
 import GeofenceManagementPage from "./pages/time-attendance/GeofenceManagementPage";
 import ProjectTimeTrackingPage from "./pages/time-attendance/ProjectTimeTrackingPage";
 import TimesheetApprovalsPage from "./pages/time-attendance/TimesheetApprovalsPage";
@@ -1595,6 +1604,78 @@ const App = () => (
               element={
                 <ProtectedRoute moduleCode="time_attendance">
                   <ShiftManagementPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/time-attendance/shifts/calendar"
+              element={
+                <ProtectedRoute moduleCode="time_attendance">
+                  <ShiftCalendarPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/time-attendance/shifts/swap-requests"
+              element={
+                <ProtectedRoute moduleCode="time_attendance">
+                  <ShiftSwapRequestsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/time-attendance/shifts/open-shifts"
+              element={
+                <ProtectedRoute moduleCode="time_attendance">
+                  <OpenShiftBoardPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/time-attendance/shifts/templates"
+              element={
+                <ProtectedRoute moduleCode="time_attendance">
+                  <ShiftTemplatesPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/time-attendance/shifts/rotations"
+              element={
+                <ProtectedRoute moduleCode="time_attendance">
+                  <RotationPatternsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/time-attendance/shifts/fatigue"
+              element={
+                <ProtectedRoute moduleCode="time_attendance">
+                  <FatigueManagementPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/time-attendance/shifts/coverage"
+              element={
+                <ProtectedRoute moduleCode="time_attendance">
+                  <ShiftCoveragePage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/time-attendance/shifts/bidding"
+              element={
+                <ProtectedRoute moduleCode="time_attendance">
+                  <ShiftBiddingPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/time-attendance/shifts/ai-scheduler"
+              element={
+                <ProtectedRoute moduleCode="time_attendance">
+                  <AISchedulerPage />
                 </ProtectedRoute>
               }
             />
