@@ -3,21 +3,39 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Calculator, RefreshCw } from "lucide-react";
+import { Calculator, RefreshCw, CalendarIcon, AlertCircle, Globe } from "lucide-react";
 import { format, parseISO } from "date-fns";
+import { cn } from "@/lib/utils";
 import { 
   calculateProrationFactor, 
   applyProration, 
   getProrationMethodCode,
   type ProrationResult 
 } from "@/utils/payroll/prorationCalculator";
+import { usePayGroupMultiCurrency } from "@/hooks/useMultiCurrencyPayroll";
+import { useCurrencies, Currency } from "@/hooks/useCurrencies";
 
 interface PayrollSimulatorProps {
   companyId: string;
   employeeId: string;
   payPeriodId: string;
+  payGroupId?: string;
+}
+
+interface ExchangeRateEntry {
+  fromCurrencyId: string;
+  toCurrencyId: string;
+  rate: number;
+  fromCurrency?: Currency;
+  toCurrency?: Currency;
 }
 
 interface StatutoryDeduction {
@@ -153,9 +171,27 @@ interface StatutoryType {
   statutory_name: string;
 }
 
-export function PayrollSimulator({ companyId, employeeId, payPeriodId }: PayrollSimulatorProps) {
+export function PayrollSimulator({ companyId, employeeId, payPeriodId, payGroupId }: PayrollSimulatorProps) {
   const [isCalculating, setIsCalculating] = useState(false);
   const [result, setResult] = useState<SimulationResult | null>(null);
+  
+  // Multi-currency state
+  const [exchangeRateDialogOpen, setExchangeRateDialogOpen] = useState(false);
+  const [exchangeRates, setExchangeRates] = useState<ExchangeRateEntry[]>([]);
+  const [selectedRateDate, setSelectedRateDate] = useState<Date>(new Date());
+  const [missingRates, setMissingRates] = useState<string[]>([]);
+  const [loadingRates, setLoadingRates] = useState(false);
+  const [foreignCurrencyIds, setForeignCurrencyIds] = useState<string[]>([]);
+  const [localCurrencyId, setLocalCurrencyId] = useState<string | null>(null);
+  const [confirmedRatesMap, setConfirmedRatesMap] = useState<Map<string, number>>(new Map());
+  const [hasCheckedCurrencies, setHasCheckedCurrencies] = useState(false);
+  
+  // Check if pay group has multi-currency enabled
+  const { data: payGroupSettings } = usePayGroupMultiCurrency(payGroupId);
+  const isMultiCurrencyEnabled = payGroupSettings?.enable_multi_currency || false;
+  
+  // Fetch currencies
+  const { currencies } = useCurrencies();
 
   const calculateStatutoryDeductions = (
     taxableIncome: number,
@@ -293,8 +329,195 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
     return totalTax;
   };
 
-  const runSimulation = async () => {
+  // Check for foreign currencies and prompt for exchange rates if needed
+  const checkAndPromptForExchangeRates = async () => {
+    if (!isMultiCurrencyEnabled || !payGroupId) {
+      setHasCheckedCurrencies(true);
+      return false; // No need for exchange rates
+    }
+
+    // Fetch company local currency
+    const { data: companyData } = await supabase
+      .from('companies')
+      .select('local_currency_id, country')
+      .eq('id', companyId)
+      .single();
+
+    let localCurrId = companyData?.local_currency_id;
+    
+    // If no local currency set, try to resolve from country
+    if (!localCurrId && companyData?.country) {
+      const { data: fiscal } = await supabase
+        .from('country_fiscal_years')
+        .select('currency_code')
+        .eq('country_code', companyData.country)
+        .eq('is_active', true)
+        .maybeSingle();
+
+      if (fiscal?.currency_code) {
+        const { data: currency } = await supabase
+          .from('currencies')
+          .select('id')
+          .eq('code', fiscal.currency_code)
+          .eq('is_active', true)
+          .maybeSingle();
+
+        localCurrId = currency?.id;
+      }
+    }
+
+    if (!localCurrId) {
+      toast.error("Company local currency is not configured. Please set it on the Company record.");
+      setHasCheckedCurrencies(true);
+      return true; // Block simulation
+    }
+
+    setLocalCurrencyId(localCurrId);
+
+    // Build currency code -> id map
+    const { data: currencyRows } = await supabase
+      .from('currencies')
+      .select('id, code')
+      .eq('is_active', true);
+
+    const codeToId = new Map<string, string>();
+    (currencyRows || []).forEach((c) => {
+      if (c?.code && c?.id) codeToId.set(String(c.code).toUpperCase(), c.id);
+    });
+
+    // Fetch employee compensation to find foreign currencies
+    const { data: compensations } = await supabase
+      .from('employee_compensation')
+      .select('currency_id, currency')
+      .eq('employee_id', employeeId)
+      .eq('is_active', true);
+
+    // Also check period allowances and deductions
+    const [{ data: allowances }, { data: deductions }] = await Promise.all([
+      supabase
+        .from('employee_period_allowances')
+        .select('currency_id')
+        .eq('employee_id', employeeId)
+        .eq('pay_period_id', payPeriodId),
+      supabase
+        .from('employee_period_deductions')
+        .select('currency_id')
+        .eq('employee_id', employeeId)
+        .eq('pay_period_id', payPeriodId)
+    ]);
+
+    // Find unique foreign currencies
+    const foreignIds = new Set<string>();
+    
+    (compensations || []).forEach((c: any) => {
+      const idFromCode = c.currency ? codeToId.get(String(c.currency).toUpperCase()) : undefined;
+      const effectiveCurrencyId: string | undefined = c.currency_id || idFromCode;
+
+      if (effectiveCurrencyId && effectiveCurrencyId !== localCurrId) {
+        foreignIds.add(effectiveCurrencyId);
+      }
+    });
+
+    (allowances || []).forEach((a: any) => {
+      if (a.currency_id && a.currency_id !== localCurrId) {
+        foreignIds.add(a.currency_id);
+      }
+    });
+
+    (deductions || []).forEach((d: any) => {
+      if (d.currency_id && d.currency_id !== localCurrId) {
+        foreignIds.add(d.currency_id);
+      }
+    });
+
+    if (foreignIds.size === 0) {
+      setHasCheckedCurrencies(true);
+      return false; // No foreign currencies, proceed
+    }
+
+    // Build rate entries for the dialog
+    const localCurrency = currencies.find(c => c.id === localCurrId);
+    const rateEntries: ExchangeRateEntry[] = [];
+
+    foreignIds.forEach(foreignId => {
+      const foreignCurrency = currencies.find(c => c.id === foreignId);
+      rateEntries.push({
+        fromCurrencyId: foreignId,
+        toCurrencyId: localCurrId,
+        rate: 0,
+        fromCurrency: foreignCurrency,
+        toCurrency: localCurrency
+      });
+    });
+
+    setForeignCurrencyIds(Array.from(foreignIds));
+    setExchangeRates(rateEntries);
+    setExchangeRateDialogOpen(true);
+    
+    return true; // Block simulation until rates are confirmed
+  };
+
+  // Fetch exchange rates for selected date
+  const fetchRatesForDate = async () => {
+    setLoadingRates(true);
+    const dateStr = format(selectedRateDate, 'yyyy-MM-dd');
+    const missing: string[] = [];
+    
+    const updatedRates = await Promise.all(
+      exchangeRates.map(async (entry) => {
+        const { data } = await supabase
+          .from("exchange_rates")
+          .select("rate")
+          .eq("from_currency_id", entry.fromCurrencyId)
+          .eq("to_currency_id", entry.toCurrencyId)
+          .lte("rate_date", dateStr)
+          .order("rate_date", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        
+        if (data?.rate) {
+          return { ...entry, rate: data.rate };
+        } else {
+          missing.push(`${entry.fromCurrency?.code || 'Unknown'} → ${entry.toCurrency?.code || 'Unknown'}`);
+          return entry;
+        }
+      })
+    );
+    
+    setExchangeRates(updatedRates);
+    setMissingRates(missing);
+    setLoadingRates(false);
+  };
+
+  const handleRateChange = (index: number, value: string) => {
+    const numValue = parseFloat(value) || 0;
+    setExchangeRates(prev => prev.map((r, i) => i === index ? { ...r, rate: numValue } : r));
+  };
+
+  const handleConfirmRates = () => {
+    // Build a map of currency conversions
+    const ratesMap = new Map<string, number>();
+    exchangeRates.forEach(r => {
+      if (r.rate > 0) {
+        ratesMap.set(`${r.fromCurrencyId}_${r.toCurrencyId}`, r.rate);
+        // Add inverse rate
+        ratesMap.set(`${r.toCurrencyId}_${r.fromCurrencyId}`, 1 / r.rate);
+      }
+    });
+    
+    setConfirmedRatesMap(ratesMap);
+    setHasCheckedCurrencies(true);
+    setExchangeRateDialogOpen(false);
+    
+    // Now run simulation with the confirmed rates
+    runSimulationWithRates(ratesMap);
+  };
+
+  const allRatesValid = exchangeRates.every(r => r.rate > 0);
+
+  const runSimulationWithRates = async (ratesMap: Map<string, number>) => {
     setIsCalculating(true);
+    const exchangeRatesMap = ratesMap;
     
     try {
       // Fetch employee info
@@ -799,8 +1022,8 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
         },
         net_pay: netPay,
         rules_applied: Array.from(rulesApplied.values()),
-        localCurrencyCode: baseCompCurrency,
-        hasMultiCurrency: false // Simulator uses single currency for now
+        localCurrencyCode: localCurrencyId ? (currencies.find(c => c.id === localCurrencyId)?.code || baseCompCurrency) : baseCompCurrency,
+        hasMultiCurrency: isMultiCurrencyEnabled && exchangeRatesMap.size > 0
       });
 
       if (periodBaseSalary === 0 && additionalCompList.length === 0) {
@@ -818,9 +1041,30 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
     setIsCalculating(false);
   };
 
+  // Initial simulation check - prompt for exchange rates if needed
+  const runSimulation = async () => {
+    if (isMultiCurrencyEnabled && !hasCheckedCurrencies) {
+      const blocked = await checkAndPromptForExchangeRates();
+      if (blocked) return; // Dialog will handle running simulation after rates confirmed
+    }
+    
+    // Run with empty rates map if no multi-currency or already have rates
+    runSimulationWithRates(confirmedRatesMap);
+  };
+
   useEffect(() => {
+    // Reset currency check when employee/period changes
+    setHasCheckedCurrencies(false);
+    setConfirmedRatesMap(new Map());
     runSimulation();
   }, [employeeId, payPeriodId]);
+
+  // Re-fetch rates when dialog opens
+  useEffect(() => {
+    if (exchangeRateDialogOpen && exchangeRates.length > 0) {
+      fetchRatesForDate();
+    }
+  }, [selectedRateDate, exchangeRateDialogOpen]);
 
   if (!result) {
     return (
@@ -1392,6 +1636,123 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId }: Payroll
         <RefreshCw className={`h-4 w-4 ${isCalculating ? 'animate-spin' : ''}`} />
         Recalculate
       </Button>
+
+      {/* Exchange Rate Selection Dialog */}
+      <Dialog open={exchangeRateDialogOpen} onOpenChange={setExchangeRateDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Globe className="h-5 w-5" />
+              Select Exchange Rates for Simulation
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div className="flex items-center gap-4">
+              <div className="space-y-2">
+                <Label>Rate Date</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-[240px] justify-start text-left font-normal",
+                        !selectedRateDate && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {selectedRateDate ? format(selectedRateDate, "PPP") : "Select date"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={selectedRateDate}
+                      onSelect={(date) => date && setSelectedRateDate(date)}
+                      disabled={(date) => date > new Date()}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+              
+              <Button
+                variant="outline"
+                onClick={fetchRatesForDate}
+                disabled={loadingRates}
+                className="mt-6"
+              >
+                <RefreshCw className={cn("h-4 w-4 mr-2", loadingRates && "animate-spin")} />
+                Fetch Rates
+              </Button>
+            </div>
+            
+            {missingRates.length > 0 && (
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  No rates found for: {missingRates.join(", ")}. Please enter manually.
+                </AlertDescription>
+              </Alert>
+            )}
+            
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>From Currency</TableHead>
+                  <TableHead>To Currency</TableHead>
+                  <TableHead>Exchange Rate</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {exchangeRates.map((entry, index) => (
+                  <TableRow key={`${entry.fromCurrencyId}-${entry.toCurrencyId}`}>
+                    <TableCell>
+                      <span className="font-medium">{entry.fromCurrency?.code}</span>
+                      <span className="text-muted-foreground ml-2">{entry.fromCurrency?.name}</span>
+                    </TableCell>
+                    <TableCell>
+                      <span className="font-medium">{entry.toCurrency?.code}</span>
+                      <span className="text-muted-foreground ml-2">{entry.toCurrency?.name}</span>
+                    </TableCell>
+                    <TableCell>
+                      <Input
+                        type="number"
+                        step="0.000001"
+                        value={entry.rate || ""}
+                        onChange={(e) => handleRateChange(index, e.target.value)}
+                        className="w-32"
+                        placeholder="0.000000"
+                      />
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+            
+            <p className="text-sm text-muted-foreground">
+              These rates will be used for currency conversions in this simulation.
+            </p>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => {
+              setExchangeRateDialogOpen(false);
+              setHasCheckedCurrencies(true);
+              // Run with empty rates - amounts won't be converted
+              runSimulationWithRates(new Map());
+            }}>
+              Skip (Use Original Amounts)
+            </Button>
+            <Button
+              onClick={handleConfirmRates}
+              disabled={!allRatesValid}
+            >
+              Confirm Rates & Calculate
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
