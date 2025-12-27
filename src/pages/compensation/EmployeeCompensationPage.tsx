@@ -1271,7 +1271,7 @@ export default function EmployeeCompensationPage() {
         )}
 
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogContent className="max-w-lg">
+          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>
                 {editing
@@ -1283,205 +1283,212 @@ export default function EmployeeCompensationPage() {
               </DialogDescription>
             </DialogHeader>
 
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label>{t("compensation.employeeCompensation.employee")} *</Label>
-                <Select value={formEmployeeId} onValueChange={setFormEmployeeId}>
-                  <SelectTrigger>
-                    <SelectValue placeholder={t("compensation.employeeCompensation.dialog.selectEmployee")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {employees.map((e) => (
-                      <SelectItem key={e.id} value={e.id}>
-                        {e.full_name} ({e.email})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label>{t("compensation.employeeCompensation.position")}</Label>
-                <Select 
-                  value={formPositionId} 
-                  onValueChange={setFormPositionId}
-                  disabled={!formEmployeeId || employeePositions.length === 0}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder={
-                      !formEmployeeId 
-                        ? t("compensation.employeeCompensation.dialog.selectEmployeeFirst")
-                        : employeePositions.length === 0 
-                          ? t("compensation.employeeCompensation.dialog.noPositionsAssigned") 
-                          : t("compensation.employeeCompensation.dialog.selectPosition")
-                    } />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {employeePositions.map((ep) => (
-                      <SelectItem key={ep.position_id} value={ep.position_id}>
-                        <span className="flex items-center gap-2">
-                          <span>{ep.position?.title} ({ep.position?.code})</span>
-                          <Badge variant="outline" className={ep.assignment_type === "primary" ? "bg-primary/10 text-primary" : "bg-muted"}>
-                            {ep.assignment_type ? t(`workforce.assignmentTypes.${ep.assignment_type}`, ep.assignment_type.charAt(0).toUpperCase() + ep.assignment_type.slice(1)) : "Primary"}
-                          </Badge>
-                          {ep.is_primary && <span className="text-primary">★</span>}
-                        </span>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label>{t("compensation.employeeCompensation.payElement")} *</Label>
-                <Select 
-                  value={formPayElementId} 
-                  onValueChange={setFormPayElementId}
-                  disabled={!formPositionId}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder={
-                      !formPositionId 
-                        ? t("compensation.employeeCompensation.dialog.selectPositionFirst", "Select a position first")
-                        : t("compensation.employeeCompensation.dialog.selectPayElement")
-                    } />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {payElements.map((pe) => (
-                      <SelectItem key={pe.id} value={pe.id}>
-                        {pe.name} ({pe.code}) {formPositionPayElementIds.includes(pe.id) && "★"}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {formPositionPayElementIds.length > 0 && (
-                  <p className="text-xs text-muted-foreground">
-                    ★ = {t("compensation.employeeCompensation.dialog.linkedToPosition", "Linked to position")}
-                  </p>
-                )}
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Left Column - Employee & Position */}
+              <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="amount">{t("compensation.employeeCompensation.amount")} *</Label>
-                  <Input
-                    id="amount"
-                    type="number"
-                    step="0.01"
-                    value={formAmount}
-                    onChange={(e) => setFormAmount(e.target.value)}
-                    placeholder="0.00"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>{t("compensation.employeeCompensation.frequencyLabel")}</Label>
-                  <Select value={formFrequency} onValueChange={setFormFrequency}>
+                  <Label>{t("compensation.employeeCompensation.employee")} *</Label>
+                  <Select value={formEmployeeId} onValueChange={setFormEmployeeId}>
                     <SelectTrigger>
-                      <SelectValue />
+                      <SelectValue placeholder={t("compensation.employeeCompensation.dialog.selectEmployee")} />
                     </SelectTrigger>
                     <SelectContent>
-                      {frequencyOptions.map((opt) => (
-                        <SelectItem key={opt.value} value={opt.value}>
-                          {opt.label}
+                      {employees.map((e) => (
+                        <SelectItem key={e.id} value={e.id}>
+                          {e.full_name} ({e.email})
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
-              </div>
 
-              <div className="space-y-2">
-                <Label>{t("compensation.employeeCompensation.currency")}</Label>
-                <Select value={formCurrency} onValueChange={(val) => {
-                  setFormCurrency(val);
-                  // Find and set currency_id based on code
-                  const curr = currencies.find(c => c.code === val);
-                  setFormCurrencyId(curr?.id || "");
-                }}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {currencies.length > 0 ? currencies.map((c) => (
-                      <SelectItem key={c.id} value={c.code}>
-                        {c.code} - {c.name}
-                      </SelectItem>
-                    )) : (
-                      <>
-                        <SelectItem value="USD">USD</SelectItem>
-                        <SelectItem value="EUR">EUR</SelectItem>
-                        <SelectItem value="GBP">GBP</SelectItem>
-                        <SelectItem value="CAD">CAD</SelectItem>
-                        <SelectItem value="AUD">AUD</SelectItem>
-                      </>
-                    )}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="startDate">{t("common.startDate")} *</Label>
-                  <Input
-                    id="startDate"
-                    type="date"
-                    value={formStartDate}
-                    onChange={(e) => setFormStartDate(e.target.value)}
+                  <Label>{t("compensation.employeeCompensation.position")}</Label>
+                  <Select 
+                    value={formPositionId} 
+                    onValueChange={setFormPositionId}
+                    disabled={!formEmployeeId || employeePositions.length === 0}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={
+                        !formEmployeeId 
+                          ? t("compensation.employeeCompensation.dialog.selectEmployeeFirst")
+                          : employeePositions.length === 0 
+                            ? t("compensation.employeeCompensation.dialog.noPositionsAssigned") 
+                            : t("compensation.employeeCompensation.dialog.selectPosition")
+                      } />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {employeePositions.map((ep) => (
+                        <SelectItem key={ep.position_id} value={ep.position_id}>
+                          <span className="flex items-center gap-2">
+                            <span>{ep.position?.title} ({ep.position?.code})</span>
+                            <Badge variant="outline" className={ep.assignment_type === "primary" ? "bg-primary/10 text-primary" : "bg-muted"}>
+                              {ep.assignment_type ? t(`workforce.assignmentTypes.${ep.assignment_type}`, ep.assignment_type.charAt(0).toUpperCase() + ep.assignment_type.slice(1)) : "Primary"}
+                            </Badge>
+                            {ep.is_primary && <span className="text-primary">★</span>}
+                          </span>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>{t("compensation.employeeCompensation.payElement")} *</Label>
+                  <Select 
+                    value={formPayElementId} 
+                    onValueChange={setFormPayElementId}
+                    disabled={!formPositionId}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={
+                        !formPositionId 
+                          ? t("compensation.employeeCompensation.dialog.selectPositionFirst", "Select a position first")
+                          : t("compensation.employeeCompensation.dialog.selectPayElement")
+                      } />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {payElements.map((pe) => (
+                        <SelectItem key={pe.id} value={pe.id}>
+                          {pe.name} ({pe.code}) {formPositionPayElementIds.includes(pe.id) && "★"}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {formPositionPayElementIds.length > 0 && (
+                    <p className="text-xs text-muted-foreground">
+                      ★ = {t("compensation.employeeCompensation.dialog.linkedToPosition", "Linked to position")}
+                    </p>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="notes">{t("common.notes")}</Label>
+                  <Textarea
+                    id="notes"
+                    value={formNotes}
+                    onChange={(e) => setFormNotes(e.target.value)}
+                    rows={3}
+                    className="resize-none"
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="endDate">{t("common.endDate")}</Label>
-                  <Input
-                    id="endDate"
-                    type="date"
-                    value={formEndDate}
-                    onChange={(e) => setFormEndDate(e.target.value)}
-                  />
+              </div>
+
+              {/* Right Column - Amount & Dates */}
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="amount">{t("compensation.employeeCompensation.amount")} *</Label>
+                    <Input
+                      id="amount"
+                      type="number"
+                      step="0.01"
+                      value={formAmount}
+                      onChange={(e) => setFormAmount(e.target.value)}
+                      placeholder="0.00"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>{t("compensation.employeeCompensation.frequencyLabel")}</Label>
+                    <Select value={formFrequency} onValueChange={setFormFrequency}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {frequencyOptions.map((opt) => (
+                          <SelectItem key={opt.value} value={opt.value}>
+                            {opt.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
-              </div>
 
-              <div className="flex items-center gap-2">
-                <Switch
-                  id="isOverride"
-                  checked={formIsOverride}
-                  onCheckedChange={setFormIsOverride}
-                />
-                <Label htmlFor="isOverride">{t("compensation.employeeCompensation.dialog.isOverride")}</Label>
-              </div>
-
-              {formIsOverride && (
                 <div className="space-y-2">
-                  <Label htmlFor="overrideReason">{t("compensation.employeeCompensation.dialog.overrideReason")}</Label>
-                  <Input
-                    id="overrideReason"
-                    value={formOverrideReason}
-                    onChange={(e) => setFormOverrideReason(e.target.value)}
-                    placeholder={t("compensation.employeeCompensation.dialog.overrideReasonPlaceholder")}
-                  />
+                  <Label>{t("compensation.employeeCompensation.currency")}</Label>
+                  <Select value={formCurrency} onValueChange={(val) => {
+                    setFormCurrency(val);
+                    const curr = currencies.find(c => c.code === val);
+                    setFormCurrencyId(curr?.id || "");
+                  }}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {currencies.length > 0 ? currencies.map((c) => (
+                        <SelectItem key={c.id} value={c.code}>
+                          {c.code} - {c.name}
+                        </SelectItem>
+                      )) : (
+                        <>
+                          <SelectItem value="USD">USD</SelectItem>
+                          <SelectItem value="EUR">EUR</SelectItem>
+                          <SelectItem value="GBP">GBP</SelectItem>
+                          <SelectItem value="CAD">CAD</SelectItem>
+                          <SelectItem value="AUD">AUD</SelectItem>
+                        </>
+                      )}
+                    </SelectContent>
+                  </Select>
                 </div>
-              )}
 
-              <div className="space-y-2">
-                <Label htmlFor="notes">{t("common.notes")}</Label>
-                <Textarea
-                  id="notes"
-                  value={formNotes}
-                  onChange={(e) => setFormNotes(e.target.value)}
-                  rows={2}
-                />
-              </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="startDate">{t("common.startDate")} *</Label>
+                    <Input
+                      id="startDate"
+                      type="date"
+                      value={formStartDate}
+                      onChange={(e) => setFormStartDate(e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="endDate">{t("common.endDate")}</Label>
+                    <Input
+                      id="endDate"
+                      type="date"
+                      value={formEndDate}
+                      onChange={(e) => setFormEndDate(e.target.value)}
+                    />
+                  </div>
+                </div>
 
-              <div className="flex items-center gap-2">
-                <Switch
-                  id="isActive"
-                  checked={formIsActive}
-                  onCheckedChange={setFormIsActive}
-                />
-                <Label htmlFor="isActive">{t("common.active")}</Label>
+                <div className="flex items-center justify-between gap-4 pt-2">
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      id="isOverride"
+                      checked={formIsOverride}
+                      onCheckedChange={setFormIsOverride}
+                    />
+                    <Label htmlFor="isOverride">{t("compensation.employeeCompensation.dialog.isOverride")}</Label>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      id="isActive"
+                      checked={formIsActive}
+                      onCheckedChange={setFormIsActive}
+                    />
+                    <Label htmlFor="isActive">{t("common.active")}</Label>
+                  </div>
+                </div>
+
+                {formIsOverride && (
+                  <div className="space-y-2">
+                    <Label htmlFor="overrideReason">{t("compensation.employeeCompensation.dialog.overrideReason")}</Label>
+                    <Input
+                      id="overrideReason"
+                      value={formOverrideReason}
+                      onChange={(e) => setFormOverrideReason(e.target.value)}
+                      placeholder={t("compensation.employeeCompensation.dialog.overrideReasonPlaceholder")}
+                    />
+                  </div>
+                )}
               </div>
             </div>
 
-            <DialogFooter>
+            <DialogFooter className="mt-6">
               <Button variant="outline" onClick={() => setDialogOpen(false)}>
                 {t("common.cancel")}
               </Button>
