@@ -32923,6 +32923,7 @@ export type Database = {
           department_id: string | null
           email: string
           employment_status: string | null
+          enable_multi_currency_payment: boolean | null
           failed_login_attempts: number | null
           first_hire_date: string | null
           force_password_change: boolean | null
@@ -32953,6 +32954,7 @@ export type Database = {
           department_id?: string | null
           email: string
           employment_status?: string | null
+          enable_multi_currency_payment?: boolean | null
           failed_login_attempts?: number | null
           first_hire_date?: string | null
           force_password_change?: boolean | null
@@ -32983,6 +32985,7 @@ export type Database = {
           department_id?: string | null
           email?: string
           employment_status?: string | null
+          enable_multi_currency_payment?: boolean | null
           failed_login_attempts?: number | null
           first_hire_date?: string | null
           force_password_change?: boolean | null

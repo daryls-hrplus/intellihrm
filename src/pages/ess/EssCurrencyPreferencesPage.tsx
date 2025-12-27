@@ -12,18 +12,19 @@ import { EmployeeCurrencyPreferenceForm } from "@/components/payroll/EmployeeCur
 export default function EssCurrencyPreferencesPage() {
   const { user } = useAuth();
 
-  // Get employee's company and check if multi-currency is enabled for their pay group
+  // Get employee's company and check if multi-currency is enabled for their pay group AND profile
   const { data: employeeData, isLoading } = useQuery({
     queryKey: ["my-currency-preference-context", user?.id],
     queryFn: async () => {
       if (!user?.id) return null;
       
-      // Get employee's profile and position
+      // Get employee's profile with multi-currency flag
       const { data: profile, error: profileError } = await supabase
         .from("profiles")
         .select(`
           id,
           company_id,
+          enable_multi_currency_payment,
           company:companies(
             id,
             name,
@@ -51,10 +52,16 @@ export default function EssCurrencyPreferencesPage() {
       
       if (posError) throw posError;
       
+      // Both pay group AND employee must be enabled for multi-currency
+      const payGroupEnabled = position?.pay_group?.enable_multi_currency || false;
+      const employeeEnabled = profile?.enable_multi_currency_payment || false;
+      
       return {
         profile,
         position,
-        isMultiCurrencyEnabled: position?.pay_group?.enable_multi_currency || false,
+        isMultiCurrencyEnabled: payGroupEnabled && employeeEnabled,
+        payGroupMultiCurrency: payGroupEnabled,
+        employeeMultiCurrency: employeeEnabled,
         localCurrency: profile?.company?.local_currency
       };
     },
@@ -96,10 +103,16 @@ export default function EssCurrencyPreferencesPage() {
         ) : !isMultiCurrencyEnabled ? (
           <Alert>
             <Info className="h-4 w-4" />
-            <AlertTitle>Multi-Currency Not Enabled</AlertTitle>
+            <AlertTitle>Multi-Currency Not Available</AlertTitle>
             <AlertDescription>
-              Your pay group does not have multi-currency payroll enabled. 
-              All payments will be made in your company's local currency 
+              {!employeeData?.payGroupMultiCurrency ? (
+                <>Your pay group does not have multi-currency payroll enabled.</>
+              ) : !employeeData?.employeeMultiCurrency ? (
+                <>Your profile is not enabled for multi-currency payments. Please contact HR if you believe this should be enabled.</>
+              ) : (
+                <>Multi-currency payroll is not available for your account.</>
+              )}
+              {' '}All payments will be made in your company's local currency 
               ({employeeData?.localCurrency?.code} - {employeeData?.localCurrency?.name}).
             </AlertDescription>
           </Alert>
