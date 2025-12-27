@@ -30748,6 +30748,223 @@ export type Database = {
           },
         ]
       }
+      overpayment_records: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          company_id: string
+          created_at: string
+          created_by: string | null
+          currency: string
+          discovery_date: string
+          employee_id: string
+          id: string
+          linked_deduction_id: string | null
+          notes: string | null
+          original_amount: number
+          overpayment_date: string
+          priority: string
+          reason: string
+          reason_details: string | null
+          recovery_amount_per_cycle: number
+          remaining_balance: number
+          scheduled_resume_date: string | null
+          status: string
+          total_recovered: number
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          discovery_date?: string
+          employee_id: string
+          id?: string
+          linked_deduction_id?: string | null
+          notes?: string | null
+          original_amount: number
+          overpayment_date: string
+          priority?: string
+          reason: string
+          reason_details?: string | null
+          recovery_amount_per_cycle: number
+          remaining_balance: number
+          scheduled_resume_date?: string | null
+          status?: string
+          total_recovered?: number
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          discovery_date?: string
+          employee_id?: string
+          id?: string
+          linked_deduction_id?: string | null
+          notes?: string | null
+          original_amount?: number
+          overpayment_date?: string
+          priority?: string
+          reason?: string
+          reason_details?: string | null
+          recovery_amount_per_cycle?: number
+          remaining_balance?: number
+          scheduled_resume_date?: string | null
+          status?: string
+          total_recovered?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "overpayment_records_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "overpayment_records_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "overpayment_records_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "overpayment_records_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "overpayment_records_linked_deduction_id_fkey"
+            columns: ["linked_deduction_id"]
+            isOneToOne: false
+            referencedRelation: "employee_regular_deductions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      overpayment_recovery_payments: {
+        Row: {
+          amount: number
+          created_at: string
+          deduction_id: string | null
+          id: string
+          notes: string | null
+          overpayment_id: string
+          pay_period_id: string | null
+          payment_date: string
+          payment_method: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          deduction_id?: string | null
+          id?: string
+          notes?: string | null
+          overpayment_id: string
+          pay_period_id?: string | null
+          payment_date?: string
+          payment_method?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          deduction_id?: string | null
+          id?: string
+          notes?: string | null
+          overpayment_id?: string
+          pay_period_id?: string | null
+          payment_date?: string
+          payment_method?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "overpayment_recovery_payments_deduction_id_fkey"
+            columns: ["deduction_id"]
+            isOneToOne: false
+            referencedRelation: "employee_period_deductions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "overpayment_recovery_payments_overpayment_id_fkey"
+            columns: ["overpayment_id"]
+            isOneToOne: false
+            referencedRelation: "overpayment_records"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "overpayment_recovery_payments_pay_period_id_fkey"
+            columns: ["pay_period_id"]
+            isOneToOne: false
+            referencedRelation: "pay_periods"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      overpayment_status_history: {
+        Row: {
+          changed_by: string | null
+          created_at: string
+          id: string
+          new_status: string
+          notes: string | null
+          old_status: string | null
+          overpayment_id: string
+          reason: string | null
+        }
+        Insert: {
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          new_status: string
+          notes?: string | null
+          old_status?: string | null
+          overpayment_id: string
+          reason?: string | null
+        }
+        Update: {
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          new_status?: string
+          notes?: string | null
+          old_status?: string | null
+          overpayment_id?: string
+          reason?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "overpayment_status_history_changed_by_fkey"
+            columns: ["changed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "overpayment_status_history_overpayment_id_fkey"
+            columns: ["overpayment_id"]
+            isOneToOne: false
+            referencedRelation: "overpayment_records"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       overtime_requests: {
         Row: {
           actual_hours: number | null
@@ -43463,6 +43680,7 @@ export type Database = {
         | "position_employment_type"
         | "flsa_status"
         | "overtime_status"
+        | "overpayment_reason"
       message_status: "sent" | "delivered" | "read"
       validation_status: "pending" | "validated" | "rejected" | "expired"
       workflow_action:
@@ -43744,6 +43962,7 @@ export const Constants = {
         "position_employment_type",
         "flsa_status",
         "overtime_status",
+        "overpayment_reason",
       ],
       message_status: ["sent", "delivered", "read"],
       validation_status: ["pending", "validated", "rejected", "expired"],
