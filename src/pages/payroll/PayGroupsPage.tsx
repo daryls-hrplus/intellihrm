@@ -29,6 +29,7 @@ interface PayGroupFormData {
   uses_national_insurance: boolean;
   gl_configured: boolean;
   enable_multi_currency: boolean;
+  default_exchange_rate_source: string;
   start_date: string;
   end_date: string;
 }
@@ -50,6 +51,7 @@ export default function PayGroupsPage() {
     uses_national_insurance: false,
     gl_configured: false,
     enable_multi_currency: false,
+    default_exchange_rate_source: "manual",
     start_date: getTodayString(),
     end_date: "",
   });
@@ -83,6 +85,7 @@ export default function PayGroupsPage() {
         uses_national_insurance: data.uses_national_insurance,
         gl_configured: data.gl_configured,
         enable_multi_currency: data.enable_multi_currency,
+        default_exchange_rate_source: data.enable_multi_currency ? data.default_exchange_rate_source : null,
         start_date: data.start_date,
         end_date: data.end_date || null,
       };
@@ -134,6 +137,7 @@ export default function PayGroupsPage() {
       uses_national_insurance: false,
       gl_configured: false,
       enable_multi_currency: false,
+      default_exchange_rate_source: "manual",
       start_date: getTodayString(),
       end_date: "",
     });
@@ -151,6 +155,7 @@ export default function PayGroupsPage() {
       uses_national_insurance: item.uses_national_insurance || false,
       gl_configured: item.gl_configured || false,
       enable_multi_currency: item.enable_multi_currency || false,
+      default_exchange_rate_source: item.default_exchange_rate_source || "manual",
       start_date: item.start_date,
       end_date: item.end_date || "",
     });
@@ -404,6 +409,28 @@ export default function PayGroupsPage() {
                 <span className="text-xs text-muted-foreground">(Process pay elements in different currencies)</span>
               </div>
             </div>
+            {formData.enable_multi_currency && (
+              <div className="grid gap-2">
+                <Label>Default Exchange Rate Source</Label>
+                <Select
+                  value={formData.default_exchange_rate_source}
+                  onValueChange={(value) => setFormData((prev) => ({ ...prev, default_exchange_rate_source: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="manual">Manual Entry</SelectItem>
+                    <SelectItem value="central_bank">Central Bank Rates</SelectItem>
+                    <SelectItem value="market">Market Rates</SelectItem>
+                    <SelectItem value="fixed">Fixed Rate</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  Default source for exchange rates when processing payroll
+                </p>
+              </div>
+            )}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={closeDialog}>

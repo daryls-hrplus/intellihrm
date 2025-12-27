@@ -36,6 +36,7 @@ import { useCompensation, PayElement, LookupValue } from "@/hooks/useCompensatio
 import { supabase } from "@/integrations/supabase/client";
 import { useTranslation } from "react-i18next";
 import { getTodayString } from "@/utils/dateUtils";
+import { useCurrencies, Currency } from "@/hooks/useCurrencies";
 
 interface Company {
   id: string;
@@ -62,6 +63,9 @@ export default function PayElementsPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<PayElement | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  
+  // Load currencies
+  const { currencies } = useCurrencies();
 
   // Form state
   const [formCode, setFormCode] = useState("");
@@ -76,6 +80,8 @@ export default function PayElementsPage() {
   const [formDisplayOrder, setFormDisplayOrder] = useState("0");
   const [formStartDate, setFormStartDate] = useState(getTodayString());
   const [formEndDate, setFormEndDate] = useState("");
+  const [formCurrencyId, setFormCurrencyId] = useState<string>("");
+  const [formAllowCurrencyOverride, setFormAllowCurrencyOverride] = useState(false);
 
   useEffect(() => {
     loadInitialData();
@@ -126,6 +132,8 @@ export default function PayElementsPage() {
     setFormDisplayOrder("0");
     setFormStartDate(getTodayString());
     setFormEndDate("");
+    setFormCurrencyId("");
+    setFormAllowCurrencyOverride(false);
     setDialogOpen(true);
   };
 
@@ -143,6 +151,8 @@ export default function PayElementsPage() {
     setFormDisplayOrder(element.display_order.toString());
     setFormStartDate(element.start_date || getTodayString());
     setFormEndDate(element.end_date || "");
+    setFormCurrencyId((element as any).currency_id || "");
+    setFormAllowCurrencyOverride((element as any).allow_currency_override || false);
     setDialogOpen(true);
   };
 
@@ -166,6 +176,8 @@ export default function PayElementsPage() {
       display_order: parseInt(formDisplayOrder) || 0,
       start_date: formStartDate,
       end_date: formEndDate || null,
+      currency_id: formCurrencyId || null,
+      allow_currency_override: formAllowCurrencyOverride,
     };
 
     let success: boolean;
@@ -400,14 +412,35 @@ export default function PayElementsPage() {
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="displayOrder">{t("compensation.payElements.dialog.displayOrder")}</Label>
-                <Input
-                  id="displayOrder"
-                  type="number"
-                  value={formDisplayOrder}
-                  onChange={(e) => setFormDisplayOrder(e.target.value)}
-                />
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Default Currency</Label>
+                  <Select value={formCurrencyId} onValueChange={setFormCurrencyId}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Company default" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">Company Default</SelectItem>
+                      {currencies.map((c) => (
+                        <SelectItem key={c.id} value={c.id}>
+                          {c.code} - {c.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground">
+                    Currency for this pay element (leave blank for company default)
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="displayOrder">{t("compensation.payElements.dialog.displayOrder")}</Label>
+                  <Input
+                    id="displayOrder"
+                    type="number"
+                    value={formDisplayOrder}
+                    onChange={(e) => setFormDisplayOrder(e.target.value)}
+                  />
+                </div>
               </div>
 
               <div className="flex flex-wrap gap-6">
@@ -443,6 +476,16 @@ export default function PayElementsPage() {
                       onCheckedChange={setFormShowOnPayslip}
                     />
                     <Label htmlFor="showOnPayslip">{t("compensation.payElements.dialog.showOnPayslip", "Show on Payslip")}</Label>
+                  </div>
+                )}
+                {formCurrencyId && (
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      id="allowCurrencyOverride"
+                      checked={formAllowCurrencyOverride}
+                      onCheckedChange={setFormAllowCurrencyOverride}
+                    />
+                    <Label htmlFor="allowCurrencyOverride">Allow Currency Override</Label>
                   </div>
                 )}
               </div>

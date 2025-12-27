@@ -42,6 +42,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
+import { useCurrencies } from "@/hooks/useCurrencies";
 
 interface Company {
   id: string;
@@ -123,6 +124,7 @@ interface EmployeeCompensation {
   position_id: string | null;
   amount: number;
   currency: string;
+  currency_id: string | null;
   frequency: string;
   is_override: boolean;
   override_reason: string | null;
@@ -138,6 +140,7 @@ interface EmployeeCompensation {
 export default function EmployeeCompensationPage() {
   const { t } = useTranslation();
   const { user } = useAuth();
+  const { currencies } = useCurrencies();
 
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
@@ -171,6 +174,7 @@ export default function EmployeeCompensationPage() {
   const [formPayElementId, setFormPayElementId] = useState("");
   const [formAmount, setFormAmount] = useState("");
   const [formCurrency, setFormCurrency] = useState("USD");
+  const [formCurrencyId, setFormCurrencyId] = useState<string>("");
   const [formFrequency, setFormFrequency] = useState("monthly");
   const [formIsOverride, setFormIsOverride] = useState(false);
   const [formOverrideReason, setFormOverrideReason] = useState("");
@@ -514,6 +518,7 @@ export default function EmployeeCompensationPage() {
     setFormPayElementId("");
     setFormAmount("");
     setFormCurrency("USD");
+    setFormCurrencyId("");
     setFormFrequency("monthly");
     setFormIsOverride(false);
     setFormOverrideReason("");
@@ -534,6 +539,7 @@ export default function EmployeeCompensationPage() {
     setFormPayElementId(item.pay_element_id);
     setFormAmount(item.amount.toString());
     setFormCurrency(item.currency);
+    setFormCurrencyId(item.currency_id || "");
     setFormFrequency(item.frequency);
     setFormIsOverride(item.is_override);
     setFormOverrideReason(item.override_reason || "");
@@ -665,6 +671,7 @@ export default function EmployeeCompensationPage() {
       pay_element_id: formPayElementId,
       amount: parseFloat(formAmount),
       currency: formCurrency,
+      currency_id: formCurrencyId || null,
       frequency: formFrequency,
       is_override: formIsOverride,
       override_reason: formIsOverride ? formOverrideReason.trim() || null : null,
@@ -1346,16 +1353,29 @@ export default function EmployeeCompensationPage() {
                 </div>
                 <div className="space-y-2">
                   <Label>{t("compensation.employeeCompensation.currency")}</Label>
-                  <Select value={formCurrency} onValueChange={setFormCurrency}>
+                  <Select value={formCurrency} onValueChange={(val) => {
+                    setFormCurrency(val);
+                    // Find and set currency_id based on code
+                    const curr = currencies.find(c => c.code === val);
+                    setFormCurrencyId(curr?.id || "");
+                  }}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="USD">USD</SelectItem>
-                      <SelectItem value="EUR">EUR</SelectItem>
-                      <SelectItem value="GBP">GBP</SelectItem>
-                      <SelectItem value="CAD">CAD</SelectItem>
-                      <SelectItem value="AUD">AUD</SelectItem>
+                      {currencies.length > 0 ? currencies.map((c) => (
+                        <SelectItem key={c.id} value={c.code}>
+                          {c.code} - {c.name}
+                        </SelectItem>
+                      )) : (
+                        <>
+                          <SelectItem value="USD">USD</SelectItem>
+                          <SelectItem value="EUR">EUR</SelectItem>
+                          <SelectItem value="GBP">GBP</SelectItem>
+                          <SelectItem value="CAD">CAD</SelectItem>
+                          <SelectItem value="AUD">AUD</SelectItem>
+                        </>
+                      )}
                     </SelectContent>
                   </Select>
                 </div>
