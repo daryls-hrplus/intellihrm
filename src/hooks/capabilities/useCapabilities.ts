@@ -3,11 +3,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import type { Database } from "@/integrations/supabase/types";
 
-type CapabilityRow = Database['public']['Tables']['capabilities']['Row'];
-type CapabilityInsert = Database['public']['Tables']['capabilities']['Insert'];
-type CapabilityUpdate = Database['public']['Tables']['capabilities']['Update'];
-type EvidenceRow = Database['public']['Tables']['capability_evidence']['Row'];
-type EvidenceInsert = Database['public']['Tables']['capability_evidence']['Insert'];
+type CapabilityRow = Database['public']['Tables']['skills_competencies']['Row'];
+type CapabilityInsert = Database['public']['Tables']['skills_competencies']['Insert'];
+type CapabilityUpdate = Database['public']['Tables']['skills_competencies']['Update'];
+type EvidenceRow = Database['public']['Tables']['competency_evidence']['Row'];
+type EvidenceInsert = Database['public']['Tables']['competency_evidence']['Insert'];
 
 interface FetchCapabilitiesFilters {
   companyId?: string;
@@ -24,7 +24,7 @@ export function useCapabilities() {
   const fetchCapabilities = useCallback(async (filters?: FetchCapabilitiesFilters) => {
     setIsLoading(true);
     try {
-      let query = supabase.from("capabilities").select("*");
+      let query = supabase.from("skills_competencies").select("*");
 
       if (filters?.companyId) {
         query = query.or(`company_id.eq.${filters.companyId},company_id.is.null`);
@@ -58,7 +58,7 @@ export function useCapabilities() {
   const createCapability = useCallback(async (capability: CapabilityInsert) => {
     try {
       const { data, error } = await supabase
-        .from("capabilities")
+        .from("skills_competencies")
         .insert(capability)
         .select()
         .single();
@@ -75,7 +75,7 @@ export function useCapabilities() {
   const updateCapability = useCallback(async (id: string, updates: CapabilityUpdate) => {
     try {
       const { data, error } = await supabase
-        .from("capabilities")
+        .from("skills_competencies")
         .update({ ...updates, updated_at: new Date().toISOString() })
         .eq("id", id)
         .select()
@@ -108,10 +108,10 @@ export function useEmployeeCapabilities(employeeId?: string) {
     setIsLoading(true);
     try {
       const { data, error } = await supabase
-        .from("capability_evidence")
+        .from("competency_evidence")
         .select(`
           *,
-          capability:capabilities(*)
+          capability:skills_competencies(*)
         `)
         .eq("employee_id", employeeId)
         .order("effective_from", { ascending: false });
@@ -131,7 +131,7 @@ export function useEmployeeCapabilities(employeeId?: string) {
   const addEvidence = useCallback(async (newEvidence: EvidenceInsert) => {
     try {
       const { data, error } = await supabase
-        .from("capability_evidence")
+        .from("competency_evidence")
         .insert(newEvidence)
         .select()
         .single();

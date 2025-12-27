@@ -6,12 +6,12 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Plus, X, Sparkles, Target, CheckCircle2 } from "lucide-react";
+import { Plus, Sparkles, Target, CheckCircle2 } from "lucide-react";
 import { useCapabilities } from "@/hooks/capabilities/useCapabilities";
 import { useGoalCapabilityIntegration } from "@/hooks/capabilities/useGoalCapabilityIntegration";
 import type { Database } from "@/integrations/supabase/types";
 
-type CapabilityRow = Database['public']['Tables']['capabilities']['Row'];
+type CapabilityRow = Database['public']['Tables']['skills_competencies']['Row'];
 
 interface GoalCapabilitySelectorProps {
   goalId: string;

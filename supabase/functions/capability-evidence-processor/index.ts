@@ -77,10 +77,10 @@ async function calculateAggregateProficiency(employeeId: string, capabilityId: s
 
   // Fetch all evidence for this employee and capability
   const { data: evidence, error } = await supabase
-    .from("capability_evidence")
+    .from("competency_evidence")
     .select("*")
     .eq("employee_id", employeeId)
-    .eq("capability_id", capabilityId)
+    .eq("competency_id", capabilityId)
     .neq("validation_status", "rejected")
     .order("effective_from", { ascending: false });
 
@@ -150,16 +150,16 @@ async function applyRecencyDecay(companyId: string, supabase: any) {
 
   // Find old evidence that needs decay applied
   const { data: oldEvidence, error } = await supabase
-    .from("capability_evidence")
+    .from("competency_evidence")
     .select(`
       id,
       confidence_score,
       effective_from,
-      capability_id,
+      competency_id,
       employee_id,
-      capabilities!inner(company_id)
+      skills_competencies!inner(company_id)
     `)
-    .eq("capabilities.company_id", companyId)
+    .eq("skills_competencies.company_id", companyId)
     .lt("effective_from", twoYearsAgo.toISOString())
     .gt("confidence_score", 0.3);
 
@@ -177,7 +177,7 @@ async function applyRecencyDecay(companyId: string, supabase: any) {
 
     if (newConfidence < ev.confidence_score) {
       const { error: updateError } = await supabase
-        .from("capability_evidence")
+        .from("competency_evidence")
         .update({ confidence_score: newConfidence, updated_at: now.toISOString() })
         .eq("id", ev.id);
 

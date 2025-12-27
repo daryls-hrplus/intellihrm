@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import type { Database } from "@/integrations/supabase/types";
 
-type CapabilityRow = Database['public']['Tables']['capabilities']['Row'];
+type CapabilityRow = Database['public']['Tables']['skills_competencies']['Row'];
 type GoalSkillRequirementRow = Database['public']['Tables']['goal_skill_requirements']['Row'];
 
 interface GoalCapabilityRequirement extends GoalSkillRequirementRow {
@@ -32,7 +32,7 @@ export function useGoalCapabilityIntegration() {
         .from("goal_skill_requirements")
         .select(`
           *,
-          capability:capabilities(*)
+          capability:skills_competencies(*)
         `)
         .eq("goal_id", goalId);
 
@@ -83,7 +83,7 @@ export function useGoalCapabilityIntegration() {
     try {
       // First get the capability details
       const { data: capability, error: capError } = await supabase
-        .from("capabilities")
+        .from("skills_competencies")
         .select("name, category")
         .eq("id", capabilityId)
         .single();
@@ -128,7 +128,7 @@ export function useGoalCapabilityIntegration() {
         .from("goal_skill_requirements")
         .select(`
           *,
-          capability:capabilities(*)
+          capability:skills_competencies(*)
         `)
         .eq("goal_id", goalId)
         .not("capability_id", "is", null);
@@ -142,10 +142,10 @@ export function useGoalCapabilityIntegration() {
         .map(r => r.capability_id as string);
 
       const { data: evidence, error: evError } = await supabase
-        .from("capability_evidence")
+        .from("competency_evidence")
         .select("*")
         .eq("employee_id", employeeId)
-        .in("capability_id", capabilityIds)
+        .in("competency_id", capabilityIds)
         .eq("validation_status", "validated")
         .order("effective_from", { ascending: false });
 
@@ -167,7 +167,7 @@ export function useGoalCapabilityIntegration() {
         const requiredLevel = proficiencyMap[req.proficiency_level?.toLowerCase() || "intermediate"] || 2;
         
         // Find latest evidence for this capability
-        const employeeEvidence = evidence?.find(e => e.capability_id === req.capability_id);
+        const employeeEvidence = evidence?.find(e => e.competency_id === req.capability_id);
         const currentLevel = employeeEvidence?.proficiency_level || 0;
         
         const gap = requiredLevel - currentLevel;

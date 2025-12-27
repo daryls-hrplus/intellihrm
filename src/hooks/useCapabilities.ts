@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import type { Database } from "@/integrations/supabase/types";
 
 export type CapabilityType = "SKILL" | "COMPETENCY";
 export type CapabilityCategory = "technical" | "functional" | "behavioral" | "leadership" | "core";
@@ -115,7 +116,7 @@ export function useCapabilities() {
     setLoading(true);
     try {
       let query = supabase
-        .from("capabilities")
+        .from("skills_competencies")
         .select(`
           *,
           proficiency_scales(*),
@@ -148,7 +149,7 @@ export function useCapabilities() {
         return [];
       }
 
-      const transformed = (data || []).map(cap => ({
+      const transformed = (data || []).map((cap: any) => ({
         ...cap,
         skill_attributes: Array.isArray(cap.skill_attributes) ? cap.skill_attributes[0] : cap.skill_attributes,
         competency_attributes: Array.isArray(cap.competency_attributes) ? cap.competency_attributes[0] : cap.competency_attributes,
@@ -170,7 +171,7 @@ export function useCapabilities() {
       const { skill_attributes, competency_attributes, ...capabilityData } = input;
 
       const { data: capability, error } = await supabase
-        .from("capabilities")
+        .from("skills_competencies")
         .insert([capabilityData as any])
         .select()
         .single();
@@ -225,7 +226,7 @@ export function useCapabilities() {
       const { skill_attributes, competency_attributes, ...capabilityData } = input;
 
       const { data: capability, error } = await supabase
-        .from("capabilities")
+        .from("skills_competencies")
         .update(capabilityData as any)
         .eq("id", id)
         .select()
@@ -276,7 +277,7 @@ export function useCapabilities() {
   const deleteCapability = useCallback(async (id: string): Promise<boolean> => {
     try {
       const { error } = await supabase
-        .from("capabilities")
+        .from("skills_competencies")
         .delete()
         .eq("id", id);
 
@@ -301,7 +302,7 @@ export function useCapabilities() {
   ): Promise<boolean> => {
     try {
       const { error } = await supabase
-        .from("capabilities")
+        .from("skills_competencies")
         .update({ status })
         .eq("id", id);
 
