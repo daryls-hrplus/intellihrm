@@ -616,7 +616,7 @@ export default function ShiftManagementPage() {
   };
 
   const breadcrumbItems = [
-    { label: t("nav.timeAttendance"), href: "/time-attendance" },
+    { label: "Time & Attendance", href: "/time-attendance" },
     { label: t("timeAttendance.modules.shifts.title") }
   ];
 
