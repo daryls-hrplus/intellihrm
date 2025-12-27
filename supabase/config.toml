@@ -215,3 +215,6 @@ verify_jwt = false
 
 [functions.competency-evidence-processor]
 verify_jwt = false
+
+[functions.esco-skills-import]
+verify_jwt = false

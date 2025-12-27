@@ -23566,6 +23566,54 @@ export type Database = {
           },
         ]
       }
+      industry_occupation_mappings: {
+        Row: {
+          created_at: string
+          id: string
+          industry_code: string
+          industry_icon: string | null
+          industry_name: string
+          industry_name_en: string | null
+          is_core_occupation: boolean | null
+          occupation_label: string
+          occupation_label_en: string | null
+          occupation_uri: string
+          priority: number | null
+          skill_count_estimate: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          industry_code: string
+          industry_icon?: string | null
+          industry_name: string
+          industry_name_en?: string | null
+          is_core_occupation?: boolean | null
+          occupation_label: string
+          occupation_label_en?: string | null
+          occupation_uri: string
+          priority?: number | null
+          skill_count_estimate?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          industry_code?: string
+          industry_icon?: string | null
+          industry_name?: string
+          industry_name_en?: string | null
+          is_core_occupation?: boolean | null
+          occupation_label?: string
+          occupation_label_en?: string | null
+          occupation_uri?: string
+          priority?: number | null
+          skill_count_estimate?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       institutions: {
         Row: {
           accreditation_body: string | null
