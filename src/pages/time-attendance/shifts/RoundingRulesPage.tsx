@@ -273,12 +273,12 @@ export default function RoundingRulesPage() {
                   </div>
                   <div className="space-y-2">
                     <Label>{t("timeAttendance.shifts.applyToShift")}</Label>
-                    <Select value={form.shift_id} onValueChange={(v) => setForm({...form, shift_id: v})}>
+                    <Select value={form.shift_id || "_all"} onValueChange={(v) => setForm({...form, shift_id: v === "_all" ? "" : v})}>
                       <SelectTrigger>
                         <SelectValue placeholder={t("timeAttendance.shifts.allShifts")} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">{t("timeAttendance.shifts.allShifts")}</SelectItem>
+                        <SelectItem value="_all">{t("timeAttendance.shifts.allShifts")}</SelectItem>
                         {shifts.map((shift) => (
                           <SelectItem key={shift.id} value={shift.id}>{shift.name}</SelectItem>
                         ))}
