@@ -471,7 +471,7 @@ serve(async (req) => {
       }
 
       case "bulk_import_occupation": {
-        const { occupationUri, companyId, userId, language = "en", sourceOccupation } = params;
+        const { occupationUri, occupationLabel, companyId, userId, language = "en", sourceOccupation } = params;
         
         // Check guardrails first
         const guardrailCheck = await checkGuardrails(supabaseClient, companyId, 100);
@@ -482,29 +482,85 @@ serve(async (req) => {
           );
         }
         
-        // Get skills for this occupation from ESCO API
-        const skills = await getOccupationSkills(occupationUri, language);
+        let actualOccupationUri = occupationUri;
+        let actualOccupationLabel = occupationLabel || sourceOccupation?.label || "";
         
-        if (skills.length === 0) {
-          return new Response(
-            JSON.stringify({ imported: 0, skipped: 0, errors: ["No skills found for occupation"] }),
-            { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        // If the URI doesn't work, try searching for the occupation by name
+        try {
+          const skills = await getOccupationSkills(actualOccupationUri, language);
+          
+          if (skills.length === 0) {
+            return new Response(
+              JSON.stringify({ imported: 0, skipped: 0, errors: ["No skills found for occupation"] }),
+              { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+            );
+          }
+          
+          // Import the skills
+          const result = await importSkills(
+            supabaseClient,
+            skills,
+            companyId,
+            userId,
+            language,
+            sourceOccupation || { uri: actualOccupationUri, label: actualOccupationLabel }
           );
+          
+          return new Response(JSON.stringify(result), {
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        } catch (err) {
+          // If direct URI fails, try searching by occupation name
+          console.log(`[ESCO Import] Direct URI failed, searching by name: ${actualOccupationLabel}`);
+          
+          if (!actualOccupationLabel) {
+            return new Response(
+              JSON.stringify({ error: "Occupation not found in ESCO API", imported: 0, skipped: 0, errors: ["Occupation URI not valid and no label provided for search"] }),
+              { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+            );
+          }
+          
+          // Search for the occupation by name
+          const searchResult = await searchOccupations(actualOccupationLabel, language, 5, 0);
+          
+          if (!searchResult.occupations || searchResult.occupations.length === 0) {
+            return new Response(
+              JSON.stringify({ error: `No occupation found matching "${actualOccupationLabel}"`, imported: 0, skipped: 0, errors: [`Occupation "${actualOccupationLabel}" not found in ESCO`] }),
+              { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+            );
+          }
+          
+          // Use the first (best match) result
+          const matchedOccupation = searchResult.occupations[0];
+          console.log(`[ESCO Import] Found occupation: ${matchedOccupation.title} (${matchedOccupation.uri})`);
+          
+          // Now get skills for this occupation
+          const skills = await getOccupationSkills(matchedOccupation.uri, language);
+          
+          if (skills.length === 0) {
+            return new Response(
+              JSON.stringify({ imported: 0, skipped: 0, errors: [`No skills found for occupation "${matchedOccupation.title}"`] }),
+              { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+            );
+          }
+          
+          // Import the skills
+          const result = await importSkills(
+            supabaseClient,
+            skills,
+            companyId,
+            userId,
+            language,
+            { uri: matchedOccupation.uri, label: matchedOccupation.title }
+          );
+          
+          return new Response(JSON.stringify({
+            ...result,
+            matchedOccupation: { uri: matchedOccupation.uri, title: matchedOccupation.title }
+          }), {
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
         }
-        
-        // Import the skills
-        const result = await importSkills(
-          supabaseClient,
-          skills,
-          companyId,
-          userId,
-          language,
-          sourceOccupation
-        );
-        
-        return new Response(JSON.stringify(result), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
       }
 
       case "get_industry_occupations": {

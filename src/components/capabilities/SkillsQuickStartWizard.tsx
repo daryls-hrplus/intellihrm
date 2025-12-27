@@ -111,12 +111,14 @@ export function SkillsQuickStartWizard({
 
       try {
         // Call edge function to bulk import
+        // Pass occupationLabel for fallback search if URI doesn't exist in ESCO
         const { data, error } = await supabase.functions.invoke(
           "esco-skills-import",
           {
             body: {
               action: "bulk_import_occupation",
               occupationUri,
+              occupationLabel, // Used for fallback search by name
               companyId,
               userId: user.id,
               language: "en",
