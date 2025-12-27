@@ -28,6 +28,7 @@ import {
   Info,
   MessageSquare,
   Hash,
+  ArrowLeft,
 } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
@@ -35,12 +36,16 @@ interface ChatHeaderProps {
   channel: Channel;
   onStartVideoCall: () => void;
   onLeaveChannel?: () => void;
+  onBack?: () => void;
+  showBackButton?: boolean;
 }
 
 export const ChatHeader = ({
   channel,
   onStartVideoCall,
   onLeaveChannel,
+  onBack,
+  showBackButton = false,
 }: ChatHeaderProps) => {
   const { user } = useAuth();
 
@@ -82,6 +87,11 @@ export const ChatHeader = ({
   return (
     <div className="flex items-center justify-between p-4 border-b bg-card">
       <div className="flex items-center gap-3">
+        {showBackButton && onBack && (
+          <Button variant="ghost" size="icon" onClick={onBack}>
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+        )}
         <Avatar className="h-10 w-10">
           <AvatarImage src={getChannelAvatar() || undefined} />
           <AvatarFallback className="bg-primary/10 text-primary">
