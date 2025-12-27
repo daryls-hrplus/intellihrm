@@ -36282,6 +36282,7 @@ export type Database = {
         Row: {
           approved_at: string | null
           approved_by: string | null
+          auto_include: boolean
           company_id: string
           config_name: string
           created_at: string
@@ -36292,11 +36293,14 @@ export type Database = {
           id: string
           pay_group_id: string
           status: string
+          target_pay_period_id: string | null
+          target_run_types: string[] | null
           updated_at: string
         }
         Insert: {
           approved_at?: string | null
           approved_by?: string | null
+          auto_include?: boolean
           company_id: string
           config_name: string
           created_at?: string
@@ -36307,11 +36311,14 @@ export type Database = {
           id?: string
           pay_group_id: string
           status?: string
+          target_pay_period_id?: string | null
+          target_run_types?: string[] | null
           updated_at?: string
         }
         Update: {
           approved_at?: string | null
           approved_by?: string | null
+          auto_include?: boolean
           company_id?: string
           config_name?: string
           created_at?: string
@@ -36322,6 +36329,8 @@ export type Database = {
           id?: string
           pay_group_id?: string
           status?: string
+          target_pay_period_id?: string | null
+          target_run_types?: string[] | null
           updated_at?: string
         }
         Relationships: [
@@ -36351,6 +36360,13 @@ export type Database = {
             columns: ["pay_group_id"]
             isOneToOne: false
             referencedRelation: "pay_groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "retroactive_pay_configs_target_pay_period_id_fkey"
+            columns: ["target_pay_period_id"]
+            isOneToOne: false
+            referencedRelation: "pay_periods"
             referencedColumns: ["id"]
           },
         ]

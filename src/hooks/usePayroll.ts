@@ -648,6 +648,15 @@ export function usePayroll() {
     try {
       const calculationStartedAt = new Date().toISOString();
       
+      // Get run info including run_type for retro targeting
+      const { data: runInfo } = await supabase
+        .from("payroll_runs")
+        .select("run_type")
+        .eq("id", payrollRunId)
+        .single();
+      
+      const runType = runInfo?.run_type || 'regular';
+      
       // Update run status with start time
       await supabase.from("payroll_runs").update({ 
         status: 'calculating',
@@ -1142,7 +1151,10 @@ export function usePayroll() {
         
         if (payGroupId) {
           const { fetchEmployeePendingRetro, markRetroAsProcessed } = await import("@/utils/payroll/retroactivePayService");
-          const pendingRetro = await fetchEmployeePendingRetro(emp.employee_id, payGroupId);
+          const pendingRetro = await fetchEmployeePendingRetro(emp.employee_id, payGroupId, {
+            runType: runType,
+            payPeriodId: payPeriodId,
+          });
           
           if (pendingRetro.total > 0) {
             retroactivePayTotal = pendingRetro.total;

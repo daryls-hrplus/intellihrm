@@ -10,6 +10,9 @@ export interface RetroactivePayConfig {
   effective_start_date: string;
   effective_end_date: string;
   status: string;
+  target_run_types: string[] | null;
+  target_pay_period_id: string | null;
+  auto_include: boolean;
   approved_by: string | null;
   approved_at: string | null;
   created_by: string | null;
@@ -19,6 +22,12 @@ export interface RetroactivePayConfig {
     id: string;
     name: string;
     code: string;
+  };
+  target_pay_period?: {
+    id: string;
+    period_number: string;
+    period_start: string;
+    period_end: string;
   };
 }
 
@@ -79,6 +88,9 @@ export interface RetroactivePayConfigInput {
   effective_start_date: string;
   effective_end_date: string;
   status?: string;
+  target_run_types?: string[];
+  target_pay_period_id?: string;
+  auto_include?: boolean;
 }
 
 export interface RetroactivePayConfigItemInput {
