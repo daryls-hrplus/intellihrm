@@ -2560,6 +2560,7 @@
         "pastFilledShifts": "Past / Filled Shifts",
         "unknownShift": "Unknown Shift"
       },
+      "templatesLabel": "Templates",
       "templates": {
         "title": "Shift Templates",
         "weeklyTemplate": "Create reusable weekly/rotation templates",
