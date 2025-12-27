@@ -977,7 +977,7 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId, payGroupI
       });
 
       const totalAllowances = allowanceList.reduce((sum, a) => sum + a.amount, 0);
-      const totalGross = regularPay + overtimePay + totalAdditionalComp + totalAllowances;
+      const totalGross = overtimePay + totalAdditionalComp + totalAllowances;
 
       // Calculate deductions (convert to local for totals, preserve original for display)
       const pretaxDeductions = (deductions || [])
