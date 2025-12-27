@@ -18,7 +18,7 @@ import { usePayslipTemplates, PayslipTemplate } from "@/hooks/usePayslipTemplate
 import { PayslipDocument } from "@/components/payroll/PayslipDocument";
 import { BulkPayslipDistribution } from "@/components/payroll/BulkPayslipDistribution";
 import { ExchangeRateSelectionDialog } from "@/components/payroll/ExchangeRateSelectionDialog";
-import { usePayGroupMultiCurrency } from "@/hooks/useMultiCurrencyPayroll";
+import { usePayGroupMultiCurrency, usePayrollRunExchangeRates, calculateNetPaySplit, EmployeeCurrencyPreference } from "@/hooks/useMultiCurrencyPayroll";
 import { supabase } from "@/integrations/supabase/client";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/contexts/AuthContext";
@@ -52,6 +52,166 @@ interface ExtendedPayrollRun extends PayrollRun {
   recalculation_requested_by?: string | null;
   recalculation_approved_by?: string | null;
   recalculation_approved_at?: string | null;
+}
+
+// Net Pay component with currency preference split
+function NetPayWithCurrencySplit({
+  selectedEmployee,
+  localCurrencyCode,
+  companyLocalCurrencyId,
+  currencyCodeMap,
+  expandedRunId,
+  selectedCompanyId,
+  t,
+  formatCurrency,
+}: {
+  selectedEmployee: EmployeePayroll;
+  localCurrencyCode: string;
+  companyLocalCurrencyId: string | null;
+  currencyCodeMap: Map<string, string>;
+  expandedRunId: string | null;
+  selectedCompanyId: string;
+  t: any;
+  formatCurrency: (amount: number, currency?: string) => string;
+}) {
+  const [currencyPreference, setCurrencyPreference] = useState<EmployeeCurrencyPreference | null>(null);
+  const [isLoadingPreference, setIsLoadingPreference] = useState(false);
+  
+  // Fetch exchange rates for this payroll run
+  const { data: payrollExchangeRates = [] } = usePayrollRunExchangeRates(expandedRunId || undefined);
+  
+  // Fetch employee currency preference
+  useEffect(() => {
+    const loadPreference = async () => {
+      if (!selectedEmployee?.employee_id || !selectedCompanyId) return;
+      
+      setIsLoadingPreference(true);
+      try {
+        const { data, error } = await supabase
+          .from("employee_currency_preferences")
+          .select(`
+            *,
+            primary_currency:currencies!employee_currency_preferences_primary_currency_id_fkey(*),
+            secondary_currency:currencies!employee_currency_preferences_secondary_currency_id_fkey(*)
+          `)
+          .eq("employee_id", selectedEmployee.employee_id)
+          .eq("company_id", selectedCompanyId)
+          .order("effective_date", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        
+        if (!error && data) {
+          setCurrencyPreference(data as EmployeeCurrencyPreference);
+        }
+      } catch (err) {
+        console.error("Failed to load currency preference:", err);
+      } finally {
+        setIsLoadingPreference(false);
+      }
+    };
+    
+    loadPreference();
+  }, [selectedEmployee?.employee_id, selectedCompanyId]);
+  
+  // Build exchange rates map for calculation
+  const exchangeRatesMap = new Map<string, number>();
+  payrollExchangeRates.forEach(r => {
+    exchangeRatesMap.set(`${r.from_currency_id}_${r.to_currency_id}`, r.exchange_rate);
+    // Also add inverse for lookups
+    if (r.exchange_rate > 0) {
+      exchangeRatesMap.set(`${r.to_currency_id}_${r.from_currency_id}`, 1 / r.exchange_rate);
+    }
+  });
+  
+  // Calculate the net pay split based on employee preferences
+  const netPaySplits = currencyPreference && companyLocalCurrencyId
+    ? calculateNetPaySplit(
+        selectedEmployee.net_pay,
+        companyLocalCurrencyId,
+        currencyPreference,
+        exchangeRatesMap
+      )
+    : null;
+  
+  // Get currency code by ID
+  const getCurrencyCode = (currencyId: string) => {
+    return currencyCodeMap.get(currencyId) || 'USD';
+  };
+
+  return (
+    <div className="bg-success/10 rounded-lg p-4">
+      <div className="flex justify-between items-center mb-3">
+        <span className="font-semibold text-lg">{t("payroll.processing.netPay")}</span>
+        <span className="font-bold text-2xl text-success">{formatCurrency(selectedEmployee.net_pay, localCurrencyCode)}</span>
+      </div>
+      
+      {/* Payment Distribution (based on employee preference) */}
+      {netPaySplits && netPaySplits.length > 1 && (
+        <div className="border-t border-success/30 pt-3 space-y-2">
+          <p className="text-xs text-muted-foreground uppercase flex items-center gap-1">
+            <Globe className="h-3 w-3" />
+            {t("payroll.processing.paymentDistribution", "Payment Distribution")}
+          </p>
+          
+          {netPaySplits.map((split, idx) => {
+            const currencyCode = split.currency?.code || getCurrencyCode(split.currency_id);
+            const isLocalCurrency = split.currency_id === companyLocalCurrencyId;
+            
+            return (
+              <div key={idx} className="flex justify-between text-sm">
+                <span className="text-muted-foreground">
+                  {currencyCode}
+                  {split.is_primary && <span className="ml-1 text-xs">(Primary)</span>}
+                  {!split.is_primary && currencyPreference?.secondary_currency_percentage && (
+                    <span className="ml-1 text-xs">({currencyPreference.secondary_currency_percentage}%)</span>
+                  )}
+                </span>
+                <div className="text-right">
+                  {!isLocalCurrency && split.exchange_rate_used && split.exchange_rate_used !== 1 && (
+                    <span className="font-mono text-xs text-muted-foreground mr-2">
+                      @ {split.exchange_rate_used.toFixed(4)}
+                    </span>
+                  )}
+                  <span className="font-mono font-medium text-success">
+                    {formatCurrency(split.amount, currencyCode)}
+                  </span>
+                  {!isLocalCurrency && split.local_currency_equivalent && (
+                    <div className="text-xs text-muted-foreground">
+                      ({formatCurrency(split.local_currency_equivalent, localCurrencyCode)} {localCurrencyCode})
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+      
+      {/* Show loading state */}
+      {isLoadingPreference && (
+        <div className="border-t border-success/30 pt-3">
+          <p className="text-xs text-muted-foreground">Loading currency preferences...</p>
+        </div>
+      )}
+      
+      {/* Show if no multi-currency preference but has foreign currency inputs */}
+      {!netPaySplits && !isLoadingPreference && (() => {
+        const calcDetails = selectedEmployee.calculation_details as any;
+        const earnings = calcDetails?.earnings || [];
+        const hasConversions = earnings.some((e: any) => e.original_currency_id && e.original_amount !== undefined);
+        
+        if (!hasConversions) return null;
+        
+        return (
+          <div className="border-t border-success/30 pt-3">
+            <p className="text-xs text-muted-foreground">
+              {t("payroll.processing.allPaidInLocal", "Entire net pay will be paid in")} {localCurrencyCode}
+            </p>
+          </div>
+        );
+      })()}
+    </div>
+  );
 }
 
 export default function PayrollProcessingPage() {
@@ -1460,95 +1620,16 @@ export default function PayrollProcessingPage() {
                 </div>
 
                 {/* Net Pay */}
-                <div className="bg-success/10 rounded-lg p-4">
-                  <div className="flex justify-between items-center mb-3">
-                    <span className="font-semibold text-lg">{t("payroll.processing.netPay")}</span>
-                    <span className="font-bold text-2xl text-success">{formatCurrency(selectedEmployee.net_pay, localCurrencyCode)}</span>
-                  </div>
-                  
-                  {/* Currency Breakdown */}
-                  {(() => {
-                    const calcDetails = selectedEmployee.calculation_details as any;
-                    const earnings = calcDetails?.earnings || [];
-                    const allowances = calcDetails?.allowances || [];
-                    const periodDeductions = calcDetails?.period_deductions || [];
-                    
-                    // Calculate original currency totals for earnings
-                    const currencyTotals = new Map<string, { originalAmount: number; localAmount: number; currencyCode: string }>();
-                    
-                    // Process earnings
-                    earnings.forEach((e: any) => {
-                      if (e.original_currency_id && e.original_amount !== undefined) {
-                        const currencyCode = currencyCodeMap.get(e.original_currency_id) || 'USD';
-                        const existing = currencyTotals.get(currencyCode) || { originalAmount: 0, localAmount: 0, currencyCode };
-                        existing.originalAmount += e.original_amount;
-                        existing.localAmount += e.amount;
-                        currencyTotals.set(currencyCode, existing);
-                      }
-                    });
-                    
-                    // Process allowances
-                    allowances.forEach((a: any) => {
-                      if (a.original_currency_id && a.original_amount !== undefined) {
-                        const currencyCode = a.original_currency || currencyCodeMap.get(a.original_currency_id) || 'USD';
-                        const existing = currencyTotals.get(currencyCode) || { originalAmount: 0, localAmount: 0, currencyCode };
-                        existing.originalAmount += a.original_amount;
-                        existing.localAmount += a.amount;
-                        currencyTotals.set(currencyCode, existing);
-                      }
-                    });
-                    
-                    // Process deductions (subtract from totals)
-                    periodDeductions.forEach((d: any) => {
-                      if (d.original_currency_id && d.original_amount !== undefined) {
-                        const currencyCode = d.original_currency || currencyCodeMap.get(d.original_currency_id) || 'USD';
-                        const existing = currencyTotals.get(currencyCode) || { originalAmount: 0, localAmount: 0, currencyCode };
-                        existing.originalAmount -= d.original_amount;
-                        existing.localAmount -= d.amount;
-                        currencyTotals.set(currencyCode, existing);
-                      }
-                    });
-                    
-                    // Calculate amount in local currency (TTD) that wasn't converted
-                    const totalConvertedLocal = Array.from(currencyTotals.values()).reduce((sum, t) => sum + t.localAmount, 0);
-                    const localOnlyAmount = selectedEmployee.net_pay - totalConvertedLocal;
-                    
-                    if (currencyTotals.size === 0) {
-                      return null; // No foreign currencies, don't show breakdown
-                    }
-                    
-                    return (
-                      <div className="border-t border-success/30 pt-3 space-y-2">
-                        <p className="text-xs text-muted-foreground uppercase">{t("payroll.processing.currencyBreakdown", "Currency Breakdown")}</p>
-                        
-                        {/* Local currency portion (not converted) */}
-                        {Math.abs(localOnlyAmount) > 0.01 && (
-                          <div className="flex justify-between text-sm">
-                            <span className="text-muted-foreground">
-                              {localCurrencyCode} {t("payroll.processing.localPortion", "(local)")}
-                            </span>
-                            <span className="font-mono">{formatCurrency(localOnlyAmount, localCurrencyCode)}</span>
-                          </div>
-                        )}
-                        
-                        {/* Foreign currency portions */}
-                        {Array.from(currencyTotals.entries()).map(([code, totals]) => (
-                          <div key={code} className="flex justify-between text-sm">
-                            <span className="text-muted-foreground">
-                              {code} → {localCurrencyCode}
-                            </span>
-                            <div className="text-right">
-                              <span className="font-mono text-xs text-muted-foreground mr-2">
-                                ({formatCurrency(totals.originalAmount, code)})
-                              </span>
-                              <span className="font-mono">{formatCurrency(totals.localAmount, localCurrencyCode)}</span>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    );
-                  })()}
-                </div>
+                <NetPayWithCurrencySplit 
+                  selectedEmployee={selectedEmployee}
+                  localCurrencyCode={localCurrencyCode}
+                  companyLocalCurrencyId={companyLocalCurrencyId}
+                  currencyCodeMap={currencyCodeMap}
+                  expandedRunId={expandedRunId}
+                  selectedCompanyId={selectedCompanyId}
+                  t={t}
+                  formatCurrency={formatCurrency}
+                />
 
                 {/* Employer Contributions */}
                 {((selectedEmployee.employer_taxes || 0) > 0 || (selectedEmployee.employer_benefits || 0) > 0) && (
