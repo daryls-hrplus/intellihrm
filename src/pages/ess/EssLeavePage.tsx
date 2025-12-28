@@ -512,33 +512,25 @@ export default function EssLeavePage() {
                             <span className="text-xs text-muted-foreground">Current Balance</span>
                           </div>
                           
-                          {/* Pending and Booked indicators */}
-                          {(leaveStatus.pending > 0 || leaveStatus.booked > 0) && (
-                            <div className="flex flex-wrap gap-2">
-                              {leaveStatus.booked > 0 && (
-                                <Badge variant="secondary" className="text-xs">
-                                  <CalendarClock className="h-3 w-3 mr-1" />
-                                  {leaveStatus.booked} booked
-                                </Badge>
-                              )}
-                              {leaveStatus.pending > 0 && (
-                                <Badge variant="outline" className="text-xs text-amber-600 border-amber-300">
-                                  <Clock className="h-3 w-3 mr-1" />
-                                  {leaveStatus.pending} pending
-                                </Badge>
-                              )}
-                            </div>
-                          )}
+                          {/* Booked and Pending indicators - always show */}
+                          <div className="flex flex-wrap gap-2">
+                            <Badge variant="secondary" className="text-xs">
+                              <CalendarClock className="h-3 w-3 mr-1" />
+                              {leaveStatus.booked} booked
+                            </Badge>
+                            <Badge variant="outline" className="text-xs text-amber-600 border-amber-300">
+                              <Clock className="h-3 w-3 mr-1" />
+                              {leaveStatus.pending} pending
+                            </Badge>
+                          </div>
                           
-                          {/* Available after commitments */}
-                          {(leaveStatus.pending > 0 || leaveStatus.booked > 0) && (
-                            <div className="pt-2 border-t">
-                              <div className="flex justify-between items-center">
-                                <span className="text-xs text-muted-foreground">Available</span>
-                                <span className="font-semibold text-foreground">{availableBalance}</span>
-                              </div>
+                          {/* Available after commitments - always show */}
+                          <div className="pt-2 border-t">
+                            <div className="flex justify-between items-center">
+                              <span className="text-xs text-muted-foreground">Available</span>
+                              <span className="font-semibold text-primary">{availableBalance}</span>
                             </div>
-                          )}
+                          </div>
                           
                           <div className="grid grid-cols-2 gap-2 text-sm text-muted-foreground pt-2 border-t">
                             <div>
