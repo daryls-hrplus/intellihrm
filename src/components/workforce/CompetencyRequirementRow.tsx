@@ -318,9 +318,6 @@ export function CompetencyRequirementRow({
                     <div className="flex items-center gap-2">
                       <Wrench className="h-3.5 w-3.5 text-blue-500" />
                       <span className="text-sm">{skill.skill?.name}</span>
-                      <span className="text-xs text-muted-foreground">
-                        ({skill.skill?.code})
-                      </span>
                       <Badge variant="outline" className="text-xs bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 border-blue-200 dark:border-blue-800">
                         Skill
                       </Badge>
