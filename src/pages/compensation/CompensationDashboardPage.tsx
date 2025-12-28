@@ -32,6 +32,7 @@ import {
   Target,
   CalendarIcon,
   ListOrdered,
+  Briefcase,
 } from "lucide-react";
 
 export default function CompensationDashboardPage() {
@@ -57,6 +58,7 @@ export default function CompensationDashboardPage() {
     budgets: { title: t("compensation.modules.budgets.title"), description: t("compensation.modules.budgets.description"), href: "/compensation/budgets", icon: PiggyBank, color: "bg-orange-500/10 text-orange-600", tabCode: "budgets" },
     equity: { title: t("compensation.modules.equity.title"), description: t("compensation.modules.equity.description"), href: "/compensation/equity", icon: Gem, color: "bg-fuchsia-500/10 text-fuchsia-600", tabCode: "equity" },
     analytics: { title: t("compensation.modules.analytics.title"), description: t("compensation.modules.analytics.description"), href: "/compensation/analytics", icon: TrendingUp, color: "bg-lime-500/10 text-lime-600", tabCode: "analytics" },
+    positionBudgeting: { title: "Position Budgeting", description: "Workforce planning with position-based budgets, scenarios & what-if modeling", href: "/compensation/position-budgeting", icon: Briefcase, color: "bg-purple-500/10 text-purple-600", tabCode: "position_budgeting" },
   };
 
   const filterByAccess = (modules: typeof allModules[keyof typeof allModules][]) =>
@@ -78,6 +80,10 @@ export default function CompensationDashboardPage() {
     {
       titleKey: "Analytics & Benchmarking",
       items: filterByAccess([allModules.marketBenchmarking, allModules.compaRatio, allModules.payEquity, allModules.totalRewards, allModules.budgets, allModules.analytics]),
+    },
+    {
+      titleKey: "Workforce Planning & Budgeting",
+      items: filterByAccess([allModules.positionBudgeting]),
     },
   ];
 
