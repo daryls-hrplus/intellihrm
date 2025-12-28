@@ -18,14 +18,18 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -37,9 +41,12 @@ import {
 } from "@/components/ui/tooltip";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Plus, Trash2, Loader2, Zap, Info, Filter } from "lucide-react";
+import { Plus, Loader2, Target, Info, ChevronsUpDown, Check, ArrowRight, Sparkles } from "lucide-react";
 import { getTodayString, formatDateForDisplay } from "@/utils/dateUtils";
-import { ProficiencyLevelPicker, ProficiencyLevelBadge } from "@/components/capabilities/ProficiencyLevelPicker";
+import { ProficiencyLevelPicker } from "@/components/capabilities/ProficiencyLevelPicker";
+import { CompetencyRequirementRow } from "./CompetencyRequirementRow";
+import { AICompetencySuggestions } from "./AICompetencySuggestions";
+import { cn } from "@/lib/utils";
 
 interface JobCapabilityRequirement {
   id: string;
@@ -57,6 +64,7 @@ interface JobCapabilityRequirement {
     code: string;
     type: string;
     category: string;
+    description?: string;
   };
 }
 
@@ -66,6 +74,26 @@ interface Capability {
   code: string;
   type: string;
   category: string;
+  description?: string;
+}
+
+interface LinkedSkill {
+  id: string;
+  skill_id: string;
+  min_proficiency_level: number | null;
+  weight: number;
+  is_required: boolean;
+  skill: {
+    id: string;
+    name: string;
+    code: string;
+    category: string;
+  } | null;
+}
+
+interface JobInfo {
+  name: string;
+  description?: string;
 }
 
 interface JobCapabilityRequirementsManagerProps {
@@ -73,27 +101,20 @@ interface JobCapabilityRequirementsManagerProps {
   companyId: string;
 }
 
-type FilterType = "all" | "SKILL" | "COMPETENCY";
-
-// Removed PROFICIENCY_LEVELS and getProficiencyLabel - now using ProficiencyLevelPicker component
-
-const getTypeBadgeStyles = (type: string) => {
-  if (type === "SKILL") {
-    return "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 border-blue-200 dark:border-blue-800";
-  }
-  return "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400 border-purple-200 dark:border-purple-800";
-};
-
 export function JobCapabilityRequirementsManager({ 
   jobId, 
   companyId 
 }: JobCapabilityRequirementsManagerProps) {
   const [requirements, setRequirements] = useState<JobCapabilityRequirement[]>([]);
   const [capabilities, setCapabilities] = useState<Capability[]>([]);
+  const [linkedSkillsMap, setLinkedSkillsMap] = useState<Record<string, LinkedSkill[]>>({});
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingSkills, setIsLoadingSkills] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [typeFilter, setTypeFilter] = useState<FilterType>("all");
+  const [comboboxOpen, setComboboxOpen] = useState(false);
+  const [jobInfo, setJobInfo] = useState<JobInfo | null>(null);
+  
   const [formData, setFormData] = useState({
     capability_id: "",
     required_proficiency_level: "3",
@@ -108,7 +129,20 @@ export function JobCapabilityRequirementsManager({
   useEffect(() => {
     fetchRequirements();
     fetchCapabilities();
+    fetchJobInfo();
   }, [jobId, companyId]);
+
+  const fetchJobInfo = async () => {
+    const { data, error } = await supabase
+      .from("jobs")
+      .select("name, description")
+      .eq("id", jobId)
+      .single();
+    
+    if (!error && data) {
+      setJobInfo(data);
+    }
+  };
 
   const fetchRequirements = async () => {
     setIsLoading(true);
@@ -116,27 +150,82 @@ export function JobCapabilityRequirementsManager({
       .from("job_capability_requirements")
       .select(`
         *,
-        skills_competencies(name, code, type, category)
+        skills_competencies(name, code, type, category, description)
       `)
       .eq("job_id", jobId)
-      .order("start_date", { ascending: false });
+      .order("weighting", { ascending: false });
 
     if (error) {
       console.error("Error fetching job capability requirements:", error);
       toast.error("Failed to load capability requirements");
     } else {
-      setRequirements(data || []);
+      // Filter to only competencies for the primary view
+      const competencyReqs = (data || []).filter(
+        (r) => r.skills_competencies?.type === "COMPETENCY"
+      );
+      setRequirements(competencyReqs);
+      
+      // Fetch linked skills for all competencies
+      if (competencyReqs.length > 0) {
+        fetchLinkedSkills(competencyReqs.map((r) => r.capability_id));
+      }
     }
     setIsLoading(false);
+  };
+
+  const fetchLinkedSkills = async (competencyIds: string[]) => {
+    setIsLoadingSkills(true);
+    const { data, error } = await supabase
+      .from("competency_skill_mappings")
+      .select(`
+        id,
+        skill_id,
+        min_proficiency_level,
+        weight,
+        is_required,
+        skill:skills_competencies!competency_skill_mappings_skill_id_fkey(id, name, code, category)
+      `)
+      .in("competency_id", competencyIds);
+
+    if (error) {
+      console.error("Error fetching linked skills:", error);
+    } else {
+      // Group skills by competency_id
+      const skillsMap: Record<string, LinkedSkill[]> = {};
+      competencyIds.forEach((id) => {
+        skillsMap[id] = [];
+      });
+      
+      // We need to re-query to get competency_id in the mapping
+      const { data: mappings } = await supabase
+        .from("competency_skill_mappings")
+        .select("*")
+        .in("competency_id", competencyIds);
+      
+      if (mappings) {
+        mappings.forEach((mapping) => {
+          const skillData = data?.find((d) => d.id === mapping.id);
+          if (skillData && skillsMap[mapping.competency_id]) {
+            skillsMap[mapping.competency_id].push({
+              ...skillData,
+              skill: skillData.skill as any,
+            });
+          }
+        });
+      }
+      
+      setLinkedSkillsMap(skillsMap);
+    }
+    setIsLoadingSkills(false);
   };
 
   const fetchCapabilities = async () => {
     const { data, error } = await supabase
       .from("skills_competencies")
-      .select("id, name, code, type, category")
+      .select("id, name, code, type, category, description")
       .eq("status", "active")
+      .eq("type", "COMPETENCY") // Only fetch competencies for the dropdown
       .or(`company_id.eq.${companyId},company_id.is.null`)
-      .order("type")
       .order("name");
 
     if (error) {
@@ -146,22 +235,27 @@ export function JobCapabilityRequirementsManager({
     }
   };
 
-  // Group capabilities by type for the dropdown
-  const groupedCapabilities = useMemo(() => {
-    const skills = capabilities.filter(c => c.type === "SKILL");
-    const competencies = capabilities.filter(c => c.type === "COMPETENCY");
-    return { skills, competencies };
+  // Group competencies by category
+  const groupedCompetencies = useMemo(() => {
+    const groups: Record<string, Capability[]> = {};
+    capabilities.forEach((c) => {
+      const category = c.category || "other";
+      if (!groups[category]) {
+        groups[category] = [];
+      }
+      groups[category].push(c);
+    });
+    return groups;
   }, [capabilities]);
 
-  // Filter requirements based on selected type
-  const filteredRequirements = useMemo(() => {
-    if (typeFilter === "all") return requirements;
-    return requirements.filter(r => r.skills_competencies?.type === typeFilter);
-  }, [requirements, typeFilter]);
+  const existingRequirementIds = useMemo(
+    () => requirements.map((r) => r.capability_id),
+    [requirements]
+  );
 
-  const handleOpenDialog = () => {
+  const handleOpenDialog = (preselectedCapability?: Capability) => {
     setFormData({
-      capability_id: "",
+      capability_id: preselectedCapability?.id || "",
       required_proficiency_level: "3",
       weighting: "10",
       is_required: true,
@@ -173,6 +267,10 @@ export function JobCapabilityRequirementsManager({
     setDialogOpen(true);
   };
 
+  const handleAISuggestionSelect = (capability: Capability) => {
+    handleOpenDialog(capability);
+  };
+
   const calculateOverlappingWeight = (
     newStartDate: string,
     newEndDate: string | null
@@ -180,7 +278,7 @@ export function JobCapabilityRequirementsManager({
     const e1 = newEndDate || "9999-12-31";
     
     return requirements
-      .filter(req => {
+      .filter((req) => {
         const e2 = req.end_date || "9999-12-31";
         return newStartDate <= e2 && req.start_date <= e1;
       })
@@ -189,7 +287,7 @@ export function JobCapabilityRequirementsManager({
 
   const handleSave = async () => {
     if (!formData.capability_id) {
-      toast.error("Please select a skill or competency");
+      toast.error("Please select a competency");
       return;
     }
 
@@ -234,12 +332,12 @@ export function JobCapabilityRequirementsManager({
     if (error) {
       console.error("Error adding capability requirement:", error);
       if (error.message?.includes("job_capability_no_overlap")) {
-        toast.error("This capability already has an entry for overlapping dates");
+        toast.error("This competency already has an entry for overlapping dates");
       } else {
-        toast.error("Failed to add capability requirement");
+        toast.error("Failed to add competency requirement");
       }
     } else {
-      toast.success("Capability requirement added successfully");
+      toast.success("Competency requirement added successfully");
       fetchRequirements();
       setDialogOpen(false);
     }
@@ -251,96 +349,85 @@ export function JobCapabilityRequirementsManager({
 
     if (error) {
       console.error("Error deleting capability requirement:", error);
-      toast.error("Failed to remove capability requirement");
+      toast.error("Failed to remove competency requirement");
     } else {
-      toast.success("Capability requirement removed");
+      toast.success("Competency requirement removed");
       fetchRequirements();
     }
   };
 
   const totalWeight = requirements
-    .filter(r => !r.end_date)
+    .filter((r) => !r.end_date)
     .reduce((sum, r) => sum + Number(r.weighting), 0);
 
-  const selectedCapability = capabilities.find(c => c.id === formData.capability_id);
-
-  // Count by type for filter badges
-  const skillsCount = requirements.filter(r => r.skills_competencies?.type === "SKILL").length;
-  const competenciesCount = requirements.filter(r => r.skills_competencies?.type === "COMPETENCY").length;
+  const selectedCapability = capabilities.find((c) => c.id === formData.capability_id);
 
   return (
     <div className="space-y-4">
-      {/* Info callout explaining the difference */}
-      <Alert className="bg-muted/50 border-muted-foreground/20">
-        <Info className="h-4 w-4" />
+      {/* Info callout explaining competency-first approach */}
+      <Alert className="bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-950/20 dark:to-indigo-950/20 border-purple-200 dark:border-purple-800">
+        <Target className="h-4 w-4 text-purple-600" />
         <AlertDescription className="text-sm">
-          <strong>Skills</strong> are specific, teachable abilities (e.g., Excel, SQL, Project Management). 
-          <strong className="ml-1">Competencies</strong> are broader behavioral capabilities (e.g., Leadership, Problem-Solving, Communication).
+          <div className="flex flex-col gap-1">
+            <span className="font-medium text-purple-800 dark:text-purple-300">
+              Competency-First Approach
+            </span>
+            <span className="text-purple-700 dark:text-purple-400">
+              Competencies are evaluated in <strong>performance appraisals</strong>. Skills are linked underneath each competency for context and learning paths.
+            </span>
+            <div className="flex items-center gap-2 mt-1 text-xs text-purple-600 dark:text-purple-400">
+              <span className="flex items-center gap-1">
+                <span className="w-2 h-2 rounded-full bg-purple-500" />
+                Competency
+              </span>
+              <ArrowRight className="h-3 w-3" />
+              <span>Appraisal Evaluation</span>
+              <ArrowRight className="h-3 w-3" />
+              <span>Performance Score</span>
+            </div>
+          </div>
         </AlertDescription>
       </Alert>
 
+      {/* AI Suggestions Section */}
+      {jobInfo && (
+        <AICompetencySuggestions
+          jobName={jobInfo.name}
+          jobDescription={jobInfo.description}
+          companyId={companyId}
+          availableCompetencies={capabilities}
+          existingRequirementIds={existingRequirementIds}
+          onSelectCompetency={handleAISuggestionSelect}
+        />
+      )}
+
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div className="flex items-center gap-2">
-          <Zap className="h-5 w-5 text-primary" />
-          <h3 className="font-semibold">Required Skills & Competencies</h3>
+          <Target className="h-5 w-5 text-purple-600" />
+          <h3 className="font-semibold">Competency Requirements</h3>
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
                 <Info className="h-4 w-4 text-muted-foreground cursor-help" />
               </TooltipTrigger>
               <TooltipContent className="max-w-xs">
-                <p>Define the skills and competencies required for this job role, along with the expected proficiency level and importance weighting.</p>
+                <p>Define the competencies required for this job role. Competencies flow directly to performance appraisals. Expand each competency to see linked skills.</p>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
           <Badge variant="outline">Total Weight: {totalWeight}%</Badge>
         </div>
-        <Button size="sm" onClick={handleOpenDialog} disabled={capabilities.length === 0}>
+        <Button size="sm" onClick={() => handleOpenDialog()} disabled={capabilities.length === 0}>
           <Plus className="mr-2 h-4 w-4" />
-          Add Requirement
+          Add Competency
         </Button>
-      </div>
-
-      {/* Type Filter buttons */}
-      <div className="flex items-center gap-2 flex-wrap">
-        <Filter className="h-4 w-4 text-muted-foreground" />
-        <span className="text-sm text-muted-foreground">Filter:</span>
-        <div className="flex gap-1">
-          <Button
-            variant={typeFilter === "all" ? "default" : "outline"}
-            size="sm"
-            onClick={() => setTypeFilter("all")}
-            className="h-7 text-xs"
-          >
-            All ({requirements.length})
-          </Button>
-          <Button
-            variant={typeFilter === "SKILL" ? "default" : "outline"}
-            size="sm"
-            onClick={() => setTypeFilter("SKILL")}
-            className="h-7 text-xs"
-          >
-            <span className="w-2 h-2 rounded-full bg-blue-500 mr-1.5" />
-            Skills ({skillsCount})
-          </Button>
-          <Button
-            variant={typeFilter === "COMPETENCY" ? "default" : "outline"}
-            size="sm"
-            onClick={() => setTypeFilter("COMPETENCY")}
-            className="h-7 text-xs"
-          >
-            <span className="w-2 h-2 rounded-full bg-purple-500 mr-1.5" />
-            Competencies ({competenciesCount})
-          </Button>
-        </div>
       </div>
 
       <div className="rounded-lg border">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Type</TableHead>
+              <TableHead>Competency</TableHead>
               <TableHead>Category</TableHead>
               <TableHead>Required Level</TableHead>
               <TableHead className="w-[100px]">Weight %</TableHead>
@@ -353,131 +440,130 @@ export function JobCapabilityRequirementsManager({
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={9} className="text-center py-4">
+                <TableCell colSpan={8} className="text-center py-4">
                   <Loader2 className="h-5 w-5 animate-spin mx-auto" />
                 </TableCell>
               </TableRow>
-            ) : filteredRequirements.length === 0 ? (
+            ) : requirements.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={9} className="text-center py-4 text-muted-foreground">
-                  {requirements.length === 0 
-                    ? "No capability requirements defined for this job" 
-                    : "No matching requirements for the selected filter"}
+                <TableCell colSpan={8} className="text-center py-8">
+                  <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                    <Target className="h-8 w-8 opacity-50" />
+                    <p>No competency requirements defined for this job</p>
+                    <p className="text-xs">Add competencies to define what's evaluated in appraisals</p>
+                    {jobInfo && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="mt-2"
+                        onClick={() => handleOpenDialog()}
+                      >
+                        <Sparkles className="mr-2 h-4 w-4" />
+                        Add First Competency
+                      </Button>
+                    )}
+                  </div>
                 </TableCell>
               </TableRow>
             ) : (
-              filteredRequirements.map((req) => (
-                <TableRow key={req.id}>
-                  <TableCell className="font-medium">
-                    {req.skills_competencies?.name}
-                    <span className="text-muted-foreground ml-1">({req.skills_competencies?.code})</span>
-                  </TableCell>
-                  <TableCell>
-                    <Badge 
-                      variant="outline" 
-                      className={getTypeBadgeStyles(req.skills_competencies?.type || "")}
-                    >
-                      {req.skills_competencies?.type === "SKILL" ? "Skill" : "Competency"}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <span className="capitalize text-muted-foreground">
-                      {req.skills_competencies?.category}
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    <ProficiencyLevelBadge level={req.required_proficiency_level} size="sm" />
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="outline">{req.weighting}%</Badge>
-                  </TableCell>
-                  <TableCell>{formatDateForDisplay(req.start_date)}</TableCell>
-                  <TableCell>
-                    {req.end_date ? formatDateForDisplay(req.end_date) : "—"}
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={req.is_required ? "default" : "secondary"}>
-                      {req.is_required ? "Yes" : "No"}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleDelete(req.id)}
-                    >
-                      <Trash2 className="h-4 w-4 text-destructive" />
-                    </Button>
-                  </TableCell>
-                </TableRow>
+              requirements.map((req) => (
+                <CompetencyRequirementRow
+                  key={req.id}
+                  requirement={req}
+                  linkedSkills={linkedSkillsMap[req.capability_id] || []}
+                  onDelete={handleDelete}
+                  isLoadingSkills={isLoadingSkills}
+                />
               ))
             )}
           </TableBody>
         </Table>
       </div>
 
+      {/* Add Competency Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
-            <DialogTitle>Add Skill or Competency Requirement</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              <Target className="h-5 w-5 text-purple-600" />
+              Add Competency Requirement
+            </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label>Skill or Competency *</Label>
-              <Select
-                value={formData.capability_id}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, capability_id: value })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select skill or competency" />
-                </SelectTrigger>
-                <SelectContent>
-                  {groupedCapabilities.skills.length > 0 && (
-                    <SelectGroup>
-                      <SelectLabel className="flex items-center gap-2">
-                        <span className="w-2 h-2 rounded-full bg-blue-500" />
-                        Skills
-                      </SelectLabel>
-                      {groupedCapabilities.skills.map((c) => (
-                        <SelectItem key={c.id} value={c.id}>
-                          <div className="flex items-center gap-2">
-                            <span>{c.name} ({c.code})</span>
-                            <Badge 
-                              variant="outline" 
-                              className={`text-xs ${getTypeBadgeStyles(c.type)}`}
-                            >
-                              Skill
-                            </Badge>
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  )}
-                  {groupedCapabilities.competencies.length > 0 && (
-                    <SelectGroup>
-                      <SelectLabel className="flex items-center gap-2">
+              <Label>Competency *</Label>
+              <Popover open={comboboxOpen} onOpenChange={setComboboxOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={comboboxOpen}
+                    className="w-full justify-between"
+                  >
+                    {selectedCapability ? (
+                      <div className="flex items-center gap-2">
                         <span className="w-2 h-2 rounded-full bg-purple-500" />
-                        Competencies
-                      </SelectLabel>
-                      {groupedCapabilities.competencies.map((c) => (
-                        <SelectItem key={c.id} value={c.id}>
-                          <div className="flex items-center gap-2">
-                            <span>{c.name} ({c.code})</span>
-                            <Badge 
-                              variant="outline" 
-                              className={`text-xs ${getTypeBadgeStyles(c.type)}`}
-                            >
-                              Competency
-                            </Badge>
-                          </div>
-                        </SelectItem>
+                        {selectedCapability.name}
+                        <span className="text-muted-foreground">({selectedCapability.code})</span>
+                      </div>
+                    ) : (
+                      "Select competency..."
+                    )}
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[450px] p-0" align="start">
+                  <Command>
+                    <CommandInput placeholder="Search competencies..." />
+                    <CommandList className="max-h-[300px]">
+                      <CommandEmpty>No competency found.</CommandEmpty>
+                      {Object.entries(groupedCompetencies).map(([category, comps]) => (
+                        <CommandGroup key={category} heading={category.charAt(0).toUpperCase() + category.slice(1)}>
+                          {comps.map((c) => {
+                            const isAdded = existingRequirementIds.includes(c.id);
+                            return (
+                              <CommandItem
+                                key={c.id}
+                                value={c.name}
+                                disabled={isAdded}
+                                onSelect={() => {
+                                  setFormData({ ...formData, capability_id: c.id });
+                                  setComboboxOpen(false);
+                                }}
+                                className={cn(
+                                  "flex items-center gap-2",
+                                  isAdded && "opacity-50"
+                                )}
+                              >
+                                <Check
+                                  className={cn(
+                                    "h-4 w-4",
+                                    formData.capability_id === c.id ? "opacity-100" : "opacity-0"
+                                  )}
+                                />
+                                <span className="w-2 h-2 rounded-full bg-purple-500" />
+                                <div className="flex flex-col">
+                                  <span>{c.name} ({c.code})</span>
+                                  {c.description && (
+                                    <span className="text-xs text-muted-foreground truncate max-w-[350px]">
+                                      {c.description}
+                                    </span>
+                                  )}
+                                </div>
+                                {isAdded && (
+                                  <Badge variant="secondary" className="ml-auto text-xs">
+                                    Already added
+                                  </Badge>
+                                )}
+                              </CommandItem>
+                            );
+                          })}
+                        </CommandGroup>
                       ))}
-                    </SelectGroup>
-                  )}
-                </SelectContent>
-              </Select>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
               {selectedCapability && (
                 <p className="text-xs text-muted-foreground capitalize">
                   Category: {selectedCapability.category}
@@ -563,7 +649,7 @@ export function JobCapabilityRequirementsManager({
             </Button>
             <Button onClick={handleSave} disabled={isSaving}>
               {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Add Requirement
+              Add Competency
             </Button>
           </DialogFooter>
         </DialogContent>
