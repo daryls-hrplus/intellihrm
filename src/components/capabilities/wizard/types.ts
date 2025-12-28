@@ -2,6 +2,7 @@
 
 export type WizardStep = 
   | "welcome" 
+  | "company"  // NEW: Company selection step
   | "industry" 
   | "occupations"
   | "skills-preview" 
@@ -70,6 +71,8 @@ export interface MasterIndustry {
 }
 
 export interface WizardState {
+  selectedCompanies: string[];  // NEW: Selected company IDs
+  isGlobal: boolean;  // NEW: Whether capabilities are global
   selectedIndustries: string[];
   selectedSubIndustries: string[];
   selectedOccupations: string[];
@@ -92,6 +95,7 @@ export interface ImportProgress {
 
 export const WIZARD_STEPS: { step: WizardStep; title: string; description: string }[] = [
   { step: "welcome", title: "Welcome", description: "Get started" },
+  { step: "company", title: "Companies", description: "Select companies" },
   { step: "industry", title: "Industry", description: "Select your sector" },
   { step: "occupations", title: "Occupations", description: "Choose roles" },
   { step: "skills-preview", title: "Skills", description: "Preview & select" },

@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import {
   WizardStepper,
   WizardStepWelcome,
+  WizardStepCompany,
   WizardStepIndustry,
   WizardStepOccupations,
   WizardStepSkillsPreview,
@@ -48,6 +49,8 @@ export function SkillsQuickStartWizard({
   const [currentStep, setCurrentStep] = useState<WizardStep>("welcome");
   
   // Selection state
+  const [selectedCompanies, setSelectedCompanies] = useState<string[]>([companyId]);
+  const [isGlobal, setIsGlobal] = useState(false);
   const [selectedIndustries, setSelectedIndustries] = useState<string[]>([]);
   const [selectedSubIndustries, setSelectedSubIndustries] = useState<string[]>([]);
   const [selectedOccupations, setSelectedOccupations] = useState<string[]>([]);
@@ -70,6 +73,8 @@ export function SkillsQuickStartWizard({
     switch (currentStep) {
       case "welcome":
         return true;
+      case "company":
+        return isGlobal || selectedCompanies.length > 0;
       case "industry":
         return selectedIndustries.length > 0;
       case "occupations":
@@ -83,7 +88,7 @@ export function SkillsQuickStartWizard({
       default:
         return false;
     }
-  }, [currentStep, selectedIndustries, selectedOccupations, selectedSkills, selectedCompetencies, allSkills]);
+  }, [currentStep, selectedCompanies, isGlobal, selectedIndustries, selectedOccupations, selectedSkills, selectedCompetencies, allSkills]);
 
   const goToStep = (step: WizardStep) => {
     setCurrentStep(step);
@@ -104,6 +109,22 @@ export function SkillsQuickStartWizard({
     const prevStep = WIZARD_STEPS[currentIndex - 1];
     if (prevStep && prevStep.step !== "importing" && prevStep.step !== "complete") {
       setCurrentStep(prevStep.step);
+    }
+  };
+
+  // Company selection handlers
+  const handleCompanyToggle = (companyId: string) => {
+    setSelectedCompanies(prev =>
+      prev.includes(companyId)
+        ? prev.filter(id => id !== companyId)
+        : [...prev, companyId]
+    );
+  };
+
+  const handleGlobalToggle = (global: boolean) => {
+    setIsGlobal(global);
+    if (global) {
+      setSelectedCompanies([]);
     }
   };
 
@@ -229,10 +250,14 @@ export function SkillsQuickStartWizard({
 
   // Import logic
   const handleStartImport = async () => {
-    if (!user || !companyId) {
+    if (!user) {
       toast.error("Please ensure you're logged in");
       return;
     }
+
+    // Determine the primary company for skills_competencies.company_id
+    // If global, set company_id to null; otherwise use first selected company
+    const primaryCompanyId = isGlobal ? null : (selectedCompanies[0] || companyId);
 
     const skillsToImport = allSkills.filter(s => selectedSkills.has(s.id) && !s.alreadyExists);
     const competenciesToImport = allCompetencies.filter(c => selectedCompetencies.has(c.id) && !c.alreadyExists);
@@ -271,6 +296,27 @@ export function SkillsQuickStartWizard({
     const errors: string[] = [];
     let currentCount = 0;
 
+    // Helper function to create company_capabilities entries
+    const createCompanyCapabilities = async (capabilityId: string) => {
+      if (isGlobal) {
+        // For global capabilities, we don't need company_capabilities entries
+        // as they're accessible to all via is_global flag
+        return;
+      }
+      
+      // Create entries for each selected company
+      for (const compId of selectedCompanies) {
+        await supabase
+          .from('company_capabilities')
+          .insert({
+            company_id: compId,
+            capability_id: capabilityId,
+            created_by: user.id,
+          })
+          .single();
+      }
+    };
+
     // Import skills
     for (const skill of skillsToImport) {
       currentCount++;
@@ -283,10 +329,11 @@ export function SkillsQuickStartWizard({
       try {
         const profLevel = proficiencyLevels[skill.id] || skill.proficiency_level || 'proficient';
         
-        const { error: insertError } = await supabase
+        const { data: insertedSkill, error: insertError } = await supabase
           .from('skills_competencies')
           .insert([{
-            company_id: companyId,
+            company_id: primaryCompanyId,
+            is_global: isGlobal,
             type: 'SKILL' as const,
             name: skill.skill_name,
             code: skill.skill_name.toUpperCase().replace(/[^A-Z0-9]/g, '_').substring(0, 20),
@@ -302,7 +349,9 @@ export function SkillsQuickStartWizard({
               original_source: skill.source,
               proficiency_level: profLevel,
             }
-          }]);
+          }])
+          .select('id')
+          .single();
 
         if (insertError) {
           if (insertError.code === '23505') { // Duplicate
@@ -310,8 +359,10 @@ export function SkillsQuickStartWizard({
           } else {
             errors.push(`Skill "${skill.skill_name}": ${insertError.message}`);
           }
-        } else {
+        } else if (insertedSkill) {
           importedSkills++;
+          // Create company_capabilities entries for multi-company support
+          await createCompanyCapabilities(insertedSkill.id);
         }
       } catch (err) {
         errors.push(`Skill "${skill.skill_name}": ${err instanceof Error ? err.message : String(err)}`);
@@ -339,10 +390,11 @@ export function SkillsQuickStartWizard({
       try {
         const profLevel = proficiencyLevels[comp.id] || comp.proficiency_level || 'proficient';
         
-        const { error: insertError } = await supabase
+        const { data: insertedComp, error: insertError } = await supabase
           .from('skills_competencies')
           .insert([{
-            company_id: companyId,
+            company_id: primaryCompanyId,
+            is_global: isGlobal,
             type: 'COMPETENCY' as const,
             name: comp.competency_name,
             code: comp.competency_name.toUpperCase().replace(/[^A-Z0-9]/g, '_').substring(0, 20),
@@ -358,7 +410,9 @@ export function SkillsQuickStartWizard({
               original_source: comp.source,
               proficiency_level: profLevel,
             }
-          }]);
+          }])
+          .select('id')
+          .single();
 
         if (insertError) {
           if (insertError.code === '23505') { // Duplicate
@@ -366,8 +420,10 @@ export function SkillsQuickStartWizard({
           } else {
             errors.push(`Competency "${comp.competency_name}": ${insertError.message}`);
           }
-        } else {
+        } else if (insertedComp) {
           importedCompetencies++;
+          // Create company_capabilities entries for multi-company support
+          await createCompanyCapabilities(insertedComp.id);
         }
       } catch (err) {
         errors.push(`Competency "${comp.competency_name}": ${err instanceof Error ? err.message : String(err)}`);
@@ -400,6 +456,8 @@ export function SkillsQuickStartWizard({
   const handleClose = () => {
     // Reset state
     setCurrentStep("welcome");
+    setSelectedCompanies([companyId]);
+    setIsGlobal(false);
     setSelectedIndustries([]);
     setSelectedSubIndustries([]);
     setSelectedOccupations([]);
@@ -424,6 +482,16 @@ export function SkillsQuickStartWizard({
           <WizardStepWelcome
             onNext={goNext}
             onCancel={handleClose}
+          />
+        );
+      
+      case "company":
+        return (
+          <WizardStepCompany
+            selectedCompanies={selectedCompanies}
+            isGlobal={isGlobal}
+            onCompanyToggle={handleCompanyToggle}
+            onGlobalToggle={handleGlobalToggle}
           />
         );
       
