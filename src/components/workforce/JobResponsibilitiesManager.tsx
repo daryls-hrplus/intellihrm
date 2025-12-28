@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
@@ -20,22 +21,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Plus, Trash2, AlertCircle, ChevronDown, ChevronUp, Target, Star, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ResponsibilityCategoryBadge, ResponsibilityCategory } from "./ResponsibilityCategoryBadge";
 import { ComplexityLevelIndicator } from "./ComplexityLevelIndicator";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { format } from "date-fns";
 import { getTodayString, formatDateForDisplay } from "@/utils/dateUtils";
+import { JobKRAContextualizationDialog } from "./JobKRAContextualizationDialog";
+import { useJobResponsibilityKRAs, GenericKRA } from "@/hooks/useJobResponsibilityKRAs";
 
 interface JobResponsibility {
   id: string;
@@ -94,8 +87,11 @@ export function JobResponsibilitiesManager({ jobId, companyId, jobFamilyId }: Jo
   const [jobResponsibilities, setJobResponsibilities] = useState<JobResponsibility[]>([]);
   const [responsibilities, setResponsibilities] = useState<Responsibility[]>([]);
   const [jobFamily, setJobFamily] = useState<JobFamily | null>(null);
+  const [jobDetails, setJobDetails] = useState<{ name: string; description?: string; grade?: string; level?: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [kraDialogOpen, setKraDialogOpen] = useState(false);
+  const [selectedJobResponsibility, setSelectedJobResponsibility] = useState<JobResponsibility | null>(null);
   const [saving, setSaving] = useState(false);
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
   const [formData, setFormData] = useState({
@@ -105,6 +101,8 @@ export function JobResponsibilitiesManager({ jobId, companyId, jobFamilyId }: Jo
     start_date: getTodayString(),
     end_date: "",
   });
+
+  const { generateWithAI, saveAIGeneratedKRAs, generating } = useJobResponsibilityKRAs(selectedJobResponsibility?.id || "");
 
   const toggleRowExpanded = (id: string) => {
     setExpandedRows(prev => {
@@ -123,10 +121,28 @@ export function JobResponsibilitiesManager({ jobId, companyId, jobFamilyId }: Jo
   useEffect(() => {
     fetchJobResponsibilities();
     fetchResponsibilities();
+    fetchJobDetails();
     if (jobFamilyId) {
       fetchJobFamily();
     }
   }, [jobId, companyId, jobFamilyId]);
+
+  const fetchJobDetails = async () => {
+    const { data, error } = await supabase
+      .from("jobs")
+      .select("name, description, job_grade, job_level")
+      .eq("id", jobId)
+      .single();
+
+    if (!error && data) {
+      setJobDetails({
+        name: data.name,
+        description: data.description || undefined,
+        grade: data.job_grade || undefined,
+        level: data.job_level || undefined,
+      });
+    }
+  };
 
   const fetchJobFamily = async () => {
     if (!jobFamilyId) return;
