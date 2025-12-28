@@ -155,7 +155,14 @@ export function JobFamilyDefaultResponsibilities({
     setShowSuggestions(false);
 
     try {
-      const existingNames = responsibilities.map((r) => r.name);
+      const existingNames = defaultResponsibilities
+        .map((dr) => {
+          return (
+            dr.responsibility?.name ??
+            responsibilities.find((r) => r.id === dr.responsibility_id)?.name
+          );
+        })
+        .filter((n): n is string => Boolean(n));
 
       const { data, error } = await supabase.functions.invoke("responsibility-ai-helper", {
         body: {
