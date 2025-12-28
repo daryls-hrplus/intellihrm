@@ -26317,6 +26317,64 @@ export type Database = {
           },
         ]
       }
+      job_skill_overrides: {
+        Row: {
+          competency_requirement_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          job_id: string
+          override_proficiency_level: number
+          override_reason: string | null
+          skill_id: string
+          updated_at: string
+        }
+        Insert: {
+          competency_requirement_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          job_id: string
+          override_proficiency_level: number
+          override_reason?: string | null
+          skill_id: string
+          updated_at?: string
+        }
+        Update: {
+          competency_requirement_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          job_id?: string
+          override_proficiency_level?: number
+          override_reason?: string | null
+          skill_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_skill_overrides_competency_requirement_id_fkey"
+            columns: ["competency_requirement_id"]
+            isOneToOne: false
+            referencedRelation: "job_capability_requirements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_skill_overrides_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_skill_overrides_skill_id_fkey"
+            columns: ["skill_id"]
+            isOneToOne: false
+            referencedRelation: "skills_competencies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       jobs: {
         Row: {
           code: string
