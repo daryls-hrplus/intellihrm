@@ -358,38 +358,47 @@ export function CompetencyRequirementRow({
                         </Popover>
                       </div>
                     ) : (
-                      <div className="flex items-center gap-2">
-                        {displayLevel ? (
-                          <ProficiencyLevelBadge 
-                            level={displayLevel} 
-                            size="sm" 
-                            skillId={skill.skill?.id}
-                            skillName={skill.skill?.name}
-                            skillIndicators={skill.skill?.proficiency_indicators}
-                          />
-                        ) : (
-                          <span className="text-xs text-muted-foreground">—</span>
-                        )}
-                        {hasOverride && (
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Badge variant="outline" className="text-xs bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 border-amber-200 dark:border-amber-800">
-                                  <AlertTriangle className="h-3 w-3 mr-1" />
-                                  Override
-                                </Badge>
-                              </TooltipTrigger>
-                              <TooltipContent className="max-w-xs">
-                                <div className="space-y-1">
-                                  <p className="font-medium">Job-Specific Override</p>
-                                  <p className="text-xs">Baseline level: {skill.min_proficiency_level || "Not set"}</p>
-                                  {skill.override?.override_reason && (
-                                    <p className="text-xs">Reason: {skill.override.override_reason}</p>
-                                  )}
-                                </div>
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
+                      <div className="flex flex-col gap-1">
+                        <div className="flex items-center gap-2">
+                          {displayLevel ? (
+                            <ProficiencyLevelBadge 
+                              level={displayLevel} 
+                              size="sm" 
+                              skillId={skill.skill?.id}
+                              skillName={skill.skill?.name}
+                              skillIndicators={skill.skill?.proficiency_indicators}
+                            />
+                          ) : (
+                            <span className="text-xs text-muted-foreground">—</span>
+                          )}
+                          {hasOverride && (
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Badge variant="outline" className="text-xs bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 border-amber-200 dark:border-amber-800">
+                                    <AlertTriangle className="h-3 w-3 mr-1" />
+                                    Override
+                                  </Badge>
+                                </TooltipTrigger>
+                                <TooltipContent className="max-w-xs">
+                                  <div className="space-y-1">
+                                    <p className="font-medium">Job-Specific Override</p>
+                                    <p className="text-xs">Baseline level: {skill.min_proficiency_level || "Not set"}</p>
+                                    {skill.override?.override_reason && (
+                                      <p className="text-xs">Reason: {skill.override.override_reason}</p>
+                                    )}
+                                  </div>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          )}
+                        </div>
+                        {/* Skill-specific proficiency context - visible inline */}
+                        {displayLevel && skill.skill?.proficiency_indicators && skill.skill.proficiency_indicators[displayLevel.toString()] && (
+                          <div className="text-[11px] text-muted-foreground leading-tight max-w-[280px]">
+                            <span className="text-primary/70 font-medium">• </span>
+                            {skill.skill.proficiency_indicators[displayLevel.toString()][0]}
+                          </div>
                         )}
                       </div>
                     )}
