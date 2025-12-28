@@ -48,20 +48,22 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Fetch available skills - handle missing/invalid companyId gracefully
+    // Fetch available skills - when no companyId, fetch ALL skills (not just global)
     let query = supabase
       .from('skills_competencies')
-      .select('id, name, code, description, category')
+      .select('id, name, code, description, category, company_id')
       .eq('type', 'SKILL')
       .eq('status', 'active');
 
     if (companyId) {
+      // Filter to company-specific and global skills
       query = query.or(`company_id.eq.${companyId},is_global.eq.true`);
-    } else {
-      query = query.eq('is_global', true);
     }
+    // When no companyId, fetch all skills (no additional filter)
 
     const { data: skills, error: skillsError } = await query.limit(200);
+
+    console.log('Fetched skills count:', skills?.length || 0);
 
     if (skillsError) {
       console.error('Error fetching skills:', skillsError);
@@ -75,8 +77,10 @@ serve(async (req) => {
       .eq('competency_id', competencyId);
 
     const existingSkillIds = new Set((existingMappings || []).map(m => m.skill_id));
+    console.log('Existing mappings count:', existingSkillIds.size);
 
     const availableSkills = skills?.filter(s => !existingSkillIds.has(s.id)) || [];
+    console.log('Available skills after filtering:', availableSkills.length);
 
     if (availableSkills.length === 0) {
       return new Response(JSON.stringify({ suggestions: [] }), {
@@ -147,15 +151,19 @@ Only include skills with confidence > 0.5. skill_index is the 1-based index from
       console.error('Failed to parse AI response:', e);
     }
 
-    // Map AI suggestions to actual skill data
+    // Map AI suggestions to actual skill data with correct format for frontend
     const suggestions = aiSuggestions
       .filter(s => s.skill_index > 0 && s.skill_index <= availableSkills.length)
-      .map(s => ({
-        skill: availableSkills[s.skill_index - 1],
-        confidence: s.confidence,
-        reason: s.reason,
-        ai_suggested: true,
-      }))
+      .map(s => {
+        const skill = availableSkills[s.skill_index - 1];
+        return {
+          skill_id: skill.id,
+          skill_name: skill.name,
+          weight: Math.round(s.confidence * 100),
+          reasoning: s.reason,
+          ai_suggested: true,
+        };
+      })
       .slice(0, 10);
 
     console.log(`Suggested ${suggestions.length} skills for competency ${competencyName}`);
@@ -204,11 +212,19 @@ function performKeywordMatching(
       score += 2;
     }
     
-    return { skill, confidence: Math.min(score / 10, 0.9), reason: 'Keyword match', ai_suggested: false };
+    return { 
+      skill_id: skill.id,
+      skill_name: skill.name,
+      weight: Math.round(Math.min(score / 10, 0.9) * 100),
+      reasoning: 'Keyword match',
+      ai_suggested: false,
+      score: Math.min(score / 10, 0.9)
+    };
   });
 
   return scored
-    .filter(s => s.confidence > 0.1)
-    .sort((a, b) => b.confidence - a.confidence)
+    .filter(s => s.score > 0.1)
+    .sort((a, b) => b.score - a.score)
+    .map(({ score, ...rest }) => rest) // Remove score from output
     .slice(0, 10);
 }
