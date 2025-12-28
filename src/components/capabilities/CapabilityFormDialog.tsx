@@ -29,6 +29,8 @@ import {
   CreateCapabilityInput,
   ProficiencyScale,
 } from "@/hooks/useCapabilities";
+import { JobApplicabilitySelect } from "./JobApplicabilitySelect";
+import { useCapabilityJobApplicability } from "@/hooks/useCapabilityJobApplicability";
 
 interface CapabilityFormDialogProps {
   open: boolean;
@@ -94,6 +96,9 @@ export function CapabilityFormDialog({
   const [newKeyword, setNewKeyword] = useState("");
   const [newRole, setNewRole] = useState("");
   const [saving, setSaving] = useState(false);
+  const [selectedJobIds, setSelectedJobIds] = useState<string[]>([]);
+
+  const { applicability, fetchApplicability, bulkSetApplicability } = useCapabilityJobApplicability();
 
   useEffect(() => {
     if (capability) {
@@ -122,6 +127,13 @@ export function CapabilityFormDialog({
           can_be_inferred: false,
         },
       });
+      
+      // Fetch job applicability for existing competencies
+      if (capability.type === "COMPETENCY") {
+        fetchApplicability(capability.id).then((apps) => {
+          setSelectedJobIds(apps?.map((a: any) => a.job_id) || []);
+        });
+      }
     } else {
       setFormData({
         company_id: null,
@@ -146,8 +158,9 @@ export function CapabilityFormDialog({
           can_be_inferred: false,
         },
       });
+      setSelectedJobIds([]);
     }
-  }, [capability, defaultType, open]);
+  }, [capability, defaultType, open, fetchApplicability]);
 
   const handleSubmit = async () => {
     if (!formData.name || !formData.code || !formData.category) {
@@ -157,6 +170,12 @@ export function CapabilityFormDialog({
     setSaving(true);
     try {
       await onSave(formData);
+      
+      // If editing a competency and we have job selections, update job applicability
+      if (capability && formData.type === "COMPETENCY") {
+        await bulkSetApplicability(capability.id, selectedJobIds);
+      }
+      
       onOpenChange(false);
     } finally {
       setSaving(false);
@@ -584,31 +603,12 @@ export function CapabilityFormDialog({
                   <Switch checked disabled />
                 </div>
 
-                <div className="space-y-2">
-                  <Label>Role Applicability</Label>
-                  <div className="flex gap-2">
-                    <Input
-                      value={newRole}
-                      onChange={(e) => setNewRole(e.target.value)}
-                      placeholder="e.g., Manager, Senior, Executive"
-                      onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addRole())}
-                    />
-                    <Button type="button" size="icon" onClick={addRole}>
-                      <Plus className="h-4 w-4" />
-                    </Button>
-                  </div>
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {formData.competency_attributes?.role_applicability?.map((role, idx) => (
-                      <Badge key={idx} variant="secondary" className="gap-1">
-                        {role}
-                        <X
-                          className="h-3 w-3 cursor-pointer"
-                          onClick={() => removeRole(idx)}
-                        />
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
+                {/* Job Applicability Multi-Select */}
+                <JobApplicabilitySelect
+                  selectedJobIds={selectedJobIds}
+                  onSelectionChange={setSelectedJobIds}
+                  companyId={formData.company_id}
+                />
 
                 <div className="rounded-lg border p-4 bg-muted/50">
                   <p className="text-sm text-muted-foreground">

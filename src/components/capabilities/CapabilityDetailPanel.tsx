@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -16,9 +16,12 @@ import {
   Sparkles,
   AlertTriangle,
   CheckCircle2,
-  Calendar
+  Calendar,
+  Briefcase,
+  Loader2
 } from "lucide-react";
 import { format } from "date-fns";
+import { useCapabilityJobApplicability } from "@/hooks/useCapabilityJobApplicability";
 
 interface SkillAttribute {
   id: string;
@@ -101,6 +104,7 @@ export function CapabilityDetailPanel({
   onEdit 
 }: CapabilityDetailPanelProps) {
   const [activeTab, setActiveTab] = useState("overview");
+  const { applicability, loading: loadingJobs, fetchApplicability } = useCapabilityJobApplicability();
   
   const isSkill = capability.type === "SKILL";
   const isCompetency = capability.type === "COMPETENCY";
@@ -108,6 +112,13 @@ export function CapabilityDetailPanel({
   const compAttrs = capability.competency_attributes;
   const proficiencyLevels = capability.proficiency_scales?.levels || [];
   const skillMappings = capability.competency_skill_mappings || [];
+
+  // Fetch job applicability when viewing competency
+  useEffect(() => {
+    if (isCompetency) {
+      fetchApplicability(capability.id);
+    }
+  }, [capability.id, isCompetency, fetchApplicability]);
 
   return (
     <Card className="h-full">
@@ -337,18 +348,42 @@ export function CapabilityDetailPanel({
                 </>
               )}
 
-              {isCompetency && compAttrs && (
+              {isCompetency && (
                 <>
-                  {/* Role Applicability */}
-                  {compAttrs.role_applicability?.length > 0 && (
+                  {/* Job Applicability - from capability_job_applicability table */}
+                  <div className="p-3 rounded-lg border bg-card">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Briefcase className="h-4 w-4 text-blue-500" />
+                      <h4 className="text-sm font-medium">Applicable Jobs</h4>
+                      {loadingJobs && <Loader2 className="h-3 w-3 animate-spin" />}
+                    </div>
+                    {applicability.length > 0 ? (
+                      <div className="flex flex-wrap gap-1">
+                        {applicability.map((app) => (
+                          <Badge key={app.id} variant="outline" className="text-xs">
+                            <Briefcase className="h-3 w-3 mr-1" />
+                            {app.job?.name || "Unknown Job"}
+                            {app.ai_suggested && (
+                              <Sparkles className="h-3 w-3 ml-1 text-purple-500" />
+                            )}
+                          </Badge>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-xs text-muted-foreground">No jobs linked to this competency</p>
+                    )}
+                  </div>
+
+                  {/* Legacy Role Applicability (free-text, kept for backward compatibility) */}
+                  {compAttrs?.role_applicability?.length > 0 && (
                     <div className="p-3 rounded-lg border bg-card">
                       <div className="flex items-center gap-2 mb-2">
-                        <Users className="h-4 w-4 text-blue-500" />
-                        <h4 className="text-sm font-medium">Role Applicability</h4>
+                        <Users className="h-4 w-4 text-muted-foreground" />
+                        <h4 className="text-sm font-medium text-muted-foreground">Legacy Role Applicability</h4>
                       </div>
                       <div className="flex flex-wrap gap-1">
                         {compAttrs.role_applicability.map((role, i) => (
-                          <Badge key={i} variant="outline" className="text-xs">
+                          <Badge key={i} variant="secondary" className="text-xs">
                             {role}
                           </Badge>
                         ))}
@@ -409,7 +444,7 @@ export function CapabilityDetailPanel({
                   <p className="text-sm">No skill attributes configured</p>
                 </div>
               )}
-              {isCompetency && !compAttrs && skillMappings.length === 0 && (
+              {isCompetency && !compAttrs && skillMappings.length === 0 && applicability.length === 0 && (
                 <div className="text-center py-8 text-muted-foreground">
                   <Brain className="h-8 w-8 mx-auto mb-2 opacity-50" />
                   <p className="text-sm">No competency details configured</p>
