@@ -49,10 +49,16 @@ import {
   Loader2,
   ClipboardList,
   ChevronLeft,
+  Sparkles,
+  Target,
+  X,
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { getTodayString } from "@/utils/dateUtils";
 import { useLanguage } from "@/hooks/useLanguage";
+import { ResponsibilityCategoryBadge, getCategoryOptions, ResponsibilityCategory } from "@/components/workforce/ResponsibilityCategoryBadge";
+import { ComplexityLevelIndicator, getComplexityLevelOptions } from "@/components/workforce/ComplexityLevelIndicator";
+import { useResponsibilityAI } from "@/hooks/useResponsibilityAI";
 
 interface Responsibility {
   id: string;
@@ -60,6 +66,9 @@ interface Responsibility {
   name: string;
   code: string;
   description: string | null;
+  category: ResponsibilityCategory | null;
+  complexity_level: number | null;
+  key_result_areas: string[];
   start_date: string;
   end_date: string | null;
   is_active: boolean;
@@ -77,6 +86,9 @@ const emptyForm = {
   name: "",
   code: "",
   description: "",
+  category: "" as ResponsibilityCategory | "",
+  complexity_level: null as number | null,
+  key_result_areas: [] as string[],
   company_id: "",
   start_date: getTodayString(),
   end_date: "",
@@ -90,13 +102,19 @@ export default function ResponsibilitiesPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedResponsibility, setSelectedResponsibility] = useState<Responsibility | null>(null);
   const [formData, setFormData] = useState(emptyForm);
+  const [newKRA, setNewKRA] = useState("");
 
   const { logAction } = useAuditLog();
   const { t } = useLanguage();
+  const { isGenerating, generateDescription, suggestKRAs, enrichAll } = useResponsibilityAI();
+
+  const categoryOptions = getCategoryOptions();
+  const complexityOptions = getComplexityLevelOptions();
 
   useEffect(() => {
     fetchCompanies();
@@ -141,7 +159,11 @@ export default function ResponsibilitiesPage() {
       console.error("Error fetching responsibilities:", error);
       toast.error(t("workforce.responsibilities.failedToLoad"));
     } else {
-      setResponsibilities(data || []);
+      const mapped = (data || []).map((r: any) => ({
+        ...r,
+        key_result_areas: Array.isArray(r.key_result_areas) ? r.key_result_areas : [],
+      }));
+      setResponsibilities(mapped);
     }
     setIsLoading(false);
   };
@@ -153,6 +175,9 @@ export default function ResponsibilitiesPage() {
         name: responsibility.name,
         code: responsibility.code,
         description: responsibility.description || "",
+        category: responsibility.category || "",
+        complexity_level: responsibility.complexity_level,
+        key_result_areas: responsibility.key_result_areas || [],
         company_id: responsibility.company_id,
         start_date: responsibility.start_date,
         end_date: responsibility.end_date || "",
@@ -162,6 +187,7 @@ export default function ResponsibilitiesPage() {
       setSelectedResponsibility(null);
       setFormData({ ...emptyForm, company_id: selectedCompanyId });
     }
+    setNewKRA("");
     setDialogOpen(true);
   };
 
@@ -185,6 +211,9 @@ export default function ResponsibilitiesPage() {
       name: formData.name.trim(),
       code: formData.code.trim().toUpperCase(),
       description: formData.description.trim() || null,
+      category: formData.category || null,
+      complexity_level: formData.complexity_level,
+      key_result_areas: formData.key_result_areas,
       start_date: formData.start_date,
       end_date: formData.end_date || null,
       is_active: formData.is_active,
@@ -245,11 +274,95 @@ export default function ResponsibilitiesPage() {
     }
   };
 
-  const filteredResponsibilities = responsibilities.filter(
-    (r) =>
-      r.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      r.code.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const handleGenerateDescription = async () => {
+    if (!formData.name.trim()) {
+      toast.error("Please enter a responsibility name first");
+      return;
+    }
+
+    const description = await generateDescription({
+      name: formData.name,
+      category: formData.category || undefined,
+      existingDescription: formData.description || undefined,
+    });
+
+    if (description) {
+      setFormData({ ...formData, description });
+      toast.success("Description generated");
+    } else {
+      toast.error("Failed to generate description");
+    }
+  };
+
+  const handleSuggestKRAs = async () => {
+    if (!formData.name.trim()) {
+      toast.error("Please enter a responsibility name first");
+      return;
+    }
+
+    const kras = await suggestKRAs({
+      name: formData.name,
+      category: formData.category || undefined,
+      description: formData.description || undefined,
+    });
+
+    if (kras && kras.length > 0) {
+      setFormData({ ...formData, key_result_areas: [...formData.key_result_areas, ...kras] });
+      toast.success(`${kras.length} KRAs suggested`);
+    } else {
+      toast.error("Failed to suggest KRAs");
+    }
+  };
+
+  const handleEnrichAll = async () => {
+    if (!formData.name.trim()) {
+      toast.error("Please enter a responsibility name first");
+      return;
+    }
+
+    const result = await enrichAll({
+      name: formData.name,
+      category: formData.category || undefined,
+      existingDescription: formData.description || undefined,
+    });
+
+    if (result) {
+      setFormData({
+        ...formData,
+        description: result.description || formData.description,
+        key_result_areas: result.kras.length > 0 ? result.kras : formData.key_result_areas,
+        category: result.suggestedCategory as ResponsibilityCategory || formData.category,
+        complexity_level: result.complexity || formData.complexity_level,
+      });
+      toast.success("Responsibility enriched with AI suggestions");
+    } else {
+      toast.error("Failed to enrich responsibility");
+    }
+  };
+
+  const addKRA = () => {
+    if (newKRA.trim()) {
+      setFormData({
+        ...formData,
+        key_result_areas: [...formData.key_result_areas, newKRA.trim()],
+      });
+      setNewKRA("");
+    }
+  };
+
+  const removeKRA = (index: number) => {
+    setFormData({
+      ...formData,
+      key_result_areas: formData.key_result_areas.filter((_, i) => i !== index),
+    });
+  };
+
+  const filteredResponsibilities = responsibilities.filter((r) => {
+    const matchesSearch = r.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      r.code.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = categoryFilter === "all" || r.category === categoryFilter;
+    return matchesSearch && matchesCategory;
+  });
 
   return (
     <AppLayout>
@@ -293,6 +406,21 @@ export default function ResponsibilitiesPage() {
               ))}
             </SelectContent>
           </Select>
+          
+          <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+            <SelectTrigger className="w-full sm:w-[180px]">
+              <SelectValue placeholder="All Categories" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Categories</SelectItem>
+              {categoryOptions.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
@@ -310,9 +438,9 @@ export default function ResponsibilitiesPage() {
               <TableRow>
                 <TableHead>{t("common.name")}</TableHead>
                 <TableHead>{t("common.code")}</TableHead>
-                <TableHead>{t("common.description")}</TableHead>
-                <TableHead>{t("common.startDate")}</TableHead>
-                <TableHead>{t("common.endDate")}</TableHead>
+                <TableHead>Category</TableHead>
+                <TableHead>Complexity</TableHead>
+                <TableHead>KRAs</TableHead>
                 <TableHead>{t("common.status")}</TableHead>
                 <TableHead className="w-[100px]">{t("common.actions")}</TableHead>
               </TableRow>
@@ -333,11 +461,33 @@ export default function ResponsibilitiesPage() {
               ) : (
                 filteredResponsibilities.map((responsibility) => (
                   <TableRow key={responsibility.id}>
-                    <TableCell className="font-medium">{responsibility.name}</TableCell>
+                    <TableCell>
+                      <div>
+                        <span className="font-medium">{responsibility.name}</span>
+                        {responsibility.description && (
+                          <p className="text-xs text-muted-foreground truncate max-w-xs">
+                            {responsibility.description}
+                          </p>
+                        )}
+                      </div>
+                    </TableCell>
                     <TableCell>{responsibility.code}</TableCell>
-                    <TableCell className="max-w-xs truncate">{responsibility.description || "-"}</TableCell>
-                    <TableCell>{responsibility.start_date}</TableCell>
-                    <TableCell>{responsibility.end_date || "-"}</TableCell>
+                    <TableCell>
+                      <ResponsibilityCategoryBadge category={responsibility.category} size="sm" />
+                    </TableCell>
+                    <TableCell>
+                      <ComplexityLevelIndicator level={responsibility.complexity_level} size="sm" />
+                    </TableCell>
+                    <TableCell>
+                      {responsibility.key_result_areas.length > 0 ? (
+                        <Badge variant="secondary" className="text-xs">
+                          <Target className="h-3 w-3 mr-1" />
+                          {responsibility.key_result_areas.length} KRAs
+                        </Badge>
+                      ) : (
+                        <span className="text-muted-foreground text-xs">—</span>
+                      )}
+                    </TableCell>
                     <TableCell>
                       <Badge variant={responsibility.is_active ? "default" : "secondary"}>
                         {responsibility.is_active ? t("common.active") : t("common.inactive")}
@@ -373,13 +523,31 @@ export default function ResponsibilitiesPage() {
 
         {/* Create/Edit Dialog */}
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogContent className="max-w-lg">
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>
                 {selectedResponsibility ? t("workforce.responsibilities.editResponsibility") : t("workforce.responsibilities.createResponsibility")}
               </DialogTitle>
             </DialogHeader>
             <div className="space-y-4 py-4">
+              {/* AI Enrich Button */}
+              <div className="flex justify-end">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleEnrichAll}
+                  disabled={isGenerating || !formData.name.trim()}
+                >
+                  {isGenerating ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <Sparkles className="h-4 w-4 mr-2" />
+                  )}
+                  AI Enrich All Fields
+                </Button>
+              </div>
+
               <div className="space-y-2">
                 <Label>{t("common.company")} *</Label>
                 <Select
@@ -418,14 +586,127 @@ export default function ResponsibilitiesPage() {
                 </div>
               </div>
 
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Category</Label>
+                  <Select
+                    value={formData.category || "none"}
+                    onValueChange={(value) => setFormData({ ...formData, category: value === "none" ? "" : value as ResponsibilityCategory })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">No Category</SelectItem>
+                      {categoryOptions.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Complexity Level</Label>
+                  <Select
+                    value={formData.complexity_level?.toString() || "none"}
+                    onValueChange={(value) => setFormData({ ...formData, complexity_level: value === "none" ? null : parseInt(value) })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select complexity" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">Not Set</SelectItem>
+                      {complexityOptions.map((option) => (
+                        <SelectItem key={option.value} value={option.value.toString()}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
               <div className="space-y-2">
-                <Label>{t("common.description")}</Label>
+                <div className="flex items-center justify-between">
+                  <Label>{t("common.description")}</Label>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleGenerateDescription}
+                    disabled={isGenerating || !formData.name.trim()}
+                  >
+                    {isGenerating ? (
+                      <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                    ) : (
+                      <Sparkles className="h-3 w-3 mr-1" />
+                    )}
+                    Generate
+                  </Button>
+                </div>
                 <Textarea
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   placeholder="Describe this responsibility..."
                   rows={3}
                 />
+              </div>
+
+              {/* Key Result Areas */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label>Key Result Areas (KRAs)</Label>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleSuggestKRAs}
+                    disabled={isGenerating || !formData.name.trim()}
+                  >
+                    {isGenerating ? (
+                      <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                    ) : (
+                      <Sparkles className="h-3 w-3 mr-1" />
+                    )}
+                    Suggest KRAs
+                  </Button>
+                </div>
+                
+                {formData.key_result_areas.length > 0 && (
+                  <div className="space-y-2 mb-2">
+                    {formData.key_result_areas.map((kra, index) => (
+                      <div key={index} className="flex items-start gap-2 p-2 bg-muted/50 rounded-md">
+                        <Target className="h-4 w-4 mt-0.5 text-muted-foreground shrink-0" />
+                        <span className="flex-1 text-sm">{kra}</span>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6 shrink-0"
+                          onClick={() => removeKRA(index)}
+                        >
+                          <X className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                
+                <div className="flex gap-2">
+                  <Input
+                    value={newKRA}
+                    onChange={(e) => setNewKRA(e.target.value)}
+                    placeholder="Add a measurable KRA..."
+                    onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addKRA())}
+                  />
+                  <Button type="button" variant="outline" size="sm" onClick={addKRA}>
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Define measurable outcomes for this responsibility
+                </p>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
