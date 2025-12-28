@@ -166,6 +166,11 @@ import CompaRatioPage from "./pages/compensation/CompaRatioPage";
 import CompensationAnalyticsPage from "./pages/compensation/CompensationAnalyticsPage";
 import SpinalPointsPage from "./pages/compensation/SpinalPointsPage";
 import EmployeeCompensationPage from "./pages/compensation/EmployeeCompensationPage";
+import PositionBudgetDashboardPage from "./pages/compensation/PositionBudgetDashboardPage";
+import PositionBudgetPlanPage from "./pages/compensation/PositionBudgetPlanPage";
+import PositionBudgetWhatIfPage from "./pages/compensation/PositionBudgetWhatIfPage";
+import PositionBudgetApprovalsPage from "./pages/compensation/PositionBudgetApprovalsPage";
+import PositionBudgetCostConfigPage from "./pages/compensation/PositionBudgetCostConfigPage";
 
 // Benefits pages
 import BenefitsDashboardPage from "./pages/benefits/BenefitsDashboardPage";
@@ -2510,6 +2515,46 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
                   <SpinalPointsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/compensation/position-budgeting"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <PositionBudgetDashboardPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/compensation/position-budgeting/plans"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <PositionBudgetPlanPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/compensation/position-budgeting/what-if"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <PositionBudgetWhatIfPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/compensation/position-budgeting/approvals"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <PositionBudgetApprovalsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/compensation/position-budgeting/cost-config"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <PositionBudgetCostConfigPage />
                 </ProtectedRoute>
               }
             />
