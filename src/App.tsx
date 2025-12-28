@@ -327,6 +327,7 @@ import RetroactivePayConfigPage from "./pages/payroll/RetroactivePayConfigPage";
 import RetroactivePayGeneratePage from "./pages/payroll/RetroactivePayGeneratePage";
 import PayrollCountryDocumentationPage from "./pages/payroll/PayrollCountryDocumentationPage";
 import SalaryAdvancesPage from "./pages/payroll/SalaryAdvancesPage";
+import SavingsProgramsPage from "./pages/payroll/SavingsProgramsPage";
 import GLDashboardPage from "./pages/payroll/gl/GLDashboardPage";
 import GLAccountsPage from "./pages/payroll/gl/GLAccountsPage";
 import CostCenterSegmentsPage from "./pages/payroll/gl/CostCenterSegmentsPage";
@@ -2107,6 +2108,14 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
                   <SalaryAdvancesPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/payroll/savings-programs"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
+                  <SavingsProgramsPage />
                 </ProtectedRoute>
               }
             />
