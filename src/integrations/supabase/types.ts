@@ -32081,6 +32081,72 @@ export type Database = {
           },
         ]
       }
+      overtime_rate_tiers: {
+        Row: {
+          applies_to: string[] | null
+          company_id: string
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean | null
+          max_hours: number | null
+          min_hours: number
+          multiplier: number
+          payroll_rule_id: string | null
+          priority: number | null
+          tier_code: string
+          tier_name: string
+          updated_at: string
+        }
+        Insert: {
+          applies_to?: string[] | null
+          company_id: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          max_hours?: number | null
+          min_hours?: number
+          multiplier?: number
+          payroll_rule_id?: string | null
+          priority?: number | null
+          tier_code: string
+          tier_name: string
+          updated_at?: string
+        }
+        Update: {
+          applies_to?: string[] | null
+          company_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          max_hours?: number | null
+          min_hours?: number
+          multiplier?: number
+          payroll_rule_id?: string | null
+          priority?: number | null
+          tier_code?: string
+          tier_name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "overtime_rate_tiers_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "overtime_rate_tiers_payroll_rule_id_fkey"
+            columns: ["payroll_rule_id"]
+            isOneToOne: false
+            referencedRelation: "payroll_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       overtime_requests: {
         Row: {
           actual_hours: number | null
@@ -33365,8 +33431,12 @@ export type Database = {
           break_deduction_minutes: number | null
           code: string
           company_id: string
+          consecutive_day_multiplier: number | null
+          consecutive_day_threshold: number | null
           created_at: string
           description: string | null
+          double_half_multiplier: number | null
+          double_time_multiplier: number | null
           end_date: string | null
           holiday_multiplier: number | null
           id: string
@@ -33374,8 +33444,14 @@ export type Database = {
           name: string
           night_shift_multiplier: number | null
           overtime_multiplier: number | null
+          overtime_tier_1_threshold: number | null
+          overtime_tier_2_threshold: number | null
+          overtime_tier_3_threshold: number | null
+          overtime_tier_4_threshold: number | null
+          quadruple_time_multiplier: number | null
           rule_type: string
           start_date: string
+          triple_time_multiplier: number | null
           updated_at: string
           weekend_multiplier: number | null
         }
@@ -33383,8 +33459,12 @@ export type Database = {
           break_deduction_minutes?: number | null
           code: string
           company_id: string
+          consecutive_day_multiplier?: number | null
+          consecutive_day_threshold?: number | null
           created_at?: string
           description?: string | null
+          double_half_multiplier?: number | null
+          double_time_multiplier?: number | null
           end_date?: string | null
           holiday_multiplier?: number | null
           id?: string
@@ -33392,8 +33472,14 @@ export type Database = {
           name: string
           night_shift_multiplier?: number | null
           overtime_multiplier?: number | null
+          overtime_tier_1_threshold?: number | null
+          overtime_tier_2_threshold?: number | null
+          overtime_tier_3_threshold?: number | null
+          overtime_tier_4_threshold?: number | null
+          quadruple_time_multiplier?: number | null
           rule_type: string
           start_date?: string
+          triple_time_multiplier?: number | null
           updated_at?: string
           weekend_multiplier?: number | null
         }
@@ -33401,8 +33487,12 @@ export type Database = {
           break_deduction_minutes?: number | null
           code?: string
           company_id?: string
+          consecutive_day_multiplier?: number | null
+          consecutive_day_threshold?: number | null
           created_at?: string
           description?: string | null
+          double_half_multiplier?: number | null
+          double_time_multiplier?: number | null
           end_date?: string | null
           holiday_multiplier?: number | null
           id?: string
@@ -33410,8 +33500,14 @@ export type Database = {
           name?: string
           night_shift_multiplier?: number | null
           overtime_multiplier?: number | null
+          overtime_tier_1_threshold?: number | null
+          overtime_tier_2_threshold?: number | null
+          overtime_tier_3_threshold?: number | null
+          overtime_tier_4_threshold?: number | null
+          quadruple_time_multiplier?: number | null
           rule_type?: string
           start_date?: string
+          triple_time_multiplier?: number | null
           updated_at?: string
           weekend_multiplier?: number | null
         }
@@ -43211,6 +43307,53 @@ export type Database = {
             columns: ["requester_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      time_clock_breaks: {
+        Row: {
+          break_end: string | null
+          break_start: string
+          break_type: string | null
+          created_at: string
+          duration_minutes: number | null
+          id: string
+          is_paid: boolean | null
+          notes: string | null
+          time_clock_entry_id: string
+          updated_at: string
+        }
+        Insert: {
+          break_end?: string | null
+          break_start: string
+          break_type?: string | null
+          created_at?: string
+          duration_minutes?: number | null
+          id?: string
+          is_paid?: boolean | null
+          notes?: string | null
+          time_clock_entry_id: string
+          updated_at?: string
+        }
+        Update: {
+          break_end?: string | null
+          break_start?: string
+          break_type?: string | null
+          created_at?: string
+          duration_minutes?: number | null
+          id?: string
+          is_paid?: boolean | null
+          notes?: string | null
+          time_clock_entry_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "time_clock_breaks_time_clock_entry_id_fkey"
+            columns: ["time_clock_entry_id"]
+            isOneToOne: false
+            referencedRelation: "time_clock_entries"
             referencedColumns: ["id"]
           },
         ]
