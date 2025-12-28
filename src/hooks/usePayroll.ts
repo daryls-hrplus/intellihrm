@@ -1168,6 +1168,42 @@ export function usePayroll() {
           }
         }
         
+        // Add approved expense claims as non-taxable reimbursements
+        let expenseReimbursementTotal = 0;
+        const expenseClaimsBreakdown: {
+          claim_id: string;
+          claim_number: string;
+          claim_date: string;
+          amount: number;
+          description: string | null;
+        }[] = [];
+        
+        const { data: pendingExpenseClaims } = await supabase
+          .from("expense_claims")
+          .select("id, claim_number, claim_date, total_amount, description, currency")
+          .eq("employee_id", emp.employee_id)
+          .eq("pay_period_id", payPeriodId)
+          .eq("status", "pending_payment");
+        
+        for (const claim of pendingExpenseClaims || []) {
+          const claimAmount = Number(claim.total_amount) || 0;
+          // Convert expense claim to local currency if needed
+          const claimCurrencyId = claim.currency ? currencyCodeToIdMap.get(String(claim.currency).toUpperCase()) || null : null;
+          const { localAmount, exchangeRateUsed, wasConverted } = convertToLocalCurrency(claimAmount, claimCurrencyId);
+          
+          expenseReimbursementTotal += localAmount;
+          expenseClaimsBreakdown.push({
+            claim_id: claim.id,
+            claim_number: claim.claim_number,
+            claim_date: claim.claim_date,
+            amount: localAmount,
+            description: claim.description,
+          });
+        }
+        
+        // Add expense reimbursements to gross pay (non-taxable)
+        grossPay += expenseReimbursementTotal;
+        
         // Add period deductions (non-statutory)
         const { data: periodDeductions } = await supabase
           .from("employee_period_deductions")
@@ -1319,6 +1355,10 @@ export function usePayroll() {
             retroactive_pay: retroactiveBreakdown.length > 0 ? {
               total: retroactivePayTotal,
               items: retroactiveBreakdown,
+            } : undefined,
+            expense_reimbursements: expenseClaimsBreakdown.length > 0 ? {
+              total: expenseReimbursementTotal,
+              claims: expenseClaimsBreakdown,
             } : undefined,
             statutory_deductions: statutoryTypes && rateBands ? 
               calculateStatutoryDeductions(
@@ -1541,6 +1581,13 @@ export function usePayroll() {
   const processPayment = async (payrollRunId: string) => {
     setIsLoading(true);
     try {
+      // Get pay period ID from the payroll run
+      const { data: runData } = await supabase
+        .from("payroll_runs")
+        .select("pay_period_id")
+        .eq("id", payrollRunId)
+        .single();
+      
       const { error } = await supabase.from("payroll_runs").update({
         status: 'paid',
         paid_at: new Date().toISOString(),
@@ -1552,6 +1599,15 @@ export function usePayroll() {
       await supabase.from("employee_payroll").update({
         status: 'paid'
       }).eq("payroll_run_id", payrollRunId);
+      
+      // Mark expense claims as paid for this pay period
+      if (runData?.pay_period_id) {
+        await supabase.from("expense_claims").update({
+          status: 'paid',
+          paid_at: new Date().toISOString(),
+        }).eq("pay_period_id", runData.pay_period_id)
+         .eq("status", "pending_payment");
+      }
       
       toast.success("Payment processed");
       return true;
