@@ -20,6 +20,11 @@ import {
   createSavingsTransactions,
   type EmployeeSavingsDeductions,
 } from "@/utils/payroll/savingsDeductionService";
+import {
+  calculateLeaveDeductions,
+  saveLeavePayrollTransactions,
+  type LeaveDeductionResult,
+} from "@/utils/payroll/leaveDeductionService";
 
 export interface PayPeriodSchedule {
   id: string;

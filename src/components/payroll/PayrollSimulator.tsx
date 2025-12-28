@@ -25,6 +25,7 @@ import { usePayGroupMultiCurrency, useEmployeeCurrencyPreference, calculateNetPa
 import { useCurrencies, Currency } from "@/hooks/useCurrencies";
 import { useCompanyLocalCurrency } from "@/hooks/useCurrencies";
 import { GLSimulationPreview } from "./GLSimulationPreview";
+import { LeavePayrollPreview } from "./LeavePayrollPreview";
 
 interface PayrollSimulatorProps {
   companyId: string;
@@ -1777,7 +1778,14 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId, payGroupI
         </Card>
       )}
 
-      {/* GL Simulation Preview Tab */}
+      {/* Leave Impact Preview */}
+      <LeavePayrollPreview
+        companyId={companyId}
+        employeeId={employeeId}
+        payPeriodId={payPeriodId}
+      />
+
+      {/* GL Simulation Preview */}
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-base flex items-center gap-2">
