@@ -14,18 +14,33 @@ serve(async (req) => {
   try {
     const { competencyId, competencyName, competencyDescription, competencyCategory, companyId } = await req.json();
     
+    console.log('Request params:', { competencyId, competencyName, competencyCategory, companyId });
+    
+    if (!competencyId || !competencyName) {
+      return new Response(JSON.stringify({ error: 'competencyId and competencyName are required' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Fetch available skills for this company
-    const { data: skills, error: skillsError } = await supabase
+    // Fetch available skills - handle missing companyId gracefully
+    let query = supabase
       .from('skills_competencies')
       .select('id, name, code, description, category')
       .eq('type', 'SKILL')
-      .eq('status', 'active')
-      .or(`company_id.eq.${companyId},is_global.eq.true`)
-      .limit(200);
+      .eq('status', 'active');
+    
+    if (companyId) {
+      query = query.or(`company_id.eq.${companyId},is_global.eq.true`);
+    } else {
+      query = query.eq('is_global', true);
+    }
+    
+    const { data: skills, error: skillsError } = await query.limit(200);
 
     if (skillsError) {
       console.error('Error fetching skills:', skillsError);
