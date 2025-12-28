@@ -41,7 +41,7 @@ import {
 } from "@/components/ui/tooltip";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Plus, Loader2, Target, Info, ChevronsUpDown, Check, ArrowRight, Sparkles } from "lucide-react";
+import { Plus, Loader2, Target, Info, ChevronsUpDown, Check, ArrowRight, Sparkles, AlertTriangle, CheckCircle2 } from "lucide-react";
 import { getTodayString, formatDateForDisplay } from "@/utils/dateUtils";
 import { ProficiencyLevelPicker } from "@/components/capabilities/ProficiencyLevelPicker";
 import { CompetencyRequirementRow } from "./CompetencyRequirementRow";
@@ -548,6 +548,30 @@ export function JobCapabilityRequirementsManager({
           Add Competency
         </Button>
       </div>
+
+      {/* Skill Mapping Summary */}
+      {requirements.length > 0 && (
+        <div className="flex items-center gap-4 text-sm">
+          {(() => {
+            const withSkills = requirements.filter(r => (linkedSkillsMap[r.capability_id]?.length || 0) > 0).length;
+            const withoutSkills = requirements.length - withSkills;
+            return (
+              <>
+                <div className="flex items-center gap-1.5 text-muted-foreground">
+                  <CheckCircle2 className="h-4 w-4 text-green-600" />
+                  <span><strong className="text-foreground">{withSkills}</strong> with skills mapped</span>
+                </div>
+                {withoutSkills > 0 && (
+                  <div className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400">
+                    <AlertTriangle className="h-4 w-4" />
+                    <span><strong>{withoutSkills}</strong> without skill mappings</span>
+                  </div>
+                )}
+              </>
+            );
+          })()}
+        </div>
+      )}
 
       <div className="rounded-lg border">
         <Table>
