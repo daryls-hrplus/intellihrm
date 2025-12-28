@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, Fragment } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -9,11 +9,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
 import {
   Popover,
   PopoverContent,
@@ -149,27 +144,30 @@ export function CompetencyRequirementRow({
   };
 
   return (
-    <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+    <Fragment>
       <TableRow className="group hover:bg-muted/50">
-        <TableCell className="font-medium min-w-[220px]">
+        <TableCell className="font-medium">
           <div className="flex items-center gap-2">
             {hasLinkedSkills ? (
-              <CollapsibleTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-6 w-6 shrink-0">
-                  {isOpen ? (
-                    <ChevronDown className="h-4 w-4" />
-                  ) : (
-                    <ChevronRight className="h-4 w-4" />
-                  )}
-                </Button>
-              </CollapsibleTrigger>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-6 w-6 shrink-0"
+                onClick={() => setIsOpen(!isOpen)}
+              >
+                {isOpen ? (
+                  <ChevronDown className="h-4 w-4" />
+                ) : (
+                  <ChevronRight className="h-4 w-4" />
+                )}
+              </Button>
             ) : (
               <div className="w-6 shrink-0" />
             )}
             <div className="flex flex-col min-w-0">
               <div className="flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-purple-500 shrink-0" />
-                <span className="font-medium truncate">{requirement.skills_competencies?.name}</span>
+                <span className="font-medium">{requirement.skills_competencies?.name}</span>
               </div>
               <div className="flex items-center gap-1.5 ml-3.5 text-xs text-muted-foreground">
                 <span className="font-mono">{requirement.skills_competencies?.code}</span>
@@ -248,7 +246,7 @@ export function CompetencyRequirementRow({
         </TableCell>
       </TableRow>
 
-      <CollapsibleContent asChild>
+      {isOpen && (
         <>
           {isLoadingSkills ? (
             <TableRow className="bg-muted/30">
@@ -456,7 +454,7 @@ export function CompetencyRequirementRow({
             })
           )}
         </>
-      </CollapsibleContent>
-    </Collapsible>
+      )}
+    </Fragment>
   );
 }
