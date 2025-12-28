@@ -13,13 +13,19 @@ interface AnalysisRequest {
     | "suggest_synonyms" 
     | "suggest_adjacent"
     | "analyze_gap"
-    | "generate_proficiency_indicators";
+    | "generate_proficiency_indicators"
+    | "suggest_job_competencies";
   text?: string;
   capability?: { id: string; name: string; description?: string; type: string; code: string };
   capabilities?: { id: string; name: string; code: string }[];
   companyId?: string;
   employeeId?: string;
   jobProfileId?: string;
+  jobName?: string;
+  jobDescription?: string;
+  jobLevel?: string;
+  jobGrade?: string;
+  availableCompetencies?: { id: string; name: string; code: string; category: string }[];
 }
 
 serve(async (req) => {
@@ -38,7 +44,7 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     const body = await req.json() as AnalysisRequest;
-    const { action, text, capability, capabilities, companyId, employeeId, jobProfileId } = body;
+    const { action, text, capability, capabilities, companyId, employeeId, jobProfileId, jobName, jobDescription, jobLevel, jobGrade, availableCompetencies } = body;
     console.log(`Processing capability AI action: ${action}`);
 
     let result: unknown;
@@ -61,6 +67,16 @@ serve(async (req) => {
         break;
       case "generate_proficiency_indicators":
         result = await generateProficiencyIndicators(capability!, LOVABLE_API_KEY);
+        break;
+      case "suggest_job_competencies":
+        result = await suggestJobCompetencies(
+          jobName || "",
+          jobDescription,
+          jobLevel,
+          jobGrade,
+          availableCompetencies || [],
+          LOVABLE_API_KEY
+        );
         break;
       default:
         throw new Error(`Unknown action: ${action}`);
@@ -618,4 +634,154 @@ Ensure progression is clear and each level builds upon the previous.`;
   }
 
   return JSON.parse(toolCall.function.arguments);
+}
+
+async function suggestJobCompetencies(
+  jobName: string,
+  jobDescription: string | undefined,
+  jobLevel: string | undefined,
+  jobGrade: string | undefined,
+  availableCompetencies: { id: string; name: string; code: string; category: string }[],
+  apiKey: string
+) {
+  console.log(`Suggesting competencies for job: ${jobName}, level: ${jobLevel}`);
+
+  if (!availableCompetencies || availableCompetencies.length === 0) {
+    return { suggestions: [] };
+  }
+
+  // Map job levels to expected proficiency ranges
+  const levelProficiencyMap: Record<string, { min: number; typical: number; max: number }> = {
+    "entry": { min: 1, typical: 2, max: 2 },
+    "junior": { min: 1, typical: 2, max: 3 },
+    "associate": { min: 2, typical: 2, max: 3 },
+    "professional": { min: 2, typical: 3, max: 4 },
+    "senior": { min: 3, typical: 4, max: 4 },
+    "specialist": { min: 3, typical: 4, max: 5 },
+    "lead": { min: 3, typical: 4, max: 5 },
+    "principal": { min: 4, typical: 4, max: 5 },
+    "manager": { min: 3, typical: 4, max: 4 },
+    "senior manager": { min: 4, typical: 4, max: 5 },
+    "director": { min: 4, typical: 5, max: 5 },
+    "vp": { min: 4, typical: 5, max: 5 },
+    "executive": { min: 4, typical: 5, max: 5 },
+    "c-level": { min: 5, typical: 5, max: 5 },
+  };
+
+  const normalizedLevel = jobLevel?.toLowerCase().trim() || "";
+  const levelConfig = levelProficiencyMap[normalizedLevel] || { min: 2, typical: 3, max: 4 };
+
+  const competencyList = availableCompetencies
+    .slice(0, 50) // Limit to avoid token overflow
+    .map(c => `- ${c.name} (${c.code}) [${c.category}]`)
+    .join("\n");
+
+  const systemPrompt = `You are an expert HR consultant specializing in competency frameworks and job design.
+Your task is to recommend the most relevant competencies for a job role and suggest appropriate proficiency levels.
+
+Job Level Context:
+- Job Level: ${jobLevel || "Not specified"}
+- Job Grade: ${jobGrade || "Not specified"}
+- Expected proficiency range for this level: ${levelConfig.min}-${levelConfig.max} (typical: ${levelConfig.typical})
+
+Proficiency Scale:
+1 = Basic/Awareness - Can perform with guidance
+2 = Developing - Can perform independently in routine situations
+3 = Intermediate/Proficient - Can handle complex situations, guides others
+4 = Advanced - Expert level, leads initiatives, mentors others
+5 = Expert/Master - Sets strategy, drives innovation, thought leader
+
+Guidelines for level assignment:
+- Entry/Junior roles: Levels 1-2
+- Professional/Senior roles: Levels 3-4  
+- Manager/Director roles: Levels 3-5
+- Executive roles: Levels 4-5
+
+Select 3-6 most relevant competencies from the available list and assign appropriate proficiency levels.`;
+
+  const userPrompt = `Job Title: ${jobName}
+${jobDescription ? `Job Description: ${jobDescription}` : ""}
+${jobLevel ? `Job Level: ${jobLevel}` : ""}
+${jobGrade ? `Job Grade: ${jobGrade}` : ""}
+
+Available Competencies:
+${competencyList}
+
+Select the most relevant competencies for this role and suggest appropriate proficiency levels.`;
+
+  const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: "google/gemini-2.5-flash",
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userPrompt },
+      ],
+      tools: [
+        {
+          type: "function",
+          function: {
+            name: "suggest_competencies",
+            description: "Returns competency suggestions with proficiency levels",
+            parameters: {
+              type: "object",
+              properties: {
+                suggestions: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      capability_id: { type: "string", description: "The ID of the competency from the available list" },
+                      name: { type: "string", description: "Name of the competency" },
+                      code: { type: "string", description: "Code of the competency" },
+                      suggested_level: { type: "integer", minimum: 1, maximum: 5, description: "Recommended proficiency level" },
+                      confidence: { type: "number", minimum: 0, maximum: 1 },
+                      reason: { type: "string", description: "Why this competency is relevant and why this level" },
+                    },
+                    required: ["name", "suggested_level", "reason"],
+                  },
+                },
+              },
+              required: ["suggestions"],
+            },
+          },
+        },
+      ],
+      tool_choice: { type: "function", function: { name: "suggest_competencies" } },
+    }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error("AI API error:", errorText);
+    throw new Error("Failed to suggest competencies");
+  }
+
+  const data = await response.json();
+  const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
+
+  if (!toolCall?.function?.arguments) {
+    return { suggestions: [] };
+  }
+
+  const result = JSON.parse(toolCall.function.arguments);
+  
+  // Match suggestions back to actual competency IDs
+  result.suggestions = result.suggestions.map((s: any) => {
+    const matched = availableCompetencies.find(
+      c => c.id === s.capability_id || 
+           c.name.toLowerCase() === s.name?.toLowerCase() ||
+           c.code.toLowerCase() === s.code?.toLowerCase()
+    );
+    return {
+      ...s,
+      capability_id: matched?.id || s.capability_id,
+    };
+  });
+
+  return result;
 }

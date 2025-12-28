@@ -99,6 +99,8 @@ interface LinkedSkill {
 interface JobInfo {
   name: string;
   description?: string;
+  job_level?: string;
+  job_grade?: string;
 }
 
 interface JobCapabilityRequirementsManagerProps {
@@ -140,7 +142,7 @@ export function JobCapabilityRequirementsManager({
   const fetchJobInfo = async () => {
     const { data, error } = await supabase
       .from("jobs")
-      .select("name, description")
+      .select("name, description, job_level, job_grade")
       .eq("id", jobId)
       .single();
     
@@ -277,10 +279,10 @@ export function JobCapabilityRequirementsManager({
     [requirements]
   );
 
-  const handleOpenDialog = (preselectedCapability?: Capability) => {
+  const handleOpenDialog = (preselectedCapability?: Capability, suggestedLevel?: number) => {
     setFormData({
       capability_id: preselectedCapability?.id || "",
-      required_proficiency_level: "3",
+      required_proficiency_level: suggestedLevel?.toString() || "3",
       weighting: "10",
       is_required: true,
       is_preferred: false,
@@ -291,8 +293,8 @@ export function JobCapabilityRequirementsManager({
     setDialogOpen(true);
   };
 
-  const handleAISuggestionSelect = (capability: Capability) => {
-    handleOpenDialog(capability);
+  const handleAISuggestionSelect = (capability: Capability, suggestedLevel?: number) => {
+    handleOpenDialog(capability, suggestedLevel);
   };
 
   const calculateOverlappingWeight = (
@@ -475,6 +477,8 @@ export function JobCapabilityRequirementsManager({
         <AICompetencySuggestions
           jobName={jobInfo.name}
           jobDescription={jobInfo.description}
+          jobLevel={jobInfo.job_level}
+          jobGrade={jobInfo.job_grade}
           companyId={companyId}
           availableCompetencies={capabilities}
           existingRequirementIds={existingRequirementIds}

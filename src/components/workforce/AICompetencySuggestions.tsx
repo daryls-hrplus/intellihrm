@@ -13,7 +13,8 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Sparkles, ChevronDown, ChevronRight, Loader2, RefreshCw, Check, Plus } from "lucide-react";
-import { useCapabilityAIAnalyzer } from "@/hooks/capabilities/useCapabilityAIAnalyzer";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface Capability {
   id: string;
@@ -25,6 +26,7 @@ interface Capability {
 
 interface SuggestedCapability {
   name: string;
+  suggestedLevel?: number;
   confidence?: number;
   reason?: string;
   matchedCapability?: Capability;
@@ -33,15 +35,19 @@ interface SuggestedCapability {
 interface AICompetencySuggestionsProps {
   jobName: string;
   jobDescription?: string;
+  jobLevel?: string;
+  jobGrade?: string;
   companyId: string;
   availableCompetencies: Capability[];
   existingRequirementIds: string[];
-  onSelectCompetency: (capability: Capability) => void;
+  onSelectCompetency: (capability: Capability, suggestedLevel?: number) => void;
 }
 
 export function AICompetencySuggestions({
   jobName,
   jobDescription,
+  jobLevel,
+  jobGrade,
   companyId,
   availableCompetencies,
   existingRequirementIds,
@@ -50,32 +56,55 @@ export function AICompetencySuggestions({
   const [isOpen, setIsOpen] = useState(true);
   const [suggestions, setSuggestions] = useState<SuggestedCapability[]>([]);
   const [addedIds, setAddedIds] = useState<Set<string>>(new Set());
-  const { analyzing, inferSkillsFromText } = useCapabilityAIAnalyzer();
+  const [analyzing, setAnalyzing] = useState(false);
 
   const fetchSuggestions = async () => {
-    const text = `Job Title: ${jobName}\n${jobDescription ? `Description: ${jobDescription}` : ""}`;
-    const result = await inferSkillsFromText(text, companyId);
-    
-    if (result?.skills) {
-      // Match AI suggestions to actual competencies in the system
-      const matched = result.skills
-        .filter((s: any) => s.type === "COMPETENCY" || s.category === "behavioral" || s.category === "leadership")
-        .map((s: any) => {
+    setAnalyzing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("capability-ai-analyzer", {
+        body: { 
+          action: "suggest_job_competencies", 
+          jobName,
+          jobDescription,
+          jobLevel,
+          jobGrade,
+          companyId,
+          availableCompetencies: availableCompetencies.map(c => ({
+            id: c.id,
+            name: c.name,
+            code: c.code,
+            category: c.category
+          }))
+        },
+      });
+      
+      if (error) throw error;
+      
+      if (data?.suggestions) {
+        // Match AI suggestions to actual competencies in the system
+        const matched = data.suggestions.map((s: any) => {
           const matchedCap = availableCompetencies.find(
             (c) =>
-              c.name.toLowerCase() === s.name.toLowerCase() ||
-              c.code.toLowerCase() === s.name.toLowerCase().replace(/\s+/g, "_")
+              c.id === s.capability_id ||
+              c.name.toLowerCase() === s.name?.toLowerCase() ||
+              c.code.toLowerCase() === s.code?.toLowerCase()
           );
           return {
             name: s.name,
+            suggestedLevel: s.suggested_level,
             confidence: s.confidence,
             reason: s.reason,
             matchedCapability: matchedCap,
           };
-        })
-        .filter((s: SuggestedCapability) => s.matchedCapability); // Only show if we have a match
-      
-      setSuggestions(matched);
+        }).filter((s: SuggestedCapability) => s.matchedCapability);
+        
+        setSuggestions(matched);
+      }
+    } catch (error) {
+      console.error("Error fetching AI suggestions:", error);
+      toast.error("Failed to get AI suggestions");
+    } finally {
+      setAnalyzing(false);
     }
   };
 
@@ -87,7 +116,7 @@ export function AICompetencySuggestions({
 
   const handleAddSuggestion = (suggestion: SuggestedCapability) => {
     if (suggestion.matchedCapability) {
-      onSelectCompetency(suggestion.matchedCapability);
+      onSelectCompetency(suggestion.matchedCapability, suggestion.suggestedLevel);
       setAddedIds((prev) => new Set([...prev, suggestion.matchedCapability!.id]));
     }
   };
@@ -98,6 +127,17 @@ export function AICompetencySuggestions({
       existingRequirementIds.includes(suggestion.matchedCapability.id) ||
       addedIds.has(suggestion.matchedCapability.id)
     );
+  };
+
+  const getLevelLabel = (level: number) => {
+    const labels: Record<number, string> = {
+      1: "Basic",
+      2: "Developing",
+      3: "Intermediate",
+      4: "Advanced",
+      5: "Expert"
+    };
+    return labels[level] || `L${level}`;
   };
 
   if (!jobName) return null;
@@ -118,6 +158,7 @@ export function AICompetencySuggestions({
                 <span className="font-medium">AI Suggested Competencies</span>
                 <Badge variant="secondary" className="text-xs">
                   Based on "{jobName}"
+                  {jobLevel && ` • ${jobLevel}`}
                 </Badge>
               </div>
             </Button>
@@ -160,7 +201,7 @@ export function AICompetencySuggestions({
                         <Button
                           variant={isAlreadyAdded(suggestion) ? "secondary" : "outline"}
                           size="sm"
-                          className={`h-8 gap-2 ${
+                          className={`h-auto py-1.5 gap-2 ${
                             isAlreadyAdded(suggestion)
                               ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 border-green-200"
                               : "hover:bg-purple-100 dark:hover:bg-purple-900/30"
@@ -173,10 +214,13 @@ export function AICompetencySuggestions({
                           ) : (
                             <Plus className="h-3 w-3" />
                           )}
-                          {suggestion.matchedCapability?.name || suggestion.name}
-                          {suggestion.confidence && (
-                            <Badge variant="outline" className="ml-1 text-xs">
-                              {Math.round(suggestion.confidence * 100)}%
+                          <span>{suggestion.matchedCapability?.name || suggestion.name}</span>
+                          {suggestion.suggestedLevel && (
+                            <Badge 
+                              variant="outline" 
+                              className="ml-1 text-xs bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400"
+                            >
+                              L{suggestion.suggestedLevel}
                             </Badge>
                           )}
                         </Button>
@@ -187,6 +231,12 @@ export function AICompetencySuggestions({
                           <p className="text-xs text-muted-foreground capitalize">
                             Category: {suggestion.matchedCapability?.category}
                           </p>
+                          {suggestion.suggestedLevel && (
+                            <p className="text-xs">
+                              <strong>Suggested Level:</strong> {getLevelLabel(suggestion.suggestedLevel)} (L{suggestion.suggestedLevel})
+                              {jobLevel && ` for ${jobLevel} role`}
+                            </p>
+                          )}
                           {suggestion.reason && (
                             <p className="text-xs">{suggestion.reason}</p>
                           )}
@@ -204,7 +254,7 @@ export function AICompetencySuggestions({
 
           <p className="text-xs text-muted-foreground mt-3 flex items-center gap-1">
             <Sparkles className="h-3 w-3" />
-            Click a suggestion to add it as a requirement. Competencies are evaluated in performance appraisals.
+            Click a suggestion to add it with the AI-recommended proficiency level. Competencies are evaluated in performance appraisals.
           </p>
         </CollapsibleContent>
       </div>
