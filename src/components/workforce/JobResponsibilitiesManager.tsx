@@ -81,6 +81,7 @@ export function JobResponsibilitiesManager({ jobId, companyId }: JobResponsibili
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
   const [formData, setFormData] = useState({
     responsibility_id: "",
     weighting: 0,
@@ -88,6 +89,18 @@ export function JobResponsibilitiesManager({ jobId, companyId }: JobResponsibili
     start_date: getTodayString(),
     end_date: "",
   });
+
+  const toggleRowExpanded = (id: string) => {
+    setExpandedRows(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
 
   const totalWeight = jobResponsibilities.reduce((sum, jr) => sum + Number(jr.weighting), 0);
 
@@ -108,7 +121,7 @@ export function JobResponsibilitiesManager({ jobId, companyId }: JobResponsibili
         notes,
         start_date,
         end_date,
-        responsibilities (name)
+        responsibilities (name, category, complexity_level, key_result_areas)
       `)
       .eq("job_id", jobId)
       .order("start_date", { ascending: false });
@@ -120,6 +133,11 @@ export function JobResponsibilitiesManager({ jobId, companyId }: JobResponsibili
       const mapped = (data || []).map((jr: any) => ({
         ...jr,
         responsibility_name: jr.responsibilities?.name,
+        responsibility_category: jr.responsibilities?.category,
+        responsibility_complexity: jr.responsibilities?.complexity_level,
+        responsibility_kras: Array.isArray(jr.responsibilities?.key_result_areas) 
+          ? jr.responsibilities.key_result_areas 
+          : [],
       }));
       setJobResponsibilities(mapped);
     }
@@ -129,7 +147,7 @@ export function JobResponsibilitiesManager({ jobId, companyId }: JobResponsibili
   const fetchResponsibilities = async () => {
     const { data, error } = await supabase
       .from("responsibilities")
-      .select("id, name, code")
+      .select("id, name, code, category, complexity_level, key_result_areas")
       .eq("company_id", companyId)
       .eq("is_active", true)
       .order("name");
@@ -137,7 +155,10 @@ export function JobResponsibilitiesManager({ jobId, companyId }: JobResponsibili
     if (error) {
       console.error("Error fetching responsibilities:", error);
     } else {
-      setResponsibilities(data || []);
+      setResponsibilities((data || []).map((r: any) => ({
+        ...r,
+        key_result_areas: Array.isArray(r.key_result_areas) ? r.key_result_areas : [],
+      })));
     }
   };
 
@@ -288,28 +309,51 @@ export function JobResponsibilitiesManager({ jobId, companyId }: JobResponsibili
           No responsibilities assigned to this job yet.
         </div>
       ) : (
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Responsibility</TableHead>
-              <TableHead className="w-24">Weight %</TableHead>
-              <TableHead>Start Date</TableHead>
-              <TableHead>End Date</TableHead>
-              <TableHead>Notes</TableHead>
-              <TableHead className="w-16"></TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {jobResponsibilities.map((jr) => (
-              <TableRow key={jr.id}>
-                <TableCell className="font-medium">{jr.responsibility_name}</TableCell>
-                <TableCell>{jr.weighting}%</TableCell>
-                <TableCell>{formatDateForDisplay(jr.start_date)}</TableCell>
-                <TableCell>
-                  {jr.end_date ? formatDateForDisplay(jr.end_date) : "—"}
-                </TableCell>
-                <TableCell className="text-muted-foreground">{jr.notes || "-"}</TableCell>
-                <TableCell>
+        <div className="space-y-2">
+          {jobResponsibilities.map((jr) => {
+            const hasKRAs = jr.responsibility_kras && jr.responsibility_kras.length > 0;
+            const isExpanded = expandedRows.has(jr.id);
+            
+            return (
+              <div key={jr.id} className="border rounded-lg overflow-hidden">
+                <div className="flex items-center gap-3 p-3 bg-card">
+                  {/* Expand button if has KRAs */}
+                  <div className="w-6">
+                    {hasKRAs && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6"
+                        onClick={() => toggleRowExpanded(jr.id)}
+                      >
+                        {isExpanded ? (
+                          <ChevronUp className="h-4 w-4" />
+                        ) : (
+                          <ChevronDown className="h-4 w-4" />
+                        )}
+                      </Button>
+                    )}
+                  </div>
+                  
+                  {/* Responsibility info */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-medium">{jr.responsibility_name}</span>
+                      <ResponsibilityCategoryBadge category={jr.responsibility_category} size="sm" showIcon={false} />
+                      <ComplexityLevelIndicator level={jr.responsibility_complexity} size="sm" />
+                    </div>
+                    <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1">
+                      <span>{formatDateForDisplay(jr.start_date)} → {jr.end_date ? formatDateForDisplay(jr.end_date) : "Ongoing"}</span>
+                      {jr.notes && <span className="truncate max-w-[200px]">{jr.notes}</span>}
+                    </div>
+                  </div>
+                  
+                  {/* Weight */}
+                  <div className="text-right shrink-0">
+                    <span className="font-semibold text-lg">{jr.weighting}%</span>
+                  </div>
+                  
+                  {/* Actions */}
                   <Button
                     variant="ghost"
                     size="icon"
@@ -317,11 +361,26 @@ export function JobResponsibilitiesManager({ jobId, companyId }: JobResponsibili
                   >
                     <Trash2 className="h-4 w-4 text-destructive" />
                   </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+                </div>
+                
+                {/* Expandable KRAs section */}
+                {hasKRAs && isExpanded && (
+                  <div className="px-4 py-3 bg-muted/30 border-t">
+                    <div className="text-xs font-medium text-muted-foreground mb-2">Key Result Areas</div>
+                    <div className="space-y-1.5">
+                      {jr.responsibility_kras?.map((kra, index) => (
+                        <div key={index} className="flex items-start gap-2 text-sm">
+                          <Target className="h-3.5 w-3.5 mt-0.5 text-primary shrink-0" />
+                          <span>{kra}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
       )}
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
