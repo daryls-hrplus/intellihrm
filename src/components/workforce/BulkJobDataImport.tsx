@@ -241,11 +241,13 @@ export function BulkJobDataImport({
           }
         }
       } else if (activeTab === "competencies") {
-        // Fetch competencies lookup
+        // Fetch competencies lookup from skills_competencies (unified capability registry)
         const { data: competencies } = await supabase
-          .from("competencies")
+          .from("skills_competencies")
           .select("id, code")
-          .eq("company_id", companyId);
+          .eq("company_id", companyId)
+          .eq("type", "COMPETENCY")
+          .eq("status", "active");
 
         const compLookup = new Map((competencies || []).map(c => [c.code.toUpperCase(), c.id]));
 
@@ -258,7 +260,14 @@ export function BulkJobDataImport({
           const jobId = jobLookup.get(row.data.job_code.toUpperCase());
           const competencyId = compLookup.get(row.data.competency_code.toUpperCase());
 
-          if (!jobId || !competencyId) {
+          if (!jobId) {
+            console.error(`Job not found: ${row.data.job_code}`);
+            failed++;
+            continue;
+          }
+          
+          if (!competencyId) {
+            console.error(`Competency not found: ${row.data.competency_code}`);
             failed++;
             continue;
           }
