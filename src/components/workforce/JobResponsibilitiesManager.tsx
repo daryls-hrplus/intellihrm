@@ -53,6 +53,7 @@ interface Responsibility {
   id: string;
   name: string;
   code: string;
+  description?: string | null;
   category?: ResponsibilityCategory | null;
   complexity_level?: number | null;
   key_result_areas?: string[];
@@ -147,7 +148,7 @@ export function JobResponsibilitiesManager({ jobId, companyId }: JobResponsibili
   const fetchResponsibilities = async () => {
     const { data, error } = await supabase
       .from("responsibilities")
-      .select("id, name, code, category, complexity_level, key_result_areas")
+      .select("id, name, code, description, category, complexity_level, key_result_areas")
       .eq("company_id", companyId)
       .eq("is_active", true)
       .order("name");
@@ -161,6 +162,9 @@ export function JobResponsibilitiesManager({ jobId, companyId }: JobResponsibili
       })));
     }
   };
+
+  // Get the selected responsibility details for preview
+  const selectedResponsibility = responsibilities.find(r => r.id === formData.responsibility_id);
 
   const handleOpenDialog = () => {
     setFormData({
@@ -384,82 +388,134 @@ export function JobResponsibilitiesManager({ jobId, companyId }: JobResponsibili
       )}
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent>
+        <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Add Responsibility to Job</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label>Responsibility *</Label>
-              <Select
-                value={formData.responsibility_id}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, responsibility_id: value })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select responsibility" />
-                </SelectTrigger>
-                <SelectContent>
-                  {responsibilities.map((r) => (
-                    <SelectItem key={r.id} value={r.id}>
-                      {r.name} ({r.code})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+          <div className="space-y-6 py-4">
+            {/* Section 1: Select & Preview */}
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Select Responsibility *</Label>
+                <Select
+                  value={formData.responsibility_id}
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, responsibility_id: value })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select responsibility from library" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {responsibilities.map((r) => (
+                      <SelectItem key={r.id} value={r.id}>
+                        <div className="flex items-center gap-2">
+                          <span>{r.name}</span>
+                          <span className="text-muted-foreground">({r.code})</span>
+                          <ResponsibilityCategoryBadge category={r.category} size="sm" showIcon={false} />
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Responsibility Preview */}
+              {selectedResponsibility && (
+                <div className="rounded-lg border bg-muted/30 p-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-medium">Responsibility Preview</h4>
+                    <span className="text-xs text-muted-foreground">Read-only from library</span>
+                  </div>
+                  
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <ResponsibilityCategoryBadge category={selectedResponsibility.category} showIcon />
+                    <ComplexityLevelIndicator level={selectedResponsibility.complexity_level} showLabel />
+                  </div>
+
+                  {selectedResponsibility.description && (
+                    <p className="text-sm text-muted-foreground">{selectedResponsibility.description}</p>
+                  )}
+
+                  {selectedResponsibility.key_result_areas && selectedResponsibility.key_result_areas.length > 0 && (
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+                        <Target className="h-3.5 w-3.5" />
+                        Key Result Areas ({selectedResponsibility.key_result_areas.length})
+                      </div>
+                      <div className="grid gap-1.5">
+                        {selectedResponsibility.key_result_areas.map((kra, index) => (
+                          <div key={index} className="flex items-start gap-2 text-sm bg-background rounded px-2 py-1.5">
+                            <span className="text-primary font-medium shrink-0">{index + 1}.</span>
+                            <span>{kra}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {(!selectedResponsibility.key_result_areas || selectedResponsibility.key_result_areas.length === 0) && (
+                    <p className="text-xs text-muted-foreground italic">No Key Result Areas defined for this responsibility</p>
+                  )}
+                </div>
+              )}
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Start Date *</Label>
-                <Input
-                  type="date"
-                  value={formData.start_date}
-                  onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
-                />
+            {/* Section 2: Assignment Details */}
+            <div className="space-y-4 border-t pt-4">
+              <h4 className="text-sm font-medium text-muted-foreground">Assignment Details</h4>
+              
+              <div className="grid grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label>Weight % *</Label>
+                  <Input
+                    type="number"
+                    min={1}
+                    max={100}
+                    value={formData.weighting}
+                    onChange={(e) =>
+                      setFormData({ ...formData, weighting: Number(e.target.value) })
+                    }
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Start Date *</Label>
+                  <Input
+                    type="date"
+                    value={formData.start_date}
+                    onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>End Date</Label>
+                  <Input
+                    type="date"
+                    value={formData.end_date}
+                    onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
+                  />
+                </div>
               </div>
-              <div className="space-y-2">
-                <Label>End Date</Label>
-                <Input
-                  type="date"
-                  value={formData.end_date}
-                  onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label>Weight % *</Label>
-              <Input
-                type="number"
-                min={1}
-                max={100}
-                value={formData.weighting}
-                onChange={(e) =>
-                  setFormData({ ...formData, weighting: Number(e.target.value) })
-                }
-              />
               <p className="text-xs text-muted-foreground">
                 Total weight for overlapping responsibilities cannot exceed 100%
               </p>
-            </div>
 
-            <div className="space-y-2">
-              <Label>Notes</Label>
-              <Textarea
-                value={formData.notes}
-                onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                placeholder="Optional notes..."
-              />
+              <div className="space-y-2">
+                <Label>Assignment Notes</Label>
+                <Textarea
+                  value={formData.notes}
+                  onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                  placeholder="Optional notes about this responsibility assignment..."
+                  rows={2}
+                />
+              </div>
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogOpen(false)}>
               Cancel
             </Button>
-            <Button onClick={handleSave} disabled={saving}>
-              {saving ? "Saving..." : "Add"}
+            <Button onClick={handleSave} disabled={saving || !formData.responsibility_id}>
+              {saving ? "Saving..." : "Add to Job"}
             </Button>
           </DialogFooter>
         </DialogContent>
