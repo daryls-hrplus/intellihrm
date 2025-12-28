@@ -10299,6 +10299,8 @@ export type Database = {
           garnishment_deductions: number | null
           gross_pay: number | null
           holiday_hours: number | null
+          hourly_rate: number | null
+          hours_based_earnings: number | null
           id: string
           net_pay: number | null
           notes: string | null
@@ -10307,6 +10309,7 @@ export type Database = {
           other_hours: number | null
           overtime_hours: number | null
           overtime_pay: number | null
+          overtime_rate: number | null
           pay_period_id: string
           payroll_run_id: string
           payslip_document_id: string | null
@@ -10320,6 +10323,8 @@ export type Database = {
           tax_deductions: number | null
           total_deductions: number | null
           total_employer_cost: number | null
+          total_overtime_hours: number | null
+          total_regular_hours: number | null
           updated_at: string
           vacation_hours: number | null
           ytd_gross_pay: number | null
@@ -10342,6 +10347,8 @@ export type Database = {
           garnishment_deductions?: number | null
           gross_pay?: number | null
           holiday_hours?: number | null
+          hourly_rate?: number | null
+          hours_based_earnings?: number | null
           id?: string
           net_pay?: number | null
           notes?: string | null
@@ -10350,6 +10357,7 @@ export type Database = {
           other_hours?: number | null
           overtime_hours?: number | null
           overtime_pay?: number | null
+          overtime_rate?: number | null
           pay_period_id: string
           payroll_run_id: string
           payslip_document_id?: string | null
@@ -10363,6 +10371,8 @@ export type Database = {
           tax_deductions?: number | null
           total_deductions?: number | null
           total_employer_cost?: number | null
+          total_overtime_hours?: number | null
+          total_regular_hours?: number | null
           updated_at?: string
           vacation_hours?: number | null
           ytd_gross_pay?: number | null
@@ -10385,6 +10395,8 @@ export type Database = {
           garnishment_deductions?: number | null
           gross_pay?: number | null
           holiday_hours?: number | null
+          hourly_rate?: number | null
+          hours_based_earnings?: number | null
           id?: string
           net_pay?: number | null
           notes?: string | null
@@ -10393,6 +10405,7 @@ export type Database = {
           other_hours?: number | null
           overtime_hours?: number | null
           overtime_pay?: number | null
+          overtime_rate?: number | null
           pay_period_id?: string
           payroll_run_id?: string
           payslip_document_id?: string | null
@@ -10406,6 +10419,8 @@ export type Database = {
           tax_deductions?: number | null
           total_deductions?: number | null
           total_employer_cost?: number | null
+          total_overtime_hours?: number | null
+          total_regular_hours?: number | null
           updated_at?: string
           vacation_hours?: number | null
           ytd_gross_pay?: number | null
@@ -13250,10 +13265,14 @@ export type Database = {
           is_scheduled_day: boolean | null
           notes: string | null
           overtime_hours: number | null
+          overtime_request_id: string | null
           pay_period_id: string | null
           payroll_rule_id: string | null
           position_id: string | null
           regular_hours: number | null
+          source_type: string | null
+          time_clock_entry_id: string | null
+          timesheet_entry_id: string | null
           total_hours_worked: number | null
           updated_at: string
           work_date: string
@@ -13267,10 +13286,14 @@ export type Database = {
           is_scheduled_day?: boolean | null
           notes?: string | null
           overtime_hours?: number | null
+          overtime_request_id?: string | null
           pay_period_id?: string | null
           payroll_rule_id?: string | null
           position_id?: string | null
           regular_hours?: number | null
+          source_type?: string | null
+          time_clock_entry_id?: string | null
+          timesheet_entry_id?: string | null
           total_hours_worked?: number | null
           updated_at?: string
           work_date: string
@@ -13284,10 +13307,14 @@ export type Database = {
           is_scheduled_day?: boolean | null
           notes?: string | null
           overtime_hours?: number | null
+          overtime_request_id?: string | null
           pay_period_id?: string | null
           payroll_rule_id?: string | null
           position_id?: string | null
           regular_hours?: number | null
+          source_type?: string | null
+          time_clock_entry_id?: string | null
+          timesheet_entry_id?: string | null
           total_hours_worked?: number | null
           updated_at?: string
           work_date?: string
@@ -13305,6 +13332,13 @@ export type Database = {
             columns: ["employee_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_work_records_overtime_request_id_fkey"
+            columns: ["overtime_request_id"]
+            isOneToOne: false
+            referencedRelation: "overtime_requests"
             referencedColumns: ["id"]
           },
           {
@@ -13326,6 +13360,20 @@ export type Database = {
             columns: ["position_id"]
             isOneToOne: false
             referencedRelation: "positions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_work_records_time_clock_entry_id_fkey"
+            columns: ["time_clock_entry_id"]
+            isOneToOne: false
+            referencedRelation: "time_clock_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_work_records_timesheet_entry_id_fkey"
+            columns: ["timesheet_entry_id"]
+            isOneToOne: false
+            referencedRelation: "timesheet_entries"
             referencedColumns: ["id"]
           },
         ]
@@ -33998,6 +34046,101 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payroll_time_sync_logs: {
+        Row: {
+          company_id: string | null
+          completed_at: string | null
+          created_at: string
+          created_by: string | null
+          employees_processed: number | null
+          error_message: string | null
+          id: string
+          pay_period_id: string | null
+          records_created: number | null
+          records_updated: number | null
+          reversed_at: string | null
+          reversed_by: string | null
+          started_at: string | null
+          status: string
+          sync_options: Json | null
+          sync_type: string
+          total_overtime_hours: number | null
+          total_regular_hours: number | null
+          updated_at: string
+        }
+        Insert: {
+          company_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          employees_processed?: number | null
+          error_message?: string | null
+          id?: string
+          pay_period_id?: string | null
+          records_created?: number | null
+          records_updated?: number | null
+          reversed_at?: string | null
+          reversed_by?: string | null
+          started_at?: string | null
+          status?: string
+          sync_options?: Json | null
+          sync_type: string
+          total_overtime_hours?: number | null
+          total_regular_hours?: number | null
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          employees_processed?: number | null
+          error_message?: string | null
+          id?: string
+          pay_period_id?: string | null
+          records_created?: number | null
+          records_updated?: number | null
+          reversed_at?: string | null
+          reversed_by?: string | null
+          started_at?: string | null
+          status?: string
+          sync_options?: Json | null
+          sync_type?: string
+          total_overtime_hours?: number | null
+          total_regular_hours?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payroll_time_sync_logs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payroll_time_sync_logs_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payroll_time_sync_logs_pay_period_id_fkey"
+            columns: ["pay_period_id"]
+            isOneToOne: false
+            referencedRelation: "pay_periods"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payroll_time_sync_logs_reversed_by_fkey"
+            columns: ["reversed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
