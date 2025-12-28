@@ -35640,6 +35640,648 @@ export type Database = {
           },
         ]
       }
+      position_budget_actuals: {
+        Row: {
+          actual_allowances: number | null
+          actual_base_salary: number | null
+          actual_benefits: number | null
+          actual_bonus: number | null
+          actual_employer_taxes: number | null
+          actual_other: number | null
+          actual_overhead: number | null
+          actual_total: number | null
+          budget_item_id: string
+          created_at: string
+          id: string
+          period_end: string
+          period_start: string
+          source: string | null
+          updated_at: string
+          variance: number | null
+          variance_percentage: number | null
+        }
+        Insert: {
+          actual_allowances?: number | null
+          actual_base_salary?: number | null
+          actual_benefits?: number | null
+          actual_bonus?: number | null
+          actual_employer_taxes?: number | null
+          actual_other?: number | null
+          actual_overhead?: number | null
+          actual_total?: number | null
+          budget_item_id: string
+          created_at?: string
+          id?: string
+          period_end: string
+          period_start: string
+          source?: string | null
+          updated_at?: string
+          variance?: number | null
+          variance_percentage?: number | null
+        }
+        Update: {
+          actual_allowances?: number | null
+          actual_base_salary?: number | null
+          actual_benefits?: number | null
+          actual_bonus?: number | null
+          actual_employer_taxes?: number | null
+          actual_other?: number | null
+          actual_overhead?: number | null
+          actual_total?: number | null
+          budget_item_id?: string
+          created_at?: string
+          id?: string
+          period_end?: string
+          period_start?: string
+          source?: string | null
+          updated_at?: string
+          variance?: number | null
+          variance_percentage?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "position_budget_actuals_budget_item_id_fkey"
+            columns: ["budget_item_id"]
+            isOneToOne: false
+            referencedRelation: "position_budget_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      position_budget_approval_levels: {
+        Row: {
+          approver_id: string | null
+          company_id: string
+          created_at: string
+          department_id: string | null
+          id: string
+          is_active: boolean | null
+          level_name: string
+          level_order: number
+          role_required: string | null
+          threshold_amount: number | null
+          updated_at: string
+        }
+        Insert: {
+          approver_id?: string | null
+          company_id: string
+          created_at?: string
+          department_id?: string | null
+          id?: string
+          is_active?: boolean | null
+          level_name: string
+          level_order: number
+          role_required?: string | null
+          threshold_amount?: number | null
+          updated_at?: string
+        }
+        Update: {
+          approver_id?: string | null
+          company_id?: string
+          created_at?: string
+          department_id?: string | null
+          id?: string
+          is_active?: boolean | null
+          level_name?: string
+          level_order?: number
+          role_required?: string | null
+          threshold_amount?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "position_budget_approval_levels_approver_id_fkey"
+            columns: ["approver_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "position_budget_approval_levels_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "position_budget_approval_levels_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      position_budget_approvals: {
+        Row: {
+          approval_level_id: string | null
+          approver_id: string | null
+          comments: string | null
+          created_at: string
+          decided_at: string | null
+          id: string
+          level_name: string
+          level_order: number
+          plan_id: string
+          status: string
+          submitted_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          approval_level_id?: string | null
+          approver_id?: string | null
+          comments?: string | null
+          created_at?: string
+          decided_at?: string | null
+          id?: string
+          level_name: string
+          level_order: number
+          plan_id: string
+          status?: string
+          submitted_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          approval_level_id?: string | null
+          approver_id?: string | null
+          comments?: string | null
+          created_at?: string
+          decided_at?: string | null
+          id?: string
+          level_name?: string
+          level_order?: number
+          plan_id?: string
+          status?: string
+          submitted_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "position_budget_approvals_approval_level_id_fkey"
+            columns: ["approval_level_id"]
+            isOneToOne: false
+            referencedRelation: "position_budget_approval_levels"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "position_budget_approvals_approver_id_fkey"
+            columns: ["approver_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "position_budget_approvals_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "position_budget_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      position_budget_cost_details: {
+        Row: {
+          amount: number
+          budget_item_id: string
+          calculation_basis: string | null
+          cost_component_id: string
+          created_at: string
+          id: string
+          notes: string | null
+          percentage: number | null
+          updated_at: string
+        }
+        Insert: {
+          amount?: number
+          budget_item_id: string
+          calculation_basis?: string | null
+          cost_component_id: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          percentage?: number | null
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          budget_item_id?: string
+          calculation_basis?: string | null
+          cost_component_id?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          percentage?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "position_budget_cost_details_budget_item_id_fkey"
+            columns: ["budget_item_id"]
+            isOneToOne: false
+            referencedRelation: "position_budget_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "position_budget_cost_details_cost_component_id_fkey"
+            columns: ["cost_component_id"]
+            isOneToOne: false
+            referencedRelation: "position_cost_components"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      position_budget_forecasts: {
+        Row: {
+          attrition_rate: number | null
+          created_at: string
+          forecast_period: string
+          forecast_type: string
+          growth_rate: number | null
+          id: string
+          inflation_adjustment: number | null
+          plan_id: string
+          projected_cost: number | null
+          projected_headcount: number | null
+          scenario_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          attrition_rate?: number | null
+          created_at?: string
+          forecast_period: string
+          forecast_type?: string
+          growth_rate?: number | null
+          id?: string
+          inflation_adjustment?: number | null
+          plan_id: string
+          projected_cost?: number | null
+          projected_headcount?: number | null
+          scenario_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          attrition_rate?: number | null
+          created_at?: string
+          forecast_period?: string
+          forecast_type?: string
+          growth_rate?: number | null
+          id?: string
+          inflation_adjustment?: number | null
+          plan_id?: string
+          projected_cost?: number | null
+          projected_headcount?: number | null
+          scenario_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "position_budget_forecasts_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "position_budget_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "position_budget_forecasts_scenario_id_fkey"
+            columns: ["scenario_id"]
+            isOneToOne: false
+            referencedRelation: "position_budget_scenarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      position_budget_items: {
+        Row: {
+          allowances_amount: number | null
+          annual_cost: number | null
+          base_salary: number
+          benefits_amount: number | null
+          bonus_amount: number | null
+          created_at: string
+          current_incumbent_id: string | null
+          department_id: string | null
+          employer_taxes_amount: number | null
+          employment_type: string | null
+          fte: number | null
+          fully_loaded_cost: number | null
+          headcount: number | null
+          id: string
+          is_new_position: boolean | null
+          is_vacant: boolean | null
+          job_family: string | null
+          job_level: string | null
+          notes: string | null
+          other_costs: number | null
+          overhead_amount: number | null
+          planned_end_date: string | null
+          planned_start_date: string | null
+          position_id: string | null
+          position_title: string
+          scenario_id: string
+          total_compensation: number | null
+          updated_at: string
+        }
+        Insert: {
+          allowances_amount?: number | null
+          annual_cost?: number | null
+          base_salary?: number
+          benefits_amount?: number | null
+          bonus_amount?: number | null
+          created_at?: string
+          current_incumbent_id?: string | null
+          department_id?: string | null
+          employer_taxes_amount?: number | null
+          employment_type?: string | null
+          fte?: number | null
+          fully_loaded_cost?: number | null
+          headcount?: number | null
+          id?: string
+          is_new_position?: boolean | null
+          is_vacant?: boolean | null
+          job_family?: string | null
+          job_level?: string | null
+          notes?: string | null
+          other_costs?: number | null
+          overhead_amount?: number | null
+          planned_end_date?: string | null
+          planned_start_date?: string | null
+          position_id?: string | null
+          position_title: string
+          scenario_id: string
+          total_compensation?: number | null
+          updated_at?: string
+        }
+        Update: {
+          allowances_amount?: number | null
+          annual_cost?: number | null
+          base_salary?: number
+          benefits_amount?: number | null
+          bonus_amount?: number | null
+          created_at?: string
+          current_incumbent_id?: string | null
+          department_id?: string | null
+          employer_taxes_amount?: number | null
+          employment_type?: string | null
+          fte?: number | null
+          fully_loaded_cost?: number | null
+          headcount?: number | null
+          id?: string
+          is_new_position?: boolean | null
+          is_vacant?: boolean | null
+          job_family?: string | null
+          job_level?: string | null
+          notes?: string | null
+          other_costs?: number | null
+          overhead_amount?: number | null
+          planned_end_date?: string | null
+          planned_start_date?: string | null
+          position_id?: string | null
+          position_title?: string
+          scenario_id?: string
+          total_compensation?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "position_budget_items_current_incumbent_id_fkey"
+            columns: ["current_incumbent_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "position_budget_items_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "position_budget_items_position_id_fkey"
+            columns: ["position_id"]
+            isOneToOne: false
+            referencedRelation: "positions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "position_budget_items_scenario_id_fkey"
+            columns: ["scenario_id"]
+            isOneToOne: false
+            referencedRelation: "position_budget_scenarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      position_budget_plans: {
+        Row: {
+          company_id: string
+          created_at: string
+          created_by: string | null
+          currency_code: string
+          description: string | null
+          end_date: string
+          fiscal_year: number
+          id: string
+          is_baseline: boolean | null
+          name: string
+          parent_plan_id: string | null
+          plan_type: string
+          start_date: string
+          status: string
+          total_actual_amount: number | null
+          total_budgeted_amount: number | null
+          total_forecast_amount: number | null
+          updated_at: string
+          version: number
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          currency_code?: string
+          description?: string | null
+          end_date: string
+          fiscal_year: number
+          id?: string
+          is_baseline?: boolean | null
+          name: string
+          parent_plan_id?: string | null
+          plan_type?: string
+          start_date: string
+          status?: string
+          total_actual_amount?: number | null
+          total_budgeted_amount?: number | null
+          total_forecast_amount?: number | null
+          updated_at?: string
+          version?: number
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          currency_code?: string
+          description?: string | null
+          end_date?: string
+          fiscal_year?: number
+          id?: string
+          is_baseline?: boolean | null
+          name?: string
+          parent_plan_id?: string | null
+          plan_type?: string
+          start_date?: string
+          status?: string
+          total_actual_amount?: number | null
+          total_budgeted_amount?: number | null
+          total_forecast_amount?: number | null
+          updated_at?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "position_budget_plans_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "position_budget_plans_parent_plan_id_fkey"
+            columns: ["parent_plan_id"]
+            isOneToOne: false
+            referencedRelation: "position_budget_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      position_budget_scenarios: {
+        Row: {
+          assumptions: Json | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          plan_id: string
+          scenario_type: string
+          total_cost: number | null
+          total_headcount: number | null
+          updated_at: string
+          variance_from_baseline: number | null
+          variance_percentage: number | null
+        }
+        Insert: {
+          assumptions?: Json | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          plan_id: string
+          scenario_type?: string
+          total_cost?: number | null
+          total_headcount?: number | null
+          updated_at?: string
+          variance_from_baseline?: number | null
+          variance_percentage?: number | null
+        }
+        Update: {
+          assumptions?: Json | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          plan_id?: string
+          scenario_type?: string
+          total_cost?: number | null
+          total_headcount?: number | null
+          updated_at?: string
+          variance_from_baseline?: number | null
+          variance_percentage?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "position_budget_scenarios_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "position_budget_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      position_budget_whatif_sessions: {
+        Row: {
+          base_scenario_id: string | null
+          changes: Json | null
+          converted_to_scenario_id: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          impact_summary: Json | null
+          is_saved: boolean | null
+          name: string
+          plan_id: string
+          session_data: Json | null
+          updated_at: string
+        }
+        Insert: {
+          base_scenario_id?: string | null
+          changes?: Json | null
+          converted_to_scenario_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          impact_summary?: Json | null
+          is_saved?: boolean | null
+          name: string
+          plan_id: string
+          session_data?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          base_scenario_id?: string | null
+          changes?: Json | null
+          converted_to_scenario_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          impact_summary?: Json | null
+          is_saved?: boolean | null
+          name?: string
+          plan_id?: string
+          session_data?: Json | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "position_budget_whatif_sessions_base_scenario_id_fkey"
+            columns: ["base_scenario_id"]
+            isOneToOne: false
+            referencedRelation: "position_budget_scenarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "position_budget_whatif_sessions_converted_to_scenario_id_fkey"
+            columns: ["converted_to_scenario_id"]
+            isOneToOne: false
+            referencedRelation: "position_budget_scenarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "position_budget_whatif_sessions_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "position_budget_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       position_compensation: {
         Row: {
           amount: number
@@ -35703,6 +36345,65 @@ export type Database = {
             columns: ["position_id"]
             isOneToOne: false
             referencedRelation: "positions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      position_cost_components: {
+        Row: {
+          calculation_method: string
+          code: string
+          company_id: string
+          component_type: string
+          created_at: string
+          default_percentage: number | null
+          default_value: number | null
+          display_order: number | null
+          formula: string | null
+          id: string
+          is_active: boolean | null
+          is_taxable: boolean | null
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          calculation_method?: string
+          code: string
+          company_id: string
+          component_type: string
+          created_at?: string
+          default_percentage?: number | null
+          default_value?: number | null
+          display_order?: number | null
+          formula?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_taxable?: boolean | null
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          calculation_method?: string
+          code?: string
+          company_id?: string
+          component_type?: string
+          created_at?: string
+          default_percentage?: number | null
+          default_value?: number | null
+          display_order?: number | null
+          formula?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_taxable?: boolean | null
+          name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "position_cost_components_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
             referencedColumns: ["id"]
           },
         ]
@@ -47181,6 +47882,10 @@ export type Database = {
         Returns: number
       }
       calculate_goal_risk_score: { Args: { p_goal_id: string }; Returns: Json }
+      calculate_scenario_totals: {
+        Args: { p_scenario_id: string }
+        Returns: undefined
+      }
       calculate_shift_differential: {
         Args: {
           p_clock_in: string
