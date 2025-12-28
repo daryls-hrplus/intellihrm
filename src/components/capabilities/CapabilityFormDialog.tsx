@@ -29,8 +29,8 @@ import {
   CreateCapabilityInput,
   ProficiencyScale,
 } from "@/hooks/useCapabilities";
-import { JobApplicabilitySelect } from "./JobApplicabilitySelect";
-import { useCapabilityJobApplicability } from "@/hooks/useCapabilityJobApplicability";
+import { EnhancedJobApplicabilitySelect } from "./EnhancedJobApplicabilitySelect";
+import { useCapabilityJobApplicability, JobRequirementInput } from "@/hooks/useCapabilityJobApplicability";
 
 interface CapabilityFormDialogProps {
   open: boolean;
@@ -96,9 +96,9 @@ export function CapabilityFormDialog({
   const [newKeyword, setNewKeyword] = useState("");
   const [newRole, setNewRole] = useState("");
   const [saving, setSaving] = useState(false);
-  const [selectedJobIds, setSelectedJobIds] = useState<string[]>([]);
+  const [selectedJobRequirements, setSelectedJobRequirements] = useState<JobRequirementInput[]>([]);
 
-  const { applicability, fetchApplicability, bulkSetApplicability } = useCapabilityJobApplicability();
+  const { requirements, fetchApplicability, bulkSetApplicability } = useCapabilityJobApplicability();
 
   useEffect(() => {
     if (capability) {
@@ -131,7 +131,14 @@ export function CapabilityFormDialog({
       // Fetch job applicability for existing competencies
       if (capability.type === "COMPETENCY") {
         fetchApplicability(capability.id).then((apps) => {
-          setSelectedJobIds(apps?.map((a: any) => a.job_id) || []);
+          const reqs: JobRequirementInput[] = (apps || []).map((a: any) => ({
+            job_id: a.job_id,
+            required_proficiency_level: a.required_proficiency_level ?? 3,
+            weighting: a.weighting ?? 10,
+            is_required: a.is_required ?? true,
+            is_preferred: a.is_preferred ?? false,
+          }));
+          setSelectedJobRequirements(reqs);
         });
       }
     } else {
@@ -158,7 +165,7 @@ export function CapabilityFormDialog({
           can_be_inferred: false,
         },
       });
-      setSelectedJobIds([]);
+      setSelectedJobRequirements([]);
     }
   }, [capability, defaultType, open, fetchApplicability]);
 
@@ -173,7 +180,7 @@ export function CapabilityFormDialog({
       
       // If editing a competency and we have job selections, update job applicability
       if (capability && formData.type === "COMPETENCY") {
-        await bulkSetApplicability(capability.id, selectedJobIds);
+        await bulkSetApplicability(capability.id, selectedJobRequirements);
       }
       
       onOpenChange(false);
@@ -603,11 +610,17 @@ export function CapabilityFormDialog({
                   <Switch checked disabled />
                 </div>
 
-                {/* Job Applicability Multi-Select */}
-                <JobApplicabilitySelect
-                  selectedJobIds={selectedJobIds}
-                  onSelectionChange={setSelectedJobIds}
+                {/* Enhanced Job Applicability Multi-Select */}
+                <EnhancedJobApplicabilitySelect
+                  selectedRequirements={selectedJobRequirements}
+                  onSelectionChange={setSelectedJobRequirements}
                   companyId={formData.company_id}
+                  existingRequirements={requirements.map(r => ({
+                    job_id: r.job_id,
+                    required_proficiency_level: r.required_proficiency_level,
+                    weighting: r.weighting,
+                    is_required: r.is_required,
+                  }))}
                 />
 
                 <div className="rounded-lg border p-4 bg-muted/50">
