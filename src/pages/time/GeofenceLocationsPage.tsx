@@ -10,7 +10,6 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -29,10 +28,6 @@ interface GeofenceLocation {
   is_active: boolean;
   requires_wifi_validation?: boolean;
   allowed_wifi_ssids?: string[] | null;
-}
-  is_active: boolean;
-  requires_wifi_validation: boolean;
-  allowed_wifi_ssids: string[] | null;
 }
 
 interface EmployeeAssignment {
@@ -106,13 +101,10 @@ export default function GeofenceLocationsPage() {
     }
     setLoading(false);
   };
-    }
-    setLoading(false);
-  };
 
   const fetchEmployees = async () => {
     if (!companyId) return;
-    const { data } = await supabase
+    const { data } = await (supabase as any)
       .from("profiles")
       .select("id, full_name, employee_id")
       .eq("company_id", companyId)
@@ -122,14 +114,22 @@ export default function GeofenceLocationsPage() {
   };
 
   const fetchAssignments = async (locationId: string) => {
-    const { data } = await supabase
+    const { data } = await (supabase as any)
       .from("employee_geofence_assignments")
-      .select(`
-        *,
-        employee:employee_id(full_name, employee_id)
-      `)
+      .select("*")
       .eq("geofence_location_id", locationId);
-    setAssignments((data as any[]) || []);
+    
+    const assignmentsWithEmployees = await Promise.all(
+      (data || []).map(async (a: any) => {
+        const { data: emp } = await (supabase as any)
+          .from("profiles")
+          .select("full_name, employee_id")
+          .eq("id", a.employee_id)
+          .single();
+        return { ...a, employee: emp };
+      })
+    );
+    setAssignments(assignmentsWithEmployees);
   };
 
   const handleSave = async () => {
@@ -222,7 +222,7 @@ export default function GeofenceLocationsPage() {
     }
   };
 
-  const getLocationIcon = (type: string) => {
+  const getLocationIcon = (type: string | undefined) => {
     const found = LOCATION_TYPES.find(t => t.value === type);
     if (found) {
       const Icon = found.icon;
@@ -317,7 +317,7 @@ export default function GeofenceLocationsPage() {
                         </div>
                       </TableCell>
                       <TableCell className="capitalize">
-                        {loc.location_type.replace("_", " ")}
+                        {loc.location_type?.replace("_", " ") || "-"}
                       </TableCell>
                       <TableCell>
                         <div className="text-xs font-mono">

@@ -138,7 +138,7 @@ export default function FaceVerificationPage() {
 
   const fetchEmployees = async () => {
     if (!companyId) return;
-    const { data } = await supabase
+    const { data } = await (supabase as any)
       .from("profiles")
       .select("id, full_name, employee_id")
       .eq("company_id", companyId)

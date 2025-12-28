@@ -21,6 +21,9 @@ import {
   Sun,
   MapPin,
   Briefcase,
+  Moon,
+  Camera,
+  Sliders,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -199,6 +202,30 @@ export default function TimeAttendanceDashboardPage() {
       color: "bg-cyan-500/10 text-cyan-600",
       tabCode: "import",
     },
+    shiftDifferentials: {
+      title: "Shift Differentials",
+      description: "Configure night, weekend, and holiday pay premiums",
+      icon: Moon,
+      href: "/time/shift-differentials",
+      color: "bg-indigo-500/10 text-indigo-600",
+      tabCode: "shift_differentials",
+    },
+    geofenceLocations: {
+      title: "Geofence Locations",
+      description: "Define approved work locations for clock-in validation",
+      icon: MapPin,
+      href: "/time/geofence-locations",
+      color: "bg-emerald-500/10 text-emerald-600",
+      tabCode: "geofence_locations",
+    },
+    faceVerification: {
+      title: "Face Verification",
+      description: "Enroll employee faces and manage verification settings",
+      icon: Camera,
+      href: "/time/face-verification",
+      color: "bg-rose-500/10 text-rose-600",
+      tabCode: "face_verification",
+    },
     // Analytics
     analytics: {
       title: t("timeAttendance.modules.analytics.title"),
@@ -248,6 +275,9 @@ export default function TimeAttendanceDashboardPage() {
         allModules.devices,
         allModules.geofencing,
         allModules.import,
+        allModules.shiftDifferentials,
+        allModules.geofenceLocations,
+        allModules.faceVerification,
       ]),
     },
     {
