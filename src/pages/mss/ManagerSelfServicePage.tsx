@@ -61,6 +61,12 @@ export default function ManagerSelfServicePage() {
     compensation: { title: t("mss.modules.compensation.title"), description: t("mss.modules.compensation.description"), href: "/mss/compensation", icon: DollarSign, color: "bg-emerald-500/10 text-emerald-600", tabCode: "mss-compensation" },
     calibration: { title: t("mss.modules.calibration.title", "Calibration"), description: t("mss.modules.calibration.description", "Participate in rating calibration sessions"), href: "/mss/calibration", icon: Scale, color: "bg-indigo-500/10 text-indigo-600", tabCode: "mss-calibration" },
     tickets: { title: t("mss.dashboard.submitTicket"), description: t("mss.dashboard.submitTicketDesc"), href: "/help/tickets/new?from=mss", icon: TicketPlus, color: "bg-red-500/10 text-red-600", tabCode: "mss-tickets" },
+    // NEW: Previously missing links
+    appraisalInterviews: { title: t("mss.modules.appraisalInterviews.title", "Appraisal Interviews"), description: t("mss.modules.appraisalInterviews.description", "Schedule and manage team appraisal meetings"), href: "/mss/appraisal-interviews", icon: Calendar, color: "bg-purple-500/10 text-purple-600", tabCode: "mss-appraisal-interviews" },
+    goalInterviews: { title: t("mss.modules.goalInterviews.title", "Goal Interviews"), description: t("mss.modules.goalInterviews.description", "Schedule goal-setting meetings with team members"), href: "/mss/goal-interviews", icon: Target, color: "bg-pink-500/10 text-pink-600", tabCode: "mss-goal-interviews" },
+    development: { title: t("mss.modules.development.title", "Development Plans"), description: t("mss.modules.development.description", "View and manage team development plans"), href: "/mss/development", icon: TrendingUp, color: "bg-cyan-500/10 text-cyan-600", tabCode: "mss-development" },
+    compaRatio: { title: t("mss.modules.compaRatio.title", "Compa-Ratio"), description: t("mss.modules.compaRatio.description", "View team compensation ratios"), href: "/mss/compensation/compa-ratio", icon: BarChart3, color: "bg-green-500/10 text-green-600", tabCode: "mss-compa-ratio" },
+    equity: { title: t("mss.modules.equity.title", "Equity"), description: t("mss.modules.equity.description", "View team equity and stock grants"), href: "/mss/compensation/equity", icon: DollarSign, color: "bg-indigo-500/10 text-indigo-600", tabCode: "mss-equity" },
   };
 
   const filterByAccess = (modules: GroupedModuleItem[]) =>
@@ -77,11 +83,11 @@ export default function ManagerSelfServicePage() {
     },
     {
       titleKey: "Performance & Development",
-      items: filterByAccess([allModules.appraisals, allModules.goals, allModules.feedback360, allModules.calibration, allModules.pips, allModules.feedback, allModules.recognition, allModules.training, allModules.succession]),
+      items: filterByAccess([allModules.appraisals, allModules.appraisalInterviews, allModules.goals, allModules.goalInterviews, allModules.development, allModules.feedback360, allModules.calibration, allModules.pips, allModules.feedback, allModules.recognition, allModules.training, allModules.succession]),
     },
     {
       titleKey: "Team Resources",
-      items: filterByAccess([allModules.property, allModules.relations, allModules.benefits, allModules.hse, allModules.compensation]),
+      items: filterByAccess([allModules.property, allModules.relations, allModules.benefits, allModules.hse, allModules.compensation, allModules.compaRatio, allModules.equity]),
     },
     {
       titleKey: "Analytics & Support",
