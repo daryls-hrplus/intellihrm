@@ -89,6 +89,11 @@ interface LinkedSkill {
     code: string;
     category: string;
   } | null;
+  override?: {
+    id: string;
+    override_proficiency_level: number;
+    override_reason: string | null;
+  } | null;
 }
 
 interface JobInfo {
@@ -167,13 +172,13 @@ export function JobCapabilityRequirementsManager({
       
       // Fetch linked skills for all competencies
       if (competencyReqs.length > 0) {
-        fetchLinkedSkills(competencyReqs.map((r) => r.capability_id));
+        fetchLinkedSkills(competencyReqs.map((r) => r.capability_id), competencyReqs);
       }
     }
     setIsLoading(false);
   };
 
-  const fetchLinkedSkills = async (competencyIds: string[]) => {
+  const fetchLinkedSkills = async (competencyIds: string[], reqs: JobCapabilityRequirement[]) => {
     setIsLoadingSkills(true);
     const { data, error } = await supabase
       .from("competency_skill_mappings")
@@ -190,6 +195,14 @@ export function JobCapabilityRequirementsManager({
     if (error) {
       console.error("Error fetching linked skills:", error);
     } else {
+      // Fetch any job-specific overrides
+      const reqIds = reqs.map(r => r.id);
+      const { data: overrides } = await supabase
+        .from("job_skill_overrides")
+        .select("*")
+        .eq("job_id", jobId)
+        .in("competency_requirement_id", reqIds);
+
       // Group skills by competency_id
       const skillsMap: Record<string, LinkedSkill[]> = {};
       competencyIds.forEach((id) => {
@@ -206,9 +219,20 @@ export function JobCapabilityRequirementsManager({
         mappings.forEach((mapping) => {
           const skillData = data?.find((d) => d.id === mapping.id);
           if (skillData && skillsMap[mapping.competency_id]) {
+            // Find if there's an override for this skill
+            const competencyReq = reqs.find(r => r.capability_id === mapping.competency_id);
+            const override = overrides?.find(
+              o => o.skill_id === skillData.skill_id && o.competency_requirement_id === competencyReq?.id
+            );
+            
             skillsMap[mapping.competency_id].push({
               ...skillData,
               skill: skillData.skill as any,
+              override: override ? {
+                id: override.id,
+                override_proficiency_level: override.override_proficiency_level,
+                override_reason: override.override_reason,
+              } : null,
             });
           }
         });
@@ -356,6 +380,63 @@ export function JobCapabilityRequirementsManager({
     }
   };
 
+  const handleSkillOverride = async (
+    requirementId: string,
+    skillId: string,
+    overrideLevel: number | null,
+    reason: string | null,
+    existingOverrideId?: string
+  ) => {
+    if (existingOverrideId && overrideLevel === null) {
+      // Remove override
+      const { error } = await supabase
+        .from("job_skill_overrides")
+        .delete()
+        .eq("id", existingOverrideId);
+      
+      if (error) {
+        toast.error("Failed to remove override");
+        return;
+      }
+      toast.success("Override removed - using baseline level");
+    } else if (existingOverrideId) {
+      // Update existing override
+      const { error } = await supabase
+        .from("job_skill_overrides")
+        .update({
+          override_proficiency_level: overrideLevel,
+          override_reason: reason,
+        })
+        .eq("id", existingOverrideId);
+      
+      if (error) {
+        toast.error("Failed to update override");
+        return;
+      }
+      toast.success("Skill level override updated");
+    } else if (overrideLevel !== null) {
+      // Create new override
+      const { error } = await supabase
+        .from("job_skill_overrides")
+        .insert({
+          job_id: jobId,
+          competency_requirement_id: requirementId,
+          skill_id: skillId,
+          override_proficiency_level: overrideLevel,
+          override_reason: reason,
+        });
+      
+      if (error) {
+        toast.error("Failed to save override");
+        return;
+      }
+      toast.success("Skill level override saved");
+    }
+    
+    // Refresh linked skills to show updated overrides
+    fetchLinkedSkills(requirements.map(r => r.capability_id), requirements);
+  };
+
   const totalWeight = requirements
     .filter((r) => !r.end_date)
     .reduce((sum, r) => sum + Number(r.weighting), 0);
@@ -472,6 +553,9 @@ export function JobCapabilityRequirementsManager({
                   requirement={req}
                   linkedSkills={linkedSkillsMap[req.capability_id] || []}
                   onDelete={handleDelete}
+                  onSkillOverride={(skillId, level, reason, existingId) => 
+                    handleSkillOverride(req.id, skillId, level, reason, existingId)
+                  }
                   isLoadingSkills={isLoadingSkills}
                 />
               ))
