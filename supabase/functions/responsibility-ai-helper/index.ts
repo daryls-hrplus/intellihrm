@@ -202,19 +202,20 @@ async function callLovableAI(prompt: string, context: string): Promise<string> {
   const lovableApiKey = Deno.env.get('LOVABLE_API_KEY');
   
   if (!lovableApiKey) {
-    console.log('Using fallback response - no Lovable API key');
+    console.log('Using fallback response - no LOVABLE_API_KEY configured');
     return generateFallbackResponse(prompt, context);
   }
 
   try {
-    const response = await fetch('https://api.lovable.dev/v1/chat/completions', {
+    console.log('Calling Lovable AI Gateway...');
+    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${lovableApiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: 'google/gemini-2.5-flash',
         messages: [
           { 
             role: 'system', 
@@ -222,18 +223,26 @@ async function callLovableAI(prompt: string, context: string): Promise<string> {
           },
           { role: 'user', content: prompt }
         ],
-        max_tokens: 500,
-        temperature: 0.7,
       }),
     });
 
     if (!response.ok) {
-      console.error('Lovable AI API error:', response.status, await response.text());
+      const errorText = await response.text();
+      console.error('Lovable AI Gateway error:', response.status, errorText);
+      
+      if (response.status === 429) {
+        console.log('Rate limited, using fallback');
+      } else if (response.status === 402) {
+        console.log('Payment required, using fallback');
+      }
+      
       return generateFallbackResponse(prompt, context);
     }
 
     const data = await response.json();
-    return data.choices[0]?.message?.content?.trim() || generateFallbackResponse(prompt, context);
+    const content = data.choices?.[0]?.message?.content?.trim();
+    console.log('AI response received:', content?.substring(0, 100));
+    return content || generateFallbackResponse(prompt, context);
   } catch (error) {
     console.error('Error calling Lovable AI:', error);
     return generateFallbackResponse(prompt, context);
