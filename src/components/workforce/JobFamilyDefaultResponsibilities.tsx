@@ -320,6 +320,9 @@ export function JobFamilyDefaultResponsibilities({
             <div className="flex items-center gap-2">
               <Sparkles className="h-4 w-4 text-primary" />
               <span className="font-medium text-sm">AI Suggestions for {familyName}</span>
+              <Badge variant="outline" className="text-xs">
+                {aiSuggestions.length} suggestions
+              </Badge>
             </div>
             <Button
               variant="ghost"
@@ -329,52 +332,65 @@ export function JobFamilyDefaultResponsibilities({
               <X className="h-4 w-4" />
             </Button>
           </div>
-          <ScrollArea className="max-h-[250px]">
-            <div className="space-y-2">
-              {aiSuggestions.map((suggestion, index) => (
-                <div
-                  key={index}
-                  className="flex items-start justify-between p-3 bg-background rounded-md border"
-                >
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium text-sm">{suggestion.name}</span>
-                      <Badge
-                        variant="outline"
-                        className={`text-xs ${CATEGORY_COLORS[suggestion.category] || ""}`}
-                      >
-                        {suggestion.category.replace("_", " ")}
-                      </Badge>
-                      <Badge variant="secondary" className="text-xs">
-                        {suggestion.suggestedWeight}%
-                      </Badge>
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-1 truncate">
-                      {suggestion.description}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-1 ml-2">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 text-success hover:text-success"
-                      onClick={() => acceptSuggestion(suggestion)}
+          <div className="max-h-[300px] overflow-y-auto pr-2 space-y-2">
+            {aiSuggestions.map((suggestion, index) => (
+              <div
+                key={index}
+                className="flex items-start justify-between p-3 bg-background rounded-md border hover:border-primary/50 transition-colors"
+              >
+                <div className="flex-1 min-w-0 pr-4">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="font-medium text-sm">{suggestion.name}</span>
+                    <Badge
+                      variant="outline"
+                      className={`text-xs ${CATEGORY_COLORS[suggestion.category] || ""}`}
                     >
-                      <CheckCircle2 className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                      onClick={() => dismissSuggestion(suggestion.name)}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
+                      {suggestion.category.replace("_", " ")}
+                    </Badge>
+                    <Badge variant="secondary" className="text-xs">
+                      {suggestion.suggestedWeight}%
+                    </Badge>
                   </div>
+                  <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                    {suggestion.description}
+                  </p>
                 </div>
-              ))}
-            </div>
-          </ScrollArea>
+                <div className="flex items-center gap-1 flex-shrink-0">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8 text-success border-success/30 hover:bg-success/10 hover:text-success"
+                    onClick={() => acceptSuggestion(suggestion)}
+                  >
+                    <CheckCircle2 className="h-4 w-4 mr-1" />
+                    Add
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                    onClick={() => dismissSuggestion(suggestion.name)}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="flex items-center justify-between pt-2 border-t">
+            <span className="text-xs text-muted-foreground">
+              Click "Add" to include a responsibility in the template
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                aiSuggestions.forEach((s) => acceptSuggestion(s));
+              }}
+            >
+              Add All
+            </Button>
+          </div>
         </div>
       )}
 
