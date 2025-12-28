@@ -580,7 +580,6 @@ export default function ResponsibilitiesPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>{t("common.name")}</TableHead>
-                <TableHead>{t("common.code")}</TableHead>
                 <TableHead>Category</TableHead>
                 <TableHead>Complexity</TableHead>
                 <TableHead>KRAs</TableHead>
@@ -591,13 +590,13 @@ export default function ResponsibilitiesPage() {
             <TableBody>
               {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8">
+                  <TableCell colSpan={6} className="text-center py-8">
                     <Loader2 className="h-6 w-6 animate-spin mx-auto" />
                   </TableCell>
                 </TableRow>
               ) : filteredResponsibilities.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
                     {searchTerm ? t("workforce.responsibilities.noMatchingSearch") : t("workforce.responsibilities.createToStart")}
                   </TableCell>
                 </TableRow>
@@ -614,7 +613,6 @@ export default function ResponsibilitiesPage() {
                         )}
                       </div>
                     </TableCell>
-                    <TableCell>{responsibility.code}</TableCell>
                     <TableCell>
                       <ResponsibilityCategoryBadge category={responsibility.category} size="sm" />
                     </TableCell>
