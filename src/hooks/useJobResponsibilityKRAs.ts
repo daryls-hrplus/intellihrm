@@ -200,9 +200,17 @@ export function useJobResponsibilityKRAs(jobResponsibilityId: string) {
 
     setLoading(true);
     try {
+      // First, delete existing job-specific KRAs for this job responsibility
+      await supabase
+        .from("job_responsibility_kras")
+        .delete()
+        .eq("job_responsibility_id", jobResponsibilityId);
+
+      // Insert new KRAs - set responsibility_kra_id to null since these are from string arrays
+      // not from actual responsibility_kras records
       const krasToInsert = contextualizedKRAs.map((kra, index) => ({
         job_responsibility_id: jobResponsibilityId,
-        responsibility_kra_id: kra.responsibility_kra_id,
+        responsibility_kra_id: null, // Set to null - the IDs are synthetic, not real UUIDs
         name: kra.name,
         job_specific_target: kra.target,
         measurement_method: kra.method,
@@ -215,7 +223,7 @@ export function useJobResponsibilityKRAs(jobResponsibilityId: string) {
 
       const { error } = await supabase
         .from("job_responsibility_kras")
-        .upsert(krasToInsert, { onConflict: "job_responsibility_id,responsibility_kra_id" });
+        .insert(krasToInsert);
 
       if (error) throw error;
       
