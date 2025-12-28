@@ -27,7 +27,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Slider } from "@/components/ui/slider";
-import { Plus, Trash2, Zap, Search, Loader2 } from "lucide-react";
+import { Plus, Trash2, Zap, Search, Loader2, Sparkles } from "lucide-react";
 import {
   Capability,
   CompetencySkillMapping,
@@ -35,6 +35,8 @@ import {
   useCapabilities,
 } from "@/hooks/useCapabilities";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface SkillMappingsDialogProps {
   open: boolean;
@@ -58,6 +60,8 @@ export function SkillMappingsDialog({
   const [isRequired, setIsRequired] = useState(false);
   const [minLevel, setMinLevel] = useState<number | undefined>(undefined);
   const [adding, setAdding] = useState(false);
+  const [suggestingAI, setSuggestingAI] = useState(false);
+  const [aiSuggestions, setAiSuggestions] = useState<Array<{ skill_id: string; skill_name: string; weight: number; reasoning: string }>>([]);
 
   useEffect(() => {
     if (open && competency) {
@@ -113,6 +117,60 @@ export function SkillMappingsDialog({
     }
   };
 
+  const handleAISuggest = async () => {
+    if (!competency) return;
+    setSuggestingAI(true);
+    setAiSuggestions([]);
+    try {
+      const { data, error } = await supabase.functions.invoke("suggest-skill-mappings", {
+        body: {
+          competency_id: competency.id,
+          competency_name: competency.name,
+          competency_description: competency.description,
+          competency_category: competency.category,
+        },
+      });
+
+      if (error) throw error;
+
+      if (data?.suggestions && Array.isArray(data.suggestions)) {
+        // Filter out already mapped skills
+        const unmappedSuggestions = data.suggestions.filter(
+          (s: any) => !mappings.some((m) => m.skill_id === s.skill_id)
+        );
+        setAiSuggestions(unmappedSuggestions);
+        if (unmappedSuggestions.length === 0) {
+          toast.info("No new skill suggestions - all suggested skills are already mapped");
+        } else {
+          toast.success(`Found ${unmappedSuggestions.length} skill suggestions`);
+        }
+      }
+    } catch (error: any) {
+      console.error("AI suggest error:", error);
+      toast.error(error.message || "Failed to get AI suggestions");
+    } finally {
+      setSuggestingAI(false);
+    }
+  };
+
+  const handleApplySuggestion = async (suggestion: { skill_id: string; weight: number }) => {
+    if (!competency) return;
+    setAdding(true);
+    const success = await addMapping(
+      competency.id,
+      suggestion.skill_id,
+      suggestion.weight,
+      false,
+      undefined
+    );
+    if (success) {
+      await fetchMappings(competency.id);
+      setAiSuggestions((prev) => prev.filter((s) => s.skill_id !== suggestion.skill_id));
+      toast.success("Skill mapping added");
+    }
+    setAdding(false);
+  };
+
   if (!competency) return null;
 
   return (
@@ -123,11 +181,70 @@ export function SkillMappingsDialog({
         </DialogHeader>
 
         <div className="space-y-6">
+          {/* AI Suggestions */}
+          <div className="border rounded-lg p-4 space-y-4 bg-gradient-to-r from-purple-500/5 to-blue-500/5">
+            <div className="flex items-center justify-between">
+              <h4 className="font-medium flex items-center gap-2">
+                <Sparkles className="h-4 w-4 text-purple-500" />
+                AI Skill Suggestions
+              </h4>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleAISuggest}
+                disabled={suggestingAI}
+                className="gap-2"
+              >
+                {suggestingAI ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Analyzing...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="h-4 w-4" />
+                    Suggest Skills
+                  </>
+                )}
+              </Button>
+            </div>
+            {aiSuggestions.length > 0 && (
+              <div className="space-y-2">
+                {aiSuggestions.map((suggestion) => (
+                  <div
+                    key={suggestion.skill_id}
+                    className="flex items-center justify-between p-3 rounded-lg bg-background border"
+                  >
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <Zap className="h-4 w-4 text-blue-500" />
+                        <span className="font-medium text-sm">{suggestion.skill_name}</span>
+                        <Badge variant="outline" className="text-xs">
+                          {suggestion.weight}%
+                        </Badge>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">{suggestion.reasoning}</p>
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      onClick={() => handleApplySuggestion(suggestion)}
+                      disabled={adding}
+                    >
+                      <Plus className="h-4 w-4 mr-1" />
+                      Add
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
           {/* Add new skill mapping */}
           <div className="border rounded-lg p-4 space-y-4 bg-muted/30">
             <h4 className="font-medium flex items-center gap-2">
               <Plus className="h-4 w-4" />
-              Link a Skill
+              Link a Skill Manually
             </h4>
 
             <div className="grid grid-cols-2 gap-4">
