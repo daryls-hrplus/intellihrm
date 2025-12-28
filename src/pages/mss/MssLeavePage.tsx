@@ -1,7 +1,9 @@
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
-import { Calendar } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Calendar, Wallet } from "lucide-react";
 import { TeamLeaveCalendar } from "@/components/leave/TeamLeaveCalendar";
+import { TeamMemberBalances } from "@/components/mss/TeamMemberBalances";
 import { useLanguage } from "@/hooks/useLanguage";
 
 export default function MssLeavePage() {
@@ -27,7 +29,26 @@ export default function MssLeavePage() {
           </div>
         </div>
 
-        <TeamLeaveCalendar />
+        <Tabs defaultValue="calendar" className="space-y-4">
+          <TabsList>
+            <TabsTrigger value="calendar" className="flex items-center gap-2">
+              <Calendar className="h-4 w-4" />
+              Team Calendar
+            </TabsTrigger>
+            <TabsTrigger value="balances" className="flex items-center gap-2">
+              <Wallet className="h-4 w-4" />
+              Team Balances
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="calendar">
+            <TeamLeaveCalendar />
+          </TabsContent>
+
+          <TabsContent value="balances">
+            <TeamMemberBalances />
+          </TabsContent>
+        </Tabs>
       </div>
     </AppLayout>
   );
