@@ -459,7 +459,23 @@ export function JobResponsibilitiesManager({ jobId, companyId, jobFamilyId }: Jo
                 {/* Expandable KRAs section */}
                 {hasKRAs && isExpanded && (
                   <div className="px-4 py-3 bg-muted/30 border-t">
-                    <div className="text-xs font-medium text-muted-foreground mb-2">Key Result Areas</div>
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="text-xs font-medium text-muted-foreground">
+                        Key Result Areas (Generic)
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-7 text-xs gap-1"
+                        onClick={() => {
+                          setSelectedJobResponsibility(jr);
+                          setKraDialogOpen(true);
+                        }}
+                      >
+                        <Sparkles className="h-3 w-3" />
+                        Contextualize for Job
+                      </Button>
+                    </div>
                     <div className="space-y-1.5">
                       {jr.responsibility_kras?.map((kra, index) => (
                         <div key={index} className="flex items-start gap-2 text-sm">
@@ -665,6 +681,48 @@ export function JobResponsibilitiesManager({ jobId, companyId, jobFamilyId }: Jo
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* KRA Contextualization Dialog */}
+      {selectedJobResponsibility && jobDetails && (
+        <JobKRAContextualizationDialog
+          open={kraDialogOpen}
+          onOpenChange={(open) => {
+            setKraDialogOpen(open);
+            if (!open) setSelectedJobResponsibility(null);
+          }}
+          genericKRAs={(selectedJobResponsibility.responsibility_kras || []).map((kra, index) => ({
+            id: `${selectedJobResponsibility.responsibility_id}-${index}`,
+            name: kra,
+            target_metric: null,
+            weight: 0,
+          }))}
+          jobName={jobDetails.name}
+          jobDescription={jobDetails.description}
+          jobGrade={jobDetails.grade}
+          jobLevel={jobDetails.level}
+          onGenerate={async () => {
+            const genericKRAs: GenericKRA[] = (selectedJobResponsibility.responsibility_kras || []).map((kra, index) => ({
+              id: `${selectedJobResponsibility.responsibility_id}-${index}`,
+              name: kra,
+              target_metric: null,
+              weight: 0,
+            }));
+            return await generateWithAI(genericKRAs, {
+              jobName: jobDetails.name,
+              jobDescription: jobDetails.description,
+              jobGrade: jobDetails.grade,
+              jobLevel: jobDetails.level,
+            });
+          }}
+          onSave={async (kras) => {
+            await saveAIGeneratedKRAs(kras.map(k => ({
+              ...k,
+              responsibility_kra_id: k.responsibility_kra_id,
+            })));
+          }}
+          generating={generating}
+        />
+      )}
     </div>
   );
 }
