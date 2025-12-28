@@ -54,20 +54,20 @@ export const BrandWizardTab = ({ onApplyColors }: BrandWizardTabProps) => {
 
     try {
       // Convert file to base64
-      const base64 = await new Promise<string>((resolve, reject) => {
+      const dataUrl = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = () => {
-          const result = reader.result as string;
-          // Remove data URL prefix
-          const base64Data = result.split(',')[1];
-          resolve(base64Data);
+          resolve(reader.result as string);
         };
         reader.onerror = reject;
         reader.readAsDataURL(file);
       });
 
-      // Set preview image
-      setPreviewImage(`data:${file.type};base64,${base64}`);
+      // Set preview image with full data URL
+      setPreviewImage(dataUrl);
+
+      // Extract base64 data for API call (remove data URL prefix)
+      const base64 = dataUrl.split(',')[1];
 
       // Call edge function
       const { data, error } = await supabase.functions.invoke('extract-brand-colors', {
