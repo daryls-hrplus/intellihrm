@@ -1,4 +1,5 @@
 import { useState, Fragment } from "react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -197,7 +198,16 @@ export function CompetencyRequirementRow({
                           </Badge>
                         </TooltipTrigger>
                         <TooltipContent className="max-w-xs">
-                          <p>This competency has no skills mapped. Link skills in Competency Settings.</p>
+                          <div className="space-y-2">
+                            <p>This competency has no skills mapped.</p>
+                            <Link 
+                              to="/capabilities/competency-skill-mapping" 
+                              className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
+                            >
+                              <Wrench className="h-3 w-3" />
+                              Manage Skill Mappings
+                            </Link>
+                          </div>
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
