@@ -24,6 +24,7 @@ import {
   Moon,
   Camera,
   Sliders,
+  DollarSign,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -274,6 +275,7 @@ export default function TimeAttendanceDashboardPage() {
       items: filterByAccess([
         allModules.projects,
         allModules.timesheetApprovals,
+        allModules.projectCosts,
       ]),
     },
     {
