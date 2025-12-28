@@ -55,7 +55,14 @@ import {
   ChevronRight,
   Copy,
   Upload,
+  HelpCircle,
 } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Checkbox } from "@/components/ui/checkbox";
 import { NavLink } from "react-router-dom";
 import { format } from "date-fns";
@@ -106,6 +113,48 @@ const WORK_PERIODS = [
   { value: "bi-monthly", label: "Bi-Monthly" },
   { value: "fortnightly", label: "Fortnightly" },
   { value: "weekly", label: "Weekly" },
+];
+
+const JOB_LEVELS = [
+  { value: "Intern", label: "Intern" },
+  { value: "Clerk", label: "Clerk" },
+  { value: "Operator", label: "Operator" },
+  { value: "Officer", label: "Officer" },
+  { value: "Staff", label: "Staff" },
+  { value: "Senior", label: "Senior" },
+  { value: "Supervisor", label: "Supervisor" },
+  { value: "Manager", label: "Manager" },
+  { value: "Director", label: "Director" },
+  { value: "Executive", label: "Executive" },
+];
+
+const JOB_GRADES = [
+  { value: "GR1", label: "GR1" },
+  { value: "GR2", label: "GR2" },
+  { value: "GR3", label: "GR3" },
+  { value: "GR4", label: "GR4" },
+  { value: "GR5", label: "GR5" },
+  { value: "GR6", label: "GR6" },
+  { value: "GR7", label: "GR7" },
+  { value: "GR8", label: "GR8" },
+  { value: "GR9", label: "GR9" },
+  { value: "GR10", label: "GR10" },
+];
+
+const CRITICAL_LEVELS = [
+  { value: "Low", label: "Low" },
+  { value: "Medium", label: "Medium" },
+  { value: "High", label: "High" },
+  { value: "Critical", label: "Critical" },
+];
+
+const JOB_CLASSES = [
+  { value: "Technical", label: "Technical" },
+  { value: "Administrative", label: "Administrative" },
+  { value: "Managerial", label: "Managerial" },
+  { value: "Professional", label: "Professional" },
+  { value: "Operational", label: "Operational" },
+  { value: "Support", label: "Support" },
 ];
 
 const emptyForm = {
@@ -278,10 +327,10 @@ export default function JobsPage() {
       name: formData.name.trim(),
       code: formData.code.trim().toUpperCase(),
       description: formData.description.trim() || null,
-      job_grade: formData.job_grade.trim() || null,
-      job_level: formData.job_level.trim() || null,
-      critical_level: formData.critical_level.trim() || null,
-      job_class: formData.job_class.trim() || null,
+      job_grade: formData.job_grade || null,
+      job_level: formData.job_level || null,
+      critical_level: formData.critical_level || null,
+      job_class: formData.job_class || null,
       standard_hours: formData.standard_hours ? parseFloat(formData.standard_hours) : null,
       standard_work_period: formData.standard_work_period || null,
       start_date: formData.start_date,
@@ -590,38 +639,90 @@ export default function JobsPage() {
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label>Job Grade</Label>
-          <Input
-            value={formData.job_grade}
-            onChange={(e) => setFormData({ ...formData, job_grade: e.target.value })}
-            placeholder="e.g., G5"
-          />
+          <Select
+            value={formData.job_grade || "__none__"}
+            onValueChange={(value) =>
+              setFormData({ ...formData, job_grade: value === "__none__" ? "" : value })
+            }
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select grade" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="__none__">None</SelectItem>
+              {JOB_GRADES.map((grade) => (
+                <SelectItem key={grade.value} value={grade.value}>
+                  {grade.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
         <div className="space-y-2">
           <Label>Job Level</Label>
-          <Input
-            value={formData.job_level}
-            onChange={(e) => setFormData({ ...formData, job_level: e.target.value })}
-            placeholder="e.g., Senior"
-          />
+          <Select
+            value={formData.job_level || "__none__"}
+            onValueChange={(value) =>
+              setFormData({ ...formData, job_level: value === "__none__" ? "" : value })
+            }
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select level" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="__none__">None</SelectItem>
+              {JOB_LEVELS.map((level) => (
+                <SelectItem key={level.value} value={level.value}>
+                  {level.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label>Critical Level</Label>
-          <Input
-            value={formData.critical_level}
-            onChange={(e) => setFormData({ ...formData, critical_level: e.target.value })}
-            placeholder="e.g., High"
-          />
+          <Select
+            value={formData.critical_level || "__none__"}
+            onValueChange={(value) =>
+              setFormData({ ...formData, critical_level: value === "__none__" ? "" : value })
+            }
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select critical level" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="__none__">None</SelectItem>
+              {CRITICAL_LEVELS.map((level) => (
+                <SelectItem key={level.value} value={level.value}>
+                  {level.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
         <div className="space-y-2">
           <Label>Job Class (User Defined)</Label>
-          <Input
-            value={formData.job_class}
-            onChange={(e) => setFormData({ ...formData, job_class: e.target.value })}
-            placeholder="e.g., Technical"
-          />
+          <Select
+            value={formData.job_class || "__none__"}
+            onValueChange={(value) =>
+              setFormData({ ...formData, job_class: value === "__none__" ? "" : value })
+            }
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select job class" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="__none__">None</SelectItem>
+              {JOB_CLASSES.map((jc) => (
+                <SelectItem key={jc.value} value={jc.value}>
+                  {jc.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
@@ -690,7 +791,28 @@ export default function JobsPage() {
             checked={formData.is_key_position}
             onCheckedChange={(checked) => setFormData({ ...formData, is_key_position: checked })}
           />
-          <Label>Key Position</Label>
+          <Label className="flex items-center gap-1">
+            Key Position
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <HelpCircle className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
+                </TooltipTrigger>
+                <TooltipContent className="max-w-xs">
+                  <p className="font-medium mb-1">Key Position Flag</p>
+                  <p className="text-xs text-muted-foreground">
+                    Marks this job as critical to organizational success. Key positions are referenced in:
+                  </p>
+                  <ul className="text-xs text-muted-foreground mt-1 ml-3 list-disc">
+                    <li>Succession Planning - for identifying critical roles needing successors</li>
+                    <li>Workforce Planning - for prioritizing talent pipelines</li>
+                    <li>Position Control - for vacancy risk assessment</li>
+                    <li>Talent Dashboard - for leadership visibility</li>
+                  </ul>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </Label>
         </div>
       </div>
     </>
