@@ -59,6 +59,20 @@ export function AICompetencySuggestions({
   const [addedIds, setAddedIds] = useState<Set<string>>(new Set());
   const [analyzing, setAnalyzing] = useState(false);
 
+  // Sync addedIds with existingRequirementIds - remove from addedIds if deleted externally
+  useEffect(() => {
+    setAddedIds((prev) => {
+      const existingSet = new Set(existingRequirementIds);
+      const updated = new Set<string>();
+      prev.forEach((id) => {
+        if (existingSet.has(id)) {
+          updated.add(id);
+        }
+      });
+      return updated;
+    });
+  }, [existingRequirementIds]);
+
   const fetchSuggestions = async () => {
     setAnalyzing(true);
     try {
