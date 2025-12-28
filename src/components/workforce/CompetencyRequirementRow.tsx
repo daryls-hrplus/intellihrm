@@ -15,6 +15,11 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { 
   ChevronRight, 
   ChevronDown, 
@@ -26,8 +31,10 @@ import {
   Pencil,
   X,
   Check,
-  Loader2
+  Loader2,
+  HelpCircle
 } from "lucide-react";
+import { SkillProficiencyLevelsPanel } from "./SkillProficiencyLevelsPanel";
 import { formatDateForDisplay } from "@/utils/dateUtils";
 import { ProficiencyLevelBadge, ProficiencyLevelPicker } from "@/components/capabilities/ProficiencyLevelPicker";
 
@@ -98,6 +105,7 @@ export function CompetencyRequirementRow({
   const [overrideLevel, setOverrideLevel] = useState<number | null>(null);
   const [overrideReason, setOverrideReason] = useState("");
   const [isSavingOverride, setIsSavingOverride] = useState(false);
+  const [expandedSkillGuide, setExpandedSkillGuide] = useState<string | null>(null);
 
   const hasLinkedSkills = linkedSkills.length > 0;
   const overriddenSkillsCount = linkedSkills.filter(s => s.override).length;
@@ -308,188 +316,212 @@ export function CompetencyRequirementRow({
               const isEditing = editingSkillId === skill.skill_id;
               const hasOverride = !!skill.override;
               const displayLevel = skill.override?.override_proficiency_level ?? skill.min_proficiency_level;
+              const isGuideExpanded = expandedSkillGuide === skill.skill_id;
               
               return (
-                <TableRow 
-                  key={skill.id} 
-                  className={`bg-muted/30 hover:bg-muted/50 ${hasOverride ? 'border-l-2 border-l-amber-500' : ''}`}
-                >
-                  <TableCell className="py-2 pl-14">
-                    <div className="flex items-center gap-2">
-                      <Wrench className="h-3.5 w-3.5 text-blue-500" />
-                      <span className="text-sm">{skill.skill?.name}</span>
-                      <Badge variant="outline" className="text-xs bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 border-blue-200 dark:border-blue-800">
-                        Skill
-                      </Badge>
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-sm text-muted-foreground capitalize">
-                    {skill.skill?.category}
-                  </TableCell>
-                  <TableCell>
-                    {isEditing ? (
+                <Fragment key={skill.id}>
+                  <TableRow 
+                    className={`bg-muted/30 hover:bg-muted/50 ${hasOverride ? 'border-l-2 border-l-amber-500' : ''}`}
+                  >
+                    <TableCell className="py-2 pl-14">
                       <div className="flex items-center gap-2">
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <Button variant="outline" size="sm" className="h-7">
-                              {overrideLevel ? (
-                                <ProficiencyLevelBadge level={overrideLevel} size="sm" />
-                              ) : (
-                                "Select level"
-                              )}
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-80 p-3" align="start">
-                            <ProficiencyLevelPicker
-                              value={overrideLevel}
-                              onChange={setOverrideLevel}
-                              showDescription
-                            />
-                            <div className="mt-3 pt-3 border-t">
-                              <label className="text-xs font-medium text-muted-foreground">Override Reason (optional)</label>
-                              <Input
-                                value={overrideReason}
-                                onChange={(e) => setOverrideReason(e.target.value)}
-                                placeholder="Why is a different level needed?"
-                                className="mt-1 h-8 text-sm"
-                              />
-                            </div>
-                          </PopoverContent>
-                        </Popover>
+                        <Wrench className="h-3.5 w-3.5 text-blue-500" />
+                        <span className="text-sm">{skill.skill?.name}</span>
+                        <Badge variant="outline" className="text-xs bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 border-blue-200 dark:border-blue-800">
+                          Skill
+                        </Badge>
                       </div>
-                    ) : (
-                      <div className="flex flex-col gap-1">
+                    </TableCell>
+                    <TableCell className="text-sm text-muted-foreground capitalize">
+                      {skill.skill?.category}
+                    </TableCell>
+                    <TableCell>
+                      {isEditing ? (
                         <div className="flex items-center gap-2">
-                          {displayLevel ? (
-                            <ProficiencyLevelBadge 
-                              level={displayLevel} 
-                              size="sm" 
-                              skillId={skill.skill?.id}
-                              skillName={skill.skill?.name}
-                              skillIndicators={skill.skill?.proficiency_indicators}
-                            />
-                          ) : (
-                            <span className="text-xs text-muted-foreground">—</span>
-                          )}
-                          {hasOverride && (
-                            <TooltipProvider>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Badge variant="outline" className="text-xs bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 border-amber-200 dark:border-amber-800">
-                                    <AlertTriangle className="h-3 w-3 mr-1" />
-                                    Override
-                                  </Badge>
-                                </TooltipTrigger>
-                                <TooltipContent className="max-w-xs">
-                                  <div className="space-y-1">
-                                    <p className="font-medium">Job-Specific Override</p>
-                                    <p className="text-xs">Baseline level: {skill.min_proficiency_level || "Not set"}</p>
-                                    {skill.override?.override_reason && (
-                                      <p className="text-xs">Reason: {skill.override.override_reason}</p>
-                                    )}
-                                  </div>
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <Button variant="outline" size="sm" className="h-7">
+                                {overrideLevel ? (
+                                  <ProficiencyLevelBadge level={overrideLevel} size="sm" />
+                                ) : (
+                                  "Select level"
+                                )}
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-80 p-3" align="start">
+                              <ProficiencyLevelPicker
+                                value={overrideLevel}
+                                onChange={setOverrideLevel}
+                                showDescription
+                              />
+                              <div className="mt-3 pt-3 border-t">
+                                <label className="text-xs font-medium text-muted-foreground">Override Reason (optional)</label>
+                                <Input
+                                  value={overrideReason}
+                                  onChange={(e) => setOverrideReason(e.target.value)}
+                                  placeholder="Why is a different level needed?"
+                                  className="mt-1 h-8 text-sm"
+                                />
+                              </div>
+                            </PopoverContent>
+                          </Popover>
+                        </div>
+                      ) : (
+                        <div className="flex flex-col gap-1">
+                          <div className="flex items-center gap-2">
+                            {displayLevel ? (
+                              <ProficiencyLevelBadge 
+                                level={displayLevel} 
+                                size="sm" 
+                                skillId={skill.skill?.id}
+                                skillName={skill.skill?.name}
+                                skillIndicators={skill.skill?.proficiency_indicators}
+                              />
+                            ) : (
+                              <span className="text-xs text-muted-foreground">—</span>
+                            )}
+                            {hasOverride && (
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <Badge variant="outline" className="text-xs bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 border-amber-200 dark:border-amber-800">
+                                      <AlertTriangle className="h-3 w-3 mr-1" />
+                                      Override
+                                    </Badge>
+                                  </TooltipTrigger>
+                                  <TooltipContent className="max-w-xs">
+                                    <div className="space-y-1">
+                                      <p className="font-medium">Job-Specific Override</p>
+                                      <p className="text-xs">Baseline level: {skill.min_proficiency_level || "Not set"}</p>
+                                      {skill.override?.override_reason && (
+                                        <p className="text-xs">Reason: {skill.override.override_reason}</p>
+                                      )}
+                                    </div>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+                            )}
+                            {/* What does this level mean? button */}
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-5 px-1.5 text-[10px] text-muted-foreground hover:text-primary gap-1"
+                              onClick={() => setExpandedSkillGuide(isGuideExpanded ? null : skill.skill_id)}
+                            >
+                              <HelpCircle className="h-3 w-3" />
+                              {isGuideExpanded ? "Hide" : "Levels"}
+                            </Button>
+                          </div>
+                          {/* Skill-specific proficiency context - visible inline */}
+                          {displayLevel && skill.skill?.proficiency_indicators && skill.skill.proficiency_indicators[displayLevel.toString()] && (
+                            <div className="text-[11px] text-muted-foreground leading-tight max-w-[280px]">
+                              <span className="text-primary/70 font-medium">• </span>
+                              {skill.skill.proficiency_indicators[displayLevel.toString()][0]}
+                            </div>
                           )}
                         </div>
-                        {/* Skill-specific proficiency context - visible inline */}
-                        {displayLevel && skill.skill?.proficiency_indicators && skill.skill.proficiency_indicators[displayLevel.toString()] && (
-                          <div className="text-[11px] text-muted-foreground leading-tight max-w-[280px]">
-                            <span className="text-primary/70 font-medium">• </span>
-                            {skill.skill.proficiency_indicators[displayLevel.toString()][0]}
-                          </div>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className="text-xs">{skill.weight}%</Badge>
+                    </TableCell>
+                    <TableCell colSpan={2}>
+                      {hasOverride ? (
+                        <span className="text-xs text-amber-600 dark:text-amber-400 italic flex items-center gap-1">
+                          <AlertTriangle className="h-3 w-3" />
+                          Job-specific level (baseline: L{skill.min_proficiency_level || "?"})
+                        </span>
+                      ) : (
+                        <span className="text-xs text-muted-foreground italic">
+                          Inherited from competency mapping
+                        </span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={skill.is_required ? "secondary" : "outline"} className="text-xs">
+                        {skill.is_required ? "Required" : "Optional"}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1">
+                        {isEditing ? (
+                          <>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-6 w-6"
+                              onClick={() => handleSaveOverride(skill)}
+                              disabled={isSavingOverride || !overrideLevel}
+                            >
+                              {isSavingOverride ? (
+                                <Loader2 className="h-3 w-3 animate-spin" />
+                              ) : (
+                                <Check className="h-3 w-3 text-green-600" />
+                              )}
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-6 w-6"
+                              onClick={handleCancelEdit}
+                              disabled={isSavingOverride}
+                            >
+                              <X className="h-3 w-3" />
+                            </Button>
+                          </>
+                        ) : (
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-6 w-6"
+                                  onClick={() => handleStartEdit(skill)}
+                                >
+                                  <Pencil className="h-3 w-3 text-muted-foreground hover:text-foreground" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                {hasOverride ? "Edit override" : "Override skill level for this job"}
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        )}
+                        {hasOverride && !isEditing && (
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-6 w-6"
+                                  onClick={() => handleRemoveOverride(skill)}
+                                  disabled={isSavingOverride}
+                                >
+                                  <X className="h-3 w-3 text-amber-600 hover:text-destructive" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>Remove override (use baseline)</TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
                         )}
                       </div>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="outline" className="text-xs">{skill.weight}%</Badge>
-                  </TableCell>
-                  <TableCell colSpan={2}>
-                    {hasOverride ? (
-                      <span className="text-xs text-amber-600 dark:text-amber-400 italic flex items-center gap-1">
-                        <AlertTriangle className="h-3 w-3" />
-                        Job-specific level (baseline: L{skill.min_proficiency_level || "?"})
-                      </span>
-                    ) : (
-                      <span className="text-xs text-muted-foreground italic">
-                        Inherited from competency mapping
-                      </span>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={skill.is_required ? "secondary" : "outline"} className="text-xs">
-                      {skill.is_required ? "Required" : "Optional"}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-1">
-                      {isEditing ? (
-                        <>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-6 w-6"
-                            onClick={() => handleSaveOverride(skill)}
-                            disabled={isSavingOverride || !overrideLevel}
-                          >
-                            {isSavingOverride ? (
-                              <Loader2 className="h-3 w-3 animate-spin" />
-                            ) : (
-                              <Check className="h-3 w-3 text-green-600" />
-                            )}
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-6 w-6"
-                            onClick={handleCancelEdit}
-                            disabled={isSavingOverride}
-                          >
-                            <X className="h-3 w-3" />
-                          </Button>
-                        </>
-                      ) : (
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-6 w-6"
-                                onClick={() => handleStartEdit(skill)}
-                              >
-                                <Pencil className="h-3 w-3 text-muted-foreground hover:text-foreground" />
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              {hasOverride ? "Edit override" : "Override skill level for this job"}
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      )}
-                      {hasOverride && !isEditing && (
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-6 w-6"
-                                onClick={() => handleRemoveOverride(skill)}
-                                disabled={isSavingOverride}
-                              >
-                                <X className="h-3 w-3 text-amber-600 hover:text-destructive" />
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>Remove override (use baseline)</TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      )}
-                    </div>
-                  </TableCell>
-                </TableRow>
+                    </TableCell>
+                  </TableRow>
+                  {/* Expandable proficiency guide panel */}
+                  {isGuideExpanded && skill.skill && (
+                    <TableRow className="bg-muted/20">
+                      <TableCell colSpan={8} className="py-2 pl-14 pr-4">
+                        <SkillProficiencyLevelsPanel
+                          skillName={skill.skill.name}
+                          skillIndicators={skill.skill.proficiency_indicators}
+                          currentLevel={displayLevel || undefined}
+                        />
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </Fragment>
               );
             })
           )}
