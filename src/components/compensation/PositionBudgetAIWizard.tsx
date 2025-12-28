@@ -27,6 +27,7 @@ interface PositionWithCompensation {
   code: string;
   department: { id: string; name: string } | null;
   authorized_headcount: number;
+  filledHeadcount: number;
   compensation: {
     base_salary: number;
     bonus: number;
@@ -51,11 +52,20 @@ export function PositionBudgetAIWizard({
   const [overheadPercentage, setOverheadPercentage] = useState(15);
   const [employerTaxPercentage, setEmployerTaxPercentage] = useState(12);
 
-  // Fetch all positions for the company with their compensation
+  // Fetch all positions for the company with their compensation from employee_compensation
   const { data: positions = [], isLoading } = useQuery({
-    queryKey: ["positions-with-compensation", companyId],
+    queryKey: ["positions-with-employee-compensation", companyId],
     queryFn: async () => {
-      // Get all active positions
+      // Get all active positions for the company through departments
+      const { data: companyDepts } = await supabase
+        .from("departments")
+        .select("id")
+        .eq("company_id", companyId);
+
+      const companyDeptIds = companyDepts?.map(d => d.id) || [];
+      
+      if (companyDeptIds.length === 0) return [];
+
       const { data: positionData, error: posError } = await supabase
         .from("positions")
         .select(`
@@ -65,74 +75,105 @@ export function PositionBudgetAIWizard({
           authorized_headcount,
           department:departments(id, name)
         `)
+        .in("department_id", companyDeptIds)
         .eq("is_active", true)
         .order("title");
 
       if (posError) throw posError;
 
-      // Filter by company through department
-      const { data: companyDepts } = await supabase
-        .from("departments")
-        .select("id")
-        .eq("company_id", companyId);
+      // Get employee compensation aggregated by position
+      const { data: employeeCompData } = await supabase
+        .from("employee_compensation")
+        .select(`
+          position_id,
+          amount,
+          pay_element:pay_elements(code, name)
+        `)
+        .eq("company_id", companyId)
+        .eq("is_active", true)
+        .not("position_id", "is", null);
 
-      const companyDeptIds = new Set(companyDepts?.map(d => d.id) || []);
-      const companyPositions = (positionData || []).filter((p: any) => 
-        p.department && companyDeptIds.has(p.department.id)
-      );
+      // Group compensation by position
+      const positionCompMap = new Map<string, {
+        base_salary: number;
+        bonus: number;
+        benefits: number;
+        allowances: number;
+        employeeCount: number;
+      }>();
 
-      // Get compensation for each position
-      const positionsWithComp: PositionWithCompensation[] = await Promise.all(
-        companyPositions.map(async (pos: any) => {
-          const { data: compData } = await supabase
-            .from("position_compensation")
-            .select(`
-              amount,
-              pay_element:pay_elements(code, element_type_id)
-            `)
-            .eq("position_id", pos.id)
-            .eq("is_active", true);
+      // Track unique employees per position for headcount
+      const positionEmployees = new Map<string, Set<string>>();
 
-          let baseSalary = 0;
-          let bonus = 0;
-          let benefits = 0;
-          let allowances = 0;
+      (employeeCompData || []).forEach((comp: any) => {
+        if (!comp.position_id) return;
+        
+        const existing = positionCompMap.get(comp.position_id) || {
+          base_salary: 0,
+          bonus: 0,
+          benefits: 0,
+          allowances: 0,
+          employeeCount: 0,
+        };
 
-          (compData || []).forEach((comp: any) => {
-            const code = comp.pay_element?.code?.toLowerCase() || "";
-            const amount = comp.amount || 0;
-            
-            if (code.includes("base") || code.includes("salary") || code === "basic") {
-              baseSalary += amount;
-            } else if (code.includes("bonus") || code.includes("incentive")) {
-              bonus += amount;
-            } else if (code.includes("benefit") || code.includes("insurance") || code.includes("medical")) {
-              benefits += amount;
-            } else if (code.includes("allowance") || code.includes("housing") || code.includes("transport")) {
-              allowances += amount;
-            } else {
-              // Default to base salary for unclassified
-              baseSalary += amount;
-            }
-          });
+        const code = comp.pay_element?.code?.toLowerCase() || "";
+        const amount = comp.amount || 0;
+        
+        if (code.includes("base") || code.includes("salary") || code === "basic") {
+          existing.base_salary += amount;
+        } else if (code.includes("bonus") || code.includes("incentive")) {
+          existing.bonus += amount;
+        } else if (code.includes("benefit") || code.includes("insurance") || code.includes("medical")) {
+          existing.benefits += amount;
+        } else if (code.includes("allowance") || code.includes("housing") || code.includes("transport")) {
+          existing.allowances += amount;
+        } else {
+          existing.base_salary += amount;
+        }
 
-          return {
-            id: pos.id,
-            title: pos.title,
-            code: pos.code || "",
-            department: pos.department,
-            authorized_headcount: pos.authorized_headcount || 1,
-            compensation: {
-              base_salary: baseSalary,
-              bonus,
-              benefits,
-              allowances,
-              total: baseSalary + bonus + benefits + allowances,
-            },
-            isSelected: false,
-          };
-        })
-      );
+        positionCompMap.set(comp.position_id, existing);
+      });
+
+      // Get actual filled headcount per position from employee_positions
+      const { data: employeePositions } = await supabase
+        .from("employee_positions")
+        .select("position_id, employee_id")
+        .eq("is_active", true);
+
+      (employeePositions || []).forEach((ep: any) => {
+        if (!positionEmployees.has(ep.position_id)) {
+          positionEmployees.set(ep.position_id, new Set());
+        }
+        positionEmployees.get(ep.position_id)?.add(ep.employee_id);
+      });
+
+      // Build positions with compensation
+      const positionsWithComp: PositionWithCompensation[] = (positionData || []).map((pos: any) => {
+        const comp = positionCompMap.get(pos.id) || {
+          base_salary: 0,
+          bonus: 0,
+          benefits: 0,
+          allowances: 0,
+        };
+        const filledCount = positionEmployees.get(pos.id)?.size || 0;
+
+        return {
+          id: pos.id,
+          title: pos.title,
+          code: pos.code || "",
+          department: pos.department,
+          authorized_headcount: pos.authorized_headcount || 1,
+          filledHeadcount: filledCount,
+          compensation: {
+            base_salary: comp.base_salary,
+            bonus: comp.bonus,
+            benefits: comp.benefits,
+            allowances: comp.allowances,
+            total: comp.base_salary + comp.bonus + comp.benefits + comp.allowances,
+          },
+          isSelected: false,
+        };
+      });
 
       return positionsWithComp;
     },
@@ -327,7 +368,7 @@ export function PositionBudgetAIWizard({
                             )}
                             <span className="flex items-center gap-1">
                               <Users className="h-3 w-3" />
-                              {pos.authorized_headcount} HC
+                              {pos.filledHeadcount}/{pos.authorized_headcount} filled
                             </span>
                           </div>
                         </div>
