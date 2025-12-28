@@ -2,6 +2,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { useLanguage } from "@/hooks/useLanguage";
 import { GroupedModuleCards, ModuleSection, GroupedModuleItem } from "@/components/ui/GroupedModuleCards";
+import { TeamLeaveIntelligence } from "@/components/mss/TeamLeaveIntelligence";
 import { useGranularPermissions } from "@/hooks/useGranularPermissions";
 import {
   Users,
@@ -102,6 +103,9 @@ export default function ManagerSelfServicePage() {
             {t("mss.subtitle")}
           </p>
         </div>
+
+        {/* Team Leave Intelligence */}
+        <TeamLeaveIntelligence />
 
         <GroupedModuleCards sections={sections} />
       </div>
