@@ -17950,6 +17950,7 @@ export type Database = {
         Row: {
           account_id: string
           batch_id: string
+          composed_gl_string: string | null
           cost_center_id: string | null
           created_at: string
           credit_amount: number | null
@@ -17958,16 +17959,20 @@ export type Database = {
           employee_id: string | null
           entry_date: string
           entry_number: number
+          entry_type: string | null
           id: string
+          override_rule_id: string | null
           reallocation_id: string | null
           reference_id: string | null
           reference_type: string | null
+          segment_values: Json | null
           source_type: string | null
           updated_at: string
         }
         Insert: {
           account_id: string
           batch_id: string
+          composed_gl_string?: string | null
           cost_center_id?: string | null
           created_at?: string
           credit_amount?: number | null
@@ -17976,16 +17981,20 @@ export type Database = {
           employee_id?: string | null
           entry_date: string
           entry_number: number
+          entry_type?: string | null
           id?: string
+          override_rule_id?: string | null
           reallocation_id?: string | null
           reference_id?: string | null
           reference_type?: string | null
+          segment_values?: Json | null
           source_type?: string | null
           updated_at?: string
         }
         Update: {
           account_id?: string
           batch_id?: string
+          composed_gl_string?: string | null
           cost_center_id?: string | null
           created_at?: string
           credit_amount?: number | null
@@ -17994,10 +18003,13 @@ export type Database = {
           employee_id?: string | null
           entry_date?: string
           entry_number?: number
+          entry_type?: string | null
           id?: string
+          override_rule_id?: string | null
           reallocation_id?: string | null
           reference_id?: string | null
           reference_type?: string | null
+          segment_values?: Json | null
           source_type?: string | null
           updated_at?: string
         }
@@ -18031,10 +18043,175 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "gl_journal_entries_override_rule_id_fkey"
+            columns: ["override_rule_id"]
+            isOneToOne: false
+            referencedRelation: "gl_override_rules"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "gl_journal_entries_reallocation_id_fkey"
             columns: ["reallocation_id"]
             isOneToOne: false
             referencedRelation: "gl_cost_reallocations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gl_override_conditions: {
+        Row: {
+          created_at: string
+          dimension_type: string
+          dimension_value_code: string | null
+          dimension_value_id: string | null
+          id: string
+          operator: string
+          override_rule_id: string
+          value_list: string[] | null
+        }
+        Insert: {
+          created_at?: string
+          dimension_type: string
+          dimension_value_code?: string | null
+          dimension_value_id?: string | null
+          id?: string
+          operator?: string
+          override_rule_id: string
+          value_list?: string[] | null
+        }
+        Update: {
+          created_at?: string
+          dimension_type?: string
+          dimension_value_code?: string | null
+          dimension_value_id?: string | null
+          id?: string
+          operator?: string
+          override_rule_id?: string
+          value_list?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gl_override_conditions_override_rule_id_fkey"
+            columns: ["override_rule_id"]
+            isOneToOne: false
+            referencedRelation: "gl_override_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gl_override_rules: {
+        Row: {
+          applies_to_credit: boolean
+          applies_to_debit: boolean
+          company_id: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          effective_date: string
+          end_date: string | null
+          id: string
+          is_active: boolean
+          override_type: string
+          priority: number
+          rule_code: string
+          rule_name: string
+          updated_at: string
+        }
+        Insert: {
+          applies_to_credit?: boolean
+          applies_to_debit?: boolean
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          effective_date?: string
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          override_type?: string
+          priority?: number
+          rule_code: string
+          rule_name: string
+          updated_at?: string
+        }
+        Update: {
+          applies_to_credit?: boolean
+          applies_to_debit?: boolean
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          effective_date?: string
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          override_type?: string
+          priority?: number
+          rule_code?: string
+          rule_name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gl_override_rules_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gl_override_targets: {
+        Row: {
+          created_at: string
+          custom_gl_string: string | null
+          id: string
+          override_rule_id: string
+          segment_overrides: Json | null
+          target_credit_account_id: string | null
+          target_debit_account_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          custom_gl_string?: string | null
+          id?: string
+          override_rule_id: string
+          segment_overrides?: Json | null
+          target_credit_account_id?: string | null
+          target_debit_account_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          custom_gl_string?: string | null
+          id?: string
+          override_rule_id?: string
+          segment_overrides?: Json | null
+          target_credit_account_id?: string | null
+          target_debit_account_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gl_override_targets_override_rule_id_fkey"
+            columns: ["override_rule_id"]
+            isOneToOne: false
+            referencedRelation: "gl_override_rules"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gl_override_targets_target_credit_account_id_fkey"
+            columns: ["target_credit_account_id"]
+            isOneToOne: false
+            referencedRelation: "gl_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gl_override_targets_target_debit_account_id_fkey"
+            columns: ["target_debit_account_id"]
+            isOneToOne: false
+            referencedRelation: "gl_accounts"
             referencedColumns: ["id"]
           },
         ]
