@@ -992,7 +992,8 @@ export default function JobsPage() {
                             <TabsContent value="responsibilities" className="mt-4">
                               <JobResponsibilitiesManager 
                                 jobId={job.id} 
-                                companyId={job.company_id} 
+                                companyId={job.company_id}
+                                jobFamilyId={job.job_family_id}
                               />
                             </TabsContent>
                             <TabsContent value="goals" className="mt-4">

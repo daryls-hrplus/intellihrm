@@ -14,7 +14,9 @@ import {
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
@@ -26,7 +28,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Plus, Trash2, AlertCircle, ChevronDown, ChevronUp, Target } from "lucide-react";
+import { Plus, Trash2, AlertCircle, ChevronDown, ChevronUp, Target, Star, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ResponsibilityCategoryBadge, ResponsibilityCategory } from "./ResponsibilityCategoryBadge";
@@ -59,9 +61,21 @@ interface Responsibility {
   key_result_areas?: string[];
 }
 
+interface FamilyDefaultResponsibility {
+  responsibility_id: string;
+  suggested_weight: number;
+}
+
+interface JobFamily {
+  id: string;
+  name: string;
+  default_responsibilities: FamilyDefaultResponsibility[];
+}
+
 interface JobResponsibilitiesManagerProps {
   jobId: string;
   companyId: string;
+  jobFamilyId?: string;
 }
 
 // Check if two date ranges overlap (using string comparison for dates in YYYY-MM-DD format)
@@ -76,9 +90,10 @@ function datesOverlap(
   return start1 <= e2 && start2 <= e1;
 }
 
-export function JobResponsibilitiesManager({ jobId, companyId }: JobResponsibilitiesManagerProps) {
+export function JobResponsibilitiesManager({ jobId, companyId, jobFamilyId }: JobResponsibilitiesManagerProps) {
   const [jobResponsibilities, setJobResponsibilities] = useState<JobResponsibility[]>([]);
   const [responsibilities, setResponsibilities] = useState<Responsibility[]>([]);
+  const [jobFamily, setJobFamily] = useState<JobFamily | null>(null);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -108,7 +123,37 @@ export function JobResponsibilitiesManager({ jobId, companyId }: JobResponsibili
   useEffect(() => {
     fetchJobResponsibilities();
     fetchResponsibilities();
-  }, [jobId, companyId]);
+    if (jobFamilyId) {
+      fetchJobFamily();
+    }
+  }, [jobId, companyId, jobFamilyId]);
+
+  const fetchJobFamily = async () => {
+    if (!jobFamilyId) return;
+    
+    const { data, error } = await supabase
+      .from("job_families")
+      .select("id, name, default_responsibilities")
+      .eq("id", jobFamilyId)
+      .single();
+
+    if (error) {
+      console.error("Error fetching job family:", error);
+    } else if (data) {
+      // Parse default_responsibilities JSONB
+      const defaults = Array.isArray(data.default_responsibilities) 
+        ? data.default_responsibilities.map((d: any) => ({
+            responsibility_id: d.responsibility_id,
+            suggested_weight: d.suggested_weight || 0,
+          }))
+        : [];
+      setJobFamily({
+        id: data.id,
+        name: data.name,
+        default_responsibilities: defaults,
+      });
+    }
+  };
 
   const fetchJobResponsibilities = async () => {
     setLoading(true);
@@ -166,6 +211,23 @@ export function JobResponsibilitiesManager({ jobId, companyId }: JobResponsibili
   // Get the selected responsibility details for preview
   const selectedResponsibility = responsibilities.find(r => r.id === formData.responsibility_id);
 
+  // Create a map of recommended responsibility IDs to their suggested weights
+  const recommendedMap = new Map<string, number>();
+  if (jobFamily?.default_responsibilities) {
+    jobFamily.default_responsibilities.forEach(d => {
+      recommendedMap.set(d.responsibility_id, d.suggested_weight);
+    });
+  }
+
+  // Split responsibilities into recommended and other groups
+  const recommendedResponsibilities = responsibilities.filter(r => recommendedMap.has(r.id));
+  const otherResponsibilities = responsibilities.filter(r => !recommendedMap.has(r.id));
+
+  // Get suggested weight for selected responsibility (if recommended)
+  const getSuggestedWeight = (responsibilityId: string): number | null => {
+    return recommendedMap.get(responsibilityId) ?? null;
+  };
+
   const handleOpenDialog = () => {
     setFormData({
       responsibility_id: "",
@@ -175,6 +237,17 @@ export function JobResponsibilitiesManager({ jobId, companyId }: JobResponsibili
       end_date: "",
     });
     setDialogOpen(true);
+  };
+
+  // Handle responsibility selection with auto-fill weight
+  const handleResponsibilitySelect = (responsibilityId: string) => {
+    const suggestedWeight = getSuggestedWeight(responsibilityId);
+    setFormData(prev => ({
+      ...prev,
+      responsibility_id: responsibilityId,
+      // Auto-fill weight if this is a recommended responsibility
+      weighting: suggestedWeight !== null ? suggestedWeight : prev.weighting,
+    }));
   };
 
   // Calculate total weighting for responsibilities that overlap with the new entry's date range
@@ -396,26 +469,67 @@ export function JobResponsibilitiesManager({ jobId, companyId }: JobResponsibili
             {/* Section 1: Select & Preview */}
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label>Select Responsibility *</Label>
+                <div className="flex items-center justify-between">
+                  <Label>Select Responsibility *</Label>
+                  {jobFamily && (
+                    <span className="text-xs text-muted-foreground flex items-center gap-1">
+                      <Sparkles className="h-3 w-3 text-amber-500" />
+                      Family: {jobFamily.name}
+                    </span>
+                  )}
+                </div>
                 <Select
                   value={formData.responsibility_id}
-                  onValueChange={(value) =>
-                    setFormData({ ...formData, responsibility_id: value })
-                  }
+                  onValueChange={handleResponsibilitySelect}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select responsibility from library" />
                   </SelectTrigger>
-                  <SelectContent>
-                    {responsibilities.map((r) => (
-                      <SelectItem key={r.id} value={r.id}>
-                        <div className="flex items-center gap-2">
-                          <span>{r.name}</span>
-                          <span className="text-muted-foreground">({r.code})</span>
-                          <ResponsibilityCategoryBadge category={r.category} size="sm" showIcon={false} />
-                        </div>
-                      </SelectItem>
-                    ))}
+                  <SelectContent className="max-h-[300px]">
+                    {/* Recommended responsibilities (from job family) */}
+                    {recommendedResponsibilities.length > 0 && (
+                      <SelectGroup>
+                        <SelectLabel className="flex items-center gap-1.5 text-amber-600">
+                          <Star className="h-3.5 w-3.5 fill-amber-500 text-amber-500" />
+                          Recommended for {jobFamily?.name || "Job Family"}
+                        </SelectLabel>
+                        {recommendedResponsibilities.map((r) => {
+                          const suggestedWeight = getSuggestedWeight(r.id);
+                          return (
+                            <SelectItem key={r.id} value={r.id}>
+                              <div className="flex items-center gap-2">
+                                <Star className="h-3 w-3 fill-amber-400 text-amber-400 shrink-0" />
+                                <span className="font-medium">{r.name}</span>
+                                {suggestedWeight && (
+                                  <span className="text-xs text-amber-600 bg-amber-50 dark:bg-amber-900/30 px-1.5 py-0.5 rounded">
+                                    {suggestedWeight}%
+                                  </span>
+                                )}
+                                <ResponsibilityCategoryBadge category={r.category} size="sm" showIcon={false} />
+                              </div>
+                            </SelectItem>
+                          );
+                        })}
+                      </SelectGroup>
+                    )}
+
+                    {/* Other responsibilities */}
+                    {otherResponsibilities.length > 0 && (
+                      <SelectGroup>
+                        <SelectLabel className="text-muted-foreground">
+                          {recommendedResponsibilities.length > 0 ? "Other Responsibilities" : "All Responsibilities"}
+                        </SelectLabel>
+                        {otherResponsibilities.map((r) => (
+                          <SelectItem key={r.id} value={r.id}>
+                            <div className="flex items-center gap-2">
+                              <span>{r.name}</span>
+                              <span className="text-muted-foreground text-xs">({r.code})</span>
+                              <ResponsibilityCategoryBadge category={r.category} size="sm" showIcon={false} />
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    )}
                   </SelectContent>
                 </Select>
               </div>
@@ -424,7 +538,15 @@ export function JobResponsibilitiesManager({ jobId, companyId }: JobResponsibili
               {selectedResponsibility && (
                 <div className="rounded-lg border bg-muted/30 p-4 space-y-3">
                   <div className="flex items-center justify-between">
-                    <h4 className="font-medium">Responsibility Preview</h4>
+                    <div className="flex items-center gap-2">
+                      <h4 className="font-medium">Responsibility Preview</h4>
+                      {recommendedMap.has(selectedResponsibility.id) && (
+                        <span className="flex items-center gap-1 text-xs text-amber-600 bg-amber-50 dark:bg-amber-900/30 px-2 py-0.5 rounded-full">
+                          <Star className="h-3 w-3 fill-amber-500" />
+                          Recommended
+                        </span>
+                      )}
+                    </div>
                     <span className="text-xs text-muted-foreground">Read-only from library</span>
                   </div>
                   
@@ -467,7 +589,14 @@ export function JobResponsibilitiesManager({ jobId, companyId }: JobResponsibili
               
               <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-2">
-                  <Label>Weight % *</Label>
+                  <div className="flex items-center justify-between">
+                    <Label>Weight % *</Label>
+                    {formData.responsibility_id && getSuggestedWeight(formData.responsibility_id) !== null && (
+                      <span className="text-xs text-amber-600">
+                        Suggested: {getSuggestedWeight(formData.responsibility_id)}%
+                      </span>
+                    )}
+                  </div>
                   <Input
                     type="number"
                     min={1}
