@@ -45,18 +45,17 @@ export default function SavingsProgramsPage() {
     fetchCompanies();
   }, []);
 
-  const breadcrumbs = [
-    { label: "Payroll", href: "/payroll" },
-    { label: "Savings Programs" },
-  ];
-
   return (
-    <AppLayout
-      title="Savings Programs"
-      description="Manage employee savings programs, enrollments, and payouts"
-      breadcrumbs={breadcrumbs}
-    >
+    <AppLayout>
       <div className="space-y-6">
+        {/* Header */}
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Savings Programs</h1>
+          <p className="text-muted-foreground">
+            Manage employee savings programs, enrollments, and payouts
+          </p>
+        </div>
+
         {/* Company Selector */}
         <Card>
           <CardContent className="py-4">
