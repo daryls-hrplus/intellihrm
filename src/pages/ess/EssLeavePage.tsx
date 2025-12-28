@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useLeaveManagement } from "@/hooks/useLeaveManagement";
+import { useLeaveYearAllocations } from "@/hooks/useLeaveYearAllocations";
 import { useWorkflow } from "@/hooks/useWorkflow";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/hooks/useLanguage";
@@ -180,6 +181,24 @@ export default function EssLeavePage() {
       })
       .sort((a, b) => new Date(b.start_date).getTime() - new Date(a.start_date).getTime());
   }, [leaveRequests, selectedYear]);
+
+  // Get IDs of leave taken for fetching allocations
+  const leaveTakenIds = useMemo(() => leaveTaken.map((l) => l.id), [leaveTaken]);
+  
+  // Fetch year allocations for cross-year leave display
+  const { data: yearAllocations = [] } = useLeaveYearAllocations(leaveTakenIds);
+  
+  // Create a map for quick lookup
+  const allocationsByRequest = useMemo(() => {
+    const map = new Map<string, typeof yearAllocations>();
+    yearAllocations.forEach((alloc) => {
+      if (!map.has(alloc.leave_request_id)) {
+        map.set(alloc.leave_request_id, []);
+      }
+      map.get(alloc.leave_request_id)!.push(alloc);
+    });
+    return map;
+  }, [yearAllocations]);
 
   // Filter upcoming approved leave
   const upcomingLeave = useMemo(() => {
@@ -442,7 +461,13 @@ export default function EssLeavePage() {
                     </CardTitle>
                     <div className="flex items-center gap-3">
                       <div className="text-sm text-muted-foreground">
-                        Total: <span className="font-semibold text-foreground">{leaveTaken.reduce((sum, l) => sum + (l.duration || 0), 0)} days</span>
+                        Total in {selectedYear}: <span className="font-semibold text-foreground">
+                          {leaveTaken.reduce((sum, l) => {
+                            const allocations = allocationsByRequest.get(l.id) || [];
+                            const yearAlloc = allocations.find((a) => a.year === parseInt(selectedYear));
+                            return sum + (yearAlloc?.allocated_days ?? l.duration ?? 0);
+                          }, 0)} days
+                        </span>
                       </div>
                       <Select value={selectedYear} onValueChange={setSelectedYear}>
                         <SelectTrigger className="w-[120px]">
@@ -465,27 +490,34 @@ export default function EssLeavePage() {
                       <TableRow>
                         <TableHead>Type</TableHead>
                         <TableHead>Dates</TableHead>
-                        <TableHead>Duration</TableHead>
+                        <TableHead>Total Duration</TableHead>
+                        <TableHead>Days in {selectedYear}</TableHead>
                         <TableHead>Status</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {loadingRequests ? (
                         <TableRow>
-                          <TableCell colSpan={4} className="text-center py-8">
+                          <TableCell colSpan={5} className="text-center py-8">
                             <Loader2 className="h-5 w-5 animate-spin mx-auto text-muted-foreground" />
                           </TableCell>
                         </TableRow>
                       ) : leaveTaken.length === 0 ? (
                         <TableRow>
-                          <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
+                          <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
                             No leave taken in {selectedYear}.
                           </TableCell>
                         </TableRow>
                       ) : (
                         leaveTaken.map((leave) => {
                           const endDate = parseISO(leave.end_date);
-                          const isOngoing = !isPast(endDate) && (isToday(parseISO(leave.start_date)) || isPast(parseISO(leave.start_date)));
+                          const startDate = parseISO(leave.start_date);
+                          const isOngoing = !isPast(endDate) && (isToday(startDate) || isPast(startDate));
+                          const isCrossYear = getYear(startDate) !== getYear(endDate);
+                          const allocations = allocationsByRequest.get(leave.id) || [];
+                          const yearAllocation = allocations.find((a) => a.year === parseInt(selectedYear));
+                          const daysInSelectedYear = yearAllocation?.allocated_days ?? leave.duration;
+                          
                           return (
                             <TableRow key={leave.id}>
                               <TableCell>
@@ -494,7 +526,14 @@ export default function EssLeavePage() {
                                     className="h-3 w-3 rounded-full" 
                                     style={{ backgroundColor: leave.leave_type?.color || "#3B82F6" }} 
                                   />
-                                  {leave.leave_type?.name || "Unknown"}
+                                  <div>
+                                    <span>{leave.leave_type?.name || "Unknown"}</span>
+                                    {isCrossYear && (
+                                      <Badge variant="outline" className="ml-2 text-xs">
+                                        Cross-Year
+                                      </Badge>
+                                    )}
+                                  </div>
                                 </div>
                               </TableCell>
                               <TableCell>
@@ -505,6 +544,14 @@ export default function EssLeavePage() {
                               </TableCell>
                               <TableCell>
                                 {leave.duration} {leave.leave_type?.accrual_unit || "days"}
+                              </TableCell>
+                              <TableCell>
+                                <span className="font-medium">{daysInSelectedYear}</span>
+                                {isCrossYear && allocations.length > 0 && (
+                                  <span className="text-xs text-muted-foreground ml-1">
+                                    ({allocations.map((a) => `${a.year}: ${a.allocated_days}d`).join(", ")})
+                                  </span>
+                                )}
                               </TableCell>
                               <TableCell>
                                 {isOngoing ? (
