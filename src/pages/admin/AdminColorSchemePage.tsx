@@ -112,9 +112,9 @@ const AdminColorSchemePage = () => {
         </div>
 
         {previewing && (
-          <Card className="border-warning bg-warning/10">
+          <Card className="border-amber-500 bg-amber-50 dark:bg-amber-950/50">
             <CardContent className="py-3">
-              <p className="text-sm text-warning-foreground flex items-center gap-2">
+              <p className="text-sm text-amber-800 dark:text-amber-200 flex items-center gap-2 font-medium">
                 <Palette className="h-4 w-4" />
                 Preview mode active. Changes are temporary until you save.
               </p>
