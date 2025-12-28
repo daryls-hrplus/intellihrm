@@ -12,34 +12,55 @@ serve(async (req) => {
   }
 
   try {
-    const { competencyId, competencyName, competencyDescription, competencyCategory, companyId } = await req.json();
-    
+    const body = await req.json().catch(() => ({}));
+
+    // Accept both camelCase and snake_case (client may send either)
+    const competencyIdRaw = body.competencyId ?? body.competency_id;
+    const competencyName = body.competencyName ?? body.competency_name;
+    const competencyDescription = body.competencyDescription ?? body.competency_description ?? null;
+    const competencyCategory = body.competencyCategory ?? body.competency_category ?? 'general';
+    const companyIdRaw = body.companyId ?? body.company_id;
+
+    const isUuid = (v: unknown): v is string =>
+      typeof v === 'string' &&
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(v);
+
+    const competencyId = isUuid(competencyIdRaw) ? competencyIdRaw : null;
+    const companyId = isUuid(companyIdRaw) ? companyIdRaw : null;
+
     console.log('Request params:', { competencyId, competencyName, competencyCategory, companyId });
-    
-    if (!competencyId || !competencyName) {
-      return new Response(JSON.stringify({ error: 'competencyId and competencyName are required' }), {
+
+    if (!competencyId) {
+      return new Response(JSON.stringify({ error: 'competency_id must be a valid UUID' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
-    
+
+    if (!competencyName) {
+      return new Response(JSON.stringify({ error: 'competency_name is required' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Fetch available skills - handle missing companyId gracefully
+    // Fetch available skills - handle missing/invalid companyId gracefully
     let query = supabase
       .from('skills_competencies')
       .select('id, name, code, description, category')
       .eq('type', 'SKILL')
       .eq('status', 'active');
-    
+
     if (companyId) {
       query = query.or(`company_id.eq.${companyId},is_global.eq.true`);
     } else {
       query = query.eq('is_global', true);
     }
-    
+
     const { data: skills, error: skillsError } = await query.limit(200);
 
     if (skillsError) {
@@ -54,6 +75,7 @@ serve(async (req) => {
       .eq('competency_id', competencyId);
 
     const existingSkillIds = new Set((existingMappings || []).map(m => m.skill_id));
+
     const availableSkills = skills?.filter(s => !existingSkillIds.has(s.id)) || [];
 
     if (availableSkills.length === 0) {
@@ -144,8 +166,14 @@ Only include skills with confidence > 0.5. skill_index is the 1-based index from
 
   } catch (error) {
     console.error('Error in suggest-skill-mappings:', error);
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    return new Response(JSON.stringify({ error: message }), {
+
+    const errObj = error as any;
+    const message =
+      (errObj && typeof errObj === 'object' && typeof errObj.message === 'string' && errObj.message) ||
+      (error instanceof Error ? error.message : '') ||
+      'Unknown error';
+
+    return new Response(JSON.stringify({ error: message, code: errObj?.code ?? null }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
