@@ -32,6 +32,7 @@ import {
   ArrowRightLeft,
   MapPin,
   Users,
+  TrendingUp,
 } from "lucide-react";
 
 export default function EmployeeSelfServicePage() {
@@ -68,6 +69,14 @@ export default function EmployeeSelfServicePage() {
     recognition: { title: t("ess.modules.recognition.title"), description: t("ess.modules.recognition.description"), href: "/ess/recognition", icon: Award, color: "bg-amber-500/10 text-amber-600", tabCode: "ess-recognition" },
     reminders: { title: t("ess.modules.reminders.title"), description: t("ess.modules.reminders.description"), href: "/ess/reminders", icon: Bell, color: "bg-rose-500/10 text-rose-600", tabCode: "ess-reminders" },
     notifications: { title: t("ess.modules.notifications.title"), description: t("ess.modules.notifications.description"), href: "/profile/notifications", icon: Bell, color: "bg-amber-500/10 text-amber-600", tabCode: "ess-notifications" },
+    // NEW: Previously missing links
+    development: { title: t("ess.modules.development.title", "My Development Plan"), description: t("ess.modules.development.description", "View and manage your development goals"), href: "/ess/development", icon: TrendingUp, color: "bg-purple-500/10 text-purple-600", tabCode: "ess-development" },
+    appraisalInterviews: { title: t("ess.modules.appraisalInterviews.title", "Appraisal Interviews"), description: t("ess.modules.appraisalInterviews.description", "View and prepare for scheduled appraisal meetings"), href: "/ess/appraisal-interviews", icon: Calendar, color: "bg-indigo-500/10 text-indigo-600", tabCode: "ess-appraisal-interviews" },
+    goalInterviews: { title: t("ess.modules.goalInterviews.title", "Goal Interviews"), description: t("ess.modules.goalInterviews.description", "View and prepare for goal-setting meetings"), href: "/ess/goal-interviews", icon: Target, color: "bg-pink-500/10 text-pink-600", tabCode: "ess-goal-interviews" },
+    timesheets: { title: t("ess.modules.timesheets.title", "My Timesheets"), description: t("ess.modules.timesheets.description", "Submit and view your timesheets"), href: "/ess/timesheets", icon: Clock, color: "bg-blue-500/10 text-blue-600", tabCode: "ess-timesheets" },
+    teamCalendar: { title: t("ess.modules.teamCalendar.title", "Team Calendar"), description: t("ess.modules.teamCalendar.description", "View team availability and schedules"), href: "/ess/team-calendar", icon: Users, color: "bg-cyan-500/10 text-cyan-600", tabCode: "ess-team-calendar" },
+    milestones: { title: t("ess.modules.milestones.title", "Milestones"), description: t("ess.modules.milestones.description", "View your career milestones and achievements"), href: "/ess/milestones", icon: Award, color: "bg-amber-500/10 text-amber-600", tabCode: "ess-milestones" },
+    announcements: { title: t("ess.modules.announcements.title", "Announcements"), description: t("ess.modules.announcements.description", "View company announcements and news"), href: "/ess/announcements", icon: Bell, color: "bg-blue-500/10 text-blue-600", tabCode: "ess-announcements" },
   };
 
   const filterByAccess = (modules: GroupedModuleItem[]) =>
@@ -76,11 +85,11 @@ export default function EmployeeSelfServicePage() {
   const sections: ModuleSection[] = [
     {
       titleKey: "Personal",
-      items: filterByAccess([allModules.profile, allModules.personalInfo, allModules.dependents, allModules.documents, allModules.letters, allModules.jobs, allModules.transactions]),
+      items: filterByAccess([allModules.profile, allModules.personalInfo, allModules.dependents, allModules.documents, allModules.letters, allModules.jobs, allModules.transactions, allModules.milestones, allModules.announcements]),
     },
     {
       titleKey: "Time & Leave",
-      items: filterByAccess([allModules.leave, allModules.myCalendar, allModules.timeAttendance]),
+      items: filterByAccess([allModules.leave, allModules.myCalendar, allModules.teamCalendar, allModules.timeAttendance, allModules.timesheets]),
     },
     {
       titleKey: "Pay & Benefits",
@@ -88,7 +97,7 @@ export default function EmployeeSelfServicePage() {
     },
     {
       titleKey: "Career & Development",
-      items: filterByAccess([allModules.training, allModules.goals, allModules.feedback, allModules.recognition, allModules.onboarding, allModules.offboarding]),
+      items: filterByAccess([allModules.training, allModules.goals, allModules.goalInterviews, allModules.development, allModules.appraisalInterviews, allModules.feedback, allModules.recognition, allModules.onboarding, allModules.offboarding]),
     },
     {
       titleKey: "Workplace Resources",
