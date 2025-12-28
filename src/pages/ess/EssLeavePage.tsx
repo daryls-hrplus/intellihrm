@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { useLeaveManagement } from "@/hooks/useLeaveManagement";
+import { useLeaveManagement, LeaveBalance } from "@/hooks/useLeaveManagement";
 import { useLeaveYearAllocations } from "@/hooks/useLeaveYearAllocations";
 import { useWorkflow } from "@/hooks/useWorkflow";
 import { useAuth } from "@/contexts/AuthContext";
@@ -26,7 +27,9 @@ import {
   Loader2,
   Send,
   CalendarCheck,
-  CalendarClock
+  CalendarClock,
+  LayoutGrid,
+  List
 } from "lucide-react";
 import { format, differenceInDays, startOfYear, isPast, isToday, isFuture, parseISO, getYear } from "date-fns";
 import { formatDateForDisplay } from "@/utils/dateUtils";
@@ -99,6 +102,46 @@ export default function EssLeavePage() {
   const [showApplyDialog, setShowApplyDialog] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [selectedYear, setSelectedYear] = useState<string>(new Date().getFullYear().toString());
+  const [balanceYear, setBalanceYear] = useState<string>(new Date().getFullYear().toString());
+  const [balanceViewMode, setBalanceViewMode] = useState<"grid" | "list">("grid");
+
+  // Fetch available balance years for the user
+  const { data: availableBalanceYears = [] } = useQuery({
+    queryKey: ["available-balance-years", profile?.id],
+    queryFn: async () => {
+      if (!profile?.id) return [];
+      const { data, error } = await supabase
+        .from("leave_balances")
+        .select("year")
+        .eq("employee_id", profile.id)
+        .order("year", { ascending: false });
+      if (error) throw error;
+      const years = [...new Set(data.map((d) => d.year))];
+      // Always include current year
+      const currentYear = new Date().getFullYear();
+      if (!years.includes(currentYear)) {
+        years.unshift(currentYear);
+      }
+      return years.sort((a, b) => b - a);
+    },
+    enabled: !!profile?.id,
+  });
+
+  // Fetch balances for the selected balance year
+  const { data: filteredBalances = [], isLoading: loadingFilteredBalances } = useQuery({
+    queryKey: ["leave-balances-by-year", profile?.id, balanceYear],
+    queryFn: async () => {
+      if (!profile?.id) return [];
+      const { data, error } = await supabase
+        .from("leave_balances")
+        .select("*, leave_type:leave_types(*), leave_year:leave_years(*)")
+        .eq("employee_id", profile.id)
+        .eq("year", parseInt(balanceYear));
+      if (error) throw error;
+      return data as LeaveBalance[];
+    },
+    enabled: !!profile?.id,
+  });
   const [formData, setFormData] = useState({
     leave_type_id: "",
     start_date: undefined as Date | undefined,
@@ -354,63 +397,145 @@ export default function EssLeavePage() {
           </TabsContent>
 
           <TabsContent value="balances">
-            {loadingBalances ? (
-              <div className="flex items-center justify-center py-12">
-                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            <div className="space-y-4">
+              {/* Filter and View Controls */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground">Year:</span>
+                  <Select value={balanceYear} onValueChange={setBalanceYear}>
+                    <SelectTrigger className="w-[120px]">
+                      <SelectValue placeholder="Year" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableBalanceYears.map((year) => (
+                        <SelectItem key={year} value={year.toString()}>
+                          {year}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex items-center gap-1 border rounded-md p-1">
+                  <Button
+                    variant={balanceViewMode === "grid" ? "secondary" : "ghost"}
+                    size="sm"
+                    onClick={() => setBalanceViewMode("grid")}
+                    className="h-7 px-2"
+                  >
+                    <LayoutGrid className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant={balanceViewMode === "list" ? "secondary" : "ghost"}
+                    size="sm"
+                    onClick={() => setBalanceViewMode("list")}
+                    className="h-7 px-2"
+                  >
+                    <List className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
-            ) : leaveBalances.length === 0 ? (
-              <Card>
-                <CardContent className="py-12 text-center text-muted-foreground">
-                  No leave balances found. Contact HR to set up your leave entitlements.
-                </CardContent>
-              </Card>
-            ) : (
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                {leaveBalances.map((balance) => (
-                  <Card key={balance.id}>
-                    <CardHeader className="pb-2">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <div 
-                            className="h-3 w-3 rounded-full" 
-                            style={{ backgroundColor: balance.leave_type?.color || "#3B82F6" }} 
-                          />
-                          <CardTitle className="text-base">
-                            {balance.leave_type?.name || "Unknown"}
-                          </CardTitle>
+
+              {loadingFilteredBalances ? (
+                <div className="flex items-center justify-center py-12">
+                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                </div>
+              ) : filteredBalances.length === 0 ? (
+                <Card>
+                  <CardContent className="py-12 text-center text-muted-foreground">
+                    No leave balances found for {balanceYear}. 
+                    {parseInt(balanceYear) === new Date().getFullYear() && " Contact HR to set up your leave entitlements."}
+                  </CardContent>
+                </Card>
+              ) : balanceViewMode === "grid" ? (
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                  {filteredBalances.map((balance) => (
+                    <Card key={balance.id}>
+                      <CardHeader className="pb-2">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <div 
+                              className="h-3 w-3 rounded-full" 
+                              style={{ backgroundColor: balance.leave_type?.color || "#3B82F6" }} 
+                            />
+                            <CardTitle className="text-base">
+                              {balance.leave_type?.name || "Unknown"}
+                            </CardTitle>
+                          </div>
+                          <Badge variant="outline" className="capitalize">
+                            {balance.leave_type?.accrual_unit || "days"}
+                          </Badge>
                         </div>
-                        <Badge variant="outline" className="capitalize">
-                          {balance.leave_type?.accrual_unit || "days"}
-                        </Badge>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-3xl font-bold text-foreground mb-2">
-                        {balance.current_balance}
-                      </div>
-                      <div className="grid grid-cols-2 gap-2 text-sm text-muted-foreground">
-                        <div>
-                          <span className="block text-xs">Accrued</span>
-                          <span className="font-medium text-foreground">{balance.accrued_amount}</span>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-3xl font-bold text-foreground mb-2">
+                          {balance.current_balance}
                         </div>
-                        <div>
-                          <span className="block text-xs">Used</span>
-                          <span className="font-medium text-foreground">{balance.used_amount}</span>
+                        <div className="grid grid-cols-2 gap-2 text-sm text-muted-foreground">
+                          <div>
+                            <span className="block text-xs">Opening</span>
+                            <span className="font-medium text-foreground">{balance.opening_balance}</span>
+                          </div>
+                          <div>
+                            <span className="block text-xs">Accrued</span>
+                            <span className="font-medium text-foreground">{balance.accrued_amount}</span>
+                          </div>
+                          <div>
+                            <span className="block text-xs">Used</span>
+                            <span className="font-medium text-foreground">{balance.used_amount}</span>
+                          </div>
+                          <div>
+                            <span className="block text-xs">Carried</span>
+                            <span className="font-medium text-foreground">{balance.carried_forward}</span>
+                          </div>
                         </div>
-                        <div>
-                          <span className="block text-xs">Carried</span>
-                          <span className="font-medium text-foreground">{balance.carried_forward}</span>
-                        </div>
-                        <div>
-                          <span className="block text-xs">Adjustments</span>
-                          <span className="font-medium text-foreground">{balance.adjustment_amount}</span>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            )}
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              ) : (
+                <Card>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Leave Type</TableHead>
+                        <TableHead className="text-right">Opening</TableHead>
+                        <TableHead className="text-right">Accrued</TableHead>
+                        <TableHead className="text-right">Used</TableHead>
+                        <TableHead className="text-right">Carried Fwd</TableHead>
+                        <TableHead className="text-right">Adjustments</TableHead>
+                        <TableHead className="text-right">Balance</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredBalances.map((balance) => (
+                        <TableRow key={balance.id}>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <div 
+                                className="h-3 w-3 rounded-full" 
+                                style={{ backgroundColor: balance.leave_type?.color || "#3B82F6" }} 
+                              />
+                              <span>{balance.leave_type?.name || "Unknown"}</span>
+                              <Badge variant="outline" className="capitalize text-xs">
+                                {balance.leave_type?.accrual_unit || "days"}
+                              </Badge>
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-right font-mono">{balance.opening_balance}</TableCell>
+                          <TableCell className="text-right font-mono text-green-600">+{balance.accrued_amount}</TableCell>
+                          <TableCell className="text-right font-mono text-red-600">-{balance.used_amount}</TableCell>
+                          <TableCell className="text-right font-mono">{balance.carried_forward}</TableCell>
+                          <TableCell className="text-right font-mono">
+                            {balance.adjustment_amount >= 0 ? "+" : ""}{balance.adjustment_amount}
+                          </TableCell>
+                          <TableCell className="text-right font-mono font-bold">{balance.current_balance}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </Card>
+              )}
+            </div>
           </TabsContent>
 
           <TabsContent value="taken">
