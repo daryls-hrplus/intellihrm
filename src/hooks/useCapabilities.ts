@@ -209,6 +209,27 @@ export function useCapabilities() {
         }
       }
 
+      // Auto-generate proficiency indicators for skills (fire and forget)
+      if (input.type === "SKILL" && capability) {
+        supabase.functions.invoke("capability-ai-analyzer", {
+          body: {
+            action: "generate_proficiency_indicators",
+            capability: {
+              id: capability.id,
+              name: capability.name,
+              type: capability.type,
+              description: capability.description,
+            },
+          },
+        }).then((result) => {
+          if (result.data?.saved) {
+            console.log(`Proficiency indicators generated for skill: ${capability.name}`);
+          }
+        }).catch((err) => {
+          console.warn("Background indicator generation failed:", err);
+        });
+      }
+
       toast.success(`${input.type === "SKILL" ? "Skill" : "Competency"} created successfully`);
       return capability as Capability;
     } catch (err) {
