@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { AppLayout } from "@/components/layout/AppLayout";
@@ -38,7 +38,10 @@ export default function PositionBudgetPlanPage() {
   const { planId } = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const isNew = planId === "new";
+  const searchParams = new URLSearchParams(window.location.search);
+  const idFromQuery = searchParams.get("id");
+  const effectivePlanId = planId || idFromQuery;
+  const isNew = !effectivePlanId;
 
   const [formData, setFormData] = useState({
     name: "",
@@ -96,9 +99,9 @@ export default function PositionBudgetPlanPage() {
   });
 
   const { data: plan, isLoading: planLoading } = useQuery({
-    queryKey: ["position-budget-plan", planId],
+    queryKey: ["position-budget-plan", effectivePlanId],
     queryFn: async () => {
-      if (isNew) return null;
+      if (isNew || !effectivePlanId) return null;
       const { data, error } = await supabase
         .from("position_budget_plans")
         .select(`
@@ -108,16 +111,16 @@ export default function PositionBudgetPlanPage() {
             position_budget_items(*)
           )
         `)
-        .eq("id", planId)
+        .eq("id", effectivePlanId)
         .single();
       if (error) throw error;
       return data;
     },
-    enabled: !isNew,
+    enabled: !isNew && !!effectivePlanId,
   });
 
   // Set form data when plan loads
-  useState(() => {
+  useEffect(() => {
     if (plan) {
       setFormData({
         name: plan.name,
@@ -133,7 +136,7 @@ export default function PositionBudgetPlanPage() {
         setSelectedScenarioId(plan.position_budget_scenarios[0].id);
       }
     }
-  });
+  }, [plan]);
 
   const savePlanMutation = useMutation({
     mutationFn: async () => {
@@ -165,7 +168,7 @@ export default function PositionBudgetPlanPage() {
         const { data, error } = await supabase
           .from("position_budget_plans")
           .update(formData)
-          .eq("id", planId)
+          .eq("id", effectivePlanId)
           .select()
           .single();
         if (error) throw error;
@@ -176,7 +179,7 @@ export default function PositionBudgetPlanPage() {
       toast.success(isNew ? "Budget plan created" : "Budget plan saved");
       queryClient.invalidateQueries({ queryKey: ["position-budget-plan"] });
       if (isNew) {
-        navigate(`/compensation/position-budget/${data.id}`);
+        navigate(`/compensation/position-budgeting/plans?id=${data.id}`);
       }
     },
     onError: (error: any) => {
@@ -194,7 +197,7 @@ export default function PositionBudgetPlanPage() {
       const { data, error } = await supabase
         .from("position_budget_scenarios")
         .insert({
-          plan_id: planId,
+          plan_id: effectivePlanId,
           name: names[scenarioType] || "New Scenario",
           scenario_type: scenarioType,
           created_by: (await supabase.auth.getUser()).data.user?.id,
@@ -257,7 +260,7 @@ export default function PositionBudgetPlanPage() {
         await supabase
           .from("position_budget_plans")
           .update({ status: "approved" })
-          .eq("id", planId);
+          .eq("id", effectivePlanId);
         return;
       }
 
@@ -266,7 +269,7 @@ export default function PositionBudgetPlanPage() {
         await supabase
           .from("position_budget_approvals")
           .insert({
-            plan_id: planId,
+            plan_id: effectivePlanId,
             approval_level_id: level.id,
             level_order: level.level_order,
             level_name: level.level_name,
@@ -278,7 +281,7 @@ export default function PositionBudgetPlanPage() {
       await supabase
         .from("position_budget_plans")
         .update({ status: "pending_approval" })
-        .eq("id", planId);
+        .eq("id", effectivePlanId);
     },
     onSuccess: () => {
       toast.success("Plan submitted for approval");
@@ -313,14 +316,14 @@ export default function PositionBudgetPlanPage() {
         <Breadcrumbs
           items={[
             { label: "Compensation", href: "/compensation" },
-            { label: "Position-Based Budgeting", href: "/compensation/position-budget" },
+            { label: "Position-Based Budgeting", href: "/compensation/position-budgeting" },
             { label: isNew ? "New Plan" : plan?.name || "Plan" },
           ]}
         />
 
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
-            <Link to="/compensation/position-budget">
+            <Link to="/compensation/position-budgeting">
               <Button variant="ghost" size="icon">
                 <ArrowLeft className="h-4 w-4" />
               </Button>
