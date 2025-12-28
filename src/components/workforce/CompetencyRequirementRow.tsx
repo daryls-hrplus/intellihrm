@@ -78,6 +78,7 @@ interface CompetencyRequirementRowProps {
   requirement: CompetencyRequirement;
   linkedSkills: LinkedSkill[];
   onDelete: (id: string) => void;
+  onEdit: (requirement: CompetencyRequirement) => void;
   onSkillOverride: (
     skillId: string, 
     overrideLevel: number | null, 
@@ -91,6 +92,7 @@ export function CompetencyRequirementRow({
   requirement,
   linkedSkills,
   onDelete,
+  onEdit,
   onSkillOverride,
   isLoadingSkills,
 }: CompetencyRequirementRowProps) {
@@ -149,11 +151,11 @@ export function CompetencyRequirementRow({
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
       <TableRow className="group hover:bg-muted/50">
-        <TableCell className="font-medium">
+        <TableCell className="font-medium min-w-[220px]">
           <div className="flex items-center gap-2">
             {hasLinkedSkills ? (
               <CollapsibleTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-6 w-6">
+                <Button variant="ghost" size="icon" className="h-6 w-6 shrink-0">
                   {isOpen ? (
                     <ChevronDown className="h-4 w-4" />
                   ) : (
@@ -162,28 +164,31 @@ export function CompetencyRequirementRow({
                 </Button>
               </CollapsibleTrigger>
             ) : (
-              <div className="w-6" />
+              <div className="w-6 shrink-0" />
             )}
-            <div className="flex flex-col">
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-purple-500" />
-                <span>{requirement.skills_competencies?.name}</span>
-                <span className="text-muted-foreground text-sm">
-                  ({requirement.skills_competencies?.code})
-                </span>
+            <div className="flex flex-col min-w-0">
+              <div className="flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-purple-500 shrink-0" />
+                <span className="font-medium truncate">{requirement.skills_competencies?.name}</span>
               </div>
-              {hasLinkedSkills && (
-                <span className="text-xs text-muted-foreground ml-6 flex items-center gap-1">
-                  <Link2 className="h-3 w-3" />
-                  {linkedSkills.length} linked skill{linkedSkills.length !== 1 ? "s" : ""}
-                  {overriddenSkillsCount > 0 && (
-                    <Badge variant="outline" className="ml-1 text-xs bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 border-amber-200 dark:border-amber-800">
-                      <AlertTriangle className="h-3 w-3 mr-1" />
-                      {overriddenSkillsCount} override{overriddenSkillsCount !== 1 ? "s" : ""}
-                    </Badge>
-                  )}
-                </span>
-              )}
+              <div className="flex items-center gap-1.5 ml-3.5 text-xs text-muted-foreground">
+                <span className="font-mono">{requirement.skills_competencies?.code}</span>
+                {hasLinkedSkills && (
+                  <>
+                    <span>·</span>
+                    <span className="flex items-center gap-1">
+                      <Link2 className="h-3 w-3" />
+                      {linkedSkills.length} skill{linkedSkills.length !== 1 ? "s" : ""}
+                    </span>
+                    {overriddenSkillsCount > 0 && (
+                      <Badge variant="outline" className="text-[10px] h-4 px-1 bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 border-amber-200 dark:border-amber-800">
+                        <AlertTriangle className="h-2.5 w-2.5 mr-0.5" />
+                        {overriddenSkillsCount}
+                      </Badge>
+                    )}
+                  </>
+                )}
+              </div>
             </div>
           </div>
         </TableCell>
@@ -208,20 +213,38 @@ export function CompetencyRequirementRow({
           </Badge>
         </TableCell>
         <TableCell>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => onDelete(requirement.id)}
-                >
-                  <Trash2 className="h-4 w-4 text-destructive" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Remove requirement</TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <div className="flex items-center gap-0.5">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={() => onEdit(requirement)}
+                  >
+                    <Pencil className="h-4 w-4 text-muted-foreground hover:text-foreground" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Edit requirement</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={() => onDelete(requirement.id)}
+                  >
+                    <Trash2 className="h-4 w-4 text-destructive" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Remove requirement</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
         </TableCell>
       </TableRow>
 
