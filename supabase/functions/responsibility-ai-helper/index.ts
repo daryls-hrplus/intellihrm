@@ -120,8 +120,7 @@ serve(async (req) => {
       const { familyName, familyDescription, existingResponsibilities } = body as SuggestForFamilyRequest;
       
       const prompt = buildFamilySuggestionPrompt(familyName, familyDescription, existingResponsibilities);
-      const suggestionsText = await callLovableAI(prompt, 'Suggest responsibilities for job family');
-      const suggestions = parseFamilySuggestions(suggestionsText);
+      const suggestions = await callLovableAIForFamilySuggestions(prompt);
       
       return new Response(
         JSON.stringify({ success: true, suggestions }),
@@ -244,7 +243,7 @@ function buildFamilySuggestionPrompt(familyName: string, familyDescription?: str
   }
   
   if (existingResponsibilities && existingResponsibilities.length > 0) {
-    prompt += `\n\nExisting responsibilities in the system (avoid duplicates): ${existingResponsibilities.join(', ')}`;
+    prompt += `\n\nExisting responsibilities already in this job family template (avoid duplicates): ${existingResponsibilities.join(', ')}`;
   }
   
   prompt += `\n\nFor each responsibility, provide:
@@ -340,6 +339,119 @@ async function callLovableAI(prompt: string, context: string): Promise<string> {
   }
 }
 
+async function callLovableAIForFamilySuggestions(prompt: string): Promise<FamilySuggestion[]> {
+  const lovableApiKey = Deno.env.get('LOVABLE_API_KEY');
+
+  if (!lovableApiKey) {
+    console.log('No LOVABLE_API_KEY configured; returning empty family suggestions');
+    return [];
+  }
+
+  try {
+    console.log('Calling Lovable AI Gateway (tool) for family suggestions...');
+
+    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${lovableApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'google/gemini-2.5-flash',
+        messages: [
+          {
+            role: 'system',
+            content:
+              'You are an expert HR professional. Suggest practical, industry-standard job family responsibilities. Use the provided tool to return structured results.',
+          },
+          { role: 'user', content: prompt },
+        ],
+        tools: [
+          {
+            type: 'function',
+            function: {
+              name: 'return_family_suggestions',
+              description: 'Return 5-8 job family responsibility suggestions.',
+              parameters: {
+                type: 'object',
+                properties: {
+                  suggestions: {
+                    type: 'array',
+                    items: {
+                      type: 'object',
+                      properties: {
+                        name: { type: 'string' },
+                        category: {
+                          type: 'string',
+                          description:
+                            'One of: financial, operational, people_leadership, technical, compliance, strategic, administrative, customer_service, project_management',
+                        },
+                        suggestedWeight: {
+                          type: 'number',
+                          description: 'Suggested weight percentage (5-30).',
+                        },
+                        description: { type: 'string' },
+                      },
+                      required: ['name', 'category', 'suggestedWeight', 'description'],
+                      additionalProperties: false,
+                    },
+                  },
+                },
+                required: ['suggestions'],
+                additionalProperties: false,
+              },
+            },
+          },
+        ],
+        tool_choice: { type: 'function', function: { name: 'return_family_suggestions' } },
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Lovable AI Gateway error (tool):', response.status, errorText);
+      return [];
+    }
+
+    const data = await response.json();
+    const argsStr = data?.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments as string | undefined;
+
+    if (argsStr) {
+      try {
+        const parsed = JSON.parse(argsStr) as { suggestions?: any[] };
+        const raw = Array.isArray(parsed.suggestions) ? parsed.suggestions : [];
+
+        const normalized = raw
+          .map((s) => {
+            const name = String(s?.name ?? '').trim();
+            const category = validateCategory(String(s?.category ?? 'operational'));
+            const suggestedWeightNum = Number(s?.suggestedWeight);
+            const suggestedWeight = Number.isFinite(suggestedWeightNum)
+              ? Math.min(30, Math.max(5, Math.round(suggestedWeightNum)))
+              : 15;
+            const description = String(s?.description ?? '').trim();
+
+            return { name, category, suggestedWeight, description } as FamilySuggestion;
+          })
+          .filter((s) => s.name && s.description);
+
+        return normalized.slice(0, 8);
+      } catch (e) {
+        console.error('Failed to parse tool arguments, falling back to text parsing:', e);
+      }
+    }
+
+    // Fallback: try to parse the assistant text if tool-calling didn't return args
+    const content = data?.choices?.[0]?.message?.content?.trim() as string | undefined;
+    if (content) return parseFamilySuggestions(content);
+
+    return [];
+  } catch (error) {
+    console.error('Error calling Lovable AI (tool) for family suggestions:', error);
+    return [];
+  }
+}
+
 function generateFallbackResponse(prompt: string, context: string): string {
   // Extract the name from the prompt
   const nameMatch = prompt.match(/["']([^"']+)["']/);
@@ -420,35 +532,86 @@ interface FamilySuggestion {
 
 function parseFamilySuggestions(text: string): FamilySuggestion[] {
   const suggestions: FamilySuggestion[] = [];
-  const blocks = text.split('---').filter(block => block.trim());
-  
-  for (const block of blocks) {
-    const lines = block.trim().split('\n');
-    let name = '';
-    let category = 'operational';
-    let suggestedWeight = 15;
-    let description = '';
-    
-    for (const line of lines) {
-      const trimmedLine = line.trim();
-      if (trimmedLine.startsWith('NAME:')) {
-        name = trimmedLine.replace('NAME:', '').trim();
-      } else if (trimmedLine.startsWith('CATEGORY:')) {
-        category = validateCategory(trimmedLine.replace('CATEGORY:', '').trim());
-      } else if (trimmedLine.startsWith('WEIGHT:')) {
-        const weightMatch = trimmedLine.match(/(\d+)/);
-        if (weightMatch) {
-          suggestedWeight = Math.min(30, Math.max(5, parseInt(weightMatch[1], 10)));
-        }
-      } else if (trimmedLine.startsWith('DESCRIPTION:')) {
-        description = trimmedLine.replace('DESCRIPTION:', '').trim();
-      }
+
+  // Supports two common formats:
+  // 1) NAME:/CATEGORY:/WEIGHT:/DESCRIPTION: blocks separated by ---
+  // 2) Headline blocks like "FINANCIAL REPORTING:" followed by CATEGORY/WEIGHT/DESCRIPTION (often without ---)
+
+  const pushIfValid = (draft: {
+    name: string;
+    category: string;
+    suggestedWeight: number;
+    description: string;
+  }) => {
+    const name = draft.name.trim();
+    if (!name) return;
+    suggestions.push({
+      name,
+      category: validateCategory(draft.category),
+      suggestedWeight: Math.min(30, Math.max(5, draft.suggestedWeight || 15)),
+      description: draft.description.trim(),
+    });
+  };
+
+  const lines = text
+    .split(/\r?\n/)
+    .map((l) => l.trim())
+    .filter((l) => l.length > 0);
+
+  let current = { name: '', category: 'operational', suggestedWeight: 15, description: '' };
+
+  const startNew = () => {
+    if (current.name) pushIfValid(current);
+    current = { name: '', category: 'operational', suggestedWeight: 15, description: '' };
+  };
+
+  for (const line of lines) {
+    if (line === '---') {
+      startNew();
+      continue;
     }
-    
-    if (name) {
-      suggestions.push({ name, category, suggestedWeight, description });
+
+    if (line.startsWith('NAME:')) {
+      if (current.name) startNew();
+      current.name = line.replace('NAME:', '').trim();
+      continue;
+    }
+
+    // Headline name format (e.g., "FINANCIAL REPORTING:")
+    if (
+      !line.startsWith('CATEGORY:') &&
+      !line.startsWith('WEIGHT:') &&
+      !line.startsWith('DESCRIPTION:') &&
+      /:$/.test(line)
+    ) {
+      if (current.name) startNew();
+      current.name = line.replace(/:$/, '').trim();
+      continue;
+    }
+
+    if (line.startsWith('CATEGORY:')) {
+      current.category = line.replace('CATEGORY:', '').trim();
+      continue;
+    }
+
+    if (line.startsWith('WEIGHT:')) {
+      const weightMatch = line.match(/(\d+)/);
+      if (weightMatch) current.suggestedWeight = parseInt(weightMatch[1], 10);
+      continue;
+    }
+
+    if (line.startsWith('DESCRIPTION:')) {
+      current.description = line.replace('DESCRIPTION:', '').trim();
+      continue;
+    }
+
+    // Sometimes description spills onto the next line(s)
+    if (current.name && current.description) {
+      current.description = `${current.description} ${line}`.trim();
     }
   }
-  
-  return suggestions.slice(0, 8); // Max 8 suggestions
+
+  if (current.name) pushIfValid(current);
+
+  return suggestions.slice(0, 8);
 }
