@@ -373,6 +373,8 @@ import ShiftDifferentialsPage from "./pages/time/ShiftDifferentialsPage";
 import GeofenceLocationsPage from "./pages/time/GeofenceLocationsPage";
 import FaceVerificationPage from "./pages/time/FaceVerificationPage";
 import ProjectCostDashboardPage from "./pages/time/ProjectCostDashboardPage";
+import ProjectCostConfigPage from "./pages/time/ProjectCostConfigPage";
+import CostAllocationPage from "./pages/time/CostAllocationPage";
 
 import EmployeeSelfServicePage from "./pages/ess/EmployeeSelfServicePage";
 import MyLettersPage from "./pages/ess/MyLettersPage";
@@ -1824,6 +1826,22 @@ const App = () => (
               element={
                 <ProtectedRoute moduleCode="time_attendance" requiredRoles={["admin", "hr_manager"]}>
                   <ProjectCostDashboardPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/time/project-cost-config"
+              element={
+                <ProtectedRoute moduleCode="time_attendance" requiredRoles={["admin", "hr_manager"]}>
+                  <ProjectCostConfigPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/time/cost-allocation"
+              element={
+                <ProtectedRoute moduleCode="time_attendance" requiredRoles={["admin", "hr_manager"]}>
+                  <CostAllocationPage />
                 </ProtectedRoute>
               }
             />

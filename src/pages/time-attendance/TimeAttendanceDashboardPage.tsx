@@ -25,6 +25,7 @@ import {
   Camera,
   Sliders,
   DollarSign,
+  SplitSquareHorizontal,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -178,6 +179,22 @@ export default function TimeAttendanceDashboardPage() {
       color: "bg-emerald-500/10 text-emerald-600",
       tabCode: "project_costs",
     },
+    costConfig: {
+      title: "Cost Configuration",
+      description: "Configure project rates and budgets",
+      icon: Settings,
+      href: "/time/project-cost-config",
+      color: "bg-cyan-500/10 text-cyan-600",
+      tabCode: "cost_config",
+    },
+    costAllocation: {
+      title: "Cost Allocation",
+      description: "Split time entries across projects",
+      icon: SplitSquareHorizontal,
+      href: "/time/cost-allocation",
+      color: "bg-violet-500/10 text-violet-600",
+      tabCode: "cost_allocation",
+    },
     // Configuration
     policies: {
       title: t("timeAttendance.modules.policies.title"),
@@ -271,11 +288,13 @@ export default function TimeAttendanceDashboardPage() {
       ]),
     },
     {
-      titleKey: "Project Time",
+      titleKey: "Project Time & Costs",
       items: filterByAccess([
         allModules.projects,
         allModules.timesheetApprovals,
         allModules.projectCosts,
+        allModules.costConfig,
+        allModules.costAllocation,
       ]),
     },
     {
