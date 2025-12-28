@@ -1,10 +1,15 @@
+import { useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useLeaveManagement } from "@/hooks/useLeaveManagement";
+import { useResumptionOfDuty } from "@/hooks/useResumptionOfDuty";
 import { useLanguage } from "@/hooks/useLanguage";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
-import { Calendar, CalendarPlus, Clock, CheckCircle, XCircle, AlertCircle } from "lucide-react";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { ResumptionOfDutyForm } from "@/components/leave/ResumptionOfDutyForm";
+import { ResumptionOfDutyCard } from "@/components/leave/ResumptionOfDutyCard";
+import { Calendar, CalendarPlus, Clock, CheckCircle, XCircle, AlertCircle, FileCheck } from "lucide-react";
 import { formatDateForDisplay } from "@/utils/dateUtils";
 import { NavLink } from "react-router-dom";
 import {
@@ -19,6 +24,10 @@ import {
 export default function MyLeavePage() {
   const { t } = useLanguage();
   const { leaveBalances, leaveRequests, loadingBalances, loadingRequests } = useLeaveManagement();
+  const { pendingForEmployee, myRodsLoading } = useResumptionOfDuty();
+  const [selectedRod, setSelectedRod] = useState<string | null>(null);
+
+  const selectedRodData = pendingForEmployee.find(r => r.id === selectedRod);
 
   const getStatusBadge = (status: string) => {
     const variants: Record<string, { variant: "default" | "secondary" | "destructive" | "outline"; icon: React.ReactNode }> = {
@@ -65,6 +74,27 @@ export default function MyLeavePage() {
             </Button>
           </NavLink>
         </div>
+
+        {/* Pending Resumption of Duty */}
+        {pendingForEmployee.length > 0 && (
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <FileCheck className="h-5 w-5 text-amber-600" />
+              <h2 className="text-lg font-semibold">Pending Resumption of Duty</h2>
+              <Badge variant="secondary">{pendingForEmployee.length}</Badge>
+            </div>
+            <div className="grid gap-4 md:grid-cols-2">
+              {pendingForEmployee.map((rod) => (
+                <ResumptionOfDutyCard
+                  key={rod.id}
+                  rod={rod}
+                  onAction={() => setSelectedRod(rod.id)}
+                  actionLabel="Complete Form"
+                />
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Leave Balances */}
         <div>
@@ -187,6 +217,18 @@ export default function MyLeavePage() {
             </Table>
           </div>
         </div>
+
+        {/* ROD Form Dialog */}
+        <Dialog open={!!selectedRod} onOpenChange={(open) => !open && setSelectedRod(null)}>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            {selectedRodData && (
+              <ResumptionOfDutyForm
+                rod={selectedRodData}
+                onSuccess={() => setSelectedRod(null)}
+              />
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
     </AppLayout>
   );

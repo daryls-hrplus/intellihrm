@@ -3,10 +3,12 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { ModuleReportsButton } from "@/components/reports/ModuleReportsButton";
 import { ModuleBIButton } from "@/components/bi/ModuleBIButton";
 import { LeaveIntelligence } from "@/components/leave/LeaveIntelligence";
+import { RODOverdueAlerts } from "@/components/leave/RODOverdueAlerts";
 import { useLeaveManagement } from "@/hooks/useLeaveManagement";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/hooks/useLanguage";
 import { useGranularPermissions } from "@/hooks/useGranularPermissions";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { GroupedModuleCards, GroupedModuleItem, ModuleSection } from "@/components/ui/GroupedModuleCards";
 import {
@@ -82,6 +84,47 @@ export default function LeaveDashboardPage() {
   const displayBalancesRaw = selectedCompanyId === "all" ? (allLeaveBalances ?? []) : (leaveBalances ?? []);
   const displayBalances = Array.isArray(displayBalancesRaw) ? displayBalancesRaw : [];
   const totalBalance = displayBalances.reduce((sum, b) => sum + (b.current_balance || 0), 0);
+
+  // Fetch all overdue RODs for HR view
+  const { data: allOverdueRods = [] } = useQuery({
+    queryKey: ['hr-overdue-rods', effectiveCompanyId],
+    queryFn: async () => {
+      let query = supabase
+        .from('resumption_of_duty')
+        .select(`
+          *,
+          profiles!resumption_of_duty_employee_id_fkey (
+            id,
+            full_name,
+            email,
+            avatar_url
+          ),
+          leave_requests (
+            id,
+            request_number,
+            start_date,
+            end_date,
+            duration,
+            leave_types (
+              id,
+              name,
+              code
+            )
+          )
+        `)
+        .in('status', ['overdue', 'no_show'])
+        .order('leave_end_date', { ascending: true });
+
+      if (effectiveCompanyId) {
+        query = query.eq('company_id', effectiveCompanyId);
+      }
+
+      const { data, error } = await query;
+      if (error) throw error;
+      return (data || []) as unknown as import("@/hooks/useResumptionOfDuty").ResumptionOfDuty[];
+    },
+    enabled: isAdminOrHR
+  });
 
   // Define all modules
   const allModules = {
@@ -325,6 +368,14 @@ export default function LeaveDashboardPage() {
             );
           })}
         </div>
+
+        {/* Overdue Resumptions for HR */}
+        {isAdminOrHR && allOverdueRods.length > 0 && (
+          <RODOverdueAlerts 
+            overdueRods={allOverdueRods} 
+            title="Overdue Resumptions Requiring Attention" 
+          />
+        )}
 
         {/* Leave Intelligence for Managers */}
         {isAdminOrHR && <LeaveIntelligence />}
