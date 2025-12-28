@@ -15,6 +15,7 @@ import {
   Loader2,
   CheckCircle2,
   AlertCircle,
+  Info,
 } from "lucide-react";
 import {
   Command,
@@ -29,6 +30,12 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface Responsibility {
   id: string;
@@ -304,12 +311,24 @@ export function JobFamilyDefaultResponsibilities({
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="text-sm text-muted-foreground">Total Weight:</span>
+          <span className="text-sm text-muted-foreground">Suggested Total:</span>
           <Badge
             variant={totalWeight > 100 ? "destructive" : totalWeight === 100 ? "default" : "secondary"}
           >
             {totalWeight}%
           </Badge>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Info className="h-4 w-4 text-muted-foreground cursor-help" />
+              </TooltipTrigger>
+              <TooltipContent side="left" className="max-w-[280px]">
+                <p className="text-sm">
+                  These are <strong>suggested weights</strong> that will be pre-populated when creating jobs in this family. Weights can be adjusted at the individual job level.
+                </p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
       </div>
 
@@ -394,6 +413,12 @@ export function JobFamilyDefaultResponsibilities({
         </div>
       )}
 
+      {/* Helper text */}
+      <p className="text-xs text-muted-foreground bg-muted/30 rounded-md px-3 py-2">
+        <Info className="h-3 w-3 inline mr-1" />
+        Suggested weights serve as templates for new jobs in this family. They can be customized at the individual job level.
+      </p>
+
       {/* Selected Responsibilities List */}
       {defaultResponsibilities.length === 0 ? (
         <div className="text-center py-8 text-muted-foreground border rounded-lg bg-muted/20">
@@ -427,7 +452,8 @@ export function JobFamilyDefaultResponsibilities({
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3 w-[200px]">
+                <div className="flex items-center gap-3 w-[220px]">
+                  <span className="text-xs text-muted-foreground whitespace-nowrap">Suggested:</span>
                   <Slider
                     value={[dr.suggested_weight]}
                     onValueChange={(value) => updateWeight(dr.responsibility_id, value[0])}
