@@ -3,6 +3,7 @@ import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { useLanguage } from "@/hooks/useLanguage";
 import { GroupedModuleCards, ModuleSection, GroupedModuleItem } from "@/components/ui/GroupedModuleCards";
 import { TeamLeaveIntelligence } from "@/components/mss/TeamLeaveIntelligence";
+import { ManagerRODWidget } from "@/components/mss/ManagerRODWidget";
 import { useGranularPermissions } from "@/hooks/useGranularPermissions";
 import {
   Users,
@@ -106,6 +107,9 @@ export default function ManagerSelfServicePage() {
 
         {/* Team Leave Intelligence */}
         <TeamLeaveIntelligence />
+
+        {/* Resumption of Duty Widget */}
+        <ManagerRODWidget />
 
         <GroupedModuleCards sections={sections} />
       </div>
