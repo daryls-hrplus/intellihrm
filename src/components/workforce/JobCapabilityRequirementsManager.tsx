@@ -89,6 +89,7 @@ interface LinkedSkill {
     name: string;
     code: string;
     category: string;
+    proficiency_indicators?: { [level: string]: string[] } | null;
   } | null;
   override?: {
     id: string;
@@ -192,7 +193,7 @@ export function JobCapabilityRequirementsManager({
         min_proficiency_level,
         weight,
         is_required,
-        skill:skills_competencies!competency_skill_mappings_skill_id_fkey(id, name, code, category)
+        skill:skills_competencies!competency_skill_mappings_skill_id_fkey(id, name, code, category, proficiency_indicators)
       `)
       .in("competency_id", competencyIds);
 
