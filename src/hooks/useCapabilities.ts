@@ -388,7 +388,7 @@ export function useCompetencySkillMappings() {
     try {
       const { data, error } = await supabase
         .from("competency_skill_mappings")
-        .select("*")
+        .select("*, skill:skills_competencies!skill_id(*)")
         .eq("competency_id", competencyId)
         .order("weight", { ascending: false });
 
