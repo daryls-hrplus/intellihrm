@@ -56,6 +56,7 @@ import {
   Copy,
   Upload,
   HelpCircle,
+  Sparkles,
 } from "lucide-react";
 import {
   Tooltip,
@@ -203,6 +204,9 @@ export default function JobsPage() {
   
   // Bulk import state
   const [bulkImportOpen, setBulkImportOpen] = useState(false);
+  
+  // AI generation state
+  const [isGeneratingDescription, setIsGeneratingDescription] = useState(false);
 
   const { logAction } = useAuditLog();
 
@@ -300,6 +304,45 @@ export default function JobsPage() {
 
   const toggleExpand = (jobId: string) => {
     setExpandedJobId(expandedJobId === jobId ? null : jobId);
+  };
+
+  const handleGenerateDescription = async () => {
+    if (!formData.name.trim()) {
+      toast.error("Please enter a job name first");
+      return;
+    }
+
+    setIsGeneratingDescription(true);
+    try {
+      // Get job family name for context
+      const selectedJobFamily = jobFamilies.find(jf => jf.id === formData.job_family_id);
+      
+      const { data, error } = await supabase.functions.invoke('responsibility-ai-helper', {
+        body: {
+          action: 'generate_job_description',
+          jobName: formData.name,
+          jobFamily: selectedJobFamily?.name,
+          jobGrade: formData.job_grade,
+          jobLevel: formData.job_level,
+          jobClass: formData.job_class,
+          existingDescription: formData.description || undefined,
+        },
+      });
+
+      if (error) throw error;
+      
+      if (data?.success && data?.description) {
+        setFormData({ ...formData, description: data.description });
+        toast.success("Job description generated successfully");
+      } else {
+        throw new Error(data?.error || "Failed to generate description");
+      }
+    } catch (error) {
+      console.error('Error generating job description:', error);
+      toast.error("Failed to generate job description");
+    } finally {
+      setIsGeneratingDescription(false);
+    }
   };
 
   const handleSave = async () => {
@@ -586,7 +629,24 @@ export default function JobsPage() {
       </div>
 
       <div className="space-y-2">
-        <Label>Description</Label>
+        <div className="flex items-center justify-between">
+          <Label>Description</Label>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="h-7 text-xs gap-1"
+            onClick={handleGenerateDescription}
+            disabled={isGeneratingDescription || !formData.name.trim()}
+          >
+            {isGeneratingDescription ? (
+              <Loader2 className="h-3 w-3 animate-spin" />
+            ) : (
+              <Sparkles className="h-3 w-3" />
+            )}
+            {formData.description ? "Improve with AI" : "Generate with AI"}
+          </Button>
+        </div>
         <Textarea
           value={formData.description}
           onChange={(e) => setFormData({ ...formData, description: e.target.value })}
