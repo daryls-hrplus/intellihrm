@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { GroupedModuleCards, ModuleSection, GroupedModuleItem } from "@/components/ui/GroupedModuleCards";
+import { EmployeeRODWidget } from "@/components/ess/EmployeeRODWidget";
 import { useGranularPermissions } from "@/hooks/useGranularPermissions";
 import {
   User,
@@ -114,6 +115,9 @@ export default function EmployeeSelfServicePage() {
             {t("ess.subtitle")}
           </p>
         </div>
+
+        {/* Pending Resumption of Duty */}
+        <EmployeeRODWidget />
 
         <GroupedModuleCards sections={sections} />
       </div>
