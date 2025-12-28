@@ -171,7 +171,7 @@ export function CompetencyRequirementRow({
               </div>
               <div className="flex items-center gap-1.5 ml-3.5 text-xs text-muted-foreground">
                 <span className="font-mono">{requirement.skills_competencies?.code}</span>
-                {hasLinkedSkills && (
+                {hasLinkedSkills ? (
                   <>
                     <span>·</span>
                     <span className="flex items-center gap-1">
@@ -184,6 +184,23 @@ export function CompetencyRequirementRow({
                         {overriddenSkillsCount}
                       </Badge>
                     )}
+                  </>
+                ) : (
+                  <>
+                    <span>·</span>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Badge variant="outline" className="text-[10px] h-4 px-1 bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 border-amber-200 dark:border-amber-800 cursor-help">
+                            <AlertTriangle className="h-2.5 w-2.5 mr-0.5" />
+                            No Skills
+                          </Badge>
+                        </TooltipTrigger>
+                        <TooltipContent className="max-w-xs">
+                          <p>This competency has no skills mapped. Link skills in Competency Settings.</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   </>
                 )}
               </div>
