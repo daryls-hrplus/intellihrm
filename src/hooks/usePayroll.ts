@@ -14,6 +14,12 @@ import {
   type StatutoryDeduction,
   type StatutoryRateBand,
 } from "@/utils/statutoryDeductionCalculator";
+import {
+  fetchActiveSavingsEnrollments,
+  calculateSavingsDeductions,
+  createSavingsTransactions,
+  type EmployeeSavingsDeductions,
+} from "@/utils/payroll/savingsDeductionService";
 
 export interface PayPeriodSchedule {
   id: string;
@@ -1304,10 +1310,39 @@ export function usePayroll() {
           }
         }
         
+        // Calculate savings program deductions
+        let savingsDeductions = 0;
+        let employerSavingsContributions = 0;
+        let savingsPretaxDeductions = 0;
+        let savingsBreakdown: { name: string; code: string; employee_amount: number; employer_amount: number; is_pretax: boolean; category: string }[] = [];
+        
+        const savingsEnrollments = await fetchActiveSavingsEnrollments(
+          emp.employee_id,
+          companyId,
+          payPeriod?.period_end || getTodayString()
+        );
+        
+        if (savingsEnrollments.length > 0) {
+          const savingsResult = calculateSavingsDeductions(savingsEnrollments, grossPay);
+          savingsDeductions = savingsResult.total_employee_deductions;
+          employerSavingsContributions = savingsResult.total_employer_contributions;
+          savingsPretaxDeductions = savingsResult.total_pretax_deductions;
+          savingsBreakdown = savingsResult.deductions.map(d => ({
+            name: d.program_name,
+            code: d.program_code,
+            employee_amount: d.employee_amount,
+            employer_amount: d.employer_amount,
+            is_pretax: d.is_pretax,
+            category: d.category,
+          }));
+        }
+        
         // Calculate statutory deductions using shared calculator with cumulative PAYE
+        // Adjust taxable income for pre-tax savings deductions
         let taxDeductions = 0;
         let employerTaxes = 0;
         let openingBalances = { ytdTaxableIncome: 0, ytdTaxPaid: 0 };
+        const adjustedTaxableIncome = Math.max(0, taxableIncome - savingsPretaxDeductions);
         
         if (statutoryTypes && statutoryTypes.length > 0 && rateBands) {
           // Fetch opening balances for cumulative PAYE calculation
@@ -1315,7 +1350,7 @@ export function usePayroll() {
           
           // Use the shared calculator that handles cumulative PAYE
           const statutoryResult = calculateStatutoryDeductions(
-            taxableIncome,
+            adjustedTaxableIncome,
             statutoryTypes as StatutoryDeduction[],
             rateBands as StatutoryRateBand[],
             mondayCount,
@@ -1327,9 +1362,9 @@ export function usePayroll() {
           employerTaxes = statutoryResult.totalEmployerContributions;
         }
         
-        const totalDed = taxDeductions + totalPeriodDeductions + benefitDeductions;
+        const totalDed = taxDeductions + totalPeriodDeductions + benefitDeductions + savingsDeductions;
         const netPay = grossPay - totalDed;
-        const totalEmployerCost = grossPay + employerTaxes + employerBenefits;
+        const totalEmployerCost = grossPay + employerTaxes + employerBenefits + employerSavingsContributions;
         
         employeePayrolls.push({
           payroll_run_id: payrollRunId,
@@ -1343,10 +1378,12 @@ export function usePayroll() {
           total_deductions: totalDed,
           tax_deductions: taxDeductions,
           benefit_deductions: benefitDeductions,
-          other_deductions: totalPeriodDeductions,
+          other_deductions: totalPeriodDeductions + savingsDeductions,
+          retirement_deductions: savingsDeductions,
           net_pay: netPay,
           employer_taxes: employerTaxes,
           employer_benefits: employerBenefits,
+          employer_retirement: employerSavingsContributions,
           total_employer_cost: totalEmployerCost,
           currency: currency,
           calculation_details: {
@@ -1362,7 +1399,7 @@ export function usePayroll() {
             } : undefined,
             statutory_deductions: statutoryTypes && rateBands ? 
               calculateStatutoryDeductions(
-                taxableIncome,
+                adjustedTaxableIncome,
                 statutoryTypes as StatutoryDeduction[],
                 rateBands as StatutoryRateBand[],
                 mondayCount,
@@ -1385,8 +1422,13 @@ export function usePayroll() {
               exchange_rate_used: d.exchange_rate_used,
               was_converted: d.was_converted
             })),
-            taxable_income: taxableIncome,
-            pretax_deductions: totalPretaxDeductions,
+            savings_deductions: savingsBreakdown.length > 0 ? {
+              total_employee: savingsDeductions,
+              total_employer: employerSavingsContributions,
+              items: savingsBreakdown,
+            } : undefined,
+            taxable_income: adjustedTaxableIncome,
+            pretax_deductions: totalPretaxDeductions + savingsPretaxDeductions,
           },
         });
         
@@ -1395,7 +1437,7 @@ export function usePayroll() {
         totalDeductions += totalDed;
         totalTaxes += taxDeductions;
         totalEmployerTaxes += employerTaxes;
-        totalEmployerBenefits += employerBenefits;
+        totalEmployerBenefits += employerBenefits + employerSavingsContributions;
       }
       
       // Insert employee payroll records
@@ -1581,10 +1623,10 @@ export function usePayroll() {
   const processPayment = async (payrollRunId: string) => {
     setIsLoading(true);
     try {
-      // Get pay period ID from the payroll run
+      // Get payroll run details including company_id
       const { data: runData } = await supabase
         .from("payroll_runs")
-        .select("pay_period_id")
+        .select("pay_period_id, company_id")
         .eq("id", payrollRunId)
         .single();
       
@@ -1607,6 +1649,82 @@ export function usePayroll() {
           paid_at: new Date().toISOString(),
         }).eq("pay_period_id", runData.pay_period_id)
          .eq("status", "pending_payment");
+      }
+      
+      // Create savings transactions for employees with savings enrollments
+      if (runData?.company_id && runData?.pay_period_id) {
+        // Get all employee payroll records for this run
+        const { data: empPayrolls } = await supabase
+          .from("employee_payroll")
+          .select("id, employee_id, calculation_details")
+          .eq("payroll_run_id", payrollRunId);
+        
+        if (empPayrolls && empPayrolls.length > 0) {
+          // Build maps for savings transaction creation
+          const employeePayrollMap = new Map<string, string>();
+          const savingsDeductionsMap = new Map<string, EmployeeSavingsDeductions>();
+          
+          const { data: currentUser } = await supabase.auth.getUser();
+          const processedBy = currentUser?.user?.id || '';
+          
+          for (const ep of empPayrolls) {
+            employeePayrollMap.set(ep.employee_id, ep.id);
+            
+            // Check if this employee has savings deductions in calculation_details
+            const calcDetails = ep.calculation_details as any;
+            if (calcDetails?.savings_deductions?.items?.length > 0) {
+              // Fetch enrollments to get enrollment IDs
+              const enrollments = await fetchActiveSavingsEnrollments(
+                ep.employee_id,
+                runData.company_id,
+                new Date().toISOString().split('T')[0]
+              );
+              
+              if (enrollments.length > 0) {
+                const deductions = calculateSavingsDeductions(enrollments, 0); // Amount already calculated
+                // Override with actual amounts from calculation_details
+                deductions.deductions = calcDetails.savings_deductions.items.map((item: any) => {
+                  const enrollment = enrollments.find(e => e.program_type?.code === item.code);
+                  return {
+                    enrollment_id: enrollment?.id || '',
+                    program_code: item.code,
+                    program_name: item.name,
+                    category: item.category,
+                    employee_amount: item.employee_amount,
+                    employer_amount: item.employer_amount,
+                    is_pretax: item.is_pretax,
+                    deduction_priority: 0,
+                  };
+                }).filter((d: any) => d.enrollment_id);
+                
+                deductions.total_employee_deductions = calcDetails.savings_deductions.total_employee || 0;
+                deductions.total_employer_contributions = calcDetails.savings_deductions.total_employer || 0;
+                
+                if (deductions.deductions.length > 0) {
+                  savingsDeductionsMap.set(ep.employee_id, deductions);
+                }
+              }
+            }
+          }
+          
+          // Create savings transactions
+          if (savingsDeductionsMap.size > 0) {
+            const txResult = await createSavingsTransactions(
+              payrollRunId,
+              runData.pay_period_id,
+              runData.company_id,
+              employeePayrollMap,
+              savingsDeductionsMap,
+              processedBy
+            );
+            
+            if (txResult.success && txResult.transactionCount > 0) {
+              console.log(`Created ${txResult.transactionCount} savings transactions`);
+            } else if (!txResult.success) {
+              console.error("Failed to create savings transactions:", txResult.error);
+            }
+          }
+        }
       }
       
       toast.success("Payment processed");
