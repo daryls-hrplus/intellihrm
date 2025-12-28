@@ -29019,6 +29019,7 @@ export type Database = {
           is_active: boolean | null
           name: string
           name_en: string | null
+          operator_attributes: Json | null
           parent_industry_id: string | null
           search_vector: unknown
           updated_at: string | null
@@ -29033,6 +29034,7 @@ export type Database = {
           is_active?: boolean | null
           name: string
           name_en?: string | null
+          operator_attributes?: Json | null
           parent_industry_id?: string | null
           search_vector?: unknown
           updated_at?: string | null
@@ -29047,6 +29049,7 @@ export type Database = {
           is_active?: boolean | null
           name?: string
           name_en?: string | null
+          operator_attributes?: Json | null
           parent_industry_id?: string | null
           search_vector?: unknown
           updated_at?: string | null
