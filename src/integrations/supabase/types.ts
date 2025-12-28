@@ -27806,6 +27806,67 @@ export type Database = {
           },
         ]
       }
+      leave_request_year_allocations: {
+        Row: {
+          allocated_days: number
+          balance_id: string | null
+          created_at: string
+          deducted_at: string | null
+          id: string
+          is_deducted: boolean
+          leave_request_id: string
+          leave_year_id: string | null
+          updated_at: string
+          year: number
+        }
+        Insert: {
+          allocated_days?: number
+          balance_id?: string | null
+          created_at?: string
+          deducted_at?: string | null
+          id?: string
+          is_deducted?: boolean
+          leave_request_id: string
+          leave_year_id?: string | null
+          updated_at?: string
+          year: number
+        }
+        Update: {
+          allocated_days?: number
+          balance_id?: string | null
+          created_at?: string
+          deducted_at?: string | null
+          id?: string
+          is_deducted?: boolean
+          leave_request_id?: string
+          leave_year_id?: string | null
+          updated_at?: string
+          year?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leave_request_year_allocations_balance_id_fkey"
+            columns: ["balance_id"]
+            isOneToOne: false
+            referencedRelation: "leave_balances"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leave_request_year_allocations_leave_request_id_fkey"
+            columns: ["leave_request_id"]
+            isOneToOne: false
+            referencedRelation: "leave_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leave_request_year_allocations_leave_year_id_fkey"
+            columns: ["leave_year_id"]
+            isOneToOne: false
+            referencedRelation: "leave_years"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       leave_requests: {
         Row: {
           approval_notes_en: string | null
@@ -48302,6 +48363,10 @@ export type Database = {
         Returns: number
       }
       calculate_goal_risk_score: { Args: { p_goal_id: string }; Returns: Json }
+      calculate_leave_year_allocations: {
+        Args: { p_leave_request_id: string }
+        Returns: undefined
+      }
       calculate_responsibility_kra_rollup: {
         Args: { p_participant_id: string; p_responsibility_id: string }
         Returns: number
@@ -48381,6 +48446,10 @@ export type Database = {
       check_year_end_reports_complete: {
         Args: { p_closing_id: string }
         Returns: boolean
+      }
+      deduct_leave_from_balances: {
+        Args: { p_leave_request_id: string }
+        Returns: undefined
       }
       execute_report_sql: { Args: { sql_query: string }; Returns: Json }
       generate_new_year_pay_periods: {
@@ -48669,6 +48738,10 @@ export type Database = {
               used_balance: number
             }[]
           }
+      reverse_leave_deductions: {
+        Args: { p_leave_request_id: string }
+        Returns: undefined
+      }
       seed_role_container_access: { Args: never; Returns: undefined }
       seed_role_pii_access: { Args: never; Returns: undefined }
       submit_goal_for_approval: { Args: { p_goal_id: string }; Returns: Json }
