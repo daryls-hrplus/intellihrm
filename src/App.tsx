@@ -369,8 +369,10 @@ import AttendanceExceptionsPage from "./pages/time-attendance/AttendanceExceptio
 import LiveAttendancePage from "./pages/time-attendance/LiveAttendancePage";
 import PunchImportPage from "./pages/time-attendance/PunchImportPage";
 import AttendanceAnalyticsPage from "./pages/time-attendance/AttendanceAnalyticsPage";
+import ShiftDifferentialsPage from "./pages/time/ShiftDifferentialsPage";
+import GeofenceLocationsPage from "./pages/time/GeofenceLocationsPage";
+import FaceVerificationPage from "./pages/time/FaceVerificationPage";
 
-// ESS & MSS pages
 import EmployeeSelfServicePage from "./pages/ess/EmployeeSelfServicePage";
 import MyLettersPage from "./pages/ess/MyLettersPage";
 import MyGoalsPage from "./pages/ess/MyGoalsPage";
@@ -1789,6 +1791,30 @@ const App = () => (
               element={
                 <ProtectedRoute moduleCode="time_attendance" requiredRoles={["admin", "hr_manager"]}>
                   <AttendanceAnalyticsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/time/shift-differentials"
+              element={
+                <ProtectedRoute moduleCode="time_attendance" requiredRoles={["admin", "hr_manager"]}>
+                  <ShiftDifferentialsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/time/geofence-locations"
+              element={
+                <ProtectedRoute moduleCode="time_attendance" requiredRoles={["admin", "hr_manager"]}>
+                  <GeofenceLocationsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/time/face-verification"
+              element={
+                <ProtectedRoute moduleCode="time_attendance" requiredRoles={["admin", "hr_manager"]}>
+                  <FaceVerificationPage />
                 </ProtectedRoute>
               }
             />
