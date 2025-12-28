@@ -42846,6 +42846,7 @@ export type Database = {
           name: string
           owner_role: string | null
           parent_capability_id: string | null
+          proficiency_indicators: Json | null
           proficiency_scale_id: string | null
           status: Database["public"]["Enums"]["capability_status"]
           type: Database["public"]["Enums"]["capability_type"]
@@ -42874,6 +42875,7 @@ export type Database = {
           name: string
           owner_role?: string | null
           parent_capability_id?: string | null
+          proficiency_indicators?: Json | null
           proficiency_scale_id?: string | null
           status?: Database["public"]["Enums"]["capability_status"]
           type: Database["public"]["Enums"]["capability_type"]
@@ -42902,6 +42904,7 @@ export type Database = {
           name?: string
           owner_role?: string | null
           parent_capability_id?: string | null
+          proficiency_indicators?: Json | null
           proficiency_scale_id?: string | null
           status?: Database["public"]["Enums"]["capability_status"]
           type?: Database["public"]["Enums"]["capability_type"]

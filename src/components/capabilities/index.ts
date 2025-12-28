@@ -9,6 +9,7 @@ export { EvidenceValidationPanel } from './EvidenceValidationPanel';
 export { SkillMappingsDialog } from './SkillMappingsDialog';
 export { MasterLibrarySearch } from './MasterLibrarySearch';
 export { ProficiencyLevelPicker, ProficiencyLevelBadge, DEFAULT_PROFICIENCY_LEVELS } from './ProficiencyLevelPicker';
+export { SkillProficiencyGuide } from './SkillProficiencyGuide';
 
 // Integration components
 export { GoalCapabilitySelector } from './GoalCapabilitySelector';
