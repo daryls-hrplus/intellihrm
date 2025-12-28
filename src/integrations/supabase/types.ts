@@ -39181,37 +39181,49 @@ export type Database = {
       }
       responsibilities: {
         Row: {
+          category: string | null
           code: string
           company_id: string
+          complexity_level: number | null
           created_at: string
           description: string | null
           end_date: string | null
           id: string
           is_active: boolean
+          key_result_areas: Json | null
+          linked_competency_ids: string[] | null
           name: string
           start_date: string
           updated_at: string
         }
         Insert: {
+          category?: string | null
           code: string
           company_id: string
+          complexity_level?: number | null
           created_at?: string
           description?: string | null
           end_date?: string | null
           id?: string
           is_active?: boolean
+          key_result_areas?: Json | null
+          linked_competency_ids?: string[] | null
           name: string
           start_date?: string
           updated_at?: string
         }
         Update: {
+          category?: string | null
           code?: string
           company_id?: string
+          complexity_level?: number | null
           created_at?: string
           description?: string | null
           end_date?: string | null
           id?: string
           is_active?: boolean
+          key_result_areas?: Json | null
+          linked_competency_ids?: string[] | null
           name?: string
           start_date?: string
           updated_at?: string
@@ -48463,6 +48475,16 @@ export type Database = {
         | "overtime_status"
         | "overpayment_reason"
       message_status: "sent" | "delivered" | "read"
+      responsibility_category:
+        | "financial"
+        | "operational"
+        | "people_leadership"
+        | "technical"
+        | "compliance"
+        | "strategic"
+        | "administrative"
+        | "customer_service"
+        | "project_management"
       validation_status: "pending" | "validated" | "rejected" | "expired"
       workflow_action:
         | "approve"
@@ -48746,6 +48768,17 @@ export const Constants = {
         "overpayment_reason",
       ],
       message_status: ["sent", "delivered", "read"],
+      responsibility_category: [
+        "financial",
+        "operational",
+        "people_leadership",
+        "technical",
+        "compliance",
+        "strategic",
+        "administrative",
+        "customer_service",
+        "project_management",
+      ],
       validation_status: ["pending", "validated", "rejected", "expired"],
       workflow_action: [
         "approve",

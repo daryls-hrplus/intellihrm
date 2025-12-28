@@ -26,9 +26,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Plus, Trash2, AlertCircle } from "lucide-react";
+import { Plus, Trash2, AlertCircle, ChevronDown, ChevronUp, Target } from "lucide-react";
 import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { ResponsibilityCategoryBadge, ResponsibilityCategory } from "./ResponsibilityCategoryBadge";
+import { ComplexityLevelIndicator } from "./ComplexityLevelIndicator";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { format } from "date-fns";
 import { getTodayString, formatDateForDisplay } from "@/utils/dateUtils";
 
@@ -41,12 +44,18 @@ interface JobResponsibility {
   start_date: string;
   end_date: string | null;
   responsibility_name?: string;
+  responsibility_category?: ResponsibilityCategory | null;
+  responsibility_complexity?: number | null;
+  responsibility_kras?: string[];
 }
 
 interface Responsibility {
   id: string;
   name: string;
   code: string;
+  category?: ResponsibilityCategory | null;
+  complexity_level?: number | null;
+  key_result_areas?: string[];
 }
 
 interface JobResponsibilitiesManagerProps {
