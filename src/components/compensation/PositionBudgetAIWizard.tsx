@@ -208,9 +208,7 @@ export function PositionBudgetAIWizard({
             fte: 1.0,
             is_new_position: false,
             is_vacant: false,
-            total_compensation: pos.compensation.total + overhead + employerTax,
-            fully_loaded_cost: pos.compensation.total + overhead + employerTax,
-            annual_cost: (pos.compensation.total + overhead + employerTax) * pos.authorized_headcount,
+            // Note: total_compensation, fully_loaded_cost, and annual_cost are generated columns
           });
 
         if (error) {
