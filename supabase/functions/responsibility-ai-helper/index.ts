@@ -65,7 +65,17 @@ interface BulkContextualizeKRAsRequest {
   jobLevel?: string;
 }
 
-type RequestBody = GenerateDescriptionRequest | SuggestKRAsRequest | EnrichResponsibilityRequest | SuggestForFamilyRequest | GenerateFamilyDescriptionRequest | ContextualizeKRARequest | BulkContextualizeKRAsRequest;
+interface GenerateJobDescriptionRequest {
+  action: 'generate_job_description';
+  jobName: string;
+  jobFamily?: string;
+  jobGrade?: string;
+  jobLevel?: string;
+  jobClass?: string;
+  existingDescription?: string;
+}
+
+type RequestBody = GenerateDescriptionRequest | SuggestKRAsRequest | EnrichResponsibilityRequest | SuggestForFamilyRequest | GenerateFamilyDescriptionRequest | ContextualizeKRARequest | BulkContextualizeKRAsRequest | GenerateJobDescriptionRequest;
 
 serve(async (req) => {
   // Handle CORS preflight
@@ -190,6 +200,18 @@ serve(async (req) => {
       
       return new Response(
         JSON.stringify({ success: true, results }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (action === 'generate_job_description') {
+      const { jobName, jobFamily, jobGrade, jobLevel, jobClass, existingDescription } = body as GenerateJobDescriptionRequest;
+      
+      const prompt = buildJobDescriptionPrompt(jobName, jobFamily, jobGrade, jobLevel, jobClass, existingDescription);
+      const description = await callLovableAI(prompt, 'Generate a professional job description');
+      
+      return new Response(
+        JSON.stringify({ success: true, description }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -635,10 +657,54 @@ async function callLovableAIForFamilySuggestions(prompt: string): Promise<Family
   }
 }
 
+function buildJobDescriptionPrompt(
+  jobName: string,
+  jobFamily?: string,
+  jobGrade?: string,
+  jobLevel?: string,
+  jobClass?: string,
+  existingDescription?: string
+): string {
+  let prompt = `Generate a professional job description for: "${jobName}"`;
+  
+  if (jobFamily) {
+    prompt += `\nJob Family: ${jobFamily}`;
+  }
+  if (jobGrade) {
+    prompt += `\nGrade: ${jobGrade}`;
+  }
+  if (jobLevel) {
+    prompt += `\nLevel: ${jobLevel}`;
+  }
+  if (jobClass) {
+    prompt += `\nJob Class: ${jobClass}`;
+  }
+  
+  if (existingDescription) {
+    prompt += `\n\nExisting description to improve/update: "${existingDescription}"`;
+    prompt += `\n\nPlease improve and enhance the existing description while preserving its key points.`;
+  }
+  
+  prompt += `\n\nRequirements:
+- 3-5 sentences maximum
+- Use professional HR language
+- Include the purpose and scope of the role
+- Mention key responsibilities at a high level
+- Reference the level of authority and decision-making appropriate for the grade/level
+- Be specific about the impact this role has on the organization
+- Do not use bullet points, write as flowing paragraphs`;
+  
+  return prompt;
+}
+
 function generateFallbackResponse(prompt: string, context: string): string {
   // Extract the name from the prompt
   const nameMatch = prompt.match(/["']([^"']+)["']/);
   const name = nameMatch ? nameMatch[1] : 'this responsibility';
+  
+  if (context.includes('job description')) {
+    return `The ${name} role is responsible for delivering key outcomes within their functional area, ensuring adherence to organizational standards and best practices. This position collaborates with cross-functional teams to achieve departmental objectives while maintaining high standards of quality and efficiency. The role holder contributes to strategic initiatives and continuous improvement efforts within their scope of authority.`;
+  }
   
   if (context.includes('job family description')) {
     return `The ${name} job family encompasses roles focused on ${name.toLowerCase()}-related activities across the organization. Professionals in this family are responsible for driving excellence in their domain, collaborating with stakeholders, and ensuring alignment with organizational objectives. Career progression typically advances from entry-level specialist positions through senior and leadership roles.`;
