@@ -33,6 +33,7 @@ import {
   Loader2,
   BarChart3,
   Sparkles,
+  Upload,
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -52,6 +53,7 @@ import { CapabilityFormDialog } from "@/components/capabilities/CapabilityFormDi
 import { SkillMappingsDialog } from "@/components/capabilities/SkillMappingsDialog";
 import { SkillsQuickStartWizard } from "@/components/capabilities/SkillsQuickStartWizard";
 import { BatchGenerateIndicatorsButton } from "@/components/capabilities/BatchGenerateIndicatorsButton";
+import { BulkCompetencyImport } from "@/components/capabilities/BulkCompetencyImport";
 import { useAuth } from "@/contexts/AuthContext";
 
 interface Company {
@@ -84,6 +86,7 @@ export default function CapabilityRegistryPage() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isMappingsOpen, setIsMappingsOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [isBulkImportOpen, setIsBulkImportOpen] = useState(false);
   const [selectedCapability, setSelectedCapability] = useState<Capability | null>(null);
   const [defaultType, setDefaultType] = useState<CapabilityType>("SKILL");
 
@@ -204,6 +207,10 @@ export default function CapabilityRegistryPage() {
             <Button variant="outline" onClick={() => setIsQuickStartOpen(true)}>
               <Sparkles className="mr-2 h-4 w-4" />
               Quick Start
+            </Button>
+            <Button variant="outline" onClick={() => setIsBulkImportOpen(true)}>
+              <Upload className="mr-2 h-4 w-4" />
+              Bulk Import
             </Button>
             <Button variant="outline" onClick={() => handleAdd("COMPETENCY")}>
               <Target className="mr-2 h-4 w-4" />
@@ -436,6 +443,16 @@ export default function CapabilityRegistryPage() {
         }}
         companyId={companies[0]?.id || ""}
         onComplete={() => {
+          fetchCapabilities({});
+        }}
+      />
+
+      {/* Bulk Competency Import */}
+      <BulkCompetencyImport
+        open={isBulkImportOpen}
+        onOpenChange={setIsBulkImportOpen}
+        companyId={companyFilter !== "all" ? companyFilter : companies[0]?.id || ""}
+        onImportComplete={() => {
           fetchCapabilities({});
         }}
       />
