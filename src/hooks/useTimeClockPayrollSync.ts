@@ -410,6 +410,7 @@ export function useTimeClockPayrollSync() {
     
     try {
       // Create sync log
+      const syncOptionsJson = JSON.parse(JSON.stringify(options));
       const { data: syncLog, error: logError } = await supabase
         .from("payroll_time_sync_logs")
         .insert([{
@@ -418,7 +419,7 @@ export function useTimeClockPayrollSync() {
           sync_type: 'full' as const,
           status: 'processing' as const,
           created_by: profile?.id,
-          sync_options: options
+          sync_options: syncOptionsJson
         }])
         .select()
         .single();

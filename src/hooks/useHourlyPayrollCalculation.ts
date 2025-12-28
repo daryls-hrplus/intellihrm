@@ -93,8 +93,6 @@ export function useHourlyPayrollCalculation() {
         multipliers.weekend = rule.weekend_multiplier || 2.0;
       } else if (rule.code?.includes('holiday')) {
         multipliers.holiday = rule.holiday_multiplier || 2.5;
-      } else if (rule.code?.includes('night')) {
-        multipliers.night = rule.night_multiplier || 1.25;
       } else {
         multipliers.standard = rule.overtime_multiplier || 1.5;
       }
