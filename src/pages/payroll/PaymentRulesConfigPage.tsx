@@ -12,7 +12,6 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Clock, DollarSign, Plus, Save, Trash2, Settings2 } from "lucide-react";
-import { useSessionContext } from "@supabase/auth-helpers-react";
 
 interface PayrollRule {
   id: string;
@@ -86,7 +85,6 @@ const DEFAULT_TIER: Partial<OvertimeRateTier> = {
 };
 
 export default function PaymentRulesConfigPage() {
-  const { session } = useSessionContext();
   const [selectedCompany, setSelectedCompany] = useState<string | null>(null);
   const [rules, setRules] = useState<PayrollRule[]>([]);
   const [tiers, setTiers] = useState<OvertimeRateTier[]>([]);
@@ -95,16 +93,17 @@ export default function PaymentRulesConfigPage() {
   // Fetch company from profile
   useEffect(() => {
     const fetchCompany = async () => {
-      if (!session?.user?.id) return;
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user?.id) return;
       const { data } = await supabase
         .from("profiles")
         .select("company_id")
-        .eq("id", session.user.id)
+        .eq("id", user.id)
         .single();
       if (data?.company_id) setSelectedCompany(data.company_id);
     };
     fetchCompany();
-  }, [session?.user?.id]);
+  }, []);
   const [saving, setSaving] = useState(false);
   const [selectedRule, setSelectedRule] = useState<PayrollRule | null>(null);
   const [isRuleDialogOpen, setIsRuleDialogOpen] = useState(false);

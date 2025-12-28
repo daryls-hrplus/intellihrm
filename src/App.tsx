@@ -329,6 +329,7 @@ import PayrollCountryDocumentationPage from "./pages/payroll/PayrollCountryDocum
 import SalaryAdvancesPage from "./pages/payroll/SalaryAdvancesPage";
 import SavingsProgramsPage from "./pages/payroll/SavingsProgramsPage";
 import TimePayrollSyncPage from "./pages/payroll/TimePayrollSyncPage";
+import PaymentRulesConfigPage from "./pages/payroll/PaymentRulesConfigPage";
 import GLDashboardPage from "./pages/payroll/gl/GLDashboardPage";
 import GLAccountsPage from "./pages/payroll/gl/GLAccountsPage";
 import CostCenterSegmentsPage from "./pages/payroll/gl/CostCenterSegmentsPage";
@@ -2190,6 +2191,14 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
                   <TimePayrollSyncPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/payroll/payment-rules"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
+                  <PaymentRulesConfigPage />
                 </ProtectedRoute>
               }
             />
