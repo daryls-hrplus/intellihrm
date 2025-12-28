@@ -39,6 +39,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Plus, Trash2, Loader2, Zap, Info, Filter } from "lucide-react";
 import { getTodayString, formatDateForDisplay } from "@/utils/dateUtils";
+import { ProficiencyLevelPicker, ProficiencyLevelBadge } from "@/components/capabilities/ProficiencyLevelPicker";
 
 interface JobCapabilityRequirement {
   id: string;
@@ -74,17 +75,7 @@ interface JobCapabilityRequirementsManagerProps {
 
 type FilterType = "all" | "SKILL" | "COMPETENCY";
 
-const PROFICIENCY_LEVELS = [
-  { value: 1, label: "Level 1 - Novice" },
-  { value: 2, label: "Level 2 - Beginner" },
-  { value: 3, label: "Level 3 - Intermediate" },
-  { value: 4, label: "Level 4 - Advanced" },
-  { value: 5, label: "Level 5 - Expert" },
-];
-
-const getProficiencyLabel = (level: number): string => {
-  return PROFICIENCY_LEVELS.find(p => p.value === level)?.label || `Level ${level}`;
-};
+// Removed PROFICIENCY_LEVELS and getProficiencyLabel - now using ProficiencyLevelPicker component
 
 const getTypeBadgeStyles = (type: string) => {
   if (type === "SKILL") {
@@ -395,9 +386,7 @@ export function JobCapabilityRequirementsManager({
                     </span>
                   </TableCell>
                   <TableCell>
-                    <Badge variant="outline">
-                      Level {req.required_proficiency_level}
-                    </Badge>
+                    <ProficiencyLevelBadge level={req.required_proficiency_level} size="sm" />
                   </TableCell>
                   <TableCell>
                     <Badge variant="outline">{req.weighting}%</Badge>
@@ -498,23 +487,14 @@ export function JobCapabilityRequirementsManager({
 
             <div className="space-y-2">
               <Label>Required Proficiency Level *</Label>
-              <Select
-                value={formData.required_proficiency_level}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, required_proficiency_level: value })
+              <ProficiencyLevelPicker
+                value={parseInt(formData.required_proficiency_level) || null}
+                onChange={(value) =>
+                  setFormData({ ...formData, required_proficiency_level: value?.toString() || "3" })
                 }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select level" />
-                </SelectTrigger>
-                <SelectContent>
-                  {PROFICIENCY_LEVELS.map((level) => (
-                    <SelectItem key={level.value} value={level.value.toString()}>
-                      {level.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                showDescription
+                showAppraisalContext
+              />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
