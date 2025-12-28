@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { 
@@ -59,6 +58,7 @@ export function JobSpecificKRAsList({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState({ target: "", method: "" });
   const [saving, setSaving] = useState(false);
+  const [creating, setCreating] = useState(false);
 
   const fetchJobKRAs = useCallback(async () => {
     if (!jobResponsibilityId) return;
@@ -105,8 +105,8 @@ export function JobSpecificKRAsList({
       const { error } = await supabase
         .from("job_responsibility_kras")
         .update({
-          job_specific_target: editForm.target,
-          measurement_method: editForm.method,
+          job_specific_target: editForm.target.trim() ? editForm.target.trim() : null,
+          measurement_method: editForm.method ? editForm.method : null,
           is_inherited: false,
           customized_at: new Date().toISOString(),
         })
@@ -117,9 +117,9 @@ export function JobSpecificKRAsList({
       await fetchJobKRAs();
       setEditingId(null);
       toast.success("KRA updated");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error updating KRA:", error);
-      toast.error("Failed to update KRA");
+      toast.error(error?.message ? `Failed to update KRA: ${error.message}` : "Failed to update KRA");
     } finally {
       setSaving(false);
     }
@@ -139,6 +139,42 @@ export function JobSpecificKRAsList({
     } catch (error) {
       console.error("Error deleting KRA:", error);
       toast.error("Failed to remove KRA");
+    }
+  };
+
+  const createEditableKRAsFromGeneric = async () => {
+    if (!jobResponsibilityId || genericKRAs.length === 0) return;
+
+    setCreating(true);
+    try {
+      const krasToInsert = genericKRAs.map((name, index) => ({
+        job_responsibility_id: jobResponsibilityId,
+        responsibility_kra_id: null,
+        name,
+        job_specific_target: null,
+        measurement_method: null,
+        weight: 0,
+        is_inherited: true,
+        inherited_at: new Date().toISOString(),
+        ai_generated: false,
+        ai_source: null,
+        customized_at: null,
+        sequence_order: index,
+      }));
+
+      const { error } = await supabase
+        .from("job_responsibility_kras")
+        .insert(krasToInsert);
+
+      if (error) throw error;
+
+      await fetchJobKRAs();
+      toast.success("Editable KRAs created");
+    } catch (error: any) {
+      console.error("Error creating editable KRAs:", error);
+      toast.error(error?.message ? `Failed to create KRAs: ${error.message}` : "Failed to create KRAs");
+    } finally {
+      setCreating(false);
     }
   };
 
@@ -304,15 +340,27 @@ export function JobSpecificKRAsList({
             <div className="text-xs font-medium text-muted-foreground">
               Key Result Areas (Generic)
             </div>
-            <Button
-              size="sm"
-              variant="outline"
-              className="h-7 text-xs gap-1"
-              onClick={onContextualizeClick}
-            >
-              <Sparkles className="h-3 w-3" />
-              Contextualize for Job
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                size="sm"
+                variant="outline"
+                className="h-7 text-xs gap-1"
+                onClick={createEditableKRAsFromGeneric}
+                disabled={creating}
+              >
+                <Pencil className="h-3 w-3" />
+                Edit manually
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                className="h-7 text-xs gap-1"
+                onClick={onContextualizeClick}
+              >
+                <Sparkles className="h-3 w-3" />
+                Contextualize for Job
+              </Button>
+            </div>
           </div>
           <div className="space-y-1.5">
             {genericKRAs.map((kra, index) => (
