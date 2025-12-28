@@ -38,6 +38,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuditLog } from "@/hooks/useAuditLog";
 import { toast } from "sonner";
@@ -52,6 +53,7 @@ import {
   Sparkles,
   Target,
   X,
+  Settings,
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { getTodayString } from "@/utils/dateUtils";
@@ -59,6 +61,7 @@ import { useLanguage } from "@/hooks/useLanguage";
 import { ResponsibilityCategoryBadge, getCategoryOptions, ResponsibilityCategory } from "@/components/workforce/ResponsibilityCategoryBadge";
 import { ComplexityLevelIndicator, getComplexityLevelOptions } from "@/components/workforce/ComplexityLevelIndicator";
 import { useResponsibilityAI } from "@/hooks/useResponsibilityAI";
+import { ResponsibilityKRAManager } from "@/components/responsibilities/ResponsibilityKRAManager";
 
 interface Responsibility {
   id: string;
@@ -523,219 +526,246 @@ export default function ResponsibilitiesPage() {
 
         {/* Create/Edit Dialog */}
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>
                 {selectedResponsibility ? t("workforce.responsibilities.editResponsibility") : t("workforce.responsibilities.createResponsibility")}
               </DialogTitle>
             </DialogHeader>
-            <div className="space-y-4 py-4">
-              {/* AI Enrich Button */}
-              <div className="flex justify-end">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={handleEnrichAll}
-                  disabled={isGenerating || !formData.name.trim()}
-                >
-                  {isGenerating ? (
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  ) : (
-                    <Sparkles className="h-4 w-4 mr-2" />
+            
+            <Tabs defaultValue="details" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="details" className="gap-2">
+                  <Settings className="h-4 w-4" />
+                  Details
+                </TabsTrigger>
+                <TabsTrigger value="kras" className="gap-2" disabled={!selectedResponsibility}>
+                  <Target className="h-4 w-4" />
+                  Structured KRAs
+                  {!selectedResponsibility && (
+                    <Badge variant="secondary" className="text-xs ml-1">Save first</Badge>
                   )}
-                  AI Enrich All Fields
-                </Button>
-              </div>
+                </TabsTrigger>
+              </TabsList>
 
-              <div className="space-y-2">
-                <Label>{t("common.company")} *</Label>
-                <Select
-                  value={formData.company_id}
-                  onValueChange={(value) => setFormData({ ...formData, company_id: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder={t("workforce.selectCompany")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {companies.map((company) => (
-                      <SelectItem key={company.id} value={company.id}>
-                        {company.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>{t("common.name")} *</Label>
-                  <Input
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    placeholder="e.g., Budget Management"
-                  />
+              <TabsContent value="details" className="space-y-4 mt-4">
+                {/* AI Enrich Button */}
+                <div className="flex justify-end">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleEnrichAll}
+                    disabled={isGenerating || !formData.name.trim()}
+                  >
+                    {isGenerating ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <Sparkles className="h-4 w-4 mr-2" />
+                    )}
+                    AI Enrich All Fields
+                  </Button>
                 </div>
-                <div className="space-y-2">
-                  <Label>{t("common.code")} *</Label>
-                  <Input
-                    value={formData.code}
-                    onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
-                    placeholder="e.g., BUDGMGT"
-                  />
-                </div>
-              </div>
 
-              <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Category</Label>
+                  <Label>{t("common.company")} *</Label>
                   <Select
-                    value={formData.category || "none"}
-                    onValueChange={(value) => setFormData({ ...formData, category: value === "none" ? "" : value as ResponsibilityCategory })}
+                    value={formData.company_id}
+                    onValueChange={(value) => setFormData({ ...formData, company_id: value })}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select category" />
+                      <SelectValue placeholder={t("workforce.selectCompany")} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="none">No Category</SelectItem>
-                      {categoryOptions.map((option) => (
-                        <SelectItem key={option.value} value={option.value}>
-                          {option.label}
+                      {companies.map((company) => (
+                        <SelectItem key={company.id} value={company.id}>
+                          {company.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="space-y-2">
-                  <Label>Complexity Level</Label>
-                  <Select
-                    value={formData.complexity_level?.toString() || "none"}
-                    onValueChange={(value) => setFormData({ ...formData, complexity_level: value === "none" ? null : parseInt(value) })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select complexity" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">Not Set</SelectItem>
-                      {complexityOptions.map((option) => (
-                        <SelectItem key={option.value} value={option.value.toString()}>
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
 
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label>{t("common.description")}</Label>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleGenerateDescription}
-                    disabled={isGenerating || !formData.name.trim()}
-                  >
-                    {isGenerating ? (
-                      <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-                    ) : (
-                      <Sparkles className="h-3 w-3 mr-1" />
-                    )}
-                    Generate
-                  </Button>
-                </div>
-                <Textarea
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="Describe this responsibility..."
-                  rows={3}
-                />
-              </div>
-
-              {/* Key Result Areas */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label>Key Result Areas (KRAs)</Label>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleSuggestKRAs}
-                    disabled={isGenerating || !formData.name.trim()}
-                  >
-                    {isGenerating ? (
-                      <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-                    ) : (
-                      <Sparkles className="h-3 w-3 mr-1" />
-                    )}
-                    Suggest KRAs
-                  </Button>
-                </div>
-                
-                {formData.key_result_areas.length > 0 && (
-                  <div className="space-y-2 mb-2">
-                    {formData.key_result_areas.map((kra, index) => (
-                      <div key={index} className="flex items-start gap-2 p-2 bg-muted/50 rounded-md">
-                        <Target className="h-4 w-4 mt-0.5 text-muted-foreground shrink-0" />
-                        <span className="flex-1 text-sm">{kra}</span>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          className="h-6 w-6 shrink-0"
-                          onClick={() => removeKRA(index)}
-                        >
-                          <X className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    ))}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>{t("common.name")} *</Label>
+                    <Input
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      placeholder="e.g., Budget Management"
+                    />
                   </div>
+                  <div className="space-y-2">
+                    <Label>{t("common.code")} *</Label>
+                    <Input
+                      value={formData.code}
+                      onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
+                      placeholder="e.g., BUDGMGT"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Category</Label>
+                    <Select
+                      value={formData.category || "none"}
+                      onValueChange={(value) => setFormData({ ...formData, category: value === "none" ? "" : value as ResponsibilityCategory })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">No Category</SelectItem>
+                        {categoryOptions.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Complexity Level</Label>
+                    <Select
+                      value={formData.complexity_level?.toString() || "none"}
+                      onValueChange={(value) => setFormData({ ...formData, complexity_level: value === "none" ? null : parseInt(value) })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select complexity" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">Not Set</SelectItem>
+                        {complexityOptions.map((option) => (
+                          <SelectItem key={option.value} value={option.value.toString()}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label>{t("common.description")}</Label>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleGenerateDescription}
+                      disabled={isGenerating || !formData.name.trim()}
+                    >
+                      {isGenerating ? (
+                        <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                      ) : (
+                        <Sparkles className="h-3 w-3 mr-1" />
+                      )}
+                      Generate
+                    </Button>
+                  </div>
+                  <Textarea
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    placeholder="Describe this responsibility..."
+                    rows={3}
+                  />
+                </div>
+
+                {/* Legacy Key Result Areas - Quick Add */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label>Quick KRAs (Text-based)</Label>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleSuggestKRAs}
+                      disabled={isGenerating || !formData.name.trim()}
+                    >
+                      {isGenerating ? (
+                        <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                      ) : (
+                        <Sparkles className="h-3 w-3 mr-1" />
+                      )}
+                      Suggest KRAs
+                    </Button>
+                  </div>
+                  
+                  {formData.key_result_areas.length > 0 && (
+                    <div className="space-y-2 mb-2">
+                      {formData.key_result_areas.map((kra, index) => (
+                        <div key={index} className="flex items-start gap-2 p-2 bg-muted/50 rounded-md">
+                          <Target className="h-4 w-4 mt-0.5 text-muted-foreground shrink-0" />
+                          <span className="flex-1 text-sm">{kra}</span>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6 shrink-0"
+                            onClick={() => removeKRA(index)}
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  
+                  <div className="flex gap-2">
+                    <Input
+                      value={newKRA}
+                      onChange={(e) => setNewKRA(e.target.value)}
+                      placeholder="Add a measurable KRA..."
+                      onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addKRA())}
+                    />
+                    <Button type="button" variant="outline" size="sm" onClick={addKRA}>
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    For weighted KRAs with individual ratings, use the "Structured KRAs" tab after saving
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>{t("common.startDate")} *</Label>
+                    <Input
+                      type="date"
+                      value={formData.start_date}
+                      onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>{t("common.endDate")}</Label>
+                    <Input
+                      type="date"
+                      value={formData.end_date}
+                      onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <Switch
+                    checked={formData.is_active}
+                    onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
+                  />
+                  <Label>{t("common.active")}</Label>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="kras" className="mt-4">
+                {selectedResponsibility && (
+                  <ResponsibilityKRAManager
+                    responsibilityId={selectedResponsibility.id}
+                    companyId={selectedResponsibility.company_id}
+                  />
                 )}
-                
-                <div className="flex gap-2">
-                  <Input
-                    value={newKRA}
-                    onChange={(e) => setNewKRA(e.target.value)}
-                    placeholder="Add a measurable KRA..."
-                    onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addKRA())}
-                  />
-                  <Button type="button" variant="outline" size="sm" onClick={addKRA}>
-                    <Plus className="h-4 w-4" />
-                  </Button>
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Define measurable outcomes for this responsibility
-                </p>
-              </div>
+              </TabsContent>
+            </Tabs>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>{t("common.startDate")} *</Label>
-                  <Input
-                    type="date"
-                    value={formData.start_date}
-                    onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>{t("common.endDate")}</Label>
-                  <Input
-                    type="date"
-                    value={formData.end_date}
-                    onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
-                  />
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <Switch
-                  checked={formData.is_active}
-                  onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
-                />
-                <Label>{t("common.active")}</Label>
-              </div>
-            </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setDialogOpen(false)}>
                 {t("common.cancel")}
