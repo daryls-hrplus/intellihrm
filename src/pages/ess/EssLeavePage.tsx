@@ -23,9 +23,11 @@ import {
   XCircle, 
   AlertCircle,
   Loader2,
-  Send
+  Send,
+  CalendarCheck,
+  CalendarClock
 } from "lucide-react";
-import { format, differenceInDays, startOfYear } from "date-fns";
+import { format, differenceInDays, startOfYear, isPast, isToday, isFuture, parseISO } from "date-fns";
 import { formatDateForDisplay } from "@/utils/dateUtils";
 import {
   Table,
@@ -137,6 +139,29 @@ export default function EssLeavePage() {
       bookedPending: bookedLeave,
     };
   }, [selectedBalance, bookedLeave]);
+
+  // Filter leave taken (approved leave where start date has passed or is today)
+  const leaveTaken = useMemo(() => {
+    const today = new Date();
+    return leaveRequests
+      .filter((r) => {
+        if (r.status !== "approved") return false;
+        const startDate = parseISO(r.start_date);
+        return isPast(startDate) || isToday(startDate);
+      })
+      .sort((a, b) => new Date(b.start_date).getTime() - new Date(a.start_date).getTime());
+  }, [leaveRequests]);
+
+  // Filter upcoming approved leave
+  const upcomingLeave = useMemo(() => {
+    return leaveRequests
+      .filter((r) => {
+        if (r.status !== "approved") return false;
+        const startDate = parseISO(r.start_date);
+        return isFuture(startDate);
+      })
+      .sort((a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime());
+  }, [leaveRequests]);
 
   // Calculate duration
   const calculateDuration = () => {
@@ -271,8 +296,9 @@ export default function EssLeavePage() {
         <Tabs defaultValue="balances" className="space-y-4">
           <TabsList>
             <TabsTrigger value="balances">My Balances</TabsTrigger>
+            <TabsTrigger value="taken">Leave Taken</TabsTrigger>
             <TabsTrigger value="calendar">Leave Calendar</TabsTrigger>
-            <TabsTrigger value="requests">My Requests</TabsTrigger>
+            <TabsTrigger value="requests">Request History</TabsTrigger>
           </TabsList>
 
           <TabsContent value="calendar">
@@ -337,6 +363,117 @@ export default function EssLeavePage() {
                 ))}
               </div>
             )}
+          </TabsContent>
+
+          <TabsContent value="taken">
+            <div className="space-y-6">
+              {/* Currently on Leave / Upcoming */}
+              {upcomingLeave.length > 0 && (
+                <Card className="border-primary/20 bg-primary/5">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="flex items-center gap-2 text-base">
+                      <CalendarClock className="h-4 w-4 text-primary" />
+                      Upcoming Approved Leave
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {upcomingLeave.map((leave) => (
+                        <div key={leave.id} className="flex items-center justify-between p-3 rounded-lg bg-background border">
+                          <div className="flex items-center gap-3">
+                            <div 
+                              className="h-3 w-3 rounded-full" 
+                              style={{ backgroundColor: leave.leave_type?.color || "#3B82F6" }} 
+                            />
+                            <div>
+                              <p className="font-medium">{leave.leave_type?.name}</p>
+                              <p className="text-sm text-muted-foreground">
+                                {formatDateForDisplay(leave.start_date, "MMM d, yyyy")}
+                                {leave.start_date !== leave.end_date && (
+                                  <> - {formatDateForDisplay(leave.end_date, "MMM d, yyyy")}</>
+                                )}
+                              </p>
+                            </div>
+                          </div>
+                          <Badge variant="outline">{leave.duration} {leave.leave_type?.accrual_unit || "days"}</Badge>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Leave Taken History */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center gap-2 text-base">
+                    <CalendarCheck className="h-4 w-4" />
+                    Leave Taken This Year
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Type</TableHead>
+                        <TableHead>Dates</TableHead>
+                        <TableHead>Duration</TableHead>
+                        <TableHead>Status</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {loadingRequests ? (
+                        <TableRow>
+                          <TableCell colSpan={4} className="text-center py-8">
+                            <Loader2 className="h-5 w-5 animate-spin mx-auto text-muted-foreground" />
+                          </TableCell>
+                        </TableRow>
+                      ) : leaveTaken.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
+                            No leave taken yet this year.
+                          </TableCell>
+                        </TableRow>
+                      ) : (
+                        leaveTaken.map((leave) => {
+                          const endDate = parseISO(leave.end_date);
+                          const isOngoing = !isPast(endDate) && (isToday(parseISO(leave.start_date)) || isPast(parseISO(leave.start_date)));
+                          return (
+                            <TableRow key={leave.id}>
+                              <TableCell>
+                                <div className="flex items-center gap-2">
+                                  <div 
+                                    className="h-3 w-3 rounded-full" 
+                                    style={{ backgroundColor: leave.leave_type?.color || "#3B82F6" }} 
+                                  />
+                                  {leave.leave_type?.name || "Unknown"}
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                {formatDateForDisplay(leave.start_date, "MMM d, yyyy")}
+                                {leave.start_date !== leave.end_date && (
+                                  <> - {formatDateForDisplay(leave.end_date, "MMM d, yyyy")}</>
+                                )}
+                              </TableCell>
+                              <TableCell>
+                                {leave.duration} {leave.leave_type?.accrual_unit || "days"}
+                              </TableCell>
+                              <TableCell>
+                                {isOngoing ? (
+                                  <Badge className="bg-green-500">Currently on Leave</Badge>
+                                ) : (
+                                  <Badge variant="secondary">Completed</Badge>
+                                )}
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })
+                      )}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
 
           <TabsContent value="requests">
