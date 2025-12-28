@@ -750,21 +750,27 @@ export function JobCapabilityRequirementsManager({
               </p>
             </div>
 
-            <div className="flex items-center gap-6">
-              <div className="flex items-center gap-2">
-                <Switch
-                  checked={formData.is_required}
-                  onCheckedChange={(checked) => setFormData({ ...formData, is_required: checked })}
-                />
-                <Label>Required</Label>
+            <div className="space-y-2">
+              <div className="flex items-center gap-6">
+                <div className="flex items-center gap-2">
+                  <Switch
+                    checked={formData.is_required}
+                    onCheckedChange={(checked) => setFormData({ ...formData, is_required: checked })}
+                  />
+                  <Label>Required</Label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Switch
+                    checked={formData.is_preferred}
+                    onCheckedChange={(checked) => setFormData({ ...formData, is_preferred: checked })}
+                  />
+                  <Label>Preferred</Label>
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <Switch
-                  checked={formData.is_preferred}
-                  onCheckedChange={(checked) => setFormData({ ...formData, is_preferred: checked })}
-                />
-                <Label>Preferred</Label>
-              </div>
+              <p className="text-xs text-muted-foreground">
+                <strong>Required:</strong> Must-have competency for the role — candidates without it may be disqualified. 
+                <strong className="ml-2">Preferred:</strong> Nice-to-have competency — adds value but not essential.
+              </p>
             </div>
 
             <div className="space-y-2">
