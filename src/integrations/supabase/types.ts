@@ -38717,6 +38717,652 @@ export type Database = {
           },
         ]
       }
+      savings_balances: {
+        Row: {
+          company_id: string
+          contribution_count: number | null
+          created_at: string | null
+          current_balance: number | null
+          employee_id: string
+          enrollment_id: string
+          first_contribution_date: string | null
+          goal_progress_percentage: number | null
+          id: string
+          last_contribution_amount: number | null
+          last_contribution_date: string | null
+          last_updated_at: string | null
+          program_type_id: string
+          total_contributions: number | null
+          total_employer_match: number | null
+          total_fees: number | null
+          total_interest: number | null
+          total_penalties: number | null
+          total_withdrawals: number | null
+          unvested_employer_match: number | null
+          vested_employer_match: number | null
+          ytd_contributions: number | null
+          ytd_employer_match: number | null
+          ytd_interest: number | null
+          ytd_withdrawals: number | null
+        }
+        Insert: {
+          company_id: string
+          contribution_count?: number | null
+          created_at?: string | null
+          current_balance?: number | null
+          employee_id: string
+          enrollment_id: string
+          first_contribution_date?: string | null
+          goal_progress_percentage?: number | null
+          id?: string
+          last_contribution_amount?: number | null
+          last_contribution_date?: string | null
+          last_updated_at?: string | null
+          program_type_id: string
+          total_contributions?: number | null
+          total_employer_match?: number | null
+          total_fees?: number | null
+          total_interest?: number | null
+          total_penalties?: number | null
+          total_withdrawals?: number | null
+          unvested_employer_match?: number | null
+          vested_employer_match?: number | null
+          ytd_contributions?: number | null
+          ytd_employer_match?: number | null
+          ytd_interest?: number | null
+          ytd_withdrawals?: number | null
+        }
+        Update: {
+          company_id?: string
+          contribution_count?: number | null
+          created_at?: string | null
+          current_balance?: number | null
+          employee_id?: string
+          enrollment_id?: string
+          first_contribution_date?: string | null
+          goal_progress_percentage?: number | null
+          id?: string
+          last_contribution_amount?: number | null
+          last_contribution_date?: string | null
+          last_updated_at?: string | null
+          program_type_id?: string
+          total_contributions?: number | null
+          total_employer_match?: number | null
+          total_fees?: number | null
+          total_interest?: number | null
+          total_penalties?: number | null
+          total_withdrawals?: number | null
+          unvested_employer_match?: number | null
+          vested_employer_match?: number | null
+          ytd_contributions?: number | null
+          ytd_employer_match?: number | null
+          ytd_interest?: number | null
+          ytd_withdrawals?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "savings_balances_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "savings_balances_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "savings_balances_enrollment_id_fkey"
+            columns: ["enrollment_id"]
+            isOneToOne: true
+            referencedRelation: "savings_enrollments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "savings_balances_program_type_id_fkey"
+            columns: ["program_type_id"]
+            isOneToOne: false
+            referencedRelation: "savings_program_types"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      savings_enrollments: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          company_id: string
+          completed_at: string | null
+          completion_reason: string | null
+          contribution_amount: number | null
+          contribution_percentage: number | null
+          created_at: string | null
+          created_by: string | null
+          currency: string | null
+          effective_start_date: string | null
+          employee_id: string
+          end_date: string | null
+          enrollment_date: string
+          external_account_number: string | null
+          external_institution_name: string | null
+          external_routing_number: string | null
+          frequency: string | null
+          goal_amount: number | null
+          goal_description: string | null
+          id: string
+          pause_reason: string | null
+          paused_at: string | null
+          program_type_id: string
+          project_id: string | null
+          requires_approval: boolean | null
+          status: string | null
+          target_date: string | null
+          updated_at: string | null
+          workflow_instance_id: string | null
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          company_id: string
+          completed_at?: string | null
+          completion_reason?: string | null
+          contribution_amount?: number | null
+          contribution_percentage?: number | null
+          created_at?: string | null
+          created_by?: string | null
+          currency?: string | null
+          effective_start_date?: string | null
+          employee_id: string
+          end_date?: string | null
+          enrollment_date?: string
+          external_account_number?: string | null
+          external_institution_name?: string | null
+          external_routing_number?: string | null
+          frequency?: string | null
+          goal_amount?: number | null
+          goal_description?: string | null
+          id?: string
+          pause_reason?: string | null
+          paused_at?: string | null
+          program_type_id: string
+          project_id?: string | null
+          requires_approval?: boolean | null
+          status?: string | null
+          target_date?: string | null
+          updated_at?: string | null
+          workflow_instance_id?: string | null
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          company_id?: string
+          completed_at?: string | null
+          completion_reason?: string | null
+          contribution_amount?: number | null
+          contribution_percentage?: number | null
+          created_at?: string | null
+          created_by?: string | null
+          currency?: string | null
+          effective_start_date?: string | null
+          employee_id?: string
+          end_date?: string | null
+          enrollment_date?: string
+          external_account_number?: string | null
+          external_institution_name?: string | null
+          external_routing_number?: string | null
+          frequency?: string | null
+          goal_amount?: number | null
+          goal_description?: string | null
+          id?: string
+          pause_reason?: string | null
+          paused_at?: string | null
+          program_type_id?: string
+          project_id?: string | null
+          requires_approval?: boolean | null
+          status?: string | null
+          target_date?: string | null
+          updated_at?: string | null
+          workflow_instance_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "savings_enrollments_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "savings_enrollments_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "savings_enrollments_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "savings_enrollments_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "savings_enrollments_program_type_id_fkey"
+            columns: ["program_type_id"]
+            isOneToOne: false
+            referencedRelation: "savings_program_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "savings_enrollments_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "savings_enrollments_workflow_instance_id_fkey"
+            columns: ["workflow_instance_id"]
+            isOneToOne: false
+            referencedRelation: "workflow_instances"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      savings_program_types: {
+        Row: {
+          allow_early_withdrawal: boolean | null
+          calculation_method: string | null
+          category: string
+          code: string
+          company_id: string | null
+          created_at: string | null
+          created_by: string | null
+          deduction_priority: number | null
+          default_amount: number | null
+          default_percentage: number | null
+          description: string | null
+          description_en: string | null
+          early_withdrawal_penalty_percentage: number | null
+          earns_interest: boolean | null
+          eligible_department_ids: string[] | null
+          eligible_employment_types: string[] | null
+          employer_match_cap: number | null
+          employer_match_percentage: number | null
+          employer_match_vesting_months: number | null
+          end_date: string | null
+          has_employer_match: boolean | null
+          id: string
+          institution_account: string | null
+          institution_code: string | null
+          institution_name: string | null
+          interest_calculation_method: string | null
+          interest_rate_annual: number | null
+          is_active: boolean | null
+          is_pretax: boolean | null
+          max_contribution: number | null
+          min_contribution: number | null
+          min_tenure_months: number | null
+          name: string
+          name_en: string | null
+          pay_element_id: string | null
+          release_type: string | null
+          scheduled_release_day: number | null
+          scheduled_release_month: number | null
+          start_date: string
+          updated_at: string | null
+        }
+        Insert: {
+          allow_early_withdrawal?: boolean | null
+          calculation_method?: string | null
+          category: string
+          code: string
+          company_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          deduction_priority?: number | null
+          default_amount?: number | null
+          default_percentage?: number | null
+          description?: string | null
+          description_en?: string | null
+          early_withdrawal_penalty_percentage?: number | null
+          earns_interest?: boolean | null
+          eligible_department_ids?: string[] | null
+          eligible_employment_types?: string[] | null
+          employer_match_cap?: number | null
+          employer_match_percentage?: number | null
+          employer_match_vesting_months?: number | null
+          end_date?: string | null
+          has_employer_match?: boolean | null
+          id?: string
+          institution_account?: string | null
+          institution_code?: string | null
+          institution_name?: string | null
+          interest_calculation_method?: string | null
+          interest_rate_annual?: number | null
+          is_active?: boolean | null
+          is_pretax?: boolean | null
+          max_contribution?: number | null
+          min_contribution?: number | null
+          min_tenure_months?: number | null
+          name: string
+          name_en?: string | null
+          pay_element_id?: string | null
+          release_type?: string | null
+          scheduled_release_day?: number | null
+          scheduled_release_month?: number | null
+          start_date?: string
+          updated_at?: string | null
+        }
+        Update: {
+          allow_early_withdrawal?: boolean | null
+          calculation_method?: string | null
+          category?: string
+          code?: string
+          company_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          deduction_priority?: number | null
+          default_amount?: number | null
+          default_percentage?: number | null
+          description?: string | null
+          description_en?: string | null
+          early_withdrawal_penalty_percentage?: number | null
+          earns_interest?: boolean | null
+          eligible_department_ids?: string[] | null
+          eligible_employment_types?: string[] | null
+          employer_match_cap?: number | null
+          employer_match_percentage?: number | null
+          employer_match_vesting_months?: number | null
+          end_date?: string | null
+          has_employer_match?: boolean | null
+          id?: string
+          institution_account?: string | null
+          institution_code?: string | null
+          institution_name?: string | null
+          interest_calculation_method?: string | null
+          interest_rate_annual?: number | null
+          is_active?: boolean | null
+          is_pretax?: boolean | null
+          max_contribution?: number | null
+          min_contribution?: number | null
+          min_tenure_months?: number | null
+          name?: string
+          name_en?: string | null
+          pay_element_id?: string | null
+          release_type?: string | null
+          scheduled_release_day?: number | null
+          scheduled_release_month?: number | null
+          start_date?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "savings_program_types_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "savings_program_types_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "savings_program_types_pay_element_id_fkey"
+            columns: ["pay_element_id"]
+            isOneToOne: false
+            referencedRelation: "pay_elements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      savings_scheduled_releases: {
+        Row: {
+          company_id: string
+          completed_at: string | null
+          created_at: string | null
+          id: string
+          notes: string | null
+          processed_by: string | null
+          processed_count: number | null
+          processing_started_at: string | null
+          program_type_id: string
+          release_day: number | null
+          release_month: number
+          release_year: number
+          scheduled_date: string
+          status: string | null
+          total_amount: number | null
+          total_enrollments: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          company_id: string
+          completed_at?: string | null
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          processed_by?: string | null
+          processed_count?: number | null
+          processing_started_at?: string | null
+          program_type_id: string
+          release_day?: number | null
+          release_month: number
+          release_year: number
+          scheduled_date: string
+          status?: string | null
+          total_amount?: number | null
+          total_enrollments?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          company_id?: string
+          completed_at?: string | null
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          processed_by?: string | null
+          processed_count?: number | null
+          processing_started_at?: string | null
+          program_type_id?: string
+          release_day?: number | null
+          release_month?: number
+          release_year?: number
+          scheduled_date?: string
+          status?: string | null
+          total_amount?: number | null
+          total_enrollments?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "savings_scheduled_releases_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "savings_scheduled_releases_processed_by_fkey"
+            columns: ["processed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "savings_scheduled_releases_program_type_id_fkey"
+            columns: ["program_type_id"]
+            isOneToOne: false
+            referencedRelation: "savings_program_types"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      savings_transactions: {
+        Row: {
+          amount: number
+          approved_at: string | null
+          approved_by: string | null
+          balance_after: number | null
+          company_id: string
+          created_at: string | null
+          currency: string | null
+          employee_id: string
+          employee_payroll_id: string | null
+          enrollment_id: string
+          external_reference: string | null
+          id: string
+          metadata: Json | null
+          notes: string | null
+          pay_period_id: string | null
+          payroll_run_id: string | null
+          processed_at: string | null
+          processed_by: string | null
+          reference_number: string | null
+          rejection_reason: string | null
+          release_method: string | null
+          release_reason: string | null
+          requested_by: string | null
+          status: string | null
+          transaction_type: string
+          updated_at: string | null
+        }
+        Insert: {
+          amount: number
+          approved_at?: string | null
+          approved_by?: string | null
+          balance_after?: number | null
+          company_id: string
+          created_at?: string | null
+          currency?: string | null
+          employee_id: string
+          employee_payroll_id?: string | null
+          enrollment_id: string
+          external_reference?: string | null
+          id?: string
+          metadata?: Json | null
+          notes?: string | null
+          pay_period_id?: string | null
+          payroll_run_id?: string | null
+          processed_at?: string | null
+          processed_by?: string | null
+          reference_number?: string | null
+          rejection_reason?: string | null
+          release_method?: string | null
+          release_reason?: string | null
+          requested_by?: string | null
+          status?: string | null
+          transaction_type: string
+          updated_at?: string | null
+        }
+        Update: {
+          amount?: number
+          approved_at?: string | null
+          approved_by?: string | null
+          balance_after?: number | null
+          company_id?: string
+          created_at?: string | null
+          currency?: string | null
+          employee_id?: string
+          employee_payroll_id?: string | null
+          enrollment_id?: string
+          external_reference?: string | null
+          id?: string
+          metadata?: Json | null
+          notes?: string | null
+          pay_period_id?: string | null
+          payroll_run_id?: string | null
+          processed_at?: string | null
+          processed_by?: string | null
+          reference_number?: string | null
+          rejection_reason?: string | null
+          release_method?: string | null
+          release_reason?: string | null
+          requested_by?: string | null
+          status?: string | null
+          transaction_type?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "savings_transactions_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "savings_transactions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "savings_transactions_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "savings_transactions_employee_payroll_id_fkey"
+            columns: ["employee_payroll_id"]
+            isOneToOne: false
+            referencedRelation: "employee_payroll"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "savings_transactions_enrollment_id_fkey"
+            columns: ["enrollment_id"]
+            isOneToOne: false
+            referencedRelation: "savings_enrollments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "savings_transactions_pay_period_id_fkey"
+            columns: ["pay_period_id"]
+            isOneToOne: false
+            referencedRelation: "pay_periods"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "savings_transactions_payroll_run_id_fkey"
+            columns: ["payroll_run_id"]
+            isOneToOne: false
+            referencedRelation: "payroll_runs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "savings_transactions_processed_by_fkey"
+            columns: ["processed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "savings_transactions_requested_by_fkey"
+            columns: ["requested_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       scenario_comments: {
         Row: {
           annotation_target: string | null
