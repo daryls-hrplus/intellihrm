@@ -42,6 +42,7 @@ export interface LinkedSkill {
     name: string;
     code: string;
     category: string;
+    proficiency_indicators?: { [level: string]: string[] } | null;
   } | null;
   override?: {
     id: string;
@@ -362,7 +363,13 @@ export function CompetencyRequirementRow({
                     ) : (
                       <div className="flex items-center gap-2">
                         {displayLevel ? (
-                          <ProficiencyLevelBadge level={displayLevel} size="sm" />
+                          <ProficiencyLevelBadge 
+                            level={displayLevel} 
+                            size="sm" 
+                            skillId={skill.skill?.id}
+                            skillName={skill.skill?.name}
+                            skillIndicators={skill.skill?.proficiency_indicators}
+                          />
                         ) : (
                           <span className="text-xs text-muted-foreground">—</span>
                         )}

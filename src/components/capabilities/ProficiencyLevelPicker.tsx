@@ -249,19 +249,32 @@ export function ProficiencyLevelPicker({
 }
 
 // Compact display component for showing proficiency level info
+interface ProficiencyLevelBadgeProps {
+  level: number;
+  showLabel?: boolean;
+  size?: "sm" | "default" | "lg";
+  // Skill-specific context props
+  skillId?: string;
+  skillName?: string;
+  skillIndicators?: { [level: string]: string[] } | null;
+}
+
 export function ProficiencyLevelBadge({
   level,
   showLabel = true,
   size = "default",
-}: {
-  level: number;
-  showLabel?: boolean;
-  size?: "sm" | "default" | "lg";
-}) {
+  skillId,
+  skillName,
+  skillIndicators,
+}: ProficiencyLevelBadgeProps) {
   const levelInfo = DEFAULT_PROFICIENCY_LEVELS.find((l) => l.level === level);
   if (!levelInfo) return <span>{level}</span>;
 
   const Icon = levelInfo.icon;
+  
+  // Get skill-specific indicators for this level
+  const specificIndicators = skillIndicators?.[level.toString()] || null;
+  const hasSkillContext = !!skillName && !!specificIndicators && specificIndicators.length > 0;
 
   return (
     <TooltipProvider>
@@ -287,10 +300,45 @@ export function ProficiencyLevelBadge({
             )}
           </div>
         </TooltipTrigger>
-        <TooltipContent>
-          <div className="space-y-1">
-            <p className="font-medium">Level {level} - {levelInfo.name}</p>
-            <p className="text-sm text-muted-foreground">{levelInfo.shortDescription}</p>
+        <TooltipContent className="max-w-xs">
+          <div className="space-y-2">
+            {/* Level header */}
+            <div>
+              <p className="font-medium">Level {level} - {levelInfo.name}</p>
+              <p className="text-sm text-muted-foreground">{levelInfo.shortDescription}</p>
+            </div>
+            
+            {/* Skill-specific context */}
+            {hasSkillContext && (
+              <div className="pt-2 border-t border-border/50">
+                <p className="text-xs font-semibold text-primary mb-1.5">
+                  ★ For {skillName}:
+                </p>
+                <ul className="space-y-1">
+                  {specificIndicators.slice(0, 3).map((indicator, i) => (
+                    <li key={i} className="text-xs flex items-start gap-1.5">
+                      <span className="text-primary mt-0.5">•</span>
+                      <span>{indicator}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            
+            {/* Generic behavioral indicators fallback */}
+            {!hasSkillContext && (
+              <div className="pt-2 border-t border-border/50">
+                <p className="text-xs font-semibold text-muted-foreground mb-1">Typical indicators:</p>
+                <ul className="space-y-0.5">
+                  {levelInfo.behavioralIndicators.slice(0, 2).map((indicator, i) => (
+                    <li key={i} className="text-xs text-muted-foreground flex items-start gap-1">
+                      <span>•</span>
+                      <span>{indicator}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
         </TooltipContent>
       </Tooltip>
