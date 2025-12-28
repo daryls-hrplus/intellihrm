@@ -677,7 +677,7 @@ async function suggestJobCompetencies(
     .join("\n");
 
   const systemPrompt = `You are an expert HR consultant specializing in competency frameworks and job design.
-Your task is to recommend the most relevant competencies for a job role and suggest appropriate proficiency levels.
+Your task is to recommend the most relevant competencies for a job role and suggest appropriate proficiency levels and weightings.
 
 Job Level Context:
 - Job Level: ${jobLevel || "Not specified"}
@@ -697,7 +697,14 @@ Guidelines for level assignment:
 - Manager/Director roles: Levels 3-5
 - Executive roles: Levels 4-5
 
-Select 3-6 most relevant competencies from the available list and assign appropriate proficiency levels.`;
+Weight Distribution Guidelines:
+- All suggested competency weights should sum to approximately 100%
+- Critical/core competencies: 20-35% each
+- Important supporting competencies: 10-20% each
+- Nice-to-have competencies: 5-10% each
+- Distribute weights based on importance to the role
+
+Select 3-6 most relevant competencies from the available list and assign appropriate proficiency levels and weights.`;
 
   const userPrompt = `Job Title: ${jobName}
 ${jobDescription ? `Job Description: ${jobDescription}` : ""}
@@ -707,7 +714,7 @@ ${jobGrade ? `Job Grade: ${jobGrade}` : ""}
 Available Competencies:
 ${competencyList}
 
-Select the most relevant competencies for this role and suggest appropriate proficiency levels.`;
+Select the most relevant competencies for this role and suggest appropriate proficiency levels and weights (weights should sum to ~100%).`;
 
   const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
     method: "POST",
@@ -726,7 +733,7 @@ Select the most relevant competencies for this role and suggest appropriate prof
           type: "function",
           function: {
             name: "suggest_competencies",
-            description: "Returns competency suggestions with proficiency levels",
+            description: "Returns competency suggestions with proficiency levels and weights",
             parameters: {
               type: "object",
               properties: {
@@ -739,10 +746,11 @@ Select the most relevant competencies for this role and suggest appropriate prof
                       name: { type: "string", description: "Name of the competency" },
                       code: { type: "string", description: "Code of the competency" },
                       suggested_level: { type: "integer", minimum: 1, maximum: 5, description: "Recommended proficiency level" },
+                      suggested_weight: { type: "integer", minimum: 5, maximum: 50, description: "Recommended weight percentage (all weights should sum to ~100%)" },
                       confidence: { type: "number", minimum: 0, maximum: 1 },
-                      reason: { type: "string", description: "Why this competency is relevant and why this level" },
+                      reason: { type: "string", description: "Why this competency is relevant and why this level and weight" },
                     },
-                    required: ["name", "suggested_level", "reason"],
+                    required: ["name", "suggested_level", "suggested_weight", "reason"],
                   },
                 },
               },

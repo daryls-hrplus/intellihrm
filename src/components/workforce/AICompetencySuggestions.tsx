@@ -27,6 +27,7 @@ interface Capability {
 interface SuggestedCapability {
   name: string;
   suggestedLevel?: number;
+  suggestedWeight?: number;
   confidence?: number;
   reason?: string;
   matchedCapability?: Capability;
@@ -40,7 +41,7 @@ interface AICompetencySuggestionsProps {
   companyId: string;
   availableCompetencies: Capability[];
   existingRequirementIds: string[];
-  onSelectCompetency: (capability: Capability, suggestedLevel?: number) => void;
+  onSelectCompetency: (capability: Capability, suggestedLevel?: number, suggestedWeight?: number) => void;
 }
 
 export function AICompetencySuggestions({
@@ -92,6 +93,7 @@ export function AICompetencySuggestions({
           return {
             name: s.name,
             suggestedLevel: s.suggested_level,
+            suggestedWeight: s.suggested_weight,
             confidence: s.confidence,
             reason: s.reason,
             matchedCapability: matchedCap,
@@ -116,7 +118,7 @@ export function AICompetencySuggestions({
 
   const handleAddSuggestion = (suggestion: SuggestedCapability) => {
     if (suggestion.matchedCapability) {
-      onSelectCompetency(suggestion.matchedCapability, suggestion.suggestedLevel);
+      onSelectCompetency(suggestion.matchedCapability, suggestion.suggestedLevel, suggestion.suggestedWeight);
       setAddedIds((prev) => new Set([...prev, suggestion.matchedCapability!.id]));
     }
   };
@@ -223,6 +225,14 @@ export function AICompetencySuggestions({
                               L{suggestion.suggestedLevel}
                             </Badge>
                           )}
+                          {suggestion.suggestedWeight && (
+                            <Badge 
+                              variant="outline" 
+                              className="text-xs bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
+                            >
+                              {suggestion.suggestedWeight}%
+                            </Badge>
+                          )}
                         </Button>
                       </TooltipTrigger>
                       <TooltipContent className="max-w-xs">
@@ -235,6 +245,11 @@ export function AICompetencySuggestions({
                             <p className="text-xs">
                               <strong>Suggested Level:</strong> {getLevelLabel(suggestion.suggestedLevel)} (L{suggestion.suggestedLevel})
                               {jobLevel && ` for ${jobLevel} role`}
+                            </p>
+                          )}
+                          {suggestion.suggestedWeight && (
+                            <p className="text-xs">
+                              <strong>Suggested Weight:</strong> {suggestion.suggestedWeight}%
                             </p>
                           )}
                           {suggestion.reason && (
@@ -253,9 +268,9 @@ export function AICompetencySuggestions({
           </div>
 
           <p className="text-xs text-muted-foreground mt-3 flex items-center gap-1">
-            <Sparkles className="h-3 w-3" />
-            Click a suggestion to add it with the AI-recommended proficiency level. Competencies are evaluated in performance appraisals.
-          </p>
+          <Sparkles className="h-3 w-3" />
+          Click a suggestion to add it with AI-recommended level & weight. Competencies are evaluated in performance appraisals.
+        </p>
         </CollapsibleContent>
       </div>
     </Collapsible>

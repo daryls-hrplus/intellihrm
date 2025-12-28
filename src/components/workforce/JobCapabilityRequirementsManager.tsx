@@ -119,6 +119,7 @@ export function JobCapabilityRequirementsManager({
   const [isLoadingSkills, setIsLoadingSkills] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [editingRequirement, setEditingRequirement] = useState<JobCapabilityRequirement | null>(null);
   const [comboboxOpen, setComboboxOpen] = useState(false);
   const [jobInfo, setJobInfo] = useState<JobInfo | null>(null);
   
@@ -279,11 +280,12 @@ export function JobCapabilityRequirementsManager({
     [requirements]
   );
 
-  const handleOpenDialog = (preselectedCapability?: Capability, suggestedLevel?: number) => {
+  const handleOpenDialog = (preselectedCapability?: Capability, suggestedLevel?: number, suggestedWeight?: number) => {
+    setEditingRequirement(null);
     setFormData({
       capability_id: preselectedCapability?.id || "",
       required_proficiency_level: suggestedLevel?.toString() || "3",
-      weighting: "10",
+      weighting: suggestedWeight?.toString() || "10",
       is_required: true,
       is_preferred: false,
       notes: "",
@@ -293,8 +295,23 @@ export function JobCapabilityRequirementsManager({
     setDialogOpen(true);
   };
 
-  const handleAISuggestionSelect = (capability: Capability, suggestedLevel?: number) => {
-    handleOpenDialog(capability, suggestedLevel);
+  const handleEditRequirement = (requirement: JobCapabilityRequirement) => {
+    setEditingRequirement(requirement);
+    setFormData({
+      capability_id: requirement.capability_id,
+      required_proficiency_level: requirement.required_proficiency_level.toString(),
+      weighting: requirement.weighting.toString(),
+      is_required: requirement.is_required,
+      is_preferred: requirement.is_preferred,
+      notes: requirement.notes || "",
+      start_date: requirement.start_date,
+      end_date: requirement.end_date || "",
+    });
+    setDialogOpen(true);
+  };
+
+  const handleAISuggestionSelect = (capability: Capability, suggestedLevel?: number, suggestedWeight?: number) => {
+    handleOpenDialog(capability, suggestedLevel, suggestedWeight);
   };
 
   const calculateOverlappingWeight = (
@@ -328,10 +345,15 @@ export function JobCapabilityRequirementsManager({
       return;
     }
 
-    const currentOverlappingWeight = calculateOverlappingWeight(
-      formData.start_date,
-      formData.end_date || null
-    );
+    // Exclude current requirement when checking overlap for edits
+    const currentOverlappingWeight = requirements
+      .filter((req) => {
+        if (editingRequirement && req.id === editingRequirement.id) return false;
+        const e1 = formData.end_date || "9999-12-31";
+        const e2 = req.end_date || "9999-12-31";
+        return formData.start_date <= e2 && req.start_date <= e1;
+      })
+      .reduce((sum, req) => sum + Number(req.weighting), 0);
     
     if (currentOverlappingWeight + weighting > 100) {
       toast.error(
@@ -353,19 +375,38 @@ export function JobCapabilityRequirementsManager({
       end_date: formData.end_date || null,
     };
 
-    const { error } = await supabase.from("job_capability_requirements").insert([payload]);
+    if (editingRequirement) {
+      // Update existing requirement
+      const { error } = await supabase
+        .from("job_capability_requirements")
+        .update(payload)
+        .eq("id", editingRequirement.id);
 
-    if (error) {
-      console.error("Error adding capability requirement:", error);
-      if (error.message?.includes("job_capability_no_overlap")) {
-        toast.error("This competency already has an entry for overlapping dates");
+      if (error) {
+        console.error("Error updating capability requirement:", error);
+        toast.error("Failed to update competency requirement");
       } else {
-        toast.error("Failed to add competency requirement");
+        toast.success("Competency requirement updated");
+        fetchRequirements();
+        setDialogOpen(false);
+        setEditingRequirement(null);
       }
     } else {
-      toast.success("Competency requirement added successfully");
-      fetchRequirements();
-      setDialogOpen(false);
+      // Insert new requirement
+      const { error } = await supabase.from("job_capability_requirements").insert([payload]);
+
+      if (error) {
+        console.error("Error adding capability requirement:", error);
+        if (error.message?.includes("job_capability_no_overlap")) {
+          toast.error("This competency already has an entry for overlapping dates");
+        } else {
+          toast.error("Failed to add competency requirement");
+        }
+      } else {
+        toast.success("Competency requirement added successfully");
+        fetchRequirements();
+        setDialogOpen(false);
+      }
     }
     setIsSaving(false);
   };
@@ -557,6 +598,7 @@ export function JobCapabilityRequirementsManager({
                   requirement={req}
                   linkedSkills={linkedSkillsMap[req.capability_id] || []}
                   onDelete={handleDelete}
+                  onEdit={handleEditRequirement}
                   onSkillOverride={(skillId, level, reason, existingId) => 
                     handleSkillOverride(req.id, skillId, level, reason, existingId)
                   }
@@ -568,13 +610,16 @@ export function JobCapabilityRequirementsManager({
         </Table>
       </div>
 
-      {/* Add Competency Dialog */}
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+      {/* Add/Edit Competency Dialog */}
+      <Dialog open={dialogOpen} onOpenChange={(open) => {
+        setDialogOpen(open);
+        if (!open) setEditingRequirement(null);
+      }}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Target className="h-5 w-5 text-purple-600" />
-              Add Competency Requirement
+              {editingRequirement ? "Edit Competency Requirement" : "Add Competency Requirement"}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
@@ -732,12 +777,15 @@ export function JobCapabilityRequirementsManager({
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDialogOpen(false)}>
+            <Button variant="outline" onClick={() => {
+              setDialogOpen(false);
+              setEditingRequirement(null);
+            }}>
               Cancel
             </Button>
             <Button onClick={handleSave} disabled={isSaving}>
               {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Add Competency
+              {editingRequirement ? "Save Changes" : "Add Competency"}
             </Button>
           </DialogFooter>
         </DialogContent>
