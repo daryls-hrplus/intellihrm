@@ -27126,6 +27126,7 @@ export type Database = {
           id: string
           is_active: boolean | null
           leave_type_id: string
+          mapping_type: string | null
           pay_element_id: string | null
           payroll_code: string
           start_date: string
@@ -27139,6 +27140,7 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           leave_type_id: string
+          mapping_type?: string | null
           pay_element_id?: string | null
           payroll_code: string
           start_date?: string
@@ -27152,6 +27154,7 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           leave_type_id?: string
+          mapping_type?: string | null
           pay_element_id?: string | null
           payroll_code?: string
           start_date?: string
@@ -27177,6 +27180,125 @@ export type Database = {
             columns: ["pay_element_id"]
             isOneToOne: false
             referencedRelation: "pay_elements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      leave_payroll_transactions: {
+        Row: {
+          company_id: string
+          created_at: string
+          daily_rate: number | null
+          description: string | null
+          employee_id: string
+          gross_amount: number
+          hourly_rate: number | null
+          id: string
+          leave_days: number
+          leave_hours: number | null
+          leave_payroll_mapping_id: string | null
+          leave_request_id: string | null
+          leave_type_id: string
+          net_amount: number
+          pay_period_id: string
+          payment_percentage: number | null
+          payroll_run_id: string | null
+          processed_at: string | null
+          transaction_type: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          daily_rate?: number | null
+          description?: string | null
+          employee_id: string
+          gross_amount?: number
+          hourly_rate?: number | null
+          id?: string
+          leave_days?: number
+          leave_hours?: number | null
+          leave_payroll_mapping_id?: string | null
+          leave_request_id?: string | null
+          leave_type_id: string
+          net_amount?: number
+          pay_period_id: string
+          payment_percentage?: number | null
+          payroll_run_id?: string | null
+          processed_at?: string | null
+          transaction_type: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          daily_rate?: number | null
+          description?: string | null
+          employee_id?: string
+          gross_amount?: number
+          hourly_rate?: number | null
+          id?: string
+          leave_days?: number
+          leave_hours?: number | null
+          leave_payroll_mapping_id?: string | null
+          leave_request_id?: string | null
+          leave_type_id?: string
+          net_amount?: number
+          pay_period_id?: string
+          payment_percentage?: number | null
+          payroll_run_id?: string | null
+          processed_at?: string | null
+          transaction_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leave_payroll_transactions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leave_payroll_transactions_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leave_payroll_transactions_leave_payroll_mapping_id_fkey"
+            columns: ["leave_payroll_mapping_id"]
+            isOneToOne: false
+            referencedRelation: "leave_payroll_mappings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leave_payroll_transactions_leave_request_id_fkey"
+            columns: ["leave_request_id"]
+            isOneToOne: false
+            referencedRelation: "leave_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leave_payroll_transactions_leave_type_id_fkey"
+            columns: ["leave_type_id"]
+            isOneToOne: false
+            referencedRelation: "leave_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leave_payroll_transactions_pay_period_id_fkey"
+            columns: ["pay_period_id"]
+            isOneToOne: false
+            referencedRelation: "pay_periods"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leave_payroll_transactions_payroll_run_id_fkey"
+            columns: ["payroll_run_id"]
+            isOneToOne: false
+            referencedRelation: "payroll_runs"
             referencedColumns: ["id"]
           },
         ]
@@ -27490,12 +27612,14 @@ export type Database = {
           id: string
           is_accrual_based: boolean
           is_active: boolean
+          is_paid: boolean
           leave_year_basis: string | null
           max_consecutive_days: number | null
           max_negative_balance: number | null
           min_request_amount: number | null
           name: string
           name_en: string | null
+          payment_method: string | null
           requires_approval: boolean
           start_date: string
           updated_at: string
@@ -27519,12 +27643,14 @@ export type Database = {
           id?: string
           is_accrual_based?: boolean
           is_active?: boolean
+          is_paid?: boolean
           leave_year_basis?: string | null
           max_consecutive_days?: number | null
           max_negative_balance?: number | null
           min_request_amount?: number | null
           name: string
           name_en?: string | null
+          payment_method?: string | null
           requires_approval?: boolean
           start_date?: string
           updated_at?: string
@@ -27548,12 +27674,14 @@ export type Database = {
           id?: string
           is_accrual_based?: boolean
           is_active?: boolean
+          is_paid?: boolean
           leave_year_basis?: string | null
           max_consecutive_days?: number | null
           max_negative_balance?: number | null
           min_request_amount?: number | null
           name?: string
           name_en?: string | null
+          payment_method?: string | null
           requires_approval?: boolean
           start_date?: string
           updated_at?: string
