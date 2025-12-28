@@ -9,7 +9,8 @@ import {
   ArrowRightLeft, 
   Download,
   Building2,
-  Link2
+  Link2,
+  Settings2
 } from 'lucide-react';
 import { DraggableModuleCards, ModuleCardItem } from '@/components/ui/DraggableModuleCards';
 
@@ -80,6 +81,14 @@ const GLDashboardPage = () => {
       href: '/payroll/gl/exports',
       color: 'bg-gray-500/10 text-gray-600',
       tabCode: 'export_history',
+    },
+    {
+      title: t('payroll.gl.overrideRules', 'Override Rules'),
+      description: t('payroll.gl.overrideRulesDesc', 'Configure GL segment override routing rules'),
+      icon: Settings2,
+      href: '/payroll/gl/override-rules',
+      color: 'bg-amber-500/10 text-amber-600',
+      tabCode: 'override_rules',
     }
   ];
 
