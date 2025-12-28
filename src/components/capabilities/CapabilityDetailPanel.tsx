@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 import { useCapabilityJobApplicability } from "@/hooks/useCapabilityJobApplicability";
+import { ProficiencyLevelBadge } from "@/components/capabilities/ProficiencyLevelPicker";
 
 interface SkillAttribute {
   id: string;
@@ -412,7 +413,10 @@ export function CapabilityDetailPanel({
                             </div>
                             <div className="flex items-center gap-3 text-xs text-muted-foreground">
                               <span>Weight: {Math.round(mapping.weight * 100)}%</span>
-                              <span>Min Level: {mapping.min_proficiency_level}</span>
+                              <ProficiencyLevelBadge 
+                                level={mapping.min_proficiency_level} 
+                                size="sm"
+                              />
                             </div>
                           </div>
                         ))}
