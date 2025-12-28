@@ -28,6 +28,7 @@ import { ResponsibilityCategoryBadge, ResponsibilityCategory } from "./Responsib
 import { ComplexityLevelIndicator } from "./ComplexityLevelIndicator";
 import { getTodayString, formatDateForDisplay } from "@/utils/dateUtils";
 import { JobKRAContextualizationDialog } from "./JobKRAContextualizationDialog";
+import { JobSpecificKRAsList } from "./JobSpecificKRAsList";
 import { useJobResponsibilityKRAs, GenericKRA } from "@/hooks/useJobResponsibilityKRAs";
 
 interface JobResponsibility {
@@ -458,33 +459,14 @@ export function JobResponsibilitiesManager({ jobId, companyId, jobFamilyId }: Jo
                 
                 {/* Expandable KRAs section */}
                 {hasKRAs && isExpanded && (
-                  <div className="px-4 py-3 bg-muted/30 border-t">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="text-xs font-medium text-muted-foreground">
-                        Key Result Areas (Generic)
-                      </div>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="h-7 text-xs gap-1"
-                        onClick={() => {
-                          setSelectedJobResponsibility(jr);
-                          setKraDialogOpen(true);
-                        }}
-                      >
-                        <Sparkles className="h-3 w-3" />
-                        Contextualize for Job
-                      </Button>
-                    </div>
-                    <div className="space-y-1.5">
-                      {jr.responsibility_kras?.map((kra, index) => (
-                        <div key={index} className="flex items-start gap-2 text-sm">
-                          <Target className="h-3.5 w-3.5 mt-0.5 text-primary shrink-0" />
-                          <span>{kra}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+                  <JobSpecificKRAsList
+                    jobResponsibilityId={jr.id}
+                    genericKRAs={jr.responsibility_kras || []}
+                    onContextualizeClick={() => {
+                      setSelectedJobResponsibility(jr);
+                      setKraDialogOpen(true);
+                    }}
+                  />
                 )}
               </div>
             );
