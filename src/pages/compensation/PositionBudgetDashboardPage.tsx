@@ -149,7 +149,7 @@ export default function PositionBudgetDashboardPage() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Link to="/compensation/position-budget/new">
+            <Link to="/compensation/position-budgeting/plans">
               <Button>
                 <Plus className="mr-2 h-4 w-4" />
                 New Budget Plan
@@ -252,7 +252,7 @@ export default function PositionBudgetDashboardPage() {
 
         {/* Quick Actions */}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <Link to="/compensation/position-budget/scenarios">
+          <Link to="/compensation/position-budgeting/plans">
             <Card className="cursor-pointer hover:border-primary/50 transition-colors h-full">
               <CardContent className="pt-6">
                 <div className="flex items-center gap-3">
@@ -268,7 +268,7 @@ export default function PositionBudgetDashboardPage() {
             </Card>
           </Link>
 
-          <Link to="/compensation/position-budget/whatif">
+          <Link to="/compensation/position-budgeting/what-if">
             <Card className="cursor-pointer hover:border-primary/50 transition-colors h-full">
               <CardContent className="pt-6">
                 <div className="flex items-center gap-3">
@@ -284,7 +284,7 @@ export default function PositionBudgetDashboardPage() {
             </Card>
           </Link>
 
-          <Link to="/compensation/position-budget/approvals">
+          <Link to="/compensation/position-budgeting/approvals">
             <Card className="cursor-pointer hover:border-primary/50 transition-colors h-full">
               <CardContent className="pt-6">
                 <div className="flex items-center gap-3">
@@ -302,7 +302,7 @@ export default function PositionBudgetDashboardPage() {
             </Card>
           </Link>
 
-          <Link to="/compensation/position-budget/cost-config">
+          <Link to="/compensation/position-budgeting/cost-config">
             <Card className="cursor-pointer hover:border-primary/50 transition-colors h-full">
               <CardContent className="pt-6">
                 <div className="flex items-center gap-3">
@@ -343,7 +343,7 @@ export default function PositionBudgetDashboardPage() {
                   <div className="text-center py-8">
                     <Calculator className="mx-auto h-12 w-12 text-muted-foreground/50" />
                     <p className="mt-4 text-muted-foreground">No budget plans found</p>
-                    <Link to="/compensation/position-budget/new">
+                    <Link to="/compensation/position-budgeting/plans">
                       <Button className="mt-4">
                         <Plus className="mr-2 h-4 w-4" />
                         Create First Plan
@@ -413,7 +413,7 @@ export default function PositionBudgetDashboardPage() {
                             </TableCell>
                             <TableCell>{getStatusBadge(plan.status)}</TableCell>
                             <TableCell>
-                              <Link to={`/compensation/position-budget/${plan.id}`}>
+                              <Link to={`/compensation/position-budgeting/plans?id=${plan.id}`}>
                                 <Button variant="ghost" size="sm">
                                   <ArrowRight className="h-4 w-4" />
                                 </Button>
