@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { AppLayout } from "@/components/layout/AppLayout";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -311,15 +313,23 @@ export default function PaymentRulesConfigPage() {
   };
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Payment Rules Configuration</h1>
-          <p className="text-muted-foreground">
-            Configure overtime multipliers, thresholds, and payment rate tiers
-          </p>
+    <AppLayout>
+      <div className="space-y-6">
+        <Breadcrumbs
+          items={[
+            { label: "Payroll", href: "/payroll" },
+            { label: "Payment Rules" }
+          ]}
+        />
+        
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Payment Rules Configuration</h1>
+            <p className="text-muted-foreground">
+              Configure overtime multipliers, thresholds, and payment rate tiers
+            </p>
+          </div>
         </div>
-      </div>
 
       <Tabs defaultValue="rules" className="space-y-4">
         <TabsList>
@@ -808,5 +818,6 @@ export default function PaymentRulesConfigPage() {
         </TabsContent>
       </Tabs>
     </div>
+    </AppLayout>
   );
 }
