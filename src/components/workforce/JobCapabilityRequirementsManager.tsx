@@ -44,6 +44,7 @@ import { toast } from "sonner";
 import { Plus, Loader2, Target, Info, ChevronsUpDown, Check, ArrowRight, Sparkles, AlertTriangle, CheckCircle2 } from "lucide-react";
 import { getTodayString, formatDateForDisplay } from "@/utils/dateUtils";
 import { ProficiencyLevelPicker } from "@/components/capabilities/ProficiencyLevelPicker";
+import { SkillProficiencyGuide } from "@/components/capabilities/SkillProficiencyGuide";
 import { CompetencyRequirementRow } from "./CompetencyRequirementRow";
 import { AICompetencySuggestions } from "./AICompetencySuggestions";
 import { cn } from "@/lib/utils";
@@ -579,7 +580,16 @@ export function JobCapabilityRequirementsManager({
             <TableRow>
               <TableHead>Competency</TableHead>
               <TableHead>Category</TableHead>
-              <TableHead>Required Level</TableHead>
+              <TableHead>
+                <div className="flex items-center gap-1.5">
+                  Required Level
+                  <SkillProficiencyGuide 
+                    trigger={
+                      <Info className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground cursor-help" />
+                    }
+                  />
+                </div>
+              </TableHead>
               <TableHead className="w-[100px]">Weight %</TableHead>
               <TableHead>Start Date</TableHead>
               <TableHead>End Date</TableHead>

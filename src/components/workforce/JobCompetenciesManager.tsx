@@ -28,7 +28,8 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Plus, Trash2, Loader2, Award } from "lucide-react";
+import { Plus, Trash2, Loader2, Award, Info } from "lucide-react";
+import { SkillProficiencyGuide } from "@/components/capabilities/SkillProficiencyGuide";
 import { format } from "date-fns";
 import { getTodayString, formatDateForDisplay } from "@/utils/dateUtils";
 
@@ -312,7 +313,16 @@ export function JobCompetenciesManager({ jobId, companyId }: JobCompetenciesMana
           <TableHeader>
             <TableRow>
               <TableHead>Competency</TableHead>
-              <TableHead>Required Level</TableHead>
+              <TableHead>
+                <div className="flex items-center gap-1.5">
+                  Required Level
+                  <SkillProficiencyGuide 
+                    trigger={
+                      <Info className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground cursor-help" />
+                    }
+                  />
+                </div>
+              </TableHead>
               <TableHead className="w-[100px]">Weight %</TableHead>
               <TableHead>Start Date</TableHead>
               <TableHead>End Date</TableHead>
