@@ -300,6 +300,16 @@ const payrollModule: ModuleDefinition = {
       ]
     },
     {
+      groupCode: "advances_loans",
+      groupName: "Advances & Loans",
+      features: [
+        { code: "salary_advances", name: "Salary Advances", description: "Manage employee salary advance requests and repayments", routePath: "/payroll/salary-advances", icon: "Wallet", tabCode: "salary_advances", roleRequirements: ["admin", "hr_manager"], workflowSteps: ["Submit request", "Approve advance", "Track repayments"], uiElements: ["Request form", "Approval workflow", "Repayment tracker"] },
+        { code: "advance_types", name: "Advance Types", description: "Configure salary advance types and rules", routePath: "/payroll/salary-advances", icon: "Settings", tabCode: "advance_types", roleRequirements: ["admin"], workflowSteps: ["Create type", "Set limits", "Configure rules"], uiElements: ["Type list", "Limit editor", "Rules form"] },
+        { code: "advance_payroll_queue", name: "Advance Payroll Queue", description: "Review and approve salary advance repayments for payroll processing", routePath: "/payroll/salary-advances", icon: "ClipboardList", tabCode: "advance_payroll_queue", roleRequirements: ["admin"], workflowSteps: ["View queue", "Approve repayments", "Exclude items"], uiElements: ["Queue table", "Stats cards", "Action buttons"] },
+        { code: "employee_loans", name: "Employee Loans", description: "Manage employee loans with structured repayment plans", routePath: "/payroll/loans", icon: "Banknote", tabCode: "employee_loans", roleRequirements: ["admin", "hr_manager"], workflowSteps: ["Create loan", "Set schedule", "Track payments"], uiElements: ["Loan form", "Schedule editor", "Payment tracker"] },
+      ]
+    },
+    {
       groupCode: "integration",
       groupName: "Integration",
       features: [
@@ -369,10 +379,20 @@ const timeAttendanceModule: ModuleDefinition = {
       ]
     },
     {
+      groupCode: "ai_scheduling",
+      groupName: "AI Scheduling",
+      features: [
+        { code: "ai_schedule_generation", name: "AI Schedule Generation", description: "Generate optimized schedules using AI-powered recommendations", routePath: "/time-attendance/ai-scheduling", icon: "Brain", tabCode: "ai_schedule_generation", roleRequirements: ["admin", "hr_manager"], workflowSteps: ["Set parameters", "Generate schedule", "Review recommendations"], uiElements: ["Parameter form", "Schedule preview", "Recommendation cards"] },
+        { code: "schedule_optimization", name: "Schedule Optimization", description: "AI-driven schedule optimization with coverage and preference scoring", routePath: "/time-attendance/ai-scheduling", icon: "Sparkles", tabCode: "schedule_optimization", roleRequirements: ["admin", "hr_manager"], workflowSteps: ["Set optimization goal", "Run optimization", "Apply schedule"], uiElements: ["Goal selector", "Score dashboard", "Apply button"] },
+        { code: "scheduling_constraints", name: "Scheduling Constraints", description: "Configure hard and soft constraints for AI scheduling", routePath: "/time-attendance/ai-scheduling/constraints", icon: "Shield", tabCode: "scheduling_constraints", roleRequirements: ["admin"], workflowSteps: ["Add constraint", "Set priority", "Configure parameters"], uiElements: ["Constraint list", "Priority editor", "Parameter form"] },
+      ]
+    },
+    {
       groupCode: "analytics",
       groupName: "Analytics",
       features: [
         { code: "analytics", name: "Attendance Analytics", description: "Comprehensive attendance analytics", routePath: "/time-attendance/analytics", icon: "TrendingUp", tabCode: "analytics", roleRequirements: ["admin", "hr_manager"], workflowSteps: ["Select metrics", "Apply filters", "View trends"], uiElements: ["KPI cards", "Trend charts", "Breakdown tables"] },
+        { code: "overtime_analytics", name: "Overtime Analytics", description: "Track overtime trends, costs, and burnout risk indicators", routePath: "/time-attendance/analytics/overtime", icon: "Clock", tabCode: "overtime_analytics", roleRequirements: ["admin", "hr_manager"], workflowSteps: ["View trends", "Analyze costs", "Monitor risks"], uiElements: ["Trend charts", "Cost breakdown", "Risk alerts"] },
       ]
     }
   ]
