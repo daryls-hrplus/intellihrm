@@ -98,14 +98,39 @@ const emptyForm = {
   is_active: true,
 };
 
+interface JobFamily {
+  id: string;
+  name: string;
+  code: string;
+  default_responsibilities: Array<{ responsibility_id: string }> | null;
+}
+
+interface Job {
+  id: string;
+  name: string;
+  code: string;
+  job_family_id: string | null;
+}
+
+interface Job {
+  id: string;
+  name: string;
+  code: string;
+  job_family_id: string | null;
+}
+
 export default function ResponsibilitiesPage() {
   const [responsibilities, setResponsibilities] = useState<Responsibility[]>([]);
   const [companies, setCompanies] = useState<Company[]>([]);
+  const [jobFamilies, setJobFamilies] = useState<JobFamily[]>([]);
+  const [jobs, setJobs] = useState<Job[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
+  const [jobFamilyFilter, setJobFamilyFilter] = useState<string>("all");
+  const [jobFilter, setJobFilter] = useState<string>("all");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedResponsibility, setSelectedResponsibility] = useState<Responsibility | null>(null);
@@ -126,6 +151,8 @@ export default function ResponsibilitiesPage() {
   useEffect(() => {
     if (selectedCompanyId) {
       fetchResponsibilities();
+      fetchJobFamilies();
+      fetchJobs();
     }
   }, [selectedCompanyId]);
 
@@ -144,6 +171,40 @@ export default function ResponsibilitiesPage() {
       if (data && data.length > 0 && !selectedCompanyId) {
         setSelectedCompanyId(data[0].id);
       }
+    }
+  };
+
+  const fetchJobFamilies = async () => {
+    const { data, error } = await supabase
+      .from("job_families")
+      .select("id, name, code, default_responsibilities")
+      .eq("company_id", selectedCompanyId)
+      .eq("is_active", true)
+      .order("name");
+
+    if (error) {
+      console.error("Error fetching job families:", error);
+    } else {
+      const mapped = (data || []).map((jf: any) => ({
+        ...jf,
+        default_responsibilities: Array.isArray(jf.default_responsibilities) ? jf.default_responsibilities : [],
+      }));
+      setJobFamilies(mapped);
+    }
+  };
+
+  const fetchJobs = async () => {
+    const { data, error } = await supabase
+      .from("jobs")
+      .select("id, name, code, job_family_id")
+      .eq("company_id", selectedCompanyId)
+      .eq("is_active", true)
+      .order("name");
+
+    if (error) {
+      console.error("Error fetching jobs:", error);
+    } else {
+      setJobs(data || []);
     }
   };
 
@@ -360,11 +421,56 @@ export default function ResponsibilitiesPage() {
     });
   };
 
+  // Get responsibility IDs linked to selected job family
+  const getJobFamilyResponsibilityIds = (): Set<string> => {
+    if (jobFamilyFilter === "all") return new Set();
+    const selectedFamily = jobFamilies.find(jf => jf.id === jobFamilyFilter);
+    if (!selectedFamily || !selectedFamily.default_responsibilities) return new Set();
+    return new Set(selectedFamily.default_responsibilities.map(r => r.responsibility_id));
+  };
+
+  // Get job family IDs for selected job
+  const getJobFamilyIdsForJob = (): string | null => {
+    if (jobFilter === "all") return null;
+    const selectedJob = jobs.find(j => j.id === jobFilter);
+    return selectedJob?.job_family_id || null;
+  };
+
+  // Filter jobs based on selected job family
+  const filteredJobs = jobFamilyFilter === "all" 
+    ? jobs 
+    : jobs.filter(j => j.job_family_id === jobFamilyFilter);
+
   const filteredResponsibilities = responsibilities.filter((r) => {
     const matchesSearch = r.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       r.code.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = categoryFilter === "all" || r.category === categoryFilter;
-    return matchesSearch && matchesCategory;
+    
+    // Filter by job family - check if responsibility is in the family's default_responsibilities
+    let matchesJobFamily = true;
+    if (jobFamilyFilter !== "all") {
+      const familyResponsibilityIds = getJobFamilyResponsibilityIds();
+      matchesJobFamily = familyResponsibilityIds.has(r.id);
+    }
+    
+    // Filter by job - get the job's family and check its responsibilities
+    let matchesJob = true;
+    if (jobFilter !== "all") {
+      const jobFamilyId = getJobFamilyIdsForJob();
+      if (jobFamilyId) {
+        const family = jobFamilies.find(jf => jf.id === jobFamilyId);
+        if (family && family.default_responsibilities) {
+          const familyResponsibilityIds = new Set(family.default_responsibilities.map(r => r.responsibility_id));
+          matchesJob = familyResponsibilityIds.has(r.id);
+        } else {
+          matchesJob = false;
+        }
+      } else {
+        matchesJob = false;
+      }
+    }
+    
+    return matchesSearch && matchesCategory && matchesJobFamily && matchesJob;
   });
 
   return (
@@ -419,6 +525,40 @@ export default function ResponsibilitiesPage() {
               {categoryOptions.map((option) => (
                 <SelectItem key={option.value} value={option.value}>
                   {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select 
+            value={jobFamilyFilter} 
+            onValueChange={(value) => {
+              setJobFamilyFilter(value);
+              setJobFilter("all"); // Reset job filter when job family changes
+            }}
+          >
+            <SelectTrigger className="w-full sm:w-[180px]">
+              <SelectValue placeholder="All Job Families" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Job Families</SelectItem>
+              {jobFamilies.map((jf) => (
+                <SelectItem key={jf.id} value={jf.id}>
+                  {jf.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select value={jobFilter} onValueChange={setJobFilter}>
+            <SelectTrigger className="w-full sm:w-[180px]">
+              <SelectValue placeholder="All Jobs" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Jobs</SelectItem>
+              {filteredJobs.map((job) => (
+                <SelectItem key={job.id} value={job.id}>
+                  {job.name}
                 </SelectItem>
               ))}
             </SelectContent>
