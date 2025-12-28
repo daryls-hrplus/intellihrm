@@ -9,9 +9,10 @@ import { Label } from "@/components/ui/label";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Calculator, RefreshCw, CalendarIcon, AlertCircle, Globe } from "lucide-react";
+import { Calculator, RefreshCw, CalendarIcon, AlertCircle, Globe, BookOpen } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { cn } from "@/lib/utils";
 import { 
@@ -23,6 +24,7 @@ import {
 import { usePayGroupMultiCurrency, useEmployeeCurrencyPreference, calculateNetPaySplit, NetPaySplit } from "@/hooks/useMultiCurrencyPayroll";
 import { useCurrencies, Currency } from "@/hooks/useCurrencies";
 import { useCompanyLocalCurrency } from "@/hooks/useCurrencies";
+import { GLSimulationPreview } from "./GLSimulationPreview";
 
 interface PayrollSimulatorProps {
   companyId: string;
@@ -1774,6 +1776,25 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId, payGroupI
           </CardContent>
         </Card>
       )}
+
+      {/* GL Simulation Preview Tab */}
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base flex items-center gap-2">
+            <BookOpen className="h-4 w-4" />
+            GL Simulation Preview
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <GLSimulationPreview
+            companyId={companyId}
+            employeeId={employeeId}
+            payPeriodId={payPeriodId}
+            payGroupId={payGroupId}
+            simulationResult={result}
+          />
+        </CardContent>
+      </Card>
 
       <Button onClick={runSimulation} disabled={isCalculating} className="w-full gap-2">
         <RefreshCw className={`h-4 w-4 ${isCalculating ? 'animate-spin' : ''}`} />
