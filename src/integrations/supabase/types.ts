@@ -39481,6 +39481,110 @@ export type Database = {
           },
         ]
       }
+      resumption_of_duty: {
+        Row: {
+          actual_resumption_date: string | null
+          company_id: string
+          created_at: string | null
+          employee_id: string
+          employee_notes: string | null
+          fit_to_work: boolean | null
+          form_created_at: string | null
+          form_submitted_at: string | null
+          id: string
+          leave_end_date: string
+          leave_request_id: string
+          medical_clearance_file_path: string | null
+          medical_clearance_notes: string | null
+          medical_clearance_uploaded_at: string | null
+          rejected_at: string | null
+          rejection_reason: string | null
+          requires_medical_clearance: boolean | null
+          status: string
+          updated_at: string | null
+          verification_notes: string | null
+          verified_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          actual_resumption_date?: string | null
+          company_id: string
+          created_at?: string | null
+          employee_id: string
+          employee_notes?: string | null
+          fit_to_work?: boolean | null
+          form_created_at?: string | null
+          form_submitted_at?: string | null
+          id?: string
+          leave_end_date: string
+          leave_request_id: string
+          medical_clearance_file_path?: string | null
+          medical_clearance_notes?: string | null
+          medical_clearance_uploaded_at?: string | null
+          rejected_at?: string | null
+          rejection_reason?: string | null
+          requires_medical_clearance?: boolean | null
+          status?: string
+          updated_at?: string | null
+          verification_notes?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          actual_resumption_date?: string | null
+          company_id?: string
+          created_at?: string | null
+          employee_id?: string
+          employee_notes?: string | null
+          fit_to_work?: boolean | null
+          form_created_at?: string | null
+          form_submitted_at?: string | null
+          id?: string
+          leave_end_date?: string
+          leave_request_id?: string
+          medical_clearance_file_path?: string | null
+          medical_clearance_notes?: string | null
+          medical_clearance_uploaded_at?: string | null
+          rejected_at?: string | null
+          rejection_reason?: string | null
+          requires_medical_clearance?: boolean | null
+          status?: string
+          updated_at?: string | null
+          verification_notes?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "resumption_of_duty_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "resumption_of_duty_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "resumption_of_duty_leave_request_id_fkey"
+            columns: ["leave_request_id"]
+            isOneToOne: false
+            referencedRelation: "leave_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "resumption_of_duty_verified_by_fkey"
+            columns: ["verified_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       retroactive_pay_calculations: {
         Row: {
           adjustment_amount: number

@@ -233,3 +233,6 @@ verify_jwt = false
 
 [functions.responsibility-ai-helper]
 verify_jwt = false
+
+[functions.process-resumption-of-duty]
+verify_jwt = false
