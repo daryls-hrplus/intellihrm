@@ -8,6 +8,7 @@ export { CapabilityGapAnalysisCard } from './CapabilityGapAnalysisCard';
 export { EvidenceValidationPanel } from './EvidenceValidationPanel';
 export { SkillMappingsDialog } from './SkillMappingsDialog';
 export { MasterLibrarySearch } from './MasterLibrarySearch';
+export { ProficiencyLevelPicker, ProficiencyLevelBadge, DEFAULT_PROFICIENCY_LEVELS } from './ProficiencyLevelPicker';
 
 // Integration components
 export { GoalCapabilitySelector } from './GoalCapabilitySelector';
