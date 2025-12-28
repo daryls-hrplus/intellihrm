@@ -49,6 +49,13 @@ export interface MasterOccupation {
   competencies_count: number | null;
 }
 
+export interface OperatorAttributes {
+  seasonal?: boolean;
+  high_risk?: boolean;
+  regulated?: boolean;
+  multi_site?: boolean;
+}
+
 export interface MasterIndustry {
   id: string;
   code: string;
@@ -58,10 +65,13 @@ export interface MasterIndustry {
   icon_name: string | null;
   display_order: number;
   is_active: boolean;
+  parent_industry_id: string | null;
+  operator_attributes: OperatorAttributes | null;
 }
 
 export interface WizardState {
   selectedIndustries: string[];
+  selectedSubIndustries: string[];
   selectedOccupations: string[];
   occupationLabels: Record<string, string>;
   selectedSkills: Set<string>;

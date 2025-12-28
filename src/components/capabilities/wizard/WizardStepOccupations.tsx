@@ -21,6 +21,7 @@ import {
 
 interface WizardStepOccupationsProps {
   selectedIndustries: string[];
+  selectedSubIndustries?: string[];
   selectedOccupations: string[];
   occupationLabels: Record<string, string>;
   onOccupationToggle: (occupationId: string, occupationLabel: string) => void;
@@ -30,6 +31,7 @@ interface WizardStepOccupationsProps {
 
 export function WizardStepOccupations({
   selectedIndustries,
+  selectedSubIndustries = [],
   selectedOccupations,
   occupationLabels,
   onOccupationToggle,
@@ -45,25 +47,43 @@ export function WizardStepOccupations({
 
   useEffect(() => {
     loadOccupations();
-  }, [selectedIndustries]);
+  }, [selectedIndustries, selectedSubIndustries]);
 
   const loadOccupations = async () => {
     setLoading(true);
     try {
+      // Determine which industry codes to use - prefer sub-industries if selected
+      const industryCodesToUse = selectedSubIndustries.length > 0 
+        ? selectedSubIndustries 
+        : selectedIndustries;
+
       // Get industry IDs
       const { data: industries } = await supabase
         .from('master_industries')
         .select('id, code')
-        .in('code', selectedIndustries);
+        .in('code', industryCodesToUse);
 
       const industryIds = industries?.map(i => i.id) || [];
 
+      // If sub-industries selected, also include parent industry occupations
+      let allIndustryIds = [...industryIds];
+      if (selectedSubIndustries.length > 0 && selectedIndustries.length > 0) {
+        const { data: parentIndustries } = await supabase
+          .from('master_industries')
+          .select('id, code')
+          .in('code', selectedIndustries);
+        
+        if (parentIndustries) {
+          allIndustryIds = [...new Set([...industryIds, ...parentIndustries.map(i => i.id)])];
+        }
+      }
+
       // Load industry-specific occupations
-      if (industryIds.length > 0) {
+      if (allIndustryIds.length > 0) {
         const { data: occupationsData, error } = await supabase
           .from('master_occupations_library')
           .select('id, occupation_name, description, job_family, job_level, is_cross_cutting, skills_count, competencies_count')
-          .in('industry_id', industryIds)
+          .in('industry_id', allIndustryIds)
           .eq('is_active', true)
           .eq('is_cross_cutting', false)
           .order('occupation_name');
