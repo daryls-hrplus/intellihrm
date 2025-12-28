@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PiggyBank, Users, BarChart3, Settings, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { SavingsProgramsList } from "@/components/payroll/savings/SavingsProgramsList";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 
 interface Company {
   id: string;
@@ -48,6 +49,14 @@ export default function SavingsProgramsPage() {
   return (
     <AppLayout>
       <div className="space-y-6">
+        {/* Breadcrumbs */}
+        <Breadcrumbs
+          items={[
+            { label: "Payroll", href: "/payroll" },
+            { label: "Savings Programs" },
+          ]}
+        />
+
         {/* Header */}
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Savings Programs</h1>
