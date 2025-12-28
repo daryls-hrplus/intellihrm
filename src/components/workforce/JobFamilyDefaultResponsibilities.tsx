@@ -55,6 +55,8 @@ interface AISuggestion {
   category: string;
   suggestedWeight: number;
   description: string;
+  kras?: string[];
+  complexityLevel?: number;
 }
 
 interface JobFamilyDefaultResponsibilitiesProps {
@@ -210,9 +212,11 @@ export function JobFamilyDefaultResponsibilities({
             name: suggestion.name,
             category: suggestion.category,
             description: suggestion.description,
-            complexity_level: 3,
+            complexity_level: suggestion.complexityLevel ?? 3,
+            key_result_areas: suggestion.kras ?? [],
             is_active: true,
             code: suggestion.name.toUpperCase().replace(/\s+/g, '_').substring(0, 20),
+            start_date: new Date().toISOString().split('T')[0],
           }])
           .select("id, name, category, complexity_level")
           .single();
@@ -376,6 +380,16 @@ export function JobFamilyDefaultResponsibilities({
                     <Badge variant="secondary" className="text-xs">
                       {suggestion.suggestedWeight}%
                     </Badge>
+                    {suggestion.kras && suggestion.kras.length > 0 && (
+                      <Badge variant="outline" className="text-xs bg-primary/5">
+                        {suggestion.kras.length} KRAs
+                      </Badge>
+                    )}
+                    {suggestion.complexityLevel && (
+                      <Badge variant="outline" className="text-xs bg-muted">
+                        L{suggestion.complexityLevel}
+                      </Badge>
+                    )}
                   </div>
                   <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
                     {suggestion.description}

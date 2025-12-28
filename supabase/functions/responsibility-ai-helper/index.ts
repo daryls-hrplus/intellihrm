@@ -251,13 +251,8 @@ function buildFamilySuggestionPrompt(familyName: string, familyDescription?: str
 2. Category (one of: financial, operational, people_leadership, technical, compliance, strategic, administrative, customer_service, project_management)
 3. Suggested weight percentage (5-30%)
 4. Brief description (1-2 sentences)
-
-Format each responsibility as:
-NAME: [name]
-CATEGORY: [category]
-WEIGHT: [percentage]
-DESCRIPTION: [description]
----
+5. 3-5 Key Result Areas (KRAs) - measurable outcomes that define success
+6. Complexity level (1-5 where 1=basic, 3=advanced, 5=executive)
 
 Focus on responsibilities that are:
 - Foundational to the job family
@@ -371,7 +366,7 @@ async function callLovableAIForFamilySuggestions(prompt: string): Promise<Family
             type: 'function',
             function: {
               name: 'return_family_suggestions',
-              description: 'Return 5-8 job family responsibility suggestions.',
+              description: 'Return 5-8 job family responsibility suggestions with complete details including KRAs and complexity.',
               parameters: {
                 type: 'object',
                 properties: {
@@ -380,7 +375,7 @@ async function callLovableAIForFamilySuggestions(prompt: string): Promise<Family
                     items: {
                       type: 'object',
                       properties: {
-                        name: { type: 'string' },
+                        name: { type: 'string', description: 'Short, action-oriented responsibility name' },
                         category: {
                           type: 'string',
                           description:
@@ -390,9 +385,18 @@ async function callLovableAIForFamilySuggestions(prompt: string): Promise<Family
                           type: 'number',
                           description: 'Suggested weight percentage (5-30).',
                         },
-                        description: { type: 'string' },
+                        description: { type: 'string', description: '1-2 sentence description of the responsibility' },
+                        kras: {
+                          type: 'array',
+                          items: { type: 'string' },
+                          description: '3-5 Key Result Areas - measurable outcomes that define success for this responsibility',
+                        },
+                        complexityLevel: {
+                          type: 'number',
+                          description: 'Complexity level 1-5 where 1=basic/entry-level, 2=intermediate, 3=advanced, 4=expert, 5=executive',
+                        },
                       },
-                      required: ['name', 'category', 'suggestedWeight', 'description'],
+                      required: ['name', 'category', 'suggestedWeight', 'description', 'kras', 'complexityLevel'],
                       additionalProperties: false,
                     },
                   },
@@ -430,8 +434,18 @@ async function callLovableAIForFamilySuggestions(prompt: string): Promise<Family
               ? Math.min(30, Math.max(5, Math.round(suggestedWeightNum)))
               : 15;
             const description = String(s?.description ?? '').trim();
+            
+            // Parse KRAs - ensure it's an array of strings
+            const rawKras = Array.isArray(s?.kras) ? s.kras : [];
+            const kras = rawKras.map((k: any) => String(k).trim()).filter((k: string) => k.length > 0);
+            
+            // Parse complexity level - ensure it's 1-5
+            const rawComplexity = Number(s?.complexityLevel);
+            const complexityLevel = Number.isFinite(rawComplexity) 
+              ? Math.min(5, Math.max(1, Math.round(rawComplexity))) 
+              : 3;
 
-            return { name, category, suggestedWeight, description } as FamilySuggestion;
+            return { name, category, suggestedWeight, description, kras, complexityLevel } as FamilySuggestion;
           })
           .filter((s) => s.name && s.description);
 
@@ -528,6 +542,8 @@ interface FamilySuggestion {
   category: string;
   suggestedWeight: number;
   description: string;
+  kras: string[];
+  complexityLevel: number;
 }
 
 function parseFamilySuggestions(text: string): FamilySuggestion[] {
@@ -542,6 +558,8 @@ function parseFamilySuggestions(text: string): FamilySuggestion[] {
     category: string;
     suggestedWeight: number;
     description: string;
+    kras: string[];
+    complexityLevel: number;
   }) => {
     const name = draft.name.trim();
     if (!name) return;
@@ -550,6 +568,8 @@ function parseFamilySuggestions(text: string): FamilySuggestion[] {
       category: validateCategory(draft.category),
       suggestedWeight: Math.min(30, Math.max(5, draft.suggestedWeight || 15)),
       description: draft.description.trim(),
+      kras: draft.kras.length > 0 ? draft.kras : [],
+      complexityLevel: draft.complexityLevel || 3,
     });
   };
 
@@ -558,11 +578,11 @@ function parseFamilySuggestions(text: string): FamilySuggestion[] {
     .map((l) => l.trim())
     .filter((l) => l.length > 0);
 
-  let current = { name: '', category: 'operational', suggestedWeight: 15, description: '' };
+  let current = { name: '', category: 'operational', suggestedWeight: 15, description: '', kras: [] as string[], complexityLevel: 3 };
 
   const startNew = () => {
     if (current.name) pushIfValid(current);
-    current = { name: '', category: 'operational', suggestedWeight: 15, description: '' };
+    current = { name: '', category: 'operational', suggestedWeight: 15, description: '', kras: [], complexityLevel: 3 };
   };
 
   for (const line of lines) {
