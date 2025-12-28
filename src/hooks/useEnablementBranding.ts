@@ -11,9 +11,9 @@ export interface BrandColors {
 }
 
 const DEFAULT_BRAND_COLORS: BrandColors = {
-  primaryColor: "#7c3aed",
-  secondaryColor: "#4f46e5",
-  accentColor: "#10b981",
+  primaryColor: "#2F7AC3",    // HRplus Moderate Azure
+  secondaryColor: "#0C4277",  // HRplus Dark Azure
+  accentColor: "#17A584",     // Teal (unique differentiator)
   companyName: "HRplus Cerebra"
 };
 

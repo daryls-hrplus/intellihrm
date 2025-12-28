@@ -15,41 +15,44 @@ export interface ColorScheme {
 }
 
 export const DEFAULT_COLORS = {
-  // Light mode
+  // Light mode - HRplus Brand Colors
   background: "210 20% 98%",
   foreground: "222 47% 11%",
   card: "0 0% 100%",
   "card-foreground": "222 47% 11%",
   popover: "0 0% 100%",
   "popover-foreground": "222 47% 11%",
-  primary: "168 76% 36%",
+  // HRplus Moderate Azure (#2F7AC3)
+  primary: "210 61% 47%",
   "primary-foreground": "0 0% 100%",
-  secondary: "215 20% 95%",
+  secondary: "210 30% 95%",
   "secondary-foreground": "222 47% 11%",
-  muted: "215 20% 94%",
-  "muted-foreground": "215 16% 47%",
-  accent: "168 76% 94%",
-  "accent-foreground": "168 76% 26%",
+  muted: "210 20% 94%",
+  "muted-foreground": "210 16% 47%",
+  // Light azure accent
+  accent: "210 61% 94%",
+  "accent-foreground": "210 61% 35%",
   destructive: "0 84% 60%",
   "destructive-foreground": "0 0% 100%",
-  success: "142 76% 36%",
+  // Teal repurposed as success (unique differentiator)
+  success: "168 76% 36%",
   "success-foreground": "0 0% 100%",
   warning: "38 92% 50%",
   "warning-foreground": "0 0% 100%",
   info: "199 89% 48%",
   "info-foreground": "0 0% 100%",
-  border: "214 32% 91%",
-  input: "214 32% 91%",
-  ring: "168 76% 36%",
-  // Sidebar
-  "sidebar-background": "222 47% 11%",
-  "sidebar-foreground": "215 20% 85%",
-  "sidebar-primary": "168 76% 42%",
+  border: "210 32% 91%",
+  input: "210 32% 91%",
+  ring: "210 61% 47%",
+  // Sidebar - HRplus Dark Azure (#0C4277)
+  "sidebar-background": "211 81% 26%",
+  "sidebar-foreground": "210 40% 98%",
+  "sidebar-primary": "210 61% 55%",
   "sidebar-primary-foreground": "0 0% 100%",
-  "sidebar-accent": "222 47% 16%",
-  "sidebar-accent-foreground": "215 20% 95%",
-  "sidebar-border": "222 47% 18%",
-  "sidebar-ring": "168 76% 42%",
+  "sidebar-accent": "211 81% 32%",
+  "sidebar-accent-foreground": "210 40% 98%",
+  "sidebar-border": "211 81% 35%",
+  "sidebar-ring": "210 61% 55%",
 };
 
 export const useColorScheme = () => {
