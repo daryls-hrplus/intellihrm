@@ -25825,6 +25825,7 @@ export type Database = {
           company_division_id: string | null
           company_id: string
           created_at: string
+          default_responsibilities: Json | null
           department_id: string | null
           description: string | null
           end_date: string | null
@@ -25839,6 +25840,7 @@ export type Database = {
           company_division_id?: string | null
           company_id: string
           created_at?: string
+          default_responsibilities?: Json | null
           department_id?: string | null
           description?: string | null
           end_date?: string | null
@@ -25853,6 +25855,7 @@ export type Database = {
           company_division_id?: string | null
           company_id?: string
           created_at?: string
+          default_responsibilities?: Json | null
           department_id?: string | null
           description?: string | null
           end_date?: string | null

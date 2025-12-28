@@ -27,7 +27,14 @@ interface EnrichResponsibilityRequest {
   existingDescription?: string;
 }
 
-type RequestBody = GenerateDescriptionRequest | SuggestKRAsRequest | EnrichResponsibilityRequest;
+interface SuggestForFamilyRequest {
+  action: 'suggest_for_family';
+  familyName: string;
+  familyDescription?: string;
+  existingResponsibilities?: string[];
+}
+
+type RequestBody = GenerateDescriptionRequest | SuggestKRAsRequest | EnrichResponsibilityRequest | SuggestForFamilyRequest;
 
 serve(async (req) => {
   // Handle CORS preflight
@@ -99,6 +106,19 @@ serve(async (req) => {
           suggestedCategory,
           complexity
         }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (action === 'suggest_for_family') {
+      const { familyName, familyDescription, existingResponsibilities } = body as SuggestForFamilyRequest;
+      
+      const prompt = buildFamilySuggestionPrompt(familyName, familyDescription, existingResponsibilities);
+      const suggestionsText = await callLovableAI(prompt, 'Suggest responsibilities for job family');
+      const suggestions = parseFamilySuggestions(suggestionsText);
+      
+      return new Response(
+        JSON.stringify({ success: true, suggestions }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -196,6 +216,38 @@ Description: "${description}"
 Key Result Areas: ${kras.join(', ')}
 
 Reply with ONLY a single number (1-5), nothing else.`;
+}
+
+function buildFamilySuggestionPrompt(familyName: string, familyDescription?: string, existingResponsibilities?: string[]): string {
+  let prompt = `Suggest 5-8 core job responsibilities that would be common across roles in the "${familyName}" job family.`;
+  
+  if (familyDescription) {
+    prompt += `\n\nJob Family Description: "${familyDescription}"`;
+  }
+  
+  if (existingResponsibilities && existingResponsibilities.length > 0) {
+    prompt += `\n\nExisting responsibilities in the system (avoid duplicates): ${existingResponsibilities.join(', ')}`;
+  }
+  
+  prompt += `\n\nFor each responsibility, provide:
+1. Name (short, action-oriented)
+2. Category (one of: financial, operational, people_leadership, technical, compliance, strategic, administrative, customer_service, project_management)
+3. Suggested weight percentage (5-30%)
+4. Brief description (1-2 sentences)
+
+Format each responsibility as:
+NAME: [name]
+CATEGORY: [category]
+WEIGHT: [percentage]
+DESCRIPTION: [description]
+---
+
+Focus on responsibilities that are:
+- Foundational to the job family
+- Applicable across different levels (with varying complexity)
+- Measurable and outcome-oriented`;
+  
+  return prompt;
 }
 
 async function callLovableAI(prompt: string, context: string): Promise<string> {
@@ -314,4 +366,46 @@ function parseComplexity(text: string): number {
     return parseInt(match[0], 10);
   }
   return 3; // Default to middle complexity
+}
+
+interface FamilySuggestion {
+  name: string;
+  category: string;
+  suggestedWeight: number;
+  description: string;
+}
+
+function parseFamilySuggestions(text: string): FamilySuggestion[] {
+  const suggestions: FamilySuggestion[] = [];
+  const blocks = text.split('---').filter(block => block.trim());
+  
+  for (const block of blocks) {
+    const lines = block.trim().split('\n');
+    let name = '';
+    let category = 'operational';
+    let suggestedWeight = 15;
+    let description = '';
+    
+    for (const line of lines) {
+      const trimmedLine = line.trim();
+      if (trimmedLine.startsWith('NAME:')) {
+        name = trimmedLine.replace('NAME:', '').trim();
+      } else if (trimmedLine.startsWith('CATEGORY:')) {
+        category = validateCategory(trimmedLine.replace('CATEGORY:', '').trim());
+      } else if (trimmedLine.startsWith('WEIGHT:')) {
+        const weightMatch = trimmedLine.match(/(\d+)/);
+        if (weightMatch) {
+          suggestedWeight = Math.min(30, Math.max(5, parseInt(weightMatch[1], 10)));
+        }
+      } else if (trimmedLine.startsWith('DESCRIPTION:')) {
+        description = trimmedLine.replace('DESCRIPTION:', '').trim();
+      }
+    }
+    
+    if (name) {
+      suggestions.push({ name, category, suggestedWeight, description });
+    }
+  }
+  
+  return suggestions.slice(0, 8); // Max 8 suggestions
 }

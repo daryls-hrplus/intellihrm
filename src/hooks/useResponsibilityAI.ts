@@ -26,6 +26,19 @@ interface EnrichAllResult {
   complexity?: number;
 }
 
+interface SuggestForFamilyParams {
+  familyName: string;
+  familyDescription?: string;
+  existingResponsibilities?: string[];
+}
+
+interface FamilySuggestion {
+  name: string;
+  category: string;
+  suggestedWeight: number;
+  description: string;
+}
+
 export function useResponsibilityAI() {
   const [isGenerating, setIsGenerating] = useState(false);
 
@@ -106,10 +119,35 @@ export function useResponsibilityAI() {
     }
   };
 
+  const suggestForFamily = async (params: SuggestForFamilyParams): Promise<FamilySuggestion[] | null> => {
+    setIsGenerating(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('responsibility-ai-helper', {
+        body: {
+          action: 'suggest_for_family',
+          ...params,
+        },
+      });
+
+      if (error) {
+        console.error('Error suggesting for family:', error);
+        return null;
+      }
+
+      return data.suggestions || null;
+    } catch (error) {
+      console.error('Error calling AI:', error);
+      return null;
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
   return {
     isGenerating,
     generateDescription,
     suggestKRAs,
     enrichAll,
+    suggestForFamily,
   };
 }

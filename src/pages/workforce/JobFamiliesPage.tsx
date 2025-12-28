@@ -8,7 +8,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Building2, FolderTree, Plus, Pencil, Trash2, Search } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Building2, FolderTree, Plus, Pencil, Trash2, Search, ClipboardList } from "lucide-react";
 import { useLanguage } from "@/hooks/useLanguage";
 import { toast } from "sonner";
 import { useAuditLog } from "@/hooks/useAuditLog";
@@ -45,6 +46,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { getTodayString, formatDateForDisplay } from "@/utils/dateUtils";
+import { JobFamilyDefaultResponsibilities } from "@/components/workforce/JobFamilyDefaultResponsibilities";
+import { Json } from "@/integrations/supabase/types";
 
 interface Company {
   id: string;
@@ -62,6 +65,12 @@ interface JobFamily {
   start_date: string;
   end_date: string | null;
   created_at: string;
+  default_responsibilities: Json | null;
+}
+
+interface DefaultResponsibility {
+  responsibility_id: string;
+  suggested_weight: number;
 }
 
 const emptyForm = {
@@ -72,6 +81,7 @@ const emptyForm = {
   is_active: true,
   start_date: getTodayString(),
   end_date: "",
+  default_responsibilities: [] as DefaultResponsibility[],
 };
 
 export default function JobFamiliesPage() {
@@ -86,6 +96,7 @@ export default function JobFamiliesPage() {
   const [selectedJobFamily, setSelectedJobFamily] = useState<JobFamily | null>(null);
   const [formData, setFormData] = useState(emptyForm);
   const [isSaving, setIsSaving] = useState(false);
+  const [activeTab, setActiveTab] = useState("general");
   const { logAction } = useAuditLog();
 
   useEffect(() => {
@@ -130,6 +141,10 @@ export default function JobFamiliesPage() {
   const handleOpenDialog = (jobFamily?: JobFamily) => {
     if (jobFamily) {
       setSelectedJobFamily(jobFamily);
+      // Parse default_responsibilities from JSON
+      const defaultResp = Array.isArray(jobFamily.default_responsibilities) 
+        ? (jobFamily.default_responsibilities as unknown as DefaultResponsibility[])
+        : [];
       setFormData({
         name: jobFamily.name,
         code: jobFamily.code,
@@ -138,11 +153,13 @@ export default function JobFamiliesPage() {
         is_active: jobFamily.is_active,
         start_date: jobFamily.start_date,
         end_date: jobFamily.end_date || "",
+        default_responsibilities: defaultResp,
       });
     } else {
       setSelectedJobFamily(null);
       setFormData({ ...emptyForm, company_id: selectedCompanyId });
     }
+    setActiveTab("general");
     setDialogOpen(true);
   };
 
@@ -165,6 +182,7 @@ export default function JobFamiliesPage() {
       is_active: formData.is_active,
       start_date: formData.start_date,
       end_date: formData.end_date || null,
+      default_responsibilities: formData.default_responsibilities as unknown as Json,
     };
 
     if (selectedJobFamily) {
@@ -388,89 +406,124 @@ export default function JobFamiliesPage() {
       </div>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-hidden flex flex-col">
           <DialogHeader>
             <DialogTitle>
               {selectedJobFamily ? t("workforce.jobFamilies.editJobFamily") : t("workforce.jobFamilies.addJobFamily")}
             </DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>{t("common.code")} *</Label>
-                <Input
-                  value={formData.code}
-                  onChange={(e) => setFormData({ ...formData, code: e.target.value })}
-                  placeholder="e.g., ENG"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>{t("common.name")} *</Label>
-                <Input
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="e.g., Engineering"
-                />
-              </div>
-            </div>
+          
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 overflow-hidden flex flex-col">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="general" className="flex items-center gap-2">
+                <FolderTree className="h-4 w-4" />
+                General
+              </TabsTrigger>
+              <TabsTrigger value="responsibilities" className="flex items-center gap-2">
+                <ClipboardList className="h-4 w-4" />
+                Default Responsibilities
+              </TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="general" className="flex-1 overflow-y-auto mt-4">
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>{t("common.code")} *</Label>
+                    <Input
+                      value={formData.code}
+                      onChange={(e) => setFormData({ ...formData, code: e.target.value })}
+                      placeholder="e.g., ENG"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>{t("common.name")} *</Label>
+                    <Input
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      placeholder="e.g., Engineering"
+                    />
+                  </div>
+                </div>
 
-            <div className="space-y-2">
-              <Label>{t("common.company")} *</Label>
-              <Select
-                value={formData.company_id}
-                onValueChange={(value) => setFormData({ ...formData, company_id: value })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder={t("workforce.selectCompany")} />
-                </SelectTrigger>
-                <SelectContent>
-                  {companies.map((company) => (
-                    <SelectItem key={company.id} value={company.id}>
-                      {company.name} ({company.code})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+                <div className="space-y-2">
+                  <Label>{t("common.company")} *</Label>
+                  <Select
+                    value={formData.company_id}
+                    onValueChange={(value) => setFormData({ ...formData, company_id: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={t("workforce.selectCompany")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {companies.map((company) => (
+                        <SelectItem key={company.id} value={company.id}>
+                          {company.name} ({company.code})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-            <div className="space-y-2">
-              <Label>{t("common.description")}</Label>
-              <Textarea
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                rows={3}
-                placeholder={t("workforce.jobFamilies.descriptionPlaceholder")}
-              />
-            </div>
+                <div className="space-y-2">
+                  <Label>{t("common.description")}</Label>
+                  <Textarea
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    rows={3}
+                    placeholder={t("workforce.jobFamilies.descriptionPlaceholder")}
+                  />
+                </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>{t("common.startDate")} *</Label>
-                <Input
-                  type="date"
-                  value={formData.start_date}
-                  onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
-                />
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>{t("common.startDate")} *</Label>
+                    <Input
+                      type="date"
+                      value={formData.start_date}
+                      onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>{t("common.endDate")}</Label>
+                    <Input
+                      type="date"
+                      value={formData.end_date}
+                      onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <Switch
+                    checked={formData.is_active}
+                    onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
+                  />
+                  <Label>{t("common.active")}</Label>
+                </div>
               </div>
-              <div className="space-y-2">
-                <Label>{t("common.endDate")}</Label>
-                <Input
-                  type="date"
-                  value={formData.end_date}
-                  onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
+            </TabsContent>
+            
+            <TabsContent value="responsibilities" className="flex-1 overflow-y-auto mt-4">
+              {formData.company_id ? (
+                <JobFamilyDefaultResponsibilities
+                  companyId={formData.company_id}
+                  familyName={formData.name}
+                  familyDescription={formData.description}
+                  defaultResponsibilities={formData.default_responsibilities}
+                  onUpdate={(responsibilities) => 
+                    setFormData({ ...formData, default_responsibilities: responsibilities })
+                  }
                 />
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <Switch
-                checked={formData.is_active}
-                onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
-              />
-              <Label>{t("common.active")}</Label>
-            </div>
-          </div>
-          <DialogFooter>
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  Please select a company first to manage default responsibilities.
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
+          
+          <DialogFooter className="mt-4">
             <Button variant="outline" onClick={() => setDialogOpen(false)}>
               {t("common.cancel")}
             </Button>
