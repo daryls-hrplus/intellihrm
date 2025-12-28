@@ -205,70 +205,76 @@ export function SkillMappingsDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[90vh]">
+      <DialogContent className="max-w-3xl max-h-[85vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>Skills Linked to: {competency.name}</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-6">
-          {/* AI Suggestions */}
-          <div className="border rounded-lg p-4 space-y-4 bg-gradient-to-r from-purple-500/5 to-blue-500/5">
-            <div className="flex items-center justify-between">
-              <h4 className="font-medium flex items-center gap-2">
-                <Sparkles className="h-4 w-4 text-purple-500" />
-                AI Skill Suggestions
-              </h4>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleAISuggest}
-                disabled={suggestingAI}
-                className="gap-2"
-              >
-                {suggestingAI ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Analyzing...
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="h-4 w-4" />
-                    Suggest Skills
-                  </>
-                )}
-              </Button>
-            </div>
-            {aiSuggestions.length > 0 && (
-              <div className="space-y-2">
-                {aiSuggestions.map((suggestion) => (
-                  <div
-                    key={suggestion.skill_id}
-                    className="flex items-center justify-between p-3 rounded-lg bg-background border"
-                  >
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <Zap className="h-4 w-4 text-blue-500" />
-                        <span className="font-medium text-sm">{suggestion.skill_name}</span>
-                        <Badge variant="outline" className="text-xs">
-                          {suggestion.weight}%
-                        </Badge>
-                      </div>
-                      <p className="text-xs text-muted-foreground mt-1">{suggestion.reasoning}</p>
-                    </div>
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      onClick={() => handleApplySuggestion(suggestion)}
-                      disabled={adding}
-                    >
-                      <Plus className="h-4 w-4 mr-1" />
-                      Add
-                    </Button>
-                  </div>
-                ))}
+        <ScrollArea className="flex-1 pr-4">
+          <div className="space-y-6">
+            {/* AI Suggestions - Compact View */}
+            <div className="border rounded-lg p-3 bg-gradient-to-r from-purple-500/5 to-blue-500/5">
+              <div className="flex items-center justify-between">
+                <h4 className="font-medium flex items-center gap-2 text-sm">
+                  <Sparkles className="h-4 w-4 text-purple-500" />
+                  AI Suggestions
+                  {aiSuggestions.length > 0 && (
+                    <Badge variant="secondary" className="text-xs">
+                      {aiSuggestions.length}
+                    </Badge>
+                  )}
+                </h4>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleAISuggest}
+                  disabled={suggestingAI}
+                  className="gap-2 h-8"
+                >
+                  {suggestingAI ? (
+                    <>
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                      Analyzing...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="h-3 w-3" />
+                      Suggest
+                    </>
+                  )}
+                </Button>
               </div>
-            )}
-          </div>
+              {aiSuggestions.length > 0 && (
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {aiSuggestions.slice(0, 8).map((suggestion) => (
+                    <div
+                      key={suggestion.skill_id}
+                      className="group flex items-center gap-2 px-3 py-1.5 rounded-full bg-background border hover:border-primary/50 transition-colors"
+                    >
+                      <Zap className="h-3 w-3 text-blue-500" />
+                      <span className="text-sm font-medium">{suggestion.skill_name}</span>
+                      <Badge variant="outline" className="text-xs h-5 px-1.5">
+                        {suggestion.weight}%
+                      </Badge>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-5 w-5 opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={() => handleApplySuggestion(suggestion)}
+                        disabled={adding}
+                      >
+                        <Plus className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  ))}
+                  {aiSuggestions.length > 8 && (
+                    <span className="text-xs text-muted-foreground self-center">
+                      +{aiSuggestions.length - 8} more
+                    </span>
+                  )}
+                </div>
+              )}
+            </div>
 
           {/* Add new skill mapping */}
           <div className="border rounded-lg p-4 space-y-4 bg-muted/30">
@@ -442,6 +448,7 @@ export function SkillMappingsDialog({
             </ScrollArea>
           </div>
         </div>
+        </ScrollArea>
       </DialogContent>
     </Dialog>
   );
