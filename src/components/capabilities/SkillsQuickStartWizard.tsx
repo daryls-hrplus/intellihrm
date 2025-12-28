@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import {
   Dialog,
   DialogContent,
@@ -7,44 +7,33 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
-import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import {
-  Sparkles,
-  ArrowRight,
-  ArrowLeft,
-  Check,
-  Loader2,
-  Rocket,
-  AlertCircle,
-  Zap,
-  Target,
-  XCircle,
-} from "lucide-react";
-import { IndustrySelector } from "./IndustrySelector";
+import { Sparkles, ArrowRight, ArrowLeft, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import {
+  WizardStepper,
+  WizardStepWelcome,
+  WizardStepIndustry,
+  WizardStepOccupations,
+  WizardStepSkillsPreview,
+  WizardStepCompetenciesPreview,
+  WizardStepReview,
+  WizardStepImporting,
+  WizardStepComplete,
+  WizardStep,
+  MasterSkill,
+  MasterCompetency,
+  ImportProgress,
+  WIZARD_STEPS,
+} from "./wizard";
 
 interface SkillsQuickStartWizardProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   companyId: string;
   onComplete: () => void;
-}
-
-type WizardStep = "welcome" | "industry" | "importing" | "complete";
-
-interface ImportProgress {
-  current: number;
-  total: number;
-  currentOccupation: string;
-  importedSkills: number;
-  importedCompetencies: number;
-  skipped: number;
-  errors: string[];
 }
 
 export function SkillsQuickStartWizard({
@@ -54,275 +43,161 @@ export function SkillsQuickStartWizard({
   onComplete,
 }: SkillsQuickStartWizardProps) {
   const { user } = useAuth();
-  const [step, setStep] = useState<WizardStep>("welcome");
-  const [selectedIndustry, setSelectedIndustry] = useState<string | null>(null);
+  
+  // Wizard step state
+  const [currentStep, setCurrentStep] = useState<WizardStep>("welcome");
+  
+  // Selection state
+  const [selectedIndustries, setSelectedIndustries] = useState<string[]>([]);
   const [selectedOccupations, setSelectedOccupations] = useState<string[]>([]);
   const [occupationLabels, setOccupationLabels] = useState<Record<string, string>>({});
+  const [selectedSkills, setSelectedSkills] = useState<Set<string>>(new Set());
+  const [selectedCompetencies, setSelectedCompetencies] = useState<Set<string>>(new Set());
+  const [proficiencyLevels, setProficiencyLevels] = useState<Record<string, string>>({});
+  
+  // Data state
+  const [allSkills, setAllSkills] = useState<MasterSkill[]>([]);
+  const [allCompetencies, setAllCompetencies] = useState<MasterCompetency[]>([]);
+  
+  // Import state
   const [progress, setProgress] = useState<ImportProgress | null>(null);
 
-  const handleOccupationToggle = (occupationId: string, occupationLabel?: string) => {
-    setSelectedOccupations((prev) =>
+  // Navigation helpers
+  const getStepIndex = (step: WizardStep) => WIZARD_STEPS.findIndex(s => s.step === step);
+  
+  const canGoNext = useCallback(() => {
+    switch (currentStep) {
+      case "welcome":
+        return true;
+      case "industry":
+        return selectedIndustries.length > 0;
+      case "occupations":
+        return selectedOccupations.length > 0;
+      case "skills-preview":
+        return selectedSkills.size > 0 || allSkills.filter(s => !s.alreadyExists).length === 0;
+      case "competencies-preview":
+        return true; // Competencies are optional
+      case "review":
+        return selectedSkills.size > 0 || selectedCompetencies.size > 0;
+      default:
+        return false;
+    }
+  }, [currentStep, selectedIndustries, selectedOccupations, selectedSkills, selectedCompetencies, allSkills]);
+
+  const goToStep = (step: WizardStep) => {
+    setCurrentStep(step);
+  };
+
+  const goNext = () => {
+    const currentIndex = getStepIndex(currentStep);
+    const nextStep = WIZARD_STEPS[currentIndex + 1];
+    if (nextStep && nextStep.step !== "importing" && nextStep.step !== "complete") {
+      setCurrentStep(nextStep.step);
+    } else if (currentStep === "review") {
+      handleStartImport();
+    }
+  };
+
+  const goBack = () => {
+    const currentIndex = getStepIndex(currentStep);
+    const prevStep = WIZARD_STEPS[currentIndex - 1];
+    if (prevStep && prevStep.step !== "importing" && prevStep.step !== "complete") {
+      setCurrentStep(prevStep.step);
+    }
+  };
+
+  // Handlers
+  const handleIndustryToggle = (industryCode: string) => {
+    setSelectedIndustries(prev => 
+      prev.includes(industryCode)
+        ? prev.filter(c => c !== industryCode)
+        : [...prev, industryCode]
+    );
+    // Clear downstream selections when industry changes
+    setSelectedOccupations([]);
+    setOccupationLabels({});
+    setSelectedSkills(new Set());
+    setSelectedCompetencies(new Set());
+  };
+
+  const handleOccupationToggle = (occupationId: string, occupationLabel: string) => {
+    setSelectedOccupations(prev =>
       prev.includes(occupationId)
-        ? prev.filter((id) => id !== occupationId)
+        ? prev.filter(id => id !== occupationId)
         : [...prev, occupationId]
     );
-    if (occupationLabel) {
-      setOccupationLabels((prev) => ({ ...prev, [occupationId]: occupationLabel }));
-    }
+    setOccupationLabels(prev => ({ ...prev, [occupationId]: occupationLabel }));
   };
 
-  const handleSelectAllOccupations = (occupations: { uri: string; label: string }[]) => {
-    setSelectedOccupations(occupations.map(o => o.uri));
+  const handleSelectAllOccupations = (occupations: { id: string; name: string }[]) => {
+    setSelectedOccupations(occupations.map(o => o.id));
     const labels: Record<string, string> = {};
-    occupations.forEach(o => { labels[o.uri] = o.label; });
-    setOccupationLabels((prev) => ({ ...prev, ...labels }));
+    occupations.forEach(o => { labels[o.id] = o.name; });
+    setOccupationLabels(prev => ({ ...prev, ...labels }));
   };
 
-  const handleStartImport = async () => {
-    if (!user || selectedOccupations.length === 0 || !companyId) {
-      toast.error("Please select a company and at least one occupation");
-      return;
-    }
-
-    setStep("importing");
-    setProgress({
-      current: 0,
-      total: selectedOccupations.length,
-      currentOccupation: "",
-      importedSkills: 0,
-      importedCompetencies: 0,
-      skipped: 0,
-      errors: [],
-    });
-
-    let totalImportedSkills = 0;
-    let totalImportedCompetencies = 0;
-    let totalSkipped = 0;
-    const allErrors: string[] = [];
-
-    // Get the industry ID
-    const { data: industryData } = await supabase
-      .from('master_industries')
-      .select('id')
-      .eq('code', selectedIndustry)
-      .single();
-
-    const industryId = industryData?.id;
-
-    for (let i = 0; i < selectedOccupations.length; i++) {
-      const occupationId = selectedOccupations[i];
-      const occupationLabel = occupationLabels[occupationId] || "Unknown";
-
-      setProgress((prev) =>
-        prev
-          ? {
-              ...prev,
-              current: i + 1,
-              currentOccupation: occupationLabel,
-            }
-          : null
-      );
-
-      try {
-        // 1. Get skills for this occupation from master_occupation_skills
-        const { data: occupationSkills, error: skillsError } = await supabase
-          .from('master_occupation_skills')
-          .select(`
-            skill_id,
-            proficiency_level,
-            master_skills_library (
-              id,
-              skill_name,
-              skill_type,
-              category,
-              description,
-              source,
-              reuse_level
-            )
-          `)
-          .eq('occupation_id', occupationId);
-
-        if (skillsError) throw skillsError;
-
-        // 2. Get competencies for this occupation from master_occupation_competencies
-        const { data: occupationCompetencies, error: compsError } = await supabase
-          .from('master_occupation_competencies')
-          .select(`
-            competency_id,
-            proficiency_level,
-            master_competencies_library (
-              id,
-              competency_name,
-              competency_type,
-              category,
-              description,
-              source
-            )
-          `)
-          .eq('occupation_id', occupationId);
-
-        if (compsError) throw compsError;
-
-        // 3. Also get skills associated with the industry
-        let industrySkills: any[] = [];
-        if (industryId) {
-          const { data: indSkills } = await supabase
-            .from('master_industry_skills')
-            .select(`
-              skill_id,
-              relevance_score,
-              master_skills_library (
-                id,
-                skill_name,
-                skill_type,
-                category,
-                description,
-                source,
-                reuse_level
-              )
-            `)
-            .eq('industry_id', industryId);
-          industrySkills = indSkills || [];
-        }
-
-        // Combine skills from occupation and industry (deduplicate)
-        const allSkills = new Map<string, any>();
-        occupationSkills?.forEach((s: any) => {
-          if (s.master_skills_library) {
-            allSkills.set(s.skill_id, s.master_skills_library);
-          }
-        });
-        industrySkills.forEach((s: any) => {
-          if (s.master_skills_library && !allSkills.has(s.skill_id)) {
-            allSkills.set(s.skill_id, s.master_skills_library);
-          }
-        });
-
-        // 4. Import skills to company capabilities table
-        for (const [skillId, skill] of allSkills) {
-          // Check if already exists
-          const { data: existing } = await supabase
-            .from('skills_competencies')
-            .select('id')
-            .eq('company_id', companyId)
-            .eq('name', skill.skill_name)
-            .eq('type', 'SKILL')
-            .maybeSingle();
-
-          if (existing) {
-            totalSkipped++;
-            continue;
-          }
-
-          // Insert new skill
-          const { error: insertError } = await supabase
-            .from('skills_competencies')
-            .insert([{
-              company_id: companyId,
-              type: 'SKILL' as const,
-              name: skill.skill_name,
-              code: skill.skill_name.toUpperCase().replace(/[^A-Z0-9]/g, '_').substring(0, 20),
-              description: skill.description,
-              category: mapCategory(skill.category) as 'technical' | 'leadership' | 'functional' | 'behavioral' | 'core',
-              status: 'active' as const,
-              version: 1,
-              effective_from: new Date().toISOString().split('T')[0],
-              created_by: user.id,
-              metadata: {
-                source: 'HRplus Quick Start',
-                master_skill_id: skillId,
-                original_source: skill.source,
-              }
-            }]);
-
-          if (insertError) {
-            allErrors.push(`Skill "${skill.skill_name}": ${insertError.message}`);
-          } else {
-            totalImportedSkills++;
-          }
-        }
-
-        // 5. Import competencies to company capabilities table
-        for (const comp of (occupationCompetencies || [])) {
-          if (!comp.master_competencies_library) continue;
-          const competency = comp.master_competencies_library as any;
-
-          // Check if already exists
-          const { data: existing } = await supabase
-            .from('skills_competencies')
-            .select('id')
-            .eq('company_id', companyId)
-            .eq('name', competency.competency_name)
-            .eq('type', 'COMPETENCY')
-            .maybeSingle();
-
-          if (existing) {
-            totalSkipped++;
-            continue;
-          }
-
-          // Insert new competency
-          const { error: insertError } = await supabase
-            .from('skills_competencies')
-            .insert([{
-              company_id: companyId,
-              type: 'COMPETENCY' as const,
-              name: competency.competency_name,
-              code: competency.competency_name.toUpperCase().replace(/[^A-Z0-9]/g, '_').substring(0, 20),
-              description: competency.description,
-              category: mapCategory(competency.category) as 'technical' | 'leadership' | 'functional' | 'behavioral' | 'core',
-              status: 'active' as const,
-              version: 1,
-              effective_from: new Date().toISOString().split('T')[0],
-              created_by: user.id,
-              metadata: {
-                source: 'HRplus Quick Start',
-                master_competency_id: comp.competency_id,
-                original_source: competency.source,
-              }
-            }]);
-
-          if (insertError) {
-            allErrors.push(`Competency "${competency.competency_name}": ${insertError.message}`);
-          } else {
-            totalImportedCompetencies++;
-          }
-        }
-
-      } catch (err) {
-        const msg = err instanceof Error ? err.message : String(err);
-        allErrors.push(`${occupationLabel}: ${msg}`);
-      }
-
-      setProgress((prev) =>
-        prev
-          ? {
-              ...prev,
-              importedSkills: totalImportedSkills,
-              importedCompetencies: totalImportedCompetencies,
-              skipped: totalSkipped,
-              errors: allErrors,
-            }
-          : null
-      );
-
-      // Small delay to avoid overwhelming the database
-      await new Promise((resolve) => setTimeout(resolve, 100));
-    }
-
-    setStep("complete");
-    toast.success(`Imported ${totalImportedSkills} skills and ${totalImportedCompetencies} competencies`);
-  };
-
-  const handleClose = () => {
-    setStep("welcome");
-    setSelectedIndustry(null);
+  const handleDeselectAllOccupations = () => {
     setSelectedOccupations([]);
-    setProgress(null);
-    onOpenChange(false);
-    if (step === "complete") {
-      onComplete();
-    }
+  };
+
+  const handleSkillToggle = (skillId: string) => {
+    setSelectedSkills(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(skillId)) {
+        newSet.delete(skillId);
+      } else {
+        newSet.add(skillId);
+      }
+      return newSet;
+    });
+  };
+
+  const handleSelectAllSkills = () => {
+    const nonDuplicateSkills = allSkills.filter(s => !s.alreadyExists);
+    setSelectedSkills(new Set(nonDuplicateSkills.map(s => s.id)));
+  };
+
+  const handleDeselectAllSkills = () => {
+    setSelectedSkills(new Set());
+  };
+
+  const handleCompetencyToggle = (competencyId: string) => {
+    setSelectedCompetencies(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(competencyId)) {
+        newSet.delete(competencyId);
+      } else {
+        newSet.add(competencyId);
+      }
+      return newSet;
+    });
+  };
+
+  const handleSelectAllCompetencies = () => {
+    const nonDuplicateComps = allCompetencies.filter(c => !c.alreadyExists);
+    setSelectedCompetencies(new Set(nonDuplicateComps.map(c => c.id)));
+  };
+
+  const handleDeselectAllCompetencies = () => {
+    setSelectedCompetencies(new Set());
+  };
+
+  const handleProficiencyChange = (itemId: string, level: string) => {
+    setProficiencyLevels(prev => ({ ...prev, [itemId]: level }));
+  };
+
+  const handleSkillsLoaded = (skills: MasterSkill[]) => {
+    setAllSkills(skills);
+    // Auto-select all non-duplicate skills
+    const nonDuplicates = skills.filter(s => !s.alreadyExists);
+    setSelectedSkills(new Set(nonDuplicates.map(s => s.id)));
+  };
+
+  const handleCompetenciesLoaded = (competencies: MasterCompetency[]) => {
+    setAllCompetencies(competencies);
+    // Auto-select all non-duplicate competencies
+    const nonDuplicates = competencies.filter(c => !c.alreadyExists);
+    setSelectedCompetencies(new Set(nonDuplicates.map(c => c.id)));
   };
 
   // Helper to map categories
@@ -337,220 +212,342 @@ export function SkillsQuickStartWizard({
     return mapping[category] || 'functional';
   };
 
+  // Import logic
+  const handleStartImport = async () => {
+    if (!user || !companyId) {
+      toast.error("Please ensure you're logged in");
+      return;
+    }
+
+    const skillsToImport = allSkills.filter(s => selectedSkills.has(s.id) && !s.alreadyExists);
+    const competenciesToImport = allCompetencies.filter(c => selectedCompetencies.has(c.id) && !c.alreadyExists);
+    
+    const totalItems = skillsToImport.length + competenciesToImport.length;
+    
+    if (totalItems === 0) {
+      toast.info("No new items to import");
+      setCurrentStep("complete");
+      setProgress({
+        current: 0,
+        total: 0,
+        currentItem: "",
+        importedSkills: 0,
+        importedCompetencies: 0,
+        skipped: allSkills.filter(s => s.alreadyExists).length + allCompetencies.filter(c => c.alreadyExists).length,
+        errors: [],
+      });
+      return;
+    }
+
+    setCurrentStep("importing");
+    setProgress({
+      current: 0,
+      total: totalItems,
+      currentItem: "",
+      importedSkills: 0,
+      importedCompetencies: 0,
+      skipped: 0,
+      errors: [],
+    });
+
+    let importedSkills = 0;
+    let importedCompetencies = 0;
+    let skipped = 0;
+    const errors: string[] = [];
+    let currentCount = 0;
+
+    // Import skills
+    for (const skill of skillsToImport) {
+      currentCount++;
+      setProgress(prev => prev ? {
+        ...prev,
+        current: currentCount,
+        currentItem: skill.skill_name,
+      } : null);
+
+      try {
+        const profLevel = proficiencyLevels[skill.id] || skill.proficiency_level || 'proficient';
+        
+        const { error: insertError } = await supabase
+          .from('skills_competencies')
+          .insert([{
+            company_id: companyId,
+            type: 'SKILL' as const,
+            name: skill.skill_name,
+            code: skill.skill_name.toUpperCase().replace(/[^A-Z0-9]/g, '_').substring(0, 20),
+            description: skill.description,
+            category: mapCategory(skill.category || '') as 'technical' | 'leadership' | 'functional' | 'behavioral' | 'core',
+            status: 'active' as const,
+            version: 1,
+            effective_from: new Date().toISOString().split('T')[0],
+            created_by: user.id,
+            metadata: {
+              source: 'HRplus Quick Start Wizard',
+              master_skill_id: skill.id,
+              original_source: skill.source,
+              proficiency_level: profLevel,
+            }
+          }]);
+
+        if (insertError) {
+          if (insertError.code === '23505') { // Duplicate
+            skipped++;
+          } else {
+            errors.push(`Skill "${skill.skill_name}": ${insertError.message}`);
+          }
+        } else {
+          importedSkills++;
+        }
+      } catch (err) {
+        errors.push(`Skill "${skill.skill_name}": ${err instanceof Error ? err.message : String(err)}`);
+      }
+
+      setProgress(prev => prev ? {
+        ...prev,
+        importedSkills,
+        skipped,
+        errors,
+      } : null);
+
+      await new Promise(resolve => setTimeout(resolve, 50));
+    }
+
+    // Import competencies
+    for (const comp of competenciesToImport) {
+      currentCount++;
+      setProgress(prev => prev ? {
+        ...prev,
+        current: currentCount,
+        currentItem: comp.competency_name,
+      } : null);
+
+      try {
+        const profLevel = proficiencyLevels[comp.id] || comp.proficiency_level || 'proficient';
+        
+        const { error: insertError } = await supabase
+          .from('skills_competencies')
+          .insert([{
+            company_id: companyId,
+            type: 'COMPETENCY' as const,
+            name: comp.competency_name,
+            code: comp.competency_name.toUpperCase().replace(/[^A-Z0-9]/g, '_').substring(0, 20),
+            description: comp.description,
+            category: mapCategory(comp.category || '') as 'technical' | 'leadership' | 'functional' | 'behavioral' | 'core',
+            status: 'active' as const,
+            version: 1,
+            effective_from: new Date().toISOString().split('T')[0],
+            created_by: user.id,
+            metadata: {
+              source: 'HRplus Quick Start Wizard',
+              master_competency_id: comp.id,
+              original_source: comp.source,
+              proficiency_level: profLevel,
+            }
+          }]);
+
+        if (insertError) {
+          if (insertError.code === '23505') { // Duplicate
+            skipped++;
+          } else {
+            errors.push(`Competency "${comp.competency_name}": ${insertError.message}`);
+          }
+        } else {
+          importedCompetencies++;
+        }
+      } catch (err) {
+        errors.push(`Competency "${comp.competency_name}": ${err instanceof Error ? err.message : String(err)}`);
+      }
+
+      setProgress(prev => prev ? {
+        ...prev,
+        importedCompetencies,
+        skipped,
+        errors,
+      } : null);
+
+      await new Promise(resolve => setTimeout(resolve, 50));
+    }
+
+    setProgress(prev => prev ? {
+      ...prev,
+      current: totalItems,
+      currentItem: "",
+      importedSkills,
+      importedCompetencies,
+      skipped,
+      errors,
+    } : null);
+
+    setCurrentStep("complete");
+    toast.success(`Imported ${importedSkills} skills and ${importedCompetencies} competencies`);
+  };
+
+  const handleClose = () => {
+    // Reset state
+    setCurrentStep("welcome");
+    setSelectedIndustries([]);
+    setSelectedOccupations([]);
+    setOccupationLabels({});
+    setSelectedSkills(new Set());
+    setSelectedCompetencies(new Set());
+    setProficiencyLevels({});
+    setAllSkills([]);
+    setAllCompetencies([]);
+    setProgress(null);
+    
+    onOpenChange(false);
+    if (currentStep === "complete") {
+      onComplete();
+    }
+  };
+
+  const renderStep = () => {
+    switch (currentStep) {
+      case "welcome":
+        return (
+          <WizardStepWelcome
+            onNext={goNext}
+            onCancel={handleClose}
+          />
+        );
+      
+      case "industry":
+        return (
+          <WizardStepIndustry
+            selectedIndustries={selectedIndustries}
+            onIndustryToggle={handleIndustryToggle}
+          />
+        );
+      
+      case "occupations":
+        return (
+          <WizardStepOccupations
+            selectedIndustries={selectedIndustries}
+            selectedOccupations={selectedOccupations}
+            occupationLabels={occupationLabels}
+            onOccupationToggle={handleOccupationToggle}
+            onSelectAll={handleSelectAllOccupations}
+            onDeselectAll={handleDeselectAllOccupations}
+          />
+        );
+      
+      case "skills-preview":
+        return (
+          <WizardStepSkillsPreview
+            selectedOccupations={selectedOccupations}
+            selectedSkills={selectedSkills}
+            proficiencyLevels={proficiencyLevels}
+            companyId={companyId}
+            onSkillToggle={handleSkillToggle}
+            onSelectAll={handleSelectAllSkills}
+            onDeselectAll={handleDeselectAllSkills}
+            onProficiencyChange={handleProficiencyChange}
+            onSkillsLoaded={handleSkillsLoaded}
+          />
+        );
+      
+      case "competencies-preview":
+        return (
+          <WizardStepCompetenciesPreview
+            selectedOccupations={selectedOccupations}
+            selectedCompetencies={selectedCompetencies}
+            proficiencyLevels={proficiencyLevels}
+            companyId={companyId}
+            onCompetencyToggle={handleCompetencyToggle}
+            onSelectAll={handleSelectAllCompetencies}
+            onDeselectAll={handleDeselectAllCompetencies}
+            onProficiencyChange={handleProficiencyChange}
+            onCompetenciesLoaded={handleCompetenciesLoaded}
+          />
+        );
+      
+      case "review":
+        return (
+          <WizardStepReview
+            selectedIndustries={selectedIndustries}
+            selectedOccupations={selectedOccupations}
+            occupationLabels={occupationLabels}
+            selectedSkills={selectedSkills}
+            selectedCompetencies={selectedCompetencies}
+            allSkills={allSkills}
+            allCompetencies={allCompetencies}
+          />
+        );
+      
+      case "importing":
+        return progress ? <WizardStepImporting progress={progress} /> : null;
+      
+      case "complete":
+        return progress ? (
+          <WizardStepComplete progress={progress} onClose={handleClose} />
+        ) : null;
+      
+      default:
+        return null;
+    }
+  };
+
+  const showNavigation = !["welcome", "importing", "complete"].includes(currentStep);
+  const showStepper = !["welcome"].includes(currentStep);
+
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-3xl max-h-[85vh] overflow-hidden flex flex-col">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-primary" />
-            Skills Quick Start Wizard
+            Capability Library Import Wizard
           </DialogTitle>
           <DialogDescription>
-            Quickly populate your skills library with industry-standard skills from the HRplus library
+            Import skills and competencies from the HRplus library
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex-1 overflow-hidden">
-          {step === "welcome" && (
-            <div className="py-8 text-center space-y-6">
-              <div className="mx-auto w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center">
-                <Rocket className="h-10 w-10 text-primary" />
-              </div>
+        {showStepper && (
+          <div className="py-4 border-b">
+            <WizardStepper
+              currentStep={currentStep}
+              onStepClick={(step) => {
+                const targetIndex = getStepIndex(step);
+                const currentIndex = getStepIndex(currentStep);
+                if (targetIndex < currentIndex) {
+                  goToStep(step);
+                }
+              }}
+            />
+          </div>
+        )}
 
-              <div className="space-y-2">
-                <h2 className="text-2xl font-bold">
-                  Welcome to Skills Quick Start
-                </h2>
-                <p className="text-muted-foreground max-w-md mx-auto">
-                  Get started in under 2 minutes by importing pre-curated skills
-                  for your industry from the HRplus library, built for Caribbean
-                  and African enterprises.
-                </p>
-              </div>
+        <ScrollArea className="flex-1 overflow-auto">
+          <div className="py-4 px-1">
+            {renderStep()}
+          </div>
+        </ScrollArea>
 
-              <div className="grid grid-cols-3 gap-4 max-w-lg mx-auto">
-                <div className="p-4 rounded-lg bg-muted/50">
-                  <Zap className="h-6 w-6 text-primary mx-auto mb-2" />
-                  <p className="text-sm font-medium">90+ Skills</p>
-                  <p className="text-xs text-muted-foreground">
-                    Industry relevant
-                  </p>
-                </div>
-                <div className="p-4 rounded-lg bg-muted/50">
-                  <Target className="h-6 w-6 text-primary mx-auto mb-2" />
-                  <p className="text-sm font-medium">15 Competencies</p>
-                  <p className="text-xs text-muted-foreground">Core behaviors</p>
-                </div>
-                <div className="p-4 rounded-lg bg-muted/50">
-                  <Check className="h-6 w-6 text-primary mx-auto mb-2" />
-                  <p className="text-sm font-medium">Ready to Use</p>
-                  <p className="text-xs text-muted-foreground">
-                    No manual entry
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex gap-3 justify-center pt-4">
-                <Button variant="outline" onClick={handleClose}>
-                  I'll add skills manually
-                </Button>
-                <Button onClick={() => setStep("industry")}>
-                  Get Started
+        {showNavigation && (
+          <div className="flex items-center justify-between pt-4 border-t">
+            <Button variant="outline" onClick={goBack}>
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back
+            </Button>
+            <Button
+              onClick={goNext}
+              disabled={!canGoNext()}
+            >
+              {currentStep === "review" ? (
+                <>
+                  Start Import
+                  <Loader2 className="ml-2 h-4 w-4" />
+                </>
+              ) : (
+                <>
+                  Next
                   <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          )}
-
-          {step === "industry" && (
-            <div className="space-y-4">
-              <ScrollArea className="h-[400px] pr-4">
-                <IndustrySelector
-                  selectedIndustry={selectedIndustry}
-                  selectedOccupations={selectedOccupations}
-                  onIndustrySelect={setSelectedIndustry}
-                  onOccupationToggle={handleOccupationToggle}
-                  onSelectAllOccupations={handleSelectAllOccupations}
-                />
-              </ScrollArea>
-
-              {selectedOccupations.length > 0 && (
-                <Alert>
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>
-                    <strong>{selectedOccupations.length}</strong> occupation(s)
-                    selected - skills and competencies will be imported for your company.
-                  </AlertDescription>
-                </Alert>
+                </>
               )}
-
-              <div className="flex gap-3 justify-between pt-4 border-t">
-                <Button variant="outline" onClick={() => setStep("welcome")}>
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                  Back
-                </Button>
-                <Button
-                  onClick={handleStartImport}
-                  disabled={selectedOccupations.length === 0}
-                >
-                  Import Skills & Competencies
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          )}
-
-          {step === "importing" && progress && (
-            <div className="py-8 space-y-6">
-              <div className="text-center space-y-2">
-                <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto" />
-                <h2 className="text-xl font-bold">Importing Skills & Competencies...</h2>
-                <p className="text-muted-foreground">
-                  Please wait while we import from the HRplus library
-                </p>
-              </div>
-
-              <div className="space-y-4 max-w-md mx-auto">
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span>
-                      Occupation {progress.current} of {progress.total}
-                    </span>
-                    <span>
-                      {Math.round((progress.current / progress.total) * 100)}%
-                    </span>
-                  </div>
-                  <Progress
-                    value={(progress.current / progress.total) * 100}
-                    className="h-2"
-                  />
-                </div>
-
-                {progress.currentOccupation && (
-                  <p className="text-sm text-center text-muted-foreground">
-                    Processing: {progress.currentOccupation}
-                  </p>
-                )}
-
-                <div className="flex justify-center gap-4 text-sm">
-                  <Badge variant="secondary" className="gap-1">
-                    <Zap className="h-3 w-3" />
-                    {progress.importedSkills} skills
-                  </Badge>
-                  <Badge variant="secondary" className="gap-1">
-                    <Target className="h-3 w-3" />
-                    {progress.importedCompetencies} competencies
-                  </Badge>
-                  <Badge variant="outline" className="gap-1">
-                    {progress.skipped} skipped
-                  </Badge>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {step === "complete" && progress && (
-            <div className="py-8 text-center space-y-6">
-              <div className="mx-auto w-20 h-20 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center">
-                <Check className="h-10 w-10 text-green-600 dark:text-green-400" />
-              </div>
-
-              <div className="space-y-2">
-                <h2 className="text-2xl font-bold">Import Complete!</h2>
-                <p className="text-muted-foreground">
-                  Your skills & competencies library is now ready to use
-                </p>
-              </div>
-
-              <div className="grid grid-cols-3 gap-4 max-w-md mx-auto">
-                <div className="p-4 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
-                  <p className="text-2xl font-bold text-green-600 dark:text-green-400">
-                    {progress.importedSkills}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    Skills
-                  </p>
-                </div>
-                <div className="p-4 rounded-lg bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800">
-                  <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">
-                    {progress.importedCompetencies}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    Competencies
-                  </p>
-                </div>
-                <div className="p-4 rounded-lg bg-muted/50 border">
-                  <p className="text-2xl font-bold">{progress.skipped}</p>
-                  <p className="text-sm text-muted-foreground">
-                    Already Existed
-                  </p>
-                </div>
-              </div>
-
-              {progress.errors.length > 0 && (
-                <Alert variant="destructive" className="max-w-md mx-auto text-left">
-                  <XCircle className="h-4 w-4" />
-                  <AlertDescription>
-                    <p className="font-medium mb-1">Some errors occurred:</p>
-                    <ul className="text-xs list-disc list-inside">
-                      {progress.errors.slice(0, 3).map((err, i) => (
-                        <li key={i}>{err}</li>
-                      ))}
-                      {progress.errors.length > 3 && (
-                        <li>...and {progress.errors.length - 3} more</li>
-                      )}
-                    </ul>
-                  </AlertDescription>
-                </Alert>
-              )}
-
-              <Button onClick={handleClose} size="lg">
-                <Check className="mr-2 h-4 w-4" />
-                View My Skills & Competencies
-              </Button>
-            </div>
-          )}
-        </div>
+            </Button>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );
