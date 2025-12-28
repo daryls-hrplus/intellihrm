@@ -32,7 +32,9 @@ import {
   GitBranch,
   Target,
   FileCheck,
+  Sparkles,
 } from "lucide-react";
+import { PositionBudgetAIWizard } from "@/components/compensation/PositionBudgetAIWizard";
 
 export default function PositionBudgetPlanPage() {
   const { planId } = useParams();
@@ -56,6 +58,7 @@ export default function PositionBudgetPlanPage() {
 
   const [selectedScenarioId, setSelectedScenarioId] = useState<string | null>(null);
   const [showAddItemDialog, setShowAddItemDialog] = useState(false);
+  const [showAIWizard, setShowAIWizard] = useState(false);
   const [newItem, setNewItem] = useState({
     position_title: "",
     department_id: "",
@@ -496,6 +499,14 @@ export default function PositionBudgetPlanPage() {
                         </SelectContent>
                       </Select>
                     )}
+                    <Button
+                      variant="outline"
+                      onClick={() => setShowAIWizard(true)}
+                      disabled={!selectedScenarioId || !formData.company_id}
+                    >
+                      <Sparkles className="mr-2 h-4 w-4" />
+                      AI Import
+                    </Button>
                     <Dialog open={showAddItemDialog} onOpenChange={setShowAddItemDialog}>
                       <DialogTrigger asChild>
                         <Button disabled={!selectedScenarioId}>
@@ -815,6 +826,17 @@ export default function PositionBudgetPlanPage() {
             </TabsContent>
           )}
         </Tabs>
+
+        {/* AI Import Wizard */}
+        <PositionBudgetAIWizard
+          open={showAIWizard}
+          onOpenChange={setShowAIWizard}
+          companyId={formData.company_id}
+          scenarioId={selectedScenarioId || ""}
+          onComplete={() => {
+            queryClient.invalidateQueries({ queryKey: ["position-budget-plan"] });
+          }}
+        />
       </div>
     </AppLayout>
   );
