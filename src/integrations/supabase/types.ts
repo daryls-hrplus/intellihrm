@@ -26320,6 +26320,78 @@ export type Database = {
           },
         ]
       }
+      job_responsibility_kras: {
+        Row: {
+          ai_generated: boolean | null
+          ai_source: string | null
+          created_at: string | null
+          customized_at: string | null
+          customized_by: string | null
+          id: string
+          inherited_at: string | null
+          is_inherited: boolean | null
+          job_responsibility_id: string
+          job_specific_target: string | null
+          measurement_method: string | null
+          name: string
+          responsibility_kra_id: string | null
+          sequence_order: number | null
+          updated_at: string | null
+          weight: number | null
+        }
+        Insert: {
+          ai_generated?: boolean | null
+          ai_source?: string | null
+          created_at?: string | null
+          customized_at?: string | null
+          customized_by?: string | null
+          id?: string
+          inherited_at?: string | null
+          is_inherited?: boolean | null
+          job_responsibility_id: string
+          job_specific_target?: string | null
+          measurement_method?: string | null
+          name: string
+          responsibility_kra_id?: string | null
+          sequence_order?: number | null
+          updated_at?: string | null
+          weight?: number | null
+        }
+        Update: {
+          ai_generated?: boolean | null
+          ai_source?: string | null
+          created_at?: string | null
+          customized_at?: string | null
+          customized_by?: string | null
+          id?: string
+          inherited_at?: string | null
+          is_inherited?: boolean | null
+          job_responsibility_id?: string
+          job_specific_target?: string | null
+          measurement_method?: string | null
+          name?: string
+          responsibility_kra_id?: string | null
+          sequence_order?: number | null
+          updated_at?: string | null
+          weight?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_responsibility_kras_job_responsibility_id_fkey"
+            columns: ["job_responsibility_id"]
+            isOneToOne: false
+            referencedRelation: "job_responsibilities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_responsibility_kras_responsibility_kra_id_fkey"
+            columns: ["responsibility_kra_id"]
+            isOneToOne: false
+            referencedRelation: "responsibility_kras"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       job_skill_overrides: {
         Row: {
           competency_requirement_id: string

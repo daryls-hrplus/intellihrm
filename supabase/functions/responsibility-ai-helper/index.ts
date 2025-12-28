@@ -40,7 +40,32 @@ interface GenerateFamilyDescriptionRequest {
   existingDescription?: string;
 }
 
-type RequestBody = GenerateDescriptionRequest | SuggestKRAsRequest | EnrichResponsibilityRequest | SuggestForFamilyRequest | GenerateFamilyDescriptionRequest;
+interface ContextualizeKRARequest {
+  action: 'contextualize_kra_for_job';
+  kraName: string;
+  kraDescription?: string;
+  genericTarget?: string;
+  jobName: string;
+  jobDescription?: string;
+  jobGrade?: string;
+  jobLevel?: string;
+}
+
+interface BulkContextualizeKRAsRequest {
+  action: 'bulk_contextualize_kras';
+  kras: Array<{
+    id: string;
+    name: string;
+    description?: string;
+    genericTarget?: string;
+  }>;
+  jobName: string;
+  jobDescription?: string;
+  jobGrade?: string;
+  jobLevel?: string;
+}
+
+type RequestBody = GenerateDescriptionRequest | SuggestKRAsRequest | EnrichResponsibilityRequest | SuggestForFamilyRequest | GenerateFamilyDescriptionRequest | ContextualizeKRARequest | BulkContextualizeKRAsRequest;
 
 serve(async (req) => {
   // Handle CORS preflight
@@ -136,6 +161,35 @@ serve(async (req) => {
       
       return new Response(
         JSON.stringify({ success: true, description }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (action === 'contextualize_kra_for_job') {
+      const { kraName, kraDescription, genericTarget, jobName, jobDescription, jobGrade, jobLevel } = body as ContextualizeKRARequest;
+      
+      const prompt = buildKRAContextualizationPrompt(kraName, kraDescription, genericTarget, jobName, jobDescription, jobGrade, jobLevel);
+      const result = await callLovableAIForKRAContextualization(prompt);
+      
+      return new Response(
+        JSON.stringify({ success: true, ...result }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (action === 'bulk_contextualize_kras') {
+      const { kras, jobName, jobDescription, jobGrade, jobLevel } = body as BulkContextualizeKRAsRequest;
+      
+      const results = await Promise.all(
+        kras.map(async (kra) => {
+          const prompt = buildKRAContextualizationPrompt(kra.name, kra.description, kra.genericTarget, jobName, jobDescription, jobGrade, jobLevel);
+          const result = await callLovableAIForKRAContextualization(prompt);
+          return { id: kra.id, name: kra.name, ...result };
+        })
+      );
+      
+      return new Response(
+        JSON.stringify({ success: true, results }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -281,6 +335,121 @@ Example for "Finance" job family:
 "The Finance job family encompasses roles responsible for financial planning, analysis, reporting, and compliance across the organization. Professionals in this family manage budgets, forecast financial performance, and ensure accurate record-keeping in accordance with regulatory standards. Career progression typically moves from financial analyst to controller and ultimately to executive leadership positions such as CFO."`;
   
   return prompt;
+}
+
+function buildKRAContextualizationPrompt(
+  kraName: string,
+  kraDescription?: string,
+  genericTarget?: string,
+  jobName?: string,
+  jobDescription?: string,
+  jobGrade?: string,
+  jobLevel?: string
+): string {
+  let prompt = `Given this Key Result Area (KRA) and job context, suggest a specific, measurable target appropriate for this job level:
+
+KRA: "${kraName}"`;
+
+  if (kraDescription) {
+    prompt += `\nKRA Description: "${kraDescription}"`;
+  }
+  if (genericTarget) {
+    prompt += `\nGeneric Target: "${genericTarget}"`;
+  }
+
+  prompt += `\n\nJob Context:`;
+  if (jobName) {
+    prompt += `\n- Job Title: "${jobName}"`;
+  }
+  if (jobDescription) {
+    prompt += `\n- Job Description: "${jobDescription}"`;
+  }
+  if (jobGrade) {
+    prompt += `\n- Grade: ${jobGrade}`;
+  }
+  if (jobLevel) {
+    prompt += `\n- Level: ${jobLevel}`;
+  }
+
+  prompt += `\n\nProvide a job-specific target and measurement method. Consider that:
+- Entry-level/Junior jobs should have more achievable, learning-focused targets
+- Senior/Expert jobs should have more ambitious, leadership-focused targets
+- Executive jobs should have strategic, organization-wide targets
+- Targets should be SMART (Specific, Measurable, Achievable, Relevant, Time-bound)
+
+Reply in JSON format only: {"target": "specific measurable target for this job level", "method": "how to measure this target"}`;
+
+  return prompt;
+}
+
+interface KRAContextualizationResult {
+  target: string;
+  method: string;
+}
+
+async function callLovableAIForKRAContextualization(prompt: string): Promise<KRAContextualizationResult> {
+  const lovableApiKey = Deno.env.get('LOVABLE_API_KEY');
+
+  const fallbackResult: KRAContextualizationResult = {
+    target: 'Achieve target within established standards',
+    method: 'Regular progress reviews and performance metrics'
+  };
+
+  if (!lovableApiKey) {
+    console.log('No LOVABLE_API_KEY configured; returning fallback KRA contextualization');
+    return fallbackResult;
+  }
+
+  try {
+    console.log('Calling Lovable AI Gateway for KRA contextualization...');
+    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${lovableApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'google/gemini-2.5-flash',
+        messages: [
+          {
+            role: 'system',
+            content: 'You are an expert HR professional helping to contextualize KRA targets for specific job levels. Always respond with valid JSON only.'
+          },
+          { role: 'user', content: prompt }
+        ],
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Lovable AI Gateway error:', response.status, errorText);
+      return fallbackResult;
+    }
+
+    const data = await response.json();
+    const content = data.choices?.[0]?.message?.content?.trim();
+    
+    if (content) {
+      try {
+        // Try to extract JSON from the response
+        const jsonMatch = content.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          const parsed = JSON.parse(jsonMatch[0]);
+          return {
+            target: parsed.target || fallbackResult.target,
+            method: parsed.method || fallbackResult.method
+          };
+        }
+      } catch (parseError) {
+        console.error('Failed to parse KRA contextualization response:', parseError);
+      }
+    }
+
+    return fallbackResult;
+  } catch (error) {
+    console.error('Error calling Lovable AI for KRA contextualization:', error);
+    return fallbackResult;
+  }
 }
 
 async function callLovableAI(prompt: string, context: string): Promise<string> {
