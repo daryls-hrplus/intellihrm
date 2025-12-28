@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -246,13 +245,8 @@ export default function TimePayrollSyncPage() {
 
   const totalPending = pendingCounts.timeClock + pendingCounts.timesheets + pendingCounts.overtime;
 
-  const breadcrumbs = [
-    { label: "Payroll", href: "/payroll" },
-    { label: "Time Import", href: "/payroll/time-sync" }
-  ];
-
   return (
-    <AppLayout breadcrumbs={breadcrumbs}>
+    <div className="space-y-6 p-6">
       <div className="space-y-6">
         {/* Header */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -669,6 +663,6 @@ export default function TimePayrollSyncPage() {
           </DialogContent>
         </Dialog>
       </div>
-    </AppLayout>
+    </div>
   );
 }

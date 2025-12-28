@@ -26,6 +26,7 @@ import { useCurrencies, Currency } from "@/hooks/useCurrencies";
 import { useCompanyLocalCurrency } from "@/hooks/useCurrencies";
 import { GLSimulationPreview } from "./GLSimulationPreview";
 import { LeavePayrollPreview } from "./LeavePayrollPreview";
+import { HourlyPayrollPreview } from "./HourlyPayrollPreview";
 
 interface PayrollSimulatorProps {
   companyId: string;
@@ -178,6 +179,7 @@ interface StatutoryType {
 export function PayrollSimulator({ companyId, employeeId, payPeriodId, payGroupId }: PayrollSimulatorProps) {
   const [isCalculating, setIsCalculating] = useState(false);
   const [result, setResult] = useState<SimulationResult | null>(null);
+  const [periodDates, setPeriodDates] = useState<{ start: string; end: string } | null>(null);
   
   // Multi-currency state
   const [exchangeRateDialogOpen, setExchangeRateDialogOpen] = useState(false);
@@ -623,6 +625,11 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId, payGroupI
 
       if (payPeriodError) {
         console.error('Pay period fetch error:', payPeriodError);
+      }
+      
+      // Store period dates for components
+      if (payPeriod?.period_start && payPeriod?.period_end) {
+        setPeriodDates({ start: payPeriod.period_start, end: payPeriod.period_end });
       }
       
       // Filter out compensation items with end_date before the pay period start
@@ -1776,6 +1783,16 @@ export function PayrollSimulator({ companyId, employeeId, payPeriodId, payGroupI
             })()}
           </CardContent>
         </Card>
+      )}
+
+      {/* Hours-Based Pay Preview */}
+      {periodDates && (
+        <HourlyPayrollPreview
+          companyId={companyId}
+          employeeId={employeeId}
+          periodStart={periodDates.start}
+          periodEnd={periodDates.end}
+        />
       )}
 
       {/* Leave Impact Preview */}

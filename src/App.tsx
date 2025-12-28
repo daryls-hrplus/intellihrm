@@ -328,6 +328,7 @@ import RetroactivePayGeneratePage from "./pages/payroll/RetroactivePayGeneratePa
 import PayrollCountryDocumentationPage from "./pages/payroll/PayrollCountryDocumentationPage";
 import SalaryAdvancesPage from "./pages/payroll/SalaryAdvancesPage";
 import SavingsProgramsPage from "./pages/payroll/SavingsProgramsPage";
+import TimePayrollSyncPage from "./pages/payroll/TimePayrollSyncPage";
 import GLDashboardPage from "./pages/payroll/gl/GLDashboardPage";
 import GLAccountsPage from "./pages/payroll/gl/GLAccountsPage";
 import CostCenterSegmentsPage from "./pages/payroll/gl/CostCenterSegmentsPage";
@@ -2181,6 +2182,14 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
                   <LeaveBalanceBuyoutPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/payroll/time-sync"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
+                  <TimePayrollSyncPage />
                 </ProtectedRoute>
               }
             />
