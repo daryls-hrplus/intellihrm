@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   Dialog,
   DialogContent,
@@ -37,6 +37,7 @@ import {
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { ProficiencyLevelPicker, ProficiencyLevelBadge } from "./ProficiencyLevelPicker";
 
 interface SkillMappingsDialogProps {
   open: boolean;
@@ -66,13 +67,42 @@ export function SkillMappingsDialog({
   useEffect(() => {
     if (open && competency) {
       fetchMappings(competency.id);
-      fetchCapabilities({ type: "SKILL", status: "active" }).then((data) => {
+      // Fetch skills filtered by company context
+      fetchCapabilities({ 
+        type: "SKILL", 
+        status: "active",
+        companyId: competency.company_id || undefined,
+      }).then((data) => {
         setAvailableSkills(data);
       });
     }
   }, [open, competency, fetchMappings, fetchCapabilities]);
 
-  const filteredSkills = availableSkills.filter((skill) => {
+  // Deduplicate skills by name, preferring company-specific over global
+  const deduplicatedSkills = useMemo(() => {
+    const skillMap = new Map<string, Capability>();
+    
+    for (const skill of availableSkills) {
+      const key = skill.name.toLowerCase();
+      const existing = skillMap.get(key);
+      
+      if (!existing) {
+        skillMap.set(key, skill);
+      } else {
+        // Prefer company-specific skill over global
+        const isCurrentCompanySpecific = skill.company_id === competency?.company_id;
+        const isExistingGlobal = !existing.company_id;
+        
+        if (isCurrentCompanySpecific && isExistingGlobal) {
+          skillMap.set(key, skill);
+        }
+      }
+    }
+    
+    return Array.from(skillMap.values());
+  }, [availableSkills, competency?.company_id]);
+
+  const filteredSkills = deduplicatedSkills.filter((skill) => {
     // Exclude already mapped skills
     const isMapped = mappings.some((m) => m.skill_id === skill.id);
     if (isMapped) return false;
@@ -295,22 +325,14 @@ export function SkillMappingsDialog({
               </div>
               <div className="space-y-2">
                 <Label>Min Proficiency Level</Label>
-                <Select
-                  value={minLevel?.toString() || "none"}
-                  onValueChange={(v) => setMinLevel(v === "none" ? undefined : parseInt(v))}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Any level" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">Any level</SelectItem>
-                    <SelectItem value="1">Level 1</SelectItem>
-                    <SelectItem value="2">Level 2</SelectItem>
-                    <SelectItem value="3">Level 3</SelectItem>
-                    <SelectItem value="4">Level 4</SelectItem>
-                    <SelectItem value="5">Level 5</SelectItem>
-                  </SelectContent>
-                </Select>
+                <ProficiencyLevelPicker
+                  value={minLevel}
+                  onChange={setMinLevel}
+                  allowNone={true}
+                  nonePlaceholder="Any level"
+                  showDescription={true}
+                  showAppraisalContext={false}
+                />
               </div>
               <div className="flex items-end gap-4">
                 <div className="flex items-center gap-2">
@@ -387,7 +409,11 @@ export function SkillMappingsDialog({
                           </div>
                         </TableCell>
                         <TableCell className="text-center">
-                          {mapping.min_proficiency_level || "-"}
+                          {mapping.min_proficiency_level ? (
+                            <ProficiencyLevelBadge level={mapping.min_proficiency_level} size="sm" />
+                          ) : (
+                            <span className="text-muted-foreground">-</span>
+                          )}
                         </TableCell>
                         <TableCell className="text-center">
                           {mapping.is_required ? (
