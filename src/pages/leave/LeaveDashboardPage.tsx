@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { ModuleReportsButton } from "@/components/reports/ModuleReportsButton";
 import { ModuleBIButton } from "@/components/bi/ModuleBIButton";
+import { LeaveIntelligence } from "@/components/leave/LeaveIntelligence";
 import { useLeaveManagement } from "@/hooks/useLeaveManagement";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/hooks/useLanguage";
@@ -324,6 +325,9 @@ export default function LeaveDashboardPage() {
             );
           })}
         </div>
+
+        {/* Leave Intelligence for Managers */}
+        {isAdminOrHR && <LeaveIntelligence />}
 
         <GroupedModuleCards sections={sections} />
       </div>
