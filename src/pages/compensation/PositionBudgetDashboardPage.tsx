@@ -162,12 +162,12 @@ export default function PositionBudgetDashboardPage() {
         <div className="flex flex-wrap items-center gap-3 p-4 rounded-lg border border-border bg-card">
           <div className="flex items-center gap-2">
             <Building2 className="h-4 w-4 text-muted-foreground" />
-            <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
+            <Select value={selectedCompanyId || "all"} onValueChange={(v) => setSelectedCompanyId(v === "all" ? "" : v)}>
               <SelectTrigger className="w-[220px]">
                 <SelectValue placeholder="All Companies" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Companies</SelectItem>
+                <SelectItem value="all">All Companies</SelectItem>
                 {companies.map((c) => (
                   <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
                 ))}
