@@ -48,8 +48,8 @@ export function SkillsQuickStartWizard({
   // Wizard step state
   const [currentStep, setCurrentStep] = useState<WizardStep>("welcome");
   
-  // Selection state
-  const [selectedCompanies, setSelectedCompanies] = useState<string[]>([companyId]);
+  // Selection state - start empty so user must actively select a company
+  const [selectedCompanies, setSelectedCompanies] = useState<string[]>([]);
   const [isGlobal, setIsGlobal] = useState(false);
   const [selectedIndustries, setSelectedIndustries] = useState<string[]>([]);
   const [selectedSubIndustries, setSelectedSubIndustries] = useState<string[]>([]);
@@ -257,7 +257,13 @@ export function SkillsQuickStartWizard({
 
     // Determine the primary company for skills_competencies.company_id
     // If global, set company_id to null; otherwise use first selected company
-    const primaryCompanyId = isGlobal ? null : (selectedCompanies[0] || companyId);
+    // IMPORTANT: selectedCompanies MUST have at least one company if not global
+    const primaryCompanyId = isGlobal ? null : selectedCompanies[0];
+    
+    if (!isGlobal && !primaryCompanyId) {
+      toast.error("Please select at least one company");
+      return;
+    }
 
     const skillsToImport = allSkills.filter(s => selectedSkills.has(s.id) && !s.alreadyExists);
     const competenciesToImport = allCompetencies.filter(c => selectedCompetencies.has(c.id) && !c.alreadyExists);
@@ -456,7 +462,7 @@ export function SkillsQuickStartWizard({
   const handleClose = () => {
     // Reset state
     setCurrentStep("welcome");
-    setSelectedCompanies([companyId]);
+    setSelectedCompanies([]);
     setIsGlobal(false);
     setSelectedIndustries([]);
     setSelectedSubIndustries([]);
