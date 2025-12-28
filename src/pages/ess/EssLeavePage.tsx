@@ -141,7 +141,7 @@ export default function EssLeavePage() {
     };
   }, [selectedBalance, bookedLeave]);
 
-  // Get available years from leave requests
+  // Get available years from leave requests (including years where leave spans into)
   const availableYears = useMemo(() => {
     const years = new Set<number>();
     const currentYear = new Date().getFullYear();
@@ -149,22 +149,33 @@ export default function EssLeavePage() {
     
     leaveRequests.forEach((r) => {
       if (r.status === "approved") {
-        years.add(getYear(parseISO(r.start_date)));
+        const startYear = getYear(parseISO(r.start_date));
+        const endYear = getYear(parseISO(r.end_date));
+        years.add(startYear);
+        years.add(endYear);
       }
     });
     
     return Array.from(years).sort((a, b) => b - a); // Sort descending
   }, [leaveRequests]);
 
-  // Filter leave taken (approved leave where start date has passed or is today)
+  // Filter leave taken (approved leave where any part falls within selected year)
   const leaveTaken = useMemo(() => {
     const filterYear = parseInt(selectedYear);
+    const yearStart = new Date(filterYear, 0, 1); // Jan 1 of filter year
+    const yearEnd = new Date(filterYear, 11, 31); // Dec 31 of filter year
+    
     return leaveRequests
       .filter((r) => {
         if (r.status !== "approved") return false;
         const startDate = parseISO(r.start_date);
-        const leaveYear = getYear(startDate);
-        if (leaveYear !== filterYear) return false;
+        const endDate = parseISO(r.end_date);
+        
+        // Check if leave period overlaps with the selected year
+        const leaveOverlapsYear = startDate <= yearEnd && endDate >= yearStart;
+        if (!leaveOverlapsYear) return false;
+        
+        // Only show if leave has started (past or today)
         return isPast(startDate) || isToday(startDate);
       })
       .sort((a, b) => new Date(b.start_date).getTime() - new Date(a.start_date).getTime());
