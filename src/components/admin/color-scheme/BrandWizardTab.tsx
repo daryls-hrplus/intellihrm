@@ -1,10 +1,10 @@
 import { useState, useCallback } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Upload, Wand2, Loader2, CheckCircle, AlertCircle } from "lucide-react";
+import { Upload, Wand2, Loader2, CheckCircle, FileText } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { deriveFullPalette, hexToHsl } from "@/hooks/useColorScheme";
+import { deriveFullPalette } from "@/hooks/useColorScheme";
 
 interface BrandWizardTabProps {
   onApplyColors: (colors: Record<string, string>) => void;
@@ -27,6 +27,8 @@ export const BrandWizardTab = ({ onApplyColors }: BrandWizardTabProps) => {
   const [isExtracting, setIsExtracting] = useState(false);
   const [extractedColors, setExtractedColors] = useState<ExtractedColors | null>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [previewMimeType, setPreviewMimeType] = useState<string | null>(null);
+  const [previewFileName, setPreviewFileName] = useState<string | null>(null);
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -39,13 +41,16 @@ export const BrandWizardTab = ({ onApplyColors }: BrandWizardTabProps) => {
   }, []);
 
   const processFile = async (file: File) => {
-    if (!file.type.startsWith('image/') && file.type !== 'application/pdf') {
-      toast.error('Please upload an image (PNG, JPG) or PDF file');
+    const inferredType =
+      file.type || (file.name.toLowerCase().endsWith(".pdf") ? "application/pdf" : "");
+
+    if (!inferredType.startsWith("image/") && inferredType !== "application/pdf") {
+      toast.error("Please upload an image (PNG, JPG) or PDF file");
       return;
     }
 
     if (file.size > 10 * 1024 * 1024) {
-      toast.error('File size must be less than 10MB');
+      toast.error("File size must be less than 10MB");
       return;
     }
 
@@ -63,15 +68,17 @@ export const BrandWizardTab = ({ onApplyColors }: BrandWizardTabProps) => {
         reader.readAsDataURL(file);
       });
 
-      // Set preview image with full data URL
+      // Set preview asset info
       setPreviewImage(dataUrl);
+      setPreviewMimeType(inferredType);
+      setPreviewFileName(file.name);
 
       // Extract base64 data for API call (remove data URL prefix)
-      const base64 = dataUrl.split(',')[1];
+      const base64 = dataUrl.split(",")[1];
 
       // Call edge function
-      const { data, error } = await supabase.functions.invoke('extract-brand-colors', {
-        body: { imageBase64: base64, mimeType: file.type }
+      const { data, error } = await supabase.functions.invoke("extract-brand-colors", {
+        body: { imageBase64: base64, mimeType: inferredType },
       });
 
       if (error) {
@@ -201,13 +208,36 @@ export const BrandWizardTab = ({ onApplyColors }: BrandWizardTabProps) => {
                 {/* Preview Image */}
                 {previewImage && (
                   <div className="space-y-2">
-                    <p className="text-sm font-medium">Uploaded Asset</p>
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="text-sm font-medium">Uploaded Asset</p>
+                      {previewFileName && (
+                        <p className="text-xs text-muted-foreground truncate max-w-[14rem]">
+                          {previewFileName}
+                        </p>
+                      )}
+                    </div>
                     <div className="aspect-video rounded-lg border overflow-hidden bg-muted">
-                      <img 
-                        src={previewImage} 
-                        alt="Brand asset preview" 
-                        className="w-full h-full object-contain"
-                      />
+                      {previewMimeType === "application/pdf" ? (
+                        <object
+                          data={previewImage}
+                          type="application/pdf"
+                          className="w-full h-full"
+                        >
+                          <div className="h-full w-full flex flex-col items-center justify-center text-center p-4">
+                            <FileText className="h-8 w-8 text-muted-foreground" />
+                            <p className="text-sm font-medium mt-2">PDF preview not available</p>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              Color extraction still works — use Apply to Theme below.
+                            </p>
+                          </div>
+                        </object>
+                      ) : (
+                        <img
+                          src={previewImage}
+                          alt="Brand asset preview"
+                          className="w-full h-full object-contain"
+                        />
+                      )}
                     </div>
                   </div>
                 )}
