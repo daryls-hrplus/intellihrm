@@ -169,6 +169,14 @@ export default function TimeAttendanceDashboardPage() {
       color: "bg-indigo-500/10 text-indigo-600",
       tabCode: "timesheet_approvals",
     },
+    projectCosts: {
+      title: "Project Costs",
+      description: "Track labor costs, budgets, and profitability by project",
+      icon: DollarSign,
+      href: "/time/project-costs",
+      color: "bg-emerald-500/10 text-emerald-600",
+      tabCode: "project_costs",
+    },
     // Configuration
     policies: {
       title: t("timeAttendance.modules.policies.title"),
