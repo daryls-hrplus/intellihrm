@@ -1,6 +1,7 @@
 // Export all wizard components
 export { WizardStepper } from './WizardStepper';
 export { WizardStepWelcome } from './WizardStepWelcome';
+export { WizardStepCompany } from './WizardStepCompany';
 export { WizardStepIndustry } from './WizardStepIndustry';
 export { WizardStepOccupations } from './WizardStepOccupations';
 export { WizardStepSkillsPreview } from './WizardStepSkillsPreview';

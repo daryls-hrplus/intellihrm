@@ -4586,6 +4586,51 @@ export type Database = {
           },
         ]
       }
+      capability_job_applicability: {
+        Row: {
+          ai_suggested: boolean | null
+          capability_id: string
+          confidence_score: number | null
+          created_at: string | null
+          created_by: string | null
+          id: string
+          job_id: string
+        }
+        Insert: {
+          ai_suggested?: boolean | null
+          capability_id: string
+          confidence_score?: number | null
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          job_id: string
+        }
+        Update: {
+          ai_suggested?: boolean | null
+          capability_id?: string
+          confidence_score?: number | null
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          job_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "capability_job_applicability_capability_id_fkey"
+            columns: ["capability_id"]
+            isOneToOne: false
+            referencedRelation: "skills_competencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "capability_job_applicability_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       career_path_steps: {
         Row: {
           career_path_id: string
@@ -5539,6 +5584,45 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "company_branch_locations_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      company_capabilities: {
+        Row: {
+          capability_id: string
+          company_id: string
+          created_at: string | null
+          created_by: string | null
+          id: string
+        }
+        Insert: {
+          capability_id: string
+          company_id: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+        }
+        Update: {
+          capability_id?: string
+          company_id?: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_capabilities_capability_id_fkey"
+            columns: ["capability_id"]
+            isOneToOne: false
+            referencedRelation: "skills_competencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_capabilities_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
@@ -39940,6 +40024,7 @@ export type Database = {
           external_source: string | null
           external_sync_status: string | null
           id: string
+          is_global: boolean | null
           last_external_sync_at: string | null
           metadata: Json | null
           name: string
@@ -39967,6 +40052,7 @@ export type Database = {
           external_source?: string | null
           external_sync_status?: string | null
           id?: string
+          is_global?: boolean | null
           last_external_sync_at?: string | null
           metadata?: Json | null
           name: string
@@ -39994,6 +40080,7 @@ export type Database = {
           external_source?: string | null
           external_sync_status?: string | null
           id?: string
+          is_global?: boolean | null
           last_external_sync_at?: string | null
           metadata?: Json | null
           name?: string

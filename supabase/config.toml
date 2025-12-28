@@ -221,3 +221,6 @@ verify_jwt = false
 
 [functions.ai-shift-scheduler]
 verify_jwt = false
+
+[functions.suggest-skill-mappings]
+verify_jwt = false
