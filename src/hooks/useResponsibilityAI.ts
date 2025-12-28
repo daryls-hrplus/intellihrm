@@ -39,6 +39,11 @@ interface FamilySuggestion {
   description: string;
 }
 
+interface GenerateFamilyDescriptionParams {
+  familyName: string;
+  existingDescription?: string;
+}
+
 export function useResponsibilityAI() {
   const [isGenerating, setIsGenerating] = useState(false);
 
@@ -143,11 +148,36 @@ export function useResponsibilityAI() {
     }
   };
 
+  const generateFamilyDescription = async (params: GenerateFamilyDescriptionParams): Promise<string | null> => {
+    setIsGenerating(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('responsibility-ai-helper', {
+        body: {
+          action: 'generate_family_description',
+          ...params,
+        },
+      });
+
+      if (error) {
+        console.error('Error generating family description:', error);
+        return null;
+      }
+
+      return data.description || null;
+    } catch (error) {
+      console.error('Error calling AI:', error);
+      return null;
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
   return {
     isGenerating,
     generateDescription,
     suggestKRAs,
     enrichAll,
     suggestForFamily,
+    generateFamilyDescription,
   };
 }
