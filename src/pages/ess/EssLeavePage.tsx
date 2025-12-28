@@ -243,6 +243,41 @@ export default function EssLeavePage() {
     return map;
   }, [yearAllocations]);
 
+  // Calculate pending and booked leave per leave type for the balance year
+  const leaveStatusByType = useMemo(() => {
+    const filterYear = parseInt(balanceYear);
+    const yearStart = new Date(filterYear, 0, 1);
+    const yearEnd = new Date(filterYear, 11, 31);
+    const today = new Date();
+    
+    const result = new Map<string, { pending: number; booked: number }>();
+    
+    leaveRequests.forEach((request) => {
+      const startDate = parseISO(request.start_date);
+      const endDate = parseISO(request.end_date);
+      
+      // Check if leave overlaps with the selected balance year
+      const overlapsYear = startDate <= yearEnd && endDate >= yearStart;
+      if (!overlapsYear) return;
+      
+      if (!result.has(request.leave_type_id)) {
+        result.set(request.leave_type_id, { pending: 0, booked: 0 });
+      }
+      
+      const entry = result.get(request.leave_type_id)!;
+      
+      if (request.status === "pending") {
+        // Pending approval
+        entry.pending += request.duration || 0;
+      } else if (request.status === "approved" && isFuture(startDate)) {
+        // Approved but not yet started
+        entry.booked += request.duration || 0;
+      }
+    });
+    
+    return result;
+  }, [leaveRequests, balanceYear]);
+
   // Filter upcoming approved leave
   const upcomingLeave = useMemo(() => {
     return leaveRequests
@@ -448,49 +483,85 @@ export default function EssLeavePage() {
                 </Card>
               ) : balanceViewMode === "grid" ? (
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                  {filteredBalances.map((balance) => (
-                    <Card key={balance.id}>
-                      <CardHeader className="pb-2">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <div 
-                              className="h-3 w-3 rounded-full" 
-                              style={{ backgroundColor: balance.leave_type?.color || "#3B82F6" }} 
-                            />
-                            <CardTitle className="text-base">
-                              {balance.leave_type?.name || "Unknown"}
-                            </CardTitle>
+                  {filteredBalances.map((balance) => {
+                    const leaveStatus = leaveStatusByType.get(balance.leave_type_id) || { pending: 0, booked: 0 };
+                    const availableBalance = balance.current_balance - leaveStatus.booked - leaveStatus.pending;
+                    return (
+                      <Card key={balance.id}>
+                        <CardHeader className="pb-2">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <div 
+                                className="h-3 w-3 rounded-full" 
+                                style={{ backgroundColor: balance.leave_type?.color || "#3B82F6" }} 
+                              />
+                              <CardTitle className="text-base">
+                                {balance.leave_type?.name || "Unknown"}
+                              </CardTitle>
+                            </div>
+                            <Badge variant="outline" className="capitalize">
+                              {balance.leave_type?.accrual_unit || "days"}
+                            </Badge>
                           </div>
-                          <Badge variant="outline" className="capitalize">
-                            {balance.leave_type?.accrual_unit || "days"}
-                          </Badge>
-                        </div>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="text-3xl font-bold text-foreground mb-2">
-                          {balance.current_balance}
-                        </div>
-                        <div className="grid grid-cols-2 gap-2 text-sm text-muted-foreground">
+                        </CardHeader>
+                        <CardContent className="space-y-3">
                           <div>
-                            <span className="block text-xs">Opening</span>
-                            <span className="font-medium text-foreground">{balance.opening_balance}</span>
+                            <div className="text-3xl font-bold text-foreground">
+                              {balance.current_balance}
+                            </div>
+                            <span className="text-xs text-muted-foreground">Current Balance</span>
                           </div>
-                          <div>
-                            <span className="block text-xs">Accrued</span>
-                            <span className="font-medium text-foreground">{balance.accrued_amount}</span>
+                          
+                          {/* Pending and Booked indicators */}
+                          {(leaveStatus.pending > 0 || leaveStatus.booked > 0) && (
+                            <div className="flex flex-wrap gap-2">
+                              {leaveStatus.booked > 0 && (
+                                <Badge variant="secondary" className="text-xs">
+                                  <CalendarClock className="h-3 w-3 mr-1" />
+                                  {leaveStatus.booked} booked
+                                </Badge>
+                              )}
+                              {leaveStatus.pending > 0 && (
+                                <Badge variant="outline" className="text-xs text-amber-600 border-amber-300">
+                                  <Clock className="h-3 w-3 mr-1" />
+                                  {leaveStatus.pending} pending
+                                </Badge>
+                              )}
+                            </div>
+                          )}
+                          
+                          {/* Available after commitments */}
+                          {(leaveStatus.pending > 0 || leaveStatus.booked > 0) && (
+                            <div className="pt-2 border-t">
+                              <div className="flex justify-between items-center">
+                                <span className="text-xs text-muted-foreground">Available</span>
+                                <span className="font-semibold text-foreground">{availableBalance}</span>
+                              </div>
+                            </div>
+                          )}
+                          
+                          <div className="grid grid-cols-2 gap-2 text-sm text-muted-foreground pt-2 border-t">
+                            <div>
+                              <span className="block text-xs">Opening</span>
+                              <span className="font-medium text-foreground">{balance.opening_balance}</span>
+                            </div>
+                            <div>
+                              <span className="block text-xs">Accrued</span>
+                              <span className="font-medium text-foreground">{balance.accrued_amount}</span>
+                            </div>
+                            <div>
+                              <span className="block text-xs">Used</span>
+                              <span className="font-medium text-foreground">{balance.used_amount}</span>
+                            </div>
+                            <div>
+                              <span className="block text-xs">Carried</span>
+                              <span className="font-medium text-foreground">{balance.carried_forward}</span>
+                            </div>
                           </div>
-                          <div>
-                            <span className="block text-xs">Used</span>
-                            <span className="font-medium text-foreground">{balance.used_amount}</span>
-                          </div>
-                          <div>
-                            <span className="block text-xs">Carried</span>
-                            <span className="font-medium text-foreground">{balance.carried_forward}</span>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
                 </div>
               ) : (
                 <Card>
@@ -501,36 +572,52 @@ export default function EssLeavePage() {
                         <TableHead className="text-right">Opening</TableHead>
                         <TableHead className="text-right">Accrued</TableHead>
                         <TableHead className="text-right">Used</TableHead>
-                        <TableHead className="text-right">Carried Fwd</TableHead>
-                        <TableHead className="text-right">Adjustments</TableHead>
+                        <TableHead className="text-right">Carried</TableHead>
+                        <TableHead className="text-right">Adj.</TableHead>
                         <TableHead className="text-right">Balance</TableHead>
+                        <TableHead className="text-right">Booked</TableHead>
+                        <TableHead className="text-right">Pending</TableHead>
+                        <TableHead className="text-right">Available</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {filteredBalances.map((balance) => (
-                        <TableRow key={balance.id}>
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              <div 
-                                className="h-3 w-3 rounded-full" 
-                                style={{ backgroundColor: balance.leave_type?.color || "#3B82F6" }} 
-                              />
-                              <span>{balance.leave_type?.name || "Unknown"}</span>
-                              <Badge variant="outline" className="capitalize text-xs">
-                                {balance.leave_type?.accrual_unit || "days"}
-                              </Badge>
-                            </div>
-                          </TableCell>
-                          <TableCell className="text-right font-mono">{balance.opening_balance}</TableCell>
-                          <TableCell className="text-right font-mono text-green-600">+{balance.accrued_amount}</TableCell>
-                          <TableCell className="text-right font-mono text-red-600">-{balance.used_amount}</TableCell>
-                          <TableCell className="text-right font-mono">{balance.carried_forward}</TableCell>
-                          <TableCell className="text-right font-mono">
-                            {balance.adjustment_amount >= 0 ? "+" : ""}{balance.adjustment_amount}
-                          </TableCell>
-                          <TableCell className="text-right font-mono font-bold">{balance.current_balance}</TableCell>
-                        </TableRow>
-                      ))}
+                      {filteredBalances.map((balance) => {
+                        const leaveStatus = leaveStatusByType.get(balance.leave_type_id) || { pending: 0, booked: 0 };
+                        const availableBalance = balance.current_balance - leaveStatus.booked - leaveStatus.pending;
+                        return (
+                          <TableRow key={balance.id}>
+                            <TableCell>
+                              <div className="flex items-center gap-2">
+                                <div 
+                                  className="h-3 w-3 rounded-full" 
+                                  style={{ backgroundColor: balance.leave_type?.color || "#3B82F6" }} 
+                                />
+                                <span>{balance.leave_type?.name || "Unknown"}</span>
+                                <Badge variant="outline" className="capitalize text-xs">
+                                  {balance.leave_type?.accrual_unit || "days"}
+                                </Badge>
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-right font-mono">{balance.opening_balance}</TableCell>
+                            <TableCell className="text-right font-mono text-green-600">+{balance.accrued_amount}</TableCell>
+                            <TableCell className="text-right font-mono text-red-600">-{balance.used_amount}</TableCell>
+                            <TableCell className="text-right font-mono">{balance.carried_forward}</TableCell>
+                            <TableCell className="text-right font-mono">
+                              {balance.adjustment_amount >= 0 ? "+" : ""}{balance.adjustment_amount}
+                            </TableCell>
+                            <TableCell className="text-right font-mono font-bold">{balance.current_balance}</TableCell>
+                            <TableCell className="text-right font-mono text-blue-600">
+                              {leaveStatus.booked > 0 ? leaveStatus.booked : "-"}
+                            </TableCell>
+                            <TableCell className="text-right font-mono text-amber-600">
+                              {leaveStatus.pending > 0 ? leaveStatus.pending : "-"}
+                            </TableCell>
+                            <TableCell className="text-right font-mono font-bold text-primary">
+                              {availableBalance}
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
                     </TableBody>
                   </Table>
                 </Card>
