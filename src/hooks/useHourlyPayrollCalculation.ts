@@ -17,17 +17,43 @@ export interface HourlyEmployeeData {
 }
 
 export interface OvertimeMultipliers {
-  standard: number;
-  weekend: number;
-  holiday: number;
-  night: number;
+  standard: number;       // 1.5x - Time and a half
+  weekend: number;        // 2.0x - Double time
+  holiday: number;        // 2.5x - Double and a half
+  night: number;          // 1.25x - Night differential
+  doubleTime: number;     // 2.0x - After tier 1 threshold
+  doubleHalf: number;     // 2.5x - After tier 2 threshold
+  tripleTime: number;     // 3.0x - After tier 3 threshold
+  quadrupleTime: number;  // 4.0x - After tier 4 threshold
+  consecutiveDay: number; // For 7th consecutive day
+}
+
+export interface OvertimeThresholds {
+  tier1: number;  // Standard OT starts (default 40)
+  tier2: number;  // Double time starts (default 48)
+  tier3: number;  // Triple time starts (default 56)
+  tier4: number;  // Quadruple time starts (default 64)
+  consecutiveDays: number; // 7th day multiplier (default 7)
 }
 
 const DEFAULT_OVERTIME_MULTIPLIERS: OvertimeMultipliers = {
   standard: 1.5,
   weekend: 2.0,
   holiday: 2.5,
-  night: 1.25
+  night: 1.25,
+  doubleTime: 2.0,
+  doubleHalf: 2.5,
+  tripleTime: 3.0,
+  quadrupleTime: 4.0,
+  consecutiveDay: 2.0
+};
+
+const DEFAULT_OVERTIME_THRESHOLDS: OvertimeThresholds = {
+  tier1: 40,
+  tier2: 48,
+  tier3: 56,
+  tier4: 64,
+  consecutiveDays: 7
 };
 
 export function useHourlyPayrollCalculation() {
