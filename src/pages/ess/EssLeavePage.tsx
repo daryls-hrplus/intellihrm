@@ -27,7 +27,7 @@ import {
   CalendarCheck,
   CalendarClock
 } from "lucide-react";
-import { format, differenceInDays, startOfYear, isPast, isToday, isFuture, parseISO } from "date-fns";
+import { format, differenceInDays, startOfYear, isPast, isToday, isFuture, parseISO, getYear } from "date-fns";
 import { formatDateForDisplay } from "@/utils/dateUtils";
 import {
   Table,
@@ -97,6 +97,7 @@ export default function EssLeavePage() {
   
   const [showApplyDialog, setShowApplyDialog] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [selectedYear, setSelectedYear] = useState<string>(new Date().getFullYear().toString());
   const [formData, setFormData] = useState({
     leave_type_id: "",
     start_date: undefined as Date | undefined,
@@ -140,17 +141,34 @@ export default function EssLeavePage() {
     };
   }, [selectedBalance, bookedLeave]);
 
+  // Get available years from leave requests
+  const availableYears = useMemo(() => {
+    const years = new Set<number>();
+    const currentYear = new Date().getFullYear();
+    years.add(currentYear); // Always include current year
+    
+    leaveRequests.forEach((r) => {
+      if (r.status === "approved") {
+        years.add(getYear(parseISO(r.start_date)));
+      }
+    });
+    
+    return Array.from(years).sort((a, b) => b - a); // Sort descending
+  }, [leaveRequests]);
+
   // Filter leave taken (approved leave where start date has passed or is today)
   const leaveTaken = useMemo(() => {
-    const today = new Date();
+    const filterYear = parseInt(selectedYear);
     return leaveRequests
       .filter((r) => {
         if (r.status !== "approved") return false;
         const startDate = parseISO(r.start_date);
+        const leaveYear = getYear(startDate);
+        if (leaveYear !== filterYear) return false;
         return isPast(startDate) || isToday(startDate);
       })
       .sort((a, b) => new Date(b.start_date).getTime() - new Date(a.start_date).getTime());
-  }, [leaveRequests]);
+  }, [leaveRequests, selectedYear]);
 
   // Filter upcoming approved leave
   const upcomingLeave = useMemo(() => {
@@ -406,10 +424,29 @@ export default function EssLeavePage() {
               {/* Leave Taken History */}
               <Card>
                 <CardHeader className="pb-3">
-                  <CardTitle className="flex items-center gap-2 text-base">
-                    <CalendarCheck className="h-4 w-4" />
-                    Leave Taken This Year
-                  </CardTitle>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="flex items-center gap-2 text-base">
+                      <CalendarCheck className="h-4 w-4" />
+                      Leave History
+                    </CardTitle>
+                    <div className="flex items-center gap-3">
+                      <div className="text-sm text-muted-foreground">
+                        Total: <span className="font-semibold text-foreground">{leaveTaken.reduce((sum, l) => sum + (l.duration || 0), 0)} days</span>
+                      </div>
+                      <Select value={selectedYear} onValueChange={setSelectedYear}>
+                        <SelectTrigger className="w-[120px]">
+                          <SelectValue placeholder="Year" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {availableYears.map((year) => (
+                            <SelectItem key={year} value={year.toString()}>
+                              {year}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
                 </CardHeader>
                 <CardContent className="p-0">
                   <Table>
@@ -431,7 +468,7 @@ export default function EssLeavePage() {
                       ) : leaveTaken.length === 0 ? (
                         <TableRow>
                           <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
-                            No leave taken yet this year.
+                            No leave taken in {selectedYear}.
                           </TableCell>
                         </TableRow>
                       ) : (
