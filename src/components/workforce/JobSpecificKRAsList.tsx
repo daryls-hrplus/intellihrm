@@ -21,6 +21,14 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { MEASUREMENT_METHODS } from "@/types/responsibilityKRA";
 
 interface JobSpecificKRA {
   id: string;
@@ -222,12 +230,21 @@ export function JobSpecificKRAsList({
                     </div>
                     <div>
                       <label className="text-xs text-muted-foreground">Measurement Method</label>
-                      <Input
+                      <Select
                         value={editForm.method}
-                        onChange={(e) => setEditForm({ ...editForm, method: e.target.value })}
-                        placeholder="How will this be measured?"
-                        className="text-sm mt-1"
-                      />
+                        onValueChange={(value) => setEditForm({ ...editForm, method: value })}
+                      >
+                        <SelectTrigger className="text-sm mt-1">
+                          <SelectValue placeholder="Select method" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {MEASUREMENT_METHODS.map((method) => (
+                            <SelectItem key={method.value} value={method.value}>
+                              {method.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                     <div className="flex gap-2 pt-1">
                       <Button
@@ -262,7 +279,9 @@ export function JobSpecificKRAsList({
                     {kra.measurement_method && (
                       <div className="flex gap-2">
                         <span className="text-muted-foreground shrink-0 text-xs">Method:</span>
-                        <span className="text-xs">{kra.measurement_method}</span>
+                        <span className="text-xs">
+                          {MEASUREMENT_METHODS.find(m => m.value === kra.measurement_method)?.label || kra.measurement_method}
+                        </span>
                       </div>
                     )}
                     {!kra.job_specific_target && !kra.measurement_method && (

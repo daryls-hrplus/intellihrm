@@ -8,13 +8,20 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Sparkles, Target, Check, RefreshCw, ArrowRight } from "lucide-react";
 import { GenericKRA, ContextualizedKRA } from "@/hooks/useJobResponsibilityKRAs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { MEASUREMENT_METHODS } from "@/types/responsibilityKRA";
 
 interface JobKRAContextualizationDialogProps {
   open: boolean;
@@ -214,12 +221,21 @@ export function JobKRAContextualizationDialog({
                   </div>
                   <div className="space-y-1.5">
                     <Label className="text-xs">Measurement Method</Label>
-                    <Input
+                    <Select
                       value={kra.method}
-                      onChange={(e) => handleKRAChange(kra.id, "method", e.target.value)}
-                      placeholder="How will this be measured?"
-                      className="text-sm"
-                    />
+                      onValueChange={(value) => handleKRAChange(kra.id, "method", value)}
+                    >
+                      <SelectTrigger className="text-sm">
+                        <SelectValue placeholder="Select method" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {MEASUREMENT_METHODS.map((method) => (
+                          <SelectItem key={method.value} value={method.value}>
+                            {method.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
               </div>
