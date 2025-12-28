@@ -9,9 +9,16 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Building2, FolderTree, Plus, Pencil, Trash2, Search, ClipboardList } from "lucide-react";
+import { Building2, FolderTree, Plus, Pencil, Trash2, Search, ClipboardList, Sparkles, Loader2 } from "lucide-react";
 import { useLanguage } from "@/hooks/useLanguage";
 import { toast } from "sonner";
+import { useResponsibilityAI } from "@/hooks/useResponsibilityAI";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useAuditLog } from "@/hooks/useAuditLog";
 import {
   Dialog,
@@ -98,6 +105,7 @@ export default function JobFamiliesPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [activeTab, setActiveTab] = useState("general");
   const { logAction } = useAuditLog();
+  const { generateFamilyDescription, isGenerating: isGeneratingDescription } = useResponsibilityAI();
 
   useEffect(() => {
     const fetchCompanies = async () => {
@@ -466,7 +474,46 @@ export default function JobFamiliesPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label>{t("common.description")}</Label>
+                  <div className="flex items-center justify-between">
+                    <Label>{t("common.description")}</Label>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="h-7 px-2 text-xs"
+                            disabled={!formData.name.trim() || isGeneratingDescription}
+                            onClick={async () => {
+                              const description = await generateFamilyDescription({
+                                familyName: formData.name,
+                                existingDescription: formData.description || undefined,
+                              });
+                              if (description) {
+                                setFormData({ ...formData, description });
+                                toast.success("Description generated successfully");
+                              } else {
+                                toast.error("Failed to generate description");
+                              }
+                            }}
+                          >
+                            {isGeneratingDescription ? (
+                              <Loader2 className="h-3.5 w-3.5 animate-spin mr-1" />
+                            ) : (
+                              <Sparkles className="h-3.5 w-3.5 mr-1" />
+                            )}
+                            Generate with AI
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          {formData.name.trim() 
+                            ? "Generate a professional description using AI" 
+                            : "Enter a family name first"}
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
                   <Textarea
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}

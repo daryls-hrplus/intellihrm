@@ -34,7 +34,13 @@ interface SuggestForFamilyRequest {
   existingResponsibilities?: string[];
 }
 
-type RequestBody = GenerateDescriptionRequest | SuggestKRAsRequest | EnrichResponsibilityRequest | SuggestForFamilyRequest;
+interface GenerateFamilyDescriptionRequest {
+  action: 'generate_family_description';
+  familyName: string;
+  existingDescription?: string;
+}
+
+type RequestBody = GenerateDescriptionRequest | SuggestKRAsRequest | EnrichResponsibilityRequest | SuggestForFamilyRequest | GenerateFamilyDescriptionRequest;
 
 serve(async (req) => {
   // Handle CORS preflight
@@ -119,6 +125,18 @@ serve(async (req) => {
       
       return new Response(
         JSON.stringify({ success: true, suggestions }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (action === 'generate_family_description') {
+      const { familyName, existingDescription } = body as GenerateFamilyDescriptionRequest;
+      
+      const prompt = buildFamilyDescriptionPrompt(familyName, existingDescription);
+      const description = await callLovableAI(prompt, 'Generate job family description');
+      
+      return new Response(
+        JSON.stringify({ success: true, description }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -250,6 +268,27 @@ Focus on responsibilities that are:
   return prompt;
 }
 
+function buildFamilyDescriptionPrompt(familyName: string, existingDescription?: string): string {
+  let prompt = `Generate a professional job family description for: "${familyName}"`;
+  
+  if (existingDescription) {
+    prompt += `\n\nExisting description to improve: "${existingDescription}"`;
+  }
+  
+  prompt += `\n\nRequirements:
+- 3-4 sentences maximum
+- Explain the scope and purpose of this job family
+- Mention typical roles or career progression within the family
+- Use professional HR language
+- Be specific about the type of work and skills involved
+- Do not use bullet points, write as a paragraph
+
+Example for "Finance" job family:
+"The Finance job family encompasses roles responsible for financial planning, analysis, reporting, and compliance across the organization. Professionals in this family manage budgets, forecast financial performance, and ensure accurate record-keeping in accordance with regulatory standards. Career progression typically moves from financial analyst to controller and ultimately to executive leadership positions such as CFO."`;
+  
+  return prompt;
+}
+
 async function callLovableAI(prompt: string, context: string): Promise<string> {
   const lovableApiKey = Deno.env.get('LOVABLE_API_KEY');
   
@@ -302,9 +341,13 @@ async function callLovableAI(prompt: string, context: string): Promise<string> {
 }
 
 function generateFallbackResponse(prompt: string, context: string): string {
-  // Extract the responsibility name from the prompt
+  // Extract the name from the prompt
   const nameMatch = prompt.match(/["']([^"']+)["']/);
   const name = nameMatch ? nameMatch[1] : 'this responsibility';
+  
+  if (context.includes('job family description')) {
+    return `The ${name} job family encompasses roles focused on ${name.toLowerCase()}-related activities across the organization. Professionals in this family are responsible for driving excellence in their domain, collaborating with stakeholders, and ensuring alignment with organizational objectives. Career progression typically advances from entry-level specialist positions through senior and leadership roles.`;
+  }
   
   if (context.includes('description')) {
     return `Responsible for ${name.toLowerCase()}, ensuring adherence to organizational standards and timely completion of all related tasks. This includes coordinating with stakeholders and maintaining accurate documentation.`;
