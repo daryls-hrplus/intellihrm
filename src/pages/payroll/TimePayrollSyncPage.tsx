@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { AppLayout } from "@/components/layout/AppLayout";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -246,8 +248,15 @@ export default function TimePayrollSyncPage() {
   const totalPending = pendingCounts.timeClock + pendingCounts.timesheets + pendingCounts.overtime;
 
   return (
-    <div className="space-y-6 p-6">
+    <AppLayout>
       <div className="space-y-6">
+        <Breadcrumbs
+          items={[
+            { label: "Payroll", href: "/payroll" },
+            { label: "Time & Attendance Sync" }
+          ]}
+        />
+        
         {/* Header */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
@@ -663,6 +672,6 @@ export default function TimePayrollSyncPage() {
           </DialogContent>
         </Dialog>
       </div>
-    </div>
+    </AppLayout>
   );
 }
