@@ -224,3 +224,6 @@ verify_jwt = false
 
 [functions.suggest-skill-mappings]
 verify_jwt = false
+
+[functions.capability-ai-analyzer]
+verify_jwt = false

@@ -51,6 +51,7 @@ import { CapabilityCard } from "@/components/capabilities/CapabilityCard";
 import { CapabilityFormDialog } from "@/components/capabilities/CapabilityFormDialog";
 import { SkillMappingsDialog } from "@/components/capabilities/SkillMappingsDialog";
 import { SkillsQuickStartWizard } from "@/components/capabilities/SkillsQuickStartWizard";
+import { BatchGenerateIndicatorsButton } from "@/components/capabilities/BatchGenerateIndicatorsButton";
 import { useAuth } from "@/contexts/AuthContext";
 
 interface Company {
@@ -196,6 +197,10 @@ export default function CapabilityRegistryPage() {
             </div>
           </div>
           <div className="flex gap-2">
+            <BatchGenerateIndicatorsButton
+              companyId={companyFilter !== "all" ? companyFilter : companies[0]?.id}
+              onComplete={() => fetchCapabilities({})}
+            />
             <Button variant="outline" onClick={() => setIsQuickStartOpen(true)}>
               <Sparkles className="mr-2 h-4 w-4" />
               Quick Start

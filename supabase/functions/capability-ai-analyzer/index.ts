@@ -14,7 +14,8 @@ interface AnalysisRequest {
     | "suggest_adjacent"
     | "analyze_gap"
     | "generate_proficiency_indicators"
-    | "suggest_job_competencies";
+    | "suggest_job_competencies"
+    | "batch_generate_indicators";
   text?: string;
   capability?: { id: string; name: string; description?: string; type: string; code: string };
   capabilities?: { id: string; name: string; code: string }[];
@@ -66,7 +67,10 @@ serve(async (req) => {
         result = await analyzeCapabilityGap(employeeId!, jobProfileId!, LOVABLE_API_KEY, supabase);
         break;
       case "generate_proficiency_indicators":
-        result = await generateProficiencyIndicators(capability!, LOVABLE_API_KEY);
+        result = await generateProficiencyIndicators(capability!, LOVABLE_API_KEY, supabase);
+        break;
+      case "batch_generate_indicators":
+        result = await batchGenerateIndicators(companyId, LOVABLE_API_KEY, supabase);
         break;
       case "suggest_job_competencies":
         result = await suggestJobCompetencies(
@@ -566,7 +570,7 @@ Prioritize mandatory/primary requirements over optional ones.`;
 }
 
 // deno-lint-ignore no-explicit-any
-async function generateProficiencyIndicators(capability: any, apiKey: string) {
+async function generateProficiencyIndicators(capability: any, apiKey: string, supabase: any) {
   console.log("Generating proficiency indicators for:", capability.name);
 
   const systemPrompt = `You are an expert in competency framework design.
@@ -630,10 +634,94 @@ Ensure progression is clear and each level builds upon the previous.`;
   const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
 
   if (!toolCall?.function?.arguments) {
-    return { levels: [] };
+    return { levels: [], saved: false };
   }
 
-  return JSON.parse(toolCall.function.arguments);
+  const parsed = JSON.parse(toolCall.function.arguments);
+  
+  // Transform levels array into the JSONB format expected by the database
+  // Format: { "1": ["indicator1", "indicator2"], "2": [...], ... }
+  const proficiencyIndicators: Record<string, string[]> = {};
+  for (const level of parsed.levels || []) {
+    proficiencyIndicators[String(level.level)] = level.behavioral_indicators || [];
+  }
+
+  // Save to database if we have a capability ID
+  if (capability.id && Object.keys(proficiencyIndicators).length > 0) {
+    const { error } = await supabase
+      .from("skills_competencies")
+      .update({ proficiency_indicators: proficiencyIndicators })
+      .eq("id", capability.id);
+
+    if (error) {
+      console.error("Failed to save proficiency indicators:", error);
+      return { ...parsed, saved: false, error: error.message };
+    }
+
+    console.log(`Saved proficiency indicators for skill ${capability.id}`);
+    return { ...parsed, saved: true, proficiency_indicators: proficiencyIndicators };
+  }
+
+  return { ...parsed, saved: false };
+}
+
+// deno-lint-ignore no-explicit-any
+async function batchGenerateIndicators(companyId: string | undefined, apiKey: string, supabase: any) {
+  console.log("Batch generating proficiency indicators for company:", companyId || "all");
+
+  // Fetch skills without proficiency indicators
+  let query = supabase
+    .from("skills_competencies")
+    .select("id, name, type, description, code")
+    .eq("type", "SKILL")
+    .eq("status", "active")
+    .is("proficiency_indicators", null);
+
+  if (companyId) {
+    query = query.or(`company_id.eq.${companyId},company_id.is.null`);
+  }
+
+  const { data: skills, error: fetchError } = await query.limit(50); // Limit batch size
+
+  if (fetchError) {
+    console.error("Failed to fetch skills:", fetchError);
+    return { success: false, error: fetchError.message, processed: 0, succeeded: 0, failed: [] };
+  }
+
+  if (!skills || skills.length === 0) {
+    return { success: true, message: "No skills need indicator generation", processed: 0, succeeded: 0, failed: [] };
+  }
+
+  console.log(`Found ${skills.length} skills without proficiency indicators`);
+
+  const results = {
+    processed: 0,
+    succeeded: 0,
+    failed: [] as { id: string; name: string; error: string }[],
+  };
+
+  // Process each skill
+  for (const skill of skills) {
+    results.processed++;
+    try {
+      const result = await generateProficiencyIndicators(skill, apiKey, supabase);
+      if (result.saved) {
+        results.succeeded++;
+        console.log(`Generated indicators for: ${skill.name}`);
+      } else {
+        results.failed.push({ id: skill.id, name: skill.name, error: result.error || "Unknown error" });
+      }
+    } catch (err) {
+      console.error(`Failed to generate indicators for ${skill.name}:`, err);
+      results.failed.push({ id: skill.id, name: skill.name, error: err instanceof Error ? err.message : "Unknown error" });
+    }
+  }
+
+  return {
+    success: true,
+    message: `Processed ${results.processed} skills, ${results.succeeded} succeeded`,
+    ...results,
+  };
 }
 
 async function suggestJobCompetencies(
