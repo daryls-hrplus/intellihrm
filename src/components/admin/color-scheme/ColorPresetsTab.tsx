@@ -21,6 +21,7 @@ interface Preset {
 }
 
 const PRESETS: Preset[] = [
+  // Default & Professional
   {
     id: "hrplus-azure",
     name: "HRplus Azure",
@@ -48,15 +49,126 @@ const PRESETS: Preset[] = [
     accent: "#8B5CF6",
     tags: ["Modern", "Minimal"]
   },
+
+  // Dark Mode Variations
   {
-    id: "warm-professional",
-    name: "Warm Professional",
-    description: "Warm brown tones with coral accent for a friendly, approachable feel",
-    primary: "#78716C",
-    secondary: "#44403C",
-    accent: "#F97316",
-    tags: ["Warm", "Friendly"]
+    id: "midnight-dark",
+    name: "Midnight Dark",
+    description: "Deep dark theme with electric blue accents for low-light environments",
+    primary: "#3B82F6",
+    secondary: "#0F172A",
+    accent: "#22D3EE",
+    tags: ["Dark Mode", "Modern"]
   },
+  {
+    id: "carbon-dark",
+    name: "Carbon Dark",
+    description: "Rich carbon blacks with amber highlights for a premium dark experience",
+    primary: "#71717A",
+    secondary: "#18181B",
+    accent: "#F59E0B",
+    tags: ["Dark Mode", "Premium"]
+  },
+  {
+    id: "obsidian-dark",
+    name: "Obsidian Dark",
+    description: "Deep obsidian with emerald accents for a sophisticated dark interface",
+    primary: "#64748B",
+    secondary: "#0C0A09",
+    accent: "#10B981",
+    tags: ["Dark Mode", "Elegant"]
+  },
+  {
+    id: "night-owl",
+    name: "Night Owl",
+    description: "Developer-friendly dark theme with soft purple and pink tones",
+    primary: "#7C3AED",
+    secondary: "#1E1B4B",
+    accent: "#EC4899",
+    tags: ["Dark Mode", "Developer"]
+  },
+
+  // Healthcare
+  {
+    id: "healthcare-trust",
+    name: "Healthcare Trust",
+    description: "Calming blues and greens that inspire trust and wellbeing",
+    primary: "#0EA5E9",
+    secondary: "#0369A1",
+    accent: "#14B8A6",
+    tags: ["Healthcare", "Medical"]
+  },
+  {
+    id: "clinical-clean",
+    name: "Clinical Clean",
+    description: "Clean, clinical palette with soft teal for medical environments",
+    primary: "#0D9488",
+    secondary: "#115E59",
+    accent: "#06B6D4",
+    tags: ["Healthcare", "Clinical"]
+  },
+
+  // Finance & Banking
+  {
+    id: "finance-prestige",
+    name: "Finance Prestige",
+    description: "Deep navy and gold conveying stability and wealth management",
+    primary: "#1E3A8A",
+    secondary: "#172554",
+    accent: "#CA8A04",
+    tags: ["Finance", "Banking"]
+  },
+  {
+    id: "fintech-modern",
+    name: "Fintech Modern",
+    description: "Contemporary fintech palette with vibrant gradients",
+    primary: "#6366F1",
+    secondary: "#312E81",
+    accent: "#22C55E",
+    tags: ["Finance", "Fintech"]
+  },
+
+  // Education
+  {
+    id: "education-inspire",
+    name: "Education Inspire",
+    description: "Warm, inspiring colors that promote learning and creativity",
+    primary: "#7C3AED",
+    secondary: "#5B21B6",
+    accent: "#F97316",
+    tags: ["Education", "Learning"]
+  },
+  {
+    id: "academic-classic",
+    name: "Academic Classic",
+    description: "Traditional academic colors with dignified burgundy tones",
+    primary: "#9F1239",
+    secondary: "#4C0519",
+    accent: "#D4A84B",
+    tags: ["Education", "Academic"]
+  },
+
+  // Legal & Government
+  {
+    id: "legal-authority",
+    name: "Legal Authority",
+    description: "Authoritative deep blues conveying trust and professionalism",
+    primary: "#1E40AF",
+    secondary: "#1E3A5F",
+    accent: "#78716C",
+    tags: ["Legal", "Government"]
+  },
+  {
+    id: "civic-trust",
+    name: "Civic Trust",
+    description: "Patriotic palette suitable for government and public sector",
+    primary: "#1D4ED8",
+    secondary: "#1E3A8A",
+    accent: "#DC2626",
+    tags: ["Government", "Public Sector"]
+  },
+
+  // Technology
   {
     id: "tech-cyan",
     name: "Tech Cyan",
@@ -67,6 +179,55 @@ const PRESETS: Preset[] = [
     tags: ["Tech", "Bold"]
   },
   {
+    id: "startup-vibrant",
+    name: "Startup Vibrant",
+    description: "Energetic, modern palette for innovative startups",
+    primary: "#8B5CF6",
+    secondary: "#4C1D95",
+    accent: "#F43F5E",
+    tags: ["Tech", "Startup"]
+  },
+  {
+    id: "saas-professional",
+    name: "SaaS Professional",
+    description: "Clean, professional SaaS palette with subtle gradients",
+    primary: "#2563EB",
+    secondary: "#1E3A8A",
+    accent: "#10B981",
+    tags: ["Tech", "SaaS"]
+  },
+
+  // Hospitality & Retail
+  {
+    id: "hospitality-warm",
+    name: "Hospitality Warm",
+    description: "Warm, welcoming colors for hotels and hospitality",
+    primary: "#B45309",
+    secondary: "#78350F",
+    accent: "#D97706",
+    tags: ["Hospitality", "Warm"]
+  },
+  {
+    id: "retail-energy",
+    name: "Retail Energy",
+    description: "Energetic retail palette that drives engagement",
+    primary: "#E11D48",
+    secondary: "#9F1239",
+    accent: "#F97316",
+    tags: ["Retail", "Energy"]
+  },
+  {
+    id: "luxury-brand",
+    name: "Luxury Brand",
+    description: "Sophisticated palette for premium and luxury brands",
+    primary: "#44403C",
+    secondary: "#1C1917",
+    accent: "#A16207",
+    tags: ["Retail", "Luxury"]
+  },
+
+  // Sustainability & Non-profit
+  {
     id: "forest-green",
     name: "Forest Green",
     description: "Nature-inspired greens for sustainability-focused organizations",
@@ -75,6 +236,26 @@ const PRESETS: Preset[] = [
     accent: "#84CC16",
     tags: ["Natural", "Sustainable"]
   },
+  {
+    id: "nonprofit-trust",
+    name: "Non-profit Trust",
+    description: "Approachable, trustworthy colors for charitable organizations",
+    primary: "#0891B2",
+    secondary: "#155E75",
+    accent: "#F59E0B",
+    tags: ["Non-profit", "Charity"]
+  },
+  {
+    id: "eco-earth",
+    name: "Eco Earth",
+    description: "Earthy tones reflecting environmental consciousness",
+    primary: "#65A30D",
+    secondary: "#365314",
+    accent: "#22C55E",
+    tags: ["Sustainable", "Eco"]
+  },
+
+  // Creative & Media
   {
     id: "royal-purple",
     name: "Royal Purple",
@@ -85,6 +266,17 @@ const PRESETS: Preset[] = [
     tags: ["Creative", "Premium"]
   },
   {
+    id: "media-bold",
+    name: "Media Bold",
+    description: "Bold, attention-grabbing colors for media and entertainment",
+    primary: "#DC2626",
+    secondary: "#7F1D1D",
+    accent: "#FACC15",
+    tags: ["Media", "Entertainment"]
+  },
+
+  // Minimal & Clean
+  {
     id: "minimal-gray",
     name: "Minimal Gray",
     description: "Ultra-clean grayscale with subtle blue accent for minimalist design",
@@ -92,6 +284,24 @@ const PRESETS: Preset[] = [
     secondary: "#374151",
     accent: "#3B82F6",
     tags: ["Minimal", "Clean"]
+  },
+  {
+    id: "warm-professional",
+    name: "Warm Professional",
+    description: "Warm brown tones with coral accent for a friendly, approachable feel",
+    primary: "#78716C",
+    secondary: "#44403C",
+    accent: "#F97316",
+    tags: ["Warm", "Friendly"]
+  },
+  {
+    id: "nordic-frost",
+    name: "Nordic Frost",
+    description: "Cool, crisp Scandinavian-inspired minimalist palette",
+    primary: "#94A3B8",
+    secondary: "#475569",
+    accent: "#0EA5E9",
+    tags: ["Minimal", "Nordic"]
   }
 ];
 
