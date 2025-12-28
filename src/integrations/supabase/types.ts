@@ -26664,6 +26664,111 @@ export type Database = {
           },
         ]
       }
+      kra_rating_submissions: {
+        Row: {
+          achievement_notes: string | null
+          calculated_score: number | null
+          company_id: string | null
+          created_at: string | null
+          evidence_urls: Json | null
+          final_score: number | null
+          id: string
+          manager_comments: string | null
+          manager_id: string | null
+          manager_rating: number | null
+          manager_rating_at: string | null
+          participant_id: string
+          responsibility_id: string
+          responsibility_kra_id: string
+          self_comments: string | null
+          self_rating: number | null
+          self_rating_at: string | null
+          status: string | null
+          updated_at: string | null
+          weight_adjusted_score: number | null
+        }
+        Insert: {
+          achievement_notes?: string | null
+          calculated_score?: number | null
+          company_id?: string | null
+          created_at?: string | null
+          evidence_urls?: Json | null
+          final_score?: number | null
+          id?: string
+          manager_comments?: string | null
+          manager_id?: string | null
+          manager_rating?: number | null
+          manager_rating_at?: string | null
+          participant_id: string
+          responsibility_id: string
+          responsibility_kra_id: string
+          self_comments?: string | null
+          self_rating?: number | null
+          self_rating_at?: string | null
+          status?: string | null
+          updated_at?: string | null
+          weight_adjusted_score?: number | null
+        }
+        Update: {
+          achievement_notes?: string | null
+          calculated_score?: number | null
+          company_id?: string | null
+          created_at?: string | null
+          evidence_urls?: Json | null
+          final_score?: number | null
+          id?: string
+          manager_comments?: string | null
+          manager_id?: string | null
+          manager_rating?: number | null
+          manager_rating_at?: string | null
+          participant_id?: string
+          responsibility_id?: string
+          responsibility_kra_id?: string
+          self_comments?: string | null
+          self_rating?: number | null
+          self_rating_at?: string | null
+          status?: string | null
+          updated_at?: string | null
+          weight_adjusted_score?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kra_rating_submissions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kra_rating_submissions_manager_id_fkey"
+            columns: ["manager_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kra_rating_submissions_participant_id_fkey"
+            columns: ["participant_id"]
+            isOneToOne: false
+            referencedRelation: "appraisal_participants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kra_rating_submissions_responsibility_id_fkey"
+            columns: ["responsibility_id"]
+            isOneToOne: false
+            referencedRelation: "responsibilities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kra_rating_submissions_responsibility_kra_id_fkey"
+            columns: ["responsibility_kra_id"]
+            isOneToOne: false
+            referencedRelation: "responsibility_kras"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       learning_path_courses: {
         Row: {
           course_id: string
@@ -39241,6 +39346,69 @@ export type Database = {
           },
         ]
       }
+      responsibility_kras: {
+        Row: {
+          company_id: string | null
+          created_at: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          is_required: boolean | null
+          measurement_method: string | null
+          name: string
+          responsibility_id: string
+          sequence_order: number | null
+          target_metric: string | null
+          updated_at: string | null
+          weight: number
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_required?: boolean | null
+          measurement_method?: string | null
+          name: string
+          responsibility_id: string
+          sequence_order?: number | null
+          target_metric?: string | null
+          updated_at?: string | null
+          weight?: number
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_required?: boolean | null
+          measurement_method?: string | null
+          name?: string
+          responsibility_id?: string
+          sequence_order?: number | null
+          target_metric?: string | null
+          updated_at?: string | null
+          weight?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "responsibility_kras_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "responsibility_kras_responsibility_id_fkey"
+            columns: ["responsibility_id"]
+            isOneToOne: false
+            referencedRelation: "responsibilities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       retroactive_pay_calculations: {
         Row: {
           adjustment_amount: number
@@ -47958,6 +48126,10 @@ export type Database = {
         Returns: number
       }
       calculate_goal_risk_score: { Args: { p_goal_id: string }; Returns: Json }
+      calculate_responsibility_kra_rollup: {
+        Args: { p_participant_id: string; p_responsibility_id: string }
+        Returns: number
+      }
       calculate_scenario_totals: {
         Args: { p_scenario_id: string }
         Returns: undefined
