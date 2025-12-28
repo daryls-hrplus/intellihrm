@@ -102,14 +102,14 @@ export const WIZARD_STEPS: { step: WizardStep; title: string; description: strin
 ];
 
 export const JOB_LEVELS = [
-  { value: "Entry", label: "Entry Level" },
-  { value: "Junior", label: "Junior" },
-  { value: "Mid", label: "Mid-Level" },
-  { value: "Senior", label: "Senior" },
-  { value: "Lead", label: "Lead" },
-  { value: "Manager", label: "Manager" },
-  { value: "Director", label: "Director" },
-  { value: "Executive", label: "Executive" },
+  { value: "entry", label: "Entry Level" },
+  { value: "junior", label: "Junior" },
+  { value: "mid", label: "Mid-Level" },
+  { value: "senior", label: "Senior" },
+  { value: "lead", label: "Lead" },
+  { value: "manager", label: "Manager" },
+  { value: "director", label: "Director" },
+  { value: "executive", label: "Executive" },
 ];
 
 export const PROFICIENCY_LEVELS = [

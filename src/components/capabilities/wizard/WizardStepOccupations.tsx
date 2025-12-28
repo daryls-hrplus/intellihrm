@@ -17,7 +17,9 @@ import {
   DropdownMenuContent,
   DropdownMenuCheckboxItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
+import { X } from "lucide-react";
 
 interface WizardStepOccupationsProps {
   selectedIndustries: string[];
@@ -174,6 +176,20 @@ export function WizardStepOccupations({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48">
+            {selectedJobLevels.length > 0 && (
+              <>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="w-full justify-start text-destructive hover:text-destructive"
+                  onClick={() => setSelectedJobLevels([])}
+                >
+                  <X className="h-4 w-4 mr-2" />
+                  Clear filters
+                </Button>
+                <DropdownMenuSeparator />
+              </>
+            )}
             {JOB_LEVELS.map(level => (
               <DropdownMenuCheckboxItem
                 key={level.value}
