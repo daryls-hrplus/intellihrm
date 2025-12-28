@@ -1597,6 +1597,15 @@ export function usePayroll() {
   const approvePayroll = async (payrollRunId: string) => {
     setIsLoading(true);
     try {
+      // Get payroll run details including pay group
+      const { data: runData, error: runFetchError } = await supabase
+        .from("payroll_runs")
+        .select("pay_group_id, company_id, run_number")
+        .eq("id", payrollRunId)
+        .single();
+      
+      if (runFetchError) throw runFetchError;
+      
       const { error } = await supabase.from("payroll_runs").update({
         status: 'approved',
         approved_at: new Date().toISOString(),
@@ -1610,6 +1619,146 @@ export function usePayroll() {
       }).eq("payroll_run_id", payrollRunId);
       
       toast.success("Payroll approved");
+      
+      // Auto-generate GL entries if GL is configured for the pay group
+      if (runData?.pay_group_id && runData?.company_id) {
+        const { data: payGroupData } = await supabase
+          .from("pay_groups")
+          .select("gl_configured")
+          .eq("id", runData.pay_group_id)
+          .single();
+        
+        if (payGroupData?.gl_configured) {
+          try {
+            // Check if GL already calculated
+            const { data: existingBatch } = await supabase
+              .from("gl_journal_batches")
+              .select("id")
+              .eq("payroll_run_id", payrollRunId)
+              .limit(1);
+            
+            if (!existingBatch || existingBatch.length === 0) {
+              // Dynamically import to avoid circular dependencies
+              const { useGLCalculation } = await import("@/hooks/useGLCalculation");
+              
+              // Fetch mappings and create entries directly
+              const { data: mappings } = await supabase
+                .from("gl_account_mappings")
+                .select("*")
+                .eq("company_id", runData.company_id)
+                .eq("is_active", true);
+              
+              if (mappings && mappings.length > 0) {
+                // Fetch payroll totals
+                const { data: empPayrolls } = await supabase
+                  .from("employee_payroll")
+                  .select("gross_pay, net_pay, tax_deductions, benefit_deductions, employer_taxes, employer_benefits, employer_retirement, calculation_details")
+                  .eq("payroll_run_id", payrollRunId);
+                
+                const totals = (empPayrolls || []).reduce(
+                  (acc: any, emp: any) => {
+                    const calcDetails = emp.calculation_details as any;
+                    const savingsDeductions = calcDetails?.savings_deductions || {};
+                    return {
+                      grossPay: acc.grossPay + (emp.gross_pay || 0),
+                      netPay: acc.netPay + (emp.net_pay || 0),
+                      taxDeductions: acc.taxDeductions + (emp.tax_deductions || 0),
+                      benefitDeductions: acc.benefitDeductions + (emp.benefit_deductions || 0),
+                      employerTaxes: acc.employerTaxes + (emp.employer_taxes || 0),
+                      employerBenefits: acc.employerBenefits + (emp.employer_benefits || 0),
+                      employerRetirement: acc.employerRetirement + (emp.employer_retirement || 0),
+                      savingsEmployeeTotal: acc.savingsEmployeeTotal + (savingsDeductions.total_employee || 0),
+                      savingsEmployerTotal: acc.savingsEmployerTotal + (savingsDeductions.total_employer || 0),
+                    };
+                  },
+                  { grossPay: 0, netPay: 0, taxDeductions: 0, benefitDeductions: 0, employerTaxes: 0, employerBenefits: 0, employerRetirement: 0, savingsEmployeeTotal: 0, savingsEmployerTotal: 0 }
+                );
+                
+                // Create batch
+                const batchNumber = `PR-${runData.run_number}-${Date.now().toString(36).toUpperCase()}`;
+                const { data: batch, error: batchError } = await supabase
+                  .from("gl_journal_batches")
+                  .insert({
+                    company_id: runData.company_id,
+                    batch_number: batchNumber,
+                    batch_date: new Date().toISOString().split('T')[0],
+                    payroll_run_id: payrollRunId,
+                    description: `Auto-generated GL entries for payroll run ${runData.run_number}`,
+                    status: "draft",
+                    total_debits: 0,
+                    total_credits: 0,
+                  })
+                  .select()
+                  .single();
+                
+                if (!batchError && batch) {
+                  const findMapping = (type: string) => mappings.find((m: any) => m.mapping_type === type);
+                  const entries: any[] = [];
+                  let entryNum = 1;
+                  let totalDebits = 0;
+                  let totalCredits = 0;
+                  
+                  const addEntry = (accountId: string | null, amount: number, isDebit: boolean, desc: string) => {
+                    if (!accountId || amount <= 0) return;
+                    entries.push({
+                      batch_id: batch.id,
+                      entry_number: entryNum++,
+                      entry_date: batch.batch_date,
+                      account_id: accountId,
+                      debit_amount: isDebit ? amount : 0,
+                      credit_amount: isDebit ? 0 : amount,
+                      description: desc,
+                      source_type: "payroll_run",
+                      entry_type: isDebit ? 'debit' : 'credit',
+                    });
+                    if (isDebit) totalDebits += amount;
+                    else totalCredits += amount;
+                  };
+                  
+                  // Create entries
+                  const grossMapping = findMapping("gross_pay") || findMapping("wages_expense");
+                  const netMapping = findMapping("net_pay");
+                  const taxLiabMapping = findMapping("tax_liability");
+                  const empTaxMapping = findMapping("tax_expense");
+                  const benLiabMapping = findMapping("benefit_liability");
+                  const empBenMapping = findMapping("benefit_expense");
+                  const savingsEmpMapping = findMapping("savings_employee_deduction");
+                  const savingsErExpMapping = findMapping("savings_employer_contribution");
+                  const savingsErLiabMapping = findMapping("savings_employer_liability");
+                  
+                  addEntry(grossMapping?.debit_account_id, totals.grossPay, true, "Gross payroll expense");
+                  addEntry(empTaxMapping?.debit_account_id, totals.employerTaxes, true, "Employer tax expense");
+                  addEntry(empBenMapping?.debit_account_id, totals.employerBenefits, true, "Employer benefit expense");
+                  addEntry(savingsErExpMapping?.debit_account_id, totals.savingsEmployerTotal, true, "Employer savings match");
+                  
+                  addEntry(netMapping?.credit_account_id, totals.netPay, false, "Net pay payable");
+                  addEntry(taxLiabMapping?.credit_account_id, totals.taxDeductions, false, "Tax withholdings");
+                  addEntry(benLiabMapping?.credit_account_id, totals.benefitDeductions, false, "Benefit deductions");
+                  addEntry(empTaxMapping?.credit_account_id || taxLiabMapping?.credit_account_id, totals.employerTaxes, false, "Employer taxes payable");
+                  addEntry(empBenMapping?.credit_account_id || benLiabMapping?.credit_account_id, totals.employerBenefits, false, "Employer benefits payable");
+                  addEntry(savingsEmpMapping?.credit_account_id, totals.savingsEmployeeTotal, false, "Employee savings");
+                  addEntry(savingsErLiabMapping?.credit_account_id || savingsErExpMapping?.credit_account_id, totals.savingsEmployerTotal, false, "Employer savings payable");
+                  
+                  if (entries.length > 0) {
+                    await supabase.from("gl_journal_entries").insert(entries);
+                    await supabase.from("gl_journal_batches").update({
+                      total_debits: totalDebits,
+                      total_credits: totalCredits,
+                    }).eq("id", batch.id);
+                    
+                    toast.success(`GL entries auto-generated: ${entries.length} entries`);
+                  }
+                }
+              }
+            }
+          } catch (glErr) {
+            console.error("Error auto-generating GL:", glErr);
+            // Don't fail the approval, just log the error
+            toast.warning("Payroll approved but GL generation encountered an issue");
+          }
+        }
+      }
+      
       return true;
     } catch (err: any) {
       toast.error(err.message || "Failed to approve payroll");

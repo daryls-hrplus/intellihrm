@@ -79,6 +79,14 @@ const GLAccountMappingsPage = () => {
     { value: 'employer_contribution', label: t('payroll.gl.employerContribution', 'Employer Contribution') },
     { value: 'employee_deduction', label: t('payroll.gl.employeeDeduction', 'Employee Deduction') },
     { value: 'net_pay', label: t('payroll.gl.netPay', 'Net Pay') },
+    { value: 'savings_employee_deduction', label: t('payroll.gl.savingsEmployeeDeduction', 'Savings - Employee Deduction') },
+    { value: 'savings_employer_contribution', label: t('payroll.gl.savingsEmployerContribution', 'Savings - Employer Match') },
+    { value: 'savings_employer_liability', label: t('payroll.gl.savingsEmployerLiability', 'Savings - Employer Liability') },
+    { value: 'loan_repayment', label: t('payroll.gl.loanRepayment', 'Loan Repayment') },
+    { value: 'garnishment', label: t('payroll.gl.garnishment', 'Garnishment') },
+    { value: 'union_dues', label: t('payroll.gl.unionDues', 'Union Dues') },
+    { value: 'retirement_expense', label: t('payroll.gl.retirementExpense', 'Retirement Expense') },
+    { value: 'retirement_liability', label: t('payroll.gl.retirementLiability', 'Retirement Liability') },
     { value: 'custom', label: t('payroll.gl.custom', 'Custom') }
   ];
 
