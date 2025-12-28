@@ -40,7 +40,20 @@ interface JournalEntry {
   credit_amount: number;
   description: string | null;
   source_type: string | null;
+  entry_type: string | null;
+  composed_gl_string: string | null;
+  override_rule_id: string | null;
+  segment_values: Record<string, string> | null;
 }
+
+const mapEntries = (data: any[]): JournalEntry[] => {
+  return data.map(d => ({
+    ...d,
+    segment_values: typeof d.segment_values === 'object' && d.segment_values !== null 
+      ? d.segment_values as Record<string, string>
+      : null
+  }));
+};
 
 interface GLAccount {
   id: string;
@@ -109,7 +122,7 @@ const GLJournalBatchesPage = () => {
         .eq('batch_id', batchId)
         .order('entry_number');
       if (error) throw error;
-      setEntries(prev => ({ ...prev, [batchId]: data || [] }));
+      setEntries(prev => ({ ...prev, [batchId]: mapEntries(data || []) }));
     } catch (error) {
       console.error('Error loading entries:', error);
     }
@@ -297,6 +310,8 @@ const GLJournalBatchesPage = () => {
                               <TableHeader>
                                 <TableRow>
                                   <TableHead className="w-16">#</TableHead>
+                                  <TableHead>{t('payroll.gl.type', 'Type')}</TableHead>
+                                  <TableHead>{t('payroll.gl.composedGLString', 'GL String')}</TableHead>
                                   <TableHead>{t('payroll.gl.account', 'Account')}</TableHead>
                                   <TableHead>{t('payroll.gl.costCenter', 'Cost Center')}</TableHead>
                                   <TableHead className="text-right">{t('payroll.gl.debit', 'Debit')}</TableHead>
@@ -308,6 +323,16 @@ const GLJournalBatchesPage = () => {
                                 {(entries[batch.id] || []).map((entry) => (
                                   <TableRow key={entry.id}>
                                     <TableCell className="font-mono">{entry.entry_number}</TableCell>
+                                    <TableCell>
+                                      {entry.entry_type ? (
+                                        <Badge variant={entry.entry_type === 'debit' ? 'default' : 'secondary'} className="text-xs">
+                                          {entry.entry_type === 'debit' ? 'DR' : 'CR'}
+                                        </Badge>
+                                      ) : '-'}
+                                    </TableCell>
+                                    <TableCell className="font-mono text-xs text-primary">
+                                      {entry.composed_gl_string || '-'}
+                                    </TableCell>
                                     <TableCell className="font-mono text-sm">{getAccountName(entry.account_id)}</TableCell>
                                     <TableCell className="font-mono text-sm">{getCostCenterCode(entry.cost_center_id)}</TableCell>
                                     <TableCell className="text-right font-mono">
