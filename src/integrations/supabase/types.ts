@@ -16422,6 +16422,143 @@ export type Database = {
           },
         ]
       }
+      face_verification_logs: {
+        Row: {
+          captured_photo_url: string | null
+          confidence_score: number | null
+          created_at: string | null
+          device_info: Json | null
+          employee_id: string
+          failure_reason: string | null
+          id: string
+          matched_template_id: string | null
+          override_by: string | null
+          override_reason: string | null
+          punch_type: string
+          time_clock_entry_id: string | null
+          verification_status: string | null
+        }
+        Insert: {
+          captured_photo_url?: string | null
+          confidence_score?: number | null
+          created_at?: string | null
+          device_info?: Json | null
+          employee_id: string
+          failure_reason?: string | null
+          id?: string
+          matched_template_id?: string | null
+          override_by?: string | null
+          override_reason?: string | null
+          punch_type: string
+          time_clock_entry_id?: string | null
+          verification_status?: string | null
+        }
+        Update: {
+          captured_photo_url?: string | null
+          confidence_score?: number | null
+          created_at?: string | null
+          device_info?: Json | null
+          employee_id?: string
+          failure_reason?: string | null
+          id?: string
+          matched_template_id?: string | null
+          override_by?: string | null
+          override_reason?: string | null
+          punch_type?: string
+          time_clock_entry_id?: string | null
+          verification_status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "face_verification_logs_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "face_verification_logs_matched_template_id_fkey"
+            columns: ["matched_template_id"]
+            isOneToOne: false
+            referencedRelation: "face_verification_templates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "face_verification_logs_override_by_fkey"
+            columns: ["override_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "face_verification_logs_time_clock_entry_id_fkey"
+            columns: ["time_clock_entry_id"]
+            isOneToOne: false
+            referencedRelation: "time_clock_entries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      face_verification_templates: {
+        Row: {
+          created_at: string | null
+          employee_id: string
+          enrolled_at: string | null
+          enrolled_by: string | null
+          id: string
+          is_active: boolean | null
+          is_primary: boolean | null
+          last_verified_at: string | null
+          photo_url: string | null
+          template_data: string
+          updated_at: string | null
+          verification_count: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          employee_id: string
+          enrolled_at?: string | null
+          enrolled_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_primary?: boolean | null
+          last_verified_at?: string | null
+          photo_url?: string | null
+          template_data: string
+          updated_at?: string | null
+          verification_count?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          employee_id?: string
+          enrolled_at?: string | null
+          enrolled_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_primary?: boolean | null
+          last_verified_at?: string | null
+          photo_url?: string | null
+          template_data?: string
+          updated_at?: string | null
+          verification_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "face_verification_templates_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "face_verification_templates_enrolled_by_fkey"
+            columns: ["enrolled_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       fatigue_management_rules: {
         Row: {
           applies_to: string
@@ -17216,6 +17353,86 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      geofence_validations: {
+        Row: {
+          captured_accuracy_meters: number | null
+          captured_latitude: number | null
+          captured_longitude: number | null
+          created_at: string | null
+          distance_from_location_meters: number | null
+          employee_id: string
+          id: string
+          matched_location_id: string | null
+          override_by: string | null
+          override_reason: string | null
+          punch_type: string
+          time_clock_entry_id: string | null
+          validation_message: string | null
+          validation_status: string | null
+        }
+        Insert: {
+          captured_accuracy_meters?: number | null
+          captured_latitude?: number | null
+          captured_longitude?: number | null
+          created_at?: string | null
+          distance_from_location_meters?: number | null
+          employee_id: string
+          id?: string
+          matched_location_id?: string | null
+          override_by?: string | null
+          override_reason?: string | null
+          punch_type: string
+          time_clock_entry_id?: string | null
+          validation_message?: string | null
+          validation_status?: string | null
+        }
+        Update: {
+          captured_accuracy_meters?: number | null
+          captured_latitude?: number | null
+          captured_longitude?: number | null
+          created_at?: string | null
+          distance_from_location_meters?: number | null
+          employee_id?: string
+          id?: string
+          matched_location_id?: string | null
+          override_by?: string | null
+          override_reason?: string | null
+          punch_type?: string
+          time_clock_entry_id?: string | null
+          validation_message?: string | null
+          validation_status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "geofence_validations_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "geofence_validations_matched_location_id_fkey"
+            columns: ["matched_location_id"]
+            isOneToOne: false
+            referencedRelation: "geofence_locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "geofence_validations_override_by_fkey"
+            columns: ["override_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "geofence_validations_time_clock_entry_id_fkey"
+            columns: ["time_clock_entry_id"]
+            isOneToOne: false
+            referencedRelation: "time_clock_entries"
             referencedColumns: ["id"]
           },
         ]
@@ -40607,6 +40824,77 @@ export type Database = {
           },
         ]
       }
+      shift_differentials: {
+        Row: {
+          applies_to_days: string[] | null
+          calculation_method: string | null
+          code: string
+          company_id: string
+          created_at: string | null
+          differential_type: string
+          effective_end_date: string | null
+          effective_start_date: string | null
+          end_time: string
+          flat_amount: number | null
+          id: string
+          is_active: boolean | null
+          min_hours_for_differential: number | null
+          multiplier: number | null
+          name: string
+          priority: number | null
+          start_time: string
+          updated_at: string | null
+        }
+        Insert: {
+          applies_to_days?: string[] | null
+          calculation_method?: string | null
+          code: string
+          company_id: string
+          created_at?: string | null
+          differential_type: string
+          effective_end_date?: string | null
+          effective_start_date?: string | null
+          end_time: string
+          flat_amount?: number | null
+          id?: string
+          is_active?: boolean | null
+          min_hours_for_differential?: number | null
+          multiplier?: number | null
+          name: string
+          priority?: number | null
+          start_time: string
+          updated_at?: string | null
+        }
+        Update: {
+          applies_to_days?: string[] | null
+          calculation_method?: string | null
+          code?: string
+          company_id?: string
+          created_at?: string | null
+          differential_type?: string
+          effective_end_date?: string | null
+          effective_start_date?: string | null
+          end_time?: string
+          flat_amount?: number | null
+          id?: string
+          is_active?: boolean | null
+          min_hours_for_differential?: number | null
+          multiplier?: number | null
+          name?: string
+          priority?: number | null
+          start_time?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shift_differentials_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       shift_notifications: {
         Row: {
           company_id: string
@@ -43367,7 +43655,10 @@ export type Database = {
           break_end: string | null
           break_start: string | null
           clock_in: string
+          clock_in_accuracy_meters: number | null
+          clock_in_face_verified: boolean | null
           clock_in_geofence_id: string | null
+          clock_in_geofence_status: string | null
           clock_in_latitude: number | null
           clock_in_location: string | null
           clock_in_longitude: number | null
@@ -43375,7 +43666,10 @@ export type Database = {
           clock_in_photo_url: string | null
           clock_in_within_geofence: boolean | null
           clock_out: string | null
+          clock_out_accuracy_meters: number | null
+          clock_out_face_verified: boolean | null
           clock_out_geofence_id: string | null
+          clock_out_geofence_status: string | null
           clock_out_latitude: number | null
           clock_out_location: string | null
           clock_out_longitude: number | null
@@ -43388,8 +43682,10 @@ export type Database = {
           face_verified: boolean | null
           geofence_violation_notes: string | null
           id: string
+          is_split_shift: boolean | null
           notes: string | null
           overtime_hours: number | null
+          parent_entry_id: string | null
           project_id: string | null
           regular_hours: number | null
           rounded_clock_in: string | null
@@ -43397,7 +43693,10 @@ export type Database = {
           rounding_rule_applied: string | null
           schedule_id: string | null
           shift_differential: number | null
+          shift_differential_amount: number | null
+          shift_differential_id: string | null
           shift_id: string | null
+          shift_sequence: number | null
           status: string | null
           task_id: string | null
           total_hours: number | null
@@ -43411,7 +43710,10 @@ export type Database = {
           break_end?: string | null
           break_start?: string | null
           clock_in: string
+          clock_in_accuracy_meters?: number | null
+          clock_in_face_verified?: boolean | null
           clock_in_geofence_id?: string | null
+          clock_in_geofence_status?: string | null
           clock_in_latitude?: number | null
           clock_in_location?: string | null
           clock_in_longitude?: number | null
@@ -43419,7 +43721,10 @@ export type Database = {
           clock_in_photo_url?: string | null
           clock_in_within_geofence?: boolean | null
           clock_out?: string | null
+          clock_out_accuracy_meters?: number | null
+          clock_out_face_verified?: boolean | null
           clock_out_geofence_id?: string | null
+          clock_out_geofence_status?: string | null
           clock_out_latitude?: number | null
           clock_out_location?: string | null
           clock_out_longitude?: number | null
@@ -43432,8 +43737,10 @@ export type Database = {
           face_verified?: boolean | null
           geofence_violation_notes?: string | null
           id?: string
+          is_split_shift?: boolean | null
           notes?: string | null
           overtime_hours?: number | null
+          parent_entry_id?: string | null
           project_id?: string | null
           regular_hours?: number | null
           rounded_clock_in?: string | null
@@ -43441,7 +43748,10 @@ export type Database = {
           rounding_rule_applied?: string | null
           schedule_id?: string | null
           shift_differential?: number | null
+          shift_differential_amount?: number | null
+          shift_differential_id?: string | null
           shift_id?: string | null
+          shift_sequence?: number | null
           status?: string | null
           task_id?: string | null
           total_hours?: number | null
@@ -43455,7 +43765,10 @@ export type Database = {
           break_end?: string | null
           break_start?: string | null
           clock_in?: string
+          clock_in_accuracy_meters?: number | null
+          clock_in_face_verified?: boolean | null
           clock_in_geofence_id?: string | null
+          clock_in_geofence_status?: string | null
           clock_in_latitude?: number | null
           clock_in_location?: string | null
           clock_in_longitude?: number | null
@@ -43463,7 +43776,10 @@ export type Database = {
           clock_in_photo_url?: string | null
           clock_in_within_geofence?: boolean | null
           clock_out?: string | null
+          clock_out_accuracy_meters?: number | null
+          clock_out_face_verified?: boolean | null
           clock_out_geofence_id?: string | null
+          clock_out_geofence_status?: string | null
           clock_out_latitude?: number | null
           clock_out_location?: string | null
           clock_out_longitude?: number | null
@@ -43476,8 +43792,10 @@ export type Database = {
           face_verified?: boolean | null
           geofence_violation_notes?: string | null
           id?: string
+          is_split_shift?: boolean | null
           notes?: string | null
           overtime_hours?: number | null
+          parent_entry_id?: string | null
           project_id?: string | null
           regular_hours?: number | null
           rounded_clock_in?: string | null
@@ -43485,7 +43803,10 @@ export type Database = {
           rounding_rule_applied?: string | null
           schedule_id?: string | null
           shift_differential?: number | null
+          shift_differential_amount?: number | null
+          shift_differential_id?: string | null
           shift_id?: string | null
+          shift_sequence?: number | null
           status?: string | null
           task_id?: string | null
           total_hours?: number | null
@@ -43528,6 +43849,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "time_clock_entries_parent_entry_id_fkey"
+            columns: ["parent_entry_id"]
+            isOneToOne: false
+            referencedRelation: "time_clock_entries"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "time_clock_entries_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
@@ -43546,6 +43874,13 @@ export type Database = {
             columns: ["schedule_id"]
             isOneToOne: false
             referencedRelation: "work_schedules"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "time_clock_entries_shift_differential_id_fkey"
+            columns: ["shift_differential_id"]
+            isOneToOne: false
+            referencedRelation: "shift_differentials"
             referencedColumns: ["id"]
           },
           {
