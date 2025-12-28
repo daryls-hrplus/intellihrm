@@ -15,22 +15,25 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
 
-    --primary: 168 76% 36%;
+    /* HRplus Moderate Azure - Primary brand color */
+    --primary: 210 61% 47%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 215 20% 95%;
+    --secondary: 210 30% 95%;
     --secondary-foreground: 222 47% 11%;
 
-    --muted: 215 20% 94%;
-    --muted-foreground: 215 16% 47%;
+    --muted: 210 20% 94%;
+    --muted-foreground: 210 16% 47%;
 
-    --accent: 168 76% 94%;
-    --accent-foreground: 168 76% 26%;
+    /* Light azure tint for accents */
+    --accent: 210 61% 94%;
+    --accent-foreground: 210 61% 35%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --success: 142 76% 36%;
+    /* Repurposed teal as success color - unique differentiator */
+    --success: 168 76% 36%;
     --success-foreground: 0 0% 100%;
 
     --warning: 38 92% 50%;
@@ -39,30 +42,31 @@
     --info: 199 89% 48%;
     --info-foreground: 0 0% 100%;
 
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
-    --ring: 168 76% 36%;
+    --border: 210 32% 91%;
+    --input: 210 32% 91%;
+    --ring: 210 61% 47%;
 
     --radius: 0.5rem;
 
-    --sidebar-background: 225 73% 35%;
+    /* HRplus Dark Azure - Sidebar brand color */
+    --sidebar-background: 211 81% 26%;
     --sidebar-foreground: 210 40% 98%;
-    --sidebar-primary: 168 76% 42%;
+    --sidebar-primary: 210 61% 55%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 225 73% 42%;
+    --sidebar-accent: 211 81% 32%;
     --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-border: 225 73% 45%;
-    --sidebar-ring: 168 76% 42%;
+    --sidebar-border: 211 81% 35%;
+    --sidebar-ring: 210 61% 55%;
 
-    /* Custom tokens */
-    --gradient-primary: linear-gradient(135deg, hsl(168 76% 36%), hsl(168 76% 28%));
-    --gradient-sidebar: linear-gradient(180deg, hsl(225 73% 35%), hsl(225 73% 28%));
-    --gradient-card-hover: linear-gradient(135deg, hsl(168 76% 96%), hsl(168 76% 94%));
+    /* Custom tokens - Updated for HRplus brand */
+    --gradient-primary: linear-gradient(135deg, hsl(210 61% 47%), hsl(211 81% 26%));
+    --gradient-sidebar: linear-gradient(180deg, hsl(211 81% 26%), hsl(211 81% 20%));
+    --gradient-card-hover: linear-gradient(135deg, hsl(210 61% 97%), hsl(210 61% 94%));
     
     --shadow-sm: 0 1px 2px 0 hsl(222 47% 11% / 0.05);
     --shadow-md: 0 4px 6px -1px hsl(222 47% 11% / 0.1), 0 2px 4px -2px hsl(222 47% 11% / 0.1);
     --shadow-lg: 0 10px 15px -3px hsl(222 47% 11% / 0.1), 0 4px 6px -4px hsl(222 47% 11% / 0.1);
-    --shadow-glow: 0 0 20px hsl(168 76% 36% / 0.15);
+    --shadow-glow: 0 0 20px hsl(210 61% 47% / 0.15);
   }
 
   .dark {
@@ -75,33 +79,35 @@
     --popover: 222 47% 9%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 168 76% 42%;
+    /* HRplus Moderate Azure - slightly brighter for dark mode */
+    --primary: 210 61% 52%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 222 47% 14%;
     --secondary-foreground: 210 40% 98%;
 
     --muted: 222 47% 14%;
-    --muted-foreground: 215 20% 65%;
+    --muted-foreground: 210 20% 65%;
 
     --accent: 222 47% 16%;
-    --accent-foreground: 168 76% 42%;
+    --accent-foreground: 210 61% 52%;
 
     --destructive: 0 63% 31%;
     --destructive-foreground: 210 40% 98%;
 
     --border: 222 47% 16%;
     --input: 222 47% 16%;
-    --ring: 168 76% 42%;
+    --ring: 210 61% 52%;
 
-    --sidebar-background: 225 73% 28%;
+    /* Dark mode sidebar - slightly lighter Dark Azure */
+    --sidebar-background: 211 81% 22%;
     --sidebar-foreground: 210 40% 98%;
-    --sidebar-primary: 168 76% 42%;
+    --sidebar-primary: 210 61% 55%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 225 73% 35%;
+    --sidebar-accent: 211 81% 28%;
     --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-border: 225 73% 38%;
-    --sidebar-ring: 168 76% 42%;
+    --sidebar-border: 211 81% 32%;
+    --sidebar-ring: 210 61% 55%;
   }
 }
 
