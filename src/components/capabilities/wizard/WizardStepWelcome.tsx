@@ -27,14 +27,14 @@ export function WizardStepWelcome({ onNext, onCancel }: WizardStepWelcomeProps) 
       <div className="grid grid-cols-4 gap-4 max-w-2xl mx-auto">
         <div className="p-4 rounded-lg bg-muted/50">
           <Zap className="h-6 w-6 text-primary mx-auto mb-2" />
-          <p className="text-sm font-medium">140+ Skills</p>
+          <p className="text-sm font-medium">260+ Skills</p>
           <p className="text-xs text-muted-foreground">
             Industry relevant
           </p>
         </div>
         <div className="p-4 rounded-lg bg-muted/50">
           <Target className="h-6 w-6 text-primary mx-auto mb-2" />
-          <p className="text-sm font-medium">25+ Competencies</p>
+          <p className="text-sm font-medium">75+ Competencies</p>
           <p className="text-xs text-muted-foreground">Core behaviors</p>
         </div>
         <div className="p-4 rounded-lg bg-muted/50">
