@@ -1,5 +1,8 @@
 project_id = "hmdewkkytchwrenqagkw"
 
+[functions.extract-brand-colors]
+verify_jwt = false
+
 [functions.process-goal-checkins]
 verify_jwt = false
 
