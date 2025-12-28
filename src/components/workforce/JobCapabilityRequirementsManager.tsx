@@ -31,7 +31,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Tooltip,
@@ -750,27 +750,47 @@ export function JobCapabilityRequirementsManager({
               </p>
             </div>
 
-            <div className="space-y-2">
-              <div className="flex items-center gap-6">
-                <div className="flex items-center gap-2">
-                  <Switch
-                    checked={formData.is_required}
-                    onCheckedChange={(checked) => setFormData({ ...formData, is_required: checked })}
-                  />
-                  <Label>Required</Label>
+            <div className="space-y-3">
+              <Label>Requirement Type</Label>
+              <RadioGroup
+                value={formData.is_required ? 'required' : formData.is_preferred ? 'preferred' : 'optional'}
+                onValueChange={(value) => {
+                  setFormData({
+                    ...formData,
+                    is_required: value === 'required',
+                    is_preferred: value === 'preferred'
+                  });
+                }}
+                className="flex flex-col gap-3"
+              >
+                <div className="flex items-start gap-3">
+                  <RadioGroupItem value="required" id="req-required" className="mt-0.5" />
+                  <div className="space-y-1">
+                    <Label htmlFor="req-required" className="font-medium cursor-pointer">Required</Label>
+                    <p className="text-xs text-muted-foreground">
+                      Must-have competency — candidates without it may be disqualified
+                    </p>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Switch
-                    checked={formData.is_preferred}
-                    onCheckedChange={(checked) => setFormData({ ...formData, is_preferred: checked })}
-                  />
-                  <Label>Preferred</Label>
+                <div className="flex items-start gap-3">
+                  <RadioGroupItem value="preferred" id="req-preferred" className="mt-0.5" />
+                  <div className="space-y-1">
+                    <Label htmlFor="req-preferred" className="font-medium cursor-pointer">Preferred</Label>
+                    <p className="text-xs text-muted-foreground">
+                      Nice-to-have competency — adds value but not essential for the role
+                    </p>
+                  </div>
                 </div>
-              </div>
-              <p className="text-xs text-muted-foreground">
-                <strong>Required:</strong> Must-have competency for the role — candidates without it may be disqualified. 
-                <strong className="ml-2">Preferred:</strong> Nice-to-have competency — adds value but not essential.
-              </p>
+                <div className="flex items-start gap-3">
+                  <RadioGroupItem value="optional" id="req-optional" className="mt-0.5" />
+                  <div className="space-y-1">
+                    <Label htmlFor="req-optional" className="font-medium cursor-pointer">Optional</Label>
+                    <p className="text-xs text-muted-foreground">
+                      Tracked for development purposes but not evaluated in hiring decisions
+                    </p>
+                  </div>
+                </div>
+              </RadioGroup>
             </div>
 
             <div className="space-y-2">
