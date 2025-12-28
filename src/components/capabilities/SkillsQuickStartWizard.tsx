@@ -49,6 +49,7 @@ export function SkillsQuickStartWizard({
   
   // Selection state
   const [selectedIndustries, setSelectedIndustries] = useState<string[]>([]);
+  const [selectedSubIndustries, setSelectedSubIndustries] = useState<string[]>([]);
   const [selectedOccupations, setSelectedOccupations] = useState<string[]>([]);
   const [occupationLabels, setOccupationLabels] = useState<Record<string, string>>({});
   const [selectedSkills, setSelectedSkills] = useState<Set<string>>(new Set());
@@ -114,6 +115,20 @@ export function SkillsQuickStartWizard({
         : [...prev, industryCode]
     );
     // Clear downstream selections when industry changes
+    setSelectedSubIndustries([]);
+    setSelectedOccupations([]);
+    setOccupationLabels({});
+    setSelectedSkills(new Set());
+    setSelectedCompetencies(new Set());
+  };
+
+  const handleSubIndustryToggle = (subIndustryCode: string) => {
+    setSelectedSubIndustries(prev =>
+      prev.includes(subIndustryCode)
+        ? prev.filter(c => c !== subIndustryCode)
+        : [...prev, subIndustryCode]
+    );
+    // Clear downstream selections when sub-industry changes
     setSelectedOccupations([]);
     setOccupationLabels({});
     setSelectedSkills(new Set());
@@ -386,6 +401,7 @@ export function SkillsQuickStartWizard({
     // Reset state
     setCurrentStep("welcome");
     setSelectedIndustries([]);
+    setSelectedSubIndustries([]);
     setSelectedOccupations([]);
     setOccupationLabels({});
     setSelectedSkills(new Set());
@@ -415,7 +431,9 @@ export function SkillsQuickStartWizard({
         return (
           <WizardStepIndustry
             selectedIndustries={selectedIndustries}
+            selectedSubIndustries={selectedSubIndustries}
             onIndustryToggle={handleIndustryToggle}
+            onSubIndustryToggle={handleSubIndustryToggle}
           />
         );
       
@@ -423,6 +441,7 @@ export function SkillsQuickStartWizard({
         return (
           <WizardStepOccupations
             selectedIndustries={selectedIndustries}
+            selectedSubIndustries={selectedSubIndustries}
             selectedOccupations={selectedOccupations}
             occupationLabels={occupationLabels}
             onOccupationToggle={handleOccupationToggle}
