@@ -7,7 +7,7 @@ const corsHeaders = {
 };
 
 interface SentimentRequest {
-  action: "analyze_response" | "analyze_batch" | "generate_metrics" | "generate_nudges" | "detect_alerts";
+  action: "analyze_response" | "analyze_batch" | "generate_metrics" | "generate_nudges" | "detect_alerts" | "calculate_enps";
   surveyId?: string;
   responseId?: string;
   companyId: string;
@@ -17,8 +17,36 @@ interface SentimentRequest {
     id: string;
     questionText: string;
     responseText: string;
+    responseValue?: number; // For NPS questions (0-10)
+    questionType?: string;
     departmentId?: string;
   }>;
+}
+
+// eNPS calculation helper
+function calculateENPS(scores: number[]): { 
+  enpsScore: number; 
+  promoters: number; 
+  passives: number; 
+  detractors: number;
+  total: number;
+} {
+  if (scores.length === 0) return { enpsScore: 0, promoters: 0, passives: 0, detractors: 0, total: 0 };
+  
+  let promoters = 0;
+  let passives = 0;
+  let detractors = 0;
+  
+  for (const score of scores) {
+    if (score >= 9) promoters++;
+    else if (score >= 7) passives++;
+    else detractors++;
+  }
+  
+  const total = scores.length;
+  const enpsScore = Math.round(((promoters - detractors) / total) * 100);
+  
+  return { enpsScore, promoters, passives, detractors, total };
 }
 
 serve(async (req) => {
@@ -260,6 +288,92 @@ Create nudges that:
           }
         }];
         break;
+
+      case "calculate_enps": {
+        // Handle eNPS calculation separately (no AI needed) - return early
+        // Fetch NPS responses for the survey
+        const { data: npsResponses, error: npsError } = await supabase
+          .from("pulse_survey_responses")
+          .select("response_data, employee_id, profiles(department_id)")
+          .eq("survey_id", request.surveyId)
+          .eq("company_id", request.companyId);
+
+        if (npsError) throw npsError;
+
+        // Extract NPS scores from response_data
+        const npsScores: number[] = [];
+        const deptScores: Record<string, number[]> = {};
+
+        for (const response of npsResponses || []) {
+          const responseData = response.response_data as Record<string, any>;
+          // Look for NPS-type answers (0-10 scale)
+          for (const [key, value] of Object.entries(responseData)) {
+            if (typeof value === "number" && value >= 0 && value <= 10) {
+              npsScores.push(value);
+              const deptId = (response.profiles as any)?.department_id;
+              if (deptId) {
+                if (!deptScores[deptId]) deptScores[deptId] = [];
+                deptScores[deptId].push(value);
+              }
+            }
+          }
+        }
+
+        const orgENPS = calculateENPS(npsScores);
+        console.log("Calculated org eNPS:", orgENPS);
+
+        // Store org-level eNPS metrics
+        await supabase.from("pulse_sentiment_metrics").upsert({
+          company_id: request.companyId,
+          survey_id: request.surveyId,
+          department_id: null,
+          metric_date: new Date().toISOString().split("T")[0],
+          enps_score: orgENPS.enpsScore,
+          promoter_count: orgENPS.promoters,
+          passive_count: orgENPS.passives,
+          detractor_count: orgENPS.detractors,
+          enps_response_count: orgENPS.total,
+        }, { onConflict: "company_id,department_id,survey_id,metric_date" });
+
+        // Store department-level eNPS metrics
+        for (const [deptId, scores] of Object.entries(deptScores)) {
+          const deptENPS = calculateENPS(scores);
+          await supabase.from("pulse_sentiment_metrics").upsert({
+            company_id: request.companyId,
+            survey_id: request.surveyId,
+            department_id: deptId,
+            metric_date: new Date().toISOString().split("T")[0],
+            enps_score: deptENPS.enpsScore,
+            promoter_count: deptENPS.promoters,
+            passive_count: deptENPS.passives,
+            detractor_count: deptENPS.detractors,
+            enps_response_count: deptENPS.total,
+          }, { onConflict: "company_id,department_id,survey_id,metric_date" });
+        }
+
+        // Check for eNPS alerts
+        if (orgENPS.enpsScore < 0) {
+          await supabase.from("pulse_sentiment_alerts").insert({
+            company_id: request.companyId,
+            survey_id: request.surveyId,
+            alert_type: "enps_critical",
+            severity: "high",
+            title: "Negative eNPS Score",
+            description: `Organization eNPS is ${orgENPS.enpsScore}, indicating more detractors than promoters.`,
+            trigger_metrics: { enps_score: orgENPS.enpsScore, ...orgENPS },
+            recommended_actions: [
+              "Conduct focus groups with detractors to understand concerns",
+              "Review exit interview data for common themes",
+              "Address top pain points identified in open feedback"
+            ],
+            is_enps_alert: true,
+          });
+        }
+
+        return new Response(JSON.stringify({ success: true, result: orgENPS }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
 
       default:
         throw new Error(`Unknown action: ${request.action}`);
