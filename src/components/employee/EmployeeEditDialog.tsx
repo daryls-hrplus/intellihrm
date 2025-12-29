@@ -114,6 +114,12 @@ interface EmployeeEditDialogProps {
     date_of_birth?: string | null;
     marital_status?: string | null;
     nationality?: string | null;
+    // Employee identifiers
+    employee_id?: string | null;
+    badge_number?: string | null;
+    global_id?: string | null;
+    cedula_number?: string | null;
+    time_clock_id?: string | null;
   } | null;
   onSuccess?: () => void;
 }
@@ -142,6 +148,12 @@ export function EmployeeEditDialog({
   const [dateOfBirth, setDateOfBirth] = useState("");
   const [maritalStatus, setMaritalStatus] = useState("");
   const [nationality, setNationality] = useState("");
+  // Employee identifiers
+  const [employeeIdField, setEmployeeIdField] = useState("");
+  const [badgeNumber, setBadgeNumber] = useState("");
+  const [globalId, setGlobalId] = useState("");
+  const [cedulaNumber, setCedulaNumber] = useState("");
+  const [timeClockId, setTimeClockId] = useState("");
   const [saving, setSaving] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [customFieldValues, setCustomFieldValues] = useState<Record<string, string | number | boolean | string[] | null>>({});
@@ -175,6 +187,12 @@ export function EmployeeEditDialog({
       setDateOfBirth(employee.date_of_birth || "");
       setMaritalStatus(employee.marital_status || "");
       setNationality(employee.nationality || "");
+      // Employee identifiers
+      setEmployeeIdField(employee.employee_id || "");
+      setBadgeNumber(employee.badge_number || "");
+      setGlobalId(employee.global_id || "");
+      setCedulaNumber(employee.cedula_number || "");
+      setTimeClockId(employee.time_clock_id || "");
     }
   }, [employee]);
 
@@ -273,6 +291,12 @@ export function EmployeeEditDialog({
           date_of_birth: dateOfBirth || null,
           marital_status: maritalStatus || null,
           nationality: nationality || null,
+          // Employee identifiers
+          employee_id: employeeIdField || null,
+          badge_number: badgeNumber || null,
+          global_id: globalId || null,
+          cedula_number: cedulaNumber || null,
+          time_clock_id: timeClockId || null,
         })
         .eq("id", employee.id);
 
@@ -306,6 +330,11 @@ export function EmployeeEditDialog({
           date_of_birth: employee.date_of_birth,
           marital_status: employee.marital_status,
           nationality: employee.nationality,
+          employee_id: employee.employee_id,
+          badge_number: employee.badge_number,
+          global_id: employee.global_id,
+          cedula_number: employee.cedula_number,
+          time_clock_id: employee.time_clock_id,
         },
         newValues: {
           full_name: fullName,
@@ -325,6 +354,11 @@ export function EmployeeEditDialog({
           date_of_birth: dateOfBirth || null,
           marital_status: maritalStatus || null,
           nationality: nationality || null,
+          employee_id: employeeIdField || null,
+          badge_number: badgeNumber || null,
+          global_id: globalId || null,
+          cedula_number: cedulaNumber || null,
+          time_clock_id: timeClockId || null,
         },
       });
 
@@ -560,6 +594,60 @@ export function EmployeeEditDialog({
                   value={nationality}
                   onChange={(e) => setNationality(e.target.value)}
                   placeholder="Enter nationality"
+                />
+              </div>
+            </div>
+          </div>
+
+          <Separator />
+
+          {/* Employee Identifiers Section */}
+          <div className="space-y-4">
+            <h4 className="text-sm font-medium">Employee Identifiers</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="employeeIdField">Employee ID</Label>
+                <Input
+                  id="employeeIdField"
+                  value={employeeIdField}
+                  onChange={(e) => setEmployeeIdField(e.target.value)}
+                  placeholder="Enter employee ID"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="badgeNumber">Badge Number</Label>
+                <Input
+                  id="badgeNumber"
+                  value={badgeNumber}
+                  onChange={(e) => setBadgeNumber(e.target.value)}
+                  placeholder="Enter badge number"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="globalId">Global ID</Label>
+                <Input
+                  id="globalId"
+                  value={globalId}
+                  onChange={(e) => setGlobalId(e.target.value)}
+                  placeholder="Enter global ID"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="cedulaNumber">Cédula Number</Label>
+                <Input
+                  id="cedulaNumber"
+                  value={cedulaNumber}
+                  onChange={(e) => setCedulaNumber(e.target.value)}
+                  placeholder="Enter cédula number"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="timeClockId">Time Clock ID</Label>
+                <Input
+                  id="timeClockId"
+                  value={timeClockId}
+                  onChange={(e) => setTimeClockId(e.target.value)}
+                  placeholder="Enter time clock ID"
                 />
               </div>
             </div>

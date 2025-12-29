@@ -98,6 +98,7 @@ interface EmployeeProfile {
   badge_number: string | null;
   global_id: string | null;
   cedula_number: string | null;
+  time_clock_id: string | null;
   // Name component fields
   first_name: string | null;
   middle_name: string | null;
@@ -167,7 +168,7 @@ export default function EmployeeProfilePage() {
       // Fetch profile
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
-        .select('id, full_name, email, avatar_url, timezone, preferred_language, date_format, time_format, created_at, first_hire_date, last_hire_date, start_date, continuous_service_date, seniority_date, adjusted_service_date, employment_status, employee_id, badge_number, global_id, cedula_number, first_name, middle_name, first_last_name, second_last_name, gender, date_of_birth, marital_status, nationality')
+        .select('id, full_name, email, avatar_url, timezone, preferred_language, date_format, time_format, created_at, first_hire_date, last_hire_date, start_date, continuous_service_date, seniority_date, adjusted_service_date, employment_status, employee_id, badge_number, global_id, cedula_number, time_clock_id, first_name, middle_name, first_last_name, second_last_name, gender, date_of_birth, marital_status, nationality')
         .eq('id', employeeId)
         .maybeSingle();
 
@@ -243,6 +244,7 @@ export default function EmployeeProfilePage() {
         badge_number: profile.badge_number,
         global_id: profile.global_id,
         cedula_number: profile.cedula_number,
+        time_clock_id: profile.time_clock_id,
         // Name component fields
         first_name: profile.first_name,
         middle_name: profile.middle_name,
@@ -611,6 +613,15 @@ export default function EmployeeProfilePage() {
                         <p className="text-sm font-medium text-foreground">Cédula Number</p>
                         <p className="text-sm text-muted-foreground">
                           {employee.cedula_number || 'Not Set'}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <Clock className="h-4 w-4 text-muted-foreground" />
+                      <div>
+                        <p className="text-sm font-medium text-foreground">Time Clock ID</p>
+                        <p className="text-sm text-muted-foreground">
+                          {employee.time_clock_id || 'Not Set'}
                         </p>
                       </div>
                     </div>
