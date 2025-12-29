@@ -20,6 +20,8 @@ import {
   Check,
   Pencil,
   Trash2,
+  LayoutGrid,
+  List,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -51,6 +53,14 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { toast } from "sonner";
 import { EmployeeEditDialog } from "@/components/employee/EmployeeEditDialog";
 import { AddEmployeeDialog } from "@/components/employee/AddEmployeeDialog";
@@ -86,6 +96,7 @@ export default function EmployeesPage() {
   const [filterOpen, setFilterOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState<"all" | "active" | "unassigned">("all");
   const [departmentFilter, setDepartmentFilter] = useState<string>("all");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [employeeToDelete, setEmployeeToDelete] = useState<Employee | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -427,6 +438,34 @@ export default function EmployeesPage() {
             </PopoverContent>
           </Popover>
 
+          {/* View Toggle */}
+          <div className="flex items-center rounded-lg border border-border bg-card p-1">
+            <button
+              onClick={() => setViewMode("grid")}
+              className={cn(
+                "rounded-md p-2 transition-colors",
+                viewMode === "grid"
+                  ? "bg-primary text-primary-foreground"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted"
+              )}
+              title="Grid view"
+            >
+              <LayoutGrid className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => setViewMode("list")}
+              className={cn(
+                "rounded-md p-2 transition-colors",
+                viewMode === "list"
+                  ? "bg-primary text-primary-foreground"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted"
+              )}
+              title="List view"
+            >
+              <List className="h-4 w-4" />
+            </button>
+          </div>
+
           {!canViewPii && (
             <Tooltip>
               <TooltipTrigger asChild>
@@ -490,8 +529,8 @@ export default function EmployeesPage() {
           </div>
         )}
 
-        {/* Employee Grid */}
-        {!loading && filteredEmployees.length > 0 && (
+        {/* Employee Grid View */}
+        {!loading && filteredEmployees.length > 0 && viewMode === "grid" && (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {filteredEmployees.map((employee, index) => (
               <div
@@ -609,6 +648,126 @@ export default function EmployeesPage() {
                 </div>
               </div>
             ))}
+          </div>
+        )}
+
+        {/* Employee List View */}
+        {!loading && filteredEmployees.length > 0 && viewMode === "list" && (
+          <div className="rounded-lg border border-border bg-card overflow-hidden">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[300px]">{t("workforce.employee")}</TableHead>
+                  <TableHead>{t("workforce.position")}</TableHead>
+                  <TableHead>{t("workforce.department")}</TableHead>
+                  <TableHead>{t("workforce.email")}</TableHead>
+                  <TableHead>{t("workforce.location")}</TableHead>
+                  <TableHead>{t("workforce.status")}</TableHead>
+                  <TableHead className="w-[100px]">{t("common.actions")}</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredEmployees.map((employee) => (
+                  <TableRow 
+                    key={employee.id} 
+                    className="cursor-pointer hover:bg-muted/50"
+                    onClick={() => navigate(`/workforce/employees/${employee.id}`)}
+                  >
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-8 w-8">
+                          <AvatarImage src={employee.avatar_url || undefined} alt={employee.full_name} />
+                          <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
+                            {getInitials(employee.full_name)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span className="font-medium text-foreground">{employee.full_name}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      {employee.positions.length > 0 ? (
+                        <div className="flex items-center gap-1">
+                          <span className="text-sm">{employee.positions[0].position_title}</span>
+                          {employee.positions.length > 1 && (
+                            <Badge variant="secondary" className="text-xs">
+                              +{employee.positions.length - 1}
+                            </Badge>
+                          )}
+                        </div>
+                      ) : (
+                        <span className="text-sm text-muted-foreground">{t("workforce.noPositionAssigned")}</span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {employee.positions.length > 0 && employee.positions[0].department_name ? (
+                        <span className="text-sm">{employee.positions[0].department_name}</span>
+                      ) : (
+                        <span className="text-sm text-muted-foreground">—</span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <span className={cn("text-sm", !canViewPii && "font-mono text-xs")}>
+                        {maskPii(employee.email, "email")}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      {employee.location ? (
+                        <span className={cn("text-sm", !canViewPii && "font-mono text-xs")}>
+                          {maskPii(employee.location, "text")}
+                        </span>
+                      ) : (
+                        <span className="text-sm text-muted-foreground">—</span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <span
+                        className={cn(
+                          "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium",
+                          employee.is_active
+                            ? "bg-success/10 text-success"
+                            : "bg-muted text-muted-foreground"
+                        )}
+                      >
+                        {employee.is_active ? t("workforce.active") : t("workforce.unassigned")}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="h-8 w-8"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={(e) => {
+                            e.stopPropagation();
+                            handleEditEmployee(employee);
+                          }}>
+                            <Pencil className="mr-2 h-4 w-4" />
+                            {t("common.edit")}
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteClick(employee);
+                            }}
+                            className="text-destructive focus:text-destructive"
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            {t("common.delete")}
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </div>
         )}
 
