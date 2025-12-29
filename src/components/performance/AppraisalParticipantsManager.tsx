@@ -138,14 +138,33 @@ export function AppraisalParticipantsManager({
       return;
     }
 
+    setAddingParticipant(true);
     try {
-      const { error } = await supabase.from("appraisal_participants").insert({
-        cycle_id: cycle.id,
-        employee_id: selectedEmployee,
-        evaluator_id: selectedEvaluator || null,
-      });
+      // Insert participant
+      const { data: newParticipant, error } = await supabase
+        .from("appraisal_participants")
+        .insert({
+          cycle_id: cycle.id,
+          employee_id: selectedEmployee,
+          evaluator_id: selectedEvaluator || null,
+        })
+        .select("id")
+        .single();
 
       if (error) throw error;
+
+      // Detect and create role segments if cycle has start/end dates
+      if (cycle.start_date && cycle.end_date && newParticipant) {
+        const hasRoleChange = await createRoleSegments(
+          newParticipant.id,
+          selectedEmployee,
+          cycle.start_date,
+          cycle.end_date
+        );
+        if (hasRoleChange) {
+          toast.info("Role changes detected - segments created for weighted scoring");
+        }
+      }
 
       toast.success("Participant added successfully");
       setSelectedEmployee("");
@@ -155,6 +174,8 @@ export function AppraisalParticipantsManager({
     } catch (error: any) {
       console.error("Error adding participant:", error);
       toast.error(error.message || "Failed to add participant");
+    } finally {
+      setAddingParticipant(false);
     }
   };
 
@@ -224,12 +245,15 @@ export function AppraisalParticipantsManager({
             </div>
             <div className="flex-1">
               <label className="text-sm font-medium mb-1 block">Evaluator (Optional)</label>
-              <Select value={selectedEvaluator} onValueChange={setSelectedEvaluator}>
+              <Select 
+                value={selectedEvaluator || "none"} 
+                onValueChange={(v) => setSelectedEvaluator(v === "none" ? "" : v)}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Select evaluator..." />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">No evaluator</SelectItem>
+                  <SelectItem value="none">No evaluator</SelectItem>
                   {employees.map((employee) => (
                     <SelectItem key={employee.id} value={employee.id}>
                       {employee.full_name}
@@ -238,9 +262,16 @@ export function AppraisalParticipantsManager({
                 </SelectContent>
               </Select>
             </div>
-            <Button onClick={handleAddParticipant} disabled={!selectedEmployee}>
-              <UserPlus className="mr-2 h-4 w-4" />
-              Add
+            <Button 
+              onClick={handleAddParticipant} 
+              disabled={!selectedEmployee || addingParticipant || segmentsLoading}
+            >
+              {addingParticipant || segmentsLoading ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <UserPlus className="mr-2 h-4 w-4" />
+              )}
+              {addingParticipant ? "Adding..." : "Add"}
             </Button>
           </div>
 
@@ -266,19 +297,33 @@ export function AppraisalParticipantsManager({
                 ) : (
                   participants.map((participant) => (
                     <TableRow key={participant.id}>
-                      <TableCell className="font-medium">{participant.employee_name}</TableCell>
+                      <TableCell className="font-medium">
+                        <div className="flex items-center gap-2">
+                          {participant.employee_name}
+                          {participant.has_role_change && (
+                            <Tooltip>
+                              <TooltipTrigger>
+                                <GitBranch className="h-4 w-4 text-info" />
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                Role changed during cycle - weighted scoring applies
+                              </TooltipContent>
+                            </Tooltip>
+                          )}
+                        </div>
+                      </TableCell>
                       <TableCell>
                         <Select
-                          value={participant.evaluator_id || ""}
+                          value={participant.evaluator_id || "none"}
                           onValueChange={(value) =>
-                            handleUpdateEvaluator(participant.id, value || null)
+                            handleUpdateEvaluator(participant.id, value === "none" ? null : value)
                           }
                         >
                           <SelectTrigger className="w-[180px]">
                             <SelectValue placeholder="Assign evaluator..." />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="">No evaluator</SelectItem>
+                            <SelectItem value="none">No evaluator</SelectItem>
                             {employees.map((employee) => (
                               <SelectItem key={employee.id} value={employee.id}>
                                 {employee.full_name}

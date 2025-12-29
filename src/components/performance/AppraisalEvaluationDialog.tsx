@@ -10,10 +10,12 @@ import { Slider } from "@/components/ui/slider";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Target, Briefcase, Award, Save, Send, ChevronDown, ChevronUp, Loader2 } from "lucide-react";
+import { Target, Briefcase, Award, Save, Send, ChevronDown, ChevronUp, Loader2, GitBranch } from "lucide-react";
 import { useKRARatingSubmissions } from "@/hooks/useKRARatingSubmissions";
 import { KRAWithRating, ResponsibilityKRA } from "@/types/responsibilityKRA";
 import { KRARatingCard } from "./KRARatingCard";
+import { RoleSegmentTimeline } from "./RoleSegmentTimeline";
+import { useAppraisalRoleSegments, RoleSegment } from "@/hooks/useAppraisalRoleSegments";
 
 interface AppraisalScore {
   id?: string;
@@ -28,6 +30,9 @@ interface AppraisalScore {
   hasKRAs?: boolean;
   kras?: KRAWithRating[];
   kraRollupScore?: number;
+  // For segment tracking
+  segment_id?: string;
+  segment_name?: string;
 }
 
 interface CycleInfo {
@@ -36,6 +41,13 @@ interface CycleInfo {
   goal_weight: number;
   min_rating: number;
   max_rating: number;
+}
+
+interface ParticipantInfo {
+  employee_id: string;
+  final_comments: string | null;
+  has_role_change: boolean;
+  primary_position_id: string | null;
 }
 
 interface AppraisalEvaluationDialogProps {
@@ -66,6 +78,11 @@ export function AppraisalEvaluationDialog({
   const [scores, setScores] = useState<AppraisalScore[]>([]);
   const [finalComments, setFinalComments] = useState("");
   const [expandedResponsibilities, setExpandedResponsibilities] = useState<Set<string>>(new Set());
+  const [hasRoleChange, setHasRoleChange] = useState(false);
+  const [roleSegments, setRoleSegments] = useState<RoleSegment[]>([]);
+  const [activeSegmentId, setActiveSegmentId] = useState<string | undefined>();
+
+  const { fetchSegments } = useAppraisalRoleSegments();
 
   const { 
     fetchKRAsWithRatings, 
@@ -97,13 +114,24 @@ export function AppraisalEvaluationDialog({
       // Fetch participant info
       const { data: participantData } = await supabase
         .from("appraisal_participants")
-        .select("employee_id, final_comments")
+        .select("employee_id, final_comments, has_role_change, primary_position_id")
         .eq("id", participantId)
         .single();
 
       if (participantData) {
         setFinalComments(participantData.final_comments || "");
-        await fetchEmployeeItems(participantData.employee_id);
+        setHasRoleChange(participantData.has_role_change || false);
+        
+        // Fetch role segments if there's a role change
+        if (participantData.has_role_change) {
+          const segments = await fetchSegments(participantId);
+          setRoleSegments(segments);
+          if (segments.length > 0) {
+            setActiveSegmentId(segments[segments.length - 1].id); // Default to most recent
+          }
+        }
+        
+        await fetchEmployeeItems(participantData.employee_id, participantData.has_role_change);
       }
 
       // Fetch existing scores
@@ -115,7 +143,75 @@ export function AppraisalEvaluationDialog({
     }
   };
 
-  const fetchEmployeeItems = async (employeeId: string) => {
+  // Fetch items from stored role segments
+  const fetchSegmentBasedItems = async () => {
+    const newScores: AppraisalScore[] = [];
+    
+    for (const segment of roleSegments) {
+      const segmentWeight = segment.contribution_percentage / 100;
+      const segmentName = segment.position_title || 'Unknown Role';
+      
+      // Add segment competencies
+      if (segment.competencies && Array.isArray(segment.competencies)) {
+        for (const comp of segment.competencies as any[]) {
+          newScores.push({
+            item_id: `${segment.id}-${comp.id}`,
+            item_name: comp.name,
+            evaluation_type: "competency",
+            weight: (comp.weight || 0) * segmentWeight,
+            rating: null,
+            weighted_score: null,
+            comments: "",
+            segment_id: segment.id,
+            segment_name: segmentName,
+          });
+        }
+      }
+      
+      // Add segment responsibilities
+      if (segment.responsibilities && Array.isArray(segment.responsibilities)) {
+        for (const resp of segment.responsibilities as any[]) {
+          newScores.push({
+            item_id: `${segment.id}-${resp.id}`,
+            item_name: resp.name,
+            evaluation_type: "responsibility",
+            weight: (resp.weight || 0) * segmentWeight,
+            rating: null,
+            weighted_score: null,
+            comments: "",
+            segment_id: segment.id,
+            segment_name: segmentName,
+          });
+        }
+      }
+      
+      // Add segment goals
+      if (segment.goals && Array.isArray(segment.goals)) {
+        for (const goal of segment.goals as any[]) {
+          newScores.push({
+            item_id: `${segment.id}-${goal.id}`,
+            item_name: goal.name,
+            evaluation_type: "goal",
+            weight: (goal.weight || 0) * segmentWeight,
+            rating: null,
+            weighted_score: null,
+            comments: "",
+            segment_id: segment.id,
+            segment_name: segmentName,
+          });
+        }
+      }
+    }
+    
+    setScores(newScores);
+  };
+
+  const fetchEmployeeItems = async (employeeId: string, hasMultipleRoles: boolean = false) => {
+    // If employee has role changes, fetch items per segment
+    if (hasMultipleRoles && roleSegments.length > 0) {
+      await fetchSegmentBasedItems();
+      return;
+    }
     // Fetch employee competencies
     const { data: competencies } = await supabase
       .from("employee_competencies")
@@ -469,8 +565,13 @@ export function AppraisalEvaluationDialog({
               <CollapsibleTrigger asChild>
                 <CardHeader className="cursor-pointer hover:bg-muted/50 pb-3">
                   <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <CardTitle className="text-base">{item.item_name}</CardTitle>
+                      {item.segment_name && hasRoleChange && (
+                        <Badge variant="outline" className="text-xs bg-info/10 text-info border-info/30">
+                          {item.segment_name}
+                        </Badge>
+                      )}
                       {item.hasKRAs && (
                         <Badge variant="secondary" className="text-xs">
                           <Target className="h-3 w-3 mr-1" />
@@ -479,7 +580,7 @@ export function AppraisalEvaluationDialog({
                       )}
                     </div>
                     <div className="flex items-center gap-2">
-                      <Badge variant="outline">{item.weight}% weight</Badge>
+                      <Badge variant="outline">{item.weight.toFixed(1)}% weight</Badge>
                       {item.hasKRAs && item.kraRollupScore !== undefined && (
                         <Badge variant="default" className="bg-green-600">
                           Score: {item.kraRollupScore.toFixed(2)}
@@ -605,8 +706,15 @@ export function AppraisalEvaluationDialog({
           <Card key={`${item.evaluation_type}-${item.item_id}`}>
             <CardHeader className="pb-3">
               <div className="flex items-start justify-between">
-                <CardTitle className="text-base">{item.item_name}</CardTitle>
-                <Badge variant="outline">{item.weight}% weight</Badge>
+                <div className="flex items-center gap-2">
+                  <CardTitle className="text-base">{item.item_name}</CardTitle>
+                  {item.segment_name && hasRoleChange && (
+                    <Badge variant="secondary" className="text-xs">
+                      {item.segment_name}
+                    </Badge>
+                  )}
+                </div>
+                <Badge variant="outline">{item.weight.toFixed(1)}% weight</Badge>
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -678,12 +786,26 @@ export function AppraisalEvaluationDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>
+          <DialogTitle className="flex items-center gap-2">
             {isEmployee ? "Self-Evaluation" : "Evaluate"}: {employeeName}
+            {hasRoleChange && (
+              <Badge variant="secondary" className="ml-2">
+                <GitBranch className="h-3 w-3 mr-1" />
+                Role Changed
+              </Badge>
+            )}
           </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-6">
+          {/* Role Segment Timeline - show if employee had role changes */}
+          {hasRoleChange && roleSegments.length > 1 && (
+            <RoleSegmentTimeline
+              segments={roleSegments}
+              activeSegmentId={activeSegmentId}
+              onSegmentClick={setActiveSegmentId}
+            />
+          )}
           {/* Score Summary */}
           <div className="grid gap-4 md:grid-cols-4">
             <Card className="bg-muted/50">
