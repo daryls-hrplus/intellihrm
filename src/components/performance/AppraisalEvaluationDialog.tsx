@@ -23,7 +23,8 @@ import { useMultiPositionParticipant, PositionWeight } from "@/hooks/useMultiPos
 import { PositionFilterTabs } from "./PositionFilterTabs";
 import { PositionScoreSummary } from "./PositionScoreSummary";
 import { MultiPositionWeightsManager } from "./MultiPositionWeightsManager";
-
+import { useEmployeeLevelExpectations } from "@/hooks/useEmployeeLevelExpectations";
+import { JobLevelExpectationsPanel } from "./JobLevelExpectationsPanel";
 interface AppraisalScore {
   id?: string;
   item_id: string;
@@ -52,6 +53,7 @@ interface CycleInfo {
   min_rating: number;
   max_rating: number;
   multi_position_mode?: "aggregate" | "separate";
+  company_id?: string;
 }
 
 interface ParticipantInfo {
@@ -98,6 +100,7 @@ export function AppraisalEvaluationDialog({
   // Multi-position state
   const [selectedPositionId, setSelectedPositionId] = useState<string | null>(null);
   const [weightsDialogOpen, setWeightsDialogOpen] = useState(false);
+  const [employeeId, setEmployeeId] = useState<string | null>(null);
 
   const { fetchSegments } = useAppraisalRoleSegments();
   
@@ -117,6 +120,40 @@ export function AppraisalEvaluationDialog({
     calculateResponsibilityRollup,
   } = useKRARatingSubmissions({ participantId });
 
+  // Calculate current competency and goal scores for level expectations comparison
+  const currentCompetencyScore = useMemo(() => {
+    const compScores = scores.filter(s => s.evaluation_type === "competency");
+    const totalWeight = compScores.reduce((sum, s) => sum + s.weight, 0);
+    if (totalWeight === 0) return 0;
+    const weightedSum = compScores.reduce((sum, s) => {
+      if (s.rating === null) return sum;
+      return sum + s.rating * (s.weight / totalWeight);
+    }, 0);
+    return weightedSum;
+  }, [scores]);
+
+  const currentGoalScore = useMemo(() => {
+    const goalScores = scores.filter(s => s.evaluation_type === "goal");
+    const totalWeight = goalScores.reduce((sum, s) => sum + s.weight, 0);
+    const totalWeighted = goalScores.reduce((sum, s) => sum + (s.weighted_score || 0), 0);
+    return totalWeight > 0 ? (totalWeighted / totalWeight) * 100 : 0;
+  }, [scores]);
+
+  // Job level expectations hook
+  const {
+    expectation: levelExpectation,
+    employeeInfo: levelEmployeeInfo,
+    gapAnalysis,
+    loading: levelExpectationsLoading,
+  } = useEmployeeLevelExpectations(
+    open ? employeeId : null,
+    open ? cycleInfo?.company_id ?? null : null,
+    {
+      competencyScore: currentCompetencyScore,
+      goalScore: currentGoalScore,
+    }
+  );
+
   useEffect(() => {
     if (open && participantId) {
       fetchData();
@@ -126,10 +163,10 @@ export function AppraisalEvaluationDialog({
   const fetchData = async () => {
     setLoading(true);
     try {
-      // Fetch cycle info including multi_position_mode
+      // Fetch cycle info including multi_position_mode and company_id
       const { data: cycleData } = await supabase
         .from("appraisal_cycles")
-        .select("competency_weight, responsibility_weight, goal_weight, min_rating, max_rating, multi_position_mode")
+        .select("competency_weight, responsibility_weight, goal_weight, min_rating, max_rating, multi_position_mode, company_id")
         .eq("id", cycleId)
         .single();
 
@@ -148,6 +185,7 @@ export function AppraisalEvaluationDialog({
         .single();
 
       if (participantData) {
+        setEmployeeId(participantData.employee_id);
         setFinalComments(participantData.final_comments || "");
         setHasRoleChange(participantData.has_role_change || false);
         
@@ -1150,6 +1188,20 @@ export function AppraisalEvaluationDialog({
               }}
               overallWeightedScore={positionWeightedScore}
               mode={multiPositionMode}
+            />
+          )}
+
+          {/* Job Level Expectations Panel - show during evaluation */}
+          {cycleInfo && !levelExpectationsLoading && (
+            <JobLevelExpectationsPanel
+              expectation={levelExpectation}
+              employeeInfo={levelEmployeeInfo}
+              gapAnalysis={gapAnalysis}
+              currentScores={{
+                competencyScore: currentCompetencyScore,
+                goalScore: currentGoalScore,
+              }}
+              maxRating={cycleInfo.max_rating}
             />
           )}
 
