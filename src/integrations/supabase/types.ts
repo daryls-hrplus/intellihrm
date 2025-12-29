@@ -38898,6 +38898,7 @@ export type Database = {
           section_id: string | null
           seniority_date: string | null
           start_date: string | null
+          time_clock_id: string | null
           time_format: string | null
           timezone: string | null
           updated_at: string
@@ -38940,6 +38941,7 @@ export type Database = {
           section_id?: string | null
           seniority_date?: string | null
           start_date?: string | null
+          time_clock_id?: string | null
           time_format?: string | null
           timezone?: string | null
           updated_at?: string
@@ -38982,6 +38984,7 @@ export type Database = {
           section_id?: string | null
           seniority_date?: string | null
           start_date?: string | null
+          time_clock_id?: string | null
           time_format?: string | null
           timezone?: string | null
           updated_at?: string
