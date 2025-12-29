@@ -2125,10 +2125,12 @@ export type Database = {
       }
       appraisal_scores: {
         Row: {
+          ai_analysis_id: string | null
           comments: string | null
           created_at: string
           evaluation_type: string
           id: string
+          inflation_warning_acknowledged: boolean | null
           is_overridden: boolean | null
           item_id: string
           item_name: string
@@ -2143,10 +2145,12 @@ export type Database = {
           weighted_score: number | null
         }
         Insert: {
+          ai_analysis_id?: string | null
           comments?: string | null
           created_at?: string
           evaluation_type: string
           id?: string
+          inflation_warning_acknowledged?: boolean | null
           is_overridden?: boolean | null
           item_id: string
           item_name: string
@@ -2161,10 +2165,12 @@ export type Database = {
           weighted_score?: number | null
         }
         Update: {
+          ai_analysis_id?: string | null
           comments?: string | null
           created_at?: string
           evaluation_type?: string
           id?: string
+          inflation_warning_acknowledged?: boolean | null
           is_overridden?: boolean | null
           item_id?: string
           item_name?: string
@@ -2179,6 +2185,13 @@ export type Database = {
           weighted_score?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "appraisal_scores_ai_analysis_id_fkey"
+            columns: ["ai_analysis_id"]
+            isOneToOne: false
+            referencedRelation: "comment_analysis_results"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "appraisal_scores_overridden_by_fkey"
             columns: ["overridden_by"]
@@ -5610,6 +5623,87 @@ export type Database = {
           {
             foreignKeyName: "color_schemes_created_by_fkey"
             columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      comment_analysis_results: {
+        Row: {
+          analysis_model: string | null
+          bias_indicators: Json | null
+          comment_text: string
+          company_id: string | null
+          confidence_score: number | null
+          consistency_score: number | null
+          created_at: string
+          evidence_summary: Json | null
+          id: string
+          inflation_score: number | null
+          rating_value: number | null
+          review_notes: string | null
+          review_status: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          source_id: string
+          source_type: string
+          suggested_alternatives: Json | null
+          updated_at: string
+        }
+        Insert: {
+          analysis_model?: string | null
+          bias_indicators?: Json | null
+          comment_text: string
+          company_id?: string | null
+          confidence_score?: number | null
+          consistency_score?: number | null
+          created_at?: string
+          evidence_summary?: Json | null
+          id?: string
+          inflation_score?: number | null
+          rating_value?: number | null
+          review_notes?: string | null
+          review_status?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          source_id: string
+          source_type: string
+          suggested_alternatives?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          analysis_model?: string | null
+          bias_indicators?: Json | null
+          comment_text?: string
+          company_id?: string | null
+          confidence_score?: number | null
+          consistency_score?: number | null
+          created_at?: string
+          evidence_summary?: Json | null
+          id?: string
+          inflation_score?: number | null
+          rating_value?: number | null
+          review_notes?: string | null
+          review_status?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          source_id?: string
+          source_type?: string
+          suggested_alternatives?: Json | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comment_analysis_results_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "comment_analysis_results_reviewed_by_fkey"
+            columns: ["reviewed_by"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
