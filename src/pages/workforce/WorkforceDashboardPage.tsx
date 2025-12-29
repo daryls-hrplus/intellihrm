@@ -242,6 +242,31 @@ export default function WorkforceDashboardPage() {
       color: "bg-violet-500/10 text-violet-500",
       tabCode: "analytics",
     },
+    // Additional pages not in main groups
+    orgStructureConfig: {
+      title: "Org Structure Configuration",
+      description: "Configure organizational structure settings and hierarchies",
+      href: "/workforce/org-structure",
+      icon: Network,
+      color: "bg-slate-500/10 text-slate-500",
+      tabCode: "org_structure_config",
+    },
+    competencies: {
+      title: "Competencies",
+      description: "Manage competency frameworks and assessments",
+      href: "/workforce/competencies",
+      icon: Target,
+      color: "bg-amber-500/10 text-amber-500",
+      tabCode: "competencies_mgmt",
+    },
+    companyBoards: {
+      title: "Company Boards",
+      description: "Manage board of directors and board meetings",
+      href: "/workforce/company-boards",
+      icon: Users,
+      color: "bg-indigo-500/10 text-indigo-500",
+      tabCode: "company_boards",
+    },
   };
 
   // Filter by permissions
@@ -293,6 +318,14 @@ export default function WorkforceDashboardPage() {
         allModules.orgChanges,
         allModules.forecasting,
         allModules.analytics,
+      ]),
+    },
+    {
+      titleKey: "Configuration",
+      items: filterByAccess([
+        allModules.orgStructureConfig,
+        allModules.competencies,
+        allModules.companyBoards,
       ]),
     },
   ];
