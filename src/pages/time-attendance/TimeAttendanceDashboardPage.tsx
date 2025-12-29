@@ -261,6 +261,14 @@ export default function TimeAttendanceDashboardPage() {
       color: "bg-purple-500/10 text-purple-600",
       tabCode: "analytics",
     },
+    absenteeismCost: {
+      title: "Absenteeism Cost",
+      description: "Analyze absence costs, Bradford Factor, and department impact",
+      icon: DollarSign,
+      href: "/time-attendance/absenteeism-cost",
+      color: "bg-red-500/10 text-red-600",
+      tabCode: "absenteeism_cost",
+    },
   };
 
   // Filter by permissions
@@ -313,6 +321,7 @@ export default function TimeAttendanceDashboardPage() {
       titleKey: "Analytics",
       items: filterByAccess([
         allModules.analytics,
+        allModules.absenteeismCost,
       ]),
     },
   ];
