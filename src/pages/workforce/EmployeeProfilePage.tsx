@@ -36,6 +36,7 @@ import {
 } from "@/components/employee/professional";
 import { EmployeeImmigrationTab } from "@/components/employee/immigration";
 import { EmployeeGovernmentIds } from "@/components/employee/EmployeeGovernmentIds";
+import { EvidencePortfolioSection } from "@/components/capabilities/EvidencePortfolioSection";
 
 import {
   ArrowLeft,
@@ -64,6 +65,7 @@ import {
   FileSignature,
   Plane,
   IdCard,
+  ClipboardCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
@@ -385,6 +387,7 @@ export default function EmployeeProfilePage() {
             <TabsTrigger value="competencies"><Award className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.competencies")}</TabsTrigger>
             <TabsTrigger value="contact-info"><Contact className="h-4 w-4 mr-1" />Contact Info</TabsTrigger>
             <TabsTrigger value="documents"><FileText className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.documents")}</TabsTrigger>
+            <TabsTrigger value="evidence"><ClipboardCheck className="h-4 w-4 mr-1" />Evidence Portfolio</TabsTrigger>
             <TabsTrigger value="government-ids"><IdCard className="h-4 w-4 mr-1" />Government IDs</TabsTrigger>
             <TabsTrigger value="immigration"><Plane className="h-4 w-4 mr-1" />Immigration</TabsTrigger>
             <TabsTrigger value="interests"><Sparkles className="h-4 w-4 mr-1" />{t("workforce.profile.tabs.interests")}</TabsTrigger>
@@ -419,6 +422,14 @@ export default function EmployeeProfilePage() {
 
           <TabsContent value="documents" className="mt-6">
             <EmployeeDocumentsTab employeeId={employee.id} />
+          </TabsContent>
+
+          <TabsContent value="evidence" className="mt-6">
+            <EvidencePortfolioSection 
+              employeeId={employee.id}
+              canEdit={true}
+              canValidate={true}
+            />
           </TabsContent>
 
           <TabsContent value="government-ids" className="mt-6">
