@@ -27890,6 +27890,8 @@ export type Database = {
           start_half: string | null
           status: string
           submitted_at: string | null
+          travel_destination: string | null
+          travel_location: string | null
           updated_at: string
           workflow_instance_id: string | null
         }
@@ -27915,6 +27917,8 @@ export type Database = {
           start_half?: string | null
           status?: string
           submitted_at?: string | null
+          travel_destination?: string | null
+          travel_location?: string | null
           updated_at?: string
           workflow_instance_id?: string | null
         }
@@ -27940,6 +27944,8 @@ export type Database = {
           start_half?: string | null
           status?: string
           submitted_at?: string | null
+          travel_destination?: string | null
+          travel_location?: string | null
           updated_at?: string
           workflow_instance_id?: string | null
         }
