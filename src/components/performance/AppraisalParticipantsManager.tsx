@@ -6,11 +6,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Plus, Trash2, UserPlus } from "lucide-react";
+import { Plus, Trash2, UserPlus, GitBranch, Loader2 } from "lucide-react";
+import { useAppraisalRoleSegments } from "@/hooks/useAppraisalRoleSegments";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface AppraisalCycle {
   id: string;
   name: string;
+  start_date?: string;
+  end_date?: string;
 }
 
 interface Participant {
@@ -21,6 +25,7 @@ interface Participant {
   evaluator_name: string | null;
   status: string;
   overall_score: number | null;
+  has_role_change?: boolean;
 }
 
 interface Employee {
@@ -52,8 +57,11 @@ export function AppraisalParticipantsManager({
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
+  const [addingParticipant, setAddingParticipant] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState<string>("");
   const [selectedEvaluator, setSelectedEvaluator] = useState<string>("");
+
+  const { createRoleSegments, isLoading: segmentsLoading } = useAppraisalRoleSegments();
 
   useEffect(() => {
     if (open && cycle.id) {
@@ -79,6 +87,7 @@ export function AppraisalParticipantsManager({
         evaluator_id,
         status,
         overall_score,
+        has_role_change,
         employee:profiles!appraisal_participants_employee_id_fkey (full_name),
         evaluator:profiles!appraisal_participants_evaluator_id_fkey (full_name)
       `)
@@ -97,6 +106,7 @@ export function AppraisalParticipantsManager({
       evaluator_name: item.evaluator?.full_name || null,
       status: item.status,
       overall_score: item.overall_score,
+      has_role_change: item.has_role_change || false,
     }));
 
     setParticipants(formatted);
