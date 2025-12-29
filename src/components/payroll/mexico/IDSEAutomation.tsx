@@ -83,7 +83,11 @@ const STATUS_LABELS = {
   confirmed: { label: "Confirmado", color: "bg-green-500" }
 };
 
-export function IDSEAutomation() {
+interface IDSEAutomationProps {
+  companyId: string;
+}
+
+export function IDSEAutomation({ companyId }: IDSEAutomationProps) {
   const [movements, setMovements] = useState<IDSEMovement[]>(mockMovements);
   const [selectedMovements, setSelectedMovements] = useState<string[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);

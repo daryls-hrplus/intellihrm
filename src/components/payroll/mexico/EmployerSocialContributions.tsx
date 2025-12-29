@@ -69,7 +69,11 @@ const stateISN = [
 
 const COLORS = ["#3b82f6", "#8b5cf6", "#06b6d4", "#f59e0b", "#10b981", "#ef4444"];
 
-export function EmployerSocialContributions() {
+interface EmployerSocialContributionsProps {
+  companyId: string;
+}
+
+export function EmployerSocialContributions({ companyId }: EmployerSocialContributionsProps) {
   const [selectedPeriod, setSelectedPeriod] = useState("2024-12");
   const [selectedState, setSelectedState] = useState("all");
 

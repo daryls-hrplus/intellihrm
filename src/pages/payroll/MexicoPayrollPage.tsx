@@ -37,7 +37,13 @@ import {
   Link,
   PieChart,
   Shield,
-  CalendarClock
+  CalendarClock,
+  // Phase 12 icons
+  FileSearch,
+  UserCog,
+  FileUp,
+  Building,
+  Brain
 } from "lucide-react";
 import {
   MexicanCompanySetup,
@@ -63,6 +69,12 @@ import {
   SeveranceCalculator,
   PayrollTemplates,
   IntegrationWebhooks,
+  // Phase 12 - Advanced Compliance & AI
+  SATXMLValidator,
+  IDSEAutomation,
+  SUAAdvancedGenerator,
+  EmployerSocialContributions,
+  PayrollAnomalyDetection,
   // Phase 13 - Enterprise & Integration
   MexicoEmployeeMobileESS,
   SIPAREIntegration,
@@ -304,6 +316,27 @@ export default function MexicoPayrollPage() {
                 <Webhook className="h-4 w-4" />
                 <span className="hidden md:inline">Webhooks</span>
               </TabsTrigger>
+              {/* Phase 12 - Advanced Compliance & AI */}
+              <TabsTrigger value="sat-xml-validator" className="gap-1">
+                <FileSearch className="h-4 w-4" />
+                <span className="hidden md:inline">XML Validator</span>
+              </TabsTrigger>
+              <TabsTrigger value="idse-automation" className="gap-1">
+                <UserCog className="h-4 w-4" />
+                <span className="hidden md:inline">IDSE Auto</span>
+              </TabsTrigger>
+              <TabsTrigger value="sua-advanced" className="gap-1">
+                <FileUp className="h-4 w-4" />
+                <span className="hidden md:inline">SUA Adv</span>
+              </TabsTrigger>
+              <TabsTrigger value="social-contributions" className="gap-1">
+                <Building className="h-4 w-4" />
+                <span className="hidden md:inline">Social Contrib</span>
+              </TabsTrigger>
+              <TabsTrigger value="anomaly-detection" className="gap-1">
+                <Brain className="h-4 w-4" />
+                <span className="hidden md:inline">AI Anomaly</span>
+              </TabsTrigger>
               {/* Phase 13 - Enterprise & Integration */}
               <TabsTrigger value="mobile-ess" className="gap-1">
                 <Smartphone className="h-4 w-4" />
@@ -447,6 +480,27 @@ export default function MexicoPayrollPage() {
 
             <TabsContent value="webhooks">
               <IntegrationWebhooks companyId={selectedCompanyId} />
+            </TabsContent>
+
+            {/* Phase 12 - Advanced Compliance & AI */}
+            <TabsContent value="sat-xml-validator">
+              <SATXMLValidator companyId={selectedCompanyId} />
+            </TabsContent>
+
+            <TabsContent value="idse-automation">
+              <IDSEAutomation companyId={selectedCompanyId} />
+            </TabsContent>
+
+            <TabsContent value="sua-advanced">
+              <SUAAdvancedGenerator companyId={selectedCompanyId} />
+            </TabsContent>
+
+            <TabsContent value="social-contributions">
+              <EmployerSocialContributions companyId={selectedCompanyId} />
+            </TabsContent>
+
+            <TabsContent value="anomaly-detection">
+              <PayrollAnomalyDetection companyId={selectedCompanyId} />
             </TabsContent>
 
             {/* Phase 13 - Enterprise & Integration */}

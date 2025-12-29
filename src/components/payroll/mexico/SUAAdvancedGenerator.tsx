@@ -99,7 +99,11 @@ const STATUS_CONFIG = {
   submitted: { label: "Submitted", color: "bg-purple-500" }
 };
 
-export function SUAAdvancedGenerator() {
+interface SUAAdvancedGeneratorProps {
+  companyId: string;
+}
+
+export function SUAAdvancedGenerator({ companyId }: SUAAdvancedGeneratorProps) {
   const [files, setFiles] = useState<SUAFile[]>(mockFiles);
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationProgress, setGenerationProgress] = useState(0);
