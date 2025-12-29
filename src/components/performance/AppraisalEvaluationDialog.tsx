@@ -10,7 +10,7 @@ import { Slider } from "@/components/ui/slider";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Target, Briefcase, Award, Save, Send, ChevronDown, ChevronUp, Loader2, GitBranch, Settings2 } from "lucide-react";
+import { Target, Briefcase, Award, Save, Send, ChevronDown, ChevronUp, Loader2, GitBranch, Settings2, Users } from "lucide-react";
 import { useKRARatingSubmissions } from "@/hooks/useKRARatingSubmissions";
 import { KRAWithRating, ResponsibilityKRA } from "@/types/responsibilityKRA";
 import { KRARatingCard } from "./KRARatingCard";
@@ -19,6 +19,10 @@ import { useAppraisalRoleSegments, RoleSegment } from "@/hooks/useAppraisalRoleS
 import { SegmentFilterTabs } from "./SegmentFilterTabs";
 import { SegmentScoreSummary } from "./SegmentScoreSummary";
 import { SegmentOverrideDialog } from "./SegmentOverrideDialog";
+import { useMultiPositionParticipant, PositionWeight } from "@/hooks/useMultiPositionParticipant";
+import { PositionFilterTabs } from "./PositionFilterTabs";
+import { PositionScoreSummary } from "./PositionScoreSummary";
+import { MultiPositionWeightsManager } from "./MultiPositionWeightsManager";
 
 interface AppraisalScore {
   id?: string;
@@ -33,9 +37,12 @@ interface AppraisalScore {
   hasKRAs?: boolean;
   kras?: KRAWithRating[];
   kraRollupScore?: number;
-  // For segment tracking
+  // For segment tracking (role changes over time)
   segment_id?: string;
   segment_name?: string;
+  // For multi-position tracking (concurrent positions)
+  position_id?: string;
+  position_title?: string;
 }
 
 interface CycleInfo {
@@ -44,6 +51,7 @@ interface CycleInfo {
   goal_weight: number;
   min_rating: number;
   max_rating: number;
+  multi_position_mode?: "aggregate" | "separate";
 }
 
 interface ParticipantInfo {
@@ -86,8 +94,21 @@ export function AppraisalEvaluationDialog({
   const [activeSegmentId, setActiveSegmentId] = useState<string | undefined>();
   const [selectedFilterSegmentId, setSelectedFilterSegmentId] = useState<string | null>(null);
   const [overrideDialogOpen, setOverrideDialogOpen] = useState(false);
+  
+  // Multi-position state
+  const [selectedPositionId, setSelectedPositionId] = useState<string | null>(null);
+  const [weightsDialogOpen, setWeightsDialogOpen] = useState(false);
 
   const { fetchSegments } = useAppraisalRoleSegments();
+  
+  // Multi-position hook
+  const {
+    hasMultiplePositions,
+    positions: multiPositions,
+    multiPositionMode,
+    loading: multiPositionLoading,
+    refetch: refetchMultiPosition,
+  } = useMultiPositionParticipant(open ? participantId : null, open ? cycleId : null);
 
   const { 
     fetchKRAsWithRatings, 
@@ -105,15 +126,18 @@ export function AppraisalEvaluationDialog({
   const fetchData = async () => {
     setLoading(true);
     try {
-      // Fetch cycle info
+      // Fetch cycle info including multi_position_mode
       const { data: cycleData } = await supabase
         .from("appraisal_cycles")
-        .select("competency_weight, responsibility_weight, goal_weight, min_rating, max_rating")
+        .select("competency_weight, responsibility_weight, goal_weight, min_rating, max_rating, multi_position_mode")
         .eq("id", cycleId)
         .single();
 
       if (cycleData) {
-        setCycleInfo(cycleData);
+        setCycleInfo({
+          ...cycleData,
+          multi_position_mode: (cycleData.multi_position_mode as "aggregate" | "separate") || "aggregate",
+        });
       }
 
       // Fetch participant info
@@ -132,7 +156,7 @@ export function AppraisalEvaluationDialog({
           const segments = await fetchSegments(participantId);
           setRoleSegments(segments);
           if (segments.length > 0) {
-            setActiveSegmentId(segments[segments.length - 1].id); // Default to most recent
+            setActiveSegmentId(segments[segments.length - 1].id);
           }
         }
         
@@ -211,13 +235,109 @@ export function AppraisalEvaluationDialog({
     setScores(newScores);
   };
 
+  // Fetch items for multi-position employees
+  const fetchMultiPositionItems = async (employeeId: string) => {
+    const newScores: AppraisalScore[] = [];
+    
+    for (const position of multiPositions) {
+      const positionWeight = position.weight_percentage / 100;
+      const positionTitle = position.position_title;
+      const jobId = position.job_id;
+      
+      if (!jobId) continue;
+      
+      // Fetch competencies for this position's job
+      const { data: jobCompetencies } = await supabase
+        .from("job_competencies")
+        .select("competency_id, weighting, competencies(id, name)")
+        .eq("job_id", jobId)
+        .is("end_date", null);
+      
+      for (const jc of jobCompetencies || []) {
+        newScores.push({
+          item_id: `${position.position_id}-${jc.competency_id}`,
+          item_name: (jc as any).competencies?.name || "Unknown",
+          evaluation_type: "competency",
+          weight: ((jc.weighting || 0) * positionWeight),
+          rating: null,
+          weighted_score: null,
+          comments: "",
+          position_id: position.position_id,
+          position_title: positionTitle,
+        });
+      }
+      
+      // Fetch responsibilities for this position's job
+      const { data: jobResps } = await supabase
+        .from("job_responsibilities")
+        .select("responsibility_id, weighting, responsibilities(id, name)")
+        .eq("job_id", jobId)
+        .is("end_date", null);
+      
+      for (const jr of jobResps || []) {
+        const respId = jr.responsibility_id;
+        const krasWithRatings = await fetchKRAsWithRatings(participantId, respId);
+        const hasKRAs = krasWithRatings.length > 0;
+        
+        newScores.push({
+          item_id: `${position.position_id}-${respId}`,
+          item_name: (jr as any).responsibilities?.name || "Unknown",
+          evaluation_type: "responsibility",
+          weight: ((jr.weighting || 0) * positionWeight),
+          rating: null,
+          weighted_score: null,
+          comments: "",
+          position_id: position.position_id,
+          position_title: positionTitle,
+          hasKRAs,
+          kras: hasKRAs ? krasWithRatings : undefined,
+          kraRollupScore: hasKRAs ? calculateKRAScore(krasWithRatings) : undefined,
+        });
+        
+        if (hasKRAs) {
+          setExpandedResponsibilities(prev => new Set([...prev, `${position.position_id}-${respId}`]));
+        }
+      }
+      
+      // Fetch goals for this position's job
+      const { data: jobGoals } = await supabase
+        .from("job_goals")
+        .select("id, goal_name, weighting")
+        .eq("job_id", jobId)
+        .is("end_date", null);
+      
+      for (const goal of jobGoals || []) {
+        newScores.push({
+          item_id: `${position.position_id}-${goal.id}`,
+          item_name: goal.goal_name,
+          evaluation_type: "goal",
+          weight: ((goal.weighting || 0) * positionWeight),
+          rating: null,
+          weighted_score: null,
+          comments: "",
+          position_id: position.position_id,
+          position_title: positionTitle,
+        });
+      }
+    }
+    
+    setScores(newScores);
+  };
+
   const fetchEmployeeItems = async (employeeId: string, hasMultipleRoles: boolean = false) => {
     // If employee has role changes, fetch items per segment
     if (hasMultipleRoles && roleSegments.length > 0) {
       await fetchSegmentBasedItems();
       return;
     }
-    // Fetch employee competencies
+    
+    // If employee has multiple concurrent positions with position weights configured
+    if (hasMultiplePositions && multiPositions.length > 0) {
+      await fetchMultiPositionItems(employeeId);
+      return;
+    }
+    
+    // Standard single-position fetch
     const { data: competencies } = await supabase
       .from("employee_competencies")
       .select(`
@@ -228,7 +348,6 @@ export function AppraisalEvaluationDialog({
       .eq("employee_id", employeeId)
       .is("end_date", null);
 
-    // Get competency names
     const compIds = (competencies || []).map((c: any) => c.competency_id);
     let compNames: Record<string, string> = {};
     if (compIds.length > 0) {
@@ -239,7 +358,6 @@ export function AppraisalEvaluationDialog({
       compNames = Object.fromEntries((compData || []).map((c: any) => [c.id, c.name]));
     }
 
-    // Fetch employee responsibilities from job_responsibilities via positions
     const { data: positions } = await supabase
       .from("employee_positions")
       .select("position_id, positions!inner(job_id)")
@@ -268,7 +386,6 @@ export function AppraisalEvaluationDialog({
       }
     }
 
-    // Fetch employee goals from job_goals via positions -> jobs
     let goals: { id: string; title: string; weight: number }[] = [];
     if (positions && positions.length > 0) {
       const jobIds = positions
@@ -290,10 +407,8 @@ export function AppraisalEvaluationDialog({
       }
     }
 
-    // Build scores array
     const newScores: AppraisalScore[] = [];
 
-    // Add competencies
     (competencies || []).forEach((comp: any) => {
       newScores.push({
         item_id: comp.competency_id,
@@ -306,9 +421,7 @@ export function AppraisalEvaluationDialog({
       });
     });
 
-    // Add responsibilities - check for structured KRAs
     for (const resp of responsibilities) {
-      // Check if this responsibility has structured KRAs
       const krasWithRatings = await fetchKRAsWithRatings(participantId, resp.id);
       const hasKRAs = krasWithRatings.length > 0;
 
@@ -325,13 +438,11 @@ export function AppraisalEvaluationDialog({
         kraRollupScore: hasKRAs ? calculateKRAScore(krasWithRatings) : undefined,
       });
 
-      // Auto-expand responsibilities with KRAs
       if (hasKRAs) {
         setExpandedResponsibilities(prev => new Set([...prev, resp.id]));
       }
     }
 
-    // Add goals
     (goals || []).forEach((goal: any) => {
       newScores.push({
         item_id: goal.id,
@@ -420,7 +531,6 @@ export function AppraisalEvaluationDialog({
       return;
     }
 
-    // Refresh KRAs for this responsibility
     const updatedKRAs = await fetchKRAsWithRatings(participantId, responsibilityId);
     const newRollupScore = calculateKRAScore(updatedKRAs);
 
@@ -447,7 +557,6 @@ export function AppraisalEvaluationDialog({
       return;
     }
 
-    // Refresh KRAs for this responsibility
     const updatedKRAs = await fetchKRAsWithRatings(participantId, responsibilityId);
     const newRollupScore = calculateKRAScore(updatedKRAs);
 
@@ -470,7 +579,6 @@ export function AppraisalEvaluationDialog({
     try {
       // Upsert scores
       for (const score of scores) {
-        // For responsibilities with KRAs, use the rollup score
         const finalRating = score.hasKRAs ? score.kraRollupScore : score.rating;
         
         if (finalRating !== null && finalRating !== undefined) {
@@ -489,6 +597,41 @@ export function AppraisalEvaluationDialog({
           } else {
             await supabase.from("appraisal_scores").insert(payload);
           }
+        }
+      }
+
+      // Save position-level scores if multi-position
+      if (hasMultiplePositions && multiPositions.length > 0 && multiPositionMode === "aggregate") {
+        for (const position of multiPositions) {
+          const positionItems = scores.filter(s => s.position_id === position.position_id);
+          
+          const calcTypeScore = (type: string) => {
+            const typeItems = positionItems.filter(s => s.evaluation_type === type);
+            const totalWeight = typeItems.reduce((sum, s) => sum + s.weight, 0);
+            const totalWeighted = typeItems.reduce((sum, s) => sum + (s.weighted_score || 0), 0);
+            return totalWeight > 0 ? (totalWeighted / totalWeight) * 100 : null;
+          };
+          
+          const compScore = calcTypeScore("competency");
+          const respScore = calcTypeScore("responsibility");
+          const goalScore = calcTypeScore("goal");
+          
+          const overall = cycleInfo && compScore !== null && respScore !== null && goalScore !== null
+            ? (compScore * cycleInfo.competency_weight +
+               respScore * cycleInfo.responsibility_weight +
+               goalScore * cycleInfo.goal_weight) / 100
+            : null;
+          
+          await (supabase
+            .from("appraisal_position_weights" as any)
+            .update({
+              competency_score: compScore,
+              responsibility_score: respScore,
+              goal_score: goalScore,
+              overall_score: overall,
+            })
+            .eq("participant_id", participantId)
+            .eq("position_id", position.position_id) as any);
         }
       }
 
@@ -518,11 +661,18 @@ export function AppraisalEvaluationDialog({
   };
 
   const getScoresByType = (type: string) => {
-    const typeScores = scores.filter((s) => s.evaluation_type === type);
-    // Apply segment filter if set
+    let typeScores = scores.filter((s) => s.evaluation_type === type);
+    
+    // Apply segment filter if set (for role changes)
     if (selectedFilterSegmentId && hasRoleChange) {
-      return typeScores.filter((s) => s.segment_id === selectedFilterSegmentId);
+      typeScores = typeScores.filter((s) => s.segment_id === selectedFilterSegmentId);
     }
+    
+    // Apply position filter if set (for multi-position)
+    if (selectedPositionId && hasMultiplePositions) {
+      typeScores = typeScores.filter((s) => s.position_id === selectedPositionId);
+    }
+    
     return typeScores;
   };
 
@@ -537,7 +687,7 @@ export function AppraisalEvaluationDialog({
     return getScoresByType(type).reduce((sum, s) => sum + s.weight, 0);
   };
 
-  // Calculate segment-level scores for SegmentScoreSummary
+  // Calculate segment-level scores for SegmentScoreSummary (role changes)
   const segmentScores = useMemo(() => {
     if (!hasRoleChange || roleSegments.length <= 1) return [];
     
@@ -571,6 +721,40 @@ export function AppraisalEvaluationDialog({
     });
   }, [scores, roleSegments, hasRoleChange, cycleInfo]);
 
+  // Calculate position-level scores for PositionScoreSummary (multi-position)
+  const positionScores = useMemo(() => {
+    if (!hasMultiplePositions || multiPositions.length <= 1) return [];
+    
+    return multiPositions.map(position => {
+      const positionItems = scores.filter(s => s.position_id === position.position_id);
+      
+      const calcTypeScore = (type: string) => {
+        const typeItems = positionItems.filter(s => s.evaluation_type === type);
+        const totalWeight = typeItems.reduce((sum, s) => sum + s.weight, 0);
+        const totalWeighted = typeItems.reduce((sum, s) => sum + (s.weighted_score || 0), 0);
+        return totalWeight > 0 ? (totalWeighted / totalWeight) * 100 : 0;
+      };
+      
+      const compScore = calcTypeScore("competency");
+      const respScore = calcTypeScore("responsibility");
+      const goalScore = calcTypeScore("goal");
+      
+      const overall = cycleInfo
+        ? (compScore * cycleInfo.competency_weight +
+           respScore * cycleInfo.responsibility_weight +
+           goalScore * cycleInfo.goal_weight) / 100
+        : 0;
+      
+      return {
+        positionId: position.position_id,
+        competency: compScore,
+        responsibility: respScore,
+        goal: goalScore,
+        overall,
+      };
+    });
+  }, [scores, multiPositions, hasMultiplePositions, cycleInfo]);
+
   const overallWeightedScore = useMemo(() => {
     if (!hasRoleChange || roleSegments.length <= 1) return 0;
     
@@ -580,8 +764,22 @@ export function AppraisalEvaluationDialog({
     }, 0);
   }, [segmentScores, roleSegments, hasRoleChange]);
 
+  // Calculate weighted overall for multi-position
+  const positionWeightedScore = useMemo(() => {
+    if (!hasMultiplePositions || multiPositions.length <= 1) return 0;
+    
+    return multiPositions.reduce((sum, position) => {
+      const posScore = positionScores.find(s => s.positionId === position.position_id);
+      return sum + (posScore?.overall || 0) * (position.weight_percentage / 100);
+    }, 0);
+  }, [positionScores, multiPositions, hasMultiplePositions]);
+
   const handleOverrideSuccess = () => {
-    // Refetch segments to get updated percentages
+    fetchData();
+  };
+
+  const handleWeightsSuccess = () => {
+    refetchMultiPosition();
     fetchData();
   };
 
@@ -612,7 +810,7 @@ export function AppraisalEvaluationDialog({
     return (
       <div className="space-y-4">
         <div className="flex justify-between text-sm">
-          <span className="text-muted-foreground">Total weight: {totalWeight}%</span>
+          <span className="text-muted-foreground">Total weight: {totalWeight.toFixed(1)}%</span>
           <span className={totalWeight === 100 ? "text-success" : "text-warning"}>
             {totalWeight === 100 ? "✓ Valid" : "Should total 100%"}
           </span>
@@ -632,6 +830,11 @@ export function AppraisalEvaluationDialog({
                       {item.segment_name && hasRoleChange && (
                         <Badge variant="outline" className="text-xs bg-info/10 text-info border-info/30">
                           {item.segment_name}
+                        </Badge>
+                      )}
+                      {item.position_title && hasMultiplePositions && (
+                        <Badge variant="outline" className="text-xs bg-accent/20 text-accent-foreground border-accent/40">
+                          {item.position_title}
                         </Badge>
                       )}
                       {item.hasKRAs && (
@@ -661,7 +864,6 @@ export function AppraisalEvaluationDialog({
               <CollapsibleContent>
                 <CardContent className="space-y-4 pt-0">
                   {item.hasKRAs && item.kras ? (
-                    // Render individual KRA rating cards
                     <div className="space-y-3">
                       <div className="text-sm font-medium text-muted-foreground">
                         Rate each Key Result Area individually:
@@ -682,7 +884,6 @@ export function AppraisalEvaluationDialog({
                         />
                       ))}
                       
-                      {/* Rollup Summary */}
                       <div className="p-3 bg-primary/10 rounded-lg">
                         <div className="flex items-center justify-between">
                           <span className="text-sm font-medium">Responsibility Rollup Score</span>
@@ -696,7 +897,6 @@ export function AppraisalEvaluationDialog({
                       </div>
                     </div>
                   ) : (
-                    // Traditional single rating
                     <>
                       <div>
                         <div className="flex items-center justify-between mb-2">
@@ -758,7 +958,7 @@ export function AppraisalEvaluationDialog({
     return (
       <div className="space-y-4">
         <div className="flex justify-between text-sm">
-          <span className="text-muted-foreground">Total weight: {totalWeight}%</span>
+          <span className="text-muted-foreground">Total weight: {totalWeight.toFixed(1)}%</span>
           <span className={totalWeight === 100 ? "text-success" : "text-warning"}>
             {totalWeight === 100 ? "✓ Valid" : "Should total 100%"}
           </span>
@@ -773,6 +973,11 @@ export function AppraisalEvaluationDialog({
                   {item.segment_name && hasRoleChange && (
                     <Badge variant="secondary" className="text-xs">
                       {item.segment_name}
+                    </Badge>
+                  )}
+                  {item.position_title && hasMultiplePositions && (
+                    <Badge variant="outline" className="text-xs bg-accent/20 text-accent-foreground border-accent/40">
+                      {item.position_title}
                     </Badge>
                   )}
                 </div>
@@ -821,7 +1026,7 @@ export function AppraisalEvaluationDialog({
     );
   };
 
-  if (loading) {
+  if (loading || multiPositionLoading) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-4xl">
@@ -844,6 +1049,13 @@ export function AppraisalEvaluationDialog({
         100
       : 0;
 
+  // Determine which overall score to display
+  const displayOverallScore = hasMultiplePositions && multiPositions.length > 1
+    ? positionWeightedScore
+    : hasRoleChange && roleSegments.length > 1
+      ? overallWeightedScore
+      : overallScore;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
@@ -854,6 +1066,12 @@ export function AppraisalEvaluationDialog({
               <Badge variant="secondary" className="ml-2">
                 <GitBranch className="h-3 w-3 mr-1" />
                 Role Changed
+              </Badge>
+            )}
+            {hasMultiplePositions && multiPositions.length > 1 && (
+              <Badge variant="outline" className="ml-2 bg-accent/20">
+                <Users className="h-3 w-3 mr-1" />
+                {multiPositions.length} Positions
               </Badge>
             )}
           </DialogTitle>
@@ -883,6 +1101,29 @@ export function AppraisalEvaluationDialog({
             </div>
           )}
 
+          {/* Multi-Position Info Banner */}
+          {hasMultiplePositions && multiPositions.length > 1 && (
+            <div className="flex items-center justify-between p-3 bg-accent/10 rounded-lg border border-accent/30">
+              <div className="flex items-center gap-2">
+                <Users className="h-4 w-4 text-accent-foreground" />
+                <span className="text-sm">
+                  This employee holds <strong>{multiPositions.length} concurrent positions</strong>. 
+                  Scores are {multiPositionMode === "aggregate" ? "aggregated by weighted average" : "tracked separately"}.
+                </span>
+              </div>
+              {!isEmployee && multiPositionMode === "aggregate" && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setWeightsDialogOpen(true)}
+                >
+                  <Settings2 className="h-4 w-4 mr-2" />
+                  Configure Weights
+                </Button>
+              )}
+            </div>
+          )}
+
           {/* Segment-Level Score Summary - for multi-role employees */}
           {hasRoleChange && roleSegments.length > 1 && cycleInfo && (
             <SegmentScoreSummary
@@ -894,6 +1135,21 @@ export function AppraisalEvaluationDialog({
                 goal_weight: cycleInfo.goal_weight,
               }}
               overallWeightedScore={overallWeightedScore}
+            />
+          )}
+
+          {/* Position-Level Score Summary - for multi-position employees */}
+          {hasMultiplePositions && multiPositions.length > 1 && cycleInfo && (
+            <PositionScoreSummary
+              positions={multiPositions}
+              positionScores={positionScores}
+              cycleWeights={{
+                competency_weight: cycleInfo.competency_weight,
+                responsibility_weight: cycleInfo.responsibility_weight,
+                goal_weight: cycleInfo.goal_weight,
+              }}
+              overallWeightedScore={positionWeightedScore}
+              mode={multiPositionMode}
             />
           )}
 
@@ -929,7 +1185,10 @@ export function AppraisalEvaluationDialog({
             <Card className="bg-primary/10">
               <CardContent className="p-4 text-center">
                 <p className="text-sm text-muted-foreground">Overall</p>
-                <p className="text-2xl font-bold text-primary">{overallScore.toFixed(1)}%</p>
+                <p className="text-2xl font-bold text-primary">{displayOverallScore.toFixed(1)}%</p>
+                {(hasMultiplePositions && multiPositions.length > 1) && (
+                  <p className="text-xs text-muted-foreground">Weighted Average</p>
+                )}
               </CardContent>
             </Card>
           </div>
@@ -958,6 +1217,17 @@ export function AppraisalEvaluationDialog({
                   segments={roleSegments}
                   selectedSegmentId={selectedFilterSegmentId}
                   onSegmentChange={setSelectedFilterSegmentId}
+                />
+              </div>
+            )}
+
+            {/* Position Filter Tabs - show for multi-position employees */}
+            {hasMultiplePositions && multiPositions.length > 1 && (
+              <div className="mt-3">
+                <PositionFilterTabs
+                  positions={multiPositions}
+                  selectedPositionId={selectedPositionId}
+                  onPositionChange={setSelectedPositionId}
                 />
               </div>
             )}
@@ -1011,6 +1281,15 @@ export function AppraisalEvaluationDialog({
         participantId={participantId}
         segments={roleSegments}
         onSuccess={handleOverrideSuccess}
+      />
+
+      {/* Multi-Position Weights Manager */}
+      <MultiPositionWeightsManager
+        open={weightsDialogOpen}
+        onOpenChange={setWeightsDialogOpen}
+        participantId={participantId}
+        employeeName={employeeName}
+        onSuccess={handleWeightsSuccess}
       />
     </Dialog>
   );
