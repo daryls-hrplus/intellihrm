@@ -126,6 +126,8 @@ export interface LeaveRequest {
   reason: string | null;
   contact_during_leave: string | null;
   handover_notes: string | null;
+  travel_location: "in_country" | "out_of_country" | null;
+  travel_destination: string | null;
   status: "draft" | "pending" | "approved" | "rejected" | "cancelled" | "withdrawn";
   submitted_at: string | null;
   reviewed_by: string | null;

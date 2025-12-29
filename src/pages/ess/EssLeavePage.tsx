@@ -151,6 +151,8 @@ export default function EssLeavePage() {
     reason: "",
     contact_during_leave: "",
     handover_notes: "",
+    travel_location: "in_country" as "in_country" | "out_of_country",
+    travel_destination: "",
   });
 
   const selectedType = leaveTypes.find((t) => t.id === formData.leave_type_id);
@@ -316,6 +318,8 @@ export default function EssLeavePage() {
       reason: "",
       contact_during_leave: "",
       handover_notes: "",
+      travel_location: "in_country",
+      travel_destination: "",
     });
   };
 
@@ -335,6 +339,8 @@ export default function EssLeavePage() {
         reason: formData.reason || undefined,
         contact_during_leave: formData.contact_during_leave || undefined,
         handover_notes: formData.handover_notes || undefined,
+        travel_location: formData.travel_location,
+        travel_destination: formData.travel_location === "out_of_country" ? formData.travel_destination || undefined : undefined,
         status: "pending",
       });
 
@@ -1037,6 +1043,49 @@ export default function EssLeavePage() {
                 placeholder="Any handover instructions for your team"
                 rows={2}
               />
+            </div>
+
+            {/* Travel Location */}
+            <div className="space-y-3 p-4 rounded-lg border bg-muted/30">
+              <Label className="flex items-center gap-2">
+                <CalendarDays className="h-4 w-4" />
+                Location During Leave
+              </Label>
+              <div className="flex gap-4">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="travel_location"
+                    value="in_country"
+                    checked={formData.travel_location === "in_country"}
+                    onChange={() => setFormData({ ...formData, travel_location: "in_country", travel_destination: "" })}
+                    className="h-4 w-4 text-primary"
+                  />
+                  <span className="text-sm">In Country</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="travel_location"
+                    value="out_of_country"
+                    checked={formData.travel_location === "out_of_country"}
+                    onChange={() => setFormData({ ...formData, travel_location: "out_of_country" })}
+                    className="h-4 w-4 text-primary"
+                  />
+                  <span className="text-sm">Out of Country</span>
+                </label>
+              </div>
+              {formData.travel_location === "out_of_country" && (
+                <div className="space-y-2 pt-2">
+                  <Label htmlFor="travel_destination">Travel Destination</Label>
+                  <Input
+                    id="travel_destination"
+                    value={formData.travel_destination}
+                    onChange={(e) => setFormData({ ...formData, travel_destination: e.target.value })}
+                    placeholder="Country or location you'll be visiting"
+                  />
+                </div>
+              )}
             </div>
 
             {/* Actions */}
