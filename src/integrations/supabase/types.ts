@@ -39144,6 +39144,7 @@ export type Database = {
           department_id: string | null
           description: string | null
           id: string
+          is_enps_alert: boolean | null
           is_resolved: boolean | null
           recommended_actions: string[] | null
           resolution_notes: string | null
@@ -39161,6 +39162,7 @@ export type Database = {
           department_id?: string | null
           description?: string | null
           id?: string
+          is_enps_alert?: boolean | null
           is_resolved?: boolean | null
           recommended_actions?: string[] | null
           resolution_notes?: string | null
@@ -39178,6 +39180,7 @@ export type Database = {
           department_id?: string | null
           description?: string | null
           id?: string
+          is_enps_alert?: boolean | null
           is_resolved?: boolean | null
           recommended_actions?: string[] | null
           resolution_notes?: string | null
@@ -39304,13 +39307,18 @@ export type Database = {
           company_id: string
           created_at: string
           department_id: string | null
+          detractor_count: number | null
           emotion_breakdown: Json | null
           engagement_score: number | null
+          enps_response_count: number | null
+          enps_score: number | null
           id: string
           metric_date: string
           negative_count: number | null
           neutral_count: number | null
+          passive_count: number | null
           positive_count: number | null
+          promoter_count: number | null
           survey_id: string | null
           top_themes: string[] | null
           total_responses: number | null
@@ -39323,13 +39331,18 @@ export type Database = {
           company_id: string
           created_at?: string
           department_id?: string | null
+          detractor_count?: number | null
           emotion_breakdown?: Json | null
           engagement_score?: number | null
+          enps_response_count?: number | null
+          enps_score?: number | null
           id?: string
           metric_date: string
           negative_count?: number | null
           neutral_count?: number | null
+          passive_count?: number | null
           positive_count?: number | null
+          promoter_count?: number | null
           survey_id?: string | null
           top_themes?: string[] | null
           total_responses?: number | null
@@ -39342,13 +39355,18 @@ export type Database = {
           company_id?: string
           created_at?: string
           department_id?: string | null
+          detractor_count?: number | null
           emotion_breakdown?: Json | null
           engagement_score?: number | null
+          enps_response_count?: number | null
+          enps_score?: number | null
           id?: string
           metric_date?: string
           negative_count?: number | null
           neutral_count?: number | null
+          passive_count?: number | null
           positive_count?: number | null
+          promoter_count?: number | null
           survey_id?: string | null
           top_themes?: string[] | null
           total_responses?: number | null
