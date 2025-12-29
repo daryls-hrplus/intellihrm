@@ -20,7 +20,11 @@ import {
   Calendar
 } from "lucide-react";
 
-export function SIPAREIntegration() {
+interface SIPAREIntegrationProps {
+  companyId: string;
+}
+
+export function SIPAREIntegration({ companyId }: SIPAREIntegrationProps) {
   const [selectedPeriod, setSelectedPeriod] = useState("2025-01");
   const [isGenerating, setIsGenerating] = useState(false);
 

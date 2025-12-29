@@ -20,7 +20,11 @@ import {
   Calendar
 } from "lucide-react";
 
-export function ConstanciaSituacionFiscal() {
+interface ConstanciaSituacionFiscalProps {
+  employeeId: string;
+}
+
+export function ConstanciaSituacionFiscal({ employeeId }: ConstanciaSituacionFiscalProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [isValidating, setIsValidating] = useState(false);
 

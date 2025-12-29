@@ -29,7 +29,15 @@ import {
   Sun,
   UserMinus,
   FileStack,
-  Webhook
+  Webhook,
+  Smartphone,
+  Database,
+  FileCheck,
+  RefreshCw,
+  Link,
+  PieChart,
+  Shield,
+  CalendarClock
 } from "lucide-react";
 import {
   MexicanCompanySetup,
@@ -54,7 +62,16 @@ import {
   VacationPTUManager,
   SeveranceCalculator,
   PayrollTemplates,
-  IntegrationWebhooks
+  IntegrationWebhooks,
+  // Phase 13 - Enterprise & Integration
+  MexicoEmployeeMobileESS,
+  SIPAREIntegration,
+  ConstanciaSituacionFiscal,
+  ISRAnnualAdjustment,
+  SATIMSSAPIIntegration,
+  AdvancedPTUDistribution,
+  MexicanPayrollAuditDashboard,
+  MexicanRegulatoryCalendar
 } from "@/components/payroll/mexico";
 
 interface Company {
@@ -287,6 +304,39 @@ export default function MexicoPayrollPage() {
                 <Webhook className="h-4 w-4" />
                 <span className="hidden md:inline">Webhooks</span>
               </TabsTrigger>
+              {/* Phase 13 - Enterprise & Integration */}
+              <TabsTrigger value="mobile-ess" className="gap-1">
+                <Smartphone className="h-4 w-4" />
+                <span className="hidden md:inline">Mobile ESS</span>
+              </TabsTrigger>
+              <TabsTrigger value="sipare" className="gap-1">
+                <Database className="h-4 w-4" />
+                <span className="hidden md:inline">SIPARE</span>
+              </TabsTrigger>
+              <TabsTrigger value="constancia-fiscal" className="gap-1">
+                <FileCheck className="h-4 w-4" />
+                <span className="hidden md:inline">Constancia</span>
+              </TabsTrigger>
+              <TabsTrigger value="isr-adjustment" className="gap-1">
+                <RefreshCw className="h-4 w-4" />
+                <span className="hidden md:inline">ISR Adjust</span>
+              </TabsTrigger>
+              <TabsTrigger value="sat-imss-api" className="gap-1">
+                <Link className="h-4 w-4" />
+                <span className="hidden md:inline">SAT/IMSS API</span>
+              </TabsTrigger>
+              <TabsTrigger value="adv-ptu" className="gap-1">
+                <PieChart className="h-4 w-4" />
+                <span className="hidden md:inline">Adv PTU</span>
+              </TabsTrigger>
+              <TabsTrigger value="audit-dashboard" className="gap-1">
+                <Shield className="h-4 w-4" />
+                <span className="hidden md:inline">Audit Dashboard</span>
+              </TabsTrigger>
+              <TabsTrigger value="reg-calendar" className="gap-1">
+                <CalendarClock className="h-4 w-4" />
+                <span className="hidden md:inline">Reg Calendar</span>
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="company">
@@ -397,6 +447,57 @@ export default function MexicoPayrollPage() {
 
             <TabsContent value="webhooks">
               <IntegrationWebhooks companyId={selectedCompanyId} />
+            </TabsContent>
+
+            {/* Phase 13 - Enterprise & Integration */}
+            <TabsContent value="mobile-ess">
+              {selectedEmployeeId ? (
+                <MexicoEmployeeMobileESS employeeId={selectedEmployeeId} />
+              ) : (
+                <Alert>
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>
+                    Please select an employee to view Mobile ESS.
+                  </AlertDescription>
+                </Alert>
+              )}
+            </TabsContent>
+
+            <TabsContent value="sipare">
+              <SIPAREIntegration companyId={selectedCompanyId} />
+            </TabsContent>
+
+            <TabsContent value="constancia-fiscal">
+              {selectedEmployeeId ? (
+                <ConstanciaSituacionFiscal employeeId={selectedEmployeeId} />
+              ) : (
+                <Alert>
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>
+                    Please select an employee to view their Constancia de Situación Fiscal.
+                  </AlertDescription>
+                </Alert>
+              )}
+            </TabsContent>
+
+            <TabsContent value="isr-adjustment">
+              <ISRAnnualAdjustment companyId={selectedCompanyId} />
+            </TabsContent>
+
+            <TabsContent value="sat-imss-api">
+              <SATIMSSAPIIntegration companyId={selectedCompanyId} />
+            </TabsContent>
+
+            <TabsContent value="adv-ptu">
+              <AdvancedPTUDistribution companyId={selectedCompanyId} />
+            </TabsContent>
+
+            <TabsContent value="audit-dashboard">
+              <MexicanPayrollAuditDashboard companyId={selectedCompanyId} />
+            </TabsContent>
+
+            <TabsContent value="reg-calendar">
+              <MexicanRegulatoryCalendar companyId={selectedCompanyId} />
             </TabsContent>
           </Tabs>
         )}

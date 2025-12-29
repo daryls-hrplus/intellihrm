@@ -23,7 +23,11 @@ import {
 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
 
-export function ISRAnnualAdjustment() {
+interface ISRAnnualAdjustmentProps {
+  companyId: string;
+}
+
+export function ISRAnnualAdjustment({ companyId }: ISRAnnualAdjustmentProps) {
   const [selectedYear, setSelectedYear] = useState("2024");
   const [isCalculating, setIsCalculating] = useState(false);
 

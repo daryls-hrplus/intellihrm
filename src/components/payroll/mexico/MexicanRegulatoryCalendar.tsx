@@ -28,7 +28,11 @@ interface RegulatoryEvent {
   priority: "high" | "medium" | "low";
 }
 
-export function MexicanRegulatoryCalendar() {
+interface MexicanRegulatoryCalendarProps {
+  companyId: string;
+}
+
+export function MexicanRegulatoryCalendar({ companyId }: MexicanRegulatoryCalendarProps) {
   const [selectedMonth, setSelectedMonth] = useState("2025-02");
   const [selectedCategory, setSelectedCategory] = useState("all");
 

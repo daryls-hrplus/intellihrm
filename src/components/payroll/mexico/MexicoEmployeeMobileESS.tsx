@@ -20,7 +20,11 @@ import {
   Settings
 } from "lucide-react";
 
-export function MexicoEmployeeMobileESS() {
+interface MexicoEmployeeMobileESSProps {
+  employeeId: string;
+}
+
+export function MexicoEmployeeMobileESS({ employeeId }: MexicoEmployeeMobileESSProps) {
   const [pushNotifications, setPushNotifications] = useState(true);
   const [biometricAuth, setBiometricAuth] = useState(true);
 

@@ -22,7 +22,11 @@ import {
 } from "lucide-react";
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from "recharts";
 
-export function AdvancedPTUDistribution() {
+interface AdvancedPTUDistributionProps {
+  companyId: string;
+}
+
+export function AdvancedPTUDistribution({ companyId }: AdvancedPTUDistributionProps) {
   const [selectedYear, setSelectedYear] = useState("2024");
   const [isCalculating, setIsCalculating] = useState(false);
 
