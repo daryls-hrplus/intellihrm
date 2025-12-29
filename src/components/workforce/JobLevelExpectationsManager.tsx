@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useLanguage } from "@/hooks/useLanguage";
 import {
   useJobLevelExpectations,
   JobLevelExpectationForm,
   emptyExpectationForm,
+  ThresholdSuggestion,
+  ValidationWarning,
 } from "@/hooks/useJobLevelExpectations";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -49,7 +51,13 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
   Plus,
   Pencil,
@@ -60,6 +68,10 @@ import {
   HelpCircle,
   CheckCircle,
   AlertCircle,
+  Sparkles,
+  Lightbulb,
+  AlertTriangle,
+  ChevronDown,
 } from "lucide-react";
 
 const JOB_LEVELS = [
@@ -98,8 +110,12 @@ export function JobLevelExpectationsManager({ companyId }: Props) {
     expectations,
     isLoading,
     isSaving,
+    isGenerating,
     saveExpectation,
     deleteExpectation,
+    analyzeThresholdPatterns,
+    validateConsistency,
+    generateProgressionCriteria,
   } = useJobLevelExpectations(companyId);
 
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -108,6 +124,29 @@ export function JobLevelExpectationsManager({ companyId }: Props) {
   const [formData, setFormData] = useState<JobLevelExpectationForm>(
     emptyExpectationForm
   );
+  const [suggestions, setSuggestions] = useState<ThresholdSuggestion | null>(null);
+  const [warnings, setWarnings] = useState<ValidationWarning[]>([]);
+  const [warningsOpen, setWarningsOpen] = useState(true);
+
+  // Update suggestions when grade/level changes
+  useEffect(() => {
+    if (dialogOpen && formData.job_grade && formData.job_level) {
+      const newSuggestions = analyzeThresholdPatterns(formData.job_grade, formData.job_level);
+      setSuggestions(newSuggestions);
+    } else {
+      setSuggestions(null);
+    }
+  }, [dialogOpen, formData.job_grade, formData.job_level, analyzeThresholdPatterns]);
+
+  // Update warnings when form data changes
+  useEffect(() => {
+    if (dialogOpen && formData.job_grade && formData.job_level) {
+      const newWarnings = validateConsistency(formData, selectedId || undefined);
+      setWarnings(newWarnings);
+    } else {
+      setWarnings([]);
+    }
+  }, [dialogOpen, formData, selectedId, validateConsistency]);
 
   const handleOpenDialog = (id?: string) => {
     if (id) {
@@ -132,6 +171,9 @@ export function JobLevelExpectationsManager({ companyId }: Props) {
       setSelectedId(null);
       setFormData(emptyExpectationForm);
     }
+    setSuggestions(null);
+    setWarnings([]);
+    setWarningsOpen(true);
     setDialogOpen(true);
   };
 
@@ -463,6 +505,21 @@ export function JobLevelExpectationsManager({ companyId }: Props) {
                   }
                   placeholder="e.g., 3.0"
                 />
+                {suggestions && suggestions.competencyScore && suggestions.confidence !== 'low' && (
+                  <button
+                    type="button"
+                    className="flex items-center gap-1 text-xs text-primary hover:underline"
+                    onClick={() =>
+                      setFormData({
+                        ...formData,
+                        min_competency_score: suggestions.competencyScore!.toString(),
+                      })
+                    }
+                  >
+                    <Lightbulb className="h-3 w-3" />
+                    Suggested: {suggestions.competencyScore}
+                  </button>
+                )}
                 <p className="text-xs text-muted-foreground">
                   Average competency rating required (1-5 scale)
                 </p>
@@ -483,14 +540,65 @@ export function JobLevelExpectationsManager({ companyId }: Props) {
                   }
                   placeholder="e.g., 80"
                 />
+                {suggestions && suggestions.goalPercent && suggestions.confidence !== 'low' && (
+                  <button
+                    type="button"
+                    className="flex items-center gap-1 text-xs text-primary hover:underline"
+                    onClick={() =>
+                      setFormData({
+                        ...formData,
+                        min_goal_achievement_percent: suggestions.goalPercent!.toString(),
+                      })
+                    }
+                  >
+                    <Lightbulb className="h-3 w-3" />
+                    Suggested: {suggestions.goalPercent}%
+                  </button>
+                )}
                 <p className="text-xs text-muted-foreground">
                   Goal achievement percentage required
                 </p>
               </div>
             </div>
 
+            {suggestions && suggestions.message && (
+              <p className="text-xs text-muted-foreground flex items-center gap-1">
+                <Lightbulb className="h-3 w-3" />
+                {suggestions.message}
+              </p>
+            )}
+
             <div className="space-y-2">
-              <Label>Progression Criteria</Label>
+              <div className="flex items-center justify-between">
+                <Label>Progression Criteria</Label>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 gap-1 text-xs"
+                  disabled={isGenerating || !formData.job_grade || !formData.job_level}
+                  onClick={async () => {
+                    const result = await generateProgressionCriteria(
+                      formData.job_level,
+                      formData.job_grade
+                    );
+                    if (result) {
+                      setFormData({
+                        ...formData,
+                        progression_criteria: result.criteria,
+                        progression_criteria_en: result.criteria_en,
+                      });
+                    }
+                  }}
+                >
+                  {isGenerating ? (
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                  ) : (
+                    <Sparkles className="h-3 w-3" />
+                  )}
+                  Generate with AI
+                </Button>
+              </div>
               <Textarea
                 value={formData.progression_criteria}
                 onChange={(e) =>
@@ -564,12 +672,54 @@ export function JobLevelExpectationsManager({ companyId }: Props) {
               />
               <Label htmlFor="is_active">Active</Label>
             </div>
+
+            {/* Validation Warnings */}
+            {warnings.length > 0 && (
+              <Collapsible open={warningsOpen} onOpenChange={setWarningsOpen}>
+                <CollapsibleTrigger asChild>
+                  <Alert className="cursor-pointer border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950">
+                    <AlertTriangle className="h-4 w-4 text-amber-600" />
+                    <AlertTitle className="flex items-center justify-between">
+                      <span>{warnings.length} Warning{warnings.length > 1 ? 's' : ''}</span>
+                      <ChevronDown className={`h-4 w-4 transition-transform ${warningsOpen ? 'rotate-180' : ''}`} />
+                    </AlertTitle>
+                  </Alert>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="mt-2 space-y-2">
+                  {warnings.map((warning, idx) => (
+                    <div
+                      key={idx}
+                      className="rounded-md border border-amber-200 bg-amber-50/50 p-3 text-sm dark:border-amber-800 dark:bg-amber-950/50"
+                    >
+                      <p className="font-medium text-amber-700 dark:text-amber-400">
+                        {warning.message}
+                      </p>
+                      {warning.recommendation && (
+                        <p className="text-xs text-amber-600 dark:text-amber-500 mt-1">
+                          💡 {warning.recommendation}
+                        </p>
+                      )}
+                    </div>
+                  ))}
+                </CollapsibleContent>
+              </Collapsible>
+            )}
           </div>
 
-          <DialogFooter>
+          <DialogFooter className="gap-2 sm:gap-0">
             <Button variant="outline" onClick={() => setDialogOpen(false)}>
               Cancel
             </Button>
+            {warnings.length > 0 && (
+              <Button
+                variant="secondary"
+                onClick={handleSave}
+                disabled={isSaving}
+              >
+                {isSaving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                Save Anyway
+              </Button>
+            )}
             <Button onClick={handleSave} disabled={isSaving}>
               {isSaving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
               {selectedId ? "Update" : "Create"}
