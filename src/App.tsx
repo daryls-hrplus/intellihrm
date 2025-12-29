@@ -365,6 +365,7 @@ import FatigueManagementPage from "./pages/time-attendance/shifts/FatigueManagem
 import ShiftCoveragePage from "./pages/time-attendance/shifts/ShiftCoveragePage";
 import ShiftBiddingPage from "./pages/time-attendance/shifts/ShiftBiddingPage";
 import AISchedulerPage from "./pages/time-attendance/shifts/AISchedulerPage";
+import MultiLocationSchedulePage from "./pages/time-attendance/shifts/MultiLocationSchedulePage";
 import GeofenceManagementPage from "./pages/time-attendance/GeofenceManagementPage";
 import ProjectTimeTrackingPage from "./pages/time-attendance/ProjectTimeTrackingPage";
 import TimesheetApprovalsPage from "./pages/time-attendance/TimesheetApprovalsPage";
@@ -1746,6 +1747,14 @@ const App = () => (
               element={
                 <ProtectedRoute moduleCode="time_attendance">
                   <AISchedulerPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/time-attendance/shifts/multi-location"
+              element={
+                <ProtectedRoute moduleCode="time_attendance">
+                  <MultiLocationSchedulePage />
                 </ProtectedRoute>
               }
             />
