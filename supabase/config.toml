@@ -284,3 +284,9 @@ verify_jwt = false
 
 [functions.mx-cfdi-find-pending]
 verify_jwt = false
+
+[functions.mx-generate-sua]
+verify_jwt = false
+
+[functions.mx-generate-idse]
+verify_jwt = false
