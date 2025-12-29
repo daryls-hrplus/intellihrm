@@ -164,14 +164,14 @@ export function GoalRatingConfigurationDialog({
           <div className="space-y-2">
             <Label>Rating Scale</Label>
             <Select
-              value={formData.rating_scale_id || ""}
-              onValueChange={(v) => setFormData({ ...formData, rating_scale_id: v || null })}
+              value={formData.rating_scale_id || "default"}
+              onValueChange={(v) => setFormData({ ...formData, rating_scale_id: v === "default" ? null : v })}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Use default scale" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Default (1-5)</SelectItem>
+                <SelectItem value="default">Default (1-5)</SelectItem>
                 {ratingScales.map((scale) => (
                   <SelectItem key={scale.id} value={scale.id}>
                     {scale.name} ({scale.min_rating}-{scale.max_rating})
