@@ -32,10 +32,12 @@ import {
   MessageSquare,
   Paperclip,
   Info,
+  FileText,
 } from "lucide-react";
 import { useGoalCheckIns, GoalCheckIn, CreateCheckInData } from "@/hooks/useGoalCheckIns";
 import { useAuth } from "@/contexts/AuthContext";
 import { format } from "date-fns";
+import { GoalEvidenceAttachment } from "./GoalEvidenceAttachment";
 
 interface Goal {
   id: string;
@@ -201,7 +203,15 @@ export function GoalCheckInDialog({
                   </div>
                 </div>
               </div>
-              {existingCheckIn?.employee_status && getStatusBadge(existingCheckIn.employee_status)}
+              <div className="flex items-center gap-2">
+                {existingCheckIn?.employee_status && getStatusBadge(existingCheckIn.employee_status)}
+                <GoalEvidenceAttachment
+                  goalId={goal.id}
+                  employeeId={goal.employee_id}
+                  goalTitle={goal.title}
+                  readOnly={!isEmployee || existingCheckIn?.status === "completed"}
+                />
+              </div>
             </div>
           </CardContent>
         </Card>

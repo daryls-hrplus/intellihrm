@@ -26,6 +26,8 @@ import { MultiPositionWeightsManager } from "./MultiPositionWeightsManager";
 import { useEmployeeLevelExpectations } from "@/hooks/useEmployeeLevelExpectations";
 import { JobLevelExpectationsPanel } from "./JobLevelExpectationsPanel";
 import { ManagerRoleChangeGuidance } from "./ManagerRoleChangeGuidance";
+import { AppraisalEvidenceSummary } from "./AppraisalEvidenceSummary";
+
 interface AppraisalScore {
   id?: string;
   item_id: string;
@@ -1058,6 +1060,15 @@ export function AppraisalEvaluationDialog({
                   rows={2}
                 />
               </div>
+              {/* Evidence Summary */}
+              {employeeId && (
+                <AppraisalEvidenceSummary
+                  employeeId={employeeId}
+                  cycleId={cycleId}
+                  goalId={type === "goal" ? item.item_id : undefined}
+                  capabilityId={type === "competency" ? item.item_id : undefined}
+                />
+              )}
             </CardContent>
           </Card>
         ))}
