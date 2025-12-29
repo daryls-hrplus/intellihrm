@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Dialog,
   DialogContent,
@@ -18,11 +18,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Send, Trash2 } from "lucide-react";
+import { Send, Trash2, Brain, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { formatDateForDisplay } from "@/utils/dateUtils";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { useCommentAnalyzer } from "@/hooks/performance/useCommentAnalyzer";
+import { CommentInflationWarning } from "./CommentInflationWarning";
+import { NeutralAlternativeSuggester } from "./NeutralAlternativeSuggester";
+import { useDebouncedCallback } from "@/hooks/use-debounced-callback";
 
 interface Comment {
   id: string;
@@ -60,6 +64,38 @@ export function GoalCommentsDialog({
   const [submitting, setSubmitting] = useState(false);
   const [newComment, setNewComment] = useState("");
   const [commentType, setCommentType] = useState("general");
+  
+  // AI Analysis state
+  const { analyzing, analyzeComment, suggestAlternatives } = useCommentAnalyzer();
+  const [commentAnalysis, setCommentAnalysis] = useState<Awaited<ReturnType<typeof analyzeComment>>>(null);
+  const [warningAcknowledged, setWarningAcknowledged] = useState(false);
+
+  // Debounced analysis when comment changes
+  const debouncedAnalyze = useDebouncedCallback(
+    async (text: string) => {
+      if (text.trim().length < 20) {
+        setCommentAnalysis(null);
+        return;
+      }
+      const result = await analyzeComment({ comment: text });
+      setCommentAnalysis(result);
+    },
+    1000
+  );
+
+  const handleCommentChange = (value: string) => {
+    setNewComment(value);
+    setWarningAcknowledged(false);
+    debouncedAnalyze(value);
+  };
+
+  const handleApplyAlternative = (original: string, alternative: string) => {
+    const regex = new RegExp(original, 'gi');
+    const updated = newComment.replace(regex, alternative);
+    setNewComment(updated);
+    debouncedAnalyze(updated);
+    toast.success(`Replaced "${original}" with "${alternative}"`);
+  };
 
   useEffect(() => {
     if (open) {
@@ -164,17 +200,49 @@ export function GoalCommentsDialog({
                   <SelectItem value="feedback">Feedback</SelectItem>
                 </SelectContent>
               </Select>
-              <Textarea
-                value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
-                placeholder="Add a comment..."
-                className="flex-1 min-h-[60px]"
-              />
+              <div className="flex-1 space-y-2">
+                <Textarea
+                  value={newComment}
+                  onChange={(e) => handleCommentChange(e.target.value)}
+                  placeholder="Add a comment..."
+                  className="min-h-[60px]"
+                />
+                {analyzing && (
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                    Analyzing feedback quality...
+                  </div>
+                )}
+              </div>
             </div>
-            <div className="flex justify-end">
+            
+            {/* AI Analysis Warnings */}
+            <CommentInflationWarning
+              analysis={commentAnalysis}
+              onAcknowledge={() => setWarningAcknowledged(true)}
+              acknowledged={warningAcknowledged}
+            />
+            
+            {/* Bias Suggestions */}
+            {commentAnalysis && commentAnalysis.suggestedAlternatives.length > 0 && (
+              <NeutralAlternativeSuggester
+                biasIndicators={commentAnalysis.biasIndicators}
+                suggestedAlternatives={commentAnalysis.suggestedAlternatives}
+                onApplyAlternative={handleApplyAlternative}
+              />
+            )}
+            
+            <div className="flex items-center justify-between">
+              {commentAnalysis && newComment.trim().length >= 20 && (
+                <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                  <Brain className="h-3 w-3" />
+                  AI quality score: {100 - commentAnalysis.inflationScore}%
+                </div>
+              )}
+              <div className="flex-1" />
               <Button
                 onClick={handleSubmit}
-                disabled={!newComment.trim() || submitting}
+                disabled={!newComment.trim() || submitting || (commentAnalysis?.overallAssessment === 'critical' && !warningAcknowledged)}
                 size="sm"
               >
                 <Send className="mr-2 h-4 w-4" />

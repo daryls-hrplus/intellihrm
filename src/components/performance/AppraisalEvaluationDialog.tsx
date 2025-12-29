@@ -10,7 +10,7 @@ import { Slider } from "@/components/ui/slider";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Target, Briefcase, Award, Save, Send, ChevronDown, ChevronUp, Loader2, GitBranch, Settings2, Users } from "lucide-react";
+import { Target, Briefcase, Award, Save, Send, ChevronDown, ChevronUp, Loader2, GitBranch, Settings2, Users, Brain } from "lucide-react";
 import { useKRARatingSubmissions } from "@/hooks/useKRARatingSubmissions";
 import { KRAWithRating, ResponsibilityKRA } from "@/types/responsibilityKRA";
 import { KRARatingCard } from "./KRARatingCard";
@@ -27,6 +27,9 @@ import { useEmployeeLevelExpectations } from "@/hooks/useEmployeeLevelExpectatio
 import { JobLevelExpectationsPanel } from "./JobLevelExpectationsPanel";
 import { ManagerRoleChangeGuidance } from "./ManagerRoleChangeGuidance";
 import { AppraisalEvidenceSummary } from "./AppraisalEvidenceSummary";
+import { useCommentAnalyzer } from "@/hooks/performance/useCommentAnalyzer";
+import { AppraisalAIAnalysisSummary } from "./AppraisalAIAnalysisSummary";
+import { CommentInflationWarning } from "./CommentInflationWarning";
 
 interface AppraisalScore {
   id?: string;
