@@ -245,3 +245,6 @@ verify_jwt = false
 
 [functions.cba-negotiation-costing]
 verify_jwt = false
+
+[functions.performance-comment-analyzer]
+verify_jwt = false
