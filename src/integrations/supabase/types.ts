@@ -26591,6 +26591,75 @@ export type Database = {
           },
         ]
       }
+      job_level_expectations: {
+        Row: {
+          company_id: string
+          created_at: string
+          created_by: string | null
+          effective_from: string
+          effective_to: string | null
+          id: string
+          is_active: boolean | null
+          job_grade: string
+          job_level: string
+          min_competency_score: number | null
+          min_goal_achievement_percent: number | null
+          notes: string | null
+          progression_criteria: string | null
+          progression_criteria_en: string | null
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          effective_from?: string
+          effective_to?: string | null
+          id?: string
+          is_active?: boolean | null
+          job_grade: string
+          job_level: string
+          min_competency_score?: number | null
+          min_goal_achievement_percent?: number | null
+          notes?: string | null
+          progression_criteria?: string | null
+          progression_criteria_en?: string | null
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          effective_from?: string
+          effective_to?: string | null
+          id?: string
+          is_active?: boolean | null
+          job_grade?: string
+          job_level?: string
+          min_competency_score?: number | null
+          min_goal_achievement_percent?: number | null
+          notes?: string | null
+          progression_criteria?: string | null
+          progression_criteria_en?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_level_expectations_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_level_expectations_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       job_postings: {
         Row: {
           created_at: string
