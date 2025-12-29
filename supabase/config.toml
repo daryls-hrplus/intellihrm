@@ -251,3 +251,18 @@ verify_jwt = false
 
 [functions.talent-risk-analyzer]
 verify_jwt = false
+
+[functions.mx-calculate-sdi]
+verify_jwt = false
+
+[functions.mx-calculate-isr]
+verify_jwt = false
+
+[functions.mx-calculate-imss]
+verify_jwt = false
+
+[functions.mx-calculate-isn]
+verify_jwt = false
+
+[functions.mx-payroll-calculate]
+verify_jwt = false
