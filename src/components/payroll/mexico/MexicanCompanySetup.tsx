@@ -9,7 +9,10 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2, Building2, Shield, FileText } from 'lucide-react';
+import { Loader2, Building2, Shield, FileText, Key, Eye, EyeOff, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const rfcRegex = /^[A-ZÑ&]{3,4}\d{6}[A-Z0-9]{3}$/;
 
@@ -21,6 +24,10 @@ const formSchema = z.object({
   imss_risk_class: z.coerce.number().min(1).max(5),
   fonacot_registration: z.string().optional(),
   pac_provider: z.string().optional(),
+  csd_certificate_number: z.string().optional(),
+  pac_username: z.string().optional(),
+  pac_password: z.string().optional(),
+  pac_sandbox_mode: z.boolean().optional(),
   domicilio_fiscal: z.object({
     calle: z.string().optional(),
     numero_exterior: z.string().optional(),
@@ -92,7 +99,10 @@ const PAC_PROVIDERS = [
 export function MexicanCompanySetup({ companyId, onSave }: MexicanCompanySetupProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isTesting, setIsTesting] = useState(false);
   const [existingRecord, setExistingRecord] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [pacConnectionStatus, setPacConnectionStatus] = useState<'untested' | 'success' | 'error'>('untested');
   const { toast } = useToast();
 
   const form = useForm<FormData>({
@@ -105,6 +115,10 @@ export function MexicanCompanySetup({ companyId, onSave }: MexicanCompanySetupPr
       imss_risk_class: 1,
       fonacot_registration: '',
       pac_provider: '',
+      csd_certificate_number: '',
+      pac_username: '',
+      pac_password: '',
+      pac_sandbox_mode: true,
       domicilio_fiscal: {
         calle: '',
         numero_exterior: '',
@@ -131,6 +145,7 @@ export function MexicanCompanySetup({ companyId, onSave }: MexicanCompanySetupPr
 
         if (data) {
           setExistingRecord(data.id);
+          const pacCreds = data.pac_credentials as { username?: string; password?: string; sandbox_mode?: boolean } | null;
           form.reset({
             rfc: data.rfc,
             razon_social: data.razon_social,
@@ -139,8 +154,15 @@ export function MexicanCompanySetup({ companyId, onSave }: MexicanCompanySetupPr
             imss_risk_class: data.imss_risk_class || 1,
             fonacot_registration: data.fonacot_registration || '',
             pac_provider: data.pac_provider || '',
+            csd_certificate_number: data.csd_certificate_number || '',
+            pac_username: pacCreds?.username || '',
+            pac_password: pacCreds?.password || '',
+            pac_sandbox_mode: pacCreds?.sandbox_mode ?? true,
             domicilio_fiscal: (data.domicilio_fiscal as FormData['domicilio_fiscal']) || {}
           });
+          if (pacCreds?.username && pacCreds?.password) {
+            setPacConnectionStatus('success');
+          }
         }
       } catch (error) {
         console.error('Error loading Mexican company data:', error);
@@ -157,9 +179,66 @@ export function MexicanCompanySetup({ companyId, onSave }: MexicanCompanySetupPr
     loadExistingData();
   }, [companyId, form, toast]);
 
+  const testPacConnection = async () => {
+    const provider = form.getValues('pac_provider');
+    const username = form.getValues('pac_username');
+    const password = form.getValues('pac_password');
+    const sandboxMode = form.getValues('pac_sandbox_mode');
+
+    if (!provider || !username || !password) {
+      toast({
+        title: 'Missing credentials',
+        description: 'Please fill in PAC provider, username, and password',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    setIsTesting(true);
+    setPacConnectionStatus('untested');
+
+    try {
+      const { data, error } = await supabase.functions.invoke('mx-pac-test-connection', {
+        body: { provider, username, password, sandboxMode }
+      });
+
+      if (error) throw error;
+
+      if (data?.success) {
+        setPacConnectionStatus('success');
+        toast({
+          title: 'Connection successful',
+          description: `Successfully connected to ${provider.toUpperCase()} PAC service`
+        });
+      } else {
+        setPacConnectionStatus('error');
+        toast({
+          title: 'Connection failed',
+          description: data?.error || 'Could not connect to PAC service',
+          variant: 'destructive'
+        });
+      }
+    } catch (error) {
+      setPacConnectionStatus('error');
+      toast({
+        title: 'Connection test failed',
+        description: error instanceof Error ? error.message : 'Unknown error',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsTesting(false);
+    }
+  };
+
   const onSubmit = async (data: FormData) => {
     setIsSaving(true);
     try {
+      const pacCredentials = data.pac_username && data.pac_password ? {
+        username: data.pac_username,
+        password: data.pac_password,
+        sandbox_mode: data.pac_sandbox_mode ?? true
+      } : null;
+
       const payload = {
         company_id: companyId,
         rfc: data.rfc.toUpperCase(),
@@ -169,6 +248,8 @@ export function MexicanCompanySetup({ companyId, onSave }: MexicanCompanySetupPr
         imss_risk_class: data.imss_risk_class,
         fonacot_registration: data.fonacot_registration || null,
         pac_provider: data.pac_provider || null,
+        csd_certificate_number: data.csd_certificate_number || null,
+        pac_credentials: pacCredentials,
         domicilio_fiscal: data.domicilio_fiscal
       };
 
@@ -375,7 +456,24 @@ export function MexicanCompanySetup({ companyId, onSave }: MexicanCompanySetupPr
               Electronic invoicing (timbrado) provider settings
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-4">
+            <FormField
+              control={form.control}
+              name="csd_certificate_number"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>CSD Certificate Number</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="20001000000300022779" />
+                  </FormControl>
+                  <FormDescription>
+                    Digital seal certificate number (Certificado de Sello Digital)
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <FormField
               control={form.control}
               name="pac_provider"
@@ -403,6 +501,126 @@ export function MexicanCompanySetup({ companyId, onSave }: MexicanCompanySetupPr
                 </FormItem>
               )}
             />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Key className="h-5 w-5" />
+              PAC Credentials
+              {pacConnectionStatus === 'success' && (
+                <Badge variant="outline" className="ml-2 text-green-600 border-green-600">
+                  <CheckCircle2 className="h-3 w-3 mr-1" />
+                  Connected
+                </Badge>
+              )}
+              {pacConnectionStatus === 'error' && (
+                <Badge variant="outline" className="ml-2 text-destructive border-destructive">
+                  <AlertCircle className="h-3 w-3 mr-1" />
+                  Connection Failed
+                </Badge>
+              )}
+            </CardTitle>
+            <CardDescription>
+              API credentials for your PAC provider to stamp CFDIs
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Alert>
+              <Key className="h-4 w-4" />
+              <AlertDescription>
+                Your PAC credentials are encrypted and stored securely. They are used only for CFDI stamping operations.
+              </AlertDescription>
+            </Alert>
+
+            <div className="grid gap-4 md:grid-cols-2">
+              <FormField
+                control={form.control}
+                name="pac_username"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>PAC Username / API Key</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="your-pac-username" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="pac_password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>PAC Password / API Secret</FormLabel>
+                    <div className="relative">
+                      <FormControl>
+                        <Input 
+                          {...field} 
+                          type={showPassword ? 'text' : 'password'}
+                          placeholder="••••••••••••"
+                        />
+                      </FormControl>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        {showPassword ? (
+                          <EyeOff className="h-4 w-4 text-muted-foreground" />
+                        ) : (
+                          <Eye className="h-4 w-4 text-muted-foreground" />
+                        )}
+                      </Button>
+                    </div>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <FormField
+              control={form.control}
+              name="pac_sandbox_mode"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                  <div className="space-y-0.5">
+                    <FormLabel className="text-base">Sandbox Mode</FormLabel>
+                    <FormDescription>
+                      Use test environment for CFDI stamping (no real charges)
+                    </FormDescription>
+                  </div>
+                  <FormControl>
+                    <Button
+                      type="button"
+                      variant={field.value ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => field.onChange(!field.value)}
+                    >
+                      {field.value ? 'Enabled' : 'Disabled'}
+                    </Button>
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+
+            <Separator />
+
+            <div className="flex justify-end">
+              <Button 
+                type="button" 
+                variant="outline"
+                onClick={testPacConnection}
+                disabled={isTesting}
+              >
+                {isTesting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Test PAC Connection
+              </Button>
+            </div>
           </CardContent>
         </Card>
 
