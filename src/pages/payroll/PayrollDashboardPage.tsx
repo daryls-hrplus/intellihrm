@@ -139,6 +139,9 @@ export default function PayrollDashboardPage() {
     savingsPrograms: { title: "Savings Programs", description: "Employee savings, Christmas clubs, and credit union deductions", icon: PiggyBank, href: "/payroll/savings-programs", color: "bg-teal-500/10 text-teal-600", tabCode: "savings_programs" },
     timePayrollSync: { title: "Time & Attendance Sync", description: "Sync time clock entries and breaks to payroll calculations", icon: Timer, href: "/payroll/time-sync", color: "bg-blue-500/10 text-blue-600", tabCode: "time_payroll_sync" },
     paymentRules: { title: "Payment Rules", description: "Configure overtime multipliers, breaks, and rate tiers", icon: Sliders, href: "/payroll/payment-rules", color: "bg-orange-500/10 text-orange-600", tabCode: "payment_rules" },
+    payslips: { title: "Payslips", description: "View and manage employee payslips", icon: FileSpreadsheet, href: "/payroll/payslips", color: "bg-emerald-500/10 text-emerald-600", tabCode: "payslips" },
+    countryDocumentation: { title: "Country Documentation", description: "View payroll documentation and requirements by country", icon: Globe, href: "/payroll/country-documentation", color: "bg-slate-500/10 text-slate-600", tabCode: "country_documentation" },
+    historicalImport: { title: "Historical Import", description: "Import historical payroll data for new implementations", icon: Archive, href: "/payroll/historical-import", color: "bg-purple-500/10 text-purple-600", tabCode: "historical_import" },
   };
 
   const filterByAccess = (modules: typeof allModules[keyof typeof allModules][]) =>
@@ -159,7 +162,7 @@ export default function PayrollDashboardPage() {
     },
     {
       titleKey: "Reporting & Analytics",
-      items: filterByAccess([allModules.reports, allModules.yearEnd, allModules.archiveSettings]),
+      items: filterByAccess([allModules.reports, allModules.yearEnd, allModules.payslips, allModules.archiveSettings, allModules.countryDocumentation, allModules.historicalImport]),
     },
   ];
 
