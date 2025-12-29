@@ -17,7 +17,13 @@ import {
   Flag,
   AlertCircle,
   Calculator,
-  BarChart3
+  BarChart3,
+  Calendar,
+  Edit,
+  User,
+  GitCompare,
+  History,
+  Settings
 } from "lucide-react";
 import {
   MexicanCompanySetup,
@@ -30,7 +36,13 @@ import {
   FONACOTManager,
   MexicanAnnualISR,
   TaxCertificates,
-  MexicanPayrollAnalytics
+  MexicanPayrollAnalytics,
+  ComplianceCalendar,
+  PayrollAdjustments,
+  EmployeeSelfService,
+  MultiPeriodComparison,
+  AuditTrail,
+  PACIntegration
 } from "@/components/payroll/mexico";
 
 interface Company {
@@ -215,6 +227,30 @@ export default function MexicoPayrollPage() {
                 <BarChart3 className="h-4 w-4" />
                 <span className="hidden md:inline">Analytics</span>
               </TabsTrigger>
+              <TabsTrigger value="calendar" className="gap-1">
+                <Calendar className="h-4 w-4" />
+                <span className="hidden md:inline">Calendar</span>
+              </TabsTrigger>
+              <TabsTrigger value="adjustments" className="gap-1">
+                <Edit className="h-4 w-4" />
+                <span className="hidden md:inline">Adjustments</span>
+              </TabsTrigger>
+              <TabsTrigger value="self-service" className="gap-1">
+                <User className="h-4 w-4" />
+                <span className="hidden md:inline">Self-Service</span>
+              </TabsTrigger>
+              <TabsTrigger value="comparison" className="gap-1">
+                <GitCompare className="h-4 w-4" />
+                <span className="hidden md:inline">Compare</span>
+              </TabsTrigger>
+              <TabsTrigger value="audit" className="gap-1">
+                <History className="h-4 w-4" />
+                <span className="hidden md:inline">Audit</span>
+              </TabsTrigger>
+              <TabsTrigger value="pac" className="gap-1">
+                <Settings className="h-4 w-4" />
+                <span className="hidden md:inline">PAC</span>
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="company">
@@ -268,6 +304,39 @@ export default function MexicoPayrollPage() {
 
             <TabsContent value="analytics">
               <MexicanPayrollAnalytics companyId={selectedCompanyId} />
+            </TabsContent>
+
+            <TabsContent value="calendar">
+              <ComplianceCalendar companyId={selectedCompanyId} />
+            </TabsContent>
+
+            <TabsContent value="adjustments">
+              <PayrollAdjustments companyId={selectedCompanyId} />
+            </TabsContent>
+
+            <TabsContent value="self-service">
+              {selectedEmployeeId ? (
+                <EmployeeSelfService employeeId={selectedEmployeeId} />
+              ) : (
+                <Alert>
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>
+                    Please select an employee to view their self-service portal.
+                  </AlertDescription>
+                </Alert>
+              )}
+            </TabsContent>
+
+            <TabsContent value="comparison">
+              <MultiPeriodComparison companyId={selectedCompanyId} />
+            </TabsContent>
+
+            <TabsContent value="audit">
+              <AuditTrail companyId={selectedCompanyId} />
+            </TabsContent>
+
+            <TabsContent value="pac">
+              <PACIntegration companyId={selectedCompanyId} />
             </TabsContent>
           </Tabs>
         )}
