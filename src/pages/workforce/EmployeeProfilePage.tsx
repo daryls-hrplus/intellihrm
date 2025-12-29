@@ -103,6 +103,11 @@ interface EmployeeProfile {
   middle_name: string | null;
   first_last_name: string | null;
   second_last_name: string | null;
+  // Personal information fields
+  gender: string | null;
+  date_of_birth: string | null;
+  marital_status: string | null;
+  nationality: string | null;
   positions: {
     id: string;
     title: string;
@@ -162,7 +167,7 @@ export default function EmployeeProfilePage() {
       // Fetch profile
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
-        .select('id, full_name, email, avatar_url, timezone, preferred_language, date_format, time_format, created_at, first_hire_date, last_hire_date, start_date, continuous_service_date, seniority_date, adjusted_service_date, employment_status, employee_id, badge_number, global_id, cedula_number, first_name, middle_name, first_last_name, second_last_name')
+        .select('id, full_name, email, avatar_url, timezone, preferred_language, date_format, time_format, created_at, first_hire_date, last_hire_date, start_date, continuous_service_date, seniority_date, adjusted_service_date, employment_status, employee_id, badge_number, global_id, cedula_number, first_name, middle_name, first_last_name, second_last_name, gender, date_of_birth, marital_status, nationality')
         .eq('id', employeeId)
         .maybeSingle();
 
@@ -243,6 +248,11 @@ export default function EmployeeProfilePage() {
         middle_name: profile.middle_name,
         first_last_name: profile.first_last_name,
         second_last_name: profile.second_last_name,
+        // Personal information fields
+        gender: profile.gender,
+        date_of_birth: profile.date_of_birth,
+        marital_status: profile.marital_status,
+        nationality: profile.nationality,
         positions: employeePositions,
       });
 
@@ -640,6 +650,50 @@ export default function EmployeeProfilePage() {
                       <p className="text-sm font-medium text-foreground">Second Last Name (Maternal)</p>
                       <p className="text-sm text-muted-foreground">
                         {employee.second_last_name || 'Not Set'}
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Personal Information */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <User className="h-5 w-5" />
+                    Personal Information
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div>
+                      <p className="text-sm font-medium text-foreground">Gender</p>
+                      <p className="text-sm text-muted-foreground">
+                        {employee.gender 
+                          ? employee.gender.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+                          : 'Not Set'}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-foreground">Date of Birth</p>
+                      <p className="text-sm text-muted-foreground">
+                        {employee.date_of_birth 
+                          ? formatDateForDisplay(employee.date_of_birth)
+                          : 'Not Set'}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-foreground">Marital Status</p>
+                      <p className="text-sm text-muted-foreground">
+                        {employee.marital_status 
+                          ? employee.marital_status.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+                          : 'Not Set'}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-foreground">Nationality</p>
+                      <p className="text-sm text-muted-foreground">
+                        {employee.nationality || 'Not Set'}
                       </p>
                     </div>
                   </div>
