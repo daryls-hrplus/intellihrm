@@ -284,6 +284,23 @@ const phases: Phase[] = [
       { order: 14, area: "Payroll Simulations", description: "What-if scenarios for salary changes, hiring plans" },
     ],
   },
+  {
+    id: "mexico-enterprise",
+    title: "Phase 13: Mexico Enterprise & Integration",
+    icon: Globe,
+    description: "Enterprise-grade Mexican payroll with direct government API integration",
+    prerequisite: "Phase 12 complete",
+    items: [
+      { order: 1, area: "Employee Mobile ESS (Mexico)", description: "Mobile app for CFDI downloads, PTU statements, IMSS history" },
+      { order: 2, area: "SIPARE Integration", description: "Direct IMSS payment reference system integration" },
+      { order: 3, area: "Constancia Situación Fiscal", description: "CSF validation, expiry tracking, bulk upload" },
+      { order: 4, area: "ISR Annual Adjustment", description: "Ajuste anual calculation with refund/balance management" },
+      { order: 5, area: "SAT/IMSS API Integration", description: "Direct API connections to government systems" },
+      { order: 6, area: "Advanced PTU Distribution", description: "50/50 calculation with legal cap (tope) handling" },
+      { order: 7, area: "Payroll Audit Dashboard", description: "Compliance scoring, findings tracking, remediation" },
+      { order: 8, area: "Complete Regulatory Calendar", description: "All Mexican payroll deadlines with reminders" },
+    ],
+  },
 ];
 
 const dependencies = [
