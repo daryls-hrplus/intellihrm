@@ -38897,7 +38897,10 @@ export type Database = {
           second_last_name: string | null
           section_id: string | null
           seniority_date: string | null
+          separation_date: string | null
           start_date: string | null
+          termination_date: string | null
+          termination_reason: string | null
           time_clock_id: string | null
           time_format: string | null
           timezone: string | null
@@ -38940,7 +38943,10 @@ export type Database = {
           second_last_name?: string | null
           section_id?: string | null
           seniority_date?: string | null
+          separation_date?: string | null
           start_date?: string | null
+          termination_date?: string | null
+          termination_reason?: string | null
           time_clock_id?: string | null
           time_format?: string | null
           timezone?: string | null
@@ -38983,7 +38989,10 @@ export type Database = {
           second_last_name?: string | null
           section_id?: string | null
           seniority_date?: string | null
+          separation_date?: string | null
           start_date?: string | null
+          termination_date?: string | null
+          termination_reason?: string | null
           time_clock_id?: string | null
           time_format?: string | null
           timezone?: string | null
