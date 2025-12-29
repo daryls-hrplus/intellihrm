@@ -23,7 +23,13 @@ import {
   User,
   GitCompare,
   History,
-  Settings
+  Settings,
+  TrendingUp,
+  Layers,
+  Sun,
+  UserMinus,
+  FileStack,
+  Webhook
 } from "lucide-react";
 import {
   MexicanCompanySetup,
@@ -42,7 +48,13 @@ import {
   EmployeeSelfService,
   MultiPeriodComparison,
   AuditTrail,
-  PACIntegration
+  PACIntegration,
+  PayrollSimulations,
+  BatchOperations,
+  VacationPTUManager,
+  SeveranceCalculator,
+  PayrollTemplates,
+  IntegrationWebhooks
 } from "@/components/payroll/mexico";
 
 interface Company {
@@ -251,6 +263,30 @@ export default function MexicoPayrollPage() {
                 <Settings className="h-4 w-4" />
                 <span className="hidden md:inline">PAC</span>
               </TabsTrigger>
+              <TabsTrigger value="simulations" className="gap-1">
+                <TrendingUp className="h-4 w-4" />
+                <span className="hidden md:inline">Simulations</span>
+              </TabsTrigger>
+              <TabsTrigger value="batch" className="gap-1">
+                <Layers className="h-4 w-4" />
+                <span className="hidden md:inline">Batch</span>
+              </TabsTrigger>
+              <TabsTrigger value="vacation-ptu" className="gap-1">
+                <Sun className="h-4 w-4" />
+                <span className="hidden md:inline">Vacation/PTU</span>
+              </TabsTrigger>
+              <TabsTrigger value="severance" className="gap-1">
+                <UserMinus className="h-4 w-4" />
+                <span className="hidden md:inline">Severance</span>
+              </TabsTrigger>
+              <TabsTrigger value="templates" className="gap-1">
+                <FileStack className="h-4 w-4" />
+                <span className="hidden md:inline">Templates</span>
+              </TabsTrigger>
+              <TabsTrigger value="webhooks" className="gap-1">
+                <Webhook className="h-4 w-4" />
+                <span className="hidden md:inline">Webhooks</span>
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="company">
@@ -337,6 +373,30 @@ export default function MexicoPayrollPage() {
 
             <TabsContent value="pac">
               <PACIntegration companyId={selectedCompanyId} />
+            </TabsContent>
+
+            <TabsContent value="simulations">
+              <PayrollSimulations companyId={selectedCompanyId} />
+            </TabsContent>
+
+            <TabsContent value="batch">
+              <BatchOperations companyId={selectedCompanyId} />
+            </TabsContent>
+
+            <TabsContent value="vacation-ptu">
+              <VacationPTUManager companyId={selectedCompanyId} />
+            </TabsContent>
+
+            <TabsContent value="severance">
+              <SeveranceCalculator companyId={selectedCompanyId} />
+            </TabsContent>
+
+            <TabsContent value="templates">
+              <PayrollTemplates companyId={selectedCompanyId} />
+            </TabsContent>
+
+            <TabsContent value="webhooks">
+              <IntegrationWebhooks companyId={selectedCompanyId} />
             </TabsContent>
           </Tabs>
         )}
