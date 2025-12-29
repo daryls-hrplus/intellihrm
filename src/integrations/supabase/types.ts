@@ -7406,11 +7406,18 @@ export type Database = {
           evidence_source: Database["public"]["Enums"]["evidence_source"]
           expires_at: string | null
           id: string
+          last_validated_date: string | null
           notes: string | null
           proficiency_level: number | null
           updated_at: string | null
           validated_at: string | null
           validated_by: string | null
+          validation_confidence:
+            | Database["public"]["Enums"]["validation_confidence"]
+            | null
+          validation_source_type:
+            | Database["public"]["Enums"]["validation_source_type"]
+            | null
           validation_status:
             | Database["public"]["Enums"]["validation_status"]
             | null
@@ -7425,11 +7432,18 @@ export type Database = {
           evidence_source: Database["public"]["Enums"]["evidence_source"]
           expires_at?: string | null
           id?: string
+          last_validated_date?: string | null
           notes?: string | null
           proficiency_level?: number | null
           updated_at?: string | null
           validated_at?: string | null
           validated_by?: string | null
+          validation_confidence?:
+            | Database["public"]["Enums"]["validation_confidence"]
+            | null
+          validation_source_type?:
+            | Database["public"]["Enums"]["validation_source_type"]
+            | null
           validation_status?:
             | Database["public"]["Enums"]["validation_status"]
             | null
@@ -7444,11 +7458,18 @@ export type Database = {
           evidence_source?: Database["public"]["Enums"]["evidence_source"]
           expires_at?: string | null
           id?: string
+          last_validated_date?: string | null
           notes?: string | null
           proficiency_level?: number | null
           updated_at?: string | null
           validated_at?: string | null
           validated_by?: string | null
+          validation_confidence?:
+            | Database["public"]["Enums"]["validation_confidence"]
+            | null
+          validation_source_type?:
+            | Database["public"]["Enums"]["validation_source_type"]
+            | null
           validation_status?:
             | Database["public"]["Enums"]["validation_status"]
             | null
@@ -7610,6 +7631,125 @@ export type Database = {
             columns: ["competency_id"]
             isOneToOne: false
             referencedRelation: "competencies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      competency_rating_history: {
+        Row: {
+          appraisal_cycle_id: string | null
+          avg_confidence_score: number | null
+          capability_id: string
+          company_id: string | null
+          created_at: string | null
+          employee_id: string
+          evidence_count: number | null
+          id: string
+          job_family_id: string | null
+          job_id: string | null
+          job_level: string | null
+          notes: string | null
+          previous_rating_level: number | null
+          rated_by: string | null
+          rating_change: number | null
+          rating_level: number
+          rating_period_end: string
+          rating_period_start: string
+          rating_source: Database["public"]["Enums"]["rating_source"] | null
+          validation_count: number | null
+        }
+        Insert: {
+          appraisal_cycle_id?: string | null
+          avg_confidence_score?: number | null
+          capability_id: string
+          company_id?: string | null
+          created_at?: string | null
+          employee_id: string
+          evidence_count?: number | null
+          id?: string
+          job_family_id?: string | null
+          job_id?: string | null
+          job_level?: string | null
+          notes?: string | null
+          previous_rating_level?: number | null
+          rated_by?: string | null
+          rating_change?: number | null
+          rating_level: number
+          rating_period_end: string
+          rating_period_start: string
+          rating_source?: Database["public"]["Enums"]["rating_source"] | null
+          validation_count?: number | null
+        }
+        Update: {
+          appraisal_cycle_id?: string | null
+          avg_confidence_score?: number | null
+          capability_id?: string
+          company_id?: string | null
+          created_at?: string | null
+          employee_id?: string
+          evidence_count?: number | null
+          id?: string
+          job_family_id?: string | null
+          job_id?: string | null
+          job_level?: string | null
+          notes?: string | null
+          previous_rating_level?: number | null
+          rated_by?: string | null
+          rating_change?: number | null
+          rating_level?: number
+          rating_period_end?: string
+          rating_period_start?: string
+          rating_source?: Database["public"]["Enums"]["rating_source"] | null
+          validation_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "competency_rating_history_appraisal_cycle_id_fkey"
+            columns: ["appraisal_cycle_id"]
+            isOneToOne: false
+            referencedRelation: "appraisal_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "competency_rating_history_capability_id_fkey"
+            columns: ["capability_id"]
+            isOneToOne: false
+            referencedRelation: "skills_competencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "competency_rating_history_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "competency_rating_history_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "competency_rating_history_job_family_id_fkey"
+            columns: ["job_family_id"]
+            isOneToOne: false
+            referencedRelation: "job_families"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "competency_rating_history_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "competency_rating_history_rated_by_fkey"
+            columns: ["rated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -26697,6 +26837,92 @@ export type Database = {
           },
         ]
       }
+      job_family_capability_history: {
+        Row: {
+          capability_id: string
+          change_reason: string | null
+          change_type:
+            | Database["public"]["Enums"]["competency_change_type"]
+            | null
+          changed_by: string | null
+          company_id: string | null
+          created_at: string | null
+          effective_from: string
+          effective_to: string | null
+          id: string
+          is_required: boolean | null
+          job_family_id: string
+          required_level: number | null
+          version_number: number
+          weighting: number | null
+        }
+        Insert: {
+          capability_id: string
+          change_reason?: string | null
+          change_type?:
+            | Database["public"]["Enums"]["competency_change_type"]
+            | null
+          changed_by?: string | null
+          company_id?: string | null
+          created_at?: string | null
+          effective_from: string
+          effective_to?: string | null
+          id?: string
+          is_required?: boolean | null
+          job_family_id: string
+          required_level?: number | null
+          version_number?: number
+          weighting?: number | null
+        }
+        Update: {
+          capability_id?: string
+          change_reason?: string | null
+          change_type?:
+            | Database["public"]["Enums"]["competency_change_type"]
+            | null
+          changed_by?: string | null
+          company_id?: string | null
+          created_at?: string | null
+          effective_from?: string
+          effective_to?: string | null
+          id?: string
+          is_required?: boolean | null
+          job_family_id?: string
+          required_level?: number | null
+          version_number?: number
+          weighting?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_family_capability_history_capability_id_fkey"
+            columns: ["capability_id"]
+            isOneToOne: false
+            referencedRelation: "skills_competencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_family_capability_history_changed_by_fkey"
+            columns: ["changed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_family_capability_history_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_family_capability_history_job_family_id_fkey"
+            columns: ["job_family_id"]
+            isOneToOne: false
+            referencedRelation: "job_families"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       job_goals: {
         Row: {
           created_at: string
@@ -36138,6 +36364,156 @@ export type Database = {
             columns: ["review_participant_id"]
             isOneToOne: false
             referencedRelation: "review_participants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      performance_evidence: {
+        Row: {
+          appraisal_cycle_id: string | null
+          attachment_path: string | null
+          attachment_size_bytes: number | null
+          attachment_type: string | null
+          capability_id: string | null
+          company_id: string | null
+          created_at: string | null
+          description: string | null
+          employee_id: string
+          evidence_type: Database["public"]["Enums"]["evidence_type"]
+          external_reference_id: string | null
+          external_url: string | null
+          goal_id: string | null
+          id: string
+          immutable_at: string | null
+          is_immutable: boolean | null
+          responsibility_id: string | null
+          source_system: string | null
+          submitted_at: string
+          submitted_by: string | null
+          title: string
+          updated_at: string | null
+          validated_at: string | null
+          validated_by: string | null
+          validation_notes: string | null
+          validation_status:
+            | Database["public"]["Enums"]["evidence_validation_status"]
+            | null
+        }
+        Insert: {
+          appraisal_cycle_id?: string | null
+          attachment_path?: string | null
+          attachment_size_bytes?: number | null
+          attachment_type?: string | null
+          capability_id?: string | null
+          company_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          employee_id: string
+          evidence_type: Database["public"]["Enums"]["evidence_type"]
+          external_reference_id?: string | null
+          external_url?: string | null
+          goal_id?: string | null
+          id?: string
+          immutable_at?: string | null
+          is_immutable?: boolean | null
+          responsibility_id?: string | null
+          source_system?: string | null
+          submitted_at?: string
+          submitted_by?: string | null
+          title: string
+          updated_at?: string | null
+          validated_at?: string | null
+          validated_by?: string | null
+          validation_notes?: string | null
+          validation_status?:
+            | Database["public"]["Enums"]["evidence_validation_status"]
+            | null
+        }
+        Update: {
+          appraisal_cycle_id?: string | null
+          attachment_path?: string | null
+          attachment_size_bytes?: number | null
+          attachment_type?: string | null
+          capability_id?: string | null
+          company_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          employee_id?: string
+          evidence_type?: Database["public"]["Enums"]["evidence_type"]
+          external_reference_id?: string | null
+          external_url?: string | null
+          goal_id?: string | null
+          id?: string
+          immutable_at?: string | null
+          is_immutable?: boolean | null
+          responsibility_id?: string | null
+          source_system?: string | null
+          submitted_at?: string
+          submitted_by?: string | null
+          title?: string
+          updated_at?: string | null
+          validated_at?: string | null
+          validated_by?: string | null
+          validation_notes?: string | null
+          validation_status?:
+            | Database["public"]["Enums"]["evidence_validation_status"]
+            | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "performance_evidence_appraisal_cycle_id_fkey"
+            columns: ["appraisal_cycle_id"]
+            isOneToOne: false
+            referencedRelation: "appraisal_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "performance_evidence_capability_id_fkey"
+            columns: ["capability_id"]
+            isOneToOne: false
+            referencedRelation: "skills_competencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "performance_evidence_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "performance_evidence_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "performance_evidence_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "performance_goals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "performance_evidence_responsibility_id_fkey"
+            columns: ["responsibility_id"]
+            isOneToOne: false
+            referencedRelation: "job_responsibility_kras"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "performance_evidence_submitted_by_fkey"
+            columns: ["submitted_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "performance_evidence_validated_by_fkey"
+            columns: ["validated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -50513,6 +50889,7 @@ export type Database = {
       capability_status: "draft" | "pending_approval" | "active" | "deprecated"
       capability_type: "SKILL" | "COMPETENCY"
       channel_type: "direct" | "group" | "channel"
+      competency_change_type: "added" | "modified" | "removed"
       custom_field_form_context:
         | "employee_profile"
         | "employee_create"
@@ -50548,6 +50925,23 @@ export type Database = {
         | "certification"
         | "project_history"
         | "ai_inference"
+      evidence_type:
+        | "project"
+        | "ticket"
+        | "deliverable"
+        | "customer_feedback"
+        | "kpi_extract"
+        | "document"
+        | "presentation"
+        | "code_contribution"
+        | "award"
+        | "recognition"
+        | "metric_achievement"
+      evidence_validation_status:
+        | "pending"
+        | "validated"
+        | "rejected"
+        | "disputed"
       gl_account_type: "asset" | "liability" | "equity" | "revenue" | "expense"
       gl_posting_status: "draft" | "pending" | "posted" | "reversed" | "failed"
       goal_dependency_type:
@@ -50605,6 +50999,7 @@ export type Database = {
         | "overtime_status"
         | "overpayment_reason"
       message_status: "sent" | "delivered" | "read"
+      rating_source: "appraisal" | "assessment" | "360_review" | "calibration"
       responsibility_category:
         | "financial"
         | "operational"
@@ -50615,6 +51010,14 @@ export type Database = {
         | "administrative"
         | "customer_service"
         | "project_management"
+      validation_confidence: "low" | "medium" | "high"
+      validation_source_type:
+        | "self"
+        | "manager"
+        | "training"
+        | "assessment"
+        | "certification"
+        | "peer"
       validation_status: "pending" | "validated" | "rejected" | "expired"
       workflow_action:
         | "approve"
@@ -50800,6 +51203,7 @@ export const Constants = {
       capability_status: ["draft", "pending_approval", "active", "deprecated"],
       capability_type: ["SKILL", "COMPETENCY"],
       channel_type: ["direct", "group", "channel"],
+      competency_change_type: ["added", "modified", "removed"],
       custom_field_form_context: [
         "employee_profile",
         "employee_create",
@@ -50837,6 +51241,25 @@ export const Constants = {
         "certification",
         "project_history",
         "ai_inference",
+      ],
+      evidence_type: [
+        "project",
+        "ticket",
+        "deliverable",
+        "customer_feedback",
+        "kpi_extract",
+        "document",
+        "presentation",
+        "code_contribution",
+        "award",
+        "recognition",
+        "metric_achievement",
+      ],
+      evidence_validation_status: [
+        "pending",
+        "validated",
+        "rejected",
+        "disputed",
       ],
       gl_account_type: ["asset", "liability", "equity", "revenue", "expense"],
       gl_posting_status: ["draft", "pending", "posted", "reversed", "failed"],
@@ -50898,6 +51321,7 @@ export const Constants = {
         "overpayment_reason",
       ],
       message_status: ["sent", "delivered", "read"],
+      rating_source: ["appraisal", "assessment", "360_review", "calibration"],
       responsibility_category: [
         "financial",
         "operational",
@@ -50908,6 +51332,15 @@ export const Constants = {
         "administrative",
         "customer_service",
         "project_management",
+      ],
+      validation_confidence: ["low", "medium", "high"],
+      validation_source_type: [
+        "self",
+        "manager",
+        "training",
+        "assessment",
+        "certification",
+        "peer",
       ],
       validation_status: ["pending", "validated", "rejected", "expired"],
       workflow_action: [
