@@ -1702,6 +1702,7 @@ export type Database = {
           locked_by: string | null
           max_rating: number
           min_rating: number
+          multi_position_mode: string | null
           name: string
           name_en: string | null
           overall_scale_id: string | null
@@ -1729,6 +1730,7 @@ export type Database = {
           locked_by?: string | null
           max_rating?: number
           min_rating?: number
+          multi_position_mode?: string | null
           name: string
           name_en?: string | null
           overall_scale_id?: string | null
@@ -1756,6 +1758,7 @@ export type Database = {
           locked_by?: string | null
           max_rating?: number
           min_rating?: number
+          multi_position_mode?: string | null
           name?: string
           name_en?: string | null
           overall_scale_id?: string | null
@@ -1980,6 +1983,73 @@ export type Database = {
           {
             foreignKeyName: "appraisal_participants_primary_position_id_fkey"
             columns: ["primary_position_id"]
+            isOneToOne: false
+            referencedRelation: "positions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      appraisal_position_weights: {
+        Row: {
+          competency_score: number | null
+          created_at: string
+          goal_score: number | null
+          id: string
+          is_primary: boolean | null
+          job_id: string | null
+          overall_score: number | null
+          participant_id: string
+          position_id: string
+          responsibility_score: number | null
+          updated_at: string
+          weight_percentage: number
+        }
+        Insert: {
+          competency_score?: number | null
+          created_at?: string
+          goal_score?: number | null
+          id?: string
+          is_primary?: boolean | null
+          job_id?: string | null
+          overall_score?: number | null
+          participant_id: string
+          position_id: string
+          responsibility_score?: number | null
+          updated_at?: string
+          weight_percentage?: number
+        }
+        Update: {
+          competency_score?: number | null
+          created_at?: string
+          goal_score?: number | null
+          id?: string
+          is_primary?: boolean | null
+          job_id?: string | null
+          overall_score?: number | null
+          participant_id?: string
+          position_id?: string
+          responsibility_score?: number | null
+          updated_at?: string
+          weight_percentage?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appraisal_position_weights_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appraisal_position_weights_participant_id_fkey"
+            columns: ["participant_id"]
+            isOneToOne: false
+            referencedRelation: "appraisal_participants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appraisal_position_weights_position_id_fkey"
+            columns: ["position_id"]
             isOneToOne: false
             referencedRelation: "positions"
             referencedColumns: ["id"]
