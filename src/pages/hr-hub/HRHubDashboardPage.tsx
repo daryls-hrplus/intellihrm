@@ -26,6 +26,7 @@ import {
   Bot,
   Users,
   Upload,
+  Brain,
 } from "lucide-react";
 
 // Hub sections and quick actions are now defined inside the component for i18n
@@ -82,6 +83,12 @@ export default function HRHubDashboardPage() {
         { titleKey: "hrHub.dataImport.title", descKey: "hrHub.dataImport.shortDesc", icon: Upload, href: "/hr-hub/data-import", badge: null },
       ],
     },
+    {
+      titleKey: "hrHub.analyticsInsights",
+      items: [
+        { titleKey: "hrHub.sentimentMonitoring", descKey: "hrHub.sentimentMonitoringDesc", icon: Brain, href: "/hr-hub/sentiment-monitoring", badge: null },
+      ],
+    },
   ];
 
   const quickActions = [
@@ -89,6 +96,7 @@ export default function HRHubDashboardPage() {
     { titleKey: "hrHub.createLetter", icon: FileText, href: "/admin/letter-templates" },
     { titleKey: "hrHub.viewTickets", icon: Headset, href: "/admin/helpdesk" },
     { titleKey: "hrHub.addEvent", icon: Calendar, href: "/hr-hub/calendar" },
+    { titleKey: "hrHub.sentimentMonitoring", icon: Brain, href: "/hr-hub/sentiment-monitoring" },
   ];
 
   const breadcrumbItems = [{ label: t("hrHub.title") }];

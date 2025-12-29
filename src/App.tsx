@@ -457,6 +457,7 @@ import HRRemindersPage from "./pages/hr-hub/HRRemindersPage";
 import SOPManagementPage from "./pages/hr-hub/SOPManagementPage";
 import GovernmentIdTypesPage from "./pages/hr-hub/GovernmentIdTypesPage";
 import HRDataImportPage from "./pages/hr-hub/HRDataImportPage";
+import SentimentMonitoringPage from "./pages/hr-hub/SentimentMonitoringPage";
 
 // Admin Reminders
 import AdminRemindersPage from "./pages/admin/AdminRemindersPage";
@@ -3794,7 +3795,14 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
-
+            <Route
+              path="/hr-hub/sentiment-monitoring"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <SentimentMonitoringPage />
+                </ProtectedRoute>
+              }
+            />
 
 
 
