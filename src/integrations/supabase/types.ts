@@ -4727,6 +4727,596 @@ export type Database = {
           },
         ]
       }
+      cba_amendments: {
+        Row: {
+          affected_articles: string[] | null
+          agreement_id: string
+          amendment_number: string
+          approved_at: string | null
+          approved_by: string | null
+          content: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          document_url: string | null
+          effective_date: string
+          expiry_date: string | null
+          id: string
+          status: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          affected_articles?: string[] | null
+          agreement_id: string
+          amendment_number: string
+          approved_at?: string | null
+          approved_by?: string | null
+          content?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          document_url?: string | null
+          effective_date: string
+          expiry_date?: string | null
+          id?: string
+          status?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          affected_articles?: string[] | null
+          agreement_id?: string
+          amendment_number?: string
+          approved_at?: string | null
+          approved_by?: string | null
+          content?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          document_url?: string | null
+          effective_date?: string
+          expiry_date?: string | null
+          id?: string
+          status?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cba_amendments_agreement_id_fkey"
+            columns: ["agreement_id"]
+            isOneToOne: false
+            referencedRelation: "collective_agreements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cba_amendments_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cba_amendments_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cba_articles: {
+        Row: {
+          agreement_id: string
+          article_number: string
+          category: string | null
+          content: string | null
+          created_at: string
+          display_order: number | null
+          id: string
+          is_active: boolean | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          agreement_id: string
+          article_number: string
+          category?: string | null
+          content?: string | null
+          created_at?: string
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          agreement_id?: string
+          article_number?: string
+          category?: string | null
+          content?: string | null
+          created_at?: string
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cba_articles_agreement_id_fkey"
+            columns: ["agreement_id"]
+            isOneToOne: false
+            referencedRelation: "collective_agreements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cba_clauses: {
+        Row: {
+          article_id: string
+          clause_number: string
+          clause_type: string | null
+          content: string | null
+          created_at: string
+          display_order: number | null
+          id: string
+          is_enforceable: boolean | null
+          rule_parameters: Json | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          article_id: string
+          clause_number: string
+          clause_type?: string | null
+          content?: string | null
+          created_at?: string
+          display_order?: number | null
+          id?: string
+          is_enforceable?: boolean | null
+          rule_parameters?: Json | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          article_id?: string
+          clause_number?: string
+          clause_type?: string | null
+          content?: string | null
+          created_at?: string
+          display_order?: number | null
+          id?: string
+          is_enforceable?: boolean | null
+          rule_parameters?: Json | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cba_clauses_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "cba_articles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cba_negotiations: {
+        Row: {
+          agenda: string | null
+          agreement_id: string | null
+          attendees: Json | null
+          company_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          location: string | null
+          meeting_type: string | null
+          next_steps: string | null
+          outcomes: string | null
+          session_date: string | null
+          session_time: string | null
+          status: string | null
+          title: string
+          union_id: string
+          updated_at: string
+        }
+        Insert: {
+          agenda?: string | null
+          agreement_id?: string | null
+          attendees?: Json | null
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          location?: string | null
+          meeting_type?: string | null
+          next_steps?: string | null
+          outcomes?: string | null
+          session_date?: string | null
+          session_time?: string | null
+          status?: string | null
+          title: string
+          union_id: string
+          updated_at?: string
+        }
+        Update: {
+          agenda?: string | null
+          agreement_id?: string | null
+          attendees?: Json | null
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          location?: string | null
+          meeting_type?: string | null
+          next_steps?: string | null
+          outcomes?: string | null
+          session_date?: string | null
+          session_time?: string | null
+          status?: string | null
+          title?: string
+          union_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cba_negotiations_agreement_id_fkey"
+            columns: ["agreement_id"]
+            isOneToOne: false
+            referencedRelation: "collective_agreements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cba_negotiations_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cba_negotiations_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cba_negotiations_union_id_fkey"
+            columns: ["union_id"]
+            isOneToOne: false
+            referencedRelation: "unions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cba_proposals: {
+        Row: {
+          affected_articles: string[] | null
+          content: string | null
+          cost_justification: string | null
+          created_at: string
+          created_by: string | null
+          estimated_cost_impact: number | null
+          id: string
+          negotiation_id: string
+          proposal_type: string
+          proposed_by: string
+          responded_at: string | null
+          responded_by: string | null
+          response_notes: string | null
+          status: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          affected_articles?: string[] | null
+          content?: string | null
+          cost_justification?: string | null
+          created_at?: string
+          created_by?: string | null
+          estimated_cost_impact?: number | null
+          id?: string
+          negotiation_id: string
+          proposal_type: string
+          proposed_by: string
+          responded_at?: string | null
+          responded_by?: string | null
+          response_notes?: string | null
+          status?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          affected_articles?: string[] | null
+          content?: string | null
+          cost_justification?: string | null
+          created_at?: string
+          created_by?: string | null
+          estimated_cost_impact?: number | null
+          id?: string
+          negotiation_id?: string
+          proposal_type?: string
+          proposed_by?: string
+          responded_at?: string | null
+          responded_by?: string | null
+          response_notes?: string | null
+          status?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cba_proposals_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cba_proposals_negotiation_id_fkey"
+            columns: ["negotiation_id"]
+            isOneToOne: false
+            referencedRelation: "cba_negotiations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cba_proposals_responded_by_fkey"
+            columns: ["responded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cba_rules: {
+        Row: {
+          agreement_id: string
+          applies_to_departments: string[] | null
+          applies_to_positions: string[] | null
+          clause_id: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          effective_date: string | null
+          enforcement_action: string | null
+          expiry_date: string | null
+          id: string
+          is_active: boolean | null
+          parameters: Json
+          priority: number | null
+          rule_name: string
+          rule_type: string
+          updated_at: string
+        }
+        Insert: {
+          agreement_id: string
+          applies_to_departments?: string[] | null
+          applies_to_positions?: string[] | null
+          clause_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          effective_date?: string | null
+          enforcement_action?: string | null
+          expiry_date?: string | null
+          id?: string
+          is_active?: boolean | null
+          parameters: Json
+          priority?: number | null
+          rule_name: string
+          rule_type: string
+          updated_at?: string
+        }
+        Update: {
+          agreement_id?: string
+          applies_to_departments?: string[] | null
+          applies_to_positions?: string[] | null
+          clause_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          effective_date?: string | null
+          enforcement_action?: string | null
+          expiry_date?: string | null
+          id?: string
+          is_active?: boolean | null
+          parameters?: Json
+          priority?: number | null
+          rule_name?: string
+          rule_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cba_rules_agreement_id_fkey"
+            columns: ["agreement_id"]
+            isOneToOne: false
+            referencedRelation: "collective_agreements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cba_rules_clause_id_fkey"
+            columns: ["clause_id"]
+            isOneToOne: false
+            referencedRelation: "cba_clauses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cba_rules_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cba_versions: {
+        Row: {
+          agreement_id: string
+          changes_summary: string | null
+          created_at: string
+          created_by: string | null
+          document_url: string | null
+          effective_date: string
+          id: string
+          version_number: number
+        }
+        Insert: {
+          agreement_id: string
+          changes_summary?: string | null
+          created_at?: string
+          created_by?: string | null
+          document_url?: string | null
+          effective_date: string
+          id?: string
+          version_number?: number
+        }
+        Update: {
+          agreement_id?: string
+          changes_summary?: string | null
+          created_at?: string
+          created_by?: string | null
+          document_url?: string | null
+          effective_date?: string
+          id?: string
+          version_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cba_versions_agreement_id_fkey"
+            columns: ["agreement_id"]
+            isOneToOne: false
+            referencedRelation: "collective_agreements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cba_versions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cba_violations: {
+        Row: {
+          affected_employee_id: string | null
+          agreement_id: string
+          clause_id: string | null
+          company_id: string
+          created_at: string
+          description: string
+          detected_at: string
+          detected_by: string | null
+          evidence: Json | null
+          id: string
+          related_grievance_id: string | null
+          resolution_notes: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          rule_id: string | null
+          severity: string | null
+          status: string | null
+          updated_at: string
+          violation_date: string
+        }
+        Insert: {
+          affected_employee_id?: string | null
+          agreement_id: string
+          clause_id?: string | null
+          company_id: string
+          created_at?: string
+          description: string
+          detected_at?: string
+          detected_by?: string | null
+          evidence?: Json | null
+          id?: string
+          related_grievance_id?: string | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          rule_id?: string | null
+          severity?: string | null
+          status?: string | null
+          updated_at?: string
+          violation_date: string
+        }
+        Update: {
+          affected_employee_id?: string | null
+          agreement_id?: string
+          clause_id?: string | null
+          company_id?: string
+          created_at?: string
+          description?: string
+          detected_at?: string
+          detected_by?: string | null
+          evidence?: Json | null
+          id?: string
+          related_grievance_id?: string | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          rule_id?: string | null
+          severity?: string | null
+          status?: string | null
+          updated_at?: string
+          violation_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cba_violations_affected_employee_id_fkey"
+            columns: ["affected_employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cba_violations_agreement_id_fkey"
+            columns: ["agreement_id"]
+            isOneToOne: false
+            referencedRelation: "collective_agreements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cba_violations_clause_id_fkey"
+            columns: ["clause_id"]
+            isOneToOne: false
+            referencedRelation: "cba_clauses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cba_violations_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cba_violations_related_grievance_id_fkey"
+            columns: ["related_grievance_id"]
+            isOneToOne: false
+            referencedRelation: "grievances"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cba_violations_resolved_by_fkey"
+            columns: ["resolved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cba_violations_rule_id_fkey"
+            columns: ["rule_id"]
+            isOneToOne: false
+            referencedRelation: "cba_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       collective_agreements: {
         Row: {
           agreement_number: string | null
@@ -21092,6 +21682,7 @@ export type Database = {
         Row: {
           assigned_to: string | null
           category: string | null
+          cba_clause_id: string | null
           company_id: string
           created_at: string
           current_step_id: string | null
@@ -21119,6 +21710,7 @@ export type Database = {
         Insert: {
           assigned_to?: string | null
           category?: string | null
+          cba_clause_id?: string | null
           company_id: string
           created_at?: string
           current_step_id?: string | null
@@ -21146,6 +21738,7 @@ export type Database = {
         Update: {
           assigned_to?: string | null
           category?: string | null
+          cba_clause_id?: string | null
           company_id?: string
           created_at?: string
           current_step_id?: string | null
@@ -21176,6 +21769,13 @@ export type Database = {
             columns: ["assigned_to"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "grievances_cba_clause_id_fkey"
+            columns: ["cba_clause_id"]
+            isOneToOne: false
+            referencedRelation: "cba_clauses"
             referencedColumns: ["id"]
           },
           {
