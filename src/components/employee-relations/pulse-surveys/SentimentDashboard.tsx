@@ -21,6 +21,7 @@ import {
   Sparkles,
   RefreshCw,
   Loader2,
+  Target,
 } from "lucide-react";
 import {
   useSentimentMetrics,
@@ -218,7 +219,29 @@ export function SentimentDashboard({ companyId }: SentimentDashboardProps) {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-5 gap-4">
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">eNPS Score</p>
+                <p className={`text-3xl font-bold ${
+                  (latestMetric?.enps_score ?? 0) >= 30 ? "text-success" : 
+                  (latestMetric?.enps_score ?? 0) >= 0 ? "text-warning" : "text-destructive"
+                }`}>
+                  {latestMetric?.enps_score !== null && latestMetric?.enps_score !== undefined 
+                    ? latestMetric.enps_score 
+                    : "--"}
+                </p>
+              </div>
+              <Target className="h-5 w-5 text-muted-foreground" />
+            </div>
+            <div className="text-xs text-muted-foreground mt-2">
+              {latestMetric?.enps_response_count || 0} responses
+            </div>
+          </CardContent>
+        </Card>
+
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">

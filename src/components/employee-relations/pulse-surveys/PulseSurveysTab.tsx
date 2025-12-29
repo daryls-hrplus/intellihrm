@@ -6,11 +6,12 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Search, Loader2, Activity, BarChart3, Lightbulb, Play, Square } from "lucide-react";
+import { Plus, Search, Loader2, Activity, BarChart3, Lightbulb, Play, Square, Target } from "lucide-react";
 import { usePulseSurveys, usePulseSurveyMutations } from "@/hooks/usePulseSurveys";
 import { CreatePulseSurveyDialog } from "./CreatePulseSurveyDialog";
 import { SentimentDashboard } from "./SentimentDashboard";
 import { ManagerCoachingNudges } from "./ManagerCoachingNudges";
+import { ENPSDashboard } from "./ENPSDashboard";
 import { formatDateForDisplay } from "@/utils/dateUtils";
 
 interface PulseSurveysTabProps {
@@ -59,6 +60,10 @@ export function PulseSurveysTab({ companyId }: PulseSurveysTabProps) {
         <TabsTrigger value="dashboard" className="gap-2">
           <BarChart3 className="h-4 w-4" />
           Sentiment Dashboard
+        </TabsTrigger>
+        <TabsTrigger value="enps" className="gap-2">
+          <Target className="h-4 w-4" />
+          eNPS Analytics
         </TabsTrigger>
         <TabsTrigger value="nudges" className="gap-2">
           <Lightbulb className="h-4 w-4" />
@@ -177,6 +182,10 @@ export function PulseSurveysTab({ companyId }: PulseSurveysTabProps) {
 
       <TabsContent value="dashboard">
         <SentimentDashboard companyId={companyId} />
+      </TabsContent>
+
+      <TabsContent value="enps">
+        <ENPSDashboard companyId={companyId} />
       </TabsContent>
 
       <TabsContent value="nudges">

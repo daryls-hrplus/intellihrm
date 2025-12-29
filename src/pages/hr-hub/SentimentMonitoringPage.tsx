@@ -26,6 +26,7 @@ import {
   Loader2,
   Brain,
   ArrowRight,
+  Target,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -269,8 +270,31 @@ export default function SentimentMonitoringPage() {
         </div>
 
         {/* Executive KPIs */}
-        <div className="grid grid-cols-5 gap-4">
-          <Card className="col-span-1">
+        <div className="grid grid-cols-6 gap-4">
+          {/* eNPS Score */}
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">eNPS Score</p>
+                  <p className={`text-3xl font-bold ${
+                    ((latestMetric as any)?.enps_score ?? 0) >= 30 ? "text-success" : 
+                    ((latestMetric as any)?.enps_score ?? 0) >= 0 ? "text-warning" : "text-destructive"
+                  }`}>
+                    {(latestMetric as any)?.enps_score !== null && (latestMetric as any)?.enps_score !== undefined 
+                      ? (latestMetric as any).enps_score 
+                      : "--"}
+                  </p>
+                </div>
+                <Target className="h-5 w-5 text-muted-foreground" />
+              </div>
+              <div className="text-xs text-muted-foreground mt-2">
+                {(latestMetric as any)?.enps_response_count || 0} responses
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
