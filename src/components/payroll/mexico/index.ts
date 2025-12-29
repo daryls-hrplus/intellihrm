@@ -12,6 +12,15 @@ export { TaxCertificates } from './TaxCertificates';
 export { MexicanPayrollAnalytics } from './MexicanPayrollAnalytics';
 export { ComplianceCalendar } from './ComplianceCalendar';
 export { PayrollAdjustments } from './PayrollAdjustments';
+
+// Phase 11 - Mexico-specific features
+export { EFirmaIntegration } from './EFirmaIntegration';
+export { STPSCompliance } from './STPSCompliance';
+export { REPSERegistry } from './REPSERegistry';
+export { ISNByState } from './ISNByState';
+export { OutsourcingReformCompliance } from './OutsourcingReformCompliance';
+export { SATAuditSupport } from './SATAuditSupport';
+export { MexicanUnionManagement } from './MexicanUnionManagement';
 export { EmployeeSelfService } from './EmployeeSelfService';
 export { MultiPeriodComparison } from './MultiPeriodComparison';
 export { AuditTrail } from './AuditTrail';

@@ -37,6 +37,7 @@ import {
 import { EmployeeImmigrationTab } from "@/components/employee/immigration";
 import { EmployeeGovernmentIds } from "@/components/employee/EmployeeGovernmentIds";
 import { EvidencePortfolioSection } from "@/components/capabilities/EvidencePortfolioSection";
+import { MexicanEmployeeData } from "@/components/payroll/mexico";
 
 import {
   ArrowLeft,
@@ -66,6 +67,7 @@ import {
   Plane,
   IdCard,
   ClipboardCheck,
+  Banknote,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
@@ -396,6 +398,9 @@ export default function EmployeeProfilePage() {
             <TabsTrigger value="pay_info"><Wallet className="h-4 w-4 mr-1" />Pay Information</TabsTrigger>
             <TabsTrigger value="professional_info"><FileSignature className="h-4 w-4 mr-1" />Professional Info</TabsTrigger>
             <TabsTrigger value="qualifications"><GraduationCap className="h-4 w-4 mr-1" />Qualifications</TabsTrigger>
+            {companyCountryCode === 'MX' && (
+              <TabsTrigger value="mexico_payroll"><Banknote className="h-4 w-4 mr-1" />Mexico Payroll Data</TabsTrigger>
+            )}
           </TabsList>
 
 
@@ -630,6 +635,12 @@ export default function EmployeeProfilePage() {
               </CardContent>
             </Card>
           </TabsContent>
+
+          {companyCountryCode === 'MX' && (
+            <TabsContent value="mexico_payroll" className="mt-6">
+              <MexicanEmployeeData employeeId={employee.id} />
+            </TabsContent>
+          )}
         </Tabs>
 
         {/* Edit Employee Dialog */}
