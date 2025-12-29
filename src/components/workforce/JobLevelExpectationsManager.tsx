@@ -612,21 +612,6 @@ export function JobLevelExpectationsManager({ companyId }: Props) {
               </p>
             </div>
 
-            <div className="space-y-2">
-              <Label>Progression Criteria (English)</Label>
-              <Textarea
-                value={formData.progression_criteria_en}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    progression_criteria_en: e.target.value,
-                  })
-                }
-                placeholder="English translation of progression criteria..."
-                rows={2}
-              />
-            </div>
-
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Effective From *</Label>
