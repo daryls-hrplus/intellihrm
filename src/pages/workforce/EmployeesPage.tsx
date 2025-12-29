@@ -660,8 +660,8 @@ export default function EmployeesPage() {
                   <TableHead className="w-[300px]">{t("workforce.employee")}</TableHead>
                   <TableHead>{t("workforce.position")}</TableHead>
                   <TableHead>{t("workforce.department")}</TableHead>
-                  <TableHead>{t("workforce.email")}</TableHead>
-                  <TableHead>{t("workforce.location")}</TableHead>
+                  <TableHead>{t("common.email")}</TableHead>
+                  <TableHead>{t("common.location")}</TableHead>
                   <TableHead>{t("workforce.status")}</TableHead>
                   <TableHead className="w-[100px]">{t("common.actions")}</TableHead>
                 </TableRow>

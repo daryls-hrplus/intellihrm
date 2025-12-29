@@ -124,12 +124,42 @@ interface EmployeeEditDialogProps {
   onSuccess?: () => void;
 }
 
+interface FullEmployeeData {
+  id: string;
+  full_name: string;
+  email: string;
+  avatar_url: string | null;
+  timezone: string | null;
+  preferred_language: string | null;
+  date_format: string | null;
+  time_format: string | null;
+  company_id: string | null;
+  first_hire_date: string | null;
+  last_hire_date: string | null;
+  start_date: string | null;
+  continuous_service_date: string | null;
+  seniority_date: string | null;
+  adjusted_service_date: string | null;
+  employment_status: string | null;
+  gender: string | null;
+  date_of_birth: string | null;
+  marital_status: string | null;
+  nationality: string | null;
+  employee_id: string | null;
+  badge_number: string | null;
+  global_id: string | null;
+  cedula_number: string | null;
+  time_clock_id: string | null;
+}
+
 export function EmployeeEditDialog({
   open,
   onOpenChange,
   employee,
   onSuccess,
 }: EmployeeEditDialogProps) {
+  const [fullEmployeeData, setFullEmployeeData] = useState<FullEmployeeData | null>(null);
+  const [loading, setLoading] = useState(false);
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
@@ -163,36 +193,66 @@ export function EmployeeEditDialog({
     formContext: 'employee_profile',
     entityId: employee?.id,
     entityType: 'profiles',
-    companyId: employee?.company_id,
+    companyId: fullEmployeeData?.company_id || employee?.company_id,
   });
 
+  // Fetch full employee data when dialog opens
   useEffect(() => {
-    if (employee) {
-      setFullName(employee.full_name || "");
-      setEmail(employee.email || "");
-      setAvatarUrl(employee.avatar_url || "");
-      setTimezone(employee.timezone || "");
-      setPreferredLanguage(employee.preferred_language || "");
-      setDateFormat(employee.date_format || "");
-      setTimeFormat(employee.time_format || "");
-      setFirstHireDate(employee.first_hire_date || "");
-      setLastHireDate(employee.last_hire_date || "");
-      setStartDate(employee.start_date || "");
-      setContinuousServiceDate(employee.continuous_service_date || "");
-      setSeniorityDate(employee.seniority_date || "");
-      setAdjustedServiceDate(employee.adjusted_service_date || "");
-      setEmploymentStatus(employee.employment_status || "permanent");
-      setGender(employee.gender || "");
-      setDateOfBirth(employee.date_of_birth || "");
-      setMaritalStatus(employee.marital_status || "");
-      setNationality(employee.nationality || "");
-      // Employee identifiers (employee_id is system-generated, not editable)
-      setBadgeNumber(employee.badge_number || "");
-      setGlobalId(employee.global_id || "");
-      setCedulaNumber(employee.cedula_number || "");
-      setTimeClockId(employee.time_clock_id || "");
-    }
-  }, [employee]);
+    const fetchFullEmployeeData = async () => {
+      if (!open || !employee?.id) return;
+      
+      setLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select(`
+            id, full_name, email, avatar_url, timezone, preferred_language,
+            date_format, time_format, company_id, first_hire_date, last_hire_date,
+            start_date, continuous_service_date, seniority_date, adjusted_service_date,
+            employment_status, gender, date_of_birth, marital_status, nationality,
+            employee_id, badge_number, global_id, cedula_number, time_clock_id
+          `)
+          .eq('id', employee.id)
+          .single();
+
+        if (error) throw error;
+        
+        if (data) {
+          setFullEmployeeData(data);
+          // Populate form fields with fetched data
+          setFullName(data.full_name || "");
+          setEmail(data.email || "");
+          setAvatarUrl(data.avatar_url || "");
+          setTimezone(data.timezone || "");
+          setPreferredLanguage(data.preferred_language || "");
+          setDateFormat(data.date_format || "");
+          setTimeFormat(data.time_format || "");
+          setFirstHireDate(data.first_hire_date || "");
+          setLastHireDate(data.last_hire_date || "");
+          setStartDate(data.start_date || "");
+          setContinuousServiceDate(data.continuous_service_date || "");
+          setSeniorityDate(data.seniority_date || "");
+          setAdjustedServiceDate(data.adjusted_service_date || "");
+          setEmploymentStatus(data.employment_status || "permanent");
+          setGender(data.gender || "");
+          setDateOfBirth(data.date_of_birth || "");
+          setMaritalStatus(data.marital_status || "");
+          setNationality(data.nationality || "");
+          setBadgeNumber(data.badge_number || "");
+          setGlobalId(data.global_id || "");
+          setCedulaNumber(data.cedula_number || "");
+          setTimeClockId(data.time_clock_id || "");
+        }
+      } catch (error) {
+        console.error('Error fetching employee data:', error);
+        toast.error('Failed to load employee data');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFullEmployeeData();
+  }, [open, employee?.id]);
 
   // Sync custom field values from hook
   useEffect(() => {
@@ -310,28 +370,27 @@ export function EmployeeEditDialog({
         entityId: employee.id,
         entityName: fullName,
         oldValues: {
-          full_name: employee.full_name,
-          avatar_url: employee.avatar_url,
-          timezone: employee.timezone,
-          preferred_language: employee.preferred_language,
-          date_format: employee.date_format,
-          time_format: employee.time_format,
-          first_hire_date: employee.first_hire_date,
-          last_hire_date: employee.last_hire_date,
-          start_date: employee.start_date,
-          continuous_service_date: employee.continuous_service_date,
-          seniority_date: employee.seniority_date,
-          adjusted_service_date: employee.adjusted_service_date,
-          employment_status: employee.employment_status,
-          gender: employee.gender,
-          date_of_birth: employee.date_of_birth,
-          marital_status: employee.marital_status,
-          nationality: employee.nationality,
-          employee_id: employee.employee_id,
-          badge_number: employee.badge_number,
-          global_id: employee.global_id,
-          cedula_number: employee.cedula_number,
-          time_clock_id: employee.time_clock_id,
+          full_name: fullEmployeeData?.full_name,
+          avatar_url: fullEmployeeData?.avatar_url,
+          timezone: fullEmployeeData?.timezone,
+          preferred_language: fullEmployeeData?.preferred_language,
+          date_format: fullEmployeeData?.date_format,
+          time_format: fullEmployeeData?.time_format,
+          first_hire_date: fullEmployeeData?.first_hire_date,
+          last_hire_date: fullEmployeeData?.last_hire_date,
+          start_date: fullEmployeeData?.start_date,
+          continuous_service_date: fullEmployeeData?.continuous_service_date,
+          seniority_date: fullEmployeeData?.seniority_date,
+          adjusted_service_date: fullEmployeeData?.adjusted_service_date,
+          employment_status: fullEmployeeData?.employment_status,
+          gender: fullEmployeeData?.gender,
+          date_of_birth: fullEmployeeData?.date_of_birth,
+          marital_status: fullEmployeeData?.marital_status,
+          nationality: fullEmployeeData?.nationality,
+          badge_number: fullEmployeeData?.badge_number,
+          global_id: fullEmployeeData?.global_id,
+          cedula_number: fullEmployeeData?.cedula_number,
+          time_clock_id: fullEmployeeData?.time_clock_id,
         },
         newValues: {
           full_name: fullName,
@@ -371,10 +430,18 @@ export function EmployeeEditDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[900px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[900px] max-h-[90vh] overflow-y-auto" aria-describedby="edit-employee-description">
         <DialogHeader>
           <DialogTitle>Edit Employee</DialogTitle>
+          <p id="edit-employee-description" className="text-sm text-muted-foreground">
+            Update employee information and settings
+          </p>
         </DialogHeader>
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        ) : (
         <div className="grid gap-6 py-4">
           {/* Two column layout for basic info */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -791,11 +858,12 @@ export function EmployeeEditDialog({
             </>
           )}
         </div>
+        )}
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button onClick={handleSave} disabled={saving}>
+          <Button onClick={handleSave} disabled={saving || loading}>
             {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Save Changes
           </Button>
