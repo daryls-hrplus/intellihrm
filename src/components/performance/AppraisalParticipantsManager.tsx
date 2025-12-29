@@ -6,15 +6,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Plus, Trash2, UserPlus, GitBranch, Loader2 } from "lucide-react";
+import { Plus, Trash2, UserPlus, GitBranch, Loader2, Users } from "lucide-react";
 import { useAppraisalRoleSegments } from "@/hooks/useAppraisalRoleSegments";
+import { useConcurrentPositionDetection, ConcurrentPosition } from "@/hooks/useConcurrentPositionDetection";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { MultiPositionEnrollmentDialog, MultiPositionHandlingMode } from "./MultiPositionEnrollmentDialog";
 
 interface AppraisalCycle {
   id: string;
   name: string;
   start_date?: string;
   end_date?: string;
+  multi_position_mode?: string;
 }
 
 interface Participant {
@@ -26,6 +29,7 @@ interface Participant {
   status: string;
   overall_score: number | null;
   has_role_change?: boolean;
+  has_multi_position?: boolean;
 }
 
 interface Employee {
@@ -60,8 +64,14 @@ export function AppraisalParticipantsManager({
   const [addingParticipant, setAddingParticipant] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState<string>("");
   const [selectedEvaluator, setSelectedEvaluator] = useState<string>("");
+  
+  // Multi-position enrollment state
+  const [showMultiPositionDialog, setShowMultiPositionDialog] = useState(false);
+  const [pendingEmployee, setPendingEmployee] = useState<{ id: string; name: string } | null>(null);
+  const [detectedPositions, setDetectedPositions] = useState<ConcurrentPosition[]>([]);
 
   const { createRoleSegments, isLoading: segmentsLoading } = useAppraisalRoleSegments();
+  const { detectConcurrentPositions, isLoading: detectingPositions } = useConcurrentPositionDetection();
 
   useEffect(() => {
     if (open && cycle.id) {
@@ -87,9 +97,7 @@ export function AppraisalParticipantsManager({
         evaluator_id,
         status,
         overall_score,
-        has_role_change,
-        employee:profiles!appraisal_participants_employee_id_fkey (full_name),
-        evaluator:profiles!appraisal_participants_evaluator_id_fkey (full_name)
+        has_role_change
       `)
       .eq("cycle_id", cycle.id);
 
@@ -98,18 +106,44 @@ export function AppraisalParticipantsManager({
       return;
     }
 
-    const formatted = (data || []).map((item: any) => ({
-      id: item.id,
-      employee_id: item.employee_id,
-      employee_name: item.employee?.full_name || "Unknown",
-      evaluator_id: item.evaluator_id,
-      evaluator_name: item.evaluator?.full_name || null,
-      status: item.status,
-      overall_score: item.overall_score,
-      has_role_change: item.has_role_change || false,
-    }));
+    // Check which participants have multiple positions
+    const participantsWithPositions = await Promise.all(
+      (data || []).map(async (item: any) => {
+        const { data: employee } = await supabase
+          .from("profiles")
+          .select("full_name")
+          .eq("id", item.employee_id)
+          .single();
 
-    setParticipants(formatted);
+        const { data: evaluator } = item.evaluator_id
+          ? await supabase
+              .from("profiles")
+              .select("full_name")
+              .eq("id", item.evaluator_id)
+              .single()
+          : { data: null };
+
+        // Check for position weights (indicates multi-position)
+        const { count } = await supabase
+          .from("appraisal_position_weights")
+          .select("id", { count: "exact" })
+          .eq("participant_id", item.id);
+
+        return {
+          id: item.id,
+          employee_id: item.employee_id,
+          employee_name: employee?.full_name || "Unknown",
+          evaluator_id: item.evaluator_id,
+          evaluator_name: evaluator?.full_name || null,
+          status: item.status,
+          overall_score: item.overall_score,
+          has_role_change: item.has_role_change || false,
+          has_multi_position: (count || 0) > 1,
+        };
+      })
+    );
+
+    setParticipants(participantsWithPositions);
   };
 
   const fetchEmployees = async () => {
@@ -138,6 +172,27 @@ export function AppraisalParticipantsManager({
       return;
     }
 
+    // Detect concurrent positions
+    const employeeInfo = employees.find(e => e.id === selectedEmployee);
+    const result = await detectConcurrentPositions(selectedEmployee);
+
+    if (result.hasMultiplePositions) {
+      // Show multi-position enrollment dialog
+      setPendingEmployee({ id: selectedEmployee, name: employeeInfo?.full_name || "Employee" });
+      setDetectedPositions(result.positions);
+      setShowMultiPositionDialog(true);
+      return;
+    }
+
+    // Single position - proceed with normal enrollment
+    await addParticipantWithSettings(selectedEmployee, "aggregate", {});
+  };
+
+  const addParticipantWithSettings = async (
+    employeeId: string,
+    mode: MultiPositionHandlingMode,
+    weights: Record<string, number>
+  ) => {
     setAddingParticipant(true);
     try {
       // Insert participant
@@ -145,7 +200,7 @@ export function AppraisalParticipantsManager({
         .from("appraisal_participants")
         .insert({
           cycle_id: cycle.id,
-          employee_id: selectedEmployee,
+          employee_id: employeeId,
           evaluator_id: selectedEvaluator || null,
         })
         .select("id")
@@ -157,7 +212,7 @@ export function AppraisalParticipantsManager({
       if (cycle.start_date && cycle.end_date && newParticipant) {
         const hasRoleChange = await createRoleSegments(
           newParticipant.id,
-          selectedEmployee,
+          employeeId,
           cycle.start_date,
           cycle.end_date
         );
@@ -166,9 +221,28 @@ export function AppraisalParticipantsManager({
         }
       }
 
+      // Create position weights if multiple positions with aggregate mode
+      if (mode === "aggregate" && Object.keys(weights).length > 1 && newParticipant) {
+        const weightsToCreate = Object.entries(weights).map(([positionId, weight]) => ({
+          participant_id: newParticipant.id,
+          position_id: positionId,
+          job_id: detectedPositions.find(p => p.position_id === positionId)?.job_id || null,
+          weight_percentage: weight,
+          is_primary: detectedPositions.find(p => p.position_id === positionId)?.is_primary || false,
+        }));
+
+        await supabase
+          .from("appraisal_position_weights")
+          .insert(weightsToCreate);
+
+        toast.info("Multi-position weights configured for weighted scoring");
+      }
+
       toast.success("Participant added successfully");
       setSelectedEmployee("");
       setSelectedEvaluator("");
+      setPendingEmployee(null);
+      setDetectedPositions([]);
       fetchParticipants();
       onSuccess();
     } catch (error: any) {
@@ -177,6 +251,19 @@ export function AppraisalParticipantsManager({
     } finally {
       setAddingParticipant(false);
     }
+  };
+
+  const handleMultiPositionConfirm = async (mode: MultiPositionHandlingMode, weights: Record<string, number>) => {
+    setShowMultiPositionDialog(false);
+    if (pendingEmployee) {
+      await addParticipantWithSettings(pendingEmployee.id, mode, weights);
+    }
+  };
+
+  const handleMultiPositionCancel = () => {
+    setShowMultiPositionDialog(false);
+    setPendingEmployee(null);
+    setDetectedPositions([]);
   };
 
   const handleUpdateEvaluator = async (participantId: string, evaluatorId: string | null) => {
@@ -264,14 +351,14 @@ export function AppraisalParticipantsManager({
             </div>
             <Button 
               onClick={handleAddParticipant} 
-              disabled={!selectedEmployee || addingParticipant || segmentsLoading}
+              disabled={!selectedEmployee || addingParticipant || segmentsLoading || detectingPositions}
             >
-              {addingParticipant || segmentsLoading ? (
+              {addingParticipant || segmentsLoading || detectingPositions ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               ) : (
                 <UserPlus className="mr-2 h-4 w-4" />
               )}
-              {addingParticipant ? "Adding..." : "Add"}
+              {detectingPositions ? "Checking..." : addingParticipant ? "Adding..." : "Add"}
             </Button>
           </div>
 
@@ -307,6 +394,16 @@ export function AppraisalParticipantsManager({
                               </TooltipTrigger>
                               <TooltipContent>
                                 Role changed during cycle - weighted scoring applies
+                              </TooltipContent>
+                            </Tooltip>
+                          )}
+                          {participant.has_multi_position && (
+                            <Tooltip>
+                              <TooltipTrigger>
+                                <Users className="h-4 w-4 text-accent-foreground" />
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                Multiple concurrent positions - weighted scoring applies
                               </TooltipContent>
                             </Tooltip>
                           )}
@@ -359,6 +456,17 @@ export function AppraisalParticipantsManager({
           </div>
         </div>
       </DialogContent>
+
+      {/* Multi-Position Enrollment Dialog */}
+      <MultiPositionEnrollmentDialog
+        open={showMultiPositionDialog}
+        onOpenChange={setShowMultiPositionDialog}
+        employeeName={pendingEmployee?.name || ""}
+        positions={detectedPositions}
+        cycleMode={(cycle.multi_position_mode as "aggregate" | "separate") || "aggregate"}
+        onConfirm={handleMultiPositionConfirm}
+        onCancel={handleMultiPositionCancel}
+      />
     </Dialog>
   );
 }
