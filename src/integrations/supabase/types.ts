@@ -8824,6 +8824,51 @@ export type Database = {
           },
         ]
       }
+      employee_badges: {
+        Row: {
+          awarded_at: string | null
+          awarded_reason: string | null
+          badge_id: string
+          created_at: string | null
+          employee_id: string
+          id: string
+          is_featured: boolean | null
+        }
+        Insert: {
+          awarded_at?: string | null
+          awarded_reason?: string | null
+          badge_id: string
+          created_at?: string | null
+          employee_id: string
+          id?: string
+          is_featured?: boolean | null
+        }
+        Update: {
+          awarded_at?: string | null
+          awarded_reason?: string | null
+          badge_id?: string
+          created_at?: string | null
+          employee_id?: string
+          id?: string
+          is_featured?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_badges_badge_id_fkey"
+            columns: ["badge_id"]
+            isOneToOne: false
+            referencedRelation: "recognition_badges"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_badges_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       employee_bank_accounts: {
         Row: {
           account_holder_name: string
@@ -39872,6 +39917,72 @@ export type Database = {
           },
         ]
       }
+      recognition_analytics: {
+        Row: {
+          company_id: string
+          created_at: string | null
+          department_id: string | null
+          id: string
+          manager_recognitions: number | null
+          participation_rate: number | null
+          peer_recognitions: number | null
+          snapshot_date: string
+          top_award_type: string | null
+          top_value: string | null
+          total_points_awarded: number | null
+          total_recognitions: number | null
+          unique_givers: number | null
+          unique_receivers: number | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string | null
+          department_id?: string | null
+          id?: string
+          manager_recognitions?: number | null
+          participation_rate?: number | null
+          peer_recognitions?: number | null
+          snapshot_date?: string
+          top_award_type?: string | null
+          top_value?: string | null
+          total_points_awarded?: number | null
+          total_recognitions?: number | null
+          unique_givers?: number | null
+          unique_receivers?: number | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string | null
+          department_id?: string | null
+          id?: string
+          manager_recognitions?: number | null
+          participation_rate?: number | null
+          peer_recognitions?: number | null
+          snapshot_date?: string
+          top_award_type?: string | null
+          top_value?: string | null
+          total_points_awarded?: number | null
+          total_recognitions?: number | null
+          unique_givers?: number | null
+          unique_receivers?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recognition_analytics_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recognition_analytics_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       recognition_awards: {
         Row: {
           approved_by: string | null
@@ -39881,9 +39992,11 @@ export type Database = {
           company_value: string | null
           created_at: string
           currency: string | null
+          department_id: string | null
           description: string
           id: string
           is_public: boolean | null
+          is_team_recognition: boolean | null
           monetary_value: number | null
           nominator_id: string
           points_awarded: number | null
@@ -39901,9 +40014,11 @@ export type Database = {
           company_value?: string | null
           created_at?: string
           currency?: string | null
+          department_id?: string | null
           description: string
           id?: string
           is_public?: boolean | null
+          is_team_recognition?: boolean | null
           monetary_value?: number | null
           nominator_id: string
           points_awarded?: number | null
@@ -39921,9 +40036,11 @@ export type Database = {
           company_value?: string | null
           created_at?: string
           currency?: string | null
+          department_id?: string | null
           description?: string
           id?: string
           is_public?: boolean | null
+          is_team_recognition?: boolean | null
           monetary_value?: number | null
           nominator_id?: string
           points_awarded?: number | null
@@ -39949,6 +40066,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "recognition_awards_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "recognition_awards_nominator_id_fkey"
             columns: ["nominator_id"]
             isOneToOne: false
@@ -39960,6 +40084,62 @@ export type Database = {
             columns: ["recipient_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      recognition_badges: {
+        Row: {
+          badge_code: string
+          badge_name: string
+          badge_type: string
+          color: string | null
+          company_id: string | null
+          created_at: string | null
+          description: string | null
+          icon_name: string | null
+          id: string
+          is_active: boolean | null
+          points_threshold: number | null
+          recognition_count_threshold: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          badge_code: string
+          badge_name: string
+          badge_type?: string
+          color?: string | null
+          company_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          icon_name?: string | null
+          id?: string
+          is_active?: boolean | null
+          points_threshold?: number | null
+          recognition_count_threshold?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          badge_code?: string
+          badge_name?: string
+          badge_type?: string
+          color?: string | null
+          company_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          icon_name?: string | null
+          id?: string
+          is_active?: boolean | null
+          points_threshold?: number | null
+          recognition_count_threshold?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recognition_badges_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
             referencedColumns: ["id"]
           },
         ]
@@ -40013,6 +40193,67 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      recognition_notifications: {
+        Row: {
+          badge_id: string | null
+          created_at: string | null
+          id: string
+          is_read: boolean | null
+          message: string | null
+          notification_type: string
+          read_at: string | null
+          recognition_id: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          badge_id?: string | null
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          message?: string | null
+          notification_type: string
+          read_at?: string | null
+          recognition_id?: string | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          badge_id?: string | null
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          message?: string | null
+          notification_type?: string
+          read_at?: string | null
+          recognition_id?: string | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recognition_notifications_badge_id_fkey"
+            columns: ["badge_id"]
+            isOneToOne: false
+            referencedRelation: "recognition_badges"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recognition_notifications_recognition_id_fkey"
+            columns: ["recognition_id"]
+            isOneToOne: false
+            referencedRelation: "recognition_awards"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recognition_notifications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
