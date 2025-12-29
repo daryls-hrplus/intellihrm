@@ -7,3 +7,6 @@ export { SUAIDSEGenerator } from './SUAIDSEGenerator';
 export { MexicanBenefitsCalculator } from './MexicanBenefitsCalculator';
 export { INFONAVITManager } from './INFONAVITManager';
 export { FONACOTManager } from './FONACOTManager';
+export { MexicanAnnualISR } from './MexicanAnnualISR';
+export { TaxCertificates } from './TaxCertificates';
+export { MexicanPayrollAnalytics } from './MexicanPayrollAnalytics';
