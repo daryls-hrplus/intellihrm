@@ -11,6 +11,7 @@ import { useAppraisalRoleSegments } from "@/hooks/useAppraisalRoleSegments";
 import { useConcurrentPositionDetection, ConcurrentPosition } from "@/hooks/useConcurrentPositionDetection";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { MultiPositionEnrollmentDialog, MultiPositionHandlingMode } from "./MultiPositionEnrollmentDialog";
+import { ParticipantRoleQuickView } from "./ParticipantRoleQuickView";
 
 interface AppraisalCycle {
   id: string;
@@ -385,29 +386,27 @@ export function AppraisalParticipantsManager({
                   participants.map((participant) => (
                     <TableRow key={participant.id}>
                       <TableCell className="font-medium">
-                        <div className="flex items-center gap-2">
-                          {participant.employee_name}
-                          {participant.has_role_change && (
-                            <Tooltip>
-                              <TooltipTrigger>
-                                <GitBranch className="h-4 w-4 text-info" />
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                Role changed during cycle - weighted scoring applies
-                              </TooltipContent>
-                            </Tooltip>
-                          )}
-                          {participant.has_multi_position && (
-                            <Tooltip>
-                              <TooltipTrigger>
-                                <Users className="h-4 w-4 text-accent-foreground" />
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                Multiple concurrent positions - weighted scoring applies
-                              </TooltipContent>
-                            </Tooltip>
-                          )}
-                        </div>
+                        <ParticipantRoleQuickView
+                          participantId={participant.id}
+                          hasRoleChange={participant.has_role_change}
+                          hasMultiPosition={participant.has_multi_position}
+                        >
+                          <div className="flex items-center gap-2">
+                            {participant.employee_name}
+                            {participant.has_role_change && (
+                              <Badge variant="outline" className="text-xs border-info/50 text-info gap-1">
+                                <GitBranch className="h-3 w-3" />
+                                Mid-Cycle Change
+                              </Badge>
+                            )}
+                            {participant.has_multi_position && (
+                              <Badge variant="outline" className="text-xs border-primary/50 text-primary gap-1">
+                                <Users className="h-3 w-3" />
+                                Multi-Role
+                              </Badge>
+                            )}
+                          </div>
+                        </ParticipantRoleQuickView>
                       </TableCell>
                       <TableCell>
                         <Select
