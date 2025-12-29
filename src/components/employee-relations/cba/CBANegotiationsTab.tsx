@@ -9,11 +9,12 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Plus, Calendar, MapPin, Users, Loader2, MessageSquare, DollarSign } from 'lucide-react';
+import { Plus, Calendar, MapPin, Users, Loader2, MessageSquare, DollarSign, Calculator } from 'lucide-react';
 import { formatDateForDisplay } from '@/utils/dateUtils';
 import { useCBANegotiations, useCBAProposals, useCreateCBANegotiation, useCreateCBAProposal, type CBANegotiation, type CBAProposal } from '@/hooks/useCBAData';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { CBANegotiationCostingTool } from './CBANegotiationCostingTool';
 
 interface CBANegotiationsTabProps {
   agreementId: string;
@@ -28,6 +29,7 @@ export function CBANegotiationsTab({ agreementId, companyId }: CBANegotiationsTa
   
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isProposalDialogOpen, setIsProposalDialogOpen] = useState(false);
+  const [isCostingToolOpen, setIsCostingToolOpen] = useState(false);
   const [selectedNegotiationId, setSelectedNegotiationId] = useState<string | null>(null);
   const [expandedNegotiation, setExpandedNegotiation] = useState<string | null>(null);
   
@@ -131,13 +133,18 @@ export function CBANegotiationsTab({ agreementId, companyId }: CBANegotiationsTa
         <p className="text-muted-foreground">
           {negotiations.length} negotiation session{negotiations.length !== 1 ? 's' : ''}
         </p>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button className="gap-2">
-              <Plus className="h-4 w-4" />
-              Schedule Session
-            </Button>
-          </DialogTrigger>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={() => setIsCostingToolOpen(true)} className="gap-2">
+            <Calculator className="h-4 w-4" />
+            AI Costing Tool
+          </Button>
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button className="gap-2">
+                <Plus className="h-4 w-4" />
+                Schedule Session
+              </Button>
+            </DialogTrigger>
           <DialogContent className="max-w-lg">
             <DialogHeader>
               <DialogTitle>Schedule Negotiation Session</DialogTitle>
@@ -227,6 +234,7 @@ export function CBANegotiationsTab({ agreementId, companyId }: CBANegotiationsTa
             </form>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       {negotiations.length === 0 ? (
@@ -422,6 +430,13 @@ export function CBANegotiationsTab({ agreementId, companyId }: CBANegotiationsTa
           </form>
         </DialogContent>
       </Dialog>
+
+      <CBANegotiationCostingTool
+        open={isCostingToolOpen}
+        onOpenChange={setIsCostingToolOpen}
+        agreementId={agreementId}
+        companyId={companyId}
+      />
     </div>
   );
 }
