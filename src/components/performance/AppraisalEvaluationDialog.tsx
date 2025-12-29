@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -10,12 +10,15 @@ import { Slider } from "@/components/ui/slider";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Target, Briefcase, Award, Save, Send, ChevronDown, ChevronUp, Loader2, GitBranch } from "lucide-react";
+import { Target, Briefcase, Award, Save, Send, ChevronDown, ChevronUp, Loader2, GitBranch, Settings2 } from "lucide-react";
 import { useKRARatingSubmissions } from "@/hooks/useKRARatingSubmissions";
 import { KRAWithRating, ResponsibilityKRA } from "@/types/responsibilityKRA";
 import { KRARatingCard } from "./KRARatingCard";
 import { RoleSegmentTimeline } from "./RoleSegmentTimeline";
 import { useAppraisalRoleSegments, RoleSegment } from "@/hooks/useAppraisalRoleSegments";
+import { SegmentFilterTabs } from "./SegmentFilterTabs";
+import { SegmentScoreSummary } from "./SegmentScoreSummary";
+import { SegmentOverrideDialog } from "./SegmentOverrideDialog";
 
 interface AppraisalScore {
   id?: string;
@@ -81,6 +84,8 @@ export function AppraisalEvaluationDialog({
   const [hasRoleChange, setHasRoleChange] = useState(false);
   const [roleSegments, setRoleSegments] = useState<RoleSegment[]>([]);
   const [activeSegmentId, setActiveSegmentId] = useState<string | undefined>();
+  const [selectedFilterSegmentId, setSelectedFilterSegmentId] = useState<string | null>(null);
+  const [overrideDialogOpen, setOverrideDialogOpen] = useState(false);
 
   const { fetchSegments } = useAppraisalRoleSegments();
 
@@ -512,15 +517,72 @@ export function AppraisalEvaluationDialog({
     }
   };
 
-  const getScoresByType = (type: string) => scores.filter((s) => s.evaluation_type === type);
+  const getScoresByType = (type: string) => {
+    const typeScores = scores.filter((s) => s.evaluation_type === type);
+    // Apply segment filter if set
+    if (selectedFilterSegmentId && hasRoleChange) {
+      return typeScores.filter((s) => s.segment_id === selectedFilterSegmentId);
+    }
+    return typeScores;
+  };
+
+  const getAllScoresByType = (type: string) => scores.filter((s) => s.evaluation_type === type);
 
   const calculateCategoryScore = (type: string) => {
-    const typeScores = getScoresByType(type);
+    const typeScores = getAllScoresByType(type);
     return typeScores.reduce((sum, s) => sum + (s.weighted_score || 0), 0);
   };
 
   const calculateTotalWeight = (type: string) => {
     return getScoresByType(type).reduce((sum, s) => sum + s.weight, 0);
+  };
+
+  // Calculate segment-level scores for SegmentScoreSummary
+  const segmentScores = useMemo(() => {
+    if (!hasRoleChange || roleSegments.length <= 1) return [];
+    
+    return roleSegments.map(segment => {
+      const segmentItems = scores.filter(s => s.segment_id === segment.id);
+      
+      const calcTypeScore = (type: string) => {
+        const typeItems = segmentItems.filter(s => s.evaluation_type === type);
+        const totalWeight = typeItems.reduce((sum, s) => sum + s.weight, 0);
+        const totalWeighted = typeItems.reduce((sum, s) => sum + (s.weighted_score || 0), 0);
+        return totalWeight > 0 ? (totalWeighted / totalWeight) * 100 : 0;
+      };
+      
+      const compScore = calcTypeScore("competency");
+      const respScore = calcTypeScore("responsibility");
+      const goalScore = calcTypeScore("goal");
+      
+      const overall = cycleInfo
+        ? (compScore * cycleInfo.competency_weight +
+           respScore * cycleInfo.responsibility_weight +
+           goalScore * cycleInfo.goal_weight) / 100
+        : 0;
+      
+      return {
+        segmentId: segment.id,
+        competency: compScore,
+        responsibility: respScore,
+        goal: goalScore,
+        overall,
+      };
+    });
+  }, [scores, roleSegments, hasRoleChange, cycleInfo]);
+
+  const overallWeightedScore = useMemo(() => {
+    if (!hasRoleChange || roleSegments.length <= 1) return 0;
+    
+    return roleSegments.reduce((sum, segment) => {
+      const segScore = segmentScores.find(s => s.segmentId === segment.id);
+      return sum + (segScore?.overall || 0) * (segment.contribution_percentage / 100);
+    }, 0);
+  }, [segmentScores, roleSegments, hasRoleChange]);
+
+  const handleOverrideSuccess = () => {
+    // Refetch segments to get updated percentages
+    fetchData();
   };
 
   const toggleResponsibilityExpanded = (itemId: string) => {
@@ -800,12 +862,41 @@ export function AppraisalEvaluationDialog({
         <div className="space-y-6">
           {/* Role Segment Timeline - show if employee had role changes */}
           {hasRoleChange && roleSegments.length > 1 && (
-            <RoleSegmentTimeline
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <RoleSegmentTimeline
+                  segments={roleSegments}
+                  activeSegmentId={activeSegmentId}
+                  onSegmentClick={setActiveSegmentId}
+                />
+                {!isEmployee && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setOverrideDialogOpen(true)}
+                  >
+                    <Settings2 className="h-4 w-4 mr-2" />
+                    Adjust Weights
+                  </Button>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Segment-Level Score Summary - for multi-role employees */}
+          {hasRoleChange && roleSegments.length > 1 && cycleInfo && (
+            <SegmentScoreSummary
               segments={roleSegments}
-              activeSegmentId={activeSegmentId}
-              onSegmentClick={setActiveSegmentId}
+              segmentScores={segmentScores}
+              cycleWeights={{
+                competency_weight: cycleInfo.competency_weight,
+                responsibility_weight: cycleInfo.responsibility_weight,
+                goal_weight: cycleInfo.goal_weight,
+              }}
+              overallWeightedScore={overallWeightedScore}
             />
           )}
+
           {/* Score Summary */}
           <div className="grid gap-4 md:grid-cols-4">
             <Card className="bg-muted/50">
@@ -860,6 +951,17 @@ export function AppraisalEvaluationDialog({
               </TabsTrigger>
             </TabsList>
 
+            {/* Segment Filter Tabs - show for multi-role employees */}
+            {hasRoleChange && roleSegments.length > 1 && (
+              <div className="mt-3">
+                <SegmentFilterTabs
+                  segments={roleSegments}
+                  selectedSegmentId={selectedFilterSegmentId}
+                  onSegmentChange={setSelectedFilterSegmentId}
+                />
+              </div>
+            )}
+
             <TabsContent value="competencies" className="mt-4">
               {renderScoreItems("competency")}
             </TabsContent>
@@ -901,6 +1003,15 @@ export function AppraisalEvaluationDialog({
           </div>
         </div>
       </DialogContent>
+
+      {/* Segment Override Dialog */}
+      <SegmentOverrideDialog
+        open={overrideDialogOpen}
+        onOpenChange={setOverrideDialogOpen}
+        participantId={participantId}
+        segments={roleSegments}
+        onSuccess={handleOverrideSuccess}
+      />
     </Dialog>
   );
 }
