@@ -38,3 +38,13 @@ export { IDSEAutomation } from './IDSEAutomation';
 export { SUAAdvancedGenerator } from './SUAAdvancedGenerator';
 export { EmployerSocialContributions } from './EmployerSocialContributions';
 export { PayrollAnomalyDetection } from './PayrollAnomalyDetection';
+
+// Phase 13 - Mexico Enterprise & Integration
+export { MexicoEmployeeMobileESS } from './MexicoEmployeeMobileESS';
+export { SIPAREIntegration } from './SIPAREIntegration';
+export { ConstanciaSituacionFiscal } from './ConstanciaSituacionFiscal';
+export { ISRAnnualAdjustment } from './ISRAnnualAdjustment';
+export { SATIMSSAPIIntegration } from './SATIMSSAPIIntegration';
+export { AdvancedPTUDistribution } from './AdvancedPTUDistribution';
+export { MexicanPayrollAuditDashboard } from './MexicanPayrollAuditDashboard';
+export { MexicanRegulatoryCalendar } from './MexicanRegulatoryCalendar';
