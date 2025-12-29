@@ -272,3 +272,9 @@ verify_jwt = false
 
 [functions.mx-cfdi-stamp]
 verify_jwt = false
+
+[functions.mx-cfdi-cancel]
+verify_jwt = false
+
+[functions.mx-cfdi-generate-pdf]
+verify_jwt = false

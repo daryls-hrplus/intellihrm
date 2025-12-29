@@ -8,21 +8,51 @@ import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { 
   Loader2, FileText, Download, XCircle, Search, 
-  CheckCircle, Clock, AlertTriangle, RefreshCw 
+  CheckCircle, Clock, AlertTriangle, RefreshCw, Stamp
 } from 'lucide-react';
 import { format } from 'date-fns';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 
 interface CFDIRecord {
   id: string;
   payroll_record_id: string;
+  company_id: string;
+  employee_id: string;
   cfdi_uuid: string | null;
   folio: string | null;
   serie: string | null;
+  xml_content: string | null;
+  pdf_url: string | null;
   timbrado_date: string | null;
   pac_provider: string | null;
+  sat_seal: string | null;
   cfdi_status: string;
   cancellation_status: string | null;
+  cancellation_date: string | null;
+  cancellation_reason: string | null;
+  related_cfdi_uuid: string | null;
+  version: string | null;
+  nomina_version: string | null;
   created_at: string;
+  updated_at: string;
 }
 
 interface CFDIDashboardProps {
@@ -30,11 +60,22 @@ interface CFDIDashboardProps {
   payrollRunId?: string;
 }
 
+const CANCELLATION_REASONS = [
+  { code: '01', label: 'Comprobante emitido con errores con relación' },
+  { code: '02', label: 'Comprobante emitido con errores sin relación' },
+  { code: '03', label: 'No se llevó a cabo la operación' },
+  { code: '04', label: 'Operación nominativa relacionada en una factura global' }
+];
+
 export function CFDIDashboard({ companyId, payrollRunId }: CFDIDashboardProps) {
   const [records, setRecords] = useState<CFDIRecord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [isProcessing, setIsProcessing] = useState<string | null>(null);
+  const [isStampingAll, setIsStampingAll] = useState(false);
+  const [cancelDialog, setCancelDialog] = useState<{ open: boolean; record: CFDIRecord | null }>({ open: false, record: null });
+  const [cancelReason, setCancelReason] = useState('02');
+  const [cancelNotes, setCancelNotes] = useState('');
   const { toast } = useToast();
 
   const fetchRecords = async () => {
@@ -104,12 +145,21 @@ export function CFDIDashboard({ companyId, payrollRunId }: CFDIDashboardProps) {
   const handleStamp = async (recordId: string) => {
     setIsProcessing(recordId);
     try {
-      // This would call the timbrado edge function
-      toast({
-        title: 'Stamping initiated',
-        description: 'CFDI stamping process has been started'
+      const { data, error } = await supabase.functions.invoke('mx-cfdi-stamp', {
+        body: { cfdiRecordId: recordId, companyId }
       });
-      // Refresh after stamping
+
+      if (error) throw error;
+
+      if (data?.success) {
+        toast({
+          title: 'CFDI stamped successfully',
+          description: `UUID: ${data.uuid}`
+        });
+      } else {
+        throw new Error(data?.error || 'Stamping failed');
+      }
+      
       await fetchRecords();
     } catch (error) {
       toast({
@@ -122,8 +172,81 @@ export function CFDIDashboard({ companyId, payrollRunId }: CFDIDashboardProps) {
     }
   };
 
+  const handleStampAll = async () => {
+    const pendingRecords = records.filter(r => r.cfdi_status === 'pending');
+    if (pendingRecords.length === 0) return;
+
+    setIsStampingAll(true);
+    let successCount = 0;
+    let errorCount = 0;
+
+    for (const record of pendingRecords) {
+      try {
+        const { data, error } = await supabase.functions.invoke('mx-cfdi-stamp', {
+          body: { cfdiRecordId: record.id, companyId }
+        });
+
+        if (error || !data?.success) {
+          errorCount++;
+        } else {
+          successCount++;
+        }
+      } catch {
+        errorCount++;
+      }
+    }
+
+    toast({
+      title: 'Batch stamping complete',
+      description: `${successCount} stamped, ${errorCount} errors`
+    });
+
+    await fetchRecords();
+    setIsStampingAll(false);
+  };
+
+  const handleCancel = async () => {
+    if (!cancelDialog.record) return;
+
+    setIsProcessing(cancelDialog.record.id);
+    try {
+      const { data, error } = await supabase.functions.invoke('mx-cfdi-cancel', {
+        body: { 
+          cfdiRecordId: cancelDialog.record.id, 
+          companyId,
+          reasonCode: cancelReason,
+          notes: cancelNotes
+        }
+      });
+
+      if (error) throw error;
+
+      if (data?.success) {
+        toast({
+          title: 'Cancellation initiated',
+          description: data.message || 'CFDI cancellation request submitted'
+        });
+      } else {
+        throw new Error(data?.error || 'Cancellation failed');
+      }
+      
+      await fetchRecords();
+    } catch (error) {
+      toast({
+        title: 'Cancellation failed',
+        description: error instanceof Error ? error.message : 'Unknown error',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsProcessing(null);
+      setCancelDialog({ open: false, record: null });
+      setCancelReason('02');
+      setCancelNotes('');
+    }
+  };
+
   const handleDownloadXML = async (record: CFDIRecord) => {
-    if (!record.cfdi_uuid) {
+    if (!record.xml_content) {
       toast({
         title: 'No XML available',
         description: 'This CFDI has not been stamped yet',
@@ -132,10 +255,19 @@ export function CFDIDashboard({ companyId, payrollRunId }: CFDIDashboardProps) {
       return;
     }
     
-    // In a real implementation, this would download the XML
+    const blob = new Blob([record.xml_content], { type: 'application/xml' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `CFDI_${record.cfdi_uuid || record.folio || record.id}.xml`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
     toast({
-      title: 'Downloading XML',
-      description: `Downloading CFDI ${record.cfdi_uuid}`
+      title: 'XML Downloaded',
+      description: `CFDI ${record.cfdi_uuid?.substring(0, 8) || record.folio} downloaded`
     });
   };
 
@@ -150,9 +282,42 @@ export function CFDIDashboard({ companyId, payrollRunId }: CFDIDashboardProps) {
     }
     
     toast({
-      title: 'Downloading PDF',
-      description: `Downloading CFDI PDF for ${record.cfdi_uuid}`
+      title: 'Generating PDF',
+      description: 'PDF generation in progress...'
     });
+
+    // In production, this would call an edge function to generate the PDF
+    try {
+      const { data, error } = await supabase.functions.invoke('mx-cfdi-generate-pdf', {
+        body: { cfdiRecordId: record.id, companyId }
+      });
+
+      if (error) throw error;
+      
+      if (data?.pdfBase64) {
+        const byteCharacters = atob(data.pdfBase64);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: 'application/pdf' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `CFDI_${record.cfdi_uuid || record.folio || record.id}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+    } catch (error) {
+      toast({
+        title: 'PDF generation failed',
+        description: error instanceof Error ? error.message : 'Unknown error',
+        variant: 'destructive'
+      });
+    }
   };
 
   const filteredRecords = records.filter(record => {
@@ -231,12 +396,14 @@ export function CFDIDashboard({ companyId, payrollRunId }: CFDIDashboardProps) {
               </CardDescription>
             </div>
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" onClick={fetchRecords}>
-                <RefreshCw className="h-4 w-4 mr-2" />
+              <Button variant="outline" size="sm" onClick={fetchRecords} disabled={isLoading}>
+                <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
                 Refresh
               </Button>
               {pendingCount > 0 && (
-                <Button size="sm">
+                <Button size="sm" onClick={handleStampAll} disabled={isStampingAll}>
+                  {isStampingAll && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                  <Stamp className="h-4 w-4 mr-2" />
                   Stamp All Pending ({pendingCount})
                 </Button>
               )}
@@ -347,11 +514,17 @@ export function CFDIDashboard({ companyId, payrollRunId }: CFDIDashboardProps) {
                                 size="icon"
                                 className="text-destructive hover:text-destructive"
                                 title="Cancel CFDI"
+                                onClick={() => setCancelDialog({ open: true, record })}
                               >
                                 <XCircle className="h-4 w-4" />
                               </Button>
                             )}
                           </>
+                        )}
+                        {record.cfdi_status === 'error' && (
+                          <span className="text-xs text-destructive max-w-[200px] truncate">
+                            Error - check logs
+                          </span>
                         )}
                       </div>
                     </TableCell>
@@ -362,6 +535,57 @@ export function CFDIDashboard({ companyId, payrollRunId }: CFDIDashboardProps) {
           )}
         </CardContent>
       </Card>
+
+      <AlertDialog open={cancelDialog.open} onOpenChange={(open) => !open && setCancelDialog({ open: false, record: null })}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Cancel CFDI</AlertDialogTitle>
+            <AlertDialogDescription>
+              You are about to cancel CFDI {cancelDialog.record?.cfdi_uuid?.substring(0, 8)}...
+              This action will notify the SAT and may require recipient acceptance.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Cancellation Reason (SAT)</Label>
+              <Select value={cancelReason} onValueChange={setCancelReason}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {CANCELLATION_REASONS.map((reason) => (
+                    <SelectItem key={reason.code} value={reason.code}>
+                      {reason.code} - {reason.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="space-y-2">
+              <Label>Notes (optional)</Label>
+              <Textarea 
+                value={cancelNotes}
+                onChange={(e) => setCancelNotes(e.target.value)}
+                placeholder="Internal notes for this cancellation..."
+              />
+            </div>
+          </div>
+
+          <AlertDialogFooter>
+            <AlertDialogCancel>Keep CFDI</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleCancel}
+              className="bg-destructive hover:bg-destructive/90"
+              disabled={isProcessing === cancelDialog.record?.id}
+            >
+              {isProcessing === cancelDialog.record?.id && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              Cancel CFDI
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
