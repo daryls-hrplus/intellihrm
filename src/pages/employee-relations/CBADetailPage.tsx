@@ -1,25 +1,28 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Breadcrumbs } from '@/components/ui/breadcrumbs';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, FileText, Scale, MessageSquare, FileEdit, AlertTriangle, Loader2 } from 'lucide-react';
+import { ArrowLeft, FileText, Scale, MessageSquare, FileEdit, AlertTriangle, Loader2, Sparkles } from 'lucide-react';
 import { CBAOverviewTab } from '@/components/employee-relations/cba/CBAOverviewTab';
 import { CBAArticlesTab } from '@/components/employee-relations/cba/CBAArticlesTab';
 import { CBARulesTab } from '@/components/employee-relations/cba/CBARulesTab';
 import { CBANegotiationsTab } from '@/components/employee-relations/cba/CBANegotiationsTab';
 import { CBAAmendmentsTab } from '@/components/employee-relations/cba/CBAAmendmentsTab';
 import { CBAViolationsTab } from '@/components/employee-relations/cba/CBAViolationsTab';
+import { CBAImportWizard } from '@/components/employee-relations/cba/CBAImportWizard';
 
 export default function CBADetailPage() {
   const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState('overview');
+  const [showImportWizard, setShowImportWizard] = useState(false);
 
   const { data: agreement, isLoading } = useQuery({
     queryKey: ['collective_agreement', id],
@@ -83,7 +86,23 @@ export default function CBADetailPage() {
               </p>
             </div>
           </div>
+          <Button onClick={() => setShowImportWizard(true)}>
+            <Sparkles className="h-4 w-4 mr-2" />
+            AI Import Wizard
+          </Button>
         </div>
+
+        <CBAImportWizard
+          open={showImportWizard}
+          onOpenChange={setShowImportWizard}
+          agreementId={agreement.id}
+          companyId={agreement.company_id}
+          onImportComplete={() => {
+            queryClient.invalidateQueries({ queryKey: ['cba_articles', agreement.id] });
+            queryClient.invalidateQueries({ queryKey: ['cba_clauses'] });
+            queryClient.invalidateQueries({ queryKey: ['cba_rules', agreement.id] });
+          }}
+        />
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="grid w-full grid-cols-6">
