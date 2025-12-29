@@ -32,6 +32,7 @@ import { toast } from "sonner";
 import { AppraisalCycleDialog } from "@/components/performance/AppraisalCycleDialog";
 import { AppraisalParticipantsManager } from "@/components/performance/AppraisalParticipantsManager";
 import { AppraisalEvaluationDialog } from "@/components/performance/AppraisalEvaluationDialog";
+import { EmployeeAppraisalDetailDialog } from "@/components/performance/EmployeeAppraisalDetailDialog";
 import { useLanguage } from "@/hooks/useLanguage";
 import { format, parseISO } from "date-fns";
 import { formatDateForDisplay } from "@/utils/dateUtils";
@@ -67,6 +68,9 @@ interface MyAppraisal {
   responsibility_score: number | null;
   goal_score: number | null;
   evaluation_deadline: string | null;
+  employee_comments?: string | null;
+  final_comments?: string | null;
+  has_role_change?: boolean;
 }
 
 interface PendingEvaluation {
@@ -119,6 +123,8 @@ export default function AppraisalsPage() {
   const [selectedParticipant, setSelectedParticipant] = useState<PendingEvaluation | null>(null);
   const [isProbationReview, setIsProbationReview] = useState(false);
   const [isManagerCycle, setIsManagerCycle] = useState(false);
+  const [employeeDetailDialogOpen, setEmployeeDetailDialogOpen] = useState(false);
+  const [selectedAppraisalForDetail, setSelectedAppraisalForDetail] = useState<MyAppraisal | null>(null);
 
   // Company switcher for admin/HR
   const [companies, setCompanies] = useState<{ id: string; name: string }[]>([]);
@@ -265,6 +271,9 @@ export default function AppraisalsPage() {
         competency_score,
         responsibility_score,
         goal_score,
+        employee_comments,
+        final_comments,
+        has_role_change,
         appraisal_cycles!inner (
           name,
           evaluation_deadline
@@ -291,6 +300,9 @@ export default function AppraisalsPage() {
       responsibility_score: item.responsibility_score,
       goal_score: item.goal_score,
       evaluation_deadline: item.appraisal_cycles?.evaluation_deadline || null,
+      employee_comments: item.employee_comments,
+      final_comments: item.final_comments,
+      has_role_change: item.has_role_change,
     }));
 
     setMyAppraisals(formatted);
@@ -530,7 +542,14 @@ export default function AppraisalsPage() {
                 </Card>
               ) : (
                 myAppraisals.map((appraisal) => (
-                  <Card key={appraisal.id}>
+                  <Card 
+                    key={appraisal.id} 
+                    className="cursor-pointer transition-colors hover:border-primary/50"
+                    onClick={() => {
+                      setSelectedAppraisalForDetail(appraisal);
+                      setEmployeeDetailDialogOpen(true);
+                    }}
+                  >
                     <CardHeader className="pb-3">
                       <div className="flex items-start justify-between">
                         <div>
@@ -873,6 +892,17 @@ export default function AppraisalsPage() {
             employeeName={selectedParticipant.employee_name}
             cycleId={selectedParticipant.cycle_id}
             onSuccess={fetchData}
+          />
+        )}
+
+        {/* Employee Appraisal Detail Dialog */}
+        {selectedAppraisalForDetail && user?.id && company?.id && (
+          <EmployeeAppraisalDetailDialog
+            open={employeeDetailDialogOpen}
+            onOpenChange={setEmployeeDetailDialogOpen}
+            appraisal={selectedAppraisalForDetail}
+            employeeId={user.id}
+            companyId={company.id}
           />
         )}
       </div>
