@@ -4,3 +4,6 @@ export { CFDIDashboard } from './CFDIDashboard';
 export { MexicanPayslipTemplate } from './MexicanPayslipTemplate';
 export { MexicanPayrollRun } from './MexicanPayrollRun';
 export { SUAIDSEGenerator } from './SUAIDSEGenerator';
+export { MexicanBenefitsCalculator } from './MexicanBenefitsCalculator';
+export { INFONAVITManager } from './INFONAVITManager';
+export { FONACOTManager } from './FONACOTManager';
