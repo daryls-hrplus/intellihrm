@@ -87,6 +87,7 @@ export default function HRHubDashboardPage() {
       titleKey: "hrHub.analyticsInsights",
       items: [
         { titleKey: "hrHub.sentimentMonitoring", descKey: "hrHub.sentimentMonitoringDesc", icon: Brain, href: "/hr-hub/sentiment-monitoring", badge: null },
+        { titleKey: "hrHub.recognitionAnalytics", descKey: "hrHub.recognitionAnalyticsDesc", icon: Gift, href: "/hr-hub/recognition-analytics", badge: null },
       ],
     },
   ];
