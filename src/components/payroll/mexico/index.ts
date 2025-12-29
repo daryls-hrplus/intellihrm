@@ -3,3 +3,4 @@ export { MexicanEmployeeData } from './MexicanEmployeeData';
 export { CFDIDashboard } from './CFDIDashboard';
 export { MexicanPayslipTemplate } from './MexicanPayslipTemplate';
 export { MexicanPayrollRun } from './MexicanPayrollRun';
+export { SUAIDSEGenerator } from './SUAIDSEGenerator';
