@@ -56,7 +56,7 @@ export function JobSpecificKRAsList({
   const [jobKRAs, setJobKRAs] = useState<JobSpecificKRA[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [editForm, setEditForm] = useState({ target: "", method: "" });
+  const [editForm, setEditForm] = useState({ name: "", target: "", method: "" });
   const [saving, setSaving] = useState(false);
   const [creating, setCreating] = useState(false);
 
@@ -89,6 +89,7 @@ export function JobSpecificKRAsList({
   const startEditing = (kra: JobSpecificKRA) => {
     setEditingId(kra.id);
     setEditForm({
+      name: kra.name || "",
       target: kra.job_specific_target || "",
       method: kra.measurement_method || "",
     });
@@ -96,15 +97,21 @@ export function JobSpecificKRAsList({
 
   const cancelEditing = () => {
     setEditingId(null);
-    setEditForm({ target: "", method: "" });
+    setEditForm({ name: "", target: "", method: "" });
   };
 
   const saveEdit = async (kraId: string) => {
+    if (!editForm.name.trim()) {
+      toast.error("KRA name is required");
+      return;
+    }
+    
     setSaving(true);
     try {
       const { error } = await supabase
         .from("job_responsibility_kras")
         .update({
+          name: editForm.name.trim(),
           job_specific_target: editForm.target.trim() ? editForm.target.trim() : null,
           measurement_method: editForm.method ? editForm.method : null,
           is_inherited: false,
@@ -255,6 +262,16 @@ export function JobSpecificKRAsList({
                 {editingId === kra.id ? (
                   <div className="space-y-2 pt-1">
                     <div>
+                      <label className="text-xs text-muted-foreground">KRA Name</label>
+                      <Textarea
+                        value={editForm.name}
+                        onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                        placeholder="Key Result Area description..."
+                        rows={2}
+                        className="text-sm mt-1"
+                      />
+                    </div>
+                    <div>
                       <label className="text-xs text-muted-foreground">Target</label>
                       <Textarea
                         value={editForm.target}
@@ -287,7 +304,7 @@ export function JobSpecificKRAsList({
                         size="sm"
                         className="h-7 text-xs"
                         onClick={() => saveEdit(kra.id)}
-                        disabled={saving}
+                        disabled={saving || !editForm.name.trim()}
                       >
                         <Check className="h-3 w-3 mr-1" />
                         Save
