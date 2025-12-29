@@ -38889,6 +38889,7 @@ export type Database = {
           is_active: boolean | null
           last_hire_date: string | null
           last_login_at: string | null
+          last_working_date: string | null
           locked_until: string | null
           marital_status: string | null
           middle_name: string | null
@@ -38899,7 +38900,6 @@ export type Database = {
           seniority_date: string | null
           separation_date: string | null
           start_date: string | null
-          termination_date: string | null
           termination_reason: string | null
           time_clock_id: string | null
           time_format: string | null
@@ -38935,6 +38935,7 @@ export type Database = {
           is_active?: boolean | null
           last_hire_date?: string | null
           last_login_at?: string | null
+          last_working_date?: string | null
           locked_until?: string | null
           marital_status?: string | null
           middle_name?: string | null
@@ -38945,7 +38946,6 @@ export type Database = {
           seniority_date?: string | null
           separation_date?: string | null
           start_date?: string | null
-          termination_date?: string | null
           termination_reason?: string | null
           time_clock_id?: string | null
           time_format?: string | null
@@ -38981,6 +38981,7 @@ export type Database = {
           is_active?: boolean | null
           last_hire_date?: string | null
           last_login_at?: string | null
+          last_working_date?: string | null
           locked_until?: string | null
           marital_status?: string | null
           middle_name?: string | null
@@ -38991,7 +38992,6 @@ export type Database = {
           seniority_date?: string | null
           separation_date?: string | null
           start_date?: string | null
-          termination_date?: string | null
           termination_reason?: string | null
           time_clock_id?: string | null
           time_format?: string | null

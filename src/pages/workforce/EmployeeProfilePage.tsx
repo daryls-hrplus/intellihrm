@@ -110,7 +110,7 @@ interface EmployeeProfile {
   marital_status: string | null;
   nationality: string | null;
   // Termination/Separation fields
-  termination_date: string | null;
+  last_working_date: string | null;
   separation_date: string | null;
   termination_reason: string | null;
   positions: {
@@ -172,7 +172,7 @@ export default function EmployeeProfilePage() {
       // Fetch profile
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
-        .select('id, full_name, email, avatar_url, timezone, preferred_language, date_format, time_format, created_at, first_hire_date, last_hire_date, start_date, continuous_service_date, seniority_date, adjusted_service_date, employment_status, employee_id, badge_number, global_id, cedula_number, time_clock_id, first_name, middle_name, first_last_name, second_last_name, gender, date_of_birth, marital_status, nationality, termination_date, separation_date, termination_reason')
+        .select('id, full_name, email, avatar_url, timezone, preferred_language, date_format, time_format, created_at, first_hire_date, last_hire_date, start_date, continuous_service_date, seniority_date, adjusted_service_date, employment_status, employee_id, badge_number, global_id, cedula_number, time_clock_id, first_name, middle_name, first_last_name, second_last_name, gender, date_of_birth, marital_status, nationality, last_working_date, separation_date, termination_reason')
         .eq('id', employeeId)
         .maybeSingle();
 
@@ -260,7 +260,7 @@ export default function EmployeeProfilePage() {
         marital_status: profile.marital_status,
         nationality: profile.nationality,
         // Termination/Separation fields
-        termination_date: profile.termination_date,
+        last_working_date: profile.last_working_date,
         separation_date: profile.separation_date,
         termination_reason: profile.termination_reason,
         positions: employeePositions,
@@ -363,7 +363,7 @@ export default function EmployeeProfilePage() {
                   )}
                 </div>
                 {/* Employment Dates */}
-                {(employee.first_hire_date || employee.last_hire_date || employee.start_date || employee.continuous_service_date || employee.seniority_date || employee.adjusted_service_date || employee.termination_date || employee.separation_date) && (
+                {(employee.first_hire_date || employee.last_hire_date || employee.start_date || employee.continuous_service_date || employee.seniority_date || employee.adjusted_service_date || employee.last_working_date || employee.separation_date) && (
                   <div className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 sm:justify-start border-t pt-3">
                     {employee.start_date && (
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -401,10 +401,10 @@ export default function EmployeeProfilePage() {
                         <span>Adjusted Service: {formatDateForDisplay(employee.adjusted_service_date)}</span>
                       </div>
                     )}
-                    {employee.termination_date && (
+                    {employee.last_working_date && (
                       <div className="flex items-center gap-2 text-sm text-destructive">
                         <AlertTriangle className="h-4 w-4" />
-                        <span>Termination: {formatDateForDisplay(employee.termination_date)}</span>
+                        <span>Last Working Date: {formatDateForDisplay(employee.last_working_date)}</span>
                       </div>
                     )}
                     {employee.separation_date && (
