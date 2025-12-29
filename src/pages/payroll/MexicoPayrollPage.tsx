@@ -22,7 +22,10 @@ import {
   MexicanEmployeeData,
   CFDIDashboard,
   MexicanPayrollRun,
-  SUAIDSEGenerator
+  SUAIDSEGenerator,
+  MexicanBenefitsCalculator,
+  INFONAVITManager,
+  FONACOTManager
 } from "@/components/payroll/mexico";
 
 interface Company {
@@ -162,31 +165,38 @@ export default function MexicoPayrollPage() {
           </Alert>
         ) : (
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <TabsList className="grid w-full grid-cols-5">
-              <TabsTrigger value="company" className="gap-2">
+            <TabsList className="grid w-full grid-cols-8">
+              <TabsTrigger value="company" className="gap-1">
                 <Building2 className="h-4 w-4" />
-                <span className="hidden sm:inline">Company Setup</span>
-                <span className="sm:hidden">Company</span>
+                <span className="hidden lg:inline">Company</span>
               </TabsTrigger>
-              <TabsTrigger value="employees" className="gap-2">
+              <TabsTrigger value="employees" className="gap-1">
                 <Users className="h-4 w-4" />
-                <span className="hidden sm:inline">Employee Data</span>
-                <span className="sm:hidden">Employees</span>
+                <span className="hidden lg:inline">Employees</span>
               </TabsTrigger>
-              <TabsTrigger value="payroll-run" className="gap-2">
+              <TabsTrigger value="payroll-run" className="gap-1">
                 <Play className="h-4 w-4" />
-                <span className="hidden sm:inline">Payroll Run</span>
-                <span className="sm:hidden">Run</span>
+                <span className="hidden lg:inline">Run</span>
               </TabsTrigger>
-              <TabsTrigger value="cfdi" className="gap-2">
+              <TabsTrigger value="cfdi" className="gap-1">
                 <FileText className="h-4 w-4" />
-                <span className="hidden sm:inline">CFDI Dashboard</span>
-                <span className="sm:hidden">CFDI</span>
+                <span className="hidden lg:inline">CFDI</span>
               </TabsTrigger>
-              <TabsTrigger value="sua-idse" className="gap-2">
+              <TabsTrigger value="sua-idse" className="gap-1">
                 <FileSpreadsheet className="h-4 w-4" />
-                <span className="hidden sm:inline">SUA / IDSE</span>
-                <span className="sm:hidden">SUA</span>
+                <span className="hidden lg:inline">SUA</span>
+              </TabsTrigger>
+              <TabsTrigger value="benefits" className="gap-1">
+                🎁
+                <span className="hidden lg:inline">Benefits</span>
+              </TabsTrigger>
+              <TabsTrigger value="infonavit" className="gap-1">
+                🏠
+                <span className="hidden lg:inline">INFONAVIT</span>
+              </TabsTrigger>
+              <TabsTrigger value="fonacot" className="gap-1">
+                💳
+                <span className="hidden lg:inline">FONACOT</span>
               </TabsTrigger>
             </TabsList>
 
@@ -217,6 +227,18 @@ export default function MexicoPayrollPage() {
 
             <TabsContent value="sua-idse">
               <SUAIDSEGenerator />
+            </TabsContent>
+
+            <TabsContent value="benefits">
+              <MexicanBenefitsCalculator companyId={selectedCompanyId} />
+            </TabsContent>
+
+            <TabsContent value="infonavit">
+              <INFONAVITManager companyId={selectedCompanyId} />
+            </TabsContent>
+
+            <TabsContent value="fonacot">
+              <FONACOTManager companyId={selectedCompanyId} />
             </TabsContent>
           </Tabs>
         )}
