@@ -32398,6 +32398,442 @@ export type Database = {
         }
         Relationships: []
       }
+      mx_cfdi_records: {
+        Row: {
+          cancellation_date: string | null
+          cancellation_reason: string | null
+          cancellation_status: string | null
+          cfdi_status: string | null
+          cfdi_uuid: string | null
+          company_id: string | null
+          created_at: string | null
+          employee_id: string | null
+          folio: string | null
+          id: string
+          nomina_version: string | null
+          pac_provider: string | null
+          payroll_record_id: string
+          pdf_url: string | null
+          related_cfdi_uuid: string | null
+          sat_seal: string | null
+          serie: string | null
+          timbrado_date: string | null
+          updated_at: string | null
+          version: string | null
+          xml_content: string | null
+        }
+        Insert: {
+          cancellation_date?: string | null
+          cancellation_reason?: string | null
+          cancellation_status?: string | null
+          cfdi_status?: string | null
+          cfdi_uuid?: string | null
+          company_id?: string | null
+          created_at?: string | null
+          employee_id?: string | null
+          folio?: string | null
+          id?: string
+          nomina_version?: string | null
+          pac_provider?: string | null
+          payroll_record_id: string
+          pdf_url?: string | null
+          related_cfdi_uuid?: string | null
+          sat_seal?: string | null
+          serie?: string | null
+          timbrado_date?: string | null
+          updated_at?: string | null
+          version?: string | null
+          xml_content?: string | null
+        }
+        Update: {
+          cancellation_date?: string | null
+          cancellation_reason?: string | null
+          cancellation_status?: string | null
+          cfdi_status?: string | null
+          cfdi_uuid?: string | null
+          company_id?: string | null
+          created_at?: string | null
+          employee_id?: string | null
+          folio?: string | null
+          id?: string
+          nomina_version?: string | null
+          pac_provider?: string | null
+          payroll_record_id?: string
+          pdf_url?: string | null
+          related_cfdi_uuid?: string | null
+          sat_seal?: string | null
+          serie?: string | null
+          timbrado_date?: string | null
+          updated_at?: string | null
+          version?: string | null
+          xml_content?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mx_cfdi_records_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mx_cfdi_records_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mx_company_registrations: {
+        Row: {
+          company_id: string
+          created_at: string | null
+          csd_certificate_number: string | null
+          domicilio_fiscal: Json | null
+          fonacot_registration: string | null
+          id: string
+          imss_risk_class: number | null
+          imss_risk_rate: number | null
+          isn_rate: number | null
+          isn_state_code: string | null
+          pac_credentials: Json | null
+          pac_provider: string | null
+          razon_social: string
+          registro_patronal_imss: string | null
+          rfc: string
+          updated_at: string | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string | null
+          csd_certificate_number?: string | null
+          domicilio_fiscal?: Json | null
+          fonacot_registration?: string | null
+          id?: string
+          imss_risk_class?: number | null
+          imss_risk_rate?: number | null
+          isn_rate?: number | null
+          isn_state_code?: string | null
+          pac_credentials?: Json | null
+          pac_provider?: string | null
+          razon_social: string
+          registro_patronal_imss?: string | null
+          rfc: string
+          updated_at?: string | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string | null
+          csd_certificate_number?: string | null
+          domicilio_fiscal?: Json | null
+          fonacot_registration?: string | null
+          id?: string
+          imss_risk_class?: number | null
+          imss_risk_rate?: number | null
+          isn_rate?: number | null
+          isn_state_code?: string | null
+          pac_credentials?: Json | null
+          pac_provider?: string | null
+          razon_social?: string
+          registro_patronal_imss?: string | null
+          rfc?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mx_company_registrations_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mx_employee_data: {
+        Row: {
+          contract_type: string | null
+          created_at: string | null
+          curp: string
+          employee_id: string
+          id: string
+          imss_registration_date: string | null
+          ine_number: string | null
+          nss: string | null
+          rfc_personal: string
+          sbc: number | null
+          sdi: number | null
+          sdi_calculation_date: string | null
+          sindicalizado: boolean | null
+          updated_at: string | null
+          work_permit_number: string | null
+          work_shift: string | null
+        }
+        Insert: {
+          contract_type?: string | null
+          created_at?: string | null
+          curp: string
+          employee_id: string
+          id?: string
+          imss_registration_date?: string | null
+          ine_number?: string | null
+          nss?: string | null
+          rfc_personal: string
+          sbc?: number | null
+          sdi?: number | null
+          sdi_calculation_date?: string | null
+          sindicalizado?: boolean | null
+          updated_at?: string | null
+          work_permit_number?: string | null
+          work_shift?: string | null
+        }
+        Update: {
+          contract_type?: string | null
+          created_at?: string | null
+          curp?: string
+          employee_id?: string
+          id?: string
+          imss_registration_date?: string | null
+          ine_number?: string | null
+          nss?: string | null
+          rfc_personal?: string
+          sbc?: number | null
+          sdi?: number | null
+          sdi_calculation_date?: string | null
+          sindicalizado?: boolean | null
+          updated_at?: string | null
+          work_permit_number?: string | null
+          work_shift?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mx_employee_data_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mx_imss_rates: {
+        Row: {
+          applies_to_sbc: boolean | null
+          concept_code: string
+          concept_name: string
+          created_at: string | null
+          effective_date: string
+          employee_rate: number
+          employer_rate: number
+          end_date: string | null
+          id: string
+          is_active: boolean | null
+          max_sbc_multiplier: number | null
+          min_sbc_multiplier: number | null
+        }
+        Insert: {
+          applies_to_sbc?: boolean | null
+          concept_code: string
+          concept_name: string
+          created_at?: string | null
+          effective_date: string
+          employee_rate: number
+          employer_rate: number
+          end_date?: string | null
+          id?: string
+          is_active?: boolean | null
+          max_sbc_multiplier?: number | null
+          min_sbc_multiplier?: number | null
+        }
+        Update: {
+          applies_to_sbc?: boolean | null
+          concept_code?: string
+          concept_name?: string
+          created_at?: string | null
+          effective_date?: string
+          employee_rate?: number
+          employer_rate?: number
+          end_date?: string | null
+          id?: string
+          is_active?: boolean | null
+          max_sbc_multiplier?: number | null
+          min_sbc_multiplier?: number | null
+        }
+        Relationships: []
+      }
+      mx_isn_rates: {
+        Row: {
+          created_at: string | null
+          effective_date: string
+          end_date: string | null
+          id: string
+          is_active: boolean | null
+          rate: number
+          state_code: string
+          state_name: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          effective_date: string
+          end_date?: string | null
+          id?: string
+          is_active?: boolean | null
+          rate: number
+          state_code: string
+          state_name: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          effective_date?: string
+          end_date?: string | null
+          id?: string
+          is_active?: boolean | null
+          rate?: number
+          state_code?: string
+          state_name?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      mx_isr_brackets: {
+        Row: {
+          created_at: string | null
+          effective_year: number
+          fixed_fee: number
+          id: string
+          is_active: boolean | null
+          lower_limit: number
+          period_type: string
+          rate_over_excess: number
+          upper_limit: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          effective_year: number
+          fixed_fee: number
+          id?: string
+          is_active?: boolean | null
+          lower_limit: number
+          period_type?: string
+          rate_over_excess: number
+          upper_limit?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          effective_year?: number
+          fixed_fee?: number
+          id?: string
+          is_active?: boolean | null
+          lower_limit?: number
+          period_type?: string
+          rate_over_excess?: number
+          upper_limit?: number | null
+        }
+        Relationships: []
+      }
+      mx_sat_catalogs: {
+        Row: {
+          catalog_type: string
+          code: string
+          created_at: string | null
+          description: string
+          description_en: string | null
+          exempt_days: number | null
+          id: string
+          is_active: boolean | null
+          is_integrable_sdi: boolean | null
+          is_taxable: boolean | null
+        }
+        Insert: {
+          catalog_type: string
+          code: string
+          created_at?: string | null
+          description: string
+          description_en?: string | null
+          exempt_days?: number | null
+          id?: string
+          is_active?: boolean | null
+          is_integrable_sdi?: boolean | null
+          is_taxable?: boolean | null
+        }
+        Update: {
+          catalog_type?: string
+          code?: string
+          created_at?: string | null
+          description?: string
+          description_en?: string | null
+          exempt_days?: number | null
+          id?: string
+          is_active?: boolean | null
+          is_integrable_sdi?: boolean | null
+          is_taxable?: boolean | null
+        }
+        Relationships: []
+      }
+      mx_subsidio_empleo: {
+        Row: {
+          created_at: string | null
+          effective_year: number
+          id: string
+          is_active: boolean | null
+          max_income: number
+          min_income: number
+          monthly_subsidy: number
+        }
+        Insert: {
+          created_at?: string | null
+          effective_year: number
+          id?: string
+          is_active?: boolean | null
+          max_income: number
+          min_income: number
+          monthly_subsidy: number
+        }
+        Update: {
+          created_at?: string | null
+          effective_year?: number
+          id?: string
+          is_active?: boolean | null
+          max_income?: number
+          min_income?: number
+          monthly_subsidy?: number
+        }
+        Relationships: []
+      }
+      mx_uma_values: {
+        Row: {
+          annual_value: number
+          created_at: string | null
+          daily_value: number
+          effective_date: string
+          effective_year: number
+          id: string
+          is_active: boolean | null
+          monthly_value: number
+        }
+        Insert: {
+          annual_value: number
+          created_at?: string | null
+          daily_value: number
+          effective_date: string
+          effective_year: number
+          id?: string
+          is_active?: boolean | null
+          monthly_value: number
+        }
+        Update: {
+          annual_value?: number
+          created_at?: string | null
+          daily_value?: number
+          effective_date?: string
+          effective_year?: number
+          id?: string
+          is_active?: boolean | null
+          monthly_value?: number
+        }
+        Relationships: []
+      }
       nine_box_assessments: {
         Row: {
           assessed_by: string | null

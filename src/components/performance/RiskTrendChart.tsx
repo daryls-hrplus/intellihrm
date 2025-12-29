@@ -39,6 +39,7 @@ export function RiskTrendChart({ companyId }: RiskTrendChartProps) {
 
       // Aggregate by date
       const records = (data || []) as any[];
+      const aggregated = records.reduce((acc: any, item: any) => {
         const date = item.snapshot_date;
         if (!acc[date]) {
           acc[date] = {
