@@ -5,7 +5,7 @@ import { PerformanceAnalyticsDashboard } from "@/components/performance/Performa
 import { LeaveCompanyFilter, useLeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
 import { DepartmentFilter, useDepartmentFilter } from "@/components/filters/DepartmentFilter";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BarChart3, ChevronLeft, TrendingUp, CheckCircle, Network, Users } from "lucide-react";
+import { BarChart3, ChevronLeft, TrendingUp, CheckCircle, Network, Users, GitBranch, Target } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { useLanguage } from "@/hooks/useLanguage";
 import { AIModuleReportBuilder } from "@/components/shared/AIModuleReportBuilder";
@@ -14,6 +14,8 @@ import { GoalQualityReport } from "@/components/performance/insights/GoalQuality
 import { AlignmentCascadeChart } from "@/components/performance/insights/AlignmentCascadeChart";
 import { EmployeeWorkloadHeatmap } from "@/components/performance/insights/EmployeeWorkloadHeatmap";
 import { OverloadedEmployeesList } from "@/components/performance/insights/OverloadedEmployeesList";
+import { RoleChangeImpactAnalysis } from "@/components/performance/insights/RoleChangeImpactAnalysis";
+import { LevelExpectationGapReport } from "@/components/performance/insights/LevelExpectationGapReport";
 
 export default function PerformanceAnalyticsPage() {
   const { t } = useLanguage();
@@ -84,6 +86,14 @@ export default function PerformanceAnalyticsPage() {
               <Users className="h-4 w-4" />
               {t("performance.insights.workload")}
             </TabsTrigger>
+            <TabsTrigger value="role-impact" className="gap-1.5">
+              <GitBranch className="h-4 w-4" />
+              Role Impact
+            </TabsTrigger>
+            <TabsTrigger value="level-gaps" className="gap-1.5">
+              <Target className="h-4 w-4" />
+              Level Gaps
+            </TabsTrigger>
             <TabsTrigger value="ai-banded">{t("reports.aiBandedReports")}</TabsTrigger>
             <TabsTrigger value="ai-bi">{t("reports.aiBIReports")}</TabsTrigger>
           </TabsList>
@@ -128,6 +138,22 @@ export default function PerformanceAnalyticsPage() {
                   departmentId={selectedDepartmentId !== "all" ? selectedDepartmentId : undefined}
                 />
               </>
+            )}
+          </TabsContent>
+
+          <TabsContent value="role-impact">
+            {selectedCompanyId && (
+              <RoleChangeImpactAnalysis 
+                companyId={selectedCompanyId !== "all" ? selectedCompanyId : undefined} 
+              />
+            )}
+          </TabsContent>
+
+          <TabsContent value="level-gaps">
+            {selectedCompanyId && (
+              <LevelExpectationGapReport 
+                companyId={selectedCompanyId !== "all" ? selectedCompanyId : undefined} 
+              />
             )}
           </TabsContent>
 
