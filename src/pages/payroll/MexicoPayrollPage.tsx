@@ -15,7 +15,9 @@ import {
   Play, 
   FileSpreadsheet,
   Flag,
-  AlertCircle
+  AlertCircle,
+  Calculator,
+  BarChart3
 } from "lucide-react";
 import {
   MexicanCompanySetup,
@@ -25,7 +27,10 @@ import {
   SUAIDSEGenerator,
   MexicanBenefitsCalculator,
   INFONAVITManager,
-  FONACOTManager
+  FONACOTManager,
+  MexicanAnnualISR,
+  TaxCertificates,
+  MexicanPayrollAnalytics
 } from "@/components/payroll/mexico";
 
 interface Company {
@@ -165,38 +170,50 @@ export default function MexicoPayrollPage() {
           </Alert>
         ) : (
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <TabsList className="grid w-full grid-cols-8">
+            <TabsList className="flex flex-wrap h-auto gap-1 p-1">
               <TabsTrigger value="company" className="gap-1">
                 <Building2 className="h-4 w-4" />
-                <span className="hidden lg:inline">Company</span>
+                <span className="hidden md:inline">Company</span>
               </TabsTrigger>
               <TabsTrigger value="employees" className="gap-1">
                 <Users className="h-4 w-4" />
-                <span className="hidden lg:inline">Employees</span>
+                <span className="hidden md:inline">Employees</span>
               </TabsTrigger>
               <TabsTrigger value="payroll-run" className="gap-1">
                 <Play className="h-4 w-4" />
-                <span className="hidden lg:inline">Run</span>
+                <span className="hidden md:inline">Run</span>
               </TabsTrigger>
               <TabsTrigger value="cfdi" className="gap-1">
                 <FileText className="h-4 w-4" />
-                <span className="hidden lg:inline">CFDI</span>
+                <span className="hidden md:inline">CFDI</span>
               </TabsTrigger>
               <TabsTrigger value="sua-idse" className="gap-1">
                 <FileSpreadsheet className="h-4 w-4" />
-                <span className="hidden lg:inline">SUA</span>
+                <span className="hidden md:inline">SUA</span>
               </TabsTrigger>
               <TabsTrigger value="benefits" className="gap-1">
                 🎁
-                <span className="hidden lg:inline">Benefits</span>
+                <span className="hidden md:inline">Benefits</span>
               </TabsTrigger>
               <TabsTrigger value="infonavit" className="gap-1">
                 🏠
-                <span className="hidden lg:inline">INFONAVIT</span>
+                <span className="hidden md:inline">INFONAVIT</span>
               </TabsTrigger>
               <TabsTrigger value="fonacot" className="gap-1">
                 💳
-                <span className="hidden lg:inline">FONACOT</span>
+                <span className="hidden md:inline">FONACOT</span>
+              </TabsTrigger>
+              <TabsTrigger value="annual-isr" className="gap-1">
+                <Calculator className="h-4 w-4" />
+                <span className="hidden md:inline">Annual ISR</span>
+              </TabsTrigger>
+              <TabsTrigger value="certificates" className="gap-1">
+                📄
+                <span className="hidden md:inline">Certificates</span>
+              </TabsTrigger>
+              <TabsTrigger value="analytics" className="gap-1">
+                <BarChart3 className="h-4 w-4" />
+                <span className="hidden md:inline">Analytics</span>
               </TabsTrigger>
             </TabsList>
 
@@ -239,6 +256,18 @@ export default function MexicoPayrollPage() {
 
             <TabsContent value="fonacot">
               <FONACOTManager companyId={selectedCompanyId} />
+            </TabsContent>
+
+            <TabsContent value="annual-isr">
+              <MexicanAnnualISR companyId={selectedCompanyId} />
+            </TabsContent>
+
+            <TabsContent value="certificates">
+              <TaxCertificates companyId={selectedCompanyId} />
+            </TabsContent>
+
+            <TabsContent value="analytics">
+              <MexicanPayrollAnalytics companyId={selectedCompanyId} />
             </TabsContent>
           </Tabs>
         )}
