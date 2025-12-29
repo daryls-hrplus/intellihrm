@@ -7,6 +7,7 @@ import { ModuleBIButton } from "@/components/bi/ModuleBIButton";
 import { useGranularPermissions } from "@/hooks/useGranularPermissions";
 import { supabase } from "@/integrations/supabase/client";
 import { GroupedModuleCards, ModuleSection } from "@/components/ui/GroupedModuleCards";
+import { Badge } from "@/components/ui/badge";
 import { 
   Wallet, 
   Calculator, 
@@ -32,10 +33,30 @@ import {
   PiggyBank,
   Timer,
   Sliders,
+  CheckCircle,
+  XCircle,
+  AlertCircle,
+  Play,
+  Loader2,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { format } from "date-fns";
+import { format, formatDistanceToNow } from "date-fns";
+
+interface PayrollActivity {
+  id: string;
+  run_number: string;
+  status: string;
+  run_type: string;
+  pay_group_name: string | null;
+  employee_count: number | null;
+  total_net_pay: number | null;
+  created_at: string;
+  updated_at: string;
+  calculated_at: string | null;
+  approved_at: string | null;
+  paid_at: string | null;
+}
 
 export default function PayrollDashboardPage() {
   const { t } = useTranslation();
@@ -48,6 +69,8 @@ export default function PayrollDashboardPage() {
     employeesPaid: "0",
     pendingApprovals: "0",
   });
+  const [recentActivity, setRecentActivity] = useState<PayrollActivity[]>([]);
+  const [loadingActivity, setLoadingActivity] = useState(true);
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -99,8 +122,114 @@ export default function PayrollDashboardPage() {
       });
     };
 
+    const fetchRecentActivity = async () => {
+      setLoadingActivity(true);
+      try {
+        const { data } = await supabase
+          .from('payroll_runs')
+          .select(`
+            id,
+            run_number,
+            status,
+            run_type,
+            employee_count,
+            total_net_pay,
+            created_at,
+            updated_at,
+            calculated_at,
+            approved_at,
+            paid_at,
+            pay_groups(name)
+          `)
+          .order('updated_at', { ascending: false })
+          .limit(10);
+
+        if (data) {
+          setRecentActivity(data.map((run: any) => ({
+            ...run,
+            pay_group_name: run.pay_groups?.name || null,
+          })));
+        }
+      } catch (error) {
+        console.error('Error fetching recent activity:', error);
+      } finally {
+        setLoadingActivity(false);
+      }
+    };
+
     fetchStats();
+    fetchRecentActivity();
   }, []);
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'paid':
+        return <CheckCircle className="h-4 w-4 text-success" />;
+      case 'approved':
+        return <CheckCircle className="h-4 w-4 text-primary" />;
+      case 'pending_approval':
+      case 'calculated':
+        return <Clock className="h-4 w-4 text-warning" />;
+      case 'calculating':
+      case 'processing':
+        return <Loader2 className="h-4 w-4 text-muted-foreground animate-spin" />;
+      case 'draft':
+        return <Play className="h-4 w-4 text-muted-foreground" />;
+      case 'failed':
+      case 'rejected':
+        return <XCircle className="h-4 w-4 text-destructive" />;
+      default:
+        return <AlertCircle className="h-4 w-4 text-muted-foreground" />;
+    }
+  };
+
+  const getStatusBadge = (status: string) => {
+    const variants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
+      paid: "default",
+      approved: "default",
+      pending_approval: "secondary",
+      calculated: "secondary",
+      calculating: "outline",
+      processing: "outline",
+      draft: "outline",
+      failed: "destructive",
+      rejected: "destructive",
+    };
+    return (
+      <Badge variant={variants[status] || "outline"} className="capitalize">
+        {status.replace(/_/g, ' ')}
+      </Badge>
+    );
+  };
+
+  const getActivityDescription = (activity: PayrollActivity): string => {
+    const payGroup = activity.pay_group_name || 'Unknown Pay Group';
+    const employees = activity.employee_count || 0;
+    
+    switch (activity.status) {
+      case 'paid':
+        return `${payGroup} - ${employees} employees paid`;
+      case 'approved':
+        return `${payGroup} - Approved for payment`;
+      case 'pending_approval':
+        return `${payGroup} - Awaiting approval`;
+      case 'calculated':
+        return `${payGroup} - Calculation complete`;
+      case 'calculating':
+        return `${payGroup} - Calculating payroll...`;
+      case 'processing':
+        return `${payGroup} - Processing payment...`;
+      case 'draft':
+        return `${payGroup} - Draft created`;
+      default:
+        return `${payGroup} - ${activity.status}`;
+    }
+  };
+
+  const formatAmount = (amount: number | null): string => {
+    if (!amount) return '-';
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
+  };
 
   const allModules = {
     payGroups: { title: t("payroll.modules.payGroups.title"), description: t("payroll.modules.payGroups.description"), icon: Users, href: "/payroll/pay-groups", color: "bg-primary/10 text-primary", tabCode: "pay_groups" },
@@ -220,18 +349,60 @@ export default function PayrollDashboardPage() {
 
         <GroupedModuleCards sections={sections} />
 
-        {/* Quick Actions */}
+        {/* Recent Payroll Activity */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <TrendingUp className="h-5 w-5" />
               {t("payroll.recentActivity")}
             </CardTitle>
+            <CardDescription>Latest payroll runs and status changes</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-center py-8 text-muted-foreground">
-              {t("payroll.noRecentActivity")}
-            </div>
+            {loadingActivity ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+              </div>
+            ) : recentActivity.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                {t("payroll.noRecentActivity")}
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {recentActivity.map((activity) => (
+                  <div 
+                    key={activity.id}
+                    className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-muted/50 transition-colors cursor-pointer"
+                    onClick={() => navigate('/payroll/processing')}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted">
+                        {getStatusIcon(activity.status)}
+                      </div>
+                      <div>
+                        <p className="font-medium text-sm">{activity.run_number}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {getActivityDescription(activity)}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      {activity.total_net_pay && activity.total_net_pay > 0 && (
+                        <span className="text-sm font-medium text-muted-foreground">
+                          {formatAmount(activity.total_net_pay)}
+                        </span>
+                      )}
+                      <div className="flex flex-col items-end gap-1">
+                        {getStatusBadge(activity.status)}
+                        <span className="text-xs text-muted-foreground">
+                          {formatDistanceToNow(new Date(activity.updated_at), { addSuffix: true })}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
