@@ -38,6 +38,7 @@ import { useGoalCheckIns, GoalCheckIn } from "@/hooks/useGoalCheckIns";
 import { supabase } from "@/integrations/supabase/client";
 import { format, formatDistanceToNow } from "date-fns";
 import { toast } from "sonner";
+import { AppraisalEvidenceSummary } from "./AppraisalEvidenceSummary";
 
 interface ManagerCheckInReviewDialogProps {
   open: boolean;
@@ -84,6 +85,7 @@ export function ManagerCheckInReviewDialog({
   const [goalTitle, setGoalTitle] = useState("");
   const [employeeName, setEmployeeName] = useState("");
   const [goalProgress, setGoalProgress] = useState(0);
+  const [employeeId, setEmployeeId] = useState<string | null>(null);
   const [previousCheckIns, setPreviousCheckIns] = useState<GoalCheckIn[]>([]);
   
   // Manager form state
@@ -117,6 +119,7 @@ export function ManagerCheckInReviewDialog({
     if (goal) {
       setGoalTitle(goal.title);
       setGoalProgress(goal.progress_percentage);
+      setEmployeeId(goal.employee_id);
       
       if (goal.employee_id) {
         const { data: profile } = await supabase
@@ -280,6 +283,16 @@ export function ManagerCheckInReviewDialog({
                     <div>
                       <Label className="text-xs text-muted-foreground">Next Steps</Label>
                       <p className="text-sm mt-1">{checkIn.next_steps}</p>
+                    </div>
+                  )}
+                  
+                  {/* Evidence Summary */}
+                  {employeeId && (
+                    <div className="pt-2 border-t">
+                      <AppraisalEvidenceSummary
+                        employeeId={employeeId}
+                        goalId={checkIn.goal_id}
+                      />
                     </div>
                   )}
                 </CardContent>
