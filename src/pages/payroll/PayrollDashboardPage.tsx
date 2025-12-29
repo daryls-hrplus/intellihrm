@@ -273,6 +273,12 @@ export default function PayrollDashboardPage() {
     countryDocumentation: { title: "Country Documentation", description: "View payroll documentation and requirements by country", icon: Globe, href: "/payroll/country-documentation", color: "bg-slate-500/10 text-slate-600", tabCode: "country_documentation" },
     historicalImport: { title: "Historical Import", description: "Import historical payroll data for new implementations", icon: Archive, href: "/payroll/historical-import", color: "bg-purple-500/10 text-purple-600", tabCode: "historical_import" },
     mexicoPayroll: { title: "Mexico Payroll", description: "CFDI, IMSS, ISR, SDI and SAT compliance for Mexican payroll", icon: Flag, href: "/payroll/mexico", color: "bg-green-500/10 text-green-600", tabCode: "mexico_payroll" },
+    // General Payroll Features
+    multiCompanyConsolidation: { title: "Multi-Company Consolidation", description: "Consolidated payroll reporting across multiple entities", icon: Globe, href: "/payroll/consolidation", color: "bg-indigo-500/10 text-indigo-600", tabCode: "multi_company_consolidation" },
+    employeeLoans: { title: "Employee Loans", description: "Manage employee loan programs and repayment schedules", icon: Banknote, href: "/payroll/loans", color: "bg-rose-500/10 text-rose-600", tabCode: "employee_loans" },
+    variableCompensation: { title: "Variable Compensation", description: "Bonuses, commissions, and incentive pay management", icon: TrendingUp, href: "/payroll/variable-compensation", color: "bg-amber-500/10 text-amber-600", tabCode: "variable_compensation" },
+    timeAttendanceIntegration: { title: "Time & Attendance Integration", description: "Connect external time tracking systems to payroll", icon: Timer, href: "/payroll/time-integration", color: "bg-cyan-500/10 text-cyan-600", tabCode: "time_attendance_integration" },
+    payrollBudgeting: { title: "Payroll Budgeting", description: "Forecast and manage payroll budgets and variances", icon: Calculator, href: "/payroll/budgeting", color: "bg-emerald-500/10 text-emerald-600", tabCode: "payroll_budgeting" },
   };
 
   const filterByAccess = (modules: typeof allModules[keyof typeof allModules][]) =>
@@ -294,6 +300,10 @@ export default function PayrollDashboardPage() {
     {
       titleKey: "Reporting & Analytics",
       items: filterByAccess([allModules.reports, allModules.yearEnd, allModules.payslips, allModules.archiveSettings, allModules.countryDocumentation, allModules.historicalImport]),
+    },
+    {
+      titleKey: "Advanced Payroll",
+      items: filterByAccess([allModules.multiCompanyConsolidation, allModules.employeeLoans, allModules.variableCompensation, allModules.timeAttendanceIntegration, allModules.payrollBudgeting]),
     },
     {
       titleKey: "Country-Specific",
