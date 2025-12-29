@@ -23,7 +23,10 @@ import {
   MessageSquare,
   Package,
   Layers,
-  CreditCard
+  CreditCard,
+  Globe,
+  MapPin,
+  Brain
 } from "lucide-react";
 import { toast } from "sonner";
 import jsPDF from "jspdf";
@@ -218,6 +221,69 @@ const phases: Phase[] = [
       { order: 11, area: "Leave Payment Rules", description: "Tiered payment percentages by day range" },
     ],
   },
+  {
+    id: "international",
+    title: "Phase 10: International Payroll",
+    icon: Globe,
+    description: "Multi-country payroll framework and statutory compliance",
+    prerequisite: "Phase 3 complete",
+    items: [
+      { order: 1, area: "Country Configuration", description: "Enable countries with tax years, currencies, statutory bodies" },
+      { order: 2, area: "Statutory Deductions", description: "Configure social security, pension, health contributions by country" },
+      { order: 3, area: "Tax Tables", description: "Import annual tax brackets, rates, and thresholds" },
+      { order: 4, area: "Country Tax Settings", description: "Tax calculation methods, refund policies, YTD handling" },
+      { order: 5, area: "Bank Formats", description: "Country-specific payment file formats (ACH, BACS, SEPA)" },
+      { order: 6, area: "Payslip Templates", description: "Localized payslip layouts per country" },
+      { order: 7, area: "Statutory Reports", description: "Configure government submission formats" },
+      { order: 8, area: "Multi-Currency Processing", description: "Exchange rates, conversion rules for expat pay" },
+      { order: 9, area: "Cross-Border Compliance", description: "Tax treaties, shadow payroll rules" },
+      { order: 10, area: "Regional Holidays", description: "Country and state-level public holidays" },
+    ],
+  },
+  {
+    id: "mexico-core",
+    title: "Phase 11: Mexico Core Payroll",
+    icon: MapPin,
+    description: "Mexican labor law compliance and IMSS/SAT integration",
+    prerequisite: "Phase 10 complete",
+    items: [
+      { order: 1, area: "Company SAT Setup", description: "RFC, regimen fiscal, e.firma (CSD) certificates" },
+      { order: 2, area: "Employee IMSS Data", description: "NSS, CURP, salary type (fixed/variable/mixed)" },
+      { order: 3, area: "SDI Calculation", description: "Integrated daily salary with factor integration" },
+      { order: 4, area: "ISR Configuration", description: "Monthly/biweekly tax tables, subsidio al empleo" },
+      { order: 5, area: "IMSS Contributions", description: "Employer/employee quotas by branch" },
+      { order: 6, area: "ISN by State", description: "State payroll tax rates and filing requirements" },
+      { order: 7, area: "CFDI Timbrado", description: "PAC integration for payroll stamping (nomina 1.2)" },
+      { order: 8, area: "INFONAVIT Credits", description: "Housing loan deductions by percentage/VSM/fixed" },
+      { order: 9, area: "FONACOT Loans", description: "Consumer credit deductions" },
+      { order: 10, area: "Aguinaldo & Vacation", description: "13th month and vacation premium calculations" },
+      { order: 11, area: "PTU Configuration", description: "Profit sharing calculation and distribution rules" },
+      { order: 12, area: "Severance Calculator", description: "3-month indemnity, 20 days/year seniority premium" },
+    ],
+  },
+  {
+    id: "mexico-advanced",
+    title: "Phase 12: Mexico Advanced Compliance",
+    icon: Brain,
+    description: "Advanced SAT compliance, IDSE automation, and AI-powered payroll intelligence",
+    prerequisite: "Phase 11 complete",
+    items: [
+      { order: 1, area: "SAT XML Validation", description: "Pre-submission validation against SAT catalogs and schemas" },
+      { order: 2, area: "IDSE Automation", description: "Automated IDSE file generation for movements (alta/baja/modificación)" },
+      { order: 3, area: "SUA Advanced", description: "Full SUA file generation with affiliation, movements, determination" },
+      { order: 4, area: "E.Firma Management", description: "Certificate expiry tracking, renewal workflows" },
+      { order: 5, area: "STPS Compliance", description: "NOM-035 risk assessment, workplace safety" },
+      { order: 6, area: "REPSE Registry", description: "Outsourcing reform compliance, contractor registry" },
+      { order: 7, area: "Outsourcing Reform", description: "Shared services documentation, IMSS validation" },
+      { order: 8, area: "SAT Audit Support", description: "Audit trail, reconciliation reports for SAT reviews" },
+      { order: 9, area: "Union Management", description: "CTM/CROM dues, collective agreements, strikes" },
+      { order: 10, area: "Employer Social Dashboard", description: "IMSS/INFONAVIT/ISN contribution analytics" },
+      { order: 11, area: "Payroll Anomaly Detection", description: "AI-powered outlier detection for payroll variances" },
+      { order: 12, area: "Compliance Calendar", description: "Auto-generated deadlines for all Mexican obligations" },
+      { order: 13, area: "Multi-Period Comparison", description: "Period-over-period variance analysis with drill-down" },
+      { order: 14, area: "Payroll Simulations", description: "What-if scenarios for salary changes, hiring plans" },
+    ],
+  },
 ];
 
 const dependencies = [
@@ -236,6 +302,11 @@ const dependencies = [
   { module: "Billing", dependsOn: "Admin (companies, currencies)" },
   { module: "Invoices", dependsOn: "Billing (subscriptions, tiers)" },
   { module: "Leave Buyout", dependsOn: "Leave + Payroll (pay groups)" },
+  { module: "International Payroll", dependsOn: "Compensation (pay elements, grades)" },
+  { module: "Mexico Core", dependsOn: "International Payroll (country config)" },
+  { module: "Mexico Advanced", dependsOn: "Mexico Core (IMSS, SAT setup)" },
+  { module: "CFDI Timbrado", dependsOn: "Mexico Core (e.firma certificates)" },
+  { module: "IDSE/SUA", dependsOn: "Mexico Core (employee IMSS data)" },
 ];
 
 export default function ImplementationHandbookPage() {

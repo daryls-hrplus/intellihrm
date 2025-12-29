@@ -31,3 +31,10 @@ export { VacationPTUManager } from './VacationPTUManager';
 export { SeveranceCalculator } from './SeveranceCalculator';
 export { PayrollTemplates } from './PayrollTemplates';
 export { IntegrationWebhooks } from './IntegrationWebhooks';
+
+// Phase 12 - Mexico Advanced Compliance & AI
+export { SATXMLValidator } from './SATXMLValidator';
+export { IDSEAutomation } from './IDSEAutomation';
+export { SUAAdvancedGenerator } from './SUAAdvancedGenerator';
+export { EmployerSocialContributions } from './EmployerSocialContributions';
+export { PayrollAnomalyDetection } from './PayrollAnomalyDetection';
