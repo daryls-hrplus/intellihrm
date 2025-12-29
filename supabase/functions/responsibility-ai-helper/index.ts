@@ -443,8 +443,8 @@ The progression criteria should describe what is required for an employee at thi
     }
   }
 
-  prompt += `\n\nRequirements:
-- Write 3-5 bullet points
+prompt += `\n\nRequirements:
+- Write 3-5 bullet points in English
 - Be specific about competency development, performance consistency, and experience requirements
 - Use professional HR language
 - Consider the level tier:
@@ -455,8 +455,7 @@ The progression criteria should describe what is required for an employee at thi
 
 Provide response in JSON format ONLY:
 {
-  "criteria": "Spanish/default language version - bullet points separated by newlines",
-  "criteria_en": "English version - bullet points separated by newlines"
+  "criteria": "English progression criteria - bullet points separated by newlines"
 }`;
 
   return prompt;
@@ -464,15 +463,13 @@ Provide response in JSON format ONLY:
 
 interface ProgressionCriteriaResult {
   criteria: string;
-  criteria_en: string;
 }
 
 async function callLovableAIForProgressionCriteria(prompt: string): Promise<ProgressionCriteriaResult> {
   const lovableApiKey = Deno.env.get('LOVABLE_API_KEY');
 
   const fallbackResult: ProgressionCriteriaResult = {
-    criteria: '• Demostrar competencia consistente en las responsabilidades actuales\n• Cumplir o superar los objetivos de desempeño durante períodos consecutivos\n• Desarrollar habilidades requeridas para el siguiente nivel\n• Mostrar capacidad de trabajo independiente y toma de decisiones',
-    criteria_en: '• Demonstrate consistent competency in current responsibilities\n• Meet or exceed performance targets for consecutive periods\n• Develop skills required for the next level\n• Show capability for independent work and decision-making'
+    criteria: '• Demonstrate consistent competency in current responsibilities\n• Meet or exceed performance targets for consecutive periods\n• Develop skills required for the next level\n• Show capability for independent work and decision-making'
   };
 
   if (!lovableApiKey) {
@@ -493,7 +490,7 @@ async function callLovableAIForProgressionCriteria(prompt: string): Promise<Prog
         messages: [
           {
             role: 'system',
-            content: 'You are an expert HR professional helping to create job level progression criteria. Always respond with valid JSON only containing "criteria" and "criteria_en" fields.'
+            content: 'You are an expert HR professional helping to create job level progression criteria. Always respond with valid JSON only containing "criteria" field in English.'
           },
           { role: 'user', content: prompt }
         ],
@@ -515,8 +512,7 @@ async function callLovableAIForProgressionCriteria(prompt: string): Promise<Prog
         if (jsonMatch) {
           const parsed = JSON.parse(jsonMatch[0]);
           return {
-            criteria: parsed.criteria || fallbackResult.criteria,
-            criteria_en: parsed.criteria_en || parsed.criteria || fallbackResult.criteria_en
+            criteria: parsed.criteria || fallbackResult.criteria
           };
         }
       } catch (parseError) {
