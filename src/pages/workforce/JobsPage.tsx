@@ -72,6 +72,7 @@ import { getTodayString } from "@/utils/dateUtils";
 import { JobResponsibilitiesManager } from "@/components/workforce/JobResponsibilitiesManager";
 import { JobGoalsManager } from "@/components/workforce/JobGoalsManager";
 import { JobCapabilityRequirementsManager } from "@/components/workforce/JobCapabilityRequirementsManager";
+import { JobLevelExpectationsManager } from "@/components/workforce/JobLevelExpectationsManager";
 import { BulkJobDataImport } from "@/components/workforce/BulkJobDataImport";
 
 interface Job {
@@ -207,6 +208,9 @@ export default function JobsPage() {
   
   // AI generation state
   const [isGeneratingDescription, setIsGeneratingDescription] = useState(false);
+  
+  // Page-level tab state
+  const [activePageTab, setActivePageTab] = useState<"jobs" | "level-expectations">("jobs");
 
   const { logAction } = useAuditLog();
 
@@ -913,29 +917,36 @@ export default function JobsPage() {
           </div>
         </div>
 
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-          <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
-            <SelectTrigger className="w-full sm:w-[250px]">
-              <SelectValue placeholder="Select company" />
-            </SelectTrigger>
-            <SelectContent>
-              {companies.map((company) => (
-                <SelectItem key={company.id} value={company.id}>
-                  {company.name} ({company.code})
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              placeholder="Search jobs..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-        </div>
+        <Tabs value={activePageTab} onValueChange={(v) => setActivePageTab(v as "jobs" | "level-expectations")} className="w-full">
+          <TabsList>
+            <TabsTrigger value="jobs">Jobs List</TabsTrigger>
+            <TabsTrigger value="level-expectations">Level Expectations</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="jobs" className="mt-4 space-y-4">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+              <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
+                <SelectTrigger className="w-full sm:w-[250px]">
+                  <SelectValue placeholder="Select company" />
+                </SelectTrigger>
+                <SelectContent>
+                  {companies.map((company) => (
+                    <SelectItem key={company.id} value={company.id}>
+                      {company.name} ({company.code})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  placeholder="Search jobs..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+            </div>
 
         <div className="rounded-lg border bg-card">
           <Table>
@@ -1072,6 +1083,18 @@ export default function JobsPage() {
             </TableBody>
           </Table>
         </div>
+          </TabsContent>
+
+          <TabsContent value="level-expectations" className="mt-4">
+            {selectedCompanyId ? (
+              <JobLevelExpectationsManager companyId={selectedCompanyId} />
+            ) : (
+              <div className="text-center py-12 text-muted-foreground">
+                Please select a company to manage level expectations
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
 
         {/* Create/Edit Dialog */}
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
