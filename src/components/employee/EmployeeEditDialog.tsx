@@ -148,8 +148,7 @@ export function EmployeeEditDialog({
   const [dateOfBirth, setDateOfBirth] = useState("");
   const [maritalStatus, setMaritalStatus] = useState("");
   const [nationality, setNationality] = useState("");
-  // Employee identifiers
-  const [employeeIdField, setEmployeeIdField] = useState("");
+  // Employee identifiers (employee_id is system-generated, not editable)
   const [badgeNumber, setBadgeNumber] = useState("");
   const [globalId, setGlobalId] = useState("");
   const [cedulaNumber, setCedulaNumber] = useState("");
@@ -187,8 +186,7 @@ export function EmployeeEditDialog({
       setDateOfBirth(employee.date_of_birth || "");
       setMaritalStatus(employee.marital_status || "");
       setNationality(employee.nationality || "");
-      // Employee identifiers
-      setEmployeeIdField(employee.employee_id || "");
+      // Employee identifiers (employee_id is system-generated, not editable)
       setBadgeNumber(employee.badge_number || "");
       setGlobalId(employee.global_id || "");
       setCedulaNumber(employee.cedula_number || "");
@@ -291,8 +289,7 @@ export function EmployeeEditDialog({
           date_of_birth: dateOfBirth || null,
           marital_status: maritalStatus || null,
           nationality: nationality || null,
-          // Employee identifiers
-          employee_id: employeeIdField || null,
+          // Employee identifiers (employee_id is system-generated, not updated here)
           badge_number: badgeNumber || null,
           global_id: globalId || null,
           cedula_number: cedulaNumber || null,
@@ -354,7 +351,6 @@ export function EmployeeEditDialog({
           date_of_birth: dateOfBirth || null,
           marital_status: maritalStatus || null,
           nationality: nationality || null,
-          employee_id: employeeIdField || null,
           badge_number: badgeNumber || null,
           global_id: globalId || null,
           cedula_number: cedulaNumber || null,
@@ -605,15 +601,6 @@ export function EmployeeEditDialog({
           <div className="space-y-4">
             <h4 className="text-sm font-medium">Employee Identifiers</h4>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              <div className="grid gap-2">
-                <Label htmlFor="employeeIdField">Employee ID</Label>
-                <Input
-                  id="employeeIdField"
-                  value={employeeIdField}
-                  onChange={(e) => setEmployeeIdField(e.target.value)}
-                  placeholder="Enter employee ID"
-                />
-              </div>
               <div className="grid gap-2">
                 <Label htmlFor="badgeNumber">Badge Number</Label>
                 <Input
