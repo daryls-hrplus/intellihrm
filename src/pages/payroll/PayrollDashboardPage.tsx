@@ -279,6 +279,13 @@ export default function PayrollDashboardPage() {
     variableCompensation: { title: "Variable Compensation", description: "Bonuses, commissions, and incentive pay management", icon: TrendingUp, href: "/payroll/variable-compensation", color: "bg-amber-500/10 text-amber-600", tabCode: "variable_compensation" },
     timeAttendanceIntegration: { title: "Time & Attendance Integration", description: "Connect external time tracking systems to payroll", icon: Timer, href: "/payroll/time-integration", color: "bg-cyan-500/10 text-cyan-600", tabCode: "time_attendance_integration" },
     payrollBudgeting: { title: "Payroll Budgeting", description: "Forecast and manage payroll budgets and variances", icon: Calculator, href: "/payroll/budgeting", color: "bg-emerald-500/10 text-emerald-600", tabCode: "payroll_budgeting" },
+    // Phase 10 General Features (moved from Mexico)
+    payrollSimulations: { title: "Payroll Simulations", description: "What-if scenarios and budget forecasting", icon: Calculator, href: "/payroll/simulations", color: "bg-violet-500/10 text-violet-600", tabCode: "payroll_simulations" },
+    batchOperations: { title: "Batch Operations", description: "Mass salary adjustments and bulk updates", icon: Users, href: "/payroll/batch-operations", color: "bg-pink-500/10 text-pink-600", tabCode: "batch_operations" },
+    vacationManager: { title: "Vacation Manager", description: "Vacation accrual and balance tracking", icon: Calendar, href: "/payroll/vacation-manager", color: "bg-sky-500/10 text-sky-600", tabCode: "vacation_manager" },
+    severanceCalculator: { title: "Severance Calculator", description: "Final pay and severance calculations", icon: Calculator, href: "/payroll/severance-calculator", color: "bg-orange-500/10 text-orange-600", tabCode: "severance_calculator" },
+    payrollTemplates: { title: "Payroll Templates", description: "Reusable payroll configurations", icon: FileText, href: "/payroll/templates", color: "bg-teal-500/10 text-teal-600", tabCode: "payroll_templates" },
+    integrationWebhooks: { title: "Integration Webhooks", description: "Event notifications to external systems", icon: Globe, href: "/payroll/webhooks", color: "bg-fuchsia-500/10 text-fuchsia-600", tabCode: "integration_webhooks" },
   };
 
   const filterByAccess = (modules: typeof allModules[keyof typeof allModules][]) =>
@@ -303,7 +310,7 @@ export default function PayrollDashboardPage() {
     },
     {
       titleKey: "Advanced Payroll",
-      items: filterByAccess([allModules.multiCompanyConsolidation, allModules.employeeLoans, allModules.variableCompensation, allModules.timeAttendanceIntegration, allModules.payrollBudgeting]),
+      items: filterByAccess([allModules.multiCompanyConsolidation, allModules.employeeLoans, allModules.variableCompensation, allModules.timeAttendanceIntegration, allModules.payrollBudgeting, allModules.payrollSimulations, allModules.batchOperations, allModules.vacationManager, allModules.severanceCalculator, allModules.payrollTemplates, allModules.integrationWebhooks]),
     },
     {
       titleKey: "Country-Specific",
