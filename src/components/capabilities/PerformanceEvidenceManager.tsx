@@ -189,13 +189,6 @@ export function PerformanceEvidenceManager({
     toast.error("Delete not yet implemented");
   };
 
-  const handleDeleteOld = async (evidenceId: string) => {
-    const result = await deleteEvidence(evidenceId);
-    if (result) {
-      fetchEvidence(employeeId, { goalId, capabilityId, responsibilityId, cycleId });
-    }
-  };
-
   const resetForm = () => {
     setFormData({
       evidence_type: "project",
