@@ -219,6 +219,14 @@ export default function LeaveDashboardPage() {
       color: "bg-emerald-500/10 text-emerald-600",
       tabCode: "leave_years",
     },
+    scheduleConfig: {
+      title: t("leave.modules.scheduleConfig", "Schedule Configuration"),
+      description: t("leave.modules.scheduleConfigDesc", "Configure automated leave processing schedules"),
+      href: "/leave/schedule-config",
+      icon: Clock,
+      color: "bg-amber-500/10 text-amber-600",
+      tabCode: "schedule_config",
+    },
     // Time Banking
     compensatoryTime: {
       title: t("leave.modules.compensatoryTime"),
@@ -278,6 +286,7 @@ export default function LeaveDashboardPage() {
         allModules.rolloverRules,
         allModules.holidays,
         allModules.compTimePolicies,
+        allModules.scheduleConfig,
       ]),
     },
     {
