@@ -72,6 +72,22 @@ const EMPLOYMENT_STATUSES = [
   { value: "part_time", label: "Part Time" },
 ];
 
+const GENDERS = [
+  { value: "male", label: "Male" },
+  { value: "female", label: "Female" },
+  { value: "other", label: "Other" },
+  { value: "prefer_not_to_say", label: "Prefer Not to Say" },
+];
+
+const MARITAL_STATUSES = [
+  { value: "single", label: "Single" },
+  { value: "married", label: "Married" },
+  { value: "divorced", label: "Divorced" },
+  { value: "widowed", label: "Widowed" },
+  { value: "separated", label: "Separated" },
+  { value: "domestic_partnership", label: "Domestic Partnership" },
+];
+
 interface EmployeeEditDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -92,6 +108,10 @@ interface EmployeeEditDialogProps {
     seniority_date?: string | null;
     adjusted_service_date?: string | null;
     employment_status?: string | null;
+    gender?: string | null;
+    date_of_birth?: string | null;
+    marital_status?: string | null;
+    nationality?: string | null;
   } | null;
   onSuccess?: () => void;
 }
@@ -116,6 +136,10 @@ export function EmployeeEditDialog({
   const [seniorityDate, setSeniorityDate] = useState("");
   const [adjustedServiceDate, setAdjustedServiceDate] = useState("");
   const [employmentStatus, setEmploymentStatus] = useState("");
+  const [gender, setGender] = useState("");
+  const [dateOfBirth, setDateOfBirth] = useState("");
+  const [maritalStatus, setMaritalStatus] = useState("");
+  const [nationality, setNationality] = useState("");
   const [saving, setSaving] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [customFieldValues, setCustomFieldValues] = useState<Record<string, string | number | boolean | string[] | null>>({});
@@ -145,6 +169,10 @@ export function EmployeeEditDialog({
       setSeniorityDate(employee.seniority_date || "");
       setAdjustedServiceDate(employee.adjusted_service_date || "");
       setEmploymentStatus(employee.employment_status || "permanent");
+      setGender(employee.gender || "");
+      setDateOfBirth(employee.date_of_birth || "");
+      setMaritalStatus(employee.marital_status || "");
+      setNationality(employee.nationality || "");
     }
   }, [employee]);
 
@@ -239,6 +267,10 @@ export function EmployeeEditDialog({
           seniority_date: seniorityDate || null,
           adjusted_service_date: adjustedServiceDate || null,
           employment_status: employmentStatus || 'permanent',
+          gender: gender || null,
+          date_of_birth: dateOfBirth || null,
+          marital_status: maritalStatus || null,
+          nationality: nationality || null,
         })
         .eq("id", employee.id);
 
@@ -268,6 +300,10 @@ export function EmployeeEditDialog({
           seniority_date: employee.seniority_date,
           adjusted_service_date: employee.adjusted_service_date,
           employment_status: employee.employment_status,
+          gender: employee.gender,
+          date_of_birth: employee.date_of_birth,
+          marital_status: employee.marital_status,
+          nationality: employee.nationality,
         },
         newValues: {
           full_name: fullName,
@@ -283,6 +319,10 @@ export function EmployeeEditDialog({
           seniority_date: seniorityDate || null,
           adjusted_service_date: adjustedServiceDate || null,
           employment_status: employmentStatus || 'permanent',
+          gender: gender || null,
+          date_of_birth: dateOfBirth || null,
+          marital_status: maritalStatus || null,
+          nationality: nationality || null,
         },
       });
 
@@ -460,6 +500,63 @@ export function EmployeeEditDialog({
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
+            </div>
+          </div>
+
+          <Separator />
+
+          {/* Personal Information Section */}
+          <div className="space-y-4">
+            <h4 className="text-sm font-medium">Personal Information</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="gender">Gender</Label>
+                <Select value={gender} onValueChange={setGender}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select gender" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {GENDERS.map((g) => (
+                      <SelectItem key={g.value} value={g.value}>
+                        {g.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="dateOfBirth">Date of Birth</Label>
+                <Input
+                  id="dateOfBirth"
+                  type="date"
+                  value={dateOfBirth}
+                  onChange={(e) => setDateOfBirth(e.target.value)}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="maritalStatus">Marital Status</Label>
+                <Select value={maritalStatus} onValueChange={setMaritalStatus}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select marital status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {MARITAL_STATUSES.map((status) => (
+                      <SelectItem key={status.value} value={status.value}>
+                        {status.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="nationality">Nationality</Label>
+                <Input
+                  id="nationality"
+                  value={nationality}
+                  onChange={(e) => setNationality(e.target.value)}
+                  placeholder="Enter nationality"
+                />
               </div>
             </div>
           </div>

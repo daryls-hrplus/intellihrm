@@ -38869,6 +38869,7 @@ export type Database = {
           continuous_service_date: string | null
           created_at: string
           date_format: string | null
+          date_of_birth: string | null
           department_id: string | null
           email: string
           employee_id: string | null
@@ -38880,6 +38881,7 @@ export type Database = {
           first_name: string | null
           force_password_change: boolean | null
           full_name: string | null
+          gender: string | null
           global_id: string | null
           id: string
           invitation_status: string | null
@@ -38888,6 +38890,7 @@ export type Database = {
           last_hire_date: string | null
           last_login_at: string | null
           locked_until: string | null
+          marital_status: string | null
           middle_name: string | null
           nationality: string | null
           preferred_language: string | null
@@ -38908,6 +38911,7 @@ export type Database = {
           continuous_service_date?: string | null
           created_at?: string
           date_format?: string | null
+          date_of_birth?: string | null
           department_id?: string | null
           email: string
           employee_id?: string | null
@@ -38919,6 +38923,7 @@ export type Database = {
           first_name?: string | null
           force_password_change?: boolean | null
           full_name?: string | null
+          gender?: string | null
           global_id?: string | null
           id: string
           invitation_status?: string | null
@@ -38927,6 +38932,7 @@ export type Database = {
           last_hire_date?: string | null
           last_login_at?: string | null
           locked_until?: string | null
+          marital_status?: string | null
           middle_name?: string | null
           nationality?: string | null
           preferred_language?: string | null
@@ -38947,6 +38953,7 @@ export type Database = {
           continuous_service_date?: string | null
           created_at?: string
           date_format?: string | null
+          date_of_birth?: string | null
           department_id?: string | null
           email?: string
           employee_id?: string | null
@@ -38958,6 +38965,7 @@ export type Database = {
           first_name?: string | null
           force_password_change?: boolean | null
           full_name?: string | null
+          gender?: string | null
           global_id?: string | null
           id?: string
           invitation_status?: string | null
@@ -38966,6 +38974,7 @@ export type Database = {
           last_hire_date?: string | null
           last_login_at?: string | null
           locked_until?: string | null
+          marital_status?: string | null
           middle_name?: string | null
           nationality?: string | null
           preferred_language?: string | null
