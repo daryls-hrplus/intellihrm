@@ -342,6 +342,12 @@ import PayrollLoansPage from "./pages/payroll/PayrollLoansPage";
 import VariableCompensationPage from "./pages/payroll/VariableCompensationPage";
 import TimeAttendanceIntegrationPage from "./pages/payroll/TimeAttendanceIntegrationPage";
 import PayrollBudgetingPage from "./pages/payroll/PayrollBudgetingPage";
+import PayrollSimulationsPage from "./pages/payroll/PayrollSimulationsPage";
+import BatchOperationsPage from "./pages/payroll/BatchOperationsPage";
+import VacationManagerPage from "./pages/payroll/VacationManagerPage";
+import SeveranceCalculatorPage from "./pages/payroll/SeveranceCalculatorPage";
+import PayrollTemplatesPage from "./pages/payroll/PayrollTemplatesPage";
+import IntegrationWebhooksPage from "./pages/payroll/IntegrationWebhooksPage";
 import GLDashboardPage from "./pages/payroll/gl/GLDashboardPage";
 import GLAccountsPage from "./pages/payroll/gl/GLAccountsPage";
 import CostCenterSegmentsPage from "./pages/payroll/gl/CostCenterSegmentsPage";
@@ -2470,6 +2476,54 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
                   <PayrollBudgetingPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/payroll/simulations"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
+                  <PayrollSimulationsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/payroll/batch-operations"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
+                  <BatchOperationsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/payroll/vacation-manager"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
+                  <VacationManagerPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/payroll/severance-calculator"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
+                  <SeveranceCalculatorPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/payroll/templates"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
+                  <PayrollTemplatesPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/payroll/webhooks"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
+                  <IntegrationWebhooksPage />
                 </ProtectedRoute>
               }
             />
