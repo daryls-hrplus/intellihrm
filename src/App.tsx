@@ -428,6 +428,8 @@ import EssCurrencyPreferencesPage from "./pages/ess/EssCurrencyPreferencesPage";
 import MssCompensationPage from "./pages/mss/MssCompensationPage";
 import MssCompaRatioPage from "./pages/mss/MssCompaRatioPage";
 import MssEquityPage from "./pages/mss/MssEquityPage";
+import MssAnalyticsPage from "./pages/mss/MssAnalyticsPage";
+import MssSuccessionPage from "./pages/mss/MssSuccessionPage";
 import MyTimeAttendancePage from "./pages/ess/MyTimeAttendancePage";
 import MssTimeAttendancePage from "./pages/mss/MssTimeAttendancePage";
 import MyTimesheetsPage from "./pages/ess/MyTimesheetsPage";
@@ -986,6 +988,22 @@ const App = () => (
               element={
                 <ProtectedRoute moduleCode="mss" requiredRoles={["admin", "hr_manager"]}>
                   <MssRemindersPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/mss/analytics"
+              element={
+                <ProtectedRoute moduleCode="mss" requiredRoles={["admin", "hr_manager"]}>
+                  <MssAnalyticsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/mss/succession"
+              element={
+                <ProtectedRoute moduleCode="mss" requiredRoles={["admin", "hr_manager"]}>
+                  <MssSuccessionPage />
                 </ProtectedRoute>
               }
             />
