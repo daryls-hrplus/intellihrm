@@ -25,6 +25,7 @@ import { PositionScoreSummary } from "./PositionScoreSummary";
 import { MultiPositionWeightsManager } from "./MultiPositionWeightsManager";
 import { useEmployeeLevelExpectations } from "@/hooks/useEmployeeLevelExpectations";
 import { JobLevelExpectationsPanel } from "./JobLevelExpectationsPanel";
+import { ManagerRoleChangeGuidance } from "./ManagerRoleChangeGuidance";
 interface AppraisalScore {
   id?: string;
   item_id: string;
@@ -1188,6 +1189,22 @@ export function AppraisalEvaluationDialog({
               }}
               overallWeightedScore={positionWeightedScore}
               mode={multiPositionMode}
+            />
+          )}
+
+          {/* Manager Guidance for Role Changes and Multi-Position */}
+          {!isEmployee && (hasRoleChange || (hasMultiplePositions && multiPositions.length > 1)) && (
+            <ManagerRoleChangeGuidance
+              hasRoleChange={hasRoleChange}
+              hasMultiPosition={hasMultiplePositions && multiPositions.length > 1}
+              roleSegments={roleSegments.map(s => ({
+                position_title: s.position_title || "Unknown",
+                contribution_percentage: s.contribution_percentage,
+              }))}
+              positions={multiPositions.map(p => ({
+                position_title: p.position_title,
+                weight_percentage: p.weight_percentage,
+              }))}
             />
           )}
 
