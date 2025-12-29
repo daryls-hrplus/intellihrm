@@ -586,7 +586,6 @@ export function JobLevelExpectationsManager({ companyId }: Props) {
                       setFormData({
                         ...formData,
                         progression_criteria: result.criteria,
-                        progression_criteria_en: result.criteria_en,
                       });
                     }
                   }}
