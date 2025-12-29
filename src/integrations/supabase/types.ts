@@ -2711,6 +2711,53 @@ export type Database = {
           },
         ]
       }
+      badge_number_patterns: {
+        Row: {
+          company_id: string | null
+          created_at: string | null
+          current_sequence: number | null
+          id: string
+          is_active: boolean | null
+          padding_length: number | null
+          pattern: string
+          prefix: string | null
+          suffix: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string | null
+          current_sequence?: number | null
+          id?: string
+          is_active?: boolean | null
+          padding_length?: number | null
+          pattern?: string
+          prefix?: string | null
+          suffix?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string | null
+          current_sequence?: number | null
+          id?: string
+          is_active?: boolean | null
+          padding_length?: number | null
+          pattern?: string
+          prefix?: string | null
+          suffix?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "badge_number_patterns_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bank_file_config: {
         Row: {
           bank_name: string
@@ -38816,18 +38863,24 @@ export type Database = {
         Row: {
           adjusted_service_date: string | null
           avatar_url: string | null
+          badge_number: string | null
+          cedula_number: string | null
           company_id: string | null
           continuous_service_date: string | null
           created_at: string
           date_format: string | null
           department_id: string | null
           email: string
+          employee_id: string | null
           employment_status: string | null
           enable_multi_currency_payment: boolean | null
           failed_login_attempts: number | null
           first_hire_date: string | null
+          first_last_name: string | null
+          first_name: string | null
           force_password_change: boolean | null
           full_name: string | null
+          global_id: string | null
           id: string
           invitation_status: string | null
           invited_at: string | null
@@ -38835,8 +38888,10 @@ export type Database = {
           last_hire_date: string | null
           last_login_at: string | null
           locked_until: string | null
+          middle_name: string | null
           nationality: string | null
           preferred_language: string | null
+          second_last_name: string | null
           section_id: string | null
           seniority_date: string | null
           start_date: string | null
@@ -38847,18 +38902,24 @@ export type Database = {
         Insert: {
           adjusted_service_date?: string | null
           avatar_url?: string | null
+          badge_number?: string | null
+          cedula_number?: string | null
           company_id?: string | null
           continuous_service_date?: string | null
           created_at?: string
           date_format?: string | null
           department_id?: string | null
           email: string
+          employee_id?: string | null
           employment_status?: string | null
           enable_multi_currency_payment?: boolean | null
           failed_login_attempts?: number | null
           first_hire_date?: string | null
+          first_last_name?: string | null
+          first_name?: string | null
           force_password_change?: boolean | null
           full_name?: string | null
+          global_id?: string | null
           id: string
           invitation_status?: string | null
           invited_at?: string | null
@@ -38866,8 +38927,10 @@ export type Database = {
           last_hire_date?: string | null
           last_login_at?: string | null
           locked_until?: string | null
+          middle_name?: string | null
           nationality?: string | null
           preferred_language?: string | null
+          second_last_name?: string | null
           section_id?: string | null
           seniority_date?: string | null
           start_date?: string | null
@@ -38878,18 +38941,24 @@ export type Database = {
         Update: {
           adjusted_service_date?: string | null
           avatar_url?: string | null
+          badge_number?: string | null
+          cedula_number?: string | null
           company_id?: string | null
           continuous_service_date?: string | null
           created_at?: string
           date_format?: string | null
           department_id?: string | null
           email?: string
+          employee_id?: string | null
           employment_status?: string | null
           enable_multi_currency_payment?: boolean | null
           failed_login_attempts?: number | null
           first_hire_date?: string | null
+          first_last_name?: string | null
+          first_name?: string | null
           force_password_change?: boolean | null
           full_name?: string | null
+          global_id?: string | null
           id?: string
           invitation_status?: string | null
           invited_at?: string | null
@@ -38897,8 +38966,10 @@ export type Database = {
           last_hire_date?: string | null
           last_login_at?: string | null
           locked_until?: string | null
+          middle_name?: string | null
           nationality?: string | null
           preferred_language?: string | null
+          second_last_name?: string | null
           section_id?: string | null
           seniority_date?: string | null
           start_date?: string | null
@@ -51064,6 +51135,8 @@ export type Database = {
         Returns: undefined
       }
       execute_report_sql: { Args: { sql_query: string }; Returns: Json }
+      generate_badge_number: { Args: { p_company_id: string }; Returns: string }
+      generate_employee_id: { Args: never; Returns: string }
       generate_new_year_pay_periods: {
         Args: {
           p_created_by: string
