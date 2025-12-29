@@ -39,6 +39,8 @@ import {
   Play,
   Loader2,
   Flag,
+  Calendar,
+  FileText,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
