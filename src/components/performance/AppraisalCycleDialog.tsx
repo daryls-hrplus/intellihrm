@@ -5,9 +5,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
+import { Users, GitMerge } from "lucide-react";
 
 interface AppraisalCycle {
   id: string;
@@ -22,6 +25,7 @@ interface AppraisalCycle {
   goal_weight: number;
   min_rating: number;
   max_rating: number;
+  multi_position_mode?: string;
 }
 
 interface AppraisalCycleDialogProps {
@@ -57,6 +61,7 @@ export function AppraisalCycleDialog({
     goal_weight: 30,
     min_rating: 1,
     max_rating: 5,
+    multi_position_mode: "aggregate" as "aggregate" | "separate",
   });
 
   useEffect(() => {
@@ -73,6 +78,7 @@ export function AppraisalCycleDialog({
         goal_weight: cycle.goal_weight,
         min_rating: cycle.min_rating,
         max_rating: cycle.max_rating,
+        multi_position_mode: (cycle.multi_position_mode as "aggregate" | "separate") || "aggregate",
       });
     } else {
       setFormData({
@@ -87,6 +93,7 @@ export function AppraisalCycleDialog({
         goal_weight: 30,
         min_rating: 1,
         max_rating: 5,
+        multi_position_mode: "aggregate",
       });
     }
   }, [cycle]);
@@ -122,6 +129,7 @@ export function AppraisalCycleDialog({
         goal_weight: formData.goal_weight,
         min_rating: formData.min_rating,
         max_rating: formData.max_rating,
+        multi_position_mode: formData.multi_position_mode,
         created_by: user?.id,
         is_probation_review: isProbationReview,
         is_manager_cycle: isManagerCycle,
@@ -320,6 +328,56 @@ export function AppraisalCycleDialog({
               </div>
             </div>
           </div>
+
+          {/* Multi-Position Handling */}
+          <Card className="border-primary/20">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base flex items-center gap-2">
+                <Users className="h-4 w-4" />
+                Multi-Position Employees
+              </CardTitle>
+              <CardDescription>
+                How should employees with multiple concurrent positions be appraised?
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <RadioGroup
+                value={formData.multi_position_mode}
+                onValueChange={(value: "aggregate" | "separate") =>
+                  setFormData({ ...formData, multi_position_mode: value })
+                }
+                className="space-y-3"
+              >
+                <div className="flex items-start space-x-3 p-3 rounded-lg border hover:bg-muted/50 cursor-pointer">
+                  <RadioGroupItem value="aggregate" id="aggregate" className="mt-1" />
+                  <div className="flex-1">
+                    <Label htmlFor="aggregate" className="flex items-center gap-2 cursor-pointer font-medium">
+                      <GitMerge className="h-4 w-4 text-primary" />
+                      Aggregate Scores
+                    </Label>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Create one appraisal per employee. Scores from all positions are combined using 
+                      configurable weights into a single overall score.
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start space-x-3 p-3 rounded-lg border hover:bg-muted/50 cursor-pointer">
+                  <RadioGroupItem value="separate" id="separate" className="mt-1" />
+                  <div className="flex-1">
+                    <Label htmlFor="separate" className="flex items-center gap-2 cursor-pointer font-medium">
+                      <Users className="h-4 w-4 text-primary" />
+                      Separate Appraisals
+                    </Label>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Create individual appraisals for each position an employee holds. 
+                      Each position is evaluated independently.
+                    </p>
+                  </div>
+                </div>
+              </RadioGroup>
+            </CardContent>
+          </Card>
 
           <div className="flex justify-end gap-2">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
