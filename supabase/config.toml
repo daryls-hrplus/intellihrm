@@ -236,3 +236,12 @@ verify_jwt = false
 
 [functions.process-resumption-of-duty]
 verify_jwt = false
+
+[functions.analyze-pulse-sentiment]
+verify_jwt = false
+
+[functions.analyze-cba-document]
+verify_jwt = false
+
+[functions.cba-negotiation-costing]
+verify_jwt = false
