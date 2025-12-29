@@ -34,7 +34,8 @@ import {
   BarChart3,
   Gavel,
   Calendar,
-  Sparkles
+  Sparkles,
+  MapPin
 } from "lucide-react";
 
 interface Company {
@@ -635,6 +636,7 @@ export default function ShiftManagementPage() {
     { title: t("timeAttendance.shifts.coverage"), description: t("timeAttendance.shifts.coverageDescription"), href: "/time-attendance/shifts/coverage", icon: BarChart3, color: "bg-teal-500/20 text-teal-600" },
     { title: t("timeAttendance.shifts.bidding"), description: t("timeAttendance.shifts.biddingDescription"), href: "/time-attendance/shifts/bidding", icon: Gavel, color: "bg-amber-500/20 text-amber-600" },
     { title: t("timeAttendance.shifts.aiScheduler"), description: t("timeAttendance.shifts.aiSchedulerDescription"), href: "/time-attendance/shifts/ai-scheduler", icon: Sparkles, color: "bg-violet-500/20 text-violet-600" },
+    { title: "Multi-Location Schedule", description: "Manage shift schedules across multiple branch locations with cross-site visibility", href: "/time-attendance/shifts/multi-location", icon: MapPin, color: "bg-emerald-500/20 text-emerald-600" },
   ];
 
   return (
