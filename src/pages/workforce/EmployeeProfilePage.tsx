@@ -68,6 +68,9 @@ import {
   IdCard,
   ClipboardCheck,
   Banknote,
+  Hash,
+  Fingerprint,
+  CreditCard,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
@@ -90,6 +93,16 @@ interface EmployeeProfile {
   seniority_date: string | null;
   adjusted_service_date: string | null;
   employment_status: string | null;
+  // New employee identifier fields
+  employee_id: string | null;
+  badge_number: string | null;
+  global_id: string | null;
+  cedula_number: string | null;
+  // Name component fields
+  first_name: string | null;
+  middle_name: string | null;
+  first_last_name: string | null;
+  second_last_name: string | null;
   positions: {
     id: string;
     title: string;
@@ -149,7 +162,7 @@ export default function EmployeeProfilePage() {
       // Fetch profile
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
-        .select('id, full_name, email, avatar_url, timezone, preferred_language, date_format, time_format, created_at, first_hire_date, last_hire_date, start_date, continuous_service_date, seniority_date, adjusted_service_date, employment_status')
+        .select('id, full_name, email, avatar_url, timezone, preferred_language, date_format, time_format, created_at, first_hire_date, last_hire_date, start_date, continuous_service_date, seniority_date, adjusted_service_date, employment_status, employee_id, badge_number, global_id, cedula_number, first_name, middle_name, first_last_name, second_last_name')
         .eq('id', employeeId)
         .maybeSingle();
 
@@ -220,6 +233,16 @@ export default function EmployeeProfilePage() {
         seniority_date: profile.seniority_date,
         adjusted_service_date: profile.adjusted_service_date,
         employment_status: profile.employment_status,
+        // New employee identifier fields
+        employee_id: profile.employee_id,
+        badge_number: profile.badge_number,
+        global_id: profile.global_id,
+        cedula_number: profile.cedula_number,
+        // Name component fields
+        first_name: profile.first_name,
+        middle_name: profile.middle_name,
+        first_last_name: profile.first_last_name,
+        second_last_name: profile.second_last_name,
         positions: employeePositions,
       });
 
@@ -532,6 +555,94 @@ export default function EmployeeProfilePage() {
                       ))}
                     </div>
                   )}
+                </CardContent>
+              </Card>
+
+              {/* Employee Identifiers */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <IdCard className="h-5 w-5" />
+                    Employee Identifiers
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="flex items-center gap-3">
+                      <Hash className="h-4 w-4 text-muted-foreground" />
+                      <div>
+                        <p className="text-sm font-medium text-foreground">Employee ID</p>
+                        <p className="text-sm text-muted-foreground">
+                          {employee.employee_id || 'Not Set'}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <CreditCard className="h-4 w-4 text-muted-foreground" />
+                      <div>
+                        <p className="text-sm font-medium text-foreground">Badge Number</p>
+                        <p className="text-sm text-muted-foreground">
+                          {employee.badge_number || 'Not Set'}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <Fingerprint className="h-4 w-4 text-muted-foreground" />
+                      <div>
+                        <p className="text-sm font-medium text-foreground">Global ID</p>
+                        <p className="text-sm text-muted-foreground font-mono text-xs">
+                          {employee.global_id || 'Not Set'}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <IdCard className="h-4 w-4 text-muted-foreground" />
+                      <div>
+                        <p className="text-sm font-medium text-foreground">Cédula Number</p>
+                        <p className="text-sm text-muted-foreground">
+                          {employee.cedula_number || 'Not Set'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Name Components */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <User className="h-5 w-5" />
+                    Name Components
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div>
+                      <p className="text-sm font-medium text-foreground">First Name</p>
+                      <p className="text-sm text-muted-foreground">
+                        {employee.first_name || 'Not Set'}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-foreground">Middle Name</p>
+                      <p className="text-sm text-muted-foreground">
+                        {employee.middle_name || 'Not Set'}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-foreground">First Last Name (Paternal)</p>
+                      <p className="text-sm text-muted-foreground">
+                        {employee.first_last_name || 'Not Set'}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-foreground">Second Last Name (Maternal)</p>
+                      <p className="text-sm text-muted-foreground">
+                        {employee.second_last_name || 'Not Set'}
+                      </p>
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
 
