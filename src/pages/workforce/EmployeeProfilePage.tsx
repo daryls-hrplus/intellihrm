@@ -319,12 +319,6 @@ export default function EmployeeProfilePage() {
           { label: employee.full_name }
         ]} />
 
-        {/* Back Button */}
-        <Button variant="ghost" onClick={() => navigate('/workforce/employees')} className="gap-2">
-          <ArrowLeft className="h-4 w-4" />
-          {t("workforce.profile.backToEmployees")}
-        </Button>
-
         {/* Profile Header */}
         <Card>
           <CardContent className="pt-6">
@@ -584,8 +578,8 @@ export default function EmployeeProfilePage() {
                       <Hash className="h-4 w-4 text-muted-foreground" />
                       <div>
                         <p className="text-sm font-medium text-foreground">Employee ID</p>
-                        <p className="text-sm text-muted-foreground">
-                          {employee.employee_id || 'Not Set'}
+                        <p className="text-sm text-muted-foreground font-mono">
+                          {employee.id.slice(0, 6).toUpperCase()}
                         </p>
                       </div>
                     </div>
