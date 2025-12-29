@@ -337,6 +337,11 @@ import SalaryAdvancesPage from "./pages/payroll/SalaryAdvancesPage";
 import SavingsProgramsPage from "./pages/payroll/SavingsProgramsPage";
 import TimePayrollSyncPage from "./pages/payroll/TimePayrollSyncPage";
 import PaymentRulesConfigPage from "./pages/payroll/PaymentRulesConfigPage";
+import MultiCompanyConsolidationPage from "./pages/payroll/MultiCompanyConsolidationPage";
+import PayrollLoansPage from "./pages/payroll/PayrollLoansPage";
+import VariableCompensationPage from "./pages/payroll/VariableCompensationPage";
+import TimeAttendanceIntegrationPage from "./pages/payroll/TimeAttendanceIntegrationPage";
+import PayrollBudgetingPage from "./pages/payroll/PayrollBudgetingPage";
 import GLDashboardPage from "./pages/payroll/gl/GLDashboardPage";
 import GLAccountsPage from "./pages/payroll/gl/GLAccountsPage";
 import CostCenterSegmentsPage from "./pages/payroll/gl/CostCenterSegmentsPage";
@@ -2425,6 +2430,46 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
                   <MexicoPayrollPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/payroll/consolidation"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
+                  <MultiCompanyConsolidationPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/payroll/loans"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
+                  <PayrollLoansPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/payroll/variable-compensation"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
+                  <VariableCompensationPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/payroll/time-integration"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
+                  <TimeAttendanceIntegrationPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/payroll/budgeting"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
+                  <PayrollBudgetingPage />
                 </ProtectedRoute>
               }
             />
