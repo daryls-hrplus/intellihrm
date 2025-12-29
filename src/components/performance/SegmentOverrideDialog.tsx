@@ -69,14 +69,14 @@ export function SegmentOverrideDialog({
   }, [open, segments]);
 
   const fetchOverrideHistory = async () => {
-    const { data } = await supabase
-      .from("segment_override_audit")
+    const { data } = await (supabase
+      .from("segment_override_audit" as any)
       .select(`
         *,
         profiles:overridden_by (first_name, last_name)
       `)
       .eq("participant_id", participantId)
-      .order("overridden_at", { ascending: false });
+      .order("overridden_at", { ascending: false }) as any);
 
     if (data) {
       setOverrideHistory(
@@ -135,9 +135,9 @@ export function SegmentOverrideDialog({
 
       // Insert audit records
       if (auditRecords.length > 0) {
-        const { error: auditError } = await supabase
-          .from("segment_override_audit")
-          .insert(auditRecords);
+        const { error: auditError } = await (supabase
+          .from("segment_override_audit" as any)
+          .insert(auditRecords) as any);
 
         if (auditError) throw auditError;
       }
