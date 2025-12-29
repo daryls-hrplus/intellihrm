@@ -24,12 +24,14 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { DatePicker } from "@/components/ui/date-picker";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuditLog } from "@/hooks/useAuditLog";
 import { toast } from "sonner";
 import { Loader2, HelpCircle, Upload, AlertTriangle } from "lucide-react";
 import { CustomFieldsRenderer } from "@/components/custom-fields/CustomFieldsRenderer";
 import { useCustomFields } from "@/hooks/useCustomFields";
+import { format } from "date-fns";
 
 const TIMEZONES = [
   "UTC",
@@ -527,11 +529,13 @@ export function EmployeeEditDialog({
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="dateOfBirth">Date of Birth</Label>
-                <Input
-                  id="dateOfBirth"
-                  type="date"
+                <DatePicker
                   value={dateOfBirth}
-                  onChange={(e) => setDateOfBirth(e.target.value)}
+                  onChange={(date) => setDateOfBirth(date ? format(date, 'yyyy-MM-dd') : "")}
+                  placeholder="Select date of birth"
+                  maxYear={new Date().getFullYear()}
+                  minYear={1920}
+                  toDate={new Date()}
                 />
               </div>
               <div className="grid gap-2">
@@ -597,11 +601,10 @@ export function EmployeeEditDialog({
                       </TooltipContent>
                     </Tooltip>
                   </div>
-                  <Input
-                    id="firstHireDate"
-                    type="date"
+                  <DatePicker
                     value={firstHireDate}
-                    onChange={(e) => setFirstHireDate(e.target.value)}
+                    onChange={(date) => setFirstHireDate(date ? format(date, 'yyyy-MM-dd') : "")}
+                    placeholder="Select date"
                   />
                 </div>
                 <div className="grid gap-2">
@@ -616,11 +619,10 @@ export function EmployeeEditDialog({
                       </TooltipContent>
                     </Tooltip>
                   </div>
-                  <Input
-                    id="lastHireDate"
-                    type="date"
+                  <DatePicker
                     value={lastHireDate}
-                    onChange={(e) => setLastHireDate(e.target.value)}
+                    onChange={(date) => setLastHireDate(date ? format(date, 'yyyy-MM-dd') : "")}
+                    placeholder="Select date"
                   />
                 </div>
                 <div className="grid gap-2">
@@ -635,11 +637,10 @@ export function EmployeeEditDialog({
                       </TooltipContent>
                     </Tooltip>
                   </div>
-                  <Input
-                    id="startDate"
-                    type="date"
+                  <DatePicker
                     value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
+                    onChange={(date) => setStartDate(date ? format(date, 'yyyy-MM-dd') : "")}
+                    placeholder="Select date"
                   />
                 </div>
                 <div className="grid gap-2">
@@ -654,11 +655,10 @@ export function EmployeeEditDialog({
                       </TooltipContent>
                     </Tooltip>
                   </div>
-                  <Input
-                    id="continuousServiceDate"
-                    type="date"
+                  <DatePicker
                     value={continuousServiceDate}
-                    onChange={(e) => setContinuousServiceDate(e.target.value)}
+                    onChange={(date) => setContinuousServiceDate(date ? format(date, 'yyyy-MM-dd') : "")}
+                    placeholder="Select date"
                   />
                 </div>
                 <div className="grid gap-2">
@@ -673,11 +673,10 @@ export function EmployeeEditDialog({
                       </TooltipContent>
                     </Tooltip>
                   </div>
-                  <Input
-                    id="seniorityDate"
-                    type="date"
+                  <DatePicker
                     value={seniorityDate}
-                    onChange={(e) => setSeniorityDate(e.target.value)}
+                    onChange={(date) => setSeniorityDate(date ? format(date, 'yyyy-MM-dd') : "")}
+                    placeholder="Select date"
                   />
                 </div>
                 <div className="grid gap-2">
@@ -692,11 +691,10 @@ export function EmployeeEditDialog({
                       </TooltipContent>
                     </Tooltip>
                   </div>
-                  <Input
-                    id="adjustedServiceDate"
-                    type="date"
+                  <DatePicker
                     value={adjustedServiceDate}
-                    onChange={(e) => setAdjustedServiceDate(e.target.value)}
+                    onChange={(date) => setAdjustedServiceDate(date ? format(date, 'yyyy-MM-dd') : "")}
+                    placeholder="Select date"
                   />
                 </div>
               </div>
