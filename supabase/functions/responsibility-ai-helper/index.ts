@@ -75,7 +75,18 @@ interface GenerateJobDescriptionRequest {
   existingDescription?: string;
 }
 
-type RequestBody = GenerateDescriptionRequest | SuggestKRAsRequest | EnrichResponsibilityRequest | SuggestForFamilyRequest | GenerateFamilyDescriptionRequest | ContextualizeKRARequest | BulkContextualizeKRAsRequest | GenerateJobDescriptionRequest;
+interface GenerateProgressionCriteriaRequest {
+  action: 'generate_progression_criteria';
+  jobLevel: string;
+  jobGrade: string;
+  existingCriteria?: Array<{
+    grade: string;
+    level: string;
+    criteria: string;
+  }>;
+}
+
+type RequestBody = GenerateDescriptionRequest | SuggestKRAsRequest | EnrichResponsibilityRequest | SuggestForFamilyRequest | GenerateFamilyDescriptionRequest | ContextualizeKRARequest | BulkContextualizeKRAsRequest | GenerateJobDescriptionRequest | GenerateProgressionCriteriaRequest;
 
 serve(async (req) => {
   // Handle CORS preflight
@@ -212,6 +223,18 @@ serve(async (req) => {
       
       return new Response(
         JSON.stringify({ success: true, description }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (action === 'generate_progression_criteria') {
+      const { jobLevel, jobGrade, existingCriteria } = body as GenerateProgressionCriteriaRequest;
+      
+      const prompt = buildProgressionCriteriaPrompt(jobLevel, jobGrade, existingCriteria);
+      const result = await callLovableAIForProgressionCriteria(prompt);
+      
+      return new Response(
+        JSON.stringify({ success: true, ...result }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -402,6 +425,110 @@ KRA: "${kraName}"`;
 Reply in JSON format only: {"target": "specific measurable target for this job level", "method": "how to measure this target"}`;
 
   return prompt;
+}
+
+function buildProgressionCriteriaPrompt(
+  jobLevel: string,
+  jobGrade: string,
+  existingCriteria?: Array<{ grade: string; level: string; criteria: string }>
+): string {
+  let prompt = `Generate professional progression criteria for a job at level "${jobLevel}" and grade "${jobGrade}".
+
+The progression criteria should describe what is required for an employee at this level to advance to the next level.`;
+
+  if (existingCriteria && existingCriteria.length > 0) {
+    prompt += `\n\nExisting progression criteria in this organization for reference (maintain consistency in style and expectations):`;
+    for (const ec of existingCriteria) {
+      prompt += `\n- ${ec.grade}/${ec.level}: "${ec.criteria}"`;
+    }
+  }
+
+  prompt += `\n\nRequirements:
+- Write 3-5 bullet points
+- Be specific about competency development, performance consistency, and experience requirements
+- Use professional HR language
+- Consider the level tier:
+  * Entry levels (Intern, Clerk, Operator): Focus on skill building and consistency
+  * Mid levels (Officer, Staff, Senior): Focus on independence, project ownership, and mentoring
+  * Leadership levels (Supervisor, Manager): Focus on team development and strategic thinking
+  * Executive levels (Director, Executive): Focus on organizational impact and vision
+
+Provide response in JSON format ONLY:
+{
+  "criteria": "Spanish/default language version - bullet points separated by newlines",
+  "criteria_en": "English version - bullet points separated by newlines"
+}`;
+
+  return prompt;
+}
+
+interface ProgressionCriteriaResult {
+  criteria: string;
+  criteria_en: string;
+}
+
+async function callLovableAIForProgressionCriteria(prompt: string): Promise<ProgressionCriteriaResult> {
+  const lovableApiKey = Deno.env.get('LOVABLE_API_KEY');
+
+  const fallbackResult: ProgressionCriteriaResult = {
+    criteria: '• Demostrar competencia consistente en las responsabilidades actuales\n• Cumplir o superar los objetivos de desempeño durante períodos consecutivos\n• Desarrollar habilidades requeridas para el siguiente nivel\n• Mostrar capacidad de trabajo independiente y toma de decisiones',
+    criteria_en: '• Demonstrate consistent competency in current responsibilities\n• Meet or exceed performance targets for consecutive periods\n• Develop skills required for the next level\n• Show capability for independent work and decision-making'
+  };
+
+  if (!lovableApiKey) {
+    console.log('No LOVABLE_API_KEY configured; returning fallback progression criteria');
+    return fallbackResult;
+  }
+
+  try {
+    console.log('Calling Lovable AI Gateway for progression criteria generation...');
+    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${lovableApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'google/gemini-2.5-flash',
+        messages: [
+          {
+            role: 'system',
+            content: 'You are an expert HR professional helping to create job level progression criteria. Always respond with valid JSON only containing "criteria" and "criteria_en" fields.'
+          },
+          { role: 'user', content: prompt }
+        ],
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Lovable AI Gateway error:', response.status, errorText);
+      return fallbackResult;
+    }
+
+    const data = await response.json();
+    const content = data.choices?.[0]?.message?.content?.trim();
+    
+    if (content) {
+      try {
+        const jsonMatch = content.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          const parsed = JSON.parse(jsonMatch[0]);
+          return {
+            criteria: parsed.criteria || fallbackResult.criteria,
+            criteria_en: parsed.criteria_en || parsed.criteria || fallbackResult.criteria_en
+          };
+        }
+      } catch (parseError) {
+        console.error('Failed to parse progression criteria response:', parseError);
+      }
+    }
+
+    return fallbackResult;
+  } catch (error) {
+    console.error('Error calling Lovable AI for progression criteria:', error);
+    return fallbackResult;
+  }
 }
 
 interface KRAContextualizationResult {
