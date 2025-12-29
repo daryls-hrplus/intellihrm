@@ -39048,6 +39048,532 @@ export type Database = {
           },
         ]
       }
+      pulse_coaching_nudges: {
+        Row: {
+          acted_upon_at: string | null
+          action_notes: string | null
+          company_id: string
+          created_at: string
+          department_id: string | null
+          dismissed_at: string | null
+          expires_at: string | null
+          id: string
+          is_acted_upon: boolean | null
+          is_dismissed: boolean | null
+          manager_id: string
+          message: string
+          nudge_type: string
+          priority: string | null
+          related_themes: string[] | null
+          sentiment_context: Json | null
+          suggested_actions: Json | null
+          survey_id: string | null
+          title: string
+        }
+        Insert: {
+          acted_upon_at?: string | null
+          action_notes?: string | null
+          company_id: string
+          created_at?: string
+          department_id?: string | null
+          dismissed_at?: string | null
+          expires_at?: string | null
+          id?: string
+          is_acted_upon?: boolean | null
+          is_dismissed?: boolean | null
+          manager_id: string
+          message: string
+          nudge_type: string
+          priority?: string | null
+          related_themes?: string[] | null
+          sentiment_context?: Json | null
+          suggested_actions?: Json | null
+          survey_id?: string | null
+          title: string
+        }
+        Update: {
+          acted_upon_at?: string | null
+          action_notes?: string | null
+          company_id?: string
+          created_at?: string
+          department_id?: string | null
+          dismissed_at?: string | null
+          expires_at?: string | null
+          id?: string
+          is_acted_upon?: boolean | null
+          is_dismissed?: boolean | null
+          manager_id?: string
+          message?: string
+          nudge_type?: string
+          priority?: string | null
+          related_themes?: string[] | null
+          sentiment_context?: Json | null
+          suggested_actions?: Json | null
+          survey_id?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pulse_coaching_nudges_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pulse_coaching_nudges_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pulse_coaching_nudges_survey_id_fkey"
+            columns: ["survey_id"]
+            isOneToOne: false
+            referencedRelation: "pulse_surveys"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pulse_sentiment_alerts: {
+        Row: {
+          alert_type: string
+          company_id: string
+          created_at: string
+          department_id: string | null
+          description: string | null
+          id: string
+          is_resolved: boolean | null
+          recommended_actions: string[] | null
+          resolution_notes: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          severity: string | null
+          survey_id: string | null
+          title: string
+          trigger_metrics: Json | null
+        }
+        Insert: {
+          alert_type: string
+          company_id: string
+          created_at?: string
+          department_id?: string | null
+          description?: string | null
+          id?: string
+          is_resolved?: boolean | null
+          recommended_actions?: string[] | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string | null
+          survey_id?: string | null
+          title: string
+          trigger_metrics?: Json | null
+        }
+        Update: {
+          alert_type?: string
+          company_id?: string
+          created_at?: string
+          department_id?: string | null
+          description?: string | null
+          id?: string
+          is_resolved?: boolean | null
+          recommended_actions?: string[] | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string | null
+          survey_id?: string | null
+          title?: string
+          trigger_metrics?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pulse_sentiment_alerts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pulse_sentiment_alerts_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pulse_sentiment_alerts_survey_id_fkey"
+            columns: ["survey_id"]
+            isOneToOne: false
+            referencedRelation: "pulse_surveys"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pulse_sentiment_analysis: {
+        Row: {
+          analyzed_at: string
+          company_id: string
+          confidence: number | null
+          created_at: string
+          department_id: string | null
+          emotions: Json | null
+          id: string
+          key_themes: string[] | null
+          question_text: string | null
+          requires_attention: boolean | null
+          response_id: string | null
+          response_text: string | null
+          sentiment_label: string | null
+          sentiment_score: number | null
+          survey_id: string
+          urgency_level: string | null
+        }
+        Insert: {
+          analyzed_at?: string
+          company_id: string
+          confidence?: number | null
+          created_at?: string
+          department_id?: string | null
+          emotions?: Json | null
+          id?: string
+          key_themes?: string[] | null
+          question_text?: string | null
+          requires_attention?: boolean | null
+          response_id?: string | null
+          response_text?: string | null
+          sentiment_label?: string | null
+          sentiment_score?: number | null
+          survey_id: string
+          urgency_level?: string | null
+        }
+        Update: {
+          analyzed_at?: string
+          company_id?: string
+          confidence?: number | null
+          created_at?: string
+          department_id?: string | null
+          emotions?: Json | null
+          id?: string
+          key_themes?: string[] | null
+          question_text?: string | null
+          requires_attention?: boolean | null
+          response_id?: string | null
+          response_text?: string | null
+          sentiment_label?: string | null
+          sentiment_score?: number | null
+          survey_id?: string
+          urgency_level?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pulse_sentiment_analysis_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pulse_sentiment_analysis_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pulse_sentiment_analysis_response_id_fkey"
+            columns: ["response_id"]
+            isOneToOne: false
+            referencedRelation: "pulse_survey_responses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pulse_sentiment_analysis_survey_id_fkey"
+            columns: ["survey_id"]
+            isOneToOne: false
+            referencedRelation: "pulse_surveys"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pulse_sentiment_metrics: {
+        Row: {
+          avg_sentiment_score: number | null
+          company_id: string
+          created_at: string
+          department_id: string | null
+          emotion_breakdown: Json | null
+          engagement_score: number | null
+          id: string
+          metric_date: string
+          negative_count: number | null
+          neutral_count: number | null
+          positive_count: number | null
+          survey_id: string | null
+          top_themes: string[] | null
+          total_responses: number | null
+          trend_change: number | null
+          trend_direction: string | null
+          updated_at: string
+        }
+        Insert: {
+          avg_sentiment_score?: number | null
+          company_id: string
+          created_at?: string
+          department_id?: string | null
+          emotion_breakdown?: Json | null
+          engagement_score?: number | null
+          id?: string
+          metric_date: string
+          negative_count?: number | null
+          neutral_count?: number | null
+          positive_count?: number | null
+          survey_id?: string | null
+          top_themes?: string[] | null
+          total_responses?: number | null
+          trend_change?: number | null
+          trend_direction?: string | null
+          updated_at?: string
+        }
+        Update: {
+          avg_sentiment_score?: number | null
+          company_id?: string
+          created_at?: string
+          department_id?: string | null
+          emotion_breakdown?: Json | null
+          engagement_score?: number | null
+          id?: string
+          metric_date?: string
+          negative_count?: number | null
+          neutral_count?: number | null
+          positive_count?: number | null
+          survey_id?: string | null
+          top_themes?: string[] | null
+          total_responses?: number | null
+          trend_change?: number | null
+          trend_direction?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pulse_sentiment_metrics_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pulse_sentiment_metrics_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pulse_sentiment_metrics_survey_id_fkey"
+            columns: ["survey_id"]
+            isOneToOne: false
+            referencedRelation: "pulse_surveys"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pulse_survey_responses: {
+        Row: {
+          answers: Json
+          created_at: string
+          department_id: string | null
+          id: string
+          is_anonymous: boolean | null
+          open_ended_responses: Json | null
+          respondent_id: string | null
+          submitted_at: string
+          survey_id: string
+        }
+        Insert: {
+          answers?: Json
+          created_at?: string
+          department_id?: string | null
+          id?: string
+          is_anonymous?: boolean | null
+          open_ended_responses?: Json | null
+          respondent_id?: string | null
+          submitted_at?: string
+          survey_id: string
+        }
+        Update: {
+          answers?: Json
+          created_at?: string
+          department_id?: string | null
+          id?: string
+          is_anonymous?: boolean | null
+          open_ended_responses?: Json | null
+          respondent_id?: string | null
+          submitted_at?: string
+          survey_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pulse_survey_responses_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pulse_survey_responses_survey_id_fkey"
+            columns: ["survey_id"]
+            isOneToOne: false
+            referencedRelation: "pulse_surveys"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pulse_survey_templates: {
+        Row: {
+          category: string | null
+          company_id: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          estimated_duration_minutes: number | null
+          id: string
+          is_active: boolean | null
+          is_system_template: boolean | null
+          name: string
+          questions: Json
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          company_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          estimated_duration_minutes?: number | null
+          id?: string
+          is_active?: boolean | null
+          is_system_template?: boolean | null
+          name: string
+          questions?: Json
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          company_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          estimated_duration_minutes?: number | null
+          id?: string
+          is_active?: boolean | null
+          is_system_template?: boolean | null
+          name?: string
+          questions?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pulse_survey_templates_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pulse_surveys: {
+        Row: {
+          company_id: string
+          completion_rate: number | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          end_date: string
+          frequency: string | null
+          id: string
+          is_anonymous: boolean | null
+          next_scheduled_at: string | null
+          questions: Json
+          reminder_days_before: number | null
+          reminder_enabled: boolean | null
+          response_count: number | null
+          schedule_cron: string | null
+          start_date: string
+          status: string | null
+          target_audience: string | null
+          target_departments: string[] | null
+          template_id: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          completion_rate?: number | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          end_date: string
+          frequency?: string | null
+          id?: string
+          is_anonymous?: boolean | null
+          next_scheduled_at?: string | null
+          questions?: Json
+          reminder_days_before?: number | null
+          reminder_enabled?: boolean | null
+          response_count?: number | null
+          schedule_cron?: string | null
+          start_date: string
+          status?: string | null
+          target_audience?: string | null
+          target_departments?: string[] | null
+          template_id?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          completion_rate?: number | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          end_date?: string
+          frequency?: string | null
+          id?: string
+          is_anonymous?: boolean | null
+          next_scheduled_at?: string | null
+          questions?: Json
+          reminder_days_before?: number | null
+          reminder_enabled?: boolean | null
+          response_count?: number | null
+          schedule_cron?: string | null
+          start_date?: string
+          status?: string | null
+          target_audience?: string | null
+          target_departments?: string[] | null
+          template_id?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pulse_surveys_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pulse_surveys_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "pulse_survey_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       punch_import_batches: {
         Row: {
           company_id: string
