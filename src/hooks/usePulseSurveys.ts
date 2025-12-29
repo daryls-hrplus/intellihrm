@@ -53,6 +53,12 @@ export interface SentimentMetrics {
   trend_direction: string;
   trend_change: number;
   engagement_score: number;
+  // eNPS fields
+  enps_score: number | null;
+  promoter_count: number;
+  passive_count: number;
+  detractor_count: number;
+  enps_response_count: number;
 }
 
 export interface SentimentAlert {
