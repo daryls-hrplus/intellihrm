@@ -130,7 +130,11 @@ const STATUS_CONFIG = {
   false_positive: { label: "False Positive", color: "bg-gray-500" }
 };
 
-export function PayrollAnomalyDetection() {
+interface PayrollAnomalyDetectionProps {
+  companyId: string;
+}
+
+export function PayrollAnomalyDetection({ companyId }: PayrollAnomalyDetectionProps) {
   const [anomalies, setAnomalies] = useState<Anomaly[]>(mockAnomalies);
   const [isScanning, setIsScanning] = useState(false);
   const [selectedAnomaly, setSelectedAnomaly] = useState<Anomaly | null>(null);

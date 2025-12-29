@@ -92,7 +92,11 @@ const satCatalogs = [
   { name: "c_RiesgosPuesto", version: "1.0", lastUpdate: "2024-01-01", records: 5 }
 ];
 
-export function SATXMLValidator() {
+interface SATXMLValidatorProps {
+  companyId: string;
+}
+
+export function SATXMLValidator({ companyId }: SATXMLValidatorProps) {
   const [isValidating, setIsValidating] = useState(false);
   const [validationProgress, setValidationProgress] = useState(0);
   const [results, setResults] = useState<ValidationResult[]>(mockValidationResults);
