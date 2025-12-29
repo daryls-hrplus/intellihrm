@@ -285,6 +285,7 @@ import ERWellnessPage from "./pages/employee-relations/ERWellnessPage";
 import ERUnionsPage from "./pages/employee-relations/ERUnionsPage";
 import ERGrievancesPage from "./pages/employee-relations/ERGrievancesPage";
 import ERCourtJudgementsPage from "./pages/employee-relations/ERCourtJudgementsPage";
+import CBADetailPage from "./pages/employee-relations/CBADetailPage";
 
 // Property pages
 import PropertyDashboardPage from "./pages/property/PropertyDashboardPage";
@@ -3323,6 +3324,14 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
                   <ERCourtJudgementsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/employee-relations/cba/:id"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <CBADetailPage />
                 </ProtectedRoute>
               }
             />

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,7 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus, Building2, Users, FileText, Search, Loader2 } from 'lucide-react';
+import { Plus, Building2, Users, FileText, Search, Loader2, ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';
 import { getTodayString, formatDateForDisplay } from '@/utils/dateUtils';
 
@@ -21,6 +22,7 @@ interface ERUnionsTabProps {
 
 export function ERUnionsTab({ companyId }: ERUnionsTabProps) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isAgreementDialogOpen, setIsAgreementDialogOpen] = useState(false);
@@ -471,11 +473,18 @@ export function ERUnionsTab({ companyId }: ERUnionsTabProps) {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {agreements.map((agreement: any) => (
-                    <TableRow key={agreement.id}>
+                {agreements.map((agreement: any) => (
+                    <TableRow 
+                      key={agreement.id} 
+                      className="cursor-pointer hover:bg-muted/50"
+                      onClick={() => navigate(`/employee-relations/cba/${agreement.id}`)}
+                    >
                       <TableCell className="font-mono">{agreement.agreement_number || '-'}</TableCell>
                       <TableCell>{agreement.unions?.name}</TableCell>
-                      <TableCell>{agreement.title}</TableCell>
+                      <TableCell className="flex items-center gap-2">
+                        {agreement.title}
+                        <ExternalLink className="h-3 w-3 text-muted-foreground" />
+                      </TableCell>
                       <TableCell>{formatDateForDisplay(agreement.effective_date, 'PP')}</TableCell>
                       <TableCell>{agreement.expiry_date ? formatDateForDisplay(agreement.expiry_date, 'PP') : '-'}</TableCell>
                       <TableCell>
