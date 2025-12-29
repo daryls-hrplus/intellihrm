@@ -38,6 +38,7 @@ import {
   AlertCircle,
   Play,
   Loader2,
+  Flag,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -271,6 +272,7 @@ export default function PayrollDashboardPage() {
     payslips: { title: "Payslips", description: "View and manage employee payslips", icon: FileSpreadsheet, href: "/payroll/payslips", color: "bg-emerald-500/10 text-emerald-600", tabCode: "payslips" },
     countryDocumentation: { title: "Country Documentation", description: "View payroll documentation and requirements by country", icon: Globe, href: "/payroll/country-documentation", color: "bg-slate-500/10 text-slate-600", tabCode: "country_documentation" },
     historicalImport: { title: "Historical Import", description: "Import historical payroll data for new implementations", icon: Archive, href: "/payroll/historical-import", color: "bg-purple-500/10 text-purple-600", tabCode: "historical_import" },
+    mexicoPayroll: { title: "Mexico Payroll", description: "CFDI, IMSS, ISR, SDI and SAT compliance for Mexican payroll", icon: Flag, href: "/payroll/mexico", color: "bg-green-500/10 text-green-600", tabCode: "mexico_payroll" },
   };
 
   const filterByAccess = (modules: typeof allModules[keyof typeof allModules][]) =>
@@ -292,6 +294,10 @@ export default function PayrollDashboardPage() {
     {
       titleKey: "Reporting & Analytics",
       items: filterByAccess([allModules.reports, allModules.yearEnd, allModules.payslips, allModules.archiveSettings, allModules.countryDocumentation, allModules.historicalImport]),
+    },
+    {
+      titleKey: "Country-Specific",
+      items: filterByAccess([allModules.mexicoPayroll]),
     },
   ];
 

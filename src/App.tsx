@@ -323,6 +323,7 @@ import LeaveBalanceBuyoutPage from "./pages/payroll/LeaveBalanceBuyoutPage";
 import PayslipTemplateConfigPage from "./pages/payroll/PayslipTemplateConfigPage";
 import PayrollExpenseClaimsPage from "./pages/payroll/PayrollExpenseClaimsPage";
 import PayrollArchiveSettingsPage from "./pages/payroll/PayrollArchiveSettingsPage";
+import MexicoPayrollPage from "./pages/payroll/MexicoPayrollPage";
 import BenefitPayrollMappingsPage from "./pages/payroll/BenefitPayrollMappingsPage";
 import EmployeeTransactionPayrollMappingsPage from "./pages/payroll/EmployeeTransactionPayrollMappingsPage";
 import StatutoryPayElementMappingsPage from "./pages/payroll/StatutoryPayElementMappingsPage";
@@ -2416,6 +2417,14 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
                   <GLOverrideRulesPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/payroll/mexico"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
+                  <MexicoPayrollPage />
                 </ProtectedRoute>
               }
             />
