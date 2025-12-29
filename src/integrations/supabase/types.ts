@@ -11963,6 +11963,7 @@ export type Database = {
           end_date: string | null
           id: string
           is_primary: boolean | null
+          location_id: string | null
           notes: string | null
           rotation_pattern: string | null
           shift_id: string
@@ -11976,6 +11977,7 @@ export type Database = {
           end_date?: string | null
           id?: string
           is_primary?: boolean | null
+          location_id?: string | null
           notes?: string | null
           rotation_pattern?: string | null
           shift_id: string
@@ -11989,6 +11991,7 @@ export type Database = {
           end_date?: string | null
           id?: string
           is_primary?: boolean | null
+          location_id?: string | null
           notes?: string | null
           rotation_pattern?: string | null
           shift_id?: string
@@ -12007,6 +12010,13 @@ export type Database = {
             columns: ["employee_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_shift_assignments_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "company_branch_locations"
             referencedColumns: ["id"]
           },
           {
@@ -29730,6 +29740,79 @@ export type Database = {
           },
         ]
       }
+      location_staffing_requirements: {
+        Row: {
+          company_id: string
+          created_at: string
+          day_of_week: number
+          department_id: string | null
+          end_time: string
+          id: string
+          is_active: boolean
+          location_id: string
+          minimum_staff: number
+          notes: string | null
+          optimal_staff: number | null
+          required_skills: string[] | null
+          start_time: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          day_of_week: number
+          department_id?: string | null
+          end_time: string
+          id?: string
+          is_active?: boolean
+          location_id: string
+          minimum_staff?: number
+          notes?: string | null
+          optimal_staff?: number | null
+          required_skills?: string[] | null
+          start_time: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          day_of_week?: number
+          department_id?: string | null
+          end_time?: string
+          id?: string
+          is_active?: boolean
+          location_id?: string
+          minimum_staff?: number
+          notes?: string | null
+          optimal_staff?: number | null
+          required_skills?: string[] | null
+          start_time?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "location_staffing_requirements_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "location_staffing_requirements_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "location_staffing_requirements_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "company_branch_locations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lookup_values: {
         Row: {
           category: Database["public"]["Enums"]["lookup_category"]
@@ -43148,6 +43231,7 @@ export type Database = {
           id: string
           is_active: boolean | null
           is_overnight: boolean | null
+          location_id: string | null
           minimum_hours: number | null
           name: string
           start_date: string
@@ -43167,6 +43251,7 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           is_overnight?: boolean | null
+          location_id?: string | null
           minimum_hours?: number | null
           name: string
           start_date?: string
@@ -43186,6 +43271,7 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           is_overnight?: boolean | null
+          location_id?: string | null
           minimum_hours?: number | null
           name?: string
           start_date?: string
@@ -43198,6 +43284,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shifts_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "company_branch_locations"
             referencedColumns: ["id"]
           },
         ]
