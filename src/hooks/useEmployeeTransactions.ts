@@ -589,6 +589,59 @@ export function useEmployeeTransactions() {
         }
       }
 
+      // For TERMINATION transactions, update the employee profile if terminating primary position
+      if (data.termination_reason_id && data.employee_id) {
+        // Check if any terminated position is the primary position
+        const terminatedPositionIds = data.terminated_position_ids || (data.position_id ? [data.position_id] : []);
+        
+        if (terminatedPositionIds.length > 0) {
+          // Check if any of the terminated positions is the primary position
+          const { data: primaryPosition } = await supabase
+            .from("employee_positions")
+            .select("position_id")
+            .eq("employee_id", data.employee_id)
+            .eq("is_primary", true)
+            .eq("is_active", true)
+            .single();
+
+          const isPrimaryTerminated = primaryPosition && terminatedPositionIds.includes(primaryPosition.position_id);
+
+          if (isPrimaryTerminated || data.terminate_all_positions) {
+            // Update employee profile with separation_date (effective_date) and last_working_date
+            const profileUpdate: Record<string, string | null> = {
+              separation_date: data.effective_date || null,
+              employment_status: 'terminated',
+            };
+
+            // Set last_working_date if provided
+            if (data.last_working_date) {
+              profileUpdate.last_working_date = data.last_working_date;
+            }
+
+            // Get termination reason name for termination_reason field
+            if (data.termination_reason_id) {
+              const { data: reason } = await supabase
+                .from("lookup_values")
+                .select("name")
+                .eq("id", data.termination_reason_id)
+                .single();
+              
+              if (reason?.name) {
+                profileUpdate.termination_reason = reason.name;
+              }
+            }
+
+            const { error: profileError } = await supabase
+              .from("profiles")
+              .update(profileUpdate)
+              .eq("id", data.employee_id);
+
+            if (profileError) {
+              console.error("Failed to update employee profile for termination:", profileError);
+            }
+          }
+        }
+      }
 
       await logAction({
         action: "CREATE",
@@ -872,6 +925,60 @@ export function useEmployeeTransactions() {
 
             if (payGroupError) {
               console.error("Failed to create employee pay group assignment:", payGroupError);
+            }
+          }
+        }
+      }
+
+      // For TERMINATION transactions (on update), update the employee profile if terminating primary position
+      if (data.termination_reason_id && data.employee_id) {
+        // Check if any terminated position is the primary position
+        const terminatedPositionIds = data.terminated_position_ids || (data.position_id ? [data.position_id] : []);
+        
+        if (terminatedPositionIds.length > 0) {
+          // Check if any of the terminated positions is the primary position
+          const { data: primaryPosition } = await supabase
+            .from("employee_positions")
+            .select("position_id")
+            .eq("employee_id", data.employee_id)
+            .eq("is_primary", true)
+            .eq("is_active", true)
+            .single();
+
+          const isPrimaryTerminated = primaryPosition && terminatedPositionIds.includes(primaryPosition.position_id);
+
+          if (isPrimaryTerminated || data.terminate_all_positions) {
+            // Update employee profile with separation_date (effective_date) and last_working_date
+            const profileUpdate: Record<string, string | null> = {
+              separation_date: data.effective_date || null,
+              employment_status: 'terminated',
+            };
+
+            // Set last_working_date if provided
+            if (data.last_working_date) {
+              profileUpdate.last_working_date = data.last_working_date;
+            }
+
+            // Get termination reason name for termination_reason field
+            if (data.termination_reason_id) {
+              const { data: reason } = await supabase
+                .from("lookup_values")
+                .select("name")
+                .eq("id", data.termination_reason_id)
+                .single();
+              
+              if (reason?.name) {
+                profileUpdate.termination_reason = reason.name;
+              }
+            }
+
+            const { error: profileError } = await supabase
+              .from("profiles")
+              .update(profileUpdate)
+              .eq("id", data.employee_id);
+
+            if (profileError) {
+              console.error("Failed to update employee profile for termination:", profileError);
             }
           }
         }
