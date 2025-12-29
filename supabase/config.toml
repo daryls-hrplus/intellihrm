@@ -278,3 +278,9 @@ verify_jwt = false
 
 [functions.mx-cfdi-generate-pdf]
 verify_jwt = false
+
+[functions.mx-cfdi-create]
+verify_jwt = false
+
+[functions.mx-cfdi-find-pending]
+verify_jwt = false
