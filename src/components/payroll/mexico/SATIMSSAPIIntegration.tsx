@@ -22,7 +22,11 @@ import {
   FileText
 } from "lucide-react";
 
-export function SATIMSSAPIIntegration() {
+interface SATIMSSAPIIntegrationProps {
+  companyId: string;
+}
+
+export function SATIMSSAPIIntegration({ companyId }: SATIMSSAPIIntegrationProps) {
   const [satConnection, setSatConnection] = useState(true);
   const [imssConnection, setImssConnection] = useState(true);
   const [isTesting, setIsTesting] = useState(false);

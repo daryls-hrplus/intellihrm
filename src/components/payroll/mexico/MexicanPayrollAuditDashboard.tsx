@@ -20,7 +20,11 @@ import {
 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, Legend } from "recharts";
 
-export function MexicanPayrollAuditDashboard() {
+interface MexicanPayrollAuditDashboardProps {
+  companyId: string;
+}
+
+export function MexicanPayrollAuditDashboard({ companyId }: MexicanPayrollAuditDashboardProps) {
   const [selectedPeriod, setSelectedPeriod] = useState("2024");
 
   const auditScore = {
