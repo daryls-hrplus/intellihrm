@@ -224,151 +224,149 @@ export default function MexicoPayrollPage() {
         ) : (
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
             <TabsList className="flex flex-wrap h-auto gap-1 p-1">
-              <TabsTrigger value="company" className="gap-1">
-                <Building2 className="h-4 w-4" />
-                <span className="hidden md:inline">Company</span>
-              </TabsTrigger>
-              <TabsTrigger value="employees" className="gap-1">
-                <Users className="h-4 w-4" />
-                <span className="hidden md:inline">Employees</span>
-              </TabsTrigger>
-              <TabsTrigger value="payroll-run" className="gap-1">
-                <Play className="h-4 w-4" />
-                <span className="hidden md:inline">Run</span>
-              </TabsTrigger>
-              <TabsTrigger value="cfdi" className="gap-1">
-                <FileText className="h-4 w-4" />
-                <span className="hidden md:inline">CFDI</span>
-              </TabsTrigger>
-              <TabsTrigger value="sua-idse" className="gap-1">
-                <FileSpreadsheet className="h-4 w-4" />
-                <span className="hidden md:inline">SUA</span>
-              </TabsTrigger>
-              <TabsTrigger value="benefits" className="gap-1">
-                🎁
-                <span className="hidden md:inline">Benefits</span>
-              </TabsTrigger>
-              <TabsTrigger value="infonavit" className="gap-1">
-                🏠
-                <span className="hidden md:inline">INFONAVIT</span>
-              </TabsTrigger>
-              <TabsTrigger value="fonacot" className="gap-1">
-                💳
-                <span className="hidden md:inline">FONACOT</span>
-              </TabsTrigger>
-              <TabsTrigger value="annual-isr" className="gap-1">
-                <Calculator className="h-4 w-4" />
-                <span className="hidden md:inline">Annual ISR</span>
-              </TabsTrigger>
-              <TabsTrigger value="certificates" className="gap-1">
-                📄
-                <span className="hidden md:inline">Certificates</span>
-              </TabsTrigger>
-              <TabsTrigger value="analytics" className="gap-1">
-                <BarChart3 className="h-4 w-4" />
-                <span className="hidden md:inline">Analytics</span>
-              </TabsTrigger>
-              <TabsTrigger value="calendar" className="gap-1">
-                <Calendar className="h-4 w-4" />
-                <span className="hidden md:inline">Calendar</span>
-              </TabsTrigger>
               <TabsTrigger value="adjustments" className="gap-1">
                 <Edit className="h-4 w-4" />
                 <span className="hidden md:inline">Adjustments</span>
-              </TabsTrigger>
-              <TabsTrigger value="self-service" className="gap-1">
-                <User className="h-4 w-4" />
-                <span className="hidden md:inline">Self-Service</span>
-              </TabsTrigger>
-              <TabsTrigger value="comparison" className="gap-1">
-                <GitCompare className="h-4 w-4" />
-                <span className="hidden md:inline">Compare</span>
-              </TabsTrigger>
-              <TabsTrigger value="audit" className="gap-1">
-                <History className="h-4 w-4" />
-                <span className="hidden md:inline">Audit</span>
-              </TabsTrigger>
-              <TabsTrigger value="pac" className="gap-1">
-                <Settings className="h-4 w-4" />
-                <span className="hidden md:inline">PAC</span>
-              </TabsTrigger>
-              <TabsTrigger value="simulations" className="gap-1">
-                <TrendingUp className="h-4 w-4" />
-                <span className="hidden md:inline">Simulations</span>
-              </TabsTrigger>
-              <TabsTrigger value="batch" className="gap-1">
-                <Layers className="h-4 w-4" />
-                <span className="hidden md:inline">Batch</span>
-              </TabsTrigger>
-              <TabsTrigger value="vacation-ptu" className="gap-1">
-                <Sun className="h-4 w-4" />
-                <span className="hidden md:inline">Vacation/PTU</span>
-              </TabsTrigger>
-              <TabsTrigger value="severance" className="gap-1">
-                <UserMinus className="h-4 w-4" />
-                <span className="hidden md:inline">Severance</span>
-              </TabsTrigger>
-              <TabsTrigger value="templates" className="gap-1">
-                <FileStack className="h-4 w-4" />
-                <span className="hidden md:inline">Templates</span>
-              </TabsTrigger>
-              <TabsTrigger value="webhooks" className="gap-1">
-                <Webhook className="h-4 w-4" />
-                <span className="hidden md:inline">Webhooks</span>
-              </TabsTrigger>
-              {/* Phase 12 - Advanced Compliance & AI */}
-              <TabsTrigger value="sat-xml-validator" className="gap-1">
-                <FileSearch className="h-4 w-4" />
-                <span className="hidden md:inline">XML Validator</span>
-              </TabsTrigger>
-              <TabsTrigger value="idse-automation" className="gap-1">
-                <UserCog className="h-4 w-4" />
-                <span className="hidden md:inline">IDSE Auto</span>
-              </TabsTrigger>
-              <TabsTrigger value="sua-advanced" className="gap-1">
-                <FileUp className="h-4 w-4" />
-                <span className="hidden md:inline">SUA Adv</span>
-              </TabsTrigger>
-              <TabsTrigger value="social-contributions" className="gap-1">
-                <Building className="h-4 w-4" />
-                <span className="hidden md:inline">Social Contrib</span>
-              </TabsTrigger>
-              <TabsTrigger value="anomaly-detection" className="gap-1">
-                <Brain className="h-4 w-4" />
-                <span className="hidden md:inline">AI Anomaly</span>
-              </TabsTrigger>
-              {/* Phase 13 - Enterprise & Integration */}
-              <TabsTrigger value="mobile-ess" className="gap-1">
-                <Smartphone className="h-4 w-4" />
-                <span className="hidden md:inline">Mobile ESS</span>
-              </TabsTrigger>
-              <TabsTrigger value="sipare" className="gap-1">
-                <Database className="h-4 w-4" />
-                <span className="hidden md:inline">SIPARE</span>
-              </TabsTrigger>
-              <TabsTrigger value="constancia-fiscal" className="gap-1">
-                <FileCheck className="h-4 w-4" />
-                <span className="hidden md:inline">Constancia</span>
-              </TabsTrigger>
-              <TabsTrigger value="isr-adjustment" className="gap-1">
-                <RefreshCw className="h-4 w-4" />
-                <span className="hidden md:inline">ISR Adjust</span>
-              </TabsTrigger>
-              <TabsTrigger value="sat-imss-api" className="gap-1">
-                <Link className="h-4 w-4" />
-                <span className="hidden md:inline">SAT/IMSS API</span>
               </TabsTrigger>
               <TabsTrigger value="adv-ptu" className="gap-1">
                 <PieChart className="h-4 w-4" />
                 <span className="hidden md:inline">Adv PTU</span>
               </TabsTrigger>
+              <TabsTrigger value="anomaly-detection" className="gap-1">
+                <Brain className="h-4 w-4" />
+                <span className="hidden md:inline">AI Anomaly</span>
+              </TabsTrigger>
+              <TabsTrigger value="analytics" className="gap-1">
+                <BarChart3 className="h-4 w-4" />
+                <span className="hidden md:inline">Analytics</span>
+              </TabsTrigger>
+              <TabsTrigger value="annual-isr" className="gap-1">
+                <Calculator className="h-4 w-4" />
+                <span className="hidden md:inline">Annual ISR</span>
+              </TabsTrigger>
+              <TabsTrigger value="audit" className="gap-1">
+                <History className="h-4 w-4" />
+                <span className="hidden md:inline">Audit</span>
+              </TabsTrigger>
               <TabsTrigger value="audit-dashboard" className="gap-1">
                 <Shield className="h-4 w-4" />
                 <span className="hidden md:inline">Audit Dashboard</span>
               </TabsTrigger>
+              <TabsTrigger value="batch" className="gap-1">
+                <Layers className="h-4 w-4" />
+                <span className="hidden md:inline">Batch</span>
+              </TabsTrigger>
+              <TabsTrigger value="benefits" className="gap-1">
+                🎁
+                <span className="hidden md:inline">Benefits</span>
+              </TabsTrigger>
+              <TabsTrigger value="calendar" className="gap-1">
+                <Calendar className="h-4 w-4" />
+                <span className="hidden md:inline">Calendar</span>
+              </TabsTrigger>
+              <TabsTrigger value="certificates" className="gap-1">
+                📄
+                <span className="hidden md:inline">Certificates</span>
+              </TabsTrigger>
+              <TabsTrigger value="cfdi" className="gap-1">
+                <FileText className="h-4 w-4" />
+                <span className="hidden md:inline">CFDI</span>
+              </TabsTrigger>
+              <TabsTrigger value="company" className="gap-1">
+                <Building2 className="h-4 w-4" />
+                <span className="hidden md:inline">Company</span>
+              </TabsTrigger>
+              <TabsTrigger value="comparison" className="gap-1">
+                <GitCompare className="h-4 w-4" />
+                <span className="hidden md:inline">Compare</span>
+              </TabsTrigger>
+              <TabsTrigger value="constancia-fiscal" className="gap-1">
+                <FileCheck className="h-4 w-4" />
+                <span className="hidden md:inline">Constancia</span>
+              </TabsTrigger>
+              <TabsTrigger value="employees" className="gap-1">
+                <Users className="h-4 w-4" />
+                <span className="hidden md:inline">Employees</span>
+              </TabsTrigger>
+              <TabsTrigger value="fonacot" className="gap-1">
+                💳
+                <span className="hidden md:inline">FONACOT</span>
+              </TabsTrigger>
+              <TabsTrigger value="idse-automation" className="gap-1">
+                <UserCog className="h-4 w-4" />
+                <span className="hidden md:inline">IDSE Auto</span>
+              </TabsTrigger>
+              <TabsTrigger value="infonavit" className="gap-1">
+                🏠
+                <span className="hidden md:inline">INFONAVIT</span>
+              </TabsTrigger>
+              <TabsTrigger value="isr-adjustment" className="gap-1">
+                <RefreshCw className="h-4 w-4" />
+                <span className="hidden md:inline">ISR Adjust</span>
+              </TabsTrigger>
+              <TabsTrigger value="mobile-ess" className="gap-1">
+                <Smartphone className="h-4 w-4" />
+                <span className="hidden md:inline">Mobile ESS</span>
+              </TabsTrigger>
+              <TabsTrigger value="pac" className="gap-1">
+                <Settings className="h-4 w-4" />
+                <span className="hidden md:inline">PAC</span>
+              </TabsTrigger>
+              <TabsTrigger value="payroll-run" className="gap-1">
+                <Play className="h-4 w-4" />
+                <span className="hidden md:inline">Run</span>
+              </TabsTrigger>
               <TabsTrigger value="reg-calendar" className="gap-1">
                 <CalendarClock className="h-4 w-4" />
                 <span className="hidden md:inline">Reg Calendar</span>
+              </TabsTrigger>
+              <TabsTrigger value="sat-imss-api" className="gap-1">
+                <Link className="h-4 w-4" />
+                <span className="hidden md:inline">SAT/IMSS API</span>
+              </TabsTrigger>
+              <TabsTrigger value="sat-xml-validator" className="gap-1">
+                <FileSearch className="h-4 w-4" />
+                <span className="hidden md:inline">XML Validator</span>
+              </TabsTrigger>
+              <TabsTrigger value="self-service" className="gap-1">
+                <User className="h-4 w-4" />
+                <span className="hidden md:inline">Self-Service</span>
+              </TabsTrigger>
+              <TabsTrigger value="severance" className="gap-1">
+                <UserMinus className="h-4 w-4" />
+                <span className="hidden md:inline">Severance</span>
+              </TabsTrigger>
+              <TabsTrigger value="simulations" className="gap-1">
+                <TrendingUp className="h-4 w-4" />
+                <span className="hidden md:inline">Simulations</span>
+              </TabsTrigger>
+              <TabsTrigger value="sipare" className="gap-1">
+                <Database className="h-4 w-4" />
+                <span className="hidden md:inline">SIPARE</span>
+              </TabsTrigger>
+              <TabsTrigger value="social-contributions" className="gap-1">
+                <Building className="h-4 w-4" />
+                <span className="hidden md:inline">Social Contrib</span>
+              </TabsTrigger>
+              <TabsTrigger value="sua-advanced" className="gap-1">
+                <FileUp className="h-4 w-4" />
+                <span className="hidden md:inline">SUA Adv</span>
+              </TabsTrigger>
+              <TabsTrigger value="sua-idse" className="gap-1">
+                <FileSpreadsheet className="h-4 w-4" />
+                <span className="hidden md:inline">SUA</span>
+              </TabsTrigger>
+              <TabsTrigger value="templates" className="gap-1">
+                <FileStack className="h-4 w-4" />
+                <span className="hidden md:inline">Templates</span>
+              </TabsTrigger>
+              <TabsTrigger value="vacation-ptu" className="gap-1">
+                <Sun className="h-4 w-4" />
+                <span className="hidden md:inline">Vacation/PTU</span>
+              </TabsTrigger>
+              <TabsTrigger value="webhooks" className="gap-1">
+                <Webhook className="h-4 w-4" />
+                <span className="hidden md:inline">Webhooks</span>
               </TabsTrigger>
             </TabsList>
 
