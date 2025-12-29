@@ -266,3 +266,9 @@ verify_jwt = false
 
 [functions.mx-payroll-calculate]
 verify_jwt = false
+
+[functions.mx-pac-test-connection]
+verify_jwt = false
+
+[functions.mx-cfdi-stamp]
+verify_jwt = false
