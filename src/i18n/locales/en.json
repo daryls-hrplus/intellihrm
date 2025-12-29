@@ -5201,7 +5201,12 @@
         "title": "Compliance Tracker",
         "description": "Monitor compliance deadlines"
       }
-    }
+    },
+    "analyticsInsights": "Analytics & Insights",
+    "sentimentMonitoring": "Sentiment Monitoring",
+    "sentimentMonitoringDesc": "Monitor employee sentiment from pulse surveys",
+    "recognitionAnalytics": "Recognition Analytics",
+    "recognitionAnalyticsDesc": "Insights into employee recognition and engagement"
   },
   "language": {
     "title": "Language",
