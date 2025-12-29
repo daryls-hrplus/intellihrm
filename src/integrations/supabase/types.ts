@@ -1904,10 +1904,13 @@ export type Database = {
           evaluator_id: string | null
           final_comments: string | null
           goal_score: number | null
+          has_role_change: boolean | null
           id: string
           overall_score: number | null
+          primary_position_id: string | null
           responsibility_score: number | null
           reviewed_at: string | null
+          role_segments: Json | null
           status: string
           submitted_at: string | null
           updated_at: string
@@ -1921,10 +1924,13 @@ export type Database = {
           evaluator_id?: string | null
           final_comments?: string | null
           goal_score?: number | null
+          has_role_change?: boolean | null
           id?: string
           overall_score?: number | null
+          primary_position_id?: string | null
           responsibility_score?: number | null
           reviewed_at?: string | null
+          role_segments?: Json | null
           status?: string
           submitted_at?: string | null
           updated_at?: string
@@ -1938,10 +1944,13 @@ export type Database = {
           evaluator_id?: string | null
           final_comments?: string | null
           goal_score?: number | null
+          has_role_change?: boolean | null
           id?: string
           overall_score?: number | null
+          primary_position_id?: string | null
           responsibility_score?: number | null
           reviewed_at?: string | null
+          role_segments?: Json | null
           status?: string
           submitted_at?: string | null
           updated_at?: string
@@ -1966,6 +1975,80 @@ export type Database = {
             columns: ["evaluator_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appraisal_participants_primary_position_id_fkey"
+            columns: ["primary_position_id"]
+            isOneToOne: false
+            referencedRelation: "positions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      appraisal_role_segments: {
+        Row: {
+          competencies: Json | null
+          contribution_percentage: number
+          created_at: string
+          goals: Json | null
+          id: string
+          job_id: string | null
+          participant_id: string
+          position_id: string | null
+          responsibilities: Json | null
+          segment_end_date: string
+          segment_start_date: string
+          updated_at: string
+        }
+        Insert: {
+          competencies?: Json | null
+          contribution_percentage?: number
+          created_at?: string
+          goals?: Json | null
+          id?: string
+          job_id?: string | null
+          participant_id: string
+          position_id?: string | null
+          responsibilities?: Json | null
+          segment_end_date: string
+          segment_start_date: string
+          updated_at?: string
+        }
+        Update: {
+          competencies?: Json | null
+          contribution_percentage?: number
+          created_at?: string
+          goals?: Json | null
+          id?: string
+          job_id?: string | null
+          participant_id?: string
+          position_id?: string | null
+          responsibilities?: Json | null
+          segment_end_date?: string
+          segment_start_date?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appraisal_role_segments_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appraisal_role_segments_participant_id_fkey"
+            columns: ["participant_id"]
+            isOneToOne: false
+            referencedRelation: "appraisal_participants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appraisal_role_segments_position_id_fkey"
+            columns: ["position_id"]
+            isOneToOne: false
+            referencedRelation: "positions"
             referencedColumns: ["id"]
           },
         ]
