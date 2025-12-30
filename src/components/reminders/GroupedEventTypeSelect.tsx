@@ -1,23 +1,24 @@
 import * as React from 'react';
-import { Check, ChevronsUpDown, FileText, FileSignature, Shield, Heart, Target, GraduationCap, Calendar, Award, UserCheck, Sparkles, Search, X } from 'lucide-react';
+import { Check, ChevronsUpDown, FileText, FileSignature, Shield, Heart, Target, GraduationCap, Calendar, Award, UserCheck, Sparkles, MessageSquare, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import type { ReminderEventType } from '@/types/reminders';
 
-// Category configuration with icons
+// Category configuration with icons - ordered by employee lifecycle
 const CATEGORY_CONFIG: Record<string, { label: string; icon: React.ComponentType<{ className?: string }>; description: string }> = {
-  document: { label: 'Documents', icon: FileText, description: 'Certificates, licenses, permits' },
-  contract: { label: 'Contract & Employment', icon: FileSignature, description: 'Contracts, agreements, retirement' },
-  compliance: { label: 'Compliance', icon: Shield, description: 'Visas, background checks' },
-  benefits: { label: 'Benefits', icon: Heart, description: 'Insurance, enrollment' },
-  performance: { label: 'Performance', icon: Target, description: 'Appraisals, goals, reviews' },
-  training: { label: 'Training', icon: GraduationCap, description: 'Training, certifications' },
-  leave: { label: 'Leave', icon: Calendar, description: 'Leave start, return dates' },
-  milestone: { label: 'Milestones', icon: Award, description: 'Birthdays, anniversaries' },
-  probation: { label: 'Probation', icon: UserCheck, description: 'Probation periods' },
   custom: { label: 'Custom', icon: Sparkles, description: 'Ad-hoc reminders' },
+  onboarding: { label: 'Onboarding & Probation', icon: UserCheck, description: 'New hire and probation events' },
+  employment: { label: 'Employment & Contracts', icon: FileSignature, description: 'Contracts and agreements' },
+  leave: { label: 'Leave & Attendance', icon: Calendar, description: 'Leave and attendance' },
+  performance: { label: 'Performance & Reviews', icon: Target, description: 'Appraisals and reviews' },
+  employee_voice: { label: 'Employee Voice', icon: MessageSquare, description: 'Escalations and feedback' },
+  training: { label: 'Training & Development', icon: GraduationCap, description: 'Training and skills' },
+  benefits: { label: 'Benefits & Wellness', icon: Heart, description: 'Insurance and benefits' },
+  document: { label: 'Documents & Certifications', icon: FileText, description: 'Credentials and licenses' },
+  compliance: { label: 'Compliance & Legal', icon: Shield, description: 'Visas and legal requirements' },
+  milestone: { label: 'Milestones', icon: Award, description: 'Birthdays and anniversaries' },
 };
 
 interface GroupedEventTypeSelectProps {
