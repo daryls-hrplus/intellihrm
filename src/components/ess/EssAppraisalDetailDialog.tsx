@@ -23,9 +23,13 @@ import {
   FileText,
   MessageSquare,
   ClipboardList,
+  ClipboardEdit,
+  Shield,
 } from "lucide-react";
 import type { MyAppraisal } from "@/hooks/useMyAppraisals";
 import { useAppraisalActionExecutions } from "@/hooks/useAppraisalActionRules";
+import { EssAppraisalSelfAssessmentDialog } from "./EssAppraisalSelfAssessmentDialog";
+import { EssAppraisalAcknowledgmentDialog } from "./EssAppraisalAcknowledgmentDialog";
 
 interface EssAppraisalDetailDialogProps {
   open: boolean;
@@ -39,7 +43,13 @@ export function EssAppraisalDetailDialog({
   appraisal,
 }: EssAppraisalDetailDialogProps) {
   const [activeTab, setActiveTab] = useState("overview");
+  const [selfAssessmentOpen, setSelfAssessmentOpen] = useState(false);
+  const [acknowledgmentOpen, setAcknowledgmentOpen] = useState(false);
   const { pendingExecutions, mandatoryPending, isLoading: actionsLoading } = useAppraisalActionExecutions(appraisal.id);
+
+  // Determine available actions
+  const canSelfAssess = !appraisal.submitted_at && (appraisal.status === "pending" || appraisal.status === "draft" || appraisal.status === "in_progress");
+  const canAcknowledge = appraisal.overall_score !== null && appraisal.status !== "acknowledged" && appraisal.reviewed_at;
 
   const getScoreColor = (score: number | null) => {
     if (score === null) return "text-muted-foreground";
@@ -102,6 +112,24 @@ export function EssAppraisalDetailDialog({
           )}
           {getStatusBadge(appraisal.status)}
         </div>
+
+        {/* Action Buttons */}
+        {(canSelfAssess || canAcknowledge) && (
+          <div className="flex flex-wrap gap-2 mb-4">
+            {canSelfAssess && (
+              <Button onClick={() => setSelfAssessmentOpen(true)}>
+                <ClipboardEdit className="h-4 w-4 mr-2" />
+                {appraisal.status === "in_progress" ? "Continue Self-Assessment" : "Start Self-Assessment"}
+              </Button>
+            )}
+            {canAcknowledge && (
+              <Button variant="outline" onClick={() => setAcknowledgmentOpen(true)}>
+                <Shield className="h-4 w-4 mr-2" />
+                Acknowledge Rating
+              </Button>
+            )}
+          </div>
+        )}
 
         {/* Pending Actions Alert */}
         {mandatoryPending.length > 0 && (
@@ -436,6 +464,23 @@ export function EssAppraisalDetailDialog({
           </TabsContent>
         </Tabs>
       </DialogContent>
+
+      {/* Self-Assessment Dialog */}
+      <EssAppraisalSelfAssessmentDialog
+        open={selfAssessmentOpen}
+        onOpenChange={setSelfAssessmentOpen}
+        appraisal={appraisal}
+      />
+
+      {/* Acknowledgment Dialog */}
+      {appraisal.company_id && (
+        <EssAppraisalAcknowledgmentDialog
+          open={acknowledgmentOpen}
+          onOpenChange={setAcknowledgmentOpen}
+          appraisal={appraisal}
+          companyId={appraisal.company_id}
+        />
+      )}
     </Dialog>
   );
 }

@@ -21,13 +21,17 @@ import {
   Users,
   FileText,
   Eye,
-  MessageSquare
+  MessageSquare,
+  ClipboardEdit,
+  Shield
 } from "lucide-react";
 import { useMyActiveAppraisals, type MyAppraisal } from "@/hooks/useMyAppraisals";
 import { useMy360FeedbackRequests, type My360Request } from "@/hooks/useMy360FeedbackRequests";
 import { EssAppraisalDetailDialog } from "@/components/ess/EssAppraisalDetailDialog";
 import { Ess360FeedbackResponseDialog } from "@/components/ess/Ess360FeedbackResponseDialog";
 import { EssPIPStatusCard } from "@/components/ess/EssPIPStatusCard";
+import { EssAppraisalSelfAssessmentDialog } from "@/components/ess/EssAppraisalSelfAssessmentDialog";
+import { EssAppraisalAcknowledgmentDialog } from "@/components/ess/EssAppraisalAcknowledgmentDialog";
 
 export default function MyAppraisalsPage() {
   const { t } = useTranslation();
@@ -43,6 +47,8 @@ export default function MyAppraisalsPage() {
   
   const [selectedAppraisal, setSelectedAppraisal] = useState<MyAppraisal | null>(null);
   const [selected360Request, setSelected360Request] = useState<My360Request | null>(null);
+  const [selfAssessmentAppraisal, setSelfAssessmentAppraisal] = useState<MyAppraisal | null>(null);
+  const [acknowledgmentAppraisal, setAcknowledgmentAppraisal] = useState<MyAppraisal | null>(null);
   const [activeTab, setActiveTab] = useState("current");
 
   const pending360 = feedbackRequests.filter(r => r.status === "pending" || r.status === "in_progress");
@@ -281,8 +287,27 @@ export default function MyAppraisalsPage() {
                       </div>
 
                       <div className="flex flex-col gap-2">
+                        {/* Self-Assessment Button */}
+                        {!appraisal.submitted_at && (appraisal.status === "pending" || appraisal.status === "draft" || appraisal.status === "in_progress") && (
+                          <Button 
+                            onClick={() => setSelfAssessmentAppraisal(appraisal)}
+                          >
+                            <ClipboardEdit className="h-4 w-4 mr-2" />
+                            {appraisal.status === "in_progress" ? "Continue" : "Self-Assess"}
+                          </Button>
+                        )}
+                        {/* Acknowledge Button */}
+                        {appraisal.overall_score !== null && appraisal.status !== "acknowledged" && appraisal.reviewed_at && (
+                          <Button 
+                            variant="outline"
+                            onClick={() => setAcknowledgmentAppraisal(appraisal)}
+                          >
+                            <Shield className="h-4 w-4 mr-2" />
+                            Acknowledge
+                          </Button>
+                        )}
                         <Button 
-                          variant="default" 
+                          variant="outline" 
                           onClick={() => setSelectedAppraisal(appraisal)}
                         >
                           <Eye className="h-4 w-4 mr-2" />
@@ -519,6 +544,23 @@ export default function MyAppraisalsPage() {
           open={!!selected360Request}
           onOpenChange={(open) => !open && setSelected360Request(null)}
           request={selected360Request}
+        />
+      )}
+
+      {selfAssessmentAppraisal && (
+        <EssAppraisalSelfAssessmentDialog
+          open={!!selfAssessmentAppraisal}
+          onOpenChange={(open) => !open && setSelfAssessmentAppraisal(null)}
+          appraisal={selfAssessmentAppraisal}
+        />
+      )}
+
+      {acknowledgmentAppraisal && acknowledgmentAppraisal.company_id && (
+        <EssAppraisalAcknowledgmentDialog
+          open={!!acknowledgmentAppraisal}
+          onOpenChange={(open) => !open && setAcknowledgmentAppraisal(null)}
+          appraisal={acknowledgmentAppraisal}
+          companyId={acknowledgmentAppraisal.company_id}
         />
       )}
     </AppLayout>
