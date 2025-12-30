@@ -39,10 +39,13 @@ export function ESSGoalsCompletedTab({ userId, onViewGoal }: ESSGoalsCompletedTa
   const fetchCompletedGoals = async () => {
     setLoading(true);
     try {
+      // Use any to avoid TS2589 type recursion error
+      const supabaseAny = supabase as any;
+      
       // Fetch completed goals
-      const { data: goalsData, error: goalsError } = await supabase
+      const { data: goalsData, error: goalsError } = await supabaseAny
         .from("performance_goals")
-        .select("*")
+        .select("id, title, description, progress_percentage, due_date, completed_date, weighting, goal_type")
         .eq("employee_id", userId)
         .eq("status", "completed")
         .order("updated_at", { ascending: false });
@@ -50,23 +53,30 @@ export function ESSGoalsCompletedTab({ userId, onViewGoal }: ESSGoalsCompletedTa
       if (goalsError) throw goalsError;
 
       // Fetch rating submissions for these goals
-      const goalIds = (goalsData || []).map(g => g.id);
+      const goalIds = (goalsData || []).map((g: any) => g.id as string);
       let ratingsMap: Record<string, any> = {};
       
       if (goalIds.length > 0) {
-        const { data: ratingsData } = await supabase
+        const { data: ratingsData } = await supabaseAny
           .from("goal_rating_submissions")
-          .select("*")
+          .select("goal_id, final_score, status, acknowledged_at")
           .in("goal_id", goalIds);
 
-        ratingsMap = (ratingsData || []).reduce((acc, r) => {
+        ratingsMap = (ratingsData || []).reduce((acc: Record<string, any>, r: any) => {
           acc[r.goal_id] = r;
           return acc;
         }, {} as Record<string, any>);
       }
 
-      const goalsWithRatings = (goalsData || []).map(goal => ({
-        ...goal,
+      const goalsWithRatings: CompletedGoal[] = (goalsData || []).map((goal: any) => ({
+        id: goal.id,
+        title: goal.title,
+        description: goal.description,
+        progress_percentage: goal.progress_percentage || 0,
+        due_date: goal.due_date,
+        completed_date: goal.completed_date,
+        weighting: goal.weighting,
+        goal_type: goal.goal_type,
         rating_submission: ratingsMap[goal.id] || null,
       }));
 
