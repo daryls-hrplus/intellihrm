@@ -88,7 +88,7 @@ export default function EmployeeSelfServicePage() {
   const sections: ModuleSection[] = [
     {
       titleKey: "My Profile",
-      items: filterByAccess([allModules.profile, allModules.personalInfo, allModules.dependents, allModules.documents, allModules.letters, allModules.banking]),
+      items: filterByAccess([allModules.profile, allModules.personalInfo, allModules.dependents, allModules.documents, allModules.letters, allModules.banking, allModules.milestones]),
     },
     {
       titleKey: "Time & Absence",
@@ -100,7 +100,7 @@ export default function EmployeeSelfServicePage() {
     },
     {
       titleKey: "Career & Development",
-      items: filterByAccess([allModules.onboarding, allModules.goals, allModules.goalInterviews, allModules.myAppraisals, allModules.appraisalInterviews, allModules.feedback, allModules.development, allModules.training, allModules.jobs, allModules.milestones, allModules.recognition, allModules.offboarding]),
+      items: filterByAccess([allModules.onboarding, allModules.goals, allModules.goalInterviews, allModules.myAppraisals, allModules.appraisalInterviews, allModules.feedback, allModules.development, allModules.training, allModules.jobs, allModules.recognition, allModules.offboarding]),
     },
     {
       titleKey: "Workplace",
