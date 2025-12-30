@@ -9,10 +9,11 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Progress } from '@/components/ui/progress';
-import { Plus, Briefcase, Users, AlertTriangle, ChevronRight, UserPlus, Loader2, Trash2 } from 'lucide-react';
+import { Plus, Briefcase, Users, AlertTriangle, ChevronRight, UserPlus, Loader2, Trash2, Heart } from 'lucide-react';
 import { SuccessionPlan, SuccessionCandidate, useSuccession } from '@/hooks/useSuccession';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
+import { ValuesPromotionCheck } from './ValuesPromotionCheck';
 
 interface SuccessionPlansTabProps {
   companyId: string;
@@ -403,6 +404,15 @@ export function SuccessionPlansTab({ companyId }: SuccessionPlansTabProps) {
                               </div>
                             </div>
                           )}
+
+                          {/* Values Promotion Check */}
+                          <div className="mt-3">
+                            <ValuesPromotionCheck
+                              employeeId={candidate.employee_id}
+                              companyId={companyId}
+                              compact={true}
+                            />
+                          </div>
                         </CardContent>
                       </Card>
                     ))}
