@@ -72,6 +72,7 @@ import { getTodayString } from "@/utils/dateUtils";
 import { JobResponsibilitiesManager } from "@/components/workforce/JobResponsibilitiesManager";
 import { JobGoalsManager } from "@/components/workforce/JobGoalsManager";
 import { JobCapabilityRequirementsManager } from "@/components/workforce/JobCapabilityRequirementsManager";
+import { JobSkillsManager } from "@/components/workforce/JobSkillsManager";
 import { JobLevelExpectationsManager } from "@/components/workforce/JobLevelExpectationsManager";
 import { BulkJobDataImport } from "@/components/workforce/BulkJobDataImport";
 
@@ -198,6 +199,7 @@ export default function JobsPage() {
     name: "",
     code: "",
     copyCompetencies: true,
+    copySkills: true,
     copyResponsibilities: true,
     copyGoals: true,
   });
@@ -466,6 +468,7 @@ export default function JobsPage() {
       name: `${job.name} (Copy)`,
       code: `${job.code}_COPY`,
       copyCompetencies: true,
+      copySkills: true,
       copyResponsibilities: true,
       copyGoals: true,
     });
@@ -507,26 +510,65 @@ export default function JobsPage() {
 
       const newJobId = newJob.id;
 
-      // Copy competencies if selected
+      // Copy competencies if selected (from job_capability_requirements where type = COMPETENCY)
       if (copyFormData.copyCompetencies) {
-        const { data: competencies } = await supabase
-          .from("job_competencies")
-          .select("*")
+        const { data: capReqs } = await supabase
+          .from("job_capability_requirements")
+          .select(`
+            *,
+            skills_competencies(type)
+          `)
           .eq("job_id", selectedJob.id)
           .is("end_date", null);
 
-        if (competencies && competencies.length > 0) {
-          const newCompetencies = competencies.map(c => ({
+        const competencyReqs = (capReqs || []).filter(
+          (r) => r.skills_competencies?.type === "COMPETENCY"
+        );
+
+        if (competencyReqs.length > 0) {
+          const newCompetencies = competencyReqs.map(c => ({
             job_id: newJobId,
-            competency_id: c.competency_id,
-            competency_level_id: c.competency_level_id,
+            capability_id: c.capability_id,
+            required_proficiency_level: c.required_proficiency_level,
             weighting: c.weighting,
             is_required: c.is_required,
+            is_preferred: c.is_preferred,
             notes: c.notes,
             start_date: getTodayString(),
             end_date: null,
           }));
-          await supabase.from("job_competencies").insert(newCompetencies);
+          await supabase.from("job_capability_requirements").insert(newCompetencies);
+        }
+      }
+
+      // Copy skills if selected (from job_capability_requirements where type = SKILL)
+      if (copyFormData.copySkills) {
+        const { data: capReqs } = await supabase
+          .from("job_capability_requirements")
+          .select(`
+            *,
+            skills_competencies(type)
+          `)
+          .eq("job_id", selectedJob.id)
+          .is("end_date", null);
+
+        const skillReqs = (capReqs || []).filter(
+          (r) => r.skills_competencies?.type === "SKILL"
+        );
+
+        if (skillReqs.length > 0) {
+          const newSkills = skillReqs.map(s => ({
+            job_id: newJobId,
+            capability_id: s.capability_id,
+            required_proficiency_level: s.required_proficiency_level,
+            weighting: s.weighting,
+            is_required: s.is_required,
+            is_preferred: s.is_preferred,
+            notes: s.notes,
+            start_date: getTodayString(),
+            end_date: null,
+          }));
+          await supabase.from("job_capability_requirements").insert(newSkills);
         }
       }
 
@@ -582,6 +624,7 @@ export default function JobsPage() {
           copiedFrom: selectedJob.id,
           copiedFromName: selectedJob.name,
           copiedCompetencies: copyFormData.copyCompetencies,
+          copiedSkills: copyFormData.copySkills,
           copiedResponsibilities: copyFormData.copyResponsibilities,
           copiedGoals: copyFormData.copyGoals,
         },
@@ -1048,14 +1091,34 @@ export default function JobsPage() {
                     {expandedJobId === job.id && (
                       <TableRow>
                         <TableCell colSpan={10} className="bg-muted/30 p-4">
-                          <Tabs defaultValue="skills-competencies" className="w-full">
+                          {/* Job Architecture Helper Tooltip */}
+                          <div className="mb-4 flex items-start gap-2 text-sm text-muted-foreground bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 p-3 rounded-lg border border-blue-200 dark:border-blue-800">
+                            <HelpCircle className="h-4 w-4 mt-0.5 text-blue-600 shrink-0" />
+                            <div>
+                              <p className="font-medium text-blue-800 dark:text-blue-300 mb-1">Understanding Job Architecture</p>
+                              <p className="text-blue-700 dark:text-blue-400">
+                                <strong>Competencies</strong> are evaluated in performance appraisals using behavioral indicators and proficiency levels. 
+                                <strong> Job Skills</strong> define capability requirements and support learning, readiness, and development — they are NOT scored in appraisals. 
+                                <strong> Responsibilities</strong> (KRAs) define key result areas with weighted scoring. 
+                                <strong> Goals</strong> are specific, measurable objectives tied to the job.
+                              </p>
+                            </div>
+                          </div>
+                          <Tabs defaultValue="competencies" className="w-full">
                             <TabsList>
-                              <TabsTrigger value="skills-competencies">Skills & Competencies</TabsTrigger>
+                              <TabsTrigger value="competencies">Competencies</TabsTrigger>
+                              <TabsTrigger value="job-skills">Job Skills</TabsTrigger>
                               <TabsTrigger value="responsibilities">Responsibilities</TabsTrigger>
                               <TabsTrigger value="goals">Goals</TabsTrigger>
                             </TabsList>
-                            <TabsContent value="skills-competencies" className="mt-4">
+                            <TabsContent value="competencies" className="mt-4">
                               <JobCapabilityRequirementsManager 
+                                jobId={job.id} 
+                                companyId={job.company_id} 
+                              />
+                            </TabsContent>
+                            <TabsContent value="job-skills" className="mt-4">
+                              <JobSkillsManager 
                                 jobId={job.id} 
                                 companyId={job.company_id} 
                               />
@@ -1194,7 +1257,19 @@ export default function JobsPage() {
                       }
                     />
                     <label htmlFor="copyCompetencies" className="text-sm cursor-pointer">
-                      Competencies
+                      Competencies (for appraisals)
+                    </label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="copySkills"
+                      checked={copyFormData.copySkills}
+                      onCheckedChange={(checked) => 
+                        setCopyFormData({ ...copyFormData, copySkills: !!checked })
+                      }
+                    />
+                    <label htmlFor="copySkills" className="text-sm cursor-pointer">
+                      Job Skills (for recruitment/learning)
                     </label>
                   </div>
                   <div className="flex items-center space-x-2">
