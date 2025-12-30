@@ -293,3 +293,6 @@ verify_jwt = false
 
 [functions.performance-risk-analyzer]
 verify_jwt = false
+
+[functions.skill-gap-processor]
+verify_jwt = false
