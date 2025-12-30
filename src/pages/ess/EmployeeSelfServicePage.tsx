@@ -35,6 +35,12 @@ import {
   Users,
   ClipboardCheck,
   TrendingUp,
+  TrendingDown,
+  Sparkles,
+  IdCard,
+  Plane,
+  Stethoscope,
+  FolderOpen,
 } from "lucide-react";
 
 export default function EmployeeSelfServicePage() {
@@ -71,7 +77,6 @@ export default function EmployeeSelfServicePage() {
     recognition: { title: t("ess.modules.recognition.title"), description: t("ess.modules.recognition.description"), href: "/ess/recognition", icon: Award, color: "bg-amber-500/10 text-amber-600", tabCode: "ess-recognition" },
     reminders: { title: t("ess.modules.reminders.title"), description: t("ess.modules.reminders.description"), href: "/ess/reminders", icon: Bell, color: "bg-rose-500/10 text-rose-600", tabCode: "ess-reminders" },
     notifications: { title: t("ess.modules.notifications.title"), description: t("ess.modules.notifications.description"), href: "/profile/notifications", icon: Bell, color: "bg-amber-500/10 text-amber-600", tabCode: "ess-notifications" },
-    // NEW: Previously missing links
     myAppraisals: { title: t("ess.modules.myAppraisals.title", "My Appraisals"), description: t("ess.modules.myAppraisals.description", "View and manage your performance appraisals"), href: "/ess/my-appraisals", icon: ClipboardCheck, color: "bg-violet-500/10 text-violet-600", tabCode: "ess-my-appraisals" },
     development: { title: t("ess.modules.development.title", "My Development Plan"), description: t("ess.modules.development.description", "View and manage your development goals"), href: "/ess/development", icon: TrendingUp, color: "bg-purple-500/10 text-purple-600", tabCode: "ess-development" },
     appraisalInterviews: { title: t("ess.modules.appraisalInterviews.title", "Appraisal Interviews"), description: t("ess.modules.appraisalInterviews.description", "View and prepare for scheduled appraisal meetings"), href: "/ess/appraisal-interviews", icon: Calendar, color: "bg-indigo-500/10 text-indigo-600", tabCode: "ess-appraisal-interviews" },
@@ -81,6 +86,15 @@ export default function EmployeeSelfServicePage() {
     milestones: { title: t("ess.modules.milestones.title", "Milestones"), description: t("ess.modules.milestones.description", "View your career milestones and achievements"), href: "/ess/milestones", icon: Award, color: "bg-amber-500/10 text-amber-600", tabCode: "ess-milestones" },
     announcements: { title: t("ess.modules.announcements.title", "Announcements"), description: t("ess.modules.announcements.description", "View company announcements and news"), href: "/ess/announcements", icon: Bell, color: "bg-blue-500/10 text-blue-600", tabCode: "ess-announcements" },
     qualifications: { title: t("ess.modules.qualifications.title", "My Qualifications"), description: t("ess.modules.qualifications.description", "Add and manage your qualifications and certifications"), href: "/ess/qualifications", icon: GraduationCap, color: "bg-indigo-500/10 text-indigo-600", tabCode: "ess-qualifications" },
+    // NEW ESS MODULES
+    competencies: { title: t("ess.modules.competencies.title", "My Competencies"), description: t("ess.modules.competencies.description", "View your competency assessments and levels"), href: "/ess/competencies", icon: Award, color: "bg-purple-500/10 text-purple-600", tabCode: "ess-competencies" },
+    skillGaps: { title: t("ess.modules.skillGaps.title", "My Skill Gaps"), description: t("ess.modules.skillGaps.description", "View development areas and recommendations"), href: "/ess/skill-gaps", icon: TrendingDown, color: "bg-orange-500/10 text-orange-600", tabCode: "ess-skill-gaps" },
+    evidencePortfolio: { title: t("ess.modules.evidencePortfolio.title", "Evidence Portfolio"), description: t("ess.modules.evidencePortfolio.description", "Manage your achievement evidence"), href: "/ess/evidence-portfolio", icon: FolderOpen, color: "bg-teal-500/10 text-teal-600", tabCode: "ess-evidence-portfolio" },
+    interests: { title: t("ess.modules.interests.title", "My Interests"), description: t("ess.modules.interests.description", "Manage your interests and hobbies"), href: "/ess/interests", icon: Sparkles, color: "bg-pink-500/10 text-pink-600", tabCode: "ess-interests" },
+    governmentIds: { title: t("ess.modules.governmentIds.title", "My Government IDs"), description: t("ess.modules.governmentIds.description", "View and manage your identification documents"), href: "/ess/government-ids", icon: IdCard, color: "bg-slate-500/10 text-slate-600", tabCode: "ess-government-ids" },
+    medicalInfo: { title: t("ess.modules.medicalInfo.title", "Medical Information"), description: t("ess.modules.medicalInfo.description", "Manage your emergency medical details"), href: "/ess/medical-info", icon: Stethoscope, color: "bg-red-500/10 text-red-600", tabCode: "ess-medical-info" },
+    immigration: { title: t("ess.modules.immigration.title", "Immigration & Permits"), description: t("ess.modules.immigration.description", "View work permits and travel documents"), href: "/ess/immigration", icon: Plane, color: "bg-sky-500/10 text-sky-600", tabCode: "ess-immigration" },
+    professionalInfo: { title: t("ess.modules.professionalInfo.title", "Professional Info"), description: t("ess.modules.professionalInfo.description", "View credentials, agreements, and work history"), href: "/ess/professional-info", icon: Briefcase, color: "bg-indigo-500/10 text-indigo-600", tabCode: "ess-professional-info" },
   };
 
   const filterByAccess = (modules: GroupedModuleItem[]) =>
@@ -89,7 +103,11 @@ export default function EmployeeSelfServicePage() {
   const sections: ModuleSection[] = [
     {
       titleKey: "My Profile",
-      items: filterByAccess([allModules.profile, allModules.personalInfo, allModules.dependents, allModules.documents, allModules.letters, allModules.banking, allModules.milestones, allModules.qualifications]),
+      items: filterByAccess([allModules.profile, allModules.personalInfo, allModules.dependents, allModules.documents, allModules.letters, allModules.banking, allModules.governmentIds, allModules.medicalInfo, allModules.milestones]),
+    },
+    {
+      titleKey: "Skills & Capabilities",
+      items: filterByAccess([allModules.competencies, allModules.qualifications, allModules.skillGaps, allModules.evidencePortfolio, allModules.interests]),
     },
     {
       titleKey: "Time & Absence",
@@ -101,11 +119,11 @@ export default function EmployeeSelfServicePage() {
     },
     {
       titleKey: "Career & Development",
-      items: filterByAccess([allModules.onboarding, allModules.goals, allModules.goalInterviews, allModules.myAppraisals, allModules.appraisalInterviews, allModules.feedback, allModules.development, allModules.training, allModules.jobs, allModules.recognition, allModules.offboarding]),
+      items: filterByAccess([allModules.onboarding, allModules.goals, allModules.goalInterviews, allModules.myAppraisals, allModules.appraisalInterviews, allModules.feedback, allModules.development, allModules.training, allModules.professionalInfo, allModules.jobs, allModules.recognition, allModules.offboarding]),
     },
     {
       titleKey: "Workplace",
-      items: filterByAccess([allModules.property, allModules.relations, allModules.hse, allModules.announcements]),
+      items: filterByAccess([allModules.property, allModules.relations, allModules.hse, allModules.announcements, allModules.immigration]),
     },
     {
       titleKey: "Tasks & Approvals",
