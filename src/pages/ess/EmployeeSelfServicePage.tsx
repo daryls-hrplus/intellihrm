@@ -177,7 +177,7 @@ export default function EmployeeSelfServicePage() {
         {/* Pending Appraisal Actions */}
         <EssPendingAppraisalActions />
 
-        <GroupedModuleCards sections={sections} sectionBadges={sectionBadges} />
+        <GroupedModuleCards sections={sections} sectionBadges={sectionBadges} defaultOpen={false} />
       </div>
     </AppLayout>
   );
