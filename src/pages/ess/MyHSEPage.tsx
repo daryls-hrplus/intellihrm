@@ -92,16 +92,16 @@ export default function MyHSEPage() {
       <div className="space-y-6">
         <Breadcrumbs
           items={[
-            { label: t('navigation.ess'), href: "/ess" },
-            { label: t('ess.myHSE.breadcrumb') },
+            { label: t('navigation.ess', 'Employee Self Service'), href: "/ess" },
+            { label: t('ess.myHSE.breadcrumb', 'Health, Safety & Environment') },
           ]}
         />
 
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">{t('ess.myHSE.title')}</h1>
+            <h1 className="text-3xl font-bold tracking-tight">{t('ess.myHSE.title', 'My Health, Safety & Environment')}</h1>
             <p className="text-muted-foreground">
-              {t('ess.myHSE.subtitle')}
+              {t('ess.myHSE.subtitle', 'Report incidents, view safety policies, and track your training')}
             </p>
           </div>
           
@@ -109,14 +109,14 @@ export default function MyHSEPage() {
             <DialogTrigger asChild>
               <Button>
                 <Plus className="mr-2 h-4 w-4" />
-                {t('ess.myHSE.reportIncident')}
+                {t('ess.myHSE.reportIncident', 'Report Incident')}
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-lg">
               <DialogHeader>
-                <DialogTitle>{t('ess.myHSE.reportSafetyIncident')}</DialogTitle>
+                <DialogTitle>{t('ess.myHSE.reportSafetyIncident', 'Report Safety Incident')}</DialogTitle>
                 <DialogDescription>
-                  {t('ess.myHSE.reportDescription')}
+                  {t('ess.myHSE.reportDescription', 'Provide details about the safety incident you want to report')}
                 </DialogDescription>
               </DialogHeader>
               
