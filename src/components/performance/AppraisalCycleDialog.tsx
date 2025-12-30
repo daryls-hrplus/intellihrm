@@ -7,10 +7,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
-import { Users, GitMerge } from "lucide-react";
+import { Users, GitMerge, FileText, AlertTriangle } from "lucide-react";
+import { useAppraisalFormTemplates } from "@/hooks/useAppraisalFormTemplates";
 
 interface AppraisalCycle {
   id: string;
@@ -26,6 +29,7 @@ interface AppraisalCycle {
   min_rating: number;
   max_rating: number;
   multi_position_mode?: string;
+  template_id?: string;
 }
 
 interface AppraisalCycleDialogProps {
@@ -49,6 +53,9 @@ export function AppraisalCycleDialog({
 }: AppraisalCycleDialogProps) {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [showWeightWarning, setShowWeightWarning] = useState(false);
+  const { templates } = useAppraisalFormTemplates(companyId || "");
+  
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -62,6 +69,7 @@ export function AppraisalCycleDialog({
     min_rating: 1,
     max_rating: 5,
     multi_position_mode: "aggregate" as "aggregate" | "separate",
+    template_id: "",
   });
 
   useEffect(() => {
@@ -79,8 +87,11 @@ export function AppraisalCycleDialog({
         min_rating: cycle.min_rating,
         max_rating: cycle.max_rating,
         multi_position_mode: (cycle.multi_position_mode as "aggregate" | "separate") || "aggregate",
+        template_id: cycle.template_id || "",
       });
     } else {
+      // Auto-select default template if available
+      const defaultTemplate = templates?.find(t => t.is_default);
       setFormData({
         name: "",
         description: "",
@@ -88,15 +99,49 @@ export function AppraisalCycleDialog({
         end_date: "",
         evaluation_deadline: "",
         status: "draft",
-        competency_weight: 40,
-        responsibility_weight: 30,
-        goal_weight: 30,
-        min_rating: 1,
-        max_rating: 5,
+        competency_weight: defaultTemplate?.competencies_weight ?? 40,
+        responsibility_weight: defaultTemplate?.responsibilities_weight ?? 30,
+        goal_weight: defaultTemplate?.goals_weight ?? 30,
+        min_rating: defaultTemplate?.min_rating ?? 1,
+        max_rating: defaultTemplate?.max_rating ?? 5,
         multi_position_mode: "aggregate",
+        template_id: defaultTemplate?.id || "",
       });
     }
-  }, [cycle]);
+  }, [cycle, templates]);
+
+  // Handle template selection - auto-populate weights
+  const handleTemplateChange = (templateId: string) => {
+    const selectedTemplate = templates?.find(t => t.id === templateId);
+    if (selectedTemplate) {
+      setFormData(prev => ({
+        ...prev,
+        template_id: templateId,
+        competency_weight: selectedTemplate.competencies_weight,
+        responsibility_weight: selectedTemplate.responsibilities_weight,
+        goal_weight: selectedTemplate.goals_weight,
+        min_rating: selectedTemplate.min_rating,
+        max_rating: selectedTemplate.max_rating,
+      }));
+      setShowWeightWarning(false);
+    } else {
+      setFormData(prev => ({ ...prev, template_id: "" }));
+    }
+  };
+
+  // Check if weights deviate from template
+  const selectedTemplate = templates?.find(t => t.id === formData.template_id);
+  const weightsDeviate = selectedTemplate && (
+    formData.competency_weight !== selectedTemplate.competencies_weight ||
+    formData.responsibility_weight !== selectedTemplate.responsibilities_weight ||
+    formData.goal_weight !== selectedTemplate.goals_weight
+  );
+
+  useEffect(() => {
+    if (weightsDeviate && selectedTemplate?.is_locked) {
+      setShowWeightWarning(true);
+    }
+  }, [weightsDeviate, selectedTemplate]);
 
   const totalWeight = formData.competency_weight + formData.responsibility_weight + formData.goal_weight;
 
@@ -130,6 +175,7 @@ export function AppraisalCycleDialog({
         min_rating: formData.min_rating,
         max_rating: formData.max_rating,
         multi_position_mode: formData.multi_position_mode,
+        template_id: formData.template_id || null,
         created_by: user?.id,
         is_probation_review: isProbationReview,
         is_manager_cycle: isManagerCycle,
@@ -243,6 +289,64 @@ export function AppraisalCycleDialog({
               </Select>
             </div>
           </div>
+
+          {/* Form Template Selector */}
+          <Card className="border-primary/20">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base flex items-center gap-2">
+                <FileText className="h-4 w-4" />
+                Appraisal Form Template
+              </CardTitle>
+              <CardDescription>
+                Select a template to auto-configure weights and sections
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <Select
+                value={formData.template_id}
+                onValueChange={handleTemplateChange}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a template (optional)" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">No template</SelectItem>
+                  {templates?.filter(t => t.is_active).map((template) => (
+                    <SelectItem key={template.id} value={template.id}>
+                      <div className="flex items-center gap-2">
+                        {template.name}
+                        {template.is_default && (
+                          <Badge variant="secondary" className="text-xs">Default</Badge>
+                        )}
+                        {template.is_locked && (
+                          <Badge variant="outline" className="text-xs">Locked</Badge>
+                        )}
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              {selectedTemplate && (
+                <div className="text-xs text-muted-foreground bg-muted/50 p-2 rounded">
+                  Includes: {selectedTemplate.include_competencies && "Competencies"} 
+                  {selectedTemplate.include_responsibilities && ", Responsibilities"}
+                  {selectedTemplate.include_goals && ", Goals"}
+                  {selectedTemplate.include_360_feedback && ", 360 Feedback"}
+                  {selectedTemplate.include_values && ", Values"}
+                </div>
+              )}
+
+              {showWeightWarning && selectedTemplate?.is_locked && (
+                <Alert variant="destructive">
+                  <AlertTriangle className="h-4 w-4" />
+                  <AlertDescription>
+                    This template is locked. Weight changes require HR approval.
+                  </AlertDescription>
+                </Alert>
+              )}
+            </CardContent>
+          </Card>
 
           <div className="space-y-4">
             <div className="flex items-center justify-between">

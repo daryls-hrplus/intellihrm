@@ -3,6 +3,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { GroupedModuleCards, ModuleSection, GroupedModuleItem } from "@/components/ui/GroupedModuleCards";
 import { EmployeeRODWidget } from "@/components/ess/EmployeeRODWidget";
+import { EssPendingAppraisalActions } from "@/components/ess/EssPendingAppraisalActions";
 import { useGranularPermissions } from "@/hooks/useGranularPermissions";
 import {
   User,
@@ -127,6 +128,9 @@ export default function EmployeeSelfServicePage() {
 
         {/* Pending Resumption of Duty */}
         <EmployeeRODWidget />
+
+        {/* Pending Appraisal Actions */}
+        <EssPendingAppraisalActions />
 
         <GroupedModuleCards sections={sections} />
       </div>
