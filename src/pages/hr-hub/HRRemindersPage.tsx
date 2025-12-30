@@ -8,9 +8,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ReminderRulesManager } from '@/components/reminders/ReminderRulesManager';
 import { EmployeeRemindersList } from '@/components/reminders/EmployeeRemindersList';
 import { AIRecommendationsPanel } from '@/components/reminders/AIRecommendationsPanel';
+import { PerformanceReminderTemplates } from '@/components/reminders/PerformanceReminderTemplates';
 import { useReminders } from '@/hooks/useReminders';
 import { supabase } from '@/integrations/supabase/client';
-import { Bell, Settings, List, Loader2 } from 'lucide-react';
+import { Bell, Settings, List, Loader2, FileText } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function HRRemindersPage() {
@@ -120,6 +121,10 @@ export default function HRRemindersPage() {
               <Settings className="h-4 w-4" />
               Rules
             </TabsTrigger>
+            <TabsTrigger value="templates" className="flex items-center gap-2">
+              <FileText className="h-4 w-4" />
+              Email Templates
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="reminders" className="space-y-6">
@@ -172,6 +177,26 @@ export default function HRRemindersPage() {
                     companyId={selectedCompanyId}
                     ref={rulesManagerRef}
                   />
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="templates" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Performance Reminder Templates</CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  Customize email templates for performance review notifications
+                </p>
+              </CardHeader>
+              <CardContent>
+                {selectedCompanyId === 'all' ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    {t('common.select')} {t('common.company')}
+                  </div>
+                ) : (
+                  <PerformanceReminderTemplates companyId={selectedCompanyId} />
                 )}
               </CardContent>
             </Card>
