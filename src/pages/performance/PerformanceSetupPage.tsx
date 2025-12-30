@@ -42,6 +42,8 @@ import {
   Scale,
 } from "lucide-react";
 import { CheckInCadenceConfig } from "@/components/performance/setup/CheckInCadenceConfig";
+import { AppraisalFormTemplateManager } from "@/components/performance/setup/AppraisalFormTemplateManager";
+import { AppraisalActionRulesManager } from "@/components/performance/setup/AppraisalActionRulesManager";
 
 // Interfaces
 interface Company { id: string; name: string; }
@@ -345,9 +347,23 @@ export default function PerformanceSetupPage() {
                     <Calendar className="h-4 w-4" />
                     Appraisal Cycles
                   </TabsTrigger>
+                  <TabsTrigger value="form-templates" className="flex items-center gap-2">
+                    <Layers className="h-4 w-4" />
+                    Form Templates
+                  </TabsTrigger>
+                  <TabsTrigger value="action-rules" className="flex items-center gap-2">
+                    <GitBranch className="h-4 w-4" />
+                    Action Rules
+                  </TabsTrigger>
                 </TabsList>
                 <TabsContent value="appraisal-cycles" className="mt-4">
                   <AppraisalCyclesContent cycles={appraisalCycles} isLoading={isLoading} t={t} />
+                </TabsContent>
+                <TabsContent value="form-templates" className="mt-4">
+                  <AppraisalFormTemplateManager companyId={selectedCompany} />
+                </TabsContent>
+                <TabsContent value="action-rules" className="mt-4">
+                  <AppraisalActionRulesManager companyId={selectedCompany} />
                 </TabsContent>
               </Tabs>
             </TabsContent>
