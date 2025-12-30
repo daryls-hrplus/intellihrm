@@ -55,6 +55,12 @@ import { format, formatDistanceToNow } from "date-fns";
 import { usePerformanceEvidence, PerformanceEvidence, CreateEvidenceData, EvidenceType, EvidenceValidationStatus } from "@/hooks/capabilities/usePerformanceEvidence";
 import { toast } from "sonner";
 
+export interface EvidencePrePopulate {
+  goalId?: string;
+  evidenceType?: EvidenceType;
+  title?: string;
+}
+
 interface PerformanceEvidenceManagerProps {
   employeeId: string;
   goalId?: string;
@@ -63,6 +69,7 @@ interface PerformanceEvidenceManagerProps {
   cycleId?: string;
   canValidate?: boolean;
   readOnly?: boolean;
+  prePopulate?: EvidencePrePopulate;
 }
 
 const EVIDENCE_TYPE_CONFIG: Record<EvidenceType, { icon: React.ElementType; label: string; color: string }> = {
@@ -94,6 +101,7 @@ export function PerformanceEvidenceManager({
   cycleId,
   canValidate = false,
   readOnly = false,
+  prePopulate,
 }: PerformanceEvidenceManagerProps) {
   const {
     evidence,
@@ -106,19 +114,19 @@ export function PerformanceEvidenceManager({
     getAttachmentUrl,
   } = usePerformanceEvidence();
 
-  const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const [addDialogOpen, setAddDialogOpen] = useState(!!prePopulate?.goalId);
   const [validationDialogOpen, setValidationDialogOpen] = useState(false);
   const [selectedEvidence, setSelectedEvidence] = useState<PerformanceEvidence | null>(null);
   const [filterType, setFilterType] = useState<EvidenceType | "all">("all");
   const [filterStatus, setFilterStatus] = useState<EvidenceValidationStatus | "all">("all");
   const [uploading, setUploading] = useState(false);
 
-  // Form state
+  // Form state - initialize with pre-populated values if provided
   const [formData, setFormData] = useState<Partial<CreateEvidenceData>>({
-    evidence_type: "project",
-    title: "",
+    evidence_type: prePopulate?.evidenceType || "project",
+    title: prePopulate?.title ? `Evidence for: ${prePopulate.title}` : "",
     description: "",
-    goal_id: goalId,
+    goal_id: prePopulate?.goalId || goalId,
     capability_id: capabilityId,
     responsibility_id: responsibilityId,
     appraisal_cycle_id: cycleId,
