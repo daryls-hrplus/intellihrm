@@ -457,6 +457,12 @@ import TeamCalendarPage from "./pages/ess/TeamCalendarPage";
 import MyCalendarPage from "./pages/ess/MyCalendarPage";
 import MilestonesPage from "./pages/ess/MilestonesPage";
 import MyQualificationsPage from "./pages/ess/MyQualificationsPage";
+import MyCompetenciesPage from "./pages/ess/MyCompetenciesPage";
+import MyInterestsPage from "./pages/ess/MyInterestsPage";
+import MyGovernmentIdsPage from "./pages/ess/MyGovernmentIdsPage";
+import MyImmigrationPage from "./pages/ess/MyImmigrationPage";
+import MyMedicalInfoPage from "./pages/ess/MyMedicalInfoPage";
+import MyEvidencePortfolioPage from "./pages/ess/MyEvidencePortfolioPage";
 import EmployeeDirectoryPage from "./pages/admin/EmployeeDirectoryPage";
 import CompanyAnnouncementsPage from "./pages/admin/CompanyAnnouncementsPage";
 import ApprovalDelegationsPage from "./pages/admin/ApprovalDelegationsPage";
@@ -3708,6 +3714,54 @@ const App = () => (
               element={
                 <ProtectedRoute moduleCode="ess">
                   <MyQualificationsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/ess/competencies"
+              element={
+                <ProtectedRoute moduleCode="ess">
+                  <MyCompetenciesPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/ess/interests"
+              element={
+                <ProtectedRoute moduleCode="ess">
+                  <MyInterestsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/ess/government-ids"
+              element={
+                <ProtectedRoute moduleCode="ess">
+                  <MyGovernmentIdsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/ess/immigration"
+              element={
+                <ProtectedRoute moduleCode="ess">
+                  <MyImmigrationPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/ess/medical-info"
+              element={
+                <ProtectedRoute moduleCode="ess">
+                  <MyMedicalInfoPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/ess/evidence-portfolio"
+              element={
+                <ProtectedRoute moduleCode="ess">
+                  <MyEvidencePortfolioPage />
                 </ProtectedRoute>
               }
             />
