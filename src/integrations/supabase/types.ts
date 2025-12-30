@@ -11662,6 +11662,140 @@ export type Database = {
         }
         Relationships: []
       }
+      employee_performance_risks: {
+        Row: {
+          acknowledged_at: string | null
+          acknowledged_by: string | null
+          affected_competencies: Json | null
+          ai_analysis: Json | null
+          ai_recommendation: string | null
+          company_id: string
+          competency_score: number | null
+          consecutive_underperformance_count: number | null
+          created_at: string
+          detection_method: string | null
+          employee_id: string
+          expiring_certifications: Json | null
+          first_detected_at: string | null
+          goal_score: number | null
+          goal_vs_behavior_gap: number | null
+          id: string
+          is_acknowledged: boolean | null
+          is_active: boolean | null
+          last_analyzed_at: string | null
+          promotion_block_reason: string | null
+          resolution_notes: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          risk_factors: Json | null
+          risk_level: Database["public"]["Enums"]["performance_risk_level"]
+          risk_score: number | null
+          risk_type: Database["public"]["Enums"]["performance_risk_type"]
+          succession_impact:
+            | Database["public"]["Enums"]["succession_impact_type"]
+            | null
+          triggered_interventions: Json | null
+          updated_at: string
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          affected_competencies?: Json | null
+          ai_analysis?: Json | null
+          ai_recommendation?: string | null
+          company_id: string
+          competency_score?: number | null
+          consecutive_underperformance_count?: number | null
+          created_at?: string
+          detection_method?: string | null
+          employee_id: string
+          expiring_certifications?: Json | null
+          first_detected_at?: string | null
+          goal_score?: number | null
+          goal_vs_behavior_gap?: number | null
+          id?: string
+          is_acknowledged?: boolean | null
+          is_active?: boolean | null
+          last_analyzed_at?: string | null
+          promotion_block_reason?: string | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          risk_factors?: Json | null
+          risk_level?: Database["public"]["Enums"]["performance_risk_level"]
+          risk_score?: number | null
+          risk_type: Database["public"]["Enums"]["performance_risk_type"]
+          succession_impact?:
+            | Database["public"]["Enums"]["succession_impact_type"]
+            | null
+          triggered_interventions?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          affected_competencies?: Json | null
+          ai_analysis?: Json | null
+          ai_recommendation?: string | null
+          company_id?: string
+          competency_score?: number | null
+          consecutive_underperformance_count?: number | null
+          created_at?: string
+          detection_method?: string | null
+          employee_id?: string
+          expiring_certifications?: Json | null
+          first_detected_at?: string | null
+          goal_score?: number | null
+          goal_vs_behavior_gap?: number | null
+          id?: string
+          is_acknowledged?: boolean | null
+          is_active?: boolean | null
+          last_analyzed_at?: string | null
+          promotion_block_reason?: string | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          risk_factors?: Json | null
+          risk_level?: Database["public"]["Enums"]["performance_risk_level"]
+          risk_score?: number | null
+          risk_type?: Database["public"]["Enums"]["performance_risk_type"]
+          succession_impact?:
+            | Database["public"]["Enums"]["succession_impact_type"]
+            | null
+          triggered_interventions?: Json | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_performance_risks_acknowledged_by_fkey"
+            columns: ["acknowledged_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_performance_risks_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_performance_risks_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_performance_risks_resolved_by_fkey"
+            columns: ["resolved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       employee_period_allowances: {
         Row: {
           allowance_code: string | null
@@ -37495,6 +37629,106 @@ export type Database = {
           },
         ]
       }
+      performance_trend_history: {
+        Row: {
+          ai_prediction: Json | null
+          company_id: string
+          competency_score: number | null
+          created_at: string
+          cycle_end_date: string | null
+          cycle_id: string | null
+          cycle_name: string | null
+          employee_id: string
+          goal_score: number | null
+          id: string
+          metric_type: string | null
+          metric_value: number | null
+          overall_score: number | null
+          peer_comparison: Json | null
+          percentile_rank: number | null
+          previous_overall_score: number | null
+          responsibility_score: number | null
+          score_delta: number | null
+          snapshot_date: string
+          trend_direction:
+            | Database["public"]["Enums"]["performance_trend_direction"]
+            | null
+          trend_score: number | null
+        }
+        Insert: {
+          ai_prediction?: Json | null
+          company_id: string
+          competency_score?: number | null
+          created_at?: string
+          cycle_end_date?: string | null
+          cycle_id?: string | null
+          cycle_name?: string | null
+          employee_id: string
+          goal_score?: number | null
+          id?: string
+          metric_type?: string | null
+          metric_value?: number | null
+          overall_score?: number | null
+          peer_comparison?: Json | null
+          percentile_rank?: number | null
+          previous_overall_score?: number | null
+          responsibility_score?: number | null
+          score_delta?: number | null
+          snapshot_date?: string
+          trend_direction?:
+            | Database["public"]["Enums"]["performance_trend_direction"]
+            | null
+          trend_score?: number | null
+        }
+        Update: {
+          ai_prediction?: Json | null
+          company_id?: string
+          competency_score?: number | null
+          created_at?: string
+          cycle_end_date?: string | null
+          cycle_id?: string | null
+          cycle_name?: string | null
+          employee_id?: string
+          goal_score?: number | null
+          id?: string
+          metric_type?: string | null
+          metric_value?: number | null
+          overall_score?: number | null
+          peer_comparison?: Json | null
+          percentile_rank?: number | null
+          previous_overall_score?: number | null
+          responsibility_score?: number | null
+          score_delta?: number | null
+          snapshot_date?: string
+          trend_direction?:
+            | Database["public"]["Enums"]["performance_trend_direction"]
+            | null
+          trend_score?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "performance_trend_history_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "performance_trend_history_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "appraisal_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "performance_trend_history_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pii_access_alerts: {
         Row: {
           access_count: number
@@ -47072,12 +47306,16 @@ export type Database = {
       }
       succession_candidates: {
         Row: {
+          block_reason: string | null
           created_at: string
           development_areas: string | null
           employee_id: string
           id: string
+          is_promotion_blocked: boolean | null
+          last_risk_check_at: string | null
           nominated_by: string | null
           notes: string | null
+          performance_risk_id: string | null
           plan_id: string
           ranking: number | null
           readiness_level: string
@@ -47087,12 +47325,16 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          block_reason?: string | null
           created_at?: string
           development_areas?: string | null
           employee_id: string
           id?: string
+          is_promotion_blocked?: boolean | null
+          last_risk_check_at?: string | null
           nominated_by?: string | null
           notes?: string | null
+          performance_risk_id?: string | null
           plan_id: string
           ranking?: number | null
           readiness_level?: string
@@ -47102,12 +47344,16 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          block_reason?: string | null
           created_at?: string
           development_areas?: string | null
           employee_id?: string
           id?: string
+          is_promotion_blocked?: boolean | null
+          last_risk_check_at?: string | null
           nominated_by?: string | null
           notes?: string | null
+          performance_risk_id?: string | null
           plan_id?: string
           ranking?: number | null
           readiness_level?: string
@@ -47129,6 +47375,13 @@ export type Database = {
             columns: ["nominated_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "succession_candidates_performance_risk_id_fkey"
+            columns: ["performance_risk_id"]
+            isOneToOne: false
+            referencedRelation: "employee_performance_risks"
             referencedColumns: ["id"]
           },
           {
@@ -51623,6 +51876,16 @@ export type Database = {
         | "overtime_status"
         | "overpayment_reason"
       message_status: "sent" | "delivered" | "read"
+      performance_risk_level: "low" | "medium" | "high" | "critical"
+      performance_risk_type:
+        | "chronic_underperformance"
+        | "skills_decay"
+        | "toxic_high_performer"
+        | "declining_trend"
+        | "competency_gap"
+        | "goal_achievement_gap"
+        | "engagement_risk"
+      performance_trend_direction: "improving" | "stable" | "declining"
       rating_source: "appraisal" | "assessment" | "360_review" | "calibration"
       responsibility_category:
         | "financial"
@@ -51634,6 +51897,7 @@ export type Database = {
         | "administrative"
         | "customer_service"
         | "project_management"
+      succession_impact_type: "none" | "flagged" | "excluded"
       validation_confidence: "low" | "medium" | "high"
       validation_source_type:
         | "self"
@@ -51945,6 +52209,17 @@ export const Constants = {
         "overpayment_reason",
       ],
       message_status: ["sent", "delivered", "read"],
+      performance_risk_level: ["low", "medium", "high", "critical"],
+      performance_risk_type: [
+        "chronic_underperformance",
+        "skills_decay",
+        "toxic_high_performer",
+        "declining_trend",
+        "competency_gap",
+        "goal_achievement_gap",
+        "engagement_risk",
+      ],
+      performance_trend_direction: ["improving", "stable", "declining"],
       rating_source: ["appraisal", "assessment", "360_review", "calibration"],
       responsibility_category: [
         "financial",
@@ -51957,6 +52232,7 @@ export const Constants = {
         "customer_service",
         "project_management",
       ],
+      succession_impact_type: ["none", "flagged", "excluded"],
       validation_confidence: ["low", "medium", "high"],
       validation_source_type: [
         "self",
