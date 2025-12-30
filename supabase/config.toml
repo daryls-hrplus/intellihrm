@@ -302,3 +302,6 @@ verify_jwt = false
 
 [functions.appraisal-action-enforcer]
 verify_jwt = false
+
+[functions.send-employee-response-notification]
+verify_jwt = false
