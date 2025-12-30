@@ -21,13 +21,15 @@ import {
   FileText,
   Eye,
   ClipboardEdit,
-  Shield
+  Shield,
+  MessageSquareReply
 } from "lucide-react";
 import { useMyActiveAppraisals, type MyAppraisal } from "@/hooks/useMyAppraisals";
 import { EssAppraisalDetailDialog } from "@/components/ess/EssAppraisalDetailDialog";
 import { EssPIPStatusCard } from "@/components/ess/EssPIPStatusCard";
 import { EssAppraisalSelfAssessmentDialog } from "@/components/ess/EssAppraisalSelfAssessmentDialog";
 import { EssAppraisalAcknowledgmentDialog } from "@/components/ess/EssAppraisalAcknowledgmentDialog";
+import { EmployeeReviewResponseDialog } from "@/components/ess/performance/EmployeeReviewResponseDialog";
 export default function MyAppraisalsPage() {
   const { t } = useTranslation();
   const { 
@@ -42,6 +44,7 @@ export default function MyAppraisalsPage() {
   const [selectedAppraisal, setSelectedAppraisal] = useState<MyAppraisal | null>(null);
   const [selfAssessmentAppraisal, setSelfAssessmentAppraisal] = useState<MyAppraisal | null>(null);
   const [acknowledgmentAppraisal, setAcknowledgmentAppraisal] = useState<MyAppraisal | null>(null);
+  const [responseAppraisal, setResponseAppraisal] = useState<MyAppraisal | null>(null);
   const [activeTab, setActiveTab] = useState("current");
 
   const getStatusBadge = (status: string) => {
@@ -278,6 +281,16 @@ export default function MyAppraisalsPage() {
                             Acknowledge
                           </Button>
                         )}
+                        {/* Respond to Review Button - shown when manager has submitted */}
+                        {appraisal.overall_score !== null && appraisal.reviewed_at && (
+                          <Button 
+                            variant="secondary"
+                            onClick={() => setResponseAppraisal(appraisal)}
+                          >
+                            <MessageSquareReply className="h-4 w-4 mr-2" />
+                            Respond
+                          </Button>
+                        )}
                         <Button 
                           variant="outline" 
                           onClick={() => setSelectedAppraisal(appraisal)}
@@ -450,6 +463,15 @@ export default function MyAppraisalsPage() {
           onOpenChange={(open) => !open && setAcknowledgmentAppraisal(null)}
           appraisal={acknowledgmentAppraisal}
           companyId={acknowledgmentAppraisal.company_id}
+        />
+      )}
+
+      {responseAppraisal && responseAppraisal.company_id && (
+        <EmployeeReviewResponseDialog
+          open={!!responseAppraisal}
+          onOpenChange={(open) => !open && setResponseAppraisal(null)}
+          appraisal={responseAppraisal}
+          companyId={responseAppraisal.company_id}
         />
       )}
     </AppLayout>

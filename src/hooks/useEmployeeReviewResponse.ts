@@ -86,6 +86,40 @@ interface UseEmployeeReviewResponseOptions {
   companyId: string;
 }
 
+// Utility functions (exported for use in components)
+export const getResponseTypeLabelUtil = (type: string): string => {
+  const labels: Record<string, string> = {
+    agree: 'Agree',
+    agree_with_comments: 'Agree with Comments',
+    disagree: 'Disagree',
+    partial_disagree: 'Partially Disagree',
+    partially_disagree: 'Partially Disagree',
+  };
+  return labels[type] || type;
+};
+
+export const getDisagreementCategoryLabel = (category: string): string => {
+  const labels: Record<string, string> = {
+    goals: 'Goals',
+    competencies: 'Competencies',
+    responsibilities: 'Responsibilities',
+    values: 'Values',
+    overall: 'Overall Rating',
+  };
+  return labels[category] || category;
+};
+
+export const getEscalationCategoryLabelUtil = (category: string): string => {
+  const labels: Record<string, string> = {
+    clarification_needed: 'Clarification Needed',
+    process_concern: 'Process Concern',
+    rating_discussion: 'Rating Discussion',
+    manager_feedback: 'Manager Feedback',
+    other: 'Other',
+  };
+  return labels[category] || category;
+};
+
 export function useEmployeeReviewResponse({ companyId }: UseEmployeeReviewResponseOptions) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -377,27 +411,14 @@ export function useEmployeeReviewResponse({ companyId }: UseEmployeeReviewRespon
     return ['manager_submitted', 'pending_response', 'awaiting_employee_response'].includes(appraisalStatus);
   }, []);
 
-  // Get response type label
+  // Get response type label (instance method)
   const getResponseTypeLabel = (type: ResponseType): string => {
-    const labels: Record<ResponseType, string> = {
-      agree: 'Agree',
-      agree_with_comments: 'Agree with Comments',
-      disagree: 'Disagree',
-      partial_disagree: 'Partially Disagree',
-    };
-    return labels[type];
+    return getResponseTypeLabelUtil(type);
   };
 
-  // Get escalation category label
+  // Get escalation category label (instance method)
   const getEscalationCategoryLabel = (category: EscalationCategory): string => {
-    const labels: Record<EscalationCategory, string> = {
-      clarification_needed: 'Clarification Needed',
-      process_concern: 'Process Concern',
-      rating_discussion: 'Rating Discussion',
-      manager_feedback: 'Manager Feedback',
-      other: 'Other',
-    };
-    return labels[category];
+    return getEscalationCategoryLabelUtil(category);
   };
 
   return {
