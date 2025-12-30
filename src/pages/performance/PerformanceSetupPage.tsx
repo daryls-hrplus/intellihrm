@@ -40,10 +40,13 @@ import {
   MessageSquare,
   Clock,
   Scale,
+  Shield,
 } from "lucide-react";
 import { CheckInCadenceConfig } from "@/components/performance/setup/CheckInCadenceConfig";
 import { AppraisalFormTemplateManager } from "@/components/performance/setup/AppraisalFormTemplateManager";
 import { AppraisalActionRulesManager } from "@/components/performance/setup/AppraisalActionRulesManager";
+import { EmployeeResponseConfigurationPanel } from "@/components/performance/setup/EmployeeResponseConfigurationPanel";
+import { HRResponseEscalationPanel } from "@/components/performance/setup/HRResponseEscalationPanel";
 
 // Interfaces
 interface Company { id: string; name: string; }
@@ -355,6 +358,14 @@ export default function PerformanceSetupPage() {
                     <GitBranch className="h-4 w-4" />
                     Action Rules
                   </TabsTrigger>
+                  <TabsTrigger value="employee-response" className="flex items-center gap-2">
+                    <MessageSquare className="h-4 w-4" />
+                    Employee Response
+                  </TabsTrigger>
+                  <TabsTrigger value="hr-escalations" className="flex items-center gap-2">
+                    <Shield className="h-4 w-4" />
+                    HR Escalations
+                  </TabsTrigger>
                 </TabsList>
                 <TabsContent value="appraisal-cycles" className="mt-4">
                   <AppraisalCyclesContent cycles={appraisalCycles} isLoading={isLoading} t={t} />
@@ -364,6 +375,12 @@ export default function PerformanceSetupPage() {
                 </TabsContent>
                 <TabsContent value="action-rules" className="mt-4">
                   <AppraisalActionRulesManager companyId={selectedCompany} />
+                </TabsContent>
+                <TabsContent value="employee-response" className="mt-4">
+                  <EmployeeResponseConfigurationPanel companyId={selectedCompany} />
+                </TabsContent>
+                <TabsContent value="hr-escalations" className="mt-4">
+                  <HRResponseEscalationPanel companyId={selectedCompany} />
                 </TabsContent>
               </Tabs>
             </TabsContent>
