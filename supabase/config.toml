@@ -296,3 +296,6 @@ verify_jwt = false
 
 [functions.skill-gap-processor]
 verify_jwt = false
+
+[functions.appraisal-action-enforcer]
+verify_jwt = false
