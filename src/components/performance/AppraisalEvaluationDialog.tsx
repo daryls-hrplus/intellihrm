@@ -32,6 +32,7 @@ import { AppraisalAIAnalysisSummary } from "./AppraisalAIAnalysisSummary";
 import { CommentInflationWarning } from "./CommentInflationWarning";
 import { ValuesAssessmentTab } from "./ValuesAssessmentTab";
 import { ValueScoreInput } from "@/types/valuesAssessment";
+import { useSkillGapManagement } from "@/hooks/performance/useSkillGapManagement";
 
 interface AppraisalScore {
   id?: string;
@@ -116,6 +117,9 @@ export function AppraisalEvaluationDialog({
   const [valueScores, setValueScores] = useState<ValueScoreInput[]>([]);
 
   const { fetchSegments } = useAppraisalRoleSegments();
+  
+  // Skill gap analysis hook
+  const { triggerGapAnalysis } = useSkillGapManagement();
   
   // Multi-position hook
   const {
@@ -701,6 +705,16 @@ export function AppraisalEvaluationDialog({
       await supabase.from("appraisal_participants").update(updatePayload).eq("id", participantId);
 
       toast.success(submit ? "Evaluation submitted successfully" : "Progress saved");
+      
+      // Trigger skill gap analysis on submit
+      if (submit && employeeId && cycleInfo?.company_id) {
+        triggerGapAnalysis('analyze-appraisal', {
+          participantId,
+          employeeId,
+          companyId: cycleInfo.company_id,
+        });
+      }
+      
       if (submit) {
         onOpenChange(false);
       }

@@ -59,6 +59,7 @@ import PasswordPoliciesPage from "./pages/admin/PasswordPoliciesPage";
 import StaffLoanDesignDocumentPage from "./pages/documents/StaffLoanDesignDocumentPage";
 import AIGovernancePage from "./pages/admin/AIGovernancePage";
 import TranslationsPage from "./pages/admin/TranslationsPage";
+import CompanyValuesPage from "./pages/admin/CompanyValuesPage";
 
 // Enablement pages
 import EnablementHubPage from "./pages/enablement/EnablementHubPage";
@@ -1184,6 +1185,14 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin"]}>
                   <GranularPermissionsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/company-values"
+              element={
+                <ProtectedRoute requiredRoles={["admin"]}>
+                  <CompanyValuesPage />
                 </ProtectedRoute>
               }
             />
