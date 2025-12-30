@@ -52947,6 +52947,7 @@ export type Database = {
         | "expense_claim"
         | "letter_request"
         | "general"
+        | "qualification"
       workflow_status:
         | "draft"
         | "pending"
@@ -53303,6 +53304,7 @@ export const Constants = {
         "expense_claim",
         "letter_request",
         "general",
+        "qualification",
       ],
       workflow_status: [
         "draft",

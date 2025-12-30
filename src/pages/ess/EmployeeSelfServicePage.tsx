@@ -80,6 +80,7 @@ export default function EmployeeSelfServicePage() {
     teamCalendar: { title: t("ess.modules.teamCalendar.title", "Team Calendar"), description: t("ess.modules.teamCalendar.description", "View team availability and schedules"), href: "/ess/calendar", icon: Users, color: "bg-cyan-500/10 text-cyan-600", tabCode: "ess-team-calendar" },
     milestones: { title: t("ess.modules.milestones.title", "Milestones"), description: t("ess.modules.milestones.description", "View your career milestones and achievements"), href: "/ess/milestones", icon: Award, color: "bg-amber-500/10 text-amber-600", tabCode: "ess-milestones" },
     announcements: { title: t("ess.modules.announcements.title", "Announcements"), description: t("ess.modules.announcements.description", "View company announcements and news"), href: "/ess/announcements", icon: Bell, color: "bg-blue-500/10 text-blue-600", tabCode: "ess-announcements" },
+    qualifications: { title: t("ess.modules.qualifications.title", "My Qualifications"), description: t("ess.modules.qualifications.description", "Add and manage your qualifications and certifications"), href: "/ess/qualifications", icon: GraduationCap, color: "bg-indigo-500/10 text-indigo-600", tabCode: "ess-qualifications" },
   };
 
   const filterByAccess = (modules: GroupedModuleItem[]) =>
@@ -88,7 +89,7 @@ export default function EmployeeSelfServicePage() {
   const sections: ModuleSection[] = [
     {
       titleKey: "My Profile",
-      items: filterByAccess([allModules.profile, allModules.personalInfo, allModules.dependents, allModules.documents, allModules.letters, allModules.banking, allModules.milestones]),
+      items: filterByAccess([allModules.profile, allModules.personalInfo, allModules.dependents, allModules.documents, allModules.letters, allModules.banking, allModules.milestones, allModules.qualifications]),
     },
     {
       titleKey: "Time & Absence",
