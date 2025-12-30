@@ -5,6 +5,7 @@ import { GroupedModuleCards, ModuleSection, GroupedModuleItem } from "@/componen
 import { EmployeeRODWidget } from "@/components/ess/EmployeeRODWidget";
 import { EssPendingAppraisalActions } from "@/components/ess/EssPendingAppraisalActions";
 import { useGranularPermissions } from "@/hooks/useGranularPermissions";
+import { useEssPendingActions } from "@/hooks/useEssPendingActions";
 import {
   User,
   Calendar,
@@ -46,6 +47,7 @@ import {
 export default function EmployeeSelfServicePage() {
   const { t } = useTranslation();
   const { hasTabAccess } = useGranularPermissions();
+  const { data: sectionBadges = {} } = useEssPendingActions();
 
   const allModules = {
     profile: { title: t("ess.modules.profile.title"), description: t("ess.modules.profile.description"), href: "/profile", icon: User, color: "bg-blue-500/10 text-blue-600", tabCode: "ess-profile" },
@@ -165,7 +167,7 @@ export default function EmployeeSelfServicePage() {
         {/* Pending Appraisal Actions */}
         <EssPendingAppraisalActions />
 
-        <GroupedModuleCards sections={sections} />
+        <GroupedModuleCards sections={sections} sectionBadges={sectionBadges} />
       </div>
     </AppLayout>
   );
