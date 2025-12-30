@@ -34,9 +34,11 @@ import {
   BarChart3,
   Sparkles,
   Upload,
+  Heart,
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { CompanyValuesTab } from "@/components/capabilities/CompanyValuesTab";
 import { toast } from "sonner";
 import {
   useCapabilities,
@@ -77,7 +79,7 @@ export default function CapabilityRegistryPage() {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [isQuickStartOpen, setIsQuickStartOpen] = useState(false);
   const [showQuickStartPrompt, setShowQuickStartPrompt] = useState(false);
-  const [activeTab, setActiveTab] = useState<"all" | "skills" | "competencies">("all");
+  const [activeTab, setActiveTab] = useState<"all" | "skills" | "competencies" | "values">("all");
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -338,7 +340,7 @@ export default function CapabilityRegistryPage() {
             </div>
           </CardHeader>
           <CardContent>
-            <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)}>
+            <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "all" | "skills" | "competencies" | "values")}>
               <TabsList>
                 <TabsTrigger value="all" className="gap-2">
                   <Layers className="h-4 w-4" />
@@ -355,9 +357,13 @@ export default function CapabilityRegistryPage() {
                   Competencies
                   <Badge variant="secondary">{competencyCount}</Badge>
                 </TabsTrigger>
+                <TabsTrigger value="values" className="gap-2">
+                  <Heart className="h-4 w-4" />
+                  Values
+                </TabsTrigger>
               </TabsList>
 
-              <TabsContent value={activeTab} className="mt-6">
+              <TabsContent value="all" className="mt-6">
                 {loading ? (
                   <div className="flex items-center justify-center py-12">
                     <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -367,14 +373,11 @@ export default function CapabilityRegistryPage() {
                     <Layers className="h-12 w-12 mx-auto mb-4 opacity-50" />
                     <p className="text-lg font-medium">No skills or competencies found</p>
                     <p className="text-sm">
-                      Create your first {activeTab === "skills" ? "skill" : activeTab === "competencies" ? "competency" : "skill or competency"} to get started.
+                      Create your first skill or competency to get started.
                     </p>
-                    <Button
-                      className="mt-4"
-                      onClick={() => handleAdd(activeTab === "competencies" ? "COMPETENCY" : "SKILL")}
-                    >
+                    <Button className="mt-4" onClick={() => handleAdd("SKILL")}>
                       <Plus className="h-4 w-4 mr-2" />
-                      Add {activeTab === "competencies" ? "Competency" : "Skill"}
+                      Add Skill
                     </Button>
                   </div>
                 ) : (
@@ -391,6 +394,71 @@ export default function CapabilityRegistryPage() {
                     ))}
                   </div>
                 )}
+              </TabsContent>
+
+              <TabsContent value="skills" className="mt-6">
+                {loading ? (
+                  <div className="flex items-center justify-center py-12">
+                    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                  </div>
+                ) : skillCount === 0 ? (
+                  <div className="text-center py-12 text-muted-foreground">
+                    <Zap className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p className="text-lg font-medium">No skills found</p>
+                    <p className="text-sm">Create your first skill to get started.</p>
+                    <Button className="mt-4" onClick={() => handleAdd("SKILL")}>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Skill
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {capabilities.filter(c => c.type === "SKILL").map((capability) => (
+                      <CapabilityCard
+                        key={capability.id}
+                        capability={capability}
+                        onEdit={handleEdit}
+                        onDelete={handleDelete}
+                        onStatusChange={handleStatusChange}
+                      />
+                    ))}
+                  </div>
+                )}
+              </TabsContent>
+
+              <TabsContent value="competencies" className="mt-6">
+                {loading ? (
+                  <div className="flex items-center justify-center py-12">
+                    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                  </div>
+                ) : competencyCount === 0 ? (
+                  <div className="text-center py-12 text-muted-foreground">
+                    <Target className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p className="text-lg font-medium">No competencies found</p>
+                    <p className="text-sm">Create your first competency to get started.</p>
+                    <Button className="mt-4" onClick={() => handleAdd("COMPETENCY")}>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Competency
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {capabilities.filter(c => c.type === "COMPETENCY").map((capability) => (
+                      <CapabilityCard
+                        key={capability.id}
+                        capability={capability}
+                        onEdit={handleEdit}
+                        onDelete={handleDelete}
+                        onStatusChange={handleStatusChange}
+                        onViewMappings={handleViewMappings}
+                      />
+                    ))}
+                  </div>
+                )}
+              </TabsContent>
+
+              <TabsContent value="values" className="mt-6">
+                <CompanyValuesTab companyId={companyFilter !== "all" ? companyFilter : companies[0]?.id || ""} />
               </TabsContent>
             </Tabs>
           </CardContent>

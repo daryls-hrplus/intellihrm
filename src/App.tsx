@@ -427,6 +427,7 @@ import MssHSEPage from "./pages/mss/MssHSEPage";
 import MssRecruitmentPage from "./pages/mss/MssRecruitmentPage";
 import MssTrainingPage from "./pages/mss/MssTrainingPage";
 import MyDevelopmentPlanPage from "./pages/ess/MyDevelopmentPlanPage";
+import MySkillGapsPage from "./pages/ess/MySkillGapsPage";
 import MssDevelopmentPlansPage from "./pages/mss/MssDevelopmentPlansPage";
 import MyFeedbackPage from "./pages/ess/MyFeedbackPage";
 import MyRecognitionPage from "./pages/ess/MyRecognitionPage";
@@ -676,6 +677,14 @@ const App = () => (
               element={
                 <ProtectedRoute moduleCode="ess">
                   <MyDevelopmentPlanPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/ess/skill-gaps"
+              element={
+                <ProtectedRoute moduleCode="ess">
+                  <MySkillGapsPage />
                 </ProtectedRoute>
               }
             />
