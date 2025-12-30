@@ -14,25 +14,31 @@ import { Progress } from "@/components/ui/progress";
 interface BatchGenerateIndicatorsButtonProps {
   companyId?: string;
   onComplete?: () => void;
+  includeCompetencies?: boolean;
 }
 
-const BATCH_SIZE = 5; // Process 5 skills at a time to avoid timeout
+const BATCH_SIZE = 5; // Process 5 items at a time to avoid timeout
 
 export function BatchGenerateIndicatorsButton({
   companyId,
   onComplete,
+  includeCompetencies = true,
 }: BatchGenerateIndicatorsButtonProps) {
   const [isGenerating, setIsGenerating] = useState(false);
-  const [missingCount, setMissingCount] = useState<number | null>(null);
+  const [skillCount, setSkillCount] = useState<number>(0);
+  const [competencyCount, setCompetencyCount] = useState<number>(0);
   const [progress, setProgress] = useState(0);
   const [processedCount, setProcessedCount] = useState(0);
 
-  useEffect(() => {
-    fetchMissingCount();
-  }, [companyId]);
+  const missingCount = skillCount + (includeCompetencies ? competencyCount : 0);
 
-  const fetchMissingCount = async () => {
-    let query = supabase
+  useEffect(() => {
+    fetchMissingCounts();
+  }, [companyId, includeCompetencies]);
+
+  const fetchMissingCounts = async () => {
+    // Count skills without indicators
+    let skillQuery = supabase
       .from("skills_competencies")
       .select("id", { count: "exact", head: true })
       .eq("type", "SKILL")
@@ -40,16 +46,33 @@ export function BatchGenerateIndicatorsButton({
       .is("proficiency_indicators", null);
 
     if (companyId) {
-      query = query.or(`company_id.eq.${companyId},company_id.is.null`);
+      skillQuery = skillQuery.or(`company_id.eq.${companyId},company_id.is.null`);
     }
 
-    const { count } = await query;
-    setMissingCount(count ?? 0);
+    const { count: skills } = await skillQuery;
+    setSkillCount(skills ?? 0);
+
+    // Count competencies without indicators
+    if (includeCompetencies) {
+      let compQuery = supabase
+        .from("skills_competencies")
+        .select("id", { count: "exact", head: true })
+        .eq("type", "COMPETENCY")
+        .eq("status", "active")
+        .is("proficiency_indicators", null);
+
+      if (companyId) {
+        compQuery = compQuery.or(`company_id.eq.${companyId},company_id.is.null`);
+      }
+
+      const { count: comps } = await compQuery;
+      setCompetencyCount(comps ?? 0);
+    }
   };
 
   const handleBatchGenerate = async () => {
     if (missingCount === 0) {
-      toast.info("All skills already have proficiency indicators");
+      toast.info("All items already have proficiency indicators");
       return;
     }
 
@@ -58,73 +81,78 @@ export function BatchGenerateIndicatorsButton({
     setProcessedCount(0);
 
     try {
-      // Fetch skills that need indicators
-      let query = supabase
-        .from("skills_competencies")
-        .select("id, name, description, code, type")
-        .eq("type", "SKILL")
-        .eq("status", "active")
-        .is("proficiency_indicators", null)
-        .limit(50); // Max 50 at a time
-
-      if (companyId) {
-        query = query.or(`company_id.eq.${companyId},company_id.is.null`);
+      // Build types to process
+      const typesToProcess: ('SKILL' | 'COMPETENCY')[] = ['SKILL'];
+      if (includeCompetencies && competencyCount > 0) {
+        typesToProcess.push('COMPETENCY');
       }
 
-      const { data: skills, error: fetchError } = await query;
-      if (fetchError) throw fetchError;
+      let totalProcessed = 0;
+      let totalSucceeded = 0;
+      let totalFailed = 0;
 
-      if (!skills || skills.length === 0) {
-        toast.info("No skills need indicators");
-        return;
+      for (const type of typesToProcess) {
+        // Fetch items that need indicators
+        let query = supabase
+          .from("skills_competencies")
+          .select("id, name, description, code, type, category")
+          .eq("type", type)
+          .eq("status", "active")
+          .is("proficiency_indicators", null)
+          .limit(50);
+
+        if (companyId) {
+          query = query.or(`company_id.eq.${companyId},company_id.is.null`);
+        }
+
+        const { data: items, error: fetchError } = await query;
+        if (fetchError) throw fetchError;
+
+        if (!items || items.length === 0) continue;
+
+        // Process in small batches
+        for (let i = 0; i < items.length; i += BATCH_SIZE) {
+          const batch = items.slice(i, i + BATCH_SIZE);
+          
+          // Process batch in parallel
+          const results = await Promise.allSettled(
+            batch.map(async (item) => {
+              const { data, error } = await supabase.functions.invoke(
+                "capability-ai-analyzer",
+                {
+                  body: {
+                    action: "generate_proficiency_indicators",
+                    capability: item,
+                  },
+                }
+              );
+              if (error) throw error;
+              return data;
+            })
+          );
+
+          results.forEach((result) => {
+            if (result.status === "fulfilled" && result.value?.saved) {
+              totalSucceeded++;
+            } else {
+              totalFailed++;
+            }
+          });
+
+          totalProcessed += batch.length;
+          setProcessedCount(totalProcessed);
+          setProgress((totalProcessed / missingCount) * 100);
+        }
       }
 
-      const total = skills.length;
-      let succeeded = 0;
-      let failed = 0;
-
-      // Process in small batches
-      for (let i = 0; i < skills.length; i += BATCH_SIZE) {
-        const batch = skills.slice(i, i + BATCH_SIZE);
-        
-        // Process batch in parallel
-        const results = await Promise.allSettled(
-          batch.map(async (skill) => {
-            const { data, error } = await supabase.functions.invoke(
-              "capability-ai-analyzer",
-              {
-                body: {
-                  action: "generate_proficiency_indicators",
-                  capability: skill,
-                },
-              }
-            );
-            if (error) throw error;
-            return data;
-          })
-        );
-
-        results.forEach((result) => {
-          if (result.status === "fulfilled" && result.value?.saved) {
-            succeeded++;
-          } else {
-            failed++;
-          }
-        });
-
-        const processed = Math.min(i + BATCH_SIZE, total);
-        setProcessedCount(processed);
-        setProgress((processed / total) * 100);
-      }
-
-      await fetchMissingCount();
+      await fetchMissingCounts();
       onComplete?.();
 
-      if (succeeded > 0) {
-        toast.success(`Generated indicators for ${succeeded} skills`);
+      if (totalSucceeded > 0) {
+        toast.success(`Generated indicators for ${totalSucceeded} items`);
       }
-      if (failed > 0) {
-        toast.warning(`${failed} skills failed to generate`);
+      if (totalFailed > 0) {
+        toast.warning(`${totalFailed} items failed to generate`);
       }
     } catch (err) {
       console.error("Batch generation error:", err);
@@ -159,7 +187,7 @@ export function BatchGenerateIndicatorsButton({
               {isGenerating 
                 ? `Generating (${processedCount}/${missingCount})...` 
                 : "Generate Indicators"}
-              {!isGenerating && missingCount !== null && missingCount > 0 && (
+              {!isGenerating && missingCount > 0 && (
                 <span className="ml-1.5 rounded-full bg-amber-100 dark:bg-amber-900/30 px-2 py-0.5 text-xs text-amber-700 dark:text-amber-400">
                   {missingCount}
                 </span>
@@ -173,10 +201,10 @@ export function BatchGenerateIndicatorsButton({
         <TooltipContent>
           <p>
             {isGenerating
-              ? `Processing ${processedCount} of ${missingCount} skills...`
+              ? `Processing ${processedCount} of ${missingCount} items...`
               : missingCount
-              ? `Generate AI proficiency indicators for ${missingCount} skills`
-              : "All skills have proficiency indicators"}
+              ? `Generate AI proficiency indicators for ${skillCount > 0 ? `${skillCount} skills` : ''}${skillCount > 0 && competencyCount > 0 ? ' + ' : ''}${competencyCount > 0 ? `${competencyCount} competencies` : ''}`
+              : "All items have proficiency indicators"}
           </p>
         </TooltipContent>
       </Tooltip>

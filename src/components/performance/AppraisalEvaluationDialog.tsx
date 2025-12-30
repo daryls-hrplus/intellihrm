@@ -10,7 +10,9 @@ import { Slider } from "@/components/ui/slider";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Target, Briefcase, Award, Save, Send, ChevronDown, ChevronUp, Loader2, GitBranch, Settings2, Users, Brain, Heart } from "lucide-react";
+import { Target, Briefcase, Award, Save, Send, ChevronDown, ChevronUp, Loader2, GitBranch, Settings2, Users, Brain, Heart, HelpCircle } from "lucide-react";
+import { CompetencyRatingCard } from "./CompetencyRatingCard";
+import { CompetencyProficiencyGuide } from "@/components/capabilities/CompetencyProficiencyGuide";
 import { useKRARatingSubmissions } from "@/hooks/useKRARatingSubmissions";
 import { KRAWithRating, ResponsibilityKRA } from "@/types/responsibilityKRA";
 import { KRARatingCard } from "./KRARatingCard";
@@ -34,6 +36,17 @@ import { ValuesAssessmentTab } from "./ValuesAssessmentTab";
 import { ValueScoreInput } from "@/types/valuesAssessment";
 import { useSkillGapManagement } from "@/hooks/performance/useSkillGapManagement";
 
+interface CompetencyMetadata {
+  selected_level?: number;
+  demonstrated_behaviors?: string[];
+  evidence?: string;
+  competency_version?: number;
+}
+
+interface ProficiencyIndicators {
+  [level: string]: string[];
+}
+
 interface AppraisalScore {
   id?: string;
   item_id: string;
@@ -53,6 +66,11 @@ interface AppraisalScore {
   // For multi-position tracking (concurrent positions)
   position_id?: string;
   position_title?: string;
+  // For competency behavioral indicators
+  proficiency_indicators?: ProficiencyIndicators;
+  competency_category?: string;
+  required_level?: number;
+  metadata?: CompetencyMetadata;
 }
 
 interface CycleInfo {
@@ -406,13 +424,30 @@ export function AppraisalEvaluationDialog({
       .is("end_date", null);
 
     const compIds = (competencies || []).map((c: any) => c.competency_id);
-    let compNames: Record<string, string> = {};
+    let compDetails: Record<string, { name: string; category?: string; proficiency_indicators?: ProficiencyIndicators }> = {};
     if (compIds.length > 0) {
-      const { data: compData } = await supabase
-        .from("competencies")
-        .select("id, name")
+      // First try skills_competencies table (for new unified model)
+      const { data: scData } = await supabase
+        .from("skills_competencies")
+        .select("id, name, category, proficiency_indicators")
         .in("id", compIds);
-      compNames = Object.fromEntries((compData || []).map((c: any) => [c.id, c.name]));
+      
+      if (scData && scData.length > 0) {
+        compDetails = Object.fromEntries(
+          scData.map((c: any) => [c.id, { 
+            name: c.name, 
+            category: c.category,
+            proficiency_indicators: c.proficiency_indicators as ProficiencyIndicators | undefined
+          }])
+        );
+      } else {
+        // Fallback to legacy competencies table
+        const { data: compData } = await supabase
+          .from("competencies")
+          .select("id, name")
+          .in("id", compIds);
+        compDetails = Object.fromEntries((compData || []).map((c: any) => [c.id, { name: c.name }]));
+      }
     }
 
     const { data: positions } = await supabase
@@ -467,14 +502,17 @@ export function AppraisalEvaluationDialog({
     const newScores: AppraisalScore[] = [];
 
     (competencies || []).forEach((comp: any) => {
+      const details = compDetails[comp.competency_id] || { name: "Unknown" };
       newScores.push({
         item_id: comp.competency_id,
-        item_name: compNames[comp.competency_id] || "Unknown",
+        item_name: details.name,
         evaluation_type: "competency",
         weight: comp.weighting || 0,
         rating: null,
         weighted_score: null,
         comments: "",
+        competency_category: details.category,
+        proficiency_indicators: details.proficiency_indicators,
       });
     });
 
@@ -543,12 +581,15 @@ export function AppraisalEvaluationDialog({
             (d) => d.item_id === score.item_id && d.evaluation_type === score.evaluation_type
           );
           if (existing) {
+            // Parse metadata if it exists (for competency behavioral indicators)
+            const metadata = existing.metadata as CompetencyMetadata | null;
             return {
               ...score,
               id: existing.id,
               rating: existing.rating,
               weighted_score: existing.weighted_score,
               comments: existing.comments || "",
+              metadata: metadata || undefined,
             };
           }
           return score;
@@ -575,6 +616,34 @@ export function AppraisalEvaluationDialog({
       prev.map((score) => {
         if (score.item_id === itemId && score.evaluation_type === type) {
           return { ...score, comments };
+        }
+        return score;
+      })
+    );
+  };
+
+  // Handle competency rating with behavioral indicators
+  const handleCompetencyScoreChange = (
+    itemId: string,
+    updates: Partial<{
+      rating: number | null;
+      comments: string;
+      metadata: CompetencyMetadata;
+    }>
+  ) => {
+    setScores((prev) =>
+      prev.map((score) => {
+        if (score.item_id === itemId && score.evaluation_type === "competency") {
+          const newRating = updates.rating ?? score.rating;
+          const maxRating = cycleInfo?.max_rating || 5;
+          const weightedScore = newRating !== null ? (newRating / maxRating) * score.weight : null;
+          return {
+            ...score,
+            rating: newRating,
+            weighted_score: weightedScore,
+            comments: updates.comments ?? score.comments,
+            metadata: updates.metadata ? { ...score.metadata, ...updates.metadata } : score.metadata,
+          };
         }
         return score;
       })
@@ -1010,6 +1079,63 @@ export function AppraisalEvaluationDialog({
     );
   };
 
+  // Render competency items with behavioral indicators (industry standard)
+  const renderCompetencyItems = () => {
+    const items = getScoresByType("competency");
+    const totalWeight = calculateTotalWeight("competency");
+
+    if (items.length === 0) {
+      return (
+        <div className="text-center py-8 text-muted-foreground">
+          No competencies assigned
+        </div>
+      );
+    }
+
+    return (
+      <div className="space-y-4">
+        <div className="flex justify-between items-center text-sm">
+          <span className="text-muted-foreground">Total weight: {totalWeight.toFixed(1)}%</span>
+          <div className="flex items-center gap-3">
+            <CompetencyProficiencyGuide 
+              trigger={
+                <Button variant="ghost" size="sm" className="gap-2">
+                  <HelpCircle className="h-4 w-4" />
+                  Assessment Guide
+                </Button>
+              }
+            />
+            <span className={totalWeight === 100 ? "text-success" : "text-warning"}>
+              {totalWeight === 100 ? "✓ Valid" : "Should total 100%"}
+            </span>
+          </div>
+        </div>
+
+        {items.map((item) => (
+          <CompetencyRatingCard
+            key={`competency-${item.item_id}`}
+            competencyId={item.item_id}
+            competencyName={item.item_name}
+            competencyCategory={item.competency_category}
+            weight={item.weight}
+            proficiencyIndicators={item.proficiency_indicators}
+            currentScore={{
+              rating: item.rating,
+              comments: item.comments,
+              metadata: item.metadata,
+            }}
+            isReadOnly={false}
+            onChange={(updates) => handleCompetencyScoreChange(item.item_id, updates)}
+            segmentName={item.segment_name}
+            positionTitle={item.position_title}
+            hasRoleChange={hasRoleChange}
+            hasMultiplePositions={hasMultiplePositions}
+          />
+        ))}
+      </div>
+    );
+  };
+
   const renderScoreItems = (type: "competency" | "goal") => {
     const items = getScoresByType(type);
     const totalWeight = calculateTotalWeight(type);
@@ -1345,7 +1471,7 @@ export function AppraisalEvaluationDialog({
             )}
 
             <TabsContent value="competencies" className="mt-4">
-              {renderScoreItems("competency")}
+              {renderCompetencyItems()}
             </TabsContent>
 
             <TabsContent value="responsibilities" className="mt-4">
