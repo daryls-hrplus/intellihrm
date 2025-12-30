@@ -71,7 +71,9 @@ import {
   Hash,
   Fingerprint,
   CreditCard,
+  TrendingDown,
 } from "lucide-react";
+import { EmployeeSkillGapsTab } from "@/components/employee/EmployeeSkillGapsTab";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { formatDateForDisplay } from "@/utils/dateUtils";
@@ -447,6 +449,7 @@ export default function EmployeeProfilePage() {
             <TabsTrigger value="pay_info"><Wallet className="h-4 w-4 mr-1" />Pay Information</TabsTrigger>
             <TabsTrigger value="professional_info"><FileSignature className="h-4 w-4 mr-1" />Professional Info</TabsTrigger>
             <TabsTrigger value="qualifications"><GraduationCap className="h-4 w-4 mr-1" />Qualifications</TabsTrigger>
+            <TabsTrigger value="skill_gaps"><TrendingDown className="h-4 w-4 mr-1" />Skill Gaps</TabsTrigger>
             {companyCountryCode === 'MX' && (
               <TabsTrigger value="mexico_payroll"><Banknote className="h-4 w-4 mr-1" />Mexico Payroll Data</TabsTrigger>
             )}
@@ -512,6 +515,10 @@ export default function EmployeeProfilePage() {
 
           <TabsContent value="pay_info" className="mt-6">
             <EmployeePayInfoTab employeeId={employee.id} />
+          </TabsContent>
+
+          <TabsContent value="skill_gaps" className="mt-6">
+            <EmployeeSkillGapsTab employeeId={employee.id} />
           </TabsContent>
 
           <TabsContent value="overview" className="mt-6">

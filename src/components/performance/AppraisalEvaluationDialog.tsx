@@ -10,7 +10,7 @@ import { Slider } from "@/components/ui/slider";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Target, Briefcase, Award, Save, Send, ChevronDown, ChevronUp, Loader2, GitBranch, Settings2, Users, Brain } from "lucide-react";
+import { Target, Briefcase, Award, Save, Send, ChevronDown, ChevronUp, Loader2, GitBranch, Settings2, Users, Brain, Heart } from "lucide-react";
 import { useKRARatingSubmissions } from "@/hooks/useKRARatingSubmissions";
 import { KRAWithRating, ResponsibilityKRA } from "@/types/responsibilityKRA";
 import { KRARatingCard } from "./KRARatingCard";
@@ -30,6 +30,8 @@ import { AppraisalEvidenceSummary } from "./AppraisalEvidenceSummary";
 import { useCommentAnalyzer } from "@/hooks/performance/useCommentAnalyzer";
 import { AppraisalAIAnalysisSummary } from "./AppraisalAIAnalysisSummary";
 import { CommentInflationWarning } from "./CommentInflationWarning";
+import { ValuesAssessmentTab } from "./ValuesAssessmentTab";
+import { ValueScoreInput } from "@/types/valuesAssessment";
 
 interface AppraisalScore {
   id?: string;
@@ -60,6 +62,8 @@ interface CycleInfo {
   max_rating: number;
   multi_position_mode?: "aggregate" | "separate";
   company_id?: string;
+  include_values_assessment?: boolean;
+  values_weight?: number;
 }
 
 interface ParticipantInfo {
@@ -107,6 +111,9 @@ export function AppraisalEvaluationDialog({
   const [selectedPositionId, setSelectedPositionId] = useState<string | null>(null);
   const [weightsDialogOpen, setWeightsDialogOpen] = useState(false);
   const [employeeId, setEmployeeId] = useState<string | null>(null);
+  
+  // Values assessment state
+  const [valueScores, setValueScores] = useState<ValueScoreInput[]>([]);
 
   const { fetchSegments } = useAppraisalRoleSegments();
   
@@ -169,10 +176,10 @@ export function AppraisalEvaluationDialog({
   const fetchData = async () => {
     setLoading(true);
     try {
-      // Fetch cycle info including multi_position_mode and company_id
+      // Fetch cycle info including multi_position_mode, company_id, and values settings
       const { data: cycleData } = await supabase
         .from("appraisal_cycles")
-        .select("competency_weight, responsibility_weight, goal_weight, min_rating, max_rating, multi_position_mode, company_id")
+        .select("competency_weight, responsibility_weight, goal_weight, min_rating, max_rating, multi_position_mode, company_id, include_values_assessment, values_weight")
         .eq("id", cycleId)
         .single();
 
@@ -180,6 +187,8 @@ export function AppraisalEvaluationDialog({
         setCycleInfo({
           ...cycleData,
           multi_position_mode: (cycleData.multi_position_mode as "aggregate" | "separate") || "aggregate",
+          include_values_assessment: cycleData.include_values_assessment || false,
+          values_weight: cycleData.values_weight || 0,
         });
       }
 
@@ -1278,7 +1287,7 @@ export function AppraisalEvaluationDialog({
 
           {/* Tabs for evaluation categories */}
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className={`grid w-full ${cycleInfo?.include_values_assessment ? 'grid-cols-4' : 'grid-cols-3'}`}>
               <TabsTrigger value="competencies" className="gap-2">
                 <Award className="h-4 w-4" />
                 Competencies
@@ -1291,6 +1300,12 @@ export function AppraisalEvaluationDialog({
                 <Target className="h-4 w-4" />
                 Goals
               </TabsTrigger>
+              {cycleInfo?.include_values_assessment && (
+                <TabsTrigger value="values" className="gap-2">
+                  <Heart className="h-4 w-4" />
+                  Values
+                </TabsTrigger>
+              )}
             </TabsList>
 
             {/* Segment Filter Tabs - show for multi-role employees */}
@@ -1326,6 +1341,18 @@ export function AppraisalEvaluationDialog({
             <TabsContent value="goals" className="mt-4">
               {renderScoreItems("goal")}
             </TabsContent>
+
+            {cycleInfo?.include_values_assessment && cycleInfo.company_id && employeeId && (
+              <TabsContent value="values" className="mt-4">
+                <ValuesAssessmentTab
+                  participantId={participantId}
+                  companyId={cycleInfo.company_id}
+                  evaluatorId={currentUserId || ""}
+                  isReadOnly={isEmployee}
+                  onScoresChange={setValueScores}
+                />
+              </TabsContent>
+            )}
           </Tabs>
 
           {/* Final Comments */}
