@@ -1695,6 +1695,7 @@ export type Database = {
           evaluation_deadline: string | null
           goal_weight: number
           id: string
+          include_values_assessment: boolean | null
           is_locked: boolean | null
           is_manager_cycle: boolean
           is_probation_review: boolean
@@ -1710,6 +1711,7 @@ export type Database = {
           start_date: string
           status: string
           updated_at: string
+          values_weight: number | null
         }
         Insert: {
           company_id: string
@@ -1723,6 +1725,7 @@ export type Database = {
           evaluation_deadline?: string | null
           goal_weight?: number
           id?: string
+          include_values_assessment?: boolean | null
           is_locked?: boolean | null
           is_manager_cycle?: boolean
           is_probation_review?: boolean
@@ -1738,6 +1741,7 @@ export type Database = {
           start_date: string
           status?: string
           updated_at?: string
+          values_weight?: number | null
         }
         Update: {
           company_id?: string
@@ -1751,6 +1755,7 @@ export type Database = {
           evaluation_deadline?: string | null
           goal_weight?: number
           id?: string
+          include_values_assessment?: boolean | null
           is_locked?: boolean | null
           is_manager_cycle?: boolean
           is_probation_review?: boolean
@@ -1766,6 +1771,7 @@ export type Database = {
           start_date?: string
           status?: string
           updated_at?: string
+          values_weight?: number | null
         }
         Relationships: [
           {
@@ -2127,6 +2133,7 @@ export type Database = {
         Row: {
           ai_analysis_id: string | null
           comments: string | null
+          competency_version: number | null
           created_at: string
           evaluation_type: string
           id: string
@@ -2147,6 +2154,7 @@ export type Database = {
         Insert: {
           ai_analysis_id?: string | null
           comments?: string | null
+          competency_version?: number | null
           created_at?: string
           evaluation_type: string
           id?: string
@@ -2167,6 +2175,7 @@ export type Database = {
         Update: {
           ai_analysis_id?: string | null
           comments?: string | null
+          competency_version?: number | null
           created_at?: string
           evaluation_type?: string
           id?: string
@@ -2204,6 +2213,67 @@ export type Database = {
             columns: ["participant_id"]
             isOneToOne: false
             referencedRelation: "appraisal_participants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      appraisal_value_scores: {
+        Row: {
+          assessed_by: string | null
+          comments: string | null
+          created_at: string | null
+          demonstrated_behaviors: Json | null
+          evidence: string | null
+          id: string
+          participant_id: string
+          rating: number | null
+          updated_at: string | null
+          value_id: string
+        }
+        Insert: {
+          assessed_by?: string | null
+          comments?: string | null
+          created_at?: string | null
+          demonstrated_behaviors?: Json | null
+          evidence?: string | null
+          id?: string
+          participant_id: string
+          rating?: number | null
+          updated_at?: string | null
+          value_id: string
+        }
+        Update: {
+          assessed_by?: string | null
+          comments?: string | null
+          created_at?: string | null
+          demonstrated_behaviors?: Json | null
+          evidence?: string | null
+          id?: string
+          participant_id?: string
+          rating?: number | null
+          updated_at?: string | null
+          value_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appraisal_value_scores_assessed_by_fkey"
+            columns: ["assessed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appraisal_value_scores_participant_id_fkey"
+            columns: ["participant_id"]
+            isOneToOne: false
+            referencedRelation: "appraisal_participants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appraisal_value_scores_value_id_fkey"
+            columns: ["value_id"]
+            isOneToOne: false
+            referencedRelation: "company_values"
             referencedColumns: ["id"]
           },
         ]
@@ -7057,6 +7127,59 @@ export type Database = {
         }
         Relationships: []
       }
+      company_values: {
+        Row: {
+          behavioral_indicators: Json | null
+          code: string | null
+          company_id: string
+          created_at: string | null
+          description: string | null
+          display_order: number | null
+          id: string
+          is_active: boolean | null
+          is_promotion_factor: boolean | null
+          name: string
+          updated_at: string | null
+          weight: number | null
+        }
+        Insert: {
+          behavioral_indicators?: Json | null
+          code?: string | null
+          company_id: string
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          is_promotion_factor?: boolean | null
+          name: string
+          updated_at?: string | null
+          weight?: number | null
+        }
+        Update: {
+          behavioral_indicators?: Json | null
+          code?: string | null
+          company_id?: string
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          is_promotion_factor?: boolean | null
+          name?: string
+          updated_at?: string | null
+          weight?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_values_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       compensation_budgets: {
         Row: {
           allocated_amount: number | null
@@ -7405,6 +7528,9 @@ export type Database = {
           proficiency_levels: Json | null
           start_date: string
           updated_at: string
+          version: number
+          version_notes: string | null
+          versioned_at: string | null
         }
         Insert: {
           category?: string
@@ -7421,6 +7547,9 @@ export type Database = {
           proficiency_levels?: Json | null
           start_date?: string
           updated_at?: string
+          version?: number
+          version_notes?: string | null
+          versioned_at?: string | null
         }
         Update: {
           category?: string
@@ -7437,6 +7566,9 @@ export type Database = {
           proficiency_levels?: Json | null
           start_date?: string
           updated_at?: string
+          version?: number
+          version_notes?: string | null
+          versioned_at?: string | null
         }
         Relationships: [
           {
@@ -13227,6 +13359,84 @@ export type Database = {
             columns: ["shift_id"]
             isOneToOne: false
             referencedRelation: "shifts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      employee_skill_gaps: {
+        Row: {
+          addressed_at: string | null
+          capability_id: string | null
+          capability_name: string
+          company_id: string | null
+          created_at: string | null
+          current_level: number
+          detected_at: string | null
+          employee_id: string
+          gap_score: number | null
+          id: string
+          idp_item_id: string | null
+          priority: string | null
+          recommended_actions: Json | null
+          required_level: number
+          source: string | null
+          source_reference_id: string | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          addressed_at?: string | null
+          capability_id?: string | null
+          capability_name: string
+          company_id?: string | null
+          created_at?: string | null
+          current_level: number
+          detected_at?: string | null
+          employee_id: string
+          gap_score?: number | null
+          id?: string
+          idp_item_id?: string | null
+          priority?: string | null
+          recommended_actions?: Json | null
+          required_level: number
+          source?: string | null
+          source_reference_id?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          addressed_at?: string | null
+          capability_id?: string | null
+          capability_name?: string
+          company_id?: string | null
+          created_at?: string | null
+          current_level?: number
+          detected_at?: string | null
+          employee_id?: string
+          gap_score?: number | null
+          id?: string
+          idp_item_id?: string | null
+          priority?: string | null
+          recommended_actions?: Json | null
+          required_level?: number
+          source?: string | null
+          source_reference_id?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_skill_gaps_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_skill_gaps_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
