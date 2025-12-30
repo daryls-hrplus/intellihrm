@@ -955,7 +955,7 @@
       },
       "feedback": {
         "title": "My Feedback",
-        "description": "Give and receive continuous feedback"
+        "description": "Give and receive continuous and 360 feedback"
       },
       "recognition": {
         "title": "My Recognition",
@@ -973,6 +973,12 @@
         "title": "Expense Claims",
         "description": "Submit and track expense reimbursements"
       }
+    },
+    "myFeedback": {
+      "title": "My Feedback",
+      "breadcrumb": "My Feedback",
+      "subtitle": "Give and receive continuous and 360 feedback",
+      "giveFeedback": "Give Feedback"
     }
   },
   "leave": {
