@@ -496,10 +496,12 @@ export function JobCapabilityRequirementsManager({
         <AlertDescription className="text-sm">
           <div className="flex flex-col gap-1">
             <span className="font-medium text-purple-800 dark:text-purple-300">
-              Competency-First Approach
+              Competencies — For Performance Appraisals
             </span>
             <span className="text-purple-700 dark:text-purple-400">
-              Competencies are evaluated in <strong>performance appraisals</strong>. Skills are linked underneath each competency for context and learning paths.
+              Competencies are evaluated in performance appraisals using behavioral indicators at each proficiency level. 
+              Each competency has a <strong>weight</strong> that contributes to the overall appraisal score. 
+              Skills linked to competencies provide supporting evidence but the <strong>competency level</strong> is what gets rated.
             </span>
             <div className="flex items-center gap-2 mt-1 text-xs text-purple-600 dark:text-purple-400">
               <span className="flex items-center gap-1">
