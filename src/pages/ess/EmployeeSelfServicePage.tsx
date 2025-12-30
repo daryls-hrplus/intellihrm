@@ -103,7 +103,7 @@ export default function EmployeeSelfServicePage() {
   const sections: ModuleSection[] = [
     {
       titleKey: "My Profile",
-      items: filterByAccess([allModules.profile, allModules.personalInfo, allModules.dependents, allModules.documents, allModules.letters, allModules.banking, allModules.governmentIds, allModules.medicalInfo, allModules.milestones]),
+      items: filterByAccess([allModules.profile, allModules.personalInfo, allModules.dependents, allModules.documents, allModules.letters, allModules.banking, allModules.governmentIds, allModules.medicalInfo, allModules.milestones, allModules.professionalInfo]),
     },
     {
       titleKey: "Skills & Capabilities",
@@ -118,8 +118,16 @@ export default function EmployeeSelfServicePage() {
       items: filterByAccess([allModules.payslips, allModules.compensation, allModules.benefits, allModules.expenses]),
     },
     {
-      titleKey: "Career & Development",
-      items: filterByAccess([allModules.onboarding, allModules.goals, allModules.goalInterviews, allModules.myAppraisals, allModules.appraisalInterviews, allModules.feedback, allModules.development, allModules.training, allModules.professionalInfo, allModules.jobs, allModules.recognition, allModules.offboarding]),
+      titleKey: "Performance",
+      items: filterByAccess([allModules.goals, allModules.goalInterviews, allModules.myAppraisals, allModules.appraisalInterviews, allModules.feedback, allModules.recognition]),
+    },
+    {
+      titleKey: "Learning & Development",
+      items: filterByAccess([allModules.development, allModules.training]),
+    },
+    {
+      titleKey: "Employee Lifecycle",
+      items: filterByAccess([allModules.onboarding, allModules.jobs, allModules.offboarding]),
     },
     {
       titleKey: "Workplace",
