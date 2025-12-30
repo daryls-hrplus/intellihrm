@@ -198,8 +198,8 @@ export function EssPendingAppraisalActions() {
 
         <div className="flex justify-end pt-2">
           <Button variant="outline" size="sm" asChild>
-            <NavLink to="/ess/development">
-              View Development Plan
+            <NavLink to="/ess/my-appraisals">
+              View My Appraisals
               <ChevronRight className="ml-1 h-4 w-4" />
             </NavLink>
           </Button>
