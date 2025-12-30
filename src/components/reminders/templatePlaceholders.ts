@@ -23,6 +23,11 @@ export const TEMPLATE_PLACEHOLDERS: TemplatePlaceholder[] = [
   { key: '{department}', label: 'Department', description: 'Employee department' },
   { key: '{position}', label: 'Position', description: 'Employee job position' },
   { key: '{company_name}', label: 'Company', description: 'Company name' },
+  
+  // Performance review details
+  { key: '{cycle_name}', label: 'Cycle Name', description: 'Appraisal/review cycle name' },
+  { key: '{response_deadline}', label: 'Response Deadline', description: 'Date response is due' },
+  { key: '{review_date}', label: 'Review Date', description: 'When manager submitted review' },
 ];
 
 // Helper to parse first/last name from full name

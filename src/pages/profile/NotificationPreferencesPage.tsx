@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Bell, Mail, Ticket, MessageSquare, Shield, Megaphone, Loader2 } from "lucide-react";
+import { Bell, Mail, Ticket, MessageSquare, Shield, Megaphone, Loader2, Target } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,6 +18,9 @@ interface NotificationPreferences {
   access_request_updates: boolean;
   system_announcements: boolean;
   email_notifications: boolean;
+  performance_review_updates: boolean;
+  review_response_reminders: boolean;
+  escalation_updates: boolean;
 }
 
 const defaultPreferences: NotificationPreferences = {
@@ -27,6 +30,9 @@ const defaultPreferences: NotificationPreferences = {
   access_request_updates: true,
   system_announcements: true,
   email_notifications: false,
+  performance_review_updates: true,
+  review_response_reminders: true,
+  escalation_updates: true,
 };
 
 export default function NotificationPreferencesPage() {
@@ -63,6 +69,9 @@ export default function NotificationPreferencesPage() {
         access_request_updates: data.access_request_updates,
         system_announcements: data.system_announcements,
         email_notifications: data.email_notifications,
+        performance_review_updates: data.performance_review_updates ?? true,
+        review_response_reminders: data.review_response_reminders ?? true,
+        escalation_updates: data.escalation_updates ?? true,
       });
     }
     setIsLoading(false);
@@ -125,6 +134,28 @@ export default function NotificationPreferencesPage() {
           key: "ticket_comment_added" as keyof NotificationPreferences,
           label: "New Comments",
           description: "When someone comments on your ticket",
+        },
+      ],
+    },
+    {
+      title: "Performance & Reviews",
+      description: "Notifications about performance appraisals and reviews",
+      icon: Target,
+      items: [
+        {
+          key: "performance_review_updates" as keyof NotificationPreferences,
+          label: "Performance Review Updates",
+          description: "Updates on your performance reviews and appraisals",
+        },
+        {
+          key: "review_response_reminders" as keyof NotificationPreferences,
+          label: "Response Reminders",
+          description: "Reminders to respond to manager reviews",
+        },
+        {
+          key: "escalation_updates" as keyof NotificationPreferences,
+          label: "Escalation Updates",
+          description: "Updates when HR responds to your escalations",
         },
       ],
     },
