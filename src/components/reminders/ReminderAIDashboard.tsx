@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -47,10 +48,27 @@ export function ReminderAIDashboard({
   onNavigateToRules,
   onNavigateToReminders 
 }: ReminderAIDashboardProps) {
+  const navigate = useNavigate();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [insights, setInsights] = useState<AIInsight[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+
+  const handleNavigateToRules = () => {
+    if (onNavigateToRules) {
+      onNavigateToRules();
+    } else {
+      navigate('/hr-hub/reminders?tab=rules');
+    }
+  };
+
+  const handleNavigateToReminders = () => {
+    if (onNavigateToReminders) {
+      onNavigateToReminders();
+    } else {
+      navigate('/hr-hub/reminders?tab=reminders');
+    }
+  };
 
   const fetchStats = async () => {
     if (!companyId || companyId === 'all') {
@@ -236,7 +254,7 @@ export function ReminderAIDashboard({
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 mb-4">
               <div 
                 className="p-3 bg-background rounded-lg border cursor-pointer hover:border-primary/30 transition-colors"
-                onClick={onNavigateToRules}
+                onClick={handleNavigateToRules}
               >
                 <div className="flex items-center gap-2 text-muted-foreground mb-1">
                   <Settings className="h-3.5 w-3.5" />
@@ -247,7 +265,7 @@ export function ReminderAIDashboard({
 
               <div 
                 className="p-3 bg-background rounded-lg border cursor-pointer hover:border-primary/30 transition-colors"
-                onClick={onNavigateToReminders}
+                onClick={handleNavigateToReminders}
               >
                 <div className="flex items-center gap-2 text-muted-foreground mb-1">
                   <Bell className="h-3.5 w-3.5" />
@@ -321,9 +339,9 @@ export function ReminderAIDashboard({
                               className="h-auto p-0 mt-1 text-xs"
                               onClick={() => {
                                 if (insight.action === 'Set up rules' || insight.action === 'Run AI analysis') {
-                                  onNavigateToRules?.();
+                                  handleNavigateToRules();
                                 } else {
-                                  onNavigateToReminders?.();
+                                  handleNavigateToReminders();
                                 }
                               }}
                             >
