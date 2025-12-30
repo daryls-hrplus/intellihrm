@@ -32,6 +32,7 @@ import {
 import { format, formatDistanceToNow, isPast, addMonths } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 interface Evidence {
   id: string;
@@ -179,12 +180,12 @@ export function EvidenceValidationPanel({
 
         <CardContent className="space-y-4">
           {/* Aggregate Stats */}
-          <div className="grid grid-cols-3 gap-4 p-3 rounded-lg bg-accent/30">
+          <div className="grid grid-cols-4 gap-4 p-3 rounded-lg bg-accent/30">
             <div>
-              <p className="text-xs text-muted-foreground">Avg Confidence</p>
+              <p className="text-xs text-muted-foreground">Confidence Score</p>
               <div className="flex items-center gap-2 mt-1">
                 <Progress value={avgConfidence * 100} className="h-2 flex-1" />
-                <span className="text-sm font-medium">{Math.round(avgConfidence * 100)}%</span>
+                <span className="text-sm font-bold">{Math.round(avgConfidence * 100)}</span>
               </div>
             </div>
             <div>
@@ -194,6 +195,15 @@ export function EvidenceValidationPanel({
             <div>
               <p className="text-xs text-muted-foreground">Pending</p>
               <p className="text-lg font-semibold text-yellow-600">{pendingCount}</p>
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Confidence Level</p>
+              <p className={cn(
+                "text-sm font-semibold",
+                avgConfidence >= 0.7 ? "text-green-600" : avgConfidence >= 0.4 ? "text-amber-600" : "text-destructive"
+              )}>
+                {avgConfidence >= 0.7 ? "High" : avgConfidence >= 0.4 ? "Medium" : "Low"}
+              </p>
             </div>
           </div>
 

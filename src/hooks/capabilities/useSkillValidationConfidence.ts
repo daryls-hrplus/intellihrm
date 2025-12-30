@@ -203,7 +203,8 @@ export function useSkillValidationConfidence() {
   const updateEvidenceConfidence = useCallback(async (
     evidenceId: string,
     confidence: ValidationConfidence,
-    sourceType?: ValidationSourceType
+    sourceType?: ValidationSourceType,
+    numericScore?: number
   ): Promise<boolean> => {
     try {
       const updateData: any = {
@@ -213,6 +214,11 @@ export function useSkillValidationConfidence() {
       
       if (sourceType) {
         updateData.validation_source_type = sourceType;
+      }
+      
+      // Persist numeric score (0-100 converted to 0-1 for database)
+      if (numericScore !== undefined) {
+        updateData.confidence_score = numericScore / 100;
       }
 
       const { error } = await supabase
@@ -230,6 +236,47 @@ export function useSkillValidationConfidence() {
       return false;
     }
   }, []);
+
+  const persistConfidenceScores = useCallback(async (
+    capabilityId: string,
+    employeeId: string
+  ): Promise<boolean> => {
+    try {
+      // Fetch all evidence for this capability/employee
+      const { data: evidence, error: fetchError } = await supabase
+        .from("competency_evidence")
+        .select("id, evidence_source, validation_status, proficiency_level, validated_at")
+        .eq("competency_id", capabilityId)
+        .eq("employee_id", employeeId);
+
+      if (fetchError) throw fetchError;
+      if (!evidence || evidence.length === 0) return true;
+
+      // Calculate confidence for all evidence
+      const result = calculateConfidence(evidence.map(e => ({
+        evidence_source: e.evidence_source,
+        validation_status: e.validation_status,
+        proficiency_level: e.proficiency_level,
+        validated_at: e.validated_at,
+      })));
+
+      // Update all evidence records with the calculated score
+      const { error: updateError } = await supabase
+        .from("competency_evidence")
+        .update({ 
+          confidence_score: result.score / 100, // Store as 0-1 decimal
+        })
+        .eq("competency_id", capabilityId)
+        .eq("employee_id", employeeId);
+
+      if (updateError) throw updateError;
+      
+      return true;
+    } catch (error: any) {
+      console.error("Error persisting confidence scores:", error);
+      return false;
+    }
+  }, [calculateConfidence]);
 
   const getConfidenceLabel = useCallback((confidence: ValidationConfidence): string => {
     switch (confidence) {
@@ -254,6 +301,7 @@ export function useSkillValidationConfidence() {
     calculateConfidence,
     getValidationSummary,
     updateEvidenceConfidence,
+    persistConfidenceScores,
     getConfidenceLabel,
     getConfidenceColor,
   };

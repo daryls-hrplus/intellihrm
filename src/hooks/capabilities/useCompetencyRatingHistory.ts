@@ -60,6 +60,9 @@ export interface DriftAnalysis {
   trend: 'IMPROVING' | 'STABLE' | 'DECLINING';
   periods_analyzed: number;
   avg_change_per_period: number;
+  // New: confidence tracking
+  current_confidence: number | null;
+  confidence_trend: 'IMPROVING' | 'STABLE' | 'DECLINING' | null;
 }
 
 export function useCompetencyRatingHistory() {
@@ -141,12 +144,14 @@ export function useCompetencyRatingHistory() {
     if (!user) return [];
 
     try {
+      // Fetch rating history
       const { data, error } = await supabase
         .from("competency_rating_history")
         .select(`
           capability_id,
           rating_level,
           rating_period_end,
+          avg_confidence_score,
           capability:skills_competencies(name)
         `)
         .eq("employee_id", employeeId)
@@ -162,15 +167,25 @@ export function useCompetencyRatingHistory() {
             capability_id: capId,
             capability_name: (record.capability as any)?.name || "Unknown",
             ratings: [],
+            confidences: [],
           };
         }
         acc[capId].ratings.push(record.rating_level);
+        if (record.avg_confidence_score !== null) {
+          acc[capId].confidences.push(record.avg_confidence_score);
+        }
         return acc;
-      }, {} as Record<string, { capability_id: string; capability_name: string; ratings: number[] }>);
+      }, {} as Record<string, { 
+        capability_id: string; 
+        capability_name: string; 
+        ratings: number[];
+        confidences: number[];
+      }>);
 
       // Calculate drift metrics
       return Object.values(byCapability).map(cap => {
         const ratings = cap.ratings;
+        const confidences = cap.confidences;
         const periodsAnalyzed = ratings.length;
         const currentLevel = ratings[ratings.length - 1] || 0;
         const previousLevel = ratings.length > 1 ? ratings[ratings.length - 2] : currentLevel;
@@ -182,6 +197,19 @@ export function useCompetencyRatingHistory() {
         if (avgChangePerPeriod > 0.1) trend = 'IMPROVING';
         else if (avgChangePerPeriod < -0.1) trend = 'DECLINING';
 
+        // Calculate confidence trend
+        const currentConfidence = confidences.length > 0 ? confidences[confidences.length - 1] : null;
+        let confidenceTrend: 'IMPROVING' | 'STABLE' | 'DECLINING' | null = null;
+        
+        if (confidences.length >= 2) {
+          const firstConf = confidences[0];
+          const lastConf = confidences[confidences.length - 1];
+          const confChange = lastConf - firstConf;
+          if (confChange > 0.05) confidenceTrend = 'IMPROVING';
+          else if (confChange < -0.05) confidenceTrend = 'DECLINING';
+          else confidenceTrend = 'STABLE';
+        }
+
         return {
           capability_id: cap.capability_id,
           capability_name: cap.capability_name,
@@ -191,6 +219,8 @@ export function useCompetencyRatingHistory() {
           trend,
           periods_analyzed: periodsAnalyzed,
           avg_change_per_period: Math.round(avgChangePerPeriod * 100) / 100,
+          current_confidence: currentConfidence,
+          confidence_trend: confidenceTrend,
         };
       });
     } catch (error: any) {
