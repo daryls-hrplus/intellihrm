@@ -16,6 +16,8 @@ import { Plus, Pencil, X, Bell, Mail, BellRing, Loader2, Calendar, User, Clock, 
 import { format } from 'date-fns';
 import type { EmployeeReminder, ReminderEventType } from '@/types/reminders';
 import { PRIORITY_OPTIONS, NOTIFICATION_METHODS, REMINDER_STATUS, REMINDER_CATEGORIES } from '@/types/reminders';
+import { GroupedEventTypeSelect } from './GroupedEventTypeSelect';
+import { GroupedEventTypeFilter } from './GroupedEventTypeFilter';
 import { supabase } from '@/integrations/supabase/client';
 import { formatDateForDisplay } from '@/utils/dateUtils';
 
@@ -320,19 +322,13 @@ export function EmployeeRemindersList({
               ))}
             </SelectContent>
           </Select>
-          <Select value={eventTypeFilter} onValueChange={setEventTypeFilter}>
-            <SelectTrigger className="w-[220px] bg-background">
-              <SelectValue placeholder="Event Type" />
-            </SelectTrigger>
-            <SelectContent className="bg-background border shadow-md z-50 max-h-[300px] min-w-[280px]">
-              <SelectItem value="all">All Event Types</SelectItem>
-              {filteredEventTypes.map((type) => (
-                <SelectItem key={type.id} value={type.id}>
-                  {type.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <GroupedEventTypeFilter
+            eventTypes={eventTypes}
+            value={eventTypeFilter}
+            onValueChange={setEventTypeFilter}
+            categoryFilter={categoryFilter}
+            placeholder="All Event Types"
+          />
         </div>
         <div className="flex items-center gap-2">
           <TooltipProvider>
@@ -417,19 +413,12 @@ export function EmployeeRemindersList({
                 </div>
                 <div className="space-y-2">
                   <Label>Event Type <span className="text-xs text-muted-foreground">(Optional)</span></Label>
-                  <Select
+                  <GroupedEventTypeSelect
+                    eventTypes={eventTypes}
                     value={formData.event_type_id}
                     onValueChange={(v) => setFormData({ ...formData, event_type_id: v })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select type (optional)" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {eventTypes.map((type) => (
-                        <SelectItem key={type.id} value={type.id}>{type.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    placeholder="Select type (optional)"
+                  />
                 </div>
               </div>
 
