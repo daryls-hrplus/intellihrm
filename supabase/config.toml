@@ -1,5 +1,8 @@
 project_id = "hmdewkkytchwrenqagkw"
 
+[functions.ess-ai-dashboard]
+verify_jwt = false
+
 [functions.extract-brand-colors]
 verify_jwt = false
 

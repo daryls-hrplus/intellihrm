@@ -4,6 +4,7 @@ import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { GroupedModuleCards, ModuleSection, GroupedModuleItem } from "@/components/ui/GroupedModuleCards";
 import { EmployeeRODWidget } from "@/components/ess/EmployeeRODWidget";
 import { EssPendingAppraisalActions } from "@/components/ess/EssPendingAppraisalActions";
+import { ESSAIDashboard } from "@/components/ess/ESSAIDashboard";
 import { useGranularPermissions } from "@/hooks/useGranularPermissions";
 import { useEssPendingActions } from "@/hooks/useEssPendingActions";
 import {
@@ -170,6 +171,9 @@ export default function EmployeeSelfServicePage() {
             {t("ess.subtitle")}
           </p>
         </div>
+
+        {/* AI-Powered Dashboard */}
+        <ESSAIDashboard />
 
         {/* Pending Resumption of Duty */}
         <EmployeeRODWidget />
