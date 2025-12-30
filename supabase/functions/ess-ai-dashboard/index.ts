@@ -60,13 +60,16 @@ serve(async (req) => {
     }
 
     // Fetch employee profile
-    const { data: profile } = await supabase
+    const { data: profile, error: profileError } = await supabase
       .from("profiles")
-      .select("id, full_name, email, job_title")
+      .select("id, full_name, first_name, email, job_title")
       .eq("id", userId)
       .single();
 
-    const firstName = profile?.full_name?.split(" ")[0] || "there";
+    console.log(`Profile fetch result:`, { profile, profileError });
+    
+    // Use first_name if available, otherwise extract from full_name
+    const firstName = profile?.first_name || profile?.full_name?.split(" ")[0] || "there";
     const today = new Date();
     const hour = today.getHours();
     const timeGreeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
