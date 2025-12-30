@@ -1,8 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger 
+} from '@/components/ui/dropdown-menu';
 import { 
   AlertTriangle, 
   TrendingDown, 
@@ -12,19 +19,115 @@ import {
   RefreshCw,
   ShieldAlert,
   Target,
-  Brain
+  Brain,
+  MoreVertical,
+  CheckCircle,
+  Eye,
+  FileText,
+  UserCheck
 } from 'lucide-react';
 import { usePerformanceRiskAnalyzer } from '@/hooks/performance/usePerformanceRiskAnalyzer';
 import { 
   RISK_TYPE_LABELS, 
   RISK_TYPE_DESCRIPTIONS,
   RISK_LEVEL_BADGE_VARIANTS,
-  type PerformanceRiskType 
+  type PerformanceRiskType,
+  type EmployeePerformanceRisk
 } from '@/types/performanceRisks';
-import { TalentRiskList } from './TalentRiskList';
 import { PerformanceTrendChart } from './PerformanceTrendChart';
 import { ToxicHighPerformerAlert } from './ToxicHighPerformerAlert';
 import { SkillsDecayWarning } from './SkillsDecayWarning';
+import { formatDistanceToNow } from 'date-fns';
+
+// Internal RiskListItem component
+function RiskListItem({ 
+  risk, 
+  onAcknowledge, 
+  onResolve, 
+  onCreateIDP 
+}: { 
+  risk: EmployeePerformanceRisk; 
+  onAcknowledge: (id: string) => void;
+  onResolve: (params: { riskId: string }) => void;
+  onCreateIDP: (params: { riskId: string; interventionType: string }) => void;
+}) {
+  const getInitials = (name: string) => {
+    return name?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '??';
+  };
+
+  return (
+    <div className="flex items-center justify-between p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors">
+      <div className="flex items-center gap-4">
+        <Avatar className="h-10 w-10">
+          <AvatarImage src={risk.employee?.avatar_url} />
+          <AvatarFallback>{getInitials(risk.employee?.full_name || '')}</AvatarFallback>
+        </Avatar>
+        
+        <div>
+          <div className="flex items-center gap-2">
+            <span className="font-medium">{risk.employee?.full_name || 'Unknown'}</span>
+            <Badge variant={RISK_LEVEL_BADGE_VARIANTS[risk.risk_level]}>
+              {risk.risk_level}
+            </Badge>
+            {risk.is_acknowledged && (
+              <Badge variant="outline" className="text-xs">Acknowledged</Badge>
+            )}
+          </div>
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <span>{RISK_TYPE_LABELS[risk.risk_type]}</span>
+            <span>•</span>
+            <span>Score: {risk.risk_score?.toFixed(0)}/100</span>
+            {risk.consecutive_underperformance_count > 0 && (
+              <>
+                <span>•</span>
+                <span>{risk.consecutive_underperformance_count} consecutive cycles</span>
+              </>
+            )}
+          </div>
+          <p className="text-xs text-muted-foreground mt-1">
+            Detected {formatDistanceToNow(new Date(risk.first_detected_at), { addSuffix: true })}
+          </p>
+        </div>
+      </div>
+
+      <div className="flex items-center gap-2">
+        {risk.succession_impact !== 'none' && (
+          <Badge variant={risk.succession_impact === 'excluded' ? 'destructive' : 'outline'} className="mr-2">
+            Succession: {risk.succession_impact}
+          </Badge>
+        )}
+        
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon">
+              <MoreVertical className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem>
+              <Eye className="h-4 w-4 mr-2" />
+              View Details
+            </DropdownMenuItem>
+            {!risk.is_acknowledged && (
+              <DropdownMenuItem onClick={() => onAcknowledge(risk.id)}>
+                <UserCheck className="h-4 w-4 mr-2" />
+                Acknowledge
+              </DropdownMenuItem>
+            )}
+            <DropdownMenuItem onClick={() => onCreateIDP({ riskId: risk.id, interventionType: 'idp' })}>
+              <FileText className="h-4 w-4 mr-2" />
+              Create IDP
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => onResolve({ riskId: risk.id })} className="text-green-600">
+              <CheckCircle className="h-4 w-4 mr-2" />
+              Mark Resolved
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+    </div>
+  );
+}
 
 interface PerformanceRiskDashboardProps {
   companyId?: string;
@@ -38,7 +141,10 @@ export function PerformanceRiskDashboard({ companyId }: PerformanceRiskDashboard
     analyzing,
     analyzeCompany,
     getHighRisks,
-    getCriticalRisks
+    getCriticalRisks,
+    acknowledgeRisk,
+    resolveRisk,
+    triggerIntervention
   } = usePerformanceRiskAnalyzer({ companyId });
 
   const criticalRisks = getCriticalRisks();
@@ -203,10 +309,43 @@ export function PerformanceRiskDashboard({ companyId }: PerformanceRiskDashboard
         </TabsList>
 
         <TabsContent value="all-risks">
-          <TalentRiskList 
-            risks={risks}
-            isLoading={isLoadingRisks}
-          />
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <AlertTriangle className="h-5 w-5" />
+                Performance Risk Registry ({risks.length})
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {isLoadingRisks ? (
+                <div className="space-y-4">
+                  {[1, 2, 3].map(i => (
+                    <div key={i} className="h-20 bg-muted rounded animate-pulse" />
+                  ))}
+                </div>
+              ) : risks.length === 0 ? (
+                <div className="py-12 text-center">
+                  <CheckCircle className="h-12 w-12 mx-auto text-green-500 mb-4" />
+                  <h3 className="text-lg font-medium">No Active Performance Risks</h3>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    All employees are performing within expected parameters
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {risks.map(risk => (
+                    <RiskListItem 
+                      key={risk.id}
+                      risk={risk}
+                      onAcknowledge={acknowledgeRisk}
+                      onResolve={resolveRisk}
+                      onCreateIDP={triggerIntervention}
+                    />
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="trends">
