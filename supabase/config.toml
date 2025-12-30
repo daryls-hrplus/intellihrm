@@ -290,3 +290,6 @@ verify_jwt = false
 
 [functions.mx-generate-idse]
 verify_jwt = false
+
+[functions.performance-risk-analyzer]
+verify_jwt = false
