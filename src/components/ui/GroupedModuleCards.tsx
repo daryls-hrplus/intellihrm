@@ -15,7 +15,8 @@ import {
   Rocket, 
   Building2, 
   CheckSquare, 
-  HelpCircle 
+  HelpCircle,
+  Compass
 } from "lucide-react";
 
 export interface GroupedModuleItem {
@@ -48,6 +49,7 @@ interface GroupedModuleCardsProps {
 const sectionIcons: Record<string, LucideIcon> = {
   "My Profile": User,
   "Skills & Capabilities": Sparkles,
+  "Career": Compass,
   "Time & Absence": Clock,
   "Pay & Benefits": CreditCard,
   "Performance": Target,

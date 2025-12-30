@@ -101,8 +101,6 @@ export function useEssPendingActions() {
           label: `${pendingIdpCount} active`,
           variant: "default",
         };
-      }
-
       return badges;
     },
     enabled: !!user?.id,
