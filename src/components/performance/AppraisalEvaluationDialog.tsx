@@ -36,6 +36,7 @@ import { CommentInflationWarning } from "./CommentInflationWarning";
 import { ValuesAssessmentTab } from "./ValuesAssessmentTab";
 import { ValueScoreInput } from "@/types/valuesAssessment";
 import { useSkillGapManagement } from "@/hooks/performance/useSkillGapManagement";
+import { AppraisalActionEnforcementDialog } from "./AppraisalActionEnforcementDialog";
 
 interface CompetencyMetadata {
   selected_level?: number;
@@ -134,6 +135,10 @@ export function AppraisalEvaluationDialog({
   
   // Values assessment state
   const [valueScores, setValueScores] = useState<ValueScoreInput[]>([]);
+  
+  // Action enforcement state
+  const [showEnforcementDialog, setShowEnforcementDialog] = useState(false);
+  const [pendingSubmit, setPendingSubmit] = useState(false);
 
   const { fetchSegments } = useAppraisalRoleSegments();
   
@@ -702,6 +707,29 @@ export function AppraisalEvaluationDialog({
       return score;
     }));
   }, [participantId, currentUserId, cycleInfo, fetchKRAsWithRatings, submitManagerRating]);
+
+  // Handle submit with enforcement check
+  const handleSubmitWithEnforcement = () => {
+    // For managers, check action rules before submitting
+    if (!isEmployee) {
+      setPendingSubmit(true);
+      setShowEnforcementDialog(true);
+    } else {
+      // Employees can submit directly (self-evaluation)
+      handleSave(true);
+    }
+  };
+
+  const handleEnforcementProceed = () => {
+    setShowEnforcementDialog(false);
+    handleSave(true);
+    setPendingSubmit(false);
+  };
+
+  const handleEnforcementCancel = () => {
+    setShowEnforcementDialog(false);
+    setPendingSubmit(false);
+  };
 
   const handleSave = async (submit: boolean = false) => {
     setSaving(true);
@@ -1502,7 +1530,7 @@ export function AppraisalEvaluationDialog({
               <Save className="mr-2 h-4 w-4" />
               Save Progress
             </Button>
-            <Button onClick={() => handleSave(true)} disabled={saving}>
+            <Button onClick={handleSubmitWithEnforcement} disabled={saving || pendingSubmit}>
               <Send className="mr-2 h-4 w-4" />
               Submit Evaluation
             </Button>
@@ -1526,6 +1554,15 @@ export function AppraisalEvaluationDialog({
         participantId={participantId}
         employeeName={employeeName}
         onSuccess={handleWeightsSuccess}
+      />
+
+      {/* Action Enforcement Dialog - shows before finalization */}
+      <AppraisalActionEnforcementDialog
+        open={showEnforcementDialog}
+        onOpenChange={setShowEnforcementDialog}
+        participantId={participantId}
+        onProceed={handleEnforcementProceed}
+        onCancel={handleEnforcementCancel}
       />
     </Dialog>
   );
