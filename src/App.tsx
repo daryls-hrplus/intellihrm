@@ -463,6 +463,9 @@ import MyGovernmentIdsPage from "./pages/ess/MyGovernmentIdsPage";
 import MyImmigrationPage from "./pages/ess/MyImmigrationPage";
 import MyMedicalInfoPage from "./pages/ess/MyMedicalInfoPage";
 import MyEvidencePortfolioPage from "./pages/ess/MyEvidencePortfolioPage";
+import MyCareerPathsPage from "./pages/ess/MyCareerPathsPage";
+import MyCareerPlanPage from "./pages/ess/MyCareerPlanPage";
+import MyMentorshipPage from "./pages/ess/MyMentorshipPage";
 import EmployeeDirectoryPage from "./pages/admin/EmployeeDirectoryPage";
 import CompanyAnnouncementsPage from "./pages/admin/CompanyAnnouncementsPage";
 import ApprovalDelegationsPage from "./pages/admin/ApprovalDelegationsPage";
@@ -3770,6 +3773,30 @@ const App = () => (
               element={
                 <ProtectedRoute moduleCode="ess">
                   <EmployeeDirectoryPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/ess/career-paths"
+              element={
+                <ProtectedRoute moduleCode="ess">
+                  <MyCareerPathsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/ess/career-plan"
+              element={
+                <ProtectedRoute moduleCode="ess">
+                  <MyCareerPlanPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/ess/mentorship"
+              element={
+                <ProtectedRoute moduleCode="ess">
+                  <MyMentorshipPage />
                 </ProtectedRoute>
               }
             />

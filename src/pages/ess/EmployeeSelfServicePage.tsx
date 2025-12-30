@@ -42,6 +42,8 @@ import {
   Plane,
   Stethoscope,
   FolderOpen,
+  Compass,
+  Route,
 } from "lucide-react";
 
 export default function EmployeeSelfServicePage() {
@@ -97,6 +99,10 @@ export default function EmployeeSelfServicePage() {
     medicalInfo: { title: t("ess.modules.medicalInfo.title", "Medical Information"), description: t("ess.modules.medicalInfo.description", "Manage your emergency medical details"), href: "/ess/medical-info", icon: Stethoscope, color: "bg-red-500/10 text-red-600", tabCode: "ess-medical-info" },
     immigration: { title: t("ess.modules.immigration.title", "Immigration & Permits"), description: t("ess.modules.immigration.description", "View work permits and travel documents"), href: "/ess/immigration", icon: Plane, color: "bg-sky-500/10 text-sky-600", tabCode: "ess-immigration" },
     professionalInfo: { title: t("ess.modules.professionalInfo.title", "Professional Info"), description: t("ess.modules.professionalInfo.description", "View credentials, agreements, and work history"), href: "/ess/professional-info", icon: Briefcase, color: "bg-indigo-500/10 text-indigo-600", tabCode: "ess-professional-info" },
+    // Career section modules
+    careerPlan: { title: t("ess.modules.careerPlan.title", "My Career Plan"), description: t("ess.modules.careerPlan.description", "Plan and track your career growth"), href: "/ess/career-plan", icon: Compass, color: "bg-violet-500/10 text-violet-600", tabCode: "ess-career-plan" },
+    careerPaths: { title: t("ess.modules.careerPaths.title", "My Career Paths"), description: t("ess.modules.careerPaths.description", "Explore career progression opportunities"), href: "/ess/career-paths", icon: Route, color: "bg-cyan-500/10 text-cyan-600", tabCode: "ess-career-paths" },
+    mentorship: { title: t("ess.modules.mentorship.title", "My Mentorship"), description: t("ess.modules.mentorship.description", "Connect with mentors and support mentees"), href: "/ess/mentorship", icon: Users, color: "bg-rose-500/10 text-rose-600", tabCode: "ess-mentorship" },
   };
 
   const filterByAccess = (modules: GroupedModuleItem[]) =>
@@ -105,11 +111,15 @@ export default function EmployeeSelfServicePage() {
   const sections: ModuleSection[] = [
     {
       titleKey: "My Profile",
-      items: filterByAccess([allModules.profile, allModules.personalInfo, allModules.dependents, allModules.documents, allModules.letters, allModules.banking, allModules.governmentIds, allModules.medicalInfo, allModules.milestones, allModules.professionalInfo]),
+      items: filterByAccess([allModules.profile, allModules.personalInfo, allModules.dependents, allModules.documents, allModules.letters, allModules.banking, allModules.governmentIds, allModules.medicalInfo]),
     },
     {
       titleKey: "Skills & Capabilities",
       items: filterByAccess([allModules.competencies, allModules.qualifications, allModules.skillGaps, allModules.evidencePortfolio, allModules.interests]),
+    },
+    {
+      titleKey: "Career",
+      items: filterByAccess([allModules.careerPlan, allModules.careerPaths, allModules.jobs, allModules.mentorship, allModules.professionalInfo, allModules.milestones]),
     },
     {
       titleKey: "Time & Absence",
@@ -129,7 +139,7 @@ export default function EmployeeSelfServicePage() {
     },
     {
       titleKey: "Employee Lifecycle",
-      items: filterByAccess([allModules.onboarding, allModules.jobs, allModules.offboarding]),
+      items: filterByAccess([allModules.onboarding, allModules.offboarding]),
     },
     {
       titleKey: "Workplace",
