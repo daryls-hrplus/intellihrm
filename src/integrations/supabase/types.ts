@@ -2141,6 +2141,7 @@ export type Database = {
           is_overridden: boolean | null
           item_id: string
           item_name: string
+          metadata: Json | null
           original_rating: number | null
           overridden_at: string | null
           overridden_by: string | null
@@ -2162,6 +2163,7 @@ export type Database = {
           is_overridden?: boolean | null
           item_id: string
           item_name: string
+          metadata?: Json | null
           original_rating?: number | null
           overridden_at?: string | null
           overridden_by?: string | null
@@ -2183,6 +2185,7 @@ export type Database = {
           is_overridden?: boolean | null
           item_id?: string
           item_name?: string
+          metadata?: Json | null
           original_rating?: number | null
           overridden_at?: string | null
           overridden_by?: string | null
