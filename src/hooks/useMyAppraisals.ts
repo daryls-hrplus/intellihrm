@@ -24,6 +24,7 @@ export interface MyAppraisal {
   mandatory_actions_count: number;
   evaluation_deadline: string | null;
   position_title: string | null;
+  company_id: string | null;
 }
 
 export function useMyAppraisals() {
@@ -53,6 +54,7 @@ export function useMyAppraisals() {
           cycle:appraisal_cycles!inner(
             id,
             name,
+            company_id,
             start_date,
             end_date,
             status,
@@ -140,6 +142,7 @@ export function useMyAppraisals() {
           mandatory_actions_count: actionCounts[p.id]?.mandatory || 0,
           evaluation_deadline: cycle.evaluation_deadline,
           position_title: p.primary_position_id ? positionMap[p.primary_position_id] || null : null,
+          company_id: cycle.company_id,
         };
       });
     },
