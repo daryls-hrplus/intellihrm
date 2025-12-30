@@ -117,7 +117,7 @@ export default function ManagerSelfServicePage() {
         {/* Resumption of Duty Widget */}
         <ManagerRODWidget />
 
-        <GroupedModuleCards sections={sections} />
+        <GroupedModuleCards sections={sections} defaultOpen={false} />
       </div>
     </AppLayout>
   );
