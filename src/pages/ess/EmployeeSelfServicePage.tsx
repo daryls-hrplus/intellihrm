@@ -100,7 +100,7 @@ export default function EmployeeSelfServicePage() {
     },
     {
       titleKey: "Career & Development",
-      items: filterByAccess([allModules.myAppraisals, allModules.training, allModules.goals, allModules.goalInterviews, allModules.development, allModules.appraisalInterviews, allModules.feedback, allModules.recognition, allModules.onboarding, allModules.offboarding]),
+      items: filterByAccess([allModules.onboarding, allModules.goals, allModules.goalInterviews, allModules.myAppraisals, allModules.appraisalInterviews, allModules.feedback, allModules.development, allModules.training, allModules.recognition, allModules.offboarding]),
     },
     {
       titleKey: "Workplace Resources",
