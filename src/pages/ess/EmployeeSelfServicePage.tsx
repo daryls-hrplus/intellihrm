@@ -93,7 +93,7 @@ export default function EmployeeSelfServicePage() {
     // NEW ESS MODULES
     competencies: { title: t("ess.modules.competencies.title", "My Competencies"), description: t("ess.modules.competencies.description", "View your competency assessments and levels"), href: "/ess/competencies", icon: Award, color: "bg-purple-500/10 text-purple-600", tabCode: "ess-competencies" },
     skillGaps: { title: t("ess.modules.skillGaps.title", "My Skill Gaps"), description: t("ess.modules.skillGaps.description", "View development areas and recommendations"), href: "/ess/skill-gaps", icon: TrendingDown, color: "bg-orange-500/10 text-orange-600", tabCode: "ess-skill-gaps" },
-    evidencePortfolio: { title: t("ess.modules.evidencePortfolio.title", "Evidence Portfolio"), description: t("ess.modules.evidencePortfolio.description", "Manage your achievement evidence"), href: "/ess/evidence-portfolio", icon: FolderOpen, color: "bg-teal-500/10 text-teal-600", tabCode: "ess-evidence-portfolio" },
+    evidencePortfolio: { title: t("ess.modules.evidencePortfolio.title", "Evidence Portfolio"), description: t("ess.modules.evidencePortfolio.description", "Attach and manage evidence for your goals and appraisals"), href: "/ess/evidence-portfolio", icon: FolderOpen, color: "bg-teal-500/10 text-teal-600", tabCode: "ess-evidence-portfolio" },
     interests: { title: t("ess.modules.interests.title", "My Interests"), description: t("ess.modules.interests.description", "Manage your interests and hobbies"), href: "/ess/interests", icon: Sparkles, color: "bg-pink-500/10 text-pink-600", tabCode: "ess-interests" },
     governmentIds: { title: t("ess.modules.governmentIds.title", "My Government IDs"), description: t("ess.modules.governmentIds.description", "View and manage your identification documents"), href: "/ess/government-ids", icon: IdCard, color: "bg-slate-500/10 text-slate-600", tabCode: "ess-government-ids" },
     medicalInfo: { title: t("ess.modules.medicalInfo.title", "Medical Information"), description: t("ess.modules.medicalInfo.description", "Manage your emergency medical details"), href: "/ess/medical-info", icon: Stethoscope, color: "bg-red-500/10 text-red-600", tabCode: "ess-medical-info" },
@@ -115,7 +115,7 @@ export default function EmployeeSelfServicePage() {
     },
     {
       titleKey: "Skills & Capabilities",
-      items: filterByAccess([allModules.competencies, allModules.qualifications, allModules.skillGaps, allModules.evidencePortfolio, allModules.interests]),
+      items: filterByAccess([allModules.competencies, allModules.qualifications, allModules.skillGaps, allModules.interests]),
     },
     {
       titleKey: "Career",
@@ -131,7 +131,7 @@ export default function EmployeeSelfServicePage() {
     },
     {
       titleKey: "Performance",
-      items: filterByAccess([allModules.goals, allModules.goalInterviews, allModules.myAppraisals, allModules.appraisalInterviews, allModules.feedback, allModules.recognition]),
+      items: filterByAccess([allModules.myAppraisals, allModules.goals, allModules.evidencePortfolio, allModules.feedback, allModules.goalInterviews, allModules.appraisalInterviews, allModules.recognition]),
     },
     {
       titleKey: "Learning & Development",
