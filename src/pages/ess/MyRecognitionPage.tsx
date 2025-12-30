@@ -47,23 +47,23 @@ export default function MyRecognitionPage() {
       <div className="space-y-6">
         <Breadcrumbs
           items={[
-            { label: t('navigation.ess'), href: "/ess" },
-            { label: t('ess.myRecognition.breadcrumb') },
+            { label: t('navigation.ess', 'Employee Self Service'), href: "/ess" },
+            { label: t('ess.myRecognition.breadcrumb', 'Recognition') },
           ]}
         />
 
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">{t('ess.myRecognition.title')}</h1>
+            <h1 className="text-3xl font-bold tracking-tight">{t('ess.myRecognition.title', 'My Recognition')}</h1>
             <p className="text-muted-foreground">
-              {t('ess.myRecognition.subtitle')}
+              {t('ess.myRecognition.subtitle', 'Give and receive recognition from your colleagues')}
             </p>
           </div>
           <div className="flex items-center gap-2">
             <RecognitionNotifications />
             <Button onClick={() => setDialogOpen(true)}>
               <Plus className="mr-2 h-4 w-4" />
-              {t('ess.myRecognition.recognizeSomeone')}
+              {t('ess.myRecognition.recognizeSomeone', 'Recognize Someone')}
             </Button>
           </div>
         </div>
