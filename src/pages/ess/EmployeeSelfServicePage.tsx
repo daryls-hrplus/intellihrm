@@ -119,7 +119,7 @@ export default function EmployeeSelfServicePage() {
     },
     {
       titleKey: "Career",
-      items: filterByAccess([allModules.careerPlan, allModules.careerPaths, allModules.jobs, allModules.mentorship, allModules.professionalInfo, allModules.milestones]),
+      items: filterByAccess([allModules.professionalInfo, allModules.careerPlan, allModules.careerPaths, allModules.mentorship, allModules.jobs, allModules.milestones]),
     },
     {
       titleKey: "Time & Absence",
