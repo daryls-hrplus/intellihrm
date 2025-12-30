@@ -2281,9 +2281,12 @@ export type Database = {
           cycle_id: string
           employee_comments: string | null
           employee_id: string
+          employee_response_due_at: string | null
+          employee_response_status: string | null
           evaluator_id: string | null
           final_comments: string | null
           goal_score: number | null
+          has_employee_response: boolean | null
           has_role_change: boolean | null
           id: string
           overall_score: number | null
@@ -2301,9 +2304,12 @@ export type Database = {
           cycle_id: string
           employee_comments?: string | null
           employee_id: string
+          employee_response_due_at?: string | null
+          employee_response_status?: string | null
           evaluator_id?: string | null
           final_comments?: string | null
           goal_score?: number | null
+          has_employee_response?: boolean | null
           has_role_change?: boolean | null
           id?: string
           overall_score?: number | null
@@ -2321,9 +2327,12 @@ export type Database = {
           cycle_id?: string
           employee_comments?: string | null
           employee_id?: string
+          employee_response_due_at?: string | null
+          employee_response_status?: string | null
           evaluator_id?: string | null
           final_comments?: string | null
           goal_score?: number | null
+          has_employee_response?: boolean | null
           has_role_change?: boolean | null
           id?: string
           overall_score?: number | null
@@ -13481,6 +13490,217 @@ export type Database = {
             columns: ["rule_id"]
             isOneToOne: false
             referencedRelation: "reminder_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      employee_response_configuration: {
+        Row: {
+          allow_disagree: boolean | null
+          allow_hr_escalation: boolean | null
+          allow_late_responses: boolean | null
+          allow_manager_rebuttal: boolean | null
+          allow_partial_disagree: boolean | null
+          auto_escalate_on_disagree: boolean | null
+          company_id: string
+          created_at: string | null
+          cycle_id: string | null
+          id: string
+          include_in_permanent_record: boolean | null
+          is_enabled: boolean | null
+          notify_hr_on_disagreement: boolean | null
+          notify_hr_on_escalation: boolean | null
+          require_comments_for_disagree: boolean | null
+          response_window_days: number | null
+          show_response_to_manager: boolean | null
+          updated_at: string | null
+        }
+        Insert: {
+          allow_disagree?: boolean | null
+          allow_hr_escalation?: boolean | null
+          allow_late_responses?: boolean | null
+          allow_manager_rebuttal?: boolean | null
+          allow_partial_disagree?: boolean | null
+          auto_escalate_on_disagree?: boolean | null
+          company_id: string
+          created_at?: string | null
+          cycle_id?: string | null
+          id?: string
+          include_in_permanent_record?: boolean | null
+          is_enabled?: boolean | null
+          notify_hr_on_disagreement?: boolean | null
+          notify_hr_on_escalation?: boolean | null
+          require_comments_for_disagree?: boolean | null
+          response_window_days?: number | null
+          show_response_to_manager?: boolean | null
+          updated_at?: string | null
+        }
+        Update: {
+          allow_disagree?: boolean | null
+          allow_hr_escalation?: boolean | null
+          allow_late_responses?: boolean | null
+          allow_manager_rebuttal?: boolean | null
+          allow_partial_disagree?: boolean | null
+          auto_escalate_on_disagree?: boolean | null
+          company_id?: string
+          created_at?: string | null
+          cycle_id?: string | null
+          id?: string
+          include_in_permanent_record?: boolean | null
+          is_enabled?: boolean | null
+          notify_hr_on_disagreement?: boolean | null
+          notify_hr_on_escalation?: boolean | null
+          require_comments_for_disagree?: boolean | null
+          response_window_days?: number | null
+          show_response_to_manager?: boolean | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_response_configuration_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_response_configuration_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "appraisal_cycles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      employee_review_responses: {
+        Row: {
+          appraisal_participant_id: string | null
+          company_id: string
+          created_at: string | null
+          employee_comments: string | null
+          employee_id: string
+          escalated_at: string | null
+          escalation_category: string | null
+          escalation_reason: string | null
+          goal_rating_submission_id: string | null
+          hr_action_taken: string | null
+          hr_response: string | null
+          hr_reviewed_at: string | null
+          hr_reviewer_id: string | null
+          id: string
+          is_escalated_to_hr: boolean | null
+          manager_id: string | null
+          manager_rebuttal: string | null
+          manager_rebuttal_at: string | null
+          response_deadline: string | null
+          response_type: string
+          specific_disagreements: Json | null
+          status: string | null
+          submitted_at: string | null
+          updated_at: string | null
+          visible_in_record: boolean | null
+          visible_to_hr: boolean | null
+          visible_to_manager: boolean | null
+        }
+        Insert: {
+          appraisal_participant_id?: string | null
+          company_id: string
+          created_at?: string | null
+          employee_comments?: string | null
+          employee_id: string
+          escalated_at?: string | null
+          escalation_category?: string | null
+          escalation_reason?: string | null
+          goal_rating_submission_id?: string | null
+          hr_action_taken?: string | null
+          hr_response?: string | null
+          hr_reviewed_at?: string | null
+          hr_reviewer_id?: string | null
+          id?: string
+          is_escalated_to_hr?: boolean | null
+          manager_id?: string | null
+          manager_rebuttal?: string | null
+          manager_rebuttal_at?: string | null
+          response_deadline?: string | null
+          response_type: string
+          specific_disagreements?: Json | null
+          status?: string | null
+          submitted_at?: string | null
+          updated_at?: string | null
+          visible_in_record?: boolean | null
+          visible_to_hr?: boolean | null
+          visible_to_manager?: boolean | null
+        }
+        Update: {
+          appraisal_participant_id?: string | null
+          company_id?: string
+          created_at?: string | null
+          employee_comments?: string | null
+          employee_id?: string
+          escalated_at?: string | null
+          escalation_category?: string | null
+          escalation_reason?: string | null
+          goal_rating_submission_id?: string | null
+          hr_action_taken?: string | null
+          hr_response?: string | null
+          hr_reviewed_at?: string | null
+          hr_reviewer_id?: string | null
+          id?: string
+          is_escalated_to_hr?: boolean | null
+          manager_id?: string | null
+          manager_rebuttal?: string | null
+          manager_rebuttal_at?: string | null
+          response_deadline?: string | null
+          response_type?: string
+          specific_disagreements?: Json | null
+          status?: string | null
+          submitted_at?: string | null
+          updated_at?: string | null
+          visible_in_record?: boolean | null
+          visible_to_hr?: boolean | null
+          visible_to_manager?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_review_responses_appraisal_participant_id_fkey"
+            columns: ["appraisal_participant_id"]
+            isOneToOne: false
+            referencedRelation: "appraisal_participants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_review_responses_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_review_responses_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_review_responses_goal_rating_submission_id_fkey"
+            columns: ["goal_rating_submission_id"]
+            isOneToOne: false
+            referencedRelation: "goal_rating_submissions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_review_responses_hr_reviewer_id_fkey"
+            columns: ["hr_reviewer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_review_responses_manager_id_fkey"
+            columns: ["manager_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
