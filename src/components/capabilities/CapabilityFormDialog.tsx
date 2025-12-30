@@ -31,6 +31,7 @@ import {
 } from "@/hooks/useCapabilities";
 import { EnhancedJobApplicabilitySelect } from "./EnhancedJobApplicabilitySelect";
 import { useCapabilityJobApplicability, JobRequirementInput } from "@/hooks/useCapabilityJobApplicability";
+import { CompetencyBehavioralLevelsEditor, ProficiencyIndicators } from "./CompetencyBehavioralLevelsEditor";
 
 interface CapabilityFormDialogProps {
   open: boolean;
@@ -97,11 +98,16 @@ export function CapabilityFormDialog({
   const [newRole, setNewRole] = useState("");
   const [saving, setSaving] = useState(false);
   const [selectedJobRequirements, setSelectedJobRequirements] = useState<JobRequirementInput[]>([]);
+  const [proficiencyIndicators, setProficiencyIndicators] = useState<ProficiencyIndicators>({});
 
   const { requirements, fetchApplicability, bulkSetApplicability } = useCapabilityJobApplicability();
 
   useEffect(() => {
     if (capability) {
+      // Parse proficiency_indicators from capability metadata if it exists
+      const existingIndicators = (capability as any).proficiency_indicators || {};
+      setProficiencyIndicators(existingIndicators);
+      
       setFormData({
         company_id: capability.company_id,
         type: capability.type,
@@ -142,6 +148,7 @@ export function CapabilityFormDialog({
         });
       }
     } else {
+      setProficiencyIndicators({});
       setFormData({
         company_id: null,
         type: defaultType,
@@ -277,9 +284,12 @@ export function CapabilityFormDialog({
         </DialogHeader>
 
         <Tabs defaultValue="basic" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className={`grid w-full ${formData.type === "COMPETENCY" ? "grid-cols-4" : "grid-cols-3"}`}>
             <TabsTrigger value="basic">Basic Info</TabsTrigger>
             <TabsTrigger value="governance">Governance</TabsTrigger>
+            {formData.type === "COMPETENCY" && (
+              <TabsTrigger value="behaviors">Behavioral Levels</TabsTrigger>
+            )}
             <TabsTrigger value="attributes">
               {formData.type === "SKILL" ? "Skill" : "Competency"} Attributes
             </TabsTrigger>
@@ -503,6 +513,20 @@ export function CapabilityFormDialog({
               />
             </div>
           </TabsContent>
+
+          {/* Behavioral Levels Tab - Only for Competencies */}
+          {formData.type === "COMPETENCY" && (
+            <TabsContent value="behaviors" className="space-y-4 mt-4">
+              <CompetencyBehavioralLevelsEditor
+                competencyName={formData.name}
+                competencyDescription={formData.description || undefined}
+                competencyCategory={formData.category}
+                competencyId={capability?.id}
+                indicators={proficiencyIndicators}
+                onIndicatorsChange={setProficiencyIndicators}
+              />
+            </TabsContent>
+          )}
 
           <TabsContent value="attributes" className="space-y-4 mt-4">
             {formData.type === "SKILL" ? (
