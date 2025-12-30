@@ -20,7 +20,8 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { X, Plus } from "lucide-react";
+import { X, Plus, Link2 } from "lucide-react";
+import { CompetencySkillLinker } from "./CompetencySkillLinker";
 import {
   Capability,
   CapabilityType,
@@ -284,11 +285,17 @@ export function CapabilityFormDialog({
         </DialogHeader>
 
         <Tabs defaultValue="basic" className="w-full">
-          <TabsList className={`grid w-full ${formData.type === "COMPETENCY" ? "grid-cols-4" : "grid-cols-3"}`}>
+          <TabsList className={`grid w-full ${formData.type === "COMPETENCY" ? "grid-cols-5" : "grid-cols-3"}`}>
             <TabsTrigger value="basic">Basic Info</TabsTrigger>
             <TabsTrigger value="governance">Governance</TabsTrigger>
             {formData.type === "COMPETENCY" && (
               <TabsTrigger value="behaviors">Behavioral Levels</TabsTrigger>
+            )}
+            {formData.type === "COMPETENCY" && (
+              <TabsTrigger value="skills" className="gap-1">
+                <Link2 className="h-3.5 w-3.5" />
+                Skills
+              </TabsTrigger>
             )}
             <TabsTrigger value="attributes">
               {formData.type === "SKILL" ? "Skill" : "Competency"} Attributes
@@ -528,6 +535,18 @@ export function CapabilityFormDialog({
             </TabsContent>
           )}
 
+          {/* Skills Linking Tab - only for competencies */}
+          {formData.type === "COMPETENCY" && (
+            <TabsContent value="skills" className="space-y-4 mt-4">
+              <CompetencySkillLinker
+                competencyId={capability?.id}
+                competencyName={formData.name}
+                companyId={formData.company_id}
+                isEditing={isEditing}
+              />
+            </TabsContent>
+          )}
+
           <TabsContent value="attributes" className="space-y-4 mt-4">
             {formData.type === "SKILL" ? (
               <>
@@ -649,8 +668,7 @@ export function CapabilityFormDialog({
 
                 <div className="rounded-lg border p-4 bg-muted/50">
                   <p className="text-sm text-muted-foreground">
-                    💡 Behavioral indicators and assessment rules can be configured after
-                    creating the competency by linking skills to it.
+                    💡 Use the <strong>Behavioral Levels</strong> tab to define proficiency indicators and the <strong>Skills</strong> tab to link supporting skills for learning path alignment.
                   </p>
                 </div>
               </>
