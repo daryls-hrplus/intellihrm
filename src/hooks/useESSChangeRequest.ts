@@ -4,7 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
 export interface ChangeRequestData {
-  request_type: 'personal_contact' | 'emergency_contact' | 'address';
+  request_type: 'personal_contact' | 'emergency_contact' | 'address' | 'qualification';
   entity_id?: string | null;
   entity_table: string;
   change_action: 'create' | 'update' | 'delete';

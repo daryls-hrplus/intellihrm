@@ -456,6 +456,7 @@ import AnnouncementsPage from "./pages/ess/AnnouncementsPage";
 import TeamCalendarPage from "./pages/ess/TeamCalendarPage";
 import MyCalendarPage from "./pages/ess/MyCalendarPage";
 import MilestonesPage from "./pages/ess/MilestonesPage";
+import MyQualificationsPage from "./pages/ess/MyQualificationsPage";
 import EmployeeDirectoryPage from "./pages/admin/EmployeeDirectoryPage";
 import CompanyAnnouncementsPage from "./pages/admin/CompanyAnnouncementsPage";
 import ApprovalDelegationsPage from "./pages/admin/ApprovalDelegationsPage";
@@ -3699,6 +3700,14 @@ const App = () => (
               element={
                 <ProtectedRoute moduleCode="ess">
                   <MilestonesPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/ess/qualifications"
+              element={
+                <ProtectedRoute moduleCode="ess">
+                  <MyQualificationsPage />
                 </ProtectedRoute>
               }
             />
