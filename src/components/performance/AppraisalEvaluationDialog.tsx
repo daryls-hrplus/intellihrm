@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Target, Briefcase, Award, Save, Send, ChevronDown, ChevronUp, Loader2, GitBranch, Settings2, Users, Brain, Heart, HelpCircle } from "lucide-react";
 import { CompetencyRatingCard } from "./CompetencyRatingCard";
+import { ResponsibilityRatingCard } from "./ResponsibilityRatingCard";
 import { CompetencyProficiencyGuide } from "@/components/capabilities/CompetencyProficiencyGuide";
 import { useKRARatingSubmissions } from "@/hooks/useKRARatingSubmissions";
 import { KRAWithRating, ResponsibilityKRA } from "@/types/responsibilityKRA";
@@ -1040,42 +1041,20 @@ export function AppraisalEvaluationDialog({
                       </div>
                     </div>
                   ) : (
-                    <>
-                      <div>
-                        <div className="flex items-center justify-between mb-2">
-                          <Label>Rating ({cycleInfo?.min_rating || 1} - {cycleInfo?.max_rating || 5})</Label>
-                          <span className="text-lg font-semibold">
-                            {item.rating !== null ? item.rating : "-"}
-                          </span>
-                        </div>
-                        <Slider
-                          value={[item.rating || cycleInfo?.min_rating || 1]}
-                          min={cycleInfo?.min_rating || 1}
-                          max={cycleInfo?.max_rating || 5}
-                          step={0.5}
-                          onValueChange={([value]) =>
-                            handleRatingChange(item.item_id, item.evaluation_type, value)
-                          }
-                        />
-                        {item.weighted_score !== null && (
-                          <p className="text-sm text-muted-foreground mt-1">
-                            Weighted score: {item.weighted_score.toFixed(1)}%
-                          </p>
-                        )}
-                      </div>
-                      <div>
-                        <Label htmlFor={`comments-${item.item_id}`}>Comments</Label>
-                        <Textarea
-                          id={`comments-${item.item_id}`}
-                          value={item.comments}
-                          onChange={(e) =>
-                            handleCommentChange(item.item_id, item.evaluation_type, e.target.value)
-                          }
-                          placeholder="Add feedback comments..."
-                          rows={2}
-                        />
-                      </div>
-                    </>
+                    <ResponsibilityRatingCard
+                      itemId={item.item_id}
+                      rating={item.rating}
+                      comments={item.comments}
+                      onRatingChange={(value) =>
+                        handleRatingChange(item.item_id, item.evaluation_type, value)
+                      }
+                      onCommentChange={(value) =>
+                        handleCommentChange(item.item_id, item.evaluation_type, value)
+                      }
+                      weightedScore={item.weighted_score}
+                      segmentBadge={item.segment_name}
+                      positionBadge={item.position_title}
+                    />
                   )}
                 </CardContent>
               </CollapsibleContent>
