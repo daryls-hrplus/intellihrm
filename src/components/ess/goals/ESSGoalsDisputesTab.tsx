@@ -54,19 +54,40 @@ export function ESSGoalsDisputesTab({ userId, companyId }: ESSGoalsDisputesTabPr
   const fetchDisputes = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
+      // Use any to avoid TS2589 type recursion error
+      const supabaseAny = supabase as any;
+      const { data, error } = await supabaseAny
         .from("goal_rating_submissions")
-        .select(`
-          *,
-          goal:performance_goals!goal_id(title)
-        `)
+        .select("id, goal_id, employee_id, final_score, is_disputed, disputed_at, dispute_reason, dispute_category, dispute_status, dispute_resolution, dispute_resolved_at")
         .eq("employee_id", userId)
         .eq("company_id", companyId)
         .eq("is_disputed", true)
         .order("disputed_at", { ascending: false });
 
       if (error) throw error;
-      setDisputes(data || []);
+      
+      // Fetch goal titles
+      const goalIds = [...new Set((data || []).map((d: any) => d.goal_id as string))];
+      let goalsMap: Record<string, string> = {};
+      
+      if (goalIds.length > 0) {
+        const { data: goalsData } = await supabaseAny
+          .from("performance_goals")
+          .select("id, title")
+          .in("id", goalIds);
+        
+        goalsMap = (goalsData || []).reduce((acc: Record<string, string>, g: any) => {
+          acc[g.id] = g.title;
+          return acc;
+        }, {} as Record<string, string>);
+      }
+      
+      const mappedData: DisputedSubmission[] = (data || []).map((d: any) => ({
+        ...d,
+        goal: { title: goalsMap[d.goal_id] || "Goal" },
+      }));
+      
+      setDisputes(mappedData);
     } catch (error) {
       console.error("Error fetching disputes:", error);
     } finally {

@@ -65,14 +65,14 @@ export function ESSGoalsAdjustmentsTab({ userId }: ESSGoalsAdjustmentsTabProps) 
           .select("id, title")
           .in("id", goalIds);
         
-        goalsMap = (goalsData || []).reduce((acc, g) => {
+        goalsMap = (goalsData || []).reduce((acc: Record<string, string>, g: any) => {
           acc[g.id] = g.title;
           return acc;
         }, {} as Record<string, string>);
       }
 
       // Map to our interface
-      const mappedData: GoalAdjustment[] = (adjustmentsData || []).map((d) => ({
+      const mappedData: GoalAdjustment[] = (adjustmentsData || []).map((d: any) => ({
         id: d.id,
         goal_id: d.goal_id,
         change_type: d.change_type,

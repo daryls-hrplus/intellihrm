@@ -7,6 +7,7 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
   SelectContent,
@@ -44,6 +45,8 @@ import {
   ScrollText,
   Star,
   Send,
+  Trophy,
+  AlertTriangle,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -65,6 +68,10 @@ import { RatingVisibilityTimeline } from "@/components/performance/RatingVisibil
 import { PersonalInsightsCard } from "@/components/performance/insights/PersonalInsightsCard";
 import { GoalNotificationBell } from "@/components/performance/goals/GoalNotificationBell";
 import { GoalSkillGapCard } from "@/components/performance/goals/GoalSkillGapCard";
+import { ESSGoalsCheckInsTab } from "@/components/ess/goals/ESSGoalsCheckInsTab";
+import { ESSGoalsAdjustmentsTab } from "@/components/ess/goals/ESSGoalsAdjustmentsTab";
+import { ESSGoalsDisputesTab } from "@/components/ess/goals/ESSGoalsDisputesTab";
+import { ESSGoalsCompletedTab } from "@/components/ess/goals/ESSGoalsCompletedTab";
 import { useGoalCheckIns, GoalCheckIn } from "@/hooks/useGoalCheckIns";
 import { usePendingAdjustments } from "@/hooks/usePendingAdjustments";
 import { useGoalRatingSubmissions } from "@/hooks/useGoalRatingSubmissions";
@@ -113,6 +120,7 @@ export default function MyGoalsPage() {
   const [contactManagerOpen, setContactManagerOpen] = useState(false);
   const [createGoalOpen, setCreateGoalOpen] = useState(false);
   const [showAnalytics, setShowAnalytics] = useState(true);
+  const [activeTab, setActiveTab] = useState("active-goals");
   
   // Check-in, Milestones, History dialogs
   const [checkInDialogOpen, setCheckInDialogOpen] = useState(false);
@@ -604,8 +612,45 @@ export default function MyGoalsPage() {
           </Alert>
         )}
 
-        {/* Filters */}
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        {/* Tabbed Navigation */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+          <TabsList className="flex-wrap h-auto gap-1">
+            <TabsTrigger value="active-goals" className="flex items-center gap-1.5">
+              <Target className="h-4 w-4" />
+              Active Goals
+              {activeGoals.length > 0 && (
+                <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">
+                  {activeGoals.length}
+                </Badge>
+              )}
+            </TabsTrigger>
+            <TabsTrigger value="check-ins" className="flex items-center gap-1.5">
+              <ClipboardCheck className="h-4 w-4" />
+              My Check-ins
+            </TabsTrigger>
+            <TabsTrigger value="adjustments" className="flex items-center gap-1.5">
+              <FileEdit className="h-4 w-4" />
+              My Adjustments
+            </TabsTrigger>
+            <TabsTrigger value="disputes" className="flex items-center gap-1.5">
+              <AlertTriangle className="h-4 w-4" />
+              My Disputes
+            </TabsTrigger>
+            <TabsTrigger value="completed" className="flex items-center gap-1.5">
+              <Trophy className="h-4 w-4" />
+              Completed
+              {completedGoals.length > 0 && (
+                <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">
+                  {completedGoals.length}
+                </Badge>
+              )}
+            </TabsTrigger>
+          </TabsList>
+
+          {/* Active Goals Tab */}
+          <TabsContent value="active-goals" className="space-y-4">
+            {/* Filters */}
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex flex-1 flex-wrap gap-2">
             <div className="relative flex-1 min-w-[200px] max-w-xs">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -876,6 +921,41 @@ export default function MyGoalsPage() {
             })}
           </div>
         )}
+          </TabsContent>
+
+          {/* Check-ins Tab */}
+          <TabsContent value="check-ins">
+            {user?.id && (
+              <ESSGoalsCheckInsTab 
+                userId={user.id} 
+                onCheckIn={(goalId) => {
+                  const goal = goals.find(g => g.id === goalId);
+                  if (goal) {
+                    setSelectedGoal(goal);
+                    setCheckInDialogOpen(true);
+                  }
+                }}
+              />
+            )}
+          </TabsContent>
+
+          {/* Adjustments Tab */}
+          <TabsContent value="adjustments">
+            {user?.id && <ESSGoalsAdjustmentsTab userId={user.id} />}
+          </TabsContent>
+
+          {/* Disputes Tab */}
+          <TabsContent value="disputes">
+            {user?.id && company?.id && (
+              <ESSGoalsDisputesTab userId={user.id} companyId={company.id} />
+            )}
+          </TabsContent>
+
+          {/* Completed Tab */}
+          <TabsContent value="completed">
+            {user?.id && <ESSGoalsCompletedTab userId={user.id} />}
+          </TabsContent>
+        </Tabs>
 
         {/* Dialogs */}
         {selectedGoal && (
