@@ -55,6 +55,7 @@ import {
   History,
   TrendingUp,
   Lightbulb,
+  Heart,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
@@ -98,6 +99,7 @@ const getAdminModuleSections = (
       { title: t("admin.modules.languages.title"), description: t("admin.modules.languages.description"), href: "/admin/languages", icon: Languages, color: "bg-accent/10 text-accent-foreground", tabCode: "languages" },
       { title: "Color Scheme", description: "Customize the application's color theme with live preview", href: "/admin/color-scheme", icon: Palette, color: "bg-gradient-to-r from-pink-500/10 to-violet-500/10 text-violet-600", tabCode: "color-scheme" },
       { title: t("admin.modules.bulkImport.title"), description: t("admin.modules.bulkImport.description"), href: "/admin/bulk-import", icon: Upload, color: "bg-cyan-500/10 text-cyan-600", tabCode: "bulk-import" },
+      { title: "Company Values", description: "Define organizational values for performance appraisals", href: "/admin/company-values", icon: Heart, color: "bg-rose-500/10 text-rose-600", tabCode: "company-values" },
       { title: "API Management", description: "Manage API keys, webhooks, and integrations", href: "/system/api-management", icon: Webhook, color: "bg-indigo-500/10 text-indigo-600", tabCode: "api-management" },
       { title: "Custom Fields", description: "Define custom fields for forms across the application", href: "/admin/custom-fields", icon: Cog, color: "bg-pink-500/10 text-pink-600", tabCode: "custom-fields" },
     ],
