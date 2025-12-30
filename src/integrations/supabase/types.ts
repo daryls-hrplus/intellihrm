@@ -43138,6 +43138,73 @@ export type Database = {
           },
         ]
       }
+      reminder_email_templates: {
+        Row: {
+          body: string
+          category: string
+          company_id: string | null
+          created_at: string | null
+          created_by: string | null
+          event_type_id: string | null
+          id: string
+          is_active: boolean | null
+          is_default: boolean | null
+          name: string
+          subject: string
+          updated_at: string | null
+        }
+        Insert: {
+          body: string
+          category: string
+          company_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          event_type_id?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_default?: boolean | null
+          name: string
+          subject: string
+          updated_at?: string | null
+        }
+        Update: {
+          body?: string
+          category?: string
+          company_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          event_type_id?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_default?: boolean | null
+          name?: string
+          subject?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reminder_email_templates_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reminder_email_templates_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reminder_email_templates_event_type_id_fkey"
+            columns: ["event_type_id"]
+            isOneToOne: false
+            referencedRelation: "reminder_event_types"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reminder_event_types: {
         Row: {
           category: string

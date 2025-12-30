@@ -8,10 +8,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ReminderRulesManager } from '@/components/reminders/ReminderRulesManager';
 import { EmployeeRemindersList } from '@/components/reminders/EmployeeRemindersList';
 import { AIRecommendationsPanel } from '@/components/reminders/AIRecommendationsPanel';
-import { PerformanceReminderTemplates } from '@/components/reminders/PerformanceReminderTemplates';
+import { ReminderWelcomeBanner } from '@/components/reminders/ReminderWelcomeBanner';
+import { ReminderAIDashboard } from '@/components/reminders/ReminderAIDashboard';
+import { ReminderEmailTemplates } from '@/components/reminders/ReminderEmailTemplates';
 import { useReminders } from '@/hooks/useReminders';
 import { supabase } from '@/integrations/supabase/client';
-import { Bell, Settings, List, Loader2, FileText } from 'lucide-react';
+import { Bell, Settings, List, Loader2, FileText, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function HRRemindersPage() {
@@ -20,6 +22,7 @@ export default function HRRemindersPage() {
   const [companies, setCompanies] = useState<{ id: string; name: string }[]>([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>('all');
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('reminders');
   const rulesManagerRef = useRef<{ reload: () => void } | null>(null);
 
   useEffect(() => {
@@ -30,6 +33,12 @@ export default function HRRemindersPage() {
         .eq('is_active', true)
         .order('name');
       setCompanies(data || []);
+      
+      // Auto-select first company if available
+      if (data && data.length > 0 && selectedCompanyId === 'all') {
+        setSelectedCompanyId(data[0].id);
+      }
+      
       setLoading(false);
     };
     fetchCompanies();
@@ -111,7 +120,20 @@ export default function HRRemindersPage() {
           </Select>
         </div>
 
-        <Tabs defaultValue="reminders" className="space-y-6">
+        {/* Welcome Banner */}
+        <ReminderWelcomeBanner 
+          onGetStarted={() => setActiveTab('rules')}
+          onViewAI={() => setActiveTab('rules')}
+        />
+
+        {/* AI Dashboard - Always Visible */}
+        <ReminderAIDashboard 
+          companyId={selectedCompanyId}
+          onNavigateToRules={() => setActiveTab('rules')}
+          onNavigateToReminders={() => setActiveTab('reminders')}
+        />
+
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList>
             <TabsTrigger value="reminders" className="flex items-center gap-2">
               <List className="h-4 w-4" />
@@ -128,18 +150,11 @@ export default function HRRemindersPage() {
           </TabsList>
 
           <TabsContent value="reminders" className="space-y-6">
-            {/* AI Recommendations Panel - also visible on reminders tab */}
-            {selectedCompanyId && selectedCompanyId !== 'all' && (
-              <AIRecommendationsPanel 
-                companyId={selectedCompanyId}
-                onApplyRecommendation={handleApplyRecommendation}
-              />
-            )}
             <Card>
               <CardHeader>
                 <CardTitle>{t('hrHub.reminders')}</CardTitle>
                 <p className="text-sm text-muted-foreground">
-                  {t('hrHub.remindersDesc')}
+                  View and manage all pending and sent reminders across the organization
                 </p>
               </CardHeader>
               <CardContent>
@@ -162,15 +177,20 @@ export default function HRRemindersPage() {
 
             <Card>
               <CardHeader>
-                <CardTitle>Reminder Rules</CardTitle>
-                <p className="text-sm text-muted-foreground">
-                  {t('hrHub.remindersDesc')}
-                </p>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Reminder Rules</CardTitle>
+                    <p className="text-sm text-muted-foreground">
+                      Configure automatic rules to send reminders for important events
+                    </p>
+                  </div>
+                </div>
               </CardHeader>
               <CardContent>
                 {selectedCompanyId === 'all' ? (
                   <div className="text-center py-8 text-muted-foreground">
-                    {t('common.select')} {t('common.company')}
+                    <Settings className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                    <p>Select a company to manage reminder rules</p>
                   </div>
                 ) : (
                   <ReminderRulesManager 
@@ -185,18 +205,19 @@ export default function HRRemindersPage() {
           <TabsContent value="templates" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Performance Reminder Templates</CardTitle>
+                <CardTitle>Email Templates</CardTitle>
                 <p className="text-sm text-muted-foreground">
-                  Customize email templates for performance review notifications
+                  Customize email notification templates for all reminder categories
                 </p>
               </CardHeader>
               <CardContent>
                 {selectedCompanyId === 'all' ? (
                   <div className="text-center py-8 text-muted-foreground">
-                    {t('common.select')} {t('common.company')}
+                    <FileText className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                    <p>Select a company to manage email templates</p>
                   </div>
                 ) : (
-                  <PerformanceReminderTemplates companyId={selectedCompanyId} />
+                  <ReminderEmailTemplates companyId={selectedCompanyId} />
                 )}
               </CardContent>
             </Card>
