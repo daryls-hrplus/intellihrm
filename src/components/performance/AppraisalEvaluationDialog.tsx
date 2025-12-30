@@ -582,7 +582,9 @@ export function AppraisalEvaluationDialog({
           );
           if (existing) {
             // Parse metadata if it exists (for competency behavioral indicators)
-            const metadata = existing.metadata as CompetencyMetadata | null;
+            // Cast to any since the types may not be regenerated yet
+            const existingAny = existing as any;
+            const metadata = existingAny.metadata as CompetencyMetadata | null;
             return {
               ...score,
               id: existing.id,
@@ -708,7 +710,7 @@ export function AppraisalEvaluationDialog({
         const finalRating = score.hasKRAs ? score.kraRollupScore : score.rating;
         
         if (finalRating !== null && finalRating !== undefined) {
-          const payload = {
+          const payload: any = {
             participant_id: participantId,
             evaluation_type: score.evaluation_type,
             item_id: score.item_id,
@@ -717,6 +719,11 @@ export function AppraisalEvaluationDialog({
             rating: finalRating,
             comments: score.comments || null,
           };
+
+          // Add metadata for competency assessments with behavioral indicators
+          if (score.evaluation_type === "competency" && score.metadata) {
+            payload.metadata = score.metadata;
+          }
 
           if (score.id) {
             await supabase.from("appraisal_scores").update(payload).eq("id", score.id);
