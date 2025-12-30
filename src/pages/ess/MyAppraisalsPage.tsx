@@ -18,21 +18,16 @@ import {
   Calendar,
   User,
   Target,
-  Users,
   FileText,
   Eye,
-  MessageSquare,
   ClipboardEdit,
   Shield
 } from "lucide-react";
 import { useMyActiveAppraisals, type MyAppraisal } from "@/hooks/useMyAppraisals";
-import { useMy360FeedbackRequests, type My360Request } from "@/hooks/useMy360FeedbackRequests";
 import { EssAppraisalDetailDialog } from "@/components/ess/EssAppraisalDetailDialog";
-import { Ess360FeedbackResponseDialog } from "@/components/ess/Ess360FeedbackResponseDialog";
 import { EssPIPStatusCard } from "@/components/ess/EssPIPStatusCard";
 import { EssAppraisalSelfAssessmentDialog } from "@/components/ess/EssAppraisalSelfAssessmentDialog";
 import { EssAppraisalAcknowledgmentDialog } from "@/components/ess/EssAppraisalAcknowledgmentDialog";
-
 export default function MyAppraisalsPage() {
   const { t } = useTranslation();
   const { 
@@ -43,16 +38,11 @@ export default function MyAppraisalsPage() {
     pendingAcknowledgment,
     isLoading: appraisalsLoading 
   } = useMyActiveAppraisals();
-  const { data: feedbackRequests = [], isLoading: feedbackLoading } = useMy360FeedbackRequests();
   
   const [selectedAppraisal, setSelectedAppraisal] = useState<MyAppraisal | null>(null);
-  const [selected360Request, setSelected360Request] = useState<My360Request | null>(null);
   const [selfAssessmentAppraisal, setSelfAssessmentAppraisal] = useState<MyAppraisal | null>(null);
   const [acknowledgmentAppraisal, setAcknowledgmentAppraisal] = useState<MyAppraisal | null>(null);
   const [activeTab, setActiveTab] = useState("current");
-
-  const pending360 = feedbackRequests.filter(r => r.status === "pending" || r.status === "in_progress");
-  const completed360 = feedbackRequests.filter(r => r.status === "completed" || r.status === "submitted");
 
   const getStatusBadge = (status: string) => {
     const variants: Record<string, { variant: "default" | "secondary" | "destructive" | "outline"; label: string }> = {
@@ -126,7 +116,7 @@ export default function MyAppraisalsPage() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Card>
             <CardContent className="pt-6">
               <div className="flex items-center gap-4">
@@ -158,20 +148,6 @@ export default function MyAppraisalsPage() {
           <Card>
             <CardContent className="pt-6">
               <div className="flex items-center gap-4">
-                <div className="p-3 rounded-full bg-purple-500/10">
-                  <Users className="h-6 w-6 text-purple-600" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">{pending360.length}</p>
-                  <p className="text-sm text-muted-foreground">360 Feedback Requests</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-4">
                 <div className="p-3 rounded-full bg-green-500/10">
                   <CheckCircle2 className="h-6 w-6 text-green-600" />
                 </div>
@@ -189,7 +165,7 @@ export default function MyAppraisalsPage() {
 
         {/* Main Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="current" className="flex items-center gap-2">
               <Clock className="h-4 w-4" />
               Current ({active.length})
@@ -197,10 +173,6 @@ export default function MyAppraisalsPage() {
             <TabsTrigger value="completed" className="flex items-center gap-2">
               <CheckCircle2 className="h-4 w-4" />
               Completed ({completed.length})
-            </TabsTrigger>
-            <TabsTrigger value="360feedback" className="flex items-center gap-2">
-              <Users className="h-4 w-4" />
-              360 Feedback ({pending360.length})
             </TabsTrigger>
             <TabsTrigger value="history" className="flex items-center gap-2">
               <FileText className="h-4 w-4" />
@@ -404,82 +376,6 @@ export default function MyAppraisalsPage() {
             )}
           </TabsContent>
 
-          {/* 360 Feedback Tab */}
-          <TabsContent value="360feedback" className="space-y-4">
-            {feedbackLoading ? (
-              <div className="space-y-4">
-                {[1, 2].map(i => <Skeleton key={i} className="h-24" />)}
-              </div>
-            ) : pending360.length === 0 ? (
-              <Card>
-                <CardContent className="py-12 text-center">
-                  <Users className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
-                  <h3 className="text-lg font-medium">No Pending Feedback Requests</h3>
-                  <p className="text-muted-foreground">You don't have any 360 feedback to provide.</p>
-                </CardContent>
-              </Card>
-            ) : (
-              pending360.map((request) => (
-                <Card key={request.id} className="hover:shadow-md transition-shadow">
-                  <CardContent className="pt-6">
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-2">
-                          <h3 className="text-lg font-semibold">
-                            Feedback for {request.subject_employee_name}
-                          </h3>
-                          {getStatusBadge(request.status)}
-                          {request.is_mandatory && (
-                            <Badge variant="destructive">Mandatory</Badge>
-                          )}
-                        </div>
-                        
-                        <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-                          <span>{request.cycle_name}</span>
-                          {request.due_date && (
-                            <span className="flex items-center gap-1">
-                              <Clock className="h-4 w-4" />
-                              Due: {format(new Date(request.due_date), "MMM d, yyyy")}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-
-                      <Button 
-                        onClick={() => setSelected360Request(request)}
-                      >
-                        <MessageSquare className="h-4 w-4 mr-2" />
-                        Provide Feedback
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))
-            )}
-
-            {/* Completed 360 Feedback */}
-            {completed360.length > 0 && (
-              <div className="mt-8">
-                <h3 className="text-lg font-semibold mb-4">Completed Feedback</h3>
-                {completed360.map((request) => (
-                  <Card key={request.id} className="mb-3 opacity-75">
-                    <CardContent className="py-4">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="font-medium">{request.subject_employee_name}</p>
-                          <p className="text-sm text-muted-foreground">
-                            {request.cycle_name} • Submitted {request.submitted_at ? format(new Date(request.submitted_at), "MMM d, yyyy") : ""}
-                          </p>
-                        </div>
-                        <Badge variant="outline">Completed</Badge>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            )}
-          </TabsContent>
-
           {/* History Tab */}
           <TabsContent value="history" className="space-y-4">
             <Card>
@@ -539,13 +435,6 @@ export default function MyAppraisalsPage() {
         />
       )}
 
-      {selected360Request && (
-        <Ess360FeedbackResponseDialog
-          open={!!selected360Request}
-          onOpenChange={(open) => !open && setSelected360Request(null)}
-          request={selected360Request}
-        />
-      )}
 
       {selfAssessmentAppraisal && (
         <EssAppraisalSelfAssessmentDialog

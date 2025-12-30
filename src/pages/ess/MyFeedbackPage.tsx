@@ -25,10 +25,13 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
+import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
-import { Plus, Loader2, MessageSquare, ThumbsUp, Lightbulb, CheckCircle, Send, Inbox } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
+import { Plus, Loader2, MessageSquare, ThumbsUp, Lightbulb, CheckCircle, Send, Inbox, Users, Clock } from "lucide-react";
+import { formatDistanceToNow, format } from "date-fns";
 import { useLanguage } from "@/hooks/useLanguage";
+import { useMy360FeedbackRequests, type My360Request } from "@/hooks/useMy360FeedbackRequests";
+import { Ess360FeedbackResponseDialog } from "@/components/ess/Ess360FeedbackResponseDialog";
 
 interface Feedback {
   id: string;
@@ -53,7 +56,8 @@ export default function MyFeedbackPage() {
   const [employees, setEmployees] = useState<{ id: string; full_name: string }[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState("received");
+  const [activeTab, setActiveTab] = useState("continuous");
+  const [selected360Request, setSelected360Request] = useState<My360Request | null>(null);
   const [formData, setFormData] = useState({
     to_user_id: "",
     feedback_type: "praise",
@@ -62,6 +66,10 @@ export default function MyFeedbackPage() {
     is_private: false,
     is_anonymous: false,
   });
+
+  const { data: feedbackRequests = [], isLoading: feedbackLoading } = useMy360FeedbackRequests();
+  const pending360 = feedbackRequests.filter(r => r.status === "pending" || r.status === "in_progress");
+  const completed360 = feedbackRequests.filter(r => r.status === "completed" || r.status === "submitted");
 
   useEffect(() => {
     if (user) fetchData();
@@ -180,6 +188,17 @@ export default function MyFeedbackPage() {
     }
   };
 
+  const getStatusBadge = (status: string) => {
+    const variants: Record<string, { variant: "default" | "secondary" | "destructive" | "outline"; label: string }> = {
+      pending: { variant: "secondary", label: "Pending" },
+      in_progress: { variant: "default", label: "In Progress" },
+      submitted: { variant: "default", label: "Submitted" },
+      completed: { variant: "default", label: "Completed" },
+    };
+    const config = variants[status] || { variant: "outline" as const, label: status };
+    return <Badge variant={config.variant}>{config.label}</Badge>;
+  };
+
   if (isLoading) {
     return (
       <AppLayout>
@@ -213,7 +232,8 @@ export default function MyFeedbackPage() {
           </Button>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2">
+        {/* Stats Cards */}
+        <div className="grid gap-4 md:grid-cols-4">
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-lg flex items-center gap-2">
@@ -240,61 +260,188 @@ export default function MyFeedbackPage() {
               <p className="text-sm text-muted-foreground">feedback given</p>
             </CardContent>
           </Card>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Users className="h-5 w-5" />
+                360 Requests
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-3xl font-bold">{pending360.length}</p>
+              <p className="text-sm text-muted-foreground">pending to complete</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <CheckCircle className="h-5 w-5" />
+                360 Completed
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-3xl font-bold">{completed360.length}</p>
+              <p className="text-sm text-muted-foreground">feedback provided</p>
+            </CardContent>
+          </Card>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList>
-            <TabsTrigger value="received">Received ({receivedFeedback.length})</TabsTrigger>
-            <TabsTrigger value="sent">Sent ({sentFeedback.length})</TabsTrigger>
+            <TabsTrigger value="continuous">Continuous ({receivedFeedback.length + sentFeedback.length})</TabsTrigger>
+            <TabsTrigger value="360requests">360 Requests ({pending360.length})</TabsTrigger>
+            <TabsTrigger value="360completed">360 Completed ({completed360.length})</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="received" className="space-y-4">
-            {receivedFeedback.length === 0 ? (
+          {/* Continuous Feedback Tab */}
+          <TabsContent value="continuous" className="space-y-4">
+            <Tabs defaultValue="received">
+              <TabsList>
+                <TabsTrigger value="received">Received ({receivedFeedback.length})</TabsTrigger>
+                <TabsTrigger value="sent">Sent ({sentFeedback.length})</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="received" className="space-y-4">
+                {receivedFeedback.length === 0 ? (
+                  <Card>
+                    <CardContent className="py-8 text-center text-muted-foreground">
+                      No feedback received yet
+                    </CardContent>
+                  </Card>
+                ) : (
+                  receivedFeedback.map((feedback) => (
+                    <Card key={feedback.id}>
+                      <CardContent className="pt-6">
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-start gap-3">
+                            <div className={`rounded-lg p-2 ${getFeedbackColor(feedback.feedback_type)}`}>
+                              {getFeedbackIcon(feedback.feedback_type)}
+                            </div>
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <span className="font-medium">
+                                  {feedback.is_anonymous ? "Anonymous" : feedback.from_user?.full_name}
+                                </span>
+                                <Badge variant="outline" className="capitalize">
+                                  {feedback.feedback_type}
+                                </Badge>
+                                {feedback.is_private && (
+                                  <Badge variant="secondary">Private</Badge>
+                                )}
+                              </div>
+                              {feedback.subject && (
+                                <p className="font-medium mt-1">{feedback.subject}</p>
+                              )}
+                              <p className="text-muted-foreground mt-1">{feedback.content}</p>
+                              <p className="text-xs text-muted-foreground mt-2">
+                                {formatDistanceToNow(new Date(feedback.created_at), { addSuffix: true })}
+                              </p>
+                            </div>
+                          </div>
+                          {!feedback.acknowledged_at && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleAcknowledge(feedback.id)}
+                            >
+                              <CheckCircle className="mr-2 h-4 w-4" />
+                              Acknowledge
+                            </Button>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))
+                )}
+              </TabsContent>
+
+              <TabsContent value="sent" className="space-y-4">
+                {sentFeedback.length === 0 ? (
+                  <Card>
+                    <CardContent className="py-8 text-center text-muted-foreground">
+                      No feedback sent yet
+                    </CardContent>
+                  </Card>
+                ) : (
+                  sentFeedback.map((feedback) => (
+                    <Card key={feedback.id}>
+                      <CardContent className="pt-6">
+                        <div className="flex items-start gap-3">
+                          <div className={`rounded-lg p-2 ${getFeedbackColor(feedback.feedback_type)}`}>
+                            {getFeedbackIcon(feedback.feedback_type)}
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium">To: {feedback.to_user?.full_name}</span>
+                              <Badge variant="outline" className="capitalize">
+                                {feedback.feedback_type}
+                              </Badge>
+                            </div>
+                            {feedback.subject && (
+                              <p className="font-medium mt-1">{feedback.subject}</p>
+                            )}
+                            <p className="text-muted-foreground mt-1">{feedback.content}</p>
+                            <p className="text-xs text-muted-foreground mt-2">
+                              {formatDistanceToNow(new Date(feedback.created_at), { addSuffix: true })}
+                              {feedback.acknowledged_at && " • Acknowledged"}
+                            </p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))
+                )}
+              </TabsContent>
+            </Tabs>
+          </TabsContent>
+
+          {/* 360 Requests Tab */}
+          <TabsContent value="360requests" className="space-y-4">
+            {feedbackLoading ? (
+              <div className="space-y-4">
+                {[1, 2].map(i => <Skeleton key={i} className="h-24" />)}
+              </div>
+            ) : pending360.length === 0 ? (
               <Card>
-                <CardContent className="py-8 text-center text-muted-foreground">
-                  No feedback received yet
+                <CardContent className="py-12 text-center">
+                  <Users className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
+                  <h3 className="text-lg font-medium">No Pending Feedback Requests</h3>
+                  <p className="text-muted-foreground">You don't have any 360 feedback to provide.</p>
                 </CardContent>
               </Card>
             ) : (
-              receivedFeedback.map((feedback) => (
-                <Card key={feedback.id}>
+              pending360.map((request) => (
+                <Card key={request.id} className="hover:shadow-md transition-shadow">
                   <CardContent className="pt-6">
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-start gap-3">
-                        <div className={`rounded-lg p-2 ${getFeedbackColor(feedback.feedback_type)}`}>
-                          {getFeedbackIcon(feedback.feedback_type)}
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <span className="font-medium">
-                              {feedback.is_anonymous ? "Anonymous" : feedback.from_user?.full_name}
-                            </span>
-                            <Badge variant="outline" className="capitalize">
-                              {feedback.feedback_type}
-                            </Badge>
-                            {feedback.is_private && (
-                              <Badge variant="secondary">Private</Badge>
-                            )}
-                          </div>
-                          {feedback.subject && (
-                            <p className="font-medium mt-1">{feedback.subject}</p>
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                          <h3 className="text-lg font-semibold">
+                            Feedback for {request.subject_employee_name}
+                          </h3>
+                          {getStatusBadge(request.status)}
+                          {request.is_mandatory && (
+                            <Badge variant="destructive">Mandatory</Badge>
                           )}
-                          <p className="text-muted-foreground mt-1">{feedback.content}</p>
-                          <p className="text-xs text-muted-foreground mt-2">
-                            {formatDistanceToNow(new Date(feedback.created_at), { addSuffix: true })}
-                          </p>
+                        </div>
+                        
+                        <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+                          <span>{request.cycle_name}</span>
+                          {request.due_date && (
+                            <span className="flex items-center gap-1">
+                              <Clock className="h-4 w-4" />
+                              Due: {format(new Date(request.due_date), "MMM d, yyyy")}
+                            </span>
+                          )}
                         </div>
                       </div>
-                      {!feedback.acknowledged_at && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleAcknowledge(feedback.id)}
-                        >
-                          <CheckCircle className="mr-2 h-4 w-4" />
-                          Acknowledge
-                        </Button>
-                      )}
+
+                      <Button 
+                        onClick={() => setSelected360Request(request)}
+                      >
+                        <MessageSquare className="h-4 w-4 mr-2" />
+                        Provide Feedback
+                      </Button>
                     </div>
                   </CardContent>
                 </Card>
@@ -302,37 +449,28 @@ export default function MyFeedbackPage() {
             )}
           </TabsContent>
 
-          <TabsContent value="sent" className="space-y-4">
-            {sentFeedback.length === 0 ? (
+          {/* 360 Completed Tab */}
+          <TabsContent value="360completed" className="space-y-4">
+            {completed360.length === 0 ? (
               <Card>
-                <CardContent className="py-8 text-center text-muted-foreground">
-                  No feedback sent yet
+                <CardContent className="py-12 text-center">
+                  <CheckCircle className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
+                  <h3 className="text-lg font-medium">No Completed Feedback</h3>
+                  <p className="text-muted-foreground">Your completed 360 feedback will appear here.</p>
                 </CardContent>
               </Card>
             ) : (
-              sentFeedback.map((feedback) => (
-                <Card key={feedback.id}>
-                  <CardContent className="pt-6">
-                    <div className="flex items-start gap-3">
-                      <div className={`rounded-lg p-2 ${getFeedbackColor(feedback.feedback_type)}`}>
-                        {getFeedbackIcon(feedback.feedback_type)}
-                      </div>
+              completed360.map((request) => (
+                <Card key={request.id}>
+                  <CardContent className="py-4">
+                    <div className="flex items-center justify-between">
                       <div>
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium">To: {feedback.to_user?.full_name}</span>
-                          <Badge variant="outline" className="capitalize">
-                            {feedback.feedback_type}
-                          </Badge>
-                        </div>
-                        {feedback.subject && (
-                          <p className="font-medium mt-1">{feedback.subject}</p>
-                        )}
-                        <p className="text-muted-foreground mt-1">{feedback.content}</p>
-                        <p className="text-xs text-muted-foreground mt-2">
-                          {formatDistanceToNow(new Date(feedback.created_at), { addSuffix: true })}
-                          {feedback.acknowledged_at && " • Acknowledged"}
+                        <p className="font-medium">{request.subject_employee_name}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {request.cycle_name} • Submitted {request.submitted_at ? format(new Date(request.submitted_at), "MMM d, yyyy") : ""}
                         </p>
                       </div>
+                      <Badge variant="outline">Completed</Badge>
                     </div>
                   </CardContent>
                 </Card>
@@ -341,6 +479,7 @@ export default function MyFeedbackPage() {
           </TabsContent>
         </Tabs>
 
+        {/* Give Feedback Dialog */}
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogContent className="max-w-md">
             <DialogHeader>
@@ -431,6 +570,15 @@ export default function MyFeedbackPage() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        {/* 360 Feedback Response Dialog */}
+        {selected360Request && (
+          <Ess360FeedbackResponseDialog
+            open={!!selected360Request}
+            onOpenChange={(open) => !open && setSelected360Request(null)}
+            request={selected360Request}
+          />
+        )}
       </div>
     </AppLayout>
   );
