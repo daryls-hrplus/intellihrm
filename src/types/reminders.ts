@@ -85,24 +85,30 @@ export interface ReminderPreference {
 }
 
 export type ReminderCategory = 
-  | 'probation' 
-  | 'contract' 
+  | 'onboarding' 
+  | 'employment' 
   | 'leave' 
-  | 'document' 
+  | 'performance'
+  | 'employee_voice'
   | 'training' 
+  | 'benefits'
+  | 'document' 
+  | 'compliance'
   | 'milestone' 
-  | 'performance' 
   | 'custom';
 
 export const REMINDER_CATEGORIES: { value: ReminderCategory; label: string }[] = [
-  { value: 'probation', label: 'Probation' },
-  { value: 'contract', label: 'Contract/Retirement' },
-  { value: 'leave', label: 'Leave Events' },
-  { value: 'document', label: 'Document Expiry' },
-  { value: 'training', label: 'Training' },
-  { value: 'milestone', label: 'Milestones' },
-  { value: 'performance', label: 'Performance' },
   { value: 'custom', label: 'Custom' },
+  { value: 'onboarding', label: 'Onboarding & Probation' },
+  { value: 'employment', label: 'Employment & Contracts' },
+  { value: 'leave', label: 'Leave & Attendance' },
+  { value: 'performance', label: 'Performance & Reviews' },
+  { value: 'employee_voice', label: 'Employee Voice' },
+  { value: 'training', label: 'Training & Development' },
+  { value: 'benefits', label: 'Benefits & Wellness' },
+  { value: 'document', label: 'Documents & Certifications' },
+  { value: 'compliance', label: 'Compliance & Legal' },
+  { value: 'milestone', label: 'Milestones' },
 ];
 
 export const PRIORITY_OPTIONS = [

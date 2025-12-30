@@ -1,23 +1,24 @@
 import * as React from 'react';
-import { Check, ChevronsUpDown, FileText, FileSignature, Shield, Heart, Target, GraduationCap, Calendar, Award, UserCheck, Sparkles, X } from 'lucide-react';
+import { Check, ChevronsUpDown, FileText, FileSignature, Shield, Heart, Target, GraduationCap, Calendar, Award, UserCheck, Sparkles, MessageSquare } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import type { ReminderEventType } from '@/types/reminders';
 
-// Category configuration with icons
+// Category configuration with icons - ordered by employee lifecycle
 const CATEGORY_CONFIG: Record<string, { label: string; icon: React.ComponentType<{ className?: string }> }> = {
-  document: { label: 'Documents', icon: FileText },
-  contract: { label: 'Contract & Employment', icon: FileSignature },
-  compliance: { label: 'Compliance', icon: Shield },
-  benefits: { label: 'Benefits', icon: Heart },
-  performance: { label: 'Performance', icon: Target },
-  training: { label: 'Training', icon: GraduationCap },
-  leave: { label: 'Leave', icon: Calendar },
-  milestone: { label: 'Milestones', icon: Award },
-  probation: { label: 'Probation', icon: UserCheck },
   custom: { label: 'Custom', icon: Sparkles },
+  onboarding: { label: 'Onboarding & Probation', icon: UserCheck },
+  employment: { label: 'Employment & Contracts', icon: FileSignature },
+  leave: { label: 'Leave & Attendance', icon: Calendar },
+  performance: { label: 'Performance & Reviews', icon: Target },
+  employee_voice: { label: 'Employee Voice', icon: MessageSquare },
+  training: { label: 'Training & Development', icon: GraduationCap },
+  benefits: { label: 'Benefits & Wellness', icon: Heart },
+  document: { label: 'Documents & Certifications', icon: FileText },
+  compliance: { label: 'Compliance & Legal', icon: Shield },
+  milestone: { label: 'Milestones', icon: Award },
 };
 
 interface GroupedEventTypeFilterProps {
