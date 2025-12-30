@@ -70,23 +70,23 @@ export default function PerformanceAnalyticsPage() {
           <TabsList className="flex-wrap h-auto gap-1">
             <TabsTrigger value="overview" className="gap-1.5">
               <BarChart3 className="h-4 w-4" />
-              {t("common.overview")}
+              Overview
             </TabsTrigger>
             <TabsTrigger value="completion" className="gap-1.5">
               <TrendingUp className="h-4 w-4" />
-              {t("performance.insights.completionRates")}
+              Completion Rates
             </TabsTrigger>
             <TabsTrigger value="quality" className="gap-1.5">
               <CheckCircle className="h-4 w-4" />
-              {t("performance.insights.goalQuality")}
+              Goal Quality
             </TabsTrigger>
             <TabsTrigger value="alignment" className="gap-1.5">
               <Network className="h-4 w-4" />
-              {t("performance.insights.alignment")}
+              Alignment
             </TabsTrigger>
             <TabsTrigger value="workload" className="gap-1.5">
               <Users className="h-4 w-4" />
-              {t("performance.insights.workload")}
+              Workload
             </TabsTrigger>
             <TabsTrigger value="role-impact" className="gap-1.5">
               <GitBranch className="h-4 w-4" />
