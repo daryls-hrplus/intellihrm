@@ -58,7 +58,7 @@ export default function MyPropertyPage() {
   } = usePropertyManagement(company?.id);
 
   const breadcrumbItems = [
-    { label: t('navigation.ess'), path: '/ess' },
+    { label: t('ess.title'), href: '/ess' },
     { label: t('ess.myProperty.breadcrumb') },
   ];
 
