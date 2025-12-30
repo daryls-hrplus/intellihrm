@@ -33,6 +33,7 @@ import {
   ArrowRightLeft,
   MapPin,
   Users,
+  ClipboardCheck,
   TrendingUp,
 } from "lucide-react";
 
@@ -71,6 +72,7 @@ export default function EmployeeSelfServicePage() {
     reminders: { title: t("ess.modules.reminders.title"), description: t("ess.modules.reminders.description"), href: "/ess/reminders", icon: Bell, color: "bg-rose-500/10 text-rose-600", tabCode: "ess-reminders" },
     notifications: { title: t("ess.modules.notifications.title"), description: t("ess.modules.notifications.description"), href: "/profile/notifications", icon: Bell, color: "bg-amber-500/10 text-amber-600", tabCode: "ess-notifications" },
     // NEW: Previously missing links
+    myAppraisals: { title: t("ess.modules.myAppraisals.title", "My Appraisals"), description: t("ess.modules.myAppraisals.description", "View and manage your performance appraisals"), href: "/ess/my-appraisals", icon: ClipboardCheck, color: "bg-violet-500/10 text-violet-600", tabCode: "ess-my-appraisals" },
     development: { title: t("ess.modules.development.title", "My Development Plan"), description: t("ess.modules.development.description", "View and manage your development goals"), href: "/ess/development", icon: TrendingUp, color: "bg-purple-500/10 text-purple-600", tabCode: "ess-development" },
     appraisalInterviews: { title: t("ess.modules.appraisalInterviews.title", "Appraisal Interviews"), description: t("ess.modules.appraisalInterviews.description", "View and prepare for scheduled appraisal meetings"), href: "/ess/appraisal-interviews", icon: Calendar, color: "bg-indigo-500/10 text-indigo-600", tabCode: "ess-appraisal-interviews" },
     goalInterviews: { title: t("ess.modules.goalInterviews.title", "Goal Interviews"), description: t("ess.modules.goalInterviews.description", "View and prepare for goal-setting meetings"), href: "/ess/goal-interviews", icon: Target, color: "bg-pink-500/10 text-pink-600", tabCode: "ess-goal-interviews" },
@@ -98,7 +100,7 @@ export default function EmployeeSelfServicePage() {
     },
     {
       titleKey: "Career & Development",
-      items: filterByAccess([allModules.training, allModules.goals, allModules.goalInterviews, allModules.development, allModules.appraisalInterviews, allModules.feedback, allModules.recognition, allModules.onboarding, allModules.offboarding]),
+      items: filterByAccess([allModules.myAppraisals, allModules.training, allModules.goals, allModules.goalInterviews, allModules.development, allModules.appraisalInterviews, allModules.feedback, allModules.recognition, allModules.onboarding, allModules.offboarding]),
     },
     {
       titleKey: "Workplace Resources",
