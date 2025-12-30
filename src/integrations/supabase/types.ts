@@ -9224,6 +9224,64 @@ export type Database = {
           },
         ]
       }
+      dashboard_configuration: {
+        Row: {
+          company_id: string | null
+          config_key: string
+          config_value: Json
+          created_at: string
+          created_by: string | null
+          id: string
+          is_active: boolean
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          company_id?: string | null
+          config_key: string
+          config_value?: Json
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          company_id?: string | null
+          config_key?: string
+          config_value?: Json
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dashboard_configuration_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dashboard_configuration_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dashboard_configuration_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       departments: {
         Row: {
           code: string
