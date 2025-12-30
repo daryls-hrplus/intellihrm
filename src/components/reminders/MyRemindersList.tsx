@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Bell, Calendar, Clock, CheckCircle2, Loader2, AlertTriangle, Info, Award, FileCheck, Plane, FileText, GraduationCap, User, ExternalLink } from 'lucide-react';
+import { Bell, Calendar, Clock, CheckCircle2, Loader2, AlertTriangle, Info, Award, FileCheck, Plane, FileText, GraduationCap, User, ExternalLink, Target, MessageSquare } from 'lucide-react';
 import { format, isToday, isTomorrow, isPast, differenceInDays, parseISO } from 'date-fns';
 import { formatDateForDisplay } from "@/utils/dateUtils";
 import type { EmployeeReminder } from '@/types/reminders';
@@ -19,6 +19,8 @@ const SOURCE_TABLE_CONFIG: Record<string, { label: string; tab: string; icon: Re
   'employee_work_permits': { label: 'Work Permit', tab: 'immigration', icon: <FileText className="h-3.5 w-3.5" /> },
   'employee_training': { label: 'Training', tab: 'training', icon: <GraduationCap className="h-3.5 w-3.5" /> },
   'profiles': { label: 'Employee', tab: 'overview', icon: <User className="h-3.5 w-3.5" /> },
+  'appraisal_participants': { label: 'Performance Review', tab: 'performance', icon: <Target className="h-3.5 w-3.5" /> },
+  'employee_review_responses': { label: 'Review Response', tab: 'performance', icon: <MessageSquare className="h-3.5 w-3.5" /> },
 };
 
 interface MyRemindersListProps {
@@ -54,6 +56,10 @@ export function MyRemindersList({ showCreateButton = false }: MyRemindersListPro
         break;
       case 'employee_training':
         navigate('/ess/my-training');
+        break;
+      case 'appraisal_participants':
+      case 'employee_review_responses':
+        navigate('/ess/my-appraisals');
         break;
       default:
         navigate('/ess');

@@ -80,12 +80,30 @@ export function useEssPendingActions() {
         .eq("employee_id", user.id)
         .in("status", ["pending", "in_progress"]);
 
-      if (pendingAppraisalsCount && pendingAppraisalsCount > 0) {
-        badges["Performance"] = {
-          count: pendingAppraisalsCount,
-          label: `${pendingAppraisalsCount} active`,
-          variant: "default",
-        };
+      // Fetch pending review responses (Employee Voice)
+      const { count: pendingResponseCount } = await supabase
+        .from("appraisal_participants")
+        .select("*", { count: "exact", head: true })
+        .eq("employee_id", user.id)
+        .eq("employee_response_status", "pending");
+
+      const totalPerformance = (pendingAppraisalsCount || 0) + (pendingResponseCount || 0);
+      
+      if (totalPerformance > 0) {
+        // Prioritize response required badge if any
+        if (pendingResponseCount && pendingResponseCount > 0) {
+          badges["Performance"] = {
+            count: pendingResponseCount,
+            label: `${pendingResponseCount} response${pendingResponseCount > 1 ? 's' : ''} required`,
+            variant: "warning",
+          };
+        } else if (pendingAppraisalsCount && pendingAppraisalsCount > 0) {
+          badges["Performance"] = {
+            count: pendingAppraisalsCount,
+            label: `${pendingAppraisalsCount} active`,
+            variant: "default",
+          };
+        }
       }
 
       // Fetch pending idp items

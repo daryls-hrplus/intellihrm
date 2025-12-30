@@ -34255,7 +34255,10 @@ export type Database = {
           access_request_updates: boolean
           created_at: string
           email_notifications: boolean
+          escalation_updates: boolean | null
           id: string
+          performance_review_updates: boolean | null
+          review_response_reminders: boolean | null
           system_announcements: boolean
           ticket_assigned: boolean
           ticket_comment_added: boolean
@@ -34267,7 +34270,10 @@ export type Database = {
           access_request_updates?: boolean
           created_at?: string
           email_notifications?: boolean
+          escalation_updates?: boolean | null
           id?: string
+          performance_review_updates?: boolean | null
+          review_response_reminders?: boolean | null
           system_announcements?: boolean
           ticket_assigned?: boolean
           ticket_comment_added?: boolean
@@ -34279,7 +34285,10 @@ export type Database = {
           access_request_updates?: boolean
           created_at?: string
           email_notifications?: boolean
+          escalation_updates?: boolean | null
           id?: string
+          performance_review_updates?: boolean | null
+          review_response_reminders?: boolean | null
           system_announcements?: boolean
           ticket_assigned?: boolean
           ticket_comment_added?: boolean
