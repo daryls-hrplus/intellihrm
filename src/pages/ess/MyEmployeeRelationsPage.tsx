@@ -61,8 +61,7 @@ export default function MyEmployeeRelationsPage() {
   } = useEmployeeRelations(company?.id);
 
   const breadcrumbItems = [
-    { label: t('common.home'), path: '/' },
-    { label: t('ess.title'), path: '/ess' },
+    { label: t('ess.title'), href: '/ess' },
     { label: t('employeeRelationsModule.ess.title') },
   ];
 

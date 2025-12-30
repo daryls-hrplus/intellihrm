@@ -36,8 +36,7 @@ export default function MyOffboardingPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   const breadcrumbItems = [
-    { label: t('common.home'), path: '/' },
-    { label: t('navigation.ess'), path: '/ess' },
+    { label: t('ess.title'), href: '/ess' },
     { label: t('ess.myOffboarding.breadcrumb') },
   ];
 
