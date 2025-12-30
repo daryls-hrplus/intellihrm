@@ -12,10 +12,10 @@ import {
   Shield,
   ExternalLink,
 } from "lucide-react";
-import { usePerformanceEvidence } from "@/hooks/capabilities/usePerformanceEvidence";
+import { usePerformanceEvidence, EvidenceType } from "@/hooks/capabilities/usePerformanceEvidence";
 import { useCompetencyRatingHistory } from "@/hooks/capabilities/useCompetencyRatingHistory";
 import { useSkillValidationConfidence } from "@/hooks/capabilities/useSkillValidationConfidence";
-import { PerformanceEvidenceManager } from "./PerformanceEvidenceManager";
+import { PerformanceEvidenceManager, EvidencePrePopulate } from "./PerformanceEvidenceManager";
 import { CompetencyDriftChart } from "./CompetencyDriftChart";
 import { SkillValidationConfidenceIndicator } from "./SkillValidationConfidenceIndicator";
 
@@ -24,6 +24,7 @@ interface EvidencePortfolioSectionProps {
   companyId?: string;
   canEdit?: boolean;
   canValidate?: boolean;
+  prePopulate?: EvidencePrePopulate;
 }
 
 export function EvidencePortfolioSection({
@@ -31,6 +32,7 @@ export function EvidencePortfolioSection({
   companyId,
   canEdit = false,
   canValidate = false,
+  prePopulate,
 }: EvidencePortfolioSectionProps) {
   const { evidence, loading: evidenceLoading, fetchEvidence } = usePerformanceEvidence();
   const { fetchDriftAnalysis, getHistoryByPeriod } = useCompetencyRatingHistory();
@@ -38,7 +40,7 @@ export function EvidencePortfolioSection({
 
   const [driftData, setDriftData] = useState<any[]>([]);
   const [validationSummaries, setValidationSummaries] = useState<any[]>([]);
-  const [activeTab, setActiveTab] = useState("evidence");
+  const [activeTab, setActiveTab] = useState(prePopulate?.goalId ? "evidence" : "evidence");
 
   useEffect(() => {
     if (employeeId) {
@@ -134,6 +136,7 @@ export function EvidencePortfolioSection({
             employeeId={employeeId}
             canValidate={canValidate}
             readOnly={!canEdit}
+            prePopulate={prePopulate}
           />
         </TabsContent>
 

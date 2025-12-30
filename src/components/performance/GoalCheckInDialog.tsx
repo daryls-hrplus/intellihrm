@@ -33,11 +33,14 @@ import {
   Paperclip,
   Info,
   FileText,
+  FolderOpen,
 } from "lucide-react";
 import { useGoalCheckIns, GoalCheckIn, CreateCheckInData } from "@/hooks/useGoalCheckIns";
 import { useAuth } from "@/contexts/AuthContext";
 import { format } from "date-fns";
 import { GoalEvidenceAttachment } from "./GoalEvidenceAttachment";
+import { useNavigate } from "react-router-dom";
+import { EvidenceType } from "@/hooks/capabilities/usePerformanceEvidence";
 
 interface Goal {
   id: string;
@@ -45,7 +48,17 @@ interface Goal {
   progress_percentage: number;
   employee_id: string;
   assigned_by?: string | null;
+  measurement_method?: string | null;
 }
+
+// Map measurement methods to suggested evidence types
+const MEASUREMENT_TO_EVIDENCE: Record<string, EvidenceType> = {
+  quantitative: "metric_achievement",
+  qualitative: "document",
+  milestone: "deliverable",
+  percentage: "metric_achievement",
+  rating_scale: "document",
+};
 
 interface GoalCheckInDialogProps {
   open: boolean;
@@ -76,6 +89,7 @@ export function GoalCheckInDialog({
   onSuccess,
 }: GoalCheckInDialogProps) {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const { createCheckIn, submitEmployeeCheckIn, submitManagerReview, saving } = useGoalCheckIns();
   
   const isManager = user?.id === goal.assigned_by && user?.id !== goal.employee_id;
@@ -312,10 +326,29 @@ export function GoalCheckInDialog({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="evidence" className="flex items-center gap-2">
-                <Paperclip className="h-4 w-4" />
-                Evidence / Attachment URL
-              </Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="evidence" className="flex items-center gap-2">
+                  <Paperclip className="h-4 w-4" />
+                  Evidence / Attachment URL
+                </Label>
+                {isEmployee && existingCheckIn?.status !== "completed" && (
+                  <Button
+                    variant="link"
+                    size="sm"
+                    className="h-auto p-0 text-primary"
+                    onClick={() => {
+                      const suggestedType = goal.measurement_method 
+                        ? MEASUREMENT_TO_EVIDENCE[goal.measurement_method] || "deliverable"
+                        : "deliverable";
+                      navigate(`/ess/evidence-portfolio?goalId=${goal.id}&type=${suggestedType}&title=${encodeURIComponent(goal.title)}`);
+                      onOpenChange(false);
+                    }}
+                  >
+                    <FolderOpen className="h-3.5 w-3.5 mr-1" />
+                    Add to Portfolio
+                  </Button>
+                )}
+              </div>
               <Input
                 id="evidence"
                 value={evidenceUrl}
@@ -323,6 +356,9 @@ export function GoalCheckInDialog({
                 placeholder="Link to supporting document or evidence"
                 disabled={!isEmployee || existingCheckIn?.status === "completed"}
               />
+              <p className="text-xs text-muted-foreground">
+                Or use "Add to Portfolio" for file uploads with full evidence tracking
+              </p>
             </div>
 
             {isEmployee && existingCheckIn?.status !== "completed" && (
