@@ -87,28 +87,32 @@ export default function EmployeeSelfServicePage() {
 
   const sections: ModuleSection[] = [
     {
-      titleKey: "Personal",
-      items: filterByAccess([allModules.profile, allModules.personalInfo, allModules.dependents, allModules.documents, allModules.letters, allModules.jobs, allModules.transactions, allModules.milestones, allModules.announcements]),
+      titleKey: "My Profile",
+      items: filterByAccess([allModules.profile, allModules.personalInfo, allModules.dependents, allModules.documents, allModules.letters, allModules.banking]),
     },
     {
-      titleKey: "Time & Leave",
+      titleKey: "Time & Absence",
       items: filterByAccess([allModules.leave, allModules.myCalendar, allModules.teamCalendar, allModules.timeAttendance, allModules.timesheets]),
     },
     {
       titleKey: "Pay & Benefits",
-      items: filterByAccess([allModules.payslips, allModules.compensation, allModules.banking, allModules.benefits, allModules.expenses]),
+      items: filterByAccess([allModules.payslips, allModules.compensation, allModules.benefits, allModules.expenses]),
     },
     {
       titleKey: "Career & Development",
-      items: filterByAccess([allModules.onboarding, allModules.goals, allModules.goalInterviews, allModules.myAppraisals, allModules.appraisalInterviews, allModules.feedback, allModules.development, allModules.training, allModules.recognition, allModules.offboarding]),
+      items: filterByAccess([allModules.onboarding, allModules.goals, allModules.goalInterviews, allModules.myAppraisals, allModules.appraisalInterviews, allModules.feedback, allModules.development, allModules.training, allModules.jobs, allModules.milestones, allModules.recognition, allModules.offboarding]),
     },
     {
-      titleKey: "Workplace Resources",
-      items: filterByAccess([allModules.property, allModules.relations, allModules.hse]),
+      titleKey: "Workplace",
+      items: filterByAccess([allModules.property, allModules.relations, allModules.hse, allModules.announcements]),
     },
     {
-      titleKey: "Support",
-      items: filterByAccess([allModules.approvals, allModules.delegates, allModules.tickets, allModules.reminders, allModules.notifications]),
+      titleKey: "Tasks & Approvals",
+      items: filterByAccess([allModules.approvals, allModules.delegates, allModules.transactions]),
+    },
+    {
+      titleKey: "Help & Settings",
+      items: filterByAccess([allModules.tickets, allModules.reminders, allModules.notifications]),
     },
   ];
 
