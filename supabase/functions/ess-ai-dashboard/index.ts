@@ -62,17 +62,20 @@ serve(async (req) => {
     // Fetch employee profile
     const { data: profile, error: profileError } = await supabase
       .from("profiles")
-      .select("id, full_name, first_name, email, job_title")
+      .select("id, full_name, first_name, timezone, email")
       .eq("id", userId)
       .single();
 
-    console.log(`Profile fetch result:`, { profile, profileError });
-    
-    // Use first_name if available, otherwise extract from full_name
+    if (profileError) {
+      console.warn("Profile fetch error:", profileError);
+    }
+
     const firstName = profile?.first_name || profile?.full_name?.split(" ")[0] || "there";
-    const today = new Date();
-    const hour = today.getHours();
-    const timeGreeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+    const timeZone = profile?.timezone || "UTC";
+
+    const now = new Date();
+    const { hour: localHour } = getZonedDateParts(now, timeZone);
+    const timeGreeting = localHour < 12 ? "Good morning" : localHour < 17 ? "Good afternoon" : "Good evening";
 
     // Collect pending tasks in parallel
     const [
