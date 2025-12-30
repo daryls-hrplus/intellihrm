@@ -1682,6 +1682,111 @@ export type Database = {
           },
         ]
       }
+      appraisal_action_executions: {
+        Row: {
+          acknowledged_at: string | null
+          acknowledged_by: string | null
+          acknowledgment_notes: string | null
+          created_at: string
+          created_idp_id: string | null
+          created_pip_id: string | null
+          created_succession_nomination_id: string | null
+          executed_at: string | null
+          executed_by: string | null
+          id: string
+          override_approved_at: string | null
+          override_approved_by: string | null
+          override_reason: string | null
+          participant_id: string
+          rule_id: string
+          status: string
+          triggered_at: string
+          triggered_score: number | null
+          triggered_section: string | null
+          updated_at: string
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          acknowledgment_notes?: string | null
+          created_at?: string
+          created_idp_id?: string | null
+          created_pip_id?: string | null
+          created_succession_nomination_id?: string | null
+          executed_at?: string | null
+          executed_by?: string | null
+          id?: string
+          override_approved_at?: string | null
+          override_approved_by?: string | null
+          override_reason?: string | null
+          participant_id: string
+          rule_id: string
+          status?: string
+          triggered_at?: string
+          triggered_score?: number | null
+          triggered_section?: string | null
+          updated_at?: string
+        }
+        Update: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          acknowledgment_notes?: string | null
+          created_at?: string
+          created_idp_id?: string | null
+          created_pip_id?: string | null
+          created_succession_nomination_id?: string | null
+          executed_at?: string | null
+          executed_by?: string | null
+          id?: string
+          override_approved_at?: string | null
+          override_approved_by?: string | null
+          override_reason?: string | null
+          participant_id?: string
+          rule_id?: string
+          status?: string
+          triggered_at?: string
+          triggered_score?: number | null
+          triggered_section?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appraisal_action_executions_acknowledged_by_fkey"
+            columns: ["acknowledged_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appraisal_action_executions_executed_by_fkey"
+            columns: ["executed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appraisal_action_executions_override_approved_by_fkey"
+            columns: ["override_approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appraisal_action_executions_participant_id_fkey"
+            columns: ["participant_id"]
+            isOneToOne: false
+            referencedRelation: "appraisal_participants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appraisal_action_executions_rule_id_fkey"
+            columns: ["rule_id"]
+            isOneToOne: false
+            referencedRelation: "appraisal_outcome_action_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       appraisal_cycles: {
         Row: {
           company_id: string
@@ -1693,8 +1798,13 @@ export type Database = {
           description_en: string | null
           end_date: string
           evaluation_deadline: string | null
+          feedback_360_weight: number | null
           goal_weight: number
           id: string
+          include_360_feedback: boolean | null
+          include_competencies: boolean | null
+          include_goals: boolean | null
+          include_responsibilities: boolean | null
           include_values_assessment: boolean | null
           is_locked: boolean | null
           is_manager_cycle: boolean
@@ -1710,8 +1820,13 @@ export type Database = {
           responsibility_weight: number
           start_date: string
           status: string
+          template_id: string | null
           updated_at: string
           values_weight: number | null
+          weights_locked: boolean | null
+          weights_override_approved_at: string | null
+          weights_override_approved_by: string | null
+          weights_override_reason: string | null
         }
         Insert: {
           company_id: string
@@ -1723,8 +1838,13 @@ export type Database = {
           description_en?: string | null
           end_date: string
           evaluation_deadline?: string | null
+          feedback_360_weight?: number | null
           goal_weight?: number
           id?: string
+          include_360_feedback?: boolean | null
+          include_competencies?: boolean | null
+          include_goals?: boolean | null
+          include_responsibilities?: boolean | null
           include_values_assessment?: boolean | null
           is_locked?: boolean | null
           is_manager_cycle?: boolean
@@ -1740,8 +1860,13 @@ export type Database = {
           responsibility_weight?: number
           start_date: string
           status?: string
+          template_id?: string | null
           updated_at?: string
           values_weight?: number | null
+          weights_locked?: boolean | null
+          weights_override_approved_at?: string | null
+          weights_override_approved_by?: string | null
+          weights_override_reason?: string | null
         }
         Update: {
           company_id?: string
@@ -1753,8 +1878,13 @@ export type Database = {
           description_en?: string | null
           end_date?: string
           evaluation_deadline?: string | null
+          feedback_360_weight?: number | null
           goal_weight?: number
           id?: string
+          include_360_feedback?: boolean | null
+          include_competencies?: boolean | null
+          include_goals?: boolean | null
+          include_responsibilities?: boolean | null
           include_values_assessment?: boolean | null
           is_locked?: boolean | null
           is_manager_cycle?: boolean
@@ -1770,8 +1900,13 @@ export type Database = {
           responsibility_weight?: number
           start_date?: string
           status?: string
+          template_id?: string | null
           updated_at?: string
           values_weight?: number | null
+          weights_locked?: boolean | null
+          weights_override_approved_at?: string | null
+          weights_override_approved_by?: string | null
+          weights_override_reason?: string | null
         }
         Relationships: [
           {
@@ -1807,6 +1942,142 @@ export type Database = {
             columns: ["overall_scale_id"]
             isOneToOne: false
             referencedRelation: "overall_rating_scales"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appraisal_cycles_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "appraisal_form_templates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appraisal_cycles_weights_override_approved_by_fkey"
+            columns: ["weights_override_approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      appraisal_form_templates: {
+        Row: {
+          allow_weight_override: boolean
+          code: string
+          company_id: string
+          competencies_weight: number
+          created_at: string
+          created_by: string | null
+          description: string | null
+          description_en: string | null
+          feedback_360_weight: number
+          goals_weight: number
+          id: string
+          include_360_feedback: boolean
+          include_competencies: boolean
+          include_goals: boolean
+          include_responsibilities: boolean
+          include_values: boolean
+          is_active: boolean
+          is_default: boolean
+          is_locked: boolean
+          max_rating: number
+          min_rating: number
+          name: string
+          overall_scale_id: string | null
+          rating_scale_id: string | null
+          requires_hr_approval_for_override: boolean
+          responsibilities_weight: number
+          updated_at: string
+          values_weight: number
+        }
+        Insert: {
+          allow_weight_override?: boolean
+          code: string
+          company_id: string
+          competencies_weight?: number
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          description_en?: string | null
+          feedback_360_weight?: number
+          goals_weight?: number
+          id?: string
+          include_360_feedback?: boolean
+          include_competencies?: boolean
+          include_goals?: boolean
+          include_responsibilities?: boolean
+          include_values?: boolean
+          is_active?: boolean
+          is_default?: boolean
+          is_locked?: boolean
+          max_rating?: number
+          min_rating?: number
+          name: string
+          overall_scale_id?: string | null
+          rating_scale_id?: string | null
+          requires_hr_approval_for_override?: boolean
+          responsibilities_weight?: number
+          updated_at?: string
+          values_weight?: number
+        }
+        Update: {
+          allow_weight_override?: boolean
+          code?: string
+          company_id?: string
+          competencies_weight?: number
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          description_en?: string | null
+          feedback_360_weight?: number
+          goals_weight?: number
+          id?: string
+          include_360_feedback?: boolean
+          include_competencies?: boolean
+          include_goals?: boolean
+          include_responsibilities?: boolean
+          include_values?: boolean
+          is_active?: boolean
+          is_default?: boolean
+          is_locked?: boolean
+          max_rating?: number
+          min_rating?: number
+          name?: string
+          overall_scale_id?: string | null
+          rating_scale_id?: string | null
+          requires_hr_approval_for_override?: boolean
+          responsibilities_weight?: number
+          updated_at?: string
+          values_weight?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appraisal_form_templates_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appraisal_form_templates_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appraisal_form_templates_overall_scale_id_fkey"
+            columns: ["overall_scale_id"]
+            isOneToOne: false
+            referencedRelation: "overall_rating_scales"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appraisal_form_templates_rating_scale_id_fkey"
+            columns: ["rating_scale_id"]
+            isOneToOne: false
+            referencedRelation: "performance_rating_scales"
             referencedColumns: ["id"]
           },
         ]
@@ -1899,6 +2170,106 @@ export type Database = {
             columns: ["participant_id"]
             isOneToOne: false
             referencedRelation: "appraisal_participants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      appraisal_outcome_action_rules: {
+        Row: {
+          action_description: string | null
+          action_is_mandatory: boolean
+          action_message: string | null
+          action_priority: number
+          action_type: Database["public"]["Enums"]["appraisal_action_type"]
+          auto_execute: boolean
+          company_id: string
+          condition_cycles: number | null
+          condition_operator: string
+          condition_section: string
+          condition_threshold: number
+          condition_type: Database["public"]["Enums"]["appraisal_condition_type"]
+          created_at: string
+          created_by: string | null
+          description: string | null
+          display_order: number
+          id: string
+          is_active: boolean
+          requires_hr_override: boolean
+          rule_code: string
+          rule_name: string
+          template_id: string
+          updated_at: string
+        }
+        Insert: {
+          action_description?: string | null
+          action_is_mandatory?: boolean
+          action_message?: string | null
+          action_priority?: number
+          action_type: Database["public"]["Enums"]["appraisal_action_type"]
+          auto_execute?: boolean
+          company_id: string
+          condition_cycles?: number | null
+          condition_operator?: string
+          condition_section: string
+          condition_threshold: number
+          condition_type: Database["public"]["Enums"]["appraisal_condition_type"]
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          requires_hr_override?: boolean
+          rule_code: string
+          rule_name: string
+          template_id: string
+          updated_at?: string
+        }
+        Update: {
+          action_description?: string | null
+          action_is_mandatory?: boolean
+          action_message?: string | null
+          action_priority?: number
+          action_type?: Database["public"]["Enums"]["appraisal_action_type"]
+          auto_execute?: boolean
+          company_id?: string
+          condition_cycles?: number | null
+          condition_operator?: string
+          condition_section?: string
+          condition_threshold?: number
+          condition_type?: Database["public"]["Enums"]["appraisal_condition_type"]
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          requires_hr_override?: boolean
+          rule_code?: string
+          rule_name?: string
+          template_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appraisal_outcome_action_rules_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appraisal_outcome_action_rules_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appraisal_outcome_action_rules_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "appraisal_form_templates"
             referencedColumns: ["id"]
           },
         ]
@@ -18389,6 +18760,364 @@ export type Database = {
             columns: ["tour_id"]
             isOneToOne: false
             referencedRelation: "enablement_tours"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      feedback_360_cycles: {
+        Row: {
+          appraisal_cycle_id: string | null
+          company_id: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          end_date: string
+          id: string
+          is_standalone: boolean
+          name: string
+          reminder_days_before: number[] | null
+          start_date: string
+          status: string
+          submission_deadline: string
+          updated_at: string
+        }
+        Insert: {
+          appraisal_cycle_id?: string | null
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          end_date: string
+          id?: string
+          is_standalone?: boolean
+          name: string
+          reminder_days_before?: number[] | null
+          start_date: string
+          status?: string
+          submission_deadline: string
+          updated_at?: string
+        }
+        Update: {
+          appraisal_cycle_id?: string | null
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          end_date?: string
+          id?: string
+          is_standalone?: boolean
+          name?: string
+          reminder_days_before?: number[] | null
+          start_date?: string
+          status?: string
+          submission_deadline?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedback_360_cycles_appraisal_cycle_id_fkey"
+            columns: ["appraisal_cycle_id"]
+            isOneToOne: false
+            referencedRelation: "appraisal_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_360_cycles_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_360_cycles_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      feedback_360_questions: {
+        Row: {
+          category_id: string | null
+          choices: Json | null
+          company_id: string
+          competency_id: string | null
+          created_at: string
+          display_order: number
+          id: string
+          is_active: boolean
+          is_required: boolean
+          question_text: string
+          question_text_en: string | null
+          question_type: string
+          rating_scale_labels: Json | null
+          rating_scale_max: number | null
+          rating_scale_min: number | null
+          updated_at: string
+        }
+        Insert: {
+          category_id?: string | null
+          choices?: Json | null
+          company_id: string
+          competency_id?: string | null
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          is_required?: boolean
+          question_text: string
+          question_text_en?: string | null
+          question_type?: string
+          rating_scale_labels?: Json | null
+          rating_scale_max?: number | null
+          rating_scale_min?: number | null
+          updated_at?: string
+        }
+        Update: {
+          category_id?: string | null
+          choices?: Json | null
+          company_id?: string
+          competency_id?: string | null
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          is_required?: boolean
+          question_text?: string
+          question_text_en?: string | null
+          question_type?: string
+          rating_scale_labels?: Json | null
+          rating_scale_max?: number | null
+          rating_scale_min?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedback_360_questions_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "feedback_360_rater_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_360_questions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_360_questions_competency_id_fkey"
+            columns: ["competency_id"]
+            isOneToOne: false
+            referencedRelation: "competencies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      feedback_360_rater_categories: {
+        Row: {
+          code: string
+          company_id: string
+          created_at: string
+          description: string | null
+          display_order: number
+          id: string
+          is_active: boolean
+          is_anonymous: boolean
+          is_required: boolean
+          max_raters: number | null
+          min_raters: number
+          name: string
+          updated_at: string
+          weight_percentage: number
+        }
+        Insert: {
+          code: string
+          company_id: string
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          is_anonymous?: boolean
+          is_required?: boolean
+          max_raters?: number | null
+          min_raters?: number
+          name: string
+          updated_at?: string
+          weight_percentage?: number
+        }
+        Update: {
+          code?: string
+          company_id?: string
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          is_anonymous?: boolean
+          is_required?: boolean
+          max_raters?: number | null
+          min_raters?: number
+          name?: string
+          updated_at?: string
+          weight_percentage?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedback_360_rater_categories_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      feedback_360_requests: {
+        Row: {
+          created_at: string
+          cycle_id: string
+          decline_reason: string | null
+          declined_at: string | null
+          due_date: string
+          id: string
+          invited_at: string
+          is_mandatory: boolean
+          last_reminder_sent_at: string | null
+          participant_id: string | null
+          rater_category_id: string
+          rater_id: string
+          reminder_count: number
+          started_at: string | null
+          status: string
+          subject_employee_id: string
+          submitted_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          cycle_id: string
+          decline_reason?: string | null
+          declined_at?: string | null
+          due_date: string
+          id?: string
+          invited_at?: string
+          is_mandatory?: boolean
+          last_reminder_sent_at?: string | null
+          participant_id?: string | null
+          rater_category_id: string
+          rater_id: string
+          reminder_count?: number
+          started_at?: string | null
+          status?: string
+          subject_employee_id: string
+          submitted_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          cycle_id?: string
+          decline_reason?: string | null
+          declined_at?: string | null
+          due_date?: string
+          id?: string
+          invited_at?: string
+          is_mandatory?: boolean
+          last_reminder_sent_at?: string | null
+          participant_id?: string | null
+          rater_category_id?: string
+          rater_id?: string
+          reminder_count?: number
+          started_at?: string | null
+          status?: string
+          subject_employee_id?: string
+          submitted_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedback_360_requests_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "feedback_360_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_360_requests_participant_id_fkey"
+            columns: ["participant_id"]
+            isOneToOne: false
+            referencedRelation: "appraisal_participants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_360_requests_rater_category_id_fkey"
+            columns: ["rater_category_id"]
+            isOneToOne: false
+            referencedRelation: "feedback_360_rater_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_360_requests_rater_id_fkey"
+            columns: ["rater_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_360_requests_subject_employee_id_fkey"
+            columns: ["subject_employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      feedback_360_responses: {
+        Row: {
+          created_at: string
+          id: string
+          question_id: string
+          rating_value: number | null
+          request_id: string
+          selected_choices: Json | null
+          text_response: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          question_id: string
+          rating_value?: number | null
+          request_id: string
+          selected_choices?: Json | null
+          text_response?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          question_id?: string
+          rating_value?: number | null
+          request_id?: string
+          selected_choices?: Json | null
+          text_response?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedback_360_responses_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "feedback_360_questions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_360_responses_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "feedback_360_requests"
             referencedColumns: ["id"]
           },
         ]
@@ -45023,6 +45752,68 @@ export type Database = {
           },
         ]
       }
+      scale_normalization_rules: {
+        Row: {
+          company_id: string
+          created_at: string
+          custom_mapping: Json | null
+          description: string | null
+          id: string
+          is_active: boolean
+          method: string
+          name: string
+          source_max: number
+          source_min: number
+          source_step: number | null
+          target_max: number
+          target_min: number
+          target_step: number | null
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          custom_mapping?: Json | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          method?: string
+          name: string
+          source_max: number
+          source_min: number
+          source_step?: number | null
+          target_max?: number
+          target_min?: number
+          target_step?: number | null
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          custom_mapping?: Json | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          method?: string
+          name?: string
+          source_max?: number
+          source_min?: number
+          source_step?: number | null
+          target_max?: number
+          target_min?: number
+          target_step?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scale_normalization_rules_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       scenario_comments: {
         Row: {
           annotation_target: string | null
@@ -51962,6 +52753,23 @@ export type Database = {
         | "system_admin"
         | "billing_admin"
         | "enablement_admin"
+      appraisal_action_type:
+        | "create_idp"
+        | "create_pip"
+        | "suggest_succession"
+        | "block_finalization"
+        | "require_comment"
+        | "notify_hr"
+        | "schedule_coaching"
+        | "require_development_plan"
+      appraisal_condition_type:
+        | "score_below"
+        | "score_above"
+        | "gap_detected"
+        | "repeated_low"
+        | "improvement_trend"
+        | "competency_gap"
+        | "goal_not_met"
       audit_action:
         | "CREATE"
         | "UPDATE"
@@ -52284,6 +53092,25 @@ export const Constants = {
         "system_admin",
         "billing_admin",
         "enablement_admin",
+      ],
+      appraisal_action_type: [
+        "create_idp",
+        "create_pip",
+        "suggest_succession",
+        "block_finalization",
+        "require_comment",
+        "notify_hr",
+        "schedule_coaching",
+        "require_development_plan",
+      ],
+      appraisal_condition_type: [
+        "score_below",
+        "score_above",
+        "gap_detected",
+        "repeated_low",
+        "improvement_trend",
+        "competency_gap",
+        "goal_not_met",
       ],
       audit_action: [
         "CREATE",
