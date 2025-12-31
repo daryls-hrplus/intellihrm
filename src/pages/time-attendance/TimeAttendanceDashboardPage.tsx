@@ -306,7 +306,7 @@ export default function TimeAttendanceDashboardPage() {
       ]),
     },
     {
-      titleKey: "Configuration",
+      titleKey: "Time and Attendance Administration",
       items: filterByAccess([
         allModules.policies,
         allModules.devices,
@@ -385,7 +385,7 @@ export default function TimeAttendanceDashboardPage() {
         </div>
 
         {/* Grouped Modules */}
-        <GroupedModuleCards sections={sections} />
+        <GroupedModuleCards sections={sections} defaultOpen={false} />
       </div>
     </AppLayout>
   );
