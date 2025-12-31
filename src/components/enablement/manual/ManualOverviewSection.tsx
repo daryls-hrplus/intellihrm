@@ -88,8 +88,8 @@ export function ManualOverviewSection() {
               <div>
                 <h4 className="font-medium text-foreground">Industry Standard</h4>
                 <p className="text-sm text-muted-foreground mt-1">
-                  HRplus Appraisals aligns with enterprise HRMS standards set by Workday, SAP SuccessFactors, 
-                  and Oracle HCM, while providing unique AI capabilities and regional compliance support.
+                  HRplus Appraisals aligns with enterprise HRMS standards while providing unique AI capabilities 
+                  and regional compliance support for the Caribbean, Africa, and global markets.
                 </p>
               </div>
             </div>
