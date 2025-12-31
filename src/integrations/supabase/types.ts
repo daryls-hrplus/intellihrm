@@ -12504,6 +12504,123 @@ export type Database = {
         }
         Relationships: []
       }
+      employee_performance_index: {
+        Row: {
+          avg_competency_score: number | null
+          avg_goal_score: number | null
+          avg_responsibility_score: number | null
+          avg_values_score: number | null
+          best_cycle_id: string | null
+          best_score: number | null
+          calculation_config: Json | null
+          company_id: string
+          consistency_rating: string | null
+          created_at: string
+          cycles_12m_count: number | null
+          cycles_24m_count: number | null
+          cycles_36m_count: number | null
+          employee_id: string
+          id: string
+          idp_completion_rate: number | null
+          last_calculated_at: string | null
+          lowest_cycle_id: string | null
+          lowest_score: number | null
+          promotion_readiness_score: number | null
+          rolling_12m_score: number | null
+          rolling_24m_score: number | null
+          rolling_36m_score: number | null
+          score_std_deviation: number | null
+          score_variance: number | null
+          skill_gap_closure_rate: number | null
+          succession_readiness_score: number | null
+          trend_confidence: number | null
+          trend_direction: string | null
+          trend_velocity: number | null
+          updated_at: string
+        }
+        Insert: {
+          avg_competency_score?: number | null
+          avg_goal_score?: number | null
+          avg_responsibility_score?: number | null
+          avg_values_score?: number | null
+          best_cycle_id?: string | null
+          best_score?: number | null
+          calculation_config?: Json | null
+          company_id: string
+          consistency_rating?: string | null
+          created_at?: string
+          cycles_12m_count?: number | null
+          cycles_24m_count?: number | null
+          cycles_36m_count?: number | null
+          employee_id: string
+          id?: string
+          idp_completion_rate?: number | null
+          last_calculated_at?: string | null
+          lowest_cycle_id?: string | null
+          lowest_score?: number | null
+          promotion_readiness_score?: number | null
+          rolling_12m_score?: number | null
+          rolling_24m_score?: number | null
+          rolling_36m_score?: number | null
+          score_std_deviation?: number | null
+          score_variance?: number | null
+          skill_gap_closure_rate?: number | null
+          succession_readiness_score?: number | null
+          trend_confidence?: number | null
+          trend_direction?: string | null
+          trend_velocity?: number | null
+          updated_at?: string
+        }
+        Update: {
+          avg_competency_score?: number | null
+          avg_goal_score?: number | null
+          avg_responsibility_score?: number | null
+          avg_values_score?: number | null
+          best_cycle_id?: string | null
+          best_score?: number | null
+          calculation_config?: Json | null
+          company_id?: string
+          consistency_rating?: string | null
+          created_at?: string
+          cycles_12m_count?: number | null
+          cycles_24m_count?: number | null
+          cycles_36m_count?: number | null
+          employee_id?: string
+          id?: string
+          idp_completion_rate?: number | null
+          last_calculated_at?: string | null
+          lowest_cycle_id?: string | null
+          lowest_score?: number | null
+          promotion_readiness_score?: number | null
+          rolling_12m_score?: number | null
+          rolling_24m_score?: number | null
+          rolling_36m_score?: number | null
+          score_std_deviation?: number | null
+          score_variance?: number | null
+          skill_gap_closure_rate?: number | null
+          succession_readiness_score?: number | null
+          trend_confidence?: number | null
+          trend_direction?: string | null
+          trend_velocity?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_performance_index_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_performance_index_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       employee_performance_risks: {
         Row: {
           acknowledged_at: string | null
@@ -38647,6 +38764,146 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      performance_cycle_snapshots: {
+        Row: {
+          archived_at: string
+          calibration_delta: number | null
+          company_id: string
+          competency_score: number | null
+          cycle_end_date: string
+          cycle_id: string
+          cycle_name: string
+          cycle_start_date: string
+          cycle_type: string | null
+          employee_id: string
+          evaluator_id: string | null
+          evaluator_name: string | null
+          evidence_count: number | null
+          feedback_360_score: number | null
+          gaps_count: number | null
+          goal_score: number | null
+          id: string
+          overall_score: number | null
+          participant_id: string | null
+          percentile_company: number | null
+          percentile_department: number | null
+          performance_category_code: string | null
+          performance_category_id: string | null
+          performance_category_name: string | null
+          rank_in_company: number | null
+          rank_in_department: number | null
+          rank_in_job_family: number | null
+          responsibility_score: number | null
+          risk_count: number | null
+          snapshot_version: number | null
+          strengths_count: number | null
+          validated_evidence_count: number | null
+          values_score: number | null
+          was_calibrated: boolean | null
+        }
+        Insert: {
+          archived_at?: string
+          calibration_delta?: number | null
+          company_id: string
+          competency_score?: number | null
+          cycle_end_date: string
+          cycle_id: string
+          cycle_name: string
+          cycle_start_date: string
+          cycle_type?: string | null
+          employee_id: string
+          evaluator_id?: string | null
+          evaluator_name?: string | null
+          evidence_count?: number | null
+          feedback_360_score?: number | null
+          gaps_count?: number | null
+          goal_score?: number | null
+          id?: string
+          overall_score?: number | null
+          participant_id?: string | null
+          percentile_company?: number | null
+          percentile_department?: number | null
+          performance_category_code?: string | null
+          performance_category_id?: string | null
+          performance_category_name?: string | null
+          rank_in_company?: number | null
+          rank_in_department?: number | null
+          rank_in_job_family?: number | null
+          responsibility_score?: number | null
+          risk_count?: number | null
+          snapshot_version?: number | null
+          strengths_count?: number | null
+          validated_evidence_count?: number | null
+          values_score?: number | null
+          was_calibrated?: boolean | null
+        }
+        Update: {
+          archived_at?: string
+          calibration_delta?: number | null
+          company_id?: string
+          competency_score?: number | null
+          cycle_end_date?: string
+          cycle_id?: string
+          cycle_name?: string
+          cycle_start_date?: string
+          cycle_type?: string | null
+          employee_id?: string
+          evaluator_id?: string | null
+          evaluator_name?: string | null
+          evidence_count?: number | null
+          feedback_360_score?: number | null
+          gaps_count?: number | null
+          goal_score?: number | null
+          id?: string
+          overall_score?: number | null
+          participant_id?: string | null
+          percentile_company?: number | null
+          percentile_department?: number | null
+          performance_category_code?: string | null
+          performance_category_id?: string | null
+          performance_category_name?: string | null
+          rank_in_company?: number | null
+          rank_in_department?: number | null
+          rank_in_job_family?: number | null
+          responsibility_score?: number | null
+          risk_count?: number | null
+          snapshot_version?: number | null
+          strengths_count?: number | null
+          validated_evidence_count?: number | null
+          values_score?: number | null
+          was_calibrated?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "performance_cycle_snapshots_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "performance_cycle_snapshots_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "appraisal_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "performance_cycle_snapshots_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "performance_cycle_snapshots_participant_id_fkey"
+            columns: ["participant_id"]
+            isOneToOne: false
+            referencedRelation: "appraisal_participants"
             referencedColumns: ["id"]
           },
         ]
