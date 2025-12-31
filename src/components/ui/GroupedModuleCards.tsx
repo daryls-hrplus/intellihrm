@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, forwardRef, useImperativeHandle } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { 
   LucideIcon, 
   ChevronDown, 
@@ -16,7 +17,8 @@ import {
   Building2, 
   CheckSquare, 
   HelpCircle,
-  Compass
+  Compass,
+  ChevronsUpDown
 } from "lucide-react";
 
 export interface GroupedModuleItem {
@@ -39,10 +41,18 @@ export interface ModuleSection {
   items: GroupedModuleItem[];
 }
 
+export interface GroupedModuleCardsHandle {
+  expandAll: () => void;
+  collapseAll: () => void;
+  toggleAll: () => void;
+  isAllExpanded: boolean;
+}
+
 interface GroupedModuleCardsProps {
   sections: ModuleSection[];
   defaultOpen?: boolean;
   sectionBadges?: Record<string, SectionBadge | null>;
+  showToggleButton?: boolean;
 }
 
 // Map section titles to icons
@@ -60,11 +70,16 @@ const sectionIcons: Record<string, LucideIcon> = {
   "Help & Settings": HelpCircle,
 };
 
-export function GroupedModuleCards({ sections, defaultOpen = false, sectionBadges = {} }: GroupedModuleCardsProps) {
+export const GroupedModuleCards = forwardRef<GroupedModuleCardsHandle, GroupedModuleCardsProps>(
+  function GroupedModuleCards({ sections, defaultOpen = false, sectionBadges = {}, showToggleButton = false }, ref) {
   const navigate = useNavigate();
   
   // Track open sections - default state based on defaultOpen prop
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
+  const [allExpanded, setAllExpanded] = useState(defaultOpen);
+
+  // Filter out empty sections
+  const nonEmptySections = sections.filter(section => section.items.length > 0);
 
   // Determine if a section is open - use state if set, otherwise use defaultOpen prop
   const isSectionOpen = (titleKey: string) => {
@@ -78,8 +93,39 @@ export function GroupedModuleCards({ sections, defaultOpen = false, sectionBadge
     }));
   };
 
-  // Filter out empty sections
-  const nonEmptySections = sections.filter(section => section.items.length > 0);
+  const expandAll = () => {
+    const newState: Record<string, boolean> = {};
+    nonEmptySections.forEach(section => {
+      newState[section.titleKey] = true;
+    });
+    setOpenSections(newState);
+    setAllExpanded(true);
+  };
+
+  const collapseAll = () => {
+    const newState: Record<string, boolean> = {};
+    nonEmptySections.forEach(section => {
+      newState[section.titleKey] = false;
+    });
+    setOpenSections(newState);
+    setAllExpanded(false);
+  };
+
+  const toggleAll = () => {
+    if (allExpanded) {
+      collapseAll();
+    } else {
+      expandAll();
+    }
+  };
+
+  // Expose methods via ref
+  useImperativeHandle(ref, () => ({
+    expandAll,
+    collapseAll,
+    toggleAll,
+    isAllExpanded: allExpanded,
+  }));
 
   const getBadgeVariantClass = (variant: SectionBadge["variant"]) => {
     switch (variant) {
@@ -93,7 +139,21 @@ export function GroupedModuleCards({ sections, defaultOpen = false, sectionBadge
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+    <div className="space-y-4">
+      {showToggleButton && (
+        <div className="flex justify-end">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={toggleAll}
+            className="gap-2"
+          >
+            <ChevronsUpDown className="h-4 w-4" />
+            {allExpanded ? "Collapse All" : "Expand All"}
+          </Button>
+        </div>
+      )}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
       {nonEmptySections.map((section) => {
         const SectionIcon = sectionIcons[section.titleKey];
         const badge = sectionBadges[section.titleKey];
@@ -158,6 +218,7 @@ export function GroupedModuleCards({ sections, defaultOpen = false, sectionBadge
           </Card>
         );
       })}
+      </div>
     </div>
   );
-}
+});
