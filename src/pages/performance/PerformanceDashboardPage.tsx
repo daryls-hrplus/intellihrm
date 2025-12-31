@@ -22,6 +22,14 @@ import {
   Award,
   Settings,
   Scale,
+  Users,
+  GitBranch,
+  UserCheck,
+  Briefcase,
+  Route,
+  UserPlus,
+  AlertCircle,
+  PieChart,
 } from "lucide-react";
 
 export default function PerformanceDashboardPage() {
@@ -39,10 +47,20 @@ export default function PerformanceDashboardPage() {
     recognition: { title: t('performance.modules.recognitionAwards'), description: t('performance.modules.recognitionAwardsDesc'), href: "/performance/recognition", icon: Award, color: "bg-rose-500/10 text-rose-600", tabCode: "recognition" },
     analytics: { title: t('performance.modules.analytics'), description: t('performance.modules.analyticsDesc'), href: "/performance/analytics", icon: BarChart3, color: "bg-muted text-muted-foreground", tabCode: "analytics" },
     setup: { title: t('performance.modules.setup', 'Setup'), description: t('performance.modules.setupDesc', 'Configure performance settings'), href: "/performance/setup", icon: Settings, color: "bg-slate-500/10 text-slate-600", tabCode: "setup" },
+    // Succession Planning modules
+    nineBox: { title: "9-Box Assessment", description: "Talent potential and performance matrix", href: "/succession/nine-box", icon: PieChart, color: "bg-purple-500/10 text-purple-600", tabCode: "nine_box" },
+    talentPools: { title: "Talent Pools", description: "Manage high-potential talent groups", href: "/succession/talent-pools", icon: Users, color: "bg-cyan-500/10 text-cyan-600", tabCode: "talent_pools" },
+    successionPlans: { title: "Succession Plans", description: "Plan leadership transitions", href: "/succession/plans", icon: GitBranch, color: "bg-orange-500/10 text-orange-600", tabCode: "succession_plans" },
+    keyPositions: { title: "Key Positions", description: "Critical roles requiring succession coverage", href: "/succession/key-positions", icon: Briefcase, color: "bg-red-500/10 text-red-600", tabCode: "key_positions" },
+    careerPaths: { title: "Career Paths", description: "Define career progression routes", href: "/succession/career-paths", icon: Route, color: "bg-teal-500/10 text-teal-600", tabCode: "career_paths" },
+    mentorship: { title: "Mentorship", description: "Mentoring relationships and programs", href: "/succession/mentorship", icon: UserPlus, color: "bg-pink-500/10 text-pink-600", tabCode: "mentorship" },
+    flightRisk: { title: "Flight Risk", description: "Identify and mitigate attrition risks", href: "/succession/flight-risk", icon: AlertCircle, color: "bg-yellow-500/10 text-yellow-600", tabCode: "flight_risk" },
+    benchStrength: { title: "Bench Strength", description: "Evaluate succession readiness", href: "/succession/bench-strength", icon: UserCheck, color: "bg-lime-500/10 text-lime-600", tabCode: "bench_strength" },
+    successionAnalytics: { title: "Succession Analytics", description: "Insights on talent pipeline health", href: "/succession/analytics", icon: BarChart3, color: "bg-gray-500/10 text-gray-600", tabCode: "succession_analytics" },
   };
 
   const filterByAccess = (modules: typeof allModules[keyof typeof allModules][]) =>
-    modules.filter(m => hasTabAccess("performance", m.tabCode));
+    modules.filter(m => hasTabAccess("performance", m.tabCode) || hasTabAccess("succession", m.tabCode));
 
   const sections: ModuleSection[] = [
     {
@@ -56,6 +74,20 @@ export default function PerformanceDashboardPage() {
     {
       titleKey: "Development",
       items: filterByAccess([allModules.pips, allModules.feedback, allModules.recognition]),
+    },
+    {
+      titleKey: "Succession Planning",
+      items: filterByAccess([
+        allModules.nineBox,
+        allModules.talentPools,
+        allModules.successionPlans,
+        allModules.keyPositions,
+        allModules.careerPaths,
+        allModules.mentorship,
+        allModules.flightRisk,
+        allModules.benchStrength,
+        allModules.successionAnalytics,
+      ]),
     },
     {
       titleKey: "Analytics",
