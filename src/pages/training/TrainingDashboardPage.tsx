@@ -128,6 +128,7 @@ export default function TrainingDashboardPage() {
     lms: { title: t("training.modules.lms.title"), description: t("training.modules.lms.description"), href: "/admin/lms", icon: Settings, color: "bg-muted text-muted-foreground", tabCode: "lms" },
     // Career & Growth modules (moved from Succession)
     careerPaths: { title: t("training.modules.careerPaths.title", "Career Paths"), description: t("training.modules.careerPaths.description", "Define career progression routes"), href: "/training/career-paths", icon: Route, color: "bg-teal-500/10 text-teal-600", tabCode: "career-paths" },
+    developmentPlans: { title: t("training.modules.developmentPlans.title", "Development Plans"), description: t("training.modules.developmentPlans.description", "Manage Individual Development Plans (IDPs)"), href: "/succession/career-development", icon: Target, color: "bg-emerald-500/10 text-emerald-600", tabCode: "development-plans" },
     mentorship: { title: t("training.modules.mentorship.title", "Mentorship"), description: t("training.modules.mentorship.description", "Mentoring relationships and programs"), href: "/training/mentorship", icon: UserPlus, color: "bg-pink-500/10 text-pink-600", tabCode: "mentorship" },
   };
 
@@ -141,7 +142,7 @@ export default function TrainingDashboardPage() {
     },
     {
       titleKey: "Career & Growth",
-      items: filterByAccess([allModules.careerPaths, allModules.mentorship]),
+      items: filterByAccess([allModules.careerPaths, allModules.developmentPlans, allModules.mentorship]),
     },
     {
       titleKey: "Course Development & Delivery",
