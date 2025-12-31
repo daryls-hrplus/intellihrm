@@ -263,7 +263,7 @@ export default function LeaveDashboardPage() {
   // Build grouped sections
   const sections: ModuleSection[] = [
     {
-      titleKey: "Leave Records Management",
+      titleKey: "Leave Records",
       items: filterByAccess([
         allModules.employeeRecords,
         allModules.employeeBalances,
@@ -271,10 +271,18 @@ export default function LeaveDashboardPage() {
       ]),
     },
     {
-      titleKey: "Approvals & Processing",
+      titleKey: "Processing",
       items: filterByAccess([
         allModules.approvals,
         allModules.balanceAdjustments,
+        allModules.compensatoryTime,
+        allModules.balanceRecalculation,
+      ]),
+    },
+    {
+      titleKey: "Analytics",
+      items: filterByAccess([
+        allModules.analytics,
       ]),
     },
     {
@@ -287,19 +295,6 @@ export default function LeaveDashboardPage() {
         allModules.holidays,
         allModules.compTimePolicies,
         allModules.scheduleConfig,
-      ]),
-    },
-    {
-      titleKey: "Time Banking",
-      items: filterByAccess([
-        allModules.compensatoryTime,
-        allModules.balanceRecalculation,
-      ]),
-    },
-    {
-      titleKey: "Analytics",
-      items: filterByAccess([
-        allModules.analytics,
       ]),
     },
   ];
