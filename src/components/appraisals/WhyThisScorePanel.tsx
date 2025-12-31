@@ -7,6 +7,7 @@ import { useState } from "react";
 import { ScoreBreakdown, getScoreComponents } from "@/hooks/useAppraisalScoreBreakdown";
 import { PerformanceCategory } from "@/hooks/usePerformanceCategories";
 import { PerformanceCategoryBadge } from "./PerformanceCategoryBadge";
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts";
 
 interface WhyThisScorePanelProps {
   breakdown: ScoreBreakdown | null;
@@ -17,8 +18,18 @@ interface WhyThisScorePanelProps {
 
 export function WhyThisScorePanel({ breakdown, category, overallScore, isLoading }: WhyThisScorePanelProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [chartType, setChartType] = useState<"bar" | "pie">("bar");
   const components = getScoreComponents(breakdown);
   const totalContribution = components.reduce((sum, c) => sum + (c.contribution || 0), 0);
+
+  // Prepare chart data
+  const chartData = components.map(c => ({
+    name: c.name,
+    contribution: c.contribution || 0,
+    weight: c.weight || 0,
+    rawScore: c.rawScore || 0,
+    color: c.color,
+  }));
 
   if (isLoading) {
     return (
@@ -32,6 +43,21 @@ export function WhyThisScorePanel({ breakdown, category, overallScore, isLoading
       </Card>
     );
   }
+
+  const CustomTooltip = ({ active, payload }: any) => {
+    if (active && payload && payload.length) {
+      const data = payload[0].payload;
+      return (
+        <div className="bg-popover border rounded-lg shadow-lg p-3 text-sm">
+          <p className="font-medium">{data.name}</p>
+          <p className="text-muted-foreground">Raw Score: {data.rawScore.toFixed(2)}</p>
+          <p className="text-muted-foreground">Weight: {data.weight.toFixed(0)}%</p>
+          <p className="font-medium text-primary">Contribution: {data.contribution.toFixed(3)}</p>
+        </div>
+      );
+    }
+    return null;
+  };
 
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
@@ -53,10 +79,73 @@ export function WhyThisScorePanel({ breakdown, category, overallScore, isLoading
 
         <CollapsibleContent>
           <CardContent className="pt-0 space-y-4">
-            {/* Score Contribution Bar */}
+            {/* Chart Type Toggle */}
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-muted-foreground">Score Contribution</span>
+              <div className="flex gap-1 border rounded-md p-0.5">
+                <button
+                  onClick={() => setChartType("bar")}
+                  className={`px-3 py-1 text-xs rounded transition-colors ${
+                    chartType === "bar" ? "bg-primary text-primary-foreground" : "hover:bg-muted"
+                  }`}
+                >
+                  Bar
+                </button>
+                <button
+                  onClick={() => setChartType("pie")}
+                  className={`px-3 py-1 text-xs rounded transition-colors ${
+                    chartType === "pie" ? "bg-primary text-primary-foreground" : "hover:bg-muted"
+                  }`}
+                >
+                  Pie
+                </button>
+              </div>
+            </div>
+
+            {/* Score Contribution Chart */}
+            {chartData.length > 0 && (
+              <div className="h-64 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  {chartType === "bar" ? (
+                    <BarChart data={chartData} layout="vertical" margin={{ top: 5, right: 30, left: 80, bottom: 5 }}>
+                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                      <XAxis type="number" domain={[0, 'auto']} tickFormatter={(v) => v.toFixed(2)} />
+                      <YAxis type="category" dataKey="name" width={75} tick={{ fontSize: 12 }} />
+                      <Tooltip content={<CustomTooltip />} />
+                      <Bar dataKey="contribution" radius={[0, 4, 4, 0]}>
+                        {chartData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  ) : (
+                    <PieChart>
+                      <Pie
+                        data={chartData}
+                        cx="50%"
+                        cy="50%"
+                        labelLine={false}
+                        outerRadius={80}
+                        innerRadius={40}
+                        dataKey="contribution"
+                        label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                      >
+                        {chartData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip content={<CustomTooltip />} />
+                      <Legend />
+                    </PieChart>
+                  )}
+                </ResponsiveContainer>
+              </div>
+            )}
+
+            {/* Stacked Score Bar */}
             <div className="space-y-2">
               <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Score Breakdown</span>
+                <span className="text-muted-foreground">Total Score</span>
                 <span className="font-medium">{totalContribution.toFixed(2)} / 5.00</span>
               </div>
               <div className="h-4 rounded-full overflow-hidden flex bg-muted">
