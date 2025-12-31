@@ -5,7 +5,8 @@ import { ArrowRight, Target, BookOpen, DollarSign, GraduationCap, Bell } from 'l
 export function ManualIntegrationSection() {
   return (
     <div className="space-y-8">
-      <Card>
+      {/* Integration Overview */}
+      <Card id="sec-7-1">
         <CardHeader>
           <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
             <Badge variant="outline">Section 7.1</Badge>
@@ -38,7 +39,8 @@ export function ManualIntegrationSection() {
         </CardContent>
       </Card>
 
-      <Card>
+      {/* Downstream Triggers */}
+      <Card id="sec-7-2">
         <CardHeader>
           <CardTitle className="text-2xl">Downstream Triggers</CardTitle>
           <CardDescription>Automatic actions based on appraisal outcomes</CardDescription>

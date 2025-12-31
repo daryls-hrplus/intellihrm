@@ -5,7 +5,8 @@ import { Brain, Sparkles, MessageSquare, AlertTriangle, TrendingUp } from 'lucid
 export function ManualAISection() {
   return (
     <div className="space-y-8">
-      <Card>
+      {/* AI Overview */}
+      <Card id="sec-5-1">
         <CardHeader>
           <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
             <Badge variant="outline">Section 5.1</Badge>
@@ -41,7 +42,8 @@ export function ManualAISection() {
         </CardContent>
       </Card>
 
-      <Card>
+      {/* Bias Detection */}
+      <Card id="sec-5-2">
         <CardHeader>
           <CardTitle className="text-2xl">Bias Detection & Remediation</CardTitle>
           <CardDescription>EEOC compliance and fair evaluation practices</CardDescription>

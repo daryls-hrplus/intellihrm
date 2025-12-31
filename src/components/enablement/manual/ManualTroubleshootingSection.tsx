@@ -6,7 +6,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 export function ManualTroubleshootingSection() {
   return (
     <div className="space-y-8">
-      <Card>
+      <Card id="sec-8-1">
         <CardHeader>
           <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
             <Badge variant="outline">Section 8.1</Badge>
@@ -54,7 +54,7 @@ export function ManualTroubleshootingSection() {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card id="sec-8-2">
         <CardHeader>
           <CardTitle className="text-2xl">Best Practices</CardTitle>
           <CardDescription>Recommendations for optimal appraisal management</CardDescription>
@@ -78,7 +78,7 @@ export function ManualTroubleshootingSection() {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card id="sec-8-3">
         <CardHeader>
           <CardTitle className="text-2xl">Compliance Checklist</CardTitle>
           <CardDescription>Quarterly/Annual audit requirements</CardDescription>
