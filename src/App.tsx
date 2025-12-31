@@ -80,6 +80,7 @@ import ArtifactDetailPage from "./pages/enablement/ArtifactDetailPage";
 import ToursManagementPage from "./pages/enablement/ToursManagementPage";
 import FeatureAuditDashboard from "./pages/enablement/FeatureAuditDashboard";
 import ImplementationDetailPage from "./pages/enablement/ImplementationDetailPage";
+import AppraisalsManualPage from "./pages/enablement/AppraisalsManualPage";
 
 // Subscription pages
 import SubscriptionPage from "./pages/subscription/SubscriptionPage";
@@ -4284,6 +4285,16 @@ const App = () => (
                 <ProtectedRoute requiredRoles={["admin"]}>
                   <EnablementAccessGuard>
                     <ToursManagementPage />
+                  </EnablementAccessGuard>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/enablement/manuals/appraisals"
+              element={
+                <ProtectedRoute requiredRoles={["admin"]}>
+                  <EnablementAccessGuard>
+                    <AppraisalsManualPage />
                   </EnablementAccessGuard>
                 </ProtectedRoute>
               }
