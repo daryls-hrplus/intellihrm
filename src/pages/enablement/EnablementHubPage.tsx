@@ -453,7 +453,7 @@ export default function EnablementHubPage() {
           </TabsList>
 
           <TabsContent value="dashboard" className="space-y-6">
-            <GroupedModuleCards sections={sections} />
+            <GroupedModuleCards sections={sections} showToggleButton />
           </TabsContent>
 
           <TabsContent value="implementations">

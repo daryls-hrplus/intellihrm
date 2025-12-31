@@ -372,7 +372,7 @@ export default function PayrollDashboardPage() {
           })}
         </div>
 
-        <GroupedModuleCards sections={sections} />
+        <GroupedModuleCards sections={sections} showToggleButton />
 
         {/* Recent Payroll Activity */}
         <Card>

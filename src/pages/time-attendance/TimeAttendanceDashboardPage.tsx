@@ -385,7 +385,7 @@ export default function TimeAttendanceDashboardPage() {
         </div>
 
         {/* Grouped Modules */}
-        <GroupedModuleCards sections={sections} defaultOpen={false} />
+        <GroupedModuleCards sections={sections} defaultOpen={false} showToggleButton />
       </div>
     </AppLayout>
   );

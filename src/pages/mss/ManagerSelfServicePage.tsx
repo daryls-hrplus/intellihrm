@@ -129,7 +129,7 @@ export default function ManagerSelfServicePage() {
           />
         )}
 
-        <GroupedModuleCards sections={sections} defaultOpen={false} />
+        <GroupedModuleCards sections={sections} defaultOpen={false} showToggleButton />
       </div>
     </AppLayout>
   );
