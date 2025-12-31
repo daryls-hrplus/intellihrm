@@ -321,7 +321,7 @@ export default function WorkforceDashboardPage() {
       ]),
     },
     {
-      titleKey: "Configuration",
+      titleKey: "Workforce Administration",
       items: filterByAccess([
         allModules.orgStructureConfig,
         allModules.competencies,
@@ -413,7 +413,7 @@ export default function WorkforceDashboardPage() {
           })}
         </div>
 
-        <GroupedModuleCards sections={sections} defaultOpen={true} />
+        <GroupedModuleCards sections={sections} defaultOpen={false} />
       </div>
     </AppLayout>
   );
