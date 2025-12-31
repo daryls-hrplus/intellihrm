@@ -176,6 +176,8 @@ import PositionBudgetPlanPage from "./pages/compensation/PositionBudgetPlanPage"
 import PositionBudgetWhatIfPage from "./pages/compensation/PositionBudgetWhatIfPage";
 import PositionBudgetApprovalsPage from "./pages/compensation/PositionBudgetApprovalsPage";
 import PositionBudgetCostConfigPage from "./pages/compensation/PositionBudgetCostConfigPage";
+import MinimumWageCompliancePage from "./pages/compensation/MinimumWageCompliancePage";
+import MinimumWageConfigPage from "./pages/compensation/MinimumWageConfigPage";
 
 // Benefits pages
 import BenefitsDashboardPage from "./pages/benefits/BenefitsDashboardPage";
@@ -2749,8 +2751,23 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="/compensation/minimum-wage-compliance"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <MinimumWageCompliancePage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/compensation/minimum-wage-config"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <MinimumWageConfigPage />
+                </ProtectedRoute>
+              }
+            />
 
-            {/* Benefits Routes */}
             <Route
               path="/benefits"
               element={

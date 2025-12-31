@@ -53,7 +53,7 @@ type WageType = "hourly" | "daily" | "weekly" | "monthly";
 interface RateFormData {
   country: string;
   region: string;
-  wage_type: WageType;
+  wage_type: string;
   rate: string;
   currency_id: string;
   effective_from: Date | undefined;
@@ -159,14 +159,14 @@ export default function MinimumWageConfigPage() {
     return `${symbol}${rate.rate.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
   };
 
-  const getWageTypeLabel = (type: WageType) => {
-    const labels = {
+  const getWageTypeLabel = (type: string) => {
+    const labels: Record<string, string> = {
       hourly: "Hourly",
       daily: "Daily",
       weekly: "Weekly",
       monthly: "Monthly",
     };
-    return labels[type];
+    return labels[type] || type;
   };
 
   return (
