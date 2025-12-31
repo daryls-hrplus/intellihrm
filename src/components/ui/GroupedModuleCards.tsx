@@ -63,19 +63,18 @@ const sectionIcons: Record<string, LucideIcon> = {
 export function GroupedModuleCards({ sections, defaultOpen = true, sectionBadges = {} }: GroupedModuleCardsProps) {
   const navigate = useNavigate();
   
-  // Initialize all sections as open by default
-  const [openSections, setOpenSections] = useState<Record<string, boolean>>(() => {
-    const initial: Record<string, boolean> = {};
-    sections.forEach(section => {
-      initial[section.titleKey] = defaultOpen;
-    });
-    return initial;
-  });
+  // Track open sections - default state based on defaultOpen prop
+  const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
+
+  // Determine if a section is open - use state if set, otherwise use defaultOpen prop
+  const isSectionOpen = (titleKey: string) => {
+    return openSections[titleKey] ?? defaultOpen;
+  };
 
   const toggleSection = (titleKey: string) => {
     setOpenSections(prev => ({
       ...prev,
-      [titleKey]: !prev[titleKey]
+      [titleKey]: !(prev[titleKey] ?? defaultOpen)
     }));
   };
 
@@ -101,10 +100,10 @@ export function GroupedModuleCards({ sections, defaultOpen = true, sectionBadges
 
         return (
           <Card key={section.titleKey} className={`overflow-hidden transition-all duration-200 ${
-            !openSections[section.titleKey] ? 'h-auto' : ''
+            !isSectionOpen(section.titleKey) ? 'h-auto' : ''
           }`}>
             <Collapsible 
-              open={openSections[section.titleKey]} 
+              open={isSectionOpen(section.titleKey)} 
               onOpenChange={() => toggleSection(section.titleKey)}
             >
               <CollapsibleTrigger asChild>
@@ -126,7 +125,7 @@ export function GroupedModuleCards({ sections, defaultOpen = true, sectionBadges
                     </div>
                     <ChevronDown 
                       className={`h-5 w-5 text-muted-foreground transition-transform duration-200 ${
-                        openSections[section.titleKey] ? 'rotate-180' : ''
+                        isSectionOpen(section.titleKey) ? 'rotate-180' : ''
                       }`} 
                     />
                   </div>
