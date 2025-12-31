@@ -105,12 +105,11 @@ export default function AppraisalsManualPage() {
     );
   }, [searchQuery]);
 
-  const toggleSection = (sectionId: string) => {
-    setExpandedSections(prev => 
-      prev.includes(sectionId) 
-        ? prev.filter(id => id !== sectionId)
-        : [...prev, sectionId]
-    );
+  const setSectionExpanded = (sectionId: string, open: boolean) => {
+    setExpandedSections((prev) => {
+      if (open) return prev.includes(sectionId) ? prev : [...prev, sectionId];
+      return prev.filter((id) => id !== sectionId);
+    });
   };
 
   const toggleCompleted = (sectionId: string) => {
@@ -122,7 +121,7 @@ export default function AppraisalsManualPage() {
   };
 
   const renderSectionContent = () => {
-    switch (activeSection) {
+    switch (activePartId) {
       case 'part-1':
         return <ManualOverviewSection />;
       case 'part-2':
@@ -229,20 +228,16 @@ export default function AppraisalsManualPage() {
                       <Collapsible
                         key={section.id}
                         open={expandedSections.includes(section.id)}
-                        onOpenChange={() => toggleSection(section.id)}
+                        onOpenChange={(open) => setSectionExpanded(section.id, open)}
                       >
                         <CollapsibleTrigger asChild>
-                          <button
-                            className={`w-full flex items-center gap-2 p-2 rounded-lg text-left text-sm transition-colors
-                              ${activeSection === section.id 
-                                ? 'bg-primary/10 text-primary font-medium' 
-                                : 'hover:bg-muted'
-                              }`}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              toggleSection(section.id);
-                              scrollToSection(section.id);
-                            }}
+                            <button
+                              className={`w-full flex items-center gap-2 p-2 rounded-lg text-left text-sm transition-colors
+                                ${activePartId === section.id 
+                                  ? 'bg-primary/10 text-primary font-medium' 
+                                  : 'hover:bg-muted'
+                                }`}
+                            onClick={() => scrollToSection(section.id)}
                           >
                             {completedSections.includes(section.id) ? (
                               <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" />
@@ -266,7 +261,7 @@ export default function AppraisalsManualPage() {
                                 <button
                                   key={sub.id}
                                   className={`w-full flex items-center gap-2 p-1.5 rounded text-left text-xs transition-colors
-                                    ${activeSection === sub.id 
+                                    ${selectedSectionId === sub.id 
                                       ? 'bg-primary/10 text-primary font-medium' 
                                       : 'text-muted-foreground hover:text-foreground hover:bg-muted'
                                     }`}
@@ -291,7 +286,7 @@ export default function AppraisalsManualPage() {
                     {/* Quick Reference & Diagrams */}
                     <button
                       className={`w-full flex items-center gap-2 p-2 rounded-lg text-left text-sm transition-colors
-                        ${activeSection === 'quick-ref' 
+                        ${selectedSectionId === 'quick-ref' 
                           ? 'bg-primary/10 text-primary font-medium' 
                           : 'hover:bg-muted'
                         }`}
@@ -302,7 +297,7 @@ export default function AppraisalsManualPage() {
                     </button>
                     <button
                       className={`w-full flex items-center gap-2 p-2 rounded-lg text-left text-sm transition-colors
-                        ${activeSection === 'diagrams' 
+                        ${selectedSectionId === 'diagrams' 
                           ? 'bg-primary/10 text-primary font-medium' 
                           : 'hover:bg-muted'
                         }`}
@@ -329,15 +324,15 @@ export default function AppraisalsManualPage() {
                 <CardTitle className="text-base">Section Info</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4 text-sm">
-                {APPRAISALS_MANUAL_STRUCTURE.find(s => s.id === activeSection || 
-                  s.subsections?.some(sub => sub.id === activeSection)) && (
+                {APPRAISALS_MANUAL_STRUCTURE.find(s => s.id === selectedSectionId || 
+                  s.subsections?.some(sub => sub.id === selectedSectionId)) && (
                   <>
                     <div>
                       <span className="text-muted-foreground">Target Audience</span>
                       <div className="flex flex-wrap gap-1 mt-1">
-                        {(APPRAISALS_MANUAL_STRUCTURE.find(s => s.id === activeSection)?.targetRoles || 
+                        {(APPRAISALS_MANUAL_STRUCTURE.find(s => s.id === selectedSectionId)?.targetRoles || 
                           APPRAISALS_MANUAL_STRUCTURE.flatMap(s => s.subsections || [])
-                            .find(sub => sub.id === activeSection)?.targetRoles || ['All']
+                            .find(sub => sub.id === selectedSectionId)?.targetRoles || ['All']
                         ).map(role => (
                           <Badge key={role} variant="secondary" className="text-xs">{role}</Badge>
                         ))}
@@ -349,9 +344,9 @@ export default function AppraisalsManualPage() {
                       <div className="flex items-center gap-1 mt-1">
                         <Clock className="h-4 w-4" />
                         <span>
-                          {APPRAISALS_MANUAL_STRUCTURE.find(s => s.id === activeSection)?.estimatedReadTime || 
+                          {APPRAISALS_MANUAL_STRUCTURE.find(s => s.id === selectedSectionId)?.estimatedReadTime || 
                             APPRAISALS_MANUAL_STRUCTURE.flatMap(s => s.subsections || [])
-                              .find(sub => sub.id === activeSection)?.estimatedReadTime || 10} min
+                              .find(sub => sub.id === selectedSectionId)?.estimatedReadTime || 10} min
                         </span>
                       </div>
                     </div>
@@ -359,18 +354,18 @@ export default function AppraisalsManualPage() {
                     <div>
                       <span className="text-muted-foreground">Industry Context</span>
                       <div className="mt-2 space-y-2">
-                        {(APPRAISALS_MANUAL_STRUCTURE.find(s => s.id === activeSection)?.industryContext ||
+                        {(APPRAISALS_MANUAL_STRUCTURE.find(s => s.id === selectedSectionId)?.industryContext ||
                           APPRAISALS_MANUAL_STRUCTURE.flatMap(s => s.subsections || [])
-                            .find(sub => sub.id === activeSection)?.industryContext) && (
+                            .find(sub => sub.id === selectedSectionId)?.industryContext) && (
                           <>
                             <div className="flex items-start gap-2">
                               <Calendar className="h-4 w-4 text-muted-foreground mt-0.5" />
                               <div>
                                 <p className="text-xs text-muted-foreground">Frequency</p>
                                 <p className="text-xs">
-                                  {APPRAISALS_MANUAL_STRUCTURE.find(s => s.id === activeSection)?.industryContext?.frequency ||
+                                  {APPRAISALS_MANUAL_STRUCTURE.find(s => s.id === selectedSectionId)?.industryContext?.frequency ||
                                     APPRAISALS_MANUAL_STRUCTURE.flatMap(s => s.subsections || [])
-                                      .find(sub => sub.id === activeSection)?.industryContext?.frequency}
+                                      .find(sub => sub.id === selectedSectionId)?.industryContext?.frequency}
                                 </p>
                               </div>
                             </div>
@@ -379,9 +374,9 @@ export default function AppraisalsManualPage() {
                               <div>
                                 <p className="text-xs text-muted-foreground">Timing</p>
                                 <p className="text-xs">
-                                  {APPRAISALS_MANUAL_STRUCTURE.find(s => s.id === activeSection)?.industryContext?.timing ||
+                                  {APPRAISALS_MANUAL_STRUCTURE.find(s => s.id === selectedSectionId)?.industryContext?.timing ||
                                     APPRAISALS_MANUAL_STRUCTURE.flatMap(s => s.subsections || [])
-                                      .find(sub => sub.id === activeSection)?.industryContext?.timing}
+                                      .find(sub => sub.id === selectedSectionId)?.industryContext?.timing}
                                 </p>
                               </div>
                             </div>
@@ -398,9 +393,9 @@ export default function AppraisalsManualPage() {
                   variant="outline" 
                   size="sm" 
                   className="w-full"
-                  onClick={() => toggleCompleted(activeSection)}
+                  onClick={() => toggleCompleted(selectedSectionId)}
                 >
-                  {completedSections.includes(activeSection) ? (
+                  {completedSections.includes(selectedSectionId) ? (
                     <>
                       <CheckCircle className="h-4 w-4 mr-2 text-green-500" />
                       Mark Incomplete
