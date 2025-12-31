@@ -41,12 +41,14 @@ import {
   Clock,
   Scale,
   Shield,
+  Tags,
 } from "lucide-react";
 import { CheckInCadenceConfig } from "@/components/performance/setup/CheckInCadenceConfig";
 import { AppraisalFormTemplateManager } from "@/components/performance/setup/AppraisalFormTemplateManager";
 import { AppraisalActionRulesManager } from "@/components/performance/setup/AppraisalActionRulesManager";
 import { EmployeeResponseConfigurationPanel } from "@/components/performance/setup/EmployeeResponseConfigurationPanel";
 import { HRResponseEscalationPanel } from "@/components/performance/setup/HRResponseEscalationPanel";
+import { PerformanceCategoriesManager } from "@/components/performance/setup/PerformanceCategoriesManager";
 
 // Interfaces
 interface Company { id: string; name: string; }
@@ -345,10 +347,14 @@ export default function PerformanceSetupPage() {
                 Performance appraisal cycle settings
               </div>
               <Tabs value={secondaryTab} onValueChange={setSecondaryTab}>
-                <TabsList>
+                <TabsList className="flex-wrap">
                   <TabsTrigger value="appraisal-cycles" className="flex items-center gap-2">
                     <Calendar className="h-4 w-4" />
                     Appraisal Cycles
+                  </TabsTrigger>
+                  <TabsTrigger value="performance-categories" className="flex items-center gap-2">
+                    <Tags className="h-4 w-4" />
+                    Performance Categories
                   </TabsTrigger>
                   <TabsTrigger value="form-templates" className="flex items-center gap-2">
                     <Layers className="h-4 w-4" />
@@ -369,6 +375,9 @@ export default function PerformanceSetupPage() {
                 </TabsList>
                 <TabsContent value="appraisal-cycles" className="mt-4">
                   <AppraisalCyclesContent cycles={appraisalCycles} isLoading={isLoading} t={t} />
+                </TabsContent>
+                <TabsContent value="performance-categories" className="mt-4">
+                  <PerformanceCategoriesManager companyId={selectedCompany} />
                 </TabsContent>
                 <TabsContent value="form-templates" className="mt-4">
                   <AppraisalFormTemplateManager companyId={selectedCompany} />

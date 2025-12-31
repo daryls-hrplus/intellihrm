@@ -10,7 +10,11 @@ import { Slider } from "@/components/ui/slider";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Target, Briefcase, Award, Save, Send, ChevronDown, ChevronUp, Loader2, GitBranch, Settings2, Users, Brain, Heart, HelpCircle } from "lucide-react";
+import { Target, Briefcase, Award, Save, Send, ChevronDown, ChevronUp, Loader2, GitBranch, Settings2, Users, Brain, Heart, HelpCircle, Sparkles } from "lucide-react";
+import { useAppraisalScoreBreakdown } from "@/hooks/useAppraisalScoreBreakdown";
+import { usePerformanceCategoryByScore } from "@/hooks/usePerformanceCategories";
+import { WhyThisScorePanel } from "@/components/appraisals/WhyThisScorePanel";
+import { PerformanceCategoryBadge } from "@/components/appraisals/PerformanceCategoryBadge";
 import { CompetencyRatingCard } from "./CompetencyRatingCard";
 import { ResponsibilityRatingCard } from "./ResponsibilityRatingCard";
 import { CompetencyProficiencyGuide } from "@/components/capabilities/CompetencyProficiencyGuide";
@@ -144,6 +148,9 @@ export function AppraisalEvaluationDialog({
   
   // Skill gap analysis hook
   const { triggerGapAnalysis } = useSkillGapManagement();
+  
+  // Score breakdown and category hooks
+  const { data: scoreBreakdown, isLoading: breakdownLoading } = useAppraisalScoreBreakdown(open ? participantId : undefined);
   
   // Multi-position hook
   const {
@@ -1438,6 +1445,71 @@ export function AppraisalEvaluationDialog({
               </CardContent>
             </Card>
           </div>
+
+          {/* Performance Category Badge */}
+          {(() => {
+            const category = scoreBreakdown?.performance_category_id ? {
+              id: scoreBreakdown.performance_category_id,
+              company_id: cycleInfo?.company_id || '',
+              code: '',
+              name: '',
+              name_en: null,
+              description: null,
+              description_en: null,
+              min_score: 0,
+              max_score: 100,
+              color: '#3b82f6',
+              icon: null,
+              promotion_eligible: false,
+              succession_eligible: false,
+              bonus_eligible: false,
+              requires_pip: false,
+              display_order: 0,
+              is_active: true,
+              created_at: '',
+              updated_at: '',
+            } : null;
+            
+            // Fetch actual category using the hook data
+            return scoreBreakdown && (
+              <div className="flex justify-center">
+                <PerformanceCategoryBadge
+                  category={{
+                    id: scoreBreakdown.performance_category_id || '',
+                    company_id: cycleInfo?.company_id || '',
+                    code: scoreBreakdown.performance_category_id ? 'category' : '',
+                    name: `${displayOverallScore >= 90 ? 'Exceptional' : displayOverallScore >= 75 ? 'Exceeds Expectations' : displayOverallScore >= 60 ? 'Meets Expectations' : displayOverallScore >= 40 ? 'Needs Improvement' : 'Unsatisfactory'}`,
+                    name_en: null,
+                    description: null,
+                    description_en: null,
+                    min_score: 0,
+                    max_score: 100,
+                    color: displayOverallScore >= 90 ? '#22c55e' : displayOverallScore >= 75 ? '#3b82f6' : displayOverallScore >= 60 ? '#f59e0b' : displayOverallScore >= 40 ? '#f97316' : '#ef4444',
+                    icon: null,
+                    promotion_eligible: displayOverallScore >= 75,
+                    succession_eligible: displayOverallScore >= 75,
+                    bonus_eligible: displayOverallScore >= 60,
+                    requires_pip: displayOverallScore < 40,
+                    display_order: 0,
+                    is_active: true,
+                    created_at: '',
+                    updated_at: '',
+                  }}
+                  score={displayOverallScore}
+                  showEligibility
+                  size="lg"
+                />
+              </div>
+            );
+          })()}
+
+          {/* Why This Score Panel */}
+          <WhyThisScorePanel 
+            breakdown={scoreBreakdown || null}
+            category={null}
+            overallScore={displayOverallScore}
+            isLoading={breakdownLoading}
+          />
 
           {/* Tabs for evaluation categories */}
           <Tabs value={activeTab} onValueChange={setActiveTab}>
