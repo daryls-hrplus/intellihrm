@@ -84,14 +84,15 @@ export function AppraisalPredictiveInsights({ companyId }: AppraisalPredictiveIn
       if (error) throw error;
 
       // Get employee risk data
-      const { data: riskData } = await supabase
+      const riskResult = await (supabase as any)
         .from('employee_performance_risks')
         .select('*')
         .eq('company_id', companyId)
         .eq('is_active', true);
+      const riskData = riskResult?.data || [];
 
       // Get succession candidates
-      const { data: successionData }: any = await supabase
+      const successionResult = await (supabase as any)
         .from('succession_candidates')
         .select(`
           employee_id,
@@ -102,6 +103,7 @@ export function AppraisalPredictiveInsights({ companyId }: AppraisalPredictiveIn
           plan:succession_plans(position_title, position_level)
         `)
         .eq('is_active', true);
+      const successionData = successionResult?.data || [];
 
       // Process Attrition Risk predictions
       const employeeScores: Record<string, { scores: number[]; employee: any; risks: any[] }> = {};

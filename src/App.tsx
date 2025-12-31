@@ -127,6 +127,7 @@ import PerformanceImprovementPlansPage from "./pages/performance/PerformanceImpr
 import ContinuousFeedbackPage from "./pages/performance/ContinuousFeedbackPage";
 import RecognitionAwardsPage from "./pages/performance/RecognitionAwardsPage";
 import PerformanceAnalyticsPage from "./pages/performance/PerformanceAnalyticsPage";
+import AppraisalAnalyticsPage from "./pages/performance/AppraisalAnalyticsPage";
 import CalibrationSessionsPage from "./pages/performance/CalibrationSessionsPage";
 import CalibrationWorkspacePage from "./pages/performance/CalibrationWorkspacePage";
 import PerformanceSetupPage from "./pages/performance/PerformanceSetupPage";
@@ -2964,6 +2965,14 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
                   <PerformanceAnalyticsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/performance/appraisal-analytics"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <AppraisalAnalyticsPage />
                 </ProtectedRoute>
               }
             />

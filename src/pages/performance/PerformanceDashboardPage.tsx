@@ -58,6 +58,7 @@ export default function PerformanceDashboardPage() {
     successionAnalytics: { title: "Succession Analytics", description: "Insights on talent pipeline health", href: "/succession/analytics", icon: BarChart3, color: "bg-gray-500/10 text-gray-600", tabCode: "succession_analytics" },
     // Analytics & Configuration
     analytics: { title: t('performance.modules.analytics'), description: t('performance.modules.analyticsDesc'), href: "/performance/analytics", icon: BarChart3, color: "bg-muted text-muted-foreground", tabCode: "analytics" },
+    appraisalAnalytics: { title: "Appraisal Analytics", description: "Distribution, scoring patterns & AI insights", href: "/performance/appraisal-analytics", icon: PieChart, color: "bg-teal-500/10 text-teal-600", tabCode: "appraisal_analytics" },
     setup: { title: t('performance.modules.setup', 'Setup'), description: t('performance.modules.setupDesc', 'Configure performance settings'), href: "/performance/setup", icon: Settings, color: "bg-slate-500/10 text-slate-600", tabCode: "setup" },
   };
 
@@ -92,7 +93,7 @@ export default function PerformanceDashboardPage() {
     },
     {
       titleKey: "Analytics",
-      items: filterByAccess([allModules.analytics, allModules.successionAnalytics]),
+      items: filterByAccess([allModules.analytics, allModules.appraisalAnalytics, allModules.successionAnalytics]),
     },
     {
       titleKey: "Talent Administration",
