@@ -335,6 +335,173 @@ export type Database = {
           },
         ]
       }
+      ai_explainability_records: {
+        Row: {
+          company_id: string
+          confidence_factors: Json | null
+          confidence_score: number
+          created_at: string | null
+          data_freshness_days: number | null
+          human_review_required: boolean | null
+          human_reviewed_at: string | null
+          human_reviewed_by: string | null
+          id: string
+          insight_id: string | null
+          insight_table: string | null
+          insight_type: string
+          iso_compliance_verified: boolean | null
+          limitations: string[] | null
+          model_provider: string | null
+          model_version: string
+          source_data_summary: Json
+          weights_applied: Json | null
+        }
+        Insert: {
+          company_id: string
+          confidence_factors?: Json | null
+          confidence_score: number
+          created_at?: string | null
+          data_freshness_days?: number | null
+          human_review_required?: boolean | null
+          human_reviewed_at?: string | null
+          human_reviewed_by?: string | null
+          id?: string
+          insight_id?: string | null
+          insight_table?: string | null
+          insight_type: string
+          iso_compliance_verified?: boolean | null
+          limitations?: string[] | null
+          model_provider?: string | null
+          model_version: string
+          source_data_summary?: Json
+          weights_applied?: Json | null
+        }
+        Update: {
+          company_id?: string
+          confidence_factors?: Json | null
+          confidence_score?: number
+          created_at?: string | null
+          data_freshness_days?: number | null
+          human_review_required?: boolean | null
+          human_reviewed_at?: string | null
+          human_reviewed_by?: string | null
+          id?: string
+          insight_id?: string | null
+          insight_table?: string | null
+          insight_type?: string
+          iso_compliance_verified?: boolean | null
+          limitations?: string[] | null
+          model_provider?: string | null
+          model_version?: string
+          source_data_summary?: Json
+          weights_applied?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_explainability_records_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_explainability_records_human_reviewed_by_fkey"
+            columns: ["human_reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_generated_narratives: {
+        Row: {
+          ai_confidence_score: number | null
+          ai_model_used: string | null
+          approved_at: string | null
+          approved_by: string | null
+          company_id: string
+          created_at: string | null
+          employee_id: string | null
+          generated_content: string
+          id: string
+          is_approved: boolean | null
+          iso_human_review_status: string | null
+          manager_edited_content: string | null
+          narrative_type: string
+          participant_id: string | null
+          source_data: Json
+          updated_at: string | null
+          version: number | null
+        }
+        Insert: {
+          ai_confidence_score?: number | null
+          ai_model_used?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          company_id: string
+          created_at?: string | null
+          employee_id?: string | null
+          generated_content: string
+          id?: string
+          is_approved?: boolean | null
+          iso_human_review_status?: string | null
+          manager_edited_content?: string | null
+          narrative_type: string
+          participant_id?: string | null
+          source_data?: Json
+          updated_at?: string | null
+          version?: number | null
+        }
+        Update: {
+          ai_confidence_score?: number | null
+          ai_model_used?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          company_id?: string
+          created_at?: string | null
+          employee_id?: string | null
+          generated_content?: string
+          id?: string
+          is_approved?: boolean | null
+          iso_human_review_status?: string | null
+          manager_edited_content?: string | null
+          narrative_type?: string
+          participant_id?: string | null
+          source_data?: Json
+          updated_at?: string | null
+          version?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_generated_narratives_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_generated_narratives_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_generated_narratives_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_generated_narratives_participant_id_fkey"
+            columns: ["participant_id"]
+            isOneToOne: false
+            referencedRelation: "appraisal_participants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ai_governance_metrics: {
         Row: {
           avg_confidence_score: number | null
@@ -4946,6 +5113,56 @@ export type Database = {
           },
         ]
       }
+      bias_nudge_templates: {
+        Row: {
+          bias_type: string
+          company_id: string | null
+          created_at: string | null
+          educational_content: string | null
+          id: string
+          is_active: boolean | null
+          nudge_message: string
+          nudge_title: string
+          severity: string
+          suggested_action: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          bias_type: string
+          company_id?: string | null
+          created_at?: string | null
+          educational_content?: string | null
+          id?: string
+          is_active?: boolean | null
+          nudge_message: string
+          nudge_title: string
+          severity: string
+          suggested_action?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          bias_type?: string
+          company_id?: string | null
+          created_at?: string | null
+          educational_content?: string | null
+          id?: string
+          is_active?: boolean | null
+          nudge_message?: string
+          nudge_title?: string
+          severity?: string
+          suggested_action?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bias_nudge_templates_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bonus_awards: {
         Row: {
           approved_at: string | null
@@ -5317,6 +5534,171 @@ export type Database = {
           },
           {
             foreignKeyName: "calibration_ai_analyses_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "calibration_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      calibration_governance_rules: {
+        Row: {
+          applies_to_roles: string[] | null
+          approval_roles: string[] | null
+          company_id: string
+          condition_config: Json
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          max_score_change: number | null
+          requires_approval: boolean | null
+          requires_justification: boolean | null
+          rule_name: string
+          rule_type: string
+          updated_at: string | null
+        }
+        Insert: {
+          applies_to_roles?: string[] | null
+          approval_roles?: string[] | null
+          company_id: string
+          condition_config?: Json
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          max_score_change?: number | null
+          requires_approval?: boolean | null
+          requires_justification?: boolean | null
+          rule_name: string
+          rule_type: string
+          updated_at?: string | null
+        }
+        Update: {
+          applies_to_roles?: string[] | null
+          approval_roles?: string[] | null
+          company_id?: string
+          condition_config?: Json
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          max_score_change?: number | null
+          requires_approval?: boolean | null
+          requires_justification?: boolean | null
+          rule_name?: string
+          rule_type?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "calibration_governance_rules_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      calibration_override_audit: {
+        Row: {
+          adjustment_id: string | null
+          approval_notes: string | null
+          approval_status: string | null
+          approved_at: string | null
+          approved_by: string | null
+          change_magnitude: number | null
+          created_at: string | null
+          employee_id: string | null
+          governance_rule_id: string | null
+          id: string
+          iso_compliance_flag: boolean | null
+          justification: string
+          justification_category: string | null
+          new_value: string | null
+          original_value: string | null
+          override_by: string
+          override_type: string
+          session_id: string
+          supporting_evidence: Json | null
+        }
+        Insert: {
+          adjustment_id?: string | null
+          approval_notes?: string | null
+          approval_status?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          change_magnitude?: number | null
+          created_at?: string | null
+          employee_id?: string | null
+          governance_rule_id?: string | null
+          id?: string
+          iso_compliance_flag?: boolean | null
+          justification: string
+          justification_category?: string | null
+          new_value?: string | null
+          original_value?: string | null
+          override_by: string
+          override_type: string
+          session_id: string
+          supporting_evidence?: Json | null
+        }
+        Update: {
+          adjustment_id?: string | null
+          approval_notes?: string | null
+          approval_status?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          change_magnitude?: number | null
+          created_at?: string | null
+          employee_id?: string | null
+          governance_rule_id?: string | null
+          id?: string
+          iso_compliance_flag?: boolean | null
+          justification?: string
+          justification_category?: string | null
+          new_value?: string | null
+          original_value?: string | null
+          override_by?: string
+          override_type?: string
+          session_id?: string
+          supporting_evidence?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "calibration_override_audit_adjustment_id_fkey"
+            columns: ["adjustment_id"]
+            isOneToOne: false
+            referencedRelation: "calibration_adjustments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "calibration_override_audit_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "calibration_override_audit_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "calibration_override_audit_governance_rule_id_fkey"
+            columns: ["governance_rule_id"]
+            isOneToOne: false
+            referencedRelation: "calibration_governance_rules"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "calibration_override_audit_override_by_fkey"
+            columns: ["override_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "calibration_override_audit_session_id_fkey"
             columns: ["session_id"]
             isOneToOne: false
             referencedRelation: "calibration_sessions"
@@ -8643,6 +9025,88 @@ export type Database = {
           },
         ]
       }
+      competency_drift_analysis: {
+        Row: {
+          action_notes: string | null
+          affected_employees_count: number | null
+          affected_job_profiles_count: number | null
+          analyzed_at: string | null
+          avg_rating_trend: number | null
+          company_id: string
+          competency_id: string | null
+          confidence_score: number | null
+          drift_type: string
+          id: string
+          recommendation: string | null
+          recommendation_details: Json | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          skill_id: string | null
+          status: string | null
+          trend_period_months: number | null
+        }
+        Insert: {
+          action_notes?: string | null
+          affected_employees_count?: number | null
+          affected_job_profiles_count?: number | null
+          analyzed_at?: string | null
+          avg_rating_trend?: number | null
+          company_id: string
+          competency_id?: string | null
+          confidence_score?: number | null
+          drift_type: string
+          id?: string
+          recommendation?: string | null
+          recommendation_details?: Json | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          skill_id?: string | null
+          status?: string | null
+          trend_period_months?: number | null
+        }
+        Update: {
+          action_notes?: string | null
+          affected_employees_count?: number | null
+          affected_job_profiles_count?: number | null
+          analyzed_at?: string | null
+          avg_rating_trend?: number | null
+          company_id?: string
+          competency_id?: string | null
+          confidence_score?: number | null
+          drift_type?: string
+          id?: string
+          recommendation?: string | null
+          recommendation_details?: Json | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          skill_id?: string | null
+          status?: string | null
+          trend_period_months?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "competency_drift_analysis_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "competency_drift_analysis_competency_id_fkey"
+            columns: ["competency_id"]
+            isOneToOne: false
+            referencedRelation: "competencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "competency_drift_analysis_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       competency_evidence: {
         Row: {
           competency_id: string
@@ -9244,6 +9708,63 @@ export type Database = {
           {
             foreignKeyName: "continuous_feedback_to_user_id_fkey"
             columns: ["to_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      continuous_performance_signals: {
+        Row: {
+          captured_at: string | null
+          company_id: string
+          employee_id: string
+          id: string
+          signal_metadata: Json | null
+          signal_sentiment: string | null
+          signal_source_id: string | null
+          signal_source_table: string | null
+          signal_type: string
+          signal_value: number | null
+          signal_weight: number | null
+        }
+        Insert: {
+          captured_at?: string | null
+          company_id: string
+          employee_id: string
+          id?: string
+          signal_metadata?: Json | null
+          signal_sentiment?: string | null
+          signal_source_id?: string | null
+          signal_source_table?: string | null
+          signal_type: string
+          signal_value?: number | null
+          signal_weight?: number | null
+        }
+        Update: {
+          captured_at?: string | null
+          company_id?: string
+          employee_id?: string
+          id?: string
+          signal_metadata?: Json | null
+          signal_sentiment?: string | null
+          signal_source_id?: string | null
+          signal_source_table?: string | null
+          signal_type?: string
+          signal_value?: number | null
+          signal_weight?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "continuous_performance_signals_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "continuous_performance_signals_employee_id_fkey"
+            columns: ["employee_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -10131,6 +10652,76 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      emerging_skills_signals: {
+        Row: {
+          company_id: string
+          created_at: string | null
+          detection_source: string
+          first_detected_at: string | null
+          growth_rate: number | null
+          id: string
+          is_validated: boolean | null
+          mention_count: number | null
+          skill_name: string
+          suggested_competency_mapping: string | null
+          updated_at: string | null
+          validated_at: string | null
+          validated_by: string | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string | null
+          detection_source: string
+          first_detected_at?: string | null
+          growth_rate?: number | null
+          id?: string
+          is_validated?: boolean | null
+          mention_count?: number | null
+          skill_name: string
+          suggested_competency_mapping?: string | null
+          updated_at?: string | null
+          validated_at?: string | null
+          validated_by?: string | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string | null
+          detection_source?: string
+          first_detected_at?: string | null
+          growth_rate?: number | null
+          id?: string
+          is_validated?: boolean | null
+          mention_count?: number | null
+          skill_name?: string
+          suggested_competency_mapping?: string | null
+          updated_at?: string | null
+          validated_at?: string | null
+          validated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "emerging_skills_signals_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "emerging_skills_signals_suggested_competency_mapping_fkey"
+            columns: ["suggested_competency_mapping"]
+            isOneToOne: false
+            referencedRelation: "competencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "emerging_skills_signals_validated_by_fkey"
+            columns: ["validated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       employee_addresses: {
         Row: {
@@ -33214,6 +33805,167 @@ export type Database = {
         }
         Relationships: []
       }
+      manager_bias_patterns: {
+        Row: {
+          affected_employees: Json | null
+          bias_type: string
+          company_id: string
+          created_at: string | null
+          cycle_id: string | null
+          detection_confidence: number | null
+          detection_method: string | null
+          dispute_reason: string | null
+          evidence_count: number | null
+          id: string
+          iso_compliance_notes: string | null
+          manager_id: string | null
+          nudge_acknowledged: boolean | null
+          nudge_disputed: boolean | null
+          nudge_message: string | null
+          nudge_shown_at: string | null
+          severity: string | null
+        }
+        Insert: {
+          affected_employees?: Json | null
+          bias_type: string
+          company_id: string
+          created_at?: string | null
+          cycle_id?: string | null
+          detection_confidence?: number | null
+          detection_method?: string | null
+          dispute_reason?: string | null
+          evidence_count?: number | null
+          id?: string
+          iso_compliance_notes?: string | null
+          manager_id?: string | null
+          nudge_acknowledged?: boolean | null
+          nudge_disputed?: boolean | null
+          nudge_message?: string | null
+          nudge_shown_at?: string | null
+          severity?: string | null
+        }
+        Update: {
+          affected_employees?: Json | null
+          bias_type?: string
+          company_id?: string
+          created_at?: string | null
+          cycle_id?: string | null
+          detection_confidence?: number | null
+          detection_method?: string | null
+          dispute_reason?: string | null
+          evidence_count?: number | null
+          id?: string
+          iso_compliance_notes?: string | null
+          manager_id?: string | null
+          nudge_acknowledged?: boolean | null
+          nudge_disputed?: boolean | null
+          nudge_message?: string | null
+          nudge_shown_at?: string | null
+          severity?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "manager_bias_patterns_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "manager_bias_patterns_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "appraisal_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "manager_bias_patterns_manager_id_fkey"
+            columns: ["manager_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      manager_intervention_prompts: {
+        Row: {
+          action_taken: string | null
+          actioned_at: string | null
+          company_id: string
+          created_at: string | null
+          dismissed_at: string | null
+          employee_id: string
+          id: string
+          is_actioned: boolean | null
+          is_dismissed: boolean | null
+          manager_id: string
+          priority: string | null
+          prompt_message: string
+          prompt_title: string
+          prompt_type: string
+          suggested_actions: Json | null
+          trigger_source: string | null
+        }
+        Insert: {
+          action_taken?: string | null
+          actioned_at?: string | null
+          company_id: string
+          created_at?: string | null
+          dismissed_at?: string | null
+          employee_id: string
+          id?: string
+          is_actioned?: boolean | null
+          is_dismissed?: boolean | null
+          manager_id: string
+          priority?: string | null
+          prompt_message: string
+          prompt_title: string
+          prompt_type: string
+          suggested_actions?: Json | null
+          trigger_source?: string | null
+        }
+        Update: {
+          action_taken?: string | null
+          actioned_at?: string | null
+          company_id?: string
+          created_at?: string | null
+          dismissed_at?: string | null
+          employee_id?: string
+          id?: string
+          is_actioned?: boolean | null
+          is_dismissed?: boolean | null
+          manager_id?: string
+          priority?: string | null
+          prompt_message?: string
+          prompt_title?: string
+          prompt_type?: string
+          suggested_actions?: Json | null
+          trigger_source?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "manager_intervention_prompts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "manager_intervention_prompts_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "manager_intervention_prompts_manager_id_fkey"
+            columns: ["manager_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       market_data_rates: {
         Row: {
           average_salary: number | null
@@ -39887,6 +40639,75 @@ export type Database = {
           },
         ]
       }
+      performance_trajectory_scores: {
+        Row: {
+          ai_explainability_id: string | null
+          calculated_at: string | null
+          company_id: string
+          contributing_factors: Json | null
+          created_at: string | null
+          data_freshness_days: number | null
+          employee_id: string
+          id: string
+          intervention_recommended: boolean | null
+          intervention_type: string | null
+          minimum_signals_met: boolean | null
+          momentum: string | null
+          risk_level: string | null
+          trajectory_score: number | null
+          trend_direction: string | null
+        }
+        Insert: {
+          ai_explainability_id?: string | null
+          calculated_at?: string | null
+          company_id: string
+          contributing_factors?: Json | null
+          created_at?: string | null
+          data_freshness_days?: number | null
+          employee_id: string
+          id?: string
+          intervention_recommended?: boolean | null
+          intervention_type?: string | null
+          minimum_signals_met?: boolean | null
+          momentum?: string | null
+          risk_level?: string | null
+          trajectory_score?: number | null
+          trend_direction?: string | null
+        }
+        Update: {
+          ai_explainability_id?: string | null
+          calculated_at?: string | null
+          company_id?: string
+          contributing_factors?: Json | null
+          created_at?: string | null
+          data_freshness_days?: number | null
+          employee_id?: string
+          id?: string
+          intervention_recommended?: boolean | null
+          intervention_type?: string | null
+          minimum_signals_met?: boolean | null
+          momentum?: string | null
+          risk_level?: string | null
+          trajectory_score?: number | null
+          trend_direction?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "performance_trajectory_scores_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "performance_trajectory_scores_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       performance_trend_history: {
         Row: {
           ai_prediction: Json | null
@@ -45285,6 +46106,72 @@ export type Database = {
             columns: ["review_cycle_id"]
             isOneToOne: false
             referencedRelation: "review_cycles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      review_quality_assessments: {
+        Row: {
+          ai_confidence_score: number | null
+          ai_model_used: string | null
+          analyzed_at: string | null
+          bias_free_score: number | null
+          clarifying_prompts: Json | null
+          company_id: string
+          consistency_score: number | null
+          created_at: string | null
+          evidence_coverage_score: number | null
+          id: string
+          is_ready_for_submission: boolean | null
+          issues: Json | null
+          participant_id: string | null
+          quality_score: number | null
+        }
+        Insert: {
+          ai_confidence_score?: number | null
+          ai_model_used?: string | null
+          analyzed_at?: string | null
+          bias_free_score?: number | null
+          clarifying_prompts?: Json | null
+          company_id: string
+          consistency_score?: number | null
+          created_at?: string | null
+          evidence_coverage_score?: number | null
+          id?: string
+          is_ready_for_submission?: boolean | null
+          issues?: Json | null
+          participant_id?: string | null
+          quality_score?: number | null
+        }
+        Update: {
+          ai_confidence_score?: number | null
+          ai_model_used?: string | null
+          analyzed_at?: string | null
+          bias_free_score?: number | null
+          clarifying_prompts?: Json | null
+          company_id?: string
+          consistency_score?: number | null
+          created_at?: string | null
+          evidence_coverage_score?: number | null
+          id?: string
+          is_ready_for_submission?: boolean | null
+          issues?: Json | null
+          participant_id?: string | null
+          quality_score?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_quality_assessments_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "review_quality_assessments_participant_id_fkey"
+            columns: ["participant_id"]
+            isOneToOne: false
+            referencedRelation: "appraisal_participants"
             referencedColumns: ["id"]
           },
         ]
