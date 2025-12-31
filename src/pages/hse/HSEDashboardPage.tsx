@@ -99,8 +99,12 @@ export default function HSEDashboardPage() {
       items: filterByAccess([allModules.emergencyResponse, allModules.firstAid, allModules.workersComp, allModules.permitToWork]),
     },
     {
-      titleKey: "Configuration & Reporting",
-      items: filterByAccess([allModules.policies, allModules.oshaReporting, allModules.ergonomics, allModules.analytics]),
+      titleKey: "Analytics",
+      items: filterByAccess([allModules.analytics]),
+    },
+    {
+      titleKey: "Health & Safety Administration",
+      items: filterByAccess([allModules.policies, allModules.oshaReporting, allModules.ergonomics]),
     },
   ];
 
@@ -173,7 +177,7 @@ export default function HSEDashboardPage() {
           })}
         </div>
 
-        <GroupedModuleCards sections={sections} />
+        <GroupedModuleCards sections={sections} defaultOpen={false} />
       </div>
     </AppLayout>
   );
