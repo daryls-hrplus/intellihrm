@@ -33,6 +33,7 @@ import {
   BarChart3,
   Monitor,
   PenTool,
+  UserPlus,
 } from "lucide-react";
 
 interface Stats {
@@ -125,6 +126,9 @@ export default function TrainingDashboardPage() {
     calendar: { title: t("training.modules.calendar.title"), description: t("training.modules.calendar.description"), href: "/training/calendar", icon: Calendar, color: "bg-destructive/10 text-destructive", tabCode: "calendar" },
     analytics: { title: t("training.modules.analytics.title"), description: t("training.modules.analytics.description"), href: "/training/analytics", icon: BarChart3, color: "bg-primary/10 text-primary", tabCode: "analytics" },
     lms: { title: t("training.modules.lms.title"), description: t("training.modules.lms.description"), href: "/admin/lms", icon: Settings, color: "bg-muted text-muted-foreground", tabCode: "lms" },
+    // Career & Growth modules (moved from Succession)
+    careerPaths: { title: t("training.modules.careerPaths.title", "Career Paths"), description: t("training.modules.careerPaths.description", "Define career progression routes"), href: "/training/career-paths", icon: Route, color: "bg-teal-500/10 text-teal-600", tabCode: "career-paths" },
+    mentorship: { title: t("training.modules.mentorship.title", "Mentorship"), description: t("training.modules.mentorship.description", "Mentoring relationships and programs"), href: "/training/mentorship", icon: UserPlus, color: "bg-pink-500/10 text-pink-600", tabCode: "mentorship" },
   };
 
   const filterByAccess = (modules: typeof allModules[keyof typeof allModules][]) =>
@@ -138,6 +142,10 @@ export default function TrainingDashboardPage() {
     {
       titleKey: "Learning & Development",
       items: filterByAccess([allModules.catalog, allModules.employeeLearning, allModules.employeeCertifications, allModules.learningPaths]),
+    },
+    {
+      titleKey: "Career & Growth",
+      items: filterByAccess([allModules.careerPaths, allModules.mentorship]),
     },
     {
       titleKey: "Planning & Assessment",
