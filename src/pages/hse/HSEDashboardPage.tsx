@@ -103,7 +103,7 @@ export default function HSEDashboardPage() {
       items: filterByAccess([allModules.analytics]),
     },
     {
-      titleKey: "Health & Safety Administration",
+      titleKey: "Health & Safety Setup",
       items: filterByAccess([allModules.policies, allModules.oshaReporting, allModules.ergonomics]),
     },
   ];

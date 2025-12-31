@@ -306,7 +306,7 @@ export default function TimeAttendanceDashboardPage() {
       ]),
     },
     {
-      titleKey: "Time and Attendance Administration",
+      titleKey: "Time & Attendance Setup",
       items: filterByAccess([
         allModules.policies,
         allModules.devices,

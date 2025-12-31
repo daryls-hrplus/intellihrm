@@ -286,7 +286,7 @@ export default function LeaveDashboardPage() {
       ]),
     },
     {
-      titleKey: "Leave Administration",
+      titleKey: "Leave Setup",
       items: filterByAccess([
         allModules.types,
         allModules.leaveYears,

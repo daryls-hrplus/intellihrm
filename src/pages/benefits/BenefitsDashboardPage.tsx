@@ -189,7 +189,7 @@ export default function BenefitsDashboardPage() {
       items: filterByAccess([allModules.analytics, allModules.costProjections]),
     },
     {
-      titleKey: "Benefits Administration",
+      titleKey: "Benefits Setup",
       items: filterByAccess([allModules.categories, allModules.providers, allModules.autoEnrollment, allModules.compliance]),
     },
   ];

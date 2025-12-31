@@ -161,7 +161,7 @@ export default function TrainingDashboardPage() {
       items: filterByAccess([allModules.analytics]),
     },
     {
-      titleKey: "L&D Administration",
+      titleKey: "L&D Setup",
       items: filterByAccess([allModules.lms, allModules.courseCompetencies, allModules.instructors, allModules.compliance, allModules.budgets]),
     },
   ];

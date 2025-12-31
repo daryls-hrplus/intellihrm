@@ -321,7 +321,7 @@ export default function WorkforceDashboardPage() {
       ]),
     },
     {
-      titleKey: "Workforce Administration",
+      titleKey: "Workforce Setup",
       items: filterByAccess([
         allModules.orgStructureConfig,
         allModules.competencies,
