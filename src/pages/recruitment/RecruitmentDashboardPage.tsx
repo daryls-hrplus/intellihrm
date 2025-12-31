@@ -187,7 +187,7 @@ export default function RecruitmentDashboardPage() {
           })}
         </div>
 
-        <GroupedModuleCards sections={sections} />
+        <GroupedModuleCards sections={sections} defaultOpen={false} />
       </div>
     </AppLayout>
   );
