@@ -66,23 +66,21 @@ export default function PerformanceDashboardPage() {
 
   const sections: ModuleSection[] = [
     {
-      titleKey: "Performance Reviews",
-      items: filterByAccess([allModules.appraisals, allModules.feedback360, allModules.calibration]),
-    },
-    {
-      titleKey: "Goal Management",
-      items: filterByAccess([allModules.goals]),
+      titleKey: "Performance & Goals",
+      items: filterByAccess([
+        allModules.appraisals,
+        allModules.feedback360,
+        allModules.calibration,
+        allModules.goals,
+        allModules.pips,
+      ]),
     },
     {
       titleKey: "Continuous Performance",
       items: filterByAccess([allModules.feedback, allModules.recognition]),
     },
     {
-      titleKey: "Performance Remediation",
-      items: filterByAccess([allModules.pips]),
-    },
-    {
-      titleKey: "Succession Planning",
+      titleKey: "Succession & Talent",
       items: filterByAccess([
         allModules.nineBox,
         allModules.talentPools,
@@ -90,12 +88,11 @@ export default function PerformanceDashboardPage() {
         allModules.keyPositions,
         allModules.flightRisk,
         allModules.benchStrength,
-        allModules.successionAnalytics,
       ]),
     },
     {
       titleKey: "Analytics",
-      items: filterByAccess([allModules.analytics]),
+      items: filterByAccess([allModules.analytics, allModules.successionAnalytics]),
     },
     {
       titleKey: "Talent Administration",
