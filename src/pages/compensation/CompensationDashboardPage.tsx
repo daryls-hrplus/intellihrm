@@ -77,11 +77,11 @@ export default function CompensationDashboardPage() {
     },
     {
       titleKey: "Incentives",
-      items: filterByAccess([allModules.meritCycles, allModules.bonus, allModules.equity]),
+      items: filterByAccess([allModules.meritCycles, allModules.bonus, allModules.equity, allModules.totalRewards]),
     },
     {
       titleKey: "Analytics & Benchmarking",
-      items: filterByAccess([allModules.marketBenchmarking, allModules.compaRatio, allModules.payEquity, allModules.totalRewards, allModules.budgets, allModules.analytics, allModules.minimumWageCompliance]),
+      items: filterByAccess([allModules.marketBenchmarking, allModules.compaRatio, allModules.payEquity, allModules.budgets, allModules.analytics, allModules.minimumWageCompliance]),
     },
     {
       titleKey: "Workforce Planning & Budgeting",
