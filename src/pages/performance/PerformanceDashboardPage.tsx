@@ -26,8 +26,6 @@ import {
   GitBranch,
   UserCheck,
   Briefcase,
-  Route,
-  UserPlus,
   AlertCircle,
   PieChart,
 } from "lucide-react";
@@ -38,25 +36,28 @@ export default function PerformanceDashboardPage() {
   const { hasTabAccess } = useGranularPermissions();
 
   const allModules = {
+    // Performance Reviews
     appraisals: { title: t('performance.modules.appraisals'), description: t('performance.modules.appraisalsDesc'), href: "/performance/appraisals", icon: ClipboardCheck, color: "bg-primary/10 text-primary", tabCode: "appraisals" },
     feedback360: { title: t('performance.modules.feedback360'), description: t('performance.modules.feedback360Desc'), href: "/performance/360", icon: MessageSquare, color: "bg-sky-500/10 text-sky-600", tabCode: "360" },
     calibration: { title: t('performance.modules.calibration', 'Calibration'), description: t('performance.modules.calibrationDesc', 'Rating calibration sessions'), href: "/performance/calibration", icon: Scale, color: "bg-indigo-500/10 text-indigo-600", tabCode: "calibration" },
+    // Goal Management
     goals: { title: t('performance.modules.goals'), description: t('performance.modules.goalsDesc'), href: "/performance/goals", icon: Flag, color: "bg-emerald-500/10 text-emerald-600", tabCode: "goals" },
-    pips: { title: t('performance.modules.improvementPlans'), description: t('performance.modules.improvementPlansDesc'), href: "/performance/pips", icon: AlertTriangle, color: "bg-amber-500/10 text-amber-600", tabCode: "pips" },
+    // Continuous Performance
     feedback: { title: t('performance.modules.continuousFeedback'), description: t('performance.modules.continuousFeedbackDesc'), href: "/performance/feedback", icon: MessageCircle, color: "bg-violet-500/10 text-violet-600", tabCode: "feedback" },
     recognition: { title: t('performance.modules.recognitionAwards'), description: t('performance.modules.recognitionAwardsDesc'), href: "/performance/recognition", icon: Award, color: "bg-rose-500/10 text-rose-600", tabCode: "recognition" },
-    analytics: { title: t('performance.modules.analytics'), description: t('performance.modules.analyticsDesc'), href: "/performance/analytics", icon: BarChart3, color: "bg-muted text-muted-foreground", tabCode: "analytics" },
-    setup: { title: t('performance.modules.setup', 'Setup'), description: t('performance.modules.setupDesc', 'Configure performance settings'), href: "/performance/setup", icon: Settings, color: "bg-slate-500/10 text-slate-600", tabCode: "setup" },
+    // Performance Remediation
+    pips: { title: t('performance.modules.improvementPlans'), description: t('performance.modules.improvementPlansDesc'), href: "/performance/pips", icon: AlertTriangle, color: "bg-amber-500/10 text-amber-600", tabCode: "pips" },
     // Succession Planning modules
     nineBox: { title: "9-Box Assessment", description: "Talent potential and performance matrix", href: "/succession/nine-box", icon: PieChart, color: "bg-purple-500/10 text-purple-600", tabCode: "nine_box" },
     talentPools: { title: "Talent Pools", description: "Manage high-potential talent groups", href: "/succession/talent-pools", icon: Users, color: "bg-cyan-500/10 text-cyan-600", tabCode: "talent_pools" },
     successionPlans: { title: "Succession Plans", description: "Plan leadership transitions", href: "/succession/plans", icon: GitBranch, color: "bg-orange-500/10 text-orange-600", tabCode: "succession_plans" },
     keyPositions: { title: "Key Positions", description: "Critical roles requiring succession coverage", href: "/succession/key-positions", icon: Briefcase, color: "bg-red-500/10 text-red-600", tabCode: "key_positions" },
-    careerPaths: { title: "Career Paths", description: "Define career progression routes", href: "/succession/career-paths", icon: Route, color: "bg-teal-500/10 text-teal-600", tabCode: "career_paths" },
-    mentorship: { title: "Mentorship", description: "Mentoring relationships and programs", href: "/succession/mentorship", icon: UserPlus, color: "bg-pink-500/10 text-pink-600", tabCode: "mentorship" },
     flightRisk: { title: "Flight Risk", description: "Identify and mitigate attrition risks", href: "/succession/flight-risk", icon: AlertCircle, color: "bg-yellow-500/10 text-yellow-600", tabCode: "flight_risk" },
     benchStrength: { title: "Bench Strength", description: "Evaluate succession readiness", href: "/succession/bench-strength", icon: UserCheck, color: "bg-lime-500/10 text-lime-600", tabCode: "bench_strength" },
     successionAnalytics: { title: "Succession Analytics", description: "Insights on talent pipeline health", href: "/succession/analytics", icon: BarChart3, color: "bg-gray-500/10 text-gray-600", tabCode: "succession_analytics" },
+    // Analytics & Configuration
+    analytics: { title: t('performance.modules.analytics'), description: t('performance.modules.analyticsDesc'), href: "/performance/analytics", icon: BarChart3, color: "bg-muted text-muted-foreground", tabCode: "analytics" },
+    setup: { title: t('performance.modules.setup', 'Setup'), description: t('performance.modules.setupDesc', 'Configure performance settings'), href: "/performance/setup", icon: Settings, color: "bg-slate-500/10 text-slate-600", tabCode: "setup" },
   };
 
   const filterByAccess = (modules: typeof allModules[keyof typeof allModules][]) =>
@@ -64,7 +65,7 @@ export default function PerformanceDashboardPage() {
 
   const sections: ModuleSection[] = [
     {
-      titleKey: "Evaluations",
+      titleKey: "Performance Reviews",
       items: filterByAccess([allModules.appraisals, allModules.feedback360, allModules.calibration]),
     },
     {
@@ -72,8 +73,12 @@ export default function PerformanceDashboardPage() {
       items: filterByAccess([allModules.goals]),
     },
     {
-      titleKey: "Development",
-      items: filterByAccess([allModules.pips, allModules.feedback, allModules.recognition]),
+      titleKey: "Continuous Performance",
+      items: filterByAccess([allModules.feedback, allModules.recognition]),
+    },
+    {
+      titleKey: "Performance Remediation",
+      items: filterByAccess([allModules.pips]),
     },
     {
       titleKey: "Succession Planning",
@@ -82,20 +87,14 @@ export default function PerformanceDashboardPage() {
         allModules.talentPools,
         allModules.successionPlans,
         allModules.keyPositions,
-        allModules.careerPaths,
-        allModules.mentorship,
         allModules.flightRisk,
         allModules.benchStrength,
         allModules.successionAnalytics,
       ]),
     },
     {
-      titleKey: "Analytics",
-      items: filterByAccess([allModules.analytics]),
-    },
-    {
-      titleKey: "Configuration",
-      items: filterByAccess([allModules.setup]),
+      titleKey: "Analytics & Configuration",
+      items: filterByAccess([allModules.analytics, allModules.setup]),
     },
   ];
 

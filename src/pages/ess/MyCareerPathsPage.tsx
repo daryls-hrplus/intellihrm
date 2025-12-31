@@ -1,9 +1,9 @@
 import { useTranslation } from "react-i18next";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, TrendingUp, Target, BookOpen } from "lucide-react";
+import { ArrowRight, TrendingUp } from "lucide-react";
 
 export default function MyCareerPathsPage() {
   const { t } = useTranslation();
