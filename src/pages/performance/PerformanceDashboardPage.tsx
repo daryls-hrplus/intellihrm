@@ -96,7 +96,7 @@ export default function PerformanceDashboardPage() {
       items: filterByAccess([allModules.analytics, allModules.appraisalAnalytics, allModules.successionAnalytics]),
     },
     {
-      titleKey: "Talent Administration",
+      titleKey: "Talent Setup",
       items: filterByAccess([allModules.setup]),
     },
   ];
