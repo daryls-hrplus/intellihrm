@@ -81,11 +81,11 @@ export default function CompensationDashboardPage() {
     },
     {
       titleKey: "Analytics & Benchmarking",
-      items: filterByAccess([allModules.marketBenchmarking, allModules.compaRatio, allModules.payEquity, allModules.budgets, allModules.analytics, allModules.minimumWageCompliance]),
+      items: filterByAccess([allModules.marketBenchmarking, allModules.compaRatio, allModules.payEquity, allModules.analytics, allModules.minimumWageCompliance]),
     },
     {
       titleKey: "Workforce Planning & Budgeting",
-      items: filterByAccess([allModules.positionBudgeting]),
+      items: filterByAccess([allModules.positionBudgeting, allModules.budgets]),
     },
   ];
 
