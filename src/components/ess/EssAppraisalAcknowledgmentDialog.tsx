@@ -32,6 +32,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { RatingDisputeDialog } from "@/components/performance/RatingDisputeDialog";
 import { useAuth } from "@/contexts/AuthContext";
+import { useAppraisalScoreBreakdown } from "@/hooks/useAppraisalScoreBreakdown";
+import { usePerformanceCategoryByScore } from "@/hooks/usePerformanceCategories";
+import { WhyThisScorePanel } from "@/components/appraisals/WhyThisScorePanel";
+import { PerformanceCategoryBadge } from "@/components/appraisals/PerformanceCategoryBadge";
 
 interface EssAppraisalAcknowledgmentDialogProps {
   open: boolean;
@@ -54,6 +58,10 @@ export function EssAppraisalAcknowledgmentDialog({
   const [acknowledged, setAcknowledged] = useState(false);
   const [comments, setComments] = useState("");
   const [disputeDialogOpen, setDisputeDialogOpen] = useState(false);
+  
+  // Score Explainability data
+  const { data: scoreBreakdown, isLoading: breakdownLoading } = useAppraisalScoreBreakdown(appraisal.id);
+  const performanceCategory = usePerformanceCategoryByScore(appraisal.overall_score);
 
   const getScoreColor = (score: number | null) => {
     if (score === null) return "text-muted-foreground";
@@ -137,12 +145,15 @@ export function EssAppraisalAcknowledgmentDialog({
           </DialogHeader>
 
           <div className="space-y-6 py-4">
-            {/* Overall Score */}
+            {/* Overall Score with Category */}
             <Card className="bg-muted/50">
               <CardHeader className="pb-3">
-                <CardTitle className="text-base flex items-center gap-2">
-                  <Star className="h-5 w-5 text-amber-500" />
-                  Final Performance Score
+                <CardTitle className="text-base flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Star className="h-5 w-5 text-amber-500" />
+                    Final Performance Score
+                  </div>
+                  <PerformanceCategoryBadge category={performanceCategory} score={appraisal.overall_score} size="sm" />
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -157,6 +168,16 @@ export function EssAppraisalAcknowledgmentDialog({
                 </div>
               </CardContent>
             </Card>
+
+            {/* Why This Score Panel */}
+            {appraisal.overall_score !== null && (
+              <WhyThisScorePanel 
+                breakdown={scoreBreakdown} 
+                category={performanceCategory}
+                overallScore={appraisal.overall_score}
+                isLoading={breakdownLoading}
+              />
+            )}
 
             {/* Score Breakdown */}
             <div className="grid grid-cols-3 gap-4">

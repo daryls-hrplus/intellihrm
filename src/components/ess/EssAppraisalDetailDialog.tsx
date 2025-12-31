@@ -25,11 +25,18 @@ import {
   ClipboardList,
   ClipboardEdit,
   Shield,
+  Sparkles,
 } from "lucide-react";
 import type { MyAppraisal } from "@/hooks/useMyAppraisals";
 import { useAppraisalActionExecutions } from "@/hooks/useAppraisalActionRules";
 import { EssAppraisalSelfAssessmentDialog } from "./EssAppraisalSelfAssessmentDialog";
 import { EssAppraisalAcknowledgmentDialog } from "./EssAppraisalAcknowledgmentDialog";
+import { useAppraisalScoreBreakdown } from "@/hooks/useAppraisalScoreBreakdown";
+import { usePerformanceCategoryByScore } from "@/hooks/usePerformanceCategories";
+import { useGroupedStrengthsGaps } from "@/hooks/useAppraisalStrengthsGaps";
+import { WhyThisScorePanel } from "@/components/appraisals/WhyThisScorePanel";
+import { StrengthsGapsSummary } from "@/components/appraisals/StrengthsGapsSummary";
+import { PerformanceCategoryBadge } from "@/components/appraisals/PerformanceCategoryBadge";
 
 interface EssAppraisalDetailDialogProps {
   open: boolean;
@@ -46,6 +53,11 @@ export function EssAppraisalDetailDialog({
   const [selfAssessmentOpen, setSelfAssessmentOpen] = useState(false);
   const [acknowledgmentOpen, setAcknowledgmentOpen] = useState(false);
   const { pendingExecutions, mandatoryPending, isLoading: actionsLoading } = useAppraisalActionExecutions(appraisal.id);
+  
+  // Score Explainability data
+  const { data: scoreBreakdown, isLoading: breakdownLoading } = useAppraisalScoreBreakdown(appraisal.id);
+  const performanceCategory = usePerformanceCategoryByScore(appraisal.overall_score);
+  const { grouped: strengthsGaps, isLoading: strengthsLoading } = useGroupedStrengthsGaps(appraisal.id);
 
   // Determine available actions
   const canSelfAssess = !appraisal.submitted_at && (appraisal.status === "pending" || appraisal.status === "draft" || appraisal.status === "in_progress");
@@ -158,12 +170,15 @@ export function EssAppraisalDetailDialog({
 
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-4 mt-4">
-            {/* Overall Score */}
+            {/* Overall Score with Category Badge */}
             <Card>
               <CardHeader className="pb-3">
-                <CardTitle className="text-base flex items-center gap-2">
-                  <Star className="h-5 w-5 text-amber-500" />
-                  Overall Performance Score
+                <CardTitle className="text-base flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Star className="h-5 w-5 text-amber-500" />
+                    Overall Performance Score
+                  </div>
+                  <PerformanceCategoryBadge category={performanceCategory} score={appraisal.overall_score} />
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -178,6 +193,24 @@ export function EssAppraisalDetailDialog({
                 </div>
               </CardContent>
             </Card>
+
+            {/* Why This Score Panel */}
+            {appraisal.overall_score !== null && (
+              <WhyThisScorePanel 
+                breakdown={scoreBreakdown} 
+                category={performanceCategory}
+                overallScore={appraisal.overall_score}
+                isLoading={breakdownLoading}
+              />
+            )}
+
+            {/* Strengths & Gaps Summary */}
+            <StrengthsGapsSummary
+              strengths={strengthsGaps.strengths}
+              gaps={strengthsGaps.gaps}
+              riskIndicators={strengthsGaps.riskIndicators}
+              isLoading={strengthsLoading}
+            />
 
             {/* Score Breakdown */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
