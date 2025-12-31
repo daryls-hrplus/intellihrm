@@ -2509,6 +2509,177 @@ export type Database = {
           },
         ]
       }
+      appraisal_score_breakdown: {
+        Row: {
+          ai_flags: Json | null
+          ai_quality_score: number | null
+          calculated_at: string | null
+          calculation_version: number | null
+          calibration_adjustment: number | null
+          calibration_reason: string | null
+          calibration_session_id: string | null
+          category_thresholds: Json | null
+          company_id: string
+          competencies_contribution: number | null
+          competencies_item_count: number | null
+          competencies_raw_score: number | null
+          competencies_weight: number | null
+          created_at: string | null
+          cycle_id: string
+          evidence_count: number | null
+          evidence_summary: Json | null
+          feedback_360_completion_rate: number | null
+          feedback_360_contribution: number | null
+          feedback_360_raw_score: number | null
+          feedback_360_response_count: number | null
+          feedback_360_weight: number | null
+          goals_contribution: number | null
+          goals_item_count: number | null
+          goals_raw_score: number | null
+          goals_weight: number | null
+          id: string
+          participant_id: string
+          performance_category_id: string | null
+          post_calibration_score: number | null
+          pre_calibration_score: number | null
+          responsibilities_contribution: number | null
+          responsibilities_item_count: number | null
+          responsibilities_raw_score: number | null
+          responsibilities_weight: number | null
+          updated_at: string | null
+          validated_evidence_count: number | null
+          values_contribution: number | null
+          values_item_count: number | null
+          values_raw_score: number | null
+          values_weight: number | null
+          was_calibrated: boolean | null
+        }
+        Insert: {
+          ai_flags?: Json | null
+          ai_quality_score?: number | null
+          calculated_at?: string | null
+          calculation_version?: number | null
+          calibration_adjustment?: number | null
+          calibration_reason?: string | null
+          calibration_session_id?: string | null
+          category_thresholds?: Json | null
+          company_id: string
+          competencies_contribution?: number | null
+          competencies_item_count?: number | null
+          competencies_raw_score?: number | null
+          competencies_weight?: number | null
+          created_at?: string | null
+          cycle_id: string
+          evidence_count?: number | null
+          evidence_summary?: Json | null
+          feedback_360_completion_rate?: number | null
+          feedback_360_contribution?: number | null
+          feedback_360_raw_score?: number | null
+          feedback_360_response_count?: number | null
+          feedback_360_weight?: number | null
+          goals_contribution?: number | null
+          goals_item_count?: number | null
+          goals_raw_score?: number | null
+          goals_weight?: number | null
+          id?: string
+          participant_id: string
+          performance_category_id?: string | null
+          post_calibration_score?: number | null
+          pre_calibration_score?: number | null
+          responsibilities_contribution?: number | null
+          responsibilities_item_count?: number | null
+          responsibilities_raw_score?: number | null
+          responsibilities_weight?: number | null
+          updated_at?: string | null
+          validated_evidence_count?: number | null
+          values_contribution?: number | null
+          values_item_count?: number | null
+          values_raw_score?: number | null
+          values_weight?: number | null
+          was_calibrated?: boolean | null
+        }
+        Update: {
+          ai_flags?: Json | null
+          ai_quality_score?: number | null
+          calculated_at?: string | null
+          calculation_version?: number | null
+          calibration_adjustment?: number | null
+          calibration_reason?: string | null
+          calibration_session_id?: string | null
+          category_thresholds?: Json | null
+          company_id?: string
+          competencies_contribution?: number | null
+          competencies_item_count?: number | null
+          competencies_raw_score?: number | null
+          competencies_weight?: number | null
+          created_at?: string | null
+          cycle_id?: string
+          evidence_count?: number | null
+          evidence_summary?: Json | null
+          feedback_360_completion_rate?: number | null
+          feedback_360_contribution?: number | null
+          feedback_360_raw_score?: number | null
+          feedback_360_response_count?: number | null
+          feedback_360_weight?: number | null
+          goals_contribution?: number | null
+          goals_item_count?: number | null
+          goals_raw_score?: number | null
+          goals_weight?: number | null
+          id?: string
+          participant_id?: string
+          performance_category_id?: string | null
+          post_calibration_score?: number | null
+          pre_calibration_score?: number | null
+          responsibilities_contribution?: number | null
+          responsibilities_item_count?: number | null
+          responsibilities_raw_score?: number | null
+          responsibilities_weight?: number | null
+          updated_at?: string | null
+          validated_evidence_count?: number | null
+          values_contribution?: number | null
+          values_item_count?: number | null
+          values_raw_score?: number | null
+          values_weight?: number | null
+          was_calibrated?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appraisal_score_breakdown_calibration_session_id_fkey"
+            columns: ["calibration_session_id"]
+            isOneToOne: false
+            referencedRelation: "calibration_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appraisal_score_breakdown_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appraisal_score_breakdown_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "appraisal_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appraisal_score_breakdown_participant_id_fkey"
+            columns: ["participant_id"]
+            isOneToOne: true
+            referencedRelation: "appraisal_participants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_breakdown_perf_category"
+            columns: ["performance_category_id"]
+            isOneToOne: false
+            referencedRelation: "performance_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       appraisal_scores: {
         Row: {
           ai_analysis_id: string | null
@@ -2593,6 +2764,104 @@ export type Database = {
           },
           {
             foreignKeyName: "appraisal_scores_participant_id_fkey"
+            columns: ["participant_id"]
+            isOneToOne: false
+            referencedRelation: "appraisal_participants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      appraisal_strengths_gaps: {
+        Row: {
+          ai_confidence: number | null
+          ai_identified: boolean | null
+          ai_reasoning: string | null
+          category: string
+          company_id: string
+          created_at: string | null
+          cycle_id: string
+          description: string | null
+          evidence_ids: Json | null
+          id: string
+          insight_type: string
+          linked_idp_goal_id: string | null
+          participant_id: string
+          priority: string | null
+          related_item_id: string | null
+          related_item_type: string | null
+          score_impact: number | null
+          suggested_action: string | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          ai_confidence?: number | null
+          ai_identified?: boolean | null
+          ai_reasoning?: string | null
+          category: string
+          company_id: string
+          created_at?: string | null
+          cycle_id: string
+          description?: string | null
+          evidence_ids?: Json | null
+          id?: string
+          insight_type: string
+          linked_idp_goal_id?: string | null
+          participant_id: string
+          priority?: string | null
+          related_item_id?: string | null
+          related_item_type?: string | null
+          score_impact?: number | null
+          suggested_action?: string | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          ai_confidence?: number | null
+          ai_identified?: boolean | null
+          ai_reasoning?: string | null
+          category?: string
+          company_id?: string
+          created_at?: string | null
+          cycle_id?: string
+          description?: string | null
+          evidence_ids?: Json | null
+          id?: string
+          insight_type?: string
+          linked_idp_goal_id?: string | null
+          participant_id?: string
+          priority?: string | null
+          related_item_id?: string | null
+          related_item_type?: string | null
+          score_impact?: number | null
+          suggested_action?: string | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appraisal_strengths_gaps_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appraisal_strengths_gaps_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "appraisal_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appraisal_strengths_gaps_linked_idp_goal_id_fkey"
+            columns: ["linked_idp_goal_id"]
+            isOneToOne: false
+            referencedRelation: "idp_goals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appraisal_strengths_gaps_participant_id_fkey"
             columns: ["participant_id"]
             isOneToOne: false
             referencedRelation: "appraisal_participants"
@@ -38308,6 +38577,80 @@ export type Database = {
           },
         ]
       }
+      performance_categories: {
+        Row: {
+          bonus_eligible: boolean | null
+          code: string
+          color: string
+          company_id: string
+          created_at: string | null
+          description: string | null
+          description_en: string | null
+          display_order: number
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          max_score: number
+          min_score: number
+          name: string
+          name_en: string | null
+          promotion_eligible: boolean | null
+          requires_pip: boolean | null
+          succession_eligible: boolean | null
+          updated_at: string | null
+        }
+        Insert: {
+          bonus_eligible?: boolean | null
+          code: string
+          color?: string
+          company_id: string
+          created_at?: string | null
+          description?: string | null
+          description_en?: string | null
+          display_order?: number
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          max_score: number
+          min_score: number
+          name: string
+          name_en?: string | null
+          promotion_eligible?: boolean | null
+          requires_pip?: boolean | null
+          succession_eligible?: boolean | null
+          updated_at?: string | null
+        }
+        Update: {
+          bonus_eligible?: boolean | null
+          code?: string
+          color?: string
+          company_id?: string
+          created_at?: string | null
+          description?: string | null
+          description_en?: string | null
+          display_order?: number
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          max_score?: number
+          min_score?: number
+          name?: string
+          name_en?: string | null
+          promotion_eligible?: boolean | null
+          requires_pip?: boolean | null
+          succession_eligible?: boolean | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "performance_categories_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       performance_evidence: {
         Row: {
           appraisal_cycle_id: string | null
@@ -53057,6 +53400,10 @@ export type Database = {
           }
       reverse_leave_deductions: {
         Args: { p_leave_request_id: string }
+        Returns: undefined
+      }
+      seed_default_performance_categories: {
+        Args: { p_company_id: string }
         Returns: undefined
       }
       seed_role_container_access: { Args: never; Returns: undefined }
