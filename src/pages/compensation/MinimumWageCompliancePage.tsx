@@ -57,7 +57,6 @@ export default function MinimumWageCompliancePage() {
   const filteredViolations = violations.filter(v => {
     const matchesSearch = 
       v.employee?.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      v.employee?.employee_number?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       v.position?.title?.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesStatus = statusFilter === "all" || v.status === statusFilter;
@@ -346,9 +345,6 @@ export default function MinimumWageCompliancePage() {
                         <TableCell>
                           <div>
                             <p className="font-medium">{violation.employee?.full_name || "Unknown"}</p>
-                            <p className="text-sm text-muted-foreground">
-                              {violation.employee?.employee_number || "-"}
-                            </p>
                           </div>
                         </TableCell>
                         <TableCell>{violation.position?.title || "-"}</TableCell>

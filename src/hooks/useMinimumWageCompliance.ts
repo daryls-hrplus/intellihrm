@@ -150,11 +150,35 @@ export function useMinimumWageCompliance(companyId?: string) {
     }
   }, [companyId]);
 
-  const createRate = async (rate: Omit<MinimumWageRate, "id" | "created_at" | "updated_at">) => {
+  const createRate = async (rateData: {
+    country: string;
+    rate: number;
+    effective_from: string;
+    region?: string | null;
+    wage_type?: string;
+    currency_id?: string | null;
+    effective_to?: string | null;
+    applicable_to?: Record<string, unknown> | null;
+    source_reference?: string | null;
+    notes?: string | null;
+    is_active?: boolean;
+  }) => {
     try {
       const { data, error: createError } = await supabase
         .from("minimum_wage_rates")
-        .insert(rate)
+        .insert([{
+          country: rateData.country,
+          rate: rateData.rate,
+          effective_from: rateData.effective_from,
+          region: rateData.region,
+          wage_type: rateData.wage_type,
+          currency_id: rateData.currency_id,
+          effective_to: rateData.effective_to,
+          applicable_to: rateData.applicable_to ? JSON.parse(JSON.stringify(rateData.applicable_to)) : null,
+          source_reference: rateData.source_reference,
+          notes: rateData.notes,
+          is_active: rateData.is_active ?? true,
+        }])
         .select()
         .single();
 

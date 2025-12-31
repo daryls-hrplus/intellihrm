@@ -33,6 +33,7 @@ import {
   CalendarIcon,
   ListOrdered,
   Briefcase,
+  Shield,
 } from "lucide-react";
 
 export default function CompensationDashboardPage() {
@@ -59,6 +60,7 @@ export default function CompensationDashboardPage() {
     equity: { title: t("compensation.modules.equity.title"), description: t("compensation.modules.equity.description"), href: "/compensation/equity", icon: Gem, color: "bg-fuchsia-500/10 text-fuchsia-600", tabCode: "equity" },
     analytics: { title: t("compensation.modules.analytics.title"), description: t("compensation.modules.analytics.description"), href: "/compensation/analytics", icon: TrendingUp, color: "bg-lime-500/10 text-lime-600", tabCode: "analytics" },
     positionBudgeting: { title: "Position Budgeting", description: "Workforce planning with position-based budgets, scenarios & what-if modeling", href: "/compensation/position-budgeting", icon: Briefcase, color: "bg-purple-500/10 text-purple-600", tabCode: "position_budgeting" },
+    minimumWageCompliance: { title: "Minimum Wage Compliance", description: "Monitor and manage minimum wage compliance across your workforce", href: "/compensation/minimum-wage-compliance", icon: Shield, color: "bg-red-500/10 text-red-600", tabCode: "minimum_wage_compliance" },
   };
 
   const filterByAccess = (modules: typeof allModules[keyof typeof allModules][]) =>
@@ -79,7 +81,7 @@ export default function CompensationDashboardPage() {
     },
     {
       titleKey: "Analytics & Benchmarking",
-      items: filterByAccess([allModules.marketBenchmarking, allModules.compaRatio, allModules.payEquity, allModules.totalRewards, allModules.budgets, allModules.analytics]),
+      items: filterByAccess([allModules.marketBenchmarking, allModules.compaRatio, allModules.payEquity, allModules.totalRewards, allModules.budgets, allModules.analytics, allModules.minimumWageCompliance]),
     },
     {
       titleKey: "Workforce Planning & Budgeting",
