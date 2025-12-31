@@ -30,8 +30,11 @@ import { EssPIPStatusCard } from "@/components/ess/EssPIPStatusCard";
 import { EssAppraisalSelfAssessmentDialog } from "@/components/ess/EssAppraisalSelfAssessmentDialog";
 import { EssAppraisalAcknowledgmentDialog } from "@/components/ess/EssAppraisalAcknowledgmentDialog";
 import { EmployeeReviewResponseDialog } from "@/components/ess/performance/EmployeeReviewResponseDialog";
+import { PerformanceTrajectoryCard } from "@/components/performance/ai/PerformanceTrajectoryCard";
+import { useAuth } from "@/contexts/AuthContext";
 export default function MyAppraisalsPage() {
   const { t } = useTranslation();
+  const { user, company } = useAuth();
   const { 
     appraisals, 
     active, 
@@ -165,6 +168,15 @@ export default function MyAppraisalsPage() {
 
         {/* PIP Status (if any) */}
         <EssPIPStatusCard />
+
+        {/* Performance Trajectory - AI Insight */}
+        {user?.id && company?.id && (
+          <PerformanceTrajectoryCard
+            employeeId={user.id}
+            companyId={company.id}
+            showDetails={true}
+          />
+        )}
 
         {/* Main Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>

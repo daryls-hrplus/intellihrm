@@ -42,6 +42,7 @@ import {
   Scale,
   Shield,
   Tags,
+  Brain,
 } from "lucide-react";
 import { CheckInCadenceConfig } from "@/components/performance/setup/CheckInCadenceConfig";
 import { AppraisalFormTemplateManager } from "@/components/performance/setup/AppraisalFormTemplateManager";
@@ -52,6 +53,7 @@ import { PerformanceCategoriesManager } from "@/components/performance/setup/Per
 import { IntegrationRulesConfigSection } from "@/components/performance/setup/IntegrationRulesConfigSection";
 import { PerformanceIndexSettingsPanel } from "@/components/performance/setup/PerformanceIndexSettingsPanel";
 import { ExternalBenchmarkConfigPanel } from "@/components/performance/setup/ExternalBenchmarkConfigPanel";
+import { CompetencyDriftDashboard } from "@/components/performance/ai/CompetencyDriftDashboard";
 
 // Interfaces
 interface Company { id: string; name: string; }
@@ -236,7 +238,7 @@ export default function PerformanceSetupPage() {
         {selectedCompany && (
           <Tabs value={primaryTab} onValueChange={setPrimaryTab} className="space-y-6">
             {/* Primary Tabs - Main Sections */}
-            <TabsList className="grid w-full grid-cols-5 h-auto p-1">
+            <TabsList className="grid w-full grid-cols-6 h-auto p-1">
               <TabsTrigger value="foundation" className="flex items-center gap-2 py-3">
                 <Layers className="h-4 w-4" />
                 <span className="hidden sm:inline">Foundation</span>
@@ -256,6 +258,10 @@ export default function PerformanceSetupPage() {
               <TabsTrigger value="recognition" className="flex items-center gap-2 py-3">
                 <Award className="h-4 w-4" />
                 <span className="hidden sm:inline">Recognition</span>
+              </TabsTrigger>
+              <TabsTrigger value="ai-insights" className="flex items-center gap-2 py-3">
+                <Brain className="h-4 w-4" />
+                <span className="hidden sm:inline">AI Insights</span>
               </TabsTrigger>
             </TabsList>
 
@@ -442,6 +448,14 @@ export default function PerformanceSetupPage() {
                   <RecognitionCategoriesContent categories={recognitionCategories} isLoading={isLoading} onAdd={() => { setEditingRecognitionCategory(null); setRecognitionCategoryDialogOpen(true); }} onEdit={(c: RecognitionCategory) => { setEditingRecognitionCategory(c); setRecognitionCategoryDialogOpen(true); }} onDelete={handleDeleteRecognitionCategory} t={t} />
                 </TabsContent>
               </Tabs>
+            </TabsContent>
+
+            {/* AI Insights Tab */}
+            <TabsContent value="ai-insights" className="space-y-4">
+              <div className="text-sm text-muted-foreground mb-4">
+                AI-powered insights for competency management and workforce analytics
+              </div>
+              <CompetencyDriftDashboard companyId={selectedCompany} />
             </TabsContent>
           </Tabs>
         )}

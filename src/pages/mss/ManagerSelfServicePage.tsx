@@ -4,7 +4,9 @@ import { useLanguage } from "@/hooks/useLanguage";
 import { GroupedModuleCards, ModuleSection, GroupedModuleItem } from "@/components/ui/GroupedModuleCards";
 import { TeamLeaveIntelligence } from "@/components/mss/TeamLeaveIntelligence";
 import { ManagerRODWidget } from "@/components/mss/ManagerRODWidget";
+import { ManagerInterventionInbox } from "@/components/performance/ai/ManagerInterventionInbox";
 import { useGranularPermissions } from "@/hooks/useGranularPermissions";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   Users,
   Calendar,
@@ -34,6 +36,7 @@ import {
 export default function ManagerSelfServicePage() {
   const { t } = useLanguage();
   const { hasTabAccess } = useGranularPermissions();
+  const { user, company } = useAuth();
 
   const allModules = {
     team: { title: t("mss.dashboard.myTeam"), description: t("mss.dashboard.myTeamDesc"), href: "/mss/team", icon: Users, color: "bg-blue-500/10 text-blue-600", tabCode: "mss-team" },
@@ -116,6 +119,15 @@ export default function ManagerSelfServicePage() {
 
         {/* Resumption of Duty Widget */}
         <ManagerRODWidget />
+
+        {/* AI Coaching Inbox - Manager Intervention Prompts */}
+        {user?.id && company?.id && (
+          <ManagerInterventionInbox
+            managerId={user.id}
+            companyId={company.id}
+            maxItems={5}
+          />
+        )}
 
         <GroupedModuleCards sections={sections} defaultOpen={false} />
       </div>

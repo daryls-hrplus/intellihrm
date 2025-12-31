@@ -16,6 +16,7 @@ import {
   ClipboardCheck,
   Target,
   Users,
+  Brain,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -24,6 +25,8 @@ import { AppraisalCycleDialog } from "@/components/performance/AppraisalCycleDia
 import { AppraisalParticipantsManager } from "@/components/performance/AppraisalParticipantsManager";
 import { AppraisalEvaluationDialog } from "@/components/performance/AppraisalEvaluationDialog";
 import { formatDateForDisplay } from "@/utils/dateUtils";
+import { ManagerInterventionInbox } from "@/components/performance/ai/ManagerInterventionInbox";
+import { ReviewQualityDashboard } from "@/components/performance/ai/ReviewQualityDashboard";
 
 interface AppraisalCycle {
   id: string;
@@ -326,6 +329,15 @@ export default function MssAppraisalsPage() {
           </Card>
         </div>
 
+        {/* AI Coaching Inbox */}
+        {user?.id && company?.id && (
+          <ManagerInterventionInbox
+            managerId={user.id}
+            companyId={company.id}
+            maxItems={5}
+          />
+        )}
+
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList>
             <TabsTrigger value="probation-reviews" className="gap-2">
@@ -344,6 +356,10 @@ export default function MssAppraisalsPage() {
             <TabsTrigger value="completed-evaluations" className="gap-2">
               <CheckCircle className="h-4 w-4" />
               Completed Evaluations
+            </TabsTrigger>
+            <TabsTrigger value="ai-insights" className="gap-2">
+              <Brain className="h-4 w-4" />
+              AI Insights
             </TabsTrigger>
           </TabsList>
 
@@ -520,6 +536,47 @@ export default function MssAppraisalsPage() {
                     </CardContent>
                   </Card>
                 ))
+              )}
+            </div>
+          </TabsContent>
+
+          {/* AI Insights Tab */}
+          <TabsContent value="ai-insights" className="mt-6">
+            <div className="grid gap-6 lg:grid-cols-2">
+              {/* Review Quality for selected participant would go here */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Brain className="h-5 w-5 text-primary" />
+                    Review Quality Analysis
+                  </CardTitle>
+                  <CardDescription>
+                    AI-powered review quality assessment and bias detection
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground">
+                    Select an evaluation from the Pending Evaluations tab to see AI quality analysis.
+                  </p>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    The AI will analyze:
+                  </p>
+                  <ul className="text-sm text-muted-foreground mt-2 space-y-1 list-disc list-inside">
+                    <li>Comment-rating consistency</li>
+                    <li>Evidence coverage</li>
+                    <li>Potential bias patterns</li>
+                    <li>Clarity and specificity</li>
+                  </ul>
+                </CardContent>
+              </Card>
+
+              {/* Manager Intervention Inbox Full View */}
+              {user?.id && company?.id && (
+                <ManagerInterventionInbox
+                  managerId={user.id}
+                  companyId={company.id}
+                  maxItems={10}
+                />
               )}
             </div>
           </TabsContent>
