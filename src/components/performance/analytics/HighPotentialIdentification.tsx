@@ -71,7 +71,7 @@ export function HighPotentialIdentification({ companyId }: HighPotentialIdentifi
       if (error) throw error;
 
       // Also get succession plan data if available
-      const { data: successionData } = await supabase
+      const successionResult = await (supabase as any)
         .from('succession_candidates')
         .select(`
           employee_id,
@@ -81,6 +81,7 @@ export function HighPotentialIdentification({ companyId }: HighPotentialIdentifi
           plan:succession_plans(position_title)
         `)
         .eq('is_active', true);
+      const successionData = successionResult?.data || [];
 
       const successionMap = new Map();
       successionData?.forEach((s: any) => {
