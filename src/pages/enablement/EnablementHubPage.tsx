@@ -236,6 +236,19 @@ export default function EnablementHubPage() {
       ],
     },
     {
+      titleKey: "Administrator Manuals",
+      items: [
+        {
+          title: "Appraisals Manual",
+          description: "Comprehensive administrator guide for the Appraisals module",
+          href: "/enablement/manuals/appraisals",
+          icon: BookOpen,
+          color: "bg-primary/10 text-primary",
+          badge: "53 Sections",
+        },
+      ],
+    },
+    {
       titleKey: "Analytics & Settings",
       items: [
         {
