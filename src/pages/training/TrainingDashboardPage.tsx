@@ -140,6 +140,10 @@ export default function TrainingDashboardPage() {
       items: filterByAccess([allModules.catalog, allModules.employeeLearning, allModules.employeeCertifications, allModules.learningPaths]),
     },
     {
+      titleKey: "Career & Growth",
+      items: filterByAccess([allModules.careerPaths, allModules.mentorship]),
+    },
+    {
       titleKey: "Course Development & Delivery",
       items: filterByAccess([allModules.contentAuthoring, allModules.virtualClassroom, allModules.liveSessions]),
     },
@@ -149,7 +153,7 @@ export default function TrainingDashboardPage() {
     },
     {
       titleKey: "Operations",
-      items: filterByAccess([allModules.requests, allModules.external, allModules.calendar, allModules.mentorship]),
+      items: filterByAccess([allModules.requests, allModules.external, allModules.calendar]),
     },
     {
       titleKey: "Analytics",
@@ -157,7 +161,7 @@ export default function TrainingDashboardPage() {
     },
     {
       titleKey: "L&D Administration",
-      items: filterByAccess([allModules.lms, allModules.courseCompetencies, allModules.instructors, allModules.compliance, allModules.budgets, allModules.careerPaths]),
+      items: filterByAccess([allModules.lms, allModules.courseCompetencies, allModules.instructors, allModules.compliance, allModules.budgets]),
     },
   ];
 
