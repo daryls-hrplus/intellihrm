@@ -60,7 +60,7 @@ const sectionIcons: Record<string, LucideIcon> = {
   "Help & Settings": HelpCircle,
 };
 
-export function GroupedModuleCards({ sections, defaultOpen = true, sectionBadges = {} }: GroupedModuleCardsProps) {
+export function GroupedModuleCards({ sections, defaultOpen = false, sectionBadges = {} }: GroupedModuleCardsProps) {
   const navigate = useNavigate();
   
   // Track open sections - default state based on defaultOpen prop
