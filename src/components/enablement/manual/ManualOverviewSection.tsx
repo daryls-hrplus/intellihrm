@@ -82,12 +82,12 @@ export function ManualOverviewSection() {
           </div>
 
           {/* Industry Benchmark Callout */}
-          <div className="p-4 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+          <div className="p-4 bg-amber-100 dark:bg-amber-900/30 border border-amber-300 dark:border-amber-700 rounded-lg">
             <div className="flex items-start gap-3">
-              <Lightbulb className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
+              <Lightbulb className="h-5 w-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
               <div>
-                <h4 className="font-medium text-amber-900 dark:text-amber-100">Industry Standard</h4>
-                <p className="text-sm text-amber-800 dark:text-amber-200 mt-1">
+                <h4 className="font-medium text-foreground">Industry Standard</h4>
+                <p className="text-sm text-muted-foreground mt-1">
                   HRplus Appraisals aligns with enterprise HRMS standards set by Workday, SAP SuccessFactors, 
                   and Oracle HCM, while providing unique AI capabilities and regional compliance support.
                 </p>
@@ -166,12 +166,12 @@ export function ManualOverviewSection() {
           </div>
 
           {/* Industry Standard Callout */}
-          <div className="p-4 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+          <div className="p-4 bg-blue-100 dark:bg-blue-900/30 border border-blue-300 dark:border-blue-700 rounded-lg">
             <div className="flex items-start gap-3">
-              <Calendar className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
+              <Calendar className="h-5 w-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
               <div>
-                <h4 className="font-medium text-blue-900 dark:text-blue-100">Industry Standard Timing</h4>
-                <p className="text-sm text-blue-800 dark:text-blue-200 mt-1">
+                <h4 className="font-medium text-foreground">Industry Standard Timing</h4>
+                <p className="text-sm text-muted-foreground mt-1">
                   The 70-20-10 weight distribution (Goals-Responsibilities-Competencies) is an industry 
                   standard. Organizations may adjust based on role type (e.g., higher goal weight for sales roles).
                 </p>

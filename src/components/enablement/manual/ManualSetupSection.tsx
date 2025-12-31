@@ -18,12 +18,12 @@ export function ManualSetupSection() {
           <CardDescription>Complete these items before configuring appraisals</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="p-4 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-lg mb-6">
+          <div className="p-4 bg-amber-100 dark:bg-amber-900/30 border border-amber-300 dark:border-amber-700 rounded-lg mb-6">
             <div className="flex items-start gap-3">
-              <AlertTriangle className="h-5 w-5 text-amber-600 flex-shrink-0" />
+              <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400 flex-shrink-0" />
               <div>
-                <h4 className="font-medium text-amber-900 dark:text-amber-100">Important</h4>
-                <p className="text-sm text-amber-800 dark:text-amber-200">
+                <h4 className="font-medium text-foreground">Important</h4>
+                <p className="text-sm text-muted-foreground">
                   Complete these prerequisites 4-6 weeks before your planned go-live date.
                 </p>
               </div>
@@ -96,12 +96,12 @@ export function ManualSetupSection() {
             </table>
           </div>
 
-          <div className="p-4 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+          <div className="p-4 bg-blue-100 dark:bg-blue-900/30 border border-blue-300 dark:border-blue-700 rounded-lg">
             <div className="flex items-start gap-3">
-              <Lightbulb className="h-5 w-5 text-blue-600 flex-shrink-0" />
+              <Lightbulb className="h-5 w-5 text-blue-600 dark:text-blue-400 flex-shrink-0" />
               <div>
-                <h4 className="font-medium text-blue-900 dark:text-blue-100">Industry Standard</h4>
-                <p className="text-sm text-blue-800 dark:text-blue-200">
+                <h4 className="font-medium text-foreground">Industry Standard</h4>
+                <p className="text-sm text-muted-foreground">
                   Some organizations prefer a 4-point scale to eliminate the "middle option" tendency. 
                   Consider your organizational culture when choosing.
                 </p>
