@@ -56,7 +56,7 @@ export function ISO42001ComplianceCard() {
           <TooltipTrigger asChild>
             <div className="flex items-center gap-1.5 cursor-default">
               <ShieldCheck className="h-3.5 w-3.5 text-blue-600" />
-              <span className="text-xs font-medium text-muted-foreground hidden sm:inline">ISO 42001</span>
+              <span className="text-xs font-medium text-muted-foreground hidden sm:inline">AI Governance</span>
               <Badge variant={getBadgeVariant(compliance.color)} className="text-[10px] px-1.5 py-0">
                 {compliance.status}
               </Badge>
