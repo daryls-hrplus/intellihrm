@@ -311,3 +311,6 @@ verify_jwt = false
 
 [functions.appraisal-feedback-assistant]
 verify_jwt = false
+
+[functions.appraisal-integration-orchestrator]
+verify_jwt = false

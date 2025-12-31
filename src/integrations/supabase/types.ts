@@ -2082,6 +2082,211 @@ export type Database = {
           },
         ]
       }
+      appraisal_integration_log: {
+        Row: {
+          action_config: Json | null
+          action_result: string
+          action_type: string
+          approved_at: string | null
+          approved_by: string | null
+          company_id: string
+          created_at: string
+          employee_id: string
+          error_message: string | null
+          executed_at: string | null
+          executed_by: string | null
+          id: string
+          participant_id: string | null
+          rejection_reason: string | null
+          requires_approval: boolean
+          rule_id: string | null
+          target_module: string
+          target_record_id: string | null
+          target_record_type: string | null
+          trigger_data: Json
+          trigger_event: string
+        }
+        Insert: {
+          action_config?: Json | null
+          action_result?: string
+          action_type: string
+          approved_at?: string | null
+          approved_by?: string | null
+          company_id: string
+          created_at?: string
+          employee_id: string
+          error_message?: string | null
+          executed_at?: string | null
+          executed_by?: string | null
+          id?: string
+          participant_id?: string | null
+          rejection_reason?: string | null
+          requires_approval?: boolean
+          rule_id?: string | null
+          target_module: string
+          target_record_id?: string | null
+          target_record_type?: string | null
+          trigger_data?: Json
+          trigger_event: string
+        }
+        Update: {
+          action_config?: Json | null
+          action_result?: string
+          action_type?: string
+          approved_at?: string | null
+          approved_by?: string | null
+          company_id?: string
+          created_at?: string
+          employee_id?: string
+          error_message?: string | null
+          executed_at?: string | null
+          executed_by?: string | null
+          id?: string
+          participant_id?: string | null
+          rejection_reason?: string | null
+          requires_approval?: boolean
+          rule_id?: string | null
+          target_module?: string
+          target_record_id?: string | null
+          target_record_type?: string | null
+          trigger_data?: Json
+          trigger_event?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appraisal_integration_log_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appraisal_integration_log_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appraisal_integration_log_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appraisal_integration_log_executed_by_fkey"
+            columns: ["executed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appraisal_integration_log_participant_id_fkey"
+            columns: ["participant_id"]
+            isOneToOne: false
+            referencedRelation: "appraisal_participants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appraisal_integration_log_rule_id_fkey"
+            columns: ["rule_id"]
+            isOneToOne: false
+            referencedRelation: "appraisal_integration_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      appraisal_integration_rules: {
+        Row: {
+          action_config: Json
+          action_type: string
+          approval_role: string | null
+          auto_execute: boolean
+          company_id: string
+          condition_category_codes: Json | null
+          condition_operator: string
+          condition_section: string | null
+          condition_type: string
+          condition_value: number | null
+          condition_value_max: number | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          execution_order: number
+          id: string
+          is_active: boolean
+          name: string
+          requires_approval: boolean
+          target_module: string
+          trigger_event: string
+          updated_at: string
+        }
+        Insert: {
+          action_config?: Json
+          action_type: string
+          approval_role?: string | null
+          auto_execute?: boolean
+          company_id: string
+          condition_category_codes?: Json | null
+          condition_operator?: string
+          condition_section?: string | null
+          condition_type: string
+          condition_value?: number | null
+          condition_value_max?: number | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          execution_order?: number
+          id?: string
+          is_active?: boolean
+          name: string
+          requires_approval?: boolean
+          target_module: string
+          trigger_event: string
+          updated_at?: string
+        }
+        Update: {
+          action_config?: Json
+          action_type?: string
+          approval_role?: string | null
+          auto_execute?: boolean
+          company_id?: string
+          condition_category_codes?: Json | null
+          condition_operator?: string
+          condition_section?: string | null
+          condition_type?: string
+          condition_value?: number | null
+          condition_value_max?: number | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          execution_order?: number
+          id?: string
+          is_active?: boolean
+          name?: string
+          requires_approval?: boolean
+          target_module?: string
+          trigger_event?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appraisal_integration_rules_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appraisal_integration_rules_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       appraisal_interviews: {
         Row: {
           agenda: string | null
@@ -8075,6 +8280,124 @@ export type Database = {
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      compensation_review_flags: {
+        Row: {
+          company_id: string
+          created_at: string
+          employee_id: string
+          expires_at: string | null
+          id: string
+          justification: string | null
+          outcome_notes: string | null
+          performance_category_code: string | null
+          performance_score: number | null
+          priority: string
+          processed_at: string | null
+          processed_by: string | null
+          recommended_action: string
+          recommended_percentage: number | null
+          review_notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          source_cycle_id: string | null
+          source_participant_id: string | null
+          source_type: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          employee_id: string
+          expires_at?: string | null
+          id?: string
+          justification?: string | null
+          outcome_notes?: string | null
+          performance_category_code?: string | null
+          performance_score?: number | null
+          priority?: string
+          processed_at?: string | null
+          processed_by?: string | null
+          recommended_action: string
+          recommended_percentage?: number | null
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          source_cycle_id?: string | null
+          source_participant_id?: string | null
+          source_type?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          employee_id?: string
+          expires_at?: string | null
+          id?: string
+          justification?: string | null
+          outcome_notes?: string | null
+          performance_category_code?: string | null
+          performance_score?: number | null
+          priority?: string
+          processed_at?: string | null
+          processed_by?: string | null
+          recommended_action?: string
+          recommended_percentage?: number | null
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          source_cycle_id?: string | null
+          source_participant_id?: string | null
+          source_type?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "compensation_review_flags_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "compensation_review_flags_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "compensation_review_flags_processed_by_fkey"
+            columns: ["processed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "compensation_review_flags_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "compensation_review_flags_source_cycle_id_fkey"
+            columns: ["source_cycle_id"]
+            isOneToOne: false
+            referencedRelation: "appraisal_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "compensation_review_flags_source_participant_id_fkey"
+            columns: ["source_participant_id"]
+            isOneToOne: false
+            referencedRelation: "appraisal_participants"
             referencedColumns: ["id"]
           },
         ]
