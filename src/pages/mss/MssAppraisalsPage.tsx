@@ -382,14 +382,6 @@ export default function MssAppraisalsPage() {
           loading={loading}
         />
 
-        {/* AI Coaching Inbox - Compact */}
-        {user?.id && company?.id && (
-          <ManagerInterventionInbox
-            managerId={user.id}
-            companyId={company.id}
-            maxItems={3}
-          />
-        )}
 
         {/* Main Content Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
