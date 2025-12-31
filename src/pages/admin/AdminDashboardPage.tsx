@@ -370,7 +370,7 @@ export default function AdminDashboardPage() {
         {/* Access Request Analytics */}
         <AccessRequestsAnalytics />
 
-        <GroupedModuleCards sections={adminSections} />
+        <GroupedModuleCards sections={adminSections} showToggleButton />
       </div>
     </AppLayout>
   );

@@ -232,7 +232,7 @@ export default function EmployeeRelationsDashboardPage() {
           })}
         </div>
 
-        <GroupedModuleCards sections={sections} />
+        <GroupedModuleCards sections={sections} showToggleButton />
       </div>
     </AppLayout>
   );

@@ -413,7 +413,7 @@ export default function WorkforceDashboardPage() {
           })}
         </div>
 
-        <GroupedModuleCards sections={sections} defaultOpen={false} />
+        <GroupedModuleCards sections={sections} defaultOpen={false} showToggleButton />
       </div>
     </AppLayout>
   );
