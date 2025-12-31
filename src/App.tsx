@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { TranslationsProvider } from "@/components/TranslationsProvider";
+import { ThemeProvider } from "next-themes";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { EnablementAccessGuard } from "@/components/auth/EnablementAccessGuard";
 import Index from "./pages/Index";
@@ -544,12 +545,13 @@ import { ProtectedLayout } from "@/components/layout/ProtectedLayout";
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <TranslationsProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <AuthProvider>
+    <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
+      <TooltipProvider>
+        <TranslationsProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <AuthProvider>
             <Routes>
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/auth/mfa" element={<MFAChallengePage />} />
@@ -4255,11 +4257,12 @@ const App = () => (
             {/* Catch-all */}
             <Route path="*" element={<NotFound />} />
             </Route>
-          </Routes>
-        </AuthProvider>
-      </BrowserRouter>
-      </TranslationsProvider>
-    </TooltipProvider>
+            </Routes>
+          </AuthProvider>
+        </BrowserRouter>
+        </TranslationsProvider>
+      </TooltipProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 
