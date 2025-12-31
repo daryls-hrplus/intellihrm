@@ -33887,6 +33887,503 @@ export type Database = {
           },
         ]
       }
+      manager_calibration_alignment: {
+        Row: {
+          ai_explainability_id: string | null
+          alignment_score: number | null
+          avg_adjustment: number | null
+          company_id: string
+          consecutive_drift_cycles: number | null
+          created_at: string | null
+          cycle_id: string | null
+          drift_pattern: string | null
+          employees_reviewed: number | null
+          historical_alignment_avg: number | null
+          id: string
+          manager_id: string
+          max_adjustment: number | null
+          recommended_interventions: Json | null
+          scores_decreased: number | null
+          scores_increased: number | null
+          scores_unchanged: number | null
+          session_id: string | null
+          training_recommended: boolean | null
+          updated_at: string | null
+        }
+        Insert: {
+          ai_explainability_id?: string | null
+          alignment_score?: number | null
+          avg_adjustment?: number | null
+          company_id: string
+          consecutive_drift_cycles?: number | null
+          created_at?: string | null
+          cycle_id?: string | null
+          drift_pattern?: string | null
+          employees_reviewed?: number | null
+          historical_alignment_avg?: number | null
+          id?: string
+          manager_id: string
+          max_adjustment?: number | null
+          recommended_interventions?: Json | null
+          scores_decreased?: number | null
+          scores_increased?: number | null
+          scores_unchanged?: number | null
+          session_id?: string | null
+          training_recommended?: boolean | null
+          updated_at?: string | null
+        }
+        Update: {
+          ai_explainability_id?: string | null
+          alignment_score?: number | null
+          avg_adjustment?: number | null
+          company_id?: string
+          consecutive_drift_cycles?: number | null
+          created_at?: string | null
+          cycle_id?: string | null
+          drift_pattern?: string | null
+          employees_reviewed?: number | null
+          historical_alignment_avg?: number | null
+          id?: string
+          manager_id?: string
+          max_adjustment?: number | null
+          recommended_interventions?: Json | null
+          scores_decreased?: number | null
+          scores_increased?: number | null
+          scores_unchanged?: number | null
+          session_id?: string | null
+          training_recommended?: boolean | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "manager_calibration_alignment_ai_explainability_id_fkey"
+            columns: ["ai_explainability_id"]
+            isOneToOne: false
+            referencedRelation: "ai_explainability_records"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "manager_calibration_alignment_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "manager_calibration_alignment_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "appraisal_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "manager_calibration_alignment_manager_id_fkey"
+            columns: ["manager_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "manager_calibration_alignment_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "calibration_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      manager_capability_metrics: {
+        Row: {
+          ai_explainability_id: string | null
+          avg_comment_depth_score: number | null
+          avg_comment_length: number | null
+          avg_days_before_deadline: number | null
+          avg_score_given: number | null
+          calculated_at: string | null
+          calculation_details: Json | null
+          calibration_adjustment_rate: number | null
+          calibration_alignment_score: number | null
+          capability_trend: string | null
+          comment_quality_score: number | null
+          comments_with_evidence: number | null
+          comments_with_examples: number | null
+          company_id: string
+          created_at: string | null
+          cycle_id: string | null
+          differentiation_score: number | null
+          id: string
+          manager_id: string
+          overall_capability_score: number | null
+          post_calibration_avg: number | null
+          pre_calibration_avg: number | null
+          reviews_completed: number | null
+          reviews_late: number | null
+          reviews_on_time: number | null
+          score_distribution: Json | null
+          score_std_deviation: number | null
+          timeliness_score: number | null
+          total_reviews_assigned: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          ai_explainability_id?: string | null
+          avg_comment_depth_score?: number | null
+          avg_comment_length?: number | null
+          avg_days_before_deadline?: number | null
+          avg_score_given?: number | null
+          calculated_at?: string | null
+          calculation_details?: Json | null
+          calibration_adjustment_rate?: number | null
+          calibration_alignment_score?: number | null
+          capability_trend?: string | null
+          comment_quality_score?: number | null
+          comments_with_evidence?: number | null
+          comments_with_examples?: number | null
+          company_id: string
+          created_at?: string | null
+          cycle_id?: string | null
+          differentiation_score?: number | null
+          id?: string
+          manager_id: string
+          overall_capability_score?: number | null
+          post_calibration_avg?: number | null
+          pre_calibration_avg?: number | null
+          reviews_completed?: number | null
+          reviews_late?: number | null
+          reviews_on_time?: number | null
+          score_distribution?: Json | null
+          score_std_deviation?: number | null
+          timeliness_score?: number | null
+          total_reviews_assigned?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          ai_explainability_id?: string | null
+          avg_comment_depth_score?: number | null
+          avg_comment_length?: number | null
+          avg_days_before_deadline?: number | null
+          avg_score_given?: number | null
+          calculated_at?: string | null
+          calculation_details?: Json | null
+          calibration_adjustment_rate?: number | null
+          calibration_alignment_score?: number | null
+          capability_trend?: string | null
+          comment_quality_score?: number | null
+          comments_with_evidence?: number | null
+          comments_with_examples?: number | null
+          company_id?: string
+          created_at?: string | null
+          cycle_id?: string | null
+          differentiation_score?: number | null
+          id?: string
+          manager_id?: string
+          overall_capability_score?: number | null
+          post_calibration_avg?: number | null
+          pre_calibration_avg?: number | null
+          reviews_completed?: number | null
+          reviews_late?: number | null
+          reviews_on_time?: number | null
+          score_distribution?: Json | null
+          score_std_deviation?: number | null
+          timeliness_score?: number | null
+          total_reviews_assigned?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "manager_capability_metrics_ai_explainability_id_fkey"
+            columns: ["ai_explainability_id"]
+            isOneToOne: false
+            referencedRelation: "ai_explainability_records"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "manager_capability_metrics_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "manager_capability_metrics_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "appraisal_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "manager_capability_metrics_manager_id_fkey"
+            columns: ["manager_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      manager_comment_analysis: {
+        Row: {
+          actionability_score: number | null
+          ai_confidence_score: number | null
+          ai_explainability_id: string | null
+          ai_model_used: string | null
+          analyzed_at: string | null
+          balanced_feedback: boolean | null
+          comment_length: number | null
+          comment_text: string | null
+          comment_type: string | null
+          company_id: string
+          created_at: string | null
+          cycle_id: string | null
+          depth_score: number | null
+          evidence_present: boolean | null
+          examples_present: boolean | null
+          forward_looking: boolean | null
+          id: string
+          improvement_suggestions: Json | null
+          issues_detected: Json | null
+          manager_id: string
+          overall_quality_score: number | null
+          participant_id: string | null
+          specificity_score: number | null
+          word_count: number | null
+        }
+        Insert: {
+          actionability_score?: number | null
+          ai_confidence_score?: number | null
+          ai_explainability_id?: string | null
+          ai_model_used?: string | null
+          analyzed_at?: string | null
+          balanced_feedback?: boolean | null
+          comment_length?: number | null
+          comment_text?: string | null
+          comment_type?: string | null
+          company_id: string
+          created_at?: string | null
+          cycle_id?: string | null
+          depth_score?: number | null
+          evidence_present?: boolean | null
+          examples_present?: boolean | null
+          forward_looking?: boolean | null
+          id?: string
+          improvement_suggestions?: Json | null
+          issues_detected?: Json | null
+          manager_id: string
+          overall_quality_score?: number | null
+          participant_id?: string | null
+          specificity_score?: number | null
+          word_count?: number | null
+        }
+        Update: {
+          actionability_score?: number | null
+          ai_confidence_score?: number | null
+          ai_explainability_id?: string | null
+          ai_model_used?: string | null
+          analyzed_at?: string | null
+          balanced_feedback?: boolean | null
+          comment_length?: number | null
+          comment_text?: string | null
+          comment_type?: string | null
+          company_id?: string
+          created_at?: string | null
+          cycle_id?: string | null
+          depth_score?: number | null
+          evidence_present?: boolean | null
+          examples_present?: boolean | null
+          forward_looking?: boolean | null
+          id?: string
+          improvement_suggestions?: Json | null
+          issues_detected?: Json | null
+          manager_id?: string
+          overall_quality_score?: number | null
+          participant_id?: string | null
+          specificity_score?: number | null
+          word_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "manager_comment_analysis_ai_explainability_id_fkey"
+            columns: ["ai_explainability_id"]
+            isOneToOne: false
+            referencedRelation: "ai_explainability_records"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "manager_comment_analysis_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "manager_comment_analysis_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "appraisal_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "manager_comment_analysis_manager_id_fkey"
+            columns: ["manager_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "manager_comment_analysis_participant_id_fkey"
+            columns: ["participant_id"]
+            isOneToOne: false
+            referencedRelation: "appraisal_participants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      manager_hr_flags: {
+        Row: {
+          acknowledged_at: string | null
+          acknowledged_by: string | null
+          action_plan: string | null
+          affected_employees_count: number | null
+          ai_explainability_id: string | null
+          company_id: string
+          created_at: string | null
+          cycle_id: string | null
+          evidence_data: Json | null
+          flag_description: string
+          flag_severity: string | null
+          flag_title: string
+          flag_type: string
+          human_review_required: boolean | null
+          human_reviewed_at: string | null
+          human_reviewed_by: string | null
+          id: string
+          is_acknowledged: boolean | null
+          is_resolved: boolean | null
+          is_visible_to_manager: boolean | null
+          manager_id: string
+          resolution_notes: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          updated_at: string | null
+          visibility_changed_at: string | null
+          visibility_changed_by: string | null
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          action_plan?: string | null
+          affected_employees_count?: number | null
+          ai_explainability_id?: string | null
+          company_id: string
+          created_at?: string | null
+          cycle_id?: string | null
+          evidence_data?: Json | null
+          flag_description: string
+          flag_severity?: string | null
+          flag_title: string
+          flag_type: string
+          human_review_required?: boolean | null
+          human_reviewed_at?: string | null
+          human_reviewed_by?: string | null
+          id?: string
+          is_acknowledged?: boolean | null
+          is_resolved?: boolean | null
+          is_visible_to_manager?: boolean | null
+          manager_id: string
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          updated_at?: string | null
+          visibility_changed_at?: string | null
+          visibility_changed_by?: string | null
+        }
+        Update: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          action_plan?: string | null
+          affected_employees_count?: number | null
+          ai_explainability_id?: string | null
+          company_id?: string
+          created_at?: string | null
+          cycle_id?: string | null
+          evidence_data?: Json | null
+          flag_description?: string
+          flag_severity?: string | null
+          flag_title?: string
+          flag_type?: string
+          human_review_required?: boolean | null
+          human_reviewed_at?: string | null
+          human_reviewed_by?: string | null
+          id?: string
+          is_acknowledged?: boolean | null
+          is_resolved?: boolean | null
+          is_visible_to_manager?: boolean | null
+          manager_id?: string
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          updated_at?: string | null
+          visibility_changed_at?: string | null
+          visibility_changed_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "manager_hr_flags_acknowledged_by_fkey"
+            columns: ["acknowledged_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "manager_hr_flags_ai_explainability_id_fkey"
+            columns: ["ai_explainability_id"]
+            isOneToOne: false
+            referencedRelation: "ai_explainability_records"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "manager_hr_flags_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "manager_hr_flags_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "appraisal_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "manager_hr_flags_human_reviewed_by_fkey"
+            columns: ["human_reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "manager_hr_flags_manager_id_fkey"
+            columns: ["manager_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "manager_hr_flags_resolved_by_fkey"
+            columns: ["resolved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "manager_hr_flags_visibility_changed_by_fkey"
+            columns: ["visibility_changed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       manager_intervention_prompts: {
         Row: {
           action_taken: string | null
