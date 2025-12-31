@@ -35701,6 +35701,175 @@ export type Database = {
           },
         ]
       }
+      minimum_wage_rates: {
+        Row: {
+          applicable_to: Json | null
+          country: string
+          created_at: string
+          created_by: string | null
+          currency_id: string | null
+          effective_from: string
+          effective_to: string | null
+          id: string
+          is_active: boolean
+          notes: string | null
+          rate: number
+          region: string | null
+          source_reference: string | null
+          updated_at: string
+          wage_type: string
+        }
+        Insert: {
+          applicable_to?: Json | null
+          country: string
+          created_at?: string
+          created_by?: string | null
+          currency_id?: string | null
+          effective_from: string
+          effective_to?: string | null
+          id?: string
+          is_active?: boolean
+          notes?: string | null
+          rate: number
+          region?: string | null
+          source_reference?: string | null
+          updated_at?: string
+          wage_type?: string
+        }
+        Update: {
+          applicable_to?: Json | null
+          country?: string
+          created_at?: string
+          created_by?: string | null
+          currency_id?: string | null
+          effective_from?: string
+          effective_to?: string | null
+          id?: string
+          is_active?: boolean
+          notes?: string | null
+          rate?: number
+          region?: string | null
+          source_reference?: string | null
+          updated_at?: string
+          wage_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "minimum_wage_rates_currency_id_fkey"
+            columns: ["currency_id"]
+            isOneToOne: false
+            referencedRelation: "currencies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      minimum_wage_violations: {
+        Row: {
+          company_id: string
+          created_at: string
+          current_hourly_rate: number | null
+          current_monthly_rate: number | null
+          detected_at: string
+          employee_id: string
+          exemption_reason: string | null
+          id: string
+          minimum_wage_rate_id: string | null
+          pay_period_end: string | null
+          pay_period_start: string | null
+          position_id: string | null
+          required_hourly_rate: number | null
+          required_monthly_rate: number | null
+          resolution_notes: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          shortfall_amount: number | null
+          shortfall_percentage: number | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          current_hourly_rate?: number | null
+          current_monthly_rate?: number | null
+          detected_at?: string
+          employee_id: string
+          exemption_reason?: string | null
+          id?: string
+          minimum_wage_rate_id?: string | null
+          pay_period_end?: string | null
+          pay_period_start?: string | null
+          position_id?: string | null
+          required_hourly_rate?: number | null
+          required_monthly_rate?: number | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          shortfall_amount?: number | null
+          shortfall_percentage?: number | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          current_hourly_rate?: number | null
+          current_monthly_rate?: number | null
+          detected_at?: string
+          employee_id?: string
+          exemption_reason?: string | null
+          id?: string
+          minimum_wage_rate_id?: string | null
+          pay_period_end?: string | null
+          pay_period_start?: string | null
+          position_id?: string | null
+          required_hourly_rate?: number | null
+          required_monthly_rate?: number | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          shortfall_amount?: number | null
+          shortfall_percentage?: number | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "minimum_wage_violations_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "minimum_wage_violations_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "minimum_wage_violations_minimum_wage_rate_id_fkey"
+            columns: ["minimum_wage_rate_id"]
+            isOneToOne: false
+            referencedRelation: "minimum_wage_rates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "minimum_wage_violations_position_id_fkey"
+            columns: ["position_id"]
+            isOneToOne: false
+            referencedRelation: "positions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       module_implementations: {
         Row: {
           company_id: string | null
