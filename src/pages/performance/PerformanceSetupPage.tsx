@@ -49,6 +49,9 @@ import { AppraisalActionRulesManager } from "@/components/performance/setup/Appr
 import { EmployeeResponseConfigurationPanel } from "@/components/performance/setup/EmployeeResponseConfigurationPanel";
 import { HRResponseEscalationPanel } from "@/components/performance/setup/HRResponseEscalationPanel";
 import { PerformanceCategoriesManager } from "@/components/performance/setup/PerformanceCategoriesManager";
+import { IntegrationRulesConfigSection } from "@/components/performance/setup/IntegrationRulesConfigSection";
+import { PerformanceIndexSettingsPanel } from "@/components/performance/setup/PerformanceIndexSettingsPanel";
+import { ExternalBenchmarkConfigPanel } from "@/components/performance/setup/ExternalBenchmarkConfigPanel";
 
 // Interfaces
 interface Company { id: string; name: string; }
@@ -372,6 +375,18 @@ export default function PerformanceSetupPage() {
                     <Shield className="h-4 w-4" />
                     HR Escalations
                   </TabsTrigger>
+                  <TabsTrigger value="integration-rules" className="flex items-center gap-2">
+                    <GitBranch className="h-4 w-4" />
+                    Integration Rules
+                  </TabsTrigger>
+                  <TabsTrigger value="index-settings" className="flex items-center gap-2">
+                    <Layers className="h-4 w-4" />
+                    Index Settings
+                  </TabsTrigger>
+                  <TabsTrigger value="benchmarks" className="flex items-center gap-2">
+                    <Scale className="h-4 w-4" />
+                    Benchmarks
+                  </TabsTrigger>
                 </TabsList>
                 <TabsContent value="appraisal-cycles" className="mt-4">
                   <AppraisalCyclesContent cycles={appraisalCycles} isLoading={isLoading} t={t} />
@@ -390,6 +405,15 @@ export default function PerformanceSetupPage() {
                 </TabsContent>
                 <TabsContent value="hr-escalations" className="mt-4">
                   <HRResponseEscalationPanel companyId={selectedCompany} />
+                </TabsContent>
+                <TabsContent value="integration-rules" className="mt-4">
+                  <IntegrationRulesConfigSection companyId={selectedCompany} />
+                </TabsContent>
+                <TabsContent value="index-settings" className="mt-4">
+                  <PerformanceIndexSettingsPanel companyId={selectedCompany} />
+                </TabsContent>
+                <TabsContent value="benchmarks" className="mt-4">
+                  <ExternalBenchmarkConfigPanel companyId={selectedCompany} />
                 </TabsContent>
               </Tabs>
             </TabsContent>

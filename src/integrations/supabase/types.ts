@@ -19112,6 +19112,62 @@ export type Database = {
           },
         ]
       }
+      external_benchmark_config: {
+        Row: {
+          api_credentials_ref: string | null
+          api_endpoint: string | null
+          benchmark_source: string | null
+          company_id: string
+          config_data: Json | null
+          created_at: string
+          id: string
+          industry_code: string | null
+          is_active: boolean
+          last_refresh_at: string | null
+          refresh_schedule: string | null
+          region_code: string | null
+          updated_at: string
+        }
+        Insert: {
+          api_credentials_ref?: string | null
+          api_endpoint?: string | null
+          benchmark_source?: string | null
+          company_id: string
+          config_data?: Json | null
+          created_at?: string
+          id?: string
+          industry_code?: string | null
+          is_active?: boolean
+          last_refresh_at?: string | null
+          refresh_schedule?: string | null
+          region_code?: string | null
+          updated_at?: string
+        }
+        Update: {
+          api_credentials_ref?: string | null
+          api_endpoint?: string | null
+          benchmark_source?: string | null
+          company_id?: string
+          config_data?: Json | null
+          created_at?: string
+          id?: string
+          industry_code?: string | null
+          is_active?: boolean
+          last_refresh_at?: string | null
+          refresh_schedule?: string | null
+          region_code?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "external_benchmark_config_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       external_training_records: {
         Row: {
           actual_cost: number | null
@@ -39721,6 +39777,56 @@ export type Database = {
             columns: ["manager_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      performance_index_settings: {
+        Row: {
+          company_id: string
+          created_at: string
+          id: string
+          include_probation_reviews: boolean
+          is_active: boolean
+          minimum_cycles_required: number
+          recency_weight_factor: number
+          rolling_window_months: number
+          trend_sensitivity: number
+          updated_at: string
+          weight_by_cycle_type: Json | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          id?: string
+          include_probation_reviews?: boolean
+          is_active?: boolean
+          minimum_cycles_required?: number
+          recency_weight_factor?: number
+          rolling_window_months?: number
+          trend_sensitivity?: number
+          updated_at?: string
+          weight_by_cycle_type?: Json | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          id?: string
+          include_probation_reviews?: boolean
+          is_active?: boolean
+          minimum_cycles_required?: number
+          recency_weight_factor?: number
+          rolling_window_months?: number
+          trend_sensitivity?: number
+          updated_at?: string
+          weight_by_cycle_type?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "performance_index_settings_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "companies"
             referencedColumns: ["id"]
           },
         ]
