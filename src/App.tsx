@@ -130,6 +130,7 @@ import PerformanceAnalyticsPage from "./pages/performance/PerformanceAnalyticsPa
 import CalibrationSessionsPage from "./pages/performance/CalibrationSessionsPage";
 import CalibrationWorkspacePage from "./pages/performance/CalibrationWorkspacePage";
 import PerformanceSetupPage from "./pages/performance/PerformanceSetupPage";
+import TalentUnifiedDashboardPage from "./pages/performance/TalentUnifiedDashboardPage";
 
 // Leave pages
 import LeaveDashboardPage from "./pages/leave/LeaveDashboardPage";
@@ -2886,6 +2887,14 @@ const App = () => (
             />
 
             {/* Performance Routes */}
+            <Route
+              path="/talent"
+              element={
+                <ProtectedRoute>
+                  <TalentUnifiedDashboardPage />
+                </ProtectedRoute>
+              }
+            />
             <Route
               path="/performance"
               element={
