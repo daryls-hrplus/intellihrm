@@ -94,8 +94,12 @@ export default function PerformanceDashboardPage() {
       ]),
     },
     {
-      titleKey: "Analytics & Configuration",
-      items: filterByAccess([allModules.analytics, allModules.setup]),
+      titleKey: "Analytics",
+      items: filterByAccess([allModules.analytics]),
+    },
+    {
+      titleKey: "Talent Administration",
+      items: filterByAccess([allModules.setup]),
     },
   ];
 
