@@ -137,27 +137,27 @@ export default function TrainingDashboardPage() {
   const sections: ModuleSection[] = [
     {
       titleKey: "Course Development & Delivery",
-      items: filterByAccess([allModules.contentAuthoring, allModules.virtualClassroom, allModules.liveSessions, allModules.courseCompetencies, allModules.lms]),
+      items: filterByAccess([allModules.contentAuthoring, allModules.virtualClassroom, allModules.liveSessions]),
     },
     {
       titleKey: "Learning & Development",
       items: filterByAccess([allModules.catalog, allModules.employeeLearning, allModules.employeeCertifications, allModules.learningPaths]),
     },
     {
-      titleKey: "Career & Growth",
-      items: filterByAccess([allModules.careerPaths, allModules.mentorship]),
-    },
-    {
       titleKey: "Planning & Assessment",
-      items: filterByAccess([allModules.needs, allModules.gapAnalysis, allModules.evaluations, allModules.compliance, allModules.recertification]),
+      items: filterByAccess([allModules.needs, allModules.gapAnalysis, allModules.evaluations, allModules.recertification]),
     },
     {
       titleKey: "Operations",
-      items: filterByAccess([allModules.requests, allModules.external, allModules.instructors, allModules.budgets, allModules.calendar]),
+      items: filterByAccess([allModules.requests, allModules.external, allModules.calendar, allModules.mentorship]),
     },
     {
       titleKey: "Analytics",
       items: filterByAccess([allModules.analytics]),
+    },
+    {
+      titleKey: "L&D Administration",
+      items: filterByAccess([allModules.lms, allModules.courseCompetencies, allModules.instructors, allModules.compliance, allModules.budgets, allModules.careerPaths]),
     },
   ];
 
@@ -221,7 +221,7 @@ export default function TrainingDashboardPage() {
           })}
         </div>
 
-        <GroupedModuleCards sections={sections} />
+        <GroupedModuleCards sections={sections} defaultOpen={false} />
       </div>
     </AppLayout>
   );
