@@ -28,6 +28,7 @@ import {
   ShieldAlert,
   Zap,
 } from "lucide-react";
+import { ISO42001ComplianceCard } from "@/components/ai/ISO42001ComplianceCard";
 
 export default function TalentUnifiedDashboardPage() {
   const { t } = useLanguage();
@@ -422,6 +423,13 @@ export default function TalentUnifiedDashboardPage() {
               )}
             </CardContent>
           </Card>
+        </div>
+
+        {/* ISO 42001 AI Governance Compliance */}
+        <div className="grid gap-4 md:grid-cols-4">
+          <div className="md:col-span-1">
+            <ISO42001ComplianceCard />
+          </div>
         </div>
 
         {/* AI Insights */}
