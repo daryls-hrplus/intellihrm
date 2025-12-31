@@ -329,3 +329,33 @@ verify_jwt = false
 
 [functions.competency-drift-analyzer]
 verify_jwt = false
+
+[functions.manager-capability-analyzer]
+verify_jwt = false
+
+[functions.send-employee-response-notification]
+verify_jwt = false
+
+[functions.calculate-performance-index]
+verify_jwt = false
+
+[functions.appraisal-feedback-assistant]
+verify_jwt = false
+
+[functions.appraisal-integration-orchestrator]
+verify_jwt = false
+
+[functions.review-quality-assistant]
+verify_jwt = false
+
+[functions.enhanced-bias-detector]
+verify_jwt = false
+
+[functions.narrative-intelligence-generator]
+verify_jwt = false
+
+[functions.continuous-performance-aggregator]
+verify_jwt = false
+
+[functions.competency-drift-analyzer]
+verify_jwt = false
