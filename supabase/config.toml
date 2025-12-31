@@ -308,3 +308,6 @@ verify_jwt = false
 
 [functions.calculate-performance-index]
 verify_jwt = false
+
+[functions.appraisal-feedback-assistant]
+verify_jwt = false

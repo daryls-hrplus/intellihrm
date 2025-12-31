@@ -41,6 +41,8 @@ import { ValuesAssessmentTab } from "./ValuesAssessmentTab";
 import { ValueScoreInput } from "@/types/valuesAssessment";
 import { useSkillGapManagement } from "@/hooks/performance/useSkillGapManagement";
 import { AppraisalActionEnforcementDialog } from "./AppraisalActionEnforcementDialog";
+import { AIFeedbackAssistantPanel } from "./AIFeedbackAssistantPanel";
+import { Suggestion } from "@/hooks/useAppraisalFeedbackAssistant";
 
 interface CompetencyMetadata {
   selected_level?: number;
@@ -1580,6 +1582,31 @@ export function AppraisalEvaluationDialog({
               </TabsContent>
             )}
           </Tabs>
+
+          {/* AI Feedback Assistant Panel - only for managers */}
+          {!isEmployee && employeeId && (
+            <AIFeedbackAssistantPanel
+              employeeId={employeeId}
+              cycleId={cycleId}
+              participantId={participantId}
+              context={{
+                scores: {
+                  goals: calculateCategoryScore("goal"),
+                  competencies: calculateCategoryScore("competency"),
+                  responsibilities: calculateCategoryScore("responsibility"),
+                  overall: overallScore
+                }
+              }}
+              onAcceptSuggestion={(suggestion: Suggestion) => {
+                if (suggestion.type === 'summary' || suggestion.type === 'strength' || suggestion.type === 'development') {
+                  setFinalComments(prev => prev ? `${prev}\n\n${suggestion.suggested}` : suggestion.suggested);
+                }
+              }}
+              onCommentImproved={(improved: string) => {
+                setFinalComments(improved);
+              }}
+            />
+          )}
 
           {/* Final Comments */}
           <div>
