@@ -278,7 +278,7 @@ export default function LeaveDashboardPage() {
       ]),
     },
     {
-      titleKey: "Leave Configuration",
+      titleKey: "Leave Administration",
       items: filterByAccess([
         allModules.types,
         allModules.leaveYears,
@@ -389,7 +389,7 @@ export default function LeaveDashboardPage() {
         {/* Leave Intelligence for Managers */}
         {isAdminOrHR && <LeaveIntelligence />}
 
-        <GroupedModuleCards sections={sections} />
+        <GroupedModuleCards sections={sections} defaultOpen={false} />
       </div>
     </AppLayout>
   );
