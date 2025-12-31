@@ -43,6 +43,7 @@ import {
   Shield,
   Tags,
   Brain,
+  Users,
 } from "lucide-react";
 import { CheckInCadenceConfig } from "@/components/performance/setup/CheckInCadenceConfig";
 import { AppraisalFormTemplateManager } from "@/components/performance/setup/AppraisalFormTemplateManager";
@@ -54,6 +55,7 @@ import { IntegrationRulesConfigSection } from "@/components/performance/setup/In
 import { PerformanceIndexSettingsPanel } from "@/components/performance/setup/PerformanceIndexSettingsPanel";
 import { ExternalBenchmarkConfigPanel } from "@/components/performance/setup/ExternalBenchmarkConfigPanel";
 import { CompetencyDriftDashboard } from "@/components/performance/ai/CompetencyDriftDashboard";
+import { ManagerCapabilityDashboard } from "@/components/performance/ai/ManagerCapabilityDashboard";
 
 // Interfaces
 interface Company { id: string; name: string; }
@@ -453,9 +455,26 @@ export default function PerformanceSetupPage() {
             {/* AI Insights Tab */}
             <TabsContent value="ai-insights" className="space-y-4">
               <div className="text-sm text-muted-foreground mb-4">
-                AI-powered insights for competency management and workforce analytics
+                AI-powered insights for performance management, manager capability tracking, and workforce analytics
               </div>
-              <CompetencyDriftDashboard companyId={selectedCompany} />
+              <Tabs defaultValue="manager-capability" className="space-y-4">
+                <TabsList>
+                  <TabsTrigger value="manager-capability" className="flex items-center gap-2">
+                    <Users className="h-4 w-4" />
+                    Manager Capability
+                  </TabsTrigger>
+                  <TabsTrigger value="competency-drift" className="flex items-center gap-2">
+                    <Brain className="h-4 w-4" />
+                    Competency Drift
+                  </TabsTrigger>
+                </TabsList>
+                <TabsContent value="manager-capability">
+                  <ManagerCapabilityDashboard companyId={selectedCompany} />
+                </TabsContent>
+                <TabsContent value="competency-drift">
+                  <CompetencyDriftDashboard companyId={selectedCompany} />
+                </TabsContent>
+              </Tabs>
             </TabsContent>
           </Tabs>
         )}

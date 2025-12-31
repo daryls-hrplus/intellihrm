@@ -45,6 +45,7 @@ import { AIFeedbackAssistantPanel } from "./AIFeedbackAssistantPanel";
 import { Suggestion } from "@/hooks/useAppraisalFeedbackAssistant";
 import { DownstreamImpactPreview } from "./DownstreamImpactPreview";
 import { AppraisalIntegrationStatus } from "./AppraisalIntegrationStatus";
+import { CommentQualityHints } from "./CommentQualityHints";
 
 interface CompetencyMetadata {
   selected_level?: number;
@@ -1226,7 +1227,12 @@ export function AppraisalEvaluationDialog({
                 )}
               </div>
               <div>
-                <Label htmlFor={`comments-${item.item_id}`}>Comments</Label>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor={`comments-${item.item_id}`}>Comments</Label>
+                  {!isEmployee && item.comments.length > 10 && (
+                    <CommentQualityHints comment={item.comments} compact />
+                  )}
+                </div>
                 <Textarea
                   id={`comments-${item.item_id}`}
                   value={item.comments}
@@ -1620,6 +1626,14 @@ export function AppraisalEvaluationDialog({
               placeholder="Provide overall feedback and development recommendations..."
               rows={4}
             />
+            {/* Comment Quality Hints - Non-blocking coaching */}
+            {!isEmployee && finalComments.length > 10 && (
+              <CommentQualityHints
+                comment={finalComments}
+                minRecommendedLength={100}
+                showAIButton={false}
+              />
+            )}
           </div>
 
           {/* Downstream Impact Preview - shows before submit */}
