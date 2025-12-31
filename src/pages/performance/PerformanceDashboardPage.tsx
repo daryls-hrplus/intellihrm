@@ -80,7 +80,7 @@ export default function PerformanceDashboardPage() {
       items: filterByAccess([allModules.feedback, allModules.recognition]),
     },
     {
-      titleKey: "Succession & Talent",
+      titleKey: "Succession Planning",
       items: filterByAccess([
         allModules.nineBox,
         allModules.talentPools,
