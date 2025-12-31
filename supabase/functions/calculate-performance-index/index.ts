@@ -287,12 +287,13 @@ Deno.serve(async (req) => {
       const participant = appraisals?.find((a: any) => a.id === participant_id);
       
       if (participant) {
-        const cycle = participant.appraisal_cycles;
-        const cycleId = cycle?.id || cycle?.[0]?.id;
-        const cycleName = cycle?.name || cycle?.[0]?.name;
-        const cycleStartDate = cycle?.start_date || cycle?.[0]?.start_date;
-        const cycleEndDate = cycle?.end_date || cycle?.[0]?.end_date;
-        const isProbation = cycle?.is_probation_review || cycle?.[0]?.is_probation_review;
+        const cycleArray = participant.appraisal_cycles as any[];
+        const cycle = Array.isArray(cycleArray) ? cycleArray[0] : cycleArray;
+        const cycleId = cycle?.id;
+        const cycleName = cycle?.name;
+        const cycleStartDate = cycle?.start_date;
+        const cycleEndDate = cycle?.end_date;
+        const isProbation = cycle?.is_probation_review;
         
         if (cycleId) {
           // Check if snapshot already exists
