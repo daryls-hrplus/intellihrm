@@ -185,7 +185,7 @@ export default function BenefitsDashboardPage() {
       items: filterByAccess([allModules.analytics, allModules.costProjections, allModules.comparison, allModules.calculator]),
     },
     {
-      titleKey: "Administration",
+      titleKey: "Benefits Administration",
       items: filterByAccess([allModules.autoEnrollment, allModules.lifeEvents, allModules.waitingPeriods, allModules.openEnrollment]),
     },
     {
@@ -272,7 +272,7 @@ export default function BenefitsDashboardPage() {
           })}
         </div>
 
-        <GroupedModuleCards sections={sections} />
+        <GroupedModuleCards sections={sections} defaultOpen={false} />
       </div>
     </AppLayout>
   );
