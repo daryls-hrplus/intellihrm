@@ -41,44 +41,43 @@ const SECTION_ICONS: Record<string, React.ReactNode> = {
 export default function AppraisalsManualPage() {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeSection, setActiveSection] = useState('part-1');
+  const [selectedSectionId, setSelectedSectionId] = useState('part-1');
   const [expandedSections, setExpandedSections] = useState<string[]>(['part-1']);
   const [completedSections, setCompletedSections] = useState<string[]>([]);
   const contentRef = useRef<HTMLDivElement>(null);
 
-  // Scroll to section when activeSection changes
-  const scrollToSection = (sectionId: string) => {
-    // First, determine which part this section belongs to
+  const activePartId = useMemo(() => {
     const parentPart = APPRAISALS_MANUAL_STRUCTURE.find(
-      s => s.id === sectionId || s.subsections?.some(sub => sub.id === sectionId)
+      (s) => s.id === selectedSectionId || s.subsections?.some((sub) => sub.id === selectedSectionId)
     );
-    
-    if (parentPart) {
-      // Set active section to parent part to render correct component
-      setActiveSection(parentPart.id);
-      
-      // Expand the parent section if it's a subsection
-      if (!expandedSections.includes(parentPart.id)) {
-        setExpandedSections(prev => [...prev, parentPart.id]);
-      }
-      
-      // Scroll to top of content area after a brief delay to allow render
-      setTimeout(() => {
-        const element = document.getElementById(sectionId);
-        if (element) {
-          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        } else if (contentRef.current) {
-          contentRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-      }, 100);
-    } else {
-      // For special sections like quick-ref, diagrams
-      setActiveSection(sectionId);
-      if (contentRef.current) {
-        contentRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
+    return parentPart?.id ?? selectedSectionId;
+  }, [selectedSectionId]);
+
+  const scrollToSection = (sectionId: string) => {
+    setSelectedSectionId(sectionId);
+
+    const parentPart = APPRAISALS_MANUAL_STRUCTURE.find(
+      (s) => s.id === sectionId || s.subsections?.some((sub) => sub.id === sectionId)
+    );
+
+    if (parentPart && !expandedSections.includes(parentPart.id)) {
+      setExpandedSections((prev) => [...prev, parentPart.id]);
     }
   };
+
+  useEffect(() => {
+    const id = selectedSectionId;
+    const timeout = window.setTimeout(() => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        return;
+      }
+      contentRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 50);
+
+    return () => window.clearTimeout(timeout);
+  }, [selectedSectionId, activePartId]);
 
   // Calculate total read time
   const totalReadTime = useMemo(() => {
