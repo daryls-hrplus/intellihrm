@@ -136,12 +136,12 @@ export default function TrainingDashboardPage() {
 
   const sections: ModuleSection[] = [
     {
-      titleKey: "Course Development & Delivery",
-      items: filterByAccess([allModules.contentAuthoring, allModules.virtualClassroom, allModules.liveSessions]),
-    },
-    {
       titleKey: "Learning & Development",
       items: filterByAccess([allModules.catalog, allModules.employeeLearning, allModules.employeeCertifications, allModules.learningPaths]),
+    },
+    {
+      titleKey: "Course Development & Delivery",
+      items: filterByAccess([allModules.contentAuthoring, allModules.virtualClassroom, allModules.liveSessions]),
     },
     {
       titleKey: "Planning & Assessment",
