@@ -8,21 +8,24 @@ import { CalibrationAIPanel } from "@/components/calibration/CalibrationAIPanel"
 import { CalibrationHeader } from "@/components/calibration/CalibrationHeader";
 import { EmployeeDetailPanel } from "@/components/calibration/EmployeeDetailPanel";
 import { RatingDistributionChart } from "@/components/calibration/RatingDistributionChart";
+import { CalibrationGovernancePanel } from "@/components/performance/ai/CalibrationGovernancePanel";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ArrowLeft, Loader2, Brain, Shield } from "lucide-react";
 import { CalibrationEmployee } from "@/types/calibration";
 import { toast } from "sonner";
 
 export default function CalibrationWorkspacePage() {
   const { sessionId } = useParams<{ sessionId: string }>();
   const navigate = useNavigate();
-  const { profile } = useAuth();
-  const companyId = profile?.company_id || "";
+  const { profile, company } = useAuth();
+  const companyId = profile?.company_id || company?.id || "";
 
   const [selectedEmployee, setSelectedEmployee] = React.useState<CalibrationEmployee | null>(null);
   const [showAIPanel, setShowAIPanel] = React.useState(true);
+  const [rightPanelTab, setRightPanelTab] = React.useState<"ai" | "governance">("ai");
 
   const {
     session,
@@ -128,18 +131,43 @@ export default function CalibrationWorkspacePage() {
           </div>
         </div>
 
-        {/* Right: AI Panel */}
+        {/* Right: AI Panel / Governance */}
         {showAIPanel && (
-          <div className="w-80 border-l bg-muted/30 overflow-auto">
-            <CalibrationAIPanel
-              analysis={analysis}
-              employees={employees}
-              adjustments={adjustments}
-              onClose={() => setShowAIPanel(false)}
-              onApplySuggestion={(employeeId, score) => {
-                updateEmployeeScore(employeeId, score);
-              }}
-            />
+          <div className="w-96 border-l bg-muted/30 overflow-auto">
+            <Tabs value={rightPanelTab} onValueChange={(v) => setRightPanelTab(v as "ai" | "governance")}>
+              <div className="p-2 border-b">
+                <TabsList className="w-full">
+                  <TabsTrigger value="ai" className="flex-1 gap-1">
+                    <Brain className="h-4 w-4" />
+                    AI Insights
+                  </TabsTrigger>
+                  <TabsTrigger value="governance" className="flex-1 gap-1">
+                    <Shield className="h-4 w-4" />
+                    Governance
+                  </TabsTrigger>
+                </TabsList>
+              </div>
+              
+              <TabsContent value="ai" className="m-0">
+                <CalibrationAIPanel
+                  analysis={analysis}
+                  employees={employees}
+                  adjustments={adjustments}
+                  onClose={() => setShowAIPanel(false)}
+                  onApplySuggestion={(employeeId, score) => {
+                    updateEmployeeScore(employeeId, score);
+                  }}
+                />
+              </TabsContent>
+              
+              <TabsContent value="governance" className="m-0 p-2">
+                <CalibrationGovernancePanel
+                  companyId={companyId}
+                  sessionId={sessionId}
+                  isAdmin={true}
+                />
+              </TabsContent>
+            </Tabs>
           </div>
         )}
       </div>
