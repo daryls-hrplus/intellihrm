@@ -128,7 +128,7 @@ export const APPRAISALS_MANUAL_STRUCTURE: ManualSection[] = [
         industryContext: {
           frequency: 'Reference material',
           timing: 'Initial onboarding',
-          benchmark: 'Workday, SAP SuccessFactors, Oracle HCM'
+          benchmark: 'Enterprise HRMS standards'
         }
       },
       {
