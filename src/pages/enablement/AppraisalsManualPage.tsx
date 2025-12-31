@@ -241,6 +241,7 @@ export default function AppraisalsManualPage() {
                               }`}
                             onClick={(e) => {
                               e.stopPropagation();
+                              toggleSection(section.id);
                               scrollToSection(section.id);
                             }}
                           >
