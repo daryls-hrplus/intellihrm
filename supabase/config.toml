@@ -305,3 +305,6 @@ verify_jwt = false
 
 [functions.send-employee-response-notification]
 verify_jwt = false
+
+[functions.calculate-performance-index]
+verify_jwt = false
