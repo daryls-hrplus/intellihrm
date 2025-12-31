@@ -227,9 +227,12 @@ export default function TalentUnifiedDashboardPage() {
                 </p>
               </div>
             </div>
-            <Button onClick={() => navigate("/performance")} variant="outline">
-              Module View <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
+            <div className="flex items-center gap-2">
+              <ISO42001ComplianceCard />
+              <Button onClick={() => navigate("/performance")} variant="outline">
+                Module View <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </div>
           </div>
         </div>
 
@@ -423,13 +426,6 @@ export default function TalentUnifiedDashboardPage() {
               )}
             </CardContent>
           </Card>
-        </div>
-
-        {/* ISO 42001 AI Governance Compliance */}
-        <div className="grid gap-4 md:grid-cols-4">
-          <div className="md:col-span-1">
-            <ISO42001ComplianceCard />
-          </div>
         </div>
 
         {/* AI Insights */}
