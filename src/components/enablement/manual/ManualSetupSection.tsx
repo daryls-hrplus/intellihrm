@@ -8,7 +8,7 @@ export function ManualSetupSection() {
   return (
     <div className="space-y-8">
       {/* Prerequisites Checklist */}
-      <Card>
+      <Card id="sec-2-1">
         <CardHeader>
           <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
             <Badge variant="outline">Section 2.1</Badge>
@@ -54,7 +54,7 @@ export function ManualSetupSection() {
       </Card>
 
       {/* Rating Scales */}
-      <Card>
+      <Card id="sec-2-2">
         <CardHeader>
           <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
             <Badge variant="outline">Section 2.2</Badge>
@@ -112,7 +112,7 @@ export function ManualSetupSection() {
       </Card>
 
       {/* Appraisal Cycles */}
-      <Card>
+      <Card id="sec-2-6">
         <CardHeader>
           <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
             <Badge variant="outline">Section 2.6</Badge>

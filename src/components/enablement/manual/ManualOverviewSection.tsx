@@ -10,7 +10,7 @@ export function ManualOverviewSection() {
   return (
     <div className="space-y-8">
       {/* Section 1.1: Introduction */}
-      <Card>
+      <Card id="sec-1-1">
         <CardHeader>
           <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
             <Badge variant="outline">Section 1.1</Badge>
@@ -98,7 +98,7 @@ export function ManualOverviewSection() {
       </Card>
 
       {/* Section 1.2: Core Concepts */}
-      <Card>
+      <Card id="sec-1-2">
         <CardHeader>
           <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
             <Badge variant="outline">Section 1.2</Badge>
@@ -182,7 +182,7 @@ export function ManualOverviewSection() {
       </Card>
 
       {/* Section 1.3: System Architecture (Placeholder) */}
-      <Card>
+      <Card id="sec-1-3">
         <CardHeader>
           <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
             <Badge variant="outline">Section 1.3</Badge>

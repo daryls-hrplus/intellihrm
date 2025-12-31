@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -44,6 +44,41 @@ export default function AppraisalsManualPage() {
   const [activeSection, setActiveSection] = useState('part-1');
   const [expandedSections, setExpandedSections] = useState<string[]>(['part-1']);
   const [completedSections, setCompletedSections] = useState<string[]>([]);
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  // Scroll to section when activeSection changes
+  const scrollToSection = (sectionId: string) => {
+    // First, determine which part this section belongs to
+    const parentPart = APPRAISALS_MANUAL_STRUCTURE.find(
+      s => s.id === sectionId || s.subsections?.some(sub => sub.id === sectionId)
+    );
+    
+    if (parentPart) {
+      // Set active section to parent part to render correct component
+      setActiveSection(parentPart.id);
+      
+      // Expand the parent section if it's a subsection
+      if (!expandedSections.includes(parentPart.id)) {
+        setExpandedSections(prev => [...prev, parentPart.id]);
+      }
+      
+      // Scroll to top of content area after a brief delay to allow render
+      setTimeout(() => {
+        const element = document.getElementById(sectionId);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } else if (contentRef.current) {
+          contentRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 100);
+    } else {
+      // For special sections like quick-ref, diagrams
+      setActiveSection(sectionId);
+      if (contentRef.current) {
+        contentRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+  };
 
   // Calculate total read time
   const totalReadTime = useMemo(() => {
@@ -206,7 +241,7 @@ export default function AppraisalsManualPage() {
                               }`}
                             onClick={(e) => {
                               e.stopPropagation();
-                              setActiveSection(section.id);
+                              scrollToSection(section.id);
                             }}
                           >
                             {completedSections.includes(section.id) ? (
@@ -235,7 +270,7 @@ export default function AppraisalsManualPage() {
                                       ? 'bg-primary/10 text-primary font-medium' 
                                       : 'text-muted-foreground hover:text-foreground hover:bg-muted'
                                     }`}
-                                  onClick={() => setActiveSection(sub.id)}
+                                  onClick={() => scrollToSection(sub.id)}
                                 >
                                   {completedSections.includes(sub.id) ? (
                                     <CheckCircle className="h-3 w-3 text-green-500 flex-shrink-0" />
@@ -260,7 +295,7 @@ export default function AppraisalsManualPage() {
                           ? 'bg-primary/10 text-primary font-medium' 
                           : 'hover:bg-muted'
                         }`}
-                      onClick={() => setActiveSection('quick-ref')}
+                      onClick={() => scrollToSection('quick-ref')}
                     >
                       <Sparkles className="h-4 w-4 text-amber-500" />
                       <span>Quick Reference Cards</span>
@@ -271,7 +306,7 @@ export default function AppraisalsManualPage() {
                           ? 'bg-primary/10 text-primary font-medium' 
                           : 'hover:bg-muted'
                         }`}
-                      onClick={() => setActiveSection('diagrams')}
+                      onClick={() => scrollToSection('diagrams')}
                     >
                       <Layers className="h-4 w-4 text-blue-500" />
                       <span>Architecture Diagrams</span>
@@ -283,7 +318,7 @@ export default function AppraisalsManualPage() {
           </div>
 
           {/* Main Content Area */}
-          <div className="flex-1 min-w-0">
+          <div className="flex-1 min-w-0" ref={contentRef}>
             {renderSectionContent()}
           </div>
 

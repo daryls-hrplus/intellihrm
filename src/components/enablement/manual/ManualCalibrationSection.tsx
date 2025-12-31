@@ -5,7 +5,7 @@ import { Target, Users, Brain, Shield } from 'lucide-react';
 export function ManualCalibrationSection() {
   return (
     <div className="space-y-8">
-      <Card>
+      <Card id="sec-4-1">
         <CardHeader>
           <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
             <Badge variant="outline">Section 4.1</Badge>
@@ -42,7 +42,7 @@ export function ManualCalibrationSection() {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card id="sec-4-2">
         <CardHeader>
           <CardTitle className="text-2xl">Nine-Box Grid Integration</CardTitle>
           <CardDescription>Visualizing talent during calibration</CardDescription>

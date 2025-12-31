@@ -5,7 +5,8 @@ import { BarChart3, TrendingUp, Users, Target } from 'lucide-react';
 export function ManualAnalyticsSection() {
   return (
     <div className="space-y-8">
-      <Card>
+      {/* Analytics Dashboard */}
+      <Card id="sec-6-1">
         <CardHeader>
           <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
             <Badge variant="outline">Section 6.1</Badge>
@@ -34,7 +35,8 @@ export function ManualAnalyticsSection() {
         </CardContent>
       </Card>
 
-      <Card>
+      {/* Distribution Analysis */}
+      <Card id="sec-6-2">
         <CardHeader>
           <CardTitle className="text-2xl">Performance Distribution Analysis</CardTitle>
           <CardDescription>Monitor rating distributions post-calibration</CardDescription>

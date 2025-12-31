@@ -6,7 +6,7 @@ export function ManualWorkflowsSection() {
   return (
     <div className="space-y-8">
       {/* Cycle Lifecycle */}
-      <Card>
+      <Card id="sec-3-1">
         <CardHeader>
           <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
             <Badge variant="outline">Section 3.1</Badge>
@@ -44,7 +44,7 @@ export function ManualWorkflowsSection() {
       </Card>
 
       {/* Manager Workflow */}
-      <Card>
+      <Card id="sec-3-2">
         <CardHeader>
           <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
             <Badge variant="outline">Section 3.3</Badge>
@@ -82,7 +82,7 @@ export function ManualWorkflowsSection() {
       </Card>
 
       {/* Employee Response */}
-      <Card>
+      <Card id="sec-3-3">
         <CardHeader>
           <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
             <Badge variant="outline">Section 3.7</Badge>
