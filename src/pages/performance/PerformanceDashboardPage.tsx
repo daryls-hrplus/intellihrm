@@ -194,7 +194,7 @@ export default function PerformanceDashboardPage() {
           })}
         </div>
 
-        <GroupedModuleCards sections={sections} />
+        <GroupedModuleCards sections={sections} defaultOpen={false} />
       </div>
     </AppLayout>
   );
