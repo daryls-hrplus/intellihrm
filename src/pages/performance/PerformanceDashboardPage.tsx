@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/hooks/useLanguage";
 import { useGranularPermissions } from "@/hooks/useGranularPermissions";
 import { GroupedModuleCards, ModuleSection } from "@/components/ui/GroupedModuleCards";
@@ -151,14 +152,18 @@ export default function PerformanceDashboardPage() {
               </div>
               <div>
                 <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-                  {t('performance.dashboard.title')}
+                  {t('performance.dashboard.talentTitle', 'Talent')}
                 </h1>
                 <p className="text-muted-foreground">
-                  {t('performance.dashboard.subtitle')}
+                  {t('performance.dashboard.talentSubtitle', 'Performance, succession planning, and talent development')}
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" onClick={() => window.location.href = '/talent'}>
+                <BarChart3 className="h-4 w-4 mr-2" />
+                {t('performance.dashboard.unifiedView', 'Unified Dashboard')}
+              </Button>
               <ModuleBIButton module="performance" />
               <ModuleReportsButton module="performance" />
             </div>
