@@ -7057,6 +7057,18 @@
       "contentAuthoring": {
         "title": "Content Authoring",
         "description": "Create and manage training content"
+      },
+      "careerPaths": {
+        "title": "Career Paths",
+        "description": "Define career progression routes"
+      },
+      "developmentPlans": {
+        "title": "Development Plans",
+        "description": "Create and manage Individual Development Plans (IDPs)"
+      },
+      "mentorship": {
+        "title": "Mentorship",
+        "description": "Mentoring relationships and programs"
       }
     },
     "virtualClassroom": {
