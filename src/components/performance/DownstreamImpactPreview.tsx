@@ -15,10 +15,10 @@ import {
   Info
 } from 'lucide-react';
 import { useAppraisalIntegration, IntegrationRule } from '@/hooks/useAppraisalIntegration';
+import { usePerformanceCategoryByScore } from '@/hooks/usePerformanceCategories';
 
 interface DownstreamImpactPreviewProps {
   companyId: string;
-  performanceCategoryCode?: string | null;
   overallScore?: number | null;
   goalScore?: number | null;
   competencyScore?: number | null;
@@ -91,12 +91,12 @@ function evaluateRuleWillMatch(
 
 export function DownstreamImpactPreview({
   companyId,
-  performanceCategoryCode,
   overallScore,
   goalScore,
   competencyScore
 }: DownstreamImpactPreviewProps) {
   const { rules, loading } = useAppraisalIntegration(companyId);
+  const performanceCategory = usePerformanceCategoryByScore(overallScore, companyId);
   const [matchingRules, setMatchingRules] = useState<IntegrationRule[]>([]);
 
   useEffect(() => {
@@ -104,7 +104,7 @@ export function DownstreamImpactPreview({
 
     const matches = rules.filter(rule => 
       rule.is_active && 
-      evaluateRuleWillMatch(rule, performanceCategoryCode, {
+      evaluateRuleWillMatch(rule, performanceCategory?.code || null, {
         overall: overallScore,
         goals: goalScore,
         competencies: competencyScore
@@ -112,7 +112,7 @@ export function DownstreamImpactPreview({
     );
 
     setMatchingRules(matches);
-  }, [rules, performanceCategoryCode, overallScore, goalScore, competencyScore]);
+  }, [rules, performanceCategory?.code, overallScore, goalScore, competencyScore]);
 
   if (loading) {
     return (
