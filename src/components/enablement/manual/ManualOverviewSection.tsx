@@ -223,6 +223,105 @@ export function ManualOverviewSection() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Section 1.4: User Personas & Journeys */}
+      <Card id="sec-1-4">
+        <CardHeader>
+          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+            <Badge variant="outline">Section 1.4</Badge>
+            <span>•</span>
+            <span>15 min read</span>
+          </div>
+          <CardTitle className="text-2xl">User Personas & Journeys</CardTitle>
+          <CardDescription>
+            Understanding the different user roles and their workflows
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="grid md:grid-cols-2 gap-4">
+            {[
+              { 
+                role: 'Employee (ESS)', 
+                icon: Users,
+                color: 'bg-blue-500/10 border-blue-500/20',
+                tasks: ['Complete self-assessment', 'Review manager feedback', 'Acknowledge evaluation', 'View historical scores']
+              },
+              { 
+                role: 'Manager (MSS)', 
+                icon: Users,
+                color: 'bg-green-500/10 border-green-500/20',
+                tasks: ['Rate team members', 'Use AI feedback tools', 'Submit evaluations', 'Participate in calibration']
+              },
+              { 
+                role: 'HR Partner', 
+                icon: Users,
+                color: 'bg-purple-500/10 border-purple-500/20',
+                tasks: ['Configure cycles', 'Monitor completion', 'Run calibration', 'Generate reports']
+              },
+              { 
+                role: 'Executive', 
+                icon: Users,
+                color: 'bg-amber-500/10 border-amber-500/20',
+                tasks: ['Review talent analytics', 'Approve calibration', 'View org-wide metrics', 'Strategic workforce insights']
+              }
+            ].map((persona) => (
+              <Card key={persona.role} className={persona.color}>
+                <CardContent className="pt-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <persona.icon className="h-5 w-5 text-primary" />
+                    <h4 className="font-medium">{persona.role}</h4>
+                  </div>
+                  <ul className="space-y-1">
+                    {persona.tasks.map((task, i) => (
+                      <li key={i} className="text-sm text-muted-foreground flex items-center gap-2">
+                        <CheckCircle className="h-3 w-3 text-green-500" />
+                        {task}
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Section 1.5: Performance Management Calendar */}
+      <Card id="sec-1-5">
+        <CardHeader>
+          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+            <Badge variant="outline">Section 1.5</Badge>
+            <span>•</span>
+            <span>10 min read</span>
+          </div>
+          <CardTitle className="text-2xl">Performance Management Calendar</CardTitle>
+          <CardDescription>
+            Annual timeline for performance activities
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {[
+              { quarter: 'Q1 (Jan-Mar)', activities: ['Goal setting', 'Annual cycle setup', 'Prior year cycle closure'], color: 'border-l-blue-500' },
+              { quarter: 'Q2 (Apr-Jun)', activities: ['Mid-year check-ins', 'Goal progress reviews', 'Development planning'], color: 'border-l-green-500' },
+              { quarter: 'Q3 (Jul-Sep)', activities: ['Ongoing feedback', 'Talent reviews', 'Succession updates'], color: 'border-l-amber-500' },
+              { quarter: 'Q4 (Oct-Dec)', activities: ['Year-end evaluations', 'Calibration sessions', 'Compensation planning'], color: 'border-l-purple-500' }
+            ].map((q) => (
+              <div key={q.quarter} className={`border-l-4 ${q.color} pl-4 py-2`}>
+                <h4 className="font-medium mb-2">{q.quarter}</h4>
+                <ul className="space-y-1">
+                  {q.activities.map((activity, i) => (
+                    <li key={i} className="text-sm text-muted-foreground flex items-center gap-2">
+                      <ArrowRight className="h-3 w-3" />
+                      {activity}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
