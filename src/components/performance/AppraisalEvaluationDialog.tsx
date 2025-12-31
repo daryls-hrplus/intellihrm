@@ -43,6 +43,8 @@ import { useSkillGapManagement } from "@/hooks/performance/useSkillGapManagement
 import { AppraisalActionEnforcementDialog } from "./AppraisalActionEnforcementDialog";
 import { AIFeedbackAssistantPanel } from "./AIFeedbackAssistantPanel";
 import { Suggestion } from "@/hooks/useAppraisalFeedbackAssistant";
+import { DownstreamImpactPreview } from "./DownstreamImpactPreview";
+import { AppraisalIntegrationStatus } from "./AppraisalIntegrationStatus";
 
 interface CompetencyMetadata {
   selected_level?: number;
@@ -1619,6 +1621,25 @@ export function AppraisalEvaluationDialog({
               rows={4}
             />
           </div>
+
+          {/* Downstream Impact Preview - shows before submit */}
+          {!isEmployee && cycleInfo?.company_id && (
+            <DownstreamImpactPreview
+              companyId={cycleInfo.company_id}
+              overallScore={overallScore}
+              goalScore={calculateCategoryScore("goal")}
+              competencyScore={calculateCategoryScore("competency")}
+            />
+          )}
+
+          {/* Integration Status - shows after any integrations have run */}
+          {!isEmployee && (
+            <AppraisalIntegrationStatus
+              participantId={participantId}
+              employeeId={employeeId || undefined}
+              compact
+            />
+          )}
 
           {/* Action Buttons */}
           <div className="flex justify-end gap-2">
