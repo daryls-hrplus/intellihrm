@@ -71,6 +71,7 @@ const getAdminModuleSections = (
       { title: t("admin.modules.companies.title"), description: t("admin.modules.companies.description"), href: "/admin/companies", icon: Building2, color: "bg-info/10 text-info", tabCode: "companies" },
       { title: t("admin.modules.territories.title"), description: t("admin.modules.territories.description"), href: "/admin/territories", icon: Globe, color: "bg-destructive/10 text-destructive", tabCode: "territories" },
       { title: "Company Tags", description: "Group companies with tags for scoped admin access", href: "/admin/company-tags", icon: Tag, color: "bg-teal-500/10 text-teal-600", tabCode: "company-tags" },
+      { title: "Client Registry", description: "Manage demo registrations and client provisioning", href: "/admin/client-registry", icon: Network, color: "bg-gradient-to-r from-purple-500/10 to-indigo-500/10 text-indigo-600", tabCode: "client-registry" },
     ],
     // Section 2: Users, Roles & Access
     usersAccess: [
