@@ -572,6 +572,11 @@ const App = () => (
             <Route path="/auth/mfa" element={<MFAChallengePage />} />
             <Route path="/unauthorized" element={<UnauthorizedPage />} />
             
+            {/* Demo Routes (public) */}
+            <Route path="/demo/login" element={<DemoLoginPage />} />
+            <Route path="/demo/expired" element={<DemoExpiredPage />} />
+            <Route path="/demo/convert" element={<DemoConversionPage />} />
+
             {/* Subscription Routes */}
             <Route path="/subscription" element={<SubscriptionPage />} />
             <Route path="/subscription/upgrade" element={<UpgradePage />} />
