@@ -44,6 +44,11 @@ import { TalentRiskList } from "@/components/performance/TalentRiskList";
 import { PerformanceDistributionChart } from "@/components/performance/analytics/PerformanceDistributionChart";
 import { CalibrationSessionCard } from "@/components/calibration/CalibrationSessionCard";
 import { AppraisalInterviewCalendar } from "@/components/appraisals/AppraisalInterviewCalendar";
+import { AITransparencyBanner } from "@/components/ai-governance/AITransparencyBanner";
+import { AIExplainabilityPanel } from "@/components/ai-governance/AIExplainabilityPanel";
+import { AIHumanOverrideDialog } from "@/components/ai-governance/AIHumanOverrideDialog";
+import { AIBiasAlertBanner } from "@/components/ai-governance/AIBiasAlertBanner";
+import { AIAuditTrailPanel } from "@/components/ai-governance/AIAuditTrailPanel";
 
 interface AppraisalCycle {
   id: string;
@@ -98,6 +103,10 @@ export default function AppraisalsPage() {
   const [isProbationReview, setIsProbationReview] = useState(false);
   const [isManagerCycle, setIsManagerCycle] = useState(false);
 
+  // AI Governance state
+  const [selectedRiskForReview, setSelectedRiskForReview] = useState<any>(null);
+  const [humanOverrideDialogOpen, setHumanOverrideDialogOpen] = useState(false);
+
   // Company switcher for admin/HR
   const [companies, setCompanies] = useState<{ id: string; name: string }[]>([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>(company?.id || "");
@@ -107,7 +116,7 @@ export default function AppraisalsPage() {
     companyId: selectedCompanyId,
   });
   const { pendingApprovals, loading: approvalsLoading } = useGoalApprovals(selectedCompanyId);
-  const { storedRisks, isLoadingRisks, riskSummary } = useTalentRiskAnalysis(selectedCompanyId);
+  const { storedRisks, isLoadingRisks, riskSummary, runAnalysis, isAnalyzing, refetchRisks } = useTalentRiskAnalysis(selectedCompanyId);
   const { interviews, loading: interviewsLoading, fetchInterviews } = useAppraisalInterviews();
 
   // Fetch interviews when company changes
@@ -678,11 +687,30 @@ export default function AppraisalsPage() {
           {/* Talent AI Tab */}
           <TabsContent value="talent" className="mt-6">
             <div className="space-y-6">
+              {/* AI Transparency Banner - ISO 42001 */}
+              <AITransparencyBanner
+                modelName="HRplus Talent Risk Analyzer"
+                lastAnalysisDate={storedRisks?.[0]?.last_analyzed_at}
+                confidenceLevel={riskSummary?.critical > 0 ? "high" : "medium"}
+                isoCompliant={true}
+                humanReviewRequired={riskSummary?.critical > 0 || riskSummary?.high > 0}
+                analyzedCount={storedRisks?.length}
+              />
+
+              {/* Bias Alert Banner - ISO 42001 */}
+              <AIBiasAlertBanner companyId={selectedCompanyId} />
+
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-lg font-semibold">AI-Powered Talent Insights</h3>
                   <p className="text-sm text-muted-foreground">Predictive risk analysis and talent trends</p>
                 </div>
+                <Button 
+                  onClick={() => runAnalysis({})} 
+                  disabled={isAnalyzing}
+                >
+                  {isAnalyzing ? "Analyzing..." : "Run AI Analysis"}
+                </Button>
               </div>
               
               {/* Risk Summary Cards */}
@@ -713,14 +741,31 @@ export default function AppraisalsPage() {
                 </Card>
               </div>
 
+              {/* Explainability Panel for Selected Risk */}
+              {selectedRiskForReview && (
+                <AIExplainabilityPanel
+                  riskScore={selectedRiskForReview.risk_score}
+                  riskLevel={selectedRiskForReview.risk_level}
+                  riskCategory={selectedRiskForReview.risk_category || selectedRiskForReview.risk_type}
+                  contributingFactors={selectedRiskForReview.risk_factors || []}
+                  recommendedInterventions={selectedRiskForReview.triggered_interventions || []}
+                  trendDirection={selectedRiskForReview.trend_direction}
+                  confidenceScore={75}
+                  onRequestHumanReview={() => setHumanOverrideDialogOpen(true)}
+                />
+              )}
+
               <TalentRiskList
                 risks={storedRisks || []}
                 isLoading={isLoadingRisks}
-                onSelectRisk={(risk) => console.log("Selected risk:", risk)}
+                onSelectRisk={(risk) => setSelectedRiskForReview(risk)}
                 getRiskColor={getRiskColor}
                 getRiskIcon={getRiskIcon}
                 getTrendIcon={getTrendIcon}
               />
+
+              {/* Audit Trail - ISO 42001 */}
+              <AIAuditTrailPanel companyId={selectedCompanyId} />
             </div>
           </TabsContent>
 
@@ -797,6 +842,24 @@ export default function AppraisalsPage() {
             onOpenChange={setParticipantsManagerOpen}
             cycle={selectedCycle}
             onSuccess={fetchData}
+          />
+        )}
+
+        {/* AI Human Override Dialog - ISO 42001 */}
+        {selectedRiskForReview && (
+          <AIHumanOverrideDialog
+            open={humanOverrideDialogOpen}
+            onOpenChange={setHumanOverrideDialogOpen}
+            riskId={selectedRiskForReview.id}
+            employeeName={`${selectedRiskForReview.profiles?.first_name || ''} ${selectedRiskForReview.profiles?.last_name || ''}`}
+            currentRiskLevel={selectedRiskForReview.risk_level}
+            currentRiskScore={selectedRiskForReview.risk_score}
+            aiRecommendation={selectedRiskForReview.ai_recommendation || "No specific recommendation"}
+            companyId={selectedCompanyId}
+            onOverrideComplete={() => {
+              refetchRisks();
+              setSelectedRiskForReview(null);
+            }}
           />
         )}
       </div>
