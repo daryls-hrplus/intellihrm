@@ -17,6 +17,19 @@ import { Users, GitMerge, FileText, AlertTriangle } from "lucide-react";
 import { useAppraisalFormTemplates } from "@/hooks/useAppraisalFormTemplates";
 import { format } from "date-fns";
 
+// Industry-standard appraisal cycle types
+const APPRAISAL_CYCLE_TYPES = [
+  { value: "annual", label: "Annual Review", description: "Standard yearly performance evaluation" },
+  { value: "mid_year", label: "Mid-Year Review", description: "Semi-annual check-in and feedback" },
+  { value: "quarterly", label: "Quarterly Review", description: "Quarterly performance assessment" },
+  { value: "probation", label: "Probation Review", description: "For employees in probationary period" },
+  { value: "manager_360", label: "Manager/360 Review", description: "Leadership assessment with multi-rater feedback" },
+  { value: "project_based", label: "Project-Based", description: "Review tied to project completion" },
+  { value: "continuous", label: "Continuous Feedback", description: "Ongoing performance conversations" },
+] as const;
+
+type AppraisalCycleType = typeof APPRAISAL_CYCLE_TYPES[number]["value"];
+
 interface AppraisalCycle {
   id: string;
   name: string;
@@ -32,6 +45,7 @@ interface AppraisalCycle {
   max_rating: number;
   multi_position_mode?: string;
   template_id?: string;
+  cycle_type?: string;
 }
 
 interface AppraisalCycleDialogProps {
@@ -58,6 +72,13 @@ export function AppraisalCycleDialog({
   const [showWeightWarning, setShowWeightWarning] = useState(false);
   const { templates } = useAppraisalFormTemplates(companyId || "");
   
+  // Determine initial cycle_type based on props for backward compatibility
+  const getInitialCycleType = (): AppraisalCycleType => {
+    if (isProbationReview) return "probation";
+    if (isManagerCycle) return "manager_360";
+    return "annual";
+  };
+
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -72,6 +93,7 @@ export function AppraisalCycleDialog({
     max_rating: 5,
     multi_position_mode: "aggregate" as "aggregate" | "separate",
     template_id: "",
+    cycle_type: getInitialCycleType(),
   });
 
   useEffect(() => {
@@ -90,6 +112,7 @@ export function AppraisalCycleDialog({
         max_rating: cycle.max_rating,
         multi_position_mode: (cycle.multi_position_mode as "aggregate" | "separate") || "aggregate",
         template_id: cycle.template_id || "",
+        cycle_type: (cycle.cycle_type as AppraisalCycleType) || getInitialCycleType(),
       });
     } else {
       // Auto-select default template if available
@@ -108,9 +131,10 @@ export function AppraisalCycleDialog({
         max_rating: defaultTemplate?.max_rating ?? 5,
         multi_position_mode: "aggregate",
         template_id: defaultTemplate?.id || "",
+        cycle_type: getInitialCycleType(),
       });
     }
-  }, [cycle, templates]);
+  }, [cycle, templates, isProbationReview, isManagerCycle]);
 
   // Handle template selection - auto-populate weights
   const handleTemplateChange = (templateId: string) => {
@@ -183,8 +207,10 @@ export function AppraisalCycleDialog({
         multi_position_mode: formData.multi_position_mode,
         template_id: formData.template_id || null,
         created_by: user?.id,
-        is_probation_review: isProbationReview,
-        is_manager_cycle: isManagerCycle,
+        cycle_type: formData.cycle_type,
+        // Keep boolean flags for backward compatibility
+        is_probation_review: formData.cycle_type === "probation",
+        is_manager_cycle: formData.cycle_type === "manager_360",
       };
 
       if (cycle) {
@@ -243,6 +269,28 @@ export function AppraisalCycleDialog({
                 placeholder="Describe the appraisal cycle..."
                 rows={3}
               />
+            </div>
+
+            <div className="md:col-span-2">
+              <Label htmlFor="cycle_type">Cycle Type *</Label>
+              <Select
+                value={formData.cycle_type}
+                onValueChange={(value: AppraisalCycleType) => setFormData({ ...formData, cycle_type: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select cycle type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {APPRAISAL_CYCLE_TYPES.map((type) => (
+                    <SelectItem key={type.value} value={type.value}>
+                      {type.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground mt-1">
+                {APPRAISAL_CYCLE_TYPES.find(t => t.value === formData.cycle_type)?.description}
+              </p>
             </div>
 
             <div>
