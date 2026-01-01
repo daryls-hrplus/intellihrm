@@ -9,7 +9,6 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
@@ -19,8 +18,10 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Card, CardContent } from '@/components/ui/card';
+import { DatePicker } from '@/components/ui/date-picker';
 import { AlertTriangle, Lightbulb, CheckCircle2 } from 'lucide-react';
 import { useTalentRiskAnalysis } from '@/hooks/useTalentRiskAnalysis';
+import { format } from 'date-fns';
 
 interface RiskInterventionDialogProps {
   open: boolean;
@@ -216,10 +217,10 @@ export function RiskInterventionDialog({
 
               <div>
                 <Label>Due Date (Optional)</Label>
-                <Input
-                  type="date"
+                <DatePicker
                   value={dueDate}
-                  onChange={(e) => setDueDate(e.target.value)}
+                  onChange={(date) => setDueDate(date ? format(date, "yyyy-MM-dd") : "")}
+                  placeholder="Select due date"
                 />
               </div>
 

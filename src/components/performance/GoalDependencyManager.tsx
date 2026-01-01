@@ -9,9 +9,11 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { DatePicker } from "@/components/ui/date-picker";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Trash2, CheckCircle, Link2, ExternalLink, Users, FileText, Shield, ArrowRight, ArrowDown } from "lucide-react";
+import { format } from "date-fns";
 import type { GoalDependency, DependencyType, ImpactLevel } from "@/types/goalDependencies";
 import { 
   DEPENDENCY_TYPE_LABELS, 
@@ -366,10 +368,10 @@ export function GoalDependencyManager({ goalId, goalTitle, open, onOpenChange }:
 
                       <div className="space-y-2">
                         <Label>Expected Resolution Date</Label>
-                        <Input
-                          type="date"
+                        <DatePicker
                           value={expectedResolutionDate}
-                          onChange={(e) => setExpectedResolutionDate(e.target.value)}
+                          onChange={(date) => setExpectedResolutionDate(date ? format(date, "yyyy-MM-dd") : "")}
+                          placeholder="Select date"
                         />
                       </div>
 

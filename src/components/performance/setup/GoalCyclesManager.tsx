@@ -10,10 +10,12 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { DatePicker } from "@/components/ui/date-picker";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Plus, Edit, Trash2, Calendar, Lock, CalendarClock } from "lucide-react";
 import { formatDateForDisplay } from "@/utils/dateUtils";
+import { format } from "date-fns";
 
 interface GoalCycle {
   id: string;
@@ -348,21 +350,19 @@ export function GoalCyclesManager({ companyId }: GoalCyclesManagerProps) {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="start_date">Cycle Start Date *</Label>
-                <Input
-                  id="start_date"
-                  type="date"
+                <Label>Cycle Start Date *</Label>
+                <DatePicker
                   value={formData.start_date}
-                  onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
+                  onChange={(date) => setFormData({ ...formData, start_date: date ? format(date, "yyyy-MM-dd") : "" })}
+                  placeholder="Select start date"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="end_date">Cycle End Date *</Label>
-                <Input
-                  id="end_date"
-                  type="date"
+                <Label>Cycle End Date *</Label>
+                <DatePicker
                   value={formData.end_date}
-                  onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
+                  onChange={(date) => setFormData({ ...formData, end_date: date ? format(date, "yyyy-MM-dd") : "" })}
+                  placeholder="Select end date"
                 />
               </div>
             </div>
@@ -374,21 +374,19 @@ export function GoalCyclesManager({ companyId }: GoalCyclesManagerProps) {
               </h4>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="goal_setting_start">Setting Start</Label>
-                  <Input
-                    id="goal_setting_start"
-                    type="date"
+                  <Label>Setting Start</Label>
+                  <DatePicker
                     value={formData.goal_setting_start}
-                    onChange={(e) => setFormData({ ...formData, goal_setting_start: e.target.value })}
+                    onChange={(date) => setFormData({ ...formData, goal_setting_start: date ? format(date, "yyyy-MM-dd") : "" })}
+                    placeholder="Select date"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="goal_setting_end">Setting End</Label>
-                  <Input
-                    id="goal_setting_end"
-                    type="date"
+                  <Label>Setting End</Label>
+                  <DatePicker
                     value={formData.goal_setting_end}
-                    onChange={(e) => setFormData({ ...formData, goal_setting_end: e.target.value })}
+                    onChange={(date) => setFormData({ ...formData, goal_setting_end: date ? format(date, "yyyy-MM-dd") : "" })}
+                    placeholder="Select date"
                   />
                 </div>
               </div>
@@ -401,21 +399,19 @@ export function GoalCyclesManager({ companyId }: GoalCyclesManagerProps) {
               </h4>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="review_start">Review Start</Label>
-                  <Input
-                    id="review_start"
-                    type="date"
+                  <Label>Review Start</Label>
+                  <DatePicker
                     value={formData.review_start}
-                    onChange={(e) => setFormData({ ...formData, review_start: e.target.value })}
+                    onChange={(date) => setFormData({ ...formData, review_start: date ? format(date, "yyyy-MM-dd") : "" })}
+                    placeholder="Select date"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="review_end">Review End</Label>
-                  <Input
-                    id="review_end"
-                    type="date"
+                  <Label>Review End</Label>
+                  <DatePicker
                     value={formData.review_end}
-                    onChange={(e) => setFormData({ ...formData, review_end: e.target.value })}
+                    onChange={(date) => setFormData({ ...formData, review_end: date ? format(date, "yyyy-MM-dd") : "" })}
+                    placeholder="Select date"
                   />
                 </div>
               </div>
@@ -430,11 +426,10 @@ export function GoalCyclesManager({ companyId }: GoalCyclesManagerProps) {
                 Goals in this cycle will be automatically locked after this date
               </p>
               <div className="space-y-2">
-                <Input
-                  id="freeze_date"
-                  type="date"
+                <DatePicker
                   value={formData.freeze_date}
-                  onChange={(e) => setFormData({ ...formData, freeze_date: e.target.value })}
+                  onChange={(date) => setFormData({ ...formData, freeze_date: date ? format(date, "yyyy-MM-dd") : "" })}
+                  placeholder="Select freeze date"
                 />
               </div>
             </div>

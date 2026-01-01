@@ -8,8 +8,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { DatePicker } from "@/components/ui/date-picker";
 import { LEVEL_FIELD_CONFIG, GoalLevel } from "./LevelFieldConfig";
 import { Lightbulb } from "lucide-react";
+import { format } from "date-fns";
 
 interface JobGoal {
   id: string;
@@ -129,23 +131,20 @@ export function StepDefinition({
       {/* Dates and Status Row */}
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="start_date">Start Date *</Label>
-          <Input
-            id="start_date"
-            type="date"
+          <Label>Start Date *</Label>
+          <DatePicker
             value={formData.start_date}
-            onChange={(e) => onChange({ start_date: e.target.value })}
-            required
+            onChange={(date) => onChange({ start_date: date ? format(date, "yyyy-MM-dd") : "" })}
+            placeholder="Select start date"
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="due_date">Due Date</Label>
-          <Input
-            id="due_date"
-            type="date"
+          <Label>Due Date</Label>
+          <DatePicker
             value={formData.due_date}
-            onChange={(e) => onChange({ due_date: e.target.value })}
+            onChange={(date) => onChange({ due_date: date ? format(date, "yyyy-MM-dd") : "" })}
+            placeholder="Select due date"
           />
         </div>
 

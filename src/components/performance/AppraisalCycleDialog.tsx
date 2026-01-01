@@ -9,11 +9,13 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { DatePicker } from "@/components/ui/date-picker";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { Users, GitMerge, FileText, AlertTriangle } from "lucide-react";
 import { useAppraisalFormTemplates } from "@/hooks/useAppraisalFormTemplates";
+import { format } from "date-fns";
 
 interface AppraisalCycle {
   id: string;
@@ -244,34 +246,29 @@ export function AppraisalCycleDialog({
             </div>
 
             <div>
-              <Label htmlFor="start_date">Start Date *</Label>
-              <Input
-                id="start_date"
-                type="date"
+              <Label>Start Date *</Label>
+              <DatePicker
                 value={formData.start_date}
-                onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
-                required
+                onChange={(date) => setFormData({ ...formData, start_date: date ? format(date, "yyyy-MM-dd") : "" })}
+                placeholder="Select start date"
               />
             </div>
 
             <div>
-              <Label htmlFor="end_date">End Date *</Label>
-              <Input
-                id="end_date"
-                type="date"
+              <Label>End Date *</Label>
+              <DatePicker
                 value={formData.end_date}
-                onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
-                required
+                onChange={(date) => setFormData({ ...formData, end_date: date ? format(date, "yyyy-MM-dd") : "" })}
+                placeholder="Select end date"
               />
             </div>
 
             <div>
-              <Label htmlFor="evaluation_deadline">Evaluation Deadline</Label>
-              <Input
-                id="evaluation_deadline"
-                type="date"
+              <Label>Evaluation Deadline</Label>
+              <DatePicker
                 value={formData.evaluation_deadline}
-                onChange={(e) => setFormData({ ...formData, evaluation_deadline: e.target.value })}
+                onChange={(date) => setFormData({ ...formData, evaluation_deadline: date ? format(date, "yyyy-MM-dd") : "" })}
+                placeholder="Select deadline"
               />
             </div>
 

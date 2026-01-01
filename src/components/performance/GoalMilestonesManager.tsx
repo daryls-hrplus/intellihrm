@@ -27,6 +27,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Checkbox } from "@/components/ui/checkbox";
+import { DatePicker } from "@/components/ui/date-picker";
 import {
   Plus,
   MoreVertical,
@@ -188,12 +189,11 @@ export function GoalMilestonesManager({ goalId, readonly = false }: GoalMileston
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="dueDate">Due Date *</Label>
-                    <Input
-                      id="dueDate"
-                      type="date"
+                    <Label>Due Date *</Label>
+                    <DatePicker
                       value={dueDate}
-                      onChange={(e) => setDueDate(e.target.value)}
+                      onChange={(date) => setDueDate(date ? format(date, "yyyy-MM-dd") : "")}
+                      placeholder="Select due date"
                     />
                   </div>
                   <div className="space-y-2">
@@ -395,12 +395,11 @@ export function GoalMilestonesManager({ goalId, readonly = false }: GoalMileston
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="editDueDate">Due Date *</Label>
-                    <Input
-                      id="editDueDate"
-                      type="date"
+                    <Label>Due Date *</Label>
+                    <DatePicker
                       value={dueDate}
-                      onChange={(e) => setDueDate(e.target.value)}
+                      onChange={(date) => setDueDate(date ? format(date, "yyyy-MM-dd") : "")}
+                      placeholder="Select due date"
                     />
                   </div>
                   <div className="space-y-2">
