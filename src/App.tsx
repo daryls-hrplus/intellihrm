@@ -4376,6 +4376,15 @@ const App = () => (
               }
             />
 
+            {/* Marketing Routes (Public) */}
+            <Route element={<MarketingLayout />}>
+              <Route path="/landing" element={<LandingPage />} />
+              <Route path="/register-demo" element={<RegisterDemoPage />} />
+              <Route path="/register-demo/success" element={<RegisterDemoSuccessPage />} />
+              <Route path="/features" element={<FeaturesPage />} />
+              <Route path="/about" element={<AboutPage />} />
+            </Route>
+
             {/* Catch-all */}
             <Route path="*" element={<NotFound />} />
             </Route>
