@@ -4383,6 +4383,7 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
+            </Route>
 
             {/* Marketing Routes (Public) */}
             <Route element={<MarketingLayout />}>
@@ -4395,7 +4396,6 @@ const App = () => (
 
             {/* Catch-all */}
             <Route path="*" element={<NotFound />} />
-            </Route>
             </Routes>
           </AuthProvider>
         </BrowserRouter>
