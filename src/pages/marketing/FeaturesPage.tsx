@@ -137,12 +137,12 @@ export default function FeaturesPage() {
   return (
     <>
       <Helmet>
-        <title>Features | HRplus - Complete HRMS Platform</title>
+        <title>Features | intellihrm - Complete HRMS Platform</title>
         <meta
           name="description"
-          content="Explore HRplus features: Core HR, Payroll, Performance Management, Time & Attendance, Learning, Recruitment, Compensation, and AI-powered insights."
+          content="Explore intellihrm features: Core HR, Payroll, Performance Management, Time & Attendance, Learning, Recruitment, Compensation, and AI-powered insights."
         />
-        <link rel="canonical" href="https://intellihr.net/features" />
+        <link rel="canonical" href="https://intellihrm.net/features" />
       </Helmet>
 
       {/* Hero */}
@@ -206,10 +206,10 @@ export default function FeaturesPage() {
         <div className="container">
           <div className="mx-auto max-w-2xl text-center">
             <h2 className="text-2xl font-bold text-foreground sm:text-3xl">
-              Ready to See HRplus in Action?
+              Ready to See intellihrm in Action?
             </h2>
             <p className="mt-4 text-muted-foreground">
-              Request a personalized demo and explore how HRplus can transform your HR operations.
+              Request a personalized demo and explore how intellihrm can transform your HR operations.
             </p>
             <Button size="lg" className="mt-8" asChild>
               <Link to="/register-demo">

@@ -67,10 +67,10 @@ export function HeroSection() {
             <div className="absolute inset-0 bg-gradient-to-tr from-primary/5 to-transparent" />
             <div className="aspect-[16/9] flex items-center justify-center bg-muted/50">
               <div className="text-center p-8">
-                <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 mb-4">
-                  <Sparkles className="h-8 w-8 text-primary" />
-                </div>
-                <p className="text-lg font-medium text-foreground">HRplus Dashboard Preview</p>
+              <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 mb-4">
+                <Sparkles className="h-8 w-8 text-primary" />
+              </div>
+              <p className="text-lg font-medium text-foreground">intellihrm Dashboard Preview</p>
                 <p className="text-sm text-muted-foreground mt-2">
                   Intelligent workforce management at your fingertips
                 </p>

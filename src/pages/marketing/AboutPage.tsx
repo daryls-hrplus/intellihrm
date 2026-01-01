@@ -26,12 +26,12 @@ export default function AboutPage() {
   return (
     <>
       <Helmet>
-        <title>About HRplus | Enterprise HRMS for Caribbean & Africa</title>
+        <title>About intellihrm | Enterprise HRMS for Caribbean & Africa</title>
         <meta
           name="description"
-          content="Learn about HRplus, the AI-powered HRMS platform purpose-built for the Caribbean, Africa, and global expansion. Contact our team today."
+          content="Learn about intellihrm, the AI-powered HRMS platform purpose-built for the Caribbean, Africa, and global expansion. Contact our team today."
         />
-        <link rel="canonical" href="https://intellihr.net/about" />
+        <link rel="canonical" href="https://intellihrm.net/about" />
       </Helmet>
 
       {/* Hero */}
@@ -42,7 +42,7 @@ export default function AboutPage() {
               Built for the Markets Others Overlook
             </h1>
             <p className="mt-6 text-lg text-muted-foreground">
-              HRplus is an AI-first, enterprise-grade HRMS purpose-built for the Caribbean, Africa,
+              intellihrm is an AI-first, enterprise-grade HRMS purpose-built for the Caribbean, Africa,
               and organizations with global expansion ambitions.
             </p>
           </div>
@@ -61,7 +61,7 @@ export default function AboutPage() {
                 committed to building deep, native support for the Caribbean and African markets.
               </p>
               <p className="mt-4 text-muted-foreground">
-                HRplus combines enterprise-grade functionality with AI-powered intelligence and
+                intellihrm combines enterprise-grade functionality with AI-powered intelligence and
                 unmatched regional compliance expertise. Our platform helps organizations attract,
                 develop, and retain top talent while navigating complex multi-country regulations.
               </p>
@@ -119,7 +119,7 @@ export default function AboutPage() {
             <div className="text-center mb-12">
               <h2 className="text-2xl font-bold text-foreground sm:text-3xl">Get in Touch</h2>
               <p className="mt-4 text-muted-foreground">
-                Have questions about HRplus? Our team is here to help.
+                Have questions about intellihrm? Our team is here to help.
               </p>
             </div>
 
@@ -175,10 +175,10 @@ export default function AboutPage() {
                           For general inquiries
                         </p>
                         <a
-                          href="mailto:info@hrplus.app"
+                          href="mailto:info@intellihrm.net"
                           className="text-sm text-primary hover:underline"
                         >
-                          info@hrplus.app
+                          info@intellihrm.net
                         </a>
                       </div>
                     </div>
@@ -197,10 +197,10 @@ export default function AboutPage() {
                           Speak with our sales team
                         </p>
                         <a
-                          href="mailto:sales@hrplus.app"
+                          href="mailto:sales@intellihrm.net"
                           className="text-sm text-primary hover:underline"
                         >
-                          sales@hrplus.app
+                          sales@intellihrm.net
                         </a>
                       </div>
                     </div>
@@ -240,7 +240,7 @@ export default function AboutPage() {
               Ready to Transform Your HR?
             </h2>
             <p className="mt-4 text-muted-foreground">
-              See how HRplus can help your organization attract, develop, and retain top talent.
+              See how intellihrm can help your organization attract, develop, and retain top talent.
             </p>
             <Button size="lg" className="mt-8" asChild>
               <Link to="/register-demo">

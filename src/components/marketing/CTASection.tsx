@@ -16,7 +16,7 @@ export function CTASection() {
           </h2>
           
           <p className="mt-4 text-lg text-primary-foreground/80">
-            Join organizations across the Caribbean and Africa who trust HRplus to manage their workforce. 
+            Join organizations across the Caribbean and Africa who trust intellihrm to manage their workforce. 
             Get started with a personalized demo today.
           </p>
 

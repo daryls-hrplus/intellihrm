@@ -8,18 +8,18 @@ export default function LandingPage() {
   return (
     <>
       <Helmet>
-        <title>HRplus | AI-Powered HRMS for Caribbean & Africa</title>
+        <title>intellihrm | AI-Powered HRMS for Caribbean & Africa</title>
         <meta
           name="description"
           content="Enterprise-grade Human Resource Management System built for the Caribbean, Africa, and global expansion. Deep regional compliance, embedded AI intelligence, and seamless cross-module orchestration."
         />
-        <meta property="og:title" content="HRplus | AI-Powered HRMS for Caribbean & Africa" />
+        <meta property="og:title" content="intellihrm | AI-Powered HRMS for Caribbean & Africa" />
         <meta
           property="og:description"
           content="Enterprise-grade HRMS with deep regional compliance and AI-powered insights."
         />
         <meta property="og:type" content="website" />
-        <link rel="canonical" href="https://intellihr.net" />
+        <link rel="canonical" href="https://intellihrm.net" />
       </Helmet>
 
       <HeroSection />

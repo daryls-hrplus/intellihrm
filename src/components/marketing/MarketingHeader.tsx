@@ -20,9 +20,9 @@ export function MarketingHeader() {
         {/* Logo */}
         <Link to="/landing" className="flex items-center space-x-2">
           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
-            <span className="text-lg font-bold text-primary-foreground">H+</span>
+            <span className="text-lg font-bold text-primary-foreground">i</span>
           </div>
-          <span className="text-xl font-bold text-foreground">HRplus</span>
+          <span className="text-xl font-bold text-foreground">intellihrm</span>
         </Link>
 
         {/* Desktop Navigation */}

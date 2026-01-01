@@ -26,9 +26,9 @@ export function MarketingFooter() {
           <div className="col-span-2 md:col-span-1">
             <Link to="/landing" className="flex items-center space-x-2 mb-4">
               <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
-                <span className="text-lg font-bold text-primary-foreground">H+</span>
+                <span className="text-lg font-bold text-primary-foreground">i</span>
               </div>
-              <span className="text-xl font-bold text-foreground">HRplus</span>
+              <span className="text-xl font-bold text-foreground">intellihrm</span>
             </Link>
             <p className="text-sm text-muted-foreground max-w-xs">
               AI-powered HRMS built for the Caribbean, Africa, and global expansion.
@@ -90,7 +90,7 @@ export function MarketingFooter() {
         {/* Bottom Bar */}
         <div className="mt-12 pt-8 border-t border-border flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-sm text-muted-foreground">
-            © {currentYear} HRplus. All rights reserved.
+            © {currentYear} intellihrm. All rights reserved.
           </p>
           <div className="flex items-center space-x-4">
             <span className="text-xs text-muted-foreground">
