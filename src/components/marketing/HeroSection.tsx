@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Play, Sparkles, Globe, Shield } from "lucide-react";
+import dashboardPreview from "@/assets/dashboard-preview.png";
 
 export function HeroSection() {
   return (
@@ -61,21 +62,15 @@ export function HeroSection() {
           </div>
         </div>
 
-        {/* Hero Image Placeholder */}
+        {/* Hero Image */}
         <div className="mt-16 mx-auto max-w-5xl">
           <div className="relative rounded-xl border border-border bg-card shadow-2xl overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-tr from-primary/5 to-transparent" />
-            <div className="aspect-[16/9] flex items-center justify-center bg-muted/50">
-              <div className="text-center p-8">
-              <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 mb-4">
-                <Sparkles className="h-8 w-8 text-primary" />
-              </div>
-              <p className="text-lg font-medium text-foreground">intellihrm Dashboard Preview</p>
-                <p className="text-sm text-muted-foreground mt-2">
-                  Intelligent workforce management at your fingertips
-                </p>
-              </div>
-            </div>
+            <div className="absolute inset-0 bg-gradient-to-tr from-primary/5 to-transparent pointer-events-none" />
+            <img 
+              src={dashboardPreview} 
+              alt="IntelliHRM Dashboard Preview - Intelligent workforce management interface" 
+              className="w-full h-auto"
+            />
           </div>
         </div>
       </div>
