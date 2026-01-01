@@ -61,6 +61,14 @@ import StaffLoanDesignDocumentPage from "./pages/documents/StaffLoanDesignDocume
 import AIGovernancePage from "./pages/admin/AIGovernancePage";
 import TranslationsPage from "./pages/admin/TranslationsPage";
 import CompanyValuesPage from "./pages/admin/CompanyValuesPage";
+import ClientRegistryPage from "./pages/admin/ClientRegistryPage";
+import ClientDetailPage from "./pages/admin/ClientDetailPage";
+import ClientProvisioningPage from "./pages/admin/ClientProvisioningPage";
+
+// Demo pages
+import DemoLoginPage from "./pages/demo/DemoLoginPage";
+import DemoExpiredPage from "./pages/demo/DemoExpiredPage";
+import DemoConversionPage from "./pages/demo/DemoConversionPage";
 
 // Enablement pages
 import EnablementHubPage from "./pages/enablement/EnablementHubPage";
@@ -1101,6 +1109,30 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin"]}>
                   <AdminCompaniesPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/client-registry"
+              element={
+                <ProtectedRoute requiredRoles={["admin"]}>
+                  <ClientRegistryPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/client-registry/:id"
+              element={
+                <ProtectedRoute requiredRoles={["admin"]}>
+                  <ClientDetailPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/client-registry/:id/provisioning"
+              element={
+                <ProtectedRoute requiredRoles={["admin"]}>
+                  <ClientProvisioningPage />
                 </ProtectedRoute>
               }
             />
