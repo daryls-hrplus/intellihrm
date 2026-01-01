@@ -358,12 +358,6 @@ export default function AppraisalsPage() {
               <Settings className="mr-2 h-4 w-4" />
               Setup
             </Button>
-            
-            {/* Primary Action */}
-            <Button onClick={() => handleCreateCycle(false, false)}>
-              <Plus className="mr-2 h-4 w-4" />
-              Create Cycle
-            </Button>
           </div>
         </div>
 
@@ -476,6 +470,17 @@ export default function AppraisalsPage() {
 
           {/* Cycles Tab */}
           <TabsContent value="cycles" className="mt-6">
+            {/* Tab Header with Create Button */}
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h2 className="text-lg font-semibold">Appraisal Cycles</h2>
+                <p className="text-sm text-muted-foreground">Configure and manage performance review cycles</p>
+              </div>
+              <Button onClick={() => handleCreateCycle(false, false)}>
+                <Plus className="mr-2 h-4 w-4" />
+                Create Cycle
+              </Button>
+            </div>
             <div className="space-y-4">
               {loading ? (
                 <Card>
