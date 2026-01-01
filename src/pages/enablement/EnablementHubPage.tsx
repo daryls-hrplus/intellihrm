@@ -35,6 +35,8 @@ import {
   FolderTree,
   ClipboardCheck,
   RefreshCw,
+  Network,
+  Users,
 } from "lucide-react";
 import { ContentWorkflowBoard } from "@/components/enablement/ContentWorkflowBoard";
 import { ReleaseManager } from "@/components/enablement/ReleaseManager";
@@ -245,6 +247,32 @@ export default function EnablementHubPage() {
           icon: BookOpen,
           color: "bg-primary/10 text-primary",
           badge: "53 Sections",
+        },
+      ],
+    },
+    {
+      titleKey: "Client Provisioning",
+      items: [
+        {
+          title: "Provisioning Guide",
+          description: "Complete implementation guide for demo tenant provisioning",
+          href: "/enablement/client-provisioning",
+          icon: Network,
+          color: "bg-indigo-500/10 text-indigo-500",
+        },
+        {
+          title: "Testing Checklist",
+          description: "Production readiness testing checklist for provisioning",
+          href: "/enablement/client-provisioning/testing",
+          icon: ClipboardCheck,
+          color: "bg-green-500/10 text-green-500",
+        },
+        {
+          title: "Client Registry",
+          description: "Manage demo registrations and client provisioning",
+          href: "/admin/client-registry",
+          icon: Users,
+          color: "bg-purple-500/10 text-purple-500",
         },
       ],
     },

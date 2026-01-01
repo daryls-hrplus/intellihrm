@@ -89,6 +89,8 @@ import ToursManagementPage from "./pages/enablement/ToursManagementPage";
 import FeatureAuditDashboard from "./pages/enablement/FeatureAuditDashboard";
 import ImplementationDetailPage from "./pages/enablement/ImplementationDetailPage";
 import AppraisalsManualPage from "./pages/enablement/AppraisalsManualPage";
+import ClientProvisioningGuidePage from "./pages/enablement/ClientProvisioningGuidePage";
+import ClientProvisioningTestingPage from "./pages/enablement/ClientProvisioningTestingPage";
 
 // Subscription pages
 import SubscriptionPage from "./pages/subscription/SubscriptionPage";
@@ -4349,6 +4351,26 @@ const App = () => (
                 <ProtectedRoute requiredRoles={["admin"]}>
                   <EnablementAccessGuard>
                     <AppraisalsManualPage />
+                  </EnablementAccessGuard>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/enablement/client-provisioning"
+              element={
+                <ProtectedRoute requiredRoles={["admin"]}>
+                  <EnablementAccessGuard>
+                    <ClientProvisioningGuidePage />
+                  </EnablementAccessGuard>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/enablement/client-provisioning/testing"
+              element={
+                <ProtectedRoute requiredRoles={["admin"]}>
+                  <EnablementAccessGuard>
+                    <ClientProvisioningTestingPage />
                   </EnablementAccessGuard>
                 </ProtectedRoute>
               }
