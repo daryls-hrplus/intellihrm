@@ -1961,6 +1961,7 @@ export type Database = {
           component_scale_id: string | null
           created_at: string
           created_by: string | null
+          cycle_type: string
           description: string | null
           description_en: string | null
           end_date: string
@@ -2001,6 +2002,7 @@ export type Database = {
           component_scale_id?: string | null
           created_at?: string
           created_by?: string | null
+          cycle_type?: string
           description?: string | null
           description_en?: string | null
           end_date: string
@@ -2041,6 +2043,7 @@ export type Database = {
           component_scale_id?: string | null
           created_at?: string
           created_by?: string | null
+          cycle_type?: string
           description?: string | null
           description_en?: string | null
           end_date?: string
