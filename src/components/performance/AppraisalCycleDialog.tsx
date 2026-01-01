@@ -112,6 +112,10 @@ export function AppraisalCycleDialog({
 
   // Handle template selection - auto-populate weights
   const handleTemplateChange = (templateId: string) => {
+    if (templateId === "none") {
+      setFormData(prev => ({ ...prev, template_id: "" }));
+      return;
+    }
     const selectedTemplate = templates?.find(t => t.id === templateId);
     if (selectedTemplate) {
       setFormData(prev => ({
@@ -303,14 +307,14 @@ export function AppraisalCycleDialog({
             </CardHeader>
             <CardContent className="space-y-3">
               <Select
-                value={formData.template_id}
+                value={formData.template_id || "none"}
                 onValueChange={handleTemplateChange}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select a template (optional)" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">No template</SelectItem>
+                  <SelectItem value="none">No template</SelectItem>
                   {templates?.filter(t => t.is_active).map((template) => (
                     <SelectItem key={template.id} value={template.id}>
                       <div className="flex items-center gap-2">
