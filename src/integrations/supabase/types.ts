@@ -6839,6 +6839,72 @@ export type Database = {
           },
         ]
       }
+      client_provisioning_tasks: {
+        Row: {
+          completed_at: string | null
+          completed_by: string | null
+          created_at: string | null
+          error_message: string | null
+          id: string
+          is_manual: boolean | null
+          metadata: Json | null
+          registration_id: string | null
+          started_at: string | null
+          status: string | null
+          task_name: string
+          task_order: number
+          task_type: string
+          updated_at: string | null
+        }
+        Insert: {
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          is_manual?: boolean | null
+          metadata?: Json | null
+          registration_id?: string | null
+          started_at?: string | null
+          status?: string | null
+          task_name: string
+          task_order: number
+          task_type: string
+          updated_at?: string | null
+        }
+        Update: {
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          is_manual?: boolean | null
+          metadata?: Json | null
+          registration_id?: string | null
+          started_at?: string | null
+          status?: string | null
+          task_name?: string
+          task_order?: number
+          task_type?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_provisioning_tasks_completed_by_fkey"
+            columns: ["completed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_provisioning_tasks_registration_id_fkey"
+            columns: ["registration_id"]
+            isOneToOne: false
+            referencedRelation: "demo_registrations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       collective_agreements: {
         Row: {
           agreement_number: string | null
@@ -7433,6 +7499,7 @@ export type Database = {
           postal_code: string | null
           second_language: string | null
           state: string | null
+          tenant_type: string | null
           territory_id: string | null
           updated_at: string
           version_updated_at: string | null
@@ -7461,6 +7528,7 @@ export type Database = {
           postal_code?: string | null
           second_language?: string | null
           state?: string | null
+          tenant_type?: string | null
           territory_id?: string | null
           updated_at?: string
           version_updated_at?: string | null
@@ -7489,6 +7557,7 @@ export type Database = {
           postal_code?: string | null
           second_language?: string | null
           state?: string | null
+          tenant_type?: string | null
           territory_id?: string | null
           updated_at?: string
           version_updated_at?: string | null
@@ -10394,6 +10463,72 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      demo_registrations: {
+        Row: {
+          assigned_subdomain: string | null
+          company_name: string
+          contact_email: string
+          contact_name: string
+          contact_phone: string | null
+          conversion_requested_at: string | null
+          converted_at: string | null
+          country: string
+          created_at: string | null
+          demo_expires_at: string | null
+          demo_started_at: string | null
+          employee_count: number | null
+          id: string
+          industry: string | null
+          lovable_project_id: string | null
+          notes: string | null
+          preferred_subdomain: string | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          assigned_subdomain?: string | null
+          company_name: string
+          contact_email: string
+          contact_name: string
+          contact_phone?: string | null
+          conversion_requested_at?: string | null
+          converted_at?: string | null
+          country: string
+          created_at?: string | null
+          demo_expires_at?: string | null
+          demo_started_at?: string | null
+          employee_count?: number | null
+          id?: string
+          industry?: string | null
+          lovable_project_id?: string | null
+          notes?: string | null
+          preferred_subdomain?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          assigned_subdomain?: string | null
+          company_name?: string
+          contact_email?: string
+          contact_name?: string
+          contact_phone?: string | null
+          conversion_requested_at?: string | null
+          converted_at?: string | null
+          country?: string
+          created_at?: string | null
+          demo_expires_at?: string | null
+          demo_started_at?: string | null
+          employee_count?: number | null
+          id?: string
+          industry?: string | null
+          lovable_project_id?: string | null
+          notes?: string | null
+          preferred_subdomain?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       departments: {
         Row: {
