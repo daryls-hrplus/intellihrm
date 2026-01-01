@@ -692,7 +692,6 @@ export default function AppraisalsPage() {
                 modelName="HRplus Talent Risk Analyzer"
                 lastAnalysisDate={storedRisks?.[0]?.last_analyzed_at}
                 confidenceLevel={riskSummary?.critical > 0 ? "high" : "medium"}
-                isoCompliant={true}
                 humanReviewRequired={riskSummary?.critical > 0 || riskSummary?.high > 0}
                 analyzedCount={storedRisks?.length}
               />
