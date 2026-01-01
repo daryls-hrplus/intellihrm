@@ -103,8 +103,8 @@ export default function ClientProvisioningGuidePage() {
           <CardHeader>
             <CardTitle>Overview</CardTitle>
           </CardHeader>
-          <CardContent className="prose prose-sm dark:prose-invert max-w-none">
-            <p>
+          <CardContent>
+            <p className="text-foreground">
               The Demo Tenant Provisioning System allows HRplus administrators to manage demo registrations, 
               provision new demo environments, and convert successful demos to production tenants.
             </p>
