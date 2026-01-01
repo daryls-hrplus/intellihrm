@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { Navigate } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { QuickActions } from "@/components/dashboard/QuickActions";
@@ -19,11 +20,16 @@ import {
 
 const Index = () => {
   const { t } = useTranslation();
-  const { profile, isAdmin, isHRManager } = useAuth();
+  const { profile, isAdmin, isHRManager, user, isLoading: authLoading } = useAuth();
   const { data: stats, isLoading } = useDashboardStats();
   const firstName = profile?.full_name?.split(" ")[0] || "there";
 
   const canViewCharts = isAdmin || isHRManager;
+
+  // Redirect unauthenticated users to landing page
+  if (!authLoading && !user) {
+    return <Navigate to="/landing" replace />;
+  }
 
   return (
     <AppLayout>
