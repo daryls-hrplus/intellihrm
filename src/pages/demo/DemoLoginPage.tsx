@@ -40,17 +40,14 @@ export default function DemoLoginPage() {
       }
 
       try {
-        let query = supabase
+        const columnName = demoId ? "id" : "assigned_subdomain";
+        const columnValue = demoId || subdomain;
+
+        const { data, error: fetchError } = await supabase
           .from("demo_registrations")
-          .select("*");
-
-        if (demoId) {
-          query = query.eq("id", demoId);
-        } else if (subdomain) {
-          query = query.eq("subdomain", subdomain);
-        }
-
-        const { data, error: fetchError } = await query.single();
+          .select("*")
+          .eq(columnName, columnValue as string)
+          .single();
 
         if (fetchError || !data) {
           setError("Demo not found. Please check your link or contact support.");
