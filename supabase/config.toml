@@ -359,3 +359,12 @@ verify_jwt = false
 
 [functions.competency-drift-analyzer]
 verify_jwt = false
+
+[functions.provision-demo-tenant]
+verify_jwt = false
+
+[functions.convert-demo-to-production]
+verify_jwt = false
+
+[functions.create-subdomain-dns]
+verify_jwt = false
