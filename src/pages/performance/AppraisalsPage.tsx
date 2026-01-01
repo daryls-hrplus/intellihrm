@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Button } from "@/components/ui/button";
@@ -15,27 +16,34 @@ import {
   AlertCircle,
   Settings,
   ClipboardCheck,
-  Target,
   Users,
   BarChart3,
-  HelpCircle,
   Building2,
+  Scale,
+  Target,
+  TrendingUp,
+  CalendarClock,
+  FileCheck,
+  Brain,
+  ExternalLink,
+  Percent,
 } from "lucide-react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { AppraisalCycleDialog } from "@/components/performance/AppraisalCycleDialog";
 import { AppraisalParticipantsManager } from "@/components/performance/AppraisalParticipantsManager";
-import { AppraisalEvaluationDialog } from "@/components/performance/AppraisalEvaluationDialog";
-import { EmployeeAppraisalDetailDialog } from "@/components/performance/EmployeeAppraisalDetailDialog";
 import { useLanguage } from "@/hooks/useLanguage";
-import { format, parseISO } from "date-fns";
 import { formatDateForDisplay } from "@/utils/dateUtils";
+import { useCalibrationSessions } from "@/hooks/useCalibrationSessions";
+import { useGoalApprovals } from "@/hooks/useGoalApprovals";
+import { useTalentRiskAnalysis } from "@/hooks/useTalentRiskAnalysis";
+import { useAppraisalInterviews } from "@/hooks/useAppraisalInterviews";
+import { GoalApprovalInbox } from "@/components/performance/GoalApprovalInbox";
+import { TalentRiskList } from "@/components/performance/TalentRiskList";
+import { PerformanceDistributionChart } from "@/components/performance/analytics/PerformanceDistributionChart";
+import { CalibrationSessionCard } from "@/components/calibration/CalibrationSessionCard";
+import { AppraisalInterviewCalendar } from "@/components/appraisals/AppraisalInterviewCalendar";
 
 interface AppraisalCycle {
   id: string;
@@ -52,40 +60,15 @@ interface AppraisalCycle {
   max_rating: number;
   participants_count?: number;
   completion_rate?: number;
+  completed_count?: number;
   is_probation_review?: boolean;
   is_manager_cycle?: boolean;
   created_by?: string;
 }
 
-interface MyAppraisal {
-  id: string;
-  cycle_id: string;
-  cycle_name: string;
-  evaluator_name: string | null;
-  status: string;
-  overall_score: number | null;
-  competency_score: number | null;
-  responsibility_score: number | null;
-  goal_score: number | null;
-  evaluation_deadline: string | null;
-  employee_comments?: string | null;
-  final_comments?: string | null;
-  has_role_change?: boolean;
-}
-
-interface PendingEvaluation {
-  id: string;
-  employee_id: string;
-  employee_name: string;
-  cycle_id: string;
-  cycle_name: string;
-  status: string;
-  evaluation_deadline: string | null;
-}
-
 const breadcrumbItems = [
   { label: "Performance", href: "/performance" },
-  { label: "Appraisals" },
+  { label: "Appraisal Administration" },
 ];
 
 const statusColors: Record<string, string> = {
@@ -98,37 +81,41 @@ const statusColors: Record<string, string> = {
   finalized: "bg-success/10 text-success",
   cancelled: "bg-destructive/10 text-destructive",
   pending: "bg-muted text-muted-foreground",
-};
-
-const tabHelpText: Record<string, string> = {
-  "my-appraisals": "View your performance appraisals across cycles. See your scores for competencies, responsibilities, and goals. Click on an appraisal to view detailed feedback.",
-  "evaluate-team": "Evaluate team members assigned to you. Rate their competencies, responsibilities, and goals. Each category's item weights must total 100%.",
-  "manage-cycles": "Create and manage appraisal cycles. Set category weights (competency, responsibility, goal) that total 100%. Add participants and track completion rates.",
+  scheduled: "bg-info/10 text-info",
 };
 
 export default function AppraisalsPage() {
   const { t } = useLanguage();
+  const navigate = useNavigate();
   const { user, company, isAdmin, isHRManager } = useAuth();
-  const [activeTab, setActiveTab] = useState("my-appraisals");
+  const [activeTab, setActiveTab] = useState("cycles");
   const [cycles, setCycles] = useState<AppraisalCycle[]>([]);
   const [managerCycles, setManagerCycles] = useState<AppraisalCycle[]>([]);
-  const [myTeamCycles, setMyTeamCycles] = useState<AppraisalCycle[]>([]);
-  const [myAppraisals, setMyAppraisals] = useState<MyAppraisal[]>([]);
-  const [pendingEvaluations, setPendingEvaluations] = useState<PendingEvaluation[]>([]);
   const [loading, setLoading] = useState(true);
   const [cycleDialogOpen, setCycleDialogOpen] = useState(false);
   const [selectedCycle, setSelectedCycle] = useState<AppraisalCycle | null>(null);
   const [participantsManagerOpen, setParticipantsManagerOpen] = useState(false);
-  const [evaluationDialogOpen, setEvaluationDialogOpen] = useState(false);
-  const [selectedParticipant, setSelectedParticipant] = useState<PendingEvaluation | null>(null);
   const [isProbationReview, setIsProbationReview] = useState(false);
   const [isManagerCycle, setIsManagerCycle] = useState(false);
-  const [employeeDetailDialogOpen, setEmployeeDetailDialogOpen] = useState(false);
-  const [selectedAppraisalForDetail, setSelectedAppraisalForDetail] = useState<MyAppraisal | null>(null);
 
   // Company switcher for admin/HR
   const [companies, setCompanies] = useState<{ id: string; name: string }[]>([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>(company?.id || "");
+
+  // HR-focused data hooks
+  const { sessions: calibrationSessions, isLoading: calibrationLoading } = useCalibrationSessions({
+    companyId: selectedCompanyId,
+  });
+  const { pendingApprovals, loading: approvalsLoading } = useGoalApprovals(selectedCompanyId);
+  const { storedRisks, isLoadingRisks, riskSummary } = useTalentRiskAnalysis(selectedCompanyId);
+  const { interviews, loading: interviewsLoading, fetchInterviews } = useAppraisalInterviews();
+
+  // Fetch interviews when company changes
+  useEffect(() => {
+    if (selectedCompanyId) {
+      fetchInterviews({ cycleId: undefined });
+    }
+  }, [selectedCompanyId]);
 
   useEffect(() => {
     if (isAdmin || isHRManager) {
@@ -137,7 +124,6 @@ export default function AppraisalsPage() {
   }, [isAdmin, isHRManager]);
 
   useEffect(() => {
-    // Set initial company when user's company loads
     if (company?.id && !selectedCompanyId) {
       setSelectedCompanyId(company.id);
     }
@@ -161,13 +147,7 @@ export default function AppraisalsPage() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      await Promise.all([
-        fetchCycles(),
-        fetchManagerCycles(),
-        fetchMyTeamCycles(),
-        fetchMyAppraisals(),
-        fetchPendingEvaluations(),
-      ]);
+      await Promise.all([fetchCycles(), fetchManagerCycles()]);
     } catch (error) {
       console.error("Error fetching appraisal data:", error);
     } finally {
@@ -176,7 +156,6 @@ export default function AppraisalsPage() {
   };
 
   const fetchCycles = async () => {
-    // Fetch central cycles (not manager cycles) for admin/HR
     const { data, error } = await supabase
       .from("appraisal_cycles")
       .select("*")
@@ -194,7 +173,6 @@ export default function AppraisalsPage() {
   };
 
   const fetchManagerCycles = async () => {
-    // Fetch all manager-created probation cycles for admin/HR view
     if (!isAdmin && !isHRManager) return;
 
     const { data, error } = await supabase
@@ -214,27 +192,6 @@ export default function AppraisalsPage() {
     setManagerCycles(cyclesWithCounts);
   };
 
-  const fetchMyTeamCycles = async () => {
-    // Fetch cycles created by current manager for their team
-    if (!user?.id || isAdmin || isHRManager) return;
-
-    const { data, error } = await supabase
-      .from("appraisal_cycles")
-      .select("*")
-      .eq("created_by", user.id)
-      .eq("is_manager_cycle", true)
-      .eq("is_probation_review", true)
-      .order("created_at", { ascending: false });
-
-    if (error) {
-      console.error("Error fetching my team cycles:", error);
-      return;
-    }
-
-    const cyclesWithCounts = await addParticipantCounts(data || []);
-    setMyTeamCycles(cyclesWithCounts);
-  };
-
   const addParticipantCounts = async (cyclesList: any[]) => {
     return await Promise.all(
       cyclesList.map(async (cycle) => {
@@ -252,99 +209,11 @@ export default function AppraisalsPage() {
         return {
           ...cycle,
           participants_count: total || 0,
+          completed_count: completed || 0,
           completion_rate: total ? Math.round(((completed || 0) / total) * 100) : 0,
         };
       })
     );
-  };
-
-  const fetchMyAppraisals = async () => {
-    if (!user?.id) return;
-
-    const { data, error } = await supabase
-      .from("appraisal_participants")
-      .select(`
-        id,
-        cycle_id,
-        status,
-        overall_score,
-        competency_score,
-        responsibility_score,
-        goal_score,
-        employee_comments,
-        final_comments,
-        has_role_change,
-        appraisal_cycles!inner (
-          name,
-          evaluation_deadline
-        ),
-        evaluator:profiles!appraisal_participants_evaluator_id_fkey (
-          full_name
-        )
-      `)
-      .eq("employee_id", user.id);
-
-    if (error) {
-      console.error("Error fetching my appraisals:", error);
-      return;
-    }
-
-    const formatted = (data || []).map((item: any) => ({
-      id: item.id,
-      cycle_id: item.cycle_id,
-      cycle_name: item.appraisal_cycles?.name || "",
-      evaluator_name: item.evaluator?.full_name || null,
-      status: item.status,
-      overall_score: item.overall_score,
-      competency_score: item.competency_score,
-      responsibility_score: item.responsibility_score,
-      goal_score: item.goal_score,
-      evaluation_deadline: item.appraisal_cycles?.evaluation_deadline || null,
-      employee_comments: item.employee_comments,
-      final_comments: item.final_comments,
-      has_role_change: item.has_role_change,
-    }));
-
-    setMyAppraisals(formatted);
-  };
-
-  const fetchPendingEvaluations = async () => {
-    if (!user?.id) return;
-
-    const { data, error } = await supabase
-      .from("appraisal_participants")
-      .select(`
-        id,
-        employee_id,
-        cycle_id,
-        status,
-        employee:profiles!appraisal_participants_employee_id_fkey (
-          full_name
-        ),
-        appraisal_cycles!inner (
-          name,
-          evaluation_deadline
-        )
-      `)
-      .eq("evaluator_id", user.id)
-      .in("status", ["pending", "in_progress"]);
-
-    if (error) {
-      console.error("Error fetching pending evaluations:", error);
-      return;
-    }
-
-    const formatted = (data || []).map((item: any) => ({
-      id: item.id,
-      employee_id: item.employee_id,
-      employee_name: item.employee?.full_name || "Unknown",
-      cycle_id: item.cycle_id,
-      cycle_name: item.appraisal_cycles?.name || "",
-      status: item.status,
-      evaluation_deadline: item.appraisal_cycles?.evaluation_deadline || null,
-    }));
-
-    setPendingEvaluations(formatted);
   };
 
   const handleCreateCycle = (probationReview: boolean = false, managerCycle: boolean = false) => {
@@ -366,17 +235,66 @@ export default function AppraisalsPage() {
     setParticipantsManagerOpen(true);
   };
 
-  const handleStartEvaluation = (evaluation: PendingEvaluation) => {
-    setSelectedParticipant(evaluation);
-    setEvaluationDialogOpen(true);
-  };
-
+  // Calculate HR-focused stats
+  const totalParticipants = cycles.reduce((sum, c) => sum + (c.participants_count || 0), 0);
+  const totalCompleted = cycles.reduce((sum, c) => sum + (c.completed_count || 0), 0);
+  const overallCompletionRate = totalParticipants > 0 ? Math.round((totalCompleted / totalParticipants) * 100) : 0;
+  
   const stats = {
     activeCycles: cycles.filter((c) => c.status === "active").length,
-    pendingEvaluations: pendingEvaluations.length,
-    completedAppraisals: myAppraisals.filter((a) => ["reviewed", "finalized"].includes(a.status)).length,
-    myAppraisals: myAppraisals.length,
+    completionRate: overallCompletionRate,
+    pendingCalibrations: calibrationSessions?.filter((s) => s.status === "pending" || s.status === "scheduled").length || 0,
+    atRiskEmployees: riskSummary?.critical + riskSummary?.high || 0,
+    pendingApprovals: pendingApprovals?.length || 0,
+    scheduledInterviews: interviews?.filter((i) => i.status === "scheduled" || i.status === "confirmed").length || 0,
   };
+
+  // Risk helper functions
+  const getRiskColor = (level: string) => {
+    switch (level) {
+      case "critical": return "text-destructive";
+      case "high": return "text-warning";
+      case "medium": return "text-info";
+      default: return "text-muted-foreground";
+    }
+  };
+
+  const getRiskIcon = (level: string) => {
+    return <AlertCircle className={`h-4 w-4 ${getRiskColor(level)}`} />;
+  };
+
+  const getTrendIcon = (trend: string) => {
+    if (trend === "improving") return <TrendingUp className="h-4 w-4 text-success" />;
+    if (trend === "declining") return <TrendingUp className="h-4 w-4 text-destructive rotate-180" />;
+    return <TrendingUp className="h-4 w-4 text-muted-foreground" />;
+  };
+
+  // Restrict page to HR/Admin only
+  if (!isAdmin && !isHRManager) {
+    return (
+      <AppLayout>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <Card className="max-w-md">
+            <CardContent className="p-8 text-center">
+              <AlertCircle className="h-12 w-12 text-warning mx-auto mb-4" />
+              <h2 className="text-xl font-semibold mb-2">Access Restricted</h2>
+              <p className="text-muted-foreground">
+                This page is for HR Administrators. Please use the Employee Self-Service or Manager portals for your appraisals.
+              </p>
+              <div className="flex gap-3 mt-6 justify-center">
+                <Button variant="outline" onClick={() => navigate("/ess/my-appraisals")}>
+                  My Appraisals
+                </Button>
+                <Button onClick={() => navigate("/mss/appraisals")}>
+                  Team Appraisals
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </AppLayout>
+    );
+  }
 
   return (
     <AppLayout>
@@ -390,20 +308,20 @@ export default function AppraisalsPage() {
             </div>
             <div>
               <h1 className="text-2xl font-bold tracking-tight text-foreground">
-                {t('performance.appraisals.title')}
+                Appraisal Administration
               </h1>
               <p className="text-muted-foreground">
-                {t('performance.appraisals.subtitle')}
+                Manage appraisal cycles, calibration, and organizational performance
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
             {/* Company Switcher */}
-            {(isAdmin || isHRManager) && companies.length > 0 && (
+            {companies.length > 0 && (
               <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
                 <SelectTrigger className="w-[200px]">
                   <Building2 className="mr-2 h-4 w-4" />
-                  <SelectValue placeholder={t('performance.appraisals.selectCompany')} />
+                  <SelectValue placeholder="Select Company" />
                 </SelectTrigger>
                 <SelectContent>
                   {companies.map((c) => (
@@ -414,188 +332,214 @@ export default function AppraisalsPage() {
                 </SelectContent>
               </Select>
             )}
-            {(isAdmin || isHRManager) && (
-              <Button onClick={() => handleCreateCycle(false, false)}>
-                <Plus className="mr-2 h-4 w-4" />
-                {t('performance.appraisals.createCycle')}
-              </Button>
-            )}
-            {!isAdmin && !isHRManager && (
-              <Button onClick={() => handleCreateCycle(true, true)}>
-                <Plus className="mr-2 h-4 w-4" />
-                {t('performance.appraisals.createProbationReview')}
-              </Button>
-            )}
+            {/* Quick Action Buttons */}
+            <Button variant="outline" size="sm" onClick={() => navigate("/performance/appraisal-analytics")}>
+              <BarChart3 className="mr-2 h-4 w-4" />
+              Analytics
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => navigate("/performance/calibration")}>
+              <Scale className="mr-2 h-4 w-4" />
+              Calibration
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => navigate("/performance/setup")}>
+              <Settings className="mr-2 h-4 w-4" />
+              Setup
+            </Button>
+            <Button onClick={() => handleCreateCycle(false, false)}>
+              <Plus className="mr-2 h-4 w-4" />
+              Create Cycle
+            </Button>
           </div>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <Card>
+        {/* HR Stats Cards */}
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-6">
+          <Card className="cursor-pointer hover:border-primary/50 transition-colors" onClick={() => setActiveTab("cycles")}>
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">{t('performance.stats.activeCycles')}</p>
+                  <p className="text-sm text-muted-foreground">Active Cycles</p>
                   <p className="text-2xl font-bold">{stats.activeCycles}</p>
                 </div>
                 <Clock className="h-8 w-8 text-info" />
               </div>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="cursor-pointer hover:border-primary/50 transition-colors" onClick={() => setActiveTab("cycles")}>
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">{t('performance.stats.pendingEvaluations')}</p>
-                  <p className="text-2xl font-bold">{stats.pendingEvaluations}</p>
+                  <p className="text-sm text-muted-foreground">Completion Rate</p>
+                  <p className="text-2xl font-bold">{stats.completionRate}%</p>
                 </div>
-                <AlertCircle className="h-8 w-8 text-warning" />
+                <Percent className="h-8 w-8 text-success" />
               </div>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="cursor-pointer hover:border-primary/50 transition-colors" onClick={() => setActiveTab("calibration")}>
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">{t('performance.stats.completed')}</p>
-                  <p className="text-2xl font-bold">{stats.completedAppraisals}</p>
+                  <p className="text-sm text-muted-foreground">Pending Calibrations</p>
+                  <p className="text-2xl font-bold">{stats.pendingCalibrations}</p>
                 </div>
-                <CheckCircle className="h-8 w-8 text-success" />
+                <Scale className="h-8 w-8 text-warning" />
               </div>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="cursor-pointer hover:border-primary/50 transition-colors" onClick={() => setActiveTab("talent")}>
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">{t('performance.stats.myAppraisals')}</p>
-                  <p className="text-2xl font-bold">{stats.myAppraisals}</p>
+                  <p className="text-sm text-muted-foreground">At-Risk Employees</p>
+                  <p className="text-2xl font-bold">{stats.atRiskEmployees}</p>
                 </div>
-                <Target className="h-8 w-8 text-primary" />
+                <AlertCircle className="h-8 w-8 text-destructive" />
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="cursor-pointer hover:border-primary/50 transition-colors" onClick={() => setActiveTab("approvals")}>
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Goal Approvals</p>
+                  <p className="text-2xl font-bold">{stats.pendingApprovals}</p>
+                </div>
+                <FileCheck className="h-8 w-8 text-primary" />
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="cursor-pointer hover:border-primary/50 transition-colors" onClick={() => setActiveTab("interviews")}>
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Scheduled Interviews</p>
+                  <p className="text-2xl font-bold">{stats.scheduledInterviews}</p>
+                </div>
+                <CalendarClock className="h-8 w-8 text-info" />
               </div>
             </CardContent>
           </Card>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="flex-wrap">
-            <TabsTrigger value="my-appraisals" className="gap-2">
-              <Target className="h-4 w-4" />
-              {t('performance.appraisals.myAppraisals')}
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <HelpCircle className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground cursor-help" />
-                </TooltipTrigger>
-                <TooltipContent side="bottom" className="w-72 p-3 text-left whitespace-normal">
-                  <p className="text-sm leading-relaxed">{t('performance.appraisals.tabs.myAppraisalsHelp')}</p>
-                </TooltipContent>
-              </Tooltip>
+          <TabsList className="flex-wrap h-auto">
+            <TabsTrigger value="cycles" className="gap-2">
+              <Settings className="h-4 w-4" />
+              Cycles
             </TabsTrigger>
-            <TabsTrigger value="evaluate-team" className="gap-2">
-              <Users className="h-4 w-4" />
-              {t('performance.appraisals.evaluateTeam')}
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <HelpCircle className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground cursor-help" />
-                </TooltipTrigger>
-                <TooltipContent side="bottom" className="w-72 p-3 text-left whitespace-normal">
-                  <p className="text-sm leading-relaxed">{t('performance.appraisals.tabs.evaluateTeamHelp')}</p>
-                </TooltipContent>
-              </Tooltip>
+            <TabsTrigger value="manager-reviews" className="gap-2">
+              <ClipboardCheck className="h-4 w-4" />
+              Manager Reviews
             </TabsTrigger>
-            {(isAdmin || isHRManager) && (
-              <>
-                <TabsTrigger value="manage-cycles" className="gap-2">
-                  <Settings className="h-4 w-4" />
-                  {t('performance.appraisals.centralCycles')}
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <HelpCircle className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground cursor-help" />
-                    </TooltipTrigger>
-                    <TooltipContent side="bottom" className="w-72 p-3 text-left whitespace-normal">
-                      <p className="text-sm leading-relaxed">{t('performance.appraisals.tabs.manageCyclesHelp')}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TabsTrigger>
-                <TabsTrigger value="manager-cycles" className="gap-2">
-                  <ClipboardCheck className="h-4 w-4" />
-                  {t('performance.appraisals.managerCycles')}
-                </TabsTrigger>
-              </>
-            )}
-            {!isAdmin && !isHRManager && (
-              <TabsTrigger value="my-team-cycles" className="gap-2">
-                <ClipboardCheck className="h-4 w-4" />
-                {t('performance.appraisals.managerCycles')}
-              </TabsTrigger>
-            )}
+            <TabsTrigger value="analytics" className="gap-2">
+              <BarChart3 className="h-4 w-4" />
+              Analytics
+            </TabsTrigger>
+            <TabsTrigger value="calibration" className="gap-2">
+              <Scale className="h-4 w-4" />
+              Calibration
+            </TabsTrigger>
+            <TabsTrigger value="approvals" className="gap-2">
+              <FileCheck className="h-4 w-4" />
+              Approvals
+              {stats.pendingApprovals > 0 && (
+                <Badge variant="destructive" className="ml-1 h-5 w-5 p-0 flex items-center justify-center text-xs">
+                  {stats.pendingApprovals}
+                </Badge>
+              )}
+            </TabsTrigger>
+            <TabsTrigger value="talent" className="gap-2">
+              <Brain className="h-4 w-4" />
+              Talent AI
+            </TabsTrigger>
+            <TabsTrigger value="interviews" className="gap-2">
+              <CalendarClock className="h-4 w-4" />
+              Interviews
+            </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="my-appraisals" className="mt-6">
+          {/* Cycles Tab */}
+          <TabsContent value="cycles" className="mt-6">
             <div className="space-y-4">
-              {myAppraisals.length === 0 ? (
+              {loading ? (
+                <Card>
+                  <CardContent className="flex items-center justify-center py-12">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+                  </CardContent>
+                </Card>
+              ) : cycles.length === 0 ? (
                 <Card>
                   <CardContent className="flex flex-col items-center justify-center py-12">
-                    <Target className="h-12 w-12 text-muted-foreground mb-4" />
-                    <p className="text-muted-foreground">No appraisals assigned to you yet</p>
+                    <Settings className="h-12 w-12 text-muted-foreground mb-4" />
+                    <p className="text-muted-foreground mb-4">No appraisal cycles created yet</p>
+                    <Button onClick={() => handleCreateCycle(false, false)}>
+                      <Plus className="mr-2 h-4 w-4" />
+                      Create First Cycle
+                    </Button>
                   </CardContent>
                 </Card>
               ) : (
-                myAppraisals.map((appraisal) => (
-                  <Card 
-                    key={appraisal.id} 
-                    className="cursor-pointer transition-colors hover:border-primary/50"
-                    onClick={() => {
-                      setSelectedAppraisalForDetail(appraisal);
-                      setEmployeeDetailDialogOpen(true);
-                    }}
-                  >
+                cycles.map((cycle) => (
+                  <Card key={cycle.id}>
                     <CardHeader className="pb-3">
                       <div className="flex items-start justify-between">
                         <div>
-                          <CardTitle className="text-lg">{appraisal.cycle_name}</CardTitle>
+                          <CardTitle className="text-lg">{cycle.name}</CardTitle>
                           <CardDescription>
-                            Evaluator: {appraisal.evaluator_name || "Not assigned"}
+                            {formatDateForDisplay(cycle.start_date, "MMM d, yyyy")} -{" "}
+                            {formatDateForDisplay(cycle.end_date, "MMM d, yyyy")}
                           </CardDescription>
                         </div>
-                        <Badge className={statusColors[appraisal.status]}>
-                          {appraisal.status.replace("_", " ")}
-                        </Badge>
+                        <Badge className={statusColors[cycle.status]}>{cycle.status}</Badge>
                       </div>
                     </CardHeader>
                     <CardContent>
-                      <div className="grid gap-4 md:grid-cols-4">
-                        <div>
-                          <p className="text-sm text-muted-foreground">Competency Score</p>
-                          <p className="text-xl font-semibold">
-                            {appraisal.competency_score?.toFixed(1) || "-"}%
-                          </p>
+                      <div className="space-y-4">
+                        <div className="grid gap-4 md:grid-cols-3">
+                          <div className="text-center p-3 bg-muted/50 rounded-lg">
+                            <p className="text-sm text-muted-foreground">Competency</p>
+                            <p className="text-xl font-semibold">{cycle.competency_weight}%</p>
+                          </div>
+                          <div className="text-center p-3 bg-muted/50 rounded-lg">
+                            <p className="text-sm text-muted-foreground">Responsibility</p>
+                            <p className="text-xl font-semibold">{cycle.responsibility_weight}%</p>
+                          </div>
+                          <div className="text-center p-3 bg-muted/50 rounded-lg">
+                            <p className="text-sm text-muted-foreground">Goals</p>
+                            <p className="text-xl font-semibold">{cycle.goal_weight}%</p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="text-sm text-muted-foreground">Responsibility Score</p>
-                          <p className="text-xl font-semibold">
-                            {appraisal.responsibility_score?.toFixed(1) || "-"}%
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-sm text-muted-foreground">Goal Score</p>
-                          <p className="text-xl font-semibold">
-                            {appraisal.goal_score?.toFixed(1) || "-"}%
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-sm text-muted-foreground">Overall Score</p>
-                          <p className="text-2xl font-bold text-primary">
-                            {appraisal.overall_score?.toFixed(1) || "-"}%
-                          </p>
+                        <div className="flex items-center gap-4">
+                          <div className="flex-1">
+                            <div className="flex items-center justify-between text-sm mb-1">
+                              <span className="text-muted-foreground">
+                                {cycle.participants_count} participants
+                              </span>
+                              <span>{cycle.completion_rate}% complete</span>
+                            </div>
+                            <Progress value={cycle.completion_rate} className="h-2" />
+                          </div>
+                          <div className="flex gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleManageParticipants(cycle)}
+                            >
+                              <Users className="mr-2 h-4 w-4" />
+                              Participants
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleEditCycle(cycle)}
+                            >
+                              <Settings className="mr-2 h-4 w-4" />
+                              Edit
+                            </Button>
+                          </div>
                         </div>
                       </div>
-                      {appraisal.evaluation_deadline && (
-                        <div className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
-                          <Calendar className="h-4 w-4" />
-                          Deadline: {formatDateForDisplay(appraisal.evaluation_deadline, "MMM d, yyyy")}
-                        </div>
-                      )}
                     </CardContent>
                   </Card>
                 ))
@@ -603,40 +547,52 @@ export default function AppraisalsPage() {
             </div>
           </TabsContent>
 
-          <TabsContent value="evaluate-team" className="mt-6">
+          {/* Manager Reviews Tab */}
+          <TabsContent value="manager-reviews" className="mt-6">
             <div className="space-y-4">
-              {pendingEvaluations.length === 0 ? (
+              {managerCycles.length === 0 ? (
                 <Card>
                   <CardContent className="flex flex-col items-center justify-center py-12">
-                    <Users className="h-12 w-12 text-muted-foreground mb-4" />
-                    <p className="text-muted-foreground">No pending evaluations</p>
+                    <ClipboardCheck className="h-12 w-12 text-muted-foreground mb-4" />
+                    <p className="text-muted-foreground">No manager-created probation reviews yet</p>
                   </CardContent>
                 </Card>
               ) : (
-                pendingEvaluations.map((evaluation) => (
-                  <Card key={evaluation.id}>
+                managerCycles.map((cycle) => (
+                  <Card key={cycle.id}>
                     <CardHeader className="pb-3">
                       <div className="flex items-start justify-between">
                         <div>
-                          <CardTitle className="text-lg">{evaluation.employee_name}</CardTitle>
-                          <CardDescription>{evaluation.cycle_name}</CardDescription>
+                          <CardTitle className="text-lg">{cycle.name}</CardTitle>
+                          <CardDescription>
+                            {formatDateForDisplay(cycle.start_date, "MMM d, yyyy")} -{" "}
+                            {formatDateForDisplay(cycle.end_date, "MMM d, yyyy")}
+                          </CardDescription>
                         </div>
-                        <Badge className={statusColors[evaluation.status]}>
-                          {evaluation.status.replace("_", " ")}
-                        </Badge>
+                        <div className="flex gap-2">
+                          <Badge variant="outline">Probation Review</Badge>
+                          <Badge className={statusColors[cycle.status]}>{cycle.status}</Badge>
+                        </div>
                       </div>
                     </CardHeader>
                     <CardContent>
-                      <div className="flex items-center justify-between">
-                        {evaluation.evaluation_deadline && (
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <Calendar className="h-4 w-4" />
-                            Deadline: {formatDateForDisplay(evaluation.evaluation_deadline, "MMM d, yyyy")}
+                      <div className="flex items-center gap-4">
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between text-sm mb-1">
+                            <span className="text-muted-foreground">
+                              {cycle.participants_count} participants
+                            </span>
+                            <span>{cycle.completion_rate}% complete</span>
                           </div>
-                        )}
-                        <Button onClick={() => handleStartEvaluation(evaluation)}>
-                          <ClipboardCheck className="mr-2 h-4 w-4" />
-                          {evaluation.status === "pending" ? "Start Evaluation" : "Continue Evaluation"}
+                          <Progress value={cycle.completion_rate} className="h-2" />
+                        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleManageParticipants(cycle)}
+                        >
+                          <Users className="mr-2 h-4 w-4" />
+                          Participants
                         </Button>
                       </div>
                     </CardContent>
@@ -646,223 +602,183 @@ export default function AppraisalsPage() {
             </div>
           </TabsContent>
 
-          {(isAdmin || isHRManager) && (
-            <TabsContent value="manage-cycles" className="mt-6">
-              <div className="space-y-4">
-                {cycles.length === 0 ? (
-                  <Card>
-                    <CardContent className="flex flex-col items-center justify-center py-12">
-                      <Settings className="h-12 w-12 text-muted-foreground mb-4" />
-                      <p className="text-muted-foreground mb-4">No central appraisal cycles created yet</p>
-                      <Button onClick={() => handleCreateCycle(false, false)}>
-                        <Plus className="mr-2 h-4 w-4" />
-                        Create First Cycle
-                      </Button>
-                    </CardContent>
-                  </Card>
-                ) : (
-                  cycles.map((cycle) => (
-                    <Card key={cycle.id}>
-                      <CardHeader className="pb-3">
-                        <div className="flex items-start justify-between">
-                          <div>
-                            <CardTitle className="text-lg">{cycle.name}</CardTitle>
-                            <CardDescription>
-                              {formatDateForDisplay(cycle.start_date, "MMM d, yyyy")} -{" "}
-                              {formatDateForDisplay(cycle.end_date, "MMM d, yyyy")}
-                            </CardDescription>
-                          </div>
-                          <Badge className={statusColors[cycle.status]}>{cycle.status}</Badge>
-                        </div>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-4">
-                          <div className="grid gap-4 md:grid-cols-3">
-                            <div className="text-center p-3 bg-muted/50 rounded-lg">
-                              <p className="text-sm text-muted-foreground">Competency Weight</p>
-                              <p className="text-xl font-semibold">{cycle.competency_weight}%</p>
-                            </div>
-                            <div className="text-center p-3 bg-muted/50 rounded-lg">
-                              <p className="text-sm text-muted-foreground">Responsibility Weight</p>
-                              <p className="text-xl font-semibold">{cycle.responsibility_weight}%</p>
-                            </div>
-                            <div className="text-center p-3 bg-muted/50 rounded-lg">
-                              <p className="text-sm text-muted-foreground">Goal Weight</p>
-                              <p className="text-xl font-semibold">{cycle.goal_weight}%</p>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-4">
-                            <div className="flex-1">
-                              <div className="flex items-center justify-between text-sm mb-1">
-                                <span className="text-muted-foreground">
-                                  {cycle.participants_count} participants
-                                </span>
-                                <span>{cycle.completion_rate}% complete</span>
-                              </div>
-                              <Progress value={cycle.completion_rate} className="h-2" />
-                            </div>
-                            <div className="flex gap-2">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleManageParticipants(cycle)}
-                              >
-                                <Users className="mr-2 h-4 w-4" />
-                                Participants
-                              </Button>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleEditCycle(cycle)}
-                              >
-                                <Settings className="mr-2 h-4 w-4" />
-                                Edit
-                              </Button>
-                            </div>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))
-                )}
-              </div>
-            </TabsContent>
-          )}
-
-          {(isAdmin || isHRManager) && (
-            <TabsContent value="manager-cycles" className="mt-6">
-              <div className="space-y-4">
-                {managerCycles.length === 0 ? (
-                  <Card>
-                    <CardContent className="flex flex-col items-center justify-center py-12">
-                      <ClipboardCheck className="h-12 w-12 text-muted-foreground mb-4" />
-                      <p className="text-muted-foreground">No manager-created probation reviews yet</p>
-                    </CardContent>
-                  </Card>
-                ) : (
-                  managerCycles.map((cycle) => (
-                    <Card key={cycle.id}>
-                      <CardHeader className="pb-3">
-                        <div className="flex items-start justify-between">
-                          <div>
-                            <CardTitle className="text-lg">{cycle.name}</CardTitle>
-                            <CardDescription>
-                              {formatDateForDisplay(cycle.start_date, "MMM d, yyyy")} -{" "}
-                              {formatDateForDisplay(cycle.end_date, "MMM d, yyyy")}
-                            </CardDescription>
-                          </div>
-                          <div className="flex gap-2">
-                            <Badge variant="outline">Probation Review</Badge>
-                            <Badge className={statusColors[cycle.status]}>{cycle.status}</Badge>
-                          </div>
-                        </div>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-4">
-                          <div className="flex items-center gap-4">
-                            <div className="flex-1">
-                              <div className="flex items-center justify-between text-sm mb-1">
-                                <span className="text-muted-foreground">
-                                  {cycle.participants_count} participants
-                                </span>
-                                <span>{cycle.completion_rate}% complete</span>
-                              </div>
-                              <Progress value={cycle.completion_rate} className="h-2" />
-                            </div>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleManageParticipants(cycle)}
-                            >
-                              <Users className="mr-2 h-4 w-4" />
-                              Participants
-                            </Button>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))
-                )}
-              </div>
-            </TabsContent>
-          )}
-
-          {!isAdmin && !isHRManager && (
-            <TabsContent value="my-team-cycles" className="mt-6">
-              <div className="space-y-4">
-                <div className="flex justify-end">
-                  <Button onClick={() => handleCreateCycle(true, true)}>
-                    <Plus className="mr-2 h-4 w-4" />
-                    Create Probation Review
-                  </Button>
+          {/* Analytics Tab */}
+          <TabsContent value="analytics" className="mt-6">
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-semibold">Performance Analytics</h3>
+                  <p className="text-sm text-muted-foreground">Organization-wide performance insights</p>
                 </div>
-                {myTeamCycles.length === 0 ? (
+                <Button onClick={() => navigate("/performance/appraisal-analytics")}>
+                  <ExternalLink className="mr-2 h-4 w-4" />
+                  Full Dashboard
+                </Button>
+              </div>
+              <PerformanceDistributionChart companyId={selectedCompanyId} />
+            </div>
+          </TabsContent>
+
+          {/* Calibration Tab */}
+          <TabsContent value="calibration" className="mt-6">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-semibold">Calibration Sessions</h3>
+                  <p className="text-sm text-muted-foreground">Review and manage calibration sessions</p>
+                </div>
+                <Button onClick={() => navigate("/performance/calibration")}>
+                  <ExternalLink className="mr-2 h-4 w-4" />
+                  Calibration Workspace
+                </Button>
+              </div>
+              {calibrationLoading ? (
+                <Card>
+                  <CardContent className="flex items-center justify-center py-12">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+                  </CardContent>
+                </Card>
+              ) : calibrationSessions.length === 0 ? (
+                <Card>
+                  <CardContent className="flex flex-col items-center justify-center py-12">
+                    <Scale className="h-12 w-12 text-muted-foreground mb-4" />
+                    <p className="text-muted-foreground mb-4">No calibration sessions created yet</p>
+                    <Button onClick={() => navigate("/performance/calibration")}>
+                      <Plus className="mr-2 h-4 w-4" />
+                      Create Session
+                    </Button>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="grid gap-4 md:grid-cols-2">
+                  {calibrationSessions.slice(0, 4).map((session) => (
+                    <CalibrationSessionCard
+                      key={session.id}
+                      session={session}
+                      onOpen={() => navigate(`/performance/calibration/${session.id}`)}
+                      onEdit={() => navigate("/performance/calibration")}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          </TabsContent>
+
+          {/* Approvals Tab */}
+          <TabsContent value="approvals" className="mt-6">
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-lg font-semibold">Goal Approvals</h3>
+                <p className="text-sm text-muted-foreground">Review and approve pending goal submissions</p>
+              </div>
+              <GoalApprovalInbox companyId={selectedCompanyId} />
+            </div>
+          </TabsContent>
+
+          {/* Talent AI Tab */}
+          <TabsContent value="talent" className="mt-6">
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-semibold">AI-Powered Talent Insights</h3>
+                  <p className="text-sm text-muted-foreground">Predictive risk analysis and talent trends</p>
+                </div>
+              </div>
+              
+              {/* Risk Summary Cards */}
+              <div className="grid gap-4 sm:grid-cols-4">
+                <Card>
+                  <CardContent className="p-4 text-center">
+                    <p className="text-sm text-muted-foreground">Critical Risk</p>
+                    <p className="text-3xl font-bold text-destructive">{riskSummary?.critical || 0}</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-4 text-center">
+                    <p className="text-sm text-muted-foreground">High Risk</p>
+                    <p className="text-3xl font-bold text-warning">{riskSummary?.high || 0}</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-4 text-center">
+                    <p className="text-sm text-muted-foreground">Medium Risk</p>
+                    <p className="text-3xl font-bold text-info">{riskSummary?.medium || 0}</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-4 text-center">
+                    <p className="text-sm text-muted-foreground">Low Risk</p>
+                    <p className="text-3xl font-bold text-success">{riskSummary?.low || 0}</p>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <TalentRiskList
+                risks={storedRisks || []}
+                isLoading={isLoadingRisks}
+                onSelectRisk={(risk) => console.log("Selected risk:", risk)}
+                getRiskColor={getRiskColor}
+                getRiskIcon={getRiskIcon}
+                getTrendIcon={getTrendIcon}
+              />
+            </div>
+          </TabsContent>
+
+          {/* Interviews Tab */}
+          <TabsContent value="interviews" className="mt-6">
+            <div className="space-y-6">
+              <div>
+                <h3 className="text-lg font-semibold">Appraisal Interviews</h3>
+                <p className="text-sm text-muted-foreground">Organization-wide interview schedule</p>
+              </div>
+              
+              {interviewsLoading ? (
+                <Card>
+                  <CardContent className="flex items-center justify-center py-12">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+                  </CardContent>
+                </Card>
+              ) : interviews.length === 0 ? (
+                <Card>
+                  <CardContent className="flex flex-col items-center justify-center py-12">
+                    <CalendarClock className="h-12 w-12 text-muted-foreground mb-4" />
+                    <p className="text-muted-foreground">No appraisal interviews scheduled</p>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="grid gap-6 lg:grid-cols-2">
+                  <AppraisalInterviewCalendar
+                    interviews={interviews}
+                    onSelectDate={(date) => console.log("Selected date:", date)}
+                    onSelectInterview={(interview) => console.log("Selected interview:", interview)}
+                  />
                   <Card>
-                    <CardContent className="flex flex-col items-center justify-center py-12">
-                      <ClipboardCheck className="h-12 w-12 text-muted-foreground mb-4" />
-                      <p className="text-muted-foreground mb-4">No probation reviews created yet</p>
-                      <p className="text-sm text-muted-foreground">
-                        Create probation reviews for your direct reports
-                      </p>
+                    <CardHeader>
+                      <CardTitle className="text-base">Upcoming Interviews</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        {interviews
+                          .filter((i) => i.status === "scheduled" || i.status === "confirmed")
+                          .slice(0, 5)
+                          .map((interview) => (
+                            <div key={interview.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                              <div>
+                                <p className="font-medium text-sm">{interview.participant?.employee?.full_name || "Unknown"}</p>
+                                <p className="text-xs text-muted-foreground">
+                                  {interview.scheduled_at ? formatDateForDisplay(interview.scheduled_at, "MMM d, yyyy h:mm a") : "Not scheduled"}
+                                </p>
+                              </div>
+                              <Badge className={statusColors[interview.status || "pending"]}>{interview.status}</Badge>
+                            </div>
+                          ))}
+                      </div>
                     </CardContent>
                   </Card>
-                ) : (
-                  myTeamCycles.map((cycle) => (
-                    <Card key={cycle.id}>
-                      <CardHeader className="pb-3">
-                        <div className="flex items-start justify-between">
-                          <div>
-                            <CardTitle className="text-lg">{cycle.name}</CardTitle>
-                            <CardDescription>
-                              {formatDateForDisplay(cycle.start_date, "MMM d, yyyy")} -{" "}
-                              {formatDateForDisplay(cycle.end_date, "MMM d, yyyy")}
-                            </CardDescription>
-                          </div>
-                          <div className="flex gap-2">
-                            <Badge variant="outline">Probation Review</Badge>
-                            <Badge className={statusColors[cycle.status]}>{cycle.status}</Badge>
-                          </div>
-                        </div>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-4">
-                          <div className="flex items-center gap-4">
-                            <div className="flex-1">
-                              <div className="flex items-center justify-between text-sm mb-1">
-                                <span className="text-muted-foreground">
-                                  {cycle.participants_count} participants
-                                </span>
-                                <span>{cycle.completion_rate}% complete</span>
-                              </div>
-                              <Progress value={cycle.completion_rate} className="h-2" />
-                            </div>
-                            <div className="flex gap-2">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleManageParticipants(cycle)}
-                              >
-                                <Users className="mr-2 h-4 w-4" />
-                                Participants
-                              </Button>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleEditCycle(cycle)}
-                              >
-                                <Settings className="mr-2 h-4 w-4" />
-                                Edit
-                              </Button>
-                            </div>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))
-                )}
-              </div>
-            </TabsContent>
-          )}
+                </div>
+              )}
+            </div>
+          </TabsContent>
         </Tabs>
 
         <AppraisalCycleDialog
@@ -881,28 +797,6 @@ export default function AppraisalsPage() {
             onOpenChange={setParticipantsManagerOpen}
             cycle={selectedCycle}
             onSuccess={fetchData}
-          />
-        )}
-
-        {selectedParticipant && (
-          <AppraisalEvaluationDialog
-            open={evaluationDialogOpen}
-            onOpenChange={setEvaluationDialogOpen}
-            participantId={selectedParticipant.id}
-            employeeName={selectedParticipant.employee_name}
-            cycleId={selectedParticipant.cycle_id}
-            onSuccess={fetchData}
-          />
-        )}
-
-        {/* Employee Appraisal Detail Dialog */}
-        {selectedAppraisalForDetail && user?.id && company?.id && (
-          <EmployeeAppraisalDetailDialog
-            open={employeeDetailDialogOpen}
-            onOpenChange={setEmployeeDetailDialogOpen}
-            appraisal={selectedAppraisalForDetail}
-            employeeId={user.id}
-            companyId={company.id}
           />
         )}
       </div>
