@@ -8,10 +8,10 @@ export default function RegisterDemoSuccessPage() {
   return (
     <>
       <Helmet>
-        <title>Demo Request Submitted | HRplus</title>
+        <title>Demo Request Submitted | intellihrm</title>
         <meta
           name="description"
-          content="Thank you for requesting a demo of HRplus. Our team will contact you within 24-48 hours."
+          content="Thank you for requesting a demo of intellihrm. Our team will contact you within 24-48 hours."
         />
       </Helmet>
 
@@ -28,7 +28,7 @@ export default function RegisterDemoSuccessPage() {
               </h1>
 
               <p className="mt-4 text-muted-foreground max-w-md mx-auto">
-                Thank you for your interest in HRplus. We have received your demo request and our
+                Thank you for your interest in intellihrm. We have received your demo request and our
                 team will be in touch shortly.
               </p>
 
@@ -72,8 +72,8 @@ export default function RegisterDemoSuccessPage() {
 
               <p className="mt-8 text-sm text-muted-foreground">
                 Questions? Contact us at{" "}
-                <a href="mailto:demo@hrplus.app" className="text-primary hover:underline">
-                  demo@hrplus.app
+                <a href="mailto:demo@intellihrm.net" className="text-primary hover:underline">
+                  demo@intellihrm.net
                 </a>
               </p>
             </CardContent>

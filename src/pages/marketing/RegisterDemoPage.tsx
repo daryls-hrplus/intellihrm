@@ -130,12 +130,12 @@ export default function RegisterDemoPage() {
   return (
     <>
       <Helmet>
-        <title>Request a Demo | HRplus</title>
+        <title>Request a Demo | intellihrm</title>
         <meta
           name="description"
-          content="Request a personalized demo of HRplus, the AI-powered HRMS built for Caribbean and African enterprises. 14-day trial with full feature access."
+          content="Request a personalized demo of intellihrm, the AI-powered HRMS built for Caribbean and African enterprises. 14-day trial with full feature access."
         />
-        <link rel="canonical" href="https://intellihr.net/register-demo" />
+        <link rel="canonical" href="https://intellihrm.net/register-demo" />
       </Helmet>
 
       <section className="py-16 md:py-24">
@@ -145,7 +145,7 @@ export default function RegisterDemoPage() {
               Request a Demo
             </h1>
             <p className="mt-4 text-lg text-muted-foreground">
-              Experience the power of HRplus with a personalized demo. Fill out the form below and
+              Experience the power of intellihrm with a personalized demo. Fill out the form below and
               our team will be in touch within 24-48 hours.
             </p>
           </div>
@@ -332,7 +332,7 @@ export default function RegisterDemoPage() {
                                 {...field}
                               />
                               <span className="inline-flex items-center px-3 h-10 border border-l-0 border-input bg-muted text-muted-foreground text-sm rounded-r-md">
-                                .hrplus.app
+                                .intellihrm.net
                               </span>
                             </div>
                           </FormControl>

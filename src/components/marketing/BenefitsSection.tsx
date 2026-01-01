@@ -42,7 +42,7 @@ export function BenefitsSection() {
       <div className="container">
         <div className="mx-auto max-w-2xl text-center mb-16">
           <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-            Why Organizations Choose HRplus
+            Why Organizations Choose intellihrm
           </h2>
           <p className="mt-4 text-lg text-muted-foreground">
             Built differently from the ground up to serve the unique needs of Caribbean and African enterprises.
