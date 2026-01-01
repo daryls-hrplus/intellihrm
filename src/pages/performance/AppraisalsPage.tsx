@@ -346,14 +346,6 @@ export default function AppraisalsPage() {
             )}
             
             {/* Quick Action Buttons */}
-            <Button variant="outline" size="sm" onClick={() => navigate("/performance/appraisal-analytics")}>
-              <BarChart3 className="mr-2 h-4 w-4" />
-              Analytics
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => navigate("/performance/calibration")}>
-              <Scale className="mr-2 h-4 w-4" />
-              Calibration
-            </Button>
             <Button variant="outline" size="sm" onClick={() => navigate("/performance/setup")}>
               <Settings className="mr-2 h-4 w-4" />
               Setup
