@@ -12,10 +12,12 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
+import { DatePicker } from "@/components/ui/date-picker";
 import { Loader2, Calendar } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { format } from "date-fns";
 
 interface ReviewCycle {
   id: string;
@@ -197,50 +199,43 @@ export function ReviewCycleDialog({
             </h3>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="start_date">Start Date *</Label>
-                <Input
-                  id="start_date"
-                  type="date"
+                <Label>Start Date *</Label>
+                <DatePicker
                   value={formData.start_date}
-                  onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
-                  required
+                  onChange={(date) => setFormData({ ...formData, start_date: date ? format(date, "yyyy-MM-dd") : "" })}
+                  placeholder="Select start date"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="end_date">End Date *</Label>
-                <Input
-                  id="end_date"
-                  type="date"
+                <Label>End Date *</Label>
+                <DatePicker
                   value={formData.end_date}
-                  onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
-                  required
+                  onChange={(date) => setFormData({ ...formData, end_date: date ? format(date, "yyyy-MM-dd") : "" })}
+                  placeholder="Select end date"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="self_review_deadline">Self Review Deadline</Label>
-                <Input
-                  id="self_review_deadline"
-                  type="date"
+                <Label>Self Review Deadline</Label>
+                <DatePicker
                   value={formData.self_review_deadline}
-                  onChange={(e) => setFormData({ ...formData, self_review_deadline: e.target.value })}
+                  onChange={(date) => setFormData({ ...formData, self_review_deadline: date ? format(date, "yyyy-MM-dd") : "" })}
+                  placeholder="Select deadline"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="peer_nomination_deadline">Peer Nomination Deadline</Label>
-                <Input
-                  id="peer_nomination_deadline"
-                  type="date"
+                <Label>Peer Nomination Deadline</Label>
+                <DatePicker
                   value={formData.peer_nomination_deadline}
-                  onChange={(e) => setFormData({ ...formData, peer_nomination_deadline: e.target.value })}
+                  onChange={(date) => setFormData({ ...formData, peer_nomination_deadline: date ? format(date, "yyyy-MM-dd") : "" })}
+                  placeholder="Select deadline"
                 />
               </div>
               <div className="space-y-2 sm:col-span-2">
-                <Label htmlFor="feedback_deadline">Feedback Deadline</Label>
-                <Input
-                  id="feedback_deadline"
-                  type="date"
+                <Label>Feedback Deadline</Label>
+                <DatePicker
                   value={formData.feedback_deadline}
-                  onChange={(e) => setFormData({ ...formData, feedback_deadline: e.target.value })}
+                  onChange={(date) => setFormData({ ...formData, feedback_deadline: date ? format(date, "yyyy-MM-dd") : "" })}
+                  placeholder="Select deadline"
                 />
               </div>
             </div>

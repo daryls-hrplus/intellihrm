@@ -6,6 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { DatePicker } from "@/components/ui/date-picker";
+import { format } from "date-fns";
 import {
   Table,
   TableBody,
@@ -299,18 +301,18 @@ export function PerformanceImprovementPlansTab({ companyId }: PerformanceImprove
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Start Date *</Label>
-                <Input
-                  type="date"
+                <DatePicker
                   value={formData.start_date}
-                  onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
+                  onChange={(date) => setFormData({ ...formData, start_date: date ? format(date, "yyyy-MM-dd") : "" })}
+                  placeholder="Select start date"
                 />
               </div>
               <div className="space-y-2">
                 <Label>End Date *</Label>
-                <Input
-                  type="date"
+                <DatePicker
                   value={formData.end_date}
-                  onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
+                  onChange={(date) => setFormData({ ...formData, end_date: date ? format(date, "yyyy-MM-dd") : "" })}
+                  placeholder="Select end date"
                 />
               </div>
             </div>
