@@ -310,7 +310,8 @@ export default function AppraisalsPage() {
       <div className="space-y-6 p-6">
         <Breadcrumbs items={breadcrumbItems} />
 
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        {/* Page Header */}
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div className="flex items-center gap-4">
             <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
               <ClipboardCheck className="h-6 w-6 text-primary" />
@@ -324,11 +325,13 @@ export default function AppraisalsPage() {
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-3 flex-wrap">
+          
+          {/* Action Toolbar */}
+          <div className="flex flex-wrap items-center gap-2">
             {/* Company Switcher */}
             {companies.length > 0 && (
               <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
-                <SelectTrigger className="w-[200px]">
+                <SelectTrigger className="w-[180px]">
                   <Building2 className="mr-2 h-4 w-4" />
                   <SelectValue placeholder="Select Company" />
                 </SelectTrigger>
@@ -341,6 +344,7 @@ export default function AppraisalsPage() {
                 </SelectContent>
               </Select>
             )}
+            
             {/* Quick Action Buttons */}
             <Button variant="outline" size="sm" onClick={() => navigate("/performance/appraisal-analytics")}>
               <BarChart3 className="mr-2 h-4 w-4" />
@@ -354,6 +358,8 @@ export default function AppraisalsPage() {
               <Settings className="mr-2 h-4 w-4" />
               Setup
             </Button>
+            
+            {/* Primary Action */}
             <Button onClick={() => handleCreateCycle(false, false)}>
               <Plus className="mr-2 h-4 w-4" />
               Create Cycle
