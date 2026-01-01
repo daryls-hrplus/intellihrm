@@ -1,5 +1,6 @@
-import { Brain, Info, ShieldCheck, Clock, AlertTriangle } from "lucide-react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useNavigate } from "react-router-dom";
+import { Brain, Info, ShieldCheck, Clock, AlertTriangle, Bot, ExternalLink } from "lucide-react";
+import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import {
   Tooltip,
@@ -7,12 +8,12 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { formatDateForDisplay } from "@/utils/dateUtils";
+import { useAIGovernance } from "@/hooks/useAIGovernance";
 
 interface AITransparencyBannerProps {
   modelName?: string;
   lastAnalysisDate?: string;
   confidenceLevel?: "low" | "medium" | "high";
-  isoCompliant?: boolean;
   humanReviewRequired?: boolean;
   analyzedCount?: number;
 }
@@ -21,10 +22,44 @@ export function AITransparencyBanner({
   modelName = "HRplus AI Risk Analyzer",
   lastAnalysisDate,
   confidenceLevel = "medium",
-  isoCompliant = true,
   humanReviewRequired = false,
   analyzedCount,
 }: AITransparencyBannerProps) {
+  const navigate = useNavigate();
+  const { summary, isLoading: governanceLoading } = useAIGovernance();
+
+  const getComplianceStatus = () => {
+    if (governanceLoading) return { status: "Loading...", color: "secondary" as const };
+    
+    const hasOpenBias = summary.openBiasIncidents > 0;
+    const hasPendingReviews = summary.pendingReviewsCount > 3;
+    const modelCompliance = summary.totalModels > 0 
+      ? (summary.compliantModels / summary.totalModels) * 100 
+      : 100;
+    
+    if (hasOpenBias || modelCompliance < 80) {
+      return { status: "Action Required", color: "destructive" as const };
+    }
+    if (hasPendingReviews || modelCompliance < 100) {
+      return { status: "Attention", color: "warning" as const };
+    }
+    return { status: "Compliant", color: "success" as const };
+  };
+
+  const compliance = getComplianceStatus();
+
+  const getComplianceBadgeClasses = () => {
+    switch (compliance.color) {
+      case "destructive":
+        return "bg-destructive/10 text-destructive border-destructive/20";
+      case "warning":
+        return "bg-warning/10 text-warning border-warning/20";
+      case "success":
+        return "bg-success/10 text-success border-success/20";
+      default:
+        return "bg-muted text-muted-foreground border-border";
+    }
+  };
   const getConfidenceColor = () => {
     switch (confidenceLevel) {
       case "high":
@@ -80,20 +115,49 @@ export function AITransparencyBanner({
             {confidenceLevel.charAt(0).toUpperCase() + confidenceLevel.slice(1)} Confidence
           </Badge>
 
-          {/* ISO Compliance Badge */}
-          {isoCompliant && (
-            <Tooltip>
-              <TooltipTrigger>
-                <Badge variant="outline" className="bg-primary/5 border-primary/20 gap-1">
-                  <ShieldCheck className="h-3 w-3" />
-                  ISO 42001
+          {/* AI Governance Badge - Clickable link to governance page */}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                onClick={() => navigate("/admin/ai-governance")}
+                className="flex items-center gap-1.5 px-2 py-1 rounded-md border border-border/50 bg-muted/30 hover:bg-muted/50 transition-colors"
+              >
+                <ShieldCheck className="h-3.5 w-3.5 text-primary" />
+                <span className="text-xs font-medium">AI Governance</span>
+                <Badge variant="outline" className={`text-[10px] px-1.5 py-0 ${getComplianceBadgeClasses()}`}>
+                  {compliance.status}
                 </Badge>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p className="text-sm">This AI system complies with ISO 42001 AI Management System standards</p>
-              </TooltipContent>
-            </Tooltip>
-          )}
+                <ExternalLink className="h-2.5 w-2.5 text-muted-foreground" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="bottom" className="max-w-xs">
+              <div className="space-y-2 p-1">
+                <p className="font-medium text-xs">AI Governance Status</p>
+                <div className="grid grid-cols-3 gap-3 text-xs">
+                  <div className="flex flex-col items-center">
+                    <Clock className="h-3 w-3 text-muted-foreground mb-0.5" />
+                    <span className={`font-semibold ${summary.pendingReviewsCount > 0 ? 'text-warning' : ''}`}>
+                      {summary.pendingReviewsCount}
+                    </span>
+                    <span className="text-muted-foreground text-[10px]">reviews</span>
+                  </div>
+                  <div className="flex flex-col items-center">
+                    <AlertTriangle className="h-3 w-3 text-muted-foreground mb-0.5" />
+                    <span className={`font-semibold ${summary.openBiasIncidents > 0 ? 'text-destructive' : ''}`}>
+                      {summary.openBiasIncidents}
+                    </span>
+                    <span className="text-muted-foreground text-[10px]">bias</span>
+                  </div>
+                  <div className="flex flex-col items-center">
+                    <Bot className="h-3 w-3 text-muted-foreground mb-0.5" />
+                    <span className="font-semibold">{summary.compliantModels}/{summary.totalModels}</span>
+                    <span className="text-muted-foreground text-[10px]">models</span>
+                  </div>
+                </div>
+                <p className="text-[10px] text-muted-foreground mt-2">Click to open AI Governance controls</p>
+              </div>
+            </TooltipContent>
+          </Tooltip>
 
           {/* Human Review Required Badge */}
           {humanReviewRequired && (
