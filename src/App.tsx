@@ -92,6 +92,14 @@ import AppraisalsManualPage from "./pages/enablement/AppraisalsManualPage";
 import ClientProvisioningGuidePage from "./pages/enablement/ClientProvisioningGuidePage";
 import ClientProvisioningTestingPage from "./pages/enablement/ClientProvisioningTestingPage";
 
+// Marketing pages
+import { MarketingLayout } from "./components/marketing/MarketingLayout";
+import LandingPage from "./pages/marketing/LandingPage";
+import RegisterDemoPage from "./pages/marketing/RegisterDemoPage";
+import RegisterDemoSuccessPage from "./pages/marketing/RegisterDemoSuccessPage";
+import FeaturesPage from "./pages/marketing/FeaturesPage";
+import AboutPage from "./pages/marketing/AboutPage";
+
 // Subscription pages
 import SubscriptionPage from "./pages/subscription/SubscriptionPage";
 import UpgradePage from "./pages/subscription/UpgradePage";
