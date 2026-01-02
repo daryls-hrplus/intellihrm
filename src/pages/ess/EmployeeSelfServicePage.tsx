@@ -144,7 +144,7 @@ export default function EmployeeSelfServicePage() {
     },
     {
       titleKey: "Workplace",
-      items: filterByAccess([allModules.property, allModules.relations, allModules.hse, allModules.announcements, allModules.immigration]),
+      items: filterByAccess([allModules.property, allModules.relations, allModules.hse, allModules.immigration]),
     },
     {
       titleKey: "Tasks & Approvals",
@@ -152,7 +152,7 @@ export default function EmployeeSelfServicePage() {
     },
     {
       titleKey: "Help & Settings",
-      items: filterByAccess([allModules.tickets, allModules.notifications]),
+      items: filterByAccess([allModules.tickets, allModules.notifications, allModules.announcements]),
     },
   ];
 
