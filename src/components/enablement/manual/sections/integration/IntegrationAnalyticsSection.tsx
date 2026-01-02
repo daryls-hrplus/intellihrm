@@ -58,9 +58,9 @@ export function IntegrationAnalyticsSection() {
               <Badge variant="outline">Path</Badge>
               <span>Performance → Intelligence Hub → Integrations</span>
             </div>
-            <Alert variant="default" className="border-blue-200 bg-blue-50 dark:bg-blue-950/20">
-              <Info className="h-4 w-4 text-blue-600" />
-              <AlertDescription className="text-blue-700 dark:text-blue-300">
+            <Alert variant="default" className="border-2 border-blue-500 bg-blue-500/20">
+              <Info className="h-4 w-4" />
+              <AlertDescription>
                 A compact Integration Status widget is also available in <strong>Performance Setup → Appraisals → Integration Status</strong> tab 
                 for quick at-a-glance monitoring. Click "View Full Analytics" to navigate to the full dashboard.
               </AlertDescription>
@@ -82,21 +82,21 @@ export function IntegrationAnalyticsSection() {
                   At the top of the dashboard, four key metrics provide an immediate health check:
                 </p>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  <div className="p-3 bg-muted/50 rounded-lg text-center">
-                    <div className="text-2xl font-bold text-primary">Total</div>
-                    <div className="text-xs text-muted-foreground">All executions (last 30 days)</div>
+                  <div className="p-3 border-2 border-primary bg-primary/20 rounded-lg text-center">
+                    <div className="text-2xl font-bold">Total</div>
+                    <div className="text-xs">All executions (last 30 days)</div>
                   </div>
-                  <div className="p-3 bg-green-50 dark:bg-green-950/20 rounded-lg text-center">
-                    <div className="text-2xl font-bold text-green-600">Success</div>
-                    <div className="text-xs text-muted-foreground">Successfully completed</div>
+                  <div className="p-3 border-2 border-green-500 bg-green-500/20 rounded-lg text-center">
+                    <div className="text-2xl font-bold text-green-700 dark:text-green-300">Success</div>
+                    <div className="text-xs">Successfully completed</div>
                   </div>
-                  <div className="p-3 bg-amber-50 dark:bg-amber-950/20 rounded-lg text-center">
-                    <div className="text-2xl font-bold text-amber-600">Pending</div>
-                    <div className="text-xs text-muted-foreground">Awaiting approval</div>
+                  <div className="p-3 border-2 border-amber-500 bg-amber-500/20 rounded-lg text-center">
+                    <div className="text-2xl font-bold text-amber-700 dark:text-amber-300">Pending</div>
+                    <div className="text-xs">Awaiting approval</div>
                   </div>
-                  <div className="p-3 bg-red-50 dark:bg-red-950/20 rounded-lg text-center">
-                    <div className="text-2xl font-bold text-destructive">Failed</div>
-                    <div className="text-xs text-muted-foreground">Requires attention</div>
+                  <div className="p-3 border-2 border-red-500 bg-red-500/20 rounded-lg text-center">
+                    <div className="text-2xl font-bold text-red-700 dark:text-red-300">Failed</div>
+                    <div className="text-xs">Requires attention</div>
                   </div>
                 </div>
               </CardContent>
@@ -200,21 +200,21 @@ export function IntegrationAnalyticsSection() {
               Use the filter controls at the top of the dashboard to narrow down integration data:
             </p>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              <div className="p-3 bg-muted/50 rounded-lg">
-                <div className="font-medium text-sm">Appraisal Cycle</div>
-                <div className="text-xs text-muted-foreground">Filter by specific cycle</div>
+              <div className="p-3 border-2 border-primary bg-primary/20 rounded-lg">
+                <div className="font-semibold text-sm">Appraisal Cycle</div>
+                <div className="text-xs">Filter by specific cycle</div>
               </div>
-              <div className="p-3 bg-muted/50 rounded-lg">
-                <div className="font-medium text-sm">Target Module</div>
-                <div className="text-xs text-muted-foreground">Nine-Box, Succession, IDP, etc.</div>
+              <div className="p-3 border-2 border-primary bg-primary/20 rounded-lg">
+                <div className="font-semibold text-sm">Target Module</div>
+                <div className="text-xs">Nine-Box, Succession, IDP, etc.</div>
               </div>
-              <div className="p-3 bg-muted/50 rounded-lg">
-                <div className="font-medium text-sm">Status</div>
-                <div className="text-xs text-muted-foreground">Success, Pending, Failed</div>
+              <div className="p-3 border-2 border-primary bg-primary/20 rounded-lg">
+                <div className="font-semibold text-sm">Status</div>
+                <div className="text-xs">Success, Pending, Failed</div>
               </div>
-              <div className="p-3 bg-muted/50 rounded-lg">
-                <div className="font-medium text-sm">Date Range</div>
-                <div className="text-xs text-muted-foreground">Custom time period</div>
+              <div className="p-3 border-2 border-primary bg-primary/20 rounded-lg">
+                <div className="font-semibold text-sm">Date Range</div>
+                <div className="text-xs">Custom time period</div>
               </div>
             </div>
           </div>

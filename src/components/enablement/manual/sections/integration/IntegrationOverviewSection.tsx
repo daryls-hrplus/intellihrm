@@ -114,10 +114,10 @@ graph TB
           </Alert>
 
           {/* Prerequisites */}
-          <Alert variant="default" className="border-amber-200 bg-amber-50 dark:bg-amber-950/20">
-            <AlertTriangle className="h-4 w-4 text-amber-600" />
-            <AlertTitle className="text-amber-800 dark:text-amber-200">Prerequisites</AlertTitle>
-            <AlertDescription className="text-amber-700 dark:text-amber-300">
+          <Alert variant="default" className="border-2 border-amber-500 bg-amber-500/20">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertTitle className="font-bold">Prerequisites</AlertTitle>
+            <AlertDescription>
               <ul className="list-disc list-inside mt-2 space-y-1">
                 <li>Active appraisal cycle with finalized participants</li>
                 <li>Target modules (Nine-Box, Succession, etc.) configured</li>
@@ -241,10 +241,10 @@ graph TB
           </Alert>
 
           {/* Future Enhancements */}
-          <Alert variant="default" className="border-blue-200 bg-blue-50 dark:bg-blue-950/20">
-            <Lightbulb className="h-4 w-4 text-blue-600" />
-            <AlertTitle className="text-blue-800 dark:text-blue-200">Future Enhancements</AlertTitle>
-            <AlertDescription className="text-blue-700 dark:text-blue-300">
+          <Alert variant="default" className="border-2 border-blue-500 bg-blue-500/20">
+            <Lightbulb className="h-4 w-4" />
+            <AlertTitle className="font-bold">Future Enhancements</AlertTitle>
+            <AlertDescription>
               <p className="mb-2">Planned enhancements to the integration framework:</p>
               <ul className="list-disc list-inside space-y-1">
                 <li>Integration Health Dashboard with success/failure metrics</li>

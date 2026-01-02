@@ -330,10 +330,10 @@ graph TB
           />
 
           {/* HR Reminders Bridge */}
-          <Alert variant="default" className="border-green-200 bg-green-50 dark:bg-green-950/20">
-            <CheckCircle2 className="h-4 w-4 text-green-600" />
-            <AlertTitle className="text-green-800 dark:text-green-200">HR Reminders Integration Available</AlertTitle>
-            <AlertDescription className="text-green-700 dark:text-green-300">
+          <Alert variant="default" className="border-2 border-green-500 bg-green-500/20">
+            <CheckCircle2 className="h-4 w-4" />
+            <AlertTitle className="font-bold">HR Reminders Integration Available</AlertTitle>
+            <AlertDescription>
               <p className="mb-2">Appraisal integration events are now bridged to HR Hub Reminders:</p>
               <ul className="list-disc list-inside space-y-1">
                 <li><strong>APPRAISAL_FINALIZED</strong> - Trigger reminders when appraisals are completed</li>
@@ -351,10 +351,10 @@ graph TB
           </Alert>
 
           {/* Future Enhancements */}
-          <Alert variant="default" className="border-blue-200 bg-blue-50 dark:bg-blue-950/20">
-            <Lightbulb className="h-4 w-4 text-blue-600" />
-            <AlertTitle className="text-blue-800 dark:text-blue-200">Future Enhancements</AlertTitle>
-            <AlertDescription className="text-blue-700 dark:text-blue-300">
+          <Alert variant="default" className="border-2 border-blue-500 bg-blue-500/20">
+            <Lightbulb className="h-4 w-4" />
+            <AlertTitle className="font-bold">Future Enhancements</AlertTitle>
+            <AlertDescription>
               <p className="mb-2">Planned enhancements to notification orchestration:</p>
               <ul className="list-disc list-inside space-y-1">
                 <li>Email delivery channel in addition to in-app notifications</li>
