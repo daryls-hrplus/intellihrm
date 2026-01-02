@@ -93,35 +93,35 @@ export function ManualDiagrams() {
             {/* Main flow */}
             <div className="flex flex-wrap justify-center items-center gap-2 p-4">
               {[
-                { status: 'draft', color: 'bg-gray-200 dark:bg-gray-800' },
-                { status: 'pending', color: 'bg-blue-200 dark:bg-blue-900' },
-                { status: 'in_progress', color: 'bg-amber-200 dark:bg-amber-900' },
-                { status: 'approved', color: 'bg-green-200 dark:bg-green-900' }
+                { status: 'draft', color: 'bg-gray-600 text-white' },
+                { status: 'pending', color: 'bg-blue-600 text-white' },
+                { status: 'in_progress', color: 'bg-amber-600 text-white' },
+                { status: 'approved', color: 'bg-green-600 text-white' }
               ].map((item, i, arr) => (
                 <div key={item.status} className="flex items-center gap-2">
                   <div className={`px-4 py-2 rounded-lg ${item.color} font-medium text-sm`}>
                     {item.status}
                   </div>
-                  {i < arr.length - 1 && <span className="text-muted-foreground">→</span>}
+                  {i < arr.length - 1 && <span className="text-primary font-bold">→</span>}
                 </div>
               ))}
             </div>
             
             {/* Alternative paths */}
-            <div className="grid md:grid-cols-2 gap-4 p-4 bg-muted/50 rounded-lg">
+            <div className="grid md:grid-cols-2 gap-4 p-4 border-l-4 border-l-primary bg-primary/5 rounded-r-lg">
               <div>
-                <h4 className="font-medium text-sm mb-3">Exception Statuses</h4>
+                <h4 className="font-medium text-sm mb-3 text-primary">Exception Statuses</h4>
                 <div className="flex flex-wrap gap-2">
-                  <Badge variant="outline" className="bg-red-100 dark:bg-red-900/30">rejected</Badge>
-                  <Badge variant="outline" className="bg-orange-100 dark:bg-orange-900/30">returned</Badge>
-                  <Badge variant="outline" className="bg-purple-100 dark:bg-purple-900/30">escalated</Badge>
+                  <Badge className="bg-red-600 text-white hover:bg-red-700">rejected</Badge>
+                  <Badge className="bg-orange-600 text-white hover:bg-orange-700">returned</Badge>
+                  <Badge className="bg-purple-600 text-white hover:bg-purple-700">escalated</Badge>
                 </div>
               </div>
               <div>
-                <h4 className="font-medium text-sm mb-3">Terminal Statuses</h4>
+                <h4 className="font-medium text-sm mb-3 text-primary">Terminal Statuses</h4>
                 <div className="flex flex-wrap gap-2">
-                  <Badge variant="outline" className="bg-gray-100 dark:bg-gray-900/30">cancelled</Badge>
-                  <Badge variant="outline" className="bg-slate-100 dark:bg-slate-900/30">auto_terminated</Badge>
+                  <Badge className="bg-gray-600 text-white hover:bg-gray-700">cancelled</Badge>
+                  <Badge className="bg-slate-600 text-white hover:bg-slate-700">auto_terminated</Badge>
                 </div>
               </div>
             </div>
@@ -234,11 +234,11 @@ export function ManualDiagrams() {
               </div>
             </div>
           </div>
-          <div className="mt-4 p-4 bg-muted/50 rounded-lg">
-            <h4 className="font-medium text-sm mb-2">appraisal_strengths_gaps Fields</h4>
+          <div className="mt-4 p-4 border-l-4 border-l-primary bg-primary/5 rounded-r-lg">
+            <h4 className="font-medium text-sm mb-2 text-primary">appraisal_strengths_gaps Fields</h4>
             <div className="flex flex-wrap gap-2">
               {['strengths', 'development_gaps', 'ai_confidence', 'suggested_idp_goals', 'linked_idp_goal_ids', 'manager_acknowledged'].map((field) => (
-                <Badge key={field} variant="outline">{field}</Badge>
+                <Badge key={field} className="bg-primary text-primary-foreground">{field}</Badge>
               ))}
             </div>
           </div>
@@ -256,33 +256,33 @@ export function ManualDiagrams() {
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap justify-center items-center gap-2 p-4">
-            {[
-              { status: 'scheduled', color: 'bg-blue-200 dark:bg-blue-900' },
-              { status: 'confirmed', color: 'bg-green-200 dark:bg-green-900' },
-              { status: 'completed', color: 'bg-emerald-200 dark:bg-emerald-900' }
-            ].map((item, i, arr) => (
-              <div key={item.status} className="flex items-center gap-2">
-                <div className={`px-4 py-2 rounded-lg ${item.color} font-medium text-sm`}>
-                  {item.status}
+              {[
+                { status: 'scheduled', color: 'bg-blue-600 text-white' },
+                { status: 'confirmed', color: 'bg-green-600 text-white' },
+                { status: 'completed', color: 'bg-emerald-600 text-white' }
+              ].map((item, i, arr) => (
+                <div key={item.status} className="flex items-center gap-2">
+                  <div className={`px-4 py-2 rounded-lg ${item.color} font-medium text-sm`}>
+                    {item.status}
+                  </div>
+                  {i < arr.length - 1 && <span className="text-primary font-bold">→</span>}
                 </div>
-                {i < arr.length - 1 && <span className="text-muted-foreground">→</span>}
-              </div>
-            ))}
+              ))}
           </div>
           <div className="grid md:grid-cols-2 gap-4 mt-4">
-            <div className="p-4 bg-muted/50 rounded-lg">
-              <h4 className="font-medium text-sm mb-2">Exception Paths</h4>
+            <div className="p-4 border-l-4 border-l-amber-500 bg-amber-500/5 rounded-r-lg">
+              <h4 className="font-medium text-sm mb-2 text-amber-600 dark:text-amber-400">Exception Paths</h4>
               <div className="flex flex-wrap gap-2">
-                <Badge variant="outline" className="bg-amber-100 dark:bg-amber-900/30">rescheduled</Badge>
-                <Badge variant="outline" className="bg-gray-100 dark:bg-gray-900/30">cancelled</Badge>
-                <Badge variant="outline" className="bg-red-100 dark:bg-red-900/30">no_show</Badge>
+                <Badge className="bg-amber-600 text-white">rescheduled</Badge>
+                <Badge className="bg-gray-600 text-white">cancelled</Badge>
+                <Badge className="bg-red-600 text-white">no_show</Badge>
               </div>
             </div>
-            <div className="p-4 bg-muted/50 rounded-lg">
-              <h4 className="font-medium text-sm mb-2">Video Integration</h4>
+            <div className="p-4 border-l-4 border-l-blue-500 bg-blue-500/5 rounded-r-lg">
+              <h4 className="font-medium text-sm mb-2 text-blue-600 dark:text-blue-400">Video Integration</h4>
               <div className="flex flex-wrap gap-2">
-                <Badge>Zoom</Badge>
-                <Badge>Microsoft Teams</Badge>
+                <Badge className="bg-blue-600 text-white">Zoom</Badge>
+                <Badge className="bg-purple-600 text-white">Microsoft Teams</Badge>
               </div>
             </div>
           </div>
@@ -385,23 +385,23 @@ export function ManualDiagrams() {
         <CardContent>
           <div className="grid md:grid-cols-3 gap-4 text-center">
             <div className="space-y-2">
-              <h4 className="font-medium text-sm text-muted-foreground">UPSTREAM</h4>
+              <h4 className="font-medium text-sm text-blue-600 dark:text-blue-400">UPSTREAM</h4>
               <div className="space-y-2">
                 {['Goals', 'Competencies', 'Job Profiles', '360 Feedback', 'Company Values', 'Position Assignments'].map((item) => (
-                  <div key={item} className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded text-sm">{item}</div>
+                  <div key={item} className="p-2 bg-blue-600 text-white rounded text-sm font-medium">{item}</div>
                 ))}
               </div>
             </div>
             <div className="flex items-center justify-center">
-              <div className="p-4 bg-primary text-primary-foreground rounded-lg font-medium">
+              <div className="p-4 bg-primary text-primary-foreground rounded-lg font-bold text-lg shadow-lg">
                 Appraisals Module
               </div>
             </div>
             <div className="space-y-2">
-              <h4 className="font-medium text-sm text-muted-foreground">DOWNSTREAM</h4>
+              <h4 className="font-medium text-sm text-green-600 dark:text-green-400">DOWNSTREAM</h4>
               <div className="space-y-2">
                 {['Nine-Box', 'Succession', 'Compensation', 'Learning/IDP', 'PIP', 'Workforce Analytics', 'Notifications'].map((item) => (
-                  <div key={item} className="p-2 bg-green-100 dark:bg-green-900/30 rounded text-sm">{item}</div>
+                  <div key={item} className="p-2 bg-green-600 text-white rounded text-sm font-medium">{item}</div>
                 ))}
               </div>
             </div>

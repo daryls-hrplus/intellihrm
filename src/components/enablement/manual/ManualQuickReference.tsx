@@ -111,13 +111,13 @@ export function ManualQuickReference() {
               </div>
             ))}
           </div>
-          <div className="mt-4 p-4 bg-muted/50 rounded-lg">
-            <h4 className="font-medium text-sm mb-2">Response Status Options</h4>
+          <div className="mt-4 p-4 border-l-4 border-l-primary bg-primary/5 rounded-r-lg">
+            <h4 className="font-medium text-sm mb-2 text-primary">Response Status Options</h4>
             <div className="flex flex-wrap gap-2">
-              <Badge variant="outline" className="bg-green-100 dark:bg-green-900/30">agree</Badge>
-              <Badge variant="outline" className="bg-red-100 dark:bg-red-900/30">disagree</Badge>
-              <Badge variant="outline" className="bg-amber-100 dark:bg-amber-900/30">partial_agree</Badge>
-              <Badge variant="outline" className="bg-gray-100 dark:bg-gray-900/30">pending</Badge>
+              <Badge className="bg-green-600 text-white hover:bg-green-700">agree</Badge>
+              <Badge className="bg-red-600 text-white hover:bg-red-700">disagree</Badge>
+              <Badge className="bg-amber-600 text-white hover:bg-amber-700">partial_agree</Badge>
+              <Badge variant="outline" className="border-primary/50">pending</Badge>
             </div>
           </div>
         </CardContent>
@@ -150,17 +150,17 @@ export function ManualQuickReference() {
               </div>
             </div>
             <div>
-              <h4 className="font-medium mb-3">Interview Status Flow</h4>
+              <h4 className="font-medium mb-3 text-primary">Interview Status Flow</h4>
               <div className="space-y-2">
                 {[
-                  { status: 'scheduled', color: 'bg-blue-100 dark:bg-blue-900/30' },
-                  { status: 'confirmed', color: 'bg-green-100 dark:bg-green-900/30' },
-                  { status: 'completed', color: 'bg-emerald-100 dark:bg-emerald-900/30' },
-                  { status: 'cancelled', color: 'bg-gray-100 dark:bg-gray-900/30' },
-                  { status: 'rescheduled', color: 'bg-amber-100 dark:bg-amber-900/30' },
-                  { status: 'no_show', color: 'bg-red-100 dark:bg-red-900/30' }
+                  { status: 'scheduled', color: 'bg-blue-600 text-white' },
+                  { status: 'confirmed', color: 'bg-green-600 text-white' },
+                  { status: 'completed', color: 'bg-emerald-600 text-white' },
+                  { status: 'cancelled', color: 'bg-gray-600 text-white' },
+                  { status: 'rescheduled', color: 'bg-amber-600 text-white' },
+                  { status: 'no_show', color: 'bg-red-600 text-white' }
                 ].map((item) => (
-                  <Badge key={item.status} variant="outline" className={item.color}>
+                  <Badge key={item.status} className={item.color}>
                     {item.status}
                   </Badge>
                 ))}
@@ -182,14 +182,14 @@ export function ManualQuickReference() {
         <CardContent>
           <div className="grid md:grid-cols-2 gap-6">
             <div>
-              <h4 className="font-medium mb-3">Evaluation Modes</h4>
+              <h4 className="font-medium mb-3 text-primary">Evaluation Modes</h4>
               <div className="space-y-3">
-                <div className="p-3 border rounded-lg">
-                  <Badge className="mb-2">aggregate</Badge>
+                <div className="p-3 border-l-4 border-l-primary bg-primary/5 rounded-r-lg">
+                  <Badge className="mb-2 bg-primary text-primary-foreground">aggregate</Badge>
                   <p className="text-sm text-muted-foreground">Combine weighted scores from all positions into one overall score</p>
                 </div>
-                <div className="p-3 border rounded-lg">
-                  <Badge variant="outline" className="mb-2">separate</Badge>
+                <div className="p-3 border-l-4 border-l-muted-foreground/50 bg-muted/50 rounded-r-lg">
+                  <Badge variant="outline" className="mb-2 border-primary/50">separate</Badge>
                   <p className="text-sm text-muted-foreground">Evaluate each position independently with separate scores</p>
                 </div>
               </div>
@@ -219,14 +219,14 @@ export function ManualQuickReference() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <div className="p-4 bg-muted/50 rounded-lg">
-              <h4 className="font-medium mb-2">Role Segment Structure</h4>
+            <div className="p-4 border-l-4 border-l-primary bg-primary/5 rounded-r-lg">
+              <h4 className="font-medium mb-2 text-primary">Role Segment Structure</h4>
               <p className="text-sm text-muted-foreground mb-3">Each segment represents a period where the employee held a specific position:</p>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
-                <Badge variant="outline">position_id</Badge>
-                <Badge variant="outline">start_date</Badge>
-                <Badge variant="outline">end_date</Badge>
-                <Badge variant="outline">contribution_percentage</Badge>
+                <Badge className="bg-primary text-primary-foreground justify-center">position_id</Badge>
+                <Badge className="bg-primary text-primary-foreground justify-center">start_date</Badge>
+                <Badge className="bg-primary text-primary-foreground justify-center">end_date</Badge>
+                <Badge className="bg-primary text-primary-foreground justify-center">contribution_%</Badge>
               </div>
             </div>
             <div className="grid md:grid-cols-2 gap-4">
@@ -241,10 +241,10 @@ export function ManualQuickReference() {
                   ))}
                 </div>
               </div>
-              <div>
-                <h4 className="font-medium mb-3">Score Calculation</h4>
-                <p className="text-sm text-muted-foreground">Final score = Σ (Segment Score × Contribution %)</p>
-              </div>
+            <div className="p-4 border-l-4 border-l-blue-500 bg-blue-500/5 rounded-r-lg">
+              <h4 className="font-medium mb-3 text-blue-600 dark:text-blue-400">Score Calculation</h4>
+              <p className="text-sm font-mono bg-muted px-3 py-2 rounded">Final score = Σ (Segment Score × Contribution %)</p>
+            </div>
             </div>
           </div>
         </CardContent>
@@ -272,12 +272,12 @@ export function ManualQuickReference() {
               </div>
             </div>
             <div>
-              <h4 className="font-medium mb-3">Scoring Components</h4>
+              <h4 className="font-medium mb-3 text-primary">Scoring Components</h4>
               <div className="space-y-2 text-sm">
-                <div className="p-2 bg-muted rounded">value_id - Reference to company value</div>
-                <div className="p-2 bg-muted rounded">score - Numeric rating</div>
-                <div className="p-2 bg-muted rounded">demonstrated_behaviors - Evidence text</div>
-                <div className="p-2 bg-muted rounded">manager_comments - Additional feedback</div>
+                <div className="p-2 border-l-4 border-l-primary bg-primary/5 rounded-r-lg font-mono">value_id - Reference to company value</div>
+                <div className="p-2 border-l-4 border-l-primary bg-primary/5 rounded-r-lg font-mono">score - Numeric rating</div>
+                <div className="p-2 border-l-4 border-l-primary bg-primary/5 rounded-r-lg font-mono">demonstrated_behaviors - Evidence text</div>
+                <div className="p-2 border-l-4 border-l-primary bg-primary/5 rounded-r-lg font-mono">manager_comments - Additional feedback</div>
               </div>
             </div>
           </div>
@@ -296,32 +296,32 @@ export function ManualQuickReference() {
         <CardContent>
           <div className="grid md:grid-cols-2 gap-6">
             <div>
-              <h4 className="font-medium mb-3">Condition Types</h4>
+              <h4 className="font-medium mb-3 text-primary">Condition Types</h4>
               <div className="flex flex-wrap gap-2">
                 {['score_below', 'score_above', 'repeated_low', 'gap_detected', 'improvement_trend', 'competency_gap', 'goal_not_met'].map((type) => (
-                  <Badge key={type} variant="outline">{type}</Badge>
+                  <Badge key={type} className="bg-amber-600 text-white hover:bg-amber-700">{type}</Badge>
                 ))}
               </div>
             </div>
             <div>
-              <h4 className="font-medium mb-3">Action Types</h4>
+              <h4 className="font-medium mb-3 text-primary">Action Types</h4>
               <div className="flex flex-wrap gap-2">
                 {['create_idp', 'create_pip', 'suggest_succession', 'block_finalization', 'require_comment', 'notify_hr', 'schedule_coaching', 'require_development_plan'].map((type) => (
-                  <Badge key={type} variant="secondary">{type}</Badge>
+                  <Badge key={type} className="bg-primary text-primary-foreground">{type}</Badge>
                 ))}
               </div>
             </div>
           </div>
-          <div className="mt-4 p-4 bg-muted/50 rounded-lg">
-            <h4 className="font-medium text-sm mb-2">Execution Status Flow</h4>
+          <div className="mt-4 p-4 border-l-4 border-l-primary bg-primary/5 rounded-r-lg">
+            <h4 className="font-medium text-sm mb-2 text-primary">Execution Status Flow</h4>
             <div className="flex flex-wrap items-center gap-2">
-              <Badge>pending</Badge>
-              <span>→</span>
-              <Badge>executed</Badge>
-              <span>or</span>
-              <Badge variant="outline">overridden</Badge>
-              <span>→</span>
-              <Badge variant="secondary">acknowledged</Badge>
+              <Badge className="bg-amber-600 text-white">pending</Badge>
+              <span className="text-primary font-bold">→</span>
+              <Badge className="bg-green-600 text-white">executed</Badge>
+              <span className="text-muted-foreground">or</span>
+              <Badge className="bg-gray-600 text-white">overridden</Badge>
+              <span className="text-primary font-bold">→</span>
+              <Badge className="bg-primary text-primary-foreground">acknowledged</Badge>
             </div>
           </div>
         </CardContent>
@@ -340,7 +340,7 @@ export function ManualQuickReference() {
           <div className="grid md:grid-cols-3 gap-4">
             <div>
               <h4 className="font-medium mb-3 flex items-center gap-2">
-                <Badge variant="outline">Pre-Session</Badge>
+                <Badge className="bg-gray-600 text-white">Pre-Session</Badge>
               </h4>
               <div className="space-y-2">
                 {['Gather all submitted evaluations', 'Run distribution analysis', 'Identify rating outliers', 'Prepare nine-box view'].map((item, i) => (
@@ -364,7 +364,7 @@ export function ManualQuickReference() {
             </div>
             <div>
               <h4 className="font-medium mb-3 flex items-center gap-2">
-                <Badge variant="secondary">Post-Session</Badge>
+                <Badge className="bg-green-600 text-white">Post-Session</Badge>
               </h4>
               <div className="space-y-2">
                 {['Finalize calibrated scores', 'Update post_calibration_score', 'Generate audit trail', 'Communicate to managers'].map((item, i) => (
