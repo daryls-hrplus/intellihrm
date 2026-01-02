@@ -622,9 +622,9 @@ export default function AppraisalsPage() {
                   <h3 className="text-lg font-semibold">Performance Analytics</h3>
                   <p className="text-sm text-muted-foreground">Organization-wide performance insights</p>
                 </div>
-                <Button onClick={() => navigate("/performance/appraisal-analytics")}>
-                  <ExternalLink className="mr-2 h-4 w-4" />
-                  Full Dashboard
+                <Button onClick={() => navigate("/performance/intelligence-hub")}>
+                  <Brain className="mr-2 h-4 w-4" />
+                  Intelligence Hub
                 </Button>
               </div>
               <PerformanceDistributionChart companyId={selectedCompanyId} />
