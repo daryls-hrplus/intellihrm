@@ -9,6 +9,7 @@ interface CoverPageProps {
   companyName: string;
   style: 'branded' | 'minimal' | 'corporate';
   brandColors: BrandColors;
+  logoUrl?: string;
 }
 
 export function CoverPage({ 
@@ -18,24 +19,42 @@ export function CoverPage({
   date, 
   companyName, 
   style, 
-  brandColors 
+  brandColors,
+  logoUrl
 }: CoverPageProps) {
+  const LogoOrIcon = () => {
+    if (logoUrl) {
+      return (
+        <img 
+          src={logoUrl} 
+          alt="Company logo" 
+          className="max-h-20 max-w-48 object-contain"
+          style={{ filter: style === 'branded' ? 'brightness(0) invert(1)' : 'none' }}
+        />
+      );
+    }
+    return (
+      <div 
+        className="w-20 h-20 rounded-2xl flex items-center justify-center"
+        style={{ backgroundColor: style === 'branded' ? 'rgba(255,255,255,0.2)' : brandColors.primaryColor + '20' }}
+      >
+        <Book className={`w-10 h-10 ${style === 'branded' ? 'text-white' : ''}`} style={{ color: style !== 'branded' ? brandColors.primaryColor : undefined }} />
+      </div>
+    );
+  };
+
   if (style === 'branded') {
     return (
       <div 
         className="print-cover w-full h-full flex flex-col justify-center items-center text-center p-12"
         style={{ 
           backgroundColor: brandColors.primaryColor,
-          minHeight: '100vh',
-          pageBreakAfter: 'always'
+          minHeight: '100%'
         }}
       >
         <div className="mb-8">
-          <div 
-            className="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6"
-            style={{ backgroundColor: 'rgba(255,255,255,0.2)' }}
-          >
-            <Book className="w-10 h-10 text-white" />
+          <div className="mb-6 flex justify-center">
+            <LogoOrIcon />
           </div>
           <h2 className="text-2xl font-medium text-white/80 mb-2">{companyName}</h2>
         </div>
@@ -65,13 +84,19 @@ export function CoverPage({
     return (
       <div 
         className="print-cover w-full h-full flex flex-col justify-center items-center text-center p-12 bg-white"
-        style={{ minHeight: '100vh', pageBreakAfter: 'always' }}
+        style={{ minHeight: '100%' }}
       >
         <div className="mb-12">
-          <div 
-            className="w-16 h-1 mx-auto mb-8"
-            style={{ backgroundColor: brandColors.primaryColor }}
-          />
+          {logoUrl ? (
+            <div className="mb-8 flex justify-center">
+              <LogoOrIcon />
+            </div>
+          ) : (
+            <div 
+              className="w-16 h-1 mx-auto mb-8"
+              style={{ backgroundColor: brandColors.primaryColor }}
+            />
+          )}
           <h2 className="text-lg font-medium text-muted-foreground mb-2">{companyName}</h2>
         </div>
         
@@ -107,7 +132,7 @@ export function CoverPage({
   return (
     <div 
       className="print-cover w-full h-full flex flex-col bg-white"
-      style={{ minHeight: '100vh', pageBreakAfter: 'always' }}
+      style={{ minHeight: '100%' }}
     >
       {/* Top band */}
       <div 
@@ -115,12 +140,21 @@ export function CoverPage({
         style={{ backgroundColor: brandColors.secondaryColor }}
       >
         <div className="flex items-center gap-4">
-          <div 
-            className="w-12 h-12 rounded-lg flex items-center justify-center"
-            style={{ backgroundColor: 'rgba(255,255,255,0.2)' }}
-          >
-            <Book className="w-6 h-6 text-white" />
-          </div>
+          {logoUrl ? (
+            <img 
+              src={logoUrl} 
+              alt="Company logo" 
+              className="h-12 w-auto object-contain"
+              style={{ filter: 'brightness(0) invert(1)' }}
+            />
+          ) : (
+            <div 
+              className="w-12 h-12 rounded-lg flex items-center justify-center"
+              style={{ backgroundColor: 'rgba(255,255,255,0.2)' }}
+            >
+              <Book className="w-6 h-6 text-white" />
+            </div>
+          )}
           <h2 className="text-xl font-semibold text-white">{companyName}</h2>
         </div>
       </div>

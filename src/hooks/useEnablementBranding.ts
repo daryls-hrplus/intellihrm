@@ -1,4 +1,3 @@
-import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -8,13 +7,15 @@ export interface BrandColors {
   secondaryColor: string;
   accentColor: string;
   companyName: string;
+  logoUrl?: string;
 }
 
 const DEFAULT_BRAND_COLORS: BrandColors = {
   primaryColor: "#2F7AC3",    // HRplus Moderate Azure
   secondaryColor: "#0C4277",  // HRplus Dark Azure
   accentColor: "#17A584",     // Teal (unique differentiator)
-  companyName: "HRplus Cerebra"
+  companyName: "HRplus Cerebra",
+  logoUrl: undefined
 };
 
 export const useEnablementBranding = () => {
@@ -42,7 +43,8 @@ export const useEnablementBranding = () => {
           primaryColor: (config.primaryColor as string) || DEFAULT_BRAND_COLORS.primaryColor,
           secondaryColor: (config.secondaryColor as string) || DEFAULT_BRAND_COLORS.secondaryColor,
           accentColor: (config.accentColor as string) || DEFAULT_BRAND_COLORS.accentColor,
-          companyName: (config.companyName as string) || DEFAULT_BRAND_COLORS.companyName
+          companyName: (config.companyName as string) || DEFAULT_BRAND_COLORS.companyName,
+          logoUrl: (config.logoUrl as string) || undefined
         };
       }
       
@@ -57,7 +59,8 @@ export const useEnablementBranding = () => {
         primaryColor: colors.primaryColor,
         secondaryColor: colors.secondaryColor,
         accentColor: colors.accentColor,
-        companyName: colors.companyName
+        companyName: colors.companyName,
+        logoUrl: colors.logoUrl || null
       };
       
       // Check if record exists

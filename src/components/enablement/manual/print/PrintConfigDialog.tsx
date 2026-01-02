@@ -9,8 +9,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Slider } from "@/components/ui/slider";
 import { Card, CardContent } from "@/components/ui/card";
 import { ManualPrintSettings } from "@/hooks/useManualPrintSettings";
-import { BrandColors } from "@/hooks/useEnablementBranding";
+import { BrandColors, useEnablementBranding } from "@/hooks/useEnablementBranding";
 import { FileText, Layout, Type, Palette, BookOpen } from "lucide-react";
+import { LogoUpload } from "./LogoUpload";
 
 interface PrintConfigDialogProps {
   open: boolean;
@@ -29,6 +30,7 @@ export function PrintConfigDialog({
   onSave,
   isSaving
 }: PrintConfigDialogProps) {
+  const { saveBrandColors } = useEnablementBranding();
   const [localSettings, setLocalSettings] = useState<ManualPrintSettings>(settings);
 
   useEffect(() => {
@@ -424,7 +426,17 @@ export function PrintConfigDialog({
 
           {/* Branding Tab */}
           <TabsContent value="branding" className="space-y-4 mt-4">
-            <div className="flex items-center justify-between">
+            <LogoUpload 
+              logoUrl={brandColors.logoUrl}
+              onLogoChange={(url) => {
+                saveBrandColors.mutate({
+                  ...brandColors,
+                  logoUrl: url
+                });
+              }}
+            />
+
+            <div className="flex items-center justify-between pt-4 border-t">
               <div>
                 <Label>Apply Brand Colors</Label>
                 <p className="text-sm text-muted-foreground">Use company colors throughout</p>
