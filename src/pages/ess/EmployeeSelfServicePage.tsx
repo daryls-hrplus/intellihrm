@@ -123,16 +123,16 @@ export default function EmployeeSelfServicePage() {
       items: filterByAccess([allModules.leave, allModules.myCalendar, allModules.teamCalendar, allModules.timeAttendance, allModules.timesheets]),
     },
     {
-      titleKey: "Career",
-      items: filterByAccess([allModules.professionalInfo, allModules.careerPlan, allModules.careerPaths, allModules.mentorship, allModules.jobs, allModules.milestones]),
-    },
-    {
       titleKey: "Skills and Competencies",
       items: filterByAccess([allModules.competencies, allModules.qualifications, allModules.skillGaps, allModules.interests]),
     },
     {
       titleKey: "Performance",
       items: filterByAccess([allModules.myAppraisals, allModules.goals, allModules.evidencePortfolio, allModules.feedback, allModules.goalInterviews, allModules.appraisalInterviews, allModules.recognition]),
+    },
+    {
+      titleKey: "Career",
+      items: filterByAccess([allModules.professionalInfo, allModules.careerPlan, allModules.careerPaths, allModules.mentorship, allModules.jobs, allModules.milestones]),
     },
     {
       titleKey: "Learning & Development",
