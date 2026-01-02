@@ -20,8 +20,15 @@ export const NAVIGATION_PATHS: Record<string, string[]> = {
 
   // Part 3: Workflows
   'sec-3-1': ['Performance', 'Appraisals', 'Cycles'],
-  'sec-3-2': ['Performance', 'Appraisals', 'Team Evaluations'],
-  'sec-3-3': ['Employee Self-Service', 'My Performance', 'Appraisals'],
+  'sec-3-2': ['Performance', 'Appraisals', 'Cycles', 'Enrollment'],
+  'sec-3-3': ['Manager Self-Service', 'Team Appraisals'],
+  'sec-3-4': ['Employee Self-Service', 'My Performance', 'Appraisals'],
+  'sec-3-5': ['Performance', 'Appraisals', 'Goal Rating'],
+  'sec-3-6': ['Performance', 'Appraisals', 'Competency Assessment'],
+  'sec-3-7': ['Employee Self-Service', 'My Performance', 'Response'],
+  'sec-3-8': ['Manager Self-Service', 'Team Appraisals', 'Interviews'],
+  'sec-3-9': ['Performance', 'Appraisals', 'Role Changes'],
+  'sec-3-10': ['Performance', 'Appraisals', 'Finalization'],
 
   // Part 4: Calibration
   'sec-4-1': ['Performance', 'Calibration', 'Sessions'],
