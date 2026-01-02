@@ -106,9 +106,20 @@ export const RELATED_TOPICS: Record<string, { sectionId: string; title: string }
     { sectionId: 'sec-5-2', title: 'Bias Detection' },
     { sectionId: 'sec-3-2', title: 'Manager Workflow' },
   ],
+  'sec-5-6': [
+    { sectionId: 'sec-6-1', title: 'Intelligence Hub Dashboard' },
+    { sectionId: 'sec-6-4', title: 'Trend Analysis & Predictions' },
+    { sectionId: 'sec-5-1', title: 'AI Feedback Assistant' },
+  ],
   'sec-6-1': [
     { sectionId: 'sec-6-2', title: 'Distribution Analysis' },
-    { sectionId: 'sec-4-1', title: 'Calibration' },
+    { sectionId: 'sec-6-4', title: 'Trend Analysis & Predictions' },
+    { sectionId: 'sec-5-6', title: 'AI Analytics Overview' },
+  ],
+  'sec-6-4': [
+    { sectionId: 'sec-6-1', title: 'Intelligence Hub Dashboard' },
+    { sectionId: 'sec-5-6', title: 'AI Analytics Overview' },
+    { sectionId: 'sec-4-1', title: 'Calibration Sessions' },
   ],
   'sec-7-1': [
     { sectionId: 'sec-7-2', title: 'Downstream Triggers' },
