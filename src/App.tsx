@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { TranslationsProvider } from "@/components/TranslationsProvider";
 import { ThemeProvider } from "next-themes";
@@ -146,8 +146,7 @@ import AppraisalsPage from "./pages/performance/AppraisalsPage";
 import PerformanceImprovementPlansPage from "./pages/performance/PerformanceImprovementPlansPage";
 import ContinuousFeedbackPage from "./pages/performance/ContinuousFeedbackPage";
 import RecognitionAwardsPage from "./pages/performance/RecognitionAwardsPage";
-import PerformanceAnalyticsPage from "./pages/performance/PerformanceAnalyticsPage";
-import AppraisalAnalyticsPage from "./pages/performance/AppraisalAnalyticsPage";
+import PerformanceIntelligenceHub from "./pages/performance/PerformanceIntelligenceHub";
 import CalibrationSessionsPage from "./pages/performance/CalibrationSessionsPage";
 import CalibrationWorkspacePage from "./pages/performance/CalibrationWorkspacePage";
 import PerformanceSetupPage from "./pages/performance/PerformanceSetupPage";
@@ -3027,20 +3026,21 @@ const App = () => (
               }
             />
             <Route
-              path="/performance/analytics"
+              path="/performance/intelligence-hub"
               element={
                 <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <PerformanceAnalyticsPage />
+                  <PerformanceIntelligenceHub />
                 </ProtectedRoute>
               }
             />
+            {/* Redirects from old analytics routes */}
+            <Route
+              path="/performance/analytics"
+              element={<Navigate to="/performance/intelligence-hub" replace />}
+            />
             <Route
               path="/performance/appraisal-analytics"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <AppraisalAnalyticsPage />
-                </ProtectedRoute>
-              }
+              element={<Navigate to="/performance/intelligence-hub" replace />}
             />
             <Route
               path="/performance/calibration"
