@@ -4,8 +4,23 @@ import { History, User, Calendar } from 'lucide-react';
 
 const VERSION_HISTORY = [
   {
-    version: '1.2.0',
+    version: '1.3.0',
     date: '2026-01-02',
+    author: 'HRplus Team',
+    changes: [
+      'Comprehensive Part 8 Troubleshooting expansion (8 subsections)',
+      'Updated RLS policies documentation to reflect actual implementation (14 policies)',
+      'Added Integration Troubleshooting Guide with actual error patterns',
+      'Added Escalation Procedures framework (organization-defined SLAs)',
+      'Added Performance Optimization and Data Quality sections',
+      'Expanded Quick Reference Cards (10 total covering all workflows)',
+      'Complete Architecture Diagrams (8 diagrams, all 14 tables documented)',
+      'Expanded Glossary (33 terms across 7 categories)',
+    ],
+  },
+  {
+    version: '1.2.0',
+    date: '2025-12-20',
     author: 'HRplus Team',
     changes: [
       'Added navigation paths to all sections',
