@@ -163,14 +163,14 @@ export function DevelopmentSuggestionsIDP() {
           </h3>
           <div className="flex flex-wrap items-center gap-2 text-sm">
             {[
-              { step: 'Gap Identified', color: 'bg-amber-100 text-amber-800' },
-              { step: 'AI Suggests Development', color: 'bg-blue-100 text-blue-800' },
-              { step: 'Link to IDP', color: 'bg-purple-100 text-purple-800' },
-              { step: 'Learning Assigned', color: 'bg-green-100 text-green-800' },
-              { step: 'Progress Tracked', color: 'bg-teal-100 text-teal-800' }
+              { step: 'Gap Identified', color: 'bg-warning/10 border-warning/30 text-warning' },
+              { step: 'AI Suggests Development', color: 'bg-info/10 border-info/30 text-info' },
+              { step: 'Link to IDP', color: 'bg-primary/10 border-primary/30 text-primary' },
+              { step: 'Learning Assigned', color: 'bg-success/10 border-success/30 text-success' },
+              { step: 'Progress Tracked', color: 'bg-secondary text-secondary-foreground' }
             ].map((item, index) => (
               <div key={item.step} className="flex items-center gap-2">
-                <Badge className={item.color}>{item.step}</Badge>
+                <Badge className={`border ${item.color}`}>{item.step}</Badge>
                 {index < 4 && <ArrowRight className="h-4 w-4 text-muted-foreground" />}
               </div>
             ))}
@@ -204,16 +204,16 @@ export function DevelopmentSuggestionsIDP() {
           <h3 className="text-lg font-semibold">Understanding Priority Levels</h3>
           <div className="space-y-3">
             {[
-              { level: 'High', color: 'bg-red-100 text-red-800', criteria: 'Critical for current role success; blocking career progression; significant performance impact', action: 'Address within 30-60 days with structured plan' },
-              { level: 'Medium', color: 'bg-amber-100 text-amber-800', criteria: 'Important for role optimization; affects team or stakeholders; limits advancement potential', action: 'Include in quarterly development plan' },
-              { level: 'Low', color: 'bg-green-100 text-green-800', criteria: 'Nice-to-have improvements; long-term career enhancement; minor efficiency gains', action: 'Consider for annual development goals' }
+              { level: 'High', color: 'bg-destructive/10 border-destructive/30 text-destructive', criteria: 'Critical for current role success; blocking career progression; significant performance impact', action: 'Address within 30-60 days with structured plan' },
+              { level: 'Medium', color: 'bg-warning/10 border-warning/30 text-warning', criteria: 'Important for role optimization; affects team or stakeholders; limits advancement potential', action: 'Include in quarterly development plan' },
+              { level: 'Low', color: 'bg-success/10 border-success/30 text-success', criteria: 'Nice-to-have improvements; long-term career enhancement; minor efficiency gains', action: 'Consider for annual development goals' }
             ].map((item) => (
               <div key={item.level} className="p-4 border rounded-lg">
                 <div className="flex items-center gap-3 mb-2">
-                  <Badge className={item.color}>{item.level} Priority</Badge>
+                  <Badge className={`border ${item.color}`}>{item.level} Priority</Badge>
                 </div>
-                <p className="text-sm text-muted-foreground"><strong>Criteria:</strong> {item.criteria}</p>
-                <p className="text-sm text-muted-foreground mt-1"><strong>Recommended Action:</strong> {item.action}</p>
+                <p className="text-sm text-foreground/80"><strong className="text-foreground">Criteria:</strong> {item.criteria}</p>
+                <p className="text-sm text-foreground/80 mt-1"><strong className="text-foreground">Recommended Action:</strong> {item.action}</p>
               </div>
             ))}
           </div>
