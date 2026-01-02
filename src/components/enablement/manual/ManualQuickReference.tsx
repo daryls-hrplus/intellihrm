@@ -1,7 +1,18 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
-import { FileText, CheckSquare, ListOrdered, Calendar } from 'lucide-react';
+import { 
+  FileText, 
+  CheckSquare, 
+  ListOrdered, 
+  Calendar, 
+  MessageSquare,
+  Video,
+  Users,
+  Star,
+  Zap,
+  Scale
+} from 'lucide-react';
 
 export function ManualQuickReference() {
   return (
@@ -73,6 +84,296 @@ export function ManualQuickReference() {
                 {step}
               </div>
             ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Employee Response Quick Guide */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <MessageSquare className="h-5 w-5 text-primary" />
+            <CardTitle>Employee Response Quick Guide</CardTitle>
+          </div>
+          <CardDescription>Steps for reviewing and responding to your evaluation</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+            {[
+              '1. Receive Notification',
+              '2. Review Manager Rating',
+              '3. Compare to Self-Score',
+              '4. Select Response Type',
+              '5. Add Comments'
+            ].map((step, i) => (
+              <div key={i} className="p-3 bg-muted rounded-lg text-center text-sm">
+                {step}
+              </div>
+            ))}
+          </div>
+          <div className="mt-4 p-4 bg-muted/50 rounded-lg">
+            <h4 className="font-medium text-sm mb-2">Response Status Options</h4>
+            <div className="flex flex-wrap gap-2">
+              <Badge variant="outline" className="bg-green-100 dark:bg-green-900/30">agree</Badge>
+              <Badge variant="outline" className="bg-red-100 dark:bg-red-900/30">disagree</Badge>
+              <Badge variant="outline" className="bg-amber-100 dark:bg-amber-900/30">partial_agree</Badge>
+              <Badge variant="outline" className="bg-gray-100 dark:bg-gray-900/30">pending</Badge>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Interview Scheduling Checklist */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Video className="h-5 w-5 text-primary" />
+            <CardTitle>Interview Scheduling Checklist</CardTitle>
+          </div>
+          <CardDescription>Scheduling and conducting performance review meetings</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid md:grid-cols-2 gap-6">
+            <div>
+              <h4 className="font-medium mb-3">Meeting Types</h4>
+              <div className="space-y-2">
+                {['in_person', 'video_call', 'phone_call'].map((type) => (
+                  <div key={type} className="flex items-center gap-2">
+                    <Badge variant="outline">{type}</Badge>
+                  </div>
+                ))}
+              </div>
+              <h4 className="font-medium mt-4 mb-3">Video Platforms</h4>
+              <div className="flex gap-2">
+                <Badge>Zoom</Badge>
+                <Badge>Microsoft Teams</Badge>
+              </div>
+            </div>
+            <div>
+              <h4 className="font-medium mb-3">Interview Status Flow</h4>
+              <div className="space-y-2">
+                {[
+                  { status: 'scheduled', color: 'bg-blue-100 dark:bg-blue-900/30' },
+                  { status: 'confirmed', color: 'bg-green-100 dark:bg-green-900/30' },
+                  { status: 'completed', color: 'bg-emerald-100 dark:bg-emerald-900/30' },
+                  { status: 'cancelled', color: 'bg-gray-100 dark:bg-gray-900/30' },
+                  { status: 'rescheduled', color: 'bg-amber-100 dark:bg-amber-900/30' },
+                  { status: 'no_show', color: 'bg-red-100 dark:bg-red-900/30' }
+                ].map((item) => (
+                  <Badge key={item.status} variant="outline" className={item.color}>
+                    {item.status}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Multi-Position Evaluation Guide */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Users className="h-5 w-5 text-primary" />
+            <CardTitle>Multi-Position Evaluation Guide</CardTitle>
+          </div>
+          <CardDescription>Handling employees with multiple concurrent positions</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid md:grid-cols-2 gap-6">
+            <div>
+              <h4 className="font-medium mb-3">Evaluation Modes</h4>
+              <div className="space-y-3">
+                <div className="p-3 border rounded-lg">
+                  <Badge className="mb-2">aggregate</Badge>
+                  <p className="text-sm text-muted-foreground">Combine weighted scores from all positions into one overall score</p>
+                </div>
+                <div className="p-3 border rounded-lg">
+                  <Badge variant="outline" className="mb-2">separate</Badge>
+                  <p className="text-sm text-muted-foreground">Evaluate each position independently with separate scores</p>
+                </div>
+              </div>
+            </div>
+            <div>
+              <h4 className="font-medium mb-3">Position Weight Setup</h4>
+              <div className="space-y-2">
+                {['Identify all active positions', 'Assign weight percentage (must sum to 100%)', 'Configure component weights per position', 'Review aggregated calculation'].map((item, i) => (
+                  <div key={i} className="flex items-center gap-2">
+                    <Checkbox /><span className="text-sm">{item}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Role Change Handling Guide */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <FileText className="h-5 w-5 text-primary" />
+            <CardTitle>Role Change Handling Guide</CardTitle>
+          </div>
+          <CardDescription>Managing evaluations when employees change roles mid-cycle</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="p-4 bg-muted/50 rounded-lg">
+              <h4 className="font-medium mb-2">Role Segment Structure</h4>
+              <p className="text-sm text-muted-foreground mb-3">Each segment represents a period where the employee held a specific position:</p>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
+                <Badge variant="outline">position_id</Badge>
+                <Badge variant="outline">start_date</Badge>
+                <Badge variant="outline">end_date</Badge>
+                <Badge variant="outline">contribution_percentage</Badge>
+              </div>
+            </div>
+            <div className="grid md:grid-cols-2 gap-4">
+              <div>
+                <h4 className="font-medium mb-3">Setup Steps</h4>
+                <div className="space-y-2">
+                  {['Enable has_role_change flag', 'Define role segments with dates', 'Set contribution percentages', 'Assign evaluators per segment'].map((item, i) => (
+                    <div key={i} className="flex items-center gap-2">
+                      <span className="w-5 h-5 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center">{i+1}</span>
+                      <span className="text-sm">{item}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <h4 className="font-medium mb-3">Score Calculation</h4>
+                <p className="text-sm text-muted-foreground">Final score = Σ (Segment Score × Contribution %)</p>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Values Assessment Quick Guide */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Star className="h-5 w-5 text-primary" />
+            <CardTitle>Values Assessment Quick Guide</CardTitle>
+          </div>
+          <CardDescription>Evaluating employee alignment with organizational values</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid md:grid-cols-2 gap-6">
+            <div>
+              <h4 className="font-medium mb-3">Configuration</h4>
+              <div className="space-y-2">
+                {['Enable include_values_assessment on cycle', 'Set values_weight percentage', 'Configure value items from company values', 'Define behavioral indicators'].map((item, i) => (
+                  <div key={i} className="flex items-center gap-2">
+                    <Checkbox /><span className="text-sm">{item}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div>
+              <h4 className="font-medium mb-3">Scoring Components</h4>
+              <div className="space-y-2 text-sm">
+                <div className="p-2 bg-muted rounded">value_id - Reference to company value</div>
+                <div className="p-2 bg-muted rounded">score - Numeric rating</div>
+                <div className="p-2 bg-muted rounded">demonstrated_behaviors - Evidence text</div>
+                <div className="p-2 bg-muted rounded">manager_comments - Additional feedback</div>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Outcome Action Rules Reference */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Zap className="h-5 w-5 text-primary" />
+            <CardTitle>Outcome Action Rules Reference</CardTitle>
+          </div>
+          <CardDescription>Automated actions triggered by appraisal outcomes</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid md:grid-cols-2 gap-6">
+            <div>
+              <h4 className="font-medium mb-3">Condition Types</h4>
+              <div className="flex flex-wrap gap-2">
+                {['score_below', 'score_above', 'repeated_low', 'gap_detected', 'improvement_trend', 'competency_gap', 'goal_not_met'].map((type) => (
+                  <Badge key={type} variant="outline">{type}</Badge>
+                ))}
+              </div>
+            </div>
+            <div>
+              <h4 className="font-medium mb-3">Action Types</h4>
+              <div className="flex flex-wrap gap-2">
+                {['create_idp', 'create_pip', 'suggest_succession', 'block_finalization', 'require_comment', 'notify_hr', 'schedule_coaching', 'require_development_plan'].map((type) => (
+                  <Badge key={type} variant="secondary">{type}</Badge>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div className="mt-4 p-4 bg-muted/50 rounded-lg">
+            <h4 className="font-medium text-sm mb-2">Execution Status Flow</h4>
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge>pending</Badge>
+              <span>→</span>
+              <Badge>executed</Badge>
+              <span>or</span>
+              <Badge variant="outline">overridden</Badge>
+              <span>→</span>
+              <Badge variant="secondary">acknowledged</Badge>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Calibration Session Checklist */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Scale className="h-5 w-5 text-primary" />
+            <CardTitle>Calibration Session Checklist</CardTitle>
+          </div>
+          <CardDescription>Facilitating fair and consistent rating calibration</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid md:grid-cols-3 gap-4">
+            <div>
+              <h4 className="font-medium mb-3 flex items-center gap-2">
+                <Badge variant="outline">Pre-Session</Badge>
+              </h4>
+              <div className="space-y-2">
+                {['Gather all submitted evaluations', 'Run distribution analysis', 'Identify rating outliers', 'Prepare nine-box view'].map((item, i) => (
+                  <div key={i} className="flex items-center gap-2">
+                    <Checkbox /><span className="text-sm">{item}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div>
+              <h4 className="font-medium mb-3 flex items-center gap-2">
+                <Badge>During Session</Badge>
+              </h4>
+              <div className="space-y-2">
+                {['Review distribution vs targets', 'Discuss outlier cases', 'Apply forced distribution (if enabled)', 'Document adjustment reasons'].map((item, i) => (
+                  <div key={i} className="flex items-center gap-2">
+                    <Checkbox /><span className="text-sm">{item}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div>
+              <h4 className="font-medium mb-3 flex items-center gap-2">
+                <Badge variant="secondary">Post-Session</Badge>
+              </h4>
+              <div className="space-y-2">
+                {['Finalize calibrated scores', 'Update post_calibration_score', 'Generate audit trail', 'Communicate to managers'].map((item, i) => (
+                  <div key={i} className="flex items-center gap-2">
+                    <Checkbox /><span className="text-sm">{item}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </CardContent>
       </Card>

@@ -5,20 +5,11 @@ import { Badge } from '@/components/ui/badge';
 import { BookOpen, Search } from 'lucide-react';
 
 const GLOSSARY_TERMS = [
+  // Core
   {
     term: 'Appraisal Cycle',
     definition: 'A time-bound evaluation period during which employee performance is assessed. Can be annual, semi-annual, quarterly, or probationary.',
     category: 'Core',
-  },
-  {
-    term: 'Calibration',
-    definition: 'A collaborative process where managers review and adjust ratings to ensure consistency, fairness, and alignment with organizational standards across teams.',
-    category: 'Process',
-  },
-  {
-    term: 'Competency',
-    definition: 'A measurable skill, behavior, or attribute that contributes to effective job performance. Assessed using behavioral indicators at defined proficiency levels.',
-    category: 'Assessment',
   },
   {
     term: 'CRGV Model',
@@ -26,39 +17,20 @@ const GLOSSARY_TERMS = [
     category: 'Core',
   },
   {
-    term: 'Evaluator',
-    definition: 'The manager or designated reviewer responsible for conducting the performance assessment of an employee.',
-    category: 'Roles',
+    term: 'Form Template',
+    definition: 'Reusable configuration defining the structure, sections, and questions for appraisal forms. Links to cycles via template_id.',
+    category: 'Core',
   },
+  // Assessment
   {
-    term: 'Forced Distribution',
-    definition: 'A calibration guideline that suggests target percentages for each rating category to prevent rating inflation.',
-    category: 'Process',
-  },
-  {
-    term: 'IDP (Individual Development Plan)',
-    definition: 'A personalized plan created for an employee to develop specific skills, competencies, or career objectives.',
-    category: 'Development',
-  },
-  {
-    term: 'Nine-Box Grid',
-    definition: 'A talent management matrix that plots employees based on performance (x-axis) and potential (y-axis) to identify talent segments.',
-    category: 'Talent',
+    term: 'Competency',
+    definition: 'A measurable skill, behavior, or attribute that contributes to effective job performance. Assessed using behavioral indicators at defined proficiency levels.',
+    category: 'Assessment',
   },
   {
     term: 'Overall Rating Scale',
     definition: 'The final performance category (e.g., Exceptional, Meets Expectations) derived from weighted component scores.',
     category: 'Assessment',
-  },
-  {
-    term: 'Participant',
-    definition: 'An employee who is enrolled in and being evaluated during an active appraisal cycle.',
-    category: 'Roles',
-  },
-  {
-    term: 'PIP (Performance Improvement Plan)',
-    definition: 'A formal document outlining specific performance deficiencies and required improvements within a defined timeline.',
-    category: 'Development',
   },
   {
     term: 'Proficiency Level',
@@ -71,9 +43,60 @@ const GLOSSARY_TERMS = [
     category: 'Assessment',
   },
   {
-    term: 'RLS (Row-Level Security)',
-    definition: 'Database security mechanism ensuring users can only access data they are authorized to view.',
-    category: 'Technical',
+    term: 'Weight',
+    definition: 'The percentage assigned to each evaluation component (goals, competencies, responsibilities, values) that determines its contribution to the overall score.',
+    category: 'Assessment',
+  },
+  {
+    term: 'Role Segment',
+    definition: 'A time-bounded portion of an appraisal period where an employee held a specific position, used when employees change roles mid-cycle. Stored in appraisal_role_segments.',
+    category: 'Assessment',
+  },
+  {
+    term: 'Multi-Position Evaluation',
+    definition: 'Evaluation mode for employees holding concurrent positions, with weighted scoring across multiple roles. Configured via multi_position_mode (aggregate or separate).',
+    category: 'Assessment',
+  },
+  {
+    term: 'Position Weight',
+    definition: 'The percentage contribution of each position to the overall score when evaluating multi-position employees. Must sum to 100%. Stored in appraisal_position_weights.',
+    category: 'Assessment',
+  },
+  {
+    term: 'Score Breakdown',
+    definition: 'Detailed decomposition of the final appraisal score showing raw scores, weights, and contributions for each component (CRGV). Stored in appraisal_score_breakdown.',
+    category: 'Assessment',
+  },
+  {
+    term: 'Values Assessment',
+    definition: 'Evaluation of employee alignment with organizational core values, scored alongside competencies and goals. Enabled via include_values_assessment.',
+    category: 'Assessment',
+  },
+  {
+    term: '360 Feedback',
+    definition: 'Multi-rater feedback collected from peers, subordinates, and other stakeholders integrated into appraisals. Weight controlled by feedback_360_weight.',
+    category: 'Assessment',
+  },
+  {
+    term: 'Pre-Calibration Score',
+    definition: 'The calculated overall score before any adjustments made during calibration sessions. Stored as pre_calibration_score on participants.',
+    category: 'Assessment',
+  },
+  {
+    term: 'Post-Calibration Score',
+    definition: 'The final overall score after calibration adjustments have been applied. Stored as post_calibration_score on participants.',
+    category: 'Assessment',
+  },
+  // Process
+  {
+    term: 'Calibration',
+    definition: 'A collaborative process where managers review and adjust ratings to ensure consistency, fairness, and alignment with organizational standards across teams.',
+    category: 'Process',
+  },
+  {
+    term: 'Forced Distribution',
+    definition: 'A calibration guideline that suggests target percentages for each rating category to prevent rating inflation.',
+    category: 'Process',
   },
   {
     term: 'Self-Assessment',
@@ -81,14 +104,78 @@ const GLOSSARY_TERMS = [
     category: 'Process',
   },
   {
+    term: 'Outcome Action Rule',
+    definition: 'Configurable automation rule that triggers specific actions (IDP, PIP, succession nomination) based on appraisal score conditions. Stored in appraisal_outcome_action_rules.',
+    category: 'Process',
+  },
+  {
+    term: 'Action Execution',
+    definition: 'Record of an automated action triggered by outcome rules, including IDP/PIP creation or succession nominations. Tracked in appraisal_action_executions.',
+    category: 'Process',
+  },
+  {
+    term: 'Appraisal Interview',
+    definition: 'Scheduled meeting between manager and employee to discuss performance evaluation results. Supports in_person, video_call, and phone_call types.',
+    category: 'Process',
+  },
+  {
+    term: 'Workflow Status',
+    definition: 'The current state of an appraisal in its lifecycle: draft, pending, in_progress, approved, rejected, cancelled, escalated, returned, or auto_terminated.',
+    category: 'Process',
+  },
+  {
+    term: 'Employee Response',
+    definition: 'The employee\'s formal acknowledgment of their appraisal, indicating agreement (agree, disagree, partial_agree, or pending). Tracked via employee_response_status.',
+    category: 'Process',
+  },
+  // Development
+  {
+    term: 'IDP (Individual Development Plan)',
+    definition: 'A personalized plan created for an employee to develop specific skills, competencies, or career objectives.',
+    category: 'Development',
+  },
+  {
+    term: 'PIP (Performance Improvement Plan)',
+    definition: 'A formal document outlining specific performance deficiencies and required improvements within a defined timeline.',
+    category: 'Development',
+  },
+  {
+    term: 'Strengths & Gaps',
+    definition: 'AI-identified areas of strong performance and development needs based on appraisal scores and evidence. Stored in appraisal_strengths_gaps with suggested IDP goals.',
+    category: 'Development',
+  },
+  // Talent
+  {
+    term: 'Nine-Box Grid',
+    definition: 'A talent management matrix that plots employees based on performance (x-axis) and potential (y-axis) to identify talent segments.',
+    category: 'Talent',
+  },
+  {
     term: 'Succession Planning',
     definition: 'The process of identifying and developing employees to fill key leadership positions when they become vacant.',
     category: 'Talent',
   },
+  // Roles
   {
-    term: 'Weight',
-    definition: 'The percentage assigned to each evaluation component (goals, competencies, responsibilities, values) that determines its contribution to the overall score.',
-    category: 'Assessment',
+    term: 'Evaluator',
+    definition: 'The manager or designated reviewer responsible for conducting the performance assessment of an employee.',
+    category: 'Roles',
+  },
+  {
+    term: 'Participant',
+    definition: 'An employee who is enrolled in and being evaluated during an active appraisal cycle.',
+    category: 'Roles',
+  },
+  // Technical
+  {
+    term: 'RLS (Row-Level Security)',
+    definition: 'Database security mechanism ensuring users can only access data they are authorized to view.',
+    category: 'Technical',
+  },
+  {
+    term: 'AI Confidence',
+    definition: 'A percentage score (0-100) indicating how certain the AI system is about its analysis, recommendations, or identified patterns. Stored as ai_confidence on strengths_gaps.',
+    category: 'Technical',
   },
 ];
 
@@ -115,7 +202,7 @@ export function ManualGlossary() {
             <CardTitle>Glossary of Terms</CardTitle>
           </div>
           <CardDescription>
-            Key terminology used in the Appraisals module
+            Key terminology used in the Appraisals module ({GLOSSARY_TERMS.length} terms)
           </CardDescription>
           <div className="flex flex-col sm:flex-row gap-3 mt-4">
             <div className="relative flex-1">

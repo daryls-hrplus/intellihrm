@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Layers, GitBranch, Users, Link2 } from 'lucide-react';
+import { Layers, GitBranch, Users, Link2, Calculator, Brain, Calendar, Zap } from 'lucide-react';
 
 export function ManualDiagrams() {
   return (
@@ -10,60 +10,256 @@ export function ManualDiagrams() {
         <p className="text-muted-foreground">Visual representations of system architecture and flows</p>
       </div>
 
-      {/* Data Architecture */}
+      {/* Complete Data Architecture */}
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
             <Layers className="h-5 w-5 text-primary" />
-            <CardTitle>Data Architecture</CardTitle>
+            <CardTitle>Complete Data Architecture</CardTitle>
           </div>
-          <CardDescription>Core appraisal tables and relationships</CardDescription>
+          <CardDescription>All 14 appraisal tables and their relationships</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="p-4 bg-muted rounded-lg font-mono text-sm overflow-x-auto">
-            <pre>{`┌─────────────────────┐
-│  appraisal_cycles   │◄──────┐
-└─────────┬───────────┘       │
-          │                   │
-          ▼                   │
-┌─────────────────────┐       │
-│appraisal_participants│──────┤
-└─────────┬───────────┘       │
-          │                   │
-          ▼                   │
-┌─────────────────────┐       │
-│  appraisal_scores   │       │
-└─────────────────────┘       │
-                              │
-┌─────────────────────┐       │
-│appraisal_form_templates│────┘
-└─────────────────────┘
-
-┌─────────────────────┐    ┌─────────────────────┐
-│appraisal_integration│───▶│ Nine-Box, Succession│
-│      _rules         │    │ IDP, Compensation   │
-└─────────────────────┘    └─────────────────────┘`}</pre>
+          <div className="p-4 bg-muted rounded-lg font-mono text-xs overflow-x-auto">
+            <pre>{`┌─────────────────────────────────────────────────────────────────────────────────────────────┐
+│                                    CORE TABLES                                               │
+├─────────────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                              │
+│  ┌──────────────────────┐     ┌──────────────────────┐     ┌──────────────────────┐         │
+│  │ appraisal_form_      │────▶│   appraisal_cycles   │◀────│ appraisal_rating_    │         │
+│  │ templates            │     │                      │     │ scales               │         │
+│  └──────────────────────┘     └──────────┬───────────┘     └──────────────────────┘         │
+│                                          │                                                   │
+│                                          ▼                                                   │
+│                               ┌──────────────────────┐                                       │
+│                               │appraisal_participants│◀─────────────────────────────┐       │
+│                               └──────────┬───────────┘                              │       │
+│                                          │                                          │       │
+│         ┌────────────────────────────────┼────────────────────────────────┐         │       │
+│         ▼                                ▼                                ▼         │       │
+│  ┌──────────────────┐         ┌──────────────────────┐         ┌──────────────────┐ │       │
+│  │ appraisal_scores │         │appraisal_score_      │         │ appraisal_value_ │ │       │
+│  │                  │         │breakdown             │         │ scores           │ │       │
+│  └──────────────────┘         └──────────────────────┘         └──────────────────┘ │       │
+│                                                                                      │       │
+├─────────────────────────────────────────────────────────────────────────────────────┼───────┤
+│                              MULTI-POSITION & ROLE CHANGE                            │       │
+├─────────────────────────────────────────────────────────────────────────────────────┼───────┤
+│                                                                                      │       │
+│  ┌──────────────────────┐                              ┌──────────────────────┐     │       │
+│  │ appraisal_position_  │──────────────────────────────│ appraisal_role_      │─────┘       │
+│  │ weights              │                              │ segments             │             │
+│  └──────────────────────┘                              └──────────────────────┘             │
+│                                                                                              │
+├─────────────────────────────────────────────────────────────────────────────────────────────┤
+│                              AI & DEVELOPMENT TABLES                                         │
+├─────────────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                              │
+│  ┌──────────────────────┐     ┌──────────────────────┐     ┌──────────────────────┐         │
+│  │ appraisal_strengths_ │     │ ai_generated_        │     │ appraisal_interviews │         │
+│  │ gaps                 │     │ narratives           │     │                      │         │
+│  └──────────────────────┘     └──────────────────────┘     └──────────────────────┘         │
+│                                                                                              │
+├─────────────────────────────────────────────────────────────────────────────────────────────┤
+│                              AUTOMATION & INTEGRATION                                        │
+├─────────────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                              │
+│  ┌──────────────────────┐     ┌──────────────────────┐                                      │
+│  │ appraisal_outcome_   │────▶│ appraisal_action_    │──────▶ IDP, PIP, Succession          │
+│  │ action_rules         │     │ executions           │                                      │
+│  └──────────────────────┘     └──────────────────────┘                                      │
+│                                                                                              │
+│  ┌──────────────────────┐     ┌──────────────────────┐                                      │
+│  │ appraisal_integration│────▶│ appraisal_integration│──────▶ Nine-Box, Succession,         │
+│  │ _rules               │     │ _log                 │       Compensation, Workforce        │
+│  └──────────────────────┘     └──────────────────────┘                                      │
+│                                                                                              │
+└─────────────────────────────────────────────────────────────────────────────────────────────┘`}</pre>
           </div>
         </CardContent>
       </Card>
 
-      {/* Cycle Lifecycle */}
+      {/* Complete Workflow Status */}
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
             <GitBranch className="h-5 w-5 text-primary" />
-            <CardTitle>Cycle Lifecycle Flow</CardTitle>
+            <CardTitle>Complete Workflow Status Flow</CardTitle>
           </div>
-          <CardDescription>Status progression through the appraisal cycle</CardDescription>
+          <CardDescription>All 9 workflow statuses and their transitions</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {/* Main flow */}
+            <div className="flex flex-wrap justify-center items-center gap-2 p-4">
+              {[
+                { status: 'draft', color: 'bg-gray-200 dark:bg-gray-800' },
+                { status: 'pending', color: 'bg-blue-200 dark:bg-blue-900' },
+                { status: 'in_progress', color: 'bg-amber-200 dark:bg-amber-900' },
+                { status: 'approved', color: 'bg-green-200 dark:bg-green-900' }
+              ].map((item, i, arr) => (
+                <div key={item.status} className="flex items-center gap-2">
+                  <div className={`px-4 py-2 rounded-lg ${item.color} font-medium text-sm`}>
+                    {item.status}
+                  </div>
+                  {i < arr.length - 1 && <span className="text-muted-foreground">→</span>}
+                </div>
+              ))}
+            </div>
+            
+            {/* Alternative paths */}
+            <div className="grid md:grid-cols-2 gap-4 p-4 bg-muted/50 rounded-lg">
+              <div>
+                <h4 className="font-medium text-sm mb-3">Exception Statuses</h4>
+                <div className="flex flex-wrap gap-2">
+                  <Badge variant="outline" className="bg-red-100 dark:bg-red-900/30">rejected</Badge>
+                  <Badge variant="outline" className="bg-orange-100 dark:bg-orange-900/30">returned</Badge>
+                  <Badge variant="outline" className="bg-purple-100 dark:bg-purple-900/30">escalated</Badge>
+                </div>
+              </div>
+              <div>
+                <h4 className="font-medium text-sm mb-3">Terminal Statuses</h4>
+                <div className="flex flex-wrap gap-2">
+                  <Badge variant="outline" className="bg-gray-100 dark:bg-gray-900/30">cancelled</Badge>
+                  <Badge variant="outline" className="bg-slate-100 dark:bg-slate-900/30">auto_terminated</Badge>
+                </div>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Score Calculation Flow */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Calculator className="h-5 w-5 text-primary" />
+            <CardTitle>Score Calculation Flow</CardTitle>
+          </div>
+          <CardDescription>Weighted CRGV scoring with calibration</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="p-4 bg-muted rounded-lg font-mono text-xs overflow-x-auto">
+            <pre>{`┌─────────────────────────────────────────────────────────────────────────────┐
+│                         SCORE CALCULATION PIPELINE                           │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  COMPONENT SCORES                           WEIGHTS                          │
+│  ┌────────────────┐                                                         │
+│  │ Competencies   │────────┐                                                │
+│  │ (avg score)    │        │         ┌──────────────────────┐               │
+│  └────────────────┘        │         │                      │               │
+│  ┌────────────────┐        ├────────▶│  Weighted Average    │               │
+│  │ Responsibilities│───────┤         │                      │               │
+│  │ (avg score)    │        │         │  goal_weight         │               │
+│  └────────────────┘        │         │  competency_weight   │               │
+│  ┌────────────────┐        │         │  responsibility_     │               │
+│  │ Goals          │────────┤         │  weight              │               │
+│  │ (avg score)    │        │         │  values_weight       │               │
+│  └────────────────┘        │         │  feedback_360_weight │               │
+│  ┌────────────────┐        │         │                      │               │
+│  │ Values         │────────┤         └──────────┬───────────┘               │
+│  │ (if enabled)   │        │                    │                           │
+│  └────────────────┘        │                    ▼                           │
+│  ┌────────────────┐        │         ┌──────────────────────┐               │
+│  │ 360 Feedback   │────────┘         │ pre_calibration_     │               │
+│  │ (if enabled)   │                  │ score                │               │
+│  └────────────────┘                  └──────────┬───────────┘               │
+│                                                 │                           │
+│                                                 ▼                           │
+│                                      ┌──────────────────────┐               │
+│                                      │ CALIBRATION SESSION  │               │
+│                                      │ • Adjustment reason  │               │
+│                                      │ • Adjusted by        │               │
+│                                      └──────────┬───────────┘               │
+│                                                 │                           │
+│                                                 ▼                           │
+│                                      ┌──────────────────────┐               │
+│                                      │ post_calibration_    │               │
+│                                      │ score                │               │
+│                                      └──────────┬───────────┘               │
+│                                                 │                           │
+│                                                 ▼                           │
+│                                      ┌──────────────────────┐               │
+│                                      │ performance_category │               │
+│                                      │ (Exceptional, Meets, │               │
+│                                      │  Needs Improvement)  │               │
+│                                      └──────────────────────┘               │
+└─────────────────────────────────────────────────────────────────────────────┘`}</pre>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* AI Analysis Pipeline */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Brain className="h-5 w-5 text-primary" />
+            <CardTitle>AI Analysis Pipeline</CardTitle>
+          </div>
+          <CardDescription>Strengths/Gaps identification and narrative generation</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid md:grid-cols-4 gap-4">
+            <div className="p-4 border rounded-lg text-center">
+              <h4 className="font-medium text-sm mb-2">1. Data Collection</h4>
+              <div className="space-y-1 text-xs text-muted-foreground">
+                <p>Scores</p>
+                <p>Comments</p>
+                <p>Goal progress</p>
+              </div>
+            </div>
+            <div className="p-4 border rounded-lg text-center">
+              <h4 className="font-medium text-sm mb-2">2. AI Analysis</h4>
+              <div className="space-y-1 text-xs text-muted-foreground">
+                <p>Pattern detection</p>
+                <p>Gap identification</p>
+                <p>Strength mapping</p>
+              </div>
+            </div>
+            <div className="p-4 border rounded-lg text-center">
+              <h4 className="font-medium text-sm mb-2">3. Output Generation</h4>
+              <div className="space-y-1 text-xs text-muted-foreground">
+                <p>Strengths list</p>
+                <p>Development gaps</p>
+                <p>Confidence score</p>
+              </div>
+            </div>
+            <div className="p-4 border rounded-lg text-center">
+              <h4 className="font-medium text-sm mb-2">4. IDP Linking</h4>
+              <div className="space-y-1 text-xs text-muted-foreground">
+                <p>Suggested goals</p>
+                <p>Learning paths</p>
+                <p>Action items</p>
+              </div>
+            </div>
+          </div>
+          <div className="mt-4 p-4 bg-muted/50 rounded-lg">
+            <h4 className="font-medium text-sm mb-2">appraisal_strengths_gaps Fields</h4>
+            <div className="flex flex-wrap gap-2">
+              {['strengths', 'development_gaps', 'ai_confidence', 'suggested_idp_goals', 'linked_idp_goal_ids', 'manager_acknowledged'].map((field) => (
+                <Badge key={field} variant="outline">{field}</Badge>
+              ))}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Interview Lifecycle */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Calendar className="h-5 w-5 text-primary" />
+            <CardTitle>Interview Lifecycle</CardTitle>
+          </div>
+          <CardDescription>Performance review meeting workflow</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap justify-center items-center gap-2 p-4">
             {[
-              { status: 'Draft', color: 'bg-gray-200' },
-              { status: 'Active', color: 'bg-blue-200' },
-              { status: 'In Progress', color: 'bg-amber-200' },
-              { status: 'Completed', color: 'bg-green-200' },
-              { status: 'Closed', color: 'bg-purple-200' }
+              { status: 'scheduled', color: 'bg-blue-200 dark:bg-blue-900' },
+              { status: 'confirmed', color: 'bg-green-200 dark:bg-green-900' },
+              { status: 'completed', color: 'bg-emerald-200 dark:bg-emerald-900' }
             ].map((item, i, arr) => (
               <div key={item.status} className="flex items-center gap-2">
                 <div className={`px-4 py-2 rounded-lg ${item.color} font-medium text-sm`}>
@@ -72,6 +268,75 @@ export function ManualDiagrams() {
                 {i < arr.length - 1 && <span className="text-muted-foreground">→</span>}
               </div>
             ))}
+          </div>
+          <div className="grid md:grid-cols-2 gap-4 mt-4">
+            <div className="p-4 bg-muted/50 rounded-lg">
+              <h4 className="font-medium text-sm mb-2">Exception Paths</h4>
+              <div className="flex flex-wrap gap-2">
+                <Badge variant="outline" className="bg-amber-100 dark:bg-amber-900/30">rescheduled</Badge>
+                <Badge variant="outline" className="bg-gray-100 dark:bg-gray-900/30">cancelled</Badge>
+                <Badge variant="outline" className="bg-red-100 dark:bg-red-900/30">no_show</Badge>
+              </div>
+            </div>
+            <div className="p-4 bg-muted/50 rounded-lg">
+              <h4 className="font-medium text-sm mb-2">Video Integration</h4>
+              <div className="flex flex-wrap gap-2">
+                <Badge>Zoom</Badge>
+                <Badge>Microsoft Teams</Badge>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Outcome Actions Flow */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Zap className="h-5 w-5 text-primary" />
+            <CardTitle>Outcome Actions Flow</CardTitle>
+          </div>
+          <CardDescription>Automated action triggering and execution</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="p-4 bg-muted rounded-lg font-mono text-xs overflow-x-auto">
+            <pre>{`┌─────────────────────────────────────────────────────────────────────────────┐
+│                         OUTCOME ACTION AUTOMATION                            │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  ┌────────────────────┐                                                     │
+│  │ TRIGGER CONDITIONS │                                                     │
+│  ├────────────────────┤                                                     │
+│  │ • score_below      │                                                     │
+│  │ • score_above      │────────┐                                            │
+│  │ • repeated_low     │        │                                            │
+│  │ • gap_detected     │        │         ┌──────────────────────┐           │
+│  │ • improvement_trend│        ├────────▶│ RULE EVALUATION      │           │
+│  │ • competency_gap   │        │         │                      │           │
+│  │ • goal_not_met     │────────┘         │ Match condition?     │           │
+│  └────────────────────┘                  │ Check threshold      │           │
+│                                          │ Verify section       │           │
+│                                          └──────────┬───────────┘           │
+│                                                     │                       │
+│                           ┌─────────────────────────┼─────────────────────┐ │
+│                           │                         │                     │ │
+│                           ▼                         ▼                     ▼ │
+│                  ┌────────────────┐      ┌────────────────┐    ┌──────────┐ │
+│                  │ ACTION TYPES   │      │ EXECUTION      │    │ OVERRIDE │ │
+│                  ├────────────────┤      │ STATUS         │    │ PATH     │ │
+│                  │ create_idp     │      ├────────────────┤    ├──────────┤ │
+│                  │ create_pip     │      │ pending        │    │ Override │ │
+│                  │ suggest_       │      │ executed       │    │ reason   │ │
+│                  │ succession     │      │ overridden     │    │ Approved │ │
+│                  │ block_         │      │ acknowledged   │    │ by       │ │
+│                  │ finalization   │      └────────────────┘    └──────────┘ │
+│                  │ require_comment│                                         │
+│                  │ notify_hr      │                                         │
+│                  │ schedule_      │                                         │
+│                  │ coaching       │                                         │
+│                  └────────────────┘                                         │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘`}</pre>
           </div>
         </CardContent>
       </Card>
@@ -88,9 +353,9 @@ export function ManualDiagrams() {
         <CardContent>
           <div className="space-y-4">
             {[
-              { role: 'Employee', steps: ['Complete Self-Assessment', 'Review Manager Rating', 'Respond/Acknowledge', 'Attend Interview'] },
-              { role: 'Manager', steps: ['Review Self-Assessment', 'Rate Performance', 'Use AI Assistant', 'Submit & Discuss'] },
-              { role: 'HR', steps: ['Configure Cycle', 'Monitor Progress', 'Facilitate Calibration', 'Process Actions'] }
+              { role: 'Employee', steps: ['Complete Self-Assessment', 'Review Manager Rating', 'Select Response Type', 'Add Comments', 'Attend Interview'] },
+              { role: 'Manager', steps: ['Review Self-Assessment', 'Rate Performance (CRGV)', 'Use AI Assistant', 'Review Strengths/Gaps', 'Submit & Discuss'] },
+              { role: 'HR', steps: ['Configure Cycle', 'Enroll Participants', 'Monitor Progress', 'Facilitate Calibration', 'Execute Actions'] }
             ].map((journey) => (
               <div key={journey.role} className="flex items-start gap-4">
                 <Badge variant="outline" className="min-w-[80px] justify-center">{journey.role}</Badge>
@@ -122,7 +387,7 @@ export function ManualDiagrams() {
             <div className="space-y-2">
               <h4 className="font-medium text-sm text-muted-foreground">UPSTREAM</h4>
               <div className="space-y-2">
-                {['Goals', 'Competencies', 'Job Profiles', '360 Feedback'].map((item) => (
+                {['Goals', 'Competencies', 'Job Profiles', '360 Feedback', 'Company Values', 'Position Assignments'].map((item) => (
                   <div key={item} className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded text-sm">{item}</div>
                 ))}
               </div>
@@ -135,7 +400,7 @@ export function ManualDiagrams() {
             <div className="space-y-2">
               <h4 className="font-medium text-sm text-muted-foreground">DOWNSTREAM</h4>
               <div className="space-y-2">
-                {['Nine-Box', 'Succession', 'Compensation', 'Learning'].map((item) => (
+                {['Nine-Box', 'Succession', 'Compensation', 'Learning/IDP', 'PIP', 'Workforce Analytics', 'Notifications'].map((item) => (
                   <div key={item} className="p-2 bg-green-100 dark:bg-green-900/30 rounded text-sm">{item}</div>
                 ))}
               </div>
