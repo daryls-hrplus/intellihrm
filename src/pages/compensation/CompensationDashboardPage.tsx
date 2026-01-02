@@ -190,7 +190,7 @@ export default function CompensationDashboardPage() {
           })}
         </div>
 
-        <GroupedModuleCards sections={sections} showToggleButton />
+        <GroupedModuleCards sections={sections} defaultOpen={true} showToggleButton />
       </div>
     </AppLayout>
   );
