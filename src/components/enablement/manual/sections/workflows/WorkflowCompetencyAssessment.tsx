@@ -4,6 +4,7 @@ import { Brain, Clock, CheckCircle, Layers, Users, ThumbsUp, ThumbsDown } from '
 import { NavigationPath } from '../../NavigationPath';
 import { NAVIGATION_PATHS } from '../../navigationPaths';
 import { TipCallout, WarningCallout, NoteCallout } from '../../components/Callout';
+import { WorkflowDiagram } from '../../components/WorkflowDiagram';
 import { StepByStep } from '../../components/StepByStep';
 import { FieldReferenceTable } from '../../components/FieldReferenceTable';
 import { BusinessRules } from '../../components/BusinessRules';
@@ -146,6 +147,49 @@ export function WorkflowCompetencyAssessment() {
             <li>Document evidence using the STAR method</li>
             <li>Identify meaningful development opportunities</li>
           </ul>
+        </div>
+
+        {/* Interactive Workflow Diagram */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold">Competency Assessment Workflow</h3>
+          <div className="p-4 bg-muted/30 rounded-lg overflow-x-auto">
+            <pre className="text-xs text-muted-foreground mb-2">Participant Flow Diagram</pre>
+            <div className="mermaid-container">
+              <presentation-mermaid>
+                {`flowchart TD
+    subgraph Understanding["📖 Understanding"]
+        A[Read Competency Definition] --> B[Review Behavioral Indicators]
+        B --> C[Check Expected Level for Role]
+    end
+    
+    subgraph Observation["👁️ Observation"]
+        D[Recall Specific Situations] --> E[Identify Behaviors Observed]
+        E --> F[Note Frequency & Consistency]
+    end
+    
+    subgraph Assessment["📊 Assessment"]
+        G{Match to Level}
+        G -->|Complex + Independent| H[Level 4-5]
+        G -->|Standard + Competent| I[Level 3]
+        G -->|Needs Guidance| J[Level 1-2]
+    end
+    
+    subgraph Documentation["📝 Documentation"]
+        K[Write STAR Examples]
+        L[Identify Development Areas]
+        M[Submit Assessment]
+    end
+    
+    C --> D
+    F --> G
+    H --> K
+    I --> K
+    J --> K
+    K --> L
+    L --> M`}
+              </presentation-mermaid>
+            </div>
+          </div>
         </div>
 
         {/* Proficiency Level Framework */}

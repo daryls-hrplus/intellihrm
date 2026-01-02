@@ -4,6 +4,7 @@ import { Users, Clock, CheckCircle, MessageSquare, Star, Brain, Save, Send } fro
 import { NavigationPath } from '../../NavigationPath';
 import { NAVIGATION_PATHS } from '../../navigationPaths';
 import { TipCallout, WarningCallout, NoteCallout } from '../../components/Callout';
+import { WorkflowDiagram } from '../../components/WorkflowDiagram';
 import { StepByStep } from '../../components/StepByStep';
 import { FieldReferenceTable } from '../../components/FieldReferenceTable';
 import { BusinessRules } from '../../components/BusinessRules';
@@ -174,6 +175,45 @@ export function WorkflowManagerEvaluation() {
             <li>Write high-quality, actionable performance comments</li>
             <li>Schedule and prepare for performance discussions</li>
           </ul>
+        </div>
+
+        {/* Interactive Workflow Diagram */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold">Manager Evaluation Workflow</h3>
+          <div className="p-4 bg-muted/30 rounded-lg overflow-x-auto">
+            <pre className="text-xs text-muted-foreground mb-2">Participant Flow Diagram</pre>
+            <div className="mermaid-container">
+              <presentation-mermaid>
+                {`flowchart LR
+    subgraph Employee["👤 Employee"]
+        A[Submit Self-Assessment]
+    end
+    
+    subgraph Manager["👔 Manager Actions"]
+        B[Review Self-Assessment] --> C[Rate Goals]
+        C --> D[Rate Competencies]
+        D --> E[Use AI Assistant]
+        E --> F[Write Comments]
+        F --> G{Save or Submit?}
+        G -->|Save| H[Draft Saved]
+        G -->|Submit| I[Submit Evaluation]
+        H --> G
+        I --> J[Schedule Interview]
+    end
+    
+    subgraph System["⚙️ System"]
+        K[Calculate Scores]
+        L[Quality Check]
+        M[Notify Employee]
+    end
+    
+    A -->|Unlocks Form| B
+    E --> L
+    I --> K
+    J --> M`}
+              </presentation-mermaid>
+            </div>
+          </div>
         </div>
 
         {/* Evaluation Checklist Overview */}

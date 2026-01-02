@@ -3,7 +3,8 @@ import { Badge } from '@/components/ui/badge';
 import { ArrowRight, Clock, Settings, AlertTriangle, CheckCircle, Lock, Unlock, RotateCcw } from 'lucide-react';
 import { NavigationPath } from '../../NavigationPath';
 import { NAVIGATION_PATHS } from '../../navigationPaths';
-import { Callout, TipCallout, WarningCallout } from '../../components/Callout';
+import { TipCallout, WarningCallout } from '../../components/Callout';
+import { WorkflowDiagram } from '../../components/WorkflowDiagram';
 import { StepByStep } from '../../components/StepByStep';
 import { FieldReferenceTable } from '../../components/FieldReferenceTable';
 import { BusinessRules } from '../../components/BusinessRules';
@@ -97,9 +98,43 @@ export function WorkflowCycleLifecycle() {
           </ul>
         </div>
 
-        {/* Lifecycle Diagram */}
+        {/* Interactive Workflow Diagram */}
+        <WorkflowDiagram 
+          title="Cycle Lifecycle Workflow"
+          description="Participant flow showing HR actions, system states, and participant interactions"
+          diagram={`flowchart LR
+    subgraph HR["🔧 HR Admin"]
+        A[Create Cycle] --> B[Configure Settings]
+        B --> C[Launch Cycle]
+        H[Run Calibration] --> I[Close Cycle]
+    end
+    
+    subgraph System["⚙️ System States"]
+        D((Draft))
+        E((Active))
+        F((In Progress))
+        G((Completed))
+        J((Closed))
+    end
+    
+    subgraph Participants["👥 Participants"]
+        K[Employees Start Self-Assessment]
+        L[Managers Submit Evaluations]
+    end
+    
+    C --> D
+    D -->|HR Launches| E
+    E -->|First Self-Assessment| F
+    K --> F
+    F -->|All Submitted| G
+    L --> G
+    G -->|HR Closes| J
+    H --> J`}
+        />
+
+        {/* Lifecycle Status Badges */}
         <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Cycle Status Progression</h3>
+          <h3 className="text-lg font-semibold">Status Progression</h3>
           <div className="flex flex-wrap items-center gap-2">
             {[
               { status: 'Draft', icon: Unlock, color: 'bg-slate-600' },

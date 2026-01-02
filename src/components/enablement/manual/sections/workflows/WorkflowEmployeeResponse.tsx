@@ -4,6 +4,7 @@ import { User, Clock, CheckCircle, MessageSquare, AlertTriangle, ThumbsUp, Thumb
 import { NavigationPath } from '../../NavigationPath';
 import { NAVIGATION_PATHS } from '../../navigationPaths';
 import { TipCallout, WarningCallout, NoteCallout, InfoCallout } from '../../components/Callout';
+import { WorkflowDiagram } from '../../components/WorkflowDiagram';
 import { StepByStep } from '../../components/StepByStep';
 import { FieldReferenceTable } from '../../components/FieldReferenceTable';
 import { BusinessRules } from '../../components/BusinessRules';
@@ -120,6 +121,52 @@ export function WorkflowEmployeeResponse() {
             <li>Document professional, evidence-based feedback</li>
             <li>Understand the escalation process for formal disagreements</li>
           </ul>
+        </div>
+
+        {/* Interactive Workflow Diagram */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold">Employee Response Workflow</h3>
+          <div className="p-4 bg-muted/30 rounded-lg overflow-x-auto">
+            <pre className="text-xs text-muted-foreground mb-2">Participant Flow Diagram</pre>
+            <div className="mermaid-container">
+              <presentation-mermaid>
+                {`flowchart TD
+    subgraph Manager["👔 Manager"]
+        A[Submit Evaluation] --> B[Conduct Interview]
+    end
+    
+    subgraph Employee["👤 Employee Actions"]
+        C[Review Evaluation] --> D[Reflect 24hrs]
+        D --> E{Select Response}
+        E -->|Accept| F[Agree]
+        E -->|Concerns| G[Partially Disagree]
+        E -->|Dispute| H[Disagree]
+        F --> I[Optional Comments]
+        G --> J[Document Specific Concerns]
+        H --> K[Detailed Justification]
+    end
+    
+    subgraph System["⚙️ System"]
+        L[Record Response]
+        M[Notify Manager]
+        N[Trigger HR Escalation]
+    end
+    
+    subgraph HR["🔧 HR Review"]
+        O[Review Case] --> P[Interview Parties]
+        P --> Q[Resolution Decision]
+    end
+    
+    B --> C
+    I --> L
+    J --> L
+    J --> M
+    K --> L
+    K --> N
+    N --> O`}
+              </presentation-mermaid>
+            </div>
+          </div>
         </div>
 
         {/* Response Options */}
