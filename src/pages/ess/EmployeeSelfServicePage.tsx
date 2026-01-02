@@ -112,11 +112,11 @@ export default function EmployeeSelfServicePage() {
   const sections: ModuleSection[] = [
     {
       titleKey: "My Profile",
-      items: filterByAccess([allModules.profile, allModules.personalInfo, allModules.dependents, allModules.documents, allModules.letters, allModules.banking, allModules.governmentIds, allModules.medicalInfo]),
+      items: filterByAccess([allModules.profile, allModules.personalInfo, allModules.dependents, allModules.documents, allModules.letters, allModules.medicalInfo]),
     },
     {
       titleKey: "Pay & Benefits",
-      items: filterByAccess([allModules.payslips, allModules.compensation, allModules.benefits, allModules.expenses]),
+      items: filterByAccess([allModules.payslips, allModules.compensation, allModules.benefits, allModules.expenses, allModules.banking, allModules.governmentIds]),
     },
     {
       titleKey: "Time & Absence",
