@@ -162,7 +162,7 @@ export function SetupApprovalWorkflows() {
             <Clock className="h-3 w-3" />
             ~12 min read
           </Badge>
-          <Badge className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
+          <Badge className="bg-green-500/20 text-green-800 dark:bg-green-900/40 dark:text-green-300 border border-green-500/30">
             As needed
           </Badge>
         </div>
@@ -210,18 +210,18 @@ export function SetupApprovalWorkflows() {
           <h4 className="font-medium mb-3">Example: Standard Approval Flow</h4>
           <div className="flex flex-wrap items-center gap-4 text-sm">
             <div className="flex items-center gap-2">
-              <Badge className="bg-blue-100 text-blue-700">Employee Submits</Badge>
+              <Badge className="bg-blue-500/20 text-blue-800 dark:text-blue-300 border border-blue-500/30">Employee Submits</Badge>
               <span>→</span>
             </div>
             <div className="flex items-center gap-2">
-              <Badge className="bg-amber-100 text-amber-700">Manager Approves</Badge>
+              <Badge className="bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-500/30">Manager Approves</Badge>
               <span>→</span>
             </div>
             <div className="flex items-center gap-2">
-              <Badge className="bg-purple-100 text-purple-700">HR Reviews</Badge>
+              <Badge className="bg-purple-500/20 text-purple-800 dark:text-purple-300 border border-purple-500/30">HR Reviews</Badge>
               <span>→</span>
             </div>
-            <Badge className="bg-green-100 text-green-700">Finalized</Badge>
+            <Badge className="bg-green-500/20 text-green-800 dark:text-green-300 border border-green-500/30">Finalized</Badge>
           </div>
         </div>
 
