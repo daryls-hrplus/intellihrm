@@ -14,8 +14,10 @@ import {
   Book, Search, Clock, Users, ChevronRight, ChevronDown,
   FileText, Layers, Settings, PlayCircle, Brain, BarChart3,
   Link2, AlertTriangle, Download, Printer, BookOpen,
-  CheckCircle, Circle, ArrowLeft, Sparkles, Calendar, Target
+  CheckCircle, Circle, ArrowLeft, Sparkles, Calendar, Target, Loader2
 } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
+import { generateAppraisalsManualDocx, MANUAL_CONTENT } from '@/utils/appraisalsManualDocx';
 import { APPRAISALS_MANUAL_STRUCTURE, QUICK_REFERENCE_CARDS, type ManualSection } from '@/types/adminManual';
 import { ManualOverviewSection } from '@/components/enablement/manual/ManualOverviewSection';
 import { ManualSetupSection } from '@/components/enablement/manual/ManualSetupSection';
@@ -45,6 +47,8 @@ export default function AppraisalsManualPage() {
   const [selectedSectionId, setSelectedSectionId] = useState('part-1');
   const [expandedSections, setExpandedSections] = useState<string[]>(['part-1']);
   const [completedSections, setCompletedSections] = useState<string[]>([]);
+  const [isExportingPdf, setIsExportingPdf] = useState(false);
+  const [isExportingDocx, setIsExportingDocx] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
 
   const activePartId = useMemo(() => {
@@ -121,89 +125,129 @@ export default function AppraisalsManualPage() {
     );
   };
 
-  const exportToPDF = () => {
-    const pdf = new jsPDF('p', 'mm', 'a4');
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
-    const margin = 20;
-    const contentWidth = pageWidth - margin * 2;
-    let yPosition = margin;
+  const exportToPDF = async () => {
+    setIsExportingPdf(true);
+    try {
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const margin = 20;
+      const contentWidth = pageWidth - margin * 2;
+      let yPosition = margin;
 
-    const addNewPageIfNeeded = (requiredSpace: number) => {
-      if (yPosition + requiredSpace > pageHeight - margin) {
-        pdf.addPage();
-        yPosition = margin;
-      }
-    };
+      const addNewPageIfNeeded = (requiredSpace: number) => {
+        if (yPosition + requiredSpace > pageHeight - margin) {
+          pdf.addPage();
+          yPosition = margin;
+        }
+      };
 
-    // Title
-    pdf.setFontSize(24);
-    pdf.setFont('helvetica', 'bold');
-    pdf.text('Appraisals Administrator Manual', pageWidth / 2, yPosition, { align: 'center' });
-    yPosition += 12;
-
-    pdf.setFontSize(10);
-    pdf.setFont('helvetica', 'normal');
-    pdf.setTextColor(100);
-    pdf.text(`Generated: ${new Date().toLocaleDateString()} | Total Read Time: ${totalReadTime} min`, pageWidth / 2, yPosition, { align: 'center' });
-    pdf.setTextColor(0);
-    yPosition += 15;
-
-    // Sections
-    APPRAISALS_MANUAL_STRUCTURE.forEach((section) => {
-      addNewPageIfNeeded(30);
-
-      // Section header
-      pdf.setFontSize(14);
+      // Title
+      pdf.setFontSize(24);
       pdf.setFont('helvetica', 'bold');
-      pdf.setTextColor(30, 64, 175);
-      const sectionTitle = `${section.sectionNumber}. ${section.title}`;
-      pdf.text(sectionTitle, margin, yPosition);
-      yPosition += 7;
+      pdf.text('Appraisals Administrator Manual', pageWidth / 2, yPosition, { align: 'center' });
+      yPosition += 12;
 
-      // Section description
-      pdf.setFontSize(10);
+      pdf.setFontSize(12);
       pdf.setFont('helvetica', 'normal');
-      pdf.setTextColor(80);
-      const descLines = pdf.splitTextToSize(section.description, contentWidth);
-      addNewPageIfNeeded(descLines.length * 5);
-      pdf.text(descLines, margin, yPosition);
-      yPosition += descLines.length * 5 + 3;
-
-      // Meta info
-      pdf.setFontSize(8);
-      pdf.setTextColor(120);
-      pdf.text(`Read Time: ${section.estimatedReadTime} min | Target: ${section.targetRoles.join(', ')}`, margin, yPosition);
-      pdf.setTextColor(0);
+      pdf.text('HRplus Performance Management Module', pageWidth / 2, yPosition, { align: 'center' });
       yPosition += 8;
 
-      // Subsections
-      if (section.subsections && section.subsections.length > 0) {
-        section.subsections.forEach((sub) => {
-          addNewPageIfNeeded(20);
+      pdf.setFontSize(10);
+      pdf.setTextColor(100);
+      pdf.text(`Generated: ${new Date().toLocaleDateString()} | Total Read Time: ${totalReadTime} min`, pageWidth / 2, yPosition, { align: 'center' });
+      pdf.setTextColor(0);
+      yPosition += 20;
 
-          pdf.setFontSize(11);
+      // Export all parts with comprehensive content
+      const parts = [
+        MANUAL_CONTENT.part1,
+        MANUAL_CONTENT.part2,
+        MANUAL_CONTENT.part3,
+        MANUAL_CONTENT.part4,
+        MANUAL_CONTENT.part5,
+        MANUAL_CONTENT.part6,
+        MANUAL_CONTENT.part7,
+        MANUAL_CONTENT.part8,
+      ];
+
+      parts.forEach((part) => {
+        // Part header
+        addNewPageIfNeeded(20);
+        pdf.setFontSize(16);
+        pdf.setFont('helvetica', 'bold');
+        pdf.setTextColor(30, 64, 175);
+        pdf.text(part.title, margin, yPosition);
+        yPosition += 12;
+        pdf.setTextColor(0);
+
+        // Sections within part
+        part.sections.forEach((section) => {
+          addNewPageIfNeeded(25);
+
+          // Section header
+          pdf.setFontSize(12);
           pdf.setFont('helvetica', 'bold');
           pdf.setTextColor(60);
-          pdf.text(`${sub.sectionNumber} ${sub.title}`, margin + 5, yPosition);
-          yPosition += 5;
+          pdf.text(section.title, margin, yPosition);
+          yPosition += 7;
 
-          pdf.setFontSize(9);
+          // Section content
+          pdf.setFontSize(10);
           pdf.setFont('helvetica', 'normal');
-          pdf.setTextColor(80);
-          const subDescLines = pdf.splitTextToSize(sub.description, contentWidth - 10);
-          addNewPageIfNeeded(subDescLines.length * 4);
-          pdf.text(subDescLines, margin + 5, yPosition);
-          yPosition += subDescLines.length * 4 + 5;
+          pdf.setTextColor(40);
+
+          section.content.forEach((line) => {
+            const lines = pdf.splitTextToSize(line, contentWidth);
+            addNewPageIfNeeded(lines.length * 5);
+            pdf.text(lines, margin, yPosition);
+            yPosition += lines.length * 5;
+          });
+
+          yPosition += 5;
         });
-      }
 
-      yPosition += 5;
-    });
+        yPosition += 10;
+      });
 
-    // Save
-    const date = new Date().toISOString().split('T')[0];
-    pdf.save(`appraisals-admin-manual-${date}.pdf`);
+      // Save
+      const date = new Date().toISOString().split('T')[0];
+      pdf.save(`appraisals-admin-manual-${date}.pdf`);
+
+      toast({
+        title: "PDF exported successfully",
+        description: "Appraisals Administrator Manual has been downloaded.",
+      });
+    } catch (error) {
+      console.error('PDF export error:', error);
+      toast({
+        title: "Export failed",
+        description: "Failed to generate PDF. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsExportingPdf(false);
+    }
+  };
+
+  const exportToDocx = async () => {
+    setIsExportingDocx(true);
+    try {
+      await generateAppraisalsManualDocx();
+      toast({
+        title: "DOCX exported successfully",
+        description: "Appraisals Administrator Manual has been downloaded.",
+      });
+    } catch (error) {
+      console.error('DOCX export error:', error);
+      toast({
+        title: "Export failed",
+        description: "Failed to generate DOCX. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsExportingDocx(false);
+    }
   };
 
   const handlePrint = () => {
@@ -268,9 +312,21 @@ export default function AppraisalsManualPage() {
                 <FileText className="h-3 w-3" />
                 {APPRAISALS_MANUAL_STRUCTURE.reduce((acc, s) => acc + 1 + (s.subsections?.length || 0), 0)} sections
               </Badge>
-              <Button variant="outline" size="sm" onClick={exportToPDF}>
-                <Download className="h-4 w-4 mr-2" />
-                Export PDF
+              <Button variant="outline" size="sm" onClick={exportToPDF} disabled={isExportingPdf}>
+                {isExportingPdf ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <Download className="h-4 w-4 mr-2" />
+                )}
+                {isExportingPdf ? 'Generating...' : 'Export PDF'}
+              </Button>
+              <Button variant="outline" size="sm" onClick={exportToDocx} disabled={isExportingDocx}>
+                {isExportingDocx ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <FileText className="h-4 w-4 mr-2" />
+                )}
+                {isExportingDocx ? 'Generating...' : 'Export DOCX'}
               </Button>
               <Button variant="outline" size="sm" onClick={handlePrint}>
                 <Printer className="h-4 w-4 mr-2" />
