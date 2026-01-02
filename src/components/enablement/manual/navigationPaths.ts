@@ -30,9 +30,13 @@ export const NAVIGATION_PATHS: Record<string, string[]> = {
   'sec-3-9': ['Performance', 'Appraisals', 'Role Changes'],
   'sec-3-10': ['Performance', 'Appraisals', 'Finalization'],
 
-  // Part 4: Calibration
-  'sec-4-1': ['Performance', 'Calibration', 'Sessions'],
-  'sec-4-2': ['Performance', 'Talent', 'Nine-Box Grid'],
+  // Part 4: Calibration Sessions
+  'sec-4-1': ['Performance', 'Calibration', 'Overview'],
+  'sec-4-2': ['Performance', 'Calibration', 'Sessions', 'Create'],
+  'sec-4-3': ['Performance', 'Calibration', 'Sessions', 'Workspace'],
+  'sec-4-4': ['Performance', 'Calibration', 'AI Insights'],
+  'sec-4-5': ['Performance', 'Talent', 'Nine-Box Grid'],
+  'sec-4-6': ['Performance', 'Calibration', 'Audit Trail'],
 
   // Part 5: AI Features
   'sec-5-1': ['Performance', 'Appraisals', 'AI Assistant'],
