@@ -153,7 +153,7 @@ export const GroupedModuleCards = forwardRef<GroupedModuleCardsHandle, GroupedMo
           </Button>
         </div>
       )}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 items-start">
       {nonEmptySections.map((section) => {
         const SectionIcon = sectionIcons[section.titleKey];
         const badge = sectionBadges[section.titleKey];
