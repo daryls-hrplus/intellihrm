@@ -156,48 +156,72 @@ const DATA_VISIBILITY_RULES = [
   }
 ];
 
+// Actual RLS policies from the database
 const RLS_POLICIES = [
   {
     table: 'appraisal_participants',
-    policy: 'Employees see own records',
-    condition: 'employee_id = auth.uid()',
+    policy: 'Employees can view own participation',
+    condition: 'auth.uid() = employee_id',
     purpose: 'Self-service access'
   },
   {
     table: 'appraisal_participants',
-    policy: 'Managers see direct reports',
-    condition: 'employee_id IN (SELECT id FROM employees WHERE manager_id = auth.uid())',
-    purpose: 'Team management'
+    policy: 'Evaluators can view and update assigned participants',
+    condition: 'auth.uid() = evaluator_id',
+    purpose: 'Manager evaluation access'
   },
   {
-    table: 'appraisal_ratings',
-    policy: 'HR sees assigned population',
-    condition: 'company_id IN (SELECT company_id FROM hr_assignments WHERE user_id = auth.uid())',
+    table: 'appraisal_participants',
+    policy: 'Admins and HR can manage all participants',
+    condition: 'has_role(auth.uid(), \'admin\') OR has_role(auth.uid(), \'hr_manager\')',
     purpose: 'HR administration'
   },
   {
-    table: 'calibration_adjustments',
-    policy: 'Only calibrators can insert',
-    condition: 'auth.uid() IN (SELECT user_id FROM calibration_participants WHERE role = \'calibrator\')',
-    purpose: 'Data integrity'
+    table: 'appraisal_cycles',
+    policy: 'Employees can view cycles they participate in',
+    condition: 'EXISTS (SELECT 1 FROM appraisal_participants WHERE cycle_id = appraisal_cycles.id AND employee_id = auth.uid())',
+    purpose: 'View assigned cycles'
   },
   {
-    table: 'appraisal_audit_log',
-    policy: 'HR and Admin read access',
-    condition: 'auth.jwt()->\'role\' IN (\'hr_user\', \'admin\')',
-    purpose: 'Compliance monitoring'
+    table: 'appraisal_cycles',
+    policy: 'Managers can manage their own cycles',
+    condition: 'is_manager_cycle = true AND created_by = auth.uid()',
+    purpose: 'Manager-initiated probation reviews'
+  },
+  {
+    table: 'appraisal_scores',
+    policy: 'Employees can view own scores',
+    condition: 'EXISTS (SELECT 1 FROM appraisal_participants ap WHERE ap.id = appraisal_scores.participant_id AND ap.employee_id = auth.uid())',
+    purpose: 'Self-service score visibility'
+  },
+  {
+    table: 'appraisal_scores',
+    policy: 'Evaluators can manage scores for assigned participants',
+    condition: 'EXISTS (SELECT 1 FROM appraisal_participants ap WHERE ap.id = appraisal_scores.participant_id AND ap.evaluator_id = auth.uid())',
+    purpose: 'Manager scoring capability'
+  },
+  {
+    table: 'appraisal_integration_rules',
+    policy: 'Admins and HR can manage integration rules',
+    condition: 'has_any_role(auth.uid(), ARRAY[\'admin\', \'hr_manager\'])',
+    purpose: 'Configuration access control'
+  },
+  {
+    table: 'appraisal_integration_log',
+    policy: 'Users can view integration logs for their company',
+    condition: 'company_id IN (SELECT company_id FROM profiles WHERE id = auth.uid())',
+    purpose: 'Audit visibility'
   }
 ];
 
 const AUDIT_LOG_EVENTS = [
-  { event: 'appraisal.created', description: 'New appraisal participant added', retention: '7 years' },
-  { event: 'appraisal.score_updated', description: 'Score changed by manager', retention: '7 years' },
-  { event: 'calibration.adjustment', description: 'Score adjusted in calibration', retention: '7 years' },
-  { event: 'appraisal.finalized', description: 'Appraisal marked as final', retention: '7 years' },
-  { event: 'appraisal.acknowledged', description: 'Employee acknowledgment recorded', retention: '7 years' },
-  { event: 'appraisal.exported', description: 'Data export performed', retention: '7 years' },
-  { event: 'integration.triggered', description: 'Downstream action initiated', retention: '7 years' },
-  { event: 'ai.bias_detected', description: 'Potential bias flagged by AI', retention: '7 years' }
+  { event: 'appraisal.created', description: 'New appraisal participant added', retention: 'Per company policy' },
+  { event: 'appraisal.score_updated', description: 'Score changed by manager', retention: 'Per company policy' },
+  { event: 'calibration.adjustment', description: 'Score adjusted in calibration', retention: 'Per company policy' },
+  { event: 'appraisal.finalized', description: 'Appraisal marked as final', retention: 'Per company policy' },
+  { event: 'appraisal.acknowledged', description: 'Employee acknowledgment recorded', retention: 'Per company policy' },
+  { event: 'integration.triggered', description: 'Downstream action initiated', retention: 'Per company policy' },
+  { event: 'ai.analysis_run', description: 'AI feature invoked', retention: 'Per company policy' }
 ];
 
 export function SecurityAccessControlSection() {

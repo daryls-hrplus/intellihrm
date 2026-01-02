@@ -9,146 +9,115 @@ import { WorkflowDiagram } from '../../components/WorkflowDiagram';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { StepByStep } from '../../components/StepByStep';
 
-const ERROR_CODES = [
+// Note: The system currently uses descriptive error messages rather than formal error codes.
+// These are the actual error patterns observed in edge function logs.
+const ACTUAL_ERROR_PATTERNS = [
   {
-    code: 'INT-001',
-    name: 'RULE_NOT_FOUND',
+    pattern: 'Participant not found or has no score data',
+    context: 'appraisal-integration-orchestrator',
     severity: 'high',
-    cause: 'Integration rule was deleted or disabled after trigger event',
+    cause: 'Participant ID is invalid or appraisal scores not yet submitted',
     resolution: [
-      'Check integration rules list for the expected rule',
-      'Verify rule is enabled (toggle is on)',
-      'Re-create rule if it was accidentally deleted',
-      'Check if rule was archived due to template changes'
+      'Verify the participant exists in appraisal_participants table',
+      'Ensure appraisal has been submitted with scores',
+      'Check participant status is not "draft"'
     ],
-    prevention: 'Lock integration rules during active cycles'
+    prevention: 'Only trigger integrations after appraisal finalization'
   },
   {
-    code: 'INT-002',
-    name: 'EMPLOYEE_NOT_ELIGIBLE',
+    pattern: 'Error fetching rules',
+    context: 'appraisal-integration-orchestrator',
     severity: 'medium',
-    cause: 'Target employee does not meet eligibility criteria for downstream action',
+    cause: 'Database connection issue or RLS policy blocking access',
     resolution: [
-      'Review employee employment status',
-      'Check if employee meets minimum tenure for target module',
-      'Verify employee is in eligible population for target action',
-      'Review rule conditions for any restrictive filters'
+      'Check database connectivity',
+      'Verify integration rules exist for the company',
+      'Review RLS policies on appraisal_integration_rules table'
     ],
-    prevention: 'Align eligibility criteria across integrated modules'
+    prevention: 'Ensure rules are configured before cycle activation'
   },
   {
-    code: 'INT-003',
-    name: 'TARGET_MODULE_DISABLED',
+    pattern: 'Unknown target module',
+    context: 'appraisal-integration-orchestrator',
+    severity: 'high',
+    cause: 'Rule configured with unsupported target_module value',
+    resolution: [
+      'Review the rule configuration',
+      'Use only supported modules: nine_box, succession, idp, pip, compensation, workforce_analytics, notifications, reminders'
+    ],
+    prevention: 'Validate rule configuration during setup'
+  },
+  {
+    pattern: 'Action execution failed',
+    context: 'appraisal-integration-orchestrator',
+    severity: 'medium',
+    cause: 'Target module action encountered an error (e.g., missing required data)',
+    resolution: [
+      'Check integration log action_result field for details',
+      'Verify target module is enabled and configured',
+      'Review error_message for specific cause'
+    ],
+    prevention: 'Test integration rules with sample data before go-live'
+  },
+  {
+    pattern: 'LOVABLE_API_KEY is not configured',
+    context: 'appraisal-feedback-assistant',
     severity: 'critical',
-    cause: 'Destination module (Nine-Box, IDP, Succession, etc.) not enabled for company',
+    cause: 'AI features require API key that is not set',
     resolution: [
-      'Navigate to company settings',
-      'Enable the required target module',
-      'Verify license includes the target module',
-      'Retry the integration after enabling'
+      'Contact system administrator to configure the API key',
+      'Verify environment variables are properly set'
     ],
-    prevention: 'Validate all target modules are enabled before cycle launch'
+    prevention: 'Verify AI configuration during initial setup'
   },
   {
-    code: 'INT-004',
-    name: 'APPROVAL_TIMEOUT',
-    severity: 'medium',
-    cause: 'Pending approval exceeded SLA without action',
-    resolution: [
-      'Identify the pending approver from integration log',
-      'Send reminder to approver',
-      'Escalate if approver is unavailable',
-      'Consider delegating approval authority'
-    ],
-    prevention: 'Set up automated escalation for aging approvals'
-  },
-  {
-    code: 'INT-005',
-    name: 'DATA_VALIDATION_FAILED',
+    pattern: 'Failed to fetch calibration session',
+    context: 'calibration-ai-analyzer',
     severity: 'high',
-    cause: 'Required fields missing in source appraisal data',
+    cause: 'Session ID invalid or user lacks access',
     resolution: [
-      'Review the appraisal participant record',
-      'Check for null/missing required fields',
-      'Complete missing data in source appraisal',
-      'Retry integration after data correction'
+      'Verify session exists in calibration_sessions table',
+      'Check user has calibrator role for the session'
     ],
-    prevention: 'Validate appraisal completeness before finalization'
-  },
-  {
-    code: 'INT-006',
-    name: 'DUPLICATE_ACTION',
-    severity: 'low',
-    cause: 'Same action already executed for this participant',
-    resolution: [
-      'Check if action already completed in target module',
-      'This may be expected if retrying a partial failure',
-      'No action needed if target state is correct'
-    ],
-    prevention: 'System already prevents true duplicates'
-  },
-  {
-    code: 'INT-007',
-    name: 'EXTERNAL_API_ERROR',
-    severity: 'high',
-    cause: 'External system (compensation, LMS) returned an error',
-    resolution: [
-      'Check external system availability',
-      'Review error message in log details',
-      'Contact external system administrator',
-      'Retry after external issue is resolved'
-    ],
-    prevention: 'Monitor external system health dashboards'
-  },
-  {
-    code: 'INT-008',
-    name: 'SCORE_THRESHOLD_NOT_MET',
-    severity: 'low',
-    cause: 'Employee score does not meet rule trigger conditions',
-    resolution: [
-      'This is expected behavior - rule correctly skipped',
-      'Review score and threshold configuration',
-      'Adjust rule threshold if needed'
-    ],
-    prevention: 'Test thresholds with representative data'
+    prevention: 'Validate session access before triggering analysis'
   }
 ];
 
 const LOG_FIELDS_EXPLANATION = [
   {
-    field: 'status',
-    values: ['success', 'pending_approval', 'failed', 'skipped'],
-    description: 'Current state of the integration execution'
-  },
-  {
     field: 'action_result',
-    values: ['JSON object with details'],
-    description: 'Detailed outcome including created record IDs, error messages, or skip reasons'
+    values: ['success', 'failed', 'pending_approval'],
+    description: 'Outcome of the integration action'
   },
   {
     field: 'error_message',
     values: ['String or null'],
-    description: 'Human-readable error description when status is failed'
+    description: 'Human-readable error description when action_result is failed'
   },
   {
-    field: 'triggered_at',
-    values: ['ISO timestamp'],
-    description: 'When the integration was triggered (appraisal finalization time)'
+    field: 'trigger_event',
+    values: ['appraisal_finalized', 'score_threshold', 'category_assigned'],
+    description: 'Event that triggered the integration rule'
+  },
+  {
+    field: 'target_module',
+    values: ['nine_box', 'succession', 'idp', 'pip', 'compensation', 'workforce_analytics', 'notifications', 'reminders'],
+    description: 'Downstream module receiving the action'
+  },
+  {
+    field: 'target_record_id',
+    values: ['UUID or null'],
+    description: 'ID of created/updated record in target module'
+  },
+  {
+    field: 'requires_approval',
+    values: ['true', 'false'],
+    description: 'Whether the action required manual approval before execution'
   },
   {
     field: 'executed_at',
     values: ['ISO timestamp or null'],
-    description: 'When the action was actually executed (may differ for async or approved actions)'
-  },
-  {
-    field: 'approved_by',
-    values: ['User ID or null'],
-    description: 'Who approved the action (if approval was required)'
-  },
-  {
-    field: 'retry_count',
-    values: ['Integer'],
-    description: 'Number of retry attempts for failed integrations'
+    description: 'When the action was executed (null if pending or failed)'
   }
 ];
 
@@ -312,27 +281,27 @@ export function IntegrationTroubleshootingSection() {
         <CardContent className="space-y-6">
           <NavigationPath path={NAVIGATION_PATHS['sec-8-5']} />
 
-          {/* Quick Stats */}
+          {/* Integration Overview - Actual Implementation */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="p-4 bg-green-500/10 border border-green-500/20 rounded-lg text-center">
               <CheckCircle className="h-6 w-6 text-green-600 mx-auto mb-2" />
-              <div className="text-lg font-bold">95%</div>
-              <div className="text-xs text-muted-foreground">Target Success Rate</div>
+              <div className="text-lg font-bold">8</div>
+              <div className="text-xs text-muted-foreground">Target Modules</div>
             </div>
             <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-lg text-center">
               <Clock className="h-6 w-6 text-amber-600 mx-auto mb-2" />
-              <div className="text-lg font-bold">24h</div>
-              <div className="text-xs text-muted-foreground">Max Resolution SLA</div>
+              <div className="text-lg font-bold">3</div>
+              <div className="text-xs text-muted-foreground">Trigger Events</div>
             </div>
             <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg text-center">
               <RefreshCw className="h-6 w-6 text-blue-600 mx-auto mb-2" />
-              <div className="text-lg font-bold">3x</div>
-              <div className="text-xs text-muted-foreground">Auto-Retry Limit</div>
+              <div className="text-lg font-bold">Manual</div>
+              <div className="text-xs text-muted-foreground">Retry Available</div>
             </div>
             <div className="p-4 bg-primary/5 border border-primary/20 rounded-lg text-center">
               <Database className="h-6 w-6 text-primary mx-auto mb-2" />
-              <div className="text-lg font-bold">30 days</div>
-              <div className="text-xs text-muted-foreground">Log Retention</div>
+              <div className="text-lg font-bold">Logged</div>
+              <div className="text-xs text-muted-foreground">All Executions</div>
             </div>
           </div>
 
@@ -348,30 +317,33 @@ export function IntegrationTroubleshootingSection() {
             <TabsContent value="error-codes" className="space-y-4 mt-4">
               <div className="flex items-center gap-2 pb-2 border-b">
                 <AlertTriangle className="h-5 w-5 text-primary" />
-                <h3 className="font-semibold">Error Code Reference</h3>
+                <h3 className="font-semibold">Error Pattern Reference</h3>
+              </div>
+              
+              <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg text-sm">
+                <strong>Note:</strong> The system uses descriptive error messages logged to edge function logs. 
+                The patterns below are derived from actual implementation.
               </div>
 
               <div className="rounded-lg border overflow-hidden">
                 <Table>
                   <TableHeader>
                     <TableRow className="bg-muted/50">
-                      <TableHead className="w-24">Code</TableHead>
-                      <TableHead className="w-40">Name</TableHead>
+                      <TableHead>Error Pattern</TableHead>
+                      <TableHead className="w-48">Context</TableHead>
                       <TableHead className="w-20">Severity</TableHead>
-                      <TableHead>Cause</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {ERROR_CODES.map((error) => (
-                      <TableRow key={error.code}>
-                        <TableCell className="font-mono text-xs">{error.code}</TableCell>
-                        <TableCell className="font-mono text-xs">{error.name}</TableCell>
+                    {ACTUAL_ERROR_PATTERNS.map((error, index) => (
+                      <TableRow key={index}>
+                        <TableCell className="font-mono text-xs">{error.pattern}</TableCell>
+                        <TableCell className="text-xs text-muted-foreground">{error.context}</TableCell>
                         <TableCell>
                           <Badge variant={error.severity === 'critical' ? 'destructive' : error.severity === 'high' ? 'outline' : 'secondary'}>
                             {error.severity}
                           </Badge>
                         </TableCell>
-                        <TableCell className="text-sm">{error.cause}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -379,12 +351,11 @@ export function IntegrationTroubleshootingSection() {
               </div>
 
               <Accordion type="single" collapsible className="w-full">
-                {ERROR_CODES.map((error) => (
-                  <AccordionItem key={error.code} value={error.code}>
+                {ACTUAL_ERROR_PATTERNS.map((error, index) => (
+                  <AccordionItem key={index} value={`error-${index}`}>
                     <AccordionTrigger className="text-left hover:no-underline">
                       <div className="flex items-center gap-3">
-                        <span className="font-mono text-xs bg-muted px-2 py-1 rounded">{error.code}</span>
-                        <span className="font-medium text-sm">{error.name}</span>
+                        <span className="font-mono text-xs bg-muted px-2 py-1 rounded truncate max-w-xs">{error.pattern}</span>
                       </div>
                     </AccordionTrigger>
                     <AccordionContent className="space-y-4 pl-4">
@@ -402,8 +373,8 @@ export function IntegrationTroubleshootingSection() {
                           Resolution Steps
                         </div>
                         <ol className="space-y-1 ml-4">
-                          {error.resolution.map((step, index) => (
-                            <li key={index} className="text-sm text-muted-foreground list-decimal">{step}</li>
+                          {error.resolution.map((step, idx) => (
+                            <li key={idx} className="text-sm text-muted-foreground list-decimal">{step}</li>
                           ))}
                         </ol>
                       </div>

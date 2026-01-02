@@ -18,6 +18,7 @@ interface EscalationTier {
   examples: string[];
 }
 
+// Note: Specific SLAs should be defined per organization. These are recommended guidelines.
 const ESCALATION_TIERS: EscalationTier[] = [
   {
     tier: 1,
@@ -25,10 +26,10 @@ const ESCALATION_TIERS: EscalationTier[] = [
     description: 'User attempts to resolve using available documentation and tools',
     owner: 'End User',
     responseSLA: 'Immediate',
-    resolutionSLA: '1 hour',
+    resolutionSLA: 'Varies',
     triggerConditions: [
       'Issue can be diagnosed using this manual',
-      'Error code is documented with resolution steps',
+      'Error message provides clear guidance',
       'No system-wide impact'
     ],
     contactMethod: 'Documentation, FAQs, In-app help',
@@ -43,8 +44,8 @@ const ESCALATION_TIERS: EscalationTier[] = [
     name: 'HR Operations Support',
     description: 'HR team handles data corrections, configuration issues, and process guidance',
     owner: 'HR Operations Team',
-    responseSLA: '4 business hours',
-    resolutionSLA: '1 business day',
+    responseSLA: 'Per organization SLA',
+    resolutionSLA: 'Per organization SLA',
     triggerConditions: [
       'Data correction required',
       'Configuration change needed',
@@ -64,8 +65,8 @@ const ESCALATION_TIERS: EscalationTier[] = [
     name: 'Technical Support',
     description: 'IT/Admin team handles system issues, integrations, and access problems',
     owner: 'IT Support / System Admin',
-    responseSLA: '8 business hours',
-    resolutionSLA: '2 business days',
+    responseSLA: 'Per organization SLA',
+    resolutionSLA: 'Per organization SLA',
     triggerConditions: [
       'System access or permission issue',
       'Integration failure not resolved by retry',
@@ -85,7 +86,7 @@ const ESCALATION_TIERS: EscalationTier[] = [
     name: 'Vendor Escalation',
     description: 'Platform vendor support for critical issues requiring engineering intervention',
     owner: 'Vendor Support Team',
-    responseSLA: 'Per contract SLA',
+    responseSLA: 'Per contract',
     resolutionSLA: 'Per severity level',
     triggerConditions: [
       'System-wide outage',
@@ -93,7 +94,7 @@ const ESCALATION_TIERS: EscalationTier[] = [
       'Confirmed product defect',
       'Tier 3 cannot resolve'
     ],
-    contactMethod: 'Vendor support portal, Emergency hotline',
+    contactMethod: 'Vendor support portal',
     examples: [
       'System unavailable for all users',
       'Data breach suspected',
@@ -103,36 +104,37 @@ const ESCALATION_TIERS: EscalationTier[] = [
   }
 ];
 
+// Note: These are recommended severity definitions. Organizations should define their own SLAs.
 const SEVERITY_DEFINITIONS = [
   {
     level: 'Critical (P1)',
     definition: 'System unavailable or critical function broken for all users',
     impact: 'Business operations halted',
-    response: '1 hour',
-    resolution: '4 hours',
+    response: 'Define per org',
+    resolution: 'Define per org',
     examples: ['System down', 'Data loss', 'Security breach']
   },
   {
     level: 'High (P2)',
     definition: 'Major function impaired affecting many users',
     impact: 'Significant business disruption',
-    response: '4 hours',
-    resolution: '1 business day',
+    response: 'Define per org',
+    resolution: 'Define per org',
     examples: ['Cannot submit appraisals', 'Integration failure', 'Performance severely degraded']
   },
   {
     level: 'Medium (P3)',
     definition: 'Feature not working as expected with workaround available',
     impact: 'Some inconvenience',
-    response: '1 business day',
-    resolution: '3 business days',
+    response: 'Define per org',
+    resolution: 'Define per org',
     examples: ['Report not generating correctly', 'Minor UI issue', 'Non-critical feature broken']
   },
   {
     level: 'Low (P4)',
     definition: 'Minor issue or enhancement request',
     impact: 'Minimal',
-    response: '2 business days',
+    response: 'Define per org',
     resolution: 'Next release',
     examples: ['Cosmetic issue', 'Feature request', 'Documentation update']
   }
@@ -238,27 +240,39 @@ export function EscalationProceduresSection() {
         <CardContent className="space-y-6">
           <NavigationPath path={NAVIGATION_PATHS['sec-8-8']} />
 
-          {/* SLA Summary */}
+          {/* Escalation Framework Note */}
+          <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+            <h4 className="font-semibold text-blue-700 dark:text-blue-400 mb-2">
+              Note: Organization-Specific SLAs Required
+            </h4>
+            <p className="text-sm text-muted-foreground">
+              Response and resolution SLAs should be defined by your organization based on business requirements, 
+              staffing levels, and contractual obligations. The framework below provides guidance but specific 
+              timeframes must be configured per your support agreements.
+            </p>
+          </div>
+
+          {/* Key Metrics */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-lg text-center">
               <AlertTriangle className="h-6 w-6 text-destructive mx-auto mb-2" />
-              <div className="text-lg font-bold">1 hour</div>
-              <div className="text-xs text-muted-foreground">P1 Response</div>
+              <div className="text-lg font-bold">P1</div>
+              <div className="text-xs text-muted-foreground">Highest Priority</div>
             </div>
             <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-lg text-center">
               <Clock className="h-6 w-6 text-amber-600 mx-auto mb-2" />
-              <div className="text-lg font-bold">4 hours</div>
-              <div className="text-xs text-muted-foreground">P2 Response</div>
-            </div>
-            <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg text-center">
-              <Users className="h-6 w-6 text-blue-600 mx-auto mb-2" />
               <div className="text-lg font-bold">4 Tiers</div>
               <div className="text-xs text-muted-foreground">Support Levels</div>
             </div>
+            <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg text-center">
+              <Users className="h-6 w-6 text-blue-600 mx-auto mb-2" />
+              <div className="text-lg font-bold">Escalate</div>
+              <div className="text-xs text-muted-foreground">When Needed</div>
+            </div>
             <div className="p-4 bg-green-500/10 border border-green-500/20 rounded-lg text-center">
               <CheckCircle className="h-6 w-6 text-green-600 mx-auto mb-2" />
-              <div className="text-lg font-bold">80%</div>
-              <div className="text-xs text-muted-foreground">Tier 1 Resolution Target</div>
+              <div className="text-lg font-bold">Document</div>
+              <div className="text-xs text-muted-foreground">All Issues</div>
             </div>
           </div>
 
