@@ -54,6 +54,7 @@ export const NAVIGATION_PATHS: Record<string, string[]> = {
   // Part 7: Integration
   'sec-7-1': ['Performance', 'Setup', 'Integration', 'Overview'],
   'sec-7-2': ['Performance', 'Setup', 'Integration', 'Triggers'],
+  'sec-7-7': ['Performance', 'Intelligence Hub', 'Integrations'],
 };
 
 // Related topics mapping for cross-referencing
