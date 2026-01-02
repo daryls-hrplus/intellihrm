@@ -7,13 +7,14 @@ import {
   SetupOverallScales,
   SetupCompetencies,
   SetupApprovalWorkflows,
+  SetupFormTemplates,
   SetupAppraisalCycles,
   SetupPerformanceCategories,
-  SetupFormTemplates,
   SetupActionRules,
+  SetupIntegrationRules,
   SetupEmployeeResponse,
   SetupHREscalations,
-  SetupIntegrationRules,
+  SetupMultiPositionAppraisals,
   SetupIndexSettings,
   SetupBenchmarks,
 } from './sections/setup';
@@ -74,20 +75,21 @@ export function ManualSetupSection() {
               <div className="text-left">
                 <h3 className="font-semibold">Appraisal Configuration</h3>
                 <p className="text-sm text-muted-foreground font-normal">
-                  Cycles, categories, forms, actions, and integrations
+                  Forms, cycles, categories, actions, and integrations
                 </p>
               </div>
-              <Badge variant="outline" className="ml-auto">9 sections</Badge>
+              <Badge variant="outline" className="ml-auto">10 sections</Badge>
             </div>
           </AccordionTrigger>
           <AccordionContent className="pt-4 space-y-6">
+            <SetupFormTemplates />
             <SetupAppraisalCycles />
             <SetupPerformanceCategories />
-            <SetupFormTemplates />
             <SetupActionRules />
+            <SetupIntegrationRules />
             <SetupEmployeeResponse />
             <SetupHREscalations />
-            <SetupIntegrationRules />
+            <SetupMultiPositionAppraisals />
             <SetupIndexSettings />
             <SetupBenchmarks />
           </AccordionContent>

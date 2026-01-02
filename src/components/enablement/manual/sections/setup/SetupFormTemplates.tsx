@@ -170,10 +170,10 @@ const TROUBLESHOOTING_ITEMS = [
 
 export function SetupFormTemplates() {
   return (
-    <Card id="sec-2-8">
+    <Card id="sec-2-5">
       <CardHeader>
         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-          <Badge variant="outline">Section 2.8</Badge>
+          <Badge variant="outline">Section 2.5</Badge>
           <Badge variant="secondary" className="gap-1">
             <Clock className="h-3 w-3" />
             ~15 min read

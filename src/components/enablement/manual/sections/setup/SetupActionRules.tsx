@@ -157,10 +157,10 @@ const TROUBLESHOOTING_ITEMS = [
 
 export function SetupActionRules() {
   return (
-    <Card id="sec-2-9">
+    <Card id="sec-2-8">
       <CardHeader>
         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-          <Badge variant="outline">Section 2.9</Badge>
+          <Badge variant="outline">Section 2.8</Badge>
           <Badge variant="secondary" className="gap-1">
             <Clock className="h-3 w-3" />
             ~15 min read
@@ -219,14 +219,14 @@ export function SetupActionRules() {
         </div>
 
         <ScreenshotPlaceholder
-          caption="Figure 2.9.1: Action Rules list with trigger conditions and action types"
+          caption="Figure 2.8.1: Action Rules list with trigger conditions and action types"
           alt="Action Rules management page"
         />
 
         <StepByStep steps={STEPS} title="Creating an Action Rule: Step-by-Step" />
 
         <ScreenshotPlaceholder
-          caption="Figure 2.9.2: Rule creation form with trigger and action configuration"
+          caption="Figure 2.8.2: Rule creation form with trigger and action configuration"
           alt="Create Action Rule dialog"
         />
 
