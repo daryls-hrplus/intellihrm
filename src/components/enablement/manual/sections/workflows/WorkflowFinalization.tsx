@@ -4,6 +4,7 @@ import { Lock, Clock, CheckCircle, Settings, Archive, Zap, FileCheck, AlertTrian
 import { NavigationPath } from '../../NavigationPath';
 import { NAVIGATION_PATHS } from '../../navigationPaths';
 import { TipCallout, WarningCallout, NoteCallout, SuccessCallout } from '../../components/Callout';
+import { WorkflowDiagram } from '../../components/WorkflowDiagram';
 import { StepByStep } from '../../components/StepByStep';
 import { FieldReferenceTable } from '../../components/FieldReferenceTable';
 import { BusinessRules } from '../../components/BusinessRules';
@@ -131,6 +132,49 @@ export function WorkflowFinalization() {
             <li>Activate downstream integrations (PIP, IDP, Succession)</li>
             <li>Understand data retention and archival policies</li>
           </ul>
+        </div>
+
+        {/* Interactive Workflow Diagram */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold">Finalization Workflow</h3>
+          <div className="p-4 bg-muted/30 rounded-lg overflow-x-auto">
+            <pre className="text-xs text-muted-foreground mb-2">Participant Flow Diagram</pre>
+            <div className="mermaid-container">
+              <presentation-mermaid>
+                {`flowchart TD
+    subgraph HR["🔧 HR Admin Actions"]
+        A[Review Completion Status] --> B{Pending Items?}
+        B -->|Yes| C[Send Reminders / Force Close]
+        B -->|No| D[Run Calibration]
+        C --> D
+        D --> E[Finalize Scores]
+        E --> F[Review Action Rules]
+        F --> G[Close Cycle]
+    end
+    
+    subgraph System["⚙️ System Processing"]
+        H[Lock All Evaluations]
+        I[Trigger Downstream Actions]
+        J[Archive Cycle Data]
+    end
+    
+    subgraph Integrations["🔗 Downstream Modules"]
+        K[PIP Creation]
+        L[IDP Generation]
+        M[Succession Nominations]
+        N[Compensation Flags]
+    end
+    
+    G --> H
+    H --> I
+    I --> K
+    I --> L
+    I --> M
+    I --> N
+    H --> J`}
+              </presentation-mermaid>
+            </div>
+          </div>
         </div>
 
         {/* Close-out Checklist */}

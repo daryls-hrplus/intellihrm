@@ -4,6 +4,7 @@ import { RefreshCw, Clock, CheckCircle, Users, ArrowRightLeft, Scale, AlertTrian
 import { NavigationPath } from '../../NavigationPath';
 import { NAVIGATION_PATHS } from '../../navigationPaths';
 import { TipCallout, WarningCallout, NoteCallout, InfoCallout } from '../../components/Callout';
+import { WorkflowDiagram } from '../../components/WorkflowDiagram';
 import { StepByStep } from '../../components/StepByStep';
 import { FieldReferenceTable } from '../../components/FieldReferenceTable';
 import { BusinessRules } from '../../components/BusinessRules';
@@ -151,6 +152,59 @@ export function WorkflowRoleChangeHandling() {
             <li>Collect and consolidate multi-manager input</li>
             <li>Document role changes for audit compliance</li>
           </ul>
+        </div>
+
+        {/* Interactive Workflow Diagram */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold">Role Change Handling Workflow</h3>
+          <div className="p-4 bg-muted/30 rounded-lg overflow-x-auto">
+            <pre className="text-xs text-muted-foreground mb-2">Participant Flow Diagram</pre>
+            <div className="mermaid-container">
+              <presentation-mermaid>
+                {`flowchart TD
+    subgraph Trigger["🔄 Change Event"]
+        A[Role/Manager Change Detected]
+    end
+    
+    subgraph HR["🔧 HR Admin"]
+        B{Determine Approach}
+        B -->|<30 days left| C[Current Manager Only]
+        B -->|>60 days served| D[Request Prior Input]
+        B -->|Complex| E[Split Evaluation]
+    end
+    
+    subgraph PriorManager["👔 Prior Manager"]
+        F[Provide Partial Rating]
+        G[Document Period Performance]
+    end
+    
+    subgraph CurrentManager["👔 Current Manager"]
+        H[Review Prior Input]
+        I[Complete Current Period]
+        J[Consolidate Ratings]
+    end
+    
+    subgraph System["⚙️ System"]
+        K[Calculate Time Weights]
+        L[Merge Scores]
+        M[Generate Final Rating]
+    end
+    
+    A --> B
+    D --> F
+    F --> G
+    G --> H
+    C --> I
+    E --> F
+    E --> I
+    H --> J
+    I --> J
+    J --> K
+    K --> L
+    L --> M`}
+              </presentation-mermaid>
+            </div>
+          </div>
         </div>
 
         {/* Change Type Overview */}

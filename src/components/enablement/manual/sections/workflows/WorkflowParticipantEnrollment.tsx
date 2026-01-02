@@ -3,7 +3,8 @@ import { Badge } from '@/components/ui/badge';
 import { Users, Clock, Settings, CheckCircle, UserPlus, UserMinus, Filter } from 'lucide-react';
 import { NavigationPath } from '../../NavigationPath';
 import { NAVIGATION_PATHS } from '../../navigationPaths';
-import { Callout, TipCallout, WarningCallout, NoteCallout } from '../../components/Callout';
+import { TipCallout, WarningCallout, NoteCallout } from '../../components/Callout';
+import { WorkflowDiagram } from '../../components/WorkflowDiagram';
 import { StepByStep } from '../../components/StepByStep';
 import { FieldReferenceTable } from '../../components/FieldReferenceTable';
 import { BusinessRules } from '../../components/BusinessRules';
@@ -134,6 +135,40 @@ export function WorkflowParticipantEnrollment() {
             <li>Handle re-enrollment and exclusion scenarios</li>
           </ul>
         </div>
+
+        {/* Interactive Workflow Diagram */}
+        <WorkflowDiagram 
+          title="Enrollment Workflow"
+          description="HR admin actions, system processing, and data source interactions"
+          diagram={`flowchart TD
+    subgraph HR["🔧 HR Admin Actions"]
+        A[Define Eligibility Criteria] --> B[Preview Participants]
+        B --> C{Adjustments Needed?}
+        C -->|Yes| D[Manual Add/Remove]
+        C -->|No| E[Assign Evaluators]
+        D --> E
+        E --> F[Confirm Enrollment]
+    end
+    
+    subgraph System["⚙️ System Processing"]
+        G[Apply Eligibility Rules]
+        H[Match to Org Structure]
+        I[Lock Enrollment]
+    end
+    
+    subgraph Data["📊 Data Sources"]
+        J[(Employee Records)]
+        K[(Org Hierarchy)]
+        L[(Previous Cycles)]
+    end
+    
+    A --> G
+    G --> J
+    G --> L
+    H --> K
+    E --> H
+    F --> I`}
+        />
 
         {/* Enrollment Methods */}
         <div className="space-y-4">

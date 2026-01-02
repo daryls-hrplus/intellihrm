@@ -4,6 +4,7 @@ import { Target, Clock, CheckCircle, TrendingUp, AlertTriangle, Scale } from 'lu
 import { NavigationPath } from '../../NavigationPath';
 import { NAVIGATION_PATHS } from '../../navigationPaths';
 import { TipCallout, WarningCallout, NoteCallout } from '../../components/Callout';
+import { WorkflowDiagram } from '../../components/WorkflowDiagram';
 import { StepByStep } from '../../components/StepByStep';
 import { FieldReferenceTable } from '../../components/FieldReferenceTable';
 import { BusinessRules } from '../../components/BusinessRules';
@@ -145,6 +146,47 @@ export function WorkflowGoalRating() {
             <li>Handle partial achievement and mitigating circumstances</li>
             <li>Understand weight calculations in overall score</li>
           </ul>
+        </div>
+
+        {/* Interactive Workflow Diagram */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold">Goal Rating Workflow</h3>
+          <div className="p-4 bg-muted/30 rounded-lg overflow-x-auto">
+            <pre className="text-xs text-muted-foreground mb-2">Participant Flow Diagram</pre>
+            <div className="mermaid-container">
+              <presentation-mermaid>
+                {`flowchart LR
+    subgraph Preparation["📋 Preparation"]
+        A[Review Goal Definition] --> B[Gather Evidence]
+        B --> C[Check Metrics]
+    end
+    
+    subgraph Rating["⭐ Rating Process"]
+        D[Compare to Scale] --> E{Achievement Level?}
+        E -->|>120%| F[5 - Exceptional]
+        E -->|105-120%| G[4 - Exceeds]
+        E -->|95-105%| H[3 - Meets]
+        E -->|70-94%| I[2 - Below]
+        E -->|<70%| J[1 - Unsatisfactory]
+    end
+    
+    subgraph Documentation["📝 Documentation"]
+        K[Write Justification]
+        L[Add Evidence Summary]
+        M[Submit Rating]
+    end
+    
+    C --> D
+    F --> K
+    G --> K
+    H --> K
+    I --> K
+    J --> K
+    K --> L
+    L --> M`}
+              </presentation-mermaid>
+            </div>
+          </div>
         </div>
 
         {/* Rating Scale Reference */}

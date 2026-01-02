@@ -4,6 +4,7 @@ import { Calendar, Clock, CheckCircle, Users, Video, FileText, MessageSquare } f
 import { NavigationPath } from '../../NavigationPath';
 import { NAVIGATION_PATHS } from '../../navigationPaths';
 import { TipCallout, WarningCallout, NoteCallout } from '../../components/Callout';
+import { WorkflowDiagram } from '../../components/WorkflowDiagram';
 import { StepByStep } from '../../components/StepByStep';
 import { FieldReferenceTable } from '../../components/FieldReferenceTable';
 import { BusinessRules } from '../../components/BusinessRules';
@@ -129,6 +130,47 @@ export function WorkflowInterviewScheduling() {
             <li>Configure meeting formats for different scenarios</li>
             <li>Document interview completion for workflow progression</li>
           </ul>
+        </div>
+
+        {/* Interactive Workflow Diagram */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold">Interview Scheduling Workflow</h3>
+          <div className="p-4 bg-muted/30 rounded-lg overflow-x-auto">
+            <pre className="text-xs text-muted-foreground mb-2">Participant Flow Diagram</pre>
+            <div className="mermaid-container">
+              <presentation-mermaid>
+                {`flowchart LR
+    subgraph Manager["👔 Manager Actions"]
+        A[Complete Evaluation] --> B[Open Scheduler]
+        B --> C[Select Time Slot]
+        C --> D[Configure Meeting]
+        D --> E[Add Agenda]
+        E --> F[Send Invitation]
+    end
+    
+    subgraph System["⚙️ System"]
+        G[Check Availability]
+        H[Create Calendar Event]
+        I[Send Notifications]
+    end
+    
+    subgraph Employee["👤 Employee"]
+        J[Receive Invitation]
+        K[Review Evaluation]
+        L[Prepare Questions]
+        M[Attend Interview]
+    end
+    
+    C --> G
+    F --> H
+    H --> I
+    I --> J
+    J --> K
+    K --> L
+    L --> M`}
+              </presentation-mermaid>
+            </div>
+          </div>
         </div>
 
         {/* Meeting Format Options */}

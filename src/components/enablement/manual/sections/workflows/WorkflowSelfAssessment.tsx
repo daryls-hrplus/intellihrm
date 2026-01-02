@@ -4,6 +4,7 @@ import { User, Clock, CheckCircle, Target, FileText, Upload, Bell } from 'lucide
 import { NavigationPath } from '../../NavigationPath';
 import { NAVIGATION_PATHS } from '../../navigationPaths';
 import { TipCallout, WarningCallout, NoteCallout, InfoCallout } from '../../components/Callout';
+import { WorkflowDiagram } from '../../components/WorkflowDiagram';
 import { StepByStep } from '../../components/StepByStep';
 import { FieldReferenceTable } from '../../components/FieldReferenceTable';
 import { BusinessRules } from '../../components/BusinessRules';
@@ -140,6 +141,44 @@ export function WorkflowSelfAssessment() {
             <li>Upload relevant documentation to strengthen your case</li>
             <li>Submit self-assessment before the deadline</li>
           </ul>
+        </div>
+
+        {/* Interactive Workflow Diagram */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold">Self-Assessment Workflow</h3>
+          <div className="p-4 bg-muted/30 rounded-lg overflow-x-auto">
+            <pre className="text-xs text-muted-foreground mb-2">Participant Flow Diagram</pre>
+            <div className="mermaid-container">
+              <presentation-mermaid>
+                {`flowchart TD
+    subgraph System["⚙️ System"]
+        A[Cycle Launches] --> B[Send Notification]
+        J[Validate Submission]
+        K[Unlock Manager Form]
+    end
+    
+    subgraph Employee["👤 Employee Actions"]
+        C[Access Appraisal] --> D[Review Goals]
+        D --> E[Rate Goals with Evidence]
+        E --> F[Assess Competencies]
+        F --> G[Upload Evidence]
+        G --> H[Write Self-Reflection]
+        H --> I{Ready to Submit?}
+        I -->|No| D
+        I -->|Yes| L[Submit Self-Assessment]
+    end
+    
+    subgraph Manager["👔 Manager"]
+        M[Begin Evaluation]
+    end
+    
+    B --> C
+    L --> J
+    J --> K
+    K --> M`}
+              </presentation-mermaid>
+            </div>
+          </div>
         </div>
 
         {/* Timeline Overview */}
