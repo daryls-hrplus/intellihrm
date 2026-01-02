@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import jsPDF from 'jspdf';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -120,6 +121,95 @@ export default function AppraisalsManualPage() {
     );
   };
 
+  const exportToPDF = () => {
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const margin = 20;
+    const contentWidth = pageWidth - margin * 2;
+    let yPosition = margin;
+
+    const addNewPageIfNeeded = (requiredSpace: number) => {
+      if (yPosition + requiredSpace > pageHeight - margin) {
+        pdf.addPage();
+        yPosition = margin;
+      }
+    };
+
+    // Title
+    pdf.setFontSize(24);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text('Appraisals Administrator Manual', pageWidth / 2, yPosition, { align: 'center' });
+    yPosition += 12;
+
+    pdf.setFontSize(10);
+    pdf.setFont('helvetica', 'normal');
+    pdf.setTextColor(100);
+    pdf.text(`Generated: ${new Date().toLocaleDateString()} | Total Read Time: ${totalReadTime} min`, pageWidth / 2, yPosition, { align: 'center' });
+    pdf.setTextColor(0);
+    yPosition += 15;
+
+    // Sections
+    APPRAISALS_MANUAL_STRUCTURE.forEach((section) => {
+      addNewPageIfNeeded(30);
+
+      // Section header
+      pdf.setFontSize(14);
+      pdf.setFont('helvetica', 'bold');
+      pdf.setTextColor(30, 64, 175);
+      const sectionTitle = `${section.sectionNumber}. ${section.title}`;
+      pdf.text(sectionTitle, margin, yPosition);
+      yPosition += 7;
+
+      // Section description
+      pdf.setFontSize(10);
+      pdf.setFont('helvetica', 'normal');
+      pdf.setTextColor(80);
+      const descLines = pdf.splitTextToSize(section.description, contentWidth);
+      addNewPageIfNeeded(descLines.length * 5);
+      pdf.text(descLines, margin, yPosition);
+      yPosition += descLines.length * 5 + 3;
+
+      // Meta info
+      pdf.setFontSize(8);
+      pdf.setTextColor(120);
+      pdf.text(`Read Time: ${section.estimatedReadTime} min | Target: ${section.targetRoles.join(', ')}`, margin, yPosition);
+      pdf.setTextColor(0);
+      yPosition += 8;
+
+      // Subsections
+      if (section.subsections && section.subsections.length > 0) {
+        section.subsections.forEach((sub) => {
+          addNewPageIfNeeded(20);
+
+          pdf.setFontSize(11);
+          pdf.setFont('helvetica', 'bold');
+          pdf.setTextColor(60);
+          pdf.text(`${sub.sectionNumber} ${sub.title}`, margin + 5, yPosition);
+          yPosition += 5;
+
+          pdf.setFontSize(9);
+          pdf.setFont('helvetica', 'normal');
+          pdf.setTextColor(80);
+          const subDescLines = pdf.splitTextToSize(sub.description, contentWidth - 10);
+          addNewPageIfNeeded(subDescLines.length * 4);
+          pdf.text(subDescLines, margin + 5, yPosition);
+          yPosition += subDescLines.length * 4 + 5;
+        });
+      }
+
+      yPosition += 5;
+    });
+
+    // Save
+    const date = new Date().toISOString().split('T')[0];
+    pdf.save(`appraisals-admin-manual-${date}.pdf`);
+  };
+
+  const handlePrint = () => {
+    window.print();
+  };
+
   const renderSectionContent = () => {
     switch (activePartId) {
       case 'part-1':
@@ -178,11 +268,11 @@ export default function AppraisalsManualPage() {
                 <FileText className="h-3 w-3" />
                 {APPRAISALS_MANUAL_STRUCTURE.reduce((acc, s) => acc + 1 + (s.subsections?.length || 0), 0)} sections
               </Badge>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={exportToPDF}>
                 <Download className="h-4 w-4 mr-2" />
                 Export PDF
               </Button>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={handlePrint}>
                 <Printer className="h-4 w-4 mr-2" />
                 Print
               </Button>
