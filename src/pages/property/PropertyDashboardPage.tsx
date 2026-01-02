@@ -133,7 +133,7 @@ export default function PropertyDashboardPage() {
           })}
         </div>
 
-        <GroupedModuleCards sections={sections} showToggleButton />
+        <GroupedModuleCards sections={sections} defaultOpen={true} showToggleButton />
       </div>
     </AppLayout>
   );
