@@ -132,7 +132,7 @@ export default function EmployeeSelfServicePage() {
     },
     {
       titleKey: "Career",
-      items: filterByAccess([allModules.professionalInfo, allModules.careerPlan, allModules.careerPaths, allModules.mentorship, allModules.jobs, allModules.milestones]),
+      items: filterByAccess([allModules.professionalInfo, allModules.careerPlan, allModules.careerPaths, allModules.mentorship, allModules.jobs, allModules.milestones, allModules.transactions]),
     },
     {
       titleKey: "Learning & Development",
@@ -148,7 +148,7 @@ export default function EmployeeSelfServicePage() {
     },
     {
       titleKey: "Tasks & Approvals",
-      items: filterByAccess([allModules.approvals, allModules.delegates, allModules.transactions, allModules.reminders]),
+      items: filterByAccess([allModules.approvals, allModules.delegates, allModules.reminders]),
     },
     {
       titleKey: "Help & Settings",
