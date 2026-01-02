@@ -171,12 +171,12 @@ export function SetupPerformanceCategories() {
           </p>
         </div>
 
-        <div className="p-4 bg-purple-100 dark:bg-purple-900/30 border border-purple-300 dark:border-purple-700 rounded-lg">
+        <div className="p-4 border-l-4 border-l-purple-500 bg-muted/50 rounded-r-lg">
           <div className="flex items-start gap-3">
             <Tag className="h-5 w-5 text-purple-600 dark:text-purple-400 flex-shrink-0" />
             <div>
-              <h4 className="font-medium text-foreground">Category Design Tip</h4>
-              <p className="text-sm text-muted-foreground">
+              <h4 className="font-semibold text-foreground">Category Design Tip</h4>
+              <p className="text-sm text-foreground">
                 Use positive, growth-oriented language. "Developing Performer" is more constructive 
                 than "Below Average." Categories should guide development conversations, not just label employees.
               </p>

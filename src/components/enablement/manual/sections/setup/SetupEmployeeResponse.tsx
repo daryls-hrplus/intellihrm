@@ -214,12 +214,12 @@ export function SetupEmployeeResponse() {
           </p>
         </div>
 
-        <div className="p-4 bg-blue-100 dark:bg-blue-900/30 border border-blue-300 dark:border-blue-700 rounded-lg">
+        <div className="p-4 border-l-4 border-l-blue-500 bg-muted/50 rounded-r-lg">
           <div className="flex items-start gap-3">
             <MessageSquare className="h-5 w-5 text-blue-600 dark:text-blue-400 flex-shrink-0" />
             <div>
-              <h4 className="font-medium text-foreground">Employee Experience Tip</h4>
-              <p className="text-sm text-muted-foreground">
+              <h4 className="font-semibold text-foreground">Employee Experience Tip</h4>
+              <p className="text-sm text-foreground">
                 A 14-day response window with edit capability provides good balance. Too short 
                 creates pressure; too long delays cycle completion. Consider your organization's 
                 culture and typical review volume.

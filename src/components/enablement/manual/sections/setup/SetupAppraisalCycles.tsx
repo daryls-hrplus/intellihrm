@@ -219,12 +219,12 @@ export function SetupAppraisalCycles() {
           </p>
         </div>
 
-        <div className="p-4 bg-green-100 dark:bg-green-900/30 border border-green-300 dark:border-green-700 rounded-lg">
+        <div className="p-4 border-l-4 border-l-green-500 bg-muted/50 rounded-r-lg">
           <div className="flex items-start gap-3">
             <Calendar className="h-5 w-5 text-green-600 dark:text-green-400 flex-shrink-0" />
             <div>
-              <h4 className="font-medium text-foreground">Cycle Planning Best Practice</h4>
-              <p className="text-sm text-muted-foreground">
+              <h4 className="font-semibold text-foreground">Cycle Planning Best Practice</h4>
+              <p className="text-sm text-foreground">
                 Plan your annual cycle calendar at the start of the fiscal year. Consider how mid-year 
                 reviews align with annual cycles, and ensure probationary reviews are triggered 
                 automatically for new hires.
