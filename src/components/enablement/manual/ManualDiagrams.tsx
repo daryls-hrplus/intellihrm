@@ -108,9 +108,9 @@ export function ManualDiagrams() {
             </div>
             
             {/* Alternative paths */}
-            <div className="grid md:grid-cols-2 gap-4 p-4 border-l-4 border-l-primary bg-primary/5 rounded-r-lg">
+            <div className="grid md:grid-cols-2 gap-4 p-4 border-2 border-primary bg-primary/20 rounded-lg">
               <div>
-                <h4 className="font-medium text-sm mb-3 text-primary">Exception Statuses</h4>
+                <h4 className="font-semibold text-sm mb-3">Exception Statuses</h4>
                 <div className="flex flex-wrap gap-2">
                   <Badge className="bg-red-600 text-white hover:bg-red-700">rejected</Badge>
                   <Badge className="bg-orange-600 text-white hover:bg-orange-700">returned</Badge>
@@ -118,7 +118,7 @@ export function ManualDiagrams() {
                 </div>
               </div>
               <div>
-                <h4 className="font-medium text-sm mb-3 text-primary">Terminal Statuses</h4>
+                <h4 className="font-semibold text-sm mb-3">Terminal Statuses</h4>
                 <div className="flex flex-wrap gap-2">
                   <Badge className="bg-gray-600 text-white hover:bg-gray-700">cancelled</Badge>
                   <Badge className="bg-slate-600 text-white hover:bg-slate-700">auto_terminated</Badge>
@@ -234,8 +234,8 @@ export function ManualDiagrams() {
               </div>
             </div>
           </div>
-          <div className="mt-4 p-4 border-l-4 border-l-primary bg-primary/5 rounded-r-lg">
-            <h4 className="font-medium text-sm mb-2 text-primary">appraisal_strengths_gaps Fields</h4>
+          <div className="mt-4 p-4 border-2 border-primary bg-primary/20 rounded-lg">
+            <h4 className="font-semibold text-sm mb-2">appraisal_strengths_gaps Fields</h4>
             <div className="flex flex-wrap gap-2">
               {['strengths', 'development_gaps', 'ai_confidence', 'suggested_idp_goals', 'linked_idp_goal_ids', 'manager_acknowledged'].map((field) => (
                 <Badge key={field} className="bg-primary text-primary-foreground">{field}</Badge>
@@ -270,16 +270,16 @@ export function ManualDiagrams() {
               ))}
           </div>
           <div className="grid md:grid-cols-2 gap-4 mt-4">
-            <div className="p-4 border-l-4 border-l-amber-500 bg-amber-500/5 rounded-r-lg">
-              <h4 className="font-medium text-sm mb-2 text-amber-600 dark:text-amber-400">Exception Paths</h4>
+            <div className="p-4 border-2 border-amber-500 bg-amber-500/20 rounded-lg">
+              <h4 className="font-semibold text-sm mb-2">Exception Paths</h4>
               <div className="flex flex-wrap gap-2">
                 <Badge className="bg-amber-600 text-white">rescheduled</Badge>
                 <Badge className="bg-gray-600 text-white">cancelled</Badge>
                 <Badge className="bg-red-600 text-white">no_show</Badge>
               </div>
             </div>
-            <div className="p-4 border-l-4 border-l-blue-500 bg-blue-500/5 rounded-r-lg">
-              <h4 className="font-medium text-sm mb-2 text-blue-600 dark:text-blue-400">Video Integration</h4>
+            <div className="p-4 border-2 border-blue-500 bg-blue-500/20 rounded-lg">
+              <h4 className="font-semibold text-sm mb-2">Video Integration</h4>
               <div className="flex flex-wrap gap-2">
                 <Badge className="bg-blue-600 text-white">Zoom</Badge>
                 <Badge className="bg-purple-600 text-white">Microsoft Teams</Badge>
