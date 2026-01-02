@@ -94,10 +94,22 @@ export function ManualPrintPreview({
     }, 100);
   };
 
+  // Helper to parse hex color to RGB
+  const hexToRgb = (hex: string) => {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result
+      ? { r: parseInt(result[1], 16), g: parseInt(result[2], 16), b: parseInt(result[3], 16) }
+      : { r: 0, g: 0, b: 0 };
+  };
+
   const handleExportPdf = async () => {
     setIsExporting(true);
     try {
-      const pdf = new jsPDF(settings.layout.orientation === 'landscape' ? 'l' : 'p', 'mm', settings.layout.pageSize.toLowerCase() as 'a4' | 'letter' | 'legal');
+      const pdf = new jsPDF(
+        settings.layout.orientation === 'landscape' ? 'l' : 'p',
+        'mm',
+        settings.layout.pageSize.toLowerCase() as 'a4' | 'letter' | 'legal'
+      );
       const pageWidth = pdf.internal.pageSize.getWidth();
       const pageHeight = pdf.internal.pageSize.getHeight();
       const margin = settings.layout.margins;
@@ -105,18 +117,32 @@ export function ManualPrintPreview({
       let yPosition = margin.top;
       let pageNumber = 0;
 
+      const primaryRgb = hexToRgb(brandColors.primaryColor);
+      const secondaryRgb = hexToRgb(brandColors.secondaryColor);
+
+      const addHeader = () => {
+        if (settings.sections.includeHeaders && settings.branding.headerStyle !== 'none') {
+          if (settings.branding.headerStyle === 'branded') {
+            pdf.setFillColor(primaryRgb.r, primaryRgb.g, primaryRgb.b);
+            pdf.rect(0, 0, pageWidth, 12, 'F');
+            pdf.setTextColor(255, 255, 255);
+          } else {
+            pdf.setTextColor(100, 100, 100);
+          }
+          pdf.setFontSize(9);
+          pdf.text(settings.sections.headerContent, margin.left, 8);
+          pdf.setTextColor(0, 0, 0);
+        }
+      };
+
       const addNewPageIfNeeded = (requiredSpace: number) => {
         if (yPosition + requiredSpace > pageHeight - margin.bottom) {
           pdf.addPage();
           pageNumber++;
           yPosition = margin.top;
-          
-          // Add header
+          addHeader();
           if (settings.sections.includeHeaders && settings.branding.headerStyle !== 'none') {
-            pdf.setFontSize(9);
-            pdf.setTextColor(100);
-            pdf.text(settings.sections.headerContent, margin.left, 12);
-            yPosition = margin.top + 5;
+            yPosition = margin.top + 8;
           }
         }
       };
@@ -124,18 +150,30 @@ export function ManualPrintPreview({
       // Cover page
       if (settings.sections.includeCover) {
         pageNumber++;
-        pdf.setFillColor(parseInt(brandColors.primaryColor.slice(1, 3), 16), parseInt(brandColors.primaryColor.slice(3, 5), 16), parseInt(brandColors.primaryColor.slice(5, 7), 16));
-        
+
         if (settings.branding.coverStyle === 'branded') {
+          // Full color background
+          pdf.setFillColor(primaryRgb.r, primaryRgb.g, primaryRgb.b);
           pdf.rect(0, 0, pageWidth, pageHeight, 'F');
           pdf.setTextColor(255, 255, 255);
+        } else if (settings.branding.coverStyle === 'corporate') {
+          // White background with colored bands
+          pdf.setFillColor(secondaryRgb.r, secondaryRgb.g, secondaryRgb.b);
+          pdf.rect(0, 0, pageWidth, 30, 'F');
+          pdf.setFillColor(primaryRgb.r, primaryRgb.g, primaryRgb.b);
+          pdf.rect(0, pageHeight - 25, pageWidth, 25, 'F');
+          pdf.setTextColor(primaryRgb.r, primaryRgb.g, primaryRgb.b);
         } else {
-          pdf.setTextColor(parseInt(brandColors.primaryColor.slice(1, 3), 16), parseInt(brandColors.primaryColor.slice(3, 5), 16), parseInt(brandColors.primaryColor.slice(5, 7), 16));
+          // Minimal - white with accent line
+          pdf.setDrawColor(primaryRgb.r, primaryRgb.g, primaryRgb.b);
+          pdf.setLineWidth(2);
+          pdf.line(margin.left, pageHeight / 2 + 30, pageWidth - margin.right, pageHeight / 2 + 30);
+          pdf.setTextColor(primaryRgb.r, primaryRgb.g, primaryRgb.b);
         }
 
         pdf.setFontSize(14);
         pdf.text(brandColors.companyName, pageWidth / 2, pageHeight / 3, { align: 'center' });
-        
+
         pdf.setFontSize(28);
         pdf.setFont('helvetica', 'bold');
         pdf.text('Appraisals Administrator', pageWidth / 2, pageHeight / 2 - 5, { align: 'center' });
@@ -143,8 +181,12 @@ export function ManualPrintPreview({
 
         pdf.setFontSize(10);
         pdf.setFont('helvetica', 'normal');
-        pdf.text(`Version 1.3.0 | ${new Date().toLocaleDateString()}`, pageWidth / 2, pageHeight - 30, { align: 'center' });
-        
+        const versionY = settings.branding.coverStyle === 'corporate' ? pageHeight - 35 : pageHeight - 30;
+        if (settings.branding.coverStyle === 'corporate') {
+          pdf.setTextColor(255, 255, 255);
+        }
+        pdf.text(`Version 1.3.0 | ${new Date().toLocaleDateString()}`, pageWidth / 2, versionY, { align: 'center' });
+
         pdf.addPage();
         pageNumber++;
         yPosition = margin.top;
@@ -152,7 +194,12 @@ export function ManualPrintPreview({
 
       // Table of Contents
       if (settings.sections.includeTableOfContents) {
-        pdf.setTextColor(0, 0, 0);
+        addHeader();
+        if (settings.sections.includeHeaders && settings.branding.headerStyle !== 'none') {
+          yPosition = margin.top + 8;
+        }
+
+        pdf.setTextColor(primaryRgb.r, primaryRgb.g, primaryRgb.b);
         pdf.setFontSize(18);
         pdf.setFont('helvetica', 'bold');
         pdf.text('Table of Contents', margin.left, yPosition);
@@ -160,20 +207,26 @@ export function ManualPrintPreview({
 
         pdf.setFontSize(10);
         pdf.setFont('helvetica', 'normal');
-        
+        pdf.setTextColor(0, 0, 0);
+
         const tocItems = [
-          '1. Module Overview & Conceptual Foundation',
-          '2. Setup & Configuration Guide',
-          '3. Operational Workflows',
-          '4. Calibration & Quality Management',
-          '5. AI-Assisted Features',
-          '6. Analytics & Reporting',
-          '7. Cross-Module Integration',
-          '8. Troubleshooting & Support'
+          { title: '1. Module Overview & Conceptual Foundation', page: 3 },
+          { title: '2. Setup & Configuration Guide', page: 8 },
+          { title: '3. Operational Workflows', page: 15 },
+          { title: '4. Calibration & Quality Management', page: 22 },
+          { title: '5. AI-Assisted Features', page: 28 },
+          { title: '6. Analytics & Reporting', page: 34 },
+          { title: '7. Cross-Module Integration', page: 40 },
+          { title: '8. Troubleshooting & Support', page: 45 },
         ];
 
-        tocItems.forEach((item, idx) => {
-          pdf.text(item, margin.left, yPosition);
+        const depth = settings.sections.tocDepth;
+        tocItems.forEach((item) => {
+          const dotLeader = '.'.repeat(Math.max(0, 60 - item.title.length));
+          pdf.text(item.title, margin.left, yPosition);
+          if (settings.sections.includePageNumbers) {
+            pdf.text(`${dotLeader} ${item.page}`, margin.left + 80, yPosition);
+          }
           yPosition += 8;
         });
 
@@ -197,16 +250,14 @@ export function ManualPrintPreview({
       pdf.setTextColor(0, 0, 0);
 
       parts.forEach((part) => {
-        // Part header
         addNewPageIfNeeded(25);
-        pdf.setFontSize(16);
+        pdf.setFontSize(settings.formatting.headingFontSize);
         pdf.setFont('helvetica', 'bold');
-        pdf.setTextColor(parseInt(brandColors.primaryColor.slice(1, 3), 16), parseInt(brandColors.primaryColor.slice(3, 5), 16), parseInt(brandColors.primaryColor.slice(5, 7), 16));
+        pdf.setTextColor(primaryRgb.r, primaryRgb.g, primaryRgb.b);
         pdf.text(part.title, margin.left, yPosition);
         yPosition += 12;
         pdf.setTextColor(0, 0, 0);
 
-        // Sections
         part.sections.forEach((section) => {
           addNewPageIfNeeded(20);
 
@@ -231,45 +282,51 @@ export function ManualPrintPreview({
         yPosition += 10;
       });
 
-      // Add page numbers if enabled
-      if (settings.sections.includePageNumbers) {
-        const totalPgs = pdf.getNumberOfPages();
-        for (let i = 1; i <= totalPgs; i++) {
-          pdf.setPage(i);
-          pdf.setFontSize(9);
-          pdf.setTextColor(100);
-          
+      // Add page numbers and footers
+      const totalPgs = pdf.getNumberOfPages();
+      const skipCover = settings.sections.includeCover ? 1 : 0;
+
+      for (let i = 1; i <= totalPgs; i++) {
+        pdf.setPage(i);
+        pdf.setFontSize(9);
+        pdf.setTextColor(100, 100, 100);
+
+        // Skip page numbers on cover
+        if (settings.sections.includePageNumbers && i > skipCover) {
           let pageText = '';
           switch (settings.sections.pageNumberFormat) {
             case 'simple':
-              pageText = String(i);
+              pageText = String(i - skipCover);
               break;
             case 'pageOf':
-              pageText = `Page ${i}`;
+              pageText = `Page ${i - skipCover}`;
               break;
             case 'pageOfTotal':
-              pageText = `Page ${i} of ${totalPgs}`;
+              pageText = `Page ${i - skipCover} of ${totalPgs - skipCover}`;
               break;
           }
 
-          const xPos = settings.sections.pageNumberPosition === 'left' 
-            ? margin.left 
-            : settings.sections.pageNumberPosition === 'center'
-            ? pageWidth / 2
-            : pageWidth - margin.right;
-          
-          const align = settings.sections.pageNumberPosition === 'left' 
-            ? 'left' 
-            : settings.sections.pageNumberPosition === 'center'
-            ? 'center'
-            : 'right';
+          const xPos =
+            settings.sections.pageNumberPosition === 'left'
+              ? margin.left
+              : settings.sections.pageNumberPosition === 'center'
+              ? pageWidth / 2
+              : pageWidth - margin.right;
+
+          const align =
+            settings.sections.pageNumberPosition === 'left'
+              ? 'left'
+              : settings.sections.pageNumberPosition === 'center'
+              ? 'center'
+              : 'right';
 
           pdf.text(pageText, xPos, pageHeight - 10, { align: align as 'left' | 'center' | 'right' });
+        }
 
-          // Footer content
-          if (settings.sections.includeFooters && i > (settings.sections.includeCover ? 1 : 0)) {
-            pdf.text(settings.sections.footerContent, margin.left, pageHeight - 10);
-          }
+        // Footer content
+        if (settings.sections.includeFooters && i > skipCover) {
+          pdf.setFontSize(8);
+          pdf.text(settings.sections.footerContent, margin.left, pageHeight - 15);
         }
       }
 
@@ -277,15 +334,15 @@ export function ManualPrintPreview({
       pdf.save(`appraisals-admin-manual-${date}.pdf`);
 
       toast({
-        title: "PDF exported successfully",
-        description: "The manual has been downloaded with your print settings applied.",
+        title: 'PDF exported successfully',
+        description: 'The manual has been downloaded with your print settings applied.',
       });
     } catch (error) {
       console.error('PDF export error:', error);
       toast({
-        title: "Export failed",
-        description: "Failed to generate PDF. Please try again.",
-        variant: "destructive",
+        title: 'Export failed',
+        description: 'Failed to generate PDF. Please try again.',
+        variant: 'destructive',
       });
     } finally {
       setIsExporting(false);
