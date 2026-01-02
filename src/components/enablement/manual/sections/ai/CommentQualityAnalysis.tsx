@@ -179,17 +179,17 @@ export function CommentQualityAnalysis() {
           <h3 className="text-lg font-semibold">Interpreting Quality Scores</h3>
           <div className="space-y-3">
             {[
-              { range: '70-100%', badge: 'Good Quality', color: 'bg-green-100 text-green-800', meaning: 'Comment is well-structured with specific examples, evidence, and development focus.', action: 'Proceed with confidence—minor tweaks optional.' },
-              { range: '40-69%', badge: 'Can Improve', color: 'bg-amber-100 text-amber-800', meaning: 'Comment has some good elements but lacks depth or specificity in key areas.', action: 'Review suggested improvements. Consider using AI enhancement.' },
-              { range: 'Below 40%', badge: 'Needs Detail', color: 'bg-red-100 text-red-800', meaning: 'Comment is too vague to be useful. Lacks evidence, specificity, or actionable guidance.', action: 'Significant revision needed. Use AI to generate enhanced version.' }
+              { range: '70-100%', badge: 'Good Quality', color: 'bg-success/10 border-success/30 text-success', meaning: 'Comment is well-structured with specific examples, evidence, and development focus.', action: 'Proceed with confidence—minor tweaks optional.' },
+              { range: '40-69%', badge: 'Can Improve', color: 'bg-warning/10 border-warning/30 text-warning', meaning: 'Comment has some good elements but lacks depth or specificity in key areas.', action: 'Review suggested improvements. Consider using AI enhancement.' },
+              { range: 'Below 40%', badge: 'Needs Detail', color: 'bg-destructive/10 border-destructive/30 text-destructive', meaning: 'Comment is too vague to be useful. Lacks evidence, specificity, or actionable guidance.', action: 'Significant revision needed. Use AI to generate enhanced version.' }
             ].map((item) => (
               <div key={item.range} className="p-4 border rounded-lg space-y-2">
                 <div className="flex items-center gap-3">
-                  <span className="font-mono text-sm font-bold">{item.range}</span>
-                  <Badge className={item.color}>{item.badge}</Badge>
+                  <span className="font-mono text-sm font-bold text-foreground">{item.range}</span>
+                  <Badge className={`border ${item.color}`}>{item.badge}</Badge>
                 </div>
-                <p className="text-sm text-muted-foreground"><strong>Meaning:</strong> {item.meaning}</p>
-                <p className="text-sm text-muted-foreground"><strong>Action:</strong> {item.action}</p>
+                <p className="text-sm text-foreground/80"><strong className="text-foreground">Meaning:</strong> {item.meaning}</p>
+                <p className="text-sm text-foreground/80"><strong className="text-foreground">Action:</strong> {item.action}</p>
               </div>
             ))}
           </div>
@@ -245,11 +245,11 @@ export function CommentQualityAnalysis() {
         <div className="space-y-4">
           <h3 className="text-lg font-semibold">Before & After: AI Enhancement</h3>
           <div className="space-y-4">
-            <div className="p-4 bg-red-50 dark:bg-red-950 rounded-lg border border-red-200 dark:border-red-800">
+            <div className="p-4 bg-destructive/10 rounded-lg border border-destructive/20">
               <div className="flex items-center gap-2 mb-2">
-                <Badge className="bg-red-100 text-red-800">Before: 25% Quality</Badge>
+                <Badge className="border bg-destructive/10 border-destructive/30 text-destructive">Before: 25% Quality</Badge>
               </div>
-              <p className="text-sm italic">
+              <p className="text-sm italic text-foreground/80">
                 "John did good work this year. He met most of his goals and was helpful to the team. 
                 Could improve on some things."
               </p>
@@ -260,11 +260,11 @@ export function CommentQualityAnalysis() {
                 <span className="text-sm">AI Enhancement</span>
               </div>
             </div>
-            <div className="p-4 bg-green-50 dark:bg-green-950 rounded-lg border border-green-200 dark:border-green-800">
+            <div className="p-4 bg-success/10 rounded-lg border border-success/20">
               <div className="flex items-center gap-2 mb-2">
-                <Badge className="bg-green-100 text-green-800">After: 85% Quality</Badge>
+                <Badge className="border bg-success/10 border-success/30 text-success">After: 85% Quality</Badge>
               </div>
-              <p className="text-sm italic">
+              <p className="text-sm italic text-foreground/80">
                 "John exceeded expectations this year, achieving 4 of 5 goals including the CRM 
                 implementation delivered 2 weeks ahead of schedule. He proactively mentored two 
                 junior team members, resulting in improved team velocity. To further develop, 

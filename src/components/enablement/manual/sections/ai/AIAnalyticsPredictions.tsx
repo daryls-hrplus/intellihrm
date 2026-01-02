@@ -172,17 +172,17 @@ export function AIAnalyticsPredictions() {
           </h3>
           <div className="space-y-3">
             {[
-              { range: '0-25%', label: 'Low Risk', color: 'bg-green-100 text-green-800 border-green-300', guidance: 'Employee shows strong engagement and commitment signals. Standard retention practices apply.' },
-              { range: '26-50%', label: 'Moderate Risk', color: 'bg-yellow-100 text-yellow-800 border-yellow-300', guidance: 'Some warning signals present. Consider check-in conversation and career pathing discussion.' },
-              { range: '51-75%', label: 'High Risk', color: 'bg-orange-100 text-orange-800 border-orange-300', guidance: 'Multiple risk factors detected. Proactive intervention recommended—retention bonus, role change, or development investment.' },
-              { range: '76-100%', label: 'Critical Risk', color: 'bg-red-100 text-red-800 border-red-300', guidance: 'Departure highly likely without intervention. Immediate stay conversation and counteroffer planning if key talent.' }
+              { range: '0-25%', label: 'Low Risk', color: 'bg-success/10 border-success/30 text-success', guidance: 'Employee shows strong engagement and commitment signals. Standard retention practices apply.' },
+              { range: '26-50%', label: 'Moderate Risk', color: 'bg-warning/10 border-warning/30 text-warning', guidance: 'Some warning signals present. Consider check-in conversation and career pathing discussion.' },
+              { range: '51-75%', label: 'High Risk', color: 'bg-orange-500/10 border-orange-500/30 text-orange-500', guidance: 'Multiple risk factors detected. Proactive intervention recommended—retention bonus, role change, or development investment.' },
+              { range: '76-100%', label: 'Critical Risk', color: 'bg-destructive/10 border-destructive/30 text-destructive', guidance: 'Departure highly likely without intervention. Immediate stay conversation and counteroffer planning if key talent.' }
             ].map((item) => (
               <div key={item.range} className={`p-4 rounded-lg border ${item.color}`}>
                 <div className="flex items-center gap-3 mb-2">
-                  <span className="font-mono text-sm font-bold">{item.range}</span>
-                  <Badge className={item.color}>{item.label}</Badge>
+                  <span className="font-mono text-sm font-bold text-foreground">{item.range}</span>
+                  <Badge className={`border ${item.color}`}>{item.label}</Badge>
                 </div>
-                <p className="text-sm">{item.guidance}</p>
+                <p className="text-sm text-foreground/80">{item.guidance}</p>
               </div>
             ))}
           </div>

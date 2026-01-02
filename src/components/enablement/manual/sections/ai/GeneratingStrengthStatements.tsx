@@ -167,15 +167,15 @@ export function GeneratingStrengthStatements() {
           <h3 className="text-lg font-semibold">Understanding Confidence Scores</h3>
           <div className="space-y-3">
             {[
-              { range: '80-100%', label: 'High Confidence', color: 'text-green-600 bg-green-100', guidance: 'Strong data support. Safe to use with minor edits.' },
-              { range: '60-79%', label: 'Moderate Confidence', color: 'text-amber-600 bg-amber-100', guidance: 'Good foundation but review carefully. May need context additions.' },
-              { range: 'Below 60%', label: 'Low Confidence', color: 'text-red-600 bg-red-100', guidance: 'Limited data. Use as inspiration only—significant editing likely needed.' }
+              { range: '80-100%', label: 'High Confidence', color: 'bg-success/10 border-success/30 text-success', guidance: 'Strong data support. Safe to use with minor edits.' },
+              { range: '60-79%', label: 'Moderate Confidence', color: 'bg-warning/10 border-warning/30 text-warning', guidance: 'Good foundation but review carefully. May need context additions.' },
+              { range: 'Below 60%', label: 'Low Confidence', color: 'bg-destructive/10 border-destructive/30 text-destructive', guidance: 'Limited data. Use as inspiration only—significant editing likely needed.' }
             ].map((item) => (
               <div key={item.range} className="flex items-center gap-4 p-3 border rounded-lg">
-                <Badge className={item.color}>{item.range}</Badge>
+                <Badge className={`border ${item.color}`}>{item.range}</Badge>
                 <div>
-                  <span className="font-medium">{item.label}</span>
-                  <p className="text-sm text-muted-foreground">{item.guidance}</p>
+                  <span className="font-medium text-foreground">{item.label}</span>
+                  <p className="text-sm text-foreground/80">{item.guidance}</p>
                 </div>
               </div>
             ))}
