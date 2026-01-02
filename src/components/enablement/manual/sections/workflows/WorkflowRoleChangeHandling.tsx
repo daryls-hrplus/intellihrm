@@ -155,13 +155,10 @@ export function WorkflowRoleChangeHandling() {
         </div>
 
         {/* Interactive Workflow Diagram */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Role Change Handling Workflow</h3>
-          <div className="p-4 bg-muted/30 rounded-lg overflow-x-auto">
-            <pre className="text-xs text-muted-foreground mb-2">Participant Flow Diagram</pre>
-            <div className="mermaid-container">
-              <presentation-mermaid>
-                {`flowchart TD
+        <WorkflowDiagram 
+          title="Role Change Handling Workflow"
+          description="Process for managing mid-cycle role and manager changes"
+          diagram={`flowchart TD
     subgraph Trigger["🔄 Change Event"]
         A[Role/Manager Change Detected]
     end
@@ -202,10 +199,7 @@ export function WorkflowRoleChangeHandling() {
     J --> K
     K --> L
     L --> M`}
-              </presentation-mermaid>
-            </div>
-          </div>
-        </div>
+        />
 
         {/* Change Type Overview */}
         <div className="space-y-4">

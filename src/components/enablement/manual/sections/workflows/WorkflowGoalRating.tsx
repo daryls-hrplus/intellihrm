@@ -149,13 +149,10 @@ export function WorkflowGoalRating() {
         </div>
 
         {/* Interactive Workflow Diagram */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Goal Rating Workflow</h3>
-          <div className="p-4 bg-muted/30 rounded-lg overflow-x-auto">
-            <pre className="text-xs text-muted-foreground mb-2">Participant Flow Diagram</pre>
-            <div className="mermaid-container">
-              <presentation-mermaid>
-                {`flowchart LR
+        <WorkflowDiagram 
+          title="Goal Rating Workflow"
+          description="Process flow for rating goals with evidence and documentation"
+          diagram={`flowchart LR
     subgraph Preparation["📋 Preparation"]
         A[Review Goal Definition] --> B[Gather Evidence]
         B --> C[Check Metrics]
@@ -184,10 +181,7 @@ export function WorkflowGoalRating() {
     J --> K
     K --> L
     L --> M`}
-              </presentation-mermaid>
-            </div>
-          </div>
-        </div>
+        />
 
         {/* Rating Scale Reference */}
         <div className="space-y-4">

@@ -133,13 +133,10 @@ export function WorkflowInterviewScheduling() {
         </div>
 
         {/* Interactive Workflow Diagram */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Interview Scheduling Workflow</h3>
-          <div className="p-4 bg-muted/30 rounded-lg overflow-x-auto">
-            <pre className="text-xs text-muted-foreground mb-2">Participant Flow Diagram</pre>
-            <div className="mermaid-container">
-              <presentation-mermaid>
-                {`flowchart LR
+        <WorkflowDiagram 
+          title="Interview Scheduling Workflow"
+          description="Flow for scheduling and preparing performance discussions"
+          diagram={`flowchart LR
     subgraph Manager["👔 Manager Actions"]
         A[Complete Evaluation] --> B[Open Scheduler]
         B --> C[Select Time Slot]
@@ -168,10 +165,7 @@ export function WorkflowInterviewScheduling() {
     J --> K
     K --> L
     L --> M`}
-              </presentation-mermaid>
-            </div>
-          </div>
-        </div>
+        />
 
         {/* Meeting Format Options */}
         <div className="space-y-4">

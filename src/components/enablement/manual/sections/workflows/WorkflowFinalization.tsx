@@ -135,13 +135,10 @@ export function WorkflowFinalization() {
         </div>
 
         {/* Interactive Workflow Diagram */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Finalization Workflow</h3>
-          <div className="p-4 bg-muted/30 rounded-lg overflow-x-auto">
-            <pre className="text-xs text-muted-foreground mb-2">Participant Flow Diagram</pre>
-            <div className="mermaid-container">
-              <presentation-mermaid>
-                {`flowchart TD
+        <WorkflowDiagram 
+          title="Finalization Workflow"
+          description="Cycle close-out and downstream action triggers"
+          diagram={`flowchart TD
     subgraph HR["🔧 HR Admin Actions"]
         A[Review Completion Status] --> B{Pending Items?}
         B -->|Yes| C[Send Reminders / Force Close]
@@ -172,10 +169,7 @@ export function WorkflowFinalization() {
     I --> M
     I --> N
     H --> J`}
-              </presentation-mermaid>
-            </div>
-          </div>
-        </div>
+        />
 
         {/* Close-out Checklist */}
         <div className="space-y-4">

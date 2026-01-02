@@ -144,13 +144,10 @@ export function WorkflowSelfAssessment() {
         </div>
 
         {/* Interactive Workflow Diagram */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Self-Assessment Workflow</h3>
-          <div className="p-4 bg-muted/30 rounded-lg overflow-x-auto">
-            <pre className="text-xs text-muted-foreground mb-2">Participant Flow Diagram</pre>
-            <div className="mermaid-container">
-              <presentation-mermaid>
-                {`flowchart TD
+        <WorkflowDiagram 
+          title="Self-Assessment Workflow"
+          description="Flow between system, employee, and manager during self-assessment"
+          diagram={`flowchart TD
     subgraph System["⚙️ System"]
         A[Cycle Launches] --> B[Send Notification]
         J[Validate Submission]
@@ -176,10 +173,7 @@ export function WorkflowSelfAssessment() {
     L --> J
     J --> K
     K --> M`}
-              </presentation-mermaid>
-            </div>
-          </div>
-        </div>
+        />
 
         {/* Timeline Overview */}
         <div className="space-y-4">

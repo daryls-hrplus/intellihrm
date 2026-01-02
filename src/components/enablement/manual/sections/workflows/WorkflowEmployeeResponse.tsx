@@ -124,13 +124,10 @@ export function WorkflowEmployeeResponse() {
         </div>
 
         {/* Interactive Workflow Diagram */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Employee Response Workflow</h3>
-          <div className="p-4 bg-muted/30 rounded-lg overflow-x-auto">
-            <pre className="text-xs text-muted-foreground mb-2">Participant Flow Diagram</pre>
-            <div className="mermaid-container">
-              <presentation-mermaid>
-                {`flowchart TD
+        <WorkflowDiagram 
+          title="Employee Response Workflow"
+          description="Flow for employee acknowledgment and escalation handling"
+          diagram={`flowchart TD
     subgraph Manager["👔 Manager"]
         A[Submit Evaluation] --> B[Conduct Interview]
     end
@@ -164,10 +161,7 @@ export function WorkflowEmployeeResponse() {
     K --> L
     K --> N
     N --> O`}
-              </presentation-mermaid>
-            </div>
-          </div>
-        </div>
+        />
 
         {/* Response Options */}
         <div className="space-y-4">
