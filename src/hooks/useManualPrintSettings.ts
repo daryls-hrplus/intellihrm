@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useEnablementBranding } from "./useEnablementBranding";
+import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { Json } from "@/integrations/supabase/types";
 
@@ -86,17 +87,25 @@ const parseConfig = <T>(config: Json | null, fallback: T): T => {
 export const useManualPrintSettings = (manualType: string = 'Appraisals Admin Manual') => {
   const queryClient = useQueryClient();
   const { brandColors, isLoading: isBrandLoading } = useEnablementBranding();
+  const { user, profile } = useAuth();
+  const companyId = profile?.company_id ?? null;
 
   const settingsName = `${manualType} Print Settings`;
+  const queryKey = ["manual-print-settings", manualType, companyId];
 
   const { data: printSettings, isLoading } = useQuery({
-    queryKey: ["manual-print-settings", manualType],
+    queryKey,
     queryFn: async (): Promise<ManualPrintSettings> => {
+      if (!companyId) return DEFAULT_PRINT_SETTINGS;
+
       const { data, error } = await supabase
         .from("enablement_document_templates")
         .select("id, layout_config, sections_config, formatting_config, branding_config")
         .eq("name", settingsName)
         .eq("category", "custom")
+        .eq("company_id", companyId)
+        .order("updated_at", { ascending: false })
+        .limit(1)
         .maybeSingle();
 
       if (error) {
@@ -110,21 +119,28 @@ export const useManualPrintSettings = (manualType: string = 'Appraisals Admin Ma
           layout: parseConfig(data.layout_config, DEFAULT_PRINT_SETTINGS.layout),
           sections: parseConfig(data.sections_config, DEFAULT_PRINT_SETTINGS.sections),
           formatting: parseConfig(data.formatting_config, DEFAULT_PRINT_SETTINGS.formatting),
-          branding: parseConfig(data.branding_config, DEFAULT_PRINT_SETTINGS.branding)
+          branding: parseConfig(data.branding_config, DEFAULT_PRINT_SETTINGS.branding),
         };
       }
 
       return DEFAULT_PRINT_SETTINGS;
-    }
+    },
   });
 
   const savePrintSettings = useMutation({
     mutationFn: async (settings: ManualPrintSettings) => {
+      if (!companyId || !user) {
+        throw new Error("No company context available to save print settings.");
+      }
+
       const { data: existing } = await supabase
         .from("enablement_document_templates")
         .select("id")
         .eq("name", settingsName)
         .eq("category", "custom")
+        .eq("company_id", companyId)
+        .order("updated_at", { ascending: false })
+        .limit(1)
         .maybeSingle();
 
       const layoutJson = settings.layout as unknown as Json;
@@ -140,15 +156,16 @@ export const useManualPrintSettings = (manualType: string = 'Appraisals Admin Ma
             sections_config: sectionsJson,
             formatting_config: formattingJson,
             branding_config: brandingJson,
-            updated_at: new Date().toISOString()
+            company_id: companyId,
+            created_by: user.id,
+            updated_at: new Date().toISOString(),
           })
           .eq("id", existing.id);
 
         if (error) throw error;
       } else {
-        const { error } = await supabase
-          .from("enablement_document_templates")
-          .insert([{
+        const { error } = await supabase.from("enablement_document_templates").insert([
+          {
             name: settingsName,
             category: "custom" as const,
             description: `Print configuration for the ${manualType}`,
@@ -156,8 +173,11 @@ export const useManualPrintSettings = (manualType: string = 'Appraisals Admin Ma
             sections_config: sectionsJson,
             formatting_config: formattingJson,
             branding_config: brandingJson,
-            is_active: true
-          }]);
+            is_active: true,
+            company_id: companyId,
+            created_by: user.id,
+          },
+        ]);
 
         if (error) throw error;
       }
@@ -165,29 +185,25 @@ export const useManualPrintSettings = (manualType: string = 'Appraisals Admin Ma
       return settings;
     },
     onMutate: async (newSettings) => {
-      // Cancel any outgoing refetches
-      await queryClient.cancelQueries({ queryKey: ["manual-print-settings", manualType] });
-      
-      // Snapshot the previous value
-      const previousSettings = queryClient.getQueryData(["manual-print-settings", manualType]);
-      
-      // Optimistically update to the new value
-      queryClient.setQueryData(["manual-print-settings", manualType], newSettings);
-      
+      await queryClient.cancelQueries({ queryKey });
+
+      const previousSettings = queryClient.getQueryData(queryKey);
+
+      queryClient.setQueryData(queryKey, newSettings);
+
       return { previousSettings };
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["manual-print-settings", manualType] });
+      queryClient.invalidateQueries({ queryKey });
       toast.success("Print settings saved successfully");
     },
     onError: (error, _newSettings, context) => {
-      // Rollback on error
       if (context?.previousSettings) {
-        queryClient.setQueryData(["manual-print-settings", manualType], context.previousSettings);
+        queryClient.setQueryData(queryKey, context.previousSettings);
       }
       console.error("Error saving print settings:", error);
       toast.error("Failed to save print settings");
-    }
+    },
   });
 
   return {
