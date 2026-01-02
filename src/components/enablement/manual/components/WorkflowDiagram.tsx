@@ -111,7 +111,7 @@ export function WorkflowDiagram({ title, description, diagram }: WorkflowDiagram
     };
   }, [isModalOpen, modalRenderNonce, renderToContainer]);
 
-  const handleZoomIn = () => setZoom((prev) => Math.min(prev + 25, 200));
+  const handleZoomIn = () => setZoom((prev) => Math.min(prev + 25, 400));
   const handleZoomOut = () => setZoom((prev) => Math.max(prev - 25, 50));
   const handleResetZoom = () => setZoom(100);
 
@@ -168,7 +168,7 @@ export function WorkflowDiagram({ title, description, diagram }: WorkflowDiagram
                   <ZoomOut className="h-4 w-4" />
                 </Button>
                 <span className="text-sm font-medium min-w-[4rem] text-center">{zoom}%</span>
-                <Button variant="outline" size="sm" onClick={handleZoomIn} disabled={zoom >= 200} type="button">
+                <Button variant="outline" size="sm" onClick={handleZoomIn} disabled={zoom >= 400} type="button">
                   <ZoomIn className="h-4 w-4" />
                 </Button>
                 <Button variant="outline" size="sm" onClick={handleResetZoom} type="button">
@@ -181,17 +181,17 @@ export function WorkflowDiagram({ title, description, diagram }: WorkflowDiagram
             </DialogDescription>
           </DialogHeader>
 
-          <div className="flex-1 overflow-auto bg-muted/30 rounded-lg p-4 min-h-[60vh]">
-            <div
-              className="flex justify-center items-start"
-              style={{
-                transform: `scale(${zoom / 100})`,
-                transformOrigin: 'top center',
-                transition: 'transform 0.2s ease-out',
-              }}
-            >
-              <div ref={modalContainerRef} className="[&_svg]:max-w-none" />
-            </div>
+           <div className="flex-1 overflow-auto bg-muted/30 rounded-lg p-4 min-h-[60vh]">
+             <div
+               className="flex justify-start items-start"
+               style={{
+                 transform: `scale(${zoom / 100})`,
+                 transformOrigin: 'top left',
+                 transition: 'transform 0.2s ease-out',
+               }}
+             >
+               <div ref={modalContainerRef} className="[&_svg]:max-w-none" />
+             </div>
           </div>
         </DialogContent>
       </Dialog>
