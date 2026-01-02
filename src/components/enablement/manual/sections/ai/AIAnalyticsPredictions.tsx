@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { BarChart3, Clock, Users, CheckCircle, TrendingUp, AlertTriangle, Brain, LineChart, PieChart, Activity, Eye, Shield } from 'lucide-react';
+import { BarChart3, Clock, Users, CheckCircle, TrendingUp, AlertTriangle, Brain, LineChart, PieChart, Activity, Eye, Shield, Layers, Lightbulb, FileText, Target, Network, GitBranch, Star, RefreshCw } from 'lucide-react';
 import { NavigationPath } from '../../NavigationPath';
 import { NAVIGATION_PATHS } from '../../navigationPaths';
 import { TipCallout, WarningCallout } from '../../components/Callout';
@@ -8,52 +8,83 @@ import { BusinessRules } from '../../components/BusinessRules';
 import { WorkflowDiagram } from '../../components/WorkflowDiagram';
 
 const FIELD_REFERENCES = [
-  { fieldName: 'AI Analytics Dashboard', location: 'Performance → Analytics → AI Insights', required: false, description: 'Central hub for AI-generated performance predictions and trends' },
-  { fieldName: 'Attrition Risk Indicator', location: 'Employee Profile / Manager Dashboard', required: false, description: 'AI-calculated probability of employee departure in next 6-12 months' },
-  { fieldName: 'Performance Trajectory', location: 'Employee Analytics', required: false, description: 'Predicted performance trend based on historical patterns' },
-  { fieldName: 'Bias Pattern Alert', location: 'HR Analytics / Manager Dashboard', required: false, description: 'AI detection of systematic rating patterns that may indicate bias' },
-  { fieldName: 'Talent Risk Summary', location: 'Executive Dashboard', required: false, description: 'Aggregated view of high-risk employees and intervention recommendations' }
+  { fieldName: 'Performance Intelligence Hub', location: 'Performance → Intelligence Hub', required: false, description: 'Unified analytics dashboard consolidating all performance insights, AI predictions, and reports' },
+  { fieldName: 'Key Insights AI Panel', location: 'Intelligence Hub (Top Section)', required: false, description: 'AI-generated summary of critical risks, trending metrics, and actionable recommendations' },
+  { fieldName: 'Operations Analytics', location: 'Intelligence Hub → Operations Tab', required: false, description: 'Goal completion, quality metrics, alignment cascade, and workload analysis' },
+  { fieldName: 'Workforce Insights', location: 'Intelligence Hub → Workforce Tab', required: false, description: 'Role impact, level gaps, skill gaps, and employee voice analytics' },
+  { fieldName: 'Appraisals Analytics', location: 'Intelligence Hub → Appraisals Tab', required: false, description: 'Performance distribution, competency heatmaps, and manager scoring patterns (filterable by cycle)' },
+  { fieldName: 'Predictive AI Section', location: 'Intelligence Hub → Predictive AI Tab', required: false, description: 'Performance risks, high potentials, predictive insights, and risk flags' },
+  { fieldName: 'AI Reports', location: 'Intelligence Hub → AI Reports Tab', required: false, description: 'Export Intelligence Reports (PDF) and AI-powered report builders' }
 ];
 
 const BUSINESS_RULES = [
   { rule: 'Predictions require minimum data threshold', enforcement: 'System' as const, description: 'AI predictions require at least 2 performance cycles and 6 months of data.' },
   { rule: 'Risk scores are confidential', enforcement: 'Policy' as const, description: 'Attrition risk scores are visible only to manager, HR, and authorized executives.' },
   { rule: 'Predictions cannot be sole basis for decisions', enforcement: 'Policy' as const, description: 'AI insights must be combined with human judgment for personnel actions.' },
-  { rule: 'All AI predictions are explainable', enforcement: 'System' as const, description: 'ISO 42001 requires clear reasoning for every AI-generated insight.' }
+  { rule: 'All AI predictions are explainable', enforcement: 'System' as const, description: 'ISO 42001 requires clear reasoning for every AI-generated insight.' },
+  { rule: 'Key Insights auto-refresh on data change', enforcement: 'System' as const, description: 'AI insights panel regenerates when underlying analytics data is updated.' }
 ];
 
-const WORKFLOW_DEFINITION = `graph TB
-    subgraph Data Collection
-        A[Performance Ratings] --> D[AI Analysis Engine]
-        B[Goal Progress] --> D
-        C[Engagement Signals] --> D
-        E[Tenure & Demographics] --> D
+const HUB_ARCHITECTURE = `graph TB
+    subgraph Performance Intelligence Hub
+        A[Key Insights AI Panel] --> B[Section Navigation]
+        
+        B --> C[Operations]
+        B --> D[Workforce]
+        B --> E[Appraisals]
+        B --> F[Predictive AI]
+        B --> G[AI Reports]
     end
     
-    subgraph AI Processing
-        D --> F[Pattern Recognition]
-        F --> G[Predictive Modeling]
-        G --> H[Risk Scoring]
+    subgraph Operations Section
+        C --> C1[Overview Dashboard]
+        C --> C2[Completion Rates]
+        C --> C3[Goal Quality]
+        C --> C4[Alignment Cascade]
+        C --> C5[Workload Analysis]
     end
     
-    subgraph Outputs
-        H --> I[Attrition Predictions]
-        H --> J[Performance Forecasts]
-        H --> K[Bias Alerts]
-        H --> L[Development Insights]
+    subgraph Predictive AI Section
+        F --> F1[Performance Risks]
+        F --> F2[High Potentials]
+        F --> F3[Predictive Insights]
+        F --> F4[Risk Flags]
     end
     
-    subgraph Human Actions
-        I --> M[Manager Review]
-        J --> M
-        K --> N[HR Investigation]
-        L --> O[IDP Updates]
-        M --> P[Intervention Planning]
+    subgraph AI Reports Section
+        G --> G1[Export Intelligence Report]
+        G --> G2[Banded Reports]
+        G --> G3[BI Reports]
     end
     
-    style D fill:#8b5cf6,stroke:#7c3aed,color:#fff
-    style G fill:#8b5cf6,stroke:#7c3aed,color:#fff
-    style H fill:#8b5cf6,stroke:#7c3aed,color:#fff`;
+    style A fill:#8b5cf6,stroke:#7c3aed,color:#fff
+    style F fill:#8b5cf6,stroke:#7c3aed,color:#fff
+    style G1 fill:#3b82f6,stroke:#2563eb,color:#fff`;
+
+const KEY_INSIGHTS_DIAGRAM = `graph LR
+    subgraph Data Sources
+        A[Goal Completion] --> E[AI Analysis Engine]
+        B[Quality Metrics] --> E
+        C[Alignment Data] --> E
+        D[Workload Data] --> E
+    end
+    
+    subgraph Key Insights Panel
+        E --> F[Critical Risks]
+        E --> G[Trending Metrics]
+        E --> H[Recommendations]
+    end
+    
+    subgraph Actions
+        F --> I[Review & Address]
+        G --> J[Monitor Trends]
+        H --> K[Implement Changes]
+    end
+    
+    style E fill:#8b5cf6,stroke:#7c3aed,color:#fff
+    style F fill:#ef4444,stroke:#dc2626,color:#fff
+    style G fill:#3b82f6,stroke:#2563eb,color:#fff
+    style H fill:#f59e0b,stroke:#d97706,color:#fff`;
 
 export function AIAnalyticsPredictions() {
   return (
@@ -65,7 +96,7 @@ export function AIAnalyticsPredictions() {
           <Badge className="gap-1 bg-purple-600 text-white"><Users className="h-3 w-3" />HR / Executive / Manager</Badge>
         </div>
         <CardTitle className="text-2xl">AI Analytics & Predictions</CardTitle>
-        <CardDescription>Predictive intelligence for talent risk, performance trends, and strategic workforce insights</CardDescription>
+        <CardDescription>Performance Intelligence Hub with unified analytics, AI-powered insights, and predictive capabilities</CardDescription>
       </CardHeader>
       <CardContent className="space-y-8">
         <NavigationPath path={NAVIGATION_PATHS['sec-5-6']} />
@@ -77,65 +108,83 @@ export function AIAnalyticsPredictions() {
             Learning Objectives
           </h3>
           <ul className="list-disc list-inside space-y-1 text-muted-foreground ml-2">
-            <li>Understand AI-powered talent analytics capabilities</li>
-            <li>Interpret attrition risk scores and performance predictions</li>
-            <li>Use AI insights for proactive talent management</li>
-            <li>Apply appropriate governance when acting on predictions</li>
+            <li>Navigate the Performance Intelligence Hub and its unified analytics sections</li>
+            <li>Interpret AI-generated key insights, risks, and recommendations</li>
+            <li>Use predictive analytics for proactive talent management</li>
+            <li>Export comprehensive intelligence reports with AI-powered executive summaries</li>
+            <li>Apply appropriate governance when acting on AI predictions</li>
           </ul>
         </div>
 
-        {/* Overview */}
+        {/* Performance Intelligence Hub Overview */}
         <div className="space-y-4">
           <h3 className="text-lg font-semibold flex items-center gap-2">
             <Brain className="h-5 w-5 text-primary" />
-            AI Analytics Overview
+            Performance Intelligence Hub Overview
           </h3>
           <p className="text-muted-foreground">
-            AI Analytics transforms performance data into actionable predictions. By analyzing patterns 
-            across ratings, goal progress, engagement signals, and historical trends, the system 
-            identifies risks and opportunities that might otherwise go unnoticed.
+            The <strong>Performance Intelligence Hub</strong> is the unified analytics center that consolidates 
+            all performance-related insights, metrics, and AI-powered predictions into a single, navigable interface. 
+            It replaces fragmented analytics pages with a cohesive experience organized into five key sections.
           </p>
           <div className="p-4 bg-primary/5 rounded-lg border border-primary/20">
             <p className="font-medium text-primary">Strategic Value</p>
             <p className="text-sm text-muted-foreground mt-1">
-              Organizations using predictive talent analytics reduce unwanted attrition by 20-30% 
-              and identify high-potential employees 2x faster than traditional methods.
+              The Intelligence Hub reduces time-to-insight by 60% by eliminating navigation between multiple 
+              analytics pages. AI-generated key insights surface critical risks automatically, enabling 
+              proactive intervention before issues escalate.
             </p>
           </div>
         </div>
 
-        {/* Key Prediction Types */}
+        {/* Hub Architecture */}
+        <WorkflowDiagram 
+          title="Intelligence Hub Architecture" 
+          diagram={HUB_ARCHITECTURE}
+        />
+
+        {/* Hub Sections */}
         <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Key Prediction Types</h3>
-          <div className="grid md:grid-cols-2 gap-4">
+          <h3 className="text-lg font-semibold flex items-center gap-2">
+            <Layers className="h-5 w-5 text-primary" />
+            Intelligence Hub Sections
+          </h3>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
             {[
               { 
-                icon: AlertTriangle, 
-                title: 'Attrition Risk', 
-                desc: 'Probability of employee departure within 6-12 months',
-                signals: ['Declining engagement', 'Stagnant performance', 'Limited career movement', 'Market demand for skills'],
-                color: 'text-red-600'
+                icon: BarChart3, 
+                title: 'Operations', 
+                desc: 'Core performance operations analytics',
+                tabs: ['Overview Dashboard', 'Completion Rates', 'Goal Quality', 'Alignment Cascade', 'Workload Analysis'],
+                color: 'text-blue-600'
               },
               { 
-                icon: TrendingUp, 
-                title: 'Performance Trajectory', 
-                desc: 'Predicted performance trend for coming periods',
-                signals: ['Historical improvement rate', 'Goal achievement patterns', 'Skill development velocity', 'Manager effectiveness'],
+                icon: Users, 
+                title: 'Workforce', 
+                desc: 'Role and skill insights',
+                tabs: ['Role Impact', 'Level Gaps', 'Skill Gaps', 'Employee Voice'],
                 color: 'text-green-600'
               },
               { 
-                icon: Eye, 
-                title: 'Bias Pattern Detection', 
-                desc: 'Systematic rating anomalies across demographics',
-                signals: ['Rating distribution variance', 'Demographic disparities', 'Manager-level patterns', 'Calibration adjustment frequency'],
+                icon: PieChart, 
+                title: 'Appraisals', 
+                desc: 'Cycle-based outcomes (with cycle filter)',
+                tabs: ['Distribution', 'Competency Heatmap', 'Manager Patterns'],
                 color: 'text-amber-600'
               },
               { 
-                icon: Activity, 
-                title: 'Development Readiness', 
-                desc: 'Likelihood of successful skill acquisition',
-                signals: ['Learning completion rates', 'Skill gap closure velocity', 'Self-directed learning', 'Feedback receptivity'],
-                color: 'text-blue-600'
+                icon: Brain, 
+                title: 'Predictive AI', 
+                desc: 'AI-powered predictions and risk analysis',
+                tabs: ['Performance Risks', 'High Potentials', 'Predictive Insights', 'Risk Flags'],
+                color: 'text-purple-600'
+              },
+              { 
+                icon: FileText, 
+                title: 'AI Reports', 
+                desc: 'Generated reports and exports',
+                tabs: ['Export Intelligence Report', 'Banded Reports', 'BI Reports'],
+                color: 'text-primary'
               }
             ].map((item) => (
               <Card key={item.title}>
@@ -143,15 +192,15 @@ export function AIAnalyticsPredictions() {
                   <div className="flex items-center gap-2">
                     <item.icon className={`h-5 w-5 ${item.color}`} />
                     <h4 className="font-semibold">{item.title}</h4>
+                    {item.title === 'Predictive AI' && (
+                      <Badge variant="secondary" className="text-xs">AI</Badge>
+                    )}
                   </div>
                   <p className="text-sm text-muted-foreground">{item.desc}</p>
-                  <div className="space-y-1">
-                    <p className="text-xs font-medium">Key Signals:</p>
-                    <ul className="text-xs text-muted-foreground space-y-0.5">
-                      {item.signals.map((signal, i) => (
-                        <li key={i}>• {signal}</li>
-                      ))}
-                    </ul>
+                  <div className="flex flex-wrap gap-1">
+                    {item.tabs.map((tab, i) => (
+                      <Badge key={i} variant="outline" className="text-xs">{tab}</Badge>
+                    ))}
                   </div>
                 </CardContent>
               </Card>
@@ -159,10 +208,150 @@ export function AIAnalyticsPredictions() {
           </div>
         </div>
 
+        {/* Key Insights AI Panel */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold flex items-center gap-2">
+            <Lightbulb className="h-5 w-5 text-amber-500" />
+            Key Insights AI Panel
+          </h3>
+          <p className="text-muted-foreground">
+            The <strong>Key Insights AI Panel</strong> appears at the top of the Intelligence Hub and provides 
+            an AI-generated summary of the most important findings across all analytics sections. It automatically 
+            analyzes goal completion, quality metrics, alignment data, and workload information to surface:
+          </p>
+          <div className="grid md:grid-cols-3 gap-4">
+            <Card className="border-destructive/30">
+              <CardContent className="pt-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <AlertTriangle className="h-5 w-5 text-destructive" />
+                  <h4 className="font-semibold">Critical Risks</h4>
+                </div>
+                <ul className="text-sm text-muted-foreground space-y-1">
+                  <li>• Employee overload warnings</li>
+                  <li>• Goal quality issues</li>
+                  <li>• Broken alignment chains</li>
+                  <li>• Performance decline patterns</li>
+                </ul>
+              </CardContent>
+            </Card>
+            <Card className="border-blue-500/30">
+              <CardContent className="pt-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <TrendingUp className="h-5 w-5 text-blue-500" />
+                  <h4 className="font-semibold">Trending Metrics</h4>
+                </div>
+                <ul className="text-sm text-muted-foreground space-y-1">
+                  <li>• Goal completion rate + trend</li>
+                  <li>• Quality score trajectory</li>
+                  <li>• Strategic alignment rate</li>
+                  <li>• Workforce health indicators</li>
+                </ul>
+              </CardContent>
+            </Card>
+            <Card className="border-amber-500/30">
+              <CardContent className="pt-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <Lightbulb className="h-5 w-5 text-amber-500" />
+                  <h4 className="font-semibold">Recommendations</h4>
+                </div>
+                <ul className="text-sm text-muted-foreground space-y-1">
+                  <li>• Boost goal completion tactics</li>
+                  <li>• Alignment improvement steps</li>
+                  <li>• Workload redistribution</li>
+                  <li>• Training recommendations</li>
+                </ul>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+
         <WorkflowDiagram 
-          title="AI Analytics Data Flow" 
-          diagram={WORKFLOW_DEFINITION}
+          title="Key Insights AI Panel Data Flow" 
+          diagram={KEY_INSIGHTS_DIAGRAM}
         />
+
+        {/* Export Intelligence Report */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold flex items-center gap-2">
+            <FileText className="h-5 w-5 text-primary" />
+            Export Intelligence Report
+          </h3>
+          <p className="text-muted-foreground">
+            The <strong>Export Intelligence Report</strong> feature (in AI Reports section) generates a 
+            comprehensive PDF document containing:
+          </p>
+          <div className="grid md:grid-cols-2 gap-4">
+            <div className="p-4 border rounded-lg space-y-2">
+              <h4 className="font-semibold">Report Contents</h4>
+              <ul className="text-sm text-muted-foreground space-y-1">
+                <li>• <strong>Cover Page:</strong> Report title, date, included sections</li>
+                <li>• <strong>AI Executive Summary:</strong> AI-generated narrative overview</li>
+                <li>• <strong>Operations Analytics:</strong> Goals, completion rates, quality</li>
+                <li>• <strong>Workforce Insights:</strong> Workload distribution, capacity</li>
+                <li>• <strong>Alignment Analytics:</strong> Cascade metrics, broken chains</li>
+                <li>• <strong>Predictive Intelligence:</strong> Risk summary, health score</li>
+              </ul>
+            </div>
+            <div className="p-4 border rounded-lg space-y-2">
+              <h4 className="font-semibold">Customization Options</h4>
+              <ul className="text-sm text-muted-foreground space-y-1">
+                <li>• Select/deselect individual sections</li>
+                <li>• Enable/disable AI Executive Summary</li>
+                <li>• Filter by company (if multi-tenant)</li>
+                <li>• Progress indicator during generation</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        {/* Predictive AI Capabilities */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold flex items-center gap-2">
+            <Brain className="h-5 w-5 text-purple-600" />
+            Predictive AI Capabilities
+          </h3>
+          <p className="text-muted-foreground">
+            The Predictive AI section provides advanced analytics powered by machine learning:
+          </p>
+          <div className="grid md:grid-cols-2 gap-4">
+            {[
+              { 
+                icon: AlertTriangle, 
+                title: 'Performance Risk Dashboard', 
+                desc: 'Real-time risk assessment across the organization with intervention recommendations',
+                color: 'text-red-600'
+              },
+              { 
+                icon: Star, 
+                title: 'High Potential Identification', 
+                desc: 'AI-powered detection of high-potential employees for succession planning',
+                color: 'text-amber-600'
+              },
+              { 
+                icon: TrendingUp, 
+                title: 'Predictive Insights', 
+                desc: 'Performance trajectory predictions based on historical patterns',
+                color: 'text-green-600'
+              },
+              { 
+                icon: Eye, 
+                title: 'Risk Flags', 
+                desc: 'Early warning indicators for performance decline or engagement issues',
+                color: 'text-orange-600'
+              }
+            ].map((item) => (
+              <Card key={item.title}>
+                <CardContent className="pt-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <item.icon className={`h-5 w-5 ${item.color}`} />
+                    <h4 className="font-semibold">{item.title}</h4>
+                  </div>
+                  <p className="text-sm text-muted-foreground">{item.desc}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
 
         {/* Attrition Risk Deep Dive */}
         <div className="space-y-4">
@@ -187,6 +376,7 @@ export function AIAnalyticsPredictions() {
             ))}
           </div>
         </div>
+
         {/* Field References */}
         <div className="space-y-4">
           <h3 className="text-lg font-semibold">Key Interface Elements</h3>
@@ -203,59 +393,32 @@ export function AIAnalyticsPredictions() {
           </div>
         </div>
 
-        {/* Analytics Dashboard Features */}
+        {/* Cycle Filtering */}
         <div className="space-y-4">
           <h3 className="text-lg font-semibold flex items-center gap-2">
-            <BarChart3 className="h-5 w-5 text-primary" />
-            Analytics Dashboard Features
+            <RefreshCw className="h-5 w-5 text-primary" />
+            Appraisal Cycle Filtering
           </h3>
-          <div className="grid md:grid-cols-3 gap-4">
-            {[
-              { icon: PieChart, title: 'Distribution Analysis', desc: 'Rating distribution across teams, departments, and demographics' },
-              { icon: LineChart, title: 'Trend Visualization', desc: 'Historical performance trends with projected trajectories' },
-              { icon: Activity, title: 'Risk Heat Map', desc: 'Visual representation of talent risk by organization unit' }
-            ].map((item) => (
-              <Card key={item.title}>
-                <CardContent className="pt-4 text-center">
-                  <item.icon className="h-8 w-8 text-primary mx-auto mb-2" />
-                  <h4 className="font-medium text-sm">{item.title}</h4>
-                  <p className="text-xs text-muted-foreground mt-1">{item.desc}</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+          <p className="text-muted-foreground">
+            When viewing the <strong>Appraisals</strong> section, a <strong>Cycle Filter</strong> dropdown 
+            appears in the header. This allows you to:
+          </p>
+          <ul className="list-disc list-inside space-y-1 text-muted-foreground ml-2">
+            <li>View analytics for a specific appraisal cycle</li>
+            <li>Compare metrics across different cycles (select "All Cycles")</li>
+            <li>Active cycles are highlighted with a badge for easy identification</li>
+            <li>Distribution, competency heatmap, and manager patterns update based on selection</li>
+          </ul>
         </div>
 
-        {/* Acting on Predictions */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Acting on AI Predictions</h3>
-          <div className="space-y-3">
-            {[
-              { prediction: 'High Attrition Risk', actions: ['Schedule stay interview', 'Review compensation competitiveness', 'Discuss career development', 'Consider retention incentives'] },
-              { prediction: 'Declining Performance Trajectory', actions: ['Identify root causes (skills, motivation, context)', 'Provide targeted coaching', 'Adjust goals if needed', 'Increase check-in frequency'] },
-              { prediction: 'Bias Pattern Detected', actions: ['Review flagged evaluations', 'Conduct manager coaching', 'Consider recalibration', 'Document investigation'] },
-              { prediction: 'High Development Potential', actions: ['Accelerate stretch assignments', 'Add to succession pool', 'Invest in leadership development', 'Increase visibility with executives'] }
-            ].map((item) => (
-              <div key={item.prediction} className="p-4 border rounded-lg">
-                <h4 className="font-semibold mb-2">{item.prediction}</h4>
-                <div className="flex flex-wrap gap-2">
-                  {item.actions.map((action, i) => (
-                    <Badge key={i} variant="secondary" className="text-xs">{action}</Badge>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Explainability */}
+        {/* AI Explainability */}
         <div className="space-y-4">
           <h3 className="text-lg font-semibold flex items-center gap-2">
             <Shield className="h-5 w-5 text-green-600" />
             AI Explainability (ISO 42001)
           </h3>
           <p className="text-muted-foreground text-sm">
-            Every AI prediction includes an explainability record showing:
+            Every AI prediction and insight includes an explainability record showing:
           </p>
           <div className="grid md:grid-cols-2 gap-4">
             {[
@@ -294,6 +457,7 @@ export function AIAnalyticsPredictions() {
                   { type: 'Attrition Risk', min: '6 months tenure, 1 cycle', optimal: '2+ years, 3+ cycles' },
                   { type: 'Performance Trajectory', min: '2 performance cycles', optimal: '4+ cycles with goals' },
                   { type: 'Bias Patterns', min: '20 evaluations per manager', optimal: '50+ evaluations' },
+                  { type: 'Key Insights Panel', min: '1 complete cycle with goals', optimal: 'Multiple cycles with full data' },
                   { type: 'Development Readiness', min: '1 IDP with progress', optimal: '2+ IDPs, LMS data' }
                 ].map((row, i) => (
                   <tr key={row.type} className={i % 2 === 0 ? 'bg-background' : 'bg-muted/30'}>
@@ -308,8 +472,9 @@ export function AIAnalyticsPredictions() {
         </div>
 
         <TipCallout title="Strategic Use">
-          Use AI predictions for pattern recognition and early warning, not as definitive judgments. 
-          The most effective organizations combine AI insights with manager intuition and HR expertise.
+          The Key Insights AI Panel provides a quick overview—use the Refresh button to regenerate insights 
+          after significant data changes. For deep analysis, explore individual section tabs where you can 
+          drill down into specific metrics and trends.
         </TipCallout>
 
         <WarningCallout title="Critical Governance">
