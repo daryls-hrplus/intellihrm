@@ -17,7 +17,7 @@ import {
   CheckCircle, Circle, ArrowLeft, Sparkles, Calendar, Target, Loader2
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { generateAppraisalsManualDocx, MANUAL_CONTENT } from '@/utils/appraisalsManualDocx';
+import { MANUAL_CONTENT } from '@/utils/appraisalsManualDocx';
 import { APPRAISALS_MANUAL_STRUCTURE, QUICK_REFERENCE_CARDS, type ManualSection } from '@/types/adminManual';
 import { ManualOverviewSection } from '@/components/enablement/manual/ManualOverviewSection';
 import { ManualSetupSection } from '@/components/enablement/manual/ManualSetupSection';
@@ -50,7 +50,7 @@ export default function AppraisalsManualPage() {
   const [expandedSections, setExpandedSections] = useState<string[]>(['part-1']);
   const [completedSections, setCompletedSections] = useState<string[]>([]);
   const [isExportingPdf, setIsExportingPdf] = useState(false);
-  const [isExportingDocx, setIsExportingDocx] = useState(false);
+  
   const contentRef = useRef<HTMLDivElement>(null);
 
   const activePartId = useMemo(() => {
@@ -232,25 +232,6 @@ export default function AppraisalsManualPage() {
     }
   };
 
-  const exportToDocx = async () => {
-    setIsExportingDocx(true);
-    try {
-      await generateAppraisalsManualDocx();
-      toast({
-        title: "DOCX exported successfully",
-        description: "Appraisals Administrator Manual has been downloaded.",
-      });
-    } catch (error) {
-      console.error('DOCX export error:', error);
-      toast({
-        title: "Export failed",
-        description: "Failed to generate DOCX. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsExportingDocx(false);
-    }
-  };
 
   const handlePrint = () => {
     window.print();
@@ -325,14 +306,6 @@ export default function AppraisalsManualPage() {
                   <Download className="h-4 w-4 mr-2" />
                 )}
                 {isExportingPdf ? 'Generating...' : 'Export PDF'}
-              </Button>
-              <Button variant="outline" size="sm" onClick={exportToDocx} disabled={isExportingDocx}>
-                {isExportingDocx ? (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                ) : (
-                  <FileText className="h-4 w-4 mr-2" />
-                )}
-                {isExportingDocx ? 'Generating...' : 'Export DOCX'}
               </Button>
               <Button variant="outline" size="sm" onClick={handlePrint}>
                 <Printer className="h-4 w-4 mr-2" />
