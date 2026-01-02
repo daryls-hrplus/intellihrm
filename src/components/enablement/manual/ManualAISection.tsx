@@ -56,9 +56,9 @@ export function ManualAISection() {
             <p className="text-muted-foreground">
               The system automatically scans for potential bias indicators and suggests neutral alternatives.
             </p>
-            <div className="p-4 bg-amber-100 dark:bg-amber-900/30 border border-amber-300 dark:border-amber-700 rounded-lg">
-              <h4 className="font-medium text-foreground mb-2">Types of Bias Detected</h4>
-              <ul className="text-sm text-muted-foreground space-y-1">
+            <div className="p-4 border-l-4 border-l-amber-500 bg-muted/50 rounded-r-lg">
+              <h4 className="font-semibold text-foreground mb-2">Types of Bias Detected</h4>
+              <ul className="text-sm text-foreground space-y-1">
                 <li>• Gender-coded language</li>
                 <li>• Age-related stereotypes</li>
                 <li>• Recency bias indicators</li>

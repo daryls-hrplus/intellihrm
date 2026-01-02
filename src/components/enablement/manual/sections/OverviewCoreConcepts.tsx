@@ -93,12 +93,12 @@ export function OverviewCoreConcepts() {
           </div>
 
           {/* Weight Configuration Best Practices */}
-          <div className="p-4 bg-amber-100 dark:bg-amber-900/30 border border-amber-300 dark:border-amber-700 rounded-lg">
+          <div className="p-4 border-l-4 border-l-amber-500 bg-muted/50 rounded-r-lg">
             <div className="flex items-start gap-3">
               <Lightbulb className="h-5 w-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
               <div>
-                <h4 className="font-medium text-foreground mb-2">Weight Configuration Best Practices</h4>
-                <ul className="text-sm text-muted-foreground space-y-1">
+                <h4 className="font-semibold text-foreground mb-2">Weight Configuration Best Practices</h4>
+                <ul className="text-sm text-foreground space-y-1">
                   <li>• <strong>Sales/Revenue roles:</strong> Higher Goals weight (50-60%) to emphasize measurable outcomes</li>
                   <li>• <strong>Management roles:</strong> Higher Competencies weight (25-35%) for leadership behaviors</li>
                   <li>• <strong>Technical roles:</strong> Balanced Responsibilities + Goals (35% + 40%)</li>
@@ -283,12 +283,12 @@ export function OverviewCoreConcepts() {
             </div>
           </div>
 
-          <div className="p-4 bg-red-100 dark:bg-red-900/30 border border-red-300 dark:border-red-700 rounded-lg">
+          <div className="p-4 border-l-4 border-l-red-500 bg-muted/50 rounded-r-lg">
             <div className="flex items-start gap-3">
               <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
               <div>
-                <h4 className="font-medium text-foreground mb-2">Caution: Forced Distribution Risks</h4>
-                <p className="text-sm text-muted-foreground">
+                <h4 className="font-semibold text-foreground mb-2">Caution: Forced Distribution Risks</h4>
+                <p className="text-sm text-foreground">
                   While forced distribution can prevent rating inflation, it can also create issues in 
                   high-performing teams where artificially labeling employees as "below expectations" 
                   damages morale and may not reflect actual performance. Consider using guided distribution 
