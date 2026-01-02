@@ -50,7 +50,8 @@ const TARGET_MODULES = [
   { value: 'pip', label: 'Performance Improvement (PIP)' },
   { value: 'compensation', label: 'Compensation Review' },
   { value: 'workforce_analytics', label: 'Workforce Analytics' },
-  { value: 'notifications', label: 'Notifications' }
+  { value: 'notifications', label: 'Notifications' },
+  { value: 'reminders', label: 'HR Reminders' }
 ];
 
 const ACTION_TYPES = [

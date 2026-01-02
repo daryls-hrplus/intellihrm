@@ -355,6 +355,9 @@ async function executeRuleAction(
       case 'notifications':
         return await executeNotificationAction(supabase, rule, data, config);
       
+      case 'reminders':
+        return await executeRemindersAction(supabase, rule, data, config);
+      
       default:
         return { success: false, error: `Unknown target module: ${rule.target_module}` };
     }
@@ -619,6 +622,50 @@ async function executeNotificationAction(
 
   if (error) return { success: false, error: error.message };
   return { success: true, targetRecordId: notification?.id };
+}
+
+async function executeRemindersAction(
+  supabase: any,
+  rule: IntegrationRule,
+  data: TriggerData,
+  config: Record<string, unknown>
+): Promise<{ success: boolean; targetRecordId?: string; error?: string }> {
+  // Create HR reminder for follow-up actions
+  const daysAfter = (config.days_after as number) || 7;
+  const reminderDate = new Date(Date.now() + daysAfter * 24 * 60 * 60 * 1000);
+  
+  // Get event type for the reminder
+  const eventTypeCode = config.event_type_code as string || 'APPRAISAL_FINALIZED';
+  const { data: eventType } = await supabase
+    .from('reminder_event_types')
+    .select('id')
+    .eq('code', eventTypeCode)
+    .single();
+
+  const { data: reminder, error } = await supabase
+    .from('employee_reminders')
+    .insert({
+      company_id: data.company_id,
+      employee_id: data.employee_id,
+      event_type_id: eventType?.id || null,
+      title: (config.title as string) || `Follow-up: ${data.cycle_name}`,
+      message: (config.message as string) || `Follow-up reminder for appraisal ${data.cycle_name}`,
+      event_date: reminderDate.toISOString(),
+      reminder_date: reminderDate.toISOString(),
+      source_record_id: data.participant_id,
+      source_table: 'appraisal_participants',
+      priority: (config.priority as string) || 'medium',
+      notification_method: 'both',
+      status: 'pending',
+      created_by_role: 'system',
+      can_employee_dismiss: true,
+      notes: `Auto-generated from appraisal integration rule: ${rule.name}`
+    })
+    .select('id')
+    .single();
+
+  if (error) return { success: false, error: error.message };
+  return { success: true, targetRecordId: reminder?.id };
 }
 
 async function logIntegration(supabase: any, logData: Record<string, unknown>): Promise<void> {
