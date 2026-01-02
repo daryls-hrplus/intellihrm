@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Clock, FileText } from 'lucide-react';
-import { NavigationPath } from '../../NavigationPath';
+import { NavigationPath } from '@/components/enablement/manual/NavigationPath';
 import { 
   LearningObjectives, 
   FieldReferenceTable, 
@@ -11,7 +11,7 @@ import {
   TroubleshootingSection,
   ScreenshotPlaceholder,
   PrerequisiteAlert
-} from '../../components';
+} from '@/components/enablement/manual/components';
 
 const FIELD_DEFINITIONS = [
   { name: 'Template Name', required: true, type: 'Text', description: 'Display name for the goal template', defaultValue: '—', validation: 'Max 100 characters' },

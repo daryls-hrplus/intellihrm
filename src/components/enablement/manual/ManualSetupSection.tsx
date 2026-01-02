@@ -1,17 +1,12 @@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
-import { Settings, Target, FileText } from 'lucide-react';
+import { Settings, FileText } from 'lucide-react';
 import {
   SetupPrerequisites,
   SetupRatingScales,
   SetupOverallScales,
   SetupCompetencies,
   SetupApprovalWorkflows,
-  SetupGoalCycles,
-  SetupGoalTemplates,
-  SetupGoalLocking,
-  SetupCheckInCadence,
-  SetupGoalRating,
 } from './sections/setup';
 
 export function ManualSetupSection() {
@@ -19,7 +14,7 @@ export function ManualSetupSection() {
     <div className="space-y-6">
       <div className="mb-6">
         <p className="text-muted-foreground">
-          This section covers the complete setup and configuration of the Performance Management module. 
+          This section covers the complete setup and configuration of the Performance Appraisals module. 
           Follow these sections in order to ensure all prerequisites are met before launching appraisal cycles.
         </p>
         <div className="flex items-center gap-4 mt-4 text-sm">
@@ -57,31 +52,6 @@ export function ManualSetupSection() {
             <SetupOverallScales />
             <SetupCompetencies />
             <SetupApprovalWorkflows />
-          </AccordionContent>
-        </AccordionItem>
-
-        {/* Goal Configuration */}
-        <AccordionItem value="goals" className="border rounded-lg px-4">
-          <AccordionTrigger className="hover:no-underline">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-green-100 dark:bg-green-900/30">
-                <Target className="h-5 w-5 text-green-600 dark:text-green-400" />
-              </div>
-              <div className="text-left">
-                <h3 className="font-semibold">Goal Configuration</h3>
-                <p className="text-sm text-muted-foreground font-normal">
-                  Goal cycles, templates, locking rules, and check-ins
-                </p>
-              </div>
-              <Badge variant="outline" className="ml-auto">5 sections</Badge>
-            </div>
-          </AccordionTrigger>
-          <AccordionContent className="pt-4 space-y-6">
-            <SetupGoalCycles />
-            <SetupGoalTemplates />
-            <SetupGoalLocking />
-            <SetupCheckInCadence />
-            <SetupGoalRating />
           </AccordionContent>
         </AccordionItem>
 
