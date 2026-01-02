@@ -119,12 +119,12 @@ export default function EmployeeSelfServicePage() {
       items: filterByAccess([allModules.payslips, allModules.compensation, allModules.benefits, allModules.expenses]),
     },
     {
-      titleKey: "Career",
-      items: filterByAccess([allModules.professionalInfo, allModules.careerPlan, allModules.careerPaths, allModules.mentorship, allModules.jobs, allModules.milestones]),
-    },
-    {
       titleKey: "Time & Absence",
       items: filterByAccess([allModules.leave, allModules.myCalendar, allModules.teamCalendar, allModules.timeAttendance, allModules.timesheets]),
+    },
+    {
+      titleKey: "Career",
+      items: filterByAccess([allModules.professionalInfo, allModules.careerPlan, allModules.careerPaths, allModules.mentorship, allModules.jobs, allModules.milestones]),
     },
     {
       titleKey: "Skills & Capabilities",
