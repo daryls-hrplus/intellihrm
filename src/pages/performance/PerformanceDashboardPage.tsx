@@ -73,12 +73,11 @@ export default function PerformanceDashboardPage() {
         allModules.feedback360,
         allModules.calibration,
         allModules.goals,
-        allModules.pips,
       ]),
     },
     {
       titleKey: "Continuous Performance",
-      items: filterByAccess([allModules.feedback, allModules.recognition]),
+      items: filterByAccess([allModules.feedback, allModules.recognition, allModules.pips]),
     },
     {
       titleKey: "Succession Planning",
