@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,12 +10,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { DatePicker } from "@/components/ui/date-picker";
+import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { Users, GitMerge, FileText, AlertTriangle } from "lucide-react";
 import { useAppraisalFormTemplates } from "@/hooks/useAppraisalFormTemplates";
 import { format } from "date-fns";
+import { checkCycleOverlap } from "@/utils/cycleOverlapCheck";
+import { useDebouncedCallback } from "@/hooks/use-debounced-callback";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 
 // Industry-standard appraisal cycle types
 const APPRAISAL_CYCLE_TYPES = [
@@ -71,6 +75,10 @@ export function AppraisalCycleDialog({
   const [loading, setLoading] = useState(false);
   const [showWeightWarning, setShowWeightWarning] = useState(false);
   const { templates } = useAppraisalFormTemplates(companyId || "");
+  
+  // Overlap detection state
+  const [overlappingCycles, setOverlappingCycles] = useState<Array<{ id: string; name: string; start_date: string; end_date: string; cycle_type: string }>>([]);
+  const [overlapAcknowledged, setOverlapAcknowledged] = useState(false);
   
   // Determine initial cycle_type based on props for backward compatibility
   const getInitialCycleType = (): AppraisalCycleType => {
@@ -173,7 +181,36 @@ export function AppraisalCycleDialog({
     }
   }, [weightsDeviate, selectedTemplate]);
 
+  // Reset overlap acknowledgment when dates or type change
+  useEffect(() => {
+    setOverlapAcknowledged(false);
+  }, [formData.start_date, formData.end_date, formData.cycle_type]);
+
+  // Debounced overlap check
+  const performOverlapCheck = useCallback(async () => {
+    if (!companyId || !formData.start_date || !formData.end_date || !formData.cycle_type) {
+      setOverlappingCycles([]);
+      return;
+    }
+    const result = await checkCycleOverlap({
+      table: 'appraisal_cycles',
+      companyId,
+      cycleType: formData.cycle_type,
+      startDate: formData.start_date,
+      endDate: formData.end_date,
+      excludeId: cycle?.id,
+    });
+    setOverlappingCycles(result.overlappingCycles);
+  }, [companyId, formData.start_date, formData.end_date, formData.cycle_type, cycle?.id]);
+
+  const debouncedOverlapCheck = useDebouncedCallback(performOverlapCheck, 500);
+
+  useEffect(() => {
+    debouncedOverlapCheck();
+  }, [formData.start_date, formData.end_date, formData.cycle_type, debouncedOverlapCheck]);
+
   const totalWeight = formData.competency_weight + formData.responsibility_weight + formData.goal_weight;
+  const hasUnacknowledgedOverlap = overlappingCycles.length > 0 && !overlapAcknowledged;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -231,7 +268,12 @@ export function AppraisalCycleDialog({
       onSuccess();
     } catch (error: any) {
       console.error("Error saving cycle:", error);
-      toast.error(error.message || "Failed to save cycle");
+      // Handle database constraint error for overlapping cycles
+      if (error.message?.includes('no_overlapping_appraisal_cycles') || error.code === '23P01') {
+        toast.error("Cannot save: This cycle overlaps with an existing cycle of the same type.");
+      } else {
+        toast.error(error.message || "Failed to save cycle");
+      }
     } finally {
       setLoading(false);
     }
@@ -310,7 +352,39 @@ export function AppraisalCycleDialog({
                 placeholder="Select end date"
               />
             </div>
+          </div>
 
+          {/* Overlap Warning */}
+          {overlappingCycles.length > 0 && (
+            <Alert className="border-amber-500 bg-amber-50 dark:bg-amber-950/20">
+              <AlertTriangle className="h-4 w-4 text-amber-600" />
+              <AlertDescription>
+                <p className="font-medium text-amber-800 dark:text-amber-300">Overlap Detected</p>
+                <p className="text-sm text-amber-700 dark:text-amber-400 mt-1">
+                  This {APPRAISAL_CYCLE_TYPES.find(t => t.value === formData.cycle_type)?.label} cycle overlaps with:
+                </p>
+                <ul className="text-sm text-amber-700 dark:text-amber-400 list-disc list-inside mt-1">
+                  {overlappingCycles.map(c => (
+                    <li key={c.id}>
+                      {c.name} ({formatDateForDisplay(c.start_date)} - {formatDateForDisplay(c.end_date)})
+                    </li>
+                  ))}
+                </ul>
+                <div className="flex items-center gap-2 mt-3">
+                  <Checkbox
+                    id="overlap-ack"
+                    checked={overlapAcknowledged}
+                    onCheckedChange={(checked) => setOverlapAcknowledged(checked === true)}
+                  />
+                  <label htmlFor="overlap-ack" className="text-sm text-amber-700 dark:text-amber-400 cursor-pointer">
+                    I understand and want to proceed with overlapping cycles
+                  </label>
+                </div>
+              </AlertDescription>
+            </Alert>
+          )}
+
+          <div className="grid gap-4 md:grid-cols-2">
             <div>
               <Label>Evaluation Deadline</Label>
               <DatePicker
@@ -536,7 +610,7 @@ export function AppraisalCycleDialog({
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button type="submit" disabled={loading || totalWeight !== 100}>
+            <Button type="submit" disabled={loading || totalWeight !== 100 || hasUnacknowledgedOverlap}>
               {loading ? "Saving..." : cycle ? "Update Cycle" : "Create Cycle"}
             </Button>
           </div>

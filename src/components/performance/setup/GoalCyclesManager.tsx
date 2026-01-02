@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,11 +11,15 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DatePicker } from "@/components/ui/date-picker";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Plus, Edit, Trash2, Calendar, Lock, CalendarClock } from "lucide-react";
+import { Plus, Edit, Trash2, Calendar, Lock, CalendarClock, AlertTriangle } from "lucide-react";
 import { formatDateForDisplay } from "@/utils/dateUtils";
 import { format } from "date-fns";
+import { checkCycleOverlap } from "@/utils/cycleOverlapCheck";
+import { useDebouncedCallback } from "@/hooks/use-debounced-callback";
 
 interface GoalCycle {
   id: string;
@@ -60,6 +64,10 @@ export function GoalCyclesManager({ companyId }: GoalCyclesManagerProps) {
   const [editingCycle, setEditingCycle] = useState<GoalCycle | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   
+  // Overlap detection state
+  const [overlappingCycles, setOverlappingCycles] = useState<Array<{ id: string; name: string; start_date: string; end_date: string; cycle_type: string }>>([]);
+  const [overlapAcknowledged, setOverlapAcknowledged] = useState(false);
+  
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -97,6 +105,46 @@ export function GoalCyclesManager({ companyId }: GoalCyclesManagerProps) {
       setIsLoading(false);
     }
   };
+
+  // Reset overlap state when dialog opens/closes
+  useEffect(() => {
+    if (!dialogOpen) {
+      setOverlappingCycles([]);
+      setOverlapAcknowledged(false);
+    }
+  }, [dialogOpen]);
+
+  // Reset overlap acknowledgment when dates or type change
+  useEffect(() => {
+    setOverlapAcknowledged(false);
+  }, [formData.start_date, formData.end_date, formData.cycle_type]);
+
+  // Debounced overlap check
+  const performOverlapCheck = useCallback(async () => {
+    if (!companyId || !formData.start_date || !formData.end_date || !formData.cycle_type) {
+      setOverlappingCycles([]);
+      return;
+    }
+    const result = await checkCycleOverlap({
+      table: 'goal_cycles',
+      companyId,
+      cycleType: formData.cycle_type,
+      startDate: formData.start_date,
+      endDate: formData.end_date,
+      excludeId: editingCycle?.id,
+    });
+    setOverlappingCycles(result.overlappingCycles);
+  }, [companyId, formData.start_date, formData.end_date, formData.cycle_type, editingCycle?.id]);
+
+  const debouncedOverlapCheck = useDebouncedCallback(performOverlapCheck, 500);
+
+  useEffect(() => {
+    if (dialogOpen) {
+      debouncedOverlapCheck();
+    }
+  }, [formData.start_date, formData.end_date, formData.cycle_type, dialogOpen, debouncedOverlapCheck]);
+
+  const hasUnacknowledgedOverlap = overlappingCycles.length > 0 && !overlapAcknowledged;
 
   const handleOpenDialog = (cycle?: GoalCycle) => {
     if (cycle) {
@@ -176,9 +224,14 @@ export function GoalCyclesManager({ companyId }: GoalCyclesManagerProps) {
       
       setDialogOpen(false);
       fetchCycles();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error saving goal cycle:", error);
-      toast.error("Failed to save goal cycle");
+      // Handle database constraint error for overlapping cycles
+      if (error.message?.includes('no_overlapping_goal_cycles') || error.code === '23P01') {
+        toast.error("Cannot save: This cycle overlaps with an existing cycle of the same type.");
+      } else {
+        toast.error("Failed to save goal cycle");
+      }
     } finally {
       setIsSaving(false);
     }
@@ -348,24 +401,54 @@ export function GoalCyclesManager({ companyId }: GoalCyclesManagerProps) {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Cycle Start Date *</Label>
-                <DatePicker
-                  value={formData.start_date}
-                  onChange={(date) => setFormData({ ...formData, start_date: date ? format(date, "yyyy-MM-dd") : "" })}
-                  placeholder="Select start date"
-                />
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Cycle Start Date *</Label>
+                  <DatePicker
+                    value={formData.start_date}
+                    onChange={(date) => setFormData({ ...formData, start_date: date ? format(date, "yyyy-MM-dd") : "" })}
+                    placeholder="Select start date"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Cycle End Date *</Label>
+                  <DatePicker
+                    value={formData.end_date}
+                    onChange={(date) => setFormData({ ...formData, end_date: date ? format(date, "yyyy-MM-dd") : "" })}
+                    placeholder="Select end date"
+                  />
+                </div>
               </div>
-              <div className="space-y-2">
-                <Label>Cycle End Date *</Label>
-                <DatePicker
-                  value={formData.end_date}
-                  onChange={(date) => setFormData({ ...formData, end_date: date ? format(date, "yyyy-MM-dd") : "" })}
-                  placeholder="Select end date"
-                />
-              </div>
-            </div>
+
+              {/* Overlap Warning */}
+              {overlappingCycles.length > 0 && (
+                <Alert className="border-amber-500 bg-amber-50 dark:bg-amber-950/20">
+                  <AlertTriangle className="h-4 w-4 text-amber-600" />
+                  <AlertDescription>
+                    <p className="font-medium text-amber-800 dark:text-amber-300">Overlap Detected</p>
+                    <p className="text-sm text-amber-700 dark:text-amber-400 mt-1">
+                      This {cycleTypes.find(t => t.value === formData.cycle_type)?.label} cycle overlaps with:
+                    </p>
+                    <ul className="text-sm text-amber-700 dark:text-amber-400 list-disc list-inside mt-1">
+                      {overlappingCycles.map(c => (
+                        <li key={c.id}>
+                          {c.name} ({formatDateForDisplay(c.start_date)} - {formatDateForDisplay(c.end_date)})
+                        </li>
+                      ))}
+                    </ul>
+                    <div className="flex items-center gap-2 mt-3">
+                      <Checkbox
+                        id="goal-overlap-ack"
+                        checked={overlapAcknowledged}
+                        onCheckedChange={(checked) => setOverlapAcknowledged(checked === true)}
+                      />
+                      <label htmlFor="goal-overlap-ack" className="text-sm text-amber-700 dark:text-amber-400 cursor-pointer">
+                        I understand and want to proceed with overlapping cycles
+                      </label>
+                    </div>
+                  </AlertDescription>
+                </Alert>
+              )}
 
             <div className="border rounded-lg p-4 space-y-4">
               <h4 className="font-medium flex items-center gap-2">
@@ -461,7 +544,7 @@ export function GoalCyclesManager({ companyId }: GoalCyclesManagerProps) {
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
-            <Button onClick={handleSave} disabled={isSaving}>
+            <Button onClick={handleSave} disabled={isSaving || hasUnacknowledgedOverlap}>
               {isSaving ? "Saving..." : editingCycle ? "Update Cycle" : "Create Cycle"}
             </Button>
           </DialogFooter>

@@ -46785,6 +46785,7 @@ export type Database = {
           company_id: string
           created_at: string
           created_by: string | null
+          cycle_type: string
           description: string | null
           end_date: string
           feedback_deadline: string | null
@@ -46808,6 +46809,7 @@ export type Database = {
           company_id: string
           created_at?: string
           created_by?: string | null
+          cycle_type?: string
           description?: string | null
           end_date: string
           feedback_deadline?: string | null
@@ -46831,6 +46833,7 @@ export type Database = {
           company_id?: string
           created_at?: string
           created_by?: string | null
+          cycle_type?: string
           description?: string | null
           end_date?: string
           feedback_deadline?: string | null
