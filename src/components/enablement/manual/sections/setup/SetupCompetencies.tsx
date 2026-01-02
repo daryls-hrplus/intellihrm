@@ -113,7 +113,7 @@ export function SetupCompetencies() {
             <Clock className="h-3 w-3" />
             ~15 min read
           </Badge>
-          <Badge className="bg-purple-500/20 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300 border border-purple-500/30">
+          <Badge className="bg-purple-600 text-white dark:bg-purple-700">
             Quarterly updates
           </Badge>
         </div>

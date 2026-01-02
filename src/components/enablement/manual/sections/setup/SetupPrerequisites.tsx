@@ -46,7 +46,7 @@ export function SetupPrerequisites() {
             <Clock className="h-3 w-3" />
             ~10 min read
           </Badge>
-          <Badge className="bg-amber-500/20 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300 border border-amber-500/30">
+          <Badge className="bg-amber-600 text-white dark:bg-amber-700">
             One-time setup
           </Badge>
         </div>
@@ -117,15 +117,15 @@ export function SetupPrerequisites() {
           <h4 className="font-medium mb-3">Configuration Dependency Chain</h4>
           <div className="p-4 bg-muted/50 rounded-lg">
             <div className="flex flex-wrap items-center gap-2 text-sm">
-              <Badge className="bg-blue-500/20 text-blue-800 dark:text-blue-300 border border-blue-500/30">Rating Scales</Badge>
+              <Badge className="bg-blue-600 text-white dark:bg-blue-700">Rating Scales</Badge>
               <span>→</span>
-              <Badge className="bg-blue-500/20 text-blue-800 dark:text-blue-300 border border-blue-500/30">Competency Library</Badge>
+              <Badge className="bg-blue-600 text-white dark:bg-blue-700">Competency Library</Badge>
               <span>→</span>
-              <Badge className="bg-blue-500/20 text-blue-800 dark:text-blue-300 border border-blue-500/30">Job Profiles</Badge>
+              <Badge className="bg-blue-600 text-white dark:bg-blue-700">Job Profiles</Badge>
               <span>→</span>
-              <Badge className="bg-green-500/20 text-green-800 dark:text-green-300 border border-green-500/30">Form Templates</Badge>
+              <Badge className="bg-green-600 text-white dark:bg-green-700">Form Templates</Badge>
               <span>→</span>
-              <Badge className="bg-green-500/20 text-green-800 dark:text-green-300 border border-green-500/30">Appraisal Cycles</Badge>
+              <Badge className="bg-green-600 text-white dark:bg-green-700">Appraisal Cycles</Badge>
             </div>
             <p className="text-xs text-muted-foreground mt-2">
               Each element depends on the previous items in the chain. Configure in this order for best results.
