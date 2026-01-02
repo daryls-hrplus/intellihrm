@@ -226,7 +226,7 @@ export default function TrainingDashboardPage() {
           })}
         </div>
 
-        <GroupedModuleCards sections={sections} defaultOpen={false} showToggleButton />
+        <GroupedModuleCards sections={sections} defaultOpen={true} showToggleButton />
       </div>
     </AppLayout>
   );

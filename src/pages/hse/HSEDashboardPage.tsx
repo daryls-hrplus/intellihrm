@@ -177,7 +177,7 @@ export default function HSEDashboardPage() {
           })}
         </div>
 
-        <GroupedModuleCards sections={sections} defaultOpen={false} showToggleButton />
+        <GroupedModuleCards sections={sections} defaultOpen={true} showToggleButton />
       </div>
     </AppLayout>
   );
