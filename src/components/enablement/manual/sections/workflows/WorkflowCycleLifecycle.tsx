@@ -100,7 +100,7 @@ export function WorkflowCycleLifecycle() {
 
         {/* Interactive Workflow Diagram */}
         <WorkflowDiagram 
-          title="Cycle Lifecycle Workflow"
+          title="Appraisal Cycle Lifecycle Workflow"
           description="Participant flow showing HR actions, system states, and participant interactions"
           diagram={`flowchart LR
     subgraph HR["🔧 HR Admin"]

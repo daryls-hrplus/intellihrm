@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { ZoomIn, ZoomOut, RotateCcw, Maximize2 } from 'lucide-react';
 import mermaid from 'mermaid';
@@ -11,28 +11,27 @@ interface WorkflowDiagramProps {
   diagram: string;
 }
 
-// Initialize mermaid with theme settings
 mermaid.initialize({
   startOnLoad: false,
   theme: 'base',
   themeVariables: {
-    primaryColor: '#3b82f6',
-    primaryTextColor: '#ffffff',
-    primaryBorderColor: '#2563eb',
-    lineColor: '#64748b',
-    secondaryColor: '#f1f5f9',
-    tertiaryColor: '#e2e8f0',
-    background: '#ffffff',
-    mainBkg: '#3b82f6',
-    secondBkg: '#f1f5f9',
-    fontFamily: 'Inter, system-ui, sans-serif',
+    primaryColor: 'hsl(var(--primary))',
+    primaryTextColor: 'hsl(var(--primary-foreground))',
+    primaryBorderColor: 'hsl(var(--primary))',
+    lineColor: 'hsl(var(--muted-foreground))',
+    secondaryColor: 'hsl(var(--muted))',
+    tertiaryColor: 'hsl(var(--muted))',
+    background: 'hsl(var(--background))',
+    mainBkg: 'hsl(var(--primary))',
+    secondBkg: 'hsl(var(--muted))',
+    fontFamily: 'ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial',
     fontSize: '14px',
-    nodeBorder: '#2563eb',
-    clusterBkg: '#f8fafc',
-    clusterBorder: '#cbd5e1',
-    defaultLinkColor: '#64748b',
-    titleColor: '#0f172a',
-    edgeLabelBackground: '#ffffff',
+    nodeBorder: 'hsl(var(--border))',
+    clusterBkg: 'hsl(var(--card))',
+    clusterBorder: 'hsl(var(--border))',
+    defaultLinkColor: 'hsl(var(--muted-foreground))',
+    titleColor: 'hsl(var(--foreground))',
+    edgeLabelBackground: 'hsl(var(--background))',
   },
   flowchart: {
     htmlLabels: true,
@@ -47,24 +46,30 @@ mermaid.initialize({
 export function WorkflowDiagram({ title, description, diagram }: WorkflowDiagramProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const modalContainerRef = useRef<HTMLDivElement>(null);
+
   const [error, setError] = useState<string | null>(null);
   const [isRendered, setIsRendered] = useState(false);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalRenderNonce, setModalRenderNonce] = useState(0);
   const [zoom, setZoom] = useState(100);
 
-  const renderToContainer = useCallback(async (container: HTMLDivElement, idPrefix: string) => {
-    try {
-      container.innerHTML = '';
-      const id = `${idPrefix}-${Math.random().toString(36).substr(2, 9)}`;
-      const { svg } = await mermaid.render(id, diagram.trim());
-      container.innerHTML = svg;
-      return true;
-    } catch (err) {
-      console.error('Mermaid rendering error:', err);
-      container.innerHTML = `<pre class="text-xs text-muted-foreground whitespace-pre-wrap font-mono p-4">${diagram}</pre>`;
-      return false;
-    }
-  }, [diagram]);
+  const renderToContainer = useCallback(
+    async (container: HTMLDivElement, idPrefix: string) => {
+      try {
+        container.innerHTML = '';
+        const id = `${idPrefix}-${Math.random().toString(36).substr(2, 9)}`;
+        const { svg } = await mermaid.render(id, diagram.trim());
+        container.innerHTML = svg;
+        return true;
+      } catch (err) {
+        console.error('Mermaid rendering error:', err);
+        container.innerHTML = `<pre class="text-xs text-muted-foreground whitespace-pre-wrap font-mono p-4">${diagram}</pre>`;
+        return false;
+      }
+    },
+    [diagram],
+  );
 
   // Render main diagram
   useEffect(() => {
@@ -72,91 +77,120 @@ export function WorkflowDiagram({ title, description, diagram }: WorkflowDiagram
       if (!containerRef.current) return;
       setError(null);
       setIsRendered(false);
+
       const success = await renderToContainer(containerRef.current, 'mermaid-main');
       setIsRendered(success);
       if (!success) setError('Failed to render diagram');
     };
+
     render();
   }, [diagram, renderToContainer]);
 
-  // Render modal diagram when opened
+  // Render modal diagram after the Dialog mounts in the portal
   useEffect(() => {
-    const render = async () => {
-      if (!isModalOpen || !modalContainerRef.current) return;
-      await renderToContainer(modalContainerRef.current, 'mermaid-modal');
-    };
-    render();
-  }, [isModalOpen, renderToContainer]);
+    if (!isModalOpen) return;
 
-  const handleZoomIn = () => setZoom(prev => Math.min(prev + 25, 200));
-  const handleZoomOut = () => setZoom(prev => Math.max(prev - 25, 50));
+    let cancelled = false;
+
+    const attemptRender = async (tries: number) => {
+      if (cancelled) return;
+
+      const el = modalContainerRef.current;
+      if (!el) {
+        if (tries < 20) requestAnimationFrame(() => attemptRender(tries + 1));
+        return;
+      }
+
+      await renderToContainer(el, 'mermaid-modal');
+    };
+
+    attemptRender(0);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isModalOpen, modalRenderNonce, renderToContainer]);
+
+  const handleZoomIn = () => setZoom((prev) => Math.min(prev + 25, 200));
+  const handleZoomOut = () => setZoom((prev) => Math.max(prev - 25, 50));
   const handleResetZoom = () => setZoom(100);
+
+  const handleOpenChange = (open: boolean) => {
+    setIsModalOpen(open);
+    if (open) {
+      setZoom(100);
+      setModalRenderNonce((n) => n + 1);
+    }
+  };
 
   return (
     <div className="space-y-3">
       <h4 className="text-base font-semibold">{title}</h4>
       {description && <p className="text-sm text-muted-foreground">{description}</p>}
-      <Card 
+
+      <Card
         className="bg-gradient-to-br from-muted/30 to-muted/50 border overflow-hidden cursor-pointer group hover:border-primary/50 transition-colors"
-        onClick={() => isRendered && setIsModalOpen(true)}
+        onClick={() => {
+          if (!isRendered) return;
+          handleOpenChange(true);
+        }}
       >
         <CardContent className="pt-4 pb-4 relative">
-          <div 
+          <div
             ref={containerRef}
             className="overflow-x-auto flex justify-center items-center min-h-[200px] [&_svg]:max-w-full"
           />
+
           {isRendered && (
             <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-              <Button variant="secondary" size="sm" className="gap-1 text-xs">
+              <Button variant="secondary" size="sm" className="gap-1 text-xs" type="button">
                 <Maximize2 className="h-3 w-3" />
                 Click to zoom
               </Button>
             </div>
           )}
-          {error && (
-            <p className="text-xs text-destructive mt-2">{error}</p>
-          )}
+
+          {error && <p className="text-xs text-destructive mt-2">{error}</p>}
         </CardContent>
       </Card>
+
       {isRendered && (
-        <p className="text-xs text-muted-foreground italic">
-          💡 Click on the diagram to zoom and view details.
-        </p>
+        <p className="text-xs text-muted-foreground italic">💡 Click on the diagram to zoom and view details.</p>
       )}
 
-      {/* Zoom Modal */}
-      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="max-w-[95vw] w-full max-h-[95vh] flex flex-col">
+      <Dialog open={isModalOpen} onOpenChange={handleOpenChange}>
+        <DialogContent key={modalRenderNonce} className="max-w-[95vw] w-full max-h-[95vh] flex flex-col">
           <DialogHeader className="flex-shrink-0">
             <DialogTitle className="flex items-center justify-between pr-8">
               <span>{title}</span>
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" onClick={handleZoomOut} disabled={zoom <= 50}>
+                <Button variant="outline" size="sm" onClick={handleZoomOut} disabled={zoom <= 50} type="button">
                   <ZoomOut className="h-4 w-4" />
                 </Button>
                 <span className="text-sm font-medium min-w-[4rem] text-center">{zoom}%</span>
-                <Button variant="outline" size="sm" onClick={handleZoomIn} disabled={zoom >= 200}>
+                <Button variant="outline" size="sm" onClick={handleZoomIn} disabled={zoom >= 200} type="button">
                   <ZoomIn className="h-4 w-4" />
                 </Button>
-                <Button variant="outline" size="sm" onClick={handleResetZoom}>
+                <Button variant="outline" size="sm" onClick={handleResetZoom} type="button">
                   <RotateCcw className="h-4 w-4" />
                 </Button>
               </div>
             </DialogTitle>
+            <DialogDescription className="sr-only">
+              Zoom and pan the workflow diagram for readability.
+            </DialogDescription>
           </DialogHeader>
+
           <div className="flex-1 overflow-auto bg-muted/30 rounded-lg p-4 min-h-[60vh]">
-            <div 
+            <div
               className="flex justify-center items-start"
-              style={{ 
+              style={{
                 transform: `scale(${zoom / 100})`,
                 transformOrigin: 'top center',
-                transition: 'transform 0.2s ease-out'
+                transition: 'transform 0.2s ease-out',
               }}
             >
-              <div 
-                ref={modalContainerRef}
-                className="[&_svg]:max-w-none"
-              />
+              <div ref={modalContainerRef} className="[&_svg]:max-w-none" />
             </div>
           </div>
         </DialogContent>
@@ -164,3 +198,4 @@ export function WorkflowDiagram({ title, description, diagram }: WorkflowDiagram
     </div>
   );
 }
+
