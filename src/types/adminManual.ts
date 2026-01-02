@@ -1029,7 +1029,6 @@ export const APPRAISALS_MANUAL_STRUCTURE: ManualSection[] = [
       }
     ]
   }
-]
 ];
 
 // Quick Reference Cards
