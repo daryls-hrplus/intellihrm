@@ -384,7 +384,7 @@ export default function LeaveDashboardPage() {
         {/* Leave Intelligence for Managers */}
         {isAdminOrHR && <LeaveIntelligence />}
 
-        <GroupedModuleCards sections={sections} defaultOpen={false} showToggleButton />
+        <GroupedModuleCards sections={sections} defaultOpen={true} showToggleButton />
       </div>
     </AppLayout>
   );
