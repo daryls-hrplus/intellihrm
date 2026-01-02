@@ -188,11 +188,12 @@ export function ManualPrintPreview({
       const addWatermark = () => {
         if (settings.branding.watermarkText) {
           pdf.setFont(fontFamily, 'bold');
-          pdf.setFontSize(60);
-          pdf.setTextColor(150, 150, 150);
+          // Use smaller font size for watermark - 40pt is subtle but visible
+          pdf.setFontSize(40);
+          pdf.setTextColor(200, 200, 200);
           
           // Save graphics state
-          const currentOpacity = settings.branding.watermarkOpacity;
+          const currentOpacity = Math.min(settings.branding.watermarkOpacity, 0.15);
           
           // Add watermark text diagonally
           pdf.saveGraphicsState();
@@ -470,7 +471,13 @@ export function ManualPrintPreview({
           pdf.setFont(fontFamily, 'normal');
 
           section.content.forEach((line) => {
-            const lines = pdf.splitTextToSize(line, contentWidth);
+            // Sanitize text - replace special characters that jsPDF can't render
+            const sanitizedLine = line
+              .replace(/•/g, '-')  // Replace bullet with dash
+              .replace(/💡/g, '*') // Replace emoji with asterisk
+              .replace(/[^\x00-\x7F]/g, ''); // Remove any other non-ASCII characters
+            
+            const lines = pdf.splitTextToSize(sanitizedLine, contentWidth);
             addNewPageIfNeeded(lines.length * 5, part.title);
             pdf.text(lines, margin.left, yPosition);
             yPosition += lines.length * 5 * settings.formatting.lineHeight;
