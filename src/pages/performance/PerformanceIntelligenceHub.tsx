@@ -4,6 +4,7 @@ import { ModuleReportsButton } from "@/components/reports/ModuleReportsButton";
 import { ModuleBIButton } from "@/components/bi/ModuleBIButton";
 import { LeaveCompanyFilter, useLeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
 import { DepartmentFilter, useDepartmentFilter } from "@/components/filters/DepartmentFilter";
+import { AppraisalCycleFilter, useAppraisalCycleFilter } from "@/components/filters/AppraisalCycleFilter";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { NavLink } from "react-router-dom";
 import { useLanguage } from "@/hooks/useLanguage";
@@ -84,7 +85,7 @@ export default function PerformanceIntelligenceHub() {
   const { t } = useLanguage();
   const { selectedCompanyId, setSelectedCompanyId } = useLeaveCompanyFilter();
   const { selectedDepartmentId, setSelectedDepartmentId } = useDepartmentFilter();
-  const [selectedCycleId, setSelectedCycleId] = useState<string | undefined>();
+  const { selectedCycleId, setSelectedCycleId, cycleId } = useAppraisalCycleFilter();
   const [activeSection, setActiveSection] = useState<Section>('operations');
 
   const companyId = selectedCompanyId !== "all" ? selectedCompanyId : undefined;
@@ -130,6 +131,13 @@ export default function PerformanceIntelligenceHub() {
                   onDepartmentChange={setSelectedDepartmentId}
                 />
               )}
+              {activeSection === 'appraisals' && (
+                <AppraisalCycleFilter
+                  companyId={selectedCompanyId}
+                  selectedCycleId={selectedCycleId}
+                  onCycleChange={setSelectedCycleId}
+                />
+              )}
               <ModuleBIButton module="performance" />
               <ModuleReportsButton module="performance" />
             </div>
@@ -172,7 +180,7 @@ export default function PerformanceIntelligenceHub() {
         )}
         
         {activeSection === 'appraisals' && (
-          <AppraisalsSection companyId={companyId} cycleId={selectedCycleId} />
+          <AppraisalsSection companyId={companyId} cycleId={cycleId} />
         )}
         
         {activeSection === 'predictive' && (
