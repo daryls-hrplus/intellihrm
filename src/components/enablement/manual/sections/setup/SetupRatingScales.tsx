@@ -160,7 +160,7 @@ export function SetupRatingScales() {
             <Clock className="h-3 w-3" />
             ~15 min read
           </Badge>
-          <Badge className="bg-blue-500/10 text-blue-700 dark:text-blue-400">
+          <Badge className="bg-blue-600 text-white dark:bg-blue-700">
             Annual review
           </Badge>
         </div>
