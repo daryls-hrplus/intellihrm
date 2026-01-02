@@ -61,6 +61,7 @@ import {
 
 // AI Reports
 import { AIModuleReportBuilder } from "@/components/shared/AIModuleReportBuilder";
+import { ExportIntelligenceReport } from "@/components/performance/intelligence/ExportIntelligenceReport";
 
 type Section = 'operations' | 'workforce' | 'appraisals' | 'predictive' | 'reports';
 
@@ -351,24 +352,30 @@ function PredictiveSection({ companyId }: { companyId?: string }) {
 function ReportsSection({ companyId }: { companyId?: string }) {
   const { t } = useLanguage();
   return (
-    <Tabs defaultValue="banded" className="space-y-4">
-      <TabsList className="flex-wrap h-auto gap-1">
-        <TabsTrigger value="banded" className="gap-1.5">
-          <Layers className="h-4 w-4" />
-          {t("reports.aiBandedReports")}
-        </TabsTrigger>
-        <TabsTrigger value="bi" className="gap-1.5">
-          <BarChart3 className="h-4 w-4" />
-          {t("reports.aiBIReports")}
-        </TabsTrigger>
-      </TabsList>
+    <div className="space-y-6">
+      {/* Export Intelligence Report - Prominent at top */}
+      <ExportIntelligenceReport companyId={companyId} />
+      
+      {/* AI Report Builder Tabs */}
+      <Tabs defaultValue="banded" className="space-y-4">
+        <TabsList className="flex-wrap h-auto gap-1">
+          <TabsTrigger value="banded" className="gap-1.5">
+            <Layers className="h-4 w-4" />
+            {t("reports.aiBandedReports")}
+          </TabsTrigger>
+          <TabsTrigger value="bi" className="gap-1.5">
+            <BarChart3 className="h-4 w-4" />
+            {t("reports.aiBIReports")}
+          </TabsTrigger>
+        </TabsList>
 
-      <TabsContent value="banded">
-        <AIModuleReportBuilder moduleName="performance" reportType="banded" companyId={companyId} />
-      </TabsContent>
-      <TabsContent value="bi">
-        <AIModuleReportBuilder moduleName="performance" reportType="bi" companyId={companyId} />
-      </TabsContent>
-    </Tabs>
+        <TabsContent value="banded">
+          <AIModuleReportBuilder moduleName="performance" reportType="banded" companyId={companyId} />
+        </TabsContent>
+        <TabsContent value="bi">
+          <AIModuleReportBuilder moduleName="performance" reportType="bi" companyId={companyId} />
+        </TabsContent>
+      </Tabs>
+    </div>
   );
 }
