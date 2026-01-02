@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -51,49 +51,42 @@ export function WorkflowDiagram({ title, description, diagram }: WorkflowDiagram
   const [isRendered, setIsRendered] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [zoom, setZoom] = useState(100);
-  const [svgContent, setSvgContent] = useState<string>('');
 
-  useEffect(() => {
-    const renderDiagram = async () => {
-      if (!containerRef.current) return;
-
-      try {
-        setError(null);
-        setIsRendered(false);
-        
-        // Clear previous content
-        containerRef.current.innerHTML = '';
-        
-        // Generate unique ID for this diagram
-        const id = `mermaid-${Math.random().toString(36).substr(2, 9)}`;
-        
-        // Render the diagram
-        const { svg } = await mermaid.render(id, diagram.trim());
-        
-        if (containerRef.current) {
-          containerRef.current.innerHTML = svg;
-          setSvgContent(svg);
-          setIsRendered(true);
-        }
-      } catch (err) {
-        console.error('Mermaid rendering error:', err);
-        setError('Failed to render diagram');
-        // Fallback to showing code
-        if (containerRef.current) {
-          containerRef.current.innerHTML = `<pre class="text-xs text-muted-foreground whitespace-pre-wrap font-mono">${diagram}</pre>`;
-        }
-      }
-    };
-
-    renderDiagram();
+  const renderToContainer = useCallback(async (container: HTMLDivElement, idPrefix: string) => {
+    try {
+      container.innerHTML = '';
+      const id = `${idPrefix}-${Math.random().toString(36).substr(2, 9)}`;
+      const { svg } = await mermaid.render(id, diagram.trim());
+      container.innerHTML = svg;
+      return true;
+    } catch (err) {
+      console.error('Mermaid rendering error:', err);
+      container.innerHTML = `<pre class="text-xs text-muted-foreground whitespace-pre-wrap font-mono p-4">${diagram}</pre>`;
+      return false;
+    }
   }, [diagram]);
 
-  // Update modal content when opened
+  // Render main diagram
   useEffect(() => {
-    if (isModalOpen && modalContainerRef.current && svgContent) {
-      modalContainerRef.current.innerHTML = svgContent;
-    }
-  }, [isModalOpen, svgContent]);
+    const render = async () => {
+      if (!containerRef.current) return;
+      setError(null);
+      setIsRendered(false);
+      const success = await renderToContainer(containerRef.current, 'mermaid-main');
+      setIsRendered(success);
+      if (!success) setError('Failed to render diagram');
+    };
+    render();
+  }, [diagram, renderToContainer]);
+
+  // Render modal diagram when opened
+  useEffect(() => {
+    const render = async () => {
+      if (!isModalOpen || !modalContainerRef.current) return;
+      await renderToContainer(modalContainerRef.current, 'mermaid-modal');
+    };
+    render();
+  }, [isModalOpen, renderToContainer]);
 
   const handleZoomIn = () => setZoom(prev => Math.min(prev + 25, 200));
   const handleZoomOut = () => setZoom(prev => Math.max(prev - 25, 50));
@@ -110,8 +103,7 @@ export function WorkflowDiagram({ title, description, diagram }: WorkflowDiagram
         <CardContent className="pt-4 pb-4 relative">
           <div 
             ref={containerRef}
-            className="overflow-x-auto flex justify-center items-center min-h-[200px]"
-            style={{ maxWidth: '100%' }}
+            className="overflow-x-auto flex justify-center items-center min-h-[200px] [&_svg]:max-w-full"
           />
           {isRendered && (
             <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -134,7 +126,7 @@ export function WorkflowDiagram({ title, description, diagram }: WorkflowDiagram
 
       {/* Zoom Modal */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="max-w-[95vw] w-full max-h-[95vh] h-full flex flex-col">
+        <DialogContent className="max-w-[95vw] w-full max-h-[95vh] flex flex-col">
           <DialogHeader className="flex-shrink-0">
             <DialogTitle className="flex items-center justify-between pr-8">
               <span>{title}</span>
@@ -152,9 +144,9 @@ export function WorkflowDiagram({ title, description, diagram }: WorkflowDiagram
               </div>
             </DialogTitle>
           </DialogHeader>
-          <div className="flex-1 overflow-auto bg-muted/30 rounded-lg p-4">
+          <div className="flex-1 overflow-auto bg-muted/30 rounded-lg p-4 min-h-[60vh]">
             <div 
-              className="flex justify-center items-start min-h-full"
+              className="flex justify-center items-start"
               style={{ 
                 transform: `scale(${zoom / 100})`,
                 transformOrigin: 'top center',
