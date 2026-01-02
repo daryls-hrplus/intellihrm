@@ -134,7 +134,35 @@ export const RELATED_TOPICS: Record<string, { sectionId: string; title: string }
     { sectionId: 'sec-5-6', title: 'AI Analytics Overview' },
   ],
   'sec-7-1': [
-    { sectionId: 'sec-7-2', title: 'Downstream Triggers' },
+    { sectionId: 'sec-7-2', title: 'Nine-Box & Succession' },
+    { sectionId: 'sec-7-3', title: 'IDP/PIP Auto-Creation' },
+    { sectionId: 'sec-7-4', title: 'Compensation Integration' },
+    { sectionId: 'sec-7-5', title: 'Learning & Development' },
+    { sectionId: 'sec-7-6', title: 'Notification Orchestration' },
+  ],
+  'sec-7-2': [
+    { sectionId: 'sec-7-1', title: 'Integration Overview' },
+    { sectionId: 'sec-7-3', title: 'IDP/PIP Auto-Creation' },
+    { sectionId: 'sec-4-1', title: 'Calibration Sessions' },
+  ],
+  'sec-7-3': [
+    { sectionId: 'sec-7-1', title: 'Integration Overview' },
+    { sectionId: 'sec-7-2', title: 'Nine-Box & Succession' },
+    { sectionId: 'sec-7-4', title: 'Compensation Integration' },
+  ],
+  'sec-7-4': [
+    { sectionId: 'sec-7-1', title: 'Integration Overview' },
+    { sectionId: 'sec-7-3', title: 'IDP/PIP Auto-Creation' },
+    { sectionId: 'sec-7-5', title: 'Learning & Development' },
+  ],
+  'sec-7-5': [
+    { sectionId: 'sec-7-1', title: 'Integration Overview' },
+    { sectionId: 'sec-7-3', title: 'IDP/PIP Auto-Creation' },
+    { sectionId: 'sec-7-4', title: 'Compensation Integration' },
+  ],
+  'sec-7-6': [
+    { sectionId: 'sec-7-1', title: 'Integration Overview' },
+    { sectionId: 'sec-7-2', title: 'Nine-Box & Succession' },
     { sectionId: 'sec-2-8', title: 'Action Rules' },
   ],
 };
