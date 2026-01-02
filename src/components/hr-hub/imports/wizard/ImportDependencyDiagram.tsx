@@ -243,13 +243,13 @@ export function ImportDependencyDiagram({ compact = false }: ImportDependencyDia
               
               {node.systemDropdowns && (
                 <div>
-                  <div className="flex items-center gap-1 text-xs font-medium text-amber-600 dark:text-amber-500 mb-1">
+                  <div className="flex items-center gap-1 text-xs font-medium text-orange-700 dark:text-orange-400 mb-1">
                     <AlertTriangle className="h-3 w-3" />
                     System Dropdowns (May Need Editing)
                   </div>
                   <div className="flex flex-wrap gap-1">
                     {node.systemDropdowns.map((dropdown) => (
-                      <Badge key={dropdown} className="text-xs font-mono bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 hover:bg-amber-100">
+                      <Badge key={dropdown} className="text-xs font-mono bg-orange-600 text-white dark:bg-orange-700 dark:text-white hover:bg-orange-700">
                         {dropdown}
                       </Badge>
                     ))}
@@ -322,7 +322,7 @@ export function ImportDependencyDiagram({ compact = false }: ImportDependencyDia
             <span className="text-muted-foreground">Standard editable</span>
           </div>
           <div className="flex items-center gap-1">
-            <Badge className="text-xs bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 hover:bg-amber-100">dropdown</Badge>
+            <Badge className="text-xs bg-orange-600 text-white dark:bg-orange-700 dark:text-white hover:bg-orange-700">dropdown</Badge>
             <span className="text-muted-foreground">May need company-specific values</span>
           </div>
           <div className="flex items-center gap-1">
