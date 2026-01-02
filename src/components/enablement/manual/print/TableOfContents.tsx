@@ -48,26 +48,26 @@ export function TableOfContents({
     return (
       <div key={section.id} className={level > 1 ? 'ml-6' : ''}>
         <div 
-          className={`flex items-center gap-2 py-2 ${isTopLevel ? 'border-b border-border/50' : ''}`}
+          className={`flex items-center gap-2 py-1 ${isTopLevel ? 'border-b border-border/30' : ''}`}
         >
           <span 
-            className={`font-mono ${isTopLevel ? 'font-bold' : 'text-sm'}`}
+            className={`font-mono flex-shrink-0 ${isTopLevel ? 'font-bold text-sm' : 'text-xs'}`}
             style={{ color: isTopLevel ? brandColors.primaryColor : undefined }}
           >
             {section.sectionNumber}
           </span>
           <span 
-            className={`flex-1 ${isTopLevel ? 'font-semibold' : 'text-sm text-muted-foreground'}`}
+            className={`flex-shrink-0 ${isTopLevel ? 'font-semibold text-sm' : 'text-xs text-muted-foreground'}`}
           >
             {section.title}
           </span>
           {showPageNumbers && (
             <>
-              <span className="flex-shrink-0 text-muted-foreground text-sm">
-                {'·'.repeat(isTopLevel ? 20 : 15)}
+              <span className="flex-1 text-muted-foreground text-xs overflow-hidden whitespace-nowrap">
+                {'·'.repeat(isTopLevel ? 30 : 20)}
               </span>
               <span 
-                className={`font-mono text-sm min-w-[3ch] text-right`}
+                className="font-mono text-xs min-w-[3ch] text-right flex-shrink-0"
                 style={{ color: brandColors.primaryColor }}
               >
                 {pageNumbers[section.id] || '—'}
@@ -87,44 +87,44 @@ export function TableOfContents({
 
   return (
     <div 
-      className="print-toc w-full p-12 bg-white"
-      style={{ pageBreakAfter: 'always' }}
+      className="print-toc w-full p-12 bg-white overflow-hidden"
+      style={{ maxHeight: 'calc(297mm - 80px)' }}
     >
       <h2 
-        className="text-2xl font-bold mb-8 pb-4 border-b-2"
+        className="text-2xl font-bold mb-6 pb-4 border-b-2"
         style={{ borderColor: brandColors.primaryColor, color: brandColors.secondaryColor }}
       >
         Table of Contents
       </h2>
       
-      <div className="space-y-1">
+      <div className="space-y-0.5 overflow-hidden">
         {APPRAISALS_MANUAL_STRUCTURE.map((section) => renderSection(section))}
       </div>
       
       {/* Appendices */}
-      <div className="mt-8 pt-4 border-t border-border">
+      <div className="mt-6 pt-4 border-t border-border">
         <h3 
-          className="text-lg font-semibold mb-4"
+          className="text-base font-semibold mb-3"
           style={{ color: brandColors.secondaryColor }}
         >
           Appendices
         </h3>
-        <div className="space-y-2">
+        <div className="space-y-1">
           {[
             { id: 'quick-ref', title: 'Quick Reference Cards', page: 95 },
             { id: 'diagrams', title: 'System Diagrams', page: 102 },
             { id: 'glossary', title: 'Glossary of Terms', page: 110 },
             { id: 'version-history', title: 'Version History', page: 118 }
           ].map((appendix) => (
-            <div key={appendix.id} className="flex items-center gap-2 py-1">
+            <div key={appendix.id} className="flex items-center gap-2 py-0.5">
               <span className="text-sm text-muted-foreground">{appendix.title}</span>
               {showPageNumbers && (
                 <>
-                  <span className="flex-1 text-muted-foreground text-sm">
-                    {'·'.repeat(30)}
+                  <span className="flex-1 text-muted-foreground text-xs overflow-hidden whitespace-nowrap">
+                    {'·'.repeat(40)}
                   </span>
                   <span 
-                    className="font-mono text-sm min-w-[3ch] text-right"
+                    className="font-mono text-sm min-w-[3ch] text-right flex-shrink-0"
                     style={{ color: brandColors.primaryColor }}
                   >
                     {appendix.page}

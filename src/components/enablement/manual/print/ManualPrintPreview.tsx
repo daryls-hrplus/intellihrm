@@ -355,7 +355,7 @@ export function ManualPrintPreview({
         <div className="flex-1 overflow-auto bg-muted/30 p-8">
           <div 
             ref={previewRef}
-            className="print-preview-content mx-auto space-y-8"
+            className="print-preview-content mx-auto flex flex-col items-center gap-8"
             style={{ 
               transform: `scale(${zoom / 100})`,
               transformOrigin: 'top center',
@@ -364,7 +364,14 @@ export function ManualPrintPreview({
           >
             {/* Cover Page */}
             {settings.sections.includeCover && (
-              <div className="bg-white shadow-lg rounded overflow-hidden" style={{ aspectRatio: '210/297' }}>
+              <div 
+                className="bg-white shadow-lg rounded overflow-hidden flex-shrink-0"
+                style={{ 
+                  width: '210mm',
+                  height: '297mm',
+                  position: 'relative'
+                }}
+              >
                 <CoverPage
                   title="Appraisals Administrator Manual"
                   subtitle="Comprehensive guide for Performance Appraisals configuration and management"
@@ -373,25 +380,36 @@ export function ManualPrintPreview({
                   companyName={brandColors.companyName}
                   style={settings.branding.coverStyle}
                   brandColors={brandColors}
+                  logoUrl={brandColors.logoUrl}
                 />
               </div>
             )}
 
             {/* Table of Contents */}
             {settings.sections.includeTableOfContents && (
-              <div className="bg-white shadow-lg rounded overflow-hidden" style={{ minHeight: '297mm' }}>
+              <div 
+                className="bg-white shadow-lg rounded overflow-hidden flex flex-col flex-shrink-0"
+                style={{ 
+                  width: '210mm',
+                  height: '297mm',
+                  position: 'relative'
+                }}
+              >
                 {settings.sections.includeHeaders && (
                   <PrintHeader 
                     content={settings.sections.headerContent}
                     style={settings.branding.headerStyle}
                     brandColors={brandColors}
+                    logoUrl={brandColors.logoUrl}
                   />
                 )}
-                <TableOfContents
-                  brandColors={brandColors}
-                  depth={settings.sections.tocDepth}
-                  showPageNumbers={settings.sections.includePageNumbers}
-                />
+                <div className="flex-1 overflow-hidden">
+                  <TableOfContents
+                    brandColors={brandColors}
+                    depth={settings.sections.tocDepth}
+                    showPageNumbers={settings.sections.includePageNumbers}
+                  />
+                </div>
                 {settings.sections.includeFooters && (
                   <PrintFooter
                     content={settings.sections.footerContent}
@@ -406,17 +424,25 @@ export function ManualPrintPreview({
             )}
 
             {/* Sample Content Page */}
-            <div className="bg-white shadow-lg rounded overflow-hidden flex flex-col" style={{ minHeight: '297mm' }}>
+            <div 
+              className="bg-white shadow-lg rounded overflow-hidden flex flex-col flex-shrink-0"
+              style={{ 
+                width: '210mm',
+                height: '297mm',
+                position: 'relative'
+              }}
+            >
               {settings.sections.includeHeaders && (
                 <PrintHeader 
                   content={settings.sections.headerContent}
                   style={settings.branding.headerStyle}
                   brandColors={brandColors}
                   sectionTitle="1. Module Overview"
+                  logoUrl={brandColors.logoUrl}
                 />
               )}
               
-              <div className="flex-1 p-12">
+              <div className="flex-1 p-12 overflow-hidden">
                 <h2 
                   className="text-2xl font-bold mb-6"
                   style={{ color: brandColors.primaryColor }}
