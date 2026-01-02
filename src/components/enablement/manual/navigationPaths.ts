@@ -1,15 +1,29 @@
 // Centralized navigation paths mapping for all manual sections
 export const NAVIGATION_PATHS: Record<string, string[]> = {
-  // Part 2: Setup & Configuration
-  'sec-2-1': ['Performance', 'Setup', '(See tabs below)'],
+  // Part 2: Setup & Configuration - Foundation
+  'sec-2-1': ['Performance', 'Setup', '(Multiple areas)'],
   'sec-2-2': ['Performance', 'Setup', 'Foundation', 'Rating Scales'],
   'sec-2-3': ['Performance', 'Setup', 'Foundation', 'Overall Rating Scales'],
   'sec-2-4': ['Performance', 'Setup', 'Foundation', 'Competencies'],
-  'sec-2-5': ['Performance', 'Setup', 'Appraisals', 'Form Templates'],
-  'sec-2-6': ['Performance', 'Setup', 'Appraisals', 'Appraisal Cycles'],
-  'sec-2-7': ['Performance', 'Setup', 'Appraisals', 'Performance Categories'],
-  'sec-2-8': ['Performance', 'Setup', 'Appraisals', 'Action Rules'],
-  'sec-2-9': ['Performance', 'Setup', 'Integration', 'Module Connections'],
+  'sec-2-5': ['Performance', 'Setup', 'Foundation', 'Workflows'],
+  
+  // Part 2: Setup & Configuration - Goals
+  'sec-2-6': ['Performance', 'Setup', 'Goals', 'Goal Cycles'],
+  'sec-2-7': ['Performance', 'Setup', 'Goals', 'Goal Templates'],
+  'sec-2-8': ['Performance', 'Setup', 'Goals', 'Locking Rules'],
+  'sec-2-9': ['Performance', 'Setup', 'Goals', 'Check-in Cadence'],
+  'sec-2-10': ['Performance', 'Setup', 'Goals', 'Rating Config'],
+  
+  // Part 2: Setup & Configuration - Appraisals
+  'sec-2-11': ['Performance', 'Setup', 'Appraisals', 'Appraisal Cycles'],
+  'sec-2-12': ['Performance', 'Setup', 'Appraisals', 'Performance Categories'],
+  'sec-2-13': ['Performance', 'Setup', 'Appraisals', 'Form Templates'],
+  'sec-2-14': ['Performance', 'Setup', 'Appraisals', 'Action Rules'],
+  'sec-2-15': ['Performance', 'Setup', 'Appraisals', 'Employee Response'],
+  'sec-2-16': ['Performance', 'Setup', 'Appraisals', 'HR Escalations'],
+  'sec-2-17': ['Performance', 'Setup', 'Integration', 'Integration Rules'],
+  'sec-2-18': ['Performance', 'Setup', 'Appraisals', 'Index Settings'],
+  'sec-2-19': ['Performance', 'Setup', 'Appraisals', 'Benchmarks'],
 
   // Part 3: Workflows
   'sec-3-1': ['Performance', 'Appraisals', 'Cycles'],
