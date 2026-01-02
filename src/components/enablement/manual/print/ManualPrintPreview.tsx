@@ -14,6 +14,7 @@ import { ChapterTitlePage } from "./ChapterTitlePage";
 import { X, ZoomIn, ZoomOut, Printer, Settings, ChevronLeft, ChevronRight, Download, Loader2 } from "lucide-react";
 import jsPDF from "jspdf";
 import { MANUAL_CONTENT } from "@/utils/appraisalsManualDocx";
+import { APPRAISALS_MANUAL_STRUCTURE, ManualSection } from "@/types/adminManual";
 import { toast } from "@/hooks/use-toast";
 
 interface ManualPrintPreviewProps {
@@ -277,7 +278,7 @@ export function ManualPrintPreview({
         yPosition = margin.top;
       }
 
-      // Table of Contents
+      // Table of Contents - generated from actual manual structure
       if (settings.sections.includeTableOfContents) {
         addHeader(pageNumber % 2 === 1);
         addWatermark();
@@ -295,24 +296,77 @@ export function ManualPrintPreview({
         pdf.setFont(fontFamily, 'normal');
         pdf.setTextColor(0, 0, 0);
 
-        const tocItems = [
-          { title: '1. Module Overview & Conceptual Foundation', page: 3 },
-          { title: '2. Setup & Configuration Guide', page: 8 },
-          { title: '3. Operational Workflows', page: 15 },
-          { title: '4. Calibration & Quality Management', page: 22 },
-          { title: '5. AI-Assisted Features', page: 28 },
-          { title: '6. Analytics & Reporting', page: 34 },
-          { title: '7. Cross-Module Integration', page: 40 },
-          { title: '8. Troubleshooting & Support', page: 45 },
-        ];
+        // Calculate page numbers based on content
+        let estimatedPage = settings.sections.includeCover ? 2 : 1;
+        estimatedPage += 1; // TOC page
+        if (settings.sections.includeRevisionHistory) estimatedPage += 1;
 
-        tocItems.forEach((item) => {
-          const dotLeader = '.'.repeat(Math.max(0, 60 - item.title.length));
-          pdf.text(item.title, margin.left, yPosition);
+        const tocDepth = settings.sections.tocDepth || 2;
+
+        // Render TOC from actual manual structure
+        const renderTocEntry = (section: ManualSection, level: number, startPage: number) => {
+          if (level > tocDepth) return startPage;
+
+          const indent = (level - 1) * 8;
+          const title = section.title;
+          const fontSize = level === 1 ? 10 : 9;
+          const isBold = level === 1;
+
+          pdf.setFontSize(fontSize);
+          pdf.setFont(fontFamily, isBold ? 'bold' : 'normal');
+          
+          addNewPageIfNeeded(8);
+          
+          pdf.text(title, margin.left + indent, yPosition);
+          
           if (settings.sections.includePageNumbers) {
-            pdf.text(`${dotLeader} ${item.page}`, margin.left + 80, yPosition);
+            const pageText = String(startPage);
+            const maxTitleWidth = contentWidth - indent - 20;
+            const titleWidth = pdf.getTextWidth(title);
+            const dotsNeeded = Math.max(0, Math.floor((maxTitleWidth - titleWidth - 10) / pdf.getTextWidth('.')));
+            const dots = '.'.repeat(dotsNeeded);
+            
+            pdf.setFont(fontFamily, 'normal');
+            pdf.text(`${dots} ${pageText}`, margin.left + indent + titleWidth + 2, yPosition);
           }
-          yPosition += 8;
+          
+          yPosition += level === 1 ? 8 : 6;
+          
+          let nextPage = startPage + Math.ceil(section.estimatedReadTime / 5);
+          
+          // Render subsections if within depth
+          if (section.subsections && level < tocDepth) {
+            section.subsections.forEach((sub) => {
+              nextPage = renderTocEntry(sub, level + 1, nextPage);
+            });
+          }
+          
+          return nextPage;
+        };
+
+        let currentEstPage = estimatedPage;
+        APPRAISALS_MANUAL_STRUCTURE.forEach((section) => {
+          currentEstPage = renderTocEntry(section, 1, currentEstPage);
+        });
+
+        // Add appendices section
+        yPosition += 4;
+        pdf.setFontSize(10);
+        pdf.setFont(fontFamily, 'bold');
+        pdf.text('Appendices', margin.left, yPosition);
+        yPosition += 8;
+        
+        pdf.setFont(fontFamily, 'normal');
+        pdf.setFontSize(9);
+        const appendices = [
+          'A. Quick Reference Cards',
+          'B. Workflow Diagrams', 
+          'C. Glossary',
+          'D. Version History'
+        ];
+        appendices.forEach((item, idx) => {
+          pdf.text(item, margin.left + 8, yPosition);
+          yPosition += 6;
         });
 
         pdf.addPage();
