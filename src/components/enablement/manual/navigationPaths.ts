@@ -1,4 +1,4 @@
-// Centralized navigation paths mapping for all manual sections
+// Centralized navigation paths mapping for all Appraisals manual sections
 export const NAVIGATION_PATHS: Record<string, string[]> = {
   // Part 2: Setup & Configuration - Foundation
   'sec-2-1': ['Performance', 'Setup', '(Multiple areas)'],
@@ -7,23 +7,16 @@ export const NAVIGATION_PATHS: Record<string, string[]> = {
   'sec-2-4': ['Performance', 'Setup', 'Foundation', 'Competencies'],
   'sec-2-5': ['Performance', 'Setup', 'Foundation', 'Workflows'],
   
-  // Part 2: Setup & Configuration - Goals
-  'sec-2-6': ['Performance', 'Setup', 'Goals', 'Goal Cycles'],
-  'sec-2-7': ['Performance', 'Setup', 'Goals', 'Goal Templates'],
-  'sec-2-8': ['Performance', 'Setup', 'Goals', 'Locking Rules'],
-  'sec-2-9': ['Performance', 'Setup', 'Goals', 'Check-in Cadence'],
-  'sec-2-10': ['Performance', 'Setup', 'Goals', 'Rating Config'],
-  
-  // Part 2: Setup & Configuration - Appraisals
-  'sec-2-11': ['Performance', 'Setup', 'Appraisals', 'Appraisal Cycles'],
-  'sec-2-12': ['Performance', 'Setup', 'Appraisals', 'Performance Categories'],
-  'sec-2-13': ['Performance', 'Setup', 'Appraisals', 'Form Templates'],
-  'sec-2-14': ['Performance', 'Setup', 'Appraisals', 'Action Rules'],
-  'sec-2-15': ['Performance', 'Setup', 'Appraisals', 'Employee Response'],
-  'sec-2-16': ['Performance', 'Setup', 'Appraisals', 'HR Escalations'],
-  'sec-2-17': ['Performance', 'Setup', 'Integration', 'Integration Rules'],
-  'sec-2-18': ['Performance', 'Setup', 'Appraisals', 'Index Settings'],
-  'sec-2-19': ['Performance', 'Setup', 'Appraisals', 'Benchmarks'],
+  // Part 2: Setup & Configuration - Appraisals (renumbered after removing goals)
+  'sec-2-6': ['Performance', 'Setup', 'Appraisals', 'Appraisal Cycles'],
+  'sec-2-7': ['Performance', 'Setup', 'Appraisals', 'Performance Categories'],
+  'sec-2-8': ['Performance', 'Setup', 'Appraisals', 'Form Templates'],
+  'sec-2-9': ['Performance', 'Setup', 'Appraisals', 'Action Rules'],
+  'sec-2-10': ['Performance', 'Setup', 'Appraisals', 'Employee Response'],
+  'sec-2-11': ['Performance', 'Setup', 'Appraisals', 'HR Escalations'],
+  'sec-2-12': ['Performance', 'Setup', 'Integration', 'Integration Rules'],
+  'sec-2-13': ['Performance', 'Setup', 'Appraisals', 'Index Settings'],
+  'sec-2-14': ['Performance', 'Setup', 'Appraisals', 'Benchmarks'],
 
   // Part 3: Workflows
   'sec-3-1': ['Performance', 'Appraisals', 'Cycles'],
@@ -58,7 +51,7 @@ export const RELATED_TOPICS: Record<string, { sectionId: string; title: string }
     { sectionId: 'sec-7-1', title: 'Integration Overview' },
   ],
   'sec-2-4': [
-    { sectionId: 'sec-2-5', title: 'Form Templates' },
+    { sectionId: 'sec-2-8', title: 'Form Templates' },
     { sectionId: 'sec-3-2', title: 'Manager Workflow' },
   ],
   'sec-2-5': [
@@ -66,7 +59,7 @@ export const RELATED_TOPICS: Record<string, { sectionId: string; title: string }
     { sectionId: 'sec-2-6', title: 'Appraisal Cycles' },
   ],
   'sec-2-6': [
-    { sectionId: 'sec-2-5', title: 'Form Templates' },
+    { sectionId: 'sec-2-8', title: 'Form Templates' },
     { sectionId: 'sec-3-1', title: 'Cycle Lifecycle' },
   ],
   'sec-3-1': [
@@ -91,6 +84,6 @@ export const RELATED_TOPICS: Record<string, { sectionId: string; title: string }
   ],
   'sec-7-1': [
     { sectionId: 'sec-7-2', title: 'Downstream Triggers' },
-    { sectionId: 'sec-2-8', title: 'Action Rules' },
+    { sectionId: 'sec-2-9', title: 'Action Rules' },
   ],
 };

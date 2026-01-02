@@ -37,6 +37,7 @@ import {
   RefreshCw,
   Network,
   Users,
+  Target,
 } from "lucide-react";
 import { ContentWorkflowBoard } from "@/components/enablement/ContentWorkflowBoard";
 import { ReleaseManager } from "@/components/enablement/ReleaseManager";
@@ -246,7 +247,15 @@ export default function EnablementHubPage() {
           href: "/enablement/manuals/appraisals",
           icon: BookOpen,
           color: "bg-primary/10 text-primary",
-          badge: "53 Sections",
+          badge: "48 Sections",
+        },
+        {
+          title: "Goals Manual",
+          description: "Administrator guide for Goals Management module",
+          href: "/enablement/manuals/goals",
+          icon: Target,
+          color: "bg-green-500/10 text-green-600",
+          badge: "24 Sections",
         },
       ],
     },
