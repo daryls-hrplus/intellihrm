@@ -1,7 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ArrowRight, Target, BookOpen, DollarSign, GraduationCap, Bell } from 'lucide-react';
-
+import { NavigationPath } from './NavigationPath';
+import { NAVIGATION_PATHS } from './navigationPaths';
 export function ManualIntegrationSection() {
   return (
     <div className="space-y-8">
@@ -15,6 +16,7 @@ export function ManualIntegrationSection() {
           <CardDescription>How appraisal data flows to other modules</CardDescription>
         </CardHeader>
         <CardContent>
+          <NavigationPath path={NAVIGATION_PATHS['sec-7-1']} />
           <div className="flex flex-col md:flex-row items-center justify-center gap-4 p-6">
             <div className="p-4 bg-primary/10 rounded-lg text-center">
               <p className="font-medium">Appraisals</p>
@@ -46,6 +48,7 @@ export function ManualIntegrationSection() {
           <CardDescription>Automatic actions based on appraisal outcomes</CardDescription>
         </CardHeader>
         <CardContent>
+          <NavigationPath path={NAVIGATION_PATHS['sec-7-2']} />
           <div className="space-y-3">
             {[
               { trigger: 'Score < 2.0', action: 'Create PIP automatically', timing: 'Within 14 days' },

@@ -1,7 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Target, Users, Brain, Shield } from 'lucide-react';
-
+import { NavigationPath } from './NavigationPath';
+import { NAVIGATION_PATHS } from './navigationPaths';
 export function ManualCalibrationSection() {
   return (
     <div className="space-y-8">
@@ -14,6 +15,7 @@ export function ManualCalibrationSection() {
           <CardDescription>Understanding why calibration matters</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
+          <NavigationPath path={NAVIGATION_PATHS['sec-4-1']} />
           <p className="text-muted-foreground">
             Calibration is a collaborative process where managers review ratings to ensure consistency, 
             fairness, and alignment with organizational standards. It reduces bias and creates a level 
@@ -48,6 +50,7 @@ export function ManualCalibrationSection() {
           <CardDescription>Visualizing talent during calibration</CardDescription>
         </CardHeader>
         <CardContent>
+          <NavigationPath path={NAVIGATION_PATHS['sec-4-2']} />
           <div className="grid grid-cols-3 gap-1 max-w-md">
             {[
               ['Enigma', 'Growth Employee', 'Future Star'],

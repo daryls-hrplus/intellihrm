@@ -3,6 +3,8 @@ import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
 import { Settings, CheckCircle, AlertTriangle, Lightbulb, Clock } from 'lucide-react';
+import { NavigationPath } from './NavigationPath';
+import { NAVIGATION_PATHS } from './navigationPaths';
 
 export function ManualSetupSection() {
   return (
@@ -18,6 +20,7 @@ export function ManualSetupSection() {
           <CardDescription>Complete these items before configuring appraisals</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          <NavigationPath path={NAVIGATION_PATHS['sec-2-1']} />
           <div className="p-4 bg-amber-100 dark:bg-amber-900/30 border border-amber-300 dark:border-amber-700 rounded-lg mb-6">
             <div className="flex items-start gap-3">
               <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400 flex-shrink-0" />
@@ -64,8 +67,9 @@ export function ManualSetupSection() {
           <CardDescription>Setting up component-level rating scales</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
+          <NavigationPath path={NAVIGATION_PATHS['sec-2-2']} />
           <p className="text-muted-foreground">
-            Rating scales define how individual items (goals, competencies, responsibilities) are scored 
+            Rating scales define how individual items (goals, competencies, responsibilities) are scored
             during evaluations. Industry standard is a 5-point scale.
           </p>
 
@@ -122,8 +126,9 @@ export function ManualSetupSection() {
           <CardDescription>Configuring final appraisal rating categories</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
+          <NavigationPath path={NAVIGATION_PATHS['sec-2-3']} />
           <p className="text-muted-foreground">
-            Overall rating scales define the final performance categories that aggregate all component scores. 
+            Overall rating scales define the final performance categories that aggregate all component scores.
             These categories typically align with compensation and talent planning decisions.
           </p>
 
@@ -182,6 +187,7 @@ export function ManualSetupSection() {
           <CardDescription>Connecting competencies to appraisal forms</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
+          <NavigationPath path={NAVIGATION_PATHS['sec-2-4']} />
           <p className="text-muted-foreground">
             The Competency Library serves as the foundation for behavioral assessments in appraisals. 
             Competencies must be properly linked to job families or positions before they can appear on evaluation forms.
@@ -245,6 +251,7 @@ export function ManualSetupSection() {
           <CardDescription>Creating and configuring evaluation templates</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
+          <NavigationPath path={NAVIGATION_PATHS['sec-2-5']} />
           <p className="text-muted-foreground">
             Templates define the structure and content of appraisal forms. Different templates can be created 
             for various employee populations (individual contributors, managers, executives).
@@ -317,6 +324,7 @@ export function ManualSetupSection() {
           <CardDescription>Setting up annual, semi-annual, or probationary cycles</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
+          <NavigationPath path={NAVIGATION_PATHS['sec-2-6']} />
           <div className="grid md:grid-cols-3 gap-4">
             <Card className="border-2">
               <CardContent className="pt-4">
