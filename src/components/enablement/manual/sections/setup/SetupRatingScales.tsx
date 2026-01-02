@@ -160,7 +160,7 @@ export function SetupRatingScales() {
             <Clock className="h-3 w-3" />
             ~15 min read
           </Badge>
-          <Badge className="bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+          <Badge className="bg-blue-500/10 text-blue-700 dark:text-blue-400">
             Annual review
           </Badge>
         </div>
@@ -202,15 +202,15 @@ export function SetupRatingScales() {
         </div>
 
         {/* Industry Insight */}
-        <div className="p-4 bg-blue-100 dark:bg-blue-900/30 border border-blue-300 dark:border-blue-700 rounded-lg">
+        <div className="p-4 border-l-4 border-l-blue-500 bg-muted/50 rounded-r-lg">
           <div className="flex items-start gap-3">
             <Lightbulb className="h-5 w-5 text-blue-600 dark:text-blue-400 flex-shrink-0" />
             <div>
-              <h4 className="font-medium text-foreground">Scale Design Considerations</h4>
-              <p className="text-sm text-muted-foreground">
+              <h4 className="font-semibold text-foreground">Scale Design Considerations</h4>
+              <p className="text-sm text-foreground">
                 <strong>5-Point Scales</strong> provide nuance but can lead to central tendency (everyone gets 3). 
-                <strong>4-Point Scales</strong> eliminate the "safe middle" forcing decisive ratings. 
-                <strong>3-Point Scales</strong> simplify but lose granularity. Choose based on your organizational 
+                <strong> 4-Point Scales</strong> eliminate the "safe middle" forcing decisive ratings. 
+                <strong> 3-Point Scales</strong> simplify but lose granularity. Choose based on your organizational 
                 culture and tolerance for differentiation.
               </p>
             </div>
