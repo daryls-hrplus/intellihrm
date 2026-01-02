@@ -148,11 +148,11 @@ export default function EmployeeSelfServicePage() {
     },
     {
       titleKey: "Tasks & Approvals",
-      items: filterByAccess([allModules.approvals, allModules.delegates, allModules.transactions]),
+      items: filterByAccess([allModules.approvals, allModules.delegates, allModules.transactions, allModules.reminders]),
     },
     {
       titleKey: "Help & Settings",
-      items: filterByAccess([allModules.tickets, allModules.reminders, allModules.notifications]),
+      items: filterByAccess([allModules.tickets, allModules.notifications]),
     },
   ];
 
