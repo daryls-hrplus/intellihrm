@@ -368,3 +368,6 @@ verify_jwt = false
 
 [functions.create-subdomain-dns]
 verify_jwt = false
+
+[functions.generate-key-insights]
+verify_jwt = false
