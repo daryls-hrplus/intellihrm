@@ -111,13 +111,13 @@ export function ManualQuickReference() {
               </div>
             ))}
           </div>
-          <div className="mt-4 p-4 border-l-4 border-l-primary bg-primary/5 rounded-r-lg">
-            <h4 className="font-medium text-sm mb-2 text-primary">Response Status Options</h4>
+          <div className="mt-4 p-4 border-l-4 border-l-primary bg-primary/20 rounded-r-lg">
+            <h4 className="font-semibold text-sm mb-2">Response Status Options</h4>
             <div className="flex flex-wrap gap-2">
               <Badge className="bg-green-600 text-white hover:bg-green-700">agree</Badge>
               <Badge className="bg-red-600 text-white hover:bg-red-700">disagree</Badge>
               <Badge className="bg-amber-600 text-white hover:bg-amber-700">partial_agree</Badge>
-              <Badge variant="outline" className="border-primary/50">pending</Badge>
+              <Badge variant="outline" className="border-2 border-primary">pending</Badge>
             </div>
           </div>
         </CardContent>
@@ -150,8 +150,8 @@ export function ManualQuickReference() {
               </div>
             </div>
             <div>
-              <h4 className="font-medium mb-3 text-primary">Interview Status Flow</h4>
-              <div className="space-y-2">
+              <h4 className="font-semibold mb-3">Interview Status Flow</h4>
+              <div className="flex flex-wrap gap-2">
                 {[
                   { status: 'scheduled', color: 'bg-blue-600 text-white' },
                   { status: 'confirmed', color: 'bg-green-600 text-white' },
@@ -182,15 +182,15 @@ export function ManualQuickReference() {
         <CardContent>
           <div className="grid md:grid-cols-2 gap-6">
             <div>
-              <h4 className="font-medium mb-3 text-primary">Evaluation Modes</h4>
+              <h4 className="font-semibold mb-3">Evaluation Modes</h4>
               <div className="space-y-3">
-                <div className="p-3 border-l-4 border-l-primary bg-primary/5 rounded-r-lg">
+                <div className="p-3 border-2 border-primary bg-primary/20 rounded-lg">
                   <Badge className="mb-2 bg-primary text-primary-foreground">aggregate</Badge>
-                  <p className="text-sm text-muted-foreground">Combine weighted scores from all positions into one overall score</p>
+                  <p className="text-sm">Combine weighted scores from all positions into one overall score</p>
                 </div>
-                <div className="p-3 border-l-4 border-l-muted-foreground/50 bg-muted/50 rounded-r-lg">
-                  <Badge variant="outline" className="mb-2 border-primary/50">separate</Badge>
-                  <p className="text-sm text-muted-foreground">Evaluate each position independently with separate scores</p>
+                <div className="p-3 border-2 border-muted-foreground/30 bg-muted rounded-lg">
+                  <Badge variant="outline" className="mb-2 border-2">separate</Badge>
+                  <p className="text-sm">Evaluate each position independently with separate scores</p>
                 </div>
               </div>
             </div>
@@ -219,9 +219,9 @@ export function ManualQuickReference() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <div className="p-4 border-l-4 border-l-primary bg-primary/5 rounded-r-lg">
-              <h4 className="font-medium mb-2 text-primary">Role Segment Structure</h4>
-              <p className="text-sm text-muted-foreground mb-3">Each segment represents a period where the employee held a specific position:</p>
+            <div className="p-4 border-2 border-primary bg-primary/20 rounded-lg">
+              <h4 className="font-semibold mb-2">Role Segment Structure</h4>
+              <p className="text-sm mb-3">Each segment represents a period where the employee held a specific position:</p>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
                 <Badge className="bg-primary text-primary-foreground justify-center">position_id</Badge>
                 <Badge className="bg-primary text-primary-foreground justify-center">start_date</Badge>
@@ -241,9 +241,9 @@ export function ManualQuickReference() {
                   ))}
                 </div>
               </div>
-            <div className="p-4 border-l-4 border-l-blue-500 bg-blue-500/5 rounded-r-lg">
-              <h4 className="font-medium mb-3 text-blue-600 dark:text-blue-400">Score Calculation</h4>
-              <p className="text-sm font-mono bg-muted px-3 py-2 rounded">Final score = Σ (Segment Score × Contribution %)</p>
+            <div className="p-4 border-2 border-blue-500 bg-blue-500/20 rounded-lg">
+              <h4 className="font-semibold mb-3">Score Calculation</h4>
+              <p className="text-sm font-mono bg-background border-2 border-blue-500 px-3 py-2 rounded">Final score = Σ (Segment Score × Contribution %)</p>
             </div>
             </div>
           </div>
@@ -272,12 +272,12 @@ export function ManualQuickReference() {
               </div>
             </div>
             <div>
-              <h4 className="font-medium mb-3 text-primary">Scoring Components</h4>
+              <h4 className="font-semibold mb-3">Scoring Components</h4>
               <div className="space-y-2 text-sm">
-                <div className="p-2 border-l-4 border-l-primary bg-primary/5 rounded-r-lg font-mono">value_id - Reference to company value</div>
-                <div className="p-2 border-l-4 border-l-primary bg-primary/5 rounded-r-lg font-mono">score - Numeric rating</div>
-                <div className="p-2 border-l-4 border-l-primary bg-primary/5 rounded-r-lg font-mono">demonstrated_behaviors - Evidence text</div>
-                <div className="p-2 border-l-4 border-l-primary bg-primary/5 rounded-r-lg font-mono">manager_comments - Additional feedback</div>
+                <div className="p-2 border-2 border-primary bg-primary/20 rounded-lg font-mono">value_id - Reference to company value</div>
+                <div className="p-2 border-2 border-primary bg-primary/20 rounded-lg font-mono">score - Numeric rating</div>
+                <div className="p-2 border-2 border-primary bg-primary/20 rounded-lg font-mono">demonstrated_behaviors - Evidence text</div>
+                <div className="p-2 border-2 border-primary bg-primary/20 rounded-lg font-mono">manager_comments - Additional feedback</div>
               </div>
             </div>
           </div>
@@ -312,15 +312,15 @@ export function ManualQuickReference() {
               </div>
             </div>
           </div>
-          <div className="mt-4 p-4 border-l-4 border-l-primary bg-primary/5 rounded-r-lg">
-            <h4 className="font-medium text-sm mb-2 text-primary">Execution Status Flow</h4>
+          <div className="mt-4 p-4 border-2 border-primary bg-primary/20 rounded-lg">
+            <h4 className="font-semibold text-sm mb-2">Execution Status Flow</h4>
             <div className="flex flex-wrap items-center gap-2">
               <Badge className="bg-amber-600 text-white">pending</Badge>
-              <span className="text-primary font-bold">→</span>
+              <span className="font-bold text-lg">→</span>
               <Badge className="bg-green-600 text-white">executed</Badge>
-              <span className="text-muted-foreground">or</span>
+              <span className="font-medium">or</span>
               <Badge className="bg-gray-600 text-white">overridden</Badge>
-              <span className="text-primary font-bold">→</span>
+              <span className="font-bold text-lg">→</span>
               <Badge className="bg-primary text-primary-foreground">acknowledged</Badge>
             </div>
           </div>

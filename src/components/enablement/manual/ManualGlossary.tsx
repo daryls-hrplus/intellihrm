@@ -231,21 +231,21 @@ export function ManualGlossary() {
         <CardContent>
           <div className="space-y-4">
             {filteredTerms.length === 0 ? (
-              <div className="p-6 border-l-4 border-l-amber-500 bg-amber-500/5 rounded-r-lg text-center">
-                <p className="text-sm text-amber-600 dark:text-amber-400 font-medium">
+              <div className="p-6 border-2 border-amber-500 bg-amber-500/20 rounded-lg text-center">
+                <p className="text-sm font-semibold">
                   No terms found matching your search.
                 </p>
               </div>
             ) : (
               filteredTerms.map((item) => (
-                <div key={item.term} className="p-4 border-l-4 border-l-primary bg-primary/5 rounded-r-lg">
+                <div key={item.term} className="p-4 border-2 border-primary bg-primary/15 rounded-lg">
                   <div className="flex items-center gap-2 mb-2">
-                    <h4 className="font-semibold text-primary">{item.term}</h4>
+                    <h4 className="font-bold">{item.term}</h4>
                     <Badge className="bg-primary text-primary-foreground text-xs">
                       {item.category}
                     </Badge>
                   </div>
-                  <p className="text-sm text-muted-foreground">{item.definition}</p>
+                  <p className="text-sm">{item.definition}</p>
                 </div>
               ))
             )}
