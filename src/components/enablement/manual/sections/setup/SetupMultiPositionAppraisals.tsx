@@ -219,12 +219,12 @@ export function SetupMultiPositionAppraisals() {
           </p>
         </div>
 
-        <div className="p-4 bg-violet-100 dark:bg-violet-900/30 border border-violet-300 dark:border-violet-700 rounded-lg">
+        <div className="p-4 border-l-4 border-l-violet-500 bg-muted/50 rounded-r-lg">
           <div className="flex items-start gap-3">
             <Briefcase className="h-5 w-5 text-violet-600 dark:text-violet-400 flex-shrink-0" />
             <div>
-              <h4 className="font-medium text-foreground">Common Scenarios</h4>
-              <p className="text-sm text-muted-foreground">
+              <h4 className="font-semibold text-foreground">Common Scenarios</h4>
+              <p className="text-sm text-foreground">
                 Multi-position handling is essential for: matrix organizations with dotted-line 
                 reporting, employees with split FTE across departments, project-based assignments 
                 alongside core roles, and interim or acting positions during transitions.

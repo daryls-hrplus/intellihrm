@@ -209,14 +209,14 @@ export function SetupBenchmarks() {
           </p>
         </div>
 
-        <div className="p-4 bg-orange-100 dark:bg-orange-900/30 border border-orange-300 dark:border-orange-700 rounded-lg">
+        <div className="p-4 border-l-4 border-l-orange-500 bg-muted/50 rounded-r-lg">
           <div className="flex items-start gap-3">
             <BarChart3 className="h-5 w-5 text-orange-600 dark:text-orange-400 flex-shrink-0" />
             <div>
-              <h4 className="font-medium text-foreground">Distribution Philosophy</h4>
-              <p className="text-sm text-muted-foreground">
+              <h4 className="font-semibold text-foreground">Distribution Philosophy</h4>
+              <p className="text-sm text-foreground">
                 <strong>Forced Distribution:</strong> Strict adherence to percentages (controversial). 
-                <strong>Guided Distribution:</strong> Targets as guidelines with manager discretion (recommended). 
+                <strong> Guided Distribution:</strong> Targets as guidelines with manager discretion (recommended). 
                 Most modern organizations use guided distribution to balance fairness with flexibility.
               </p>
             </div>
