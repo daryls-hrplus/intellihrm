@@ -29,6 +29,8 @@ import { ManualIntegrationSection } from '@/components/enablement/manual/ManualI
 import { ManualTroubleshootingSection } from '@/components/enablement/manual/ManualTroubleshootingSection';
 import { ManualQuickReference } from '@/components/enablement/manual/ManualQuickReference';
 import { ManualDiagrams } from '@/components/enablement/manual/ManualDiagrams';
+import { ManualVersionHistory } from '@/components/enablement/manual/ManualVersionHistory';
+import { ManualGlossary } from '@/components/enablement/manual/ManualGlossary';
 
 const SECTION_ICONS: Record<string, React.ReactNode> = {
   'part-1': <BookOpen className="h-5 w-5" />,
@@ -276,6 +278,10 @@ export default function AppraisalsManualPage() {
         return <ManualQuickReference />;
       case 'diagrams':
         return <ManualDiagrams />;
+      case 'glossary':
+        return <ManualGlossary />;
+      case 'version-history':
+        return <ManualVersionHistory />;
       default:
         return <ManualOverviewSection />;
     }
@@ -451,6 +457,28 @@ export default function AppraisalsManualPage() {
                     >
                       <Layers className="h-4 w-4 text-blue-500" />
                       <span>Architecture Diagrams</span>
+                    </button>
+                    <button
+                      className={`w-full flex items-center gap-2 p-2 rounded-lg text-left text-sm transition-colors
+                        ${selectedSectionId === 'glossary' 
+                          ? 'bg-primary/10 text-primary font-medium' 
+                          : 'hover:bg-muted'
+                        }`}
+                      onClick={() => scrollToSection('glossary')}
+                    >
+                      <BookOpen className="h-4 w-4 text-green-500" />
+                      <span>Glossary</span>
+                    </button>
+                    <button
+                      className={`w-full flex items-center gap-2 p-2 rounded-lg text-left text-sm transition-colors
+                        ${selectedSectionId === 'version-history' 
+                          ? 'bg-primary/10 text-primary font-medium' 
+                          : 'hover:bg-muted'
+                        }`}
+                      onClick={() => scrollToSection('version-history')}
+                    >
+                      <Clock className="h-4 w-4 text-purple-500" />
+                      <span>Version History</span>
                     </button>
                   </div>
                 </ScrollArea>

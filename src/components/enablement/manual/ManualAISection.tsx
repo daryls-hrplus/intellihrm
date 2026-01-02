@@ -1,7 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Brain, Sparkles, MessageSquare, AlertTriangle, TrendingUp } from 'lucide-react';
-
+import { NavigationPath } from './NavigationPath';
+import { NAVIGATION_PATHS } from './navigationPaths';
 export function ManualAISection() {
   return (
     <div className="space-y-8">
@@ -15,6 +16,7 @@ export function ManualAISection() {
           <CardDescription>Introduction to AI-powered evaluation assistance</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
+          <NavigationPath path={NAVIGATION_PATHS['sec-5-1']} />
           <p className="text-muted-foreground">
             The AI Feedback Assistant helps managers write better, more constructive feedback while 
             reducing evaluation time by 30-40%. It provides real-time suggestions and quality checks.
@@ -49,6 +51,7 @@ export function ManualAISection() {
           <CardDescription>EEOC compliance and fair evaluation practices</CardDescription>
         </CardHeader>
         <CardContent>
+          <NavigationPath path={NAVIGATION_PATHS['sec-5-2']} />
           <div className="space-y-4">
             <p className="text-muted-foreground">
               The system automatically scans for potential bias indicators and suggests neutral alternatives.

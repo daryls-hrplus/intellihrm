@@ -1,7 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ArrowRight, Clock, User, Users, CheckCircle } from 'lucide-react';
-
+import { NavigationPath } from './NavigationPath';
+import { NAVIGATION_PATHS } from './navigationPaths';
 export function ManualWorkflowsSection() {
   return (
     <div className="space-y-8">
@@ -16,6 +17,7 @@ export function ManualWorkflowsSection() {
           <CardDescription>Understanding and managing cycle status progression</CardDescription>
         </CardHeader>
         <CardContent>
+          <NavigationPath path={NAVIGATION_PATHS['sec-3-1']} />
           <div className="flex flex-wrap items-center gap-2 mb-6">
             {['Draft', 'Active', 'In Progress', 'Completed', 'Closed'].map((status, i, arr) => (
               <div key={status} className="flex items-center gap-2">
@@ -54,6 +56,7 @@ export function ManualWorkflowsSection() {
           <CardDescription>Complete guide for managers conducting evaluations (2-4 week window)</CardDescription>
         </CardHeader>
         <CardContent>
+          <NavigationPath path={NAVIGATION_PATHS['sec-3-2']} />
           <div className="space-y-4">
             {[
               { step: 1, title: 'Access Pending Evaluations', desc: 'Navigate to MSS → Team Appraisals' },
@@ -92,6 +95,7 @@ export function ManualWorkflowsSection() {
           <CardDescription>Managing employee acknowledgment (5-10 business days)</CardDescription>
         </CardHeader>
         <CardContent>
+          <NavigationPath path={NAVIGATION_PATHS['sec-3-3']} />
           <div className="grid md:grid-cols-3 gap-4">
             {[
               { type: 'Agree', color: 'bg-green-100 border-green-300', desc: 'Accept the evaluation as-is' },

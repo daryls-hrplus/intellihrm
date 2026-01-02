@@ -1,7 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { BarChart3, TrendingUp, Users, Target } from 'lucide-react';
-
+import { NavigationPath } from './NavigationPath';
+import { NAVIGATION_PATHS } from './navigationPaths';
 export function ManualAnalyticsSection() {
   return (
     <div className="space-y-8">
@@ -15,6 +16,7 @@ export function ManualAnalyticsSection() {
           <CardDescription>Understanding and using the analytics interface</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
+          <NavigationPath path={NAVIGATION_PATHS['sec-6-1']} />
           <div className="grid md:grid-cols-4 gap-4">
             {[
               { label: 'Completion Rate', value: '95%', target: 'Target: 95%+', icon: Target },
@@ -42,6 +44,7 @@ export function ManualAnalyticsSection() {
           <CardDescription>Monitor rating distributions post-calibration</CardDescription>
         </CardHeader>
         <CardContent>
+          <NavigationPath path={NAVIGATION_PATHS['sec-6-2']} />
           <div className="space-y-3">
             {[
               { category: 'Exceptional', percent: 10, color: 'bg-green-500' },
