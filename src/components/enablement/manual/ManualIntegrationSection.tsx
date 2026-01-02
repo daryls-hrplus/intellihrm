@@ -4,7 +4,8 @@ import {
   IdpPipSection,
   CompensationIntegrationSection,
   LearningIntegrationSection,
-  NotificationOrchestrationSection
+  NotificationOrchestrationSection,
+  IntegrationAnalyticsSection
 } from './sections/integration';
 
 export function ManualIntegrationSection() {
@@ -16,6 +17,7 @@ export function ManualIntegrationSection() {
       <CompensationIntegrationSection />
       <LearningIntegrationSection />
       <NotificationOrchestrationSection />
+      <IntegrationAnalyticsSection />
     </div>
   );
 }
