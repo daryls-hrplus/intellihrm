@@ -60,9 +60,10 @@ import {
   AppraisalRiskFlags,
 } from '@/components/performance/analytics';
 
-// AI Reports
+// AI Reports & Insights
 import { AIModuleReportBuilder } from "@/components/shared/AIModuleReportBuilder";
 import { ExportIntelligenceReport } from "@/components/performance/intelligence/ExportIntelligenceReport";
+import { KeyInsightsAIPanel } from "@/components/performance/intelligence/KeyInsightsAIPanel";
 
 type Section = 'operations' | 'workforce' | 'appraisals' | 'predictive' | 'reports';
 
@@ -143,6 +144,9 @@ export default function PerformanceIntelligenceHub() {
             </div>
           </div>
         </div>
+
+        {/* Key Insights AI Panel */}
+        <KeyInsightsAIPanel companyId={companyId} />
 
         {/* Section Navigation */}
         <div className="flex flex-wrap gap-2 border-b border-border pb-4">
