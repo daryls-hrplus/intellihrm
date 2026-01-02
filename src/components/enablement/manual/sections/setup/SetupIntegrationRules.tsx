@@ -171,10 +171,10 @@ const TROUBLESHOOTING_ITEMS = [
 
 export function SetupIntegrationRules() {
   return (
-    <Card id="sec-2-12">
+    <Card id="sec-2-9">
       <CardHeader>
         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-          <Badge variant="outline">Section 2.12</Badge>
+          <Badge variant="outline">Section 2.9</Badge>
           <Badge variant="secondary" className="gap-1">
             <Clock className="h-3 w-3" />
             ~15 min read
@@ -235,7 +235,7 @@ export function SetupIntegrationRules() {
         </div>
 
         <ScreenshotPlaceholder
-          caption="Figure 2.12.1: Integration Rules configuration with target modules"
+          caption="Figure 2.9.1: Integration Rules configuration with target modules"
           alt="Integration Rules setup page"
         />
 
