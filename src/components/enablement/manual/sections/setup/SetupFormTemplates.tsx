@@ -231,14 +231,14 @@ export function SetupFormTemplates() {
         </div>
 
         <ScreenshotPlaceholder
-          caption="Figure 2.8.1: Form Templates list with section and weight summary"
+          caption="Figure 2.5.1: Form Templates list with section and weight summary"
           alt="Form Templates management page"
         />
 
         <StepByStep steps={STEPS} title="Creating a Form Template: Step-by-Step" />
 
         <ScreenshotPlaceholder
-          caption="Figure 2.8.2: Template builder with section configuration"
+          caption="Figure 2.5.2: Template builder with section configuration"
           alt="Create Form Template wizard"
         />
 

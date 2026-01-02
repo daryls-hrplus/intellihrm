@@ -204,7 +204,7 @@ export function SetupAppraisalCycles() {
           items={[
             'Rating scales configured (Section 2.2)',
             'Overall rating scales configured (Section 2.3)',
-            'Form templates created (Section 2.8)',
+            'Form templates created (Section 2.5)',
             'Competency library populated (Section 2.4)'
           ]}
         />
