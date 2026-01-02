@@ -69,7 +69,7 @@ export function ManualTroubleshootingSection() {
               'Complete downstream actions within 30 days of cycle close',
               'Review analytics weekly during active cycles'
             ].map((tip, i) => (
-              <div key={i} className="flex items-start gap-3 p-3 bg-green-100 dark:bg-green-900/30 border border-green-300 dark:border-green-700 rounded-lg">
+            <div key={i} className="flex items-start gap-3 p-3 border-l-4 border-l-green-500 bg-muted/50 rounded-r-lg">
                 <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400 flex-shrink-0" />
                 <span className="text-sm text-foreground">{tip}</span>
               </div>

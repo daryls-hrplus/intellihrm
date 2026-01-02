@@ -7,3 +7,11 @@ export { ConfigurationExample, type ExampleConfig } from './ConfigurationExample
 export { BusinessRules, type BusinessRule } from './BusinessRules';
 export { PrerequisiteAlert } from './PrerequisiteAlert';
 export { RelatedTopics } from './RelatedTopics';
+export { 
+  Callout, 
+  InfoCallout, 
+  WarningCallout, 
+  TipCallout, 
+  NoteCallout, 
+  SuccessCallout 
+} from './Callout';

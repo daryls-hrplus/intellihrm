@@ -234,11 +234,11 @@ export function OverviewIntroduction() {
         <Separator />
 
         {/* Learning Objectives */}
-        <div className="p-6 bg-blue-100 dark:bg-blue-900/30 border border-blue-300 dark:border-blue-700 rounded-lg">
+        <div className="p-6 border-l-4 border-l-blue-500 bg-muted/50 rounded-r-lg">
           <div className="flex items-start gap-3">
             <GraduationCap className="h-6 w-6 text-blue-600 dark:text-blue-400 flex-shrink-0" />
             <div>
-              <h3 className="font-semibold text-lg mb-3">Learning Objectives</h3>
+              <h3 className="font-semibold text-lg text-foreground mb-3">Learning Objectives</h3>
               <p className="text-sm text-muted-foreground mb-3">
                 After completing Section 1, you will be able to:
               </p>
@@ -250,7 +250,7 @@ export function OverviewIntroduction() {
                   'Match user personas to their primary workflows and access levels',
                   'Outline the annual performance management calendar and key milestones'
                 ].map((item, i) => (
-                  <li key={i} className="flex items-start gap-2">
+                  <li key={i} className="flex items-start gap-2 text-foreground">
                     <span className="flex items-center justify-center w-5 h-5 rounded-full bg-blue-200 dark:bg-blue-800 text-xs font-medium">
                       {i + 1}
                     </span>
@@ -266,38 +266,38 @@ export function OverviewIntroduction() {
         <div>
           <h3 className="text-lg font-semibold mb-4">Document Conventions</h3>
           <div className="grid md:grid-cols-2 gap-4">
-            <div className="p-4 bg-amber-100 dark:bg-amber-900/30 border border-amber-300 dark:border-amber-700 rounded-lg">
+            <div className="p-4 border-l-4 border-l-amber-500 bg-muted/50 rounded-r-lg">
               <div className="flex items-start gap-2">
                 <Lightbulb className="h-4 w-4 text-amber-600 dark:text-amber-400 mt-0.5" />
                 <div>
-                  <span className="font-medium text-sm">Tip/Best Practice</span>
+                  <span className="font-semibold text-sm text-foreground">Tip/Best Practice</span>
                   <p className="text-xs text-muted-foreground mt-1">Recommendations and helpful hints</p>
                 </div>
               </div>
             </div>
-            <div className="p-4 bg-red-100 dark:bg-red-900/30 border border-red-300 dark:border-red-700 rounded-lg">
+            <div className="p-4 border-l-4 border-l-red-500 bg-muted/50 rounded-r-lg">
               <div className="flex items-start gap-2">
                 <HelpCircle className="h-4 w-4 text-red-600 dark:text-red-400 mt-0.5" />
                 <div>
-                  <span className="font-medium text-sm">Warning/Caution</span>
+                  <span className="font-semibold text-sm text-foreground">Warning/Caution</span>
                   <p className="text-xs text-muted-foreground mt-1">Important considerations to avoid issues</p>
                 </div>
               </div>
             </div>
-            <div className="p-4 bg-blue-100 dark:bg-blue-900/30 border border-blue-300 dark:border-blue-700 rounded-lg">
+            <div className="p-4 border-l-4 border-l-blue-500 bg-muted/50 rounded-r-lg">
               <div className="flex items-start gap-2">
                 <BookOpen className="h-4 w-4 text-blue-600 dark:text-blue-400 mt-0.5" />
                 <div>
-                  <span className="font-medium text-sm">Industry Standard</span>
+                  <span className="font-semibold text-sm text-foreground">Industry Standard</span>
                   <p className="text-xs text-muted-foreground mt-1">Alignment with enterprise best practices</p>
                 </div>
               </div>
             </div>
-            <div className="p-4 bg-muted border rounded-lg">
+            <div className="p-4 border-l-4 border-l-gray-400 bg-muted/50 rounded-r-lg">
               <div className="flex items-start gap-2">
                 <FileText className="h-4 w-4 text-muted-foreground mt-0.5" />
                 <div>
-                  <span className="font-medium text-sm">System Path</span>
+                  <span className="font-semibold text-sm text-foreground">System Path</span>
                   <p className="text-xs text-muted-foreground mt-1">Navigation breadcrumbs to find features</p>
                 </div>
               </div>
