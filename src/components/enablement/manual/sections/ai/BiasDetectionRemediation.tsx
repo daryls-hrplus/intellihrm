@@ -206,16 +206,16 @@ export function BiasDetectionRemediation() {
           <h3 className="text-lg font-semibold">Understanding Severity Levels</h3>
           <div className="grid md:grid-cols-3 gap-4">
             {[
-              { level: 'Low', color: 'border-yellow-300 bg-yellow-50 dark:bg-yellow-950', icon: '⚠️', guidance: 'Worth reviewing but may be contextually appropriate. Consider the alternative but use judgment.' },
-              { level: 'Medium', color: 'border-orange-300 bg-orange-50 dark:bg-orange-950', icon: '⚠️⚠️', guidance: 'Likely problematic. Strongly recommend using the neutral alternative. Document if you proceed.' },
-              { level: 'High', color: 'border-red-300 bg-red-50 dark:bg-red-950', icon: '🚨', guidance: 'Potentially discriminatory. Revise before submission. May trigger HR notification if pattern persists.' }
+              { level: 'Low', color: 'border-warning/50 bg-warning/10', textColor: 'text-warning', icon: '⚠️', guidance: 'Worth reviewing but may be contextually appropriate. Consider the alternative but use judgment.' },
+              { level: 'Medium', color: 'border-orange-500/50 bg-orange-500/10', textColor: 'text-orange-500', icon: '⚠️⚠️', guidance: 'Likely problematic. Strongly recommend using the neutral alternative. Document if you proceed.' },
+              { level: 'High', color: 'border-destructive/50 bg-destructive/10', textColor: 'text-destructive', icon: '🚨', guidance: 'Potentially discriminatory. Revise before submission. May trigger HR notification if pattern persists.' }
             ].map((item) => (
               <div key={item.level} className={`p-4 rounded-lg border ${item.color}`}>
                 <div className="flex items-center gap-2 mb-2">
                   <span>{item.icon}</span>
-                  <h4 className="font-semibold">{item.level} Severity</h4>
+                  <h4 className={`font-semibold ${item.textColor}`}>{item.level} Severity</h4>
                 </div>
-                <p className="text-sm text-muted-foreground">{item.guidance}</p>
+                <p className="text-sm text-foreground/80">{item.guidance}</p>
               </div>
             ))}
           </div>
