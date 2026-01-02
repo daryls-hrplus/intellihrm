@@ -1,4 +1,4 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -11,9 +11,6 @@ import {
   AlertTriangle, 
   Clock, 
   ArrowRight,
-  Check,
-  X,
-  RefreshCw,
   Grid3X3,
   Users,
   Target,
@@ -59,11 +56,10 @@ const STATUS_COLORS: Record<string, string> = {
 
 export function IntegrationDashboardWidget({ companyId }: IntegrationDashboardWidgetProps) {
   const navigate = useNavigate();
-  const { logs, stats, loading, bulkApprove, bulkReject, retryIntegration } = 
+  const { logs, stats, loading } = 
     useIntegrationWidget(companyId, PERFORMANCE_MODULES);
 
-  const pendingLogs = logs.filter(l => l.action_result === 'pending_approval').slice(0, 5);
-  const recentLogs = logs.slice(0, 10);
+  const recentLogs = logs.slice(0, 5);
 
   if (loading) {
     return (
@@ -129,77 +125,31 @@ export function IntegrationDashboardWidget({ companyId }: IntegrationDashboardWi
         </Card>
       </div>
 
-      {/* Pending Actions Alert */}
-      {stats.pending > 0 && (
-        <Card className="border-amber-500/50 bg-amber-500/5">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base flex items-center gap-2">
-              <Clock className="h-4 w-4 text-amber-600" />
-              Pending Approvals
-            </CardTitle>
-            <CardDescription>
-              {stats.pending} integration(s) require your approval
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            {pendingLogs.map((log) => {
-              const ModuleIcon = MODULE_ICONS[log.target_module] || GitBranch;
-              return (
-                <div key={log.id} className="flex items-center justify-between py-2 border-b last:border-0">
-                  <div className="flex items-center gap-3">
-                    <ModuleIcon className="h-4 w-4 text-muted-foreground" />
-                    <div>
-                      <p className="text-sm font-medium">{log.employee_name}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {MODULE_LABELS[log.target_module]} • {log.action_type}
-                      </p>
-                    </div>
+      {/* Quick Status Alerts */}
+      {(stats.pending > 0 || stats.failed > 0) && (
+        <Card className={stats.pending > 0 ? "border-amber-500/50 bg-amber-500/5" : "border-destructive/50 bg-destructive/5"}>
+          <CardContent className="py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                {stats.pending > 0 && (
+                  <div className="flex items-center gap-2">
+                    <Clock className="h-4 w-4 text-amber-600" />
+                    <span className="text-sm font-medium">{stats.pending} pending approval</span>
                   </div>
-                  <div className="flex gap-1">
-                    <Button size="sm" variant="ghost" onClick={() => bulkApprove([log.id])}>
-                      <Check className="h-4 w-4 text-green-600" />
-                    </Button>
-                    <Button size="sm" variant="ghost" onClick={() => bulkReject([log.id], 'Rejected from widget')}>
-                      <X className="h-4 w-4 text-red-600" />
-                    </Button>
+                )}
+                {stats.failed > 0 && (
+                  <div className="flex items-center gap-2">
+                    <AlertTriangle className="h-4 w-4 text-destructive" />
+                    <span className="text-sm font-medium">{stats.failed} failed</span>
                   </div>
-                </div>
-              );
-            })}
-            {stats.pending > 5 && (
-              <Button 
-                variant="link" 
-                className="w-full" 
-                onClick={() => navigate('/hr-hub/integrations')}
-              >
-                View all {stats.pending} pending
-                <ArrowRight className="h-4 w-4 ml-1" />
-              </Button>
-            )}
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Failed Integrations Alert */}
-      {stats.failed > 0 && (
-        <Card className="border-red-500/50 bg-red-500/5">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base flex items-center gap-2">
-              <AlertTriangle className="h-4 w-4 text-red-600" />
-              Failed Integrations
-            </CardTitle>
-            <CardDescription>
-              {stats.failed} integration(s) failed and can be retried
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex gap-2">
+                )}
+              </div>
               <Button 
                 size="sm" 
                 variant="outline"
-                onClick={() => navigate('/hr-hub/integrations')}
+                onClick={() => navigate('/performance/intelligence-hub')}
               >
-                Review Failures
+                View Full Analytics
                 <ArrowRight className="h-4 w-4 ml-1" />
               </Button>
             </div>
@@ -215,9 +165,9 @@ export function IntegrationDashboardWidget({ companyId }: IntegrationDashboardWi
             <Button 
               variant="link" 
               size="sm"
-              onClick={() => navigate('/hr-hub/integrations')}
+              onClick={() => navigate('/performance/intelligence-hub')}
             >
-              View all
+              View Full Analytics
               <ArrowRight className="h-4 w-4 ml-1" />
             </Button>
           </div>
@@ -242,7 +192,7 @@ export function IntegrationDashboardWidget({ companyId }: IntegrationDashboardWi
                         </p>
                       </div>
                     </div>
-                    <Badge className={STATUS_COLORS[log.action_result] || "bg-gray-500/20"}>
+                    <Badge className={STATUS_COLORS[log.action_result] || "bg-muted"}>
                       {log.action_result === 'pending_approval' ? 'Pending' : log.action_result}
                     </Badge>
                   </div>
@@ -252,32 +202,6 @@ export function IntegrationDashboardWidget({ companyId }: IntegrationDashboardWi
           )}
         </CardContent>
       </Card>
-
-      {/* Module Breakdown */}
-      {Object.keys(stats.byModule).length > 0 && (
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base">By Module</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              {Object.entries(stats.byModule).map(([module, counts]) => {
-                const ModuleIcon = MODULE_ICONS[module] || GitBranch;
-                const total = counts.success + counts.pending + counts.failed;
-                return (
-                  <div key={module} className="flex items-center gap-2 p-2 rounded-lg border">
-                    <ModuleIcon className="h-4 w-4 text-primary" />
-                    <div className="text-xs">
-                      <p className="font-medium">{MODULE_LABELS[module]}</p>
-                      <p className="text-muted-foreground">{total} total</p>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </CardContent>
-        </Card>
-      )}
     </div>
   );
 }
