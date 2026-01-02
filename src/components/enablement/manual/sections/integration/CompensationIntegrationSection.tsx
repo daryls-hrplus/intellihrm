@@ -322,10 +322,10 @@ graph TB
           />
 
           {/* Future Enhancement Notice */}
-          <Alert variant="default" className="border-blue-200 bg-blue-50 dark:bg-blue-950/20">
-            <Lightbulb className="h-4 w-4 text-blue-600" />
-            <AlertTitle className="text-blue-800 dark:text-blue-200">Future Enhancement: Compensation Actions Queue</AlertTitle>
-            <AlertDescription className="text-blue-700 dark:text-blue-300">
+          <Alert variant="default" className="border-2 border-blue-500 bg-blue-500/20">
+            <Lightbulb className="h-4 w-4" />
+            <AlertTitle className="font-bold">Future Enhancement: Compensation Actions Queue</AlertTitle>
+            <AlertDescription>
               <p className="mb-2">
                 A dedicated "Performance-Linked Actions" queue will be added to the Compensation module to:
               </p>
@@ -336,7 +336,7 @@ graph TB
                 <li>Enable direct navigation from flag to employee compensation record</li>
               </ul>
               <p className="mt-2 text-sm">
-                Currently, flags are stored in the <code>compensation_review_flags</code> table and can be 
+                Currently, flags are stored in the <code className="bg-muted px-1 rounded">compensation_review_flags</code> table and can be 
                 queried via database tools or custom reports.
               </p>
             </AlertDescription>

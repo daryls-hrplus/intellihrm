@@ -308,10 +308,10 @@ graph TB
           />
 
           {/* Current Limitations */}
-          <Alert variant="default" className="border-amber-200 bg-amber-50 dark:bg-amber-950/20">
-            <AlertTriangle className="h-4 w-4 text-amber-600" />
-            <AlertTitle className="text-amber-800 dark:text-amber-200">Current Implementation</AlertTitle>
-            <AlertDescription className="text-amber-700 dark:text-amber-300">
+          <Alert variant="default" className="border-2 border-amber-500 bg-amber-500/20">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertTitle className="font-bold">Current Implementation</AlertTitle>
+            <AlertDescription>
               <p className="mb-2">
                 Learning integration currently follows an <strong>indirect path</strong> through IDP goals:
               </p>
