@@ -74,15 +74,25 @@ export default function AppraisalsManualPage() {
 
   useEffect(() => {
     const id = selectedSectionId;
-    const timeout = window.setTimeout(() => {
+    let attempt = 0;
+
+    const tryScroll = () => {
+      attempt += 1;
       const el = document.getElementById(id);
       if (el) {
         el.scrollIntoView({ behavior: 'smooth', block: 'start' });
         return;
       }
-      contentRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 50);
 
+      if (attempt < 8) {
+        window.setTimeout(tryScroll, 75);
+        return;
+      }
+
+      contentRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+
+    const timeout = window.setTimeout(tryScroll, 75);
     return () => window.clearTimeout(timeout);
   }, [selectedSectionId, activePartId]);
 
@@ -242,7 +252,7 @@ export default function AppraisalsManualPage() {
       case 'part-1':
         return <ManualOverviewSection />;
       case 'part-2':
-        return <ManualSetupSection />;
+        return <ManualSetupSection selectedSectionId={selectedSectionId} />;
       case 'part-3':
         return <ManualWorkflowsSection />;
       case 'part-4':

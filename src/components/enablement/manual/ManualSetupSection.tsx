@@ -1,3 +1,4 @@
+import { useEffect, useMemo, useState } from 'react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
 import { Settings, FileText } from 'lucide-react';
@@ -19,12 +20,45 @@ import {
   SetupBenchmarks,
 } from './sections/setup';
 
-export function ManualSetupSection() {
+type ManualSetupSectionProps = {
+  selectedSectionId?: string;
+};
+
+const APPRAISALS_SECTION_IDS = new Set([
+  'sec-2-5',
+  'sec-2-6',
+  'sec-2-7',
+  'sec-2-8',
+  'sec-2-9',
+  'sec-2-10',
+  'sec-2-11',
+  'sec-2-12',
+  'sec-2-13',
+  'sec-2-14',
+]);
+
+const FOUNDATION_SECTION_IDS = new Set(['sec-2-1', 'sec-2-2', 'sec-2-3', 'sec-2-4']);
+
+export function ManualSetupSection({ selectedSectionId }: ManualSetupSectionProps) {
+  const [openGroups, setOpenGroups] = useState<string[]>(['foundation']);
+
+  const targetGroup = useMemo(() => {
+    if (!selectedSectionId) return null;
+    if (FOUNDATION_SECTION_IDS.has(selectedSectionId)) return 'foundation';
+    if (APPRAISALS_SECTION_IDS.has(selectedSectionId)) return 'appraisals';
+    return null;
+  }, [selectedSectionId]);
+
+  useEffect(() => {
+    if (!targetGroup) return;
+    setOpenGroups((prev) => (prev.includes(targetGroup) ? prev : [...prev, targetGroup]));
+  }, [targetGroup]);
+
   return (
     <div className="space-y-6">
       <div className="mb-6">
         <p className="text-muted-foreground">
-          This section covers the complete setup and configuration of the Performance Appraisals module. 
+          This section covers the complete setup and configuration of the Performance Appraisals module.
           Follow these sections in order to ensure all prerequisites are met before launching appraisal cycles.
         </p>
         <div className="flex items-center gap-4 mt-4 text-sm">
@@ -39,7 +73,12 @@ export function ManualSetupSection() {
         </div>
       </div>
 
-      <Accordion type="multiple" defaultValue={["foundation"]} className="space-y-4">
+      <Accordion
+        type="multiple"
+        value={openGroups}
+        onValueChange={setOpenGroups}
+        className="space-y-4"
+      >
         {/* Foundation Settings */}
         <AccordionItem value="foundation" className="border rounded-lg px-4">
           <AccordionTrigger className="hover:no-underline">

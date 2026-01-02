@@ -154,10 +154,10 @@ const TROUBLESHOOTING_ITEMS = [
 
 export function SetupApprovalWorkflows() {
   return (
-    <Card id="sec-2-5">
+    <Card id="sec-2-workflows">
       <CardHeader>
         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-          <Badge variant="outline">Section 2.5</Badge>
+          <Badge variant="outline">Foundation</Badge>
           <Badge variant="secondary" className="gap-1">
             <Clock className="h-3 w-3" />
             ~12 min read
@@ -226,7 +226,7 @@ export function SetupApprovalWorkflows() {
         </div>
 
         <ScreenshotPlaceholder
-          caption="Figure 2.5.1: Approval Workflow builder showing multi-step configuration"
+          caption="Figure F.1: Approval Workflow builder showing multi-step configuration"
           alt="Approval Workflow configuration page"
         />
 
