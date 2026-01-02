@@ -206,12 +206,12 @@ export function SetupIndexSettings() {
           </p>
         </div>
 
-        <div className="p-4 bg-cyan-100 dark:bg-cyan-900/30 border border-cyan-300 dark:border-cyan-700 rounded-lg">
+        <div className="p-4 border-l-4 border-l-cyan-500 bg-muted/50 rounded-r-lg">
           <div className="flex items-start gap-3">
             <TrendingUp className="h-5 w-5 text-cyan-600 dark:text-cyan-400 flex-shrink-0" />
             <div>
-              <h4 className="font-medium text-foreground">Index Use Cases</h4>
-              <p className="text-sm text-muted-foreground">
+              <h4 className="font-semibold text-foreground">Index Use Cases</h4>
+              <p className="text-sm text-foreground">
                 Performance Index is commonly used for: succession planning eligibility, merit increase 
                 guidelines, talent pool segmentation, and identifying consistent high/low performers 
                 across review cycles.

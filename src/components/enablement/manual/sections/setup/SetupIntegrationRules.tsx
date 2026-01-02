@@ -218,12 +218,12 @@ export function SetupIntegrationRules() {
           </p>
         </div>
 
-        <div className="p-4 bg-indigo-100 dark:bg-indigo-900/30 border border-indigo-300 dark:border-indigo-700 rounded-lg">
+        <div className="p-4 border-l-4 border-l-indigo-500 bg-muted/50 rounded-r-lg">
           <div className="flex items-start gap-3">
             <Link2 className="h-5 w-5 text-indigo-600 dark:text-indigo-400 flex-shrink-0" />
             <div>
-              <h4 className="font-medium text-foreground">Integration Flow</h4>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
+              <h4 className="font-semibold text-foreground">Integration Flow</h4>
+              <div className="flex items-center gap-2 text-sm text-foreground mt-1">
                 <span>Appraisals</span>
                 <ArrowRight className="h-3 w-3" />
                 <span>Calibration</span>
