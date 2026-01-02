@@ -76,15 +76,27 @@ export default function AppraisalsManualPage() {
     const id = selectedSectionId;
     let attempt = 0;
 
+    const findAnchor = () => {
+      const byData = document.querySelector<HTMLElement>(`[data-manual-anchor="${id}"]`);
+      return byData ?? document.getElementById(id);
+    };
+
+    const scrollWithOffset = (el: HTMLElement) => {
+      // Keep the section header visible below the sticky top bar
+      const headerOffset = 140;
+      const y = el.getBoundingClientRect().top + window.scrollY - headerOffset;
+      window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+    };
+
     const tryScroll = () => {
       attempt += 1;
-      const el = document.getElementById(id);
+      const el = findAnchor();
       if (el) {
-        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        scrollWithOffset(el);
         return;
       }
 
-      if (attempt < 8) {
+      if (attempt < 20) {
         window.setTimeout(tryScroll, 75);
         return;
       }
@@ -92,7 +104,7 @@ export default function AppraisalsManualPage() {
       contentRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     };
 
-    const timeout = window.setTimeout(tryScroll, 75);
+    const timeout = window.setTimeout(tryScroll, 50);
     return () => window.clearTimeout(timeout);
   }, [selectedSectionId, activePartId]);
 
