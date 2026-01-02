@@ -164,11 +164,27 @@ export const useManualPrintSettings = (manualType: string = 'Appraisals Admin Ma
 
       return settings;
     },
+    onMutate: async (newSettings) => {
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ["manual-print-settings", manualType] });
+      
+      // Snapshot the previous value
+      const previousSettings = queryClient.getQueryData(["manual-print-settings", manualType]);
+      
+      // Optimistically update to the new value
+      queryClient.setQueryData(["manual-print-settings", manualType], newSettings);
+      
+      return { previousSettings };
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["manual-print-settings", manualType] });
       toast.success("Print settings saved successfully");
     },
-    onError: (error) => {
+    onError: (error, _newSettings, context) => {
+      // Rollback on error
+      if (context?.previousSettings) {
+        queryClient.setQueryData(["manual-print-settings", manualType], context.previousSettings);
+      }
       console.error("Error saving print settings:", error);
       toast.error("Failed to save print settings");
     }
