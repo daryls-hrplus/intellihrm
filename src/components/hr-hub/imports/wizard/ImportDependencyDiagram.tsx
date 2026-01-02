@@ -1,7 +1,6 @@
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { 
   Building2, 
@@ -13,7 +12,6 @@ import {
   GitBranch,
   ChevronDown,
   ChevronRight,
-  AlertTriangle,
   Settings,
   ArrowDown
 } from "lucide-react";
@@ -24,7 +22,6 @@ interface ImportNode {
   icon: React.ElementType;
   dependsOn: string[];
   editableFields?: string[];
-  systemDropdowns?: string[];
   notes?: string;
   tier: number;
 }
@@ -37,8 +34,7 @@ const IMPORT_NODES: ImportNode[] = [
     icon: Building2,
     dependsOn: [],
     editableFields: ["company_code", "legal_name", "tax_id", "fiscal_year_start"],
-    systemDropdowns: ["country", "currency", "industry"],
-    notes: "Foundation entity. Country/currency may need custom values for regional compliance.",
+    notes: "Foundation entity - the base for all organizational data.",
     tier: 0,
   },
   // Tier 1 - Depends on Companies
@@ -56,7 +52,7 @@ const IMPORT_NODES: ImportNode[] = [
     icon: Briefcase,
     dependsOn: ["companies"],
     editableFields: ["family_code", "name", "description"],
-    notes: "Group related jobs. Can be aligned to EEO categories if needed.",
+    notes: "Group related jobs by function or career track.",
     tier: 1,
   },
   {
@@ -65,7 +61,6 @@ const IMPORT_NODES: ImportNode[] = [
     icon: Layers,
     dependsOn: ["companies"],
     editableFields: ["grade_code", "name", "min_salary", "mid_salary", "max_salary"],
-    systemDropdowns: ["currency"],
     notes: "Define pay ranges. Required for grade-based compensation.",
     tier: 1,
   },
@@ -85,8 +80,7 @@ const IMPORT_NODES: ImportNode[] = [
     icon: FolderTree,
     dependsOn: ["companies", "divisions"],
     editableFields: ["department_code", "name", "cost_center"],
-    systemDropdowns: ["department_type"],
-    notes: "Divisions optional. Department types may need customization.",
+    notes: "Divisions are optional. Departments group employees and positions.",
     tier: 2,
   },
   {
@@ -95,8 +89,7 @@ const IMPORT_NODES: ImportNode[] = [
     icon: Briefcase,
     dependsOn: ["companies", "job_families"],
     editableFields: ["job_code", "title", "job_level", "description"],
-    systemDropdowns: ["job_family", "flsa_status", "eeo_category"],
-    notes: "FLSA status critical for US compliance. EEO categories for reporting.",
+    notes: "Define job templates with levels and descriptions.",
     tier: 2,
   },
   {
@@ -123,7 +116,6 @@ const IMPORT_NODES: ImportNode[] = [
     icon: Briefcase,
     dependsOn: ["companies", "departments", "jobs"],
     editableFields: ["position_code", "title", "headcount", "reports_to"],
-    systemDropdowns: ["employment_type", "salary_grade", "pay_spine"],
     notes: "Links jobs to org structure. Compensation model determines required fields.",
     tier: 3,
   },
@@ -134,8 +126,7 @@ const IMPORT_NODES: ImportNode[] = [
     icon: Users,
     dependsOn: [],
     editableFields: ["employee_id", "first_name", "last_name", "email", "hire_date"],
-    systemDropdowns: ["gender", "nationality", "marital_status"],
-    notes: "Can import standalone or link to positions. Personal data requires compliance review.",
+    notes: "Can import standalone or link to positions later.",
     tier: 4,
   },
   {
@@ -144,7 +135,6 @@ const IMPORT_NODES: ImportNode[] = [
     icon: UserPlus,
     dependsOn: ["companies", "departments", "positions"],
     editableFields: ["effective_date", "salary", "fte"],
-    systemDropdowns: ["assignment_status", "pay_frequency"],
     notes: "Assigns employees to positions with compensation details.",
     tier: 4,
   },
@@ -188,7 +178,7 @@ export function ImportDependencyDiagram({ compact = false }: ImportDependencyDia
   const renderNode = (node: ImportNode) => {
     const Icon = node.icon;
     const isExpanded = expandedNodes.has(node.id);
-    const hasDetails = node.editableFields || node.systemDropdowns || node.notes;
+    const hasDetails = node.editableFields || node.notes;
 
     return (
       <Collapsible key={node.id} open={isExpanded} onOpenChange={() => toggleNode(node.id)}>
@@ -241,21 +231,6 @@ export function ImportDependencyDiagram({ compact = false }: ImportDependencyDia
                 </div>
               )}
               
-              {node.systemDropdowns && (
-                <div>
-                  <div className="flex items-center gap-1 text-xs font-medium text-orange-700 dark:text-orange-400 mb-1">
-                    <AlertTriangle className="h-3 w-3" />
-                    System Dropdowns (May Need Editing)
-                  </div>
-                  <div className="flex flex-wrap gap-1">
-                    {node.systemDropdowns.map((dropdown) => (
-                      <Badge key={dropdown} className="text-xs font-mono bg-orange-600 text-white dark:bg-orange-700 dark:text-white hover:bg-orange-700">
-                        {dropdown}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              )}
               
               {node.notes && (
                 <p className="text-xs text-muted-foreground italic">
@@ -320,10 +295,6 @@ export function ImportDependencyDiagram({ compact = false }: ImportDependencyDia
           <div className="flex items-center gap-1">
             <Badge variant="secondary" className="text-xs">field</Badge>
             <span className="text-muted-foreground">Standard editable</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <Badge className="text-xs bg-orange-600 text-white dark:bg-orange-700 dark:text-white hover:bg-orange-700">dropdown</Badge>
-            <span className="text-muted-foreground">May need company-specific values</span>
           </div>
           <div className="flex items-center gap-1">
             <Badge variant="outline" className="text-xs">← dep</Badge>
