@@ -8,10 +8,14 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Card, CardContent } from "@/components/ui/card";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ManualPrintSettings } from "@/hooks/useManualPrintSettings";
 import { BrandColors, useEnablementBranding } from "@/hooks/useEnablementBranding";
-import { FileText, Layout, Type, Palette, BookOpen, FileCode, Droplets } from "lucide-react";
+import { FileText, Layout, Type, Palette, BookOpen, FileCode, Droplets, CalendarIcon } from "lucide-react";
 import { LogoUpload } from "./LogoUpload";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 
 interface PrintConfigDialogProps {
   open: boolean;
@@ -198,12 +202,31 @@ export function PrintConfigDialog({
 
             <div>
               <Label>Effective Date</Label>
-              <Input
-                type="date"
-                value={localSettings.sections.effectiveDate}
-                onChange={(e) => updateSections({ effectiveDate: e.target.value })}
-                className="mt-1"
-              />
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full mt-1 justify-start text-left font-normal",
+                      !localSettings.sections.effectiveDate && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {localSettings.sections.effectiveDate 
+                      ? format(new Date(localSettings.sections.effectiveDate), "PPP") 
+                      : <span>Pick a date</span>}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={localSettings.sections.effectiveDate ? new Date(localSettings.sections.effectiveDate) : undefined}
+                    onSelect={(date) => updateSections({ effectiveDate: date ? format(date, "yyyy-MM-dd") : "" })}
+                    initialFocus
+                    className={cn("p-3 pointer-events-auto")}
+                  />
+                </PopoverContent>
+              </Popover>
             </div>
 
             <div>
