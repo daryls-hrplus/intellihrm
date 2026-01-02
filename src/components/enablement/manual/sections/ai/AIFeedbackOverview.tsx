@@ -141,8 +141,8 @@ export function AIFeedbackOverview() {
         </div>
 
         {/* Benefits Statistics */}
-        <div className="p-4 bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-950 dark:to-blue-950 rounded-lg">
-          <h4 className="font-semibold mb-3">Measured Benefits</h4>
+        <div className="p-4 bg-primary/10 border border-primary/20 rounded-lg">
+          <h4 className="font-semibold mb-3 text-foreground">Measured Benefits</h4>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
             {[
               { stat: '30-40%', label: 'Time Saved' },
@@ -151,8 +151,8 @@ export function AIFeedbackOverview() {
               { stat: '95%', label: 'Manager Satisfaction' }
             ].map((item) => (
               <div key={item.label}>
-                <p className="text-2xl font-bold text-primary">{item.stat}</p>
-                <p className="text-xs text-muted-foreground">{item.label}</p>
+                <p className="text-2xl font-bold text-success">{item.stat}</p>
+                <p className="text-xs text-foreground/80">{item.label}</p>
               </div>
             ))}
           </div>
