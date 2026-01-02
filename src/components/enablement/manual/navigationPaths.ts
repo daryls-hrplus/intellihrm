@@ -44,10 +44,10 @@ export const NAVIGATION_PATHS: Record<string, string[]> = {
   'sec-5-3': ['Performance', 'Appraisals', 'AI Assistant', 'Development Suggestions'],
   'sec-5-4': ['Performance', 'Appraisals', 'AI Assistant', 'Bias Detection'],
   'sec-5-5': ['Performance', 'Appraisals', 'AI Assistant', 'Comment Quality'],
-  'sec-5-6': ['Performance', 'Analytics', 'AI Predictions'],
+  'sec-5-6': ['Performance', 'Intelligence Hub'],
   // Part 6: Analytics
-  'sec-6-1': ['Performance', 'Analytics', 'Appraisal Dashboard'],
-  'sec-6-2': ['Performance', 'Analytics', 'Distribution Analysis'],
+  'sec-6-1': ['Performance', 'Intelligence Hub', 'Operations'],
+  'sec-6-2': ['Performance', 'Intelligence Hub', 'Appraisals'],
 
   // Part 7: Integration
   'sec-7-1': ['Performance', 'Setup', 'Integration', 'Overview'],
