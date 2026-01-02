@@ -46020,6 +46020,7 @@ export type Database = {
           company_id: string
           created_at: string
           created_by: string | null
+          cycle_type_filter: string[] | null
           days_before: number
           description: string | null
           event_type_id: string
@@ -46039,6 +46040,7 @@ export type Database = {
           company_id: string
           created_at?: string
           created_by?: string | null
+          cycle_type_filter?: string[] | null
           days_before?: number
           description?: string | null
           event_type_id: string
@@ -46058,6 +46060,7 @@ export type Database = {
           company_id?: string
           created_at?: string
           created_by?: string | null
+          cycle_type_filter?: string[] | null
           days_before?: number
           description?: string | null
           event_type_id?: string

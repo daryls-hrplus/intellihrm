@@ -55,6 +55,7 @@ export const ReminderRulesManager = forwardRef<ReminderRulesManagerRef, Reminder
     message_template: string;
     priority: 'low' | 'medium' | 'high' | 'critical';
     is_active: boolean;
+    cycle_type_filter: string[];
   }>({
     name: '',
     description: '',
@@ -68,7 +69,16 @@ export const ReminderRulesManager = forwardRef<ReminderRulesManagerRef, Reminder
     message_template: '',
     priority: 'medium',
     is_active: true,
+    cycle_type_filter: [],
   });
+
+  const CYCLE_TYPE_OPTIONS = [
+    { value: 'annual', label: 'Annual Review' },
+    { value: 'quarterly', label: 'Quarterly Review' },
+    { value: 'probation', label: 'Probation Review' },
+    { value: 'project', label: 'Project-Based' },
+    { value: 'mid_year', label: 'Mid-Year Review' },
+  ];
 
   const loadData = async () => {
     setLoading(true);
@@ -141,6 +151,7 @@ export const ReminderRulesManager = forwardRef<ReminderRulesManagerRef, Reminder
         message_template: rule.message_template || '',
         priority: rule.priority as 'low' | 'medium' | 'high' | 'critical',
         is_active: rule.is_active,
+        cycle_type_filter: (rule as any).cycle_type_filter || [],
       });
     } else {
       setEditingRule(null);
@@ -157,6 +168,7 @@ export const ReminderRulesManager = forwardRef<ReminderRulesManagerRef, Reminder
         message_template: '',
         priority: 'medium',
         is_active: true,
+        cycle_type_filter: [],
       });
     }
     setNewInterval('');
@@ -345,6 +357,50 @@ export const ReminderRulesManager = forwardRef<ReminderRulesManagerRef, Reminder
                 companyId={companyId}
                 daysBeforeArray={formData.reminder_intervals}
               />
+
+              {/* Cycle Type Filter - Only show for performance category events */}
+              {eventTypes.find(t => t.id === formData.event_type_id)?.category === 'performance' && (
+                <div className="space-y-2 p-3 bg-muted/30 rounded-lg border border-dashed">
+                  <Label className="flex items-center gap-2">
+                    <Settings className="h-4 w-4 text-primary" />
+                    Filter by Appraisal Cycle Type
+                  </Label>
+                  <p className="text-xs text-muted-foreground mb-2">
+                    Optionally restrict this rule to specific appraisal cycle types. Leave empty to trigger for all cycle types.
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {CYCLE_TYPE_OPTIONS.map((option) => {
+                      const isSelected = formData.cycle_type_filter.includes(option.value);
+                      return (
+                        <button
+                          key={option.value}
+                          type="button"
+                          onClick={() => {
+                            const newFilter = isSelected
+                              ? formData.cycle_type_filter.filter(v => v !== option.value)
+                              : [...formData.cycle_type_filter, option.value];
+                            setFormData({ ...formData, cycle_type_filter: newFilter });
+                          }}
+                          className={`px-3 py-1.5 text-sm rounded-full border transition-colors ${
+                            isSelected
+                              ? 'bg-primary text-primary-foreground border-primary'
+                              : 'bg-background hover:bg-muted border-border'
+                          }`}
+                        >
+                          {option.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {formData.cycle_type_filter.length > 0 && (
+                    <p className="text-xs text-primary mt-2">
+                      ✓ Will only trigger for: {formData.cycle_type_filter.map(v => 
+                        CYCLE_TYPE_OPTIONS.find(o => o.value === v)?.label
+                      ).join(', ')}
+                    </p>
+                  )}
+                </div>
+              )}
 
               <div className="space-y-2">
                 <Label>Description</Label>

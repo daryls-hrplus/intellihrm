@@ -329,6 +329,27 @@ graph TB
             title="Common Issues"
           />
 
+          {/* HR Reminders Bridge */}
+          <Alert variant="default" className="border-green-200 bg-green-50 dark:bg-green-950/20">
+            <CheckCircle2 className="h-4 w-4 text-green-600" />
+            <AlertTitle className="text-green-800 dark:text-green-200">HR Reminders Integration Available</AlertTitle>
+            <AlertDescription className="text-green-700 dark:text-green-300">
+              <p className="mb-2">Appraisal integration events are now bridged to HR Hub Reminders:</p>
+              <ul className="list-disc list-inside space-y-1">
+                <li><strong>APPRAISAL_FINALIZED</strong> - Trigger reminders when appraisals are completed</li>
+                <li><strong>PIP_CREATED</strong> - Create follow-up reminders for new PIPs</li>
+                <li><strong>IDP_CREATED</strong> - Schedule development plan check-ins</li>
+                <li><strong>COMPENSATION_FLAG_CREATED</strong> - Alert HR when compensation reviews are flagged</li>
+                <li><strong>COMPENSATION_FLAG_EXPIRING</strong> - Warn before compensation flags expire</li>
+                <li><strong>SUCCESSION_UPDATED</strong> - Track succession readiness changes</li>
+              </ul>
+              <p className="mt-2 text-sm">
+                Configure in <strong>Performance → Setup → Integration</strong> (target: "HR Reminders") or 
+                <strong> HR Hub → Reminders → Rules</strong> with cycle type filtering.
+              </p>
+            </AlertDescription>
+          </Alert>
+
           {/* Future Enhancements */}
           <Alert variant="default" className="border-blue-200 bg-blue-50 dark:bg-blue-950/20">
             <Lightbulb className="h-4 w-4 text-blue-600" />
@@ -339,7 +360,6 @@ graph TB
                 <li>Email delivery channel in addition to in-app notifications</li>
                 <li>Template variables for personalized messages (e.g., {`{employee_name}`})</li>
                 <li>Scheduled notifications for digest/summary delivery</li>
-                <li>Integration with HR Hub Reminders for unified notification management</li>
                 <li>Read receipts and engagement analytics</li>
               </ul>
             </AlertDescription>
