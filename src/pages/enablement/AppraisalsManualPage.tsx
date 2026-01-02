@@ -162,8 +162,11 @@ export default function AppraisalsManualPage() {
   };
 
   const handleSavePrintSettings = (settings: typeof printSettings) => {
-    savePrintSettings.mutate(settings);
-    setShowPrintConfig(false);
+    savePrintSettings.mutate(settings, {
+      onSuccess: () => {
+        setShowPrintConfig(false);
+      }
+    });
   };
 
   const renderSectionContent = () => {
