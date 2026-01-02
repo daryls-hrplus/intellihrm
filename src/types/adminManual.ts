@@ -908,16 +908,16 @@ export const APPRAISALS_MANUAL_STRUCTURE: ManualSection[] = [
     id: 'part-8',
     sectionNumber: '8',
     title: 'Troubleshooting & Best Practices',
-    description: 'Problem resolution and optimization guidance',
+    description: 'Problem resolution, optimization guidance, and escalation procedures',
     contentLevel: 'troubleshooting',
-    estimatedReadTime: 30,
-    targetRoles: ['Admin', 'Consultant'],
+    estimatedReadTime: 60,
+    targetRoles: ['Admin', 'Consultant', 'HR User'],
     subsections: [
       {
         id: 'sec-8-1',
         sectionNumber: '8.1',
         title: 'Common Issues & Solutions',
-        description: 'Frequently encountered problems and fixes',
+        description: 'Frequently encountered problems with step-by-step resolution procedures',
         contentLevel: 'troubleshooting',
         estimatedReadTime: 15,
         targetRoles: ['HR User', 'Admin'],
@@ -931,7 +931,7 @@ export const APPRAISALS_MANUAL_STRUCTURE: ManualSection[] = [
         id: 'sec-8-2',
         sectionNumber: '8.2',
         title: 'Best Practices Guide',
-        description: 'Recommendations for optimal appraisal management',
+        description: 'Industry-validated recommendations organized by cycle phase',
         contentLevel: 'reference',
         estimatedReadTime: 10,
         targetRoles: ['Admin', 'Consultant'],
@@ -945,7 +945,7 @@ export const APPRAISALS_MANUAL_STRUCTURE: ManualSection[] = [
         id: 'sec-8-3',
         sectionNumber: '8.3',
         title: 'Security & Access Control',
-        description: 'Permission configuration and data protection',
+        description: 'Permission configuration, RLS policies, and data protection',
         contentLevel: 'reference',
         estimatedReadTime: 10,
         targetRoles: ['Admin'],
@@ -960,7 +960,7 @@ export const APPRAISALS_MANUAL_STRUCTURE: ManualSection[] = [
         id: 'sec-8-4',
         sectionNumber: '8.4',
         title: 'Compliance & Audit Checklist',
-        description: 'Ensuring regulatory and policy compliance',
+        description: 'Regulatory requirements, audit checklists, and documentation standards',
         contentLevel: 'reference',
         estimatedReadTime: 10,
         targetRoles: ['Admin'],
@@ -970,9 +970,66 @@ export const APPRAISALS_MANUAL_STRUCTURE: ManualSection[] = [
           benchmark: '100% audit trail coverage',
           compliance: ['EEOC', 'SOX', 'Industry-specific regulations']
         }
+      },
+      {
+        id: 'sec-8-5',
+        sectionNumber: '8.5',
+        title: 'Integration Troubleshooting Guide',
+        description: 'Error codes, log interpretation, and retry procedures for downstream integrations',
+        contentLevel: 'troubleshooting',
+        estimatedReadTime: 15,
+        targetRoles: ['Admin', 'Consultant'],
+        industryContext: {
+          frequency: 'As needed',
+          timing: 'Post-finalization',
+          benchmark: '95% integration success rate'
+        }
+      },
+      {
+        id: 'sec-8-6',
+        sectionNumber: '8.6',
+        title: 'Performance Optimization',
+        description: 'Large dataset handling, bulk operations, and browser compatibility',
+        contentLevel: 'reference',
+        estimatedReadTime: 8,
+        targetRoles: ['Admin'],
+        industryContext: {
+          frequency: 'Reference material',
+          timing: 'Implementation and scaling',
+          benchmark: '<3s page load time'
+        }
+      },
+      {
+        id: 'sec-8-7',
+        sectionNumber: '8.7',
+        title: 'Data Quality & Validation',
+        description: 'Pre-cycle validation, data integrity checks, and score calculation verification',
+        contentLevel: 'reference',
+        estimatedReadTime: 8,
+        targetRoles: ['Admin', 'HR User'],
+        industryContext: {
+          frequency: 'Before each cycle',
+          timing: '1-2 weeks pre-launch',
+          benchmark: '100% data completeness'
+        }
+      },
+      {
+        id: 'sec-8-8',
+        sectionNumber: '8.8',
+        title: 'Escalation Procedures',
+        description: 'Tiered support model, SLA expectations, and communication templates',
+        contentLevel: 'troubleshooting',
+        estimatedReadTime: 10,
+        targetRoles: ['All'],
+        industryContext: {
+          frequency: 'Reference material',
+          timing: 'As needed',
+          benchmark: 'P1: 1hr response, P2: 4hr response'
+        }
       }
     ]
   }
+]
 ];
 
 // Quick Reference Cards
