@@ -50,6 +50,7 @@ import {
   PerformanceDistributionChart,
   CompetencyHeatmap,
   ManagerScoringPatterns,
+  IntegrationAnalytics,
 } from '@/components/performance/analytics';
 
 // Predictive Intelligence components
@@ -65,7 +66,7 @@ import { AIModuleReportBuilder } from "@/components/shared/AIModuleReportBuilder
 import { ExportIntelligenceReport } from "@/components/performance/intelligence/ExportIntelligenceReport";
 import { KeyInsightsAIPanel } from "@/components/performance/intelligence/KeyInsightsAIPanel";
 
-type Section = 'operations' | 'workforce' | 'appraisals' | 'predictive' | 'reports';
+type Section = 'operations' | 'workforce' | 'appraisals' | 'integrations' | 'predictive' | 'reports';
 
 interface SectionConfig {
   id: Section;
@@ -78,6 +79,7 @@ const sections: SectionConfig[] = [
   { id: 'operations', label: 'Operations', icon: BarChart3, description: 'Goals & workflow analytics' },
   { id: 'workforce', label: 'Workforce', icon: Users, description: 'Role & skill insights' },
   { id: 'appraisals', label: 'Appraisals', icon: PieChart, description: 'Cycle-based outcomes' },
+  { id: 'integrations', label: 'Integrations', icon: GitBranch, description: 'Cross-module activity' },
   { id: 'predictive', label: 'Predictive AI', icon: Brain, description: 'AI-powered predictions' },
   { id: 'reports', label: 'AI Reports', icon: FileText, description: 'Generated reports' },
 ];
@@ -132,7 +134,7 @@ export default function PerformanceIntelligenceHub() {
                   onDepartmentChange={setSelectedDepartmentId}
                 />
               )}
-              {activeSection === 'appraisals' && (
+              {(activeSection === 'appraisals' || activeSection === 'integrations') && (
                 <AppraisalCycleFilter
                   companyId={selectedCompanyId}
                   selectedCycleId={selectedCycleId}
@@ -185,6 +187,10 @@ export default function PerformanceIntelligenceHub() {
         
         {activeSection === 'appraisals' && (
           <AppraisalsSection companyId={companyId} cycleId={cycleId} />
+        )}
+
+        {activeSection === 'integrations' && (
+          <IntegrationAnalytics companyId={companyId} cycleId={cycleId} />
         )}
         
         {activeSection === 'predictive' && (

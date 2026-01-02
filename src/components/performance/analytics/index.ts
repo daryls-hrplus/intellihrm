@@ -4,3 +4,4 @@ export { ManagerScoringPatterns } from './ManagerScoringPatterns';
 export { HighPotentialIdentification } from './HighPotentialIdentification';
 export { AppraisalPredictiveInsights } from './AppraisalPredictiveInsights';
 export { AppraisalRiskFlags } from './AppraisalRiskFlags';
+export { IntegrationAnalytics } from './IntegrationAnalytics';

@@ -391,7 +391,7 @@ export default function PerformanceSetupPage() {
                   </TabsTrigger>
                   <TabsTrigger value="integration-dashboard" className="flex items-center gap-2">
                     <BarChart3 className="h-4 w-4" />
-                    Dashboard
+                    Integration Status
                   </TabsTrigger>
                   <TabsTrigger value="index-settings" className="flex items-center gap-2">
                     <Layers className="h-4 w-4" />
