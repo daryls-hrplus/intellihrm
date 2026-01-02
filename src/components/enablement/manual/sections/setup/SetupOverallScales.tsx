@@ -251,12 +251,12 @@ export function SetupOverallScales() {
         </div>
 
         {/* Calibration Note */}
-        <div className="p-4 bg-blue-100 dark:bg-blue-900/30 border border-blue-300 dark:border-blue-700 rounded-lg">
+        <div className="p-4 border-l-4 border-l-blue-500 bg-muted/50 rounded-r-lg">
           <div className="flex items-start gap-3">
             <Lightbulb className="h-5 w-5 text-blue-600 dark:text-blue-400 flex-shrink-0" />
             <div>
-              <h4 className="font-medium text-foreground">Calibration Connection</h4>
-              <p className="text-sm text-muted-foreground">
+              <h4 className="font-semibold text-foreground">Calibration Connection</h4>
+              <p className="text-sm text-foreground">
                 Target distributions are guidelines for calibration sessions, not hard limits. 
                 Actual distributions will vary by team based on real performance profiles. 
                 The system tracks distribution metrics to help identify potential rating inflation or deflation.

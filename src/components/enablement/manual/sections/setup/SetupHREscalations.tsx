@@ -204,12 +204,12 @@ export function SetupHREscalations() {
           </p>
         </div>
 
-        <div className="p-4 bg-red-100 dark:bg-red-900/30 border border-red-300 dark:border-red-700 rounded-lg">
+        <div className="p-4 border-l-4 border-l-red-500 bg-muted/50 rounded-r-lg">
           <div className="flex items-start gap-3">
             <Shield className="h-5 w-5 text-red-600 dark:text-red-400 flex-shrink-0" />
             <div>
-              <h4 className="font-medium text-foreground">Escalation Best Practice</h4>
-              <p className="text-sm text-muted-foreground">
+              <h4 className="font-semibold text-foreground">Escalation Best Practice</h4>
+              <p className="text-sm text-foreground">
                 Start with conservative escalation timelines and adjust based on organizational 
                 culture. Too aggressive escalation creates friction; too lenient allows deadlines 
                 to slip. Monitor escalation metrics to fine-tune timing.

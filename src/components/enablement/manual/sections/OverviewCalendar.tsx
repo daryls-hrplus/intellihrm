@@ -432,12 +432,12 @@ Cycle Configuration ──► Participant Enrollment ──► Self-Assessment  
         </div>
 
         {/* Best Practices Callout */}
-        <div className="p-4 bg-amber-100 dark:bg-amber-900/30 border border-amber-300 dark:border-amber-700 rounded-lg">
+        <div className="p-4 border-l-4 border-l-amber-500 bg-muted/50 rounded-r-lg">
           <div className="flex items-start gap-3">
             <Lightbulb className="h-5 w-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
             <div>
-              <h4 className="font-medium text-foreground mb-2">Timeline Best Practices</h4>
-              <ul className="text-sm text-muted-foreground space-y-1">
+              <h4 className="font-semibold text-foreground mb-2">Timeline Best Practices</h4>
+              <ul className="text-sm text-foreground space-y-1">
                 <li>• Build in buffer time before compensation planning cycles</li>
                 <li>• Avoid major deadline dates during company-wide events or holidays</li>
                 <li>• Schedule calibration sessions when key stakeholders are available</li>

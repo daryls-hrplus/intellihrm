@@ -204,12 +204,12 @@ export function SetupActionRules() {
           </p>
         </div>
 
-        <div className="p-4 bg-amber-100 dark:bg-amber-900/30 border border-amber-300 dark:border-amber-700 rounded-lg">
+        <div className="p-4 border-l-4 border-l-amber-500 bg-muted/50 rounded-r-lg">
           <div className="flex items-start gap-3">
             <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400 flex-shrink-0" />
             <div>
-              <h4 className="font-medium text-foreground">Important Consideration</h4>
-              <p className="text-sm text-muted-foreground">
+              <h4 className="font-semibold text-foreground">Important Consideration</h4>
+              <p className="text-sm text-foreground">
                 Exercise caution with auto-execute rules, especially for PIPs. HR review before 
                 employee notification is strongly recommended to ensure fair treatment and proper 
                 documentation.

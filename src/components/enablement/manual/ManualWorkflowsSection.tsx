@@ -98,14 +98,14 @@ export function ManualWorkflowsSection() {
           <NavigationPath path={NAVIGATION_PATHS['sec-3-3']} />
           <div className="grid md:grid-cols-3 gap-4">
             {[
-              { type: 'Agree', color: 'bg-green-100 border-green-300', desc: 'Accept the evaluation as-is' },
-              { type: 'Partially Disagree', color: 'bg-amber-100 border-amber-300', desc: 'Comment on specific areas' },
-              { type: 'Disagree', color: 'bg-red-100 border-red-300', desc: 'Request HR escalation' }
+              { type: 'Agree', color: 'border-l-4 border-l-green-500 bg-muted/50', desc: 'Accept the evaluation as-is' },
+              { type: 'Partially Disagree', color: 'border-l-4 border-l-amber-500 bg-muted/50', desc: 'Comment on specific areas' },
+              { type: 'Disagree', color: 'border-l-4 border-l-red-500 bg-muted/50', desc: 'Request HR escalation' }
             ].map((item) => (
-              <Card key={item.type} className={`${item.color} border-2`}>
+              <Card key={item.type} className={`${item.color} rounded-l-none`}>
                 <CardContent className="pt-4">
-                  <h4 className="font-medium">{item.type}</h4>
-                  <p className="text-sm text-muted-foreground mt-1">{item.desc}</p>
+                  <h4 className="font-semibold text-foreground">{item.type}</h4>
+                  <p className="text-sm text-foreground mt-1">{item.desc}</p>
                 </CardContent>
               </Card>
             ))}
