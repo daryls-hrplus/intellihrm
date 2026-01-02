@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Dialog,
   DialogContent,
@@ -13,11 +13,27 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { DatePicker } from "@/components/ui/date-picker";
-import { Loader2, Calendar } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Loader2, Calendar, AlertTriangle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { checkCycleOverlap } from "@/utils/cycleOverlapCheck";
+import { useDebouncedCallback } from "@/hooks/use-debounced-callback";
+import { formatDateForDisplay } from "@/utils/dateUtils";
+
+// Review cycle types
+const REVIEW_CYCLE_TYPES = [
+  { value: "standard", label: "Standard 360°", description: "Full multi-rater feedback cycle" },
+  { value: "manager_360", label: "Manager/Leadership 360°", description: "Leadership assessment with upward feedback" },
+  { value: "peer_only", label: "Peer Review Only", description: "Feedback from peers only" },
+  { value: "upward", label: "Upward Feedback", description: "Direct reports evaluating managers" },
+] as const;
+
+type ReviewCycleType = typeof REVIEW_CYCLE_TYPES[number]["value"];
 
 interface ReviewCycle {
   id: string;
@@ -35,6 +51,7 @@ interface ReviewCycle {
   include_direct_report_review: boolean;
   min_peer_reviewers: number;
   max_peer_reviewers: number;
+  cycle_type?: string;
 }
 
 interface ReviewCycleDialogProps {
@@ -56,6 +73,17 @@ export function ReviewCycleDialog({
 }: ReviewCycleDialogProps) {
   const { user } = useAuth();
   const [saving, setSaving] = useState(false);
+  
+  // Overlap detection state
+  const [overlappingCycles, setOverlappingCycles] = useState<Array<{ id: string; name: string; start_date: string; end_date: string; cycle_type: string }>>([]);
+  const [overlapAcknowledged, setOverlapAcknowledged] = useState(false);
+
+  // Determine initial cycle_type based on props for backward compatibility
+  const getInitialCycleType = (): ReviewCycleType => {
+    if (isManagerCycle) return "manager_360";
+    return "standard";
+  };
+
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -70,6 +98,7 @@ export function ReviewCycleDialog({
     include_direct_report_review: true,
     min_peer_reviewers: 3,
     max_peer_reviewers: 5,
+    cycle_type: getInitialCycleType(),
   });
 
   useEffect(() => {
@@ -88,6 +117,7 @@ export function ReviewCycleDialog({
         include_direct_report_review: cycle.include_direct_report_review,
         min_peer_reviewers: cycle.min_peer_reviewers || 3,
         max_peer_reviewers: cycle.max_peer_reviewers || 5,
+        cycle_type: (cycle.cycle_type as ReviewCycleType) || getInitialCycleType(),
       });
     } else {
       setFormData({
@@ -104,9 +134,45 @@ export function ReviewCycleDialog({
         include_direct_report_review: true,
         min_peer_reviewers: 3,
         max_peer_reviewers: 5,
+        cycle_type: getInitialCycleType(),
       });
     }
-  }, [cycle, open]);
+    // Reset overlap state
+    setOverlappingCycles([]);
+    setOverlapAcknowledged(false);
+  }, [cycle, open, isManagerCycle]);
+
+  // Reset overlap acknowledgment when dates or type change
+  useEffect(() => {
+    setOverlapAcknowledged(false);
+  }, [formData.start_date, formData.end_date, formData.cycle_type]);
+
+  // Debounced overlap check
+  const performOverlapCheck = useCallback(async () => {
+    if (!companyId || !formData.start_date || !formData.end_date || !formData.cycle_type) {
+      setOverlappingCycles([]);
+      return;
+    }
+    const result = await checkCycleOverlap({
+      table: 'review_cycles',
+      companyId,
+      cycleType: formData.cycle_type,
+      startDate: formData.start_date,
+      endDate: formData.end_date,
+      excludeId: cycle?.id,
+    });
+    setOverlappingCycles(result.overlappingCycles);
+  }, [companyId, formData.start_date, formData.end_date, formData.cycle_type, cycle?.id]);
+
+  const debouncedOverlapCheck = useDebouncedCallback(performOverlapCheck, 500);
+
+  useEffect(() => {
+    if (open) {
+      debouncedOverlapCheck();
+    }
+  }, [formData.start_date, formData.end_date, formData.cycle_type, open, debouncedOverlapCheck]);
+
+  const hasUnacknowledgedOverlap = overlappingCycles.length > 0 && !overlapAcknowledged;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -121,7 +187,8 @@ export function ReviewCycleDialog({
         peer_nomination_deadline: formData.peer_nomination_deadline || null,
         feedback_deadline: formData.feedback_deadline || null,
         created_by: user.id,
-        is_manager_cycle: isManagerCycle,
+        is_manager_cycle: formData.cycle_type === "manager_360",
+        cycle_type: formData.cycle_type,
       };
 
       if (cycle) {
@@ -142,9 +209,14 @@ export function ReviewCycleDialog({
       }
 
       onSuccess();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error saving review cycle:", error);
-      toast.error("Failed to save review cycle");
+      // Handle database constraint error for overlapping cycles
+      if (error.message?.includes('no_overlapping_review_cycles') || error.code === '23P01') {
+        toast.error("Cannot save: This cycle overlaps with an existing cycle of the same type.");
+      } else {
+        toast.error("Failed to save review cycle");
+      }
     } finally {
       setSaving(false);
     }
@@ -175,6 +247,27 @@ export function ReviewCycleDialog({
                   placeholder="Q4 2024 Performance Review"
                   required
                 />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="cycle_type">Cycle Type *</Label>
+                <Select
+                  value={formData.cycle_type}
+                  onValueChange={(value: ReviewCycleType) => setFormData({ ...formData, cycle_type: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select cycle type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {REVIEW_CYCLE_TYPES.map((type) => (
+                      <SelectItem key={type.value} value={type.value}>
+                        {type.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  {REVIEW_CYCLE_TYPES.find(t => t.value === formData.cycle_type)?.description}
+                </p>
               </div>
             </div>
             <div className="space-y-2">
@@ -214,6 +307,39 @@ export function ReviewCycleDialog({
                   placeholder="Select end date"
                 />
               </div>
+            </div>
+
+            {/* Overlap Warning */}
+            {overlappingCycles.length > 0 && (
+              <Alert className="border-amber-500 bg-amber-50 dark:bg-amber-950/20">
+                <AlertTriangle className="h-4 w-4 text-amber-600" />
+                <AlertDescription>
+                  <p className="font-medium text-amber-800 dark:text-amber-300">Overlap Detected</p>
+                  <p className="text-sm text-amber-700 dark:text-amber-400 mt-1">
+                    This {REVIEW_CYCLE_TYPES.find(t => t.value === formData.cycle_type)?.label} cycle overlaps with:
+                  </p>
+                  <ul className="text-sm text-amber-700 dark:text-amber-400 list-disc list-inside mt-1">
+                    {overlappingCycles.map(c => (
+                      <li key={c.id}>
+                        {c.name} ({formatDateForDisplay(c.start_date)} - {formatDateForDisplay(c.end_date)})
+                      </li>
+                    ))}
+                  </ul>
+                  <div className="flex items-center gap-2 mt-3">
+                    <Checkbox
+                      id="review-overlap-ack"
+                      checked={overlapAcknowledged}
+                      onCheckedChange={(checked) => setOverlapAcknowledged(checked === true)}
+                    />
+                    <label htmlFor="review-overlap-ack" className="text-sm text-amber-700 dark:text-amber-400 cursor-pointer">
+                      I understand and want to proceed with overlapping cycles
+                    </label>
+                  </div>
+                </AlertDescription>
+              </Alert>
+            )}
+
+            <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label>Self Review Deadline</Label>
                 <DatePicker
@@ -347,7 +473,7 @@ export function ReviewCycleDialog({
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button type="submit" disabled={saving}>
+            <Button type="submit" disabled={saving || hasUnacknowledgedOverlap}>
               {saving ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
