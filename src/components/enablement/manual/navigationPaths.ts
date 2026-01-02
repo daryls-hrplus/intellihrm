@@ -62,6 +62,18 @@ export const RELATED_TOPICS: Record<string, { sectionId: string; title: string }
     { sectionId: 'sec-2-5', title: 'Form Templates' },
     { sectionId: 'sec-3-1', title: 'Cycle Lifecycle' },
   ],
+  'sec-2-7': [
+    { sectionId: 'sec-2-14', title: 'Benchmarks Configuration' },
+    { sectionId: 'sec-4-1', title: 'Calibration Sessions' },
+  ],
+  'sec-2-13': [
+    { sectionId: 'sec-4-2', title: 'Nine-Box Grid' },
+    { sectionId: 'sec-7-1', title: 'Integration Overview' },
+  ],
+  'sec-2-14': [
+    { sectionId: 'sec-2-7', title: 'Performance Categories' },
+    { sectionId: 'sec-4-1', title: 'Calibration Sessions' },
+  ],
   'sec-3-1': [
     { sectionId: 'sec-2-6', title: 'Cycle Configuration' },
     { sectionId: 'sec-3-2', title: 'Manager Workflow' },
