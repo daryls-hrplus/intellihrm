@@ -1,12 +1,10 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { TrendingDown, Clock, Users, CheckCircle, Target, BookOpen, Link, ArrowRight, Lightbulb, AlertCircle } from 'lucide-react';
+import { TrendingDown, Clock, Users, CheckCircle, Target, BookOpen, Link, ArrowRight, Lightbulb, AlertCircle, Code } from 'lucide-react';
 import { NavigationPath } from '../../NavigationPath';
 import { NAVIGATION_PATHS } from '../../navigationPaths';
 import { TipCallout, WarningCallout } from '../../components/Callout';
-import { FieldReference } from '../../components/FieldReference';
-import { StepByStepProcedure, Step } from '../../components/StepByStepProcedure';
-import { ConfigurationExample } from '../../components/ConfigurationExample';
+import { StepByStep, Step } from '../../components/StepByStep';
 import { BusinessRules } from '../../components/BusinessRules';
 
 const FIELD_REFERENCES = [
@@ -183,9 +181,23 @@ export function DevelopmentSuggestionsIDP() {
           </p>
         </div>
 
-        <FieldReference fields={FIELD_REFERENCES} />
+        {/* Field References */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold">Key Interface Elements</h3>
+          <div className="space-y-2">
+            {FIELD_REFERENCES.map((field, index) => (
+              <div key={index} className="p-3 border rounded-lg">
+                <div className="flex items-center justify-between">
+                  <span className="font-medium text-sm">{field.fieldName}</span>
+                  <Badge variant="outline" className="text-xs">{field.location}</Badge>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">{field.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
 
-        <StepByStepProcedure title="Generating Development Suggestions & IDP Links" steps={PROCEDURE_STEPS} />
+        <StepByStep title="Generating Development Suggestions & IDP Links" steps={PROCEDURE_STEPS} />
 
         {/* Priority Levels Explained */}
         <div className="space-y-4">
@@ -207,11 +219,16 @@ export function DevelopmentSuggestionsIDP() {
           </div>
         </div>
 
-        <ConfigurationExample 
-          title="Example AI Development Suggestions" 
-          code={DEVELOPMENT_EXAMPLES}
-          description="Sample outputs showing constructive development feedback with learning path recommendations"
-        />
+        {/* Example AI Development Suggestions */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold flex items-center gap-2">
+            <Code className="h-5 w-5 text-primary" />
+            Example AI Development Suggestions
+          </h3>
+          <div className="bg-muted/50 p-4 rounded-lg border">
+            <pre className="text-xs overflow-x-auto whitespace-pre-wrap">{DEVELOPMENT_EXAMPLES}</pre>
+          </div>
+        </div>
 
         {/* Learning Path Integration */}
         <div className="space-y-4">

@@ -1,12 +1,10 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { MessageSquare, Clock, Users, CheckCircle, Target, FileText, TrendingUp, BarChart3, Lightbulb, Sparkles, AlertCircle } from 'lucide-react';
+import { MessageSquare, Clock, Users, CheckCircle, Target, FileText, TrendingUp, BarChart3, Lightbulb, Sparkles, AlertCircle, Code } from 'lucide-react';
 import { NavigationPath } from '../../NavigationPath';
 import { NAVIGATION_PATHS } from '../../navigationPaths';
 import { TipCallout, WarningCallout } from '../../components/Callout';
-import { FieldReference } from '../../components/FieldReference';
 import { BusinessRules } from '../../components/BusinessRules';
-import { ConfigurationExample } from '../../components/ConfigurationExample';
 
 const FIELD_REFERENCES = [
   { fieldName: 'Comment Quality Panel', location: 'Below Comment Text Area', required: false, description: 'Real-time analysis panel showing quality metrics for entered comments' },
@@ -197,7 +195,21 @@ export function CommentQualityAnalysis() {
           </div>
         </div>
 
-        <FieldReference fields={FIELD_REFERENCES} />
+        {/* Field References */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold">Key Interface Elements</h3>
+          <div className="space-y-2">
+            {FIELD_REFERENCES.map((field, index) => (
+              <div key={index} className="p-3 border rounded-lg">
+                <div className="flex items-center justify-between">
+                  <span className="font-medium text-sm">{field.fieldName}</span>
+                  <Badge variant="outline" className="text-xs">{field.location}</Badge>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">{field.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
 
         {/* Using AI to Improve Comments */}
         <div className="space-y-4">
@@ -263,11 +275,16 @@ export function CommentQualityAnalysis() {
           </div>
         </div>
 
-        <ConfigurationExample 
-          title="Quality Scoring Logic" 
-          code={QUALITY_ANALYSIS_CODE}
-          description="Simplified view of how quality scores are calculated (actual implementation uses AI-enhanced analysis)"
-        />
+        {/* Quality Scoring Logic */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold flex items-center gap-2">
+            <Code className="h-5 w-5 text-primary" />
+            Quality Scoring Logic
+          </h3>
+          <div className="bg-muted/50 p-4 rounded-lg border">
+            <pre className="text-xs overflow-x-auto whitespace-pre-wrap">{QUALITY_ANALYSIS_CODE}</pre>
+          </div>
+        </div>
 
         {/* Writing High-Quality Comments */}
         <div className="space-y-4">

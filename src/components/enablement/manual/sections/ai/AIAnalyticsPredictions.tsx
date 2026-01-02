@@ -4,7 +4,6 @@ import { BarChart3, Clock, Users, CheckCircle, TrendingUp, AlertTriangle, Brain,
 import { NavigationPath } from '../../NavigationPath';
 import { NAVIGATION_PATHS } from '../../navigationPaths';
 import { TipCallout, WarningCallout } from '../../components/Callout';
-import { FieldReference } from '../../components/FieldReference';
 import { BusinessRules } from '../../components/BusinessRules';
 import { WorkflowDiagram } from '../../components/WorkflowDiagram';
 
@@ -188,8 +187,21 @@ export function AIAnalyticsPredictions() {
             ))}
           </div>
         </div>
-
-        <FieldReference fields={FIELD_REFERENCES} />
+        {/* Field References */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold">Key Interface Elements</h3>
+          <div className="space-y-2">
+            {FIELD_REFERENCES.map((field, index) => (
+              <div key={index} className="p-3 border rounded-lg">
+                <div className="flex items-center justify-between">
+                  <span className="font-medium text-sm">{field.fieldName}</span>
+                  <Badge variant="outline" className="text-xs">{field.location}</Badge>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">{field.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
 
         {/* Analytics Dashboard Features */}
         <div className="space-y-4">
