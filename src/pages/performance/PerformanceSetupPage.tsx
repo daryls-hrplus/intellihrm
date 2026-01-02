@@ -44,6 +44,7 @@ import {
   Tags,
   Brain,
   Users,
+  BarChart3,
 } from "lucide-react";
 import { CheckInCadenceConfig } from "@/components/performance/setup/CheckInCadenceConfig";
 import { AppraisalFormTemplateManager } from "@/components/performance/setup/AppraisalFormTemplateManager";
@@ -56,6 +57,7 @@ import { PerformanceIndexSettingsPanel } from "@/components/performance/setup/Pe
 import { ExternalBenchmarkConfigPanel } from "@/components/performance/setup/ExternalBenchmarkConfigPanel";
 import { CompetencyDriftDashboard } from "@/components/performance/ai/CompetencyDriftDashboard";
 import { ManagerCapabilityDashboard } from "@/components/performance/ai/ManagerCapabilityDashboard";
+import { IntegrationDashboardWidget } from "@/components/performance/setup/IntegrationDashboardWidget";
 
 // Interfaces
 interface Company { id: string; name: string; }
@@ -387,6 +389,10 @@ export default function PerformanceSetupPage() {
                     <GitBranch className="h-4 w-4" />
                     Integration Rules
                   </TabsTrigger>
+                  <TabsTrigger value="integration-dashboard" className="flex items-center gap-2">
+                    <BarChart3 className="h-4 w-4" />
+                    Dashboard
+                  </TabsTrigger>
                   <TabsTrigger value="index-settings" className="flex items-center gap-2">
                     <Layers className="h-4 w-4" />
                     Index Settings
@@ -416,6 +422,9 @@ export default function PerformanceSetupPage() {
                 </TabsContent>
                 <TabsContent value="integration-rules" className="mt-4">
                   <IntegrationRulesConfigSection companyId={selectedCompany} />
+                </TabsContent>
+                <TabsContent value="integration-dashboard" className="mt-4">
+                  <IntegrationDashboardWidget companyId={selectedCompany} />
                 </TabsContent>
                 <TabsContent value="index-settings" className="mt-4">
                   <PerformanceIndexSettingsPanel companyId={selectedCompany} />
