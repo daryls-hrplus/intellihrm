@@ -127,7 +127,7 @@ export default function EmployeeSelfServicePage() {
       items: filterByAccess([allModules.professionalInfo, allModules.careerPlan, allModules.careerPaths, allModules.mentorship, allModules.jobs, allModules.milestones]),
     },
     {
-      titleKey: "Skills & Capabilities",
+      titleKey: "Skills and Competencies",
       items: filterByAccess([allModules.competencies, allModules.qualifications, allModules.skillGaps, allModules.interests]),
     },
     {
