@@ -7,6 +7,11 @@ import {
   SetupOverallScales,
   SetupCompetencies,
   SetupApprovalWorkflows,
+  SetupGoalCycles,
+  SetupGoalTemplates,
+  SetupGoalLocking,
+  SetupCheckInCadence,
+  SetupGoalRating,
 } from './sections/setup';
 
 export function ManualSetupSection() {
@@ -55,7 +60,7 @@ export function ManualSetupSection() {
           </AccordionContent>
         </AccordionItem>
 
-        {/* Goal Configuration - Placeholder */}
+        {/* Goal Configuration */}
         <AccordionItem value="goals" className="border rounded-lg px-4">
           <AccordionTrigger className="hover:no-underline">
             <div className="flex items-center gap-3">
@@ -69,15 +74,14 @@ export function ManualSetupSection() {
                 </p>
               </div>
               <Badge variant="outline" className="ml-auto">5 sections</Badge>
-              <Badge variant="secondary" className="text-xs">Coming Soon</Badge>
             </div>
           </AccordionTrigger>
-          <AccordionContent className="pt-4">
-            <div className="p-8 text-center text-muted-foreground border-2 border-dashed rounded-lg">
-              <Target className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p>Goal Configuration sections will be documented in the next update.</p>
-              <p className="text-sm mt-2">Covers: Goal Cycles, Templates, Locking Rules, Check-in Cadence, Rating Config</p>
-            </div>
+          <AccordionContent className="pt-4 space-y-6">
+            <SetupGoalCycles />
+            <SetupGoalTemplates />
+            <SetupGoalLocking />
+            <SetupCheckInCadence />
+            <SetupGoalRating />
           </AccordionContent>
         </AccordionItem>
 
