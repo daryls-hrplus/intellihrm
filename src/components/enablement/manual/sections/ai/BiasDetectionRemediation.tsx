@@ -1,13 +1,11 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { AlertTriangle, Clock, Users, CheckCircle, Shield, Scale, Eye, ArrowRight, XCircle, CheckCircle2 } from 'lucide-react';
+import { AlertTriangle, Clock, Users, CheckCircle, Shield, Scale, Eye, ArrowRight, XCircle, CheckCircle2, Code } from 'lucide-react';
 import { NavigationPath } from '../../NavigationPath';
 import { NAVIGATION_PATHS } from '../../navigationPaths';
 import { TipCallout, WarningCallout } from '../../components/Callout';
-import { FieldReference } from '../../components/FieldReference';
-import { StepByStepProcedure, Step } from '../../components/StepByStepProcedure';
+import { StepByStep, Step } from '../../components/StepByStep';
 import { BusinessRules } from '../../components/BusinessRules';
-import { ConfigurationExample } from '../../components/ConfigurationExample';
 
 const FIELD_REFERENCES = [
   { fieldName: 'Check Bias Button', location: 'AI Feedback Assistant Panel → Comment Improvement', required: false, description: 'Analyzes entered text for potential bias indicators' },
@@ -223,15 +221,34 @@ export function BiasDetectionRemediation() {
           </div>
         </div>
 
-        <FieldReference fields={FIELD_REFERENCES} />
+        {/* Field References */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold">Key Interface Elements</h3>
+          <div className="space-y-2">
+            {FIELD_REFERENCES.map((field, index) => (
+              <div key={index} className="p-3 border rounded-lg">
+                <div className="flex items-center justify-between">
+                  <span className="font-medium text-sm">{field.fieldName}</span>
+                  <Badge variant="outline" className="text-xs">{field.location}</Badge>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">{field.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
 
-        <StepByStepProcedure title="Using Bias Detection" steps={PROCEDURE_STEPS} />
+        <StepByStep title="Using Bias Detection" steps={PROCEDURE_STEPS} />
 
-        <ConfigurationExample 
-          title="Bias Detection Examples" 
-          code={BIAS_EXAMPLES}
-          description="Real examples of biased language with AI-suggested neutral alternatives"
-        />
+        {/* Bias Detection Examples */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold flex items-center gap-2">
+            <Code className="h-5 w-5 text-primary" />
+            Bias Detection Examples
+          </h3>
+          <div className="bg-muted/50 p-4 rounded-lg border">
+            <pre className="text-xs overflow-x-auto whitespace-pre-wrap">{BIAS_EXAMPLES}</pre>
+          </div>
+        </div>
 
         {/* Before and After Examples */}
         <div className="space-y-4">

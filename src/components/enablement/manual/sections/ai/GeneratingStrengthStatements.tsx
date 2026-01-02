@@ -1,12 +1,10 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { TrendingUp, Clock, Users, CheckCircle, Target, Sparkles, ThumbsUp, Pencil, Copy, AlertCircle } from 'lucide-react';
+import { TrendingUp, Clock, Users, CheckCircle, Target, Sparkles, ThumbsUp, Pencil, Copy, AlertCircle, Code } from 'lucide-react';
 import { NavigationPath } from '../../NavigationPath';
 import { NAVIGATION_PATHS } from '../../navigationPaths';
 import { TipCallout, WarningCallout } from '../../components/Callout';
-import { FieldReference } from '../../components/FieldReference';
-import { StepByStepProcedure, Step } from '../../components/StepByStepProcedure';
-import { ConfigurationExample } from '../../components/ConfigurationExample';
+import { StepByStep, Step } from '../../components/StepByStep';
 
 const FIELD_REFERENCES = [
   { fieldName: 'Generate Strengths Button', location: 'AI Feedback Assistant Panel → Quick Actions', required: false, description: 'Triggers AI analysis of high-rated areas to generate positive feedback statements' },
@@ -146,9 +144,23 @@ export function GeneratingStrengthStatements() {
           </div>
         </div>
 
-        <FieldReference fields={FIELD_REFERENCES} />
+        {/* Field References */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold">Key Interface Elements</h3>
+          <div className="space-y-2">
+            {FIELD_REFERENCES.map((field, index) => (
+              <div key={index} className="p-3 border rounded-lg">
+                <div className="flex items-center justify-between">
+                  <span className="font-medium text-sm">{field.fieldName}</span>
+                  <Badge variant="outline" className="text-xs">{field.location}</Badge>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">{field.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
 
-        <StepByStepProcedure title="Generating Strength Statements" steps={PROCEDURE_STEPS} />
+        <StepByStep title="Generating Strength Statements" steps={PROCEDURE_STEPS} />
 
         {/* Understanding Confidence Scores */}
         <div className="space-y-4">
@@ -192,11 +204,16 @@ export function GeneratingStrengthStatements() {
           </div>
         </div>
 
-        <ConfigurationExample 
-          title="Example AI-Generated Strengths" 
-          code={STRENGTH_EXAMPLES}
-          description="Sample outputs showing how AI generates contextual strength statements based on rating data"
-        />
+        {/* Example AI-Generated Strengths */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold flex items-center gap-2">
+            <Code className="h-5 w-5 text-primary" />
+            Example AI-Generated Strengths
+          </h3>
+          <div className="bg-muted/50 p-4 rounded-lg border">
+            <pre className="text-xs overflow-x-auto whitespace-pre-wrap">{STRENGTH_EXAMPLES}</pre>
+          </div>
+        </div>
 
         {/* Customization Tips */}
         <div className="space-y-4">
