@@ -16,11 +16,11 @@ export function BusinessRules({ rules, title = 'Business Rules & Validation' }: 
   const getEnforcementColor = (enforcement: BusinessRule['enforcement']) => {
     switch (enforcement) {
       case 'System':
-        return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400';
+        return 'bg-red-500/20 text-red-800 dark:bg-red-900/40 dark:text-red-300 border border-red-500/30';
       case 'Policy':
-        return 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400';
+        return 'bg-amber-500/20 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300 border border-amber-500/30';
       case 'Advisory':
-        return 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400';
+        return 'bg-blue-500/20 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300 border border-blue-500/30';
     }
   };
 

@@ -144,7 +144,7 @@ export function SetupOverallScales() {
             <Clock className="h-3 w-3" />
             ~12 min read
           </Badge>
-          <Badge className="bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+          <Badge className="bg-blue-500/20 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300 border border-blue-500/30">
             Annual review
           </Badge>
         </div>
@@ -202,7 +202,7 @@ export function SetupOverallScales() {
             <ArrowRight className="h-4 w-4 text-muted-foreground mx-2" />
             <Badge className="bg-primary text-primary-foreground">Weighted Score</Badge>
             <ArrowRight className="h-4 w-4 text-muted-foreground mx-2" />
-            <Badge className="bg-green-100 text-green-700">Final Category</Badge>
+            <Badge className="bg-green-500/20 text-green-800 dark:text-green-300 border border-green-500/30">Final Category</Badge>
           </div>
         </div>
 
