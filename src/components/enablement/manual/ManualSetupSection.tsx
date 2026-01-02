@@ -7,6 +7,15 @@ import {
   SetupOverallScales,
   SetupCompetencies,
   SetupApprovalWorkflows,
+  SetupAppraisalCycles,
+  SetupPerformanceCategories,
+  SetupFormTemplates,
+  SetupActionRules,
+  SetupEmployeeResponse,
+  SetupHREscalations,
+  SetupIntegrationRules,
+  SetupIndexSettings,
+  SetupBenchmarks,
 } from './sections/setup';
 
 export function ManualSetupSection() {
@@ -55,7 +64,7 @@ export function ManualSetupSection() {
           </AccordionContent>
         </AccordionItem>
 
-        {/* Appraisal Configuration - Placeholder */}
+        {/* Appraisal Configuration */}
         <AccordionItem value="appraisals" className="border rounded-lg px-4">
           <AccordionTrigger className="hover:no-underline">
             <div className="flex items-center gap-3">
@@ -69,15 +78,18 @@ export function ManualSetupSection() {
                 </p>
               </div>
               <Badge variant="outline" className="ml-auto">9 sections</Badge>
-              <Badge variant="secondary" className="text-xs">Coming Soon</Badge>
             </div>
           </AccordionTrigger>
-          <AccordionContent className="pt-4">
-            <div className="p-8 text-center text-muted-foreground border-2 border-dashed rounded-lg">
-              <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p>Appraisal Configuration sections will be documented in the next update.</p>
-              <p className="text-sm mt-2">Covers: Cycles, Categories, Form Templates, Action Rules, Employee Response, HR Escalations, Integration, Index Settings, Benchmarks</p>
-            </div>
+          <AccordionContent className="pt-4 space-y-6">
+            <SetupAppraisalCycles />
+            <SetupPerformanceCategories />
+            <SetupFormTemplates />
+            <SetupActionRules />
+            <SetupEmployeeResponse />
+            <SetupHREscalations />
+            <SetupIntegrationRules />
+            <SetupIndexSettings />
+            <SetupBenchmarks />
           </AccordionContent>
         </AccordionItem>
       </Accordion>
