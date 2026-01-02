@@ -150,13 +150,10 @@ export function WorkflowCompetencyAssessment() {
         </div>
 
         {/* Interactive Workflow Diagram */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Competency Assessment Workflow</h3>
-          <div className="p-4 bg-muted/30 rounded-lg overflow-x-auto">
-            <pre className="text-xs text-muted-foreground mb-2">Participant Flow Diagram</pre>
-            <div className="mermaid-container">
-              <presentation-mermaid>
-                {`flowchart TD
+        <WorkflowDiagram 
+          title="Competency Assessment Workflow"
+          description="Process for assessing behavioral competencies with proficiency levels"
+          diagram={`flowchart TD
     subgraph Understanding["📖 Understanding"]
         A[Read Competency Definition] --> B[Review Behavioral Indicators]
         B --> C[Check Expected Level for Role]
@@ -187,10 +184,7 @@ export function WorkflowCompetencyAssessment() {
     J --> K
     K --> L
     L --> M`}
-              </presentation-mermaid>
-            </div>
-          </div>
-        </div>
+        />
 
         {/* Proficiency Level Framework */}
         <div className="space-y-4">

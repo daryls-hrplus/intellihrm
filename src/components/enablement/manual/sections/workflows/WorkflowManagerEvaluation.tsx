@@ -178,13 +178,10 @@ export function WorkflowManagerEvaluation() {
         </div>
 
         {/* Interactive Workflow Diagram */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Manager Evaluation Workflow</h3>
-          <div className="p-4 bg-muted/30 rounded-lg overflow-x-auto">
-            <pre className="text-xs text-muted-foreground mb-2">Participant Flow Diagram</pre>
-            <div className="mermaid-container">
-              <presentation-mermaid>
-                {`flowchart LR
+        <WorkflowDiagram 
+          title="Manager Evaluation Workflow"
+          description="Flow between employee, manager, and system during the evaluation process"
+          diagram={`flowchart LR
     subgraph Employee["👤 Employee"]
         A[Submit Self-Assessment]
     end
@@ -211,10 +208,7 @@ export function WorkflowManagerEvaluation() {
     E --> L
     I --> K
     J --> M`}
-              </presentation-mermaid>
-            </div>
-          </div>
-        </div>
+        />
 
         {/* Evaluation Checklist Overview */}
         <div className="space-y-4">
