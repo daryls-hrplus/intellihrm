@@ -55,6 +55,16 @@ export const NAVIGATION_PATHS: Record<string, string[]> = {
   'sec-7-1': ['Performance', 'Setup', 'Integration', 'Overview'],
   'sec-7-2': ['Performance', 'Setup', 'Integration', 'Triggers'],
   'sec-7-7': ['Performance', 'Intelligence Hub', 'Integrations'],
+
+  // Part 8: Troubleshooting & Best Practices
+  'sec-8-1': ['Support', 'Troubleshooting', 'Common Issues'],
+  'sec-8-2': ['Support', 'Best Practices'],
+  'sec-8-3': ['Admin', 'Security', 'Access Control'],
+  'sec-8-4': ['Admin', 'Compliance', 'Audit'],
+  'sec-8-5': ['Support', 'Troubleshooting', 'Integration'],
+  'sec-8-6': ['Admin', 'Performance', 'Optimization'],
+  'sec-8-7': ['Admin', 'Data Quality', 'Validation'],
+  'sec-8-8': ['Support', 'Escalation', 'Procedures'],
 };
 
 // Related topics mapping for cross-referencing
