@@ -10,15 +10,14 @@ import {
   AlertTriangle, 
   TrendingUp, 
   Lightbulb,
-  CheckCircle,
-  XCircle,
-  Clock,
-  Users,
-  Target,
   ArrowUp,
   ArrowDown,
-  Minus
+  Minus,
+  ChevronDown,
+  ChevronUp,
+  EyeOff
 } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
 
 // Import analytics hooks
@@ -52,6 +51,7 @@ export function KeyInsightsAIPanel({ companyId }: KeyInsightsAIPanelProps) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [insights, setInsights] = useState<InsightsData | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isOpen, setIsOpen] = useState(true);
 
   // Fetch analytics data
   const { data: completionData, isLoading: loadingCompletion } = useGoalCompletionRates(companyId);
@@ -145,75 +145,98 @@ export function KeyInsightsAIPanel({ companyId }: KeyInsightsAIPanelProps) {
   }
 
   return (
-    <Card className="overflow-hidden">
-      <CardHeader className="bg-gradient-to-r from-primary/5 via-purple-500/5 to-primary/5 pb-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-purple-600 shadow-lg">
-              <Brain className="h-5 w-5 text-primary-foreground" />
+    <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+      <Card className="overflow-hidden">
+        <CardHeader className="bg-gradient-to-r from-primary/5 via-purple-500/5 to-primary/5 pb-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-purple-600 shadow-lg">
+                <Brain className="h-5 w-5 text-primary-foreground" />
+              </div>
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  Key Insights
+                  <Badge variant="secondary" className="gap-1 text-xs">
+                    <Brain className="h-3 w-3" />
+                    AI Powered
+                  </Badge>
+                </CardTitle>
+                <CardDescription>
+                  Critical risks, trends, and recommendations across all analytics
+                </CardDescription>
+              </div>
             </div>
-            <div>
-              <CardTitle className="flex items-center gap-2">
-                Key Insights
-                <Badge variant="secondary" className="gap-1 text-xs">
-                  <Brain className="h-3 w-3" />
-                  AI Powered
-                </Badge>
-              </CardTitle>
-              <CardDescription>
-                Critical risks, trends, and recommendations across all analytics
-              </CardDescription>
+            <div className="flex items-center gap-2">
+              {isOpen && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={generateInsights}
+                  disabled={isGenerating}
+                  className="gap-2"
+                >
+                  <RefreshCw className={cn("h-4 w-4", isGenerating && "animate-spin")} />
+                  Refresh
+                </Button>
+              )}
+              <CollapsibleTrigger asChild>
+                <Button variant="ghost" size="sm" className="gap-2">
+                  {isOpen ? (
+                    <>
+                      <EyeOff className="h-4 w-4" />
+                      Hide
+                    </>
+                  ) : (
+                    <>
+                      <ChevronDown className="h-4 w-4" />
+                      Show
+                    </>
+                  )}
+                </Button>
+              </CollapsibleTrigger>
             </div>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={generateInsights}
-            disabled={isGenerating}
-            className="gap-2"
-          >
-            <RefreshCw className={cn("h-4 w-4", isGenerating && "animate-spin")} />
-            Refresh
-          </Button>
-        </div>
-      </CardHeader>
-      <CardContent className="p-0">
-        {insights ? (
-          <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-border">
-            {/* Critical Risks */}
-            <InsightColumn
-              title="Critical Risks"
-              icon={AlertTriangle}
-              iconColor="text-destructive"
-              bgColor="bg-destructive/5"
-              items={insights.risks}
-            />
+        </CardHeader>
+        <CollapsibleContent>
+          <CardContent className="p-0">
+            {insights ? (
+              <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-border">
+                {/* Critical Risks */}
+                <InsightColumn
+                  title="Critical Risks"
+                  icon={AlertTriangle}
+                  iconColor="text-destructive"
+                  bgColor="bg-destructive/5"
+                  items={insights.risks}
+                />
 
-            {/* Trending Metrics */}
-            <InsightColumn
-              title="Trending Metrics"
-              icon={TrendingUp}
-              iconColor="text-blue-500"
-              bgColor="bg-blue-500/5"
-              items={insights.trends}
-            />
+                {/* Trending Metrics */}
+                <InsightColumn
+                  title="Trending Metrics"
+                  icon={TrendingUp}
+                  iconColor="text-blue-500"
+                  bgColor="bg-blue-500/5"
+                  items={insights.trends}
+                />
 
-            {/* Recommendations */}
-            <InsightColumn
-              title="Recommendations"
-              icon={Lightbulb}
-              iconColor="text-amber-500"
-              bgColor="bg-amber-500/5"
-              items={insights.recommendations}
-            />
-          </div>
-        ) : (
-          <div className="flex items-center justify-center h-32 text-muted-foreground">
-            No insights available
-          </div>
-        )}
-      </CardContent>
-    </Card>
+                {/* Recommendations */}
+                <InsightColumn
+                  title="Recommendations"
+                  icon={Lightbulb}
+                  iconColor="text-amber-500"
+                  bgColor="bg-amber-500/5"
+                  items={insights.recommendations}
+                />
+              </div>
+            ) : (
+              <div className="flex items-center justify-center h-32 text-muted-foreground">
+                No insights available
+              </div>
+            )}
+          </CardContent>
+        </CollapsibleContent>
+      </Card>
+    </Collapsible>
   );
 }
 
