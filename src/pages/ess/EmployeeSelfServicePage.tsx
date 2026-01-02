@@ -115,8 +115,8 @@ export default function EmployeeSelfServicePage() {
       items: filterByAccess([allModules.profile, allModules.personalInfo, allModules.dependents, allModules.documents, allModules.letters, allModules.banking, allModules.governmentIds, allModules.medicalInfo]),
     },
     {
-      titleKey: "Skills & Capabilities",
-      items: filterByAccess([allModules.competencies, allModules.qualifications, allModules.skillGaps, allModules.interests]),
+      titleKey: "Pay & Benefits",
+      items: filterByAccess([allModules.payslips, allModules.compensation, allModules.benefits, allModules.expenses]),
     },
     {
       titleKey: "Career",
@@ -127,8 +127,8 @@ export default function EmployeeSelfServicePage() {
       items: filterByAccess([allModules.leave, allModules.myCalendar, allModules.teamCalendar, allModules.timeAttendance, allModules.timesheets]),
     },
     {
-      titleKey: "Pay & Benefits",
-      items: filterByAccess([allModules.payslips, allModules.compensation, allModules.benefits, allModules.expenses]),
+      titleKey: "Skills & Capabilities",
+      items: filterByAccess([allModules.competencies, allModules.qualifications, allModules.skillGaps, allModules.interests]),
     },
     {
       titleKey: "Performance",
