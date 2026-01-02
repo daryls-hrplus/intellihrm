@@ -10,7 +10,7 @@ import { Slider } from "@/components/ui/slider";
 import { Card, CardContent } from "@/components/ui/card";
 import { ManualPrintSettings } from "@/hooks/useManualPrintSettings";
 import { BrandColors, useEnablementBranding } from "@/hooks/useEnablementBranding";
-import { FileText, Layout, Type, Palette, BookOpen } from "lucide-react";
+import { FileText, Layout, Type, Palette, BookOpen, FileCode, Droplets } from "lucide-react";
 import { LogoUpload } from "./LogoUpload";
 
 interface PrintConfigDialogProps {
@@ -80,10 +80,14 @@ export function PrintConfigDialog({
         </DialogHeader>
 
         <Tabs defaultValue="cover" className="mt-4">
-          <TabsList className="grid grid-cols-5 w-full">
+          <TabsList className="grid grid-cols-7 w-full">
             <TabsTrigger value="cover" className="text-xs gap-1">
               <BookOpen className="h-3 w-3" />
               Cover
+            </TabsTrigger>
+            <TabsTrigger value="metadata" className="text-xs gap-1">
+              <FileCode className="h-3 w-3" />
+              Document
             </TabsTrigger>
             <TabsTrigger value="headers" className="text-xs gap-1">
               <FileText className="h-3 w-3" />
@@ -100,6 +104,10 @@ export function PrintConfigDialog({
             <TabsTrigger value="branding" className="text-xs gap-1">
               <Palette className="h-3 w-3" />
               Branding
+            </TabsTrigger>
+            <TabsTrigger value="watermark" className="text-xs gap-1">
+              <Droplets className="h-3 w-3" />
+              Watermark
             </TabsTrigger>
           </TabsList>
 
@@ -173,6 +181,77 @@ export function PrintConfigDialog({
             )}
           </TabsContent>
 
+          {/* Document Metadata Tab - NEW */}
+          <TabsContent value="metadata" className="space-y-4 mt-4">
+            <div>
+              <Label>Document ID</Label>
+              <Input
+                value={localSettings.sections.documentId}
+                onChange={(e) => updateSections({ documentId: e.target.value })}
+                placeholder="e.g., HRP-APR-ADM-001"
+                className="mt-1 font-mono"
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Unique identifier shown in headers
+              </p>
+            </div>
+
+            <div>
+              <Label>Effective Date</Label>
+              <Input
+                type="date"
+                value={localSettings.sections.effectiveDate}
+                onChange={(e) => updateSections({ effectiveDate: e.target.value })}
+                className="mt-1"
+              />
+            </div>
+
+            <div>
+              <Label>Copyright Text</Label>
+              <Input
+                value={localSettings.sections.copyrightText}
+                onChange={(e) => updateSections({ copyrightText: e.target.value })}
+                placeholder="e.g., © 2026 Company Name. All rights reserved."
+                className="mt-1"
+              />
+            </div>
+
+            <div className="space-y-3 pt-4 border-t">
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label>Show Version in Header</Label>
+                  <p className="text-sm text-muted-foreground">Display version number</p>
+                </div>
+                <Switch
+                  checked={localSettings.sections.showVersionInHeader}
+                  onCheckedChange={(checked) => updateSections({ showVersionInHeader: checked })}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label>Show Print Date</Label>
+                  <p className="text-sm text-muted-foreground">Add print date to footer</p>
+                </div>
+                <Switch
+                  checked={localSettings.sections.showPrintDate}
+                  onCheckedChange={(checked) => updateSections({ showPrintDate: checked })}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label>Show Last Updated</Label>
+                  <p className="text-sm text-muted-foreground">Display last update date</p>
+                </div>
+                <Switch
+                  checked={localSettings.sections.showLastUpdated}
+                  onCheckedChange={(checked) => updateSections({ showLastUpdated: checked })}
+                />
+              </div>
+            </div>
+          </TabsContent>
+
           {/* Headers & Footers Tab */}
           <TabsContent value="headers" className="space-y-4 mt-4">
             <div className="flex items-center justify-between">
@@ -212,6 +291,51 @@ export function PrintConfigDialog({
                     </SelectContent>
                   </Select>
                 </div>
+
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label>Header Accent Line</Label>
+                    <p className="text-sm text-muted-foreground">Show colored line below header</p>
+                  </div>
+                  <Switch
+                    checked={localSettings.branding.showHeaderAccentLine}
+                    onCheckedChange={(checked) => updateBranding({ showHeaderAccentLine: checked })}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label>Alternating Headers</Label>
+                    <p className="text-sm text-muted-foreground">Different headers for odd/even pages</p>
+                  </div>
+                  <Switch
+                    checked={localSettings.sections.useAlternatingHeaders}
+                    onCheckedChange={(checked) => updateSections({ useAlternatingHeaders: checked })}
+                  />
+                </div>
+
+                {localSettings.sections.useAlternatingHeaders && (
+                  <div className="grid grid-cols-2 gap-3 pt-2">
+                    <div>
+                      <Label className="text-xs">Left Page Header</Label>
+                      <Input
+                        value={localSettings.sections.alternateHeaderLeft}
+                        onChange={(e) => updateSections({ alternateHeaderLeft: e.target.value })}
+                        placeholder="Left page content"
+                        className="mt-1"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-xs">Right Page Header</Label>
+                      <Input
+                        value={localSettings.sections.alternateHeaderRight}
+                        onChange={(e) => updateSections({ alternateHeaderRight: e.target.value })}
+                        placeholder="Right page content"
+                        className="mt-1"
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
@@ -227,13 +351,40 @@ export function PrintConfigDialog({
             </div>
 
             {localSettings.sections.includeFooters && (
-              <div>
-                <Label>Footer Content</Label>
-                <Input
-                  value={localSettings.sections.footerContent}
-                  onChange={(e) => updateSections({ footerContent: e.target.value })}
-                  className="mt-1"
-                />
+              <div className="space-y-3">
+                <div>
+                  <Label>Footer Content</Label>
+                  <Input
+                    value={localSettings.sections.footerContent}
+                    onChange={(e) => updateSections({ footerContent: e.target.value })}
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label>Footer Style</Label>
+                  <Select
+                    value={localSettings.branding.footerStyle}
+                    onValueChange={(value) => updateBranding({ footerStyle: value as 'branded' | 'simple' })}
+                  >
+                    <SelectTrigger className="mt-1">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="branded">Branded - With accent colors</SelectItem>
+                      <SelectItem value="simple">Simple - Minimal style</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label>Bottom Accent Line</Label>
+                    <p className="text-sm text-muted-foreground">Show colored line above footer</p>
+                  </div>
+                  <Switch
+                    checked={localSettings.branding.showBottomBorderAccent}
+                    onCheckedChange={(checked) => updateBranding({ showBottomBorderAccent: checked })}
+                  />
+                </div>
               </div>
             )}
 
@@ -319,6 +470,39 @@ export function PrintConfigDialog({
                 </div>
               </div>
             )}
+
+            <div className="flex items-center justify-between pt-4 border-t">
+              <div>
+                <Label>Include Revision History</Label>
+                <p className="text-sm text-muted-foreground">Add revision history page after TOC</p>
+              </div>
+              <Switch
+                checked={localSettings.sections.includeRevisionHistory}
+                onCheckedChange={(checked) => updateSections({ includeRevisionHistory: checked })}
+              />
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div>
+                <Label>Chapter Starts New Page</Label>
+                <p className="text-sm text-muted-foreground">Each chapter begins on a new page</p>
+              </div>
+              <Switch
+                checked={localSettings.sections.chapterStartsNewPage}
+                onCheckedChange={(checked) => updateSections({ chapterStartsNewPage: checked })}
+              />
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div>
+                <Label>Section Dividers</Label>
+                <p className="text-sm text-muted-foreground">Add lines between sections</p>
+              </div>
+              <Switch
+                checked={localSettings.sections.includeSectionDividers}
+                onCheckedChange={(checked) => updateSections({ includeSectionDividers: checked })}
+              />
+            </div>
           </TabsContent>
 
           {/* Layout Tab */}
@@ -400,6 +584,41 @@ export function PrintConfigDialog({
             </div>
 
             <div>
+              <Label>Font Family</Label>
+              <Select
+                value={localSettings.formatting.fontFamily}
+                onValueChange={(value) => updateFormatting({ fontFamily: value as 'Inter' | 'Arial' | 'Times New Roman' | 'Georgia' })}
+              >
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Inter">Inter (Modern)</SelectItem>
+                  <SelectItem value="Arial">Arial (Classic)</SelectItem>
+                  <SelectItem value="Times New Roman">Times New Roman (Traditional)</SelectItem>
+                  <SelectItem value="Georgia">Georgia (Elegant)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label>Heading Font Family</Label>
+              <Select
+                value={localSettings.formatting.headingFontFamily}
+                onValueChange={(value) => updateFormatting({ headingFontFamily: value as 'inherit' | 'Georgia' | 'Arial' })}
+              >
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="inherit">Same as body</SelectItem>
+                  <SelectItem value="Georgia">Georgia</SelectItem>
+                  <SelectItem value="Arial">Arial</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
               <Label>Base Font Size: {localSettings.formatting.baseFontSize}pt</Label>
               <Slider
                 value={[localSettings.formatting.baseFontSize]}
@@ -421,6 +640,34 @@ export function PrintConfigDialog({
                 step={1}
                 className="mt-2"
               />
+            </div>
+
+            <div className="flex items-center justify-between pt-4 border-t">
+              <div>
+                <Label>Colored Bullets</Label>
+                <p className="text-sm text-muted-foreground">Use brand color for bullet points</p>
+              </div>
+              <Switch
+                checked={localSettings.formatting.showBulletColors}
+                onCheckedChange={(checked) => updateFormatting({ showBulletColors: checked })}
+              />
+            </div>
+
+            <div>
+              <Label>Callout Box Style</Label>
+              <Select
+                value={localSettings.formatting.calloutStyle}
+                onValueChange={(value) => updateFormatting({ calloutStyle: value as 'boxed' | 'bordered' | 'highlighted' })}
+              >
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="boxed">Boxed - Full background</SelectItem>
+                  <SelectItem value="bordered">Bordered - Left accent</SelectItem>
+                  <SelectItem value="highlighted">Highlighted - Subtle tint</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </TabsContent>
 
@@ -486,6 +733,64 @@ export function PrintConfigDialog({
                   <p className="text-xs text-muted-foreground mt-3">
                     To change these colors, go to Enablement → Templates → Brand Settings
                   </p>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+
+          {/* Watermark Tab - NEW */}
+          <TabsContent value="watermark" className="space-y-4 mt-4">
+            <div>
+              <Label>Watermark Text</Label>
+              <Input
+                value={localSettings.branding.watermarkText}
+                onChange={(e) => updateBranding({ watermarkText: e.target.value })}
+                placeholder="e.g., DRAFT, CONFIDENTIAL"
+                className="mt-1"
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Leave empty for no watermark
+              </p>
+            </div>
+
+            {localSettings.branding.watermarkText && (
+              <div>
+                <Label>Watermark Opacity: {Math.round(localSettings.branding.watermarkOpacity * 100)}%</Label>
+                <Slider
+                  value={[localSettings.branding.watermarkOpacity * 100]}
+                  onValueChange={([value]) => updateBranding({ watermarkOpacity: value / 100 })}
+                  min={3}
+                  max={20}
+                  step={1}
+                  className="mt-2"
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Lower values are more subtle
+                </p>
+              </div>
+            )}
+
+            {/* Preview */}
+            {localSettings.branding.watermarkText && (
+              <Card>
+                <CardContent className="p-4">
+                  <p className="text-xs text-muted-foreground mb-2">Preview:</p>
+                  <div className="aspect-[3/4] rounded border bg-white relative overflow-hidden max-h-32 flex items-center justify-center">
+                    <span
+                      className="text-2xl font-bold uppercase"
+                      style={{
+                        color: '#888888',
+                        opacity: localSettings.branding.watermarkOpacity,
+                        transform: 'rotate(-45deg)',
+                      }}
+                    >
+                      {localSettings.branding.watermarkText}
+                    </span>
+                    <div className="absolute inset-4 border border-dashed border-muted-foreground/20 rounded">
+                      <div className="h-2 bg-muted-foreground/10 m-2 rounded" />
+                      <div className="h-2 bg-muted-foreground/10 m-2 rounded w-3/4" />
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
             )}

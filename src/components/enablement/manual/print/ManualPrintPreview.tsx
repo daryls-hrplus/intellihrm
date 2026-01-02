@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -8,6 +8,9 @@ import { CoverPage } from "./CoverPage";
 import { TableOfContents } from "./TableOfContents";
 import { PrintHeader } from "./PrintHeader";
 import { PrintFooter } from "./PrintFooter";
+import { RevisionHistory } from "./RevisionHistory";
+import { Watermark } from "./Watermark";
+import { ChapterTitlePage } from "./ChapterTitlePage";
 import { X, ZoomIn, ZoomOut, Printer, Settings, ChevronLeft, ChevronRight, Download, Loader2 } from "lucide-react";
 import jsPDF from "jspdf";
 import { MANUAL_CONTENT } from "@/utils/appraisalsManualDocx";
@@ -43,6 +46,7 @@ export function ManualPrintPreview({
     let pages = 0;
     if (settings.sections.includeCover) pages += 1;
     if (settings.sections.includeTableOfContents) pages += 1;
+    if (settings.sections.includeRevisionHistory) pages += 1;
     // Estimate ~2 pages per 10 min read time
     pages += Math.ceil(totalReadTime / 5);
     // Add appendices
@@ -120,8 +124,26 @@ export function ManualPrintPreview({
       const primaryRgb = hexToRgb(brandColors.primaryColor);
       const secondaryRgb = hexToRgb(brandColors.secondaryColor);
 
-      const addHeader = () => {
+      // Get font family for PDF
+      const getFontFamily = () => {
+        switch (settings.formatting.fontFamily) {
+          case 'Times New Roman':
+            return 'times';
+          case 'Georgia':
+            return 'times';
+          default:
+            return 'helvetica';
+        }
+      };
+
+      const fontFamily = getFontFamily();
+
+      const addHeader = (isOddPage: boolean = true, sectionTitle?: string) => {
         if (settings.sections.includeHeaders && settings.branding.headerStyle !== 'none') {
+          const headerContent = settings.sections.useAlternatingHeaders
+            ? (isOddPage ? (settings.sections.alternateHeaderRight || settings.sections.headerContent) : (settings.sections.alternateHeaderLeft || settings.sections.headerContent))
+            : settings.sections.headerContent;
+
           if (settings.branding.headerStyle === 'branded') {
             pdf.setFillColor(primaryRgb.r, primaryRgb.g, primaryRgb.b);
             pdf.rect(0, 0, pageWidth, 12, 'F');
@@ -129,18 +151,74 @@ export function ManualPrintPreview({
           } else {
             pdf.setTextColor(100, 100, 100);
           }
+          pdf.setFont(fontFamily, 'normal');
           pdf.setFontSize(9);
-          pdf.text(settings.sections.headerContent, margin.left, 8);
+          
+          // Header content
+          pdf.text(headerContent, margin.left, 8);
+          
+          // Document ID if set
+          if (settings.sections.documentId) {
+            pdf.setFontSize(7);
+            pdf.text(settings.sections.documentId, margin.left, 11);
+          }
+          
+          // Version in header
+          if (settings.sections.showVersionInHeader) {
+            pdf.setFontSize(8);
+            pdf.text('v1.3.0', pageWidth - margin.right, 8, { align: 'right' });
+          }
+          
+          // Section title
+          if (sectionTitle) {
+            pdf.setFontSize(8);
+            pdf.text(sectionTitle, pageWidth / 2, 8, { align: 'center' });
+          }
+          
+          pdf.setTextColor(0, 0, 0);
+          
+          // Accent line
+          if (settings.branding.showHeaderAccentLine && settings.branding.headerStyle === 'branded') {
+            pdf.setFillColor(secondaryRgb.r, secondaryRgb.g, secondaryRgb.b);
+            pdf.rect(0, 12, pageWidth, 1, 'F');
+          }
+        }
+      };
+
+      const addWatermark = () => {
+        if (settings.branding.watermarkText) {
+          pdf.setFont(fontFamily, 'bold');
+          pdf.setFontSize(60);
+          pdf.setTextColor(150, 150, 150);
+          
+          // Save graphics state
+          const currentOpacity = settings.branding.watermarkOpacity;
+          
+          // Add watermark text diagonally
+          pdf.saveGraphicsState();
+          pdf.setGState(pdf.GState({ opacity: currentOpacity }));
+          
+          // Rotate and position watermark
+          const centerX = pageWidth / 2;
+          const centerY = pageHeight / 2;
+          
+          pdf.text(settings.branding.watermarkText.toUpperCase(), centerX, centerY, {
+            align: 'center',
+            angle: 45
+          });
+          
+          pdf.restoreGraphicsState();
           pdf.setTextColor(0, 0, 0);
         }
       };
 
-      const addNewPageIfNeeded = (requiredSpace: number) => {
+      const addNewPageIfNeeded = (requiredSpace: number, sectionTitle?: string) => {
         if (yPosition + requiredSpace > pageHeight - margin.bottom) {
           pdf.addPage();
           pageNumber++;
           yPosition = margin.top;
-          addHeader();
+          addHeader(pageNumber % 2 === 1, sectionTitle);
+          addWatermark();
           if (settings.sections.includeHeaders && settings.branding.headerStyle !== 'none') {
             yPosition = margin.top + 8;
           }
@@ -171,21 +249,27 @@ export function ManualPrintPreview({
           pdf.setTextColor(primaryRgb.r, primaryRgb.g, primaryRgb.b);
         }
 
+        pdf.setFont(fontFamily, 'normal');
         pdf.setFontSize(14);
         pdf.text(brandColors.companyName, pageWidth / 2, pageHeight / 3, { align: 'center' });
 
         pdf.setFontSize(28);
-        pdf.setFont('helvetica', 'bold');
+        pdf.setFont(fontFamily, 'bold');
         pdf.text('Appraisals Administrator', pageWidth / 2, pageHeight / 2 - 5, { align: 'center' });
         pdf.text('Manual', pageWidth / 2, pageHeight / 2 + 10, { align: 'center' });
 
         pdf.setFontSize(10);
-        pdf.setFont('helvetica', 'normal');
+        pdf.setFont(fontFamily, 'normal');
         const versionY = settings.branding.coverStyle === 'corporate' ? pageHeight - 35 : pageHeight - 30;
         if (settings.branding.coverStyle === 'corporate') {
           pdf.setTextColor(255, 255, 255);
         }
-        pdf.text(`Version 1.3.0 | ${new Date().toLocaleDateString()}`, pageWidth / 2, versionY, { align: 'center' });
+        
+        let versionText = `Version 1.3.0 | ${new Date().toLocaleDateString()}`;
+        if (settings.sections.documentId) {
+          versionText = `${settings.sections.documentId} | ${versionText}`;
+        }
+        pdf.text(versionText, pageWidth / 2, versionY, { align: 'center' });
 
         pdf.addPage();
         pageNumber++;
@@ -194,19 +278,20 @@ export function ManualPrintPreview({
 
       // Table of Contents
       if (settings.sections.includeTableOfContents) {
-        addHeader();
+        addHeader(pageNumber % 2 === 1);
+        addWatermark();
         if (settings.sections.includeHeaders && settings.branding.headerStyle !== 'none') {
           yPosition = margin.top + 8;
         }
 
         pdf.setTextColor(primaryRgb.r, primaryRgb.g, primaryRgb.b);
         pdf.setFontSize(18);
-        pdf.setFont('helvetica', 'bold');
+        pdf.setFont(fontFamily, 'bold');
         pdf.text('Table of Contents', margin.left, yPosition);
         yPosition += 15;
 
         pdf.setFontSize(10);
-        pdf.setFont('helvetica', 'normal');
+        pdf.setFont(fontFamily, 'normal');
         pdf.setTextColor(0, 0, 0);
 
         const tocItems = [
@@ -220,7 +305,6 @@ export function ManualPrintPreview({
           { title: '8. Troubleshooting & Support', page: 45 },
         ];
 
-        const depth = settings.sections.tocDepth;
         tocItems.forEach((item) => {
           const dotLeader = '.'.repeat(Math.max(0, 60 - item.title.length));
           pdf.text(item.title, margin.left, yPosition);
@@ -229,6 +313,72 @@ export function ManualPrintPreview({
           }
           yPosition += 8;
         });
+
+        pdf.addPage();
+        pageNumber++;
+        yPosition = margin.top;
+      }
+
+      // Revision History page
+      if (settings.sections.includeRevisionHistory) {
+        addHeader(pageNumber % 2 === 1);
+        addWatermark();
+        if (settings.sections.includeHeaders && settings.branding.headerStyle !== 'none') {
+          yPosition = margin.top + 8;
+        }
+
+        pdf.setTextColor(primaryRgb.r, primaryRgb.g, primaryRgb.b);
+        pdf.setFontSize(18);
+        pdf.setFont(fontFamily, 'bold');
+        pdf.text('Revision History', margin.left, yPosition);
+        yPosition += 12;
+
+        if (settings.sections.documentId) {
+          pdf.setFontSize(9);
+          pdf.setFont(fontFamily, 'normal');
+          pdf.setTextColor(100, 100, 100);
+          pdf.text(`Document ID: ${settings.sections.documentId}`, margin.left, yPosition);
+          yPosition += 8;
+        }
+
+        // Table headers
+        pdf.setFontSize(10);
+        pdf.setFont(fontFamily, 'bold');
+        pdf.setTextColor(0, 0, 0);
+        pdf.text('Version', margin.left, yPosition);
+        pdf.text('Date', margin.left + 25, yPosition);
+        pdf.text('Author', margin.left + 55, yPosition);
+        pdf.text('Description', margin.left + 90, yPosition);
+        yPosition += 5;
+        
+        // Divider line
+        pdf.setDrawColor(primaryRgb.r, primaryRgb.g, primaryRgb.b);
+        pdf.setLineWidth(0.5);
+        pdf.line(margin.left, yPosition, pageWidth - margin.right, yPosition);
+        yPosition += 5;
+
+        // Revision entries
+        const revisions = [
+          { version: '1.3.0', date: '2026-01-02', author: 'System', description: 'Added AI-assisted features documentation' },
+          { version: '1.2.0', date: '2025-11-15', author: 'System', description: 'Updated calibration workflows' },
+          { version: '1.1.0', date: '2025-09-01', author: 'System', description: 'Added cross-module integration' },
+          { version: '1.0.0', date: '2025-06-01', author: 'System', description: 'Initial release' },
+        ];
+
+        pdf.setFont(fontFamily, 'normal');
+        pdf.setFontSize(9);
+        revisions.forEach((rev) => {
+          pdf.text(rev.version, margin.left, yPosition);
+          pdf.text(rev.date, margin.left + 25, yPosition);
+          pdf.text(rev.author, margin.left + 55, yPosition);
+          pdf.text(rev.description, margin.left + 90, yPosition);
+          yPosition += 6;
+        });
+
+        yPosition += 10;
+        pdf.setFontSize(8);
+        pdf.setTextColor(100, 100, 100);
+        pdf.text('This document is controlled. Printed copies are uncontrolled.', margin.left, yPosition);
 
         pdf.addPage();
         pageNumber++;
@@ -249,29 +399,79 @@ export function ManualPrintPreview({
 
       pdf.setTextColor(0, 0, 0);
 
-      parts.forEach((part) => {
-        addNewPageIfNeeded(25);
+      parts.forEach((part, partIndex) => {
+        // Chapter title page if enabled
+        if (settings.sections.chapterStartsNewPage && partIndex > 0) {
+          pdf.addPage();
+          pageNumber++;
+          
+          if (settings.branding.coverStyle === 'branded') {
+            pdf.setFillColor(primaryRgb.r, primaryRgb.g, primaryRgb.b);
+            pdf.rect(0, 0, pageWidth, pageHeight, 'F');
+            pdf.setTextColor(255, 255, 255);
+          } else if (settings.branding.coverStyle === 'corporate') {
+            pdf.setFillColor(secondaryRgb.r, secondaryRgb.g, secondaryRgb.b);
+            pdf.rect(0, 0, pageWidth, 8, 'F');
+            pdf.setFillColor(primaryRgb.r, primaryRgb.g, primaryRgb.b);
+            pdf.rect(0, pageHeight - 40, pageWidth, 40, 'F');
+            pdf.setTextColor(primaryRgb.r, primaryRgb.g, primaryRgb.b);
+          } else {
+            pdf.setDrawColor(primaryRgb.r, primaryRgb.g, primaryRgb.b);
+            pdf.setLineWidth(2);
+            pdf.line(margin.left, pageHeight / 2 + 20, margin.left + 40, pageHeight / 2 + 20);
+            pdf.setTextColor(primaryRgb.r, primaryRgb.g, primaryRgb.b);
+          }
+
+          pdf.setFont(fontFamily, 'normal');
+          pdf.setFontSize(12);
+          pdf.text(`Chapter ${partIndex + 1}`, pageWidth / 2, pageHeight / 2 - 20, { align: 'center' });
+          
+          pdf.setFont(fontFamily, 'bold');
+          pdf.setFontSize(24);
+          pdf.text(part.title.replace(/^\d+\.\s*/, ''), pageWidth / 2, pageHeight / 2, { align: 'center' });
+
+          pdf.addPage();
+          pageNumber++;
+          yPosition = margin.top;
+        }
+
+        addNewPageIfNeeded(25, part.title);
+        addHeader(pageNumber % 2 === 1, part.title);
+        addWatermark();
+        
+        if (settings.sections.includeHeaders && settings.branding.headerStyle !== 'none') {
+          yPosition = Math.max(yPosition, margin.top + 15);
+        }
+
+        pdf.setFont(fontFamily, 'bold');
         pdf.setFontSize(settings.formatting.headingFontSize);
-        pdf.setFont('helvetica', 'bold');
         pdf.setTextColor(primaryRgb.r, primaryRgb.g, primaryRgb.b);
         pdf.text(part.title, margin.left, yPosition);
         yPosition += 12;
         pdf.setTextColor(0, 0, 0);
 
+        // Section divider
+        if (settings.sections.includeSectionDividers) {
+          pdf.setDrawColor(secondaryRgb.r, secondaryRgb.g, secondaryRgb.b);
+          pdf.setLineWidth(0.5);
+          pdf.line(margin.left, yPosition - 4, margin.left + 40, yPosition - 4);
+          yPosition += 4;
+        }
+
         part.sections.forEach((section) => {
-          addNewPageIfNeeded(20);
+          addNewPageIfNeeded(20, part.title);
 
           pdf.setFontSize(12);
-          pdf.setFont('helvetica', 'bold');
+          pdf.setFont(fontFamily, 'bold');
           pdf.text(section.title, margin.left, yPosition);
           yPosition += 7;
 
           pdf.setFontSize(settings.formatting.baseFontSize);
-          pdf.setFont('helvetica', 'normal');
+          pdf.setFont(fontFamily, 'normal');
 
           section.content.forEach((line) => {
             const lines = pdf.splitTextToSize(line, contentWidth);
-            addNewPageIfNeeded(lines.length * 5);
+            addNewPageIfNeeded(lines.length * 5, part.title);
             pdf.text(lines, margin.left, yPosition);
             yPosition += lines.length * 5 * settings.formatting.lineHeight;
           });
@@ -288,6 +488,7 @@ export function ManualPrintPreview({
 
       for (let i = 1; i <= totalPgs; i++) {
         pdf.setPage(i);
+        pdf.setFont(fontFamily, 'normal');
         pdf.setFontSize(9);
         pdf.setTextColor(100, 100, 100);
 
@@ -326,7 +527,36 @@ export function ManualPrintPreview({
         // Footer content
         if (settings.sections.includeFooters && i > skipCover) {
           pdf.setFontSize(8);
+          
+          // Bottom accent line
+          if (settings.branding.showBottomBorderAccent) {
+            pdf.setFillColor(secondaryRgb.r, secondaryRgb.g, secondaryRgb.b);
+            pdf.rect(0, pageHeight - 20, pageWidth, 0.5, 'F');
+          }
+          
+          // Footer text
           pdf.text(settings.sections.footerContent, margin.left, pageHeight - 15);
+          
+          // Metadata line
+          const metadataItems: string[] = [];
+          if (settings.sections.effectiveDate) {
+            metadataItems.push(`Effective: ${settings.sections.effectiveDate}`);
+          }
+          if (settings.sections.showLastUpdated) {
+            metadataItems.push(`Updated: ${new Date().toLocaleDateString()}`);
+          }
+          if (settings.sections.showPrintDate) {
+            metadataItems.push(`Printed: ${new Date().toLocaleDateString()}`);
+          }
+          
+          if (metadataItems.length > 0) {
+            pdf.text(metadataItems.join(' | '), margin.left, pageHeight - 11);
+          }
+          
+          // Copyright
+          if (settings.sections.copyrightText) {
+            pdf.text(settings.sections.copyrightText, pageWidth - margin.right, pageHeight - 15, { align: 'right' });
+          }
         }
       }
 
@@ -452,12 +682,21 @@ export function ManualPrintPreview({
                   position: 'relative'
                 }}
               >
+                {settings.branding.watermarkText && (
+                  <Watermark 
+                    text={settings.branding.watermarkText}
+                    opacity={settings.branding.watermarkOpacity}
+                  />
+                )}
                 {settings.sections.includeHeaders && (
                   <PrintHeader 
                     content={settings.sections.headerContent}
                     style={settings.branding.headerStyle}
                     brandColors={brandColors}
                     logoUrl={brandColors.logoUrl}
+                    showVersion={settings.sections.showVersionInHeader}
+                    documentId={settings.sections.documentId}
+                    showAccentLine={settings.branding.showHeaderAccentLine}
                   />
                 )}
                 <div className="flex-1 overflow-hidden">
@@ -475,8 +714,86 @@ export function ManualPrintPreview({
                     position={settings.sections.pageNumberPosition}
                     format={settings.sections.pageNumberFormat}
                     brandColors={brandColors}
+                    style={settings.branding.footerStyle}
+                    copyrightText={settings.sections.copyrightText}
+                    showPrintDate={settings.sections.showPrintDate}
+                    showLastUpdated={settings.sections.showLastUpdated}
+                    effectiveDate={settings.sections.effectiveDate}
+                    showBottomAccent={settings.branding.showBottomBorderAccent}
                   />
                 )}
+              </div>
+            )}
+
+            {/* Revision History Page */}
+            {settings.sections.includeRevisionHistory && (
+              <div 
+                className="bg-white shadow-lg rounded overflow-hidden flex flex-col flex-shrink-0"
+                style={{ 
+                  width: '210mm',
+                  height: '297mm',
+                  position: 'relative'
+                }}
+              >
+                {settings.branding.watermarkText && (
+                  <Watermark 
+                    text={settings.branding.watermarkText}
+                    opacity={settings.branding.watermarkOpacity}
+                  />
+                )}
+                {settings.sections.includeHeaders && (
+                  <PrintHeader 
+                    content={settings.sections.headerContent}
+                    style={settings.branding.headerStyle}
+                    brandColors={brandColors}
+                    logoUrl={brandColors.logoUrl}
+                    showVersion={settings.sections.showVersionInHeader}
+                    documentId={settings.sections.documentId}
+                    showAccentLine={settings.branding.showHeaderAccentLine}
+                  />
+                )}
+                <div className="flex-1 overflow-hidden">
+                  <RevisionHistory
+                    brandColors={brandColors}
+                    documentId={settings.sections.documentId}
+                  />
+                </div>
+                {settings.sections.includeFooters && (
+                  <PrintFooter
+                    content={settings.sections.footerContent}
+                    pageNumber={3}
+                    totalPages={totalPages}
+                    position={settings.sections.pageNumberPosition}
+                    format={settings.sections.pageNumberFormat}
+                    brandColors={brandColors}
+                    style={settings.branding.footerStyle}
+                    copyrightText={settings.sections.copyrightText}
+                    showPrintDate={settings.sections.showPrintDate}
+                    showLastUpdated={settings.sections.showLastUpdated}
+                    effectiveDate={settings.sections.effectiveDate}
+                    showBottomAccent={settings.branding.showBottomBorderAccent}
+                  />
+                )}
+              </div>
+            )}
+
+            {/* Chapter Title Page Sample */}
+            {settings.sections.chapterStartsNewPage && (
+              <div 
+                className="bg-white shadow-lg rounded overflow-hidden flex-shrink-0"
+                style={{ 
+                  width: '210mm',
+                  height: '297mm',
+                  position: 'relative'
+                }}
+              >
+                <ChapterTitlePage
+                  chapterNumber={1}
+                  title="Module Overview & Conceptual Foundation"
+                  description="Understanding the architecture and philosophy behind the HRplus Appraisals module"
+                  brandColors={brandColors}
+                  style={settings.branding.coverStyle}
+                />
               </div>
             )}
 
@@ -489,6 +806,12 @@ export function ManualPrintPreview({
                 position: 'relative'
               }}
             >
+              {settings.branding.watermarkText && (
+                <Watermark 
+                  text={settings.branding.watermarkText}
+                  opacity={settings.branding.watermarkOpacity}
+                />
+              )}
               {settings.sections.includeHeaders && (
                 <PrintHeader 
                   content={settings.sections.headerContent}
@@ -496,18 +819,39 @@ export function ManualPrintPreview({
                   brandColors={brandColors}
                   sectionTitle="1. Module Overview"
                   logoUrl={brandColors.logoUrl}
+                  showVersion={settings.sections.showVersionInHeader}
+                  documentId={settings.sections.documentId}
+                  showAccentLine={settings.branding.showHeaderAccentLine}
+                  useAlternating={settings.sections.useAlternatingHeaders}
+                  alternateContentLeft={settings.sections.alternateHeaderLeft}
+                  alternateContentRight={settings.sections.alternateHeaderRight}
                 />
               )}
               
               <div className="flex-1 p-12 overflow-hidden">
                 <h2 
-                  className="text-2xl font-bold mb-6"
-                  style={{ color: brandColors.primaryColor }}
+                  className="text-2xl font-bold mb-4"
+                  style={{ 
+                    color: brandColors.primaryColor,
+                    fontFamily: settings.formatting.headingFontFamily === 'inherit' 
+                      ? settings.formatting.fontFamily 
+                      : settings.formatting.headingFontFamily
+                  }}
                 >
                   1. Module Overview & Conceptual Foundation
                 </h2>
                 
-                <div className="prose prose-sm max-w-none">
+                {settings.sections.includeSectionDividers && (
+                  <div 
+                    className="h-0.5 w-16 mb-6"
+                    style={{ backgroundColor: brandColors.secondaryColor }}
+                  />
+                )}
+                
+                <div 
+                  className="prose prose-sm max-w-none"
+                  style={{ fontFamily: settings.formatting.fontFamily }}
+                >
                   <h3 className="text-lg font-semibold mb-3">1.1 Introduction to Appraisals in HRplus</h3>
                   <p className="text-muted-foreground leading-relaxed mb-4">
                     The HRplus Performance Appraisals module is a comprehensive, enterprise-grade solution designed to manage the complete performance evaluation lifecycle. This module integrates seamlessly with other HRplus components to create an intelligent talent management ecosystem.
@@ -517,12 +861,23 @@ export function ManualPrintPreview({
                   </p>
                   
                   <h3 className="text-lg font-semibold mb-3 mt-6">Key Features</h3>
-                  <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
-                    <li>Multi-dimensional evaluation using the CRGV model (Competencies, Responsibilities, Goals, Values)</li>
-                    <li>Configurable rating scales and weighting systems</li>
-                    <li>AI-assisted narrative generation and calibration</li>
-                    <li>360-degree feedback integration</li>
-                    <li>Automatic downstream actions (PIP, IDP, Succession)</li>
+                  <ul 
+                    className="pl-6 space-y-2 text-muted-foreground"
+                    style={{ 
+                      listStyleType: settings.formatting.showBulletColors ? 'none' : 'disc',
+                    }}
+                  >
+                    {['Multi-dimensional evaluation using the CRGV model', 'Configurable rating scales and weighting systems', 'AI-assisted narrative generation and calibration', '360-degree feedback integration', 'Automatic downstream actions (PIP, IDP, Succession)'].map((item, i) => (
+                      <li key={i} className="flex items-start gap-2">
+                        {settings.formatting.showBulletColors && (
+                          <span 
+                            className="w-2 h-2 rounded-full mt-1.5 flex-shrink-0"
+                            style={{ backgroundColor: brandColors.primaryColor }}
+                          />
+                        )}
+                        <span>{item}</span>
+                      </li>
+                    ))}
                   </ul>
                 </div>
               </div>
@@ -530,11 +885,17 @@ export function ManualPrintPreview({
               {settings.sections.includeFooters && (
                 <PrintFooter
                   content={settings.sections.footerContent}
-                  pageNumber={3}
+                  pageNumber={4}
                   totalPages={totalPages}
                   position={settings.sections.pageNumberPosition}
                   format={settings.sections.pageNumberFormat}
                   brandColors={brandColors}
+                  style={settings.branding.footerStyle}
+                  copyrightText={settings.sections.copyrightText}
+                  showPrintDate={settings.sections.showPrintDate}
+                  showLastUpdated={settings.sections.showLastUpdated}
+                  effectiveDate={settings.sections.effectiveDate}
+                  showBottomAccent={settings.branding.showBottomBorderAccent}
                 />
               )}
             </div>

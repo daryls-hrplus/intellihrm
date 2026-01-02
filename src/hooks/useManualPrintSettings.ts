@@ -22,19 +22,45 @@ export interface PrintSectionsConfig {
   tocDepth: 1 | 2 | 3;
   pageNumberPosition: 'left' | 'center' | 'right';
   pageNumberFormat: 'simple' | 'pageOf' | 'pageOfTotal';
+  // Document metadata
+  documentId: string;
+  effectiveDate: string;
+  showVersionInHeader: boolean;
+  showPrintDate: boolean;
+  showLastUpdated: boolean;
+  copyrightText: string;
+  // Section formatting
+  chapterStartsNewPage: boolean;
+  includeSectionDividers: boolean;
+  // Revision history
+  includeRevisionHistory: boolean;
+  // Alternating headers
+  useAlternatingHeaders: boolean;
+  alternateHeaderLeft: string;
+  alternateHeaderRight: string;
 }
 
 export interface PrintFormattingConfig {
-  fontFamily: string;
+  fontFamily: 'Inter' | 'Arial' | 'Times New Roman' | 'Georgia';
   baseFontSize: number;
   headingFontSize: number;
   lineHeight: number;
+  headingFontFamily: 'inherit' | 'Georgia' | 'Arial';
+  showBulletColors: boolean;
+  calloutStyle: 'boxed' | 'bordered' | 'highlighted';
 }
 
 export interface PrintBrandingConfig {
   applyBrandColors: boolean;
   coverStyle: 'branded' | 'minimal' | 'corporate';
   headerStyle: 'branded' | 'simple' | 'none';
+  footerStyle: 'branded' | 'simple';
+  // Watermark
+  watermarkText: string;
+  watermarkOpacity: number;
+  // Accents
+  showBottomBorderAccent: boolean;
+  showHeaderAccentLine: boolean;
 }
 
 export interface ManualPrintSettings {
@@ -61,18 +87,42 @@ const DEFAULT_PRINT_SETTINGS: ManualPrintSettings = {
     footerContent: 'Confidential - Internal Use Only',
     tocDepth: 2,
     pageNumberPosition: 'right',
-    pageNumberFormat: 'pageOfTotal'
+    pageNumberFormat: 'pageOfTotal',
+    // Document metadata
+    documentId: '',
+    effectiveDate: '',
+    showVersionInHeader: true,
+    showPrintDate: true,
+    showLastUpdated: true,
+    copyrightText: '',
+    // Section formatting
+    chapterStartsNewPage: true,
+    includeSectionDividers: true,
+    // Revision history
+    includeRevisionHistory: false,
+    // Alternating headers
+    useAlternatingHeaders: false,
+    alternateHeaderLeft: '',
+    alternateHeaderRight: ''
   },
   formatting: {
     fontFamily: 'Inter',
     baseFontSize: 11,
     headingFontSize: 16,
-    lineHeight: 1.5
+    lineHeight: 1.5,
+    headingFontFamily: 'inherit',
+    showBulletColors: true,
+    calloutStyle: 'boxed'
   },
   branding: {
     applyBrandColors: true,
     coverStyle: 'branded',
-    headerStyle: 'branded'
+    headerStyle: 'branded',
+    footerStyle: 'simple',
+    watermarkText: '',
+    watermarkOpacity: 0.08,
+    showBottomBorderAccent: false,
+    showHeaderAccentLine: true
   }
 };
 
@@ -81,7 +131,7 @@ const parseConfig = <T>(config: Json | null, fallback: T): T => {
   if (!config || typeof config !== 'object' || Array.isArray(config)) {
     return fallback;
   }
-  return config as unknown as T;
+  return { ...fallback, ...config as unknown as T };
 };
 
 export const useManualPrintSettings = (manualType: string = 'Appraisals Admin Manual') => {
