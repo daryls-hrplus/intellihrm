@@ -96,11 +96,21 @@ export function ManualSetupSection({ selectedSectionId }: ManualSetupSectionProp
             </div>
           </AccordionTrigger>
           <AccordionContent className="pt-4 space-y-6">
-            <SetupPrerequisites />
-            <SetupRatingScales />
-            <SetupOverallScales />
-            <SetupCompetencies />
-            <SetupApprovalWorkflows />
+            <section id="sec-2-1" data-manual-anchor="sec-2-1" className="scroll-mt-32">
+              <SetupPrerequisites />
+            </section>
+            <section id="sec-2-2" data-manual-anchor="sec-2-2" className="scroll-mt-32">
+              <SetupRatingScales />
+            </section>
+            <section id="sec-2-3" data-manual-anchor="sec-2-3" className="scroll-mt-32">
+              <SetupOverallScales />
+            </section>
+            <section id="sec-2-4" data-manual-anchor="sec-2-4" className="scroll-mt-32">
+              <SetupCompetencies />
+            </section>
+            <section id="sec-2-1-workflows" data-manual-anchor="sec-2-1-workflows" className="scroll-mt-32">
+              <SetupApprovalWorkflows />
+            </section>
           </AccordionContent>
         </AccordionItem>
 
@@ -121,16 +131,36 @@ export function ManualSetupSection({ selectedSectionId }: ManualSetupSectionProp
             </div>
           </AccordionTrigger>
           <AccordionContent className="pt-4 space-y-6">
-            <SetupFormTemplates />
-            <SetupAppraisalCycles />
-            <SetupPerformanceCategories />
-            <SetupActionRules />
-            <SetupIntegrationRules />
-            <SetupEmployeeResponse />
-            <SetupHREscalations />
-            <SetupMultiPositionAppraisals />
-            <SetupIndexSettings />
-            <SetupBenchmarks />
+            <section id="sec-2-5" data-manual-anchor="sec-2-5" className="scroll-mt-32">
+              <SetupFormTemplates />
+            </section>
+            <section id="sec-2-6" data-manual-anchor="sec-2-6" className="scroll-mt-32">
+              <SetupAppraisalCycles />
+            </section>
+            <section id="sec-2-7" data-manual-anchor="sec-2-7" className="scroll-mt-32">
+              <SetupPerformanceCategories />
+            </section>
+            <section id="sec-2-8" data-manual-anchor="sec-2-8" className="scroll-mt-32">
+              <SetupActionRules />
+            </section>
+            <section id="sec-2-9" data-manual-anchor="sec-2-9" className="scroll-mt-32">
+              <SetupIntegrationRules />
+            </section>
+            <section id="sec-2-10" data-manual-anchor="sec-2-10" className="scroll-mt-32">
+              <SetupEmployeeResponse />
+            </section>
+            <section id="sec-2-11" data-manual-anchor="sec-2-11" className="scroll-mt-32">
+              <SetupHREscalations />
+            </section>
+            <section id="sec-2-12" data-manual-anchor="sec-2-12" className="scroll-mt-32">
+              <SetupMultiPositionAppraisals />
+            </section>
+            <section id="sec-2-13" data-manual-anchor="sec-2-13" className="scroll-mt-32">
+              <SetupIndexSettings />
+            </section>
+            <section id="sec-2-14" data-manual-anchor="sec-2-14" className="scroll-mt-32">
+              <SetupBenchmarks />
+            </section>
           </AccordionContent>
         </AccordionItem>
       </Accordion>

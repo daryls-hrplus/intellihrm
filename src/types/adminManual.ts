@@ -367,6 +367,34 @@ export const APPRAISALS_MANUAL_STRUCTURE: ManualSection[] = [
           timing: 'Post basic setup',
           benchmark: 'Aggregate vs Separate evaluation modes'
         }
+      },
+      {
+        id: 'sec-2-13',
+        sectionNumber: '2.13',
+        title: 'Index Settings',
+        description: 'Multi-cycle performance index calculation',
+        contentLevel: 'procedure',
+        estimatedReadTime: 10,
+        targetRoles: ['Admin', 'Consultant'],
+        industryContext: {
+          frequency: 'Annual review',
+          timing: 'After initial cycles',
+          benchmark: 'Weighted historical performance aggregation'
+        }
+      },
+      {
+        id: 'sec-2-14',
+        sectionNumber: '2.14',
+        title: 'Benchmarks',
+        description: 'Distribution targets for calibration',
+        contentLevel: 'procedure',
+        estimatedReadTime: 12,
+        targetRoles: ['Admin', 'Consultant'],
+        industryContext: {
+          frequency: 'Annual review',
+          timing: 'Pre-calibration season',
+          benchmark: 'Bell curve or custom distribution targets'
+        }
       }
     ]
   },
