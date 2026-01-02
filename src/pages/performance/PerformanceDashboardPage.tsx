@@ -28,6 +28,7 @@ import {
   UserCheck,
   Briefcase,
   AlertCircle,
+  Brain,
   PieChart,
 } from "lucide-react";
 
@@ -57,8 +58,7 @@ export default function PerformanceDashboardPage() {
     benchStrength: { title: "Bench Strength", description: "Evaluate succession readiness", href: "/succession/bench-strength", icon: UserCheck, color: "bg-lime-500/10 text-lime-600", tabCode: "bench_strength" },
     successionAnalytics: { title: "Succession Analytics", description: "Insights on talent pipeline health", href: "/succession/analytics", icon: BarChart3, color: "bg-gray-500/10 text-gray-600", tabCode: "succession_analytics" },
     // Analytics & Configuration
-    analytics: { title: t('performance.modules.analytics'), description: t('performance.modules.analyticsDesc'), href: "/performance/analytics", icon: BarChart3, color: "bg-muted text-muted-foreground", tabCode: "analytics" },
-    appraisalAnalytics: { title: "Appraisal Analytics", description: "Distribution, scoring patterns & AI insights", href: "/performance/appraisal-analytics", icon: PieChart, color: "bg-teal-500/10 text-teal-600", tabCode: "appraisal_analytics" },
+    intelligenceHub: { title: "Performance Intelligence Hub", description: "Unified analytics, insights, and AI predictions", href: "/performance/intelligence-hub", icon: Brain, color: "bg-gradient-to-br from-primary/10 to-purple-500/10 text-primary", tabCode: "analytics" },
     setup: { title: t('performance.modules.setup', 'Setup'), description: t('performance.modules.setupDesc', 'Configure performance settings'), href: "/performance/setup", icon: Settings, color: "bg-slate-500/10 text-slate-600", tabCode: "setup" },
   };
 
@@ -92,7 +92,7 @@ export default function PerformanceDashboardPage() {
     },
     {
       titleKey: "Analytics",
-      items: filterByAccess([allModules.analytics, allModules.appraisalAnalytics, allModules.successionAnalytics]),
+      items: filterByAccess([allModules.intelligenceHub, allModules.successionAnalytics]),
     },
     {
       titleKey: "Talent Setup",
