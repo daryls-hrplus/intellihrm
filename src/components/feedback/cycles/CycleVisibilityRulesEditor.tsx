@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -12,11 +11,11 @@ import {
   Shield, 
   Clock, 
   Bell,
-  Eye,
   MessageSquare,
   BarChart3,
   Users
 } from "lucide-react";
+import { IndividualResponseAccessSelector, type IndividualAccessMode } from "./IndividualResponseAccessSelector";
 
 export interface AccessLevelConfig {
   enabled: boolean;
@@ -27,7 +26,7 @@ export interface AccessLevelConfig {
 }
 
 export interface HrAccessConfig extends AccessLevelConfig {
-  show_individual_responses: boolean;
+  individual_response_access: IndividualAccessMode;
 }
 
 export interface ReleaseSettings {
@@ -64,7 +63,7 @@ export const DEFAULT_VISIBILITY_RULES: VisibilityRules = {
     show_scores: true,
     show_comments: true,
     show_reviewer_breakdown: true,
-    show_individual_responses: true,
+    individual_response_access: 'never',
     release_trigger: 'immediate',
   },
   release_settings: {
@@ -289,7 +288,7 @@ export function CycleVisibilityRulesEditor({
                     disabled={disabled}
                   />
                 </div>
-                <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30">
+                <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30 sm:col-span-2">
                   <div className="flex items-center gap-2">
                     <Users className="h-4 w-4 text-muted-foreground" />
                     <Label className="text-sm">Show Reviewer Breakdown</Label>
@@ -300,18 +299,15 @@ export function CycleVisibilityRulesEditor({
                     disabled={disabled}
                   />
                 </div>
-                <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30">
-                  <div className="flex items-center gap-2">
-                    <Eye className="h-4 w-4 text-muted-foreground" />
-                    <Label className="text-sm">Show Individual Responses</Label>
-                  </div>
-                  <Switch
-                    checked={value.hr_access.show_individual_responses}
-                    onCheckedChange={(checked) => updateHrAccess({ show_individual_responses: checked })}
-                    disabled={disabled}
-                  />
-                </div>
               </div>
+              
+              <Separator className="my-4" />
+              
+              <IndividualResponseAccessSelector
+                value={value.hr_access.individual_response_access}
+                onChange={(mode) => updateHrAccess({ individual_response_access: mode })}
+                disabled={disabled}
+              />
             </CardContent>
           )}
         </Card>

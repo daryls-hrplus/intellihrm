@@ -21901,6 +21901,129 @@ export type Database = {
           },
         ]
       }
+      feedback_investigation_access_log: {
+        Row: {
+          accessed_by: string
+          action: string
+          created_at: string | null
+          id: string
+          investigation_request_id: string
+          ip_address: string | null
+          responses_viewed: Json | null
+          user_agent: string | null
+        }
+        Insert: {
+          accessed_by: string
+          action: string
+          created_at?: string | null
+          id?: string
+          investigation_request_id: string
+          ip_address?: string | null
+          responses_viewed?: Json | null
+          user_agent?: string | null
+        }
+        Update: {
+          accessed_by?: string
+          action?: string
+          created_at?: string | null
+          id?: string
+          investigation_request_id?: string
+          ip_address?: string | null
+          responses_viewed?: Json | null
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedback_investigation_access_log_investigation_request_id_fkey"
+            columns: ["investigation_request_id"]
+            isOneToOne: false
+            referencedRelation: "feedback_investigation_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      feedback_investigation_requests: {
+        Row: {
+          access_count: number | null
+          approved_at: string | null
+          approved_by: string | null
+          company_id: string | null
+          created_at: string | null
+          cycle_id: string | null
+          denial_reason: string | null
+          expires_at: string | null
+          id: string
+          last_accessed_at: string | null
+          legal_reference: string | null
+          request_reason: string
+          request_type: string
+          requested_by: string
+          status: string
+          target_employee_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          access_count?: number | null
+          approved_at?: string | null
+          approved_by?: string | null
+          company_id?: string | null
+          created_at?: string | null
+          cycle_id?: string | null
+          denial_reason?: string | null
+          expires_at?: string | null
+          id?: string
+          last_accessed_at?: string | null
+          legal_reference?: string | null
+          request_reason: string
+          request_type: string
+          requested_by: string
+          status?: string
+          target_employee_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          access_count?: number | null
+          approved_at?: string | null
+          approved_by?: string | null
+          company_id?: string | null
+          created_at?: string | null
+          cycle_id?: string | null
+          denial_reason?: string | null
+          expires_at?: string | null
+          id?: string
+          last_accessed_at?: string | null
+          legal_reference?: string | null
+          request_reason?: string
+          request_type?: string
+          requested_by?: string
+          status?: string
+          target_employee_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedback_investigation_requests_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_investigation_requests_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "review_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_investigation_requests_target_employee_id_fkey"
+            columns: ["target_employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       feedback_remeasurement_plans: {
         Row: {
           company_id: string | null

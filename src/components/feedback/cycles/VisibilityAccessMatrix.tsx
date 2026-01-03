@@ -1,5 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Check, X, Shield } from "lucide-react";
+import { Check, X, Shield, AlertTriangle } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import type { VisibilityRules } from "./CycleVisibilityRulesEditor";
 
 interface VisibilityAccessMatrixProps {
@@ -14,7 +15,21 @@ export function VisibilityAccessMatrix({ rules }: VisibilityAccessMatrixProps) {
     { key: 'individual', label: 'Individual Responses' },
   ];
 
-  const getAccessIcon = (hasAccess: boolean) => {
+  const getAccessIcon = (hasAccess: boolean | 'investigation') => {
+    if (hasAccess === 'investigation') {
+      return (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger>
+              <AlertTriangle className="h-4 w-4 text-warning" />
+            </TooltipTrigger>
+            <TooltipContent>
+              <p className="text-xs">Requires approved investigation request</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      );
+    }
     return hasAccess ? (
       <Check className="h-4 w-4 text-success" />
     ) : (
@@ -22,7 +37,7 @@ export function VisibilityAccessMatrix({ rules }: VisibilityAccessMatrixProps) {
     );
   };
 
-  const checkAccess = (role: 'employee' | 'manager' | 'hr', element: string): boolean => {
+  const checkAccess = (role: 'employee' | 'manager' | 'hr', element: string): boolean | 'investigation' => {
     const access = role === 'employee' 
       ? rules.employee_access 
       : role === 'manager' 
@@ -39,7 +54,11 @@ export function VisibilityAccessMatrix({ rules }: VisibilityAccessMatrixProps) {
       case 'breakdown':
         return access.show_reviewer_breakdown;
       case 'individual':
-        return role === 'hr' && (rules.hr_access as any).show_individual_responses;
+        if (role !== 'hr') return false;
+        const hrAccess = rules.hr_access;
+        if (hrAccess.individual_response_access === 'always') return true;
+        if (hrAccess.individual_response_access === 'investigation_only') return 'investigation';
+        return false;
       default:
         return false;
     }
@@ -91,6 +110,17 @@ export function VisibilityAccessMatrix({ rules }: VisibilityAccessMatrixProps) {
             </tbody>
           </table>
         </div>
+        
+        {rules.hr_access.individual_response_access === 'investigation_only' && (
+          <div className="mt-4 flex items-start gap-2 p-3 rounded-lg bg-warning/10 border border-warning/20">
+            <AlertTriangle className="h-4 w-4 text-warning mt-0.5 shrink-0" />
+            <p className="text-xs text-muted-foreground">
+              <span className="font-medium text-foreground">Investigation Mode Active:</span>{' '}
+              Individual responses require a formal investigation request approved by an HR Director. 
+              All access is logged and auditable.
+            </p>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
