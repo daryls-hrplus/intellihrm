@@ -17,7 +17,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Loader2, Calendar, AlertTriangle, ChevronDown, Copy, Route } from "lucide-react";
+import { Loader2, Calendar, AlertTriangle, ChevronDown, Copy, Route, Eye } from "lucide-react";
+import { CycleVisibilityRulesEditor, VisibilityRules, DEFAULT_VISIBILITY_RULES } from "@/components/feedback/cycles/CycleVisibilityRulesEditor";
+import { VisibilityAccessMatrix } from "@/components/feedback/cycles/VisibilityAccessMatrix";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -78,6 +80,10 @@ export function ReviewCycleDialog({
   const [saving, setSaving] = useState(false);
   const [showTemplates, setShowTemplates] = useState(false);
   const [showRoutingPolicy, setShowRoutingPolicy] = useState(false);
+  const [showVisibilityRules, setShowVisibilityRules] = useState(false);
+  
+  // Visibility rules state
+  const [visibilityRules, setVisibilityRules] = useState<VisibilityRules>(DEFAULT_VISIBILITY_RULES);
   
   // Fetch templates for quick start
   const { data: templates } = useCycleTemplates(companyId);
@@ -210,6 +216,7 @@ export function ReviewCycleDialog({
         created_by: user.id,
         is_manager_cycle: formData.cycle_type === "manager_360",
         cycle_type: formData.cycle_type,
+        visibility_rules: JSON.parse(JSON.stringify(visibilityRules)),
       };
 
       if (cycle) {
@@ -558,6 +565,27 @@ export function ReviewCycleDialog({
                 onChange={setUsagePolicy}
                 disabled={saving}
               />
+            </CollapsibleContent>
+          </Collapsible>
+
+          {/* Results Visibility (Collapsible) */}
+          <Collapsible open={showVisibilityRules} onOpenChange={setShowVisibilityRules}>
+            <CollapsibleTrigger asChild>
+              <Button variant="outline" type="button" className="w-full justify-between">
+                <span className="flex items-center gap-2">
+                  <Eye className="h-4 w-4" />
+                  Results Visibility
+                </span>
+                <ChevronDown className={`h-4 w-4 transition-transform ${showVisibilityRules ? "rotate-180" : ""}`} />
+              </Button>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="pt-3 space-y-4">
+              <CycleVisibilityRulesEditor
+                value={visibilityRules}
+                onChange={setVisibilityRules}
+                disabled={saving}
+              />
+              <VisibilityAccessMatrix rules={visibilityRules} />
             </CollapsibleContent>
           </Collapsible>
 
