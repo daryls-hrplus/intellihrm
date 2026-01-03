@@ -49,7 +49,7 @@ export default function MyDevelopmentThemesPage() {
             My Development Themes
           </h1>
           <p className="text-muted-foreground mt-1">
-            Focus areas identified from your 360° feedback
+            Focus areas identified from your 360° feedback and approved by your manager
           </p>
         </div>
 
@@ -65,6 +65,17 @@ export default function MyDevelopmentThemesPage() {
           </div>
         </div>
       </div>
+
+      {/* Info banner */}
+      <Card className="bg-muted/50 border-muted">
+        <CardContent className="py-3 px-4">
+          <p className="text-sm text-muted-foreground">
+            <strong>Note:</strong> Development themes are generated based on your 360° feedback results 
+            and reviewed by your manager or HR before appearing here. You can confirm themes to 
+            receive personalized recommendations and link them to your development plan.
+          </p>
+        </CardContent>
+      </Card>
 
       {/* Main content */}
       {selectedThemeId && selectedTheme ? (

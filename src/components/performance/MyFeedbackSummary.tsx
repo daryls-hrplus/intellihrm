@@ -11,16 +11,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2, Star, TrendingUp, Users, User, UserCircle, FileDown, Printer, ArrowRight } from "lucide-react";
+import { Loader2, Star, TrendingUp, Users, User, UserCircle, ArrowRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
-import { Feedback360ReportPDF } from "@/components/feedback/reports/Feedback360ReportPDF";
 import { ReportDownloadButton, type ExportFormat } from "@/components/feedback/reports/ReportDownloadButton";
 import { ReportIntroduction } from "@/components/feedback/reports/ReportIntroduction";
 import { ScoreInterpretationGuide } from "@/components/feedback/reports/ScoreInterpretationGuide";
 import { LimitationsDisclaimer } from "@/components/feedback/reports/LimitationsDisclaimer";
-import { Results360DevelopmentBridge } from "@/components/feedback/development/Results360DevelopmentBridge";
 import { generateFeedback360PDF, downloadPDF, type Feedback360ReportData } from "@/utils/feedback360ReportPdf";
 import { toast } from "sonner";
 
@@ -64,7 +62,6 @@ export function MyFeedbackSummary({ participations, cycleId, companyId }: MyFeed
   const [loading, setLoading] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [exportFormat, setExportFormat] = useState<ExportFormat | null>(null);
-  const [showDevelopmentBridge, setShowDevelopmentBridge] = useState(false);
 
   const completedParticipations = participations.filter((p) => p.status === "completed");
   
@@ -138,17 +135,6 @@ export function MyFeedbackSummary({ participations, cycleId, companyId }: MyFeed
       score: scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : 0,
     };
   });
-
-  // Build signals for development bridge (matching SignalSummary interface)
-  const developmentSignals = categoryScores.map((cat, idx) => ({
-    id: `signal-${idx}`,
-    signal_code: cat.name.toLowerCase().replace(/\s+/g, '_'),
-    signal_name: cat.name,
-    category: 'competency',
-    score: cat.score,
-    benchmark_score: 3.5,
-    gap: 3.5 - cat.score,
-  }));
 
   // Collect all comments
   const allComments: { category: string; text: string }[] = [];
@@ -264,13 +250,6 @@ export function MyFeedbackSummary({ participations, cycleId, companyId }: MyFeed
             currentFormat={exportFormat}
             supportedFormats={['pdf', 'print']}
           />
-          <Button 
-            variant="outline" 
-            onClick={() => setShowDevelopmentBridge(!showDevelopmentBridge)}
-          >
-            <TrendingUp className="h-4 w-4 mr-2" />
-            Generate Development Plan
-          </Button>
           <Link to="/ess/my-development-themes">
             <Button variant="ghost" size="sm">
               View My Themes
@@ -294,16 +273,6 @@ export function MyFeedbackSummary({ participations, cycleId, companyId }: MyFeed
         <>
           {/* Score Interpretation Guide */}
           <ScoreInterpretationGuide />
-
-          {/* Development Bridge (collapsible) */}
-          {showDevelopmentBridge && user?.id && (
-            <Results360DevelopmentBridge
-              cycleId={cycleId || selectedParticipation}
-              employeeId={user.id}
-              companyId={companyId || company?.id || ''}
-              signals={developmentSignals}
-            />
-          )}
 
           {/* Overall Scores by Source */}
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
