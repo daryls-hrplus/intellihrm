@@ -2330,13 +2330,16 @@ export type Database = {
           goal_weight: number
           id: string
           include_360_feedback: boolean | null
+          include_360_insights: boolean | null
           include_competencies: boolean | null
           include_goals: boolean | null
           include_responsibilities: boolean | null
           include_values_assessment: boolean | null
+          insights_visibility_level: string | null
           is_locked: boolean | null
           is_manager_cycle: boolean
           is_probation_review: boolean
+          lock_360_insights_at: string | null
           locked_at: string | null
           locked_by: string | null
           max_rating: number
@@ -2371,13 +2374,16 @@ export type Database = {
           goal_weight?: number
           id?: string
           include_360_feedback?: boolean | null
+          include_360_insights?: boolean | null
           include_competencies?: boolean | null
           include_goals?: boolean | null
           include_responsibilities?: boolean | null
           include_values_assessment?: boolean | null
+          insights_visibility_level?: string | null
           is_locked?: boolean | null
           is_manager_cycle?: boolean
           is_probation_review?: boolean
+          lock_360_insights_at?: string | null
           locked_at?: string | null
           locked_by?: string | null
           max_rating?: number
@@ -2412,13 +2418,16 @@ export type Database = {
           goal_weight?: number
           id?: string
           include_360_feedback?: boolean | null
+          include_360_insights?: boolean | null
           include_competencies?: boolean | null
           include_goals?: boolean | null
           include_responsibilities?: boolean | null
           include_values_assessment?: boolean | null
+          insights_visibility_level?: string | null
           is_locked?: boolean | null
           is_manager_cycle?: boolean
           is_probation_review?: boolean
+          lock_360_insights_at?: string | null
           locked_at?: string | null
           locked_by?: string | null
           max_rating?: number
@@ -2486,6 +2495,57 @@ export type Database = {
             columns: ["weights_override_approved_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      appraisal_evidence_usage: {
+        Row: {
+          created_at: string | null
+          evidence_type: string
+          id: string
+          participant_id: string | null
+          reference_timestamp: string | null
+          source_snapshot_id: string | null
+          view_timestamp: string | null
+          was_referenced: boolean | null
+          was_viewed: boolean | null
+        }
+        Insert: {
+          created_at?: string | null
+          evidence_type: string
+          id?: string
+          participant_id?: string | null
+          reference_timestamp?: string | null
+          source_snapshot_id?: string | null
+          view_timestamp?: string | null
+          was_referenced?: boolean | null
+          was_viewed?: boolean | null
+        }
+        Update: {
+          created_at?: string | null
+          evidence_type?: string
+          id?: string
+          participant_id?: string | null
+          reference_timestamp?: string | null
+          source_snapshot_id?: string | null
+          view_timestamp?: string | null
+          was_referenced?: boolean | null
+          was_viewed?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appraisal_evidence_usage_participant_id_fkey"
+            columns: ["participant_id"]
+            isOneToOne: false
+            referencedRelation: "appraisal_participants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appraisal_evidence_usage_source_snapshot_id_fkey"
+            columns: ["source_snapshot_id"]
+            isOneToOne: false
+            referencedRelation: "talent_signal_snapshots"
             referencedColumns: ["id"]
           },
         ]
@@ -11262,6 +11322,136 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      development_recommendations: {
+        Row: {
+          accepted_at: string | null
+          created_at: string | null
+          id: string
+          is_accepted: boolean | null
+          linked_course_ids: string[] | null
+          linked_learning_path_id: string | null
+          priority_order: number | null
+          recommendation_text: string
+          recommendation_type: string
+          theme_id: string | null
+        }
+        Insert: {
+          accepted_at?: string | null
+          created_at?: string | null
+          id?: string
+          is_accepted?: boolean | null
+          linked_course_ids?: string[] | null
+          linked_learning_path_id?: string | null
+          priority_order?: number | null
+          recommendation_text: string
+          recommendation_type: string
+          theme_id?: string | null
+        }
+        Update: {
+          accepted_at?: string | null
+          created_at?: string | null
+          id?: string
+          is_accepted?: boolean | null
+          linked_course_ids?: string[] | null
+          linked_learning_path_id?: string | null
+          priority_order?: number | null
+          recommendation_text?: string
+          recommendation_type?: string
+          theme_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "development_recommendations_theme_id_fkey"
+            columns: ["theme_id"]
+            isOneToOne: false
+            referencedRelation: "development_themes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      development_themes: {
+        Row: {
+          ai_generated: boolean | null
+          company_id: string | null
+          confidence_score: number | null
+          confirmed_at: string | null
+          confirmed_by: string | null
+          created_at: string | null
+          employee_id: string | null
+          id: string
+          is_confirmed: boolean | null
+          signal_ids: string[] | null
+          source_cycle_id: string | null
+          theme_code: string | null
+          theme_description: string | null
+          theme_name: string
+          updated_at: string | null
+        }
+        Insert: {
+          ai_generated?: boolean | null
+          company_id?: string | null
+          confidence_score?: number | null
+          confirmed_at?: string | null
+          confirmed_by?: string | null
+          created_at?: string | null
+          employee_id?: string | null
+          id?: string
+          is_confirmed?: boolean | null
+          signal_ids?: string[] | null
+          source_cycle_id?: string | null
+          theme_code?: string | null
+          theme_description?: string | null
+          theme_name: string
+          updated_at?: string | null
+        }
+        Update: {
+          ai_generated?: boolean | null
+          company_id?: string | null
+          confidence_score?: number | null
+          confirmed_at?: string | null
+          confirmed_by?: string | null
+          created_at?: string | null
+          employee_id?: string | null
+          id?: string
+          is_confirmed?: boolean | null
+          signal_ids?: string[] | null
+          source_cycle_id?: string | null
+          theme_code?: string | null
+          theme_description?: string | null
+          theme_name?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "development_themes_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "development_themes_confirmed_by_fkey"
+            columns: ["confirmed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "development_themes_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "development_themes_source_cycle_id_fkey"
+            columns: ["source_cycle_id"]
+            isOneToOne: false
+            referencedRelation: "feedback_360_cycles"
             referencedColumns: ["id"]
           },
         ]
@@ -21711,6 +21901,70 @@ export type Database = {
           },
         ]
       }
+      feedback_remeasurement_plans: {
+        Row: {
+          company_id: string | null
+          completed_at: string | null
+          created_at: string | null
+          employee_id: string | null
+          focus_areas: Json | null
+          id: string
+          measurement_type: string | null
+          scheduled_date: string
+          source_cycle_id: string | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          company_id?: string | null
+          completed_at?: string | null
+          created_at?: string | null
+          employee_id?: string | null
+          focus_areas?: Json | null
+          id?: string
+          measurement_type?: string | null
+          scheduled_date: string
+          source_cycle_id?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          company_id?: string | null
+          completed_at?: string | null
+          created_at?: string | null
+          employee_id?: string | null
+          focus_areas?: Json | null
+          id?: string
+          measurement_type?: string | null
+          scheduled_date?: string
+          source_cycle_id?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedback_remeasurement_plans_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_remeasurement_plans_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_remeasurement_plans_source_cycle_id_fkey"
+            columns: ["source_cycle_id"]
+            isOneToOne: false
+            referencedRelation: "feedback_360_cycles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       feedback_responses: {
         Row: {
           created_at: string
@@ -29041,6 +29295,51 @@ export type Database = {
             columns: ["goal_id"]
             isOneToOne: false
             referencedRelation: "idp_goals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      idp_feedback_links: {
+        Row: {
+          created_at: string | null
+          id: string
+          idp_id: string | null
+          idp_item_id: string | null
+          link_type: string | null
+          source_cycle_id: string | null
+          source_theme_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          idp_id?: string | null
+          idp_item_id?: string | null
+          link_type?: string | null
+          source_cycle_id?: string | null
+          source_theme_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          idp_id?: string | null
+          idp_item_id?: string | null
+          link_type?: string | null
+          source_cycle_id?: string | null
+          source_theme_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "idp_feedback_links_source_cycle_id_fkey"
+            columns: ["source_cycle_id"]
+            isOneToOne: false
+            referencedRelation: "feedback_360_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "idp_feedback_links_source_theme_id_fkey"
+            columns: ["source_theme_id"]
+            isOneToOne: false
+            referencedRelation: "development_themes"
             referencedColumns: ["id"]
           },
         ]
