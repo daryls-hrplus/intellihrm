@@ -36,7 +36,10 @@ import {
   TabsTrigger,
 } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Plus, Edit, Trash2, MessageSquare, Users, HelpCircle } from "lucide-react";
+import { Plus, Edit, Trash2, MessageSquare, Users, HelpCircle, Sparkles, Route, Copy } from "lucide-react";
+import { SignalDefinitionsManager } from "@/components/feedback/signals/SignalDefinitionsManager";
+import { RoutingPolicyManager } from "@/components/feedback/admin/RoutingPolicyManager";
+import { CycleTemplateLibrary } from "@/components/feedback/templates/CycleTemplateLibrary";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useLanguage } from "@/hooks/useLanguage";
@@ -178,7 +181,7 @@ export function Feedback360ConfigSection({ companyId }: Feedback360ConfigSection
   return (
     <div className="space-y-4">
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="rater-categories" className="flex items-center gap-2">
             <Users className="h-4 w-4" />
             Rater Categories
@@ -186,6 +189,18 @@ export function Feedback360ConfigSection({ companyId }: Feedback360ConfigSection
           <TabsTrigger value="question-bank" className="flex items-center gap-2">
             <HelpCircle className="h-4 w-4" />
             Question Bank
+          </TabsTrigger>
+          <TabsTrigger value="signal-definitions" className="flex items-center gap-2">
+            <Sparkles className="h-4 w-4" />
+            Signal Definitions
+          </TabsTrigger>
+          <TabsTrigger value="routing-policies" className="flex items-center gap-2">
+            <Route className="h-4 w-4" />
+            Routing Policies
+          </TabsTrigger>
+          <TabsTrigger value="cycle-templates" className="flex items-center gap-2">
+            <Copy className="h-4 w-4" />
+            Cycle Templates
           </TabsTrigger>
         </TabsList>
 
@@ -332,6 +347,21 @@ export function Feedback360ConfigSection({ companyId }: Feedback360ConfigSection
               )}
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* Signal Definitions Tab */}
+        <TabsContent value="signal-definitions">
+          <SignalDefinitionsManager companyId={companyId} />
+        </TabsContent>
+
+        {/* Routing Policies Tab */}
+        <TabsContent value="routing-policies">
+          <RoutingPolicyManager companyId={companyId} />
+        </TabsContent>
+
+        {/* Cycle Templates Tab */}
+        <TabsContent value="cycle-templates">
+          <CycleTemplateLibrary companyId={companyId} />
         </TabsContent>
       </Tabs>
 

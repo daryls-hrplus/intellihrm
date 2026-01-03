@@ -16,7 +16,8 @@ import { DatePicker } from "@/components/ui/date-picker";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Loader2, Calendar, AlertTriangle } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Loader2, Calendar, AlertTriangle, ChevronDown, Copy, Route } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -24,6 +25,8 @@ import { format } from "date-fns";
 import { checkCycleOverlap } from "@/utils/cycleOverlapCheck";
 import { useDebouncedCallback } from "@/hooks/use-debounced-callback";
 import { formatDateForDisplay } from "@/utils/dateUtils";
+import { CycleUsagePolicyEditor, CycleUsagePolicy } from "@/components/feedback/cycles/CycleUsagePolicyEditor";
+import { useCycleTemplates } from "@/hooks/feedback/useCycleTemplates";
 
 // Review cycle types
 const REVIEW_CYCLE_TYPES = [
@@ -73,10 +76,28 @@ export function ReviewCycleDialog({
 }: ReviewCycleDialogProps) {
   const { user } = useAuth();
   const [saving, setSaving] = useState(false);
+  const [showTemplates, setShowTemplates] = useState(false);
+  const [showRoutingPolicy, setShowRoutingPolicy] = useState(false);
+  
+  // Fetch templates for quick start
+  const { data: templates } = useCycleTemplates(companyId);
   
   // Overlap detection state
   const [overlappingCycles, setOverlappingCycles] = useState<Array<{ id: string; name: string; start_date: string; end_date: string; cycle_type: string }>>([]);
   const [overlapAcknowledged, setOverlapAcknowledged] = useState(false);
+  
+  // Usage policy state
+  const [usagePolicy, setUsagePolicy] = useState<CycleUsagePolicy>({
+    cycle_purpose: 'development',
+    feed_to_appraisal: false,
+    feed_to_talent_profile: true,
+    feed_to_nine_box: false,
+    feed_to_succession: false,
+    include_in_analytics: true,
+    anonymity_threshold: 3,
+    retention_period_months: 24,
+    ai_tone_setting: 'development',
+  });
 
   // Determine initial cycle_type based on props for backward compatibility
   const getInitialCycleType = (): ReviewCycleType => {
@@ -233,6 +254,57 @@ export function ReviewCycleDialog({
             Configure a 360° feedback review cycle
           </DialogDescription>
         </DialogHeader>
+
+        {/* Quick Start from Template */}
+        {!cycle && templates && templates.length > 0 && (
+          <Collapsible open={showTemplates} onOpenChange={setShowTemplates}>
+            <CollapsibleTrigger asChild>
+              <Button variant="outline" type="button" className="w-full justify-between">
+                <span className="flex items-center gap-2">
+                  <Copy className="h-4 w-4" />
+                  Start from Template ({templates.length} available)
+                </span>
+                <ChevronDown className={`h-4 w-4 transition-transform ${showTemplates ? "rotate-180" : ""}`} />
+              </Button>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="pt-3">
+              <div className="grid gap-2 max-h-40 overflow-y-auto border rounded-md p-2">
+                {templates.map((template) => (
+                  <Button
+                    key={template.id}
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="justify-start h-auto py-2"
+                    onClick={() => {
+                      // Apply template settings to usage policy
+                      setUsagePolicy({
+                        cycle_purpose: template.cycle_purpose || 'development',
+                        feed_to_appraisal: template.feed_to_appraisal || false,
+                        feed_to_talent_profile: template.feed_to_talent_profile ?? true,
+                        feed_to_nine_box: template.feed_to_nine_box || false,
+                        feed_to_succession: template.feed_to_succession || false,
+                        include_in_analytics: template.include_in_analytics ?? true,
+                        anonymity_threshold: template.anonymity_threshold || 3,
+                        retention_period_months: template.retention_period_months || 24,
+                        ai_tone_setting: template.ai_tone_setting || 'development',
+                      });
+                      setShowTemplates(false);
+                      toast.success(`Template "${template.template_name}" applied`);
+                    }}
+                  >
+                    <div className="text-left">
+                      <div className="font-medium">{template.template_name || template.name}</div>
+                      {template.template_description && (
+                        <div className="text-xs text-muted-foreground">{template.template_description}</div>
+                      )}
+                    </div>
+                  </Button>
+                ))}
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Basic Info */}
@@ -468,6 +540,26 @@ export function ReviewCycleDialog({
               </div>
             </>
           )}
+
+          {/* Signal Routing & Policy (Collapsible) */}
+          <Collapsible open={showRoutingPolicy} onOpenChange={setShowRoutingPolicy}>
+            <CollapsibleTrigger asChild>
+              <Button variant="outline" type="button" className="w-full justify-between">
+                <span className="flex items-center gap-2">
+                  <Route className="h-4 w-4" />
+                  Signal Routing & Policy
+                </span>
+                <ChevronDown className={`h-4 w-4 transition-transform ${showRoutingPolicy ? "rotate-180" : ""}`} />
+              </Button>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="pt-3">
+              <CycleUsagePolicyEditor
+                value={usagePolicy}
+                onChange={setUsagePolicy}
+                disabled={saving}
+              />
+            </CollapsibleContent>
+          </Collapsible>
 
           <div className="flex justify-end gap-3 pt-4">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
