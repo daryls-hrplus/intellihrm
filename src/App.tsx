@@ -43,6 +43,8 @@ import AdminLetterTemplatesPage from "./pages/admin/AdminLetterTemplatesPage";
 import AdminLookupValuesPage from "./pages/admin/AdminLookupValuesPage";
 import AdminLmsManagementPage from "./pages/admin/AdminLmsManagementPage";
 import DemoManagementPage from "./pages/admin/DemoManagementPage";
+import DemoAnalyticsDashboard from "./pages/admin/DemoAnalyticsDashboard";
+import ProspectJourneyPage from "./pages/admin/ProspectJourneyPage";
 import AdminOnboardingPage from "./pages/admin/AdminOnboardingPage";
 import AdminOnboardingDetailPage from "./pages/admin/AdminOnboardingDetailPage";
 import AdminColorSchemePage from "./pages/admin/AdminColorSchemePage";
@@ -1475,6 +1477,22 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
                   <DemoManagementPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/demo-analytics"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <DemoAnalyticsDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/demo-analytics/prospect/:sessionId"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <ProspectJourneyPage />
                 </ProtectedRoute>
               }
             />
