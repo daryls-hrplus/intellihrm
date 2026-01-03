@@ -162,8 +162,8 @@ export default function MyDevelopmentPlanPage() {
         <div className="flex items-center gap-3">
           <BookOpen className="h-8 w-8 text-primary" />
           <div>
-            <h1 className="text-2xl font-bold">{t('ess.myDevelopmentPlan.title')}</h1>
-            <p className="text-muted-foreground">{t('ess.myDevelopmentPlan.subtitle')}</p>
+            <h1 className="text-2xl font-bold">{t('ess.myDevelopmentPlan.title', 'My Development Plan')}</h1>
+            <p className="text-muted-foreground">{t('ess.myDevelopmentPlan.subtitle', 'Track your learning goals and career development')}</p>
           </div>
         </div>
 
