@@ -544,6 +544,7 @@ import OperationalInsightsPage from "./pages/insights/OperationalInsightsPage";
 
 // System & Integration pages
 import SystemHubPage from "./pages/system/SystemHubPage";
+import AgentManagementHubPage from "./pages/system/AgentManagementHubPage";
 import APIManagementPage from "./pages/system/APIManagementPage";
 import SystemAuditLogsPage from "./pages/system/AuditLogsPage";
 import SecuritySettingsPage from "./pages/system/SecuritySettingsPage";
@@ -4158,6 +4159,14 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin"]}>
                   <SystemHubPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/system/agents"
+              element={
+                <ProtectedRoute requiredRoles={["admin"]}>
+                  <AgentManagementHubPage />
                 </ProtectedRoute>
               }
             />
