@@ -21,7 +21,15 @@ import {
   Mail,
   Briefcase,
   ChevronRight,
+  Target,
+  FileText,
+  GraduationCap,
+  Calendar,
+  TrendingUp,
+  MessageSquare,
 } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -105,6 +113,33 @@ export default function MssTeamPage() {
           </CardContent>
         </Card>
 
+        {/* What you can manage info */}
+        <Card className="bg-muted/30 border-dashed">
+          <CardContent className="py-4">
+            <p className="text-sm font-medium mb-3">For each team member you can view and manage:</p>
+            <div className="flex flex-wrap gap-2">
+              <Badge variant="outline" className="gap-1">
+                <Target className="h-3 w-3" /> Goals & OKRs
+              </Badge>
+              <Badge variant="outline" className="gap-1">
+                <FileText className="h-3 w-3" /> Performance Reviews
+              </Badge>
+              <Badge variant="outline" className="gap-1">
+                <TrendingUp className="h-3 w-3" /> 360° Feedback
+              </Badge>
+              <Badge variant="outline" className="gap-1">
+                <MessageSquare className="h-3 w-3" /> Continuous Feedback
+              </Badge>
+              <Badge variant="outline" className="gap-1">
+                <GraduationCap className="h-3 w-3" /> Learning & Development
+              </Badge>
+              <Badge variant="outline" className="gap-1">
+                <Calendar className="h-3 w-3" /> Leave & Attendance
+              </Badge>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Team List */}
         <Card>
           <CardHeader>
@@ -146,12 +181,13 @@ export default function MssTeamPage() {
                     <TableHead>Employee</TableHead>
                     <TableHead>Position</TableHead>
                     <TableHead>Contact</TableHead>
+                    <TableHead>Quick Actions</TableHead>
                     <TableHead></TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredReports.map((report) => (
-                    <TableRow key={report.employee_id}>
+                    <TableRow key={report.employee_id} className="group">
                       <TableCell>
                         <div className="flex items-center gap-3">
                           <Avatar className="h-10 w-10">
@@ -179,6 +215,44 @@ export default function MssTeamPage() {
                             </a>
                           </div>
                         )}
+                      </TableCell>
+                      <TableCell>
+                        <TooltipProvider>
+                          <div className="flex items-center gap-1">
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={(e) => { e.stopPropagation(); navigate(`/mss/team/${report.employee_id}?tab=goals`); }}>
+                                  <Target className="h-3.5 w-3.5 text-muted-foreground" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>Goals & OKRs</TooltipContent>
+                            </Tooltip>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={(e) => { e.stopPropagation(); navigate(`/mss/team/${report.employee_id}?tab=performance`); }}>
+                                  <FileText className="h-3.5 w-3.5 text-muted-foreground" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>Performance Reviews</TooltipContent>
+                            </Tooltip>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={(e) => { e.stopPropagation(); navigate(`/mss/team/${report.employee_id}?tab=360-feedback`); }}>
+                                  <TrendingUp className="h-3.5 w-3.5 text-muted-foreground" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>360° Feedback</TooltipContent>
+                            </Tooltip>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={(e) => { e.stopPropagation(); navigate(`/mss/team/${report.employee_id}?tab=learning`); }}>
+                                  <GraduationCap className="h-3.5 w-3.5 text-muted-foreground" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>Learning & Development</TooltipContent>
+                            </Tooltip>
+                          </div>
+                        </TooltipProvider>
                       </TableCell>
                       <TableCell>
                         <Button 
