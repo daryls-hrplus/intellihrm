@@ -27,7 +27,7 @@ export function HeroSection() {
 
           {/* Subheadline */}
           <p className="mt-6 text-lg text-muted-foreground md:text-xl max-w-2xl mx-auto">
-            Enterprise-grade HRMS built for the Caribbean, Africa, and global expansion. 
+            Enterprise-grade HRMS built for the Caribbean, Latin America, Africa, and global expansion.
             Deep regional compliance, embedded intelligence, and seamless cross-module orchestration.
           </p>
 
