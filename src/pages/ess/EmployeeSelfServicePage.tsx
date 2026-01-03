@@ -45,6 +45,7 @@ import {
   FolderOpen,
   Compass,
   Route,
+  Lightbulb,
 } from "lucide-react";
 
 export default function EmployeeSelfServicePage() {
@@ -84,6 +85,7 @@ export default function EmployeeSelfServicePage() {
     notifications: { title: t("ess.modules.notifications.title"), description: t("ess.modules.notifications.description"), href: "/profile/notifications", icon: Bell, color: "bg-amber-500/10 text-amber-600", tabCode: "ess-notifications" },
     myAppraisals: { title: t("ess.modules.myAppraisals.title", "My Appraisals"), description: t("ess.modules.myAppraisals.description", "View and manage your performance appraisals"), href: "/ess/my-appraisals", icon: ClipboardCheck, color: "bg-violet-500/10 text-violet-600", tabCode: "ess-my-appraisals" },
     development: { title: t("ess.modules.development.title", "My Development Plan"), description: t("ess.modules.development.description", "View and manage your development goals"), href: "/ess/development", icon: TrendingUp, color: "bg-purple-500/10 text-purple-600", tabCode: "ess-development" },
+    developmentThemes: { title: t("ess.modules.developmentThemes.title", "My Development Themes"), description: t("ess.modules.developmentThemes.description", "View AI-generated development themes from 360° feedback"), href: "/ess/my-development-themes", icon: Lightbulb, color: "bg-amber-500/10 text-amber-600", tabCode: "ess-development-themes" },
     appraisalInterviews: { title: t("ess.modules.appraisalInterviews.title", "Appraisal Interviews"), description: t("ess.modules.appraisalInterviews.description", "View and prepare for scheduled appraisal meetings"), href: "/ess/appraisal-interviews", icon: Calendar, color: "bg-indigo-500/10 text-indigo-600", tabCode: "ess-appraisal-interviews" },
     goalInterviews: { title: t("ess.modules.goalInterviews.title", "Goal Interviews"), description: t("ess.modules.goalInterviews.description", "View and prepare for goal-setting meetings"), href: "/ess/goal-interviews", icon: Target, color: "bg-pink-500/10 text-pink-600", tabCode: "ess-goal-interviews" },
     timesheets: { title: t("ess.modules.timesheets.title", "My Timesheets"), description: t("ess.modules.timesheets.description", "Submit and view your timesheets"), href: "/ess/timesheets", icon: Clock, color: "bg-blue-500/10 text-blue-600", tabCode: "ess-timesheets" },
@@ -136,7 +138,7 @@ export default function EmployeeSelfServicePage() {
     },
     {
       titleKey: "Learning & Development",
-      items: filterByAccess([allModules.development, allModules.training]),
+      items: filterByAccess([allModules.development, allModules.developmentThemes, allModules.training]),
     },
     {
       titleKey: "Employee Lifecycle",
