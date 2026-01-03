@@ -21208,51 +21208,99 @@ export type Database = {
       }
       feedback_360_cycles: {
         Row: {
+          ai_tone_setting: string | null
+          anonymity_threshold: number | null
           appraisal_cycle_id: string | null
+          cloned_from_id: string | null
           company_id: string
           created_at: string
           created_by: string | null
+          cycle_purpose: string | null
           description: string | null
           end_date: string
+          feed_to_appraisal: boolean | null
+          feed_to_nine_box: boolean | null
+          feed_to_succession: boolean | null
+          feed_to_talent_profile: boolean | null
           id: string
+          include_in_analytics: boolean | null
           is_standalone: boolean
+          is_template: boolean | null
           name: string
           reminder_days_before: number[] | null
+          results_visibility_rules: Json | null
+          retention_period_months: number | null
+          signal_processing_status: string | null
+          signals_processed_at: string | null
           start_date: string
           status: string
           submission_deadline: string
+          template_description: string | null
+          template_name: string | null
           updated_at: string
         }
         Insert: {
+          ai_tone_setting?: string | null
+          anonymity_threshold?: number | null
           appraisal_cycle_id?: string | null
+          cloned_from_id?: string | null
           company_id: string
           created_at?: string
           created_by?: string | null
+          cycle_purpose?: string | null
           description?: string | null
           end_date: string
+          feed_to_appraisal?: boolean | null
+          feed_to_nine_box?: boolean | null
+          feed_to_succession?: boolean | null
+          feed_to_talent_profile?: boolean | null
           id?: string
+          include_in_analytics?: boolean | null
           is_standalone?: boolean
+          is_template?: boolean | null
           name: string
           reminder_days_before?: number[] | null
+          results_visibility_rules?: Json | null
+          retention_period_months?: number | null
+          signal_processing_status?: string | null
+          signals_processed_at?: string | null
           start_date: string
           status?: string
           submission_deadline: string
+          template_description?: string | null
+          template_name?: string | null
           updated_at?: string
         }
         Update: {
+          ai_tone_setting?: string | null
+          anonymity_threshold?: number | null
           appraisal_cycle_id?: string | null
+          cloned_from_id?: string | null
           company_id?: string
           created_at?: string
           created_by?: string | null
+          cycle_purpose?: string | null
           description?: string | null
           end_date?: string
+          feed_to_appraisal?: boolean | null
+          feed_to_nine_box?: boolean | null
+          feed_to_succession?: boolean | null
+          feed_to_talent_profile?: boolean | null
           id?: string
+          include_in_analytics?: boolean | null
           is_standalone?: boolean
+          is_template?: boolean | null
           name?: string
           reminder_days_before?: number[] | null
+          results_visibility_rules?: Json | null
+          retention_period_months?: number | null
+          signal_processing_status?: string | null
+          signals_processed_at?: string | null
           start_date?: string
           status?: string
           submission_deadline?: string
+          template_description?: string | null
+          template_name?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -21261,6 +21309,13 @@ export type Database = {
             columns: ["appraisal_cycle_id"]
             isOneToOne: false
             referencedRelation: "appraisal_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_360_cycles_cloned_from_id_fkey"
+            columns: ["cloned_from_id"]
+            isOneToOne: false
+            referencedRelation: "feedback_360_cycles"
             referencedColumns: ["id"]
           },
           {
@@ -51039,6 +51094,50 @@ export type Database = {
           },
         ]
       }
+      signal_evidence_links: {
+        Row: {
+          contribution_value: number | null
+          contribution_weight: number | null
+          created_at: string | null
+          id: string
+          metadata: Json | null
+          snapshot_id: string | null
+          source_field: string | null
+          source_id: string
+          source_table: string
+        }
+        Insert: {
+          contribution_value?: number | null
+          contribution_weight?: number | null
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          snapshot_id?: string | null
+          source_field?: string | null
+          source_id: string
+          source_table: string
+        }
+        Update: {
+          contribution_value?: number | null
+          contribution_weight?: number | null
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          snapshot_id?: string | null
+          source_field?: string | null
+          source_id?: string
+          source_table?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "signal_evidence_links_snapshot_id_fkey"
+            columns: ["snapshot_id"]
+            isOneToOne: false
+            referencedRelation: "talent_signal_snapshots"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       skill_attributes: {
         Row: {
           adjacent_skills: string[] | null
@@ -52599,6 +52698,235 @@ export type Database = {
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      talent_signal_definitions: {
+        Row: {
+          aggregation_method: string | null
+          bias_risk_factors: Json | null
+          code: string
+          company_id: string | null
+          confidence_threshold: number | null
+          created_at: string | null
+          description: string | null
+          display_order: number | null
+          id: string
+          is_active: boolean | null
+          is_system_defined: boolean | null
+          name: string
+          name_en: string | null
+          signal_category: string
+          updated_at: string | null
+        }
+        Insert: {
+          aggregation_method?: string | null
+          bias_risk_factors?: Json | null
+          code: string
+          company_id?: string | null
+          confidence_threshold?: number | null
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          is_system_defined?: boolean | null
+          name: string
+          name_en?: string | null
+          signal_category?: string
+          updated_at?: string | null
+        }
+        Update: {
+          aggregation_method?: string | null
+          bias_risk_factors?: Json | null
+          code?: string
+          company_id?: string | null
+          confidence_threshold?: number | null
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          is_system_defined?: boolean | null
+          name?: string
+          name_en?: string | null
+          signal_category?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "talent_signal_definitions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      talent_signal_rules: {
+        Row: {
+          calculation_formula: Json | null
+          company_id: string | null
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          max_age_days: number | null
+          min_responses: number | null
+          rater_category_weights: Json | null
+          signal_definition_id: string | null
+          source_config: Json | null
+          source_type: string
+          updated_at: string | null
+          weight: number | null
+        }
+        Insert: {
+          calculation_formula?: Json | null
+          company_id?: string | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          max_age_days?: number | null
+          min_responses?: number | null
+          rater_category_weights?: Json | null
+          signal_definition_id?: string | null
+          source_config?: Json | null
+          source_type: string
+          updated_at?: string | null
+          weight?: number | null
+        }
+        Update: {
+          calculation_formula?: Json | null
+          company_id?: string | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          max_age_days?: number | null
+          min_responses?: number | null
+          rater_category_weights?: Json | null
+          signal_definition_id?: string | null
+          source_config?: Json | null
+          source_type?: string
+          updated_at?: string | null
+          weight?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "talent_signal_rules_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "talent_signal_rules_signal_definition_id_fkey"
+            columns: ["signal_definition_id"]
+            isOneToOne: false
+            referencedRelation: "talent_signal_definitions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      talent_signal_snapshots: {
+        Row: {
+          bias_factors: Json | null
+          bias_risk_level: string | null
+          company_id: string | null
+          computed_at: string | null
+          confidence_score: number | null
+          created_at: string | null
+          created_by: string | null
+          employee_id: string | null
+          evidence_count: number | null
+          evidence_summary: Json | null
+          id: string
+          is_current: boolean | null
+          normalized_score: number | null
+          rater_breakdown: Json | null
+          raw_score: number | null
+          signal_definition_id: string | null
+          signal_value: number | null
+          snapshot_version: number | null
+          source_cycle_id: string | null
+          source_type: string
+          valid_from: string | null
+          valid_until: string | null
+        }
+        Insert: {
+          bias_factors?: Json | null
+          bias_risk_level?: string | null
+          company_id?: string | null
+          computed_at?: string | null
+          confidence_score?: number | null
+          created_at?: string | null
+          created_by?: string | null
+          employee_id?: string | null
+          evidence_count?: number | null
+          evidence_summary?: Json | null
+          id?: string
+          is_current?: boolean | null
+          normalized_score?: number | null
+          rater_breakdown?: Json | null
+          raw_score?: number | null
+          signal_definition_id?: string | null
+          signal_value?: number | null
+          snapshot_version?: number | null
+          source_cycle_id?: string | null
+          source_type: string
+          valid_from?: string | null
+          valid_until?: string | null
+        }
+        Update: {
+          bias_factors?: Json | null
+          bias_risk_level?: string | null
+          company_id?: string | null
+          computed_at?: string | null
+          confidence_score?: number | null
+          created_at?: string | null
+          created_by?: string | null
+          employee_id?: string | null
+          evidence_count?: number | null
+          evidence_summary?: Json | null
+          id?: string
+          is_current?: boolean | null
+          normalized_score?: number | null
+          rater_breakdown?: Json | null
+          raw_score?: number | null
+          signal_definition_id?: string | null
+          signal_value?: number | null
+          snapshot_version?: number | null
+          source_cycle_id?: string | null
+          source_type?: string
+          valid_from?: string | null
+          valid_until?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "talent_signal_snapshots_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "talent_signal_snapshots_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "talent_signal_snapshots_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "talent_signal_snapshots_signal_definition_id_fkey"
+            columns: ["signal_definition_id"]
+            isOneToOne: false
+            referencedRelation: "talent_signal_definitions"
             referencedColumns: ["id"]
           },
         ]
