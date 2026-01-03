@@ -12,6 +12,7 @@ import {
   HelpPanel,
   FirstTimeUserDetector,
 } from "@/components/tours";
+import { HelpButton } from "@/components/help";
 
 export function ProtectedLayout() {
   const { user, isLoading } = useAuth();
@@ -50,6 +51,9 @@ export function ProtectedLayout() {
         <FloatingHelpButton />
         <HelpPanel />
         <FirstTimeUserDetector />
+        
+        {/* Video Help System */}
+        <HelpButton />
       </div>
     </TourProvider>
   );

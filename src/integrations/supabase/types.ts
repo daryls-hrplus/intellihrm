@@ -26062,6 +26062,157 @@ export type Database = {
           },
         ]
       }
+      help_video_categories: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          display_order: number | null
+          icon_name: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          name_key: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          icon_name?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          name_key?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          icon_name?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          name_key?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      help_video_history: {
+        Row: {
+          completed: boolean | null
+          context_route: string | null
+          id: string
+          user_id: string
+          video_id: string | null
+          watch_duration_seconds: number | null
+          watched_at: string | null
+        }
+        Insert: {
+          completed?: boolean | null
+          context_route?: string | null
+          id?: string
+          user_id: string
+          video_id?: string | null
+          watch_duration_seconds?: number | null
+          watched_at?: string | null
+        }
+        Update: {
+          completed?: boolean | null
+          context_route?: string | null
+          id?: string
+          user_id?: string
+          video_id?: string | null
+          watch_duration_seconds?: number | null
+          watched_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "help_video_history_video_id_fkey"
+            columns: ["video_id"]
+            isOneToOne: false
+            referencedRelation: "help_videos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      help_videos: {
+        Row: {
+          action_tags: string[] | null
+          category_id: string | null
+          created_at: string | null
+          description: string | null
+          description_key: string | null
+          difficulty_level: string | null
+          display_order: number | null
+          duration_seconds: number | null
+          id: string
+          is_active: boolean | null
+          is_featured: boolean | null
+          keywords: string[] | null
+          route_patterns: string[] | null
+          thumbnail_url: string | null
+          title: string
+          title_key: string | null
+          updated_at: string | null
+          user_roles: string[] | null
+          video_url: string
+          view_count: number | null
+        }
+        Insert: {
+          action_tags?: string[] | null
+          category_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          description_key?: string | null
+          difficulty_level?: string | null
+          display_order?: number | null
+          duration_seconds?: number | null
+          id?: string
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          keywords?: string[] | null
+          route_patterns?: string[] | null
+          thumbnail_url?: string | null
+          title: string
+          title_key?: string | null
+          updated_at?: string | null
+          user_roles?: string[] | null
+          video_url: string
+          view_count?: number | null
+        }
+        Update: {
+          action_tags?: string[] | null
+          category_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          description_key?: string | null
+          difficulty_level?: string | null
+          display_order?: number | null
+          duration_seconds?: number | null
+          id?: string
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          keywords?: string[] | null
+          route_patterns?: string[] | null
+          thumbnail_url?: string | null
+          title?: string
+          title_key?: string | null
+          updated_at?: string | null
+          user_roles?: string[] | null
+          video_url?: string
+          view_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "help_videos_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "help_video_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       historical_payroll_imports: {
         Row: {
           company_id: string

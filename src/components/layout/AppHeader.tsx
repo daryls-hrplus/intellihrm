@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { NavLink } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { UserPlus, MessageSquare, HelpCircle, Newspaper } from "lucide-react";
+import { UserPlus, MessageSquare, HelpCircle, Newspaper, PlayCircle } from "lucide-react";
 import { VirtualClock } from "./VirtualClock";
 import { Button } from "@/components/ui/button";
 import {
@@ -27,6 +27,7 @@ import defaultCompanyLogo from "@/assets/default-company-logo.png";
 import { MessagesOverlayPanel } from "@/components/overlays/MessagesOverlayPanel";
 import { IntranetOverlayPanel } from "@/components/overlays/IntranetOverlayPanel";
 import { HelpCenterOverlayPanel } from "@/components/overlays/HelpCenterOverlayPanel";
+import { HelpVideoPanel } from "@/components/help";
 
 export function AppHeader() {
   const { t } = useTranslation();
@@ -38,6 +39,7 @@ export function AppHeader() {
   const [isMessagesOpen, setIsMessagesOpen] = useState(false);
   const [isIntranetOpen, setIsIntranetOpen] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
+  const [isVideoHelpOpen, setIsVideoHelpOpen] = useState(false);
   
   const groupLogoUrl = company?.company_group?.logo_url || (company?.company_group ? defaultGroupLogo : null);
   const companyLogoUrl = company?.logo_url || defaultCompanyLogo;
@@ -256,6 +258,20 @@ export function AppHeader() {
         <TooltipContent>{t("navigation.notifications")}</TooltipContent>
       </Tooltip>
       
+      {/* Video Help Button */}
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button 
+            variant="ghost" 
+            size="icon"
+            onClick={() => setIsVideoHelpOpen(true)}
+          >
+            <PlayCircle className="h-5 w-5" />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>Help Videos</TooltipContent>
+      </Tooltip>
+      
       {/* Help Center Button */}
       <Tooltip>
         <TooltipTrigger asChild>
@@ -357,6 +373,10 @@ export function AppHeader() {
       <HelpCenterOverlayPanel 
         isOpen={isHelpOpen} 
         onClose={() => setIsHelpOpen(false)} 
+      />
+      <HelpVideoPanel 
+        open={isVideoHelpOpen} 
+        onOpenChange={setIsVideoHelpOpen} 
       />
     </div>
   );
