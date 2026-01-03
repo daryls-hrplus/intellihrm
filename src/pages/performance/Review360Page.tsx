@@ -208,7 +208,7 @@ export default function Review360Page() {
     // For managers: fetch only their own manager cycles
     let query = supabase
       .from("review_cycles")
-      .select("id, name, description, start_date, end_date, self_review_deadline, peer_nomination_deadline, feedback_deadline, status, include_self_review, include_manager_review, include_peer_review, include_direct_report_review, min_peer_reviewers, max_peer_reviewers, is_manager_cycle, created_by, company_id, results_released_at, results_released_by, release_settings, visibility_rules")
+      .select("id, name, description, start_date, end_date, self_review_deadline, peer_nomination_deadline, feedback_deadline, status, include_self_review, include_manager_review, include_peer_review, include_direct_report_review, min_peer_reviewers, max_peer_reviewers, is_manager_cycle, created_by, company_id, visibility_rules")
       .eq("company_id", selectedCompanyId)
       .order("created_at", { ascending: false });
 
