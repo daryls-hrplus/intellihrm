@@ -56,6 +56,7 @@ import {
   TrendingUp,
   Lightbulb,
   Heart,
+  Video,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
@@ -104,6 +105,7 @@ const getAdminModuleSections = (
       { title: "Company Values", description: "Define organizational values for performance appraisals", href: "/admin/company-values", icon: Heart, color: "bg-rose-500/10 text-rose-600", tabCode: "company-values" },
       { title: "API Management", description: "Manage API keys, webhooks, and integrations", href: "/system/api-management", icon: Webhook, color: "bg-indigo-500/10 text-indigo-600", tabCode: "api-management" },
       { title: "Custom Fields", description: "Define custom fields for forms across the application", href: "/admin/custom-fields", icon: Cog, color: "bg-pink-500/10 text-pink-600", tabCode: "custom-fields" },
+      { title: "Demo Management", description: "Manage product demo experiences and video chapters", href: "/admin/demo-management", icon: Video, color: "bg-cyan-500/10 text-cyan-600", tabCode: "demo-management" },
     ],
     // Section 8: Documentation & Enablement
     // Enablement Center is only visible to HRplus internal tenants
