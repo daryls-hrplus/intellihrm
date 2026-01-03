@@ -158,6 +158,7 @@ import CalibrationSessionsPage from "./pages/performance/CalibrationSessionsPage
 import CalibrationWorkspacePage from "./pages/performance/CalibrationWorkspacePage";
 import PerformanceSetupPage from "./pages/performance/PerformanceSetupPage";
 import TalentUnifiedDashboardPage from "./pages/performance/TalentUnifiedDashboardPage";
+import MyDevelopmentThemesPage from "./pages/performance/feedback/MyDevelopmentThemesPage";
 
 // Leave pages
 import LeaveDashboardPage from "./pages/leave/LeaveDashboardPage";
@@ -740,6 +741,14 @@ const App = () => (
               element={
                 <ProtectedRoute moduleCode="ess">
                   <MyAppraisalsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/ess/my-development-themes"
+              element={
+                <ProtectedRoute moduleCode="ess">
+                  <MyDevelopmentThemesPage />
                 </ProtectedRoute>
               }
             />

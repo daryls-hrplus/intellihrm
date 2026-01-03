@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -10,8 +11,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2, Star, TrendingUp, Users, User, UserCircle } from "lucide-react";
+import { Loader2, Star, TrendingUp, Users, User, UserCircle, FileDown, Printer, ArrowRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { Link } from "react-router-dom";
+import { Feedback360ReportPDF } from "@/components/feedback/reports/Feedback360ReportPDF";
+import { ReportDownloadButton, type ExportFormat } from "@/components/feedback/reports/ReportDownloadButton";
+import { ReportIntroduction } from "@/components/feedback/reports/ReportIntroduction";
+import { ScoreInterpretationGuide } from "@/components/feedback/reports/ScoreInterpretationGuide";
+import { LimitationsDisclaimer } from "@/components/feedback/reports/LimitationsDisclaimer";
+import { Results360DevelopmentBridge } from "@/components/feedback/development/Results360DevelopmentBridge";
+import { generateFeedback360PDF, downloadPDF, type Feedback360ReportData } from "@/utils/feedback360ReportPdf";
+import { toast } from "sonner";
 
 interface Participation {
   id: string;
@@ -35,6 +46,8 @@ interface FeedbackItem {
 
 interface MyFeedbackSummaryProps {
   participations: Participation[];
+  cycleId?: string;
+  companyId?: string;
 }
 
 const reviewerTypeLabels: Record<string, { label: string; icon: React.ReactNode }> = {
@@ -44,12 +57,18 @@ const reviewerTypeLabels: Record<string, { label: string; icon: React.ReactNode 
   direct_report: { label: "Direct Reports", icon: <TrendingUp className="h-4 w-4" /> },
 };
 
-export function MyFeedbackSummary({ participations }: MyFeedbackSummaryProps) {
+export function MyFeedbackSummary({ participations, cycleId, companyId }: MyFeedbackSummaryProps) {
+  const { user, company } = useAuth();
   const [selectedParticipation, setSelectedParticipation] = useState<string>("");
   const [feedback, setFeedback] = useState<FeedbackItem[]>([]);
   const [loading, setLoading] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+  const [exportFormat, setExportFormat] = useState<ExportFormat | null>(null);
+  const [showDevelopmentBridge, setShowDevelopmentBridge] = useState(false);
 
   const completedParticipations = participations.filter((p) => p.status === "completed");
+  
+  const selectedParticipationData = completedParticipations.find(p => p.id === selectedParticipation);
 
   useEffect(() => {
     if (completedParticipations.length > 0 && !selectedParticipation) {
@@ -91,18 +110,115 @@ export function MyFeedbackSummary({ participations }: MyFeedbackSummaryProps) {
   const averagesByType = feedback.reduce((acc, item) => {
     if (item.avg_rating) {
       if (!acc[item.reviewer_type]) {
-        acc[item.reviewer_type] = { total: 0, count: 0 };
+        acc[item.reviewer_type] = { total: 0, count: 0, responseCount: 0 };
       }
       acc[item.reviewer_type].total += item.avg_rating;
       acc[item.reviewer_type].count += 1;
+      acc[item.reviewer_type].responseCount += item.response_count;
     }
     return acc;
-  }, {} as Record<string, { total: number; count: number }>);
+  }, {} as Record<string, { total: number; count: number; responseCount: number }>);
 
   const overallAverages = Object.entries(averagesByType).map(([type, data]) => ({
     type,
     average: data.total / data.count,
+    responseCount: data.responseCount,
   }));
+
+  // Calculate overall score
+  const overallScore = overallAverages.length > 0 
+    ? overallAverages.reduce((sum, item) => sum + item.average, 0) / overallAverages.length 
+    : 0;
+
+  // Calculate category scores for PDF
+  const categoryScores = Object.entries(groupedByCompetency).map(([name, items]) => {
+    const scores = items.filter(i => i.avg_rating).map(i => i.avg_rating!);
+    return {
+      name,
+      score: scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : 0,
+    };
+  });
+
+  // Build signals for development bridge (matching SignalSummary interface)
+  const developmentSignals = categoryScores.map((cat, idx) => ({
+    id: `signal-${idx}`,
+    signal_code: cat.name.toLowerCase().replace(/\s+/g, '_'),
+    signal_name: cat.name,
+    category: 'competency',
+    score: cat.score,
+    benchmark_score: 3.5,
+    gap: 3.5 - cat.score,
+  }));
+
+  // Collect all comments
+  const allComments: { category: string; text: string }[] = [];
+  feedback.forEach(item => {
+    if (item.text_responses) {
+      item.text_responses.forEach(text => {
+        allComments.push({
+          category: item.competency_name || 'General',
+          text,
+        });
+      });
+    }
+  });
+
+  // AI-derived strengths and development areas (simplified for now)
+  const strengths = categoryScores
+    .filter(c => c.score >= 3.5)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 5)
+    .map(c => `Strong performance in ${c.name}`);
+
+  const developmentAreas = categoryScores
+    .filter(c => c.score < 3.5)
+    .sort((a, b) => a.score - b.score)
+    .slice(0, 5)
+    .map(c => `Opportunity to develop ${c.name}`);
+
+  const handleExport = async (format: ExportFormat) => {
+    setIsExporting(true);
+    setExportFormat(format);
+    
+    try {
+      if (format === 'print') {
+        window.print();
+        toast.success('Print dialog opened');
+      } else if (format === 'pdf') {
+        const reportData: Feedback360ReportData = {
+          employeeName: user?.user_metadata?.full_name || 'Employee',
+          employeeTitle: user?.user_metadata?.title,
+          cycleName: selectedParticipationData?.review_cycle.name || 'Review Cycle',
+          cycleEndDate: new Date().toISOString(),
+          overallScore,
+          responseRate: 100,
+          totalRaters: overallAverages.reduce((sum, a) => sum + a.responseCount, 0),
+          categoryScores,
+          raterGroupScores: overallAverages.map(a => ({
+            group: reviewerTypeLabels[a.type]?.label || a.type,
+            score: a.average,
+            count: a.responseCount,
+          })),
+          strengths,
+          developmentAreas,
+          comments: allComments.slice(0, 15),
+          companyName: company?.name,
+        };
+        
+        const blob = await generateFeedback360PDF(reportData);
+        downloadPDF(blob, `360_Feedback_Report_${new Date().toISOString().split('T')[0]}.pdf`);
+        toast.success('PDF report downloaded');
+      } else if (format === 'docx') {
+        toast.info('Word document export coming soon');
+      }
+    } catch (error) {
+      console.error('Export failed:', error);
+      toast.error('Failed to export report');
+    } finally {
+      setIsExporting(false);
+      setExportFormat(null);
+    }
+  };
 
   if (completedParticipations.length === 0) {
     return (
@@ -120,21 +236,48 @@ export function MyFeedbackSummary({ participations }: MyFeedbackSummaryProps) {
 
   return (
     <div className="space-y-6">
-      {/* Cycle Selector */}
-      <div className="flex items-center gap-4">
-        <label className="text-sm font-medium">Review Cycle:</label>
-        <Select value={selectedParticipation} onValueChange={setSelectedParticipation}>
-          <SelectTrigger className="w-[300px]">
-            <SelectValue placeholder="Select a review cycle" />
-          </SelectTrigger>
-          <SelectContent>
-            {completedParticipations.map((p) => (
-              <SelectItem key={p.id} value={p.id}>
-                {p.review_cycle.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+      {/* Report Introduction */}
+      <ReportIntroduction />
+      
+      {/* Cycle Selector & Actions */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <label className="text-sm font-medium">Review Cycle:</label>
+          <Select value={selectedParticipation} onValueChange={setSelectedParticipation}>
+            <SelectTrigger className="w-[300px]">
+              <SelectValue placeholder="Select a review cycle" />
+            </SelectTrigger>
+            <SelectContent>
+              {completedParticipations.map((p) => (
+                <SelectItem key={p.id} value={p.id}>
+                  {p.review_cycle.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        
+        <div className="flex items-center gap-2">
+          <ReportDownloadButton 
+            onExport={handleExport}
+            isExporting={isExporting}
+            currentFormat={exportFormat}
+            supportedFormats={['pdf', 'print']}
+          />
+          <Button 
+            variant="outline" 
+            onClick={() => setShowDevelopmentBridge(!showDevelopmentBridge)}
+          >
+            <TrendingUp className="h-4 w-4 mr-2" />
+            Generate Development Plan
+          </Button>
+          <Link to="/ess/my-development-themes">
+            <Button variant="ghost" size="sm">
+              View My Themes
+              <ArrowRight className="h-4 w-4 ml-2" />
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {loading ? (
@@ -149,6 +292,19 @@ export function MyFeedbackSummary({ participations }: MyFeedbackSummaryProps) {
         </Card>
       ) : (
         <>
+          {/* Score Interpretation Guide */}
+          <ScoreInterpretationGuide />
+
+          {/* Development Bridge (collapsible) */}
+          {showDevelopmentBridge && user?.id && (
+            <Results360DevelopmentBridge
+              cycleId={cycleId || selectedParticipation}
+              employeeId={user.id}
+              companyId={companyId || company?.id || ''}
+              signals={developmentSignals}
+            />
+          )}
+
           {/* Overall Scores by Source */}
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {overallAverages.map(({ type, average }) => (
@@ -248,6 +404,9 @@ export function MyFeedbackSummary({ participations }: MyFeedbackSummaryProps) {
               </Tabs>
             </CardContent>
           </Card>
+
+          {/* Limitations Disclaimer */}
+          <LimitationsDisclaimer />
         </>
       )}
     </div>
