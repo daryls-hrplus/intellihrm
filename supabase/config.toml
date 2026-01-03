@@ -371,3 +371,9 @@ verify_jwt = false
 
 [functions.generate-key-insights]
 verify_jwt = false
+
+[functions.compute-lead-score]
+verify_jwt = false
+
+[functions.generate-ai-insights]
+verify_jwt = false
