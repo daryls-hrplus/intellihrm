@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -7,6 +8,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Separator } from "@/components/ui/separator";
 import { 
   Select,
   SelectContent,
@@ -14,10 +16,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Shield, Lock, AlertTriangle, Save, Info } from "lucide-react";
+import { Shield, Lock, AlertTriangle, Save, Info, Search, FileSearch, Calendar } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
+import { InvestigationRequestDialog } from "@/components/feedback/cycles/InvestigationRequestDialog";
+import { format } from "date-fns";
 
 export type IndividualAccessPolicy = 'never' | 'investigation_only';
 
@@ -49,6 +53,27 @@ export function AnonymityPolicySettings({ companyId }: AnonymityPolicySettingsPr
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [policy, setPolicy] = useState<AnonymityPolicy>(DEFAULT_POLICY);
+  const [selectedCycleId, setSelectedCycleId] = useState<string>("");
+  const [requestDialogOpen, setRequestDialogOpen] = useState(false);
+
+  // Fetch completed 360 cycles for investigation
+  const { data: completedCycles } = useQuery({
+    queryKey: ['completed-360-cycles', companyId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('feedback_360_cycles')
+        .select('id, name, end_date, status')
+        .eq('company_id', companyId)
+        .in('status', ['completed', 'closed'])
+        .order('end_date', { ascending: false });
+
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!companyId,
+  });
+
+  const selectedCycle = completedCycles?.find(c => c.id === selectedCycleId);
 
   useEffect(() => {
     if (companyId) {
@@ -292,7 +317,82 @@ export function AnonymityPolicySettings({ companyId }: AnonymityPolicySettingsPr
           <Save className="h-4 w-4 mr-2" />
           {isSaving ? "Saving..." : "Save Policy"}
         </Button>
+
+        {/* Investigation Mode - Cycle Selection */}
+        {policy.individual_response_access === 'investigation_only' && (
+          <>
+            <Separator className="my-6" />
+            
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <FileSearch className="h-5 w-5 text-warning" />
+                <div>
+                  <h3 className="text-sm font-medium">Request Investigation Access</h3>
+                  <p className="text-xs text-muted-foreground">
+                    Select a completed 360 cycle to request individual response access
+                  </p>
+                </div>
+              </div>
+
+              {completedCycles && completedCycles.length > 0 ? (
+                <div className="space-y-3">
+                  <div className="space-y-2">
+                    <Label className="text-sm">Select Completed 360 Cycle</Label>
+                    <Select value={selectedCycleId} onValueChange={setSelectedCycleId}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a cycle to investigate..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {completedCycles.map((cycle) => (
+                          <SelectItem key={cycle.id} value={cycle.id}>
+                            <div className="flex items-center gap-2">
+                              <Calendar className="h-4 w-4 text-muted-foreground" />
+                              <span>{cycle.name}</span>
+                              <Badge variant="secondary" className="text-xs ml-2">
+                                {format(new Date(cycle.end_date), 'MMM yyyy')}
+                              </Badge>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <Button 
+                    variant="outline" 
+                    className="w-full border-warning/50 hover:bg-warning/10"
+                    disabled={!selectedCycleId}
+                    onClick={() => setRequestDialogOpen(true)}
+                  >
+                    <Search className="h-4 w-4 mr-2" />
+                    Request Investigation Access
+                  </Button>
+                </div>
+              ) : (
+                <div className="p-4 rounded-lg bg-muted/30 border border-dashed text-center">
+                  <p className="text-sm text-muted-foreground">
+                    No completed 360 cycles available for investigation
+                  </p>
+                </div>
+              )}
+            </div>
+          </>
+        )}
       </CardContent>
+      
+      {selectedCycle && (
+        <InvestigationRequestDialog
+          open={requestDialogOpen}
+          onOpenChange={setRequestDialogOpen}
+          cycleId={selectedCycle.id}
+          cycleName={selectedCycle.name}
+          companyId={companyId}
+          onSuccess={() => {
+            setSelectedCycleId("");
+            toast.success("Investigation request submitted for review");
+          }}
+        />
+      )}
     </Card>
   );
 }
