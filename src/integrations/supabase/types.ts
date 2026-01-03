@@ -48147,10 +48147,13 @@ export type Database = {
           name: string
           peer_nomination_deadline: string | null
           rating_scale_id: string | null
+          results_released_at: string | null
+          results_released_by: string | null
           self_review_deadline: string | null
           start_date: string
           status: string
           updated_at: string
+          visibility_rules: Json | null
         }
         Insert: {
           company_id: string
@@ -48171,10 +48174,13 @@ export type Database = {
           name: string
           peer_nomination_deadline?: string | null
           rating_scale_id?: string | null
+          results_released_at?: string | null
+          results_released_by?: string | null
           self_review_deadline?: string | null
           start_date: string
           status?: string
           updated_at?: string
+          visibility_rules?: Json | null
         }
         Update: {
           company_id?: string
@@ -48195,10 +48201,13 @@ export type Database = {
           name?: string
           peer_nomination_deadline?: string | null
           rating_scale_id?: string | null
+          results_released_at?: string | null
+          results_released_by?: string | null
           self_review_deadline?: string | null
           start_date?: string
           status?: string
           updated_at?: string
+          visibility_rules?: Json | null
         }
         Relationships: [
           {
