@@ -27,12 +27,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
-import { Plus, Loader2, MessageSquare, ThumbsUp, Lightbulb, CheckCircle, Send, Inbox, Users, Clock, BarChart3, ExternalLink } from "lucide-react";
+import { Plus, Loader2, MessageSquare, ThumbsUp, Lightbulb, CheckCircle, Send, Inbox, Users, Clock, BarChart3 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { formatDistanceToNow, format } from "date-fns";
 import { useLanguage } from "@/hooks/useLanguage";
 import { useMy360FeedbackRequests, type My360Request } from "@/hooks/useMy360FeedbackRequests";
 import { Ess360FeedbackResponseDialog } from "@/components/ess/Ess360FeedbackResponseDialog";
+import { MyFeedbackSummary } from "@/components/performance/MyFeedbackSummary";
 
 interface Feedback {
   id: string;
@@ -59,6 +60,8 @@ export default function MyFeedbackPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("continuous");
   const [selected360Request, setSelected360Request] = useState<My360Request | null>(null);
+  const [myParticipations, setMyParticipations] = useState<any[]>([]);
+  const [participationsLoading, setParticipationsLoading] = useState(false);
   const [formData, setFormData] = useState({
     to_user_id: "",
     feedback_type: "praise",
@@ -75,6 +78,35 @@ export default function MyFeedbackPage() {
   useEffect(() => {
     if (user) fetchData();
   }, [user]);
+
+  // Fetch participations when My 360 Results tab is active
+  useEffect(() => {
+    if (activeTab === "my360results" && user?.id) {
+      fetchMyParticipations();
+    }
+  }, [activeTab, user?.id]);
+
+  const fetchMyParticipations = async () => {
+    setParticipationsLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from("review_participants")
+        .select(`
+          id,
+          status,
+          overall_score,
+          review_cycle:review_cycles(name, status)
+        `)
+        .eq("employee_id", user?.id)
+        .order("created_at", { ascending: false });
+
+      if (!error) setMyParticipations(data || []);
+    } catch (error) {
+      console.error("Error fetching participations:", error);
+    } finally {
+      setParticipationsLoading(false);
+    }
+  };
 
   const fetchData = async () => {
     setIsLoading(true);
@@ -482,31 +514,13 @@ export default function MyFeedbackPage() {
 
           {/* My 360 Results Tab */}
           <TabsContent value="my360results" className="space-y-4">
-            <Card>
-              <CardContent className="py-12 text-center">
-                <BarChart3 className="h-12 w-12 mx-auto text-primary/70 mb-4" />
-                <h3 className="text-lg font-medium">View Your 360° Feedback Results</h3>
-                <p className="text-muted-foreground max-w-md mx-auto mt-2">
-                  Access your completed 360° feedback reports, download summaries, 
-                  and view development themes created by your manager or HR.
-                </p>
-                <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-6">
-                  <Link to="/performance/360">
-                    <Button>
-                      <BarChart3 className="h-4 w-4 mr-2" />
-                      View 360 Results & Reports
-                      <ExternalLink className="h-4 w-4 ml-2" />
-                    </Button>
-                  </Link>
-                  <Link to="/ess/my-development-themes">
-                    <Button variant="outline">
-                      <Lightbulb className="h-4 w-4 mr-2" />
-                      My Development Themes
-                    </Button>
-                  </Link>
-                </div>
-              </CardContent>
-            </Card>
+            {participationsLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+              </div>
+            ) : (
+              <MyFeedbackSummary participations={myParticipations} />
+            )}
           </TabsContent>
         </Tabs>
 
