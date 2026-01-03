@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import {
   Dialog,
   DialogContent,
@@ -17,7 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Loader2, Calendar, AlertTriangle, ChevronDown, Copy, Route, Eye } from "lucide-react";
+import { Loader2, Calendar, AlertTriangle, ChevronDown, Copy, Route, Eye, AlertCircle } from "lucide-react";
 import { ResultsPreviewDialog } from "@/components/feedback/cycles/ResultsPreviewDialog";
 import { CycleVisibilityRulesEditor, VisibilityRules, DEFAULT_VISIBILITY_RULES } from "@/components/feedback/cycles/CycleVisibilityRulesEditor";
 import { VisibilityAccessMatrix } from "@/components/feedback/cycles/VisibilityAccessMatrix";
@@ -29,6 +29,7 @@ import { checkCycleOverlap } from "@/utils/cycleOverlapCheck";
 import { useDebouncedCallback } from "@/hooks/use-debounced-callback";
 import { formatDateForDisplay } from "@/utils/dateUtils";
 import { CycleUsagePolicyEditor, CycleUsagePolicy } from "@/components/feedback/cycles/CycleUsagePolicyEditor";
+import { validateCycleDates, hasFieldError, getFieldError } from "@/utils/cycleDateValidation";
 import { useCycleTemplates } from "@/hooks/feedback/useCycleTemplates";
 
 // Review cycle types
@@ -203,6 +204,15 @@ export function ReviewCycleDialog({
 
   const hasUnacknowledgedOverlap = overlappingCycles.length > 0 && !overlapAcknowledged;
 
+  // Date validation
+  const dateValidation = useMemo(() => validateCycleDates({
+    start_date: formData.start_date,
+    end_date: formData.end_date,
+    self_review_deadline: formData.self_review_deadline,
+    peer_nomination_deadline: formData.peer_nomination_deadline,
+    feedback_deadline: formData.feedback_deadline,
+  }), [formData.start_date, formData.end_date, formData.self_review_deadline, formData.peer_nomination_deadline, formData.feedback_deadline]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!companyId || !user?.id) return;
@@ -373,22 +383,56 @@ export function ReviewCycleDialog({
             </h3>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label>Start Date *</Label>
+                <Label className={hasFieldError(dateValidation, "start_date") ? "text-destructive" : ""}>Start Date *</Label>
                 <DatePicker
                   value={formData.start_date}
                   onChange={(date) => setFormData({ ...formData, start_date: date ? format(date, "yyyy-MM-dd") : "" })}
                   placeholder="Select start date"
+                  className={hasFieldError(dateValidation, "start_date") ? "border-destructive" : ""}
                 />
               </div>
               <div className="space-y-2">
-                <Label>End Date *</Label>
+                <Label className={hasFieldError(dateValidation, "end_date") ? "text-destructive" : ""}>End Date *</Label>
                 <DatePicker
                   value={formData.end_date}
                   onChange={(date) => setFormData({ ...formData, end_date: date ? format(date, "yyyy-MM-dd") : "" })}
                   placeholder="Select end date"
+                  className={hasFieldError(dateValidation, "end_date") ? "border-destructive" : ""}
                 />
+                {getFieldError(dateValidation, "end_date") && (
+                  <p className="text-sm text-destructive">{getFieldError(dateValidation, "end_date")}</p>
+                )}
               </div>
             </div>
+
+            {/* Date Validation Errors */}
+            {dateValidation.errors.length > 0 && (
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  <ul className="list-disc list-inside">
+                    {dateValidation.errors.map((err, i) => (
+                      <li key={i}>{err.message}</li>
+                    ))}
+                  </ul>
+                </AlertDescription>
+              </Alert>
+            )}
+
+            {/* Date Validation Warnings */}
+            {dateValidation.warnings.length > 0 && (
+              <Alert className="border-amber-500 bg-amber-50 dark:bg-amber-950/20">
+                <AlertTriangle className="h-4 w-4 text-amber-600" />
+                <AlertDescription className="text-amber-700 dark:text-amber-400">
+                  <p className="font-medium">Timeline Recommendations:</p>
+                  <ul className="list-disc list-inside text-sm">
+                    {dateValidation.warnings.map((warn, i) => (
+                      <li key={i}>{warn.message}</li>
+                    ))}
+                  </ul>
+                </AlertDescription>
+              </Alert>
+            )}
 
             {/* Overlap Warning */}
             {overlappingCycles.length > 0 && (
@@ -422,28 +466,40 @@ export function ReviewCycleDialog({
 
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label>Self Review Deadline</Label>
+                <Label className={hasFieldError(dateValidation, "self_review_deadline") ? "text-destructive" : ""}>Self Review Deadline</Label>
                 <DatePicker
                   value={formData.self_review_deadline}
                   onChange={(date) => setFormData({ ...formData, self_review_deadline: date ? format(date, "yyyy-MM-dd") : "" })}
                   placeholder="Select deadline"
+                  className={hasFieldError(dateValidation, "self_review_deadline") ? "border-destructive" : ""}
                 />
+                {getFieldError(dateValidation, "self_review_deadline") && (
+                  <p className="text-sm text-destructive">{getFieldError(dateValidation, "self_review_deadline")}</p>
+                )}
               </div>
               <div className="space-y-2">
-                <Label>Peer Nomination Deadline</Label>
+                <Label className={hasFieldError(dateValidation, "peer_nomination_deadline") ? "text-destructive" : ""}>Peer Nomination Deadline</Label>
                 <DatePicker
                   value={formData.peer_nomination_deadline}
                   onChange={(date) => setFormData({ ...formData, peer_nomination_deadline: date ? format(date, "yyyy-MM-dd") : "" })}
                   placeholder="Select deadline"
+                  className={hasFieldError(dateValidation, "peer_nomination_deadline") ? "border-destructive" : ""}
                 />
+                {getFieldError(dateValidation, "peer_nomination_deadline") && (
+                  <p className="text-sm text-destructive">{getFieldError(dateValidation, "peer_nomination_deadline")}</p>
+                )}
               </div>
               <div className="space-y-2 sm:col-span-2">
-                <Label>Feedback Deadline</Label>
+                <Label className={hasFieldError(dateValidation, "feedback_deadline") ? "text-destructive" : ""}>Feedback Deadline</Label>
                 <DatePicker
                   value={formData.feedback_deadline}
                   onChange={(date) => setFormData({ ...formData, feedback_deadline: date ? format(date, "yyyy-MM-dd") : "" })}
                   placeholder="Select deadline"
+                  className={hasFieldError(dateValidation, "feedback_deadline") ? "border-destructive" : ""}
                 />
+                {getFieldError(dateValidation, "feedback_deadline") && (
+                  <p className="text-sm text-destructive">{getFieldError(dateValidation, "feedback_deadline")}</p>
+                )}
               </div>
             </div>
           </div>
@@ -606,7 +662,7 @@ export function ReviewCycleDialog({
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button type="submit" disabled={saving || hasUnacknowledgedOverlap}>
+            <Button type="submit" disabled={saving || hasUnacknowledgedOverlap || !dateValidation.isValid}>
               {saving ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
