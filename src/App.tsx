@@ -245,6 +245,7 @@ import TrainingEvaluationsPage from "./pages/training/TrainingEvaluationsPage";
 import LearningPathsPage from "./pages/training/LearningPathsPage";
 import ComplianceTrainingPage from "./pages/training/ComplianceTrainingPage";
 import InteractiveTrainingPage from "./pages/training/InteractiveTrainingPage";
+import InteractiveTrainingAdminPage from "./pages/training/InteractiveTrainingAdminPage";
 import CourseCompetenciesPage from "./pages/training/CourseCompetenciesPage";
 import RecertificationPage from "./pages/training/RecertificationPage";
 import TrainingNeedsPage from "./pages/training/TrainingNeedsPage";
@@ -3251,6 +3252,14 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
                   <CourseCompetenciesPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/training/interactive/admin"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <InteractiveTrainingAdminPage />
                 </ProtectedRoute>
               }
             />

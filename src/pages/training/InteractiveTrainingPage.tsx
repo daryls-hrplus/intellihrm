@@ -16,7 +16,8 @@ import {
   Award,
   Clock,
   TrendingUp,
-  CheckCircle2
+  CheckCircle2,
+  Settings
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { useLanguage } from "@/hooks/useLanguage";
@@ -107,25 +108,33 @@ export default function InteractiveTrainingPage() {
     <AppLayout>
       <div className="space-y-6">
         {/* Header */}
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" asChild>
-            <NavLink to="/training">
-              <ArrowLeft className="h-4 w-4" />
-            </NavLink>
-          </Button>
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-              <GraduationCap className="h-5 w-5 text-primary" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold tracking-tight text-foreground">
-                Interactive Training
-              </h1>
-              <p className="text-muted-foreground">
-                Complete video-based training with quizzes and certificates
-              </p>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" size="icon" asChild>
+              <NavLink to="/training">
+                <ArrowLeft className="h-4 w-4" />
+              </NavLink>
+            </Button>
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                <GraduationCap className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold tracking-tight text-foreground">
+                  Interactive Training
+                </h1>
+                <p className="text-muted-foreground">
+                  Complete video-based training with quizzes and certificates
+                </p>
+              </div>
             </div>
           </div>
+          <Button variant="outline" asChild>
+            <NavLink to="/training/interactive/admin">
+              <Settings className="h-4 w-4 mr-2" />
+              Admin
+            </NavLink>
+          </Button>
         </div>
         
         {/* Stats Cards */}
