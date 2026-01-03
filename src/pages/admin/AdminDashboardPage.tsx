@@ -73,6 +73,8 @@ const getAdminModuleSections = (
       { title: t("admin.modules.territories.title"), description: t("admin.modules.territories.description"), href: "/admin/territories", icon: Globe, color: "bg-destructive/10 text-destructive", tabCode: "territories" },
       { title: "Company Tags", description: "Group companies with tags for scoped admin access", href: "/admin/company-tags", icon: Tag, color: "bg-teal-500/10 text-teal-600", tabCode: "company-tags" },
       { title: "Client Registry", description: "Manage demo registrations and client provisioning", href: "/admin/client-registry", icon: Network, color: "bg-gradient-to-r from-purple-500/10 to-indigo-500/10 text-indigo-600", tabCode: "client-registry" },
+      { title: "Demo Management", description: "Manage product demo experiences and video chapters", href: "/admin/demo-management", icon: Video, color: "bg-cyan-500/10 text-cyan-600", tabCode: "demo-management" },
+      { title: "Demo Analytics", description: "Track prospect engagement, lead scores, and demo performance", href: "/admin/demo-analytics", icon: TrendingUp, color: "bg-emerald-500/10 text-emerald-600", tabCode: "demo-analytics" },
     ],
     // Section 2: Users, Roles & Access
     usersAccess: [
@@ -105,8 +107,6 @@ const getAdminModuleSections = (
       { title: "Company Values", description: "Define organizational values for performance appraisals", href: "/admin/company-values", icon: Heart, color: "bg-rose-500/10 text-rose-600", tabCode: "company-values" },
       { title: "API Management", description: "Manage API keys, webhooks, and integrations", href: "/system/api-management", icon: Webhook, color: "bg-indigo-500/10 text-indigo-600", tabCode: "api-management" },
       { title: "Custom Fields", description: "Define custom fields for forms across the application", href: "/admin/custom-fields", icon: Cog, color: "bg-pink-500/10 text-pink-600", tabCode: "custom-fields" },
-      { title: "Demo Management", description: "Manage product demo experiences and video chapters", href: "/admin/demo-management", icon: Video, color: "bg-cyan-500/10 text-cyan-600", tabCode: "demo-management" },
-      { title: "Demo Analytics", description: "Track prospect engagement, lead scores, and demo performance", href: "/admin/demo-analytics", icon: TrendingUp, color: "bg-emerald-500/10 text-emerald-600", tabCode: "demo-analytics" },
     ],
     // Section 8: Documentation & Enablement
     // Enablement Center is only visible to HRplus internal tenants
