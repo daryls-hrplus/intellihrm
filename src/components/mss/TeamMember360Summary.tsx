@@ -19,8 +19,11 @@ import {
   TrendingUp, 
   Shield,
   Lightbulb,
-  AlertCircle
+  AlertCircle,
+  MessageCircle,
+  ArrowRight
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Results360DevelopmentBridge } from '@/components/feedback/development/Results360DevelopmentBridge';
@@ -86,6 +89,7 @@ export function TeamMember360Summary({
   companyId, 
   managerId 
 }: TeamMember360SummaryProps) {
+  const navigate = useNavigate();
   const [participations, setParticipations] = useState<Participation[]>([]);
   const [selectedParticipation, setSelectedParticipation] = useState<string>('');
   const [feedback, setFeedback] = useState<FeedbackItem[]>([]);
@@ -407,6 +411,22 @@ export function TeamMember360Summary({
               />
             </div>
           )}
+
+          {/* Cross-link to Continuous Feedback */}
+          <Card className="bg-muted/30">
+            <CardContent className="py-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <MessageCircle className="h-5 w-5 text-muted-foreground" />
+                <p className="text-sm text-muted-foreground">
+                  Based on these 360 insights, you can also provide continuous feedback to {employeeName}.
+                </p>
+              </div>
+              <Button variant="link" size="sm" onClick={() => navigate('/mss/feedback')}>
+                Give Continuous Feedback
+                <ArrowRight className="ml-1 h-4 w-4" />
+              </Button>
+            </CardContent>
+          </Card>
         </>
       )}
     </div>
