@@ -17,8 +17,12 @@ import { RecommendationsPanel } from '@/components/feedback/development/Recommen
 import { IDPIntegrationPanel } from '@/components/feedback/development/IDPIntegrationPanel';
 import { RemeasurementScheduler } from '@/components/feedback/development/RemeasurementScheduler';
 import { useDevelopmentThemes } from '@/hooks/feedback/useDevelopmentThemes';
+import { AppLayout } from '@/components/layout/AppLayout';
+import { Breadcrumbs } from '@/components/ui/breadcrumbs';
+import { useLanguage } from '@/hooks/useLanguage';
 
 export default function MyDevelopmentThemesPage() {
+  const { t } = useLanguage();
   const { user, profile } = useAuth();
   const [selectedThemeId, setSelectedThemeId] = useState<string | null>(null);
   const { data: themes } = useDevelopmentThemes(user?.id);
@@ -29,18 +33,25 @@ export default function MyDevelopmentThemesPage() {
 
   if (!user || !profile) {
     return (
-      <div className="container py-8">
+      <AppLayout>
         <Card>
           <CardContent className="py-12 text-center text-muted-foreground">
             Please log in to view your development themes.
           </CardContent>
         </Card>
-      </div>
+      </AppLayout>
     );
   }
 
   return (
-    <div className="container py-8 space-y-6">
+    <AppLayout>
+      <div className="space-y-6">
+        <Breadcrumbs
+          items={[
+            { label: t('navigation.ess', 'Employee Self Service'), href: '/ess' },
+            { label: t('ess.myDevelopmentThemes.breadcrumb', 'My Development Themes') },
+          ]}
+        />
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -243,6 +254,7 @@ export default function MyDevelopmentThemesPage() {
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </AppLayout>
   );
 }
