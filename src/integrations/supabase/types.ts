@@ -48253,8 +48253,38 @@ export type Database = {
           },
         ]
       }
+      review_cycle_template_tags: {
+        Row: {
+          created_at: string | null
+          cycle_id: string
+          id: string
+          tag: string
+        }
+        Insert: {
+          created_at?: string | null
+          cycle_id: string
+          id?: string
+          tag: string
+        }
+        Update: {
+          created_at?: string | null
+          cycle_id?: string
+          id?: string
+          tag?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_cycle_template_tags_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "review_cycles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       review_cycles: {
         Row: {
+          cloned_from_id: string | null
           company_id: string
           created_at: string
           created_by: string | null
@@ -48268,6 +48298,7 @@ export type Database = {
           include_peer_review: boolean | null
           include_self_review: boolean | null
           is_manager_cycle: boolean | null
+          is_template: boolean | null
           max_peer_reviewers: number | null
           min_peer_reviewers: number | null
           name: string
@@ -48278,10 +48309,13 @@ export type Database = {
           self_review_deadline: string | null
           start_date: string
           status: string
+          template_description: string | null
+          template_name: string | null
           updated_at: string
           visibility_rules: Json | null
         }
         Insert: {
+          cloned_from_id?: string | null
           company_id: string
           created_at?: string
           created_by?: string | null
@@ -48295,6 +48329,7 @@ export type Database = {
           include_peer_review?: boolean | null
           include_self_review?: boolean | null
           is_manager_cycle?: boolean | null
+          is_template?: boolean | null
           max_peer_reviewers?: number | null
           min_peer_reviewers?: number | null
           name: string
@@ -48305,10 +48340,13 @@ export type Database = {
           self_review_deadline?: string | null
           start_date: string
           status?: string
+          template_description?: string | null
+          template_name?: string | null
           updated_at?: string
           visibility_rules?: Json | null
         }
         Update: {
+          cloned_from_id?: string | null
           company_id?: string
           created_at?: string
           created_by?: string | null
@@ -48322,6 +48360,7 @@ export type Database = {
           include_peer_review?: boolean | null
           include_self_review?: boolean | null
           is_manager_cycle?: boolean | null
+          is_template?: boolean | null
           max_peer_reviewers?: number | null
           min_peer_reviewers?: number | null
           name?: string
@@ -48332,10 +48371,19 @@ export type Database = {
           self_review_deadline?: string | null
           start_date?: string
           status?: string
+          template_description?: string | null
+          template_name?: string | null
           updated_at?: string
           visibility_rules?: Json | null
         }
         Relationships: [
+          {
+            foreignKeyName: "review_cycles_cloned_from_id_fkey"
+            columns: ["cloned_from_id"]
+            isOneToOne: false
+            referencedRelation: "review_cycles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "review_cycles_company_id_fkey"
             columns: ["company_id"]

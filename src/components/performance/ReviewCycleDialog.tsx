@@ -296,20 +296,20 @@ export function ReviewCycleDialog({
                     size="sm"
                     className="justify-start h-auto py-2"
                     onClick={() => {
-                      // Apply template settings to usage policy
-                      setUsagePolicy({
-                        cycle_purpose: template.cycle_purpose || 'development',
-                        feed_to_appraisal: template.feed_to_appraisal || false,
-                        feed_to_talent_profile: template.feed_to_talent_profile ?? true,
-                        feed_to_nine_box: template.feed_to_nine_box || false,
-                        feed_to_succession: template.feed_to_succession || false,
-                        include_in_analytics: template.include_in_analytics ?? true,
-                        anonymity_threshold: template.anonymity_threshold || 3,
-                        retention_period_months: template.retention_period_months || 24,
-                        ai_tone_setting: template.ai_tone_setting || 'development',
-                      });
+                      // Apply template settings to form data
+                      setFormData(prev => ({
+                        ...prev,
+                        description: template.description || '',
+                        include_self_review: template.include_self_review ?? true,
+                        include_manager_review: template.include_manager_review ?? true,
+                        include_peer_review: template.include_peer_review ?? true,
+                        include_direct_report_review: template.include_direct_report_review ?? false,
+                        min_peer_reviewers: template.min_peer_reviewers || 2,
+                        max_peer_reviewers: template.max_peer_reviewers || 5,
+                        rating_scale_id: template.rating_scale_id || '',
+                      }));
                       setShowTemplates(false);
-                      toast.success(`Template "${template.template_name}" applied`);
+                      toast.success(`Template "${template.template_name || template.name}" applied`);
                     }}
                   >
                     <div className="text-left">
