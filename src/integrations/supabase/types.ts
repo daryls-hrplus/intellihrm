@@ -10827,6 +10827,316 @@ export type Database = {
           },
         ]
       }
+      demo_engagement_events: {
+        Row: {
+          chapter_id: string | null
+          created_at: string
+          event_data: Json | null
+          event_type: string
+          experience_id: string | null
+          id: string
+          session_id: string
+          time_spent_seconds: number | null
+          video_watch_percentage: number | null
+        }
+        Insert: {
+          chapter_id?: string | null
+          created_at?: string
+          event_data?: Json | null
+          event_type: string
+          experience_id?: string | null
+          id?: string
+          session_id: string
+          time_spent_seconds?: number | null
+          video_watch_percentage?: number | null
+        }
+        Update: {
+          chapter_id?: string | null
+          created_at?: string
+          event_data?: Json | null
+          event_type?: string
+          experience_id?: string | null
+          id?: string
+          session_id?: string
+          time_spent_seconds?: number | null
+          video_watch_percentage?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "demo_engagement_events_chapter_id_fkey"
+            columns: ["chapter_id"]
+            isOneToOne: false
+            referencedRelation: "demo_experience_chapters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demo_engagement_events_experience_id_fkey"
+            columns: ["experience_id"]
+            isOneToOne: false
+            referencedRelation: "demo_experiences"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demo_engagement_events_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "demo_prospect_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      demo_experience_chapters: {
+        Row: {
+          chapter_order: number
+          chapter_type: string
+          created_at: string
+          cta_label: string | null
+          cta_type: string | null
+          cta_url: string | null
+          description: string | null
+          duration_seconds: number | null
+          experience_id: string
+          feature_preview_route: string | null
+          id: string
+          interactive_elements: Json | null
+          is_active: boolean | null
+          is_gated: boolean | null
+          title: string
+          updated_at: string
+          video_thumbnail_url: string | null
+          video_url: string | null
+        }
+        Insert: {
+          chapter_order?: number
+          chapter_type?: string
+          created_at?: string
+          cta_label?: string | null
+          cta_type?: string | null
+          cta_url?: string | null
+          description?: string | null
+          duration_seconds?: number | null
+          experience_id: string
+          feature_preview_route?: string | null
+          id?: string
+          interactive_elements?: Json | null
+          is_active?: boolean | null
+          is_gated?: boolean | null
+          title: string
+          updated_at?: string
+          video_thumbnail_url?: string | null
+          video_url?: string | null
+        }
+        Update: {
+          chapter_order?: number
+          chapter_type?: string
+          created_at?: string
+          cta_label?: string | null
+          cta_type?: string | null
+          cta_url?: string | null
+          description?: string | null
+          duration_seconds?: number | null
+          experience_id?: string
+          feature_preview_route?: string | null
+          id?: string
+          interactive_elements?: Json | null
+          is_active?: boolean | null
+          is_gated?: boolean | null
+          title?: string
+          updated_at?: string
+          video_thumbnail_url?: string | null
+          video_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "demo_experience_chapters_experience_id_fkey"
+            columns: ["experience_id"]
+            isOneToOne: false
+            referencedRelation: "demo_experiences"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      demo_experiences: {
+        Row: {
+          created_at: string
+          description: string | null
+          display_order: number | null
+          estimated_duration_minutes: number | null
+          experience_code: string
+          experience_name: string
+          featured_modules: string[] | null
+          hero_video_url: string | null
+          id: string
+          is_active: boolean | null
+          target_audience: string
+          target_roles: string[] | null
+          thumbnail_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          estimated_duration_minutes?: number | null
+          experience_code: string
+          experience_name: string
+          featured_modules?: string[] | null
+          hero_video_url?: string | null
+          id?: string
+          is_active?: boolean | null
+          target_audience?: string
+          target_roles?: string[] | null
+          thumbnail_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          estimated_duration_minutes?: number | null
+          experience_code?: string
+          experience_name?: string
+          featured_modules?: string[] | null
+          hero_video_url?: string | null
+          id?: string
+          is_active?: boolean | null
+          target_audience?: string
+          target_roles?: string[] | null
+          thumbnail_url?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      demo_lead_scores: {
+        Row: {
+          ai_insights: Json | null
+          chapters_completed: number | null
+          created_at: string
+          cta_clicks: number | null
+          email: string | null
+          engagement_score: number | null
+          features_explored: number | null
+          id: string
+          last_computed_at: string
+          lead_temperature: string | null
+          recommended_follow_up: string | null
+          session_id: string
+          total_watch_time_seconds: number | null
+          updated_at: string
+        }
+        Insert: {
+          ai_insights?: Json | null
+          chapters_completed?: number | null
+          created_at?: string
+          cta_clicks?: number | null
+          email?: string | null
+          engagement_score?: number | null
+          features_explored?: number | null
+          id?: string
+          last_computed_at?: string
+          lead_temperature?: string | null
+          recommended_follow_up?: string | null
+          session_id: string
+          total_watch_time_seconds?: number | null
+          updated_at?: string
+        }
+        Update: {
+          ai_insights?: Json | null
+          chapters_completed?: number | null
+          created_at?: string
+          cta_clicks?: number | null
+          email?: string | null
+          engagement_score?: number | null
+          features_explored?: number | null
+          id?: string
+          last_computed_at?: string
+          lead_temperature?: string | null
+          recommended_follow_up?: string | null
+          session_id?: string
+          total_watch_time_seconds?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "demo_lead_scores_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: true
+            referencedRelation: "demo_prospect_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      demo_prospect_sessions: {
+        Row: {
+          company_name: string | null
+          converted_at: string | null
+          created_at: string
+          email: string | null
+          employee_count: string | null
+          full_name: string | null
+          id: string
+          industry: string | null
+          is_converted: boolean | null
+          job_title: string | null
+          last_activity_at: string
+          personalization_answers: Json | null
+          phone: string | null
+          registration_id: string | null
+          session_token: string
+          source_utm_params: Json | null
+          started_at: string
+          updated_at: string
+        }
+        Insert: {
+          company_name?: string | null
+          converted_at?: string | null
+          created_at?: string
+          email?: string | null
+          employee_count?: string | null
+          full_name?: string | null
+          id?: string
+          industry?: string | null
+          is_converted?: boolean | null
+          job_title?: string | null
+          last_activity_at?: string
+          personalization_answers?: Json | null
+          phone?: string | null
+          registration_id?: string | null
+          session_token: string
+          source_utm_params?: Json | null
+          started_at?: string
+          updated_at?: string
+        }
+        Update: {
+          company_name?: string | null
+          converted_at?: string | null
+          created_at?: string
+          email?: string | null
+          employee_count?: string | null
+          full_name?: string | null
+          id?: string
+          industry?: string | null
+          is_converted?: boolean | null
+          job_title?: string | null
+          last_activity_at?: string
+          personalization_answers?: Json | null
+          phone?: string | null
+          registration_id?: string | null
+          session_token?: string
+          source_utm_params?: Json | null
+          started_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "demo_prospect_sessions_registration_id_fkey"
+            columns: ["registration_id"]
+            isOneToOne: false
+            referencedRelation: "demo_registrations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       demo_registrations: {
         Row: {
           assigned_subdomain: string | null

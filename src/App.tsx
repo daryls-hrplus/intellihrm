@@ -101,6 +101,10 @@ import RegisterDemoSuccessPage from "./pages/marketing/RegisterDemoSuccessPage";
 import FeaturesPage from "./pages/marketing/FeaturesPage";
 import AboutPage from "./pages/marketing/AboutPage";
 
+// Product Tour pages
+import ProductTourLandingPage from "./pages/product-tour/ProductTourLandingPage";
+import ProductTourPlayerPage from "./pages/product-tour/ProductTourPlayerPage";
+
 // Subscription pages
 import SubscriptionPage from "./pages/subscription/SubscriptionPage";
 import UpgradePage from "./pages/subscription/UpgradePage";
@@ -4422,6 +4426,10 @@ const App = () => (
               <Route path="/features" element={<FeaturesPage />} />
               <Route path="/about" element={<AboutPage />} />
             </Route>
+
+            {/* Product Tour Routes (Public) */}
+            <Route path="/product-tour" element={<ProductTourLandingPage />} />
+            <Route path="/product-tour/:experienceCode" element={<ProductTourPlayerPage />} />
 
             {/* Catch-all */}
             <Route path="*" element={<NotFound />} />
