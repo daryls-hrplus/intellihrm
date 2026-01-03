@@ -59,11 +59,11 @@ const AGGREGATION_METHODS: { value: AggregationMethod; label: string; descriptio
 ];
 
 const categoryColors: Record<SignalCategory, string> = {
-  leadership: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300",
-  teamwork: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
-  technical: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
-  values: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300",
-  general: "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300",
+  leadership: "bg-purple-500/20 text-purple-700 dark:text-purple-300 border border-purple-500/30",
+  teamwork: "bg-blue-500/20 text-blue-700 dark:text-blue-300 border border-blue-500/30",
+  technical: "bg-green-500/20 text-green-700 dark:text-green-300 border border-green-500/30",
+  values: "bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30",
+  general: "bg-muted text-muted-foreground border border-border",
 };
 
 export function SignalDefinitionsManager({ companyId }: SignalDefinitionsManagerProps) {
@@ -186,10 +186,10 @@ export function SignalDefinitionsManager({ companyId }: SignalDefinitionsManager
                   </TableCell>
                   <TableCell>
                     <Badge
-                      variant="secondary"
-                      className={categoryColors[signal.signal_category as SignalCategory]}
+                      variant="outline"
+                      className={categoryColors[signal.signal_category as SignalCategory] || categoryColors.general}
                     >
-                      {signal.signal_category}
+                      {SIGNAL_CATEGORIES.find(c => c.value === signal.signal_category)?.label || signal.signal_category}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-sm">
@@ -206,8 +206,8 @@ export function SignalDefinitionsManager({ companyId }: SignalDefinitionsManager
                       variant="ghost"
                       size="icon"
                       onClick={() => handleEdit(signal)}
-                      disabled={signal.is_system_defined}
-                      title={signal.is_system_defined ? "System signals cannot be edited" : "Edit"}
+                      disabled={signal.is_system_defined === true}
+                      title={signal.is_system_defined === true ? "System signals cannot be edited" : "Edit"}
                     >
                       <Edit className="h-4 w-4" />
                     </Button>
@@ -215,8 +215,8 @@ export function SignalDefinitionsManager({ companyId }: SignalDefinitionsManager
                       variant="ghost"
                       size="icon"
                       onClick={() => handleDelete(signal.id)}
-                      disabled={signal.is_system_defined}
-                      title={signal.is_system_defined ? "System signals cannot be deleted" : "Delete"}
+                      disabled={signal.is_system_defined === true}
+                      title={signal.is_system_defined === true ? "System signals cannot be deleted" : "Delete"}
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
