@@ -20282,6 +20282,54 @@ export type Database = {
           },
         ]
       }
+      evidence_usage_audit: {
+        Row: {
+          action: string
+          created_at: string | null
+          evidence_card_id: string | null
+          id: string
+          metadata: Json | null
+          used_in_entity_id: string | null
+          used_in_module: string
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string | null
+          evidence_card_id?: string | null
+          id?: string
+          metadata?: Json | null
+          used_in_entity_id?: string | null
+          used_in_module: string
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string | null
+          evidence_card_id?: string | null
+          id?: string
+          metadata?: Json | null
+          used_in_entity_id?: string | null
+          used_in_module?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "evidence_usage_audit_evidence_card_id_fkey"
+            columns: ["evidence_card_id"]
+            isOneToOne: false
+            referencedRelation: "module_evidence_cards"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "evidence_usage_audit_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       exchange_rates: {
         Row: {
           created_at: string
@@ -21227,7 +21275,12 @@ export type Database = {
           is_standalone: boolean
           is_template: boolean | null
           name: string
+          nomination_window_end: string | null
+          nomination_window_start: string | null
           reminder_days_before: number[] | null
+          response_window_end: string | null
+          response_window_start: string | null
+          results_release_date: string | null
           results_visibility_rules: Json | null
           retention_period_months: number | null
           signal_processing_status: string | null
@@ -21259,7 +21312,12 @@ export type Database = {
           is_standalone?: boolean
           is_template?: boolean | null
           name: string
+          nomination_window_end?: string | null
+          nomination_window_start?: string | null
           reminder_days_before?: number[] | null
+          response_window_end?: string | null
+          response_window_start?: string | null
+          results_release_date?: string | null
           results_visibility_rules?: Json | null
           retention_period_months?: number | null
           signal_processing_status?: string | null
@@ -21291,7 +21349,12 @@ export type Database = {
           is_standalone?: boolean
           is_template?: boolean | null
           name?: string
+          nomination_window_end?: string | null
+          nomination_window_start?: string | null
           reminder_days_before?: number[] | null
+          response_window_end?: string | null
+          response_window_start?: string | null
+          results_release_date?: string | null
           results_visibility_rules?: Json | null
           retention_period_months?: number | null
           signal_processing_status?: string | null
@@ -21615,6 +21678,35 @@ export type Database = {
             columns: ["request_id"]
             isOneToOne: false
             referencedRelation: "feedback_360_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      feedback_cycle_template_tags: {
+        Row: {
+          created_at: string | null
+          cycle_id: string | null
+          id: string
+          tag: string
+        }
+        Insert: {
+          created_at?: string | null
+          cycle_id?: string | null
+          id?: string
+          tag: string
+        }
+        Update: {
+          created_at?: string | null
+          cycle_id?: string | null
+          id?: string
+          tag?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedback_cycle_template_tags_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "feedback_360_cycles"
             referencedColumns: ["id"]
           },
         ]
@@ -36884,6 +36976,83 @@ export type Database = {
           },
         ]
       }
+      module_evidence_cards: {
+        Row: {
+          company_id: string | null
+          confidence_level: number | null
+          created_at: string | null
+          display_summary: string | null
+          employee_id: string | null
+          evidence_type: string
+          id: string
+          is_referenced: boolean | null
+          module_entity_id: string | null
+          module_type: string
+          referenced_at: string | null
+          referenced_by: string | null
+          source_snapshot_id: string | null
+        }
+        Insert: {
+          company_id?: string | null
+          confidence_level?: number | null
+          created_at?: string | null
+          display_summary?: string | null
+          employee_id?: string | null
+          evidence_type: string
+          id?: string
+          is_referenced?: boolean | null
+          module_entity_id?: string | null
+          module_type: string
+          referenced_at?: string | null
+          referenced_by?: string | null
+          source_snapshot_id?: string | null
+        }
+        Update: {
+          company_id?: string | null
+          confidence_level?: number | null
+          created_at?: string | null
+          display_summary?: string | null
+          employee_id?: string | null
+          evidence_type?: string
+          id?: string
+          is_referenced?: boolean | null
+          module_entity_id?: string | null
+          module_type?: string
+          referenced_at?: string | null
+          referenced_by?: string | null
+          source_snapshot_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "module_evidence_cards_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "module_evidence_cards_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "module_evidence_cards_referenced_by_fkey"
+            columns: ["referenced_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "module_evidence_cards_source_snapshot_id_fkey"
+            columns: ["source_snapshot_id"]
+            isOneToOne: false
+            referencedRelation: "talent_signal_snapshots"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       module_implementations: {
         Row: {
           company_id: string | null
@@ -51134,6 +51303,53 @@ export type Database = {
             columns: ["snapshot_id"]
             isOneToOne: false
             referencedRelation: "talent_signal_snapshots"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      signal_routing_policies: {
+        Row: {
+          company_id: string | null
+          created_at: string | null
+          id: string
+          is_enabled: boolean | null
+          min_completion_rate: number | null
+          require_release: boolean | null
+          source_type: string
+          target_module: string
+          updated_at: string | null
+          visibility_delay_days: number | null
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string | null
+          id?: string
+          is_enabled?: boolean | null
+          min_completion_rate?: number | null
+          require_release?: boolean | null
+          source_type: string
+          target_module: string
+          updated_at?: string | null
+          visibility_delay_days?: number | null
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string | null
+          id?: string
+          is_enabled?: boolean | null
+          min_completion_rate?: number | null
+          require_release?: boolean | null
+          source_type?: string
+          target_module?: string
+          updated_at?: string | null
+          visibility_delay_days?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "signal_routing_policies_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
             referencedColumns: ["id"]
           },
         ]
