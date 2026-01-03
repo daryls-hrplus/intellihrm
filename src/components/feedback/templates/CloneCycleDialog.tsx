@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Copy, Target, Users, Grid3X3, GitBranch, BarChart3 } from 'lucide-react';
+import { Copy, Users, UserCheck, UsersRound, UserCog } from 'lucide-react';
 import { useCloneCycle, type CycleTemplate } from '@/hooks/feedback/useCycleTemplates';
 
 interface CloneCycleDialogProps {
@@ -46,12 +46,11 @@ export function CloneCycleDialog({
 
   if (!template) return null;
 
-  const routingConfig = [
-    { enabled: template.feed_to_appraisal, icon: Target, label: 'Appraisals' },
-    { enabled: template.feed_to_talent_profile, icon: Users, label: 'Talent Profile' },
-    { enabled: template.feed_to_nine_box, icon: Grid3X3, label: '9-Box Grid' },
-    { enabled: template.feed_to_succession, icon: GitBranch, label: 'Succession' },
-    { enabled: template.include_in_analytics, icon: BarChart3, label: 'Analytics' },
+  const reviewTypes = [
+    { enabled: template.include_self_review, icon: UserCheck, label: 'Self Review' },
+    { enabled: template.include_manager_review, icon: UserCog, label: 'Manager Review' },
+    { enabled: template.include_peer_review, icon: Users, label: 'Peer Review' },
+    { enabled: template.include_direct_report_review, icon: UsersRound, label: 'Direct Report Review' },
   ];
 
   return (
@@ -83,19 +82,19 @@ export function CloneCycleDialog({
             <div className="p-3 bg-muted/50 rounded-lg space-y-3">
               <div className="flex items-center gap-2">
                 <Badge variant="outline">
-                  {template.cycle_purpose || 'development'}
+                  {template.cycle_type || '360 Feedback'}
                 </Badge>
-                {template.anonymity_threshold && (
+                {template.min_peer_reviewers && (
                   <span className="text-xs text-muted-foreground">
-                    Min {template.anonymity_threshold} responses
+                    Min {template.min_peer_reviewers} peer reviewers
                   </span>
                 )}
               </div>
 
               <div className="text-sm">
-                <span className="text-muted-foreground">Routes to: </span>
+                <span className="text-muted-foreground">Includes: </span>
                 <div className="flex flex-wrap gap-2 mt-1">
-                  {routingConfig
+                  {reviewTypes
                     .filter((r) => r.enabled)
                     .map(({ icon: Icon, label }) => (
                       <Badge key={label} variant="secondary" className="text-xs">
@@ -103,17 +102,11 @@ export function CloneCycleDialog({
                         {label}
                       </Badge>
                     ))}
-                  {routingConfig.every((r) => !r.enabled) && (
+                  {reviewTypes.every((r) => !r.enabled) && (
                     <span className="text-xs text-muted-foreground">None configured</span>
                   )}
                 </div>
               </div>
-
-              {template.ai_tone_setting && (
-                <div className="text-xs text-muted-foreground">
-                  AI Tone: <span className="capitalize">{template.ai_tone_setting}</span>
-                </div>
-              )}
             </div>
           </div>
 

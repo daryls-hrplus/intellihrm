@@ -6,18 +6,19 @@ export interface CycleTemplate {
   id: string;
   company_id: string;
   name: string;
+  description: string | null;
   template_name: string | null;
   template_description: string | null;
   is_template: boolean;
-  cycle_purpose: string | null;
-  feed_to_appraisal: boolean | null;
-  feed_to_talent_profile: boolean | null;
-  feed_to_nine_box: boolean | null;
-  feed_to_succession: boolean | null;
-  include_in_analytics: boolean | null;
-  anonymity_threshold: number | null;
-  retention_period_months: number | null;
-  ai_tone_setting: string | null;
+  include_self_review: boolean | null;
+  include_manager_review: boolean | null;
+  include_peer_review: boolean | null;
+  include_direct_report_review: boolean | null;
+  min_peer_reviewers: number | null;
+  max_peer_reviewers: number | null;
+  rating_scale_id: string | null;
+  cycle_type: string | null;
+  visibility_rules: Record<string, unknown> | null;
   created_at: string;
   tags?: string[];
 }
@@ -27,7 +28,7 @@ export function useCycleTemplates(companyId?: string) {
     queryKey: ['cycle-templates', companyId],
     queryFn: async () => {
       const { data: cycles, error } = await supabase
-        .from('feedback_360_cycles')
+        .from('review_cycles')
         .select('*')
         .eq('is_template', true)
         .order('template_name', { ascending: true });
@@ -36,8 +37,10 @@ export function useCycleTemplates(companyId?: string) {
 
       // Fetch tags for each template
       const cycleIds = cycles?.map(c => c.id) || [];
+      if (cycleIds.length === 0) return [] as CycleTemplate[];
+
       const { data: tags } = await supabase
-        .from('feedback_cycle_template_tags')
+        .from('review_cycle_template_tags')
         .select('cycle_id, tag')
         .in('cycle_id', cycleIds);
 
@@ -73,7 +76,7 @@ export function useSaveAsTemplate() {
     }) => {
       // Update cycle to be a template
       const { data: cycle, error } = await supabase
-        .from('feedback_360_cycles')
+        .from('review_cycles')
         .update({
           is_template: true,
           template_name: templateName,
@@ -87,12 +90,18 @@ export function useSaveAsTemplate() {
 
       // Add tags
       if (tags && tags.length > 0) {
+        // First delete existing tags
+        await supabase
+          .from('review_cycle_template_tags')
+          .delete()
+          .eq('cycle_id', cycleId);
+
         const tagInserts = tags.map(tag => ({
           cycle_id: cycleId,
           tag,
         }));
         await supabase
-          .from('feedback_cycle_template_tags')
+          .from('review_cycle_template_tags')
           .insert(tagInserts);
       }
 
@@ -100,6 +109,7 @@ export function useSaveAsTemplate() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['cycle-templates'] });
+      queryClient.invalidateQueries({ queryKey: ['review-cycles'] });
       toast.success('Cycle saved as template');
     },
     onError: (error) => {
@@ -123,36 +133,35 @@ export function useCloneCycle() {
     }) => {
       // Get template cycle
       const { data: template, error: fetchError } = await supabase
-        .from('feedback_360_cycles')
+        .from('review_cycles')
         .select('*')
         .eq('id', templateId)
         .single();
 
       if (fetchError) throw fetchError;
 
-      // Create new cycle from template
-      const insertData: Record<string, unknown> = {
-        company_id: companyId,
-        name: newName,
-        description: template.description,
-        cycle_purpose: template.cycle_purpose,
-        feed_to_appraisal: template.feed_to_appraisal,
-        feed_to_talent_profile: template.feed_to_talent_profile,
-        feed_to_nine_box: template.feed_to_nine_box,
-        feed_to_succession: template.feed_to_succession,
-        include_in_analytics: template.include_in_analytics,
-        anonymity_threshold: template.anonymity_threshold,
-        retention_period_months: template.retention_period_months,
-        ai_tone_setting: template.ai_tone_setting,
-        results_visibility_rules: template.results_visibility_rules,
-        is_template: false,
-        cloned_from_id: templateId,
-        status: 'draft',
-      };
-
+      // Create new cycle from template - dates will need to be set by user
       const { data: newCycle, error: insertError } = await supabase
-        .from('feedback_360_cycles')
-        .insert(insertData as never)
+        .from('review_cycles')
+        .insert({
+          company_id: companyId,
+          name: newName,
+          description: template.description,
+          start_date: template.start_date,
+          end_date: template.end_date,
+          include_self_review: template.include_self_review,
+          include_manager_review: template.include_manager_review,
+          include_peer_review: template.include_peer_review,
+          include_direct_report_review: template.include_direct_report_review,
+          min_peer_reviewers: template.min_peer_reviewers,
+          max_peer_reviewers: template.max_peer_reviewers,
+          rating_scale_id: template.rating_scale_id,
+          cycle_type: template.cycle_type,
+          visibility_rules: template.visibility_rules,
+          is_template: false,
+          cloned_from_id: templateId,
+          status: 'draft',
+        })
         .select()
         .single();
 
@@ -161,7 +170,7 @@ export function useCloneCycle() {
       return newCycle;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['feedback-360-cycles'] });
+      queryClient.invalidateQueries({ queryKey: ['review-cycles'] });
       toast.success('Cycle created from template');
     },
     onError: (error) => {
@@ -177,7 +186,7 @@ export function useDeleteTemplate() {
     mutationFn: async (templateId: string) => {
       // Remove template flag (don't delete the cycle itself)
       const { error } = await supabase
-        .from('feedback_360_cycles')
+        .from('review_cycles')
         .update({
           is_template: false,
           template_name: null,
@@ -189,7 +198,7 @@ export function useDeleteTemplate() {
 
       // Delete tags
       await supabase
-        .from('feedback_cycle_template_tags')
+        .from('review_cycle_template_tags')
         .delete()
         .eq('cycle_id', templateId);
     },

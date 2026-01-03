@@ -9,9 +9,9 @@ import {
   Copy, 
   Trash2, 
   Search,
-  Target,
+  UserCheck,
   Users,
-  Grid3X3
+  UserCog
 } from 'lucide-react';
 import { useCycleTemplates, useDeleteTemplate, type CycleTemplate } from '@/hooks/feedback/useCycleTemplates';
 import { CloneCycleDialog } from './CloneCycleDialog';
@@ -36,11 +36,11 @@ export function CycleTemplateLibrary({ companyId, onCloneSuccess }: CycleTemplat
     );
   });
 
-  const getRoutingIcons = (template: CycleTemplate) => {
+  const getReviewTypeIcons = (template: CycleTemplate) => {
     const icons = [];
-    if (template.feed_to_appraisal) icons.push({ icon: Target, label: 'Appraisals' });
-    if (template.feed_to_talent_profile) icons.push({ icon: Users, label: 'Talent Profile' });
-    if (template.feed_to_nine_box) icons.push({ icon: Grid3X3, label: '9-Box' });
+    if (template.include_self_review) icons.push({ icon: UserCheck, label: 'Self' });
+    if (template.include_manager_review) icons.push({ icon: UserCog, label: 'Manager' });
+    if (template.include_peer_review) icons.push({ icon: Users, label: 'Peer' });
     return icons;
   };
 
@@ -128,9 +128,9 @@ export function CycleTemplateLibrary({ companyId, onCloneSuccess }: CycleTemplat
 
                   <div className="flex items-center gap-3 mt-3 text-xs text-muted-foreground">
                     <Badge variant="outline" className="text-xs">
-                      {template.cycle_purpose || 'development'}
+                      {template.cycle_type || '360 Feedback'}
                     </Badge>
-                    {getRoutingIcons(template).map(({ icon: Icon, label }) => (
+                    {getReviewTypeIcons(template).map(({ icon: Icon, label }) => (
                       <span key={label} className="flex items-center gap-1">
                         <Icon className="h-3 w-3" />
                         {label}
