@@ -18,6 +18,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Loader2, Calendar, AlertTriangle, ChevronDown, Copy, Route, Eye } from "lucide-react";
+import { ResultsPreviewDialog } from "@/components/feedback/cycles/ResultsPreviewDialog";
 import { CycleVisibilityRulesEditor, VisibilityRules, DEFAULT_VISIBILITY_RULES } from "@/components/feedback/cycles/CycleVisibilityRulesEditor";
 import { VisibilityAccessMatrix } from "@/components/feedback/cycles/VisibilityAccessMatrix";
 import { supabase } from "@/integrations/supabase/client";
@@ -81,6 +82,7 @@ export function ReviewCycleDialog({
   const [showTemplates, setShowTemplates] = useState(false);
   const [showRoutingPolicy, setShowRoutingPolicy] = useState(false);
   const [showVisibilityRules, setShowVisibilityRules] = useState(false);
+  const [previewDialogOpen, setPreviewDialogOpen] = useState(false);
   
   // Visibility rules state
   const [visibilityRules, setVisibilityRules] = useState<VisibilityRules>(DEFAULT_VISIBILITY_RULES);
@@ -586,6 +588,17 @@ export function ReviewCycleDialog({
                 disabled={saving}
               />
               <VisibilityAccessMatrix rules={visibilityRules} />
+              {cycle && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => setPreviewDialogOpen(true)}
+                >
+                  <Eye className="mr-2 h-4 w-4" />
+                  Preview How Results Will Appear
+                </Button>
+              )}
             </CollapsibleContent>
           </Collapsible>
 
@@ -607,6 +620,18 @@ export function ReviewCycleDialog({
             </Button>
           </div>
         </form>
+
+        {/* Preview Dialog */}
+        {cycle && (
+          <ResultsPreviewDialog
+            open={previewDialogOpen}
+            onOpenChange={setPreviewDialogOpen}
+            cycleId={cycle.id}
+            cycleName={cycle.name}
+            visibilityRules={visibilityRules}
+            companyId={companyId}
+          />
+        )}
       </DialogContent>
     </Dialog>
   );

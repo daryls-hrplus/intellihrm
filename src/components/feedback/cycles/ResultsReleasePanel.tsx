@@ -19,12 +19,15 @@ import {
   Unlock, 
   Calendar,
   Bell,
-  Loader2
+  Loader2,
+  Eye
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { ResultsPreviewDialog } from "./ResultsPreviewDialog";
+import { VisibilityRules, DEFAULT_VISIBILITY_RULES } from "./CycleVisibilityRulesEditor";
 
 interface ResultsReleasePanelProps {
   cycleId: string;
@@ -38,6 +41,8 @@ interface ResultsReleasePanelProps {
     require_hr_approval: boolean;
     notify_on_release: boolean;
   };
+  visibilityRules?: VisibilityRules;
+  companyId?: string;
   onReleased: () => void;
 }
 
@@ -48,11 +53,14 @@ export function ResultsReleasePanel({
   resultsReleasedAt,
   resultsReleasedBy,
   releaseSettings,
+  visibilityRules = DEFAULT_VISIBILITY_RULES,
+  companyId,
   onReleased,
 }: ResultsReleasePanelProps) {
   const { user } = useAuth();
   const [releasing, setReleasing] = useState(false);
   const [releaserName, setReleaserName] = useState<string | null>(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
 
   // Fetch releaser name if we have the ID
   useState(() => {
@@ -159,6 +167,10 @@ export function ResultsReleasePanel({
             
             {isCycleClosed && (
               <div className="flex gap-2">
+                <Button variant="outline" onClick={() => setPreviewOpen(true)}>
+                  <Eye className="mr-2 h-4 w-4" />
+                  Preview Results As
+                </Button>
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
                     <Button disabled={releasing}>
@@ -196,6 +208,15 @@ export function ResultsReleasePanel({
                 </AlertDialog>
               </div>
             )}
+
+            <ResultsPreviewDialog
+              open={previewOpen}
+              onOpenChange={setPreviewOpen}
+              cycleId={cycleId}
+              cycleName={cycleName}
+              visibilityRules={visibilityRules}
+              companyId={companyId}
+            />
           </div>
         )}
       </CardContent>
