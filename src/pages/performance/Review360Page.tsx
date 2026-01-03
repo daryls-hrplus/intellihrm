@@ -52,6 +52,9 @@ import { SaveAsTemplateDialog } from "@/components/feedback/templates/SaveAsTemp
 import { AllEmployeeResultsDashboard } from "@/components/feedback/admin/AllEmployeeResultsDashboard";
 import { ResponseMonitoringDashboard } from "@/components/feedback/admin/ResponseMonitoringDashboard";
 import { InvestigationApprovalQueue } from "@/components/feedback/cycles/InvestigationApprovalQueue";
+import { ResultsReleasePanel } from "@/components/feedback/cycles/ResultsReleasePanel";
+import { ResultsPreviewDialog } from "@/components/feedback/cycles/ResultsPreviewDialog";
+import { VisibilityRules, DEFAULT_VISIBILITY_RULES } from "@/components/feedback/cycles/CycleVisibilityRulesEditor";
 import { useLanguage } from "@/hooks/useLanguage";
 import { formatDateForDisplay } from "@/utils/dateUtils";
 
@@ -76,6 +79,16 @@ interface ReviewCycle {
   is_manager_cycle?: boolean;
   created_by?: string;
   creator_name?: string;
+  company_id?: string;
+  results_released_at?: string | null;
+  results_released_by?: string | null;
+  release_settings?: {
+    auto_release_on_close: boolean;
+    release_delay_days: number;
+    require_hr_approval: boolean;
+    notify_on_release: boolean;
+  };
+  visibility_rules?: VisibilityRules;
 }
 
 interface PendingReview {
@@ -133,6 +146,8 @@ export default function Review360Page() {
   const [isCreatingManagerCycle, setIsCreatingManagerCycle] = useState(false);
   const [templateDialogOpen, setTemplateDialogOpen] = useState(false);
   const [cycleToTemplate, setCycleToTemplate] = useState<ReviewCycle | null>(null);
+  const [previewDialogOpen, setPreviewDialogOpen] = useState(false);
+  const [cycleForPreview, setCycleForPreview] = useState<ReviewCycle | null>(null);
   
   // Company switcher for admin/HR
   const [companies, setCompanies] = useState<{ id: string; name: string }[]>([]);
@@ -193,7 +208,7 @@ export default function Review360Page() {
     // For managers: fetch only their own manager cycles
     let query = supabase
       .from("review_cycles")
-      .select("*")
+      .select("id, name, description, start_date, end_date, self_review_deadline, peer_nomination_deadline, feedback_deadline, status, include_self_review, include_manager_review, include_peer_review, include_direct_report_review, min_peer_reviewers, max_peer_reviewers, is_manager_cycle, created_by, company_id, results_released_at, results_released_by, release_settings, visibility_rules")
       .eq("company_id", selectedCompanyId)
       .order("created_at", { ascending: false });
 
@@ -825,6 +840,19 @@ export default function Review360Page() {
                                 >
                                   <MessageSquare className="h-4 w-4" />
                                 </Button>
+                                {(cycle.participants_count || 0) > 0 && (
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => {
+                                      setCycleForPreview(cycle);
+                                      setPreviewDialogOpen(true);
+                                    }}
+                                    title="Preview Results"
+                                  >
+                                    <Eye className="h-4 w-4" />
+                                  </Button>
+                                )}
                                 <Button
                                   variant="outline"
                                   size="sm"
@@ -847,6 +875,28 @@ export default function Review360Page() {
                               </div>
                             </div>
                           </div>
+                          
+                          {/* Results Release Panel for completed cycles */}
+                          {cycle.status === "completed" && (
+                            <div className="mt-4 pt-4 border-t">
+                              <ResultsReleasePanel
+                                cycleId={cycle.id}
+                                cycleName={cycle.name}
+                                cycleStatus={cycle.status}
+                                resultsReleasedAt={cycle.results_released_at || null}
+                                resultsReleasedBy={cycle.results_released_by || null}
+                                releaseSettings={cycle.release_settings || {
+                                  auto_release_on_close: false,
+                                  release_delay_days: 0,
+                                  require_hr_approval: true,
+                                  notify_on_release: true,
+                                }}
+                                visibilityRules={cycle.visibility_rules || DEFAULT_VISIBILITY_RULES}
+                                companyId={cycle.company_id}
+                                onReleased={fetchData}
+                              />
+                            </div>
+                          )}
                         </CardContent>
                       </Card>
                     ))}
@@ -1124,6 +1174,20 @@ export default function Review360Page() {
             setTemplateDialogOpen(false);
             setCycleToTemplate(null);
           }}
+        />
+      )}
+
+      {cycleForPreview && (
+        <ResultsPreviewDialog
+          open={previewDialogOpen}
+          onOpenChange={(open) => {
+            setPreviewDialogOpen(open);
+            if (!open) setCycleForPreview(null);
+          }}
+          cycleId={cycleForPreview.id}
+          cycleName={cycleForPreview.name}
+          visibilityRules={cycleForPreview.visibility_rules || DEFAULT_VISIBILITY_RULES}
+          companyId={cycleForPreview.company_id}
         />
       )}
     </AppLayout>
