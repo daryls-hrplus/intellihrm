@@ -42,6 +42,7 @@ import AdminPolicyDocumentsPage from "./pages/admin/AdminPolicyDocumentsPage";
 import AdminLetterTemplatesPage from "./pages/admin/AdminLetterTemplatesPage";
 import AdminLookupValuesPage from "./pages/admin/AdminLookupValuesPage";
 import AdminLmsManagementPage from "./pages/admin/AdminLmsManagementPage";
+import DemoManagementPage from "./pages/admin/DemoManagementPage";
 import AdminOnboardingPage from "./pages/admin/AdminOnboardingPage";
 import AdminOnboardingDetailPage from "./pages/admin/AdminOnboardingDetailPage";
 import AdminColorSchemePage from "./pages/admin/AdminColorSchemePage";
@@ -1466,6 +1467,14 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
                   <AdminLmsManagementPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/demo-management"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <DemoManagementPage />
                 </ProtectedRoute>
               }
             />
