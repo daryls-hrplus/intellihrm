@@ -56,7 +56,6 @@ export function VisibilityAccessMatrix({ rules }: VisibilityAccessMatrixProps) {
       case 'individual':
         if (role !== 'hr') return false;
         const hrAccess = rules.hr_access;
-        if (hrAccess.individual_response_access === 'always') return true;
         if (hrAccess.individual_response_access === 'investigation_only') return 'investigation';
         return false;
       default:
@@ -111,16 +110,16 @@ export function VisibilityAccessMatrix({ rules }: VisibilityAccessMatrixProps) {
           </table>
         </div>
         
-        {rules.hr_access.individual_response_access === 'investigation_only' && (
-          <div className="mt-4 flex items-start gap-2 p-3 rounded-lg bg-warning/10 border border-warning/20">
-            <AlertTriangle className="h-4 w-4 text-warning mt-0.5 shrink-0" />
-            <p className="text-xs text-muted-foreground">
-              <span className="font-medium text-foreground">Investigation Mode Active:</span>{' '}
-              Individual responses require a formal investigation request approved by an HR Director. 
-              All access is logged and auditable.
-            </p>
-          </div>
-        )}
+        <div className="mt-4 flex items-start gap-2 p-3 rounded-lg bg-muted/50 border">
+          <Shield className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+          <p className="text-xs text-muted-foreground">
+            <span className="font-medium text-foreground">Individual Response Access:</span>{' '}
+            {rules.hr_access.individual_response_access === 'never' 
+              ? 'Individual responses are never visible. This policy is controlled at the organization level in Performance Setup → 360° Feedback → Anonymity & Access.'
+              : 'Requires a formal investigation request approved by HR Director. All access is logged and auditable. Policy is controlled at the organization level.'
+            }
+          </p>
+        </div>
       </CardContent>
     </Card>
   );

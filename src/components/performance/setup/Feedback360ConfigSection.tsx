@@ -36,10 +36,11 @@ import {
   TabsTrigger,
 } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Plus, Edit, Trash2, MessageSquare, Users, HelpCircle, Sparkles, Route, Copy } from "lucide-react";
+import { Plus, Edit, Trash2, MessageSquare, Users, HelpCircle, Sparkles, Route, Copy, Shield } from "lucide-react";
 import { SignalDefinitionsManager } from "@/components/feedback/signals/SignalDefinitionsManager";
 import { RoutingPolicyManager } from "@/components/feedback/admin/RoutingPolicyManager";
 import { CycleTemplateLibrary } from "@/components/feedback/templates/CycleTemplateLibrary";
+import { AnonymityPolicySettings } from "./AnonymityPolicySettings";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useLanguage } from "@/hooks/useLanguage";
@@ -181,7 +182,7 @@ export function Feedback360ConfigSection({ companyId }: Feedback360ConfigSection
   return (
     <div className="space-y-4">
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="rater-categories" className="flex items-center gap-2">
             <Users className="h-4 w-4" />
             Rater Categories
@@ -201,6 +202,10 @@ export function Feedback360ConfigSection({ companyId }: Feedback360ConfigSection
           <TabsTrigger value="cycle-templates" className="flex items-center gap-2">
             <Copy className="h-4 w-4" />
             Cycle Templates
+          </TabsTrigger>
+          <TabsTrigger value="anonymity-policy" className="flex items-center gap-2">
+            <Shield className="h-4 w-4" />
+            Anonymity & Access
           </TabsTrigger>
         </TabsList>
 
@@ -362,6 +367,11 @@ export function Feedback360ConfigSection({ companyId }: Feedback360ConfigSection
         {/* Cycle Templates Tab */}
         <TabsContent value="cycle-templates">
           <CycleTemplateLibrary companyId={companyId} />
+        </TabsContent>
+
+        {/* Anonymity & Access Tab */}
+        <TabsContent value="anonymity-policy">
+          <AnonymityPolicySettings companyId={companyId} />
         </TabsContent>
       </Tabs>
 

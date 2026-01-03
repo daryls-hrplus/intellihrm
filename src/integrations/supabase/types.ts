@@ -7909,6 +7909,7 @@ export type Database = {
           created_at: string
           division_id: string | null
           email: string | null
+          feedback_360_anonymity_policy: Json | null
           first_language: string | null
           group_id: string | null
           id: string
@@ -7938,6 +7939,7 @@ export type Database = {
           created_at?: string
           division_id?: string | null
           email?: string | null
+          feedback_360_anonymity_policy?: Json | null
           first_language?: string | null
           group_id?: string | null
           id?: string
@@ -7967,6 +7969,7 @@ export type Database = {
           created_at?: string
           division_id?: string | null
           email?: string | null
+          feedback_360_anonymity_policy?: Json | null
           first_language?: string | null
           group_id?: string | null
           id?: string
