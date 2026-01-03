@@ -242,8 +242,8 @@ export default function EnablementHubPage() {
       titleKey: "Administrator Manuals",
       items: [
         {
-          title: "Appraisals Manual",
-          description: "Comprehensive administrator guide for the Appraisals module",
+          title: "Performance Appraisal - Administrator Guide",
+          description: "Comprehensive administrator guide for the Performance Appraisal module",
           href: "/enablement/manuals/appraisals",
           icon: BookOpen,
           color: "bg-primary/10 text-primary",
