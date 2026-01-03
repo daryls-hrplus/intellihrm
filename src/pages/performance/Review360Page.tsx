@@ -25,6 +25,8 @@ import {
   Building2,
   ChevronDown,
   TrendingUp,
+  Sparkles,
+  BookmarkPlus,
 } from "lucide-react";
 import { Review360AnalyticsDashboard } from "@/components/performance/Review360AnalyticsDashboard";
 import {
@@ -41,6 +43,9 @@ import { MyFeedbackSummary } from "@/components/performance/MyFeedbackSummary";
 import { CycleParticipantsManager } from "@/components/performance/CycleParticipantsManager";
 import { CycleQuestionsManager } from "@/components/performance/CycleQuestionsManager";
 import { PeerNominationManager } from "@/components/performance/PeerNominationManager";
+import { EmployeeSignalSummary } from "@/components/feedback/signals/EmployeeSignalSummary";
+import { SignalRadarChart } from "@/components/feedback/signals/SignalRadarChart";
+import { SaveAsTemplateDialog } from "@/components/feedback/templates/SaveAsTemplateDialog";
 import { useLanguage } from "@/hooks/useLanguage";
 import { formatDateForDisplay } from "@/utils/dateUtils";
 
@@ -113,6 +118,8 @@ export default function Review360Page() {
   const [peerNominationOpen, setPeerNominationOpen] = useState(false);
   const [selectedParticipant, setSelectedParticipant] = useState<any>(null);
   const [isCreatingManagerCycle, setIsCreatingManagerCycle] = useState(false);
+  const [templateDialogOpen, setTemplateDialogOpen] = useState(false);
+  const [cycleToTemplate, setCycleToTemplate] = useState<ReviewCycle | null>(null);
   
   // Company switcher for admin/HR
   const [companies, setCompanies] = useState<{ id: string; name: string }[]>([]);
@@ -608,7 +615,23 @@ export default function Review360Page() {
           </TabsContent>
 
           <TabsContent value="my-feedback" className="mt-6">
-            <MyFeedbackSummary participations={myParticipations} />
+            <div className="space-y-6">
+              <MyFeedbackSummary participations={myParticipations} />
+              
+              {/* Talent Signals Section */}
+              {user?.id && (
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold flex items-center gap-2">
+                    <Sparkles className="h-5 w-5 text-primary" />
+                    My Talent Signals
+                  </h3>
+                  <div className="grid gap-4 lg:grid-cols-2">
+                    <SignalRadarChart employeeId={user.id} showCard />
+                    <EmployeeSignalSummary employeeId={user.id} />
+                  </div>
+                </div>
+              )}
+            </div>
           </TabsContent>
 
           {/* Central Cycles Tab - For HR/Admin */}
@@ -686,6 +709,17 @@ export default function Review360Page() {
                                   title="Configure Questions"
                                 >
                                   <MessageSquare className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    setCycleToTemplate(cycle);
+                                    setTemplateDialogOpen(true);
+                                  }}
+                                  title="Save as Template"
+                                >
+                                  <BookmarkPlus className="h-4 w-4" />
                                 </Button>
                                 <Button
                                   variant="outline"
@@ -862,6 +896,17 @@ export default function Review360Page() {
                                 <Button
                                   variant="outline"
                                   size="sm"
+                                  onClick={() => {
+                                    setCycleToTemplate(cycle);
+                                    setTemplateDialogOpen(true);
+                                  }}
+                                  title="Save as Template"
+                                >
+                                  <BookmarkPlus className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
                                   onClick={() => handleEditCycle(cycle)}
                                   title="Edit Cycle"
                                 >
@@ -924,6 +969,19 @@ export default function Review360Page() {
           minPeers={3}
           maxPeers={5}
           deadline={selectedParticipant.review_cycle?.peer_nomination_deadline}
+        />
+      )}
+
+      {cycleToTemplate && (
+        <SaveAsTemplateDialog
+          open={templateDialogOpen}
+          onOpenChange={setTemplateDialogOpen}
+          cycleId={cycleToTemplate.id}
+          cycleName={cycleToTemplate.name}
+          onSuccess={() => {
+            setTemplateDialogOpen(false);
+            setCycleToTemplate(null);
+          }}
         />
       )}
     </AppLayout>
