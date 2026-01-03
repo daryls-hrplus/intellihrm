@@ -67,6 +67,7 @@ import CompanyValuesPage from "./pages/admin/CompanyValuesPage";
 import ClientRegistryPage from "./pages/admin/ClientRegistryPage";
 import ClientDetailPage from "./pages/admin/ClientDetailPage";
 import ClientProvisioningPage from "./pages/admin/ClientProvisioningPage";
+import InvestigationRequestsPage from "./pages/admin/InvestigationRequestsPage";
 
 // Demo pages
 import DemoLoginPage from "./pages/demo/DemoLoginPage";
@@ -1184,6 +1185,14 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin"]}>
                   <AdminAuditLogsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/investigation-requests"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <InvestigationRequestsPage />
                 </ProtectedRoute>
               }
             />
