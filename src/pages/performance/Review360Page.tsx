@@ -27,6 +27,9 @@ import {
   TrendingUp,
   Sparkles,
   BookmarkPlus,
+  Activity,
+  Shield,
+  FileText,
 } from "lucide-react";
 import { Review360AnalyticsDashboard } from "@/components/performance/Review360AnalyticsDashboard";
 import {
@@ -46,6 +49,9 @@ import { PeerNominationManager } from "@/components/performance/PeerNominationMa
 import { EmployeeSignalSummary } from "@/components/feedback/signals/EmployeeSignalSummary";
 import { SignalRadarChart } from "@/components/feedback/signals/SignalRadarChart";
 import { SaveAsTemplateDialog } from "@/components/feedback/templates/SaveAsTemplateDialog";
+import { AllEmployeeResultsDashboard } from "@/components/feedback/admin/AllEmployeeResultsDashboard";
+import { ResponseMonitoringDashboard } from "@/components/feedback/admin/ResponseMonitoringDashboard";
+import { InvestigationApprovalQueue } from "@/components/feedback/cycles/InvestigationApprovalQueue";
 import { useLanguage } from "@/hooks/useLanguage";
 import { formatDateForDisplay } from "@/utils/dateUtils";
 
@@ -105,7 +111,14 @@ const tabHelpText: Record<string, string> = {
 export default function Review360Page() {
   const { t } = useLanguage();
   const { user, company, isAdmin, isHRManager } = useAuth();
-  const [activeTab, setActiveTab] = useState("my-reviews");
+  
+  // HR/Admin defaults to central-cycles; employees default to my-reviews
+  const getDefaultTab = () => {
+    if (isAdmin || isHRManager) return "central-cycles";
+    return "my-reviews";
+  };
+  
+  const [activeTab, setActiveTab] = useState(getDefaultTab());
   const [cycles, setCycles] = useState<ReviewCycle[]>([]);
   const [managerCycles, setManagerCycles] = useState<ReviewCycle[]>([]);
   const [pendingReviews, setPendingReviews] = useState<PendingReview[]>([]);
@@ -125,6 +138,13 @@ export default function Review360Page() {
   const [companies, setCompanies] = useState<{ id: string; name: string }[]>([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>(company?.id || "");
   const [showAnalytics, setShowAnalytics] = useState(false);
+
+  // Set correct default tab when roles load
+  useEffect(() => {
+    if (isAdmin || isHRManager) {
+      setActiveTab("central-cycles");
+    }
+  }, [isAdmin, isHRManager]);
 
   useEffect(() => {
     if (isAdmin || isHRManager) {
@@ -334,7 +354,16 @@ export default function Review360Page() {
     setCycleDialogOpen(true);
   };
 
-  const stats = {
+  // HR stats show organization-wide metrics; ESS shows personal metrics
+  const totalParticipants = [...cycles, ...managerCycles].reduce((sum, c) => sum + (c.participants_count || 0), 0);
+  const pendingRelease = cycles.filter(c => c.status === "completed").length;
+  
+  const stats = isAdmin || isHRManager ? {
+    activeCycles: cycles.filter((c) => c.status === "active" || c.status === "in_progress").length,
+    totalParticipants,
+    pendingRelease,
+    managerCyclesCount: managerCycles.length,
+  } : {
     activeCycles: cycles.filter((c) => c.status === "active" || c.status === "in_progress").length,
     pendingReviews: pendingReviews.length,
     completedCycles: cycles.filter((c) => c.status === "completed").length,
@@ -393,7 +422,7 @@ export default function Review360Page() {
           </div>
         </div>
 
-        {/* Stats Cards */}
+        {/* Stats Cards - Different for HR vs ESS */}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <Card>
             <CardContent className="p-4">
@@ -406,39 +435,79 @@ export default function Review360Page() {
               </div>
             </CardContent>
           </Card>
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">{t('performance.stats.pendingReviews')}</p>
-                  <p className="text-2xl font-bold">{stats.pendingReviews}</p>
-                </div>
-                <AlertCircle className="h-8 w-8 text-warning" />
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">{t('performance.stats.completedCycles')}</p>
-                  <p className="text-2xl font-bold">{stats.completedCycles}</p>
-                </div>
-                <CheckCircle className="h-8 w-8 text-success" />
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">{t('performance.stats.myParticipations')}</p>
-                  <p className="text-2xl font-bold">{stats.myParticipations}</p>
-                </div>
-                <ClipboardList className="h-8 w-8 text-primary" />
-              </div>
-            </CardContent>
-          </Card>
+          {(isAdmin || isHRManager) ? (
+            <>
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Total Participants</p>
+                      <p className="text-2xl font-bold">{stats.totalParticipants}</p>
+                    </div>
+                    <Users className="h-8 w-8 text-primary" />
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Pending Release</p>
+                      <p className="text-2xl font-bold">{stats.pendingRelease}</p>
+                    </div>
+                    <AlertCircle className="h-8 w-8 text-warning" />
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Manager Cycles</p>
+                      <p className="text-2xl font-bold">{stats.managerCyclesCount}</p>
+                    </div>
+                    <FileText className="h-8 w-8 text-success" />
+                  </div>
+                </CardContent>
+              </Card>
+            </>
+          ) : (
+            <>
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-muted-foreground">{t('performance.stats.pendingReviews')}</p>
+                      <p className="text-2xl font-bold">{stats.pendingReviews}</p>
+                    </div>
+                    <AlertCircle className="h-8 w-8 text-warning" />
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-muted-foreground">{t('performance.stats.completedCycles')}</p>
+                      <p className="text-2xl font-bold">{stats.completedCycles}</p>
+                    </div>
+                    <CheckCircle className="h-8 w-8 text-success" />
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-muted-foreground">{t('performance.stats.myParticipations')}</p>
+                      <p className="text-2xl font-bold">{stats.myParticipations}</p>
+                    </div>
+                    <ClipboardList className="h-8 w-8 text-primary" />
+                  </div>
+                </CardContent>
+              </Card>
+            </>
+          )}
         </div>
 
         {/* Analytics Dashboard (Collapsible) */}
@@ -463,30 +532,49 @@ export default function Review360Page() {
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="flex-wrap">
-            <TabsTrigger value="my-reviews" className="gap-2">
-              <ClipboardList className="h-4 w-4" />
-              {t('performance.review360.myReviews')}
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <HelpCircle className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground cursor-help" />
-                </TooltipTrigger>
-                <TooltipContent side="bottom" className="w-72 p-3 text-left whitespace-normal">
-                  <p className="text-sm leading-relaxed">{t('performance.review360.tabs.myReviewsHelp')}</p>
-                </TooltipContent>
-              </Tooltip>
-            </TabsTrigger>
-            <TabsTrigger value="my-feedback" className="gap-2">
-              <BarChart3 className="h-4 w-4" />
-              {t('performance.review360.myFeedback')}
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <HelpCircle className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground cursor-help" />
-                </TooltipTrigger>
-                <TooltipContent side="bottom" className="w-72 p-3 text-left whitespace-normal">
-                  <p className="text-sm leading-relaxed">{t('performance.review360.tabs.myFeedbackHelp')}</p>
-                </TooltipContent>
-              </Tooltip>
-            </TabsTrigger>
+            {/* ESS Tabs - Only for non-HR users */}
+            {!isAdmin && !isHRManager && (
+              <>
+                <TabsTrigger value="my-reviews" className="gap-2">
+                  <ClipboardList className="h-4 w-4" />
+                  {t('performance.review360.myReviews')}
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <HelpCircle className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="w-72 p-3 text-left whitespace-normal">
+                      <p className="text-sm leading-relaxed">{t('performance.review360.tabs.myReviewsHelp')}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TabsTrigger>
+                <TabsTrigger value="my-feedback" className="gap-2">
+                  <BarChart3 className="h-4 w-4" />
+                  {t('performance.review360.myFeedback')}
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <HelpCircle className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="w-72 p-3 text-left whitespace-normal">
+                      <p className="text-sm leading-relaxed">{t('performance.review360.tabs.myFeedbackHelp')}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TabsTrigger>
+                <TabsTrigger value="manage-cycles" className="gap-2">
+                  <Settings className="h-4 w-4" />
+                  {t('performance.review360.manageCycles')}
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <HelpCircle className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="w-72 p-3 text-left whitespace-normal">
+                      <p className="text-sm leading-relaxed">{t('performance.review360.tabs.manageCyclesHelp')}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TabsTrigger>
+              </>
+            )}
+            
+            {/* HR/Admin Tabs */}
             {(isAdmin || isHRManager) && (
               <>
                 <TabsTrigger value="central-cycles" className="gap-2">
@@ -498,6 +586,30 @@ export default function Review360Page() {
                     </TooltipTrigger>
                     <TooltipContent side="bottom" className="w-72 p-3 text-left whitespace-normal">
                       <p className="text-sm leading-relaxed">{t('performance.review360.tabs.centralCyclesHelp')}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TabsTrigger>
+                <TabsTrigger value="all-results" className="gap-2">
+                  <FileText className="h-4 w-4" />
+                  All Results
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <HelpCircle className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="w-72 p-3 text-left whitespace-normal">
+                      <p className="text-sm leading-relaxed">View all employee 360 feedback results with filtering and export options.</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TabsTrigger>
+                <TabsTrigger value="monitoring" className="gap-2">
+                  <Activity className="h-4 w-4" />
+                  Monitoring
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <HelpCircle className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="w-72 p-3 text-left whitespace-normal">
+                      <p className="text-sm leading-relaxed">Track response completion and send reminders to pending reviewers.</p>
                     </TooltipContent>
                   </Tooltip>
                 </TabsTrigger>
@@ -513,126 +625,129 @@ export default function Review360Page() {
                     </TooltipContent>
                   </Tooltip>
                 </TabsTrigger>
+                <TabsTrigger value="investigations" className="gap-2">
+                  <Shield className="h-4 w-4" />
+                  Investigations
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <HelpCircle className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="w-72 p-3 text-left whitespace-normal">
+                      <p className="text-sm leading-relaxed">Review and approve investigation requests to access individual 360 feedback responses.</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TabsTrigger>
               </>
-            )}
-            {!isAdmin && !isHRManager && (
-              <TabsTrigger value="manage-cycles" className="gap-2">
-                <Settings className="h-4 w-4" />
-                {t('performance.review360.manageCycles')}
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <HelpCircle className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground cursor-help" />
-                  </TooltipTrigger>
-                  <TooltipContent side="bottom" className="w-72 p-3 text-left whitespace-normal">
-                    <p className="text-sm leading-relaxed">{t('performance.review360.tabs.manageCyclesHelp')}</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TabsTrigger>
             )}
           </TabsList>
 
-          <TabsContent value="my-reviews" className="mt-6">
-            <div className="space-y-6">
-              {/* Pending Reviews */}
-              {pendingReviews.length > 0 && (
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">Pending Reviews</h3>
-                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                    {pendingReviews.map((review) => (
-                      <PendingReviewsCard
-                        key={review.id}
-                        review={review}
-                        onComplete={() => fetchData()}
-                      />
-                    ))}
-                  </div>
-                </div>
-              )}
+          {/* ESS Tab Contents - Only for non-HR users */}
+          {!isAdmin && !isHRManager && (
+            <>
+              <TabsContent value="my-reviews" className="mt-6">
+                <div className="space-y-6">
+                  {/* Pending Reviews */}
+                  {pendingReviews.length > 0 && (
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-semibold">Pending Reviews</h3>
+                      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                        {pendingReviews.map((review) => (
+                          <PendingReviewsCard
+                            key={review.id}
+                            review={review}
+                            onComplete={() => fetchData()}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
-              {/* My Participations */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold">My Review Cycles</h3>
-                {myParticipations.length === 0 ? (
-                  <Card>
-                    <CardContent className="py-12 text-center text-muted-foreground">
-                      You are not part of any review cycles yet.
-                    </CardContent>
-                  </Card>
-                ) : (
-                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                    {myParticipations.map((participation) => (
-                      <Card key={participation.id}>
-                        <CardHeader className="pb-2">
-                          <div className="flex items-start justify-between">
-                            <CardTitle className="text-base">
-                              {participation.review_cycle?.name}
-                            </CardTitle>
-                            <Badge className={statusColors[participation.status]}>
-                              {participation.status}
-                            </Badge>
-                          </div>
-                        </CardHeader>
-                        <CardContent className="space-y-3">
-                          <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                            <div className="flex items-center gap-1">
-                              <CheckCircle className={`h-4 w-4 ${participation.self_review_completed ? "text-success" : "text-muted-foreground"}`} />
-                              Self Review
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <CheckCircle className={`h-4 w-4 ${participation.manager_review_completed ? "text-success" : "text-muted-foreground"}`} />
-                              Manager Review
-                            </div>
-                          </div>
-                          {participation.review_cycle?.status === "active" && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="w-full"
-                              onClick={() => {
-                                setSelectedParticipant(participation);
-                                setPeerNominationOpen(true);
-                              }}
-                            >
-                              <UserPlus className="mr-2 h-4 w-4" />
-                              Nominate Peers
-                            </Button>
-                          )}
-                          {participation.overall_score && (
-                            <div className="pt-2 border-t">
-                              <p className="text-sm text-muted-foreground">Overall Score</p>
-                              <p className="text-2xl font-bold text-primary">
-                                {participation.overall_score.toFixed(1)}
-                              </p>
-                            </div>
-                          )}
+                  {/* My Participations */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold">My Review Cycles</h3>
+                    {myParticipations.length === 0 ? (
+                      <Card>
+                        <CardContent className="py-12 text-center text-muted-foreground">
+                          You are not part of any review cycles yet.
                         </CardContent>
                       </Card>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="my-feedback" className="mt-6">
-            <div className="space-y-6">
-              <MyFeedbackSummary participations={myParticipations} />
-              
-              {/* Talent Signals Section */}
-              {user?.id && (
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold flex items-center gap-2">
-                    <Sparkles className="h-5 w-5 text-primary" />
-                    My Talent Signals
-                  </h3>
-                  <div className="grid gap-4 lg:grid-cols-2">
-                    <SignalRadarChart employeeId={user.id} showCard />
-                    <EmployeeSignalSummary employeeId={user.id} />
+                    ) : (
+                      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                        {myParticipations.map((participation) => (
+                          <Card key={participation.id}>
+                            <CardHeader className="pb-2">
+                              <div className="flex items-start justify-between">
+                                <CardTitle className="text-base">
+                                  {participation.review_cycle?.name}
+                                </CardTitle>
+                                <Badge className={statusColors[participation.status]}>
+                                  {participation.status}
+                                </Badge>
+                              </div>
+                            </CardHeader>
+                            <CardContent className="space-y-3">
+                              <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                                <div className="flex items-center gap-1">
+                                  <CheckCircle className={`h-4 w-4 ${participation.self_review_completed ? "text-success" : "text-muted-foreground"}`} />
+                                  Self Review
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <CheckCircle className={`h-4 w-4 ${participation.manager_review_completed ? "text-success" : "text-muted-foreground"}`} />
+                                  Manager Review
+                                </div>
+                              </div>
+                              {participation.review_cycle?.status === "active" && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="w-full"
+                                  onClick={() => {
+                                    setSelectedParticipant(participation);
+                                    setPeerNominationOpen(true);
+                                  }}
+                                >
+                                  <UserPlus className="mr-2 h-4 w-4" />
+                                  Nominate Peers
+                                </Button>
+                              )}
+                              {participation.overall_score && (
+                                <div className="pt-2 border-t">
+                                  <p className="text-sm text-muted-foreground">Overall Score</p>
+                                  <p className="text-2xl font-bold text-primary">
+                                    {participation.overall_score.toFixed(1)}
+                                  </p>
+                                </div>
+                              )}
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
-              )}
-            </div>
-          </TabsContent>
+              </TabsContent>
+
+              <TabsContent value="my-feedback" className="mt-6">
+                <div className="space-y-6">
+                  <MyFeedbackSummary participations={myParticipations} />
+                  
+                  {/* Talent Signals Section */}
+                  {user?.id && (
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-semibold flex items-center gap-2">
+                        <Sparkles className="h-5 w-5 text-primary" />
+                        My Talent Signals
+                      </h3>
+                      <div className="grid gap-4 lg:grid-cols-2">
+                        <SignalRadarChart employeeId={user.id} showCard />
+                        <EmployeeSignalSummary employeeId={user.id} />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </TabsContent>
+            </>
+          )}
 
           {/* Central Cycles Tab - For HR/Admin */}
           {(isAdmin || isHRManager) && (
@@ -814,6 +929,33 @@ export default function Review360Page() {
                   </div>
                 )}
               </div>
+            </TabsContent>
+          )}
+
+          {/* All Results Tab - For HR/Admin */}
+          {(isAdmin || isHRManager) && (
+            <TabsContent value="all-results" className="mt-6">
+              <AllEmployeeResultsDashboard 
+                companyId={selectedCompanyId} 
+                cycles={[...cycles, ...managerCycles].map(c => ({ id: c.id, name: c.name, status: c.status }))}
+              />
+            </TabsContent>
+          )}
+
+          {/* Monitoring Tab - For HR/Admin */}
+          {(isAdmin || isHRManager) && (
+            <TabsContent value="monitoring" className="mt-6">
+              <ResponseMonitoringDashboard 
+                companyId={selectedCompanyId} 
+                cycles={[...cycles, ...managerCycles].map(c => ({ id: c.id, name: c.name, status: c.status }))}
+              />
+            </TabsContent>
+          )}
+
+          {/* Investigations Tab - For HR/Admin */}
+          {(isAdmin || isHRManager) && (
+            <TabsContent value="investigations" className="mt-6">
+              <InvestigationApprovalQueue companyId={selectedCompanyId} />
             </TabsContent>
           )}
 
