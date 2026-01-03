@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Table,
   TableBody,
@@ -30,7 +31,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, Edit, Trash2, Lock, Sparkles } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Plus, Edit, Trash2, Lock, Sparkles, Copy, Info } from "lucide-react";
 import {
   useTalentSignalDefinitions,
   useManageSignalDefinition,
@@ -59,11 +66,11 @@ const AGGREGATION_METHODS: { value: AggregationMethod; label: string; descriptio
 ];
 
 const categoryColors: Record<SignalCategory, string> = {
-  leadership: "bg-purple-500/20 text-purple-700 dark:text-purple-300 border border-purple-500/30",
-  teamwork: "bg-blue-500/20 text-blue-700 dark:text-blue-300 border border-blue-500/30",
-  technical: "bg-green-500/20 text-green-700 dark:text-green-300 border border-green-500/30",
-  values: "bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30",
-  general: "bg-muted text-muted-foreground border border-border",
+  leadership: "bg-purple-600 text-white dark:bg-purple-500",
+  teamwork: "bg-blue-600 text-white dark:bg-blue-500",
+  technical: "bg-emerald-600 text-white dark:bg-emerald-500",
+  values: "bg-amber-500 text-white dark:bg-amber-400 dark:text-amber-950",
+  general: "bg-slate-500 text-white dark:bg-slate-400 dark:text-slate-950",
 };
 
 export function SignalDefinitionsManager({ companyId }: SignalDefinitionsManagerProps) {
@@ -83,6 +90,10 @@ export function SignalDefinitionsManager({ companyId }: SignalDefinitionsManager
     confidence_threshold: 0.6,
     is_active: true,
   });
+
+  // Separate system and custom signals
+  const systemSignals = definitions?.filter((s) => s.is_system_defined === true) || [];
+  const customSignals = definitions?.filter((s) => s.is_system_defined !== true) || [];
 
   const resetForm = () => {
     setForm({
@@ -113,6 +124,21 @@ export function SignalDefinitionsManager({ companyId }: SignalDefinitionsManager
     setDialogOpen(true);
   };
 
+  const handleClone = (signal: any) => {
+    setEditingSignal(null); // Not editing, creating new
+    setForm({
+      code: `${signal.code}_custom`,
+      name: `${signal.name} (Custom)`,
+      name_en: signal.name_en ? `${signal.name_en} (Custom)` : "",
+      description: signal.description || "",
+      signal_category: signal.signal_category,
+      aggregation_method: signal.aggregation_method,
+      confidence_threshold: signal.confidence_threshold,
+      is_active: true,
+    });
+    setDialogOpen(true);
+  };
+
   const handleSave = async () => {
     await manageMutation.mutateAsync({
       id: editingSignal?.id,
@@ -128,6 +154,70 @@ export function SignalDefinitionsManager({ companyId }: SignalDefinitionsManager
     await deleteMutation.mutateAsync(id);
   };
 
+  const renderSignalRow = (signal: any, isSystem: boolean) => (
+    <TableRow key={signal.id} className={isSystem ? "bg-muted/30" : ""}>
+      <TableCell>
+        <div className="flex items-center gap-2">
+          {isSystem && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <Lock className="h-3.5 w-3.5 text-muted-foreground" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>System signal - read-only. Clone to customize.</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
+          <div>
+            <p className="font-medium">{signal.name}</p>
+            <p className="text-xs text-muted-foreground">{signal.code}</p>
+          </div>
+        </div>
+      </TableCell>
+      <TableCell>
+        <Badge className={categoryColors[signal.signal_category as SignalCategory] || categoryColors.general}>
+          {SIGNAL_CATEGORIES.find((c) => c.value === signal.signal_category)?.label || signal.signal_category}
+        </Badge>
+      </TableCell>
+      <TableCell className="text-sm">
+        {AGGREGATION_METHODS.find((m) => m.value === signal.aggregation_method)?.label}
+      </TableCell>
+      <TableCell className="text-sm">{(signal.confidence_threshold * 100).toFixed(0)}%</TableCell>
+      <TableCell>
+        <Badge variant={signal.is_active ? "default" : "secondary"}>
+          {signal.is_active ? "Active" : "Inactive"}
+        </Badge>
+      </TableCell>
+      <TableCell className="text-right">
+        {isSystem ? (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon" onClick={() => handleClone(signal)}>
+                  <Copy className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Clone to custom signal</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        ) : (
+          <>
+            <Button variant="ghost" size="icon" onClick={() => handleEdit(signal)} title="Edit">
+              <Edit className="h-4 w-4" />
+            </Button>
+            <Button variant="ghost" size="icon" onClick={() => handleDelete(signal.id)} title="Delete">
+              <Trash2 className="h-4 w-4 text-destructive" />
+            </Button>
+          </>
+        )}
+      </TableCell>
+    </TableRow>
+  );
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
@@ -136,9 +226,7 @@ export function SignalDefinitionsManager({ companyId }: SignalDefinitionsManager
             <Sparkles className="h-4 w-4" />
             Signal Definitions
           </CardTitle>
-          <CardDescription>
-            Configure talent signals tracked from 360° feedback cycles
-          </CardDescription>
+          <CardDescription>Configure talent signals tracked from 360° feedback cycles</CardDescription>
         </div>
         <Button
           size="sm"
@@ -148,10 +236,20 @@ export function SignalDefinitionsManager({ companyId }: SignalDefinitionsManager
           }}
         >
           <Plus className="h-4 w-4 mr-2" />
-          Add Signal
+          Add Custom Signal
         </Button>
       </CardHeader>
-      <CardContent>
+      <CardContent className="space-y-6">
+        {/* Info banner */}
+        <Alert>
+          <Info className="h-4 w-4" />
+          <AlertDescription>
+            <span className="font-medium">System signals</span> (🔒) are shared templates that cannot be modified.
+            Click the <Copy className="h-3 w-3 inline mx-1" /> clone button to create an editable custom version, or
+            add new signals specific to your organization.
+          </AlertDescription>
+        </Alert>
+
         {isLoading ? (
           <div className="space-y-2">
             {[1, 2, 3].map((i) => (
@@ -159,89 +257,69 @@ export function SignalDefinitionsManager({ companyId }: SignalDefinitionsManager
             ))}
           </div>
         ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Signal</TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead>Aggregation</TableHead>
-                <TableHead>Confidence</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {definitions?.map((signal) => (
-                <TableRow key={signal.id}>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      {signal.is_system_defined && (
-                        <Lock className="h-3.5 w-3.5 text-muted-foreground" />
-                      )}
-                      <div>
-                        <p className="font-medium">{signal.name}</p>
-                        <p className="text-xs text-muted-foreground">{signal.code}</p>
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge
-                      variant="outline"
-                      className={categoryColors[signal.signal_category as SignalCategory] || categoryColors.general}
-                    >
-                      {SIGNAL_CATEGORIES.find(c => c.value === signal.signal_category)?.label || signal.signal_category}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-sm">
-                    {AGGREGATION_METHODS.find((m) => m.value === signal.aggregation_method)?.label}
-                  </TableCell>
-                  <TableCell className="text-sm">{(signal.confidence_threshold * 100).toFixed(0)}%</TableCell>
-                  <TableCell>
-                    <Badge variant={signal.is_active ? "default" : "secondary"}>
-                      {signal.is_active ? "Active" : "Inactive"}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleEdit(signal)}
-                      disabled={signal.is_system_defined === true}
-                      title={signal.is_system_defined === true ? "System signals cannot be edited" : "Edit"}
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleDelete(signal.id)}
-                      disabled={signal.is_system_defined === true}
-                      title={signal.is_system_defined === true ? "System signals cannot be deleted" : "Delete"}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-              {(!definitions || definitions.length === 0) && (
-                <TableRow>
-                  <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                    No signal definitions yet. Add your first signal to start tracking talent insights.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+          <div className="space-y-6">
+            {/* System Signals Section */}
+            {systemSignals.length > 0 && (
+              <div>
+                <h3 className="text-sm font-medium text-muted-foreground mb-2 flex items-center gap-2">
+                  <Lock className="h-3.5 w-3.5" />
+                  System Signals ({systemSignals.length})
+                </h3>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Signal</TableHead>
+                      <TableHead>Category</TableHead>
+                      <TableHead>Aggregation</TableHead>
+                      <TableHead>Confidence</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>{systemSignals.map((signal) => renderSignalRow(signal, true))}</TableBody>
+                </Table>
+              </div>
+            )}
+
+            {/* Custom Signals Section */}
+            <div>
+              <h3 className="text-sm font-medium text-muted-foreground mb-2 flex items-center gap-2">
+                <Sparkles className="h-3.5 w-3.5" />
+                Custom Signals ({customSignals.length})
+              </h3>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Signal</TableHead>
+                    <TableHead>Category</TableHead>
+                    <TableHead>Aggregation</TableHead>
+                    <TableHead>Confidence</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {customSignals.length > 0 ? (
+                    customSignals.map((signal) => renderSignalRow(signal, false))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                        No custom signals yet. Add your first signal or clone a system signal to customize.
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </div>
         )}
       </CardContent>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>{editingSignal ? "Edit Signal Definition" : "Add Signal Definition"}</DialogTitle>
-            <DialogDescription>
-              Define a talent signal that will be extracted from 360° feedback
-            </DialogDescription>
+            <DialogTitle>{editingSignal ? "Edit Signal Definition" : "Add Custom Signal"}</DialogTitle>
+            <DialogDescription>Define a talent signal that will be extracted from 360° feedback</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
@@ -323,10 +401,7 @@ export function SignalDefinitionsManager({ companyId }: SignalDefinitionsManager
                 />
               </div>
               <div className="flex items-center gap-2 pt-6">
-                <Switch
-                  checked={form.is_active}
-                  onCheckedChange={(c) => setForm({ ...form, is_active: c })}
-                />
+                <Switch checked={form.is_active} onCheckedChange={(c) => setForm({ ...form, is_active: c })} />
                 <Label>Active</Label>
               </div>
             </div>
