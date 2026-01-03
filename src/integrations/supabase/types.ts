@@ -54801,6 +54801,7 @@ export type Database = {
           started_at: string | null
           status: string | null
           updated_at: string | null
+          verification_code: string | null
         }
         Insert: {
           attempts_used?: number | null
@@ -54820,6 +54821,7 @@ export type Database = {
           started_at?: string | null
           status?: string | null
           updated_at?: string | null
+          verification_code?: string | null
         }
         Update: {
           attempts_used?: number | null
@@ -54839,6 +54841,7 @@ export type Database = {
           started_at?: string | null
           status?: string | null
           updated_at?: string | null
+          verification_code?: string | null
         }
         Relationships: [
           {
