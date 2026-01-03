@@ -491,7 +491,7 @@ export default function MyFeedbackPage() {
                   and view development themes created by your manager or HR.
                 </p>
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-6">
-                  <Link to="/performance/360-feedback">
+                  <Link to="/performance/360">
                     <Button>
                       <BarChart3 className="h-4 w-4 mr-2" />
                       View 360 Results & Reports
