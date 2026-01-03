@@ -49,7 +49,7 @@ export function CycleOverviewTab({ cycle, onUpdate }: CycleOverviewTabProps) {
 
     const { error } = await supabase
       .from("review_cycles")
-      .update({ status: "active" })
+      .update({ status: "active", is_template: false })
       .eq("id", cycle.id);
 
     if (error) {
