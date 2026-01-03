@@ -25,11 +25,12 @@ export default function MyDevelopmentThemesPage() {
   const { t } = useLanguage();
   const { user, profile } = useAuth();
   const [selectedThemeId, setSelectedThemeId] = useState<string | null>(null);
-  const { data: themes } = useDevelopmentThemes(user?.id);
+  // Only fetch themes that have been released to the employee
+  const { data: themes } = useDevelopmentThemes(user?.id, true);
 
   const selectedTheme = themes?.find(t => t.id === selectedThemeId);
   const confirmedThemes = themes?.filter(t => t.is_confirmed) || [];
-  const pendingThemes = themes?.filter(t => !t.is_confirmed) || [];
+  const pendingThemes: typeof confirmedThemes = []; // Employees only see released themes, no pending
 
   if (!user || !profile) {
     return (
@@ -81,9 +82,9 @@ export default function MyDevelopmentThemesPage() {
       <Card className="bg-muted/50 border-muted">
         <CardContent className="py-3 px-4">
           <p className="text-sm text-muted-foreground">
-            <strong>Note:</strong> Development themes are generated based on your 360° feedback results 
-            and reviewed by your manager or HR before appearing here. You can confirm themes to 
-            receive personalized recommendations and link them to your development plan.
+            <strong>Note:</strong> Development themes shown here have been generated from your 360° feedback 
+            and reviewed by your manager or HR. You can view recommendations and link them to your 
+            individual development plan.
           </p>
         </CardContent>
       </Card>

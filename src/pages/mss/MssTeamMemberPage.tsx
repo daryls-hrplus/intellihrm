@@ -20,7 +20,9 @@ import {
   Award,
   BookOpen,
   TrendingUp,
+  BarChart3,
 } from 'lucide-react';
+import { TeamMember360Summary } from '@/components/mss/TeamMember360Summary';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { formatDateForDisplay } from "@/utils/dateUtils";
@@ -313,6 +315,10 @@ export default function MssTeamMemberPage() {
               <TrendingUp className="h-4 w-4" />
               Performance
             </TabsTrigger>
+            <TabsTrigger value="360feedback" className="gap-2">
+              <BarChart3 className="h-4 w-4" />
+              360 Feedback
+            </TabsTrigger>
           </TabsList>
 
           {/* Leave Tab */}
@@ -425,6 +431,18 @@ export default function MssTeamMemberPage() {
                 </p>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* 360 Feedback Tab */}
+          <TabsContent value="360feedback">
+            {user?.id && member && (
+              <TeamMember360Summary
+                employeeId={member.id}
+                employeeName={member.full_name}
+                companyId={user.user_metadata?.company_id || ''}
+                managerId={user.id}
+              />
+            )}
           </TabsContent>
         </Tabs>
       </div>

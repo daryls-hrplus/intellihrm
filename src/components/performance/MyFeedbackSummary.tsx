@@ -11,7 +11,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2, Star, TrendingUp, Users, User, UserCircle, ArrowRight } from "lucide-react";
+import { Loader2, Star, TrendingUp, Users, User, UserCircle, ArrowRight, Shield } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
@@ -40,6 +46,8 @@ interface FeedbackItem {
   avg_rating: number | null;
   response_count: number;
   text_responses: string[] | null;
+  is_suppressed: boolean;
+  suppression_reason: string | null;
 }
 
 interface MyFeedbackSummaryProps {
@@ -103,9 +111,9 @@ export function MyFeedbackSummary({ participations, cycleId, companyId }: MyFeed
     return acc;
   }, {} as Record<string, FeedbackItem[]>);
 
-  // Calculate averages by reviewer type
+  // Calculate averages by reviewer type (excluding suppressed data)
   const averagesByType = feedback.reduce((acc, item) => {
-    if (item.avg_rating) {
+    if (item.avg_rating && !item.is_suppressed) {
       if (!acc[item.reviewer_type]) {
         acc[item.reviewer_type] = { total: 0, count: 0, responseCount: 0 };
       }
@@ -115,6 +123,9 @@ export function MyFeedbackSummary({ participations, cycleId, companyId }: MyFeed
     }
     return acc;
   }, {} as Record<string, { total: number; count: number; responseCount: number }>);
+
+  // Check for suppressed categories
+  const suppressedCategories = feedback.filter(f => f.is_suppressed);
 
   const overallAverages = Object.entries(averagesByType).map(([type, data]) => ({
     type,
@@ -274,28 +285,66 @@ export function MyFeedbackSummary({ participations, cycleId, companyId }: MyFeed
           {/* Score Interpretation Guide */}
           <ScoreInterpretationGuide />
 
+          {/* Anonymity Protection Notice */}
+          {suppressedCategories.length > 0 && (
+            <Card className="bg-muted/30 border-muted">
+              <CardContent className="py-3 px-4 flex items-start gap-3">
+                <Shield className="h-5 w-5 text-primary mt-0.5" />
+                <div className="text-sm">
+                  <strong>Anonymity Protected:</strong> Some categories have fewer responses than 
+                  required to meet the anonymity threshold. These are hidden to protect reviewer identity.
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Overall Scores by Source */}
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {overallAverages.map(({ type, average }) => (
-              <Card key={type}>
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-muted-foreground flex items-center gap-2">
-                        {reviewerTypeLabels[type]?.icon}
-                        {reviewerTypeLabels[type]?.label || type}
-                      </p>
-                      <p className="text-2xl font-bold">{average.toFixed(1)}</p>
+            {Object.entries(reviewerTypeLabels).map(([type, config]) => {
+              const typeData = overallAverages.find(a => a.type === type);
+              const hasSuppressed = feedback.some(f => f.reviewer_type === type && f.is_suppressed);
+              
+              return (
+                <Card key={type}>
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-muted-foreground flex items-center gap-2">
+                          {config.icon}
+                          {config.label}
+                        </p>
+                        {typeData ? (
+                          <p className="text-2xl font-bold">{typeData.average.toFixed(1)}</p>
+                        ) : hasSuppressed ? (
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <div className="flex items-center gap-1 text-muted-foreground">
+                                  <Shield className="h-4 w-4" />
+                                  <span className="text-sm">Protected</span>
+                                </div>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Insufficient responses for anonymity threshold</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        ) : (
+                          <p className="text-sm text-muted-foreground">No data</p>
+                        )}
+                      </div>
+                      {typeData && (
+                        <div className="flex items-center gap-1">
+                          {Array.from({ length: Math.round(typeData.average) }, (_, i) => (
+                            <Star key={i} className="h-4 w-4 fill-warning text-warning" />
+                          ))}
+                        </div>
+                      )}
                     </div>
-                    <div className="flex items-center gap-1">
-                      {Array.from({ length: Math.round(average) }, (_, i) => (
-                        <Star key={i} className="h-4 w-4 fill-warning text-warning" />
-                      ))}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
 
           {/* Detailed Feedback by Competency */}

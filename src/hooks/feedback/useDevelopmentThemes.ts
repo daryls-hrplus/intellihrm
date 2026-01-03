@@ -9,9 +9,9 @@ import type {
 } from '@/types/developmentThemes';
 
 // Fetch development themes for an employee
-export function useDevelopmentThemes(employeeId?: string) {
+export function useDevelopmentThemes(employeeId?: string, visibleOnly?: boolean) {
   return useQuery({
-    queryKey: ['development-themes', employeeId],
+    queryKey: ['development-themes', employeeId, visibleOnly],
     queryFn: async () => {
       if (!employeeId) return [];
 
@@ -22,9 +22,42 @@ export function useDevelopmentThemes(employeeId?: string) {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data as DevelopmentTheme[];
+      
+      // Filter for visible only if needed
+      const themes = data as DevelopmentTheme[];
+      if (visibleOnly) {
+        return themes.filter((t: any) => t.is_visible_to_employee === true);
+      }
+      return themes;
     },
     enabled: !!employeeId,
+  });
+}
+
+// Release theme to employee
+export function useReleaseThemeToEmployee() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ themeId, userId }: { themeId: string; userId: string }) => {
+      const { error } = await supabase
+        .from('development_themes')
+        .update({
+          is_visible_to_employee: true,
+          visibility_changed_at: new Date().toISOString(),
+          visibility_changed_by: userId,
+        } as any)
+        .eq('id', themeId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['development-themes'] });
+      toast.success('Theme released to employee');
+    },
+    onError: (error) => {
+      toast.error('Failed to release theme', { description: error.message });
+    },
   });
 }
 
