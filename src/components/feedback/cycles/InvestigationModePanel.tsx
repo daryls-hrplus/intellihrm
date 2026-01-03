@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Shield, Clock, CheckCircle, XCircle, AlertTriangle } from "lucide-react";
+import { Shield, Clock, CheckCircle, XCircle, AlertTriangle, Lock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { InvestigationRequestDialog } from "./InvestigationRequestDialog";
 import { formatDistanceToNow } from "date-fns";
@@ -12,14 +12,36 @@ interface InvestigationModePanelProps {
   cycleId: string;
   cycleName: string;
   companyId: string;
+  cycleStatus?: string;
 }
 
 export function InvestigationModePanel({
   cycleId,
   cycleName,
   companyId,
+  cycleStatus,
 }: InvestigationModePanelProps) {
   const [requestDialogOpen, setRequestDialogOpen] = useState(false);
+
+  // Fetch company anonymity policy
+  const { data: companyPolicy } = useQuery({
+    queryKey: ['company-anonymity-policy', companyId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('companies')
+        .select('feedback_360_anonymity_policy')
+        .eq('id', companyId)
+        .single();
+
+      if (error) throw error;
+      const policy = data?.feedback_360_anonymity_policy;
+      if (policy && typeof policy === 'object' && !Array.isArray(policy)) {
+        return policy as Record<string, unknown>;
+      }
+      return { individual_response_access: 'never' };
+    },
+    enabled: !!companyId,
+  });
 
   const { data: requests, refetch } = useQuery({
     queryKey: ['investigation-requests', cycleId],
@@ -37,6 +59,9 @@ export function InvestigationModePanel({
       return data || [];
     },
   });
+
+  const investigationModeEnabled = companyPolicy?.individual_response_access === 'investigation_only';
+  const isCycleCompleted = cycleStatus === 'completed' || cycleStatus === 'closed';
 
   const pendingRequests = requests?.filter(r => r.status === 'pending') || [];
   const approvedRequests = requests?.filter(r => r.status === 'approved') || [];
@@ -62,6 +87,35 @@ export function InvestigationModePanel({
         return <Badge variant="outline">{status}</Badge>;
     }
   };
+
+  // If investigation mode is not enabled, show disabled state
+  if (!investigationModeEnabled) {
+    return (
+      <Card>
+        <CardHeader className="pb-3">
+          <div className="flex items-center gap-2">
+            <Lock className="h-5 w-5 text-muted-foreground" />
+            <CardTitle className="text-base">Individual Response Access</CardTitle>
+          </div>
+          <CardDescription>
+            Individual responses are protected to maintain feedback anonymity.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center gap-3 p-4 rounded-lg bg-muted/30 border border-dashed">
+            <Shield className="h-5 w-5 text-muted-foreground" />
+            <div>
+              <p className="text-sm font-medium">Access Disabled</p>
+              <p className="text-xs text-muted-foreground">
+                Individual response access is disabled for this organization. 
+                This policy is set in Performance Setup → 360° Feedback → Anonymity & Access.
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <>
@@ -118,14 +172,23 @@ export function InvestigationModePanel({
           )}
 
           {/* Request Access Button */}
-          <Button 
-            variant="outline" 
-            className="w-full"
-            onClick={() => setRequestDialogOpen(true)}
-          >
-            <AlertTriangle className="h-4 w-4 mr-2" />
-            Request Investigation Access
-          </Button>
+          {!isCycleCompleted ? (
+            <div className="flex items-center gap-2 p-3 rounded-lg bg-warning/10 border border-warning/20">
+              <AlertTriangle className="h-4 w-4 text-warning shrink-0" />
+              <p className="text-xs text-muted-foreground">
+                Investigation requests can only be submitted for completed 360 cycles.
+              </p>
+            </div>
+          ) : (
+            <Button 
+              variant="outline" 
+              className="w-full"
+              onClick={() => setRequestDialogOpen(true)}
+            >
+              <AlertTriangle className="h-4 w-4 mr-2" />
+              Request Investigation Access
+            </Button>
+          )}
 
           <p className="text-xs text-muted-foreground text-center">
             All access is logged and may be audited

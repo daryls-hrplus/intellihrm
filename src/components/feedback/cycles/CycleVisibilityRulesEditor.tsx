@@ -13,9 +13,11 @@ import {
   Bell,
   MessageSquare,
   BarChart3,
-  Users
+  Users,
+  Lock
 } from "lucide-react";
-import { IndividualResponseAccessSelector, type IndividualAccessMode } from "./IndividualResponseAccessSelector";
+
+export type IndividualAccessMode = 'never' | 'investigation_only';
 
 export interface AccessLevelConfig {
   enabled: boolean;
@@ -303,11 +305,26 @@ export function CycleVisibilityRulesEditor({
               
               <Separator className="my-4" />
               
-              <IndividualResponseAccessSelector
-                value={value.hr_access.individual_response_access}
-                onChange={(mode) => updateHrAccess({ individual_response_access: mode })}
-                disabled={disabled}
-              />
+              {/* Read-only Policy Indicator */}
+              <Card className="bg-muted/30 border-dashed">
+                <CardContent className="pt-4">
+                  <div className="flex items-center gap-3">
+                    <Lock className="h-5 w-5 text-muted-foreground" />
+                    <div className="flex-1">
+                      <p className="font-medium text-sm">Individual Response Access</p>
+                      <p className="text-xs text-muted-foreground">
+                        Policy: <strong className="text-foreground">
+                          {value.hr_access.individual_response_access === 'never' ? 'Never' : 'Investigation Mode Only'}
+                        </strong> (set at organization level)
+                      </p>
+                    </div>
+                    <Badge variant="secondary">Read-only</Badge>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Individual response access is controlled in Performance Setup → 360° Feedback → Anonymity & Access
+                  </p>
+                </CardContent>
+              </Card>
             </CardContent>
           )}
         </Card>
