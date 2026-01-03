@@ -20,7 +20,10 @@ import {
   UserPlus,
   ChevronDown,
   TrendingUp,
+  Info,
+  ArrowRight,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -96,6 +99,7 @@ const reviewerTypeLabels: Record<string, string> = {
 
 
   const { user, company } = useAuth();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("team-cycles");
   const [myTeamCycles, setMyTeamCycles] = useState<ReviewCycle[]>([]);
   const [pendingFeedback, setPendingFeedback] = useState<FeedbackItem[]>([]);
@@ -326,6 +330,23 @@ const reviewerTypeLabels: Record<string, string> = {
             Create Team Cycle
           </Button>
         </div>
+
+        {/* Navigation Help Card */}
+        <Card className="bg-info/5 border-info/20">
+          <CardContent className="flex items-center gap-4 py-4">
+            <Info className="h-5 w-5 text-info flex-shrink-0" />
+            <div className="flex-1">
+              <p className="text-sm">
+                To view individual 360 results and generate development themes, 
+                go to <strong>My Team</strong> and select a team member's <strong>360 Feedback</strong> tab.
+              </p>
+            </div>
+            <Button variant="outline" size="sm" onClick={() => navigate('/mss/team')}>
+              View My Team
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          </CardContent>
+        </Card>
 
         {/* Stats Cards */}
         <div className="grid gap-4 sm:grid-cols-3">
