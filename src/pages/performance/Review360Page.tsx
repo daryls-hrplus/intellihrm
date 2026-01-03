@@ -52,7 +52,7 @@ import { SaveAsTemplateDialog } from "@/components/feedback/templates/SaveAsTemp
 import { AllEmployeeResultsDashboard } from "@/components/feedback/admin/AllEmployeeResultsDashboard";
 import { ResponseMonitoringDashboard } from "@/components/feedback/admin/ResponseMonitoringDashboard";
 import { InvestigationApprovalQueue } from "@/components/feedback/cycles/InvestigationApprovalQueue";
-import { ResultsReleasePanel } from "@/components/feedback/cycles/ResultsReleasePanel";
+import { ExpandableCycleCard } from "@/components/feedback/cycles/ExpandableCycleCard";
 import { ResultsPreviewDialog } from "@/components/feedback/cycles/ResultsPreviewDialog";
 import { VisibilityRules, DEFAULT_VISIBILITY_RULES } from "@/components/feedback/cycles/CycleVisibilityRulesEditor";
 import { useLanguage } from "@/hooks/useLanguage";
@@ -785,120 +785,25 @@ export default function Review360Page() {
                 ) : (
                   <div className="space-y-4">
                     {cycles.map((cycle) => (
-                      <Card key={cycle.id}>
-                        <CardContent className="p-4">
-                          <div className="flex items-center justify-between">
-                            <div className="flex-1">
-                              <div className="flex items-center gap-3">
-                                <h3 className="font-semibold">{cycle.name}</h3>
-                                <Badge className={statusColors[cycle.status]}>
-                                  {cycle.status.replace("_", " ")}
-                                </Badge>
-                              </div>
-                              <p className="text-sm text-muted-foreground mt-1">
-                                {cycle.description}
-                              </p>
-                              <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
-                                <span className="flex items-center gap-1">
-                                  <Calendar className="h-4 w-4" />
-                                  {formatDateForDisplay(cycle.start_date, "MMM d")} - {formatDateForDisplay(cycle.end_date, "MMM d, yyyy")}
-                                </span>
-                                <span className="flex items-center gap-1">
-                                  <Users className="h-4 w-4" />
-                                  {cycle.participants_count} participants
-                                </span>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-4">
-                              <div className="text-right">
-                                <p className="text-sm text-muted-foreground">Completion</p>
-                                <div className="flex items-center gap-2">
-                                  <Progress value={cycle.completion_rate} className="w-24 h-2" />
-                                  <span className="text-sm font-medium">{cycle.completion_rate}%</span>
-                                </div>
-                              </div>
-                              <div className="flex gap-2">
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => {
-                                    setSelectedCycle(cycle);
-                                    setParticipantsManagerOpen(true);
-                                  }}
-                                  title="Manage Participants"
-                                >
-                                  <Users className="h-4 w-4" />
-                                </Button>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => {
-                                    setSelectedCycle(cycle);
-                                    setQuestionsManagerOpen(true);
-                                  }}
-                                  title="Configure Questions"
-                                >
-                                  <MessageSquare className="h-4 w-4" />
-                                </Button>
-                                {(cycle.participants_count || 0) > 0 && (
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => {
-                                      setCycleForPreview(cycle);
-                                      setPreviewDialogOpen(true);
-                                    }}
-                                    title="Preview Results"
-                                  >
-                                    <Eye className="h-4 w-4" />
-                                  </Button>
-                                )}
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => {
-                                    setCycleToTemplate(cycle);
-                                    setTemplateDialogOpen(true);
-                                  }}
-                                  title="Save as Template"
-                                >
-                                  <BookmarkPlus className="h-4 w-4" />
-                                </Button>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => handleEditCycle(cycle)}
-                                  title="Edit Cycle"
-                                >
-                                  <Settings className="h-4 w-4" />
-                                </Button>
-                              </div>
-                            </div>
-                          </div>
-                          
-                          {/* Results Release Panel for completed cycles */}
-                          {cycle.status === "completed" && (
-                            <div className="mt-4 pt-4 border-t">
-                              <ResultsReleasePanel
-                                cycleId={cycle.id}
-                                cycleName={cycle.name}
-                                cycleStatus={cycle.status}
-                                resultsReleasedAt={cycle.results_released_at || null}
-                                resultsReleasedBy={cycle.results_released_by || null}
-                                releaseSettings={cycle.release_settings || {
-                                  auto_release_on_close: false,
-                                  release_delay_days: 0,
-                                  require_hr_approval: true,
-                                  notify_on_release: true,
-                                }}
-                                visibilityRules={cycle.visibility_rules || DEFAULT_VISIBILITY_RULES}
-                                companyId={cycle.company_id}
-                                onReleased={fetchData}
-                              />
-                            </div>
-                          )}
-                        </CardContent>
-                      </Card>
+                      <ExpandableCycleCard
+                        key={cycle.id}
+                        cycle={cycle}
+                        statusColors={statusColors}
+                        onEdit={handleEditCycle}
+                        onSaveAsTemplate={(c) => {
+                          setCycleToTemplate(c);
+                          setTemplateDialogOpen(true);
+                        }}
+                        onManageParticipants={(c) => {
+                          setSelectedCycle(c);
+                          setParticipantsManagerOpen(true);
+                        }}
+                        onManageQuestions={(c) => {
+                          setSelectedCycle(c);
+                          setQuestionsManagerOpen(true);
+                        }}
+                        onUpdate={fetchData}
+                      />
                     ))}
                   </div>
                 )}
@@ -923,58 +828,26 @@ export default function Review360Page() {
                 ) : (
                   <div className="space-y-4">
                     {managerCycles.map((cycle) => (
-                      <Card key={cycle.id}>
-                        <CardContent className="p-4">
-                          <div className="flex items-center justify-between">
-                            <div className="flex-1">
-                              <div className="flex items-center gap-3">
-                                <h3 className="font-semibold">{cycle.name}</h3>
-                                <Badge className={statusColors[cycle.status]}>
-                                  {cycle.status.replace("_", " ")}
-                                </Badge>
-                                <Badge variant="outline" className="text-xs">
-                                  By: {cycle.creator_name}
-                                </Badge>
-                              </div>
-                              <p className="text-sm text-muted-foreground mt-1">
-                                {cycle.description}
-                              </p>
-                              <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
-                                <span className="flex items-center gap-1">
-                                  <Calendar className="h-4 w-4" />
-                                  {formatDateForDisplay(cycle.start_date, "MMM d")} - {formatDateForDisplay(cycle.end_date, "MMM d, yyyy")}
-                                </span>
-                                <span className="flex items-center gap-1">
-                                  <Users className="h-4 w-4" />
-                                  {cycle.participants_count} participants
-                                </span>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-4">
-                              <div className="text-right">
-                                <p className="text-sm text-muted-foreground">Completion</p>
-                                <div className="flex items-center gap-2">
-                                  <Progress value={cycle.completion_rate} className="w-24 h-2" />
-                                  <span className="text-sm font-medium">{cycle.completion_rate}%</span>
-                                </div>
-                              </div>
-                              <div className="flex gap-2">
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => {
-                                    setSelectedCycle(cycle);
-                                    setParticipantsManagerOpen(true);
-                                  }}
-                                  title="View Participants"
-                                >
-                                  <Eye className="h-4 w-4" />
-                                </Button>
-                              </div>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
+                      <ExpandableCycleCard
+                        key={cycle.id}
+                        cycle={cycle}
+                        statusColors={statusColors}
+                        onEdit={handleEditCycle}
+                        onSaveAsTemplate={(c) => {
+                          setCycleToTemplate(c);
+                          setTemplateDialogOpen(true);
+                        }}
+                        onManageParticipants={(c) => {
+                          setSelectedCycle(c);
+                          setParticipantsManagerOpen(true);
+                        }}
+                        onManageQuestions={(c) => {
+                          setSelectedCycle(c);
+                          setQuestionsManagerOpen(true);
+                        }}
+                        onUpdate={fetchData}
+                        showCreator
+                      />
                     ))}
                   </div>
                 )}
