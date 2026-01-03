@@ -39,9 +39,11 @@ export function HeroSection() {
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
-            <Button size="lg" variant="outline" className="text-base px-8">
-              <Play className="mr-2 h-4 w-4" />
-              Watch Product Tour
+            <Button size="lg" variant="outline" className="text-base px-8" asChild>
+              <Link to="/product-tour">
+                <Play className="mr-2 h-4 w-4" />
+                Watch Product Tour
+              </Link>
             </Button>
           </div>
 
