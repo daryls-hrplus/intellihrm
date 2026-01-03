@@ -89,6 +89,7 @@ const getAdminModuleSections = (
       { title: t("admin.modules.piiAccess.title"), description: t("admin.modules.piiAccess.description"), href: "/admin/pii-access", icon: Eye, color: "bg-amber-500/10 text-amber-600", tabCode: "pii-access" },
       { title: "AI Security Violations", description: "Monitor attempted unauthorized AI access", href: "/admin/ai-security-violations", icon: ShieldAlert, color: "bg-red-500/10 text-red-600", tabCode: "ai-security-violations" },
       { title: "AI Governance", description: "ISO 42001 AI risk management & human oversight", href: "/admin/ai-governance", icon: Brain, color: "bg-purple-500/10 text-purple-600", tabCode: "ai-governance" },
+      { title: "Agent Management Hub", description: "Registry, monitoring & orchestration of all AI agents", href: "/system/agents", icon: Bot, color: "bg-indigo-500/10 text-indigo-600", tabCode: "agent-management" },
       { title: "MFA Settings", description: "Configure multi-factor authentication requirements", href: "/admin/mfa-settings", icon: Fingerprint, color: "bg-red-500/10 text-red-600", tabCode: "mfa-settings" },
       { title: "SSO Settings", description: "Configure Single Sign-On providers and domain mappings", href: "/admin/sso-settings", icon: KeyRound, color: "bg-sky-500/10 text-sky-600", tabCode: "sso-settings" },
       { title: "Password Policies", description: "Configure enterprise password security requirements", href: "/admin/password-policies", icon: Lock, color: "bg-amber-500/10 text-amber-600", tabCode: "password-policies" },
