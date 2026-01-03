@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -28,9 +29,9 @@ import { AgentAlertsPanel } from "@/components/agents/AgentAlertsPanel";
 import { AgentDetailsPanel } from "@/components/agents/AgentDetailsPanel";
 import { Skeleton } from "@/components/ui/skeleton";
 
-const breadcrumbs = [
-  { label: "System", href: "/system" },
-  { label: "Agent Management Hub", href: "/system/agents" }
+const breadcrumbItems = [
+  { label: "Admin & Security", href: "/admin" },
+  { label: "Agent Management Hub" }
 ];
 
 export default function AgentManagementHubPage() {
@@ -98,6 +99,9 @@ export default function AgentManagementHubPage() {
   return (
     <AppLayout>
       <div className="space-y-6">
+        {/* Breadcrumbs */}
+        <Breadcrumbs items={breadcrumbItems} />
+        
         {/* Header */}
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
