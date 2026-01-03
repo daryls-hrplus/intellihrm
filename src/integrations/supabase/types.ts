@@ -58145,10 +58145,12 @@ export type Database = {
         Returns: {
           avg_rating: number
           competency_name: string
+          is_suppressed: boolean
           question_id: string
           question_text: string
           response_count: number
           reviewer_type: string
+          suppression_reason: string
           text_responses: string[]
         }[]
       }
