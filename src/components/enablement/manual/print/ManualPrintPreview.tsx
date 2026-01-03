@@ -721,7 +721,7 @@ export function ManualPrintPreview({
                 }}
               >
                 <CoverPage
-                  title="Appraisals Administrator Manual"
+                  title="Performance Appraisal - Administrator Guide"
                   subtitle="Comprehensive guide for Performance Appraisals configuration and management"
                   version="1.3.0"
                   date={new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}

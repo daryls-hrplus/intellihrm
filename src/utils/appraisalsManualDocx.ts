@@ -671,7 +671,7 @@ export const generateAppraisalsManualDocx = async (): Promise<void> => {
         children: [
           // Title Page
           new Paragraph({
-            text: "Appraisals Administrator Manual",
+            text: "Performance Appraisal - Administrator Guide",
             heading: HeadingLevel.TITLE,
             alignment: AlignmentType.CENTER,
           }),

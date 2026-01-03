@@ -83,7 +83,7 @@ const DEFAULT_PRINT_SETTINGS: ManualPrintSettings = {
     includeHeaders: true,
     includeFooters: true,
     includePageNumbers: true,
-    headerContent: 'Appraisals Administrator Manual',
+    headerContent: 'Performance Appraisal - Administrator Guide',
     footerContent: 'Confidential - Internal Use Only',
     tocDepth: 2,
     pageNumberPosition: 'right',
