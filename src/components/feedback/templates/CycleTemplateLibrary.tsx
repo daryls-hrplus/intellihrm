@@ -11,10 +11,12 @@ import {
   Search,
   UserCheck,
   Users,
-  UserCog
+  UserCog,
+  Plus
 } from 'lucide-react';
 import { useCycleTemplates, useDeleteTemplate, type CycleTemplate } from '@/hooks/feedback/useCycleTemplates';
 import { CloneCycleDialog } from './CloneCycleDialog';
+import { CreateTemplateDialog } from './CreateTemplateDialog';
 
 interface CycleTemplateLibraryProps {
   companyId: string;
@@ -26,6 +28,7 @@ export function CycleTemplateLibrary({ companyId, onCloneSuccess }: CycleTemplat
   const deleteMutation = useDeleteTemplate();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTemplate, setSelectedTemplate] = useState<CycleTemplate | null>(null);
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
 
   const filteredTemplates = templates?.filter((t) => {
     const query = searchQuery.toLowerCase();
@@ -61,14 +64,20 @@ export function CycleTemplateLibrary({ companyId, onCloneSuccess }: CycleTemplat
   return (
     <>
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <LayoutTemplate className="h-5 w-5" />
-            Cycle Templates
-          </CardTitle>
-          <CardDescription>
-            Start a new 360 feedback cycle from a saved template
-          </CardDescription>
+        <CardHeader className="flex flex-row items-start justify-between">
+          <div>
+            <CardTitle className="flex items-center gap-2">
+              <LayoutTemplate className="h-5 w-5" />
+              Cycle Templates
+            </CardTitle>
+            <CardDescription>
+              Create reusable templates or start a new cycle from an existing template
+            </CardDescription>
+          </div>
+          <Button size="sm" onClick={() => setCreateDialogOpen(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Create Template
+          </Button>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="relative">
@@ -154,6 +163,12 @@ export function CycleTemplateLibrary({ companyId, onCloneSuccess }: CycleTemplat
         open={!!selectedTemplate}
         onOpenChange={(open) => !open && setSelectedTemplate(null)}
         onSuccess={onCloneSuccess}
+      />
+
+      <CreateTemplateDialog
+        companyId={companyId}
+        open={createDialogOpen}
+        onOpenChange={setCreateDialogOpen}
       />
     </>
   );
