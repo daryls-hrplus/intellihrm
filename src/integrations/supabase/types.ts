@@ -38127,6 +38127,161 @@ export type Database = {
           },
         ]
       }
+      nine_box_evidence_sources: {
+        Row: {
+          assessment_id: string | null
+          axis: string
+          company_id: string | null
+          confidence_score: number | null
+          contribution_summary: string | null
+          created_at: string | null
+          id: string
+          source_id: string | null
+          source_type: string
+          source_value: number | null
+          weight_applied: number | null
+        }
+        Insert: {
+          assessment_id?: string | null
+          axis: string
+          company_id?: string | null
+          confidence_score?: number | null
+          contribution_summary?: string | null
+          created_at?: string | null
+          id?: string
+          source_id?: string | null
+          source_type: string
+          source_value?: number | null
+          weight_applied?: number | null
+        }
+        Update: {
+          assessment_id?: string | null
+          axis?: string
+          company_id?: string | null
+          confidence_score?: number | null
+          contribution_summary?: string | null
+          created_at?: string | null
+          id?: string
+          source_id?: string | null
+          source_type?: string
+          source_value?: number | null
+          weight_applied?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nine_box_evidence_sources_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "nine_box_assessments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nine_box_evidence_sources_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nine_box_rating_sources: {
+        Row: {
+          axis: string
+          company_id: string | null
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          priority: number | null
+          source_config: Json | null
+          source_type: string
+          updated_at: string | null
+          weight: number | null
+        }
+        Insert: {
+          axis: string
+          company_id?: string | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          priority?: number | null
+          source_config?: Json | null
+          source_type: string
+          updated_at?: string | null
+          weight?: number | null
+        }
+        Update: {
+          axis?: string
+          company_id?: string | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          priority?: number | null
+          source_config?: Json | null
+          source_type?: string
+          updated_at?: string | null
+          weight?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nine_box_rating_sources_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nine_box_signal_mappings: {
+        Row: {
+          company_id: string | null
+          contributes_to: string | null
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          minimum_confidence: number | null
+          signal_definition_id: string | null
+          updated_at: string | null
+          weight: number | null
+        }
+        Insert: {
+          company_id?: string | null
+          contributes_to?: string | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          minimum_confidence?: number | null
+          signal_definition_id?: string | null
+          updated_at?: string | null
+          weight?: number | null
+        }
+        Update: {
+          company_id?: string | null
+          contributes_to?: string | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          minimum_confidence?: number | null
+          signal_definition_id?: string | null
+          updated_at?: string | null
+          weight?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nine_box_signal_mappings_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nine_box_signal_mappings_signal_definition_id_fkey"
+            columns: ["signal_definition_id"]
+            isOneToOne: false
+            referencedRelation: "talent_signal_definitions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notification_preferences: {
         Row: {
           access_request_updates: boolean
@@ -44423,6 +44578,242 @@ export type Database = {
             columns: ["salary_grade_id"]
             isOneToOne: false
             referencedRelation: "salary_grades"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      potential_assessment_questions: {
+        Row: {
+          created_at: string | null
+          display_order: number | null
+          id: string
+          is_required: boolean | null
+          question_category: string | null
+          question_text: string
+          template_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          display_order?: number | null
+          id?: string
+          is_required?: boolean | null
+          question_category?: string | null
+          question_text: string
+          template_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          display_order?: number | null
+          id?: string
+          is_required?: boolean | null
+          question_category?: string | null
+          question_text?: string
+          template_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "potential_assessment_questions_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "potential_assessment_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      potential_assessment_responses: {
+        Row: {
+          assessment_id: string | null
+          created_at: string | null
+          id: string
+          notes: string | null
+          points_earned: number
+          question_id: string | null
+          scale_value: number
+        }
+        Insert: {
+          assessment_id?: string | null
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          points_earned: number
+          question_id?: string | null
+          scale_value: number
+        }
+        Update: {
+          assessment_id?: string | null
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          points_earned?: number
+          question_id?: string | null
+          scale_value?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "potential_assessment_responses_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "potential_assessments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "potential_assessment_responses_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "potential_assessment_questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      potential_assessment_scales: {
+        Row: {
+          created_at: string | null
+          id: string
+          points: number
+          scale_label: string
+          scale_value: number
+          template_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          points: number
+          scale_label: string
+          scale_value: number
+          template_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          points?: number
+          scale_label?: string
+          scale_value?: number
+          template_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "potential_assessment_scales_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "potential_assessment_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      potential_assessment_templates: {
+        Row: {
+          company_id: string | null
+          created_at: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          is_default: boolean | null
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_default?: boolean | null
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_default?: boolean | null
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "potential_assessment_templates_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      potential_assessments: {
+        Row: {
+          assessed_by: string | null
+          assessment_date: string
+          calculated_rating: number | null
+          company_id: string | null
+          created_at: string | null
+          employee_id: string | null
+          id: string
+          is_current: boolean | null
+          override_rating: number | null
+          override_reason: string | null
+          template_id: string | null
+          total_points: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          assessed_by?: string | null
+          assessment_date?: string
+          calculated_rating?: number | null
+          company_id?: string | null
+          created_at?: string | null
+          employee_id?: string | null
+          id?: string
+          is_current?: boolean | null
+          override_rating?: number | null
+          override_reason?: string | null
+          template_id?: string | null
+          total_points?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          assessed_by?: string | null
+          assessment_date?: string
+          calculated_rating?: number | null
+          company_id?: string | null
+          created_at?: string | null
+          employee_id?: string | null
+          id?: string
+          is_current?: boolean | null
+          override_rating?: number | null
+          override_reason?: string | null
+          template_id?: string | null
+          total_points?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "potential_assessments_assessed_by_fkey"
+            columns: ["assessed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "potential_assessments_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "potential_assessments_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "potential_assessments_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "potential_assessment_templates"
             referencedColumns: ["id"]
           },
         ]
@@ -53218,6 +53609,74 @@ export type Database = {
         }
         Relationships: []
       }
+      succession_candidate_evidence: {
+        Row: {
+          candidate_id: string | null
+          company_id: string | null
+          created_at: string | null
+          evidence_type: string
+          id: string
+          leadership_indicators: Json | null
+          readiness_contribution: number | null
+          signal_summary: Json | null
+          source_nine_box_id: string | null
+          source_snapshot_id: string | null
+        }
+        Insert: {
+          candidate_id?: string | null
+          company_id?: string | null
+          created_at?: string | null
+          evidence_type: string
+          id?: string
+          leadership_indicators?: Json | null
+          readiness_contribution?: number | null
+          signal_summary?: Json | null
+          source_nine_box_id?: string | null
+          source_snapshot_id?: string | null
+        }
+        Update: {
+          candidate_id?: string | null
+          company_id?: string | null
+          created_at?: string | null
+          evidence_type?: string
+          id?: string
+          leadership_indicators?: Json | null
+          readiness_contribution?: number | null
+          signal_summary?: Json | null
+          source_nine_box_id?: string | null
+          source_snapshot_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "succession_candidate_evidence_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "succession_candidates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "succession_candidate_evidence_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "succession_candidate_evidence_source_nine_box_id_fkey"
+            columns: ["source_nine_box_id"]
+            isOneToOne: false
+            referencedRelation: "nine_box_assessments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "succession_candidate_evidence_source_snapshot_id_fkey"
+            columns: ["source_snapshot_id"]
+            isOneToOne: false
+            referencedRelation: "talent_signal_snapshots"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       succession_candidates: {
         Row: {
           block_reason: string | null
@@ -53370,6 +53829,66 @@ export type Database = {
           },
         ]
       }
+      succession_gap_development_links: {
+        Row: {
+          candidate_id: string | null
+          company_id: string | null
+          created_at: string | null
+          gap_description: string | null
+          gap_severity: string | null
+          gap_type: string
+          id: string
+          linked_idp_item_id: string | null
+          linked_learning_id: string | null
+          recommended_experience: string | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          candidate_id?: string | null
+          company_id?: string | null
+          created_at?: string | null
+          gap_description?: string | null
+          gap_severity?: string | null
+          gap_type: string
+          id?: string
+          linked_idp_item_id?: string | null
+          linked_learning_id?: string | null
+          recommended_experience?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          candidate_id?: string | null
+          company_id?: string | null
+          created_at?: string | null
+          gap_description?: string | null
+          gap_severity?: string | null
+          gap_type?: string
+          id?: string
+          linked_idp_item_id?: string | null
+          linked_learning_id?: string | null
+          recommended_experience?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "succession_gap_development_links_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "succession_candidates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "succession_gap_development_links_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       succession_plans: {
         Row: {
           company_id: string
@@ -53454,6 +53973,60 @@ export type Database = {
             columns: ["position_id"]
             isOneToOne: false
             referencedRelation: "positions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      succession_readiness_indicators: {
+        Row: {
+          candidate_id: string | null
+          company_id: string | null
+          computed_at: string | null
+          confidence_score: number | null
+          explanation: string | null
+          id: string
+          indicator_source: string | null
+          indicator_type: string
+          indicator_value: number | null
+          valid_until: string | null
+        }
+        Insert: {
+          candidate_id?: string | null
+          company_id?: string | null
+          computed_at?: string | null
+          confidence_score?: number | null
+          explanation?: string | null
+          id?: string
+          indicator_source?: string | null
+          indicator_type: string
+          indicator_value?: number | null
+          valid_until?: string | null
+        }
+        Update: {
+          candidate_id?: string | null
+          company_id?: string | null
+          computed_at?: string | null
+          confidence_score?: number | null
+          explanation?: string | null
+          id?: string
+          indicator_source?: string | null
+          indicator_type?: string
+          indicator_value?: number | null
+          valid_until?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "succession_readiness_indicators_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "succession_candidates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "succession_readiness_indicators_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
             referencedColumns: ["id"]
           },
         ]
