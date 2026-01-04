@@ -9,11 +9,13 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Progress } from '@/components/ui/progress';
-import { Plus, Briefcase, Users, AlertTriangle, ChevronRight, UserPlus, Loader2, Trash2, Heart } from 'lucide-react';
+import { Plus, Briefcase, Users, AlertTriangle, ChevronRight, UserPlus, Loader2, Trash2, Heart, BarChart3 } from 'lucide-react';
 import { SuccessionPlan, SuccessionCandidate, useSuccession } from '@/hooks/useSuccession';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { ValuesPromotionCheck } from './ValuesPromotionCheck';
+import { SuccessorProfileLeadershipSignals } from './SuccessorProfileLeadershipSignals';
+import { CandidateSignalComparison } from './CandidateSignalComparison';
 
 interface SuccessionPlansTabProps {
   companyId: string;
@@ -405,6 +407,14 @@ export function SuccessionPlansTab({ companyId }: SuccessionPlansTabProps) {
                             </div>
                           )}
 
+                          {/* Leadership Signals */}
+                          <div className="mt-3">
+                            <SuccessorProfileLeadershipSignals
+                              employeeId={candidate.employee_id}
+                              compact={true}
+                            />
+                          </div>
+
                           {/* Values Promotion Check */}
                           <div className="mt-3">
                             <ValuesPromotionCheck
@@ -416,6 +426,27 @@ export function SuccessionPlansTab({ companyId }: SuccessionPlansTabProps) {
                         </CardContent>
                       </Card>
                     ))}
+
+                    {/* Candidate Comparison */}
+                    {candidates.length >= 2 && (
+                      <div className="mt-4 pt-4 border-t">
+                        <div className="flex items-center justify-between mb-3">
+                          <h4 className="text-sm font-medium flex items-center gap-2">
+                            <BarChart3 className="h-4 w-4" />
+                            Candidate Comparison
+                          </h4>
+                        </div>
+                        <CandidateSignalComparison
+                          candidateIds={candidates.map(c => c.id)}
+                          onSelectCandidate={(candidateId) => {
+                            const candidate = candidates.find(c => c.id === candidateId);
+                            if (candidate) {
+                              // Could open detail view
+                            }
+                          }}
+                        />
+                      </div>
+                    )}
                   </div>
                 )}
               </CardContent>

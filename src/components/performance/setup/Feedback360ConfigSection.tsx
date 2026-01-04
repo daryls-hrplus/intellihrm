@@ -36,11 +36,13 @@ import {
   TabsTrigger,
 } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Plus, Edit, Trash2, MessageSquare, Users, HelpCircle, Sparkles, Route, Copy, Shield } from "lucide-react";
+import { Plus, Edit, Trash2, MessageSquare, Users, HelpCircle, Sparkles, Route, Copy, Shield, Grid3X3, ListChecks } from "lucide-react";
 import { SignalDefinitionsManager } from "@/components/feedback/signals/SignalDefinitionsManager";
 import { RoutingPolicyManager } from "@/components/feedback/admin/RoutingPolicyManager";
 import { CycleTemplateLibrary } from "@/components/feedback/templates/CycleTemplateLibrary";
 import { AnonymityPolicySettings } from "./AnonymityPolicySettings";
+import { RaterQuestionMatrix } from "@/components/feedback/questions/RaterQuestionMatrix";
+import { BehavioralAnchorEditor } from "@/components/feedback/questions/BehavioralAnchorEditor";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useLanguage } from "@/hooks/useLanguage";
@@ -186,30 +188,46 @@ export function Feedback360ConfigSection({ companyId }: Feedback360ConfigSection
   return (
     <div className="space-y-4">
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-8">
           <TabsTrigger value="rater-categories" className="flex items-center gap-2">
             <Users className="h-4 w-4" />
-            Rater Categories
+            <span className="hidden lg:inline">Rater Categories</span>
+            <span className="lg:hidden">Raters</span>
           </TabsTrigger>
           <TabsTrigger value="question-bank" className="flex items-center gap-2">
             <HelpCircle className="h-4 w-4" />
-            Question Bank
+            <span className="hidden lg:inline">Question Bank</span>
+            <span className="lg:hidden">Questions</span>
+          </TabsTrigger>
+          <TabsTrigger value="question-assignments" className="flex items-center gap-2">
+            <Grid3X3 className="h-4 w-4" />
+            <span className="hidden lg:inline">Question Assignments</span>
+            <span className="lg:hidden">Assign</span>
+          </TabsTrigger>
+          <TabsTrigger value="behavioral-anchors" className="flex items-center gap-2">
+            <ListChecks className="h-4 w-4" />
+            <span className="hidden lg:inline">Behavioral Anchors</span>
+            <span className="lg:hidden">BARS</span>
           </TabsTrigger>
           <TabsTrigger value="signal-definitions" className="flex items-center gap-2">
             <Sparkles className="h-4 w-4" />
-            Signal Definitions
+            <span className="hidden lg:inline">Signal Definitions</span>
+            <span className="lg:hidden">Signals</span>
           </TabsTrigger>
           <TabsTrigger value="routing-policies" className="flex items-center gap-2">
             <Route className="h-4 w-4" />
-            Routing Policies
+            <span className="hidden lg:inline">Routing Policies</span>
+            <span className="lg:hidden">Routing</span>
           </TabsTrigger>
           <TabsTrigger value="cycle-templates" className="flex items-center gap-2">
             <Copy className="h-4 w-4" />
-            Cycle Templates
+            <span className="hidden lg:inline">Cycle Templates</span>
+            <span className="lg:hidden">Templates</span>
           </TabsTrigger>
           <TabsTrigger value="anonymity-policy" className="flex items-center gap-2">
             <Shield className="h-4 w-4" />
-            Anonymity & Access
+            <span className="hidden lg:inline">Anonymity & Access</span>
+            <span className="lg:hidden">Access</span>
           </TabsTrigger>
         </TabsList>
 
@@ -369,6 +387,75 @@ export function Feedback360ConfigSection({ companyId }: Feedback360ConfigSection
                   </TableBody>
                 </Table>
               )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Question Assignments Tab */}
+        <TabsContent value="question-assignments">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Question-Rater Assignments</CardTitle>
+              <CardDescription>
+                Configure which questions appear for each rater category. Select a cycle to manage assignments.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex items-center gap-4">
+                  <Label>Select Cycle</Label>
+                  <Select>
+                    <SelectTrigger className="w-64">
+                      <SelectValue placeholder="Select a 360 cycle" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="demo">Demo Cycle (Select to enable matrix)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  Select a 360 cycle above to configure question visibility for different rater categories.
+                  Once a cycle is selected, you can use the matrix view to quickly assign questions.
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Behavioral Anchors Tab */}
+        <TabsContent value="behavioral-anchors">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Behavioral Anchors (BARS)</CardTitle>
+              <CardDescription>
+                Define behavioral descriptions for each rating level to improve rating consistency.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex items-center gap-4">
+                  <Label>Select Question</Label>
+                  <Select>
+                    <SelectTrigger className="w-96">
+                      <SelectValue placeholder="Select a question to configure anchors" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {questions.filter(q => q.question_type === 'rating').map(q => (
+                        <SelectItem key={q.id} value={q.id}>
+                          {q.question_text.substring(0, 60)}...
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <BehavioralAnchorEditor
+                  companyId={companyId}
+                  scaleMax={5}
+                  onSave={(anchors) => {
+                    toast.success("Behavioral anchors saved");
+                  }}
+                />
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
