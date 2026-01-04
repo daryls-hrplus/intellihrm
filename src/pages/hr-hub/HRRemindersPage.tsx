@@ -1,11 +1,11 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useLanguage } from '@/hooks/useLanguage';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Breadcrumbs } from '@/components/ui/breadcrumbs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ReminderRulesManager } from '@/components/reminders/ReminderRulesManager';
+import { ReminderRulesManager, ReminderRulesManagerRef } from '@/components/reminders/ReminderRulesManager';
 import { EmployeeRemindersList } from '@/components/reminders/EmployeeRemindersList';
 import { AIRecommendationsPanel } from '@/components/reminders/AIRecommendationsPanel';
 import { ReminderWelcomeBanner } from '@/components/reminders/ReminderWelcomeBanner';
@@ -24,7 +24,8 @@ export default function HRRemindersPage() {
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>('all');
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('templates');
-  const rulesManagerRef = useRef<{ reload: () => void } | null>(null);
+  const [highlightRuleId, setHighlightRuleId] = useState<string | null>(null);
+  const rulesManagerRef = useRef<ReminderRulesManagerRef | null>(null);
 
   useEffect(() => {
     const fetchCompanies = async () => {
@@ -45,7 +46,7 @@ export default function HRRemindersPage() {
     fetchCompanies();
   }, []);
 
-  const handleApplyRecommendation = async (recommendation: any) => {
+  const handleApplyRecommendation = async (recommendation: any): Promise<string | void> => {
     try {
       // Fetch event types to get the ID
       const eventTypes = await fetchEventTypes();
@@ -56,7 +57,7 @@ export default function HRRemindersPage() {
       }
 
       // Create the rule with AI-suggested values
-      await createRule({
+      const newRule = await createRule({
         company_id: selectedCompanyId,
         name: `${eventType.name} Reminder`,
         description: `Auto-generated rule for ${eventType.name.toLowerCase()} reminders`,
@@ -74,11 +75,24 @@ export default function HRRemindersPage() {
 
       // Trigger reload of the rules manager
       rulesManagerRef.current?.reload();
+      
+      // Return the new rule ID for highlighting
+      return newRule?.id;
     } catch (error) {
       console.error('Error applying recommendation:', error);
       throw error;
     }
   };
+
+  const handleRuleCreated = useCallback((ruleId: string, ruleName: string) => {
+    // Set highlight and scroll to the new rule
+    setHighlightRuleId(ruleId);
+    
+    // Give the rules manager time to reload, then scroll
+    setTimeout(() => {
+      rulesManagerRef.current?.scrollToRule(ruleId);
+    }, 500);
+  }, []);
 
   const handleUseTemplate = (template: any) => {
     toast.success(`Template "${template.name}" selected. Switch to the Rules tab to create a rule using this template.`);
@@ -189,6 +203,7 @@ export default function HRRemindersPage() {
               <AIRecommendationsPanel 
                 companyId={selectedCompanyId}
                 onApplyRecommendation={handleApplyRecommendation}
+                onRuleCreated={handleRuleCreated}
               />
             )}
 
@@ -213,6 +228,7 @@ export default function HRRemindersPage() {
                   <ReminderRulesManager 
                     companyId={selectedCompanyId}
                     ref={rulesManagerRef}
+                    highlightRuleId={highlightRuleId}
                   />
                 )}
               </CardContent>

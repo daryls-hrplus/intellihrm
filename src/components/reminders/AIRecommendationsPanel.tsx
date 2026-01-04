@@ -66,10 +66,11 @@ interface AnalysisSummary {
 
 interface AIRecommendationsPanelProps {
   companyId: string;
-  onApplyRecommendation: (recommendation: Recommendation) => void;
+  onApplyRecommendation: (recommendation: Recommendation) => Promise<string | void>;
+  onRuleCreated?: (ruleId: string, ruleName: string) => void;
 }
 
-export function AIRecommendationsPanel({ companyId, onApplyRecommendation }: AIRecommendationsPanelProps) {
+export function AIRecommendationsPanel({ companyId, onApplyRecommendation, onRuleCreated }: AIRecommendationsPanelProps) {
   const { t } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -114,9 +115,27 @@ export function AIRecommendationsPanel({ companyId, onApplyRecommendation }: AIR
   const handleApply = async (recommendation: Recommendation, index: number) => {
     setApplyingIndex(index);
     try {
-      await onApplyRecommendation(recommendation);
+      const ruleId = await onApplyRecommendation(recommendation);
       setRecommendations(prev => prev.filter((_, i) => i !== index));
-      toast.success(`Rule created for "${recommendation.eventTypeName}"`);
+      
+      // Collapse the panel after successful apply
+      setIsOpen(false);
+      
+      // Notify parent about the new rule for scrolling/highlighting
+      if (ruleId && onRuleCreated) {
+        onRuleCreated(ruleId, recommendation.eventTypeName);
+      }
+      
+      toast.success(`Rule created for "${recommendation.eventTypeName}"`, {
+        action: {
+          label: 'Edit Now',
+          onClick: () => {
+            if (ruleId && onRuleCreated) {
+              onRuleCreated(ruleId, recommendation.eventTypeName);
+            }
+          },
+        },
+      });
     } catch (error) {
       console.error('Error applying recommendation:', error);
       toast.error('Failed to apply recommendation');

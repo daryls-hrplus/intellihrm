@@ -1,4 +1,4 @@
-import { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
+import { useState, useEffect, forwardRef, useImperativeHandle, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useReminders } from '@/hooks/useReminders';
 import { useReminderSourcePreview } from '@/hooks/useReminderSourcePreview';
@@ -24,18 +24,24 @@ import type { SourcePreviewData } from '@/hooks/useReminderSourcePreview';
 
 interface ReminderRulesManagerProps {
   companyId: string;
+  highlightRuleId?: string | null;
+  onEditRule?: (ruleId: string) => void;
 }
 
 export interface ReminderRulesManagerRef {
   reload: () => void;
+  scrollToRule: (ruleId: string) => void;
+  openEditDialog: (ruleId: string) => void;
 }
 
 export const ReminderRulesManager = forwardRef<ReminderRulesManagerRef, ReminderRulesManagerProps>(
-  function ReminderRulesManager({ companyId }, ref) {
+  function ReminderRulesManager({ companyId, highlightRuleId, onEditRule }, ref) {
   const navigate = useNavigate();
   const { fetchRules, fetchEventTypes, createRule, updateRule, deleteRule, isLoading } = useReminders();
   const { fetchRuleAffectedCount, fetchPreview, previewData, loading: previewLoading } = useReminderSourcePreview();
   const [rules, setRules] = useState<ReminderRule[]>([]);
+  const [highlightedRuleId, setHighlightedRuleId] = useState<string | null>(null);
+  const ruleRowRefs = useRef<Record<string, HTMLTableRowElement | null>>({});
   const [eventTypes, setEventTypes] = useState<ReminderEventType[]>([]);
   const [ruleAffectedCounts, setRuleAffectedCounts] = useState<Record<string, { count: number; employeeCount: number }>>({});
   const [loading, setLoading] = useState(true);
@@ -92,13 +98,17 @@ export const ReminderRulesManager = forwardRef<ReminderRulesManagerRef, Reminder
         fetchRules(companyId),
         fetchEventTypes(),
       ]);
-      setRules(rulesData);
+      // Sort rules by created_at DESC (newest first)
+      const sortedRules = [...rulesData].sort((a, b) => 
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
+      setRules(sortedRules);
       setEventTypes(typesData);
       
       // Fetch affected counts for each rule
       const counts: Record<string, { count: number; employeeCount: number }> = {};
       await Promise.all(
-        rulesData.map(async (rule) => {
+        sortedRules.map(async (rule) => {
           if (rule.event_type) {
             const result = await fetchRuleAffectedCount(rule.event_type, companyId);
             if (result) {
@@ -115,8 +125,29 @@ export const ReminderRulesManager = forwardRef<ReminderRulesManagerRef, Reminder
     }
   };
 
+  const scrollToRule = (ruleId: string) => {
+    setHighlightedRuleId(ruleId);
+    setTimeout(() => {
+      const row = ruleRowRefs.current[ruleId];
+      if (row) {
+        row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      // Clear highlight after 3 seconds
+      setTimeout(() => setHighlightedRuleId(null), 3000);
+    }, 100);
+  };
+
+  const openEditDialog = (ruleId: string) => {
+    const rule = rules.find(r => r.id === ruleId);
+    if (rule) {
+      handleOpenDialog(rule);
+    }
+  };
+
   useImperativeHandle(ref, () => ({
     reload: loadData,
+    scrollToRule,
+    openEditDialog,
   }));
 
   useEffect(() => {
@@ -673,9 +704,14 @@ export const ReminderRulesManager = forwardRef<ReminderRulesManagerRef, Reminder
                 const sourceTableLabel = rule.event_type?.source_table
                   ?.replace('employee_', '')
                   .replace(/_/g, ' ') || 'records';
+                const isHighlighted = highlightedRuleId === rule.id || highlightRuleId === rule.id;
                 
                 return (
-                <TableRow key={rule.id}>
+                <TableRow 
+                  key={rule.id}
+                  ref={(el) => { ruleRowRefs.current[rule.id] = el; }}
+                  className={isHighlighted ? 'animate-pulse bg-primary/10 transition-colors duration-1000' : ''}
+                >
                   <TableCell className="font-medium">{rule.name}</TableCell>
                   <TableCell>
                     <span className="text-sm">{rule.event_type?.name || '-'}</span>
