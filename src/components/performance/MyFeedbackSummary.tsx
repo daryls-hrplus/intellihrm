@@ -291,8 +291,9 @@ export function MyFeedbackSummary({ participations, cycleId, companyId }: MyFeed
               <CardContent className="py-3 px-4 flex items-start gap-3">
                 <Shield className="h-5 w-5 text-primary mt-0.5" />
                 <div className="text-sm">
-                  <strong>Anonymity Protected:</strong> Some categories have fewer responses than 
-                  required to meet the anonymity threshold. These are hidden to protect reviewer identity.
+                  <strong>Category-Specific Anonymity:</strong> Some categories have fewer responses than 
+                  their configured threshold. Manager feedback is typically shown (identity known), 
+                  while peer and direct report categories require minimum responses to protect anonymity.
                 </div>
               </CardContent>
             </Card>

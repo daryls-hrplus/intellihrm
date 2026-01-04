@@ -54,6 +54,8 @@ interface RaterCategory {
   max_raters: number;
   is_mandatory: boolean;
   is_active: boolean;
+  anonymity_threshold: number;
+  bypass_threshold_check: boolean;
 }
 
 interface QuestionBank {
@@ -85,6 +87,8 @@ export function Feedback360ConfigSection({ companyId }: Feedback360ConfigSection
     max_raters: 5,
     is_mandatory: true,
     is_active: true,
+    anonymity_threshold: 3,
+    bypass_threshold_check: false,
   });
 
   // Question Bank
@@ -109,10 +113,10 @@ export function Feedback360ConfigSection({ companyId }: Feedback360ConfigSection
     // For now, use mock data since tables may not exist yet
     // In production, these would query actual tables
     setRaterCategories([
-      { id: "1", name: "Direct Manager", code: "MGR", description: "Immediate supervisor", min_raters: 1, max_raters: 1, is_mandatory: true, is_active: true },
-      { id: "2", name: "Peers", code: "PEER", description: "Team members and colleagues", min_raters: 2, max_raters: 5, is_mandatory: true, is_active: true },
-      { id: "3", name: "Direct Reports", code: "DR", description: "Employees who report to this person", min_raters: 1, max_raters: 10, is_mandatory: false, is_active: true },
-      { id: "4", name: "External", code: "EXT", description: "Clients, vendors, or external stakeholders", min_raters: 0, max_raters: 3, is_mandatory: false, is_active: true },
+      { id: "1", name: "Direct Manager", code: "MGR", description: "Immediate supervisor", min_raters: 1, max_raters: 1, is_mandatory: true, is_active: true, anonymity_threshold: 1, bypass_threshold_check: true },
+      { id: "2", name: "Peers", code: "PEER", description: "Team members and colleagues", min_raters: 2, max_raters: 5, is_mandatory: true, is_active: true, anonymity_threshold: 3, bypass_threshold_check: false },
+      { id: "3", name: "Direct Reports", code: "DR", description: "Employees who report to this person", min_raters: 1, max_raters: 10, is_mandatory: false, is_active: true, anonymity_threshold: 3, bypass_threshold_check: false },
+      { id: "4", name: "External", code: "EXT", description: "Clients, vendors, or external stakeholders", min_raters: 0, max_raters: 3, is_mandatory: false, is_active: true, anonymity_threshold: 2, bypass_threshold_check: false },
     ]);
     
     setQuestions([
@@ -143,7 +147,7 @@ export function Feedback360ConfigSection({ companyId }: Feedback360ConfigSection
     
     setRaterDialogOpen(false);
     setEditingRater(null);
-    setRaterForm({ name: "", code: "", description: "", min_raters: 1, max_raters: 5, is_mandatory: true, is_active: true });
+    setRaterForm({ name: "", code: "", description: "", min_raters: 1, max_raters: 5, is_mandatory: true, is_active: true, anonymity_threshold: 3, bypass_threshold_check: false });
   };
 
   const handleDeleteRater = (id: string) => {
@@ -234,6 +238,7 @@ export function Feedback360ConfigSection({ companyId }: Feedback360ConfigSection
                       <TableHead>Name</TableHead>
                       <TableHead>Code</TableHead>
                       <TableHead>Raters Required</TableHead>
+                      <TableHead>Anonymity Threshold</TableHead>
                       <TableHead>Mandatory</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
@@ -245,6 +250,18 @@ export function Feedback360ConfigSection({ companyId }: Feedback360ConfigSection
                         <TableCell className="font-medium">{rater.name}</TableCell>
                         <TableCell>{rater.code}</TableCell>
                         <TableCell>{rater.min_raters} - {rater.max_raters}</TableCell>
+                        <TableCell>
+                          {rater.bypass_threshold_check ? (
+                            <Badge variant="outline" className="text-xs">
+                              <Shield className="h-3 w-3 mr-1" />
+                              Always show
+                            </Badge>
+                          ) : (
+                            <Badge variant="secondary" className="text-xs">
+                              Min {rater.anonymity_threshold} responses
+                            </Badge>
+                          )}
+                        </TableCell>
                         <TableCell>
                           <Badge variant={rater.is_mandatory ? "default" : "secondary"}>
                             {rater.is_mandatory ? "Yes" : "No"}
@@ -266,6 +283,8 @@ export function Feedback360ConfigSection({ companyId }: Feedback360ConfigSection
                               max_raters: rater.max_raters,
                               is_mandatory: rater.is_mandatory,
                               is_active: rater.is_active,
+                              anonymity_threshold: rater.anonymity_threshold ?? 3,
+                              bypass_threshold_check: rater.bypass_threshold_check ?? false,
                             });
                             setRaterDialogOpen(true);
                           }}>
@@ -429,6 +448,45 @@ export function Feedback360ConfigSection({ companyId }: Feedback360ConfigSection
                 />
               </div>
             </div>
+            
+            {/* Anonymity Threshold Settings */}
+            <div className="space-y-3 p-3 rounded-lg border bg-muted/20">
+              <div className="flex items-center gap-2">
+                <Shield className="h-4 w-4 text-muted-foreground" />
+                <Label className="text-sm font-medium">Anonymity Protection</Label>
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label className="text-sm">Always Show Results</Label>
+                  <p className="text-xs text-muted-foreground">
+                    Bypass anonymity threshold (e.g., for manager feedback where identity is known)
+                  </p>
+                </div>
+                <Switch 
+                  checked={raterForm.bypass_threshold_check} 
+                  onCheckedChange={c => setRaterForm({ ...raterForm, bypass_threshold_check: c })} 
+                />
+              </div>
+              
+              {!raterForm.bypass_threshold_check && (
+                <div className="space-y-2">
+                  <Label className="text-sm">Minimum Responses Required</Label>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="number"
+                      min={1}
+                      max={10}
+                      value={raterForm.anonymity_threshold}
+                      onChange={e => setRaterForm({ ...raterForm, anonymity_threshold: parseInt(e.target.value) || 3 })}
+                      className="w-20"
+                    />
+                    <span className="text-sm text-muted-foreground">responses before showing aggregated scores</span>
+                  </div>
+                </div>
+              )}
+            </div>
+            
             <div className="flex items-center gap-6">
               <div className="flex items-center gap-2">
                 <Switch checked={raterForm.is_mandatory} onCheckedChange={c => setRaterForm({ ...raterForm, is_mandatory: c })} />
