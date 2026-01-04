@@ -211,3 +211,84 @@ export function useDeleteTemplate() {
     },
   });
 }
+
+export function useCreateTemplate() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      companyId,
+      templateName,
+      templateDescription,
+      cycleType,
+      includeSelfReview,
+      includeManagerReview,
+      includePeerReview,
+      includeDirectReportReview,
+      minPeerReviewers,
+      maxPeerReviewers,
+      tags,
+    }: {
+      companyId: string;
+      templateName: string;
+      templateDescription?: string;
+      cycleType?: string;
+      includeSelfReview?: boolean;
+      includeManagerReview?: boolean;
+      includePeerReview?: boolean;
+      includeDirectReportReview?: boolean;
+      minPeerReviewers?: number;
+      maxPeerReviewers?: number;
+      tags?: string[];
+    }) => {
+      // Create template directly (not from existing cycle)
+      // Templates need placeholder dates - they will be set when cloning
+      const placeholderDate = new Date().toISOString().split('T')[0];
+      const futureDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+      
+      const { data: template, error } = await supabase
+        .from('review_cycles')
+        .insert({
+          company_id: companyId,
+          name: templateName,
+          template_name: templateName,
+          template_description: templateDescription,
+          is_template: true,
+          status: 'draft',
+          start_date: placeholderDate,
+          end_date: futureDate,
+          cycle_type: cycleType || '360_feedback',
+          include_self_review: includeSelfReview ?? true,
+          include_manager_review: includeManagerReview ?? true,
+          include_peer_review: includePeerReview ?? true,
+          include_direct_report_review: includeDirectReportReview ?? false,
+          min_peer_reviewers: minPeerReviewers ?? 2,
+          max_peer_reviewers: maxPeerReviewers ?? 5,
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Add tags if provided
+      if (tags && tags.length > 0) {
+        const tagInserts = tags.map(tag => ({
+          cycle_id: template.id,
+          tag,
+        }));
+        await supabase
+          .from('review_cycle_template_tags')
+          .insert(tagInserts);
+      }
+
+      return template;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['cycle-templates'] });
+      toast.success('Template created successfully');
+    },
+    onError: (error) => {
+      toast.error(`Failed to create template: ${error.message}`);
+    },
+  });
+}

@@ -77,6 +77,10 @@ export function Feedback360ConfigSection({ companyId }: Feedback360ConfigSection
   const [activeTab, setActiveTab] = useState("rater-categories");
   const [isLoading, setIsLoading] = useState(true);
   
+  // Cycles state for dropdown
+  const [cycles, setCycles] = useState<Array<{id: string, name: string, status: string}>>([]);
+  const [selectedCycleId, setSelectedCycleId] = useState<string | null>(null);
+
   // Rater Categories
   const [raterCategories, setRaterCategories] = useState<RaterCategory[]>([]);
   const [raterDialogOpen, setRaterDialogOpen] = useState(false);
@@ -112,21 +116,74 @@ export function Feedback360ConfigSection({ companyId }: Feedback360ConfigSection
 
   const loadData = async () => {
     setIsLoading(true);
-    // For now, use mock data since tables may not exist yet
-    // In production, these would query actual tables
-    setRaterCategories([
-      { id: "1", name: "Direct Manager", code: "MGR", description: "Immediate supervisor", min_raters: 1, max_raters: 1, is_mandatory: true, is_active: true, anonymity_threshold: 1, bypass_threshold_check: true },
-      { id: "2", name: "Peers", code: "PEER", description: "Team members and colleagues", min_raters: 2, max_raters: 5, is_mandatory: true, is_active: true, anonymity_threshold: 3, bypass_threshold_check: false },
-      { id: "3", name: "Direct Reports", code: "DR", description: "Employees who report to this person", min_raters: 1, max_raters: 10, is_mandatory: false, is_active: true, anonymity_threshold: 3, bypass_threshold_check: false },
-      { id: "4", name: "External", code: "EXT", description: "Clients, vendors, or external stakeholders", min_raters: 0, max_raters: 3, is_mandatory: false, is_active: true, anonymity_threshold: 2, bypass_threshold_check: false },
-    ]);
     
-    setQuestions([
-      { id: "1", question_text: "How effectively does this person communicate with others?", category: "communication", question_type: "rating", is_active: true },
-      { id: "2", question_text: "How well does this person collaborate with team members?", category: "teamwork", question_type: "rating", is_active: true },
-      { id: "3", question_text: "What are this person's greatest strengths?", category: "strengths", question_type: "open_text", is_active: true },
-      { id: "4", question_text: "What areas could this person improve?", category: "development", question_type: "open_text", is_active: true },
-    ]);
+    // Fetch 360 cycles from review_cycles table
+    const { data: cyclesData } = await supabase
+      .from('review_cycles')
+      .select('id, name, status')
+      .eq('company_id', companyId)
+      .eq('is_template', false)
+      .order('created_at', { ascending: false });
+    
+    if (cyclesData) {
+      setCycles(cyclesData);
+    }
+    
+    // Fetch rater categories from database
+    const { data: raterData } = await supabase
+      .from('feedback_360_rater_categories')
+      .select('*')
+      .eq('company_id', companyId)
+      .eq('is_active', true)
+      .order('display_order');
+    
+    if (raterData && raterData.length > 0) {
+      setRaterCategories(raterData.map(r => ({
+        id: r.id,
+        name: r.name,
+        code: r.code,
+        description: r.description,
+        min_raters: r.min_raters ?? 1,
+        max_raters: r.max_raters ?? 5,
+        is_mandatory: (r as Record<string, unknown>).is_mandatory as boolean ?? false,
+        is_active: r.is_active ?? true,
+        anonymity_threshold: 3,
+        bypass_threshold_check: false,
+      })));
+    } else {
+      // Fallback mock data if no DB data
+      setRaterCategories([
+        { id: "1", name: "Direct Manager", code: "MGR", description: "Immediate supervisor", min_raters: 1, max_raters: 1, is_mandatory: true, is_active: true, anonymity_threshold: 1, bypass_threshold_check: true },
+        { id: "2", name: "Peers", code: "PEER", description: "Team members and colleagues", min_raters: 2, max_raters: 5, is_mandatory: true, is_active: true, anonymity_threshold: 3, bypass_threshold_check: false },
+        { id: "3", name: "Direct Reports", code: "DR", description: "Employees who report to this person", min_raters: 1, max_raters: 10, is_mandatory: false, is_active: true, anonymity_threshold: 3, bypass_threshold_check: false },
+        { id: "4", name: "External", code: "EXT", description: "Clients, vendors, or external stakeholders", min_raters: 0, max_raters: 3, is_mandatory: false, is_active: true, anonymity_threshold: 2, bypass_threshold_check: false },
+      ]);
+    }
+    
+    // Fetch questions from database
+    const { data: questionsData } = await supabase
+      .from('feedback_360_questions')
+      .select('id, question_text, category_id, question_type, is_active')
+      .eq('is_active', true)
+      .order('display_order');
+    
+    if (questionsData && questionsData.length > 0) {
+      setQuestions(questionsData.map(q => ({
+        id: q.id,
+        question_text: q.question_text,
+        category: q.category_id || 'general',
+        question_type: q.question_type,
+        is_active: q.is_active ?? true,
+      })));
+    } else {
+      // Fallback mock data
+      setQuestions([
+        { id: "1", question_text: "How effectively does this person communicate with others?", category: "communication", question_type: "rating", is_active: true },
+        { id: "2", question_text: "How well does this person collaborate with team members?", category: "teamwork", question_type: "rating", is_active: true },
+        { id: "3", question_text: "What are this person's greatest strengths?", category: "strengths", question_type: "open_text", is_active: true },
+        { id: "4", question_text: "What areas could this person improve?", category: "development", question_type: "open_text", is_active: true },
+      ]);
+    }
     
     setIsLoading(false);
   };
@@ -404,19 +461,31 @@ export function Feedback360ConfigSection({ companyId }: Feedback360ConfigSection
               <div className="space-y-4">
                 <div className="flex items-center gap-4">
                   <Label>Select Cycle</Label>
-                  <Select>
+                  <Select value={selectedCycleId || ""} onValueChange={setSelectedCycleId}>
                     <SelectTrigger className="w-64">
                       <SelectValue placeholder="Select a 360 cycle" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="demo">Demo Cycle (Select to enable matrix)</SelectItem>
+                      {cycles.length === 0 ? (
+                        <SelectItem value="none" disabled>No cycles found</SelectItem>
+                      ) : (
+                        cycles.map(cycle => (
+                          <SelectItem key={cycle.id} value={cycle.id}>
+                            {cycle.name} ({cycle.status})
+                          </SelectItem>
+                        ))
+                      )}
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="text-sm text-muted-foreground">
-                  Select a 360 cycle above to configure question visibility for different rater categories.
-                  Once a cycle is selected, you can use the matrix view to quickly assign questions.
-                </div>
+                
+                {selectedCycleId ? (
+                  <RaterQuestionMatrix cycleId={selectedCycleId} companyId={companyId} />
+                ) : (
+                  <div className="text-sm text-muted-foreground">
+                    Select a 360 cycle above to configure question visibility for different rater categories.
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
