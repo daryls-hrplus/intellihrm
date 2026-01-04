@@ -60,6 +60,7 @@ export function useReminders() {
         send_to_hr: rule.send_to_hr,
         notification_method: rule.notification_method,
         message_template: rule.message_template,
+        email_template_id: rule.email_template_id,
         priority: rule.priority,
         is_active: rule.is_active,
         created_by: user?.id,

@@ -14,10 +14,21 @@ interface ReminderRule {
   send_email: boolean;
   send_in_app: boolean;
   message_template: string | null;
+  email_template_id: string | null;
+  notification_method: string;
   event_type: {
     code: string;
     name: string;
+    category: string;
   };
+}
+
+interface EmailTemplate {
+  id: string;
+  category: string;
+  name: string;
+  subject: string;
+  body: string;
 }
 
 interface Employee {
@@ -44,10 +55,12 @@ function replaceMessagePlaceholders(
   template: string,
   data: {
     employeeName: string;
+    employeeFirstName?: string;
     eventDate: string;
     daysUntil: number;
     eventTypeName: string;
     itemName?: string;
+    companyName?: string;
   }
 ): string {
   // Format the date nicely
@@ -58,12 +71,27 @@ function replaceMessagePlaceholders(
     day: 'numeric'
   });
 
+  const firstName = data.employeeFirstName || data.employeeName.split(' ')[0];
+
   return template
+    // Single curly brace format (in-app)
     .replace(/{employee_name}/gi, data.employeeName)
+    .replace(/{employee_first_name}/gi, firstName)
     .replace(/{event_date}/gi, formattedDate)
     .replace(/{days_until}/gi, data.daysUntil.toString())
     .replace(/{event_type}/gi, data.eventTypeName)
-    .replace(/{item_name}/gi, data.itemName || data.eventTypeName);
+    .replace(/{item_name}/gi, data.itemName || data.eventTypeName)
+    .replace(/{company_name}/gi, data.companyName || '')
+    // Double curly brace format (email templates)
+    .replace(/\{\{employee_name\}\}/gi, data.employeeName)
+    .replace(/\{\{employee_full_name\}\}/gi, data.employeeName)
+    .replace(/\{\{employee_first_name\}\}/gi, firstName)
+    .replace(/\{\{event_date\}\}/gi, formattedDate)
+    .replace(/\{\{days_until\}\}/gi, data.daysUntil.toString())
+    .replace(/\{\{event_type\}\}/gi, data.eventTypeName)
+    .replace(/\{\{event_title\}\}/gi, data.itemName || data.eventTypeName)
+    .replace(/\{\{item_name\}\}/gi, data.itemName || data.eventTypeName)
+    .replace(/\{\{company_name\}\}/gi, data.companyName || '');
 }
 
 serve(async (req) => {
@@ -78,12 +106,12 @@ serve(async (req) => {
 
     console.log('Starting reminder processing...');
 
-    // Get all active reminder rules with message_template
+    // Get all active reminder rules with email_template_id
     const { data: rules, error: rulesError } = await supabase
       .from('reminder_rules')
       .select(`
         *,
-        event_type:reminder_event_types(code, name)
+        event_type:reminder_event_types(code, name, category)
       `)
       .eq('is_active', true);
 
@@ -402,23 +430,31 @@ serve(async (req) => {
           continue;
         }
 
-        // Build the reminder message using template or default
-        const defaultTemplate = `Dear {employee_name},\n\nThis is a reminder that your {item_name} will expire on {event_date} ({days_until} days from now).\n\nPlease take the necessary steps.\n\nFrom HR Department`;
-        const template = rule.message_template || defaultTemplate;
-        
-        const processedMessage = replaceMessagePlaceholders(template, {
+        // Prepare placeholder data
+        const placeholderData = {
           employeeName: record.employee.full_name,
+          employeeFirstName: record.employee.full_name.split(' ')[0],
           eventDate: record.eventDate,
           daysUntil: rule.days_before,
           eventTypeName: rule.event_type?.name || 'Event',
-          itemName: record.itemName
-        });
+          itemName: record.itemName,
+          companyName: 'Your Company', // Could be fetched from companies table if needed
+        };
+
+        // Build the in-app reminder message using message_template or default
+        const defaultInAppTemplate = `Dear {employee_name},\n\nThis is a reminder that your {item_name} will expire on {event_date} ({days_until} days from now).\n\nPlease take the necessary steps.\n\nFrom HR Department`;
+        const inAppTemplate = rule.message_template || defaultInAppTemplate;
+        const processedMessage = replaceMessagePlaceholders(inAppTemplate, placeholderData);
 
         // Create title with specific item name
         const reminderTitle = `${record.itemName} - ${rule.event_type?.name}`;
 
+        // Determine if we should send in-app and/or email based on notification_method
+        const shouldSendInApp = rule.notification_method === 'in_app' || rule.notification_method === 'both';
+        const shouldSendEmail = rule.notification_method === 'email' || rule.notification_method === 'both';
+
         // Create in-app reminder if enabled
-        if (rule.send_in_app) {
+        if (shouldSendInApp) {
           const { error: reminderError } = await supabase
             .from('employee_reminders')
             .insert({
@@ -444,7 +480,49 @@ serve(async (req) => {
         }
 
         // Send email if enabled
-        if (rule.send_email && record.employee.email) {
+        if (shouldSendEmail && record.employee.email) {
+          // Fetch email template: first try linked template, then category match, then default
+          let emailTemplate: EmailTemplate | null = null;
+          
+          if (rule.email_template_id) {
+            const { data: linkedTemplate } = await supabase
+              .from('reminder_email_templates')
+              .select('id, category, name, subject, body')
+              .eq('id', rule.email_template_id)
+              .eq('is_active', true)
+              .single();
+            emailTemplate = linkedTemplate;
+          }
+          
+          // If no linked template, try to find one by category
+          if (!emailTemplate && rule.event_type?.category) {
+            const { data: categoryTemplates } = await supabase
+              .from('reminder_email_templates')
+              .select('id, category, name, subject, body')
+              .eq('category', rule.event_type.category)
+              .eq('is_active', true)
+              .or(`is_default.eq.true,company_id.eq.${rule.company_id}`)
+              .order('is_default', { ascending: true }) // Company templates first
+              .limit(1);
+            
+            if (categoryTemplates && categoryTemplates.length > 0) {
+              emailTemplate = categoryTemplates[0];
+            }
+          }
+
+          // Build email content
+          let emailSubject = `Reminder: ${reminderTitle}`;
+          let emailBody = processedMessage;
+          
+          if (emailTemplate) {
+            emailSubject = replaceMessagePlaceholders(emailTemplate.subject, placeholderData);
+            emailBody = replaceMessagePlaceholders(emailTemplate.body, placeholderData);
+            console.log(`Using email template "${emailTemplate.name}" for ${record.employee.email}`);
+          } else {
+            console.log(`No email template found for category ${rule.event_type?.category}, using in-app message`);
+          }
+
+          // Log email send attempt (actual sending would use Resend or similar)
           const { error: historyError } = await supabase
             .from('reminder_history')
             .insert({
@@ -458,6 +536,7 @@ serve(async (req) => {
 
           if (!historyError) {
             emailsSent.push(record.employee.email);
+            console.log(`Email logged for ${record.employee.email}: ${emailSubject}`);
           }
         }
       }

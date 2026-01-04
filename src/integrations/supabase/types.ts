@@ -47607,6 +47607,7 @@ export type Database = {
           cycle_type_filter: string[] | null
           days_before: number
           description: string | null
+          email_template_id: string | null
           event_type_id: string
           id: string
           is_active: boolean | null
@@ -47627,6 +47628,7 @@ export type Database = {
           cycle_type_filter?: string[] | null
           days_before?: number
           description?: string | null
+          email_template_id?: string | null
           event_type_id: string
           id?: string
           is_active?: boolean | null
@@ -47647,6 +47649,7 @@ export type Database = {
           cycle_type_filter?: string[] | null
           days_before?: number
           description?: string | null
+          email_template_id?: string | null
           event_type_id?: string
           id?: string
           is_active?: boolean | null
@@ -47673,6 +47676,13 @@ export type Database = {
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reminder_rules_email_template_id_fkey"
+            columns: ["email_template_id"]
+            isOneToOne: false
+            referencedRelation: "reminder_email_templates"
             referencedColumns: ["id"]
           },
           {

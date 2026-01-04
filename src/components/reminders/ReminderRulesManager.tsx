@@ -19,6 +19,7 @@ import { PRIORITY_OPTIONS, NOTIFICATION_METHODS } from '@/types/reminders';
 import { NaturalLanguageRuleInput } from './NaturalLanguageRuleInput';
 import { RuleSourcePreview } from './RuleSourcePreview';
 import { TemplateMessagePreview } from './TemplateMessagePreview';
+import { TemplateSelector } from './TemplateSelector';
 import type { SourcePreviewData } from '@/hooks/useReminderSourcePreview';
 
 interface ReminderRulesManagerProps {
@@ -53,6 +54,8 @@ export const ReminderRulesManager = forwardRef<ReminderRulesManagerRef, Reminder
     send_to_hr: boolean;
     notification_method: 'in_app' | 'email' | 'both';
     message_template: string;
+    email_template_id: string | null;
+    use_custom_email: boolean;
     priority: 'low' | 'medium' | 'high' | 'critical';
     is_active: boolean;
     cycle_type_filter: string[];
@@ -67,6 +70,8 @@ export const ReminderRulesManager = forwardRef<ReminderRulesManagerRef, Reminder
     send_to_hr: false,
     notification_method: 'both',
     message_template: '',
+    email_template_id: null,
+    use_custom_email: false,
     priority: 'medium',
     is_active: true,
     cycle_type_filter: [],
@@ -138,6 +143,7 @@ export const ReminderRulesManager = forwardRef<ReminderRulesManagerRef, Reminder
     if (rule) {
       setEditingRule(rule);
       const intervals = rule.reminder_intervals || [rule.days_before];
+      const hasEmailTemplate = !!(rule as any).email_template_id;
       setFormData({
         name: rule.name,
         description: rule.description || '',
@@ -149,6 +155,8 @@ export const ReminderRulesManager = forwardRef<ReminderRulesManagerRef, Reminder
         send_to_hr: rule.send_to_hr,
         notification_method: rule.notification_method as 'in_app' | 'email' | 'both',
         message_template: rule.message_template || '',
+        email_template_id: (rule as any).email_template_id || null,
+        use_custom_email: !hasEmailTemplate && !!rule.message_template,
         priority: rule.priority as 'low' | 'medium' | 'high' | 'critical',
         is_active: rule.is_active,
         cycle_type_filter: (rule as any).cycle_type_filter || [],
@@ -166,12 +174,15 @@ export const ReminderRulesManager = forwardRef<ReminderRulesManagerRef, Reminder
         send_to_hr: false,
         notification_method: 'both',
         message_template: '',
+        email_template_id: null,
+        use_custom_email: false,
         priority: 'medium',
         is_active: true,
         cycle_type_filter: [],
       });
     }
     setNewInterval('');
+
     setDialogOpen(true);
   };
 
@@ -193,11 +204,18 @@ export const ReminderRulesManager = forwardRef<ReminderRulesManagerRef, Reminder
 
   const handleSave = async () => {
     try {
+      const saveData = {
+        ...formData,
+        email_template_id: formData.use_custom_email ? null : formData.email_template_id,
+      };
+      // Remove form-only field
+      delete (saveData as any).use_custom_email;
+      
       if (editingRule) {
-        await updateRule(editingRule.id, formData);
+        await updateRule(editingRule.id, saveData);
       } else {
         await createRule({
-          ...formData,
+          ...saveData,
           company_id: companyId,
         });
       }
@@ -514,8 +532,30 @@ export const ReminderRulesManager = forwardRef<ReminderRulesManagerRef, Reminder
                 </div>
               </div>
 
+              {/* Email Template Selector - Show when email or both is selected */}
+              {(formData.notification_method === 'email' || formData.notification_method === 'both') && (
+                <TemplateSelector
+                  companyId={companyId}
+                  category={eventTypes.find(t => t.id === formData.event_type_id)?.category || null}
+                  selectedTemplateId={formData.email_template_id}
+                  onSelect={(templateId) => setFormData({ ...formData, email_template_id: templateId })}
+                  useCustom={formData.use_custom_email}
+                  onUseCustomChange={(useCustom) => setFormData({ ...formData, use_custom_email: useCustom })}
+                  onNavigateToTemplates={() => {
+                    setDialogOpen(false);
+                    navigate('/hr-hub/reminders?tab=templates');
+                  }}
+                />
+              )}
+
               <div className="space-y-2">
-                <Label>Message Template (Optional)</Label>
+                <Label>
+                  {formData.notification_method === 'email' && !formData.use_custom_email
+                    ? 'In-App Message (if enabled later)'
+                    : formData.use_custom_email || formData.notification_method === 'in_app'
+                    ? 'Message Template'
+                    : 'In-App Message Template'}
+                </Label>
                 <div className="flex flex-wrap gap-1 mb-2">
                   <span className="text-xs text-muted-foreground mr-2">Insert placeholder:</span>
                   {[
