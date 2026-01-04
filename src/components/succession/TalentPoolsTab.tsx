@@ -9,10 +9,12 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Plus, Users, Edit, Trash2, UserPlus, Loader2 } from 'lucide-react';
+import { Plus, Users, Edit, Trash2, UserPlus, Loader2, FileCheck } from 'lucide-react';
 import { TalentPool, TalentPoolMember, useSuccession } from '@/hooks/useSuccession';
 import { supabase } from '@/integrations/supabase/client';
 import { formatDateForDisplay } from '@/utils/dateUtils';
+import { TalentPoolNominationEvidence } from '@/components/talent/pool/TalentPoolNominationEvidence';
+import { HRReviewConfidenceIndicators } from '@/components/talent/pool/HRReviewConfidenceIndicators';
 
 interface TalentPoolsTabProps {
   companyId: string;
@@ -384,11 +386,14 @@ export function TalentPoolsTab({ companyId }: TalentPoolsTabProps) {
         </DialogContent>
       </Dialog>
 
-      {/* Add Member Dialog */}
+      {/* Add Member Dialog with Evidence */}
       <Dialog open={showMemberDialog} onOpenChange={setShowMemberDialog}>
-        <DialogContent>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Add Member to {selectedPool?.name}</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              <FileCheck className="h-5 w-5" />
+              Add Member to {selectedPool?.name}
+            </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
@@ -409,6 +414,21 @@ export function TalentPoolsTab({ companyId }: TalentPoolsTabProps) {
                 </SelectContent>
               </Select>
             </div>
+
+            {/* Evidence Panel - shown when employee is selected */}
+            {memberForm.employee_id && (
+              <div className="space-y-4 border-t pt-4">
+                <h4 className="font-medium text-sm">Talent Evidence</h4>
+                <TalentPoolNominationEvidence 
+                  employeeId={memberForm.employee_id}
+                  poolCriteria={selectedPool?.pool_type ? {
+                    minimumScore: 3.5,
+                    minimumConfidence: 0.7
+                  } : undefined}
+                />
+              </div>
+            )}
+
             <div className="space-y-2">
               <Label>Reason for Inclusion</Label>
               <Textarea

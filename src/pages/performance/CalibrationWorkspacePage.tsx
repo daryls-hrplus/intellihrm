@@ -9,11 +9,12 @@ import { CalibrationHeader } from "@/components/calibration/CalibrationHeader";
 import { EmployeeDetailPanel } from "@/components/calibration/EmployeeDetailPanel";
 import { RatingDistributionChart } from "@/components/calibration/RatingDistributionChart";
 import { CalibrationGovernancePanel } from "@/components/performance/ai/CalibrationGovernancePanel";
+import { CalibrationEvidenceComparison } from "@/components/succession/CalibrationEvidenceComparison";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Loader2, Brain, Shield } from "lucide-react";
+import { ArrowLeft, Loader2, Brain, Shield, GitCompare } from "lucide-react";
 import { CalibrationEmployee } from "@/types/calibration";
 import { toast } from "sonner";
 
@@ -24,8 +25,9 @@ export default function CalibrationWorkspacePage() {
   const companyId = profile?.company_id || company?.id || "";
 
   const [selectedEmployee, setSelectedEmployee] = React.useState<CalibrationEmployee | null>(null);
+  const [selectedForComparison, setSelectedForComparison] = React.useState<string[]>([]);
   const [showAIPanel, setShowAIPanel] = React.useState(true);
-  const [rightPanelTab, setRightPanelTab] = React.useState<"ai" | "governance">("ai");
+  const [rightPanelTab, setRightPanelTab] = React.useState<"ai" | "governance" | "compare">("ai");
 
   const {
     session,
@@ -131,19 +133,23 @@ export default function CalibrationWorkspacePage() {
           </div>
         </div>
 
-        {/* Right: AI Panel / Governance */}
+        {/* Right: AI Panel / Governance / Compare */}
         {showAIPanel && (
           <div className="w-96 border-l bg-muted/30 overflow-auto">
-            <Tabs value={rightPanelTab} onValueChange={(v) => setRightPanelTab(v as "ai" | "governance")}>
+            <Tabs value={rightPanelTab} onValueChange={(v) => setRightPanelTab(v as "ai" | "governance" | "compare")}>
               <div className="p-2 border-b">
                 <TabsList className="w-full">
                   <TabsTrigger value="ai" className="flex-1 gap-1">
                     <Brain className="h-4 w-4" />
-                    AI Insights
+                    AI
                   </TabsTrigger>
                   <TabsTrigger value="governance" className="flex-1 gap-1">
                     <Shield className="h-4 w-4" />
                     Governance
+                  </TabsTrigger>
+                  <TabsTrigger value="compare" className="flex-1 gap-1">
+                    <GitCompare className="h-4 w-4" />
+                    Compare
                   </TabsTrigger>
                 </TabsList>
               </div>
@@ -165,6 +171,13 @@ export default function CalibrationWorkspacePage() {
                   companyId={companyId}
                   sessionId={sessionId}
                   isAdmin={true}
+                />
+              </TabsContent>
+              
+              <TabsContent value="compare" className="m-0 p-2">
+                <CalibrationEvidenceComparison
+                  employeeIds={employees.slice(0, 4).map(e => e.employeeId)}
+                  companyId={companyId}
                 />
               </TabsContent>
             </Tabs>

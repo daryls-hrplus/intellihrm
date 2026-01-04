@@ -13,11 +13,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Users, Clock, Star, AlertTriangle } from "lucide-react";
 import type { My360Request } from "@/hooks/useMy360FeedbackRequests";
 import { use360CycleQuestions, useSubmit360Feedback } from "@/hooks/useMy360FeedbackRequests";
+import { BARSRatingScale } from "@/components/feedback/questions/BARSRatingScale";
+import { QuestionAnchors } from "@/hooks/useBehavioralAnchors";
 
 interface Ess360FeedbackResponseDialogProps {
   open: boolean;
@@ -81,40 +82,29 @@ export function Ess360FeedbackResponseDialog({
   };
 
   const renderRatingScale = (question: typeof questions[0], questionId: string) => {
-    const min = question.rating_scale_min || 1;
     const max = question.rating_scale_max || 5;
     const currentRating = responses[questionId]?.rating;
 
+    // Parse behavioral anchors if available from the question object
+    // Note: behavioral_anchors is stored as JSON in the feedback_360_questions table
+    const questionAny = question as any;
+    const anchors: QuestionAnchors | undefined = questionAny.behavioral_anchors 
+      ? (typeof questionAny.behavioral_anchors === 'string' 
+          ? JSON.parse(questionAny.behavioral_anchors) 
+          : questionAny.behavioral_anchors as QuestionAnchors)
+      : undefined;
+
+    const displayMode = (questionAny.anchor_display_mode as 'tooltip' | 'inline' | 'popup') || 'tooltip';
+
     return (
-      <div className="space-y-3">
-        <RadioGroup
-          value={currentRating?.toString() || ""}
-          onValueChange={(value) => updateResponse(questionId, "rating", parseInt(value))}
-          className="flex flex-wrap gap-2"
-        >
-          {Array.from({ length: max - min + 1 }, (_, i) => min + i).map((value) => (
-            <div key={value} className="flex flex-col items-center">
-              <RadioGroupItem value={value.toString()} id={`${questionId}-${value}`} className="sr-only" />
-              <Label
-                htmlFor={`${questionId}-${value}`}
-                className={`
-                  cursor-pointer flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all
-                  ${currentRating === value 
-                    ? "border-primary bg-primary text-primary-foreground" 
-                    : "border-muted-foreground/30 hover:border-primary/50"
-                  }
-                `}
-              >
-                {value}
-              </Label>
-            </div>
-          ))}
-        </RadioGroup>
-        <div className="flex justify-between text-xs text-muted-foreground">
-          <span>Low</span>
-          <span>High</span>
-        </div>
-      </div>
+      <BARSRatingScale
+        value={currentRating}
+        onChange={(value) => updateResponse(questionId, "rating", value)}
+        anchors={anchors}
+        displayMode={displayMode}
+        scaleMax={max}
+        showLabels={true}
+      />
     );
   };
 
