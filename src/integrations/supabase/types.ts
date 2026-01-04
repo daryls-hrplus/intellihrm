@@ -9473,6 +9473,57 @@ export type Database = {
           },
         ]
       }
+      competency_behavioral_anchors: {
+        Row: {
+          anchor_text: string
+          company_id: string | null
+          competency_id: string | null
+          created_at: string | null
+          examples: string[] | null
+          id: string
+          scale_label: string
+          scale_value: number
+          updated_at: string | null
+        }
+        Insert: {
+          anchor_text: string
+          company_id?: string | null
+          competency_id?: string | null
+          created_at?: string | null
+          examples?: string[] | null
+          id?: string
+          scale_label: string
+          scale_value: number
+          updated_at?: string | null
+        }
+        Update: {
+          anchor_text?: string
+          company_id?: string | null
+          competency_id?: string | null
+          created_at?: string | null
+          examples?: string[] | null
+          id?: string
+          scale_label?: string
+          scale_value?: number
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "competency_behavioral_anchors_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "competency_behavioral_anchors_competency_id_fkey"
+            columns: ["competency_id"]
+            isOneToOne: false
+            referencedRelation: "competencies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       competency_change_history: {
         Row: {
           approved_at: string | null
@@ -21592,6 +21643,8 @@ export type Database = {
       }
       feedback_360_questions: {
         Row: {
+          anchor_display_mode: string | null
+          behavioral_anchors: Json | null
           category_id: string | null
           choices: Json | null
           company_id: string
@@ -21610,6 +21663,8 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          anchor_display_mode?: string | null
+          behavioral_anchors?: Json | null
           category_id?: string | null
           choices?: Json | null
           company_id: string
@@ -21628,6 +21683,8 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          anchor_display_mode?: string | null
+          behavioral_anchors?: Json | null
           category_id?: string | null
           choices?: Json | null
           company_id?: string
@@ -48856,6 +48913,61 @@ export type Database = {
           },
         ]
       }
+      review_360_question_assignments: {
+        Row: {
+          created_at: string | null
+          cycle_id: string | null
+          display_order_override: number | null
+          id: string
+          is_required_override: boolean | null
+          is_visible: boolean | null
+          question_id: string | null
+          rater_category_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          cycle_id?: string | null
+          display_order_override?: number | null
+          id?: string
+          is_required_override?: boolean | null
+          is_visible?: boolean | null
+          question_id?: string | null
+          rater_category_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          cycle_id?: string | null
+          display_order_override?: number | null
+          id?: string
+          is_required_override?: boolean | null
+          is_visible?: boolean | null
+          question_id?: string | null
+          rater_category_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_360_question_assignments_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "feedback_360_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "review_360_question_assignments_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "feedback_360_questions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "review_360_question_assignments_rater_category_id_fkey"
+            columns: ["rater_category_id"]
+            isOneToOne: false
+            referencedRelation: "feedback_360_rater_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       review_cycle_template_tags: {
         Row: {
           created_at: string | null
@@ -54122,6 +54234,90 @@ export type Database = {
           },
         ]
       }
+      talent_pool_review_packets: {
+        Row: {
+          company_id: string | null
+          created_at: string | null
+          employee_id: string | null
+          evidence_snapshot: Json | null
+          id: string
+          leadership_indicators: Json | null
+          member_id: string | null
+          notes: string | null
+          review_status: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          signal_summary: Json | null
+          talent_pool_id: string | null
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string | null
+          employee_id?: string | null
+          evidence_snapshot?: Json | null
+          id?: string
+          leadership_indicators?: Json | null
+          member_id?: string | null
+          notes?: string | null
+          review_status?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          signal_summary?: Json | null
+          talent_pool_id?: string | null
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string | null
+          employee_id?: string | null
+          evidence_snapshot?: Json | null
+          id?: string
+          leadership_indicators?: Json | null
+          member_id?: string | null
+          notes?: string | null
+          review_status?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          signal_summary?: Json | null
+          talent_pool_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "talent_pool_review_packets_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "talent_pool_review_packets_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "talent_pool_review_packets_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "talent_pool_members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "talent_pool_review_packets_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "talent_pool_review_packets_talent_pool_id_fkey"
+            columns: ["talent_pool_id"]
+            isOneToOne: false
+            referencedRelation: "talent_pools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       talent_pools: {
         Row: {
           code: string
@@ -54181,6 +54377,76 @@ export type Database = {
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      talent_profile_evidence: {
+        Row: {
+          company_id: string | null
+          confidence_score: number | null
+          created_at: string | null
+          employee_id: string | null
+          evidence_summary: string | null
+          evidence_type: string
+          id: string
+          is_current: boolean | null
+          source_id: string | null
+          source_snapshot_id: string | null
+          source_table: string | null
+          valid_from: string | null
+          valid_until: string | null
+        }
+        Insert: {
+          company_id?: string | null
+          confidence_score?: number | null
+          created_at?: string | null
+          employee_id?: string | null
+          evidence_summary?: string | null
+          evidence_type: string
+          id?: string
+          is_current?: boolean | null
+          source_id?: string | null
+          source_snapshot_id?: string | null
+          source_table?: string | null
+          valid_from?: string | null
+          valid_until?: string | null
+        }
+        Update: {
+          company_id?: string | null
+          confidence_score?: number | null
+          created_at?: string | null
+          employee_id?: string | null
+          evidence_summary?: string | null
+          evidence_type?: string
+          id?: string
+          is_current?: boolean | null
+          source_id?: string | null
+          source_snapshot_id?: string | null
+          source_table?: string | null
+          valid_from?: string | null
+          valid_until?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "talent_profile_evidence_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "talent_profile_evidence_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "talent_profile_evidence_source_snapshot_id_fkey"
+            columns: ["source_snapshot_id"]
+            isOneToOne: false
+            referencedRelation: "talent_signal_snapshots"
             referencedColumns: ["id"]
           },
         ]
