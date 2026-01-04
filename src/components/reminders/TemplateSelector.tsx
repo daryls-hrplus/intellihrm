@@ -18,8 +18,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Eye, FileText, ExternalLink, Mail } from 'lucide-react';
+import { Eye, FileText, ExternalLink, Mail, Sparkles, History } from 'lucide-react';
 import { REMINDER_CATEGORIES } from '@/types/reminders';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface EmailTemplate {
   id: string;
@@ -31,11 +32,13 @@ interface EmailTemplate {
   body: string;
   is_default: boolean;
   is_active: boolean;
+  version?: number;
 }
 
 interface TemplateSelectorProps {
   companyId: string;
   category: string | null;
+  eventTypeId?: string | null;
   selectedTemplateId: string | null;
   onSelect: (templateId: string | null) => void;
   useCustom: boolean;
@@ -46,6 +49,7 @@ interface TemplateSelectorProps {
 export function TemplateSelector({
   companyId,
   category,
+  eventTypeId,
   selectedTemplateId,
   onSelect,
   useCustom,
@@ -55,6 +59,7 @@ export function TemplateSelector({
   const [templates, setTemplates] = useState<EmailTemplate[]>([]);
   const [loading, setLoading] = useState(false);
   const [previewTemplate, setPreviewTemplate] = useState<EmailTemplate | null>(null);
+  const [suggestedTemplateId, setSuggestedTemplateId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!category) {
@@ -75,11 +80,40 @@ export function TemplateSelector({
           .order('name');
 
         if (error) throw error;
-        setTemplates(data || []);
+        
+        const fetchedTemplates = data || [];
+        setTemplates(fetchedTemplates);
 
-        // Auto-select first matching template if none selected and not using custom
-        if (!selectedTemplateId && !useCustom && data && data.length > 0) {
-          onSelect(data[0].id);
+        // Intelligent template matching priority:
+        // 1. Match by specific event_type_id (highest priority)
+        // 2. Match company-specific template for category
+        // 3. Fall back to default template for category
+        let bestMatch: EmailTemplate | null = null;
+        
+        if (fetchedTemplates.length > 0) {
+          // Priority 1: Exact event_type_id match
+          if (eventTypeId) {
+            bestMatch = fetchedTemplates.find(t => t.event_type_id === eventTypeId) || null;
+          }
+          
+          // Priority 2: Company-specific template (no event_type_id but matches category)
+          if (!bestMatch) {
+            bestMatch = fetchedTemplates.find(t => t.company_id === companyId && !t.event_type_id) || null;
+          }
+          
+          // Priority 3: Default template
+          if (!bestMatch) {
+            bestMatch = fetchedTemplates.find(t => t.is_default) || fetchedTemplates[0];
+          }
+          
+          setSuggestedTemplateId(bestMatch?.id || null);
+          
+          // Auto-select best matching template if none selected and not using custom
+          if (!selectedTemplateId && !useCustom && bestMatch) {
+            onSelect(bestMatch.id);
+          }
+        } else {
+          setSuggestedTemplateId(null);
         }
       } catch (error) {
         console.error('Error fetching templates:', error);
@@ -89,7 +123,7 @@ export function TemplateSelector({
     };
 
     fetchTemplates();
-  }, [category, companyId]);
+  }, [category, companyId, eventTypeId]);
 
   const selectedTemplate = templates.find(t => t.id === selectedTemplateId);
   const getCategoryLabel = (cat: string) => 
@@ -183,10 +217,46 @@ export function TemplateSelector({
                         <div className="flex items-center gap-2">
                           <FileText className="h-3.5 w-3.5 text-muted-foreground" />
                           {template.name}
-                          {template.is_default && (
+                          {template.id === suggestedTemplateId && (
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Badge variant="default" className="text-[10px] ml-1 bg-primary/10 text-primary border-primary/20">
+                                    <Sparkles className="h-2.5 w-2.5 mr-0.5" />
+                                    Suggested
+                                  </Badge>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p className="text-xs">
+                                    {template.event_type_id 
+                                      ? 'Matched by event type' 
+                                      : template.company_id 
+                                        ? 'Company-specific template'
+                                        : 'Default category template'}
+                                  </p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          )}
+                          {template.is_default && template.id !== suggestedTemplateId && (
                             <Badge variant="secondary" className="text-[10px] ml-1">
                               Default
                             </Badge>
+                          )}
+                          {template.version && template.version > 1 && (
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Badge variant="outline" className="text-[10px] ml-1">
+                                    <History className="h-2.5 w-2.5 mr-0.5" />
+                                    v{template.version}
+                                  </Badge>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p className="text-xs">Template has been revised {template.version - 1} time(s)</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
                           )}
                         </div>
                       </SelectItem>

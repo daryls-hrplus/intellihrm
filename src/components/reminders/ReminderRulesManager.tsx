@@ -537,6 +537,7 @@ export const ReminderRulesManager = forwardRef<ReminderRulesManagerRef, Reminder
                 <TemplateSelector
                   companyId={companyId}
                   category={eventTypes.find(t => t.id === formData.event_type_id)?.category || null}
+                  eventTypeId={formData.event_type_id}
                   selectedTemplateId={formData.email_template_id}
                   onSelect={(templateId) => setFormData({ ...formData, email_template_id: templateId })}
                   useCustom={formData.use_custom_email}

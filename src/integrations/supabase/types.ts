@@ -47434,6 +47434,50 @@ export type Database = {
           },
         ]
       }
+      reminder_email_template_versions: {
+        Row: {
+          body: string
+          created_at: string
+          created_by: string | null
+          id: string
+          name: string
+          subject: string
+          template_id: string
+          version: number
+          version_notes: string | null
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name: string
+          subject: string
+          template_id: string
+          version: number
+          version_notes?: string | null
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name?: string
+          subject?: string
+          template_id?: string
+          version?: number
+          version_notes?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reminder_email_template_versions_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "reminder_email_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reminder_email_templates: {
         Row: {
           body: string
@@ -47446,8 +47490,11 @@ export type Database = {
           is_active: boolean | null
           is_default: boolean | null
           name: string
+          previous_version_id: string | null
           subject: string
           updated_at: string | null
+          version: number
+          version_notes: string | null
         }
         Insert: {
           body: string
@@ -47460,8 +47507,11 @@ export type Database = {
           is_active?: boolean | null
           is_default?: boolean | null
           name: string
+          previous_version_id?: string | null
           subject: string
           updated_at?: string | null
+          version?: number
+          version_notes?: string | null
         }
         Update: {
           body?: string
@@ -47474,8 +47524,11 @@ export type Database = {
           is_active?: boolean | null
           is_default?: boolean | null
           name?: string
+          previous_version_id?: string | null
           subject?: string
           updated_at?: string | null
+          version?: number
+          version_notes?: string | null
         }
         Relationships: [
           {
@@ -47497,6 +47550,13 @@ export type Database = {
             columns: ["event_type_id"]
             isOneToOne: false
             referencedRelation: "reminder_event_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reminder_email_templates_previous_version_id_fkey"
+            columns: ["previous_version_id"]
+            isOneToOne: false
+            referencedRelation: "reminder_email_templates"
             referencedColumns: ["id"]
           },
         ]
