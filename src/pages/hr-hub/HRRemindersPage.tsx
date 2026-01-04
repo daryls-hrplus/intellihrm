@@ -80,6 +80,11 @@ export default function HRRemindersPage() {
     }
   };
 
+  const handleUseTemplate = (template: any) => {
+    toast.success(`Template "${template.name}" selected. Switch to the Rules tab to create a rule using this template.`);
+    setActiveTab('rules');
+  };
+
   const breadcrumbItems = [
     { label: t('hrHub.title'), href: '/hr-hub' },
     { label: t('hrHub.reminders') },
@@ -222,7 +227,10 @@ export default function HRRemindersPage() {
                     <p>Select a company to manage email templates</p>
                   </div>
                 ) : (
-                  <ReminderEmailTemplates companyId={selectedCompanyId} />
+                  <ReminderEmailTemplates 
+                    companyId={selectedCompanyId} 
+                    onUseTemplate={handleUseTemplate}
+                  />
                 )}
               </CardContent>
             </Card>

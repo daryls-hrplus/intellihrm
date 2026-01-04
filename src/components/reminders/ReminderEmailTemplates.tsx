@@ -45,7 +45,8 @@ import {
   MessageSquare,
   UserPlus,
   Loader2,
-  RotateCcw
+  RotateCcw,
+  Zap
 } from 'lucide-react';
 
 interface EmailTemplate {
@@ -63,6 +64,7 @@ interface EmailTemplate {
 
 interface ReminderEmailTemplatesProps {
   companyId: string;
+  onUseTemplate?: (template: EmailTemplate) => void;
 }
 
 const CATEGORY_ICONS: Record<string, React.ReactNode> = {
@@ -78,7 +80,7 @@ const CATEGORY_ICONS: Record<string, React.ReactNode> = {
   onboarding: <UserPlus className="h-4 w-4" />,
 };
 
-export function ReminderEmailTemplates({ companyId }: ReminderEmailTemplatesProps) {
+export function ReminderEmailTemplates({ companyId, onUseTemplate }: ReminderEmailTemplatesProps) {
   const [templates, setTemplates] = useState<EmailTemplate[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingTemplate, setEditingTemplate] = useState<EmailTemplate | null>(null);
@@ -380,7 +382,7 @@ export function ReminderEmailTemplates({ companyId }: ReminderEmailTemplatesProp
                         <p className="text-xs text-muted-foreground line-clamp-2 mb-3">
                           {template.body.substring(0, 100)}...
                         </p>
-                        <div className="flex gap-2">
+                        <div className="flex gap-2 flex-wrap">
                           <Button 
                             variant="outline" 
                             size="sm"
@@ -397,6 +399,17 @@ export function ReminderEmailTemplates({ companyId }: ReminderEmailTemplatesProp
                             <Edit className="h-3.5 w-3.5 mr-1" />
                             {template.is_default ? 'Customize' : 'Edit'}
                           </Button>
+                          {onUseTemplate && (
+                            <Button 
+                              variant="default" 
+                              size="sm"
+                              onClick={() => onUseTemplate(template)}
+                              className="bg-primary hover:bg-primary/90"
+                            >
+                              <Zap className="h-3.5 w-3.5 mr-1" />
+                              Use in Rule
+                            </Button>
+                          )}
                           <Button 
                             variant="ghost" 
                             size="sm"

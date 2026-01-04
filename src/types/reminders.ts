@@ -27,6 +27,7 @@ export interface ReminderRule {
   send_to_hr: boolean;
   notification_method: 'in_app' | 'email' | 'both';
   message_template: string | null;
+  email_template_id: string | null;
   is_active: boolean;
   priority: 'low' | 'medium' | 'high' | 'critical';
   created_by: string | null;
