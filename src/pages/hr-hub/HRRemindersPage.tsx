@@ -143,26 +143,26 @@ export default function HRRemindersPage() {
           <TabsList>
             <TabsTrigger value="templates" className="flex items-center gap-2">
               <FileText className="h-4 w-4" />
-              Email Templates
+              Templates
             </TabsTrigger>
             <TabsTrigger value="rules" className="flex items-center gap-2">
               <Settings className="h-4 w-4" />
-              Rules
+              Automation Rules
             </TabsTrigger>
             <TabsTrigger value="reminders" className="flex items-center gap-2">
               <List className="h-4 w-4" />
-              {t('hrHub.reminders')}
+              Reminder Queue
             </TabsTrigger>
             <TabsTrigger value="delivery" className="flex items-center gap-2">
               <Send className="h-4 w-4" />
-              Delivery Tracking
+              Delivery Log
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="templates" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Email Templates</CardTitle>
+                <CardTitle>Templates</CardTitle>
                 <p className="text-sm text-muted-foreground">
                   Customize email notification templates for all reminder categories
                 </p>
@@ -196,7 +196,7 @@ export default function HRRemindersPage() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle>Reminder Rules</CardTitle>
+                    <CardTitle>Automation Rules</CardTitle>
                     <p className="text-sm text-muted-foreground">
                       Configure automatic rules to send reminders for important events
                     </p>
@@ -222,7 +222,7 @@ export default function HRRemindersPage() {
           <TabsContent value="reminders" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>{t('hrHub.reminders')}</CardTitle>
+                <CardTitle>Reminder Queue</CardTitle>
                 <p className="text-sm text-muted-foreground">
                   View and manage all pending and sent reminders across the organization
                 </p>
@@ -239,7 +239,7 @@ export default function HRRemindersPage() {
           <TabsContent value="delivery" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Delivery Tracking</CardTitle>
+                <CardTitle>Delivery Log</CardTitle>
                 <p className="text-sm text-muted-foreground">
                   Monitor notification delivery status across all reminder types
                 </p>
