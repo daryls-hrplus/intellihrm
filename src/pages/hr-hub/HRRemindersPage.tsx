@@ -23,7 +23,7 @@ export default function HRRemindersPage() {
   const [companies, setCompanies] = useState<{ id: string; name: string }[]>([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>('all');
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('reminders');
+  const [activeTab, setActiveTab] = useState('templates');
   const rulesManagerRef = useRef<{ reload: () => void } | null>(null);
 
   useEffect(() => {
@@ -128,7 +128,7 @@ export default function HRRemindersPage() {
 
         {/* Welcome Banner */}
         <ReminderWelcomeBanner 
-          onGetStarted={() => setActiveTab('rules')}
+          onGetStarted={() => setActiveTab('templates')}
           onViewAI={() => setActiveTab('rules')}
         />
 
@@ -141,17 +141,17 @@ export default function HRRemindersPage() {
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList>
-            <TabsTrigger value="reminders" className="flex items-center gap-2">
-              <List className="h-4 w-4" />
-              {t('hrHub.reminders')}
+            <TabsTrigger value="templates" className="flex items-center gap-2">
+              <FileText className="h-4 w-4" />
+              Email Templates
             </TabsTrigger>
             <TabsTrigger value="rules" className="flex items-center gap-2">
               <Settings className="h-4 w-4" />
               Rules
             </TabsTrigger>
-            <TabsTrigger value="templates" className="flex items-center gap-2">
-              <FileText className="h-4 w-4" />
-              Email Templates
+            <TabsTrigger value="reminders" className="flex items-center gap-2">
+              <List className="h-4 w-4" />
+              {t('hrHub.reminders')}
             </TabsTrigger>
             <TabsTrigger value="delivery" className="flex items-center gap-2">
               <Send className="h-4 w-4" />
@@ -159,19 +159,26 @@ export default function HRRemindersPage() {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="reminders" className="space-y-6">
+          <TabsContent value="templates" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>{t('hrHub.reminders')}</CardTitle>
+                <CardTitle>Email Templates</CardTitle>
                 <p className="text-sm text-muted-foreground">
-                  View and manage all pending and sent reminders across the organization
+                  Customize email notification templates for all reminder categories
                 </p>
               </CardHeader>
               <CardContent>
-                <EmployeeRemindersList 
-                  companyId={selectedCompanyId} 
-                  creatorRole="hr"
-                />
+                {selectedCompanyId === 'all' ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <FileText className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                    <p>Select a company to manage email templates</p>
+                  </div>
+                ) : (
+                  <ReminderEmailTemplates 
+                    companyId={selectedCompanyId} 
+                    onUseTemplate={handleUseTemplate}
+                  />
+                )}
               </CardContent>
             </Card>
           </TabsContent>
@@ -212,26 +219,19 @@ export default function HRRemindersPage() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="templates" className="space-y-6">
+          <TabsContent value="reminders" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Email Templates</CardTitle>
+                <CardTitle>{t('hrHub.reminders')}</CardTitle>
                 <p className="text-sm text-muted-foreground">
-                  Customize email notification templates for all reminder categories
+                  View and manage all pending and sent reminders across the organization
                 </p>
               </CardHeader>
               <CardContent>
-                {selectedCompanyId === 'all' ? (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <FileText className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                    <p>Select a company to manage email templates</p>
-                  </div>
-                ) : (
-                  <ReminderEmailTemplates 
-                    companyId={selectedCompanyId} 
-                    onUseTemplate={handleUseTemplate}
-                  />
-                )}
+                <EmployeeRemindersList 
+                  companyId={selectedCompanyId} 
+                  creatorRole="hr"
+                />
               </CardContent>
             </Card>
           </TabsContent>
