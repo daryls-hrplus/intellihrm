@@ -142,9 +142,9 @@ export function RaterQuestionMatrix({ cycleId, companyId }: RaterQuestionMatrixP
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle>{t("feedback.questionAssignment.matrixTitle")}</CardTitle>
+            <CardTitle>Question Visibility by Rater Type</CardTitle>
             <CardDescription>
-              {t("feedback.questionAssignment.matrixDescription")}
+              Configure which questions each rater category can see and respond to
             </CardDescription>
           </div>
           {hasChanges && (
