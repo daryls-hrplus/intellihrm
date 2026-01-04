@@ -13,6 +13,8 @@ interface InvestigationModePanelProps {
   cycleName: string;
   companyId: string;
   cycleStatus?: string;
+  targetEmployeeId?: string;
+  targetEmployeeName?: string;
 }
 
 export function InvestigationModePanel({
@@ -20,6 +22,8 @@ export function InvestigationModePanel({
   cycleName,
   companyId,
   cycleStatus,
+  targetEmployeeId,
+  targetEmployeeName,
 }: InvestigationModePanelProps) {
   const [requestDialogOpen, setRequestDialogOpen] = useState(false);
 
@@ -202,6 +206,8 @@ export function InvestigationModePanel({
         cycleId={cycleId}
         cycleName={cycleName}
         companyId={companyId}
+        targetEmployeeId={targetEmployeeId}
+        targetEmployeeName={targetEmployeeName}
         onSuccess={() => refetch()}
       />
     </>

@@ -28,6 +28,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Results360DevelopmentBridge } from '@/components/feedback/development/Results360DevelopmentBridge';
 import { DevelopmentThemeApproval } from './DevelopmentThemeApproval';
+import { InvestigationModePanel } from '@/components/feedback/cycles/InvestigationModePanel';
 import {
   Tooltip,
   TooltipContent,
@@ -410,6 +411,18 @@ export function TeamMember360Summary({
                 }}
               />
             </div>
+          )}
+
+          {/* Investigation Access Panel - Only for completed cycles */}
+          {selectedCycle && selectedCycle.review_cycle.status === 'completed' && (
+            <InvestigationModePanel
+              cycleId={selectedCycle.review_cycle_id}
+              cycleName={selectedCycle.review_cycle.name}
+              companyId={companyId}
+              cycleStatus={selectedCycle.review_cycle.status}
+              targetEmployeeId={employeeId}
+              targetEmployeeName={employeeName}
+            />
           )}
 
           {/* Cross-link to Continuous Feedback */}
