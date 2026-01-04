@@ -262,6 +262,7 @@ import TrainingMentorshipPage from "./pages/training/TrainingMentorshipPage";
 // Succession pages
 import SuccessionDashboardPage from "./pages/succession/SuccessionDashboardPage";
 import NineBoxPage from "./pages/succession/NineBoxPage";
+import NineBoxConfigPage from "./pages/succession/NineBoxConfigPage";
 import TalentPoolsPage from "./pages/succession/TalentPoolsPage";
 import SuccessionPlansPage from "./pages/succession/SuccessionPlansPage";
 import KeyPositionsPage from "./pages/succession/KeyPositionsPage";
@@ -3347,6 +3348,7 @@ const App = () => (
               }
             />
             <Route path="/succession/nine-box" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><NineBoxPage /></ProtectedRoute>} />
+            <Route path="/succession/nine-box/config" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><NineBoxConfigPage /></ProtectedRoute>} />
             <Route path="/succession/talent-pools" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><TalentPoolsPage /></ProtectedRoute>} />
             <Route path="/succession/plans" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><SuccessionPlansPage /></ProtectedRoute>} />
             <Route path="/succession/key-positions" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><KeyPositionsPage /></ProtectedRoute>} />
