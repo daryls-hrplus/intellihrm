@@ -380,3 +380,9 @@ verify_jwt = false
 
 [functions.contextual-help-videos]
 verify_jwt = false
+
+[functions.send-360-release-notifications]
+verify_jwt = false
+
+[functions.send-360-activation-notifications]
+verify_jwt = false

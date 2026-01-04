@@ -13,7 +13,8 @@ import { ReminderAIDashboard } from '@/components/reminders/ReminderAIDashboard'
 import { ReminderEmailTemplates } from '@/components/reminders/ReminderEmailTemplates';
 import { useReminders } from '@/hooks/useReminders';
 import { supabase } from '@/integrations/supabase/client';
-import { Bell, Settings, List, Loader2, FileText, Sparkles } from 'lucide-react';
+import { Bell, Settings, List, Loader2, FileText, Sparkles, Send } from 'lucide-react';
+import { DeliveryTrackingDashboard } from '@/components/reminders/DeliveryTrackingDashboard';
 import { toast } from 'sonner';
 
 export default function HRRemindersPage() {
@@ -147,6 +148,10 @@ export default function HRRemindersPage() {
               <FileText className="h-4 w-4" />
               Email Templates
             </TabsTrigger>
+            <TabsTrigger value="delivery" className="flex items-center gap-2">
+              <Send className="h-4 w-4" />
+              Delivery Tracking
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="reminders" className="space-y-6">
@@ -219,6 +224,20 @@ export default function HRRemindersPage() {
                 ) : (
                   <ReminderEmailTemplates companyId={selectedCompanyId} />
                 )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="delivery" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Delivery Tracking</CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  Monitor notification delivery status across all reminder types
+                </p>
+              </CardHeader>
+              <CardContent>
+                <DeliveryTrackingDashboard companyId={selectedCompanyId} />
               </CardContent>
             </Card>
           </TabsContent>

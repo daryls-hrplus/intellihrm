@@ -47320,6 +47320,120 @@ export type Database = {
           },
         ]
       }
+      reminder_delivery_log: {
+        Row: {
+          body_preview: string | null
+          company_id: string | null
+          created_at: string | null
+          delivered_at: string | null
+          delivery_channel: string
+          employee_id: string | null
+          event_type_id: string | null
+          failed_at: string | null
+          failure_reason: string | null
+          id: string
+          message_id: string | null
+          metadata: Json | null
+          opened_at: string | null
+          recipient_email: string | null
+          recipient_name: string | null
+          reminder_id: string | null
+          rule_id: string | null
+          sent_at: string | null
+          source_record_id: string | null
+          source_table: string | null
+          status: string
+          subject: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          body_preview?: string | null
+          company_id?: string | null
+          created_at?: string | null
+          delivered_at?: string | null
+          delivery_channel: string
+          employee_id?: string | null
+          event_type_id?: string | null
+          failed_at?: string | null
+          failure_reason?: string | null
+          id?: string
+          message_id?: string | null
+          metadata?: Json | null
+          opened_at?: string | null
+          recipient_email?: string | null
+          recipient_name?: string | null
+          reminder_id?: string | null
+          rule_id?: string | null
+          sent_at?: string | null
+          source_record_id?: string | null
+          source_table?: string | null
+          status?: string
+          subject?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          body_preview?: string | null
+          company_id?: string | null
+          created_at?: string | null
+          delivered_at?: string | null
+          delivery_channel?: string
+          employee_id?: string | null
+          event_type_id?: string | null
+          failed_at?: string | null
+          failure_reason?: string | null
+          id?: string
+          message_id?: string | null
+          metadata?: Json | null
+          opened_at?: string | null
+          recipient_email?: string | null
+          recipient_name?: string | null
+          reminder_id?: string | null
+          rule_id?: string | null
+          sent_at?: string | null
+          source_record_id?: string | null
+          source_table?: string | null
+          status?: string
+          subject?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reminder_delivery_log_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reminder_delivery_log_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reminder_delivery_log_event_type_id_fkey"
+            columns: ["event_type_id"]
+            isOneToOne: false
+            referencedRelation: "reminder_event_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reminder_delivery_log_reminder_id_fkey"
+            columns: ["reminder_id"]
+            isOneToOne: false
+            referencedRelation: "employee_reminders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reminder_delivery_log_rule_id_fkey"
+            columns: ["rule_id"]
+            isOneToOne: false
+            referencedRelation: "reminder_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reminder_email_templates: {
         Row: {
           body: string

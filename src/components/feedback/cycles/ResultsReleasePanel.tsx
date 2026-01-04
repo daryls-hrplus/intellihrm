@@ -91,6 +91,18 @@ export function ResultsReleasePanel({
 
       if (error) throw error;
 
+      // Trigger release notifications if enabled
+      if (releaseSettings.notify_on_release && companyId) {
+        try {
+          await supabase.functions.invoke('send-360-release-notifications', {
+            body: { cycleId, companyId }
+          });
+          console.log('Release notifications sent');
+        } catch (notifError) {
+          console.error('Failed to send release notifications:', notifError);
+        }
+      }
+
       toast.success("Results released successfully");
       onReleased();
     } catch (error) {

@@ -47,14 +47,28 @@ export function CycleOverviewTab({ cycle, onUpdate }: CycleOverviewTabProps) {
       return;
     }
 
-    const { error } = await supabase
+    const { data: cycleData, error } = await supabase
       .from("review_cycles")
       .update({ status: "active", is_template: false })
-      .eq("id", cycle.id);
+      .eq("id", cycle.id)
+      .select("company_id")
+      .single();
 
     if (error) {
       toast.error("Failed to launch cycle");
       return;
+    }
+
+    // Send activation notifications
+    if (cycleData?.company_id) {
+      try {
+        await supabase.functions.invoke('send-360-activation-notifications', {
+          body: { cycleId: cycle.id, companyId: cycleData.company_id }
+        });
+        console.log('Activation notifications sent');
+      } catch (notifError) {
+        console.error('Failed to send activation notifications:', notifError);
+      }
     }
 
     toast.success("Cycle launched successfully");
