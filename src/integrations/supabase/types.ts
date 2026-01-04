@@ -21958,6 +21958,11 @@ export type Database = {
           id: string
           last_accessed_at: string | null
           legal_reference: string | null
+          next_steps: string | null
+          outcome_documented_at: string | null
+          outcome_documented_by: string | null
+          outcome_status: string | null
+          outcome_summary: string | null
           request_reason: string
           request_type: string
           requested_by: string
@@ -21977,6 +21982,11 @@ export type Database = {
           id?: string
           last_accessed_at?: string | null
           legal_reference?: string | null
+          next_steps?: string | null
+          outcome_documented_at?: string | null
+          outcome_documented_by?: string | null
+          outcome_status?: string | null
+          outcome_summary?: string | null
           request_reason: string
           request_type: string
           requested_by: string
@@ -21996,6 +22006,11 @@ export type Database = {
           id?: string
           last_accessed_at?: string | null
           legal_reference?: string | null
+          next_steps?: string | null
+          outcome_documented_at?: string | null
+          outcome_documented_by?: string | null
+          outcome_status?: string | null
+          outcome_summary?: string | null
           request_reason?: string
           request_type?: string
           requested_by?: string
@@ -22016,6 +22031,13 @@ export type Database = {
             columns: ["cycle_id"]
             isOneToOne: false
             referencedRelation: "review_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_investigation_requests_outcome_documented_by_fkey"
+            columns: ["outcome_documented_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {

@@ -22,7 +22,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Shield, CheckCircle, XCircle, Clock, AlertTriangle, Eye } from "lucide-react";
+import { Shield, CheckCircle, XCircle, Clock, AlertTriangle, Eye, FileSearch } from "lucide-react";
+import { InvestigationResponseViewer } from "./InvestigationResponseViewer";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { format, formatDistanceToNow, addDays } from "date-fns";
@@ -39,6 +40,18 @@ interface InvestigationRequest {
   created_at: string;
   expires_at: string | null;
   access_count: number;
+  target_employee?: {
+    id: string;
+    first_name: string | null;
+  } | null;
+  requester?: {
+    id: string;
+    first_name: string | null;
+  } | null;
+  review_cycle?: {
+    id: string;
+    name: string;
+  } | null;
 }
 
 interface InvestigationApprovalQueueProps {
@@ -51,18 +64,24 @@ export function InvestigationApprovalQueue({ companyId }: InvestigationApprovalQ
   const [actionType, setActionType] = useState<'approve' | 'deny' | null>(null);
   const [expirationDays, setExpirationDays] = useState(7);
   const [notes, setNotes] = useState("");
+  const [viewResponsesRequest, setViewResponsesRequest] = useState<InvestigationRequest | null>(null);
 
   const { data: requests, isLoading } = useQuery({
     queryKey: ['investigation-requests-queue', companyId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('feedback_investigation_requests')
-        .select('*')
+        .select(`
+          *,
+          target_employee:profiles!feedback_investigation_requests_target_employee_id_fkey(id, first_name),
+          requester:profiles!feedback_investigation_requests_requested_by_fkey(id, first_name),
+          review_cycle:review_cycles(id, name)
+        `)
         .eq('company_id', companyId)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data as InvestigationRequest[];
+      return (data || []) as unknown as InvestigationRequest[];
     },
   });
 
@@ -274,37 +293,51 @@ export function InvestigationApprovalQueue({ companyId }: InvestigationApprovalQ
                 <TableHeader>
                   <TableRow>
                     <TableHead>Type</TableHead>
-                    <TableHead>Reference</TableHead>
-                    <TableHead>Submitted</TableHead>
+                    <TableHead>Target Employee</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Expires</TableHead>
                     <TableHead>Access Count</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {otherRequests.slice(0, 10).map((request) => (
-                    <TableRow key={request.id}>
-                      <TableCell className="font-medium">
-                        {getTypeLabel(request.request_type)}
-                      </TableCell>
-                      <TableCell className="text-muted-foreground">
-                        {request.legal_reference || '-'}
-                      </TableCell>
-                      <TableCell className="text-muted-foreground">
-                        {format(new Date(request.created_at), 'MMM d, yyyy')}
-                      </TableCell>
-                      <TableCell>{getStatusBadge(request.status)}</TableCell>
-                      <TableCell className="text-muted-foreground">
-                        {request.expires_at 
-                          ? format(new Date(request.expires_at), 'MMM d, yyyy')
-                          : '-'
-                        }
-                      </TableCell>
-                      <TableCell className="text-center">
-                        {request.access_count}
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                  {otherRequests.slice(0, 10).map((request) => {
+                    const isApprovedAndValid = request.status === 'approved' && 
+                      request.expires_at && new Date(request.expires_at) > new Date();
+                    
+                    return (
+                      <TableRow key={request.id}>
+                        <TableCell className="font-medium">
+                          {getTypeLabel(request.request_type)}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {request.target_employee?.first_name || 'Unknown'}
+                        </TableCell>
+                        <TableCell>{getStatusBadge(request.status)}</TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {request.expires_at 
+                            ? format(new Date(request.expires_at), 'MMM d, yyyy')
+                            : '-'
+                          }
+                        </TableCell>
+                        <TableCell className="text-center">
+                          {request.access_count}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {isApprovedAndValid && request.target_employee_id && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => setViewResponsesRequest(request)}
+                            >
+                              <FileSearch className="h-4 w-4 mr-1" />
+                              View Responses
+                            </Button>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             </CardContent>
@@ -469,6 +502,18 @@ export function InvestigationApprovalQueue({ companyId }: InvestigationApprovalQ
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Investigation Response Viewer */}
+      {viewResponsesRequest && viewResponsesRequest.target_employee_id && (
+        <InvestigationResponseViewer
+          open={!!viewResponsesRequest}
+          onOpenChange={(open) => !open && setViewResponsesRequest(null)}
+          requestId={viewResponsesRequest.id}
+          cycleId={viewResponsesRequest.cycle_id}
+          targetEmployeeId={viewResponsesRequest.target_employee_id}
+          targetEmployeeName={viewResponsesRequest.target_employee?.first_name || 'Unknown'}
+        />
+      )}
     </>
   );
 }
