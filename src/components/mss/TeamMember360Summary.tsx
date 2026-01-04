@@ -274,9 +274,9 @@ export function TeamMember360Summary({
             <CardContent className="py-3 px-4 flex items-start gap-3">
               <Shield className="h-5 w-5 text-primary mt-0.5" />
               <div className="text-sm">
-                <strong>Anonymity Protected:</strong> Categories with fewer than the required 
-                number of responses are automatically hidden to protect reviewer anonymity. 
-                You will see "Insufficient responses" for those categories.
+                <strong>Category-Specific Anonymity:</strong> Each rater category has its own threshold. 
+                Manager feedback is typically shown (identity known), while peer and direct report categories 
+                require minimum responses to protect anonymity. You'll see "Protected" for categories below threshold.
               </div>
             </CardContent>
           </Card>

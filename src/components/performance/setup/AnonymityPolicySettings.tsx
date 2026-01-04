@@ -308,8 +308,9 @@ export function AnonymityPolicySettings({ companyId }: AnonymityPolicySettingsPr
         <Alert className="bg-info/10 border-info/30">
           <Shield className="h-4 w-4 text-info" />
           <AlertDescription className="text-sm">
-            This policy applies to all 360° feedback cycles. Individual cycle configurations will inherit these settings 
-            and cannot override them. Changes take effect immediately for new and existing cycles.
+            <strong>Per-Category Thresholds:</strong> Each rater category can have its own anonymity threshold 
+            configured in the "Rater Categories" tab. Manager feedback can be set to always show results 
+            (bypass threshold), while peer and direct report categories require minimum responses for protection.
           </AlertDescription>
         </Alert>
 

@@ -21671,6 +21671,8 @@ export type Database = {
       }
       feedback_360_rater_categories: {
         Row: {
+          anonymity_threshold: number | null
+          bypass_threshold_check: boolean | null
           code: string
           company_id: string
           created_at: string
@@ -21687,6 +21689,8 @@ export type Database = {
           weight_percentage: number
         }
         Insert: {
+          anonymity_threshold?: number | null
+          bypass_threshold_check?: boolean | null
           code: string
           company_id: string
           created_at?: string
@@ -21703,6 +21707,8 @@ export type Database = {
           weight_percentage?: number
         }
         Update: {
+          anonymity_threshold?: number | null
+          bypass_threshold_check?: boolean | null
           code?: string
           company_id?: string
           created_at?: string
@@ -58529,20 +58535,38 @@ export type Database = {
           periods_created: number
         }[]
       }
-      get_360_feedback_summary: {
-        Args: { p_participant_id: string }
-        Returns: {
-          avg_rating: number
-          competency_name: string
-          is_suppressed: boolean
-          question_id: string
-          question_text: string
-          response_count: number
-          reviewer_type: string
-          suppression_reason: string
-          text_responses: string[]
-        }[]
-      }
+      get_360_feedback_summary:
+        | {
+            Args: {
+              p_cycle_id: string
+              p_employee_id: string
+              p_viewer_role?: string
+            }
+            Returns: {
+              avg_rating: number
+              category_code: string
+              category_id: string
+              category_name: string
+              is_suppressed: boolean
+              response_count: number
+              suppression_reason: string
+              text_responses: string[]
+            }[]
+          }
+        | {
+            Args: { p_participant_id: string }
+            Returns: {
+              avg_rating: number
+              competency_name: string
+              is_suppressed: boolean
+              question_id: string
+              question_text: string
+              response_count: number
+              reviewer_type: string
+              suppression_reason: string
+              text_responses: string[]
+            }[]
+          }
       get_active_workflow_template: {
         Args: { p_as_of_date?: string; p_template_code: string }
         Returns: string
