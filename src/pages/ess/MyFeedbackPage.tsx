@@ -32,6 +32,7 @@ import { Link } from "react-router-dom";
 import { formatDistanceToNow, format } from "date-fns";
 import { useLanguage } from "@/hooks/useLanguage";
 import { useMy360FeedbackRequests, type My360Request } from "@/hooks/useMy360FeedbackRequests";
+import { useMyReview360Participations } from "@/hooks/useMyReview360Participations";
 import { Ess360FeedbackResponseDialog } from "@/components/ess/Ess360FeedbackResponseDialog";
 import { MyFeedbackSummary } from "@/components/performance/MyFeedbackSummary";
 
@@ -60,8 +61,6 @@ export default function MyFeedbackPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("continuous");
   const [selected360Request, setSelected360Request] = useState<My360Request | null>(null);
-  const [myParticipations, setMyParticipations] = useState<any[]>([]);
-  const [participationsLoading, setParticipationsLoading] = useState(false);
   const [formData, setFormData] = useState({
     to_user_id: "",
     feedback_type: "praise",
@@ -72,41 +71,13 @@ export default function MyFeedbackPage() {
   });
 
   const { data: feedbackRequests = [], isLoading: feedbackLoading } = useMy360FeedbackRequests();
+  const { data: myParticipations = [], isLoading: participationsLoading } = useMyReview360Participations();
   const pending360 = feedbackRequests.filter(r => r.status === "pending" || r.status === "in_progress");
   const completed360 = feedbackRequests.filter(r => r.status === "completed" || r.status === "submitted");
 
   useEffect(() => {
     if (user) fetchData();
   }, [user]);
-
-  // Fetch participations when My 360 Results tab is active
-  useEffect(() => {
-    if (activeTab === "my360results" && user?.id) {
-      fetchMyParticipations();
-    }
-  }, [activeTab, user?.id]);
-
-  const fetchMyParticipations = async () => {
-    setParticipationsLoading(true);
-    try {
-      const { data, error } = await supabase
-        .from("review_participants")
-        .select(`
-          id,
-          status,
-          overall_score,
-          review_cycle:review_cycles(name, status)
-        `)
-        .eq("employee_id", user?.id)
-        .order("created_at", { ascending: false });
-
-      if (!error) setMyParticipations(data || []);
-    } catch (error) {
-      console.error("Error fetching participations:", error);
-    } finally {
-      setParticipationsLoading(false);
-    }
-  };
 
   const fetchData = async () => {
     setIsLoading(true);
@@ -519,7 +490,17 @@ export default function MyFeedbackPage() {
                 <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
               </div>
             ) : (
-              <MyFeedbackSummary participations={myParticipations} />
+              <MyFeedbackSummary 
+                participations={myParticipations.map(p => ({
+                  id: p.id,
+                  status: p.status,
+                  overall_score: p.overall_score,
+                  review_cycle: {
+                    name: p.cycle_name,
+                    status: p.cycle_status
+                  }
+                }))} 
+              />
             )}
           </TabsContent>
         </Tabs>
