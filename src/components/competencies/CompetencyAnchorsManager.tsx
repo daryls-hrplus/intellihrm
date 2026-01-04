@@ -59,8 +59,12 @@ export function CompetencyAnchorsManager({ companyId }: CompetencyAnchorsManager
 
       // Mark competencies that have anchors
       const anchorCompetencyIds = new Set(anchorsData.map(a => a.competency_id));
-      const competenciesWithStatus = compData.map(c => ({
-        ...c,
+      const competenciesWithStatus: Competency[] = compData.map(c => ({
+        id: c.id,
+        name: c.name,
+        code: c.code,
+        category: c.category,
+        proficiency_levels: typeof c.proficiency_levels === 'number' ? c.proficiency_levels : null,
         has_anchors: anchorCompetencyIds.has(c.id),
       }));
       
@@ -224,7 +228,7 @@ export function CompetencyAnchorsManager({ companyId }: CompetencyAnchorsManager
             <BehavioralAnchorEditor
               competencyId={selectedCompetency.id}
               companyId={companyId}
-              scaleMax={selectedCompetency.proficiency_levels || 5}
+              scaleMax={typeof selectedCompetency.proficiency_levels === 'number' ? selectedCompetency.proficiency_levels : 5}
               initialAnchors={getExistingAnchors(selectedCompetency.id)}
               onSave={handleSaveAnchors}
             />

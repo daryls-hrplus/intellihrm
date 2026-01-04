@@ -105,16 +105,16 @@ export function useTalentPoolReviewPackets() {
 
       const { data, error } = await supabase
         .from('talent_pool_review_packets')
-        .insert({
+        .insert([{
           talent_pool_id: poolId,
           member_id: memberId,
           employee_id: employeeId,
           company_id: companyId,
           evidence_snapshot: evidence || [],
-          signal_summary: signalSummary,
-          leadership_indicators: leadershipIndicators,
+          signal_summary: signalSummary as any,
+          leadership_indicators: leadershipIndicators as any,
           review_status: 'pending',
-        })
+        }])
         .select('id')
         .single();
 
