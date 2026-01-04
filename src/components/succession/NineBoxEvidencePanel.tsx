@@ -7,13 +7,16 @@ import { Sparkles, TrendingUp, Users, Brain, Target, AlertTriangle } from 'lucid
 import { supabase } from '@/integrations/supabase/client';
 import { RatingSourcesPanel } from './RatingSourcesPanel';
 import { PotentialAssessmentInline } from './PotentialAssessmentInline';
+import { CalculatedRating } from '@/hooks/succession/useNineBoxRatingSources';
 
 interface NineBoxEvidencePanelProps {
   employeeId: string;
   companyId: string;
   onSuggestedRatings?: (
     performance: { rating: number; confidence: number; sources: string[] } | null,
-    potential: { rating: number; confidence: number; sources: string[] } | null
+    potential: { rating: number; confidence: number; sources: string[] } | null,
+    performanceCalc?: CalculatedRating | null,
+    potentialCalc?: CalculatedRating | null
   ) => void;
 }
 
@@ -242,6 +245,30 @@ export function NineBoxEvidencePanel({
     const potentialRating = normalizedPotential < 0.33 ? 1 : normalizedPotential < 0.67 ? 2 : 3;
 
     if (onSuggestedRatings) {
+      const perfCalc: CalculatedRating | null = performanceWeight > 0 ? {
+        rating: performanceRating,
+        confidence: Math.min(performanceWeight, 1),
+        sources: performanceSources.map((label, idx) => ({
+          type: label.toLowerCase().replace(/\s+/g, '_'),
+          label,
+          value: idx === 0 && appraisalData ? (appraisalData.overall_score || 0) / 5 : 0,
+          weight: idx === 0 ? 0.5 : idx === 1 ? 0.3 : 0.2,
+          rawValue: null,
+        })),
+      } : null;
+
+      const potCalc: CalculatedRating | null = potentialWeight > 0 ? {
+        rating: potentialRating,
+        confidence: Math.min(potentialWeight, 1),
+        sources: potentialSources.map((label, idx) => ({
+          type: label.toLowerCase().replace(/\s+/g, '_'),
+          label,
+          value: idx === 0 && potentialData ? potentialData.calculated_rating / 3 : 0,
+          weight: idx === 0 ? 0.4 : idx === 1 ? 0.4 : 0.2,
+          rawValue: null,
+        })),
+      } : null;
+
       onSuggestedRatings(
         performanceWeight > 0 ? {
           rating: performanceRating,
@@ -252,7 +279,9 @@ export function NineBoxEvidencePanel({
           rating: potentialRating,
           confidence: Math.min(potentialWeight, 1),
           sources: potentialSources
-        } : null
+        } : null,
+        perfCalc,
+        potCalc
       );
     }
   };

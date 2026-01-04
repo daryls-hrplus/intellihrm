@@ -13,6 +13,8 @@ import { getTodayString } from '@/utils/dateUtils';
 import { NineBoxEvidencePanel } from './NineBoxEvidencePanel';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useSaveNineBoxEvidence } from '@/hooks/succession/useNineBoxEvidence';
+import { CalculatedRating } from '@/hooks/succession/useNineBoxRatingSources';
 
 interface NineBoxAssessmentDialogProps {
   open: boolean;
@@ -51,6 +53,10 @@ export function NineBoxAssessmentDialog({
   const [suggestedPerformance, setSuggestedPerformance] = useState<SuggestedRating | null>(null);
   const [suggestedPotential, setSuggestedPotential] = useState<SuggestedRating | null>(null);
   const [hasOverride, setHasOverride] = useState({ performance: false, potential: false });
+  const [calculatedPerformance, setCalculatedPerformance] = useState<CalculatedRating | null>(null);
+  const [calculatedPotential, setCalculatedPotential] = useState<CalculatedRating | null>(null);
+  
+  const saveEvidenceMutation = useSaveNineBoxEvidence();
   
   const [formData, setFormData] = useState({
     employee_id: '',
@@ -109,9 +115,18 @@ export function NineBoxAssessmentDialog({
     setEmployees(data || []);
   };
 
-  const handleSuggestedRatings = (performance: SuggestedRating | null, potential: SuggestedRating | null) => {
+  const handleSuggestedRatings = (
+    performance: SuggestedRating | null, 
+    potential: SuggestedRating | null,
+    performanceCalc?: CalculatedRating | null,
+    potentialCalc?: CalculatedRating | null
+  ) => {
     setSuggestedPerformance(performance);
     setSuggestedPotential(potential);
+    
+    // Store calculated ratings for evidence saving
+    if (performanceCalc) setCalculatedPerformance(performanceCalc);
+    if (potentialCalc) setCalculatedPotential(potentialCalc);
     
     // Auto-apply suggested ratings if available and not editing
     if (!assessment) {
@@ -158,10 +173,28 @@ export function NineBoxAssessmentDialog({
         assessment_date: formData.assessment_date,
       };
 
+      let assessmentId: string;
+      
       if (assessment) {
         await onUpdate(assessment.id, submitData);
+        assessmentId = assessment.id;
       } else {
-        await onCreate(submitData);
+        const result = await onCreate(submitData);
+        assessmentId = result?.id || result?.[0]?.id;
+      }
+
+      // Save evidence sources
+      if (assessmentId && (calculatedPerformance || calculatedPotential)) {
+        await saveEvidenceMutation.mutateAsync({
+          assessmentId,
+          companyId,
+          performanceRating: calculatedPerformance,
+          potentialRating: calculatedPotential,
+          isOverridePerformance: hasOverride.performance,
+          isOverridePotential: hasOverride.potential,
+          overridePerformanceReason: hasOverride.performance ? formData.performance_notes : undefined,
+          overridePotentialReason: hasOverride.potential ? formData.potential_notes : undefined,
+        });
       }
 
       onSuccess();
