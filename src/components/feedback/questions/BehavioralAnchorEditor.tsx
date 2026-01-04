@@ -130,9 +130,9 @@ export function BehavioralAnchorEditor({
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle>{t("feedback.bars.editorTitle")}</CardTitle>
+            <CardTitle>Behavioral Anchor Editor</CardTitle>
             <CardDescription>
-              {t("feedback.bars.editorDescription")}
+              Define behavioral examples for each rating level to help raters provide consistent feedback
             </CardDescription>
           </div>
           <div className="flex items-center gap-2">
