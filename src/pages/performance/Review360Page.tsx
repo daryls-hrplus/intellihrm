@@ -30,6 +30,7 @@ import {
   Activity,
   Shield,
   FileText,
+  History,
 } from "lucide-react";
 import { Review360AnalyticsDashboard } from "@/components/performance/Review360AnalyticsDashboard";
 import {
@@ -54,6 +55,7 @@ import { ResponseMonitoringDashboard } from "@/components/feedback/admin/Respons
 import { InvestigationApprovalQueue } from "@/components/feedback/cycles/InvestigationApprovalQueue";
 import { ExpandableCycleCard } from "@/components/feedback/cycles/ExpandableCycleCard";
 import { ResultsPreviewDialog } from "@/components/feedback/cycles/ResultsPreviewDialog";
+import { ResultsReleaseAuditLog } from "@/components/feedback/admin/ResultsReleaseAuditLog";
 import { VisibilityRules, DEFAULT_VISIBILITY_RULES } from "@/components/feedback/cycles/CycleVisibilityRulesEditor";
 import { useLanguage } from "@/hooks/useLanguage";
 import { formatDateForDisplay } from "@/utils/dateUtils";
@@ -652,6 +654,18 @@ export default function Review360Page() {
                     </TooltipContent>
                   </Tooltip>
                 </TabsTrigger>
+                <TabsTrigger value="release-audit" className="gap-2">
+                  <History className="h-4 w-4" />
+                  Release Audit
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <HelpCircle className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="w-72 p-3 text-left whitespace-normal">
+                      <p className="text-sm leading-relaxed">View complete history of all results releases across 360 feedback cycles.</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TabsTrigger>
               </>
             )}
           </TabsList>
@@ -879,6 +893,13 @@ export default function Review360Page() {
           {(isAdmin || isHRManager) && (
             <TabsContent value="investigations" className="mt-6">
               <InvestigationApprovalQueue companyId={selectedCompanyId} />
+            </TabsContent>
+          )}
+
+          {/* Release Audit Tab - For HR/Admin */}
+          {(isAdmin || isHRManager) && (
+            <TabsContent value="release-audit" className="mt-6">
+              <ResultsReleaseAuditLog companyId={selectedCompanyId} />
             </TabsContent>
           )}
 
