@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useAuditLog } from "@/hooks/useAuditLog";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { ResultsPreviewDialog } from "./ResultsPreviewDialog";
@@ -58,6 +59,7 @@ export function ResultsReleasePanel({
   onReleased,
 }: ResultsReleasePanelProps) {
   const { user } = useAuth();
+  const { logAction } = useAuditLog();
   const [releasing, setReleasing] = useState(false);
   const [releaserName, setReleaserName] = useState<string | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
@@ -81,15 +83,35 @@ export function ResultsReleasePanel({
     
     setReleasing(true);
     try {
+      const releasedAt = new Date().toISOString();
       const { error } = await supabase
         .from("review_cycles")
         .update({
-          results_released_at: new Date().toISOString(),
+          results_released_at: releasedAt,
           results_released_by: user.id,
         })
         .eq("id", cycleId);
 
       if (error) throw error;
+
+      // Log the release action to audit log
+      await logAction({
+        action: 'UPDATE',
+        entityType: 'review_cycle_results_release',
+        entityId: cycleId,
+        entityName: cycleName,
+        oldValues: { results_released_at: null, results_released_by: null },
+        newValues: { 
+          results_released_at: releasedAt,
+          results_released_by: user.id,
+          notify_on_release: releaseSettings.notify_on_release,
+          visibility_rules: visibilityRules
+        },
+        metadata: {
+          company_id: companyId,
+          auto_release: false
+        }
+      });
 
       // Trigger release notifications if enabled
       if (releaseSettings.notify_on_release && companyId) {
