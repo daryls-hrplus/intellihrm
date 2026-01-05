@@ -59632,6 +59632,79 @@ export type Database = {
           },
         ]
       }
+      workflow_analytics_snapshots: {
+        Row: {
+          avg_approval_hours_per_step: Json | null
+          avg_completion_hours: number | null
+          bottleneck_step_id: string | null
+          company_id: string | null
+          created_at: string | null
+          id: string
+          sla_compliance_rate: number | null
+          snapshot_date: string
+          template_id: string | null
+          top_rejectors: Json | null
+          total_approved: number | null
+          total_pending: number | null
+          total_rejected: number | null
+          total_submitted: number | null
+        }
+        Insert: {
+          avg_approval_hours_per_step?: Json | null
+          avg_completion_hours?: number | null
+          bottleneck_step_id?: string | null
+          company_id?: string | null
+          created_at?: string | null
+          id?: string
+          sla_compliance_rate?: number | null
+          snapshot_date: string
+          template_id?: string | null
+          top_rejectors?: Json | null
+          total_approved?: number | null
+          total_pending?: number | null
+          total_rejected?: number | null
+          total_submitted?: number | null
+        }
+        Update: {
+          avg_approval_hours_per_step?: Json | null
+          avg_completion_hours?: number | null
+          bottleneck_step_id?: string | null
+          company_id?: string | null
+          created_at?: string | null
+          id?: string
+          sla_compliance_rate?: number | null
+          snapshot_date?: string
+          template_id?: string | null
+          top_rejectors?: Json | null
+          total_approved?: number | null
+          total_pending?: number | null
+          total_rejected?: number | null
+          total_submitted?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflow_analytics_snapshots_bottleneck_step_id_fkey"
+            columns: ["bottleneck_step_id"]
+            isOneToOne: false
+            referencedRelation: "workflow_steps"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workflow_analytics_snapshots_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workflow_analytics_snapshots_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "workflow_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       workflow_approval_role_positions: {
         Row: {
           created_at: string | null
@@ -59721,6 +59794,76 @@ export type Database = {
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workflow_audit_events: {
+        Row: {
+          actor_id: string | null
+          actor_role: string | null
+          comment: string | null
+          created_at: string | null
+          event_type: string
+          id: string
+          ip_address: string | null
+          metadata: Json | null
+          new_status: string | null
+          previous_status: string | null
+          step_id: string | null
+          user_agent: string | null
+          workflow_instance_id: string
+        }
+        Insert: {
+          actor_id?: string | null
+          actor_role?: string | null
+          comment?: string | null
+          created_at?: string | null
+          event_type: string
+          id?: string
+          ip_address?: string | null
+          metadata?: Json | null
+          new_status?: string | null
+          previous_status?: string | null
+          step_id?: string | null
+          user_agent?: string | null
+          workflow_instance_id: string
+        }
+        Update: {
+          actor_id?: string | null
+          actor_role?: string | null
+          comment?: string | null
+          created_at?: string | null
+          event_type?: string
+          id?: string
+          ip_address?: string | null
+          metadata?: Json | null
+          new_status?: string | null
+          previous_status?: string | null
+          step_id?: string | null
+          user_agent?: string | null
+          workflow_instance_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflow_audit_events_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workflow_audit_events_step_id_fkey"
+            columns: ["step_id"]
+            isOneToOne: false
+            referencedRelation: "workflow_steps"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workflow_audit_events_workflow_instance_id_fkey"
+            columns: ["workflow_instance_id"]
+            isOneToOne: false
+            referencedRelation: "workflow_instances"
             referencedColumns: ["id"]
           },
         ]
@@ -60005,6 +60148,66 @@ export type Database = {
           },
         ]
       }
+      workflow_routing_rules: {
+        Row: {
+          condition_field: string
+          condition_operator: string
+          condition_value: string
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          priority: number | null
+          rule_name: string
+          skip_to_end: boolean | null
+          step_id: string
+          target_step_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          condition_field: string
+          condition_operator: string
+          condition_value: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          priority?: number | null
+          rule_name: string
+          skip_to_end?: boolean | null
+          step_id: string
+          target_step_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          condition_field?: string
+          condition_operator?: string
+          condition_value?: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          priority?: number | null
+          rule_name?: string
+          skip_to_end?: boolean | null
+          step_id?: string
+          target_step_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflow_routing_rules_step_id_fkey"
+            columns: ["step_id"]
+            isOneToOne: false
+            referencedRelation: "workflow_steps"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workflow_routing_rules_target_step_id_fkey"
+            columns: ["target_step_id"]
+            isOneToOne: false
+            referencedRelation: "workflow_steps"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       workflow_signatures: {
         Row: {
           created_at: string
@@ -60265,7 +60468,10 @@ export type Database = {
           expiration_days: number | null
           id: string
           is_active: boolean
+          is_parallel: boolean | null
           name: string
+          parallel_approval_mode: string | null
+          parallel_approver_count: number | null
           requires_comment: boolean
           requires_signature: boolean
           section_id: string | null
@@ -60295,7 +60501,10 @@ export type Database = {
           expiration_days?: number | null
           id?: string
           is_active?: boolean
+          is_parallel?: boolean | null
           name: string
+          parallel_approval_mode?: string | null
+          parallel_approver_count?: number | null
           requires_comment?: boolean
           requires_signature?: boolean
           section_id?: string | null
@@ -60325,7 +60534,10 @@ export type Database = {
           expiration_days?: number | null
           id?: string
           is_active?: boolean
+          is_parallel?: boolean | null
           name?: string
+          parallel_approval_mode?: string | null
+          parallel_approver_count?: number | null
           requires_comment?: boolean
           requires_signature?: boolean
           section_id?: string | null
