@@ -30,6 +30,7 @@ import { toast } from "sonner";
 import { Plus, Loader2, MessageSquare, ThumbsUp, Lightbulb, CheckCircle, Send, Inbox, Users, Clock, BarChart3 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { formatDistanceToNow, format } from "date-fns";
+import { AIWritingAssistant } from "@/components/feedback/writing";
 import { useLanguage } from "@/hooks/useLanguage";
 import { useMy360FeedbackRequests, type My360Request } from "@/hooks/useMy360FeedbackRequests";
 import { useMyReview360Participations } from "@/hooks/useMyReview360Participations";
@@ -566,6 +567,17 @@ export default function MyFeedbackPage() {
                   placeholder="Share your feedback..."
                   rows={4}
                 />
+                {formData.content.length >= 30 && (
+                  <AIWritingAssistant
+                    text={formData.content}
+                    questionContext={`Continuous ${formData.feedback_type} feedback`}
+                    raterCategory="peer"
+                    showCompact={false}
+                    onApplySuggestion={(_, newText) => 
+                      setFormData({ ...formData, content: newText })
+                    }
+                  />
+                )}
               </div>
 
               <div className="flex items-center justify-between">

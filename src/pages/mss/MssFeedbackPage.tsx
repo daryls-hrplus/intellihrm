@@ -27,6 +27,7 @@ import { toast } from "sonner";
 import { Plus, Loader2, MessageSquare, ThumbsUp, Lightbulb, Users } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { useLanguage } from "@/hooks/useLanguage";
+import { AIWritingAssistant } from "@/components/feedback/writing";
 
 interface Feedback {
   id: string;
@@ -380,6 +381,17 @@ export default function MssFeedbackPage() {
                   placeholder="Share your feedback..."
                   rows={4}
                 />
+                {formData.content.length >= 30 && (
+                  <AIWritingAssistant
+                    text={formData.content}
+                    questionContext={`Continuous ${formData.feedback_type} feedback`}
+                    raterCategory="manager"
+                    showCompact={false}
+                    onApplySuggestion={(_, newText) => 
+                      setFormData({ ...formData, content: newText })
+                    }
+                  />
+                )}
               </div>
             </div>
             <DialogFooter>
