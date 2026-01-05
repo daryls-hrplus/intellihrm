@@ -24,16 +24,27 @@ import { SchedulerManagement } from "@/components/admin/SchedulerManagement";
 import { WorkflowApprovalRolesManagement } from "@/components/admin/WorkflowApprovalRolesManagement";
 
 const WORKFLOW_CATEGORIES: { value: WorkflowCategory; label: string }[] = [
-  { value: "leave_request", label: "Leave Request" },
-  { value: "probation_confirmation", label: "Probation Confirmation" },
-  { value: "headcount_request", label: "Headcount Request" },
-  { value: "training_request", label: "Training Request" },
+  // Employee Transactions
+  { value: "hire", label: "New Hire" },
+  { value: "rehire", label: "Rehire" },
+  { value: "confirmation", label: "Confirmation" },
+  { value: "probation_extension", label: "Probation Extension" },
+  { value: "acting", label: "Acting Assignment" },
   { value: "promotion", label: "Promotion" },
   { value: "transfer", label: "Transfer" },
-  { value: "resignation", label: "Resignation" },
+  { value: "secondment", label: "Secondment" },
   { value: "termination", label: "Termination" },
+  { value: "resignation", label: "Resignation" },
+  { value: "salary_change", label: "Salary Change" },
+  { value: "rate_change", label: "Hourly/Daily Rate Change" },
+  // Other Workflows
+  { value: "leave_request", label: "Leave Request" },
+  { value: "probation_confirmation", label: "Probation Confirmation (Legacy)" },
+  { value: "headcount_request", label: "Headcount Request" },
+  { value: "training_request", label: "Training Request" },
   { value: "expense_claim", label: "Expense Claim" },
   { value: "letter_request", label: "Letter Request" },
+  { value: "qualification", label: "Qualification" },
   { value: "general", label: "General" },
 ];
 
