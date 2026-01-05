@@ -21522,6 +21522,7 @@ export type Database = {
           nomination_window_end: string | null
           nomination_window_start: string | null
           reminder_days_before: number[] | null
+          report_template_config: Json | null
           response_window_end: string | null
           response_window_start: string | null
           results_release_date: string | null
@@ -21559,6 +21560,7 @@ export type Database = {
           nomination_window_end?: string | null
           nomination_window_start?: string | null
           reminder_days_before?: number[] | null
+          report_template_config?: Json | null
           response_window_end?: string | null
           response_window_start?: string | null
           results_release_date?: string | null
@@ -21596,6 +21598,7 @@ export type Database = {
           nomination_window_end?: string | null
           nomination_window_start?: string | null
           reminder_days_before?: number[] | null
+          report_template_config?: Json | null
           response_window_end?: string | null
           response_window_start?: string | null
           results_release_date?: string | null
@@ -22466,6 +22469,72 @@ export type Database = {
             columns: ["source_cycle_id"]
             isOneToOne: false
             referencedRelation: "feedback_360_cycles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      feedback_report_templates: {
+        Row: {
+          anonymity_level: string | null
+          audience_type: string
+          company_id: string | null
+          content_depth: string | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          is_default: boolean | null
+          name: string
+          sections_config: Json
+          updated_at: string | null
+          visualization_config: Json | null
+        }
+        Insert: {
+          anonymity_level?: string | null
+          audience_type: string
+          company_id?: string | null
+          content_depth?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_default?: boolean | null
+          name: string
+          sections_config?: Json
+          updated_at?: string | null
+          visualization_config?: Json | null
+        }
+        Update: {
+          anonymity_level?: string | null
+          audience_type?: string
+          company_id?: string | null
+          content_depth?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_default?: boolean | null
+          name?: string
+          sections_config?: Json
+          updated_at?: string | null
+          visualization_config?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedback_report_templates_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_report_templates_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -54600,6 +54669,212 @@ export type Database = {
           value?: string | null
         }
         Relationships: []
+      }
+      talent_indicator_alerts: {
+        Row: {
+          acknowledged: boolean | null
+          acknowledged_at: string | null
+          acknowledged_by: string | null
+          alert_type: string
+          company_id: string | null
+          created_at: string | null
+          employee_id: string | null
+          id: string
+          indicator_score_id: string | null
+          message: string
+          severity: string
+        }
+        Insert: {
+          acknowledged?: boolean | null
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          alert_type: string
+          company_id?: string | null
+          created_at?: string | null
+          employee_id?: string | null
+          id?: string
+          indicator_score_id?: string | null
+          message: string
+          severity: string
+        }
+        Update: {
+          acknowledged?: boolean | null
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          alert_type?: string
+          company_id?: string | null
+          created_at?: string | null
+          employee_id?: string | null
+          id?: string
+          indicator_score_id?: string | null
+          message?: string
+          severity?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "talent_indicator_alerts_acknowledged_by_fkey"
+            columns: ["acknowledged_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "talent_indicator_alerts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "talent_indicator_alerts_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "talent_indicator_alerts_indicator_score_id_fkey"
+            columns: ["indicator_score_id"]
+            isOneToOne: false
+            referencedRelation: "talent_indicator_scores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      talent_indicator_definitions: {
+        Row: {
+          applies_to: string[]
+          calculation_config: Json | null
+          calculation_method: string
+          category: string
+          code: string
+          company_id: string | null
+          created_at: string | null
+          data_sources: string[]
+          description: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          refresh_frequency: string | null
+          threshold_levels: Json
+          updated_at: string | null
+        }
+        Insert: {
+          applies_to?: string[]
+          calculation_config?: Json | null
+          calculation_method: string
+          category: string
+          code: string
+          company_id?: string | null
+          created_at?: string | null
+          data_sources?: string[]
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          refresh_frequency?: string | null
+          threshold_levels?: Json
+          updated_at?: string | null
+        }
+        Update: {
+          applies_to?: string[]
+          calculation_config?: Json | null
+          calculation_method?: string
+          category?: string
+          code?: string
+          company_id?: string | null
+          created_at?: string | null
+          data_sources?: string[]
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          refresh_frequency?: string | null
+          threshold_levels?: Json
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "talent_indicator_definitions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      talent_indicator_scores: {
+        Row: {
+          company_id: string | null
+          computed_at: string | null
+          confidence: number | null
+          data_points_used: number | null
+          employee_id: string | null
+          explanation: string | null
+          explanation_factors: Json | null
+          id: string
+          indicator_id: string | null
+          level: string
+          score: number
+          trend: string | null
+          trend_percentage: number | null
+          valid_until: string | null
+        }
+        Insert: {
+          company_id?: string | null
+          computed_at?: string | null
+          confidence?: number | null
+          data_points_used?: number | null
+          employee_id?: string | null
+          explanation?: string | null
+          explanation_factors?: Json | null
+          id?: string
+          indicator_id?: string | null
+          level: string
+          score: number
+          trend?: string | null
+          trend_percentage?: number | null
+          valid_until?: string | null
+        }
+        Update: {
+          company_id?: string | null
+          computed_at?: string | null
+          confidence?: number | null
+          data_points_used?: number | null
+          employee_id?: string | null
+          explanation?: string | null
+          explanation_factors?: Json | null
+          id?: string
+          indicator_id?: string | null
+          level?: string
+          score?: number
+          trend?: string | null
+          trend_percentage?: number | null
+          valid_until?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "talent_indicator_scores_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "talent_indicator_scores_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "talent_indicator_scores_indicator_id_fkey"
+            columns: ["indicator_id"]
+            isOneToOne: false
+            referencedRelation: "talent_indicator_definitions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       talent_pool_members: {
         Row: {
