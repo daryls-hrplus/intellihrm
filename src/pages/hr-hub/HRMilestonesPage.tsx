@@ -8,8 +8,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format, differenceInYears, isThisMonth, addDays, isBefore, isAfter, startOfMonth, endOfMonth } from "date-fns";
-import { Cake, Award, Calendar, Gift, Star, Clock } from "lucide-react";
+import { Cake, Award, Calendar, Gift, Star, Clock, Building2 } from "lucide-react";
+
+interface Company {
+  id: string;
+  name: string;
+}
 
 // Helper to avoid deep type instantiation
 const query = (table: string) => supabase.from(table as any);
@@ -22,18 +28,31 @@ interface Milestone {
   date: Date;
   years?: number;
   department?: string;
+  company_id?: string;
 }
 
 export default function HRMilestonesPage() {
   const { profile } = useAuth();
   const { t } = useLanguage();
   const [milestones, setMilestones] = useState<Milestone[]>([]);
+  const [companies, setCompanies] = useState<Company[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("upcoming");
+  const [selectedCompany, setSelectedCompany] = useState<string>("all");
+  const [employeeCompanyMap, setEmployeeCompanyMap] = useState<Map<string, string>>(new Map());
 
   useEffect(() => {
+    loadCompanies();
     loadMilestones();
   }, []);
+
+  const loadCompanies = async () => {
+    const res: any = await query("companies")
+      .select("id, name")
+      .eq("is_active", true)
+      .order("name");
+    setCompanies(res.data || []);
+  };
 
   const loadMilestones = async () => {
     setIsLoading(true);
@@ -44,7 +63,7 @@ export default function HRMilestonesPage() {
 
       // Also fetch employee data for birthdays and anniversaries
       const empRes: any = await query("profiles")
-        .select("id, full_name, avatar_url, date_of_birth, hire_date, department_id")
+        .select("id, full_name, avatar_url, date_of_birth, hire_date, department_id, company_id")
         .eq("is_active", true);
 
       const employees = empRes.data || [];
@@ -66,6 +85,7 @@ export default function HRMilestonesPage() {
               employee_name: emp.full_name,
               avatar_url: emp.avatar_url,
               date: thisYearBirthday,
+              company_id: emp.company_id,
             });
           }
         }
@@ -83,6 +103,7 @@ export default function HRMilestonesPage() {
               avatar_url: emp.avatar_url,
               date: thisYearAnniversary,
               years,
+              company_id: emp.company_id,
             });
           }
 
@@ -95,6 +116,7 @@ export default function HRMilestonesPage() {
               employee_name: emp.full_name,
               avatar_url: emp.avatar_url,
               date: probationEnd,
+              company_id: emp.company_id,
             });
           }
         }
@@ -113,11 +135,17 @@ export default function HRMilestonesPage() {
     name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
 
   const today = new Date();
-  const upcomingMilestones = milestones.filter(m => m.date >= today);
-  const todayMilestones = milestones.filter(m => 
+  
+  // Filter by company
+  const companyFilteredMilestones = milestones.filter(m => 
+    selectedCompany === "all" || m.company_id === selectedCompany
+  );
+  
+  const upcomingMilestones = companyFilteredMilestones.filter(m => m.date >= today);
+  const todayMilestones = companyFilteredMilestones.filter(m => 
     format(m.date, "yyyy-MM-dd") === format(today, "yyyy-MM-dd")
   );
-  const thisMonthMilestones = milestones.filter(m => isThisMonth(m.date));
+  const thisMonthMilestones = companyFilteredMilestones.filter(m => isThisMonth(m.date));
 
   const getMilestoneIcon = (type: string) => {
     switch (type) {
@@ -147,11 +175,23 @@ export default function HRMilestonesPage() {
       <div className="container mx-auto py-6 space-y-6">
         <Breadcrumbs items={breadcrumbItems} />
 
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between flex-wrap gap-4">
           <div>
             <h1 className="text-3xl font-bold">{t("hrHub.milestones")}</h1>
             <p className="text-muted-foreground">{t("hrHub.milestonesSubtitle")}</p>
           </div>
+          <Select value={selectedCompany} onValueChange={setSelectedCompany}>
+            <SelectTrigger className="w-[200px]">
+              <Building2 className="h-4 w-4 mr-2" />
+              <SelectValue placeholder="All Companies" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Companies</SelectItem>
+              {companies.map((company) => (
+                <SelectItem key={company.id} value={company.id}>{company.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Stats */}
@@ -164,7 +204,7 @@ export default function HRMilestonesPage() {
                 </div>
                 <div>
                   <p className="text-2xl font-bold">
-                    {milestones.filter(m => m.type === "birthday").length}
+                    {companyFilteredMilestones.filter(m => m.type === "birthday").length}
                   </p>
                   <p className="text-sm text-muted-foreground">{t("hrHub.birthdaysThisMonth")}</p>
                 </div>
@@ -179,7 +219,7 @@ export default function HRMilestonesPage() {
                 </div>
                 <div>
                   <p className="text-2xl font-bold">
-                    {milestones.filter(m => m.type === "anniversary").length}
+                    {companyFilteredMilestones.filter(m => m.type === "anniversary").length}
                   </p>
                   <p className="text-sm text-muted-foreground">{t("hrHub.workAnniversaries")}</p>
                 </div>
@@ -194,7 +234,7 @@ export default function HRMilestonesPage() {
                 </div>
                 <div>
                   <p className="text-2xl font-bold">
-                    {milestones.filter(m => m.type === "probation").length}
+                    {companyFilteredMilestones.filter(m => m.type === "probation").length}
                   </p>
                   <p className="text-sm text-muted-foreground">{t("hrHub.probationsEnding")}</p>
                 </div>
@@ -252,8 +292,8 @@ export default function HRMilestonesPage() {
             ) : (
               <div className="space-y-3">
                 {(activeTab === "upcoming" ? upcomingMilestones :
-                  activeTab === "birthdays" ? milestones.filter(m => m.type === "birthday") :
-                  milestones.filter(m => m.type === "anniversary")
+                  activeTab === "birthdays" ? companyFilteredMilestones.filter(m => m.type === "birthday") :
+                  companyFilteredMilestones.filter(m => m.type === "anniversary")
                 ).length === 0 ? (
                   <div className="text-center py-12 text-muted-foreground">
                     <Calendar className="h-12 w-12 mx-auto mb-4 opacity-50" />
@@ -261,8 +301,8 @@ export default function HRMilestonesPage() {
                   </div>
                 ) : (
                   (activeTab === "upcoming" ? upcomingMilestones :
-                    activeTab === "birthdays" ? milestones.filter(m => m.type === "birthday") :
-                    milestones.filter(m => m.type === "anniversary")
+                    activeTab === "birthdays" ? companyFilteredMilestones.filter(m => m.type === "birthday") :
+                    companyFilteredMilestones.filter(m => m.type === "anniversary")
                   ).map((milestone) => (
                     <div
                       key={milestone.id}

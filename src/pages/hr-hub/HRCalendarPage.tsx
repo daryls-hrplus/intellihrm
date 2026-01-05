@@ -14,7 +14,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths } from "date-fns";
-import { Plus, ChevronLeft, ChevronRight, Calendar, Clock, MapPin } from "lucide-react";
+import { Plus, ChevronLeft, ChevronRight, Calendar, Clock, MapPin, Building2 } from "lucide-react";
+
+interface Company {
+  id: string;
+  name: string;
+}
 
 // Helper to avoid deep type instantiation
 const query = (table: string) => supabase.from(table as any);
@@ -44,11 +49,13 @@ export default function HRCalendarPage() {
   const { t } = useLanguage();
 
   const [events, setEvents] = useState<CalendarEvent[]>([]);
+  const [companies, setCompanies] = useState<Company[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedCompany, setSelectedCompany] = useState<string>("all");
 
   const [formData, setFormData] = useState({
     title: "",
@@ -58,11 +65,24 @@ export default function HRCalendarPage() {
     event_type: "meeting",
     location: "",
     is_all_day: false,
+    company_id: "",
   });
+
+  useEffect(() => {
+    loadCompanies();
+  }, []);
 
   useEffect(() => {
     loadEvents();
   }, [currentMonth]);
+
+  const loadCompanies = async () => {
+    const res: any = await query("companies")
+      .select("id, name")
+      .eq("is_active", true)
+      .order("name");
+    setCompanies(res.data || []);
+  };
 
   const loadEvents = async () => {
     setIsLoading(true);
@@ -94,8 +114,8 @@ export default function HRCalendarPage() {
   };
 
   const handleSubmit = async () => {
-    if (!formData.title || !formData.event_date) {
-      toast({ title: t("common.error"), description: t("validation.required"), variant: "destructive" });
+    if (!formData.title || !formData.event_date || !formData.company_id) {
+      toast({ title: t("common.error"), description: "Title, date and company are required", variant: "destructive" });
       return;
     }
 
@@ -103,7 +123,7 @@ export default function HRCalendarPage() {
     try {
       const res: any = await query("team_calendar_events").insert({
         ...formData,
-        company_id: profile?.company_id,
+        company_id: formData.company_id,
         created_by: profile?.id,
       });
 
@@ -119,6 +139,7 @@ export default function HRCalendarPage() {
         event_type: "meeting",
         location: "",
         is_all_day: false,
+        company_id: "",
       });
       loadEvents();
     } catch (error) {
@@ -134,7 +155,9 @@ export default function HRCalendarPage() {
   });
 
   const getEventsForDay = (date: Date) =>
-    events.filter((e) => isSameDay(new Date(e.event_date), date));
+    events
+      .filter((e) => selectedCompany === "all" || (e as any).company_id === selectedCompany)
+      .filter((e) => isSameDay(new Date(e.event_date), date));
 
   const getEventColor = (type: string) =>
     eventTypes.find((t) => t.value === type)?.color || "bg-gray-500";
@@ -174,12 +197,24 @@ export default function HRCalendarPage() {
         </div>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
+          <CardHeader className="flex flex-row items-center justify-between flex-wrap gap-4">
             <CardTitle className="flex items-center gap-2">
               <Calendar className="h-5 w-5" />
               {format(currentMonth, "MMMM yyyy")}
             </CardTitle>
-            <div className="flex gap-2">
+            <div className="flex gap-2 items-center">
+              <Select value={selectedCompany} onValueChange={setSelectedCompany}>
+                <SelectTrigger className="w-[180px]">
+                  <Building2 className="h-4 w-4 mr-2" />
+                  <SelectValue placeholder="All Companies" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Companies</SelectItem>
+                  {companies.map((company) => (
+                    <SelectItem key={company.id} value={company.id}>{company.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <Button variant="outline" size="icon" onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}>
                 <ChevronLeft className="h-4 w-4" />
               </Button>
@@ -246,6 +281,19 @@ export default function HRCalendarPage() {
               <DialogTitle>{t("hrHub.addEventTitle")}</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
+              <div>
+                <Label>Company *</Label>
+                <Select value={formData.company_id} onValueChange={(v) => setFormData({ ...formData, company_id: v })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select company" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {companies.map((company) => (
+                      <SelectItem key={company.id} value={company.id}>{company.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
               <div>
                 <Label>{t("common.name")} *</Label>
                 <Input

@@ -16,7 +16,12 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { formatDateForDisplay } from "@/utils/dateUtils";
-import { Plus, CheckSquare, Clock, AlertCircle, User } from "lucide-react";
+import { Plus, CheckSquare, Clock, AlertCircle, User, Building2 } from "lucide-react";
+
+interface Company {
+  id: string;
+  name: string;
+}
 
 interface HRTask {
   id: string;
@@ -26,8 +31,10 @@ interface HRTask {
   status: string;
   due_date: string | null;
   assigned_to: string | null;
+  company_id: string | null;
   created_at: string;
   completed_at: string | null;
+  company?: { name: string } | null;
 }
 
 const priorities = [
@@ -44,71 +51,106 @@ const statuses = [
   { value: "cancelled", label: "Cancelled" },
 ];
 
-// Mock data for now - would come from database
-const mockTasks: HRTask[] = [
-  { id: "1", title: "Review Q4 Performance Reports", description: "Complete review of all department reports", priority: "high", status: "pending", due_date: "2025-12-20", assigned_to: null, created_at: new Date().toISOString(), completed_at: null },
-  { id: "2", title: "Update Employee Handbook", description: "Annual handbook revision", priority: "medium", status: "in_progress", due_date: "2025-12-31", assigned_to: null, created_at: new Date().toISOString(), completed_at: null },
-  { id: "3", title: "Schedule Year-End Reviews", description: "Coordinate with department heads", priority: "urgent", status: "pending", due_date: "2025-12-15", assigned_to: null, created_at: new Date().toISOString(), completed_at: null },
-  { id: "4", title: "Process New Hire Paperwork", description: "5 new hires starting in January", priority: "high", status: "pending", due_date: "2025-12-18", assigned_to: null, created_at: new Date().toISOString(), completed_at: null },
-];
+// Helper to avoid deep type instantiation
+const query = (table: string) => supabase.from(table as any);
 
 export default function HRTasksPage() {
   const { profile } = useAuth();
   const { toast } = useToast();
   const { t } = useLanguage();
 
-  const [tasks, setTasks] = useState<HRTask[]>(mockTasks);
-  const [isLoading, setIsLoading] = useState(false);
+  const [tasks, setTasks] = useState<HRTask[]>([]);
+  const [companies, setCompanies] = useState<Company[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState("all");
+  const [selectedCompany, setSelectedCompany] = useState<string>("all");
 
   const [formData, setFormData] = useState({
     title: "",
     description: "",
     priority: "medium",
     due_date: "",
+    company_id: "",
   });
 
-  const handleSubmit = () => {
-    if (!formData.title) {
-      toast({ title: t("common.error"), description: t("validation.required"), variant: "destructive" });
+  useEffect(() => {
+    loadCompanies();
+    loadTasks();
+  }, []);
+
+  const loadCompanies = async () => {
+    const res: any = await query("companies")
+      .select("id, name")
+      .eq("is_active", true)
+      .order("name");
+    setCompanies(res.data || []);
+  };
+
+  const loadTasks = async () => {
+    setIsLoading(true);
+    try {
+      const res: any = await query("hr_tasks")
+        .select("*, company:companies(name)")
+        .order("created_at", { ascending: false });
+      setTasks(res.data || []);
+    } catch (error) {
+      console.error("Error loading tasks:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (!formData.title || !formData.company_id) {
+      toast({ title: t("common.error"), description: "Title and company are required", variant: "destructive" });
       return;
     }
 
-    const newTask: HRTask = {
-      id: Date.now().toString(),
-      title: formData.title,
-      description: formData.description || null,
-      priority: formData.priority,
-      status: "pending",
-      due_date: formData.due_date || null,
-      assigned_to: null,
-      created_at: new Date().toISOString(),
-      completed_at: null,
-    };
+    setIsSubmitting(true);
+    try {
+      const res: any = await query("hr_tasks").insert({
+        title: formData.title,
+        description: formData.description || null,
+        priority: formData.priority,
+        due_date: formData.due_date || null,
+        company_id: formData.company_id,
+        created_by: profile?.id,
+      });
 
-    setTasks([newTask, ...tasks]);
-    toast({ title: t("common.success"), description: t("common.created") });
-    setDialogOpen(false);
-    setFormData({ title: "", description: "", priority: "medium", due_date: "" });
+      if (res.error) throw res.error;
+
+      toast({ title: t("common.success"), description: t("common.created") });
+      setDialogOpen(false);
+      setFormData({ title: "", description: "", priority: "medium", due_date: "", company_id: "" });
+      loadTasks();
+    } catch (error) {
+      toast({ title: t("common.error"), description: "Failed to create task", variant: "destructive" });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const toggleTaskComplete = (taskId: string) => {
-    setTasks(tasks.map(task => {
-      if (task.id === taskId) {
-        const newStatus = task.status === "completed" ? "pending" : "completed";
-        return {
-          ...task,
-          status: newStatus,
-          completed_at: newStatus === "completed" ? new Date().toISOString() : null,
-        };
-      }
-      return task;
-    }));
+  const toggleTaskComplete = async (taskId: string, currentStatus: string) => {
+    const newStatus = currentStatus === "completed" ? "pending" : "completed";
+    const completedAt = newStatus === "completed" ? new Date().toISOString() : null;
+    
+    try {
+      await query("hr_tasks")
+        .update({ status: newStatus, completed_at: completedAt })
+        .eq("id", taskId);
+      loadTasks();
+    } catch (error) {
+      toast({ title: t("common.error"), description: "Failed to update task", variant: "destructive" });
+    }
   };
 
   const filteredTasks = tasks.filter(task => {
+    // Company filter
+    if (selectedCompany !== "all" && task.company_id !== selectedCompany) return false;
+    
+    // Status filter
     if (activeTab === "all") return task.status !== "completed";
     if (activeTab === "completed") return task.status === "completed";
     if (activeTab === "overdue") {
@@ -149,10 +191,24 @@ export default function HRTasksPage() {
             <h1 className="text-3xl font-bold">{t("hrHub.tasks")}</h1>
             <p className="text-muted-foreground">{t("hrHub.tasksSubtitle")}</p>
           </div>
-          <Button onClick={() => setDialogOpen(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            {t("hrHub.addTask")}
-          </Button>
+          <div className="flex gap-2 items-center">
+            <Select value={selectedCompany} onValueChange={setSelectedCompany}>
+              <SelectTrigger className="w-[180px]">
+                <Building2 className="h-4 w-4 mr-2" />
+                <SelectValue placeholder="All Companies" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Companies</SelectItem>
+                {companies.map((company) => (
+                  <SelectItem key={company.id} value={company.id}>{company.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button onClick={() => setDialogOpen(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              {t("hrHub.addTask")}
+            </Button>
+          </div>
         </div>
 
         {/* Stats */}
@@ -222,7 +278,9 @@ export default function HRTasksPage() {
             </Tabs>
           </CardHeader>
           <CardContent>
-            {filteredTasks.length === 0 ? (
+            {isLoading ? (
+              <div className="text-center py-12 text-muted-foreground">{t("common.loading")}</div>
+            ) : filteredTasks.length === 0 ? (
               <div className="text-center py-12 text-muted-foreground">
                 <CheckSquare className="h-12 w-12 mx-auto mb-4 opacity-50" />
                 <p>{t("hrHub.noTasksFound")}</p>
@@ -238,7 +296,7 @@ export default function HRTasksPage() {
                   >
                     <Checkbox
                       checked={task.status === "completed"}
-                      onCheckedChange={() => toggleTaskComplete(task.id)}
+                      onCheckedChange={() => toggleTaskComplete(task.id, task.status)}
                       className="mt-1"
                     />
                     <div className="flex-1 min-w-0">
@@ -249,6 +307,12 @@ export default function HRTasksPage() {
                         <Badge className={`${getPriorityColor(task.priority)} text-white`}>
                           {priorityLabels[task.priority]}
                         </Badge>
+                        {task.company && (
+                          <Badge variant="outline" className="gap-1">
+                            <Building2 className="h-3 w-3" />
+                            {task.company.name}
+                          </Badge>
+                        )}
                       </div>
                       {task.description && (
                         <p className="text-sm text-muted-foreground mt-1">{task.description}</p>
@@ -273,6 +337,19 @@ export default function HRTasksPage() {
               <DialogTitle>{t("hrHub.addTask")}</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
+              <div>
+                <Label>Company *</Label>
+                <Select value={formData.company_id} onValueChange={(v) => setFormData({ ...formData, company_id: v })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select company" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {companies.map((company) => (
+                      <SelectItem key={company.id} value={company.id}>{company.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
               <div>
                 <Label>{t("common.name")} *</Label>
                 <Input
