@@ -42,9 +42,21 @@ import {
   Users,
   Plus,
   Building2,
+  Edit,
+  Trash2,
 } from "lucide-react";
 import { formatDistanceToNow, differenceInHours, isPast, addHours } from "date-fns";
 import { formatDateForDisplay } from "@/utils/dateUtils";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface Company {
   id: string;
@@ -69,6 +81,9 @@ export default function AdminHelpdeskPage() {
   const [companyFilter, setCompanyFilter] = useState<string>("all");
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [editData, setEditData] = useState({ subject: "", description: "" });
+  const [deleteTicketId, setDeleteTicketId] = useState<string | null>(null);
   const [newTicket, setNewTicket] = useState({
     subject: "",
     description: "",
@@ -266,7 +281,45 @@ export default function AdminHelpdeskPage() {
     onError: (error: any) => toast.error(error.message),
   });
 
-  // Calculate SLA status
+  const deleteTicketMutation = useMutation({
+    mutationFn: async (ticketId: string) => {
+      const { error } = await supabase.from("tickets").delete().eq("id", ticketId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-tickets"] });
+      setSelectedTicket(null);
+      setDeleteTicketId(null);
+      toast.success("Ticket deleted");
+    },
+    onError: (error: any) => toast.error(error.message),
+  });
+
+  const handleEditTicket = async () => {
+    if (!selectedTicket || !editData.subject || !editData.description) {
+      toast.error("Subject and description are required");
+      return;
+    }
+
+    updateTicketMutation.mutate({
+      id: selectedTicket.id,
+      updates: {
+        subject: editData.subject,
+        description: editData.description,
+      },
+    });
+    
+    setSelectedTicket({ ...selectedTicket, subject: editData.subject, description: editData.description });
+    setIsEditMode(false);
+  };
+
+  const startEditMode = () => {
+    setEditData({
+      subject: selectedTicket.subject,
+      description: selectedTicket.description,
+    });
+    setIsEditMode(true);
+  };
   const getSlaStatus = (ticket: any) => {
     if (!ticket.priority) return { response: "unknown", resolution: "unknown" };
     
@@ -688,15 +741,27 @@ export default function AdminHelpdeskPage() {
         </Card>
 
         {/* Ticket Detail Dialog */}
-        <Dialog open={!!selectedTicket} onOpenChange={(open) => !open && setSelectedTicket(null)}>
+        <Dialog open={!!selectedTicket} onOpenChange={(open) => { if (!open) { setSelectedTicket(null); setIsEditMode(false); } }}>
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             {selectedTicket && (
               <>
                 <DialogHeader>
-                  <DialogTitle className="flex items-center gap-2">
-                    <span className="font-mono text-sm text-muted-foreground">{selectedTicket.ticket_number}</span>
-                    {selectedTicket.subject}
-                  </DialogTitle>
+                  <div className="flex items-center justify-between">
+                    <DialogTitle className="flex items-center gap-2">
+                      <span className="font-mono text-sm text-muted-foreground">{selectedTicket.ticket_number}</span>
+                      {isEditMode ? "Edit Ticket" : selectedTicket.subject}
+                    </DialogTitle>
+                    {!isEditMode && (
+                      <div className="flex gap-2">
+                        <Button size="sm" variant="ghost" onClick={startEditMode}>
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button size="sm" variant="ghost" onClick={() => setDeleteTicketId(selectedTicket.id)}>
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      </div>
+                    )}
+                  </div>
                 </DialogHeader>
 
                 <div className="space-y-4">
@@ -791,13 +856,41 @@ export default function AdminHelpdeskPage() {
                     </div>
                   )}
 
-                  {/* Description */}
-                  <div>
-                    <p className="text-sm text-muted-foreground mb-1">Description</p>
-                    <div className="p-3 rounded-lg border bg-background">
-                      <p className="text-sm whitespace-pre-wrap">{selectedTicket.description}</p>
+                  {/* Description / Edit Form */}
+                  {isEditMode ? (
+                    <div className="space-y-4">
+                      <div>
+                        <Label>Subject</Label>
+                        <Input
+                          value={editData.subject}
+                          onChange={(e) => setEditData({ ...editData, subject: e.target.value })}
+                        />
+                      </div>
+                      <div>
+                        <Label>Description</Label>
+                        <Textarea
+                          value={editData.description}
+                          onChange={(e) => setEditData({ ...editData, description: e.target.value })}
+                          rows={4}
+                        />
+                      </div>
+                      <div className="flex gap-2">
+                        <Button size="sm" onClick={handleEditTicket} disabled={updateTicketMutation.isPending}>
+                          {updateTicketMutation.isPending ? "Saving..." : "Save Changes"}
+                        </Button>
+                        <Button size="sm" variant="outline" onClick={() => setIsEditMode(false)}>
+                          Cancel
+                        </Button>
+                      </div>
                     </div>
-                  </div>
+                  ) : (
+                    <div>
+                      <p className="text-sm text-muted-foreground mb-1">Description</p>
+                      <div className="p-3 rounded-lg border bg-background">
+                        <p className="text-sm whitespace-pre-wrap">{selectedTicket.description}</p>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Comments */}
                   <div>
@@ -983,6 +1076,27 @@ export default function AdminHelpdeskPage() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        {/* Delete Confirmation Dialog */}
+        <AlertDialog open={!!deleteTicketId} onOpenChange={(open) => !open && setDeleteTicketId(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete Ticket</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to delete this ticket? This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                onClick={() => deleteTicketId && deleteTicketMutation.mutate(deleteTicketId)}
+              >
+                {deleteTicketMutation.isPending ? "Deleting..." : "Delete"}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </AppLayout>
   );
