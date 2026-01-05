@@ -29,6 +29,7 @@ import {
   Zap,
 } from "lucide-react";
 import { ISO42001ComplianceCard } from "@/components/ai/ISO42001ComplianceCard";
+import { UpcomingRemindersWidget } from "@/components/performance/widgets/UpcomingRemindersWidget";
 
 export default function TalentUnifiedDashboardPage() {
   const { t } = useLanguage();
@@ -428,8 +429,13 @@ export default function TalentUnifiedDashboardPage() {
           </Card>
         </div>
 
-        {/* AI Insights */}
-        <Card>
+        {/* Upcoming Reminders & AI Insights Grid */}
+        <div className="grid gap-4 lg:grid-cols-3">
+          {/* Upcoming Reminders Widget */}
+          <UpcomingRemindersWidget className="lg:col-span-1" />
+
+          {/* AI Insights */}
+          <Card className="lg:col-span-2">
           <CardHeader>
             <div className="flex items-center gap-2">
               <Lightbulb className="h-5 w-5 text-amber-500" />
@@ -491,7 +497,8 @@ export default function TalentUnifiedDashboardPage() {
               </div>
             )}
           </CardContent>
-        </Card>
+          </Card>
+        </div>
 
         {/* Quick Navigation Tabs */}
         <Tabs defaultValue="performance" className="w-full">
