@@ -59935,6 +59935,80 @@ export type Database = {
           },
         ]
       }
+      workflow_delegations: {
+        Row: {
+          company_id: string | null
+          created_at: string | null
+          created_by: string | null
+          delegate_id: string
+          delegator_id: string
+          end_date: string
+          id: string
+          is_active: boolean | null
+          reason: string | null
+          start_date: string
+          template_categories: string[] | null
+          updated_at: string | null
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          delegate_id: string
+          delegator_id: string
+          end_date: string
+          id?: string
+          is_active?: boolean | null
+          reason?: string | null
+          start_date: string
+          template_categories?: string[] | null
+          updated_at?: string | null
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          delegate_id?: string
+          delegator_id?: string
+          end_date?: string
+          id?: string
+          is_active?: boolean | null
+          reason?: string | null
+          start_date?: string
+          template_categories?: string[] | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflow_delegations_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workflow_delegations_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workflow_delegations_delegate_id_fkey"
+            columns: ["delegate_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workflow_delegations_delegator_id_fkey"
+            columns: ["delegator_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       workflow_instances: {
         Row: {
           alternate_approver_id: string | null
