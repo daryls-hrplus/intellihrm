@@ -55903,6 +55903,7 @@ export type Database = {
       tickets: {
         Row: {
           assignee_id: string | null
+          attachments: Json | null
           category_id: string | null
           closed_at: string | null
           created_at: string
@@ -55924,6 +55925,7 @@ export type Database = {
         }
         Insert: {
           assignee_id?: string | null
+          attachments?: Json | null
           category_id?: string | null
           closed_at?: string | null
           created_at?: string
@@ -55945,6 +55947,7 @@ export type Database = {
         }
         Update: {
           assignee_id?: string | null
+          attachments?: Json | null
           category_id?: string | null
           closed_at?: string | null
           created_at?: string
