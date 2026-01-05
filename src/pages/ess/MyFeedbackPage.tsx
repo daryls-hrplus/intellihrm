@@ -567,17 +567,15 @@ export default function MyFeedbackPage() {
                   placeholder="Share your feedback..."
                   rows={4}
                 />
-                {formData.content.length >= 30 && (
-                  <AIWritingAssistant
-                    text={formData.content}
-                    questionContext={`Continuous ${formData.feedback_type} feedback`}
-                    raterCategory="peer"
-                    showCompact={false}
-                    onApplySuggestion={(_, newText) => 
-                      setFormData({ ...formData, content: newText })
-                    }
-                  />
-                )}
+                <AIWritingAssistant
+                  text={formData.content}
+                  questionContext={`Continuous ${formData.feedback_type} feedback`}
+                  raterCategory="peer"
+                  showFromStart={true}
+                  onApplySuggestion={(_, newText) => 
+                    setFormData({ ...formData, content: newText })
+                  }
+                />
               </div>
 
               <div className="flex items-center justify-between">

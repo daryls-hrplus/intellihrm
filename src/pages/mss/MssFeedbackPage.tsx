@@ -381,17 +381,15 @@ export default function MssFeedbackPage() {
                   placeholder="Share your feedback..."
                   rows={4}
                 />
-                {formData.content.length >= 30 && (
-                  <AIWritingAssistant
-                    text={formData.content}
-                    questionContext={`Continuous ${formData.feedback_type} feedback`}
-                    raterCategory="manager"
-                    showCompact={false}
-                    onApplySuggestion={(_, newText) => 
-                      setFormData({ ...formData, content: newText })
-                    }
-                  />
-                )}
+                <AIWritingAssistant
+                  text={formData.content}
+                  questionContext={`Continuous ${formData.feedback_type} feedback`}
+                  raterCategory="manager"
+                  showFromStart={true}
+                  onApplySuggestion={(_, newText) => 
+                    setFormData({ ...formData, content: newText })
+                  }
+                />
               </div>
             </div>
             <DialogFooter>

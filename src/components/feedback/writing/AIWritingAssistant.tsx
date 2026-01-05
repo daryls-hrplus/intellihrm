@@ -16,6 +16,7 @@ interface AIWritingAssistantProps {
   responseId?: string;
   onApplySuggestion?: (suggestion: WritingSuggestion, newText: string) => void;
   showCompact?: boolean;
+  showFromStart?: boolean;
   className?: string;
 }
 
@@ -26,6 +27,7 @@ export function AIWritingAssistant({
   responseId,
   onApplySuggestion,
   showCompact = false,
+  showFromStart = false,
   className
 }: AIWritingAssistantProps) {
   const {
@@ -91,10 +93,30 @@ export function AIWritingAssistant({
     );
   }
 
-  // Don't show anything if text is too short
+  // Stage 1: Dormant state (0-29 chars) - show tips if showFromStart is true
   if (text.length < 30 && !isAnalyzing) {
-    return null;
+    if (!showFromStart) {
+      return null;
+    }
+    
+    return (
+      <Card className={cn("border-muted bg-muted/30", className)}>
+        <CardContent className="py-3 px-4">
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <Sparkles className="h-4 w-4" />
+            <span className="text-sm font-medium">AI Writing Assistant</span>
+            <Badge variant="outline" className="text-xs font-normal">Beta</Badge>
+          </div>
+          <p className="text-xs text-muted-foreground mt-1.5">
+            Start typing to get real-time feedback on clarity, bias detection, and specificity
+          </p>
+        </CardContent>
+      </Card>
+    );
   }
+
+  // Stage 2: Warming up (30-99 chars) - show analyzing with hint
+  const isWarmingUp = text.length >= 30 && text.length < 100;
 
   const hasSuggestions = result?.suggestions && result.suggestions.length > 0;
   const hasBiasWarning = result?.biasIndicators && result.biasIndicators.length > 0;
@@ -138,6 +160,13 @@ export function AIWritingAssistant({
           scores={result?.qualityScores ?? null}
           isAnalyzing={isAnalyzing}
         />
+
+        {/* Stage 2 hint: Keep writing */}
+        {isWarmingUp && !result && (
+          <p className="text-xs text-muted-foreground bg-muted/50 rounded px-2 py-1.5">
+            Keep writing for more detailed analysis (100+ characters recommended)
+          </p>
+        )}
 
         {/* Bias Warning */}
         {hasBiasWarning && result && (
