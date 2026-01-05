@@ -200,15 +200,10 @@ export default function PerformanceDashboardPage() {
           })}
         </div>
 
-        {/* Upcoming Reminders Widget */}
-        <div className="grid gap-4 lg:grid-cols-4">
-          <div className="lg:col-span-3">
-            <GroupedModuleCards sections={sections} defaultOpen={true} showToggleButton />
-          </div>
-          <div className="lg:col-span-1">
-            <UpcomingRemindersWidget compact />
-          </div>
-        </div>
+        {/* Upcoming Reminders - Compact horizontal bar */}
+        <UpcomingRemindersWidget compact />
+
+        <GroupedModuleCards sections={sections} defaultOpen={true} showToggleButton />
       </div>
     </AppLayout>
   );

@@ -114,56 +114,79 @@ export function UpcomingRemindersWidget({
   if (compact) {
     return (
       <Card className={cn("", className)}>
-        <CardHeader className="pb-2">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Bell className="h-4 w-4 text-primary" />
-              <CardTitle className="text-sm font-medium">Upcoming Reminders</CardTitle>
+        <CardContent className="p-4">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-primary/10 shrink-0">
+                <Bell className="h-4 w-4 text-primary" />
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="font-medium text-sm">Upcoming Reminders</span>
+                {reminders && reminders.length > 0 && (
+                  <Badge variant="secondary" className="text-xs">
+                    {reminders.length}
+                  </Badge>
+                )}
+              </div>
             </div>
-            {reminders && reminders.length > 0 && (
-              <Badge variant="secondary" className="text-xs">
-                {reminders.length}
-              </Badge>
-            )}
-          </div>
-        </CardHeader>
-        <CardContent className="pt-2">
-          {isLoading ? (
-            <div className="space-y-2">
-              {[1, 2, 3].map((i) => (
-                <Skeleton key={i} className="h-8 w-full" />
-              ))}
-            </div>
-          ) : reminders && reminders.length > 0 ? (
-            <div className="space-y-2">
-              {reminders.slice(0, 3).map((reminder) => (
-                <div
-                  key={reminder.id}
-                  className={cn(
-                    "p-2 rounded text-xs",
-                    getUrgencyStyle(reminder.reminder_date)
-                  )}
-                >
-                  <p className="font-medium truncate">{reminder.title}</p>
-                  <p className="text-muted-foreground">
-                    {formatDistanceToNow(parseISO(reminder.reminder_date), { addSuffix: true })}
-                  </p>
+            
+            <div className="flex-1 flex items-center gap-3 overflow-hidden">
+              {isLoading ? (
+                <div className="flex gap-2">
+                  {[1, 2, 3].map((i) => (
+                    <Skeleton key={i} className="h-8 w-40" />
+                  ))}
                 </div>
-              ))}
-              <Button
-                variant="ghost"
-                size="sm"
-                className="w-full text-xs"
-                onClick={handleViewAll}
-              >
-                View All <ArrowRight className="ml-1 h-3 w-3" />
-              </Button>
+              ) : reminders && reminders.length > 0 ? (
+                <div className="flex items-center gap-2 overflow-x-auto">
+                  {reminders.slice(0, 4).map((reminder) => {
+                    const reminderDate = parseISO(reminder.reminder_date);
+                    const isOverdue = isPast(reminderDate);
+                    const isDueToday = isToday(reminderDate);
+                    
+                    return (
+                      <div
+                        key={reminder.id}
+                        className={cn(
+                          "flex items-center gap-2 px-3 py-1.5 rounded-full text-xs whitespace-nowrap border shrink-0",
+                          isOverdue && "bg-destructive/10 border-destructive/30 text-destructive",
+                          isDueToday && !isOverdue && "bg-amber-100 border-amber-300 text-amber-800 dark:bg-amber-900/30 dark:border-amber-700 dark:text-amber-400",
+                          !isOverdue && !isDueToday && "bg-muted border-border"
+                        )}
+                      >
+                        <Badge
+                          variant="secondary"
+                          className={cn("text-[10px] px-1.5 py-0", priorityColors[reminder.priority])}
+                        >
+                          {reminder.priority.charAt(0).toUpperCase()}
+                        </Badge>
+                        <span className="font-medium truncate max-w-[150px]">{reminder.title}</span>
+                        <span className="text-muted-foreground">
+                          {isOverdue ? "Overdue" : isDueToday ? "Today" : formatDistanceToNow(reminderDate, { addSuffix: false })}
+                        </span>
+                      </div>
+                    );
+                  })}
+                  {reminders.length > 4 && (
+                    <span className="text-xs text-muted-foreground shrink-0">
+                      +{reminders.length - 4} more
+                    </span>
+                  )}
+                </div>
+              ) : (
+                <p className="text-xs text-muted-foreground">No upcoming reminders</p>
+              )}
             </div>
-          ) : (
-            <p className="text-xs text-muted-foreground text-center py-2">
-              No upcoming reminders
-            </p>
-          )}
+            
+            <Button
+              variant="ghost"
+              size="sm"
+              className="shrink-0 text-xs"
+              onClick={handleViewAll}
+            >
+              View All <ArrowRight className="ml-1 h-3 w-3" />
+            </Button>
+          </div>
         </CardContent>
       </Card>
     );
