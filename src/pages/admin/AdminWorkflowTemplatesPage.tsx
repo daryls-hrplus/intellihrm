@@ -67,6 +67,9 @@ export default function AdminWorkflowTemplatesPage() {
   const [roles, setRoles] = useState<{ id: string; name: string }[]>([]);
   const [governanceBodies, setGovernanceBodies] = useState<{ id: string; name: string }[]>([]);
   const [users, setUsers] = useState<{ id: string; full_name: string; email: string }[]>([]);
+  const [companies, setCompanies] = useState<{ id: string; name: string }[]>([]);
+  const [departments, setDepartments] = useState<{ id: string; name: string; company_id: string }[]>([]);
+  const [sections, setSections] = useState<{ id: string; name: string; department_id: string }[]>([]);
 
   useEffect(() => {
     fetchData();
@@ -81,12 +84,15 @@ export default function AdminWorkflowTemplatesPage() {
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      const [templatesRes, positionsRes, rolesRes, governanceRes, usersRes] = await Promise.all([
+      const [templatesRes, positionsRes, rolesRes, governanceRes, usersRes, companiesRes, departmentsRes, sectionsRes] = await Promise.all([
         supabase.from("workflow_templates").select("*").order("name"),
         supabase.from("positions").select("id, title").eq("is_active", true),
         supabase.from("roles").select("id, name").eq("is_active", true),
         supabase.from("governance_bodies").select("id, name").eq("is_active", true),
         supabase.from("profiles").select("id, full_name, email"),
+        supabase.from("companies").select("id, name").eq("is_active", true).order("name"),
+        supabase.from("departments").select("id, name, company_id").eq("is_active", true).order("name"),
+        supabase.from("sections").select("id, name, department_id").eq("is_active", true).order("name"),
       ]);
 
       if (templatesRes.data) setTemplates(templatesRes.data as WorkflowTemplate[]);
@@ -94,6 +100,9 @@ export default function AdminWorkflowTemplatesPage() {
       if (rolesRes.data) setRoles(rolesRes.data);
       if (governanceRes.data) setGovernanceBodies(governanceRes.data);
       if (usersRes.data) setUsers(usersRes.data);
+      if (companiesRes.data) setCompanies(companiesRes.data);
+      if (departmentsRes.data) setDepartments(departmentsRes.data);
+      if (sectionsRes.data) setSections(sectionsRes.data);
     } catch (error) {
       toast.error("Failed to load data");
     } finally {
@@ -530,6 +539,98 @@ export default function AdminWorkflowTemplatesPage() {
                 </Select>
               </div>
 
+              <Separator />
+              <p className="text-sm font-medium">Scope (Optional)</p>
+              <p className="text-xs text-muted-foreground -mt-2">
+                Limit this template to specific company, department, or section
+              </p>
+
+              <div className="grid gap-4 sm:grid-cols-3">
+                <div className="space-y-2">
+                  <Label>Company</Label>
+                  <Select
+                    value={editingTemplate?.company_id || "all"}
+                    onValueChange={(value) =>
+                      setEditingTemplate({ 
+                        ...editingTemplate, 
+                        company_id: value === "all" ? null : value,
+                        department_id: value === "all" ? null : editingTemplate?.department_id,
+                        section_id: value === "all" ? null : editingTemplate?.section_id,
+                      })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="All companies" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Companies</SelectItem>
+                      {companies.map((company) => (
+                        <SelectItem key={company.id} value={company.id}>
+                          {company.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Department</Label>
+                  <Select
+                    value={editingTemplate?.department_id || "all"}
+                    onValueChange={(value) =>
+                      setEditingTemplate({ 
+                        ...editingTemplate, 
+                        department_id: value === "all" ? null : value,
+                        section_id: value === "all" ? null : editingTemplate?.section_id,
+                      })
+                    }
+                    disabled={!editingTemplate?.company_id}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="All departments" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Departments</SelectItem>
+                      {departments
+                        .filter(d => !editingTemplate?.company_id || d.company_id === editingTemplate.company_id)
+                        .map((dept) => (
+                          <SelectItem key={dept.id} value={dept.id}>
+                            {dept.name}
+                          </SelectItem>
+                        ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Section</Label>
+                  <Select
+                    value={editingTemplate?.section_id || "all"}
+                    onValueChange={(value) =>
+                      setEditingTemplate({ 
+                        ...editingTemplate, 
+                        section_id: value === "all" ? null : value,
+                      })
+                    }
+                    disabled={!editingTemplate?.department_id}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="All sections" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Sections</SelectItem>
+                      {sections
+                        .filter(s => !editingTemplate?.department_id || s.department_id === editingTemplate.department_id)
+                        .map((section) => (
+                          <SelectItem key={section.id} value={section.id}>
+                            {section.name}
+                          </SelectItem>
+                        ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <Separator />
+
               <div className="space-y-2">
                 <Label>Description</Label>
                 <Textarea
@@ -797,20 +898,102 @@ export default function AdminWorkflowTemplatesPage() {
               )}
 
               <Separator />
+              <p className="text-sm font-medium">Cross-Company Routing (Optional)</p>
+              <p className="text-xs text-muted-foreground -mt-2">
+                Route this step to a different company for approval
+              </p>
 
               <div className="space-y-2">
-                <Label>Escalation After (hours)</Label>
-                <Input
-                  type="number"
-                  value={editingStep?.escalation_hours || ""}
-                  onChange={(e) =>
-                    setEditingStep({
-                      ...editingStep,
-                      escalation_hours: e.target.value ? parseInt(e.target.value) : null,
+                <Label>Target Company</Label>
+                <Select
+                  value={editingStep?.target_company_id || "same"}
+                  onValueChange={(value) =>
+                    setEditingStep({ 
+                      ...editingStep, 
+                      target_company_id: value === "same" ? null : value,
                     })
                   }
-                  placeholder="Leave empty to disable escalation"
-                />
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Same as workflow" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="same">Same as Workflow</SelectItem>
+                    {companies.map((company) => (
+                      <SelectItem key={company.id} value={company.id}>
+                        {company.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <Separator />
+              <p className="text-sm font-medium">Timing & SLA</p>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label>Escalation After (hours)</Label>
+                  <Input
+                    type="number"
+                    value={editingStep?.escalation_hours || ""}
+                    onChange={(e) =>
+                      setEditingStep({
+                        ...editingStep,
+                        escalation_hours: e.target.value ? parseInt(e.target.value) : null,
+                      })
+                    }
+                    placeholder="e.g., 24"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Expiration (days)</Label>
+                  <Input
+                    type="number"
+                    value={editingStep?.expiration_days || ""}
+                    onChange={(e) =>
+                      setEditingStep({
+                        ...editingStep,
+                        expiration_days: e.target.value ? parseInt(e.target.value) : null,
+                      })
+                    }
+                    placeholder="e.g., 7"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Auto-reject if no action
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label>SLA Warning (hours before deadline)</Label>
+                  <Input
+                    type="number"
+                    value={editingStep?.sla_warning_hours || ""}
+                    onChange={(e) =>
+                      setEditingStep({
+                        ...editingStep,
+                        sla_warning_hours: e.target.value ? parseInt(e.target.value) : null,
+                      })
+                    }
+                    placeholder="e.g., 24"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>SLA Critical (hours before deadline)</Label>
+                  <Input
+                    type="number"
+                    value={editingStep?.sla_critical_hours || ""}
+                    onChange={(e) =>
+                      setEditingStep({
+                        ...editingStep,
+                        sla_critical_hours: e.target.value ? parseInt(e.target.value) : null,
+                      })
+                    }
+                    placeholder="e.g., 8"
+                  />
+                </div>
               </div>
 
               {editingStep?.escalation_hours && (
