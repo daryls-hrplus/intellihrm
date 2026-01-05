@@ -10060,6 +10060,62 @@ export type Database = {
           },
         ]
       }
+      compliance_items: {
+        Row: {
+          category: string
+          company_id: string | null
+          created_at: string
+          created_by: string | null
+          deadline: string
+          description: string | null
+          id: string
+          priority: string
+          progress: number
+          responsible: string | null
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          company_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          deadline: string
+          description?: string | null
+          id?: string
+          priority?: string
+          progress?: number
+          responsible?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          company_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          deadline?: string
+          description?: string | null
+          id?: string
+          priority?: string
+          progress?: number
+          responsible?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "compliance_items_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       compliance_training: {
         Row: {
           applies_to_all: boolean | null
