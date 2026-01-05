@@ -15,7 +15,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { formatDateForDisplay } from "@/utils/dateUtils";
-import { Plus, FileText, Download, Trash2, Globe, Lock, Upload, X, Loader2 } from "lucide-react";
+import { Plus, FileText, Download, Trash2, Globe, Lock, Upload, X, Loader2, Building2 } from "lucide-react";
+
+interface Company {
+  id: string;
+  name: string;
+}
 
 interface CompanyDocument {
   id: string;
@@ -28,6 +33,8 @@ interface CompanyDocument {
   is_public: boolean;
   is_active: boolean;
   created_at: string;
+  company_id: string | null;
+  company?: Company | null;
 }
 
 const DOCUMENT_CATEGORIES = [
@@ -49,11 +56,13 @@ export default function CompanyDocumentsPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [documents, setDocuments] = useState<CompanyDocument[]>([]);
+  const [companies, setCompanies] = useState<Company[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [selectedCompanyFilter, setSelectedCompanyFilter] = useState<string>("all");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   
   const [formData, setFormData] = useState({
@@ -63,18 +72,33 @@ export default function CompanyDocumentsPage() {
     file_url: "",
     version: "1.0",
     is_public: true,
+    company_id: "",
   });
 
   useEffect(() => {
+    loadCompanies();
     loadDocuments();
   }, []);
+
+  const loadCompanies = async () => {
+    try {
+      const { data } = await supabase
+        .from("companies")
+        .select("id, name")
+        .eq("is_active", true)
+        .order("name");
+      setCompanies((data || []) as Company[]);
+    } catch (error) {
+      console.error("Error loading companies:", error);
+    }
+  };
 
   const loadDocuments = async () => {
     setIsLoading(true);
     try {
       const { data } = await supabase
         .from("company_documents")
-        .select("*")
+        .select("*, company:companies(id, name)")
         .eq("is_active", true)
         .order("category")
         .order("title");
@@ -142,8 +166,8 @@ export default function CompanyDocumentsPage() {
   };
 
   const handleSubmit = async () => {
-    if (!formData.title || !formData.category) {
-      toast({ title: "Error", description: "Please fill in required fields", variant: "destructive" });
+    if (!formData.title || !formData.category || !formData.company_id) {
+      toast({ title: "Error", description: "Please fill in required fields including company", variant: "destructive" });
       return;
     }
     
@@ -175,7 +199,7 @@ export default function CompanyDocumentsPage() {
         file_type: selectedFile?.type || null,
         version: formData.version,
         is_public: formData.is_public,
-        company_id: profile?.company_id || null,
+        company_id: formData.company_id,
         uploaded_by: user?.id,
       });
 
@@ -183,7 +207,7 @@ export default function CompanyDocumentsPage() {
 
       toast({ title: "Success", description: "Document added successfully" });
       setDialogOpen(false);
-      setFormData({ title: "", description: "", category: "", file_url: "", version: "1.0", is_public: true });
+      setFormData({ title: "", description: "", category: "", file_url: "", version: "1.0", is_public: true, company_id: "" });
       setSelectedFile(null);
       if (fileInputRef.current) fileInputRef.current.value = "";
       loadDocuments();
@@ -206,9 +230,11 @@ export default function CompanyDocumentsPage() {
     }
   };
 
-  const filteredDocuments = selectedCategory === "all"
-    ? documents
-    : documents.filter(d => d.category === selectedCategory);
+  const filteredDocuments = documents.filter(d => {
+    const matchesCategory = selectedCategory === "all" || d.category === selectedCategory;
+    const matchesCompany = selectedCompanyFilter === "all" || d.company_id === selectedCompanyFilter;
+    return matchesCategory && matchesCompany;
+  });
 
   const categories = [...new Set(documents.map(d => d.category))];
 
@@ -233,7 +259,19 @@ export default function CompanyDocumentsPage() {
           </Button>
         </div>
 
-        <div className="flex gap-4">
+        <div className="flex gap-4 flex-wrap">
+          <Select value={selectedCompanyFilter} onValueChange={setSelectedCompanyFilter}>
+            <SelectTrigger className="w-[220px]">
+              <Building2 className="h-4 w-4 mr-2" />
+              <SelectValue placeholder="All Companies" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Companies</SelectItem>
+              {companies.map((company) => (
+                <SelectItem key={company.id} value={company.id}>{company.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           <Select value={selectedCategory} onValueChange={setSelectedCategory}>
             <SelectTrigger className="w-[200px]">
               <SelectValue placeholder="All Categories" />
@@ -264,6 +302,7 @@ export default function CompanyDocumentsPage() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Title</TableHead>
+                    <TableHead>Company</TableHead>
                     <TableHead>Category</TableHead>
                     <TableHead>Version</TableHead>
                     <TableHead>Access</TableHead>
@@ -285,6 +324,12 @@ export default function CompanyDocumentsPage() {
                               </div>
                             )}
                           </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1">
+                          <Building2 className="h-3 w-3 text-muted-foreground" />
+                          <span className="text-sm">{doc.company?.name || "—"}</span>
                         </div>
                       </TableCell>
                       <TableCell>
@@ -338,7 +383,20 @@ export default function CompanyDocumentsPage() {
                 />
               </div>
               <div>
-                <Label>Category</Label>
+                <Label>Company <span className="text-destructive">*</span></Label>
+                <Select value={formData.company_id} onValueChange={(v) => setFormData({ ...formData, company_id: v })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select company" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {companies.map((company) => (
+                      <SelectItem key={company.id} value={company.id}>{company.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Category <span className="text-destructive">*</span></Label>
                 <Select value={formData.category} onValueChange={(v) => setFormData({ ...formData, category: v })}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select category" />
