@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Ticket, Send, Loader2 } from "lucide-react";
+import { Ticket, Send, Loader2, Paperclip, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -47,6 +47,8 @@ export default function NewTicketPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const fromSource = searchParams.get('from');
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  
   const [categories, setCategories] = useState<TicketCategory[]>([]);
   const [priorities, setPriorities] = useState<TicketPriority[]>([]);
   const [agents, setAgents] = useState<Agent[]>([]);
@@ -56,6 +58,7 @@ export default function NewTicketPage() {
   const [description, setDescription] = useState("");
   const [categoryId, setCategoryId] = useState("");
   const [priorityId, setPriorityId] = useState("");
+  const [attachments, setAttachments] = useState<File[]>([]);
 
   useEffect(() => {
     fetchOptions();
@@ -120,6 +123,45 @@ export default function NewTicketPage() {
     }
   };
 
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    const validFiles = files.filter(f => f.size <= 10 * 1024 * 1024); // 10MB limit
+    if (validFiles.length !== files.length) {
+      toast.error("Some files exceeded 10MB limit");
+    }
+    setAttachments(prev => [...prev, ...validFiles]);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const removeAttachment = (index: number) => {
+    setAttachments(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const uploadAttachments = async (ticketId: string) => {
+    const uploadedFiles = [];
+    for (const file of attachments) {
+      const filePath = `${user?.id}/${ticketId}/${Date.now()}-${file.name}`;
+      const { error } = await supabase.storage
+        .from("ticket-attachments")
+        .upload(filePath, file);
+      
+      if (error) throw error;
+      
+      const { data: urlData } = supabase.storage
+        .from("ticket-attachments")
+        .getPublicUrl(filePath);
+      
+      uploadedFiles.push({
+        name: file.name,
+        size: file.size,
+        type: file.type,
+        url: urlData.publicUrl,
+        path: filePath,
+      });
+    }
+    return uploadedFiles;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -132,6 +174,7 @@ export default function NewTicketPage() {
     try {
       const autoAssigneeId = getAutoAssignee(categoryId);
 
+      // Create ticket first
       const { data, error } = await supabase
         .from("tickets")
         .insert({
@@ -146,6 +189,15 @@ export default function NewTicketPage() {
         .single();
 
       if (error) throw error;
+
+      // Upload attachments if any
+      if (attachments.length > 0) {
+        const uploadedAttachments = await uploadAttachments(data.id);
+        await supabase
+          .from("tickets")
+          .update({ attachments: uploadedAttachments } as any)
+          .eq("id", data.id);
+      }
 
       toast.success(
         autoAssigneeId 
@@ -260,6 +312,52 @@ export default function NewTicketPage() {
                   rows={6}
                   required
                 />
+              </div>
+
+              {/* Attachments */}
+              <div className="space-y-2">
+                <Label>Attachments</Label>
+                <div className="space-y-3">
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileSelect}
+                    className="hidden"
+                    multiple
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <Paperclip className="h-4 w-4 mr-2" />
+                    Attach Files
+                  </Button>
+                  <p className="text-xs text-muted-foreground">
+                    Max 10MB per file
+                  </p>
+                  
+                  {attachments.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {attachments.map((file, idx) => (
+                        <div
+                          key={idx}
+                          className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted text-sm"
+                        >
+                          <Paperclip className="h-3 w-3" />
+                          <span className="truncate max-w-[150px]">{file.name}</span>
+                          <button
+                            type="button"
+                            onClick={() => removeAttachment(idx)}
+                            className="hover:text-destructive"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div className="flex justify-end gap-3">

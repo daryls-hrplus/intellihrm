@@ -292,8 +292,33 @@ export default function TicketDetailPage() {
                   </div>
                 </div>
               </CardHeader>
-              <CardContent>
+              <CardContent className="space-y-4">
                 <p className="whitespace-pre-wrap">{ticket.description}</p>
+                
+                {/* Initial Ticket Attachments */}
+                {ticket.attachments && Array.isArray(ticket.attachments) && ticket.attachments.length > 0 && (
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium text-muted-foreground">Attachments</p>
+                    <div className="space-y-2">
+                      {(ticket.attachments as any[]).map((att: any, idx: number) => {
+                        const FileIcon = getFileIcon(att.name);
+                        return (
+                          <a
+                            key={idx}
+                            href={att.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-2 p-2 rounded-lg border bg-background hover:bg-muted/50 transition-colors text-sm"
+                          >
+                            <FileIcon className="h-4 w-4 text-muted-foreground" />
+                            <span className="flex-1 truncate">{att.name}</span>
+                            <Download className="h-4 w-4 text-muted-foreground" />
+                          </a>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
