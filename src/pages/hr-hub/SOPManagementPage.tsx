@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,9 +14,14 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Plus, FileText, Folder, Trash2, Edit, Eye, ChevronLeft } from "lucide-react";
+import { Plus, FileText, Folder, Trash2, Edit, Eye, ChevronLeft, Building2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
+
+interface Company {
+  id: string;
+  name: string;
+}
 
 interface SOPCategory {
   id: string;
@@ -63,11 +69,29 @@ export default function SOPManagementPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { company, isAdmin, hasRole } = useAuth();
+  const isAdminOrHR = isAdmin || hasRole("hr_manager");
+  const [selectedCompany, setSelectedCompany] = useState<string>(company?.id || "");
   const [activeTab, setActiveTab] = useState("documents");
   const [showDocDialog, setShowDocDialog] = useState(false);
   const [showCatDialog, setShowCatDialog] = useState(false);
   const [editingDoc, setEditingDoc] = useState<SOPDocument | null>(null);
   const [editingCat, setEditingCat] = useState<SOPCategory | null>(null);
+
+  // Fetch companies for filter
+  const { data: companies = [] } = useQuery({
+    queryKey: ["companies-active"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("companies")
+        .select("id, name")
+        .eq("is_active", true)
+        .order("name");
+      if (error) throw error;
+      return data as Company[];
+    },
+    enabled: isAdminOrHR,
+  });
 
   // Form states
   const [docForm, setDocForm] = useState({
@@ -90,13 +114,19 @@ export default function SOPManagementPage() {
 
   // Fetch categories
   const { data: categories = [] } = useQuery({
-    queryKey: ["sop-categories"],
+    queryKey: ["sop-categories", selectedCompany],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from("sop_categories")
         .select("*")
         .eq("is_active", true)
         .order("name");
+      
+      if (selectedCompany) {
+        query = query.or(`company_id.eq.${selectedCompany},company_id.is.null`);
+      }
+      
+      const { data, error } = await query;
       if (error) throw error;
       return data as SOPCategory[];
     },
@@ -104,13 +134,19 @@ export default function SOPManagementPage() {
 
   // Fetch documents
   const { data: documents = [], isLoading } = useQuery({
-    queryKey: ["sop-documents"],
+    queryKey: ["sop-documents", selectedCompany],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from("sop_documents")
         .select("*, sop_categories(name)")
         .eq("is_active", true)
         .order("title");
+      
+      if (selectedCompany) {
+        query = query.or(`company_id.eq.${selectedCompany},is_global.eq.true`);
+      }
+      
+      const { data, error } = await query;
       if (error) throw error;
       return data as SOPDocument[];
     },
@@ -130,6 +166,7 @@ export default function SOPManagementPage() {
         effective_date: data.effective_date || null,
         steps: data.steps.length > 0 ? data.steps : null,
         processing_status: "completed",
+        company_id: data.is_global ? null : (selectedCompany || company?.id || null),
       };
 
       if (data.id) {
@@ -168,7 +205,12 @@ export default function SOPManagementPage() {
       } else {
         const { error } = await supabase
           .from("sop_categories")
-          .insert({ name: data.name, code: data.code, description: data.description || null });
+          .insert({ 
+            name: data.name, 
+            code: data.code, 
+            description: data.description || null,
+            company_id: selectedCompany || company?.id || null,
+          });
         if (error) throw error;
       }
     },
@@ -294,6 +336,22 @@ export default function SOPManagementPage() {
           </p>
         </div>
       </div>
+
+      {isAdminOrHR && companies.length > 0 && (
+        <div className="flex items-center gap-2">
+          <Building2 className="h-4 w-4 text-muted-foreground" />
+          <Select value={selectedCompany} onValueChange={setSelectedCompany}>
+            <SelectTrigger className="w-[220px]">
+              <SelectValue placeholder="Select company" />
+            </SelectTrigger>
+            <SelectContent>
+              {companies.map((c) => (
+                <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
