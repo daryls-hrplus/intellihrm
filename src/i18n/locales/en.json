@@ -7479,6 +7479,50 @@
       "regenerate": "Regenerate",
       "downloadSvg": "Download SVG",
       "downloadPng": "Download PNG"
+    },
+    "analytics": {
+      "title": "Workflow Analytics",
+      "totalSubmitted": "Total Submitted",
+      "approvalRate": "Approval Rate",
+      "avgCompletionTime": "Avg Completion Time",
+      "pending": "Pending",
+      "trends": "Workflow Trends",
+      "byCategory": "By Category",
+      "approverPerformance": "Approver Performance",
+      "approved": "Approved",
+      "rejected": "Rejected"
+    },
+    "approvals": {
+      "title": "My Approvals",
+      "pending": "Pending Approvals",
+      "overdue": "Overdue",
+      "selected": "Selected",
+      "bulkApprove": "Bulk Approve",
+      "bulkReject": "Bulk Reject",
+      "allCaughtUp": "All caught up!",
+      "noPending": "No pending approvals at this time."
+    },
+    "delegation": {
+      "title": "Workflow Delegation",
+      "description": "Delegate your approval authority to others when you're away",
+      "addDelegation": "Add Delegation",
+      "delegateTo": "Delegate To",
+      "period": "Period",
+      "reason": "Reason",
+      "status": "Status",
+      "active": "Active",
+      "inactive": "Inactive",
+      "scheduled": "Scheduled",
+      "expired": "Expired",
+      "allCategories": "All Workflow Categories"
+    },
+    "audit": {
+      "title": "Audit Trail",
+      "description": "Complete history of workflow actions and events",
+      "exportCsv": "Export CSV",
+      "eventType": "Event Type",
+      "actor": "Actor",
+      "comment": "Comment"
     }
   }
 }

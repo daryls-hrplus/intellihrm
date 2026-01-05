@@ -5,11 +5,13 @@ import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Inbox, CheckCircle2, Clock } from "lucide-react";
+import { Loader2, Inbox, CheckCircle2, Clock, Zap, UserCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { WorkflowApprovalCard } from "@/components/workflow/WorkflowApprovalCard";
 import { WorkflowStatusBadge } from "@/components/workflow/WorkflowStatusBadge";
+import { MyApprovalsHub } from "@/components/workflow/MyApprovalsHub";
+import { WorkflowDelegationManager } from "@/components/workflow/WorkflowDelegationManager";
 import type { WorkflowInstance, WorkflowStep, WorkflowStepAction } from "@/hooks/useWorkflow";
 
 export default function MyApprovalsPage() {
@@ -135,7 +137,7 @@ export default function MyApprovalsPage() {
         </div>
 
         <Tabs defaultValue="pending" className="space-y-6">
-          <TabsList>
+          <TabsList className="flex-wrap">
             <TabsTrigger value="pending" className="gap-2">
               <Clock className="h-4 w-4" />
               Pending
@@ -148,6 +150,14 @@ export default function MyApprovalsPage() {
             <TabsTrigger value="completed" className="gap-2">
               <CheckCircle2 className="h-4 w-4" />
               Completed
+            </TabsTrigger>
+            <TabsTrigger value="bulk" className="gap-2">
+              <Zap className="h-4 w-4" />
+              Bulk Actions
+            </TabsTrigger>
+            <TabsTrigger value="delegation" className="gap-2">
+              <UserCheck className="h-4 w-4" />
+              Delegation
             </TabsTrigger>
           </TabsList>
 
@@ -217,6 +227,14 @@ export default function MyApprovalsPage() {
                 ))}
               </div>
             )}
+          </TabsContent>
+
+          <TabsContent value="bulk" className="space-y-4">
+            <MyApprovalsHub />
+          </TabsContent>
+
+          <TabsContent value="delegation" className="space-y-4">
+            <WorkflowDelegationManager />
           </TabsContent>
         </Tabs>
       </div>
