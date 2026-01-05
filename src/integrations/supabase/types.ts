@@ -39043,14 +39043,22 @@ export type Database = {
           email_notifications: boolean
           escalation_updates: boolean | null
           id: string
+          leave_request_updates: boolean | null
           performance_review_updates: boolean | null
           review_response_reminders: boolean | null
           system_announcements: boolean
           ticket_assigned: boolean
           ticket_comment_added: boolean
           ticket_status_changed: boolean
+          training_request_updates: boolean | null
           updated_at: string
           user_id: string
+          workflow_approved: boolean | null
+          workflow_completed: boolean | null
+          workflow_escalated: boolean | null
+          workflow_pending_approval: boolean | null
+          workflow_rejected: boolean | null
+          workflow_returned: boolean | null
         }
         Insert: {
           access_request_updates?: boolean
@@ -39058,14 +39066,22 @@ export type Database = {
           email_notifications?: boolean
           escalation_updates?: boolean | null
           id?: string
+          leave_request_updates?: boolean | null
           performance_review_updates?: boolean | null
           review_response_reminders?: boolean | null
           system_announcements?: boolean
           ticket_assigned?: boolean
           ticket_comment_added?: boolean
           ticket_status_changed?: boolean
+          training_request_updates?: boolean | null
           updated_at?: string
           user_id: string
+          workflow_approved?: boolean | null
+          workflow_completed?: boolean | null
+          workflow_escalated?: boolean | null
+          workflow_pending_approval?: boolean | null
+          workflow_rejected?: boolean | null
+          workflow_returned?: boolean | null
         }
         Update: {
           access_request_updates?: boolean
@@ -39073,14 +39089,22 @@ export type Database = {
           email_notifications?: boolean
           escalation_updates?: boolean | null
           id?: string
+          leave_request_updates?: boolean | null
           performance_review_updates?: boolean | null
           review_response_reminders?: boolean | null
           system_announcements?: boolean
           ticket_assigned?: boolean
           ticket_comment_added?: boolean
           ticket_status_changed?: boolean
+          training_request_updates?: boolean | null
           updated_at?: string
           user_id?: string
+          workflow_approved?: boolean | null
+          workflow_completed?: boolean | null
+          workflow_escalated?: boolean | null
+          workflow_pending_approval?: boolean | null
+          workflow_rejected?: boolean | null
+          workflow_returned?: boolean | null
         }
         Relationships: []
       }

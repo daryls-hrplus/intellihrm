@@ -504,6 +504,7 @@ import MyEvidencePortfolioPage from "./pages/ess/MyEvidencePortfolioPage";
 import MyCareerPathsPage from "./pages/ess/MyCareerPathsPage";
 import MyCareerPlanPage from "./pages/ess/MyCareerPlanPage";
 import MyMentorshipPage from "./pages/ess/MyMentorshipPage";
+import EssNotificationPreferencesPage from "./pages/ess/NotificationPreferencesPage";
 import EmployeeDirectoryPage from "./pages/admin/EmployeeDirectoryPage";
 import CompanyAnnouncementsPage from "./pages/admin/CompanyAnnouncementsPage";
 import ApprovalDelegationsPage from "./pages/admin/ApprovalDelegationsPage";
@@ -3916,6 +3917,14 @@ const App = () => (
               element={
                 <ProtectedRoute moduleCode="ess">
                   <MyGovernmentIdsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/ess/notification-preferences"
+              element={
+                <ProtectedRoute moduleCode="ess">
+                  <EssNotificationPreferencesPage />
                 </ProtectedRoute>
               }
             />

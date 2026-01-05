@@ -141,7 +141,51 @@ export function useWorkflow() {
     error: null,
   });
 
-  // Send notification to approver
+  // Send notification - supports both legacy and new format
+  const sendWorkflowNotification = useCallback(async (params: {
+    instanceId: string;
+    recipientId: string;
+    notificationType: 'pending_approval' | 'approved' | 'rejected' | 'escalated' | 'returned' | 'completed' | 'comment_added';
+    workflowName: string;
+    category: string;
+    referenceType: string;
+    referenceId: string;
+    stepName?: string;
+    escalationHours?: number | null;
+    deadlineAt?: string | null;
+    initiatorName?: string;
+    actorName?: string;
+    comment?: string;
+    rejectionReason?: string;
+    returnReason?: string;
+  }) => {
+    try {
+      await supabase.functions.invoke("send-workflow-notification", {
+        body: {
+          instance_id: params.instanceId,
+          recipient_id: params.recipientId,
+          notification_type: params.notificationType,
+          workflow_name: params.workflowName,
+          category: params.category,
+          reference_type: params.referenceType,
+          reference_id: params.referenceId,
+          step_name: params.stepName,
+          escalation_hours: params.escalationHours,
+          deadline_at: params.deadlineAt,
+          initiator_name: params.initiatorName,
+          actor_name: params.actorName,
+          comment: params.comment,
+          rejection_reason: params.rejectionReason,
+          return_reason: params.returnReason,
+        },
+      });
+    } catch (error) {
+      console.error("Failed to send workflow notification:", error);
+      // Don't throw - notification failure shouldn't block workflow
+    }
+  }, []);
+
+  // Legacy function for backward compatibility
   const notifyApprover = useCallback(async (
     instanceId: string,
     approverId: string,
@@ -154,26 +198,20 @@ export function useWorkflow() {
     deadlineAt?: string | null,
     initiatorName?: string
   ) => {
-    try {
-      await supabase.functions.invoke("send-workflow-notification", {
-        body: {
-          instance_id: instanceId,
-          approver_id: approverId,
-          step_name: stepName,
-          workflow_name: workflowName,
-          category,
-          reference_type: referenceType,
-          reference_id: referenceId,
-          escalation_hours: escalationHours,
-          deadline_at: deadlineAt,
-          initiator_name: initiatorName,
-        },
-      });
-    } catch (error) {
-      console.error("Failed to send workflow notification:", error);
-      // Don't throw - notification failure shouldn't block workflow
-    }
-  }, []);
+    await sendWorkflowNotification({
+      instanceId,
+      recipientId: approverId,
+      notificationType: 'pending_approval',
+      workflowName,
+      category,
+      referenceType,
+      referenceId,
+      stepName,
+      escalationHours,
+      deadlineAt,
+      initiatorName,
+    });
+  }, [sendWorkflowNotification]);
 
   // Get the approver for a step
   const getStepApprover = useCallback(async (
