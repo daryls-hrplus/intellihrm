@@ -90,23 +90,23 @@ export function WorkflowAuditTrail() {
     setIsLoading(true);
 
     try {
-      // Since we're building audit from workflow_instance_approvals for now
+      // Build audit from workflow_step_actions
       let query = (supabase as any)
-        .from("workflow_instance_approvals")
+        .from("workflow_step_actions")
         .select(`
           id,
           action,
           comment,
           acted_at,
           created_at,
-          status,
           workflow_instances!inner(
             id,
             category,
+            company_id,
             workflow_templates(name)
           ),
           workflow_steps(name),
-          approver:profiles!workflow_instance_approvals_approver_id_fkey(full_name)
+          actor:profiles!workflow_step_actions_actor_id_fkey(full_name)
         `)
         .eq("workflow_instances.company_id", profile.company_id)
         .not("action", "is", null)
@@ -124,13 +124,13 @@ export function WorkflowAuditTrail() {
       const mappedEvents: AuditEvent[] = (data || []).map((item: any) => ({
         id: item.id,
         eventType: item.action || "unknown",
-        instanceId: (item.workflow_instances as any)?.id || "",
-        templateName: (item.workflow_instances as any)?.workflow_templates?.name || "Unknown",
-        stepName: (item.workflow_steps as any)?.name || null,
-        actorName: (item.approver as any)?.full_name || "System",
+        instanceId: item.workflow_instances?.id || "",
+        templateName: item.workflow_instances?.workflow_templates?.name || "Unknown",
+        stepName: item.workflow_steps?.name || null,
+        actorName: item.actor?.full_name || "System",
         actorRole: null,
         previousStatus: null,
-        newStatus: item.status,
+        newStatus: null,
         comment: item.comment,
         createdAt: item.acted_at || item.created_at,
       }));
