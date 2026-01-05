@@ -21938,6 +21938,162 @@ export type Database = {
           },
         ]
       }
+      feedback_ai_action_logs: {
+        Row: {
+          action_type: string
+          company_id: string | null
+          confidence_score: number | null
+          created_at: string | null
+          cycle_id: string | null
+          employee_id: string | null
+          explanation: string
+          human_override: boolean | null
+          id: string
+          input_summary: Json
+          model_used: string | null
+          model_version: string | null
+          output_summary: Json
+          override_by: string | null
+          override_reason: string | null
+          processing_time_ms: number | null
+        }
+        Insert: {
+          action_type: string
+          company_id?: string | null
+          confidence_score?: number | null
+          created_at?: string | null
+          cycle_id?: string | null
+          employee_id?: string | null
+          explanation: string
+          human_override?: boolean | null
+          id?: string
+          input_summary: Json
+          model_used?: string | null
+          model_version?: string | null
+          output_summary: Json
+          override_by?: string | null
+          override_reason?: string | null
+          processing_time_ms?: number | null
+        }
+        Update: {
+          action_type?: string
+          company_id?: string | null
+          confidence_score?: number | null
+          created_at?: string | null
+          cycle_id?: string | null
+          employee_id?: string | null
+          explanation?: string
+          human_override?: boolean | null
+          id?: string
+          input_summary?: Json
+          model_used?: string | null
+          model_version?: string | null
+          output_summary?: Json
+          override_by?: string | null
+          override_reason?: string | null
+          processing_time_ms?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedback_ai_action_logs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_ai_action_logs_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "feedback_360_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_ai_action_logs_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_ai_action_logs_override_by_fkey"
+            columns: ["override_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      feedback_consent_records: {
+        Row: {
+          company_id: string | null
+          consent_given: boolean
+          consent_text_hash: string | null
+          consent_timestamp: string | null
+          consent_type: string
+          consent_version: string
+          cycle_id: string | null
+          employee_id: string | null
+          id: string
+          ip_address: string | null
+          user_agent: string | null
+          withdrawal_reason: string | null
+          withdrawn_at: string | null
+        }
+        Insert: {
+          company_id?: string | null
+          consent_given: boolean
+          consent_text_hash?: string | null
+          consent_timestamp?: string | null
+          consent_type: string
+          consent_version?: string
+          cycle_id?: string | null
+          employee_id?: string | null
+          id?: string
+          ip_address?: string | null
+          user_agent?: string | null
+          withdrawal_reason?: string | null
+          withdrawn_at?: string | null
+        }
+        Update: {
+          company_id?: string | null
+          consent_given?: boolean
+          consent_text_hash?: string | null
+          consent_timestamp?: string | null
+          consent_type?: string
+          consent_version?: string
+          cycle_id?: string | null
+          employee_id?: string | null
+          id?: string
+          ip_address?: string | null
+          user_agent?: string | null
+          withdrawal_reason?: string | null
+          withdrawn_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedback_consent_records_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_consent_records_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "feedback_360_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_consent_records_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       feedback_cycle_template_tags: {
         Row: {
           created_at: string | null
@@ -21963,6 +22119,144 @@ export type Database = {
             columns: ["cycle_id"]
             isOneToOne: false
             referencedRelation: "feedback_360_cycles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      feedback_data_policies: {
+        Row: {
+          approval_date: string | null
+          approved_by: string | null
+          company_id: string | null
+          created_at: string | null
+          effective_from: string
+          effective_until: string | null
+          id: string
+          is_active: boolean | null
+          policy_config: Json
+          policy_type: string
+        }
+        Insert: {
+          approval_date?: string | null
+          approved_by?: string | null
+          company_id?: string | null
+          created_at?: string | null
+          effective_from: string
+          effective_until?: string | null
+          id?: string
+          is_active?: boolean | null
+          policy_config: Json
+          policy_type: string
+        }
+        Update: {
+          approval_date?: string | null
+          approved_by?: string | null
+          company_id?: string | null
+          created_at?: string | null
+          effective_from?: string
+          effective_until?: string | null
+          id?: string
+          is_active?: boolean | null
+          policy_config?: Json
+          policy_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedback_data_policies_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_data_policies_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      feedback_exceptions: {
+        Row: {
+          approval_status: string | null
+          approval_timestamp: string | null
+          approved_by: string | null
+          company_id: string | null
+          created_at: string | null
+          cycle_id: string | null
+          employee_id: string | null
+          exception_type: string
+          id: string
+          reason: string
+          requested_by: string | null
+          supporting_evidence: string | null
+          valid_until: string | null
+        }
+        Insert: {
+          approval_status?: string | null
+          approval_timestamp?: string | null
+          approved_by?: string | null
+          company_id?: string | null
+          created_at?: string | null
+          cycle_id?: string | null
+          employee_id?: string | null
+          exception_type: string
+          id?: string
+          reason: string
+          requested_by?: string | null
+          supporting_evidence?: string | null
+          valid_until?: string | null
+        }
+        Update: {
+          approval_status?: string | null
+          approval_timestamp?: string | null
+          approved_by?: string | null
+          company_id?: string | null
+          created_at?: string | null
+          cycle_id?: string | null
+          employee_id?: string | null
+          exception_type?: string
+          id?: string
+          reason?: string
+          requested_by?: string | null
+          supporting_evidence?: string | null
+          valid_until?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedback_exceptions_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_exceptions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_exceptions_cycle_id_fkey"
+            columns: ["cycle_id"]
+            isOneToOne: false
+            referencedRelation: "feedback_360_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_exceptions_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_exceptions_requested_by_fkey"
+            columns: ["requested_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
