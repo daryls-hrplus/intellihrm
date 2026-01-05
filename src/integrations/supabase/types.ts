@@ -61200,6 +61200,14 @@ export type Database = {
         | "letter_request"
         | "general"
         | "qualification"
+        | "hire"
+        | "rehire"
+        | "confirmation"
+        | "probation_extension"
+        | "acting"
+        | "secondment"
+        | "salary_change"
+        | "rate_change"
       workflow_status:
         | "draft"
         | "pending"
@@ -61557,6 +61565,14 @@ export const Constants = {
         "letter_request",
         "general",
         "qualification",
+        "hire",
+        "rehire",
+        "confirmation",
+        "probation_extension",
+        "acting",
+        "secondment",
+        "salary_change",
+        "rate_change",
       ],
       workflow_status: [
         "draft",

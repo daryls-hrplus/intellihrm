@@ -5,7 +5,7 @@ import { toast } from "sonner";
 
 export type WorkflowStatus = 'draft' | 'pending' | 'in_progress' | 'approved' | 'rejected' | 'cancelled' | 'escalated' | 'returned' | 'auto_terminated';
 export type WorkflowAction = 'approve' | 'reject' | 'return' | 'escalate' | 'delegate' | 'comment';
-export type WorkflowCategory = 'leave_request' | 'probation_confirmation' | 'headcount_request' | 'training_request' | 'promotion' | 'transfer' | 'resignation' | 'termination' | 'expense_claim' | 'letter_request' | 'general' | 'qualification';
+export type WorkflowCategory = 'leave_request' | 'probation_confirmation' | 'headcount_request' | 'training_request' | 'promotion' | 'transfer' | 'resignation' | 'termination' | 'expense_claim' | 'letter_request' | 'general' | 'qualification' | 'hire' | 'rehire' | 'confirmation' | 'probation_extension' | 'acting' | 'secondment' | 'salary_change' | 'rate_change';
 
 export interface WorkflowTemplate {
   id: string;
