@@ -69,6 +69,28 @@
     "alreadyHaveAccount": "Haben Sie bereits ein Konto?",
     "dontHaveAccount": "Haben Sie noch kein Konto?"
   },
+"hrHub": {
+    "title": "HR-Zentrum",
+    "transactionWorkflowSettings": {
+      "title": "Transaktions-Workflow-Einstellungen",
+      "subtitle": "Konfigurieren Sie, welche Mitarbeitertransaktionstypen eine Workflow-Genehmigung pro Unternehmen erfordern",
+      "description": "Steuern Sie die Workflow-Anforderungen für Mitarbeiter-Lebenszyklus-Transaktionen",
+      "selectCompanyPrompt": "Unternehmen auswählen",
+      "selectCompanyDescription": "Wählen Sie ein Unternehmen aus der Dropdown-Liste, um die Transaktions-Workflow-Einstellungen zu konfigurieren.",
+      "summary": "Konfigurationsübersicht",
+      "enableAll": "Alle Aktivieren",
+      "disableAll": "Alle Deaktivieren",
+      "workflowEnabled": "mit aktiviertem Workflow",
+      "workflowDisabled": "ohne Workflow",
+      "workflowRequired": "Workflow erforderlich",
+      "enableWorkflow": "Workflow Aktiviert",
+      "template": "Vorlage",
+      "selectTemplate": "Vorlage auswählen",
+      "autoStart": "Auto-Start",
+      "requiresApproval": "Blockieren bis genehmigt",
+      "noTransactionTypes": "Keine Transaktionstypen gefunden. Bitte konfigurieren Sie Transaktionstypen in den Nachschlagewerten."
+    }
+  },
   "navigation": {
     "dashboard": "Dashboard",
     "workforce": "Personal",

@@ -69,6 +69,28 @@
     "alreadyHaveAccount": "Heeft u al een account?",
     "dontHaveAccount": "Heeft u nog geen account?"
   },
+"hrHub": {
+    "title": "HR Hub",
+    "transactionWorkflowSettings": {
+      "title": "Transactie Workflow Instellingen",
+      "subtitle": "Configureer welke medewerker transactietypes workflow-goedkeuring vereisen per bedrijf",
+      "description": "Beheer workflow-vereisten voor medewerker levenscyclus transacties",
+      "selectCompanyPrompt": "Selecteer een Bedrijf",
+      "selectCompanyDescription": "Kies een bedrijf uit de dropdown om transactie workflow-instellingen te configureren.",
+      "summary": "Configuratie Overzicht",
+      "enableAll": "Alles Inschakelen",
+      "disableAll": "Alles Uitschakelen",
+      "workflowEnabled": "met workflow ingeschakeld",
+      "workflowDisabled": "zonder workflow",
+      "workflowRequired": "Workflow vereist",
+      "enableWorkflow": "Workflow Ingeschakeld",
+      "template": "Sjabloon",
+      "selectTemplate": "Selecteer sjabloon",
+      "autoStart": "Auto-start",
+      "requiresApproval": "Blokkeren tot goedkeuring",
+      "noTransactionTypes": "Geen transactietypes gevonden. Configureer transactietypes in Opzoekwaarden."
+    }
+  },
   "navigation": {
     "dashboard": "Dashboard",
     "workforce": "Personeel",

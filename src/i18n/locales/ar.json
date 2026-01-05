@@ -203,6 +203,28 @@
     "alreadyHaveAccount": "لديك حساب بالفعل؟",
     "dontHaveAccount": "ليس لديك حساب؟"
   },
+"hrHub": {
+    "title": "مركز الموارد البشرية",
+    "transactionWorkflowSettings": {
+      "title": "إعدادات سير عمل المعاملات",
+      "subtitle": "قم بتكوين أنواع معاملات الموظفين التي تتطلب موافقة سير العمل حسب الشركة",
+      "description": "تحكم في متطلبات سير العمل لمعاملات دورة حياة الموظف",
+      "selectCompanyPrompt": "اختر شركة",
+      "selectCompanyDescription": "اختر شركة من القائمة المنسدلة لتكوين إعدادات سير عمل المعاملات.",
+      "summary": "ملخص التكوين",
+      "enableAll": "تفعيل الكل",
+      "disableAll": "تعطيل الكل",
+      "workflowEnabled": "مع سير العمل مفعل",
+      "workflowDisabled": "بدون سير عمل",
+      "workflowRequired": "سير العمل مطلوب",
+      "enableWorkflow": "سير العمل مفعل",
+      "template": "قالب",
+      "selectTemplate": "اختر قالب",
+      "autoStart": "بدء تلقائي",
+      "requiresApproval": "حظر حتى الموافقة",
+      "noTransactionTypes": "لم يتم العثور على أنواع المعاملات. يرجى تكوين أنواع المعاملات في قيم البحث."
+    }
+  },
   "navigation": {
     "dashboard": "لوحة التحكم",
     "hrHub": "مركز الموارد البشرية",
