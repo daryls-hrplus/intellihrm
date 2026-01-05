@@ -31,6 +31,7 @@ import {
   Brain,
   PieChart,
 } from "lucide-react";
+import { UpcomingRemindersWidget } from "@/components/performance/widgets/UpcomingRemindersWidget";
 
 export default function PerformanceDashboardPage() {
   const { t } = useLanguage();
@@ -199,7 +200,15 @@ export default function PerformanceDashboardPage() {
           })}
         </div>
 
-        <GroupedModuleCards sections={sections} defaultOpen={true} showToggleButton />
+        {/* Upcoming Reminders Widget */}
+        <div className="grid gap-4 lg:grid-cols-4">
+          <div className="lg:col-span-3">
+            <GroupedModuleCards sections={sections} defaultOpen={true} showToggleButton />
+          </div>
+          <div className="lg:col-span-1">
+            <UpcomingRemindersWidget compact />
+          </div>
+        </div>
       </div>
     </AppLayout>
   );
