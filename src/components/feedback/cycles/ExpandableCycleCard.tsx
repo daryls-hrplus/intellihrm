@@ -6,6 +6,12 @@ import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
   Users,
   Calendar,
   Settings,
@@ -17,7 +23,12 @@ import {
   LayoutDashboard,
   CheckCircle,
   FileText,
+  MoreVertical,
+  Shield,
 } from "lucide-react";
+import { ExceptionRequestDialog } from "@/components/feedback/governance";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 import { CycleOverviewTab } from "./CycleOverviewTab";
 import { CycleParticipantsTab } from "./CycleParticipantsTab";
 import { CycleQuestionsTab } from "./CycleQuestionsTab";
@@ -80,8 +91,10 @@ export function ExpandableCycleCard({
   onUpdate,
   showCreator = false,
 }: ExpandableCycleCardProps) {
+  const { user } = useAuth();
   const [isExpanded, setIsExpanded] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
+  const [exceptionDialogOpen, setExceptionDialogOpen] = useState(false);
 
   return (
     <Card>
@@ -168,6 +181,19 @@ export function ExpandableCycleCard({
                 >
                   <Settings className="h-4 w-4" />
                 </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm" title="More Actions">
+                      <MoreVertical className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => setExceptionDialogOpen(true)}>
+                      <Shield className="mr-2 h-4 w-4" />
+                      Request Exception
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </div>
           </div>
@@ -243,6 +269,20 @@ export function ExpandableCycleCard({
           </div>
         </CollapsibleContent>
       </Collapsible>
+
+      {/* Exception Request Dialog */}
+      <ExceptionRequestDialog
+        open={exceptionDialogOpen}
+        onOpenChange={setExceptionDialogOpen}
+        cycleId={cycle.id}
+        companyId={cycle.company_id || ""}
+        employeeId={user?.id || ""}
+        employeeName=""
+        onSuccess={() => {
+          setExceptionDialogOpen(false);
+          toast.success("Exception request submitted successfully");
+        }}
+      />
     </Card>
   );
 }
