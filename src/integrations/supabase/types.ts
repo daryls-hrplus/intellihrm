@@ -55918,6 +55918,7 @@ export type Database = {
           attachments: Json | null
           category_id: string | null
           closed_at: string | null
+          company_id: string | null
           created_at: string
           description: string
           due_date: string | null
@@ -55940,6 +55941,7 @@ export type Database = {
           attachments?: Json | null
           category_id?: string | null
           closed_at?: string | null
+          company_id?: string | null
           created_at?: string
           description: string
           due_date?: string | null
@@ -55962,6 +55964,7 @@ export type Database = {
           attachments?: Json | null
           category_id?: string | null
           closed_at?: string | null
+          company_id?: string | null
           created_at?: string
           description?: string
           due_date?: string | null
@@ -55992,6 +55995,13 @@ export type Database = {
             columns: ["category_id"]
             isOneToOne: false
             referencedRelation: "ticket_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tickets_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
             referencedColumns: ["id"]
           },
           {

@@ -1,16 +1,19 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { sendTicketNotification } from "@/hooks/useTicketNotifications";
@@ -37,9 +40,16 @@ import {
   UserCog,
   Star,
   Users,
+  Plus,
+  Building2,
 } from "lucide-react";
 import { formatDistanceToNow, differenceInHours, isPast, addHours } from "date-fns";
 import { formatDateForDisplay } from "@/utils/dateUtils";
+
+interface Company {
+  id: string;
+  name: string;
+}
 
 const statusColors: Record<string, string> = {
   open: "bg-blue-500/10 text-blue-600 border-blue-200",
@@ -51,10 +61,35 @@ const statusColors: Record<string, string> = {
 
 export default function AdminHelpdeskPage() {
   const { t } = useTranslation();
+  const { user } = useAuth();
   const queryClient = useQueryClient();
   const [selectedTicket, setSelectedTicket] = useState<any>(null);
   const [commentText, setCommentText] = useState("");
   const [filter, setFilter] = useState<string>("all");
+  const [companyFilter, setCompanyFilter] = useState<string>("all");
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
+  const [newTicket, setNewTicket] = useState({
+    subject: "",
+    description: "",
+    category_id: "",
+    priority_id: "",
+    company_id: "",
+    requester_id: "",
+  });
+
+  const { data: companies = [] } = useQuery({
+    queryKey: ["companies"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("companies")
+        .select("id, name")
+        .eq("is_active", true)
+        .order("name");
+      if (error) throw error;
+      return data as Company[];
+    },
+  });
 
   const { data: tickets = [], isLoading } = useQuery({
     queryKey: ["admin-tickets"],
@@ -66,9 +101,23 @@ export default function AdminHelpdeskPage() {
           requester:profiles!tickets_requester_id_fkey(full_name, email),
           assignee:profiles!tickets_assignee_id_fkey(full_name, email),
           category:ticket_categories(name, code),
-          priority:ticket_priorities(name, code, color, response_time_hours, resolution_time_hours)
+          priority:ticket_priorities(name, code, color, response_time_hours, resolution_time_hours),
+          company:companies(id, name)
         `)
         .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const { data: categories = [] } = useQuery({
+    queryKey: ["ticket-categories"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("ticket_categories")
+        .select("id, name, code")
+        .eq("is_active", true)
+        .order("display_order");
       if (error) throw error;
       return data;
     },
@@ -248,6 +297,10 @@ export default function AdminHelpdeskPage() {
   };
 
   const filteredTickets = tickets.filter(t => {
+    // Company filter
+    if (companyFilter !== "all" && t.company_id !== companyFilter) return false;
+    
+    // Status filter
     if (filter === "all") return true;
     if (filter === "unassigned") return !t.assignee_id;
     if (filter === "sla_breach") {
@@ -256,6 +309,54 @@ export default function AdminHelpdeskPage() {
     }
     return t.status === filter;
   });
+
+  const generateTicketNumber = () => {
+    const prefix = "TKT";
+    const timestamp = Date.now().toString(36).toUpperCase();
+    const random = Math.random().toString(36).substring(2, 6).toUpperCase();
+    return `${prefix}-${timestamp}-${random}`;
+  };
+
+  const handleCreateTicket = async () => {
+    if (!newTicket.subject || !newTicket.description || !newTicket.company_id) {
+      toast.error("Please fill in subject, description, and select a company");
+      return;
+    }
+
+    setIsCreating(true);
+    try {
+      const ticketNumber = generateTicketNumber();
+      
+      const { error } = await supabase.from("tickets").insert({
+        ticket_number: ticketNumber,
+        subject: newTicket.subject,
+        description: newTicket.description,
+        category_id: newTicket.category_id || null,
+        priority_id: newTicket.priority_id || null,
+        company_id: newTicket.company_id,
+        requester_id: newTicket.requester_id || user?.id,
+        status: "open",
+      });
+
+      if (error) throw error;
+
+      toast.success("Ticket created successfully");
+      setCreateDialogOpen(false);
+      setNewTicket({
+        subject: "",
+        description: "",
+        category_id: "",
+        priority_id: "",
+        company_id: "",
+        requester_id: "",
+      });
+      queryClient.invalidateQueries({ queryKey: ["admin-tickets"] });
+    } catch (error: any) {
+      toast.error(error.message || "Failed to create ticket");
+    } finally {
+      setIsCreating(false);
+    }
+  };
 
   return (
     <AppLayout>
@@ -269,6 +370,10 @@ export default function AdminHelpdeskPage() {
             <h1 className="text-3xl font-bold tracking-tight">{t("hrHub.helpDesk")}</h1>
             <p className="text-muted-foreground">{t("hrHub.helpDeskDesc")}</p>
           </div>
+          <Button onClick={() => setCreateDialogOpen(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Create Ticket
+          </Button>
         </div>
 
         <Tabs defaultValue="tickets" className="space-y-4">
@@ -438,21 +543,35 @@ export default function AdminHelpdeskPage() {
         {/* Tickets Table */}
         <Card>
           <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle>Support Tickets</CardTitle>
-              <Select value={filter} onValueChange={setFilter}>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Filter" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Tickets</SelectItem>
-                  <SelectItem value="open">Open</SelectItem>
-                  <SelectItem value="in_progress">In Progress</SelectItem>
-                  <SelectItem value="pending">Pending</SelectItem>
-                  <SelectItem value="unassigned">Unassigned</SelectItem>
-                  <SelectItem value="sla_breach">SLA Breached</SelectItem>
-                </SelectContent>
-              </Select>
+            <div className="flex items-center justify-between flex-wrap gap-4">
+              <CardTitle>Support Tickets ({filteredTickets.length})</CardTitle>
+              <div className="flex gap-2">
+                <Select value={companyFilter} onValueChange={setCompanyFilter}>
+                  <SelectTrigger className="w-[200px]">
+                    <Building2 className="h-4 w-4 mr-2" />
+                    <SelectValue placeholder="All Companies" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Companies</SelectItem>
+                    {companies.map((company) => (
+                      <SelectItem key={company.id} value={company.id}>{company.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Select value={filter} onValueChange={setFilter}>
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Filter" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Tickets</SelectItem>
+                    <SelectItem value="open">Open</SelectItem>
+                    <SelectItem value="in_progress">In Progress</SelectItem>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="unassigned">Unassigned</SelectItem>
+                    <SelectItem value="sla_breach">SLA Breached</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </CardHeader>
           <CardContent className="p-0">
@@ -460,6 +579,7 @@ export default function AdminHelpdeskPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Ticket</TableHead>
+                  <TableHead>Company</TableHead>
                   <TableHead>Requester</TableHead>
                   <TableHead>Priority</TableHead>
                   <TableHead>Status</TableHead>
@@ -471,11 +591,11 @@ export default function AdminHelpdeskPage() {
               <TableBody>
                 {isLoading ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center py-8">Loading...</TableCell>
+                    <TableCell colSpan={8} className="text-center py-8">Loading...</TableCell>
                   </TableRow>
                 ) : filteredTickets.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                    <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
                       No tickets found
                     </TableCell>
                   </TableRow>
@@ -492,6 +612,12 @@ export default function AdminHelpdeskPage() {
                           <div>
                             <span className="font-mono text-xs text-muted-foreground">{ticket.ticket_number}</span>
                             <p className="font-medium truncate max-w-[200px]">{ticket.subject}</p>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-1">
+                            <Building2 className="h-3 w-3 text-muted-foreground" />
+                            <span className="text-sm">{ticket.company?.name || "—"}</span>
                           </div>
                         </TableCell>
                         <TableCell>
@@ -769,6 +895,94 @@ export default function AdminHelpdeskPage() {
             <SatisfactionAnalytics />
           </TabsContent>
         </Tabs>
+
+        {/* Create Ticket Dialog */}
+        <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Create New Ticket</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>Company <span className="text-destructive">*</span></Label>
+                <Select value={newTicket.company_id} onValueChange={(v) => setNewTicket({ ...newTicket, company_id: v })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select company" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {companies.map((company) => (
+                      <SelectItem key={company.id} value={company.id}>{company.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Subject <span className="text-destructive">*</span></Label>
+                <Input
+                  value={newTicket.subject}
+                  onChange={(e) => setNewTicket({ ...newTicket, subject: e.target.value })}
+                  placeholder="Brief summary of the issue"
+                />
+              </div>
+              <div>
+                <Label>Description <span className="text-destructive">*</span></Label>
+                <Textarea
+                  value={newTicket.description}
+                  onChange={(e) => setNewTicket({ ...newTicket, description: e.target.value })}
+                  placeholder="Detailed description of the issue"
+                  rows={4}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Category</Label>
+                  <Select value={newTicket.category_id} onValueChange={(v) => setNewTicket({ ...newTicket, category_id: v })}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {categories.map((cat: any) => (
+                        <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>Priority</Label>
+                  <Select value={newTicket.priority_id} onValueChange={(v) => setNewTicket({ ...newTicket, priority_id: v })}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select priority" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {priorities.map((p: any) => (
+                        <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div>
+                <Label>Requester</Label>
+                <Select value={newTicket.requester_id} onValueChange={(v) => setNewTicket({ ...newTicket, requester_id: v })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select requester (defaults to you)" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {agents.map((agent: any) => (
+                      <SelectItem key={agent.id} value={agent.id}>{agent.full_name || agent.email}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setCreateDialogOpen(false)}>Cancel</Button>
+              <Button onClick={handleCreateTicket} disabled={isCreating}>
+                {isCreating ? "Creating..." : "Create Ticket"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </AppLayout>
   );
