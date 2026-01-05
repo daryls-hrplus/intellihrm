@@ -523,6 +523,7 @@ import HRDataImportPage from "./pages/hr-hub/HRDataImportPage";
 import SentimentMonitoringPage from "./pages/hr-hub/SentimentMonitoringPage";
 import RecognitionAnalyticsPage from "./pages/hr-hub/RecognitionAnalyticsPage";
 import IntegrationDashboardPage from "./pages/hr-hub/IntegrationDashboardPage";
+import TransactionWorkflowSettingsPage from "./pages/hr-hub/TransactionWorkflowSettingsPage";
 
 // Admin Reminders
 import AdminRemindersPage from "./pages/admin/AdminRemindersPage";
@@ -4079,6 +4080,14 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
                   <HRDataImportPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/hr-hub/transaction-workflow-settings"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <TransactionWorkflowSettingsPage />
                 </ProtectedRoute>
               }
             />

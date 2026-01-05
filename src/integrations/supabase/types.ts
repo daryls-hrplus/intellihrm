@@ -8861,6 +8861,83 @@ export type Database = {
         }
         Relationships: []
       }
+      company_transaction_workflow_settings: {
+        Row: {
+          auto_start_workflow: boolean
+          company_id: string
+          created_at: string
+          created_by: string | null
+          effective_date: string | null
+          end_date: string | null
+          id: string
+          is_active: boolean
+          requires_approval_before_effective: boolean
+          transaction_type_id: string
+          updated_at: string
+          workflow_enabled: boolean
+          workflow_template_id: string | null
+        }
+        Insert: {
+          auto_start_workflow?: boolean
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          effective_date?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          requires_approval_before_effective?: boolean
+          transaction_type_id: string
+          updated_at?: string
+          workflow_enabled?: boolean
+          workflow_template_id?: string | null
+        }
+        Update: {
+          auto_start_workflow?: boolean
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          effective_date?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          requires_approval_before_effective?: boolean
+          transaction_type_id?: string
+          updated_at?: string
+          workflow_enabled?: boolean
+          workflow_template_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_transaction_workflow_settings_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_transaction_workflow_settings_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_transaction_workflow_settings_transaction_type_id_fkey"
+            columns: ["transaction_type_id"]
+            isOneToOne: false
+            referencedRelation: "lookup_values"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_transaction_workflow_settings_workflow_template_id_fkey"
+            columns: ["workflow_template_id"]
+            isOneToOne: false
+            referencedRelation: "workflow_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       company_values: {
         Row: {
           behavioral_indicators: Json | null
