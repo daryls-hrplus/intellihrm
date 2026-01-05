@@ -4,12 +4,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { CheckCircle2, XCircle, RotateCcw, Clock, User, ChevronDown, ChevronUp } from "lucide-react";
-import { WorkflowInstance, WorkflowStep, useWorkflow } from "@/hooks/useWorkflow";
+import { CheckCircle2, XCircle, RotateCcw, Clock, User, ChevronDown, ChevronUp, Building2 } from "lucide-react";
+import { WorkflowInstance, WorkflowStep, useWorkflow, CrossCompanyPathEntry } from "@/hooks/useWorkflow";
 import { WorkflowStatusBadge } from "./WorkflowStatusBadge";
 import { WorkflowActionDialog } from "./WorkflowActionDialog";
 import { WorkflowTimeline } from "./WorkflowTimeline";
 import { LeaveApprovalContext } from "@/components/leave/LeaveApprovalContext";
+import { CrossCompanyBadge } from "./CrossCompanyBadge";
 import type { WorkflowAction, WorkflowStepAction } from "@/hooks/useWorkflow";
 
 interface WorkflowApprovalCardProps {
@@ -83,16 +84,27 @@ export function WorkflowApprovalCard({
       <Card>
         <CardHeader className="pb-3">
           <div className="flex items-start justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-2">
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <CardTitle className="text-lg">
                   {instance.template?.name || getCategoryLabel(instance.category)}
                 </CardTitle>
                 <WorkflowStatusBadge status={instance.status} />
+                <CrossCompanyBadge
+                  isCrossCompany={instance.is_cross_company || false}
+                  originCompanyName={instance.origin_company?.name}
+                  crossCompanyPath={(instance.cross_company_path as CrossCompanyPathEntry[]) || []}
+                />
               </div>
-              <CardDescription className="mt-1">
+              <CardDescription>
                 Initiated by {instance.initiator?.full_name || "Unknown"} • {" "}
                 {formatDistanceToNow(new Date(instance.initiated_at), { addSuffix: true })}
+                {instance.origin_company?.name && (
+                  <span className="ml-2">
+                    <Building2 className="h-3 w-3 inline mr-1" />
+                    {instance.origin_company.name}
+                  </span>
+                )}
               </CardDescription>
             </div>
             {currentStep && (
@@ -118,35 +130,46 @@ export function WorkflowApprovalCard({
           {/* Step Progress */}
           {allSteps.length > 0 && showDetails && (
             <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                {allSteps.map((step, index) => (
-                  <div key={step.id} className="flex items-center gap-2">
-                    <div
-                      className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-medium ${
-                        step.step_order < instance.current_step_order
-                          ? "bg-green-500 text-white"
-                          : step.step_order === instance.current_step_order
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-muted text-muted-foreground"
-                      }`}
-                    >
-                      {step.step_order < instance.current_step_order ? (
-                        <CheckCircle2 className="h-4 w-4" />
-                      ) : (
-                        step.step_order
+              <div className="flex items-center gap-2 flex-wrap">
+                {allSteps.map((step, index) => {
+                  const hasTargetCompany = step.target_company_id && step.target_company_id !== instance.company_id;
+                  
+                  return (
+                    <div key={step.id} className="flex items-center gap-2">
+                      <div className="relative">
+                        <div
+                          className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-medium ${
+                            step.step_order < instance.current_step_order
+                              ? "bg-green-500 text-white"
+                              : step.step_order === instance.current_step_order
+                              ? "bg-primary text-primary-foreground"
+                              : "bg-muted text-muted-foreground"
+                          }`}
+                        >
+                          {step.step_order < instance.current_step_order ? (
+                            <CheckCircle2 className="h-4 w-4" />
+                          ) : (
+                            step.step_order
+                          )}
+                        </div>
+                        {hasTargetCompany && (
+                          <Building2 className="h-3 w-3 absolute -top-1 -right-1 text-amber-500" />
+                        )}
+                      </div>
+                      {index < allSteps.length - 1 && (
+                        <div
+                          className={`h-0.5 w-8 ${
+                            step.step_order < instance.current_step_order
+                              ? "bg-green-500"
+                              : hasTargetCompany
+                              ? "bg-amber-300"
+                              : "bg-muted"
+                          }`}
+                        />
                       )}
                     </div>
-                    {index < allSteps.length - 1 && (
-                      <div
-                        className={`h-0.5 w-8 ${
-                          step.step_order < instance.current_step_order
-                            ? "bg-green-500"
-                            : "bg-muted"
-                        }`}
-                      />
-                    )}
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}

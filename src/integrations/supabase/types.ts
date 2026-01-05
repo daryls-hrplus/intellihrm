@@ -59540,6 +59540,7 @@ export type Database = {
           completed_at: string | null
           completed_by: string | null
           created_at: string
+          cross_company_path: Json | null
           current_step_id: string | null
           current_step_order: number
           deadline_at: string | null
@@ -59548,7 +59549,9 @@ export type Database = {
           id: string
           initiated_at: string
           initiated_by: string
+          is_cross_company: boolean | null
           metadata: Json | null
+          origin_company_id: string | null
           reference_id: string
           reference_type: string
           status: Database["public"]["Enums"]["workflow_status"]
@@ -59562,6 +59565,7 @@ export type Database = {
           completed_at?: string | null
           completed_by?: string | null
           created_at?: string
+          cross_company_path?: Json | null
           current_step_id?: string | null
           current_step_order?: number
           deadline_at?: string | null
@@ -59570,7 +59574,9 @@ export type Database = {
           id?: string
           initiated_at?: string
           initiated_by: string
+          is_cross_company?: boolean | null
           metadata?: Json | null
+          origin_company_id?: string | null
           reference_id: string
           reference_type: string
           status?: Database["public"]["Enums"]["workflow_status"]
@@ -59584,6 +59590,7 @@ export type Database = {
           completed_at?: string | null
           completed_by?: string | null
           created_at?: string
+          cross_company_path?: Json | null
           current_step_id?: string | null
           current_step_order?: number
           deadline_at?: string | null
@@ -59592,7 +59599,9 @@ export type Database = {
           id?: string
           initiated_at?: string
           initiated_by?: string
+          is_cross_company?: boolean | null
           metadata?: Json | null
+          origin_company_id?: string | null
           reference_id?: string
           reference_type?: string
           status?: Database["public"]["Enums"]["workflow_status"]
@@ -59626,6 +59635,13 @@ export type Database = {
             columns: ["initiated_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workflow_instances_origin_company_id_fkey"
+            columns: ["origin_company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
             referencedColumns: ["id"]
           },
           {
@@ -59882,7 +59898,9 @@ export type Database = {
           approver_type: string
           approver_user_id: string | null
           can_delegate: boolean
+          company_id: string | null
           created_at: string
+          department_id: string | null
           description: string | null
           escalation_action: string | null
           escalation_hours: number | null
@@ -59891,7 +59909,9 @@ export type Database = {
           name: string
           requires_comment: boolean
           requires_signature: boolean
+          section_id: string | null
           step_order: number
+          target_company_id: string | null
           template_id: string
           updated_at: string
           use_reporting_line: boolean
@@ -59904,7 +59924,9 @@ export type Database = {
           approver_type: string
           approver_user_id?: string | null
           can_delegate?: boolean
+          company_id?: string | null
           created_at?: string
+          department_id?: string | null
           description?: string | null
           escalation_action?: string | null
           escalation_hours?: number | null
@@ -59913,7 +59935,9 @@ export type Database = {
           name: string
           requires_comment?: boolean
           requires_signature?: boolean
+          section_id?: string | null
           step_order: number
+          target_company_id?: string | null
           template_id: string
           updated_at?: string
           use_reporting_line?: boolean
@@ -59926,7 +59950,9 @@ export type Database = {
           approver_type?: string
           approver_user_id?: string | null
           can_delegate?: boolean
+          company_id?: string | null
           created_at?: string
+          department_id?: string | null
           description?: string | null
           escalation_action?: string | null
           escalation_hours?: number | null
@@ -59935,7 +59961,9 @@ export type Database = {
           name?: string
           requires_comment?: boolean
           requires_signature?: boolean
+          section_id?: string | null
           step_order?: number
+          target_company_id?: string | null
           template_id?: string
           updated_at?: string
           use_reporting_line?: boolean
@@ -59977,6 +60005,34 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "workflow_steps_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workflow_steps_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workflow_steps_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "sections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workflow_steps_target_company_id_fkey"
+            columns: ["target_company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "workflow_steps_template_id_fkey"
             columns: ["template_id"]
             isOneToOne: false
@@ -59994,6 +60050,7 @@ export type Database = {
           company_id: string | null
           created_at: string
           created_by: string
+          department_id: string | null
           description: string | null
           end_date: string | null
           id: string
@@ -60003,6 +60060,7 @@ export type Database = {
           name: string
           requires_letter: boolean
           requires_signature: boolean
+          section_id: string | null
           start_date: string | null
           updated_at: string
         }
@@ -60014,6 +60072,7 @@ export type Database = {
           company_id?: string | null
           created_at?: string
           created_by: string
+          department_id?: string | null
           description?: string | null
           end_date?: string | null
           id?: string
@@ -60023,6 +60082,7 @@ export type Database = {
           name: string
           requires_letter?: boolean
           requires_signature?: boolean
+          section_id?: string | null
           start_date?: string | null
           updated_at?: string
         }
@@ -60034,6 +60094,7 @@ export type Database = {
           company_id?: string | null
           created_at?: string
           created_by?: string
+          department_id?: string | null
           description?: string | null
           end_date?: string | null
           id?: string
@@ -60043,6 +60104,7 @@ export type Database = {
           name?: string
           requires_letter?: boolean
           requires_signature?: boolean
+          section_id?: string | null
           start_date?: string | null
           updated_at?: string
         }
@@ -60055,10 +60117,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "workflow_templates_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "workflow_templates_letter_template_id_fkey"
             columns: ["letter_template_id"]
             isOneToOne: false
             referencedRelation: "letter_templates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workflow_templates_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "sections"
             referencedColumns: ["id"]
           },
         ]
