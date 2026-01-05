@@ -59541,8 +59541,10 @@ export type Database = {
           completed_by: string | null
           created_at: string
           cross_company_path: Json | null
+          current_step_deadline_at: string | null
           current_step_id: string | null
           current_step_order: number
+          current_step_started_at: string | null
           deadline_at: string | null
           escalated_at: string | null
           final_action: Database["public"]["Enums"]["workflow_action"] | null
@@ -59554,6 +59556,7 @@ export type Database = {
           origin_company_id: string | null
           reference_id: string
           reference_type: string
+          sla_status: string | null
           status: Database["public"]["Enums"]["workflow_status"]
           template_id: string
           updated_at: string
@@ -59566,8 +59569,10 @@ export type Database = {
           completed_by?: string | null
           created_at?: string
           cross_company_path?: Json | null
+          current_step_deadline_at?: string | null
           current_step_id?: string | null
           current_step_order?: number
+          current_step_started_at?: string | null
           deadline_at?: string | null
           escalated_at?: string | null
           final_action?: Database["public"]["Enums"]["workflow_action"] | null
@@ -59579,6 +59584,7 @@ export type Database = {
           origin_company_id?: string | null
           reference_id: string
           reference_type: string
+          sla_status?: string | null
           status?: Database["public"]["Enums"]["workflow_status"]
           template_id: string
           updated_at?: string
@@ -59591,8 +59597,10 @@ export type Database = {
           completed_by?: string | null
           created_at?: string
           cross_company_path?: Json | null
+          current_step_deadline_at?: string | null
           current_step_id?: string | null
           current_step_order?: number
+          current_step_started_at?: string | null
           deadline_at?: string | null
           escalated_at?: string | null
           final_action?: Database["public"]["Enums"]["workflow_action"] | null
@@ -59604,6 +59612,7 @@ export type Database = {
           origin_company_id?: string | null
           reference_id?: string
           reference_type?: string
+          sla_status?: string | null
           status?: Database["public"]["Enums"]["workflow_status"]
           template_id?: string
           updated_at?: string
@@ -59889,6 +59898,82 @@ export type Database = {
           },
         ]
       }
+      workflow_step_tracking: {
+        Row: {
+          action: string | null
+          actor_id: string | null
+          completed_at: string | null
+          created_at: string
+          deadline_at: string | null
+          escalated_at: string | null
+          expired_at: string | null
+          id: string
+          instance_id: string
+          sla_status: string | null
+          started_at: string
+          step_id: string
+          step_order: number
+          time_to_complete_hours: number | null
+          was_overdue: boolean | null
+        }
+        Insert: {
+          action?: string | null
+          actor_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          deadline_at?: string | null
+          escalated_at?: string | null
+          expired_at?: string | null
+          id?: string
+          instance_id: string
+          sla_status?: string | null
+          started_at?: string
+          step_id: string
+          step_order: number
+          time_to_complete_hours?: number | null
+          was_overdue?: boolean | null
+        }
+        Update: {
+          action?: string | null
+          actor_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          deadline_at?: string | null
+          escalated_at?: string | null
+          expired_at?: string | null
+          id?: string
+          instance_id?: string
+          sla_status?: string | null
+          started_at?: string
+          step_id?: string
+          step_order?: number
+          time_to_complete_hours?: number | null
+          was_overdue?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflow_step_tracking_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workflow_step_tracking_instance_id_fkey"
+            columns: ["instance_id"]
+            isOneToOne: false
+            referencedRelation: "workflow_instances"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workflow_step_tracking_step_id_fkey"
+            columns: ["step_id"]
+            isOneToOne: false
+            referencedRelation: "workflow_steps"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       workflow_steps: {
         Row: {
           alternate_approver_id: string | null
@@ -59904,12 +59989,15 @@ export type Database = {
           description: string | null
           escalation_action: string | null
           escalation_hours: number | null
+          expiration_days: number | null
           id: string
           is_active: boolean
           name: string
           requires_comment: boolean
           requires_signature: boolean
           section_id: string | null
+          sla_critical_hours: number | null
+          sla_warning_hours: number | null
           step_order: number
           target_company_id: string | null
           template_id: string
@@ -59930,12 +60018,15 @@ export type Database = {
           description?: string | null
           escalation_action?: string | null
           escalation_hours?: number | null
+          expiration_days?: number | null
           id?: string
           is_active?: boolean
           name: string
           requires_comment?: boolean
           requires_signature?: boolean
           section_id?: string | null
+          sla_critical_hours?: number | null
+          sla_warning_hours?: number | null
           step_order: number
           target_company_id?: string | null
           template_id: string
@@ -59956,12 +60047,15 @@ export type Database = {
           description?: string | null
           escalation_action?: string | null
           escalation_hours?: number | null
+          expiration_days?: number | null
           id?: string
           is_active?: boolean
           name?: string
           requires_comment?: boolean
           requires_signature?: boolean
           section_id?: string | null
+          sla_critical_hours?: number | null
+          sla_warning_hours?: number | null
           step_order?: number
           target_company_id?: string | null
           template_id?: string
