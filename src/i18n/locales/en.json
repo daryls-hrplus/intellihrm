@@ -7471,5 +7471,14 @@
       "returned": "Returned",
       "cost": "Cost"
     }
+  },
+  "workflow": {
+    "processMap": {
+      "title": "Process Map",
+      "generating": "Generating process map with AI...",
+      "regenerate": "Regenerate",
+      "downloadSvg": "Download SVG",
+      "downloadPng": "Download PNG"
+    }
   }
 }

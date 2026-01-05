@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
-import { Plus, Pencil, Trash2, Loader2, GitBranch, ArrowRight, GripVertical, Clock, Settings, Users } from "lucide-react";
+import { Plus, Pencil, Trash2, Loader2, GitBranch, ArrowRight, GripVertical, Clock, Settings, Users, FileImage } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -22,6 +22,7 @@ import { formatDateForDisplay } from "@/utils/dateUtils";
 import type { WorkflowTemplate, WorkflowStep, WorkflowCategory } from "@/hooks/useWorkflow";
 import { SchedulerManagement } from "@/components/admin/SchedulerManagement";
 import { WorkflowApprovalRolesManagement } from "@/components/admin/WorkflowApprovalRolesManagement";
+import { WorkflowProcessMapDialog } from "@/components/workflow/WorkflowProcessMapDialog";
 
 const WORKFLOW_CATEGORIES: { value: WorkflowCategory; label: string }[] = [
   // Employee Transactions
@@ -84,6 +85,7 @@ export default function AdminWorkflowTemplatesPage() {
   const [departments, setDepartments] = useState<{ id: string; name: string; company_id: string }[]>([]);
   const [sections, setSections] = useState<{ id: string; name: string; department_id: string }[]>([]);
   const [workflowApprovalRoles, setWorkflowApprovalRoles] = useState<{ id: string; name: string; code: string }[]>([]);
+  const [showProcessMapDialog, setShowProcessMapDialog] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -370,6 +372,14 @@ export default function AdminWorkflowTemplatesPage() {
                       >
                         <Pencil className="h-4 w-4 mr-1" />
                         Edit
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setShowProcessMapDialog(true)}
+                      >
+                        <FileImage className="h-4 w-4 mr-1" />
+                        Process Map
                       </Button>
                       <Button
                         size="sm"
@@ -1137,6 +1147,14 @@ export default function AdminWorkflowTemplatesPage() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        {/* Process Map Dialog */}
+        <WorkflowProcessMapDialog
+          open={showProcessMapDialog}
+          onOpenChange={setShowProcessMapDialog}
+          template={selectedTemplate}
+          steps={steps}
+        />
       </div>
     </AppLayout>
   );

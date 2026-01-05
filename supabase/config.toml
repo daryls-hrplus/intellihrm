@@ -386,3 +386,6 @@ verify_jwt = false
 
 [functions.send-360-activation-notifications]
 verify_jwt = false
+
+[functions.generate-workflow-diagram]
+verify_jwt = false
