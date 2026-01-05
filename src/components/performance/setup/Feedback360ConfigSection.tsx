@@ -256,35 +256,35 @@ export function Feedback360ConfigSection({ companyId }: Feedback360ConfigSection
             <span className="hidden lg:inline">Question Bank</span>
             <span className="lg:hidden">Questions</span>
           </TabsTrigger>
-          <TabsTrigger value="question-assignments" className="flex items-center gap-2">
-            <Grid3X3 className="h-4 w-4" />
-            <span className="hidden lg:inline">Question Assignments</span>
-            <span className="lg:hidden">Assign</span>
-          </TabsTrigger>
           <TabsTrigger value="behavioral-anchors" className="flex items-center gap-2">
             <ListChecks className="h-4 w-4" />
             <span className="hidden lg:inline">Behavioral Anchors</span>
             <span className="lg:hidden">BARS</span>
           </TabsTrigger>
-          <TabsTrigger value="signal-definitions" className="flex items-center gap-2">
-            <Sparkles className="h-4 w-4" />
-            <span className="hidden lg:inline">Signal Definitions</span>
-            <span className="lg:hidden">Signals</span>
-          </TabsTrigger>
-          <TabsTrigger value="routing-policies" className="flex items-center gap-2">
-            <Route className="h-4 w-4" />
-            <span className="hidden lg:inline">Routing Policies</span>
-            <span className="lg:hidden">Routing</span>
+          <TabsTrigger value="question-assignments" className="flex items-center gap-2">
+            <Grid3X3 className="h-4 w-4" />
+            <span className="hidden lg:inline">Question Assignments</span>
+            <span className="lg:hidden">Assign</span>
           </TabsTrigger>
           <TabsTrigger value="cycle-templates" className="flex items-center gap-2">
             <Copy className="h-4 w-4" />
             <span className="hidden lg:inline">Cycle Templates</span>
             <span className="lg:hidden">Templates</span>
           </TabsTrigger>
+          <TabsTrigger value="routing-policies" className="flex items-center gap-2">
+            <Route className="h-4 w-4" />
+            <span className="hidden lg:inline">Routing Policies</span>
+            <span className="lg:hidden">Routing</span>
+          </TabsTrigger>
           <TabsTrigger value="anonymity-policy" className="flex items-center gap-2">
             <Shield className="h-4 w-4" />
             <span className="hidden lg:inline">Anonymity & Access</span>
             <span className="lg:hidden">Access</span>
+          </TabsTrigger>
+          <TabsTrigger value="signal-definitions" className="flex items-center gap-2">
+            <Sparkles className="h-4 w-4" />
+            <span className="hidden lg:inline">Signal Definitions</span>
+            <span className="lg:hidden">Signals</span>
           </TabsTrigger>
         </TabsList>
 
