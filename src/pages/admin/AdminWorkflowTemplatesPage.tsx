@@ -153,6 +153,7 @@ export default function AdminWorkflowTemplatesPage() {
             code: editingTemplate.code,
             category: editingTemplate.category,
             description: editingTemplate.description,
+            is_active: editingTemplate.is_active,
             is_global: editingTemplate.is_global,
             requires_signature: editingTemplate.requires_signature,
             requires_letter: editingTemplate.requires_letter,
@@ -750,6 +751,21 @@ export default function AdminWorkflowTemplatesPage() {
                     checked={editingTemplate?.allow_return_to_previous !== false}
                     onCheckedChange={(checked) =>
                       setEditingTemplate({ ...editingTemplate, allow_return_to_previous: checked })
+                    }
+                  />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label>Active</Label>
+                    <p className="text-xs text-muted-foreground">
+                      Template is available for use
+                    </p>
+                  </div>
+                  <Switch
+                    checked={editingTemplate?.is_active !== false}
+                    onCheckedChange={(checked) =>
+                      setEditingTemplate({ ...editingTemplate, is_active: checked })
                     }
                   />
                 </div>
