@@ -29,7 +29,8 @@ import {
   CalendarCheck,
   CalendarClock,
   LayoutGrid,
-  List
+  List,
+  GitBranch
 } from "lucide-react";
 import { format, differenceInDays, startOfYear, isPast, isToday, isFuture, parseISO, getYear } from "date-fns";
 import { formatDateForDisplay } from "@/utils/dateUtils";
@@ -62,6 +63,7 @@ import {
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { LeaveWorkflowProgressDialog } from "@/components/leave/LeaveWorkflowProgressDialog";
 import { LeaveBalanceSummary } from "@/components/leave/LeaveBalanceSummary";
 import { LeaveCalendar } from "@/components/leave/LeaveCalendar";
 
@@ -104,6 +106,8 @@ export default function EssLeavePage() {
   const [selectedYear, setSelectedYear] = useState<string>(new Date().getFullYear().toString());
   const [balanceYear, setBalanceYear] = useState<string>(new Date().getFullYear().toString());
   const [balanceViewMode, setBalanceViewMode] = useState<"grid" | "list">("grid");
+  const [showProgressDialog, setShowProgressDialog] = useState(false);
+  const [selectedRequestForProgress, setSelectedRequestForProgress] = useState<{id: string; number?: string} | null>(null);
 
   // Fetch available balance years for the user
   const { data: availableBalanceYears = [] } = useQuery({
@@ -792,18 +796,19 @@ export default function EssLeavePage() {
                     <TableHead>Duration</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Submitted</TableHead>
+                    <TableHead className="w-[100px]">Progress</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {loadingRequests ? (
                     <TableRow>
-                      <TableCell colSpan={6} className="text-center py-8">
+                      <TableCell colSpan={7} className="text-center py-8">
                         <Loader2 className="h-5 w-5 animate-spin mx-auto text-muted-foreground" />
                       </TableCell>
                     </TableRow>
                   ) : leaveRequests.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                      <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
                         No leave requests found. Apply for your first leave above.
                       </TableCell>
                     </TableRow>
@@ -835,6 +840,20 @@ export default function EssLeavePage() {
                             ? formatDateForDisplay(request.submitted_at, "MMM d, yyyy")
                             : "-"
                           }
+                        </TableCell>
+                        <TableCell>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedRequestForProgress({ id: request.id, number: request.request_number });
+                              setShowProgressDialog(true);
+                            }}
+                            className="h-8 px-2"
+                          >
+                            <GitBranch className="h-4 w-4 mr-1" />
+                            View
+                          </Button>
                         </TableCell>
                       </TableRow>
                     ))
@@ -1113,6 +1132,19 @@ export default function EssLeavePage() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Workflow Progress Dialog */}
+      {selectedRequestForProgress && (
+        <LeaveWorkflowProgressDialog
+          open={showProgressDialog}
+          onOpenChange={(open) => {
+            setShowProgressDialog(open);
+            if (!open) setSelectedRequestForProgress(null);
+          }}
+          leaveRequestId={selectedRequestForProgress.id}
+          leaveRequestNumber={selectedRequestForProgress.number}
+        />
+      )}
     </AppLayout>
   );
 }
