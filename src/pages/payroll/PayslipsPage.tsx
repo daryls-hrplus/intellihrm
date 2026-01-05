@@ -5,14 +5,17 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import { usePayroll, Payslip } from "@/hooks/usePayroll";
 import { usePayslipTemplates, PayslipTemplate } from "@/hooks/usePayslipTemplates";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { PayslipDocument } from "@/components/payroll/PayslipDocument";
-import { FileText, Download, Eye, Search, DollarSign, Calendar, Loader2, Filter } from "lucide-react";
+import { FileText, Download, Eye, Search, DollarSign, Calendar, Loader2, Filter, CheckCircle, PenLine } from "lucide-react";
 import { format, getMonth } from "date-fns";
 import { formatDateForDisplay } from "@/utils/dateUtils";
 import { useTranslation } from "react-i18next";
@@ -32,6 +35,10 @@ export default function PayslipsPage() {
   const [selectedPeriod, setSelectedPeriod] = useState<string>("all");
   const [selectedPayslip, setSelectedPayslip] = useState<Payslip | null>(null);
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
+  const [signDialogOpen, setSignDialogOpen] = useState(false);
+  const [payslipToSign, setPayslipToSign] = useState<Payslip | null>(null);
+  const [signAcknowledged, setSignAcknowledged] = useState(false);
+  const [isSigning, setIsSigning] = useState(false);
   const [template, setTemplate] = useState<PayslipTemplate | null>(null);
   const [isDownloading, setIsDownloading] = useState(false);
   const payslipRef = useRef<HTMLDivElement>(null);
@@ -145,6 +152,47 @@ export default function PayslipsPage() {
   const viewPayslip = (payslip: Payslip) => {
     setSelectedPayslip(payslip);
     setDetailDialogOpen(true);
+  };
+
+  const openSignDialog = (payslip: Payslip) => {
+    setPayslipToSign(payslip);
+    setSignAcknowledged(false);
+    setSignDialogOpen(true);
+  };
+
+  const signPayslip = async () => {
+    if (!payslipToSign || !signAcknowledged) return;
+    
+    setIsSigning(true);
+    try {
+      // Create a signature hash from payslip data + timestamp
+      const signatureData = `${payslipToSign.id}|${payslipToSign.payslip_number}|${user?.id}|${new Date().toISOString()}`;
+      const encoder = new TextEncoder();
+      const data = encoder.encode(signatureData);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      const signatureHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+
+      const { error } = await supabase
+        .from('payslips')
+        .update({
+          signed_at: new Date().toISOString(),
+          signature_hash: signatureHash,
+          signature_device_info: navigator.userAgent,
+        } as any)
+        .eq('id', payslipToSign.id);
+
+      if (error) throw error;
+
+      toast.success(t("payroll.payslips.signSuccess", "Payslip signed successfully"));
+      setSignDialogOpen(false);
+      loadPayslips(); // Refresh to show signed status
+    } catch (error: any) {
+      console.error("Error signing payslip:", error);
+      toast.error(error.message || t("payroll.payslips.signError", "Failed to sign payslip"));
+    } finally {
+      setIsSigning(false);
+    }
   };
 
   const downloadPayslipPDF = async (payslip: Payslip) => {
@@ -405,6 +453,7 @@ export default function PayslipsPage() {
                   <TableHead>{t("payroll.payslips.grossPay")}</TableHead>
                   <TableHead>{t("payroll.payslips.deductions")}</TableHead>
                   <TableHead>{t("payroll.payslips.netPay")}</TableHead>
+                  <TableHead>{t("payroll.payslips.signed", "Signed")}</TableHead>
                   <TableHead className="text-right">{t("common.actions")}</TableHead>
                 </TableRow>
               </TableHeader>
@@ -423,6 +472,18 @@ export default function PayslipsPage() {
                     <TableCell className="font-semibold text-success">
                       {formatCurrency(payslip.net_pay, payslip.currency)}
                     </TableCell>
+                    <TableCell>
+                      {(payslip as any).signed_at ? (
+                        <Badge variant="outline" className="bg-green-500/10 text-green-600 border-green-200">
+                          <CheckCircle className="h-3 w-3 mr-1" />
+                          {t("payroll.payslips.signedOn", "Signed")}
+                        </Badge>
+                      ) : (
+                        <Badge variant="outline" className="bg-yellow-500/10 text-yellow-600 border-yellow-200">
+                          {t("payroll.payslips.pendingSignature", "Pending")}
+                        </Badge>
+                      )}
+                    </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-1">
                         <Button variant="ghost" size="sm" onClick={() => viewPayslip(payslip)}>
@@ -440,13 +501,23 @@ export default function PayslipsPage() {
                             <Download className="h-4 w-4" />
                           )}
                         </Button>
+                        {!(payslip as any).signed_at && (
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={() => openSignDialog(payslip)}
+                            className="text-primary hover:text-primary"
+                          >
+                            <PenLine className="h-4 w-4" />
+                          </Button>
+                        )}
                       </div>
                     </TableCell>
                   </TableRow>
                 ))}
                 {filteredPayslips.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                    <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
                       {t("payroll.payslips.noPayslips")}
                     </TableCell>
                   </TableRow>
@@ -474,10 +545,33 @@ export default function PayslipsPage() {
                   />
                 </div>
 
+                {(selectedPayslip as any).signed_at && (
+                  <div className="flex items-center gap-2 p-3 rounded-lg bg-green-500/10 border border-green-200">
+                    <CheckCircle className="h-5 w-5 text-green-600" />
+                    <div>
+                      <p className="text-sm font-medium text-green-700">
+                        {t("payroll.payslips.electronicallySignedOn", "Electronically signed on")} {formatDateForDisplay((selectedPayslip as any).signed_at, "PPP 'at' p")}
+                      </p>
+                      <p className="text-xs text-green-600">
+                        {t("payroll.payslips.signatureHash", "Signature ID")}: {(selectedPayslip as any).signature_hash?.substring(0, 16)}...
+                      </p>
+                    </div>
+                  </div>
+                )}
+
                 <div className="flex justify-end gap-2 pt-4 border-t">
                   <Button variant="outline" onClick={() => setDetailDialogOpen(false)}>
                     {t("common.close")}
                   </Button>
+                  {!(selectedPayslip as any).signed_at && (
+                    <Button variant="outline" onClick={() => {
+                      setDetailDialogOpen(false);
+                      openSignDialog(selectedPayslip);
+                    }}>
+                      <PenLine className="h-4 w-4 mr-2" />
+                      {t("payroll.payslips.signPayslip", "Sign Payslip")}
+                    </Button>
+                  )}
                   <Button onClick={() => downloadPayslipPDF(selectedPayslip)} disabled={isDownloading}>
                     {isDownloading ? (
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -489,6 +583,68 @@ export default function PayslipsPage() {
                 </div>
               </div>
             )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Electronic Signature Dialog */}
+        <Dialog open={signDialogOpen} onOpenChange={setSignDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <PenLine className="h-5 w-5" />
+                {t("payroll.payslips.signPayslip", "Sign Payslip")}
+              </DialogTitle>
+              <DialogDescription>
+                {t("payroll.payslips.signPayslipDescription", "By signing, you acknowledge receipt and confirm you have reviewed this payslip.")}
+              </DialogDescription>
+            </DialogHeader>
+
+            {payslipToSign && (
+              <div className="space-y-4">
+                <div className="p-4 rounded-lg border bg-muted/50">
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    <div className="text-muted-foreground">{t("payroll.payslips.payslipNumber")}:</div>
+                    <div className="font-medium">{payslipToSign.payslip_number}</div>
+                    <div className="text-muted-foreground">{t("payroll.payslips.payPeriod")}:</div>
+                    <div className="font-medium">
+                      {formatDateForDisplay(payslipToSign.pay_period_start, "MMM d")} - {formatDateForDisplay(payslipToSign.pay_period_end, "MMM d, yyyy")}
+                    </div>
+                    <div className="text-muted-foreground">{t("payroll.payslips.netPay")}:</div>
+                    <div className="font-semibold text-success">
+                      {formatCurrency(payslipToSign.net_pay, payslipToSign.currency)}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3 p-3 rounded-lg border">
+                  <Checkbox
+                    id="acknowledge"
+                    checked={signAcknowledged}
+                    onCheckedChange={(checked) => setSignAcknowledged(checked as boolean)}
+                  />
+                  <Label htmlFor="acknowledge" className="text-sm leading-relaxed cursor-pointer">
+                    {t("payroll.payslips.signAcknowledgement", "I acknowledge receipt of this payslip and confirm that I have reviewed the payment details. I understand this electronic signature serves as proof of receipt.")}
+                  </Label>
+                </div>
+              </div>
+            )}
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setSignDialogOpen(false)}>
+                {t("common.cancel")}
+              </Button>
+              <Button 
+                onClick={signPayslip} 
+                disabled={!signAcknowledged || isSigning}
+              >
+                {isSigning ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <PenLine className="h-4 w-4 mr-2" />
+                )}
+                {t("payroll.payslips.confirmSign", "Confirm & Sign")}
+              </Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       </div>

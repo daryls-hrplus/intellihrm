@@ -42719,6 +42719,10 @@ export type Database = {
           recall_reason: string | null
           recalled_at: string | null
           recalled_by: string | null
+          signature_device_info: string | null
+          signature_hash: string | null
+          signed_at: string | null
+          signed_ip: string | null
           status: string
           total_deductions: number
           updated_at: string
@@ -42744,6 +42748,10 @@ export type Database = {
           recall_reason?: string | null
           recalled_at?: string | null
           recalled_by?: string | null
+          signature_device_info?: string | null
+          signature_hash?: string | null
+          signed_at?: string | null
+          signed_ip?: string | null
           status?: string
           total_deductions: number
           updated_at?: string
@@ -42769,6 +42777,10 @@ export type Database = {
           recall_reason?: string | null
           recalled_at?: string | null
           recalled_by?: string | null
+          signature_device_info?: string | null
+          signature_hash?: string | null
+          signed_at?: string | null
+          signed_ip?: string | null
           status?: string
           total_deductions?: number
           updated_at?: string
