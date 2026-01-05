@@ -484,7 +484,7 @@ export default function AdminWorkflowTemplatesPage() {
 
         {/* Template Dialog */}
         <Dialog open={showTemplateDialog} onOpenChange={setShowTemplateDialog}>
-          <DialogContent className="sm:max-w-lg">
+          <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>
                 {editingTemplate?.id ? "Edit Template" : "Create Template"}
@@ -750,7 +750,7 @@ export default function AdminWorkflowTemplatesPage() {
 
         {/* Step Dialog */}
         <Dialog open={showStepDialog} onOpenChange={setShowStepDialog}>
-          <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
+          <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>
                 {editingStep?.id ? "Edit Step" : "Add Step"}
