@@ -213,7 +213,7 @@ export default function CompanyDocumentsPage() {
   const categories = [...new Set(documents.map(d => d.category))];
 
   const breadcrumbItems = [
-    { label: "Admin & Security", href: "/admin" },
+    { label: "HR Hub", href: "/hr-hub" },
     { label: "Company Documents" },
   ];
 
