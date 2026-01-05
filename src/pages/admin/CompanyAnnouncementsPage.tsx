@@ -17,7 +17,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { format } from "date-fns";
 import { formatDateForDisplay } from "@/utils/dateUtils";
-import { Plus, Megaphone, Pin, Edit, Trash2 } from "lucide-react";
+import { Plus, Megaphone, Pin, Edit, Trash2, Building2 } from "lucide-react";
+
+interface Company {
+  id: string;
+  name: string;
+}
 
 interface Announcement {
   id: string;
@@ -30,6 +35,8 @@ interface Announcement {
   expire_at: string | null;
   created_at: string;
   created_by: string | null;
+  company_id: string | null;
+  company?: Company | null;
 }
 
 export default function CompanyAnnouncementsPage() {
@@ -38,10 +45,12 @@ export default function CompanyAnnouncementsPage() {
   const { toast } = useToast();
   
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+  const [companies, setCompanies] = useState<Company[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedCompany, setSelectedCompany] = useState<string>("all");
   
   const [formData, setFormData] = useState({
     title: "",
@@ -51,24 +60,33 @@ export default function CompanyAnnouncementsPage() {
     is_active: true,
     publish_at: "",
     expire_at: "",
+    company_id: "",
   });
 
   useEffect(() => {
-    loadAnnouncements();
+    loadData();
   }, []);
 
-  const loadAnnouncements = async () => {
+  const loadData = async () => {
     setIsLoading(true);
     try {
-      const { data } = await supabase
-        .from("company_announcements")
-        .select("*")
-        .order("is_pinned", { ascending: false })
-        .order("created_at", { ascending: false });
+      const [announcementsRes, companiesRes] = await Promise.all([
+        supabase
+          .from("company_announcements")
+          .select("*, company:companies(id, name)")
+          .order("is_pinned", { ascending: false })
+          .order("created_at", { ascending: false }),
+        supabase
+          .from("companies")
+          .select("id, name")
+          .eq("is_active", true)
+          .order("name"),
+      ]);
 
-      setAnnouncements((data || []) as Announcement[]);
+      setAnnouncements((announcementsRes.data || []) as Announcement[]);
+      setCompanies((companiesRes.data || []) as Company[]);
     } catch (error) {
-      console.error("Error loading announcements:", error);
+      console.error("Error loading data:", error);
     } finally {
       setIsLoading(false);
     }
@@ -77,6 +95,10 @@ export default function CompanyAnnouncementsPage() {
   const handleSubmit = async () => {
     if (!formData.title || !formData.content) {
       toast({ title: "Error", description: "Title and content are required", variant: "destructive" });
+      return;
+    }
+    if (!formData.company_id) {
+      toast({ title: "Error", description: "Please select a company", variant: "destructive" });
       return;
     }
     setIsSubmitting(true);
@@ -90,7 +112,7 @@ export default function CompanyAnnouncementsPage() {
         is_active: formData.is_active,
         publish_at: formData.publish_at || null,
         expire_at: formData.expire_at || null,
-        company_id: profile?.company_id || null,
+        company_id: formData.company_id,
         created_by: user?.id,
       };
 
@@ -103,7 +125,7 @@ export default function CompanyAnnouncementsPage() {
       }
 
       closeDialog();
-      loadAnnouncements();
+      loadData();
     } catch (error) {
       toast({ title: "Error", description: "Failed to save announcement", variant: "destructive" });
     } finally {
@@ -121,6 +143,7 @@ export default function CompanyAnnouncementsPage() {
       is_active: announcement.is_active,
       publish_at: announcement.publish_at ? format(new Date(announcement.publish_at), "yyyy-MM-dd'T'HH:mm") : "",
       expire_at: announcement.expire_at ? format(new Date(announcement.expire_at), "yyyy-MM-dd'T'HH:mm") : "",
+      company_id: announcement.company_id || "",
     });
     setDialogOpen(true);
   };
@@ -131,7 +154,7 @@ export default function CompanyAnnouncementsPage() {
     try {
       await supabase.from("company_announcements").delete().eq("id", id);
       toast({ title: "Success", description: "Announcement deleted" });
-      loadAnnouncements();
+      loadData();
     } catch (error) {
       toast({ title: "Error", description: "Failed to delete announcement", variant: "destructive" });
     }
@@ -148,8 +171,13 @@ export default function CompanyAnnouncementsPage() {
       is_active: true,
       publish_at: "",
       expire_at: "",
+      company_id: "",
     });
   };
+
+  const filteredAnnouncements = announcements.filter(ann => 
+    selectedCompany === "all" || ann.company_id === selectedCompany
+  );
 
   const getPriorityBadge = (priority: string) => {
     const colors: Record<string, string> = {
@@ -182,20 +210,36 @@ export default function CompanyAnnouncementsPage() {
           </Button>
         </div>
 
+        <div className="flex gap-4">
+          <Select value={selectedCompany} onValueChange={setSelectedCompany}>
+            <SelectTrigger className="w-[220px]">
+              <Building2 className="h-4 w-4 mr-2" />
+              <SelectValue placeholder="All Companies" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Companies</SelectItem>
+              {companies.map((company) => (
+                <SelectItem key={company.id} value={company.id}>{company.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
         <Card>
           <CardHeader>
-            <CardTitle>All Announcements</CardTitle>
+            <CardTitle>All Announcements ({filteredAnnouncements.length})</CardTitle>
           </CardHeader>
           <CardContent>
             {isLoading ? (
               <div className="text-center py-8 text-muted-foreground">Loading...</div>
-            ) : announcements.length === 0 ? (
+            ) : filteredAnnouncements.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">No announcements yet</div>
             ) : (
               <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead>Title</TableHead>
+                    <TableHead>Company</TableHead>
                     <TableHead>Priority</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Created</TableHead>
@@ -203,12 +247,18 @@ export default function CompanyAnnouncementsPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {announcements.map((ann) => (
+                  {filteredAnnouncements.map((ann) => (
                     <TableRow key={ann.id}>
                       <TableCell>
                         <div className="flex items-center gap-2">
                           {ann.is_pinned && <Pin className="h-4 w-4 text-primary" />}
                           <span className="font-medium">{ann.title}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1">
+                          <Building2 className="h-3 w-3 text-muted-foreground" />
+                          <span className="text-sm">{ann.company?.name || "—"}</span>
                         </div>
                       </TableCell>
                       <TableCell>{getPriorityBadge(ann.priority)}</TableCell>
@@ -243,7 +293,20 @@ export default function CompanyAnnouncementsPage() {
             </DialogHeader>
             <div className="space-y-4">
               <div>
-                <Label>Title</Label>
+                <Label>Company <span className="text-destructive">*</span></Label>
+                <Select value={formData.company_id} onValueChange={(v) => setFormData({ ...formData, company_id: v })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select company" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {companies.map((company) => (
+                      <SelectItem key={company.id} value={company.id}>{company.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Title <span className="text-destructive">*</span></Label>
                 <Input
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
@@ -251,7 +314,7 @@ export default function CompanyAnnouncementsPage() {
                 />
               </div>
               <div>
-                <Label>Content</Label>
+                <Label>Content <span className="text-destructive">*</span></Label>
                 <RichTextEditor
                   value={formData.content}
                   onChange={(val) => setFormData({ ...formData, content: val })}
