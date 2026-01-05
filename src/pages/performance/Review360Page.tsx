@@ -56,6 +56,7 @@ import { InvestigationApprovalQueue } from "@/components/feedback/cycles/Investi
 import { ExpandableCycleCard } from "@/components/feedback/cycles/ExpandableCycleCard";
 import { ResultsPreviewDialog } from "@/components/feedback/cycles/ResultsPreviewDialog";
 import { ResultsReleaseAuditLog } from "@/components/feedback/admin/ResultsReleaseAuditLog";
+import { GovernanceTabContent } from "@/components/feedback/governance";
 import { VisibilityRules, DEFAULT_VISIBILITY_RULES } from "@/components/feedback/cycles/CycleVisibilityRulesEditor";
 import { useLanguage } from "@/hooks/useLanguage";
 import { formatDateForDisplay } from "@/utils/dateUtils";
@@ -666,6 +667,18 @@ export default function Review360Page() {
                     </TooltipContent>
                   </Tooltip>
                 </TabsTrigger>
+                <TabsTrigger value="governance" className="gap-2">
+                  <Shield className="h-4 w-4" />
+                  Governance
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <HelpCircle className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="w-72 p-3 text-left whitespace-normal">
+                      <p className="text-sm leading-relaxed">Manage consent records, data policies, AI audit logs, and governance exceptions.</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TabsTrigger>
               </>
             )}
           </TabsList>
@@ -900,6 +913,16 @@ export default function Review360Page() {
           {(isAdmin || isHRManager) && (
             <TabsContent value="release-audit" className="mt-6">
               <ResultsReleaseAuditLog companyId={selectedCompanyId} />
+            </TabsContent>
+          )}
+
+          {/* Governance Tab - For HR/Admin */}
+          {(isAdmin || isHRManager) && (
+            <TabsContent value="governance" className="mt-6">
+              <GovernanceTabContent
+                companyId={selectedCompanyId}
+                cycles={[...cycles, ...managerCycles].map(c => ({ id: c.id, name: c.name }))}
+              />
             </TabsContent>
           )}
 

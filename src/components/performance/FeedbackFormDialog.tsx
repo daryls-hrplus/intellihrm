@@ -16,6 +16,7 @@ import { Separator } from "@/components/ui/separator";
 import { Loader2, ChevronLeft, ChevronRight, Check, Star } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { AIWritingAssistant } from "@/components/feedback/writing";
 
 interface Question {
   id: string;
@@ -305,12 +306,21 @@ export function FeedbackFormDialog({
                 )}
 
                 {currentQuestion.question_type === "text" && (
-                  <Textarea
-                    value={responses[currentQuestion.id]?.text || ""}
-                    onChange={(e) => handleTextChange(currentQuestion.id, e.target.value)}
-                    placeholder="Enter your response..."
-                    rows={4}
-                  />
+                  <div className="space-y-3">
+                    <Textarea
+                      value={responses[currentQuestion.id]?.text || ""}
+                      onChange={(e) => handleTextChange(currentQuestion.id, e.target.value)}
+                      placeholder="Enter your response..."
+                      rows={4}
+                    />
+                    <AIWritingAssistant
+                      text={responses[currentQuestion.id]?.text || ""}
+                      questionContext={currentQuestion.question_text}
+                      raterCategory={reviewerType}
+                      responseId={currentQuestion.id}
+                      onApplySuggestion={(suggestion, newText) => handleTextChange(currentQuestion.id, newText)}
+                    />
+                  </div>
                 )}
 
                 {/* Comments section for rating questions */}
@@ -325,6 +335,16 @@ export function FeedbackFormDialog({
                       placeholder="Add any additional feedback..."
                       rows={3}
                     />
+                    {(responses[currentQuestion.id]?.text?.length || 0) >= 30 && (
+                      <AIWritingAssistant
+                        text={responses[currentQuestion.id]?.text || ""}
+                        questionContext={currentQuestion.question_text}
+                        raterCategory={reviewerType}
+                        responseId={currentQuestion.id}
+                        onApplySuggestion={(suggestion, newText) => handleTextChange(currentQuestion.id, newText)}
+                        showCompact
+                      />
+                    )}
                   </div>
                 )}
               </div>
