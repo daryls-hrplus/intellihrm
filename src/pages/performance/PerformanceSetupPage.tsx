@@ -315,7 +315,7 @@ export default function PerformanceSetupPage() {
                   <TalentApprovalWorkflowManager companyId={selectedCompany} />
                 </TabsContent>
                 <TabsContent value="notifications" className="mt-4">
-                  <NotificationsLinkSection />
+                  <NotificationsLinkSection companyId={selectedCompany} />
                 </TabsContent>
               </Tabs>
             </TabsContent>

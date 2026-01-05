@@ -11,6 +11,7 @@ import {
   ExternalLink,
   ArrowRight
 } from "lucide-react";
+import { ConfiguredRulesPreview } from "./ConfiguredRulesPreview";
 
 const NOTIFICATION_CATEGORIES = [
   {
@@ -47,7 +48,11 @@ const NOTIFICATION_CATEGORIES = [
   }
 ];
 
-export function NotificationsLinkSection() {
+interface NotificationsLinkSectionProps {
+  companyId?: string;
+}
+
+export function NotificationsLinkSection({ companyId }: NotificationsLinkSectionProps) {
   const navigate = useNavigate();
 
   const handleNavigateToReminders = (category?: string) => {
@@ -81,14 +86,22 @@ export function NotificationsLinkSection() {
             </Button>
           </div>
         </CardHeader>
-        <CardContent>
-          <div className="rounded-lg bg-muted/50 p-4 mb-6">
+        <CardContent className="space-y-6">
+          <div className="rounded-lg bg-muted/50 p-4">
             <p className="text-sm text-muted-foreground">
               All notification templates and reminder rules are managed centrally in the <strong>Reminders module</strong>. 
               This ensures consistent notification behavior across all HR processes. Click on any category below to 
               configure its specific reminders.
             </p>
           </div>
+
+          {companyId && (
+            <ConfiguredRulesPreview 
+              companyId={companyId} 
+              category="performance"
+              maxRules={5}
+            />
+          )}
 
           <div className="grid gap-4 md:grid-cols-2">
             {NOTIFICATION_CATEGORIES.map((category) => {
