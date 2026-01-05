@@ -265,7 +265,7 @@ export default function AdminWorkflowTemplatesPage() {
       <div className="container mx-auto py-6 space-y-6">
         <Breadcrumbs
           items={[
-            { label: "Admin", href: "/admin" },
+            { label: "HR Hub", href: "/hr-hub" },
             { label: "Workflow Templates" },
           ]}
         />
