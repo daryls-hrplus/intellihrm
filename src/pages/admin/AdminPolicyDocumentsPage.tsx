@@ -124,6 +124,7 @@ export default function AdminPolicyDocumentsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
+  const [companyFilter, setCompanyFilter] = useState<string>("all");
   const [scopeFilter, setScopeFilter] = useState<string>("all");
 
   // Dialog states
@@ -201,7 +202,10 @@ export default function AdminPolicyDocumentsPage() {
       return;
     }
 
-    setIsUploading(true);
+    if (!uploadForm.is_global && !uploadForm.company_id) {
+      toast.error("Please select a company or mark as global");
+      return;
+    }
     try {
       const extension = selectedFile.name.toLowerCase().slice(selectedFile.name.lastIndexOf(".") + 1);
       const filePath = `${Date.now()}_${selectedFile.name.replace(/[^a-zA-Z0-9.-]/g, "_")}`;
@@ -341,10 +345,11 @@ export default function AdminPolicyDocumentsPage() {
     const matchesSearch = doc.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       doc.file_name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = categoryFilter === "all" || doc.category_id === categoryFilter;
+    const matchesCompany = companyFilter === "all" || doc.company_id === companyFilter;
     const matchesScope = scopeFilter === "all" || 
       (scopeFilter === "global" && doc.is_global) ||
       (scopeFilter === "company" && !doc.is_global);
-    return matchesSearch && matchesCategory && matchesScope;
+    return matchesSearch && matchesCategory && matchesCompany && matchesScope;
   });
 
   const getStatusBadge = (status: string) => {
@@ -426,6 +431,18 @@ export default function AdminPolicyDocumentsPage() {
                       <SelectItem value="all">All Categories</SelectItem>
                       {categories.map((cat) => (
                         <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Select value={companyFilter} onValueChange={setCompanyFilter}>
+                    <SelectTrigger className="w-[180px]">
+                      <Building2 className="h-4 w-4 mr-2" />
+                      <SelectValue placeholder="Company" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Companies</SelectItem>
+                      {companies.map((comp) => (
+                        <SelectItem key={comp.id} value={comp.id}>{comp.name}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
