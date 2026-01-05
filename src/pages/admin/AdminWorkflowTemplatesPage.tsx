@@ -13,13 +13,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
-import { Plus, Pencil, Trash2, Loader2, GitBranch, ArrowRight, GripVertical } from "lucide-react";
+import { Plus, Pencil, Trash2, Loader2, GitBranch, ArrowRight, GripVertical, Clock, Settings } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { formatDateForDisplay } from "@/utils/dateUtils";
 import type { WorkflowTemplate, WorkflowStep, WorkflowCategory } from "@/hooks/useWorkflow";
+import { SchedulerManagement } from "@/components/admin/SchedulerManagement";
 
 const WORKFLOW_CATEGORIES: { value: WorkflowCategory; label: string }[] = [
   { value: "leave_request", label: "Leave Request" },
@@ -230,6 +231,8 @@ export default function AdminWorkflowTemplatesPage() {
     }
   };
 
+  const [activeMainTab, setActiveMainTab] = useState("templates");
+
   return (
     <AppLayout>
       <div className="container mx-auto py-6 space-y-6">
@@ -242,21 +245,37 @@ export default function AdminWorkflowTemplatesPage() {
 
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold">Workflow Templates</h1>
+            <h1 className="text-3xl font-bold">Workflow Management</h1>
             <p className="text-muted-foreground">
-              Configure approval workflows for HR processes
+              Configure approval workflows and background processing
             </p>
           </div>
-          <Button onClick={() => {
-            setEditingTemplate({ is_global: false, requires_signature: false, requires_letter: false, allow_return_to_previous: true });
-            setShowTemplateDialog(true);
-          }}>
-            <Plus className="h-4 w-4 mr-2" />
-            New Template
-          </Button>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-3">
+        <Tabs value={activeMainTab} onValueChange={setActiveMainTab}>
+          <TabsList>
+            <TabsTrigger value="templates" className="gap-2">
+              <GitBranch className="h-4 w-4" />
+              Templates
+            </TabsTrigger>
+            <TabsTrigger value="scheduler" className="gap-2">
+              <Clock className="h-4 w-4" />
+              Scheduler
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="templates" className="mt-6">
+            <div className="flex items-center justify-end mb-4">
+              <Button onClick={() => {
+                setEditingTemplate({ is_global: false, requires_signature: false, requires_letter: false, allow_return_to_previous: true });
+                setShowTemplateDialog(true);
+              }}>
+                <Plus className="h-4 w-4 mr-2" />
+                New Template
+              </Button>
+            </div>
+
+            <div className="grid gap-6 lg:grid-cols-3">
           {/* Templates List */}
           <Card className="lg:col-span-1">
             <CardHeader>
@@ -447,6 +466,12 @@ export default function AdminWorkflowTemplatesPage() {
             )}
           </Card>
         </div>
+          </TabsContent>
+
+          <TabsContent value="scheduler" className="mt-6">
+            <SchedulerManagement />
+          </TabsContent>
+        </Tabs>
 
         {/* Template Dialog */}
         <Dialog open={showTemplateDialog} onOpenChange={setShowTemplateDialog}>

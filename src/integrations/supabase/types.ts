@@ -51925,6 +51925,72 @@ export type Database = {
           },
         ]
       }
+      scheduled_jobs: {
+        Row: {
+          company_id: string | null
+          created_at: string | null
+          created_by: string | null
+          edge_function_name: string
+          id: string
+          interval_minutes: number
+          is_enabled: boolean | null
+          job_description: string | null
+          job_name: string
+          last_run_at: string | null
+          last_run_result: Json | null
+          last_run_status: string | null
+          next_scheduled_run: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          edge_function_name: string
+          id?: string
+          interval_minutes?: number
+          is_enabled?: boolean | null
+          job_description?: string | null
+          job_name: string
+          last_run_at?: string | null
+          last_run_result?: Json | null
+          last_run_status?: string | null
+          next_scheduled_run?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          edge_function_name?: string
+          id?: string
+          interval_minutes?: number
+          is_enabled?: boolean | null
+          job_description?: string | null
+          job_name?: string
+          last_run_at?: string | null
+          last_run_result?: Json | null
+          last_run_status?: string | null
+          next_scheduled_run?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scheduled_jobs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scheduled_jobs_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       scheduled_org_reports: {
         Row: {
           company_id: string | null
