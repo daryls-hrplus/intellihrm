@@ -51,15 +51,17 @@ export function MyApprovalsHub() {
     setIsLoading(true);
 
     try {
+      // Query workflow_step_tracking for pending items where user is the actor
       let query = (supabase as any)
-        .from("workflow_instance_approvals")
+        .from("workflow_step_tracking")
         .select(`
           id,
-          workflow_instance_id,
+          instance_id,
           step_id,
-          status,
-          created_at,
-          due_at,
+          step_order,
+          started_at,
+          deadline_at,
+          action,
           workflow_instances!inner(
             id,
             category,
@@ -67,14 +69,14 @@ export function MyApprovalsHub() {
             reference_id,
             initiated_at,
             initiated_by,
-            current_step_deadline_at,
             workflow_templates(name),
             profiles!workflow_instances_initiated_by_fkey(full_name)
           ),
           workflow_steps(name)
         `)
-        .eq("approver_id", user.id)
-        .eq("status", "pending") as any;
+        .eq("actor_id", user.id)
+        .is("completed_at", null)
+        .is("action", null);
 
       if (categoryFilter !== "all") {
         query = query.eq("workflow_instances.category", categoryFilter);
@@ -84,19 +86,19 @@ export function MyApprovalsHub() {
 
       if (error) throw error;
 
-      const approvals: PendingApproval[] = (data || []).map(item => {
-        const instance = item.workflow_instances as any;
-        const deadline = item.due_at || instance?.current_step_deadline_at;
+      const approvals: PendingApproval[] = (data || []).map((item: any) => {
+        const instance = item.workflow_instances;
+        const deadline = item.deadline_at;
         const isOverdue = deadline ? new Date(deadline) < new Date() : false;
 
         return {
           id: item.id,
-          instanceId: item.workflow_instance_id,
+          instanceId: item.instance_id,
           templateName: instance?.workflow_templates?.name || "Unknown",
           category: instance?.category || "general",
           requestedBy: instance?.profiles?.full_name || "Unknown",
-          requestedAt: instance?.initiated_at || item.created_at,
-          stepName: (item.workflow_steps as any)?.name || "Approval",
+          requestedAt: item.started_at || instance?.initiated_at,
+          stepName: item.workflow_steps?.name || "Approval",
           deadline,
           isOverdue,
           referenceType: instance?.reference_type,
@@ -138,15 +140,13 @@ export function MyApprovalsHub() {
     try {
       const approvalIds = Array.from(selectedApprovals);
       
-      // Update each approval
+      // Update each approval in workflow_step_tracking
       for (const approvalId of approvalIds) {
         const { error } = await (supabase as any)
-          .from("workflow_instance_approvals")
+          .from("workflow_step_tracking")
           .update({
-            status: bulkAction === "approve" ? "approved" : "rejected",
             action: bulkAction,
-            comment: bulkComment || null,
-            acted_at: new Date().toISOString(),
+            completed_at: new Date().toISOString(),
           })
           .eq("id", approvalId);
 
@@ -169,11 +169,10 @@ export function MyApprovalsHub() {
   const handleSingleAction = async (approvalId: string, action: "approve" | "reject") => {
     try {
       const { error } = await (supabase as any)
-        .from("workflow_instance_approvals")
+        .from("workflow_step_tracking")
         .update({
-          status: action === "approve" ? "approved" : "rejected",
           action,
-          acted_at: new Date().toISOString(),
+          completed_at: new Date().toISOString(),
         })
         .eq("id", approvalId);
 

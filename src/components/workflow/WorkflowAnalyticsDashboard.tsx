@@ -126,29 +126,29 @@ export function WorkflowAnalyticsDashboard() {
           .map(([date, data]) => ({ date: format(new Date(date), "MMM d"), ...data }))
           .reverse();
 
-        // Fetch approver performance from workflow_instance_approvals
+        // Fetch approver performance from workflow_step_tracking
         const { data: approvals } = await (supabase as any)
-          .from("workflow_instance_approvals")
+          .from("workflow_step_tracking")
           .select(`
             action,
-            acted_at,
-            created_at,
-            approver:profiles!workflow_instance_approvals_approver_id_fkey(full_name)
+            completed_at,
+            started_at,
+            actor:profiles!workflow_step_tracking_actor_id_fkey(full_name)
           `)
-          .in("workflow_instance_id", instances.map(i => i.id))
+          .in("instance_id", instances.map(i => i.id))
           .not("action", "is", null);
 
         const approverMap = new Map<string, { approved: number; rejected: number; totalHours: number; count: number }>();
         (approvals || []).forEach((a: any) => {
-          const name = a.approver?.full_name || "Unknown";
+          const name = a.actor?.full_name || "Unknown";
           if (!approverMap.has(name)) {
             approverMap.set(name, { approved: 0, rejected: 0, totalHours: 0, count: 0 });
           }
           const entry = approverMap.get(name)!;
           if (a.action === "approve") entry.approved++;
           else if (a.action === "reject") entry.rejected++;
-          if (a.acted_at && a.created_at) {
-            entry.totalHours += differenceInHours(new Date(a.acted_at), new Date(a.created_at));
+          if (a.completed_at && a.started_at) {
+            entry.totalHours += differenceInHours(new Date(a.completed_at), new Date(a.started_at));
             entry.count++;
           }
         });
