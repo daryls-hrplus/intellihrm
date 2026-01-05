@@ -5,7 +5,7 @@ import { toast } from "sonner";
 
 export type WorkflowStatus = 'draft' | 'pending' | 'in_progress' | 'approved' | 'rejected' | 'cancelled' | 'escalated' | 'returned' | 'auto_terminated';
 export type WorkflowAction = 'approve' | 'reject' | 'return' | 'escalate' | 'delegate' | 'comment';
-export type WorkflowCategory = 'leave_request' | 'probation_confirmation' | 'headcount_request' | 'training_request' | 'promotion' | 'transfer' | 'resignation' | 'termination' | 'expense_claim' | 'letter_request' | 'general';
+export type WorkflowCategory = 'leave_request' | 'probation_confirmation' | 'headcount_request' | 'training_request' | 'promotion' | 'transfer' | 'resignation' | 'termination' | 'expense_claim' | 'letter_request' | 'general' | 'qualification';
 
 export interface WorkflowTemplate {
   id: string;
@@ -14,6 +14,8 @@ export interface WorkflowTemplate {
   category: WorkflowCategory;
   description: string | null;
   company_id: string | null;
+  department_id: string | null;
+  section_id: string | null;
   is_global: boolean;
   is_active: boolean;
   requires_signature: boolean;
@@ -47,6 +49,17 @@ export interface WorkflowStep {
   escalation_action: string | null;
   alternate_approver_id: string | null;
   is_active: boolean;
+  company_id: string | null;
+  department_id: string | null;
+  section_id: string | null;
+  target_company_id: string | null;
+}
+
+export interface CrossCompanyPathEntry {
+  company_id: string;
+  company_name: string;
+  step_order: number;
+  entered_at: string;
 }
 
 export interface WorkflowInstance {
@@ -68,10 +81,14 @@ export interface WorkflowInstance {
   auto_terminate_at: string | null;
   metadata: Record<string, unknown>;
   company_id: string | null;
+  is_cross_company: boolean;
+  origin_company_id: string | null;
+  cross_company_path: CrossCompanyPathEntry[];
   template?: WorkflowTemplate;
   steps?: WorkflowStep[];
   current_step?: WorkflowStep;
   initiator?: { full_name: string; email: string };
+  origin_company?: { name: string; code: string };
 }
 
 export interface WorkflowStepAction {
@@ -320,7 +337,17 @@ export function useWorkflow() {
 
       setState({ isLoading: false, error: null });
       toast.success("Workflow started successfully");
-      return instance as WorkflowInstance;
+      
+      // Transform the instance to match WorkflowInstance type
+      const workflowInstance: WorkflowInstance = {
+        ...instance,
+        is_cross_company: instance.is_cross_company ?? false,
+        cross_company_path: Array.isArray(instance.cross_company_path) 
+          ? (instance.cross_company_path as unknown as CrossCompanyPathEntry[]) 
+          : [],
+        metadata: (instance.metadata as Record<string, unknown>) ?? {},
+      };
+      return workflowInstance;
     } catch (error) {
       const message = error instanceof Error ? error.message : "Failed to start workflow";
       setState({ isLoading: false, error: message });

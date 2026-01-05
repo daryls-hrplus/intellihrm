@@ -31,26 +31,28 @@ export default function MyApprovalsPage() {
     setIsLoading(true);
 
     try {
-      // Fetch pending workflows
+      // Fetch pending workflows with origin company info
       const { data: pending } = await supabase
         .from("workflow_instances")
         .select(`
           *,
-          template:workflow_templates(name, code, category, allow_return_to_previous),
+          template:workflow_templates(name, code, category, allow_return_to_previous, department_id, section_id),
           current_step:workflow_steps(*),
-          initiator:profiles!workflow_instances_initiated_by_fkey(full_name, email)
+          initiator:profiles!workflow_instances_initiated_by_fkey(full_name, email),
+          origin_company:companies!workflow_instances_origin_company_id_fkey(name, code)
         `)
         .in("status", ["pending", "in_progress", "escalated", "returned"])
         .order("created_at", { ascending: false });
 
-      // Fetch completed workflows
+      // Fetch completed workflows with origin company info
       const { data: completed } = await supabase
         .from("workflow_instances")
         .select(`
           *,
           template:workflow_templates(name, code, category),
           current_step:workflow_steps(*),
-          initiator:profiles!workflow_instances_initiated_by_fkey(full_name, email)
+          initiator:profiles!workflow_instances_initiated_by_fkey(full_name, email),
+          origin_company:companies!workflow_instances_origin_company_id_fkey(name, code)
         `)
         .in("status", ["approved", "rejected", "cancelled", "auto_terminated"])
         .order("completed_at", { ascending: false })
