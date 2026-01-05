@@ -5075,6 +5075,7 @@
       "title": "Transaction Workflow Settings",
       "subtitle": "Configure which employee transaction types require workflow approval by company",
       "description": "Control workflow requirements for employee lifecycle transactions",
+      "shortDesc": "Control workflow requirements for transaction types",
       "selectCompanyPrompt": "Select a Company",
       "selectCompanyDescription": "Choose a company from the dropdown above to configure transaction workflow settings.",
       "summary": "Configuration Summary",

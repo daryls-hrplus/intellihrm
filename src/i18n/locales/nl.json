@@ -75,6 +75,7 @@
       "title": "Transactie Workflow Instellingen",
       "subtitle": "Configureer welke medewerker transactietypes workflow-goedkeuring vereisen per bedrijf",
       "description": "Beheer workflow-vereisten voor medewerker levenscyclus transacties",
+      "shortDesc": "Beheer workflow-vereisten voor transactietypes",
       "selectCompanyPrompt": "Selecteer een Bedrijf",
       "selectCompanyDescription": "Kies een bedrijf uit de dropdown om transactie workflow-instellingen te configureren.",
       "summary": "Configuratie Overzicht",

@@ -209,6 +209,7 @@
       "title": "Paramètres des Flux de Transactions",
       "subtitle": "Configurez quels types de transactions employés nécessitent une approbation de workflow par entreprise",
       "description": "Contrôlez les exigences de workflow pour les transactions du cycle de vie des employés",
+      "shortDesc": "Contrôlez les exigences de workflow pour les types de transactions",
       "selectCompanyPrompt": "Sélectionnez une Entreprise",
       "selectCompanyDescription": "Choisissez une entreprise dans la liste déroulante pour configurer les paramètres de workflow des transactions.",
       "summary": "Résumé de la Configuration",

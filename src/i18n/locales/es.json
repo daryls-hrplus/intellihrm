@@ -209,6 +209,7 @@
       "title": "Configuración de Flujos de Transacciones",
       "subtitle": "Configure qué tipos de transacciones de empleados requieren aprobación de flujo de trabajo por empresa",
       "description": "Controle los requisitos de flujo de trabajo para transacciones del ciclo de vida del empleado",
+      "shortDesc": "Controle los requisitos de flujo de trabajo para tipos de transacciones",
       "selectCompanyPrompt": "Seleccione una Empresa",
       "selectCompanyDescription": "Elija una empresa del menú desplegable para configurar los ajustes del flujo de trabajo de transacciones.",
       "summary": "Resumen de Configuración",

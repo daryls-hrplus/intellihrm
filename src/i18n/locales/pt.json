@@ -75,6 +75,7 @@
       "title": "Configurações de Fluxo de Transações",
       "subtitle": "Configure quais tipos de transações de funcionários requerem aprovação de fluxo de trabalho por empresa",
       "description": "Controle os requisitos de fluxo de trabalho para transações do ciclo de vida do funcionário",
+      "shortDesc": "Controle os requisitos de fluxo de trabalho para tipos de transações",
       "selectCompanyPrompt": "Selecione uma Empresa",
       "selectCompanyDescription": "Escolha uma empresa no menu suspenso para configurar as configurações de fluxo de trabalho de transações.",
       "summary": "Resumo da Configuração",

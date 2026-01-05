@@ -75,6 +75,7 @@
       "title": "Transaktions-Workflow-Einstellungen",
       "subtitle": "Konfigurieren Sie, welche Mitarbeitertransaktionstypen eine Workflow-Genehmigung pro Unternehmen erfordern",
       "description": "Steuern Sie die Workflow-Anforderungen für Mitarbeiter-Lebenszyklus-Transaktionen",
+      "shortDesc": "Steuern Sie die Workflow-Anforderungen für Transaktionstypen",
       "selectCompanyPrompt": "Unternehmen auswählen",
       "selectCompanyDescription": "Wählen Sie ein Unternehmen aus der Dropdown-Liste, um die Transaktions-Workflow-Einstellungen zu konfigurieren.",
       "summary": "Konfigurationsübersicht",
