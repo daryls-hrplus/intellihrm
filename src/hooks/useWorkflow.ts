@@ -30,6 +30,16 @@ export interface WorkflowTemplate {
   updated_at: string;
 }
 
+export interface WorkflowApprovalRole {
+  id: string;
+  name: string;
+  code: string;
+  description: string | null;
+  company_id: string | null;
+  is_active: boolean;
+  positions?: { id: string; title: string; is_primary: boolean; priority_order: number }[];
+}
+
 export interface WorkflowStep {
   id: string;
   template_id: string;
@@ -41,6 +51,7 @@ export interface WorkflowStep {
   approver_role_id: string | null;
   approver_governance_body_id: string | null;
   approver_user_id: string | null;
+  workflow_approval_role_id: string | null;
   use_reporting_line: boolean;
   requires_signature: boolean;
   requires_comment: boolean;
@@ -240,6 +251,51 @@ export function useWorkflow() {
 
         if (anyHolder?.employee_id) {
           return anyHolder.employee_id;
+        }
+      }
+
+      // Workflow approval role - check positions linked to this role
+      if (step.approver_type === "workflow_role" && step.workflow_approval_role_id) {
+        // Get positions linked to this workflow approval role, ordered by priority
+        const { data: rolePositions } = await supabase
+          .from("workflow_approval_role_positions")
+          .select("position_id, is_primary, priority_order")
+          .eq("workflow_role_id", step.workflow_approval_role_id)
+          .order("is_primary", { ascending: false })
+          .order("priority_order", { ascending: true });
+
+        if (rolePositions && rolePositions.length > 0) {
+          // Check each position in priority order
+          for (const rp of rolePositions) {
+            // First check for acting position holders
+            const { data: actingHolder } = await supabase
+              .from("employee_positions")
+              .select("employee_id")
+              .eq("position_id", rp.position_id)
+              .eq("is_active", true)
+              .eq("assignment_type", "acting")
+              .or("end_date.is.null,end_date.gte." + new Date().toISOString().split("T")[0])
+              .limit(1)
+              .single();
+
+            if (actingHolder?.employee_id) {
+              return actingHolder.employee_id;
+            }
+
+            // Fall back to primary position holder
+            const { data: primaryHolder } = await supabase
+              .from("employee_positions")
+              .select("employee_id")
+              .eq("position_id", rp.position_id)
+              .eq("is_active", true)
+              .eq("assignment_type", "primary")
+              .limit(1)
+              .single();
+
+            if (primaryHolder?.employee_id) {
+              return primaryHolder.employee_id;
+            }
+          }
         }
       }
 

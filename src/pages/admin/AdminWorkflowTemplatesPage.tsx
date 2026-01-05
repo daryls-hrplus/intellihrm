@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
-import { Plus, Pencil, Trash2, Loader2, GitBranch, ArrowRight, GripVertical, Clock, Settings } from "lucide-react";
+import { Plus, Pencil, Trash2, Loader2, GitBranch, ArrowRight, GripVertical, Clock, Settings, Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -21,6 +21,7 @@ import { format } from "date-fns";
 import { formatDateForDisplay } from "@/utils/dateUtils";
 import type { WorkflowTemplate, WorkflowStep, WorkflowCategory } from "@/hooks/useWorkflow";
 import { SchedulerManagement } from "@/components/admin/SchedulerManagement";
+import { WorkflowApprovalRolesManagement } from "@/components/admin/WorkflowApprovalRolesManagement";
 
 const WORKFLOW_CATEGORIES: { value: WorkflowCategory; label: string }[] = [
   { value: "leave_request", label: "Leave Request" },
@@ -40,14 +41,15 @@ const APPROVER_TYPES = [
   { value: "manager", label: "Direct Manager (Reporting Line)" },
   { value: "hr", label: "HR Manager" },
   { value: "position", label: "Specific Position" },
+  { value: "workflow_role", label: "Workflow Approval Role" },
   { value: "role", label: "System Role" },
   { value: "governance_body", label: "Governance Body" },
   { value: "specific_user", label: "Specific User" },
 ];
 
 const ESCALATION_ACTIONS = [
+  { value: "notify_alternate", label: "Notify Alternate (Keep Waiting)" },
   { value: "escalate_up", label: "Escalate to Next Level" },
-  { value: "notify_alternate", label: "Notify Alternate Approver" },
   { value: "auto_approve", label: "Auto-Approve" },
   { value: "auto_reject", label: "Auto-Reject" },
   { value: "terminate", label: "Terminate Workflow" },
@@ -70,6 +72,7 @@ export default function AdminWorkflowTemplatesPage() {
   const [companies, setCompanies] = useState<{ id: string; name: string }[]>([]);
   const [departments, setDepartments] = useState<{ id: string; name: string; company_id: string }[]>([]);
   const [sections, setSections] = useState<{ id: string; name: string; department_id: string }[]>([]);
+  const [workflowApprovalRoles, setWorkflowApprovalRoles] = useState<{ id: string; name: string; code: string }[]>([]);
 
   useEffect(() => {
     fetchData();
@@ -84,7 +87,7 @@ export default function AdminWorkflowTemplatesPage() {
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      const [templatesRes, positionsRes, rolesRes, governanceRes, usersRes, companiesRes, departmentsRes, sectionsRes] = await Promise.all([
+      const [templatesRes, positionsRes, rolesRes, governanceRes, usersRes, companiesRes, departmentsRes, sectionsRes, workflowRolesRes] = await Promise.all([
         supabase.from("workflow_templates").select("*").order("name"),
         supabase.from("positions").select("id, title").eq("is_active", true),
         supabase.from("roles").select("id, name").eq("is_active", true),
@@ -93,6 +96,7 @@ export default function AdminWorkflowTemplatesPage() {
         supabase.from("companies").select("id, name").eq("is_active", true).order("name"),
         supabase.from("departments").select("id, name, company_id").eq("is_active", true).order("name"),
         supabase.from("sections").select("id, name, department_id").eq("is_active", true).order("name"),
+        supabase.from("workflow_approval_roles").select("id, name, code").eq("is_active", true).order("name"),
       ]);
 
       if (templatesRes.data) setTemplates(templatesRes.data as WorkflowTemplate[]);
@@ -103,6 +107,7 @@ export default function AdminWorkflowTemplatesPage() {
       if (companiesRes.data) setCompanies(companiesRes.data);
       if (departmentsRes.data) setDepartments(departmentsRes.data);
       if (sectionsRes.data) setSections(sectionsRes.data);
+      if (workflowRolesRes.data) setWorkflowApprovalRoles(workflowRolesRes.data);
     } catch (error) {
       toast.error("Failed to load data");
     } finally {
@@ -266,6 +271,10 @@ export default function AdminWorkflowTemplatesPage() {
             <TabsTrigger value="templates" className="gap-2">
               <GitBranch className="h-4 w-4" />
               Templates
+            </TabsTrigger>
+            <TabsTrigger value="approval-roles" className="gap-2">
+              <Users className="h-4 w-4" />
+              Approval Roles
             </TabsTrigger>
             <TabsTrigger value="scheduler" className="gap-2">
               <Clock className="h-4 w-4" />
@@ -475,6 +484,10 @@ export default function AdminWorkflowTemplatesPage() {
             )}
           </Card>
         </div>
+          </TabsContent>
+
+          <TabsContent value="approval-roles" className="mt-6">
+            <WorkflowApprovalRolesManagement />
           </TabsContent>
 
           <TabsContent value="scheduler" className="mt-6">
@@ -828,9 +841,35 @@ export default function AdminWorkflowTemplatesPage() {
                 </div>
               )}
 
+              {editingStep?.approver_type === "workflow_role" && (
+                <div className="space-y-2">
+                  <Label>Workflow Approval Role</Label>
+                  <Select
+                    value={editingStep?.workflow_approval_role_id || ""}
+                    onValueChange={(value) =>
+                      setEditingStep({ ...editingStep, workflow_approval_role_id: value })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select workflow role" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {workflowApprovalRoles.map((role) => (
+                        <SelectItem key={role.id} value={role.id}>
+                          {role.name} ({role.code})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground">
+                    Create workflow roles in the "Approval Roles" tab
+                  </p>
+                </div>
+              )}
+
               {editingStep?.approver_type === "role" && (
                 <div className="space-y-2">
-                  <Label>Role</Label>
+                  <Label>System Role</Label>
                   <Select
                     value={editingStep?.approver_role_id || ""}
                     onValueChange={(value) =>
