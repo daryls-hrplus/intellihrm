@@ -69,6 +69,28 @@
     "alreadyHaveAccount": "已有账户？",
     "dontHaveAccount": "还没有账户？"
   },
+"hrHub": {
+    "title": "人力资源中心",
+    "transactionWorkflowSettings": {
+      "title": "交易工作流设置",
+      "subtitle": "按公司配置哪些员工交易类型需要工作流审批",
+      "description": "控制员工生命周期交易的工作流要求",
+      "selectCompanyPrompt": "选择公司",
+      "selectCompanyDescription": "从下拉菜单中选择公司以配置交易工作流设置。",
+      "summary": "配置摘要",
+      "enableAll": "全部启用",
+      "disableAll": "全部禁用",
+      "workflowEnabled": "已启用工作流",
+      "workflowDisabled": "无工作流",
+      "workflowRequired": "需要工作流",
+      "enableWorkflow": "工作流已启用",
+      "template": "模板",
+      "selectTemplate": "选择模板",
+      "autoStart": "自动启动",
+      "requiresApproval": "审批前阻止",
+      "noTransactionTypes": "未找到交易类型。请在查找值中配置交易类型。"
+    }
+  },
   "navigation": {
     "dashboard": "仪表板",
     "workforce": "员工管理",

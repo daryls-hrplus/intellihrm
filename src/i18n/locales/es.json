@@ -203,6 +203,28 @@
     "alreadyHaveAccount": "¿Ya tienes una cuenta?",
     "dontHaveAccount": "¿No tienes una cuenta?"
   },
+"hrHub": {
+    "title": "Centro HR",
+    "transactionWorkflowSettings": {
+      "title": "Configuración de Flujos de Transacciones",
+      "subtitle": "Configure qué tipos de transacciones de empleados requieren aprobación de flujo de trabajo por empresa",
+      "description": "Controle los requisitos de flujo de trabajo para transacciones del ciclo de vida del empleado",
+      "selectCompanyPrompt": "Seleccione una Empresa",
+      "selectCompanyDescription": "Elija una empresa del menú desplegable para configurar los ajustes del flujo de trabajo de transacciones.",
+      "summary": "Resumen de Configuración",
+      "enableAll": "Habilitar Todos",
+      "disableAll": "Deshabilitar Todos",
+      "workflowEnabled": "con flujo de trabajo habilitado",
+      "workflowDisabled": "sin flujo de trabajo",
+      "workflowRequired": "Flujo de trabajo requerido",
+      "enableWorkflow": "Flujo de Trabajo Habilitado",
+      "template": "Plantilla",
+      "selectTemplate": "Seleccionar plantilla",
+      "autoStart": "Inicio automático",
+      "requiresApproval": "Bloquear hasta aprobación",
+      "noTransactionTypes": "No se encontraron tipos de transacción. Configure los tipos de transacción en Valores de Búsqueda."
+    }
+  },
   "navigation": {
     "dashboard": "Panel de Control",
     "hrHub": "Centro de RRHH",
