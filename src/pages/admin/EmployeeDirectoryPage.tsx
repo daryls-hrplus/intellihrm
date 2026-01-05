@@ -12,7 +12,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, Mail, Phone, Building, MapPin, Users } from "lucide-react";
+import { Search, Mail, Phone, Building, Building2, MapPin, Users } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 interface EmployeePosition {
@@ -28,11 +28,17 @@ interface Employee {
   full_name: string;
   email: string;
   avatar_url: string | null;
+  company_id: string | null;
   positions: EmployeePosition[];
   company?: { name: string } | null;
 }
 
 interface Department {
+  id: string;
+  name: string;
+}
+
+interface Company {
   id: string;
   name: string;
 }
@@ -46,9 +52,11 @@ export default function EmployeeDirectoryPage() {
   
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
+  const [companies, setCompanies] = useState<Company[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedDepartment, setSelectedDepartment] = useState<string>("all");
+  const [selectedCompany, setSelectedCompany] = useState<string>("all");
 
   useEffect(() => {
     if (profile?.company_id) {
@@ -83,7 +91,9 @@ export default function EmployeeDirectoryPage() {
       const deptRes: any = await deptQuery;
 
       const companyRes: any = await query("companies")
-        .select("id, name");
+        .select("id, name")
+        .eq("is_active", true)
+        .order("name");
 
       const empData = empRes.data || [];
       const deptData = deptRes.data || [];
@@ -127,6 +137,7 @@ export default function EmployeeDirectoryPage() {
           full_name: emp.full_name || "",
           email: emp.email || "",
           avatar_url: emp.avatar_url,
+          company_id: emp.company_id || null,
           positions,
           company: emp.company_id ? { name: String(companyMap.get(emp.company_id) || "") } : null,
         });
@@ -134,6 +145,7 @@ export default function EmployeeDirectoryPage() {
 
       setEmployees(employeesWithDetails);
       setDepartments(deptData as Department[]);
+      setCompanies(companyData as Company[]);
     } catch (error) {
       console.error("Error loading data:", error);
     } finally {
@@ -152,7 +164,10 @@ export default function EmployeeDirectoryPage() {
       selectedDepartment === "all" || 
       emp.positions.some(p => p.department_id === selectedDepartment);
 
-    return matchesSearch && matchesDepartment;
+    const matchesCompany =
+      selectedCompany === "all" || emp.company_id === selectedCompany;
+
+    return matchesSearch && matchesDepartment && matchesCompany;
   });
 
   const getInitials = (name: string) =>
@@ -204,6 +219,20 @@ export default function EmployeeDirectoryPage() {
               className="pl-10"
             />
           </div>
+          <Select value={selectedCompany} onValueChange={setSelectedCompany}>
+            <SelectTrigger className="w-full md:w-[200px]">
+              <Building2 className="h-4 w-4 mr-2" />
+              <SelectValue placeholder="All Companies" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Companies</SelectItem>
+              {companies.map((comp) => (
+                <SelectItem key={comp.id} value={comp.id}>
+                  {comp.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           <Select value={selectedDepartment} onValueChange={setSelectedDepartment}>
             <SelectTrigger className="w-full md:w-[200px]">
               <SelectValue placeholder="All Departments" />
