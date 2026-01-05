@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -15,7 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { formatDateForDisplay } from "@/utils/dateUtils";
-import { Plus, FileText, Download, Trash2, Globe, Lock } from "lucide-react";
+import { Plus, FileText, Download, Trash2, Globe, Lock, Upload, X, Loader2 } from "lucide-react";
 
 interface CompanyDocument {
   id: string;
@@ -41,15 +41,20 @@ const DOCUMENT_CATEGORIES = [
   "Other",
 ];
 
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+
 export default function CompanyDocumentsPage() {
   const { user, profile } = useAuth();
   const { toast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [documents, setDocuments] = useState<CompanyDocument[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   
   const [formData, setFormData] = useState({
     title: "",
@@ -82,19 +87,92 @@ export default function CompanyDocumentsPage() {
     }
   };
 
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > MAX_FILE_SIZE) {
+      toast({ title: "Error", description: "File exceeds 10MB limit", variant: "destructive" });
+      return;
+    }
+
+    setSelectedFile(file);
+    // Auto-fill title if empty
+    if (!formData.title) {
+      const nameWithoutExt = file.name.replace(/\.[^/.]+$/, "");
+      setFormData(prev => ({ ...prev, title: nameWithoutExt }));
+    }
+  };
+
+  const removeFile = () => {
+    setSelectedFile(null);
+    setFormData(prev => ({ ...prev, file_url: "" }));
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const uploadFile = async (): Promise<string | null> => {
+    if (!selectedFile || !user) return null;
+    
+    setIsUploading(true);
+    try {
+      const timestamp = Date.now();
+      const safeName = selectedFile.name.replace(/[^a-zA-Z0-9.-]/g, "_");
+      const filePath = `${user.id}/${timestamp}-${safeName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("company-documents")
+        .upload(filePath, selectedFile);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from("company-documents")
+        .getPublicUrl(filePath);
+
+      return publicUrl;
+    } catch (error) {
+      console.error("Upload error:", error);
+      toast({ title: "Error", description: "Failed to upload file", variant: "destructive" });
+      return null;
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   const handleSubmit = async () => {
-    if (!formData.title || !formData.category || !formData.file_url) {
+    if (!formData.title || !formData.category) {
       toast({ title: "Error", description: "Please fill in required fields", variant: "destructive" });
       return;
     }
+    
+    if (!selectedFile && !formData.file_url) {
+      toast({ title: "Error", description: "Please upload a file or provide a URL", variant: "destructive" });
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
+      let fileUrl = formData.file_url;
+      
+      // Upload file if selected
+      if (selectedFile) {
+        const uploadedUrl = await uploadFile();
+        if (!uploadedUrl) {
+          setIsSubmitting(false);
+          return;
+        }
+        fileUrl = uploadedUrl;
+      }
+
       const { error } = await supabase.from("company_documents").insert({
         title: formData.title,
         description: formData.description || null,
         category: formData.category,
-        file_url: formData.file_url,
+        file_url: fileUrl,
+        file_type: selectedFile?.type || null,
         version: formData.version,
         is_public: formData.is_public,
         company_id: profile?.company_id || null,
@@ -106,6 +184,8 @@ export default function CompanyDocumentsPage() {
       toast({ title: "Success", description: "Document added successfully" });
       setDialogOpen(false);
       setFormData({ title: "", description: "", category: "", file_url: "", version: "1.0", is_public: true });
+      setSelectedFile(null);
+      if (fileInputRef.current) fileInputRef.current.value = "";
       loadDocuments();
     } catch (error) {
       toast({ title: "Error", description: "Failed to add document", variant: "destructive" });
@@ -271,11 +351,47 @@ export default function CompanyDocumentsPage() {
                 </Select>
               </div>
               <div>
-                <Label>File URL</Label>
+                <Label>Document File</Label>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  className="hidden"
+                  onChange={handleFileSelect}
+                  accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.png,.jpg,.jpeg"
+                />
+                
+                {selectedFile ? (
+                  <div className="flex items-center gap-2 p-3 bg-muted rounded-md mt-1">
+                    <FileText className="h-4 w-4 text-primary" />
+                    <span className="text-sm flex-1 truncate">{selectedFile.name}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
+                    </span>
+                    <Button type="button" size="sm" variant="ghost" onClick={removeFile}>
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ) : (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full mt-1"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <Upload className="h-4 w-4 mr-2" />
+                    Choose File
+                  </Button>
+                )}
+                
+                <p className="text-xs text-muted-foreground mt-2">
+                  Or provide an external URL:
+                </p>
                 <Input
                   value={formData.file_url}
                   onChange={(e) => setFormData({ ...formData, file_url: e.target.value })}
                   placeholder="https://..."
+                  className="mt-1"
+                  disabled={!!selectedFile}
                 />
               </div>
               <div>
@@ -305,9 +421,20 @@ export default function CompanyDocumentsPage() {
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
-              <Button onClick={handleSubmit} disabled={isSubmitting}>
-                {isSubmitting ? "Adding..." : "Add Document"}
+              <Button variant="outline" onClick={() => setDialogOpen(false)} disabled={isSubmitting || isUploading}>
+                Cancel
+              </Button>
+              <Button onClick={handleSubmit} disabled={isSubmitting || isUploading}>
+                {isUploading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Uploading...
+                  </>
+                ) : isSubmitting ? (
+                  "Adding..."
+                ) : (
+                  "Add Document"
+                )}
               </Button>
             </DialogFooter>
           </DialogContent>
