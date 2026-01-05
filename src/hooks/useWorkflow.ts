@@ -53,6 +53,10 @@ export interface WorkflowStep {
   department_id: string | null;
   section_id: string | null;
   target_company_id: string | null;
+  // SLA fields
+  expiration_days: number | null;
+  sla_warning_hours: number | null;
+  sla_critical_hours: number | null;
 }
 
 export interface CrossCompanyPathEntry {
@@ -61,6 +65,8 @@ export interface CrossCompanyPathEntry {
   step_order: number;
   entered_at: string;
 }
+
+export type SlaStatus = 'on_track' | 'warning' | 'critical' | 'overdue' | 'expired';
 
 export interface WorkflowInstance {
   id: string;
@@ -84,6 +90,10 @@ export interface WorkflowInstance {
   is_cross_company: boolean;
   origin_company_id: string | null;
   cross_company_path: CrossCompanyPathEntry[];
+  // SLA tracking fields
+  current_step_started_at: string | null;
+  current_step_deadline_at: string | null;
+  sla_status: SlaStatus;
   template?: WorkflowTemplate;
   steps?: WorkflowStep[];
   current_step?: WorkflowStep;
@@ -346,6 +356,9 @@ export function useWorkflow() {
           ? (instance.cross_company_path as unknown as CrossCompanyPathEntry[]) 
           : [],
         metadata: (instance.metadata as Record<string, unknown>) ?? {},
+        current_step_started_at: instance.current_step_started_at ?? null,
+        current_step_deadline_at: instance.current_step_deadline_at ?? null,
+        sla_status: (instance.sla_status as SlaStatus) ?? 'on_track',
       };
       return workflowInstance;
     } catch (error) {

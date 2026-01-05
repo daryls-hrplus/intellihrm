@@ -5,12 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { CheckCircle2, XCircle, RotateCcw, Clock, User, ChevronDown, ChevronUp, Building2 } from "lucide-react";
-import { WorkflowInstance, WorkflowStep, useWorkflow, CrossCompanyPathEntry } from "@/hooks/useWorkflow";
+import { WorkflowInstance, WorkflowStep, useWorkflow, CrossCompanyPathEntry, SlaStatus } from "@/hooks/useWorkflow";
 import { WorkflowStatusBadge } from "./WorkflowStatusBadge";
 import { WorkflowActionDialog } from "./WorkflowActionDialog";
 import { WorkflowTimeline } from "./WorkflowTimeline";
 import { LeaveApprovalContext } from "@/components/leave/LeaveApprovalContext";
 import { CrossCompanyBadge } from "./CrossCompanyBadge";
+import { WorkflowSlaIndicator } from "./WorkflowSlaIndicator";
 import type { WorkflowAction, WorkflowStepAction } from "@/hooks/useWorkflow";
 
 interface WorkflowApprovalCardProps {
@@ -116,6 +117,19 @@ export function WorkflowApprovalCard({
         </CardHeader>
 
         <CardContent className="space-y-4">
+          {/* SLA Status Indicator */}
+          {isActionable && currentStep && (
+            <WorkflowSlaIndicator
+              stepStartedAt={instance.current_step_started_at}
+              stepDeadlineAt={instance.current_step_deadline_at}
+              escalationHours={currentStep.escalation_hours}
+              slaWarningHours={currentStep.sla_warning_hours}
+              slaCriticalHours={currentStep.sla_critical_hours}
+              slaStatus={instance.sla_status as SlaStatus}
+              variant="detailed"
+            />
+          )}
+
           {/* Deadline Warning */}
           {instance.auto_terminate_at && isActionable && (
             <div className="flex items-center gap-2 text-sm text-amber-600 dark:text-amber-400">
