@@ -45,7 +45,11 @@ import {
   Brain,
   Users,
   BarChart3,
+  Bell,
+  ExternalLink,
 } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useNavigate } from "react-router-dom";
 import { CheckInCadenceConfig } from "@/components/performance/setup/CheckInCadenceConfig";
 import { AppraisalFormTemplateManager } from "@/components/performance/setup/AppraisalFormTemplateManager";
 import { AppraisalActionRulesManager } from "@/components/performance/setup/AppraisalActionRulesManager";
@@ -58,7 +62,7 @@ import { ExternalBenchmarkConfigPanel } from "@/components/performance/setup/Ext
 import { CompetencyDriftDashboard } from "@/components/performance/ai/CompetencyDriftDashboard";
 import { ManagerCapabilityDashboard } from "@/components/performance/ai/ManagerCapabilityDashboard";
 import { IntegrationDashboardWidget } from "@/components/performance/setup/IntegrationDashboardWidget";
-
+import { NotificationsLinkSection } from "@/components/performance/setup/NotificationsLinkSection";
 // Interfaces
 interface Company { id: string; name: string; }
 interface RatingScale { id: string; company_id: string; name: string; code: string; description: string | null; min_rating: number; max_rating: number; rating_labels: any; scale_purpose: string[] | null; is_default: boolean; is_active: boolean; }
@@ -68,6 +72,7 @@ interface RecognitionCategory { id: string; company_id: string; name: string; co
 interface AppraisalCycle { id: string; company_id: string; name: string; description: string | null; start_date: string; end_date: string; status: string; goal_weight: number; competency_weight: number; responsibility_weight: number; min_rating: number; max_rating: number; }
 
 export default function PerformanceSetupPage() {
+  const navigate = useNavigate();
   const { t } = useLanguage();
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedCompany, setSelectedCompany] = useState<string>("");
@@ -292,6 +297,10 @@ export default function PerformanceSetupPage() {
                     <GitBranch className="h-4 w-4" />
                     Workflows
                   </TabsTrigger>
+                  <TabsTrigger value="notifications" className="flex items-center gap-2">
+                    <Bell className="h-4 w-4" />
+                    Notifications
+                  </TabsTrigger>
                 </TabsList>
                 <TabsContent value="rating-scales" className="mt-4">
                   <RatingScalesContent scales={ratingScales} isLoading={isLoading} onAdd={() => { setEditingRatingScale(null); setRatingScaleDialogOpen(true); }} onEdit={(s: RatingScale) => { setEditingRatingScale(s); setRatingScaleDialogOpen(true); }} onDelete={handleDeleteRatingScale} t={t} />
@@ -305,6 +314,9 @@ export default function PerformanceSetupPage() {
                 <TabsContent value="approval-workflows" className="mt-4">
                   <TalentApprovalWorkflowManager companyId={selectedCompany} />
                 </TabsContent>
+                <TabsContent value="notifications" className="mt-4">
+                  <NotificationsLinkSection />
+                </TabsContent>
               </Tabs>
             </TabsContent>
 
@@ -313,6 +325,15 @@ export default function PerformanceSetupPage() {
               <div className="text-sm text-muted-foreground mb-4">
                 Goal framework configuration including cycles, templates, and locking rules
               </div>
+              <Alert className="bg-muted/50 border-muted mb-4">
+                <Bell className="h-4 w-4" />
+                <AlertDescription className="flex items-center justify-between">
+                  <span>Configure goal check-in and deadline reminders</span>
+                  <Button variant="link" size="sm" className="h-auto p-0" onClick={() => navigate('/hr-hub/reminders?tab=rules&category=performance')}>
+                    <ExternalLink className="h-3 w-3 mr-1" /> Manage Reminders
+                  </Button>
+                </AlertDescription>
+              </Alert>
               <Tabs value={secondaryTab} onValueChange={setSecondaryTab}>
                 <TabsList>
                   <TabsTrigger value="goal-cycles" className="flex items-center gap-2">
@@ -359,6 +380,15 @@ export default function PerformanceSetupPage() {
               <div className="text-sm text-muted-foreground mb-4">
                 Performance appraisal cycle settings
               </div>
+              <Alert className="bg-muted/50 border-muted mb-4">
+                <Bell className="h-4 w-4" />
+                <AlertDescription className="flex items-center justify-between">
+                  <span>Set up appraisal cycle notifications and escalations</span>
+                  <Button variant="link" size="sm" className="h-auto p-0" onClick={() => navigate('/hr-hub/reminders?tab=rules&category=performance')}>
+                    <ExternalLink className="h-3 w-3 mr-1" /> Manage Reminders
+                  </Button>
+                </AlertDescription>
+              </Alert>
               <Tabs value={secondaryTab} onValueChange={setSecondaryTab}>
                 <TabsList className="flex-wrap">
                   <TabsTrigger value="appraisal-cycles" className="flex items-center gap-2">
@@ -440,6 +470,15 @@ export default function PerformanceSetupPage() {
               <div className="text-sm text-muted-foreground mb-4">
                 Multi-rater feedback settings
               </div>
+              <Alert className="bg-muted/50 border-muted mb-4">
+                <Bell className="h-4 w-4" />
+                <AlertDescription className="flex items-center justify-between">
+                  <span>Configure feedback request and follow-up reminders</span>
+                  <Button variant="link" size="sm" className="h-auto p-0" onClick={() => navigate('/hr-hub/reminders?tab=rules&category=performance')}>
+                    <ExternalLink className="h-3 w-3 mr-1" /> Manage Reminders
+                  </Button>
+                </AlertDescription>
+              </Alert>
               <Feedback360ConfigSection companyId={selectedCompany} />
             </TabsContent>
 
