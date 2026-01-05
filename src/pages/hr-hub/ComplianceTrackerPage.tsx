@@ -1,5 +1,8 @@
 import { useState } from "react";
 import { useLanguage } from "@/hooks/useLanguage";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Button } from "@/components/ui/button";
@@ -13,16 +16,23 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format, differenceInDays, isPast, isFuture } from "date-fns";
-import { Plus, ShieldCheck, AlertTriangle, CheckCircle, Clock, FileText } from "lucide-react";
+import { Plus, ShieldCheck, AlertTriangle, CheckCircle, Clock, FileText, Building2 } from "lucide-react";
+import { toast } from "sonner";
+
+interface Company {
+  id: string;
+  name: string;
+}
 
 interface ComplianceItem {
   id: string;
+  company_id: string | null;
   title: string;
   category: string;
-  description: string;
+  description: string | null;
   deadline: string;
   status: "compliant" | "pending" | "overdue" | "in_progress";
-  responsible: string;
+  responsible: string | null;
   priority: string;
   progress: number;
 }
@@ -38,19 +48,12 @@ const categories = [
   "Licensing",
 ];
 
-// Mock data
-const mockItems: ComplianceItem[] = [
-  { id: "1", title: "Annual EEO-1 Report", category: "Labor Law", description: "Submit annual Equal Employment Opportunity report", deadline: "2025-03-31", status: "pending", responsible: "HR Manager", priority: "high", progress: 45 },
-  { id: "2", title: "OSHA Safety Training", category: "Safety Regulations", description: "Complete mandatory safety training for all employees", deadline: "2025-01-15", status: "in_progress", responsible: "Safety Officer", priority: "urgent", progress: 75 },
-  { id: "3", title: "Tax Form W-2 Distribution", category: "Tax Compliance", description: "Distribute W-2 forms to all employees", deadline: "2025-01-31", status: "pending", responsible: "Payroll", priority: "high", progress: 20 },
-  { id: "4", title: "GDPR Data Audit", category: "Data Protection", description: "Complete annual data protection audit", deadline: "2024-12-31", status: "overdue", responsible: "IT Security", priority: "urgent", progress: 60 },
-  { id: "5", title: "Professional License Renewals", category: "Licensing", description: "Renew professional licenses for certified employees", deadline: "2025-02-28", status: "pending", responsible: "HR Admin", priority: "medium", progress: 10 },
-  { id: "6", title: "Benefits Enrollment Compliance", category: "Benefits", description: "Complete ACA reporting requirements", deadline: "2025-03-02", status: "compliant", responsible: "Benefits Admin", priority: "high", progress: 100 },
-];
-
 export default function ComplianceTrackerPage() {
   const { t } = useLanguage();
-  const [items, setItems] = useState<ComplianceItem[]>(mockItems);
+  const queryClient = useQueryClient();
+  const { company, isAdmin, hasRole } = useAuth();
+  const isAdminOrHR = isAdmin || hasRole("hr_manager");
+  const [selectedCompany, setSelectedCompany] = useState<string>(company?.id || "");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("all");
 
@@ -61,6 +64,69 @@ export default function ComplianceTrackerPage() {
     deadline: "",
     responsible: "",
     priority: "medium",
+  });
+
+  // Fetch companies for filter
+  const { data: companies = [] } = useQuery({
+    queryKey: ["companies-active"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("companies")
+        .select("id, name")
+        .eq("is_active", true)
+        .order("name");
+      if (error) throw error;
+      return data as Company[];
+    },
+    enabled: isAdminOrHR,
+  });
+
+  // Fetch compliance items
+  const { data: items = [], isLoading } = useQuery({
+    queryKey: ["compliance-items", selectedCompany],
+    queryFn: async () => {
+      let query = supabase
+        .from("compliance_items")
+        .select("*")
+        .order("deadline", { ascending: true });
+      
+      if (selectedCompany) {
+        query = query.eq("company_id", selectedCompany);
+      }
+      
+      const { data, error } = await query;
+      if (error) throw error;
+      return data as ComplianceItem[];
+    },
+  });
+
+  // Create compliance item mutation
+  const createMutation = useMutation({
+    mutationFn: async (data: typeof formData) => {
+      const { error } = await supabase
+        .from("compliance_items")
+        .insert({
+          title: data.title,
+          category: data.category,
+          description: data.description || null,
+          deadline: data.deadline,
+          responsible: data.responsible || null,
+          priority: data.priority,
+          company_id: selectedCompany || company?.id || null,
+          status: "pending",
+          progress: 0,
+        });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["compliance-items"] });
+      setDialogOpen(false);
+      setFormData({ title: "", category: "", description: "", deadline: "", responsible: "", priority: "medium" });
+      toast.success(t("common.success"));
+    },
+    onError: (error) => {
+      toast.error("Failed to create: " + error.message);
+    },
   });
 
   const getStatusColor = (status: string) => {
@@ -124,15 +190,32 @@ export default function ComplianceTrackerPage() {
       <div className="container mx-auto py-6 space-y-6">
         <Breadcrumbs items={breadcrumbItems} />
 
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-4 flex-wrap">
           <div>
             <h1 className="text-3xl font-bold">{t("hrHub.compliance")}</h1>
             <p className="text-muted-foreground">{t("hrHub.complianceSubtitle")}</p>
           </div>
-          <Button onClick={() => setDialogOpen(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            {t("hrHub.addRequirement")}
-          </Button>
+          <div className="flex items-center gap-3">
+            {isAdminOrHR && companies.length > 0 && (
+              <div className="flex items-center gap-2">
+                <Building2 className="h-4 w-4 text-muted-foreground" />
+                <Select value={selectedCompany} onValueChange={setSelectedCompany}>
+                  <SelectTrigger className="w-[200px]">
+                    <SelectValue placeholder="Select company" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {companies.map((c) => (
+                      <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+            <Button onClick={() => setDialogOpen(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              {t("hrHub.addRequirement")}
+            </Button>
+          </div>
         </div>
 
         {/* Overall Compliance */}
@@ -245,9 +328,9 @@ export default function ComplianceTrackerPage() {
                             </span>
                           </Badge>
                         </div>
-                        <p className="text-sm text-muted-foreground mb-3">{item.description}</p>
+                        <p className="text-sm text-muted-foreground mb-3">{item.description || "-"}</p>
                         <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                          <span>{t("hrHub.responsible")}: {item.responsible}</span>
+                          <span>{t("hrHub.responsible")}: {item.responsible || "-"}</span>
                           <span>•</span>
                           <span className={item.status === "overdue" ? "text-red-500 font-medium" : ""}>
                             {getDaysRemaining(item.deadline)}
@@ -339,7 +422,12 @@ export default function ComplianceTrackerPage() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setDialogOpen(false)}>{t("common.cancel")}</Button>
-              <Button onClick={() => setDialogOpen(false)}>{t("hrHub.addRequirement")}</Button>
+              <Button 
+                onClick={() => createMutation.mutate(formData)}
+                disabled={!formData.title || !formData.deadline || createMutation.isPending}
+              >
+                {t("hrHub.addRequirement")}
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
