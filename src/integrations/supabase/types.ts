@@ -59531,6 +59531,99 @@ export type Database = {
           },
         ]
       }
+      workflow_approval_role_positions: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_primary: boolean | null
+          position_id: string
+          priority_order: number | null
+          workflow_role_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_primary?: boolean | null
+          position_id: string
+          priority_order?: number | null
+          workflow_role_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_primary?: boolean | null
+          position_id?: string
+          priority_order?: number | null
+          workflow_role_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflow_approval_role_positions_position_id_fkey"
+            columns: ["position_id"]
+            isOneToOne: false
+            referencedRelation: "positions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workflow_approval_role_positions_workflow_role_id_fkey"
+            columns: ["workflow_role_id"]
+            isOneToOne: false
+            referencedRelation: "workflow_approval_roles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workflow_approval_roles: {
+        Row: {
+          code: string
+          company_id: string | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          code: string
+          company_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          code?: string
+          company_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflow_approval_roles_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workflow_approval_roles_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       workflow_delegates: {
         Row: {
           category: Database["public"]["Enums"]["workflow_category"] | null
@@ -59600,6 +59693,8 @@ export type Database = {
       }
       workflow_instances: {
         Row: {
+          alternate_approver_id: string | null
+          alternate_notified_at: string | null
           auto_terminate_at: string | null
           category: Database["public"]["Enums"]["workflow_category"]
           company_id: string | null
@@ -59628,6 +59723,8 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          alternate_approver_id?: string | null
+          alternate_notified_at?: string | null
           auto_terminate_at?: string | null
           category: Database["public"]["Enums"]["workflow_category"]
           company_id?: string | null
@@ -59656,6 +59753,8 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          alternate_approver_id?: string | null
+          alternate_notified_at?: string | null
           auto_terminate_at?: string | null
           category?: Database["public"]["Enums"]["workflow_category"]
           company_id?: string | null
@@ -59684,6 +59783,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "workflow_instances_alternate_approver_id_fkey"
+            columns: ["alternate_approver_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "workflow_instances_company_id_fkey"
             columns: ["company_id"]
@@ -60069,6 +60175,7 @@ export type Database = {
           template_id: string
           updated_at: string
           use_reporting_line: boolean
+          workflow_approval_role_id: string | null
         }
         Insert: {
           alternate_approver_id?: string | null
@@ -60098,6 +60205,7 @@ export type Database = {
           template_id: string
           updated_at?: string
           use_reporting_line?: boolean
+          workflow_approval_role_id?: string | null
         }
         Update: {
           alternate_approver_id?: string | null
@@ -60127,6 +60235,7 @@ export type Database = {
           template_id?: string
           updated_at?: string
           use_reporting_line?: boolean
+          workflow_approval_role_id?: string | null
         }
         Relationships: [
           {
@@ -60197,6 +60306,13 @@ export type Database = {
             columns: ["template_id"]
             isOneToOne: false
             referencedRelation: "workflow_templates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workflow_steps_workflow_approval_role_id_fkey"
+            columns: ["workflow_approval_role_id"]
+            isOneToOne: false
+            referencedRelation: "workflow_approval_roles"
             referencedColumns: ["id"]
           },
         ]

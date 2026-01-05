@@ -345,6 +345,69 @@ async function handleEscalation(
         }
         break;
 
+      case "notify_alternate":
+        // Notify alternate approver but keep the step active and waiting
+        if (step.alternate_approver_id) {
+          // Check if alternate was already notified
+          const alreadyNotified = instance.metadata?.alternate_notified_at;
+          
+          if (!alreadyNotified) {
+            // Update instance to track that alternate was notified
+            await supabase
+              .from("workflow_instances")
+              .update({
+                escalated_at: new Date().toISOString(),
+                alternate_notified_at: new Date().toISOString(),
+                alternate_approver_id: step.alternate_approver_id,
+                sla_status: "overdue",
+              })
+              .eq("id", instance.id);
+
+            // Notify alternate approver - they can now also approve
+            await supabase.from("notifications").insert({
+              user_id: step.alternate_approver_id,
+              title: "Workflow Requires Your Attention",
+              message: `A workflow at step "${step.name}" is overdue and requires your attention. You have been added as an alternate approver.`,
+              type: "workflow",
+              priority: "high",
+              reference_type: "workflow_instance",
+              reference_id: instance.id,
+            });
+
+            // Also notify the original approver that alternate was notified
+            await supabase.from("notifications").insert({
+              user_id: instance.initiated_by,
+              title: "Workflow Escalated",
+              message: `Your workflow request at step "${step.name}" has been escalated. An alternate approver has been notified.`,
+              type: "workflow",
+              priority: "medium",
+              reference_type: "workflow_instance",
+              reference_id: instance.id,
+            });
+          }
+        } else {
+          // No alternate configured, just mark as overdue
+          await supabase
+            .from("workflow_instances")
+            .update({
+              escalated_at: new Date().toISOString(),
+              sla_status: "overdue",
+            })
+            .eq("id", instance.id);
+
+          await supabase.from("notifications").insert({
+            user_id: instance.initiated_by,
+            title: "Workflow Overdue",
+            message: `Your workflow request is overdue at step "${step.name}". No alternate approver is configured.`,
+            type: "workflow",
+            priority: "high",
+            reference_type: "workflow_instance",
+            reference_id: instance.id,
+          });
+        }
+        break;
+
+      case "escalate_up":
       case "notify":
       default:
         // Just mark as escalated and send notifications
