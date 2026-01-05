@@ -22559,6 +22559,140 @@ export type Database = {
           },
         ]
       }
+      feedback_writing_quality: {
+        Row: {
+          behavioral_focus_score: number | null
+          bias_risk_score: number | null
+          clarity_score: number | null
+          company_id: string | null
+          computed_at: string | null
+          id: string
+          improvement_suggestions: Json | null
+          overall_quality_score: number | null
+          response_id: string | null
+          specificity_score: number | null
+        }
+        Insert: {
+          behavioral_focus_score?: number | null
+          bias_risk_score?: number | null
+          clarity_score?: number | null
+          company_id?: string | null
+          computed_at?: string | null
+          id?: string
+          improvement_suggestions?: Json | null
+          overall_quality_score?: number | null
+          response_id?: string | null
+          specificity_score?: number | null
+        }
+        Update: {
+          behavioral_focus_score?: number | null
+          bias_risk_score?: number | null
+          clarity_score?: number | null
+          company_id?: string | null
+          computed_at?: string | null
+          id?: string
+          improvement_suggestions?: Json | null
+          overall_quality_score?: number | null
+          response_id?: string | null
+          specificity_score?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedback_writing_quality_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_writing_quality_response_id_fkey"
+            columns: ["response_id"]
+            isOneToOne: false
+            referencedRelation: "feedback_360_responses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      feedback_writing_suggestions: {
+        Row: {
+          accepted_at: string | null
+          company_id: string | null
+          created_at: string | null
+          dismissed_at: string | null
+          explanation: string | null
+          id: string
+          original_text: string
+          question_id: string | null
+          rater_id: string | null
+          response_id: string | null
+          severity: string | null
+          suggestion_text: string
+          suggestion_type: string
+          was_accepted: boolean | null
+        }
+        Insert: {
+          accepted_at?: string | null
+          company_id?: string | null
+          created_at?: string | null
+          dismissed_at?: string | null
+          explanation?: string | null
+          id?: string
+          original_text: string
+          question_id?: string | null
+          rater_id?: string | null
+          response_id?: string | null
+          severity?: string | null
+          suggestion_text: string
+          suggestion_type: string
+          was_accepted?: boolean | null
+        }
+        Update: {
+          accepted_at?: string | null
+          company_id?: string | null
+          created_at?: string | null
+          dismissed_at?: string | null
+          explanation?: string | null
+          id?: string
+          original_text?: string
+          question_id?: string | null
+          rater_id?: string | null
+          response_id?: string | null
+          severity?: string | null
+          suggestion_text?: string
+          suggestion_type?: string
+          was_accepted?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedback_writing_suggestions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_writing_suggestions_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "feedback_360_questions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_writing_suggestions_rater_id_fkey"
+            columns: ["rater_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_writing_suggestions_response_id_fkey"
+            columns: ["response_id"]
+            isOneToOne: false
+            referencedRelation: "feedback_360_responses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       fields_of_study: {
         Row: {
           category: string | null
