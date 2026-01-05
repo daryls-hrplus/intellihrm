@@ -23,6 +23,10 @@ import type { WorkflowTemplate, WorkflowStep, WorkflowCategory } from "@/hooks/u
 import { SchedulerManagement } from "@/components/admin/SchedulerManagement";
 import { WorkflowApprovalRolesManagement } from "@/components/admin/WorkflowApprovalRolesManagement";
 import { WorkflowProcessMapDialog } from "@/components/workflow/WorkflowProcessMapDialog";
+import { WorkflowAnalyticsDashboard } from "@/components/workflow/WorkflowAnalyticsDashboard";
+import { WorkflowAuditTrail } from "@/components/workflow/WorkflowAuditTrail";
+import { WorkflowDelegationManager } from "@/components/workflow/WorkflowDelegationManager";
+import { BarChart3, History, UserCheck } from "lucide-react";
 
 const WORKFLOW_CATEGORIES: { value: WorkflowCategory; label: string }[] = [
   // Employee Transactions
@@ -281,7 +285,7 @@ export default function AdminWorkflowTemplatesPage() {
         </div>
 
         <Tabs value={activeMainTab} onValueChange={setActiveMainTab}>
-          <TabsList>
+          <TabsList className="flex-wrap">
             <TabsTrigger value="templates" className="gap-2">
               <GitBranch className="h-4 w-4" />
               Templates
@@ -293,6 +297,18 @@ export default function AdminWorkflowTemplatesPage() {
             <TabsTrigger value="scheduler" className="gap-2">
               <Clock className="h-4 w-4" />
               Scheduler
+            </TabsTrigger>
+            <TabsTrigger value="analytics" className="gap-2">
+              <BarChart3 className="h-4 w-4" />
+              Analytics
+            </TabsTrigger>
+            <TabsTrigger value="audit" className="gap-2">
+              <History className="h-4 w-4" />
+              Audit Trail
+            </TabsTrigger>
+            <TabsTrigger value="delegation" className="gap-2">
+              <UserCheck className="h-4 w-4" />
+              Delegation
             </TabsTrigger>
           </TabsList>
 
@@ -514,6 +530,18 @@ export default function AdminWorkflowTemplatesPage() {
 
           <TabsContent value="scheduler" className="mt-6">
             <SchedulerManagement />
+          </TabsContent>
+
+          <TabsContent value="analytics" className="mt-6">
+            <WorkflowAnalyticsDashboard />
+          </TabsContent>
+
+          <TabsContent value="audit" className="mt-6">
+            <WorkflowAuditTrail />
+          </TabsContent>
+
+          <TabsContent value="delegation" className="mt-6">
+            <WorkflowDelegationManager />
           </TabsContent>
         </Tabs>
 
