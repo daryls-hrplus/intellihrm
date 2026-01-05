@@ -70,6 +70,7 @@ export default function HRHubDashboardPage() {
         { titleKey: "hrHub.compliance", descKey: "hrHub.complianceDesc", icon: ShieldCheck, href: "/hr-hub/compliance", badge: null },
         { titleKey: "hrHub.integrationHub", descKey: "hrHub.integrationHubDesc", icon: GitBranch, href: "/hr-hub/integrations", badge: null },
         { titleKey: "hrHub.workflowTemplates", descKey: "hrHub.workflowTemplatesDesc", icon: GitBranch, href: "/admin/workflow-templates", badge: null },
+        { titleKey: "hrHub.transactionWorkflowSettings.title", descKey: "hrHub.transactionWorkflowSettings.shortDesc", icon: FileText, href: "/hr-hub/transaction-workflow-settings", badge: null },
         { titleKey: "hrHub.approvalDelegations", descKey: "hrHub.approvalDelegationsDesc", icon: UserCheck, href: "/admin/delegations", badge: null },
         { titleKey: "hrHub.scheduledReports", descKey: "hrHub.scheduledReportsDesc", icon: BarChart3, href: "/admin/scheduled-reports", badge: null },
         { titleKey: "hrHub.sopManagement.title", descKey: "hrHub.sopManagement.description", icon: Bot, href: "/hr-hub/sop-management", badge: null },
