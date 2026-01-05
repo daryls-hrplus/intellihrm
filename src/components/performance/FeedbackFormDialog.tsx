@@ -17,6 +17,7 @@ import { Loader2, ChevronLeft, ChevronRight, Check, Star } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { AIWritingAssistant } from "@/components/feedback/writing";
+import { ConsentGate } from "@/components/feedback/governance";
 
 interface Question {
   id: string;
@@ -55,6 +56,7 @@ export function FeedbackFormDialog({
   const [questions, setQuestions] = useState<Question[]>([]);
   const [responses, setResponses] = useState<Record<string, { rating?: number; text?: string }>>({});
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [cycleInfo, setCycleInfo] = useState<{ cycleId: string; companyId: string } | null>(null);
 
   useEffect(() => {
     if (open && participantId) {
@@ -65,14 +67,21 @@ export function FeedbackFormDialog({
   const fetchQuestions = async () => {
     setLoading(true);
     try {
-      // Get the review cycle ID from participant
+      // Get the review cycle ID and company_id from participant
       const { data: participant } = await supabase
         .from("review_participants")
-        .select("review_cycle_id")
+        .select("review_cycle_id, review_cycles(company_id)")
         .eq("id", participantId)
         .single();
 
       if (!participant) throw new Error("Participant not found");
+      
+      // Store cycle info for consent gate
+      const companyId = (participant as any).review_cycles?.company_id;
+      setCycleInfo({
+        cycleId: participant.review_cycle_id,
+        companyId: companyId || "",
+      });
 
       // Get questions for this cycle that apply to this reviewer type
       const { data: questionsData, error } = await supabase
@@ -236,156 +245,162 @@ export function FeedbackFormDialog({
           <div className="py-12 text-center text-muted-foreground">
             No questions configured for this review.
           </div>
-        ) : (
-          <div className="space-y-6">
-            {/* Progress */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between text-sm">
-                <span>
-                  Question {currentIndex + 1} of {questions.length}
-                </span>
-                <span className="text-muted-foreground">
-                  {answeredCount} of {questions.length} answered
-                </span>
-              </div>
-              <Progress value={progress} className="h-2" />
-            </div>
-
-            <Separator />
-
-            {/* Current Question */}
-            {currentQuestion && (
-              <div className="space-y-4">
-                {currentQuestion.competency_name && (
-                  <Badge variant="outline">{currentQuestion.competency_name}</Badge>
-                )}
-                <div className="space-y-2">
-                  <Label className="text-base font-medium">
-                    {currentQuestion.question_text}
-                    {currentQuestion.is_required && (
-                      <span className="text-destructive ml-1">*</span>
-                    )}
-                  </Label>
+        ) : cycleInfo ? (
+          <ConsentGate cycleId={cycleInfo.cycleId} companyId={cycleInfo.companyId}>
+            <div className="space-y-6">
+              {/* Progress */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span>
+                    Question {currentIndex + 1} of {questions.length}
+                  </span>
+                  <span className="text-muted-foreground">
+                    {answeredCount} of {questions.length} answered
+                  </span>
                 </div>
+                <Progress value={progress} className="h-2" />
+              </div>
 
-                {currentQuestion.question_type === "rating" && (
-                  <div className="space-y-4">
-                    <RadioGroup
-                      value={responses[currentQuestion.id]?.rating?.toString() || ""}
-                      onValueChange={(value) =>
-                        handleRatingChange(currentQuestion.id, parseInt(value))
-                      }
-                      className="space-y-2"
-                    >
-                      {Array.from(
-                        { length: currentQuestion.rating_scale_max - currentQuestion.rating_scale_min + 1 },
-                        (_, i) => currentQuestion.rating_scale_min + i
-                      ).map((value, index) => (
-                        <div
-                          key={value}
-                          className="flex items-center space-x-3 rounded-lg border p-3 cursor-pointer hover:bg-muted/50"
-                        >
-                          <RadioGroupItem value={value.toString()} id={`rating-${value}`} />
-                          <Label
-                            htmlFor={`rating-${value}`}
-                            className="flex-1 cursor-pointer flex items-center gap-2"
-                          >
-                            <div className="flex items-center gap-1">
-                              {Array.from({ length: value }, (_, i) => (
-                                <Star key={i} className="h-4 w-4 fill-warning text-warning" />
-                              ))}
-                            </div>
-                            <span className="text-sm">
-                              {currentQuestion.rating_labels[index] || `${value}`}
-                            </span>
-                          </Label>
-                        </div>
-                      ))}
-                    </RadioGroup>
-                  </div>
-                )}
+              <Separator />
 
-                {currentQuestion.question_type === "text" && (
-                  <div className="space-y-3">
-                    <Textarea
-                      value={responses[currentQuestion.id]?.text || ""}
-                      onChange={(e) => handleTextChange(currentQuestion.id, e.target.value)}
-                      placeholder="Enter your response..."
-                      rows={4}
-                    />
-                    <AIWritingAssistant
-                      text={responses[currentQuestion.id]?.text || ""}
-                      questionContext={currentQuestion.question_text}
-                      raterCategory={reviewerType}
-                      responseId={currentQuestion.id}
-                      onApplySuggestion={(suggestion, newText) => handleTextChange(currentQuestion.id, newText)}
-                    />
-                  </div>
-                )}
-
-                {/* Comments section for rating questions */}
-                {currentQuestion.question_type === "rating" && (
-                  <div className="space-y-2 pt-4">
-                    <Label className="text-sm text-muted-foreground">
-                      Additional Comments (Optional)
+              {/* Current Question */}
+              {currentQuestion && (
+                <div className="space-y-4">
+                  {currentQuestion.competency_name && (
+                    <Badge variant="outline">{currentQuestion.competency_name}</Badge>
+                  )}
+                  <div className="space-y-2">
+                    <Label className="text-base font-medium">
+                      {currentQuestion.question_text}
+                      {currentQuestion.is_required && (
+                        <span className="text-destructive ml-1">*</span>
+                      )}
                     </Label>
-                    <Textarea
-                      value={responses[currentQuestion.id]?.text || ""}
-                      onChange={(e) => handleTextChange(currentQuestion.id, e.target.value)}
-                      placeholder="Add any additional feedback..."
-                      rows={3}
-                    />
-                    {(responses[currentQuestion.id]?.text?.length || 0) >= 30 && (
+                  </div>
+
+                  {currentQuestion.question_type === "rating" && (
+                    <div className="space-y-4">
+                      <RadioGroup
+                        value={responses[currentQuestion.id]?.rating?.toString() || ""}
+                        onValueChange={(value) =>
+                          handleRatingChange(currentQuestion.id, parseInt(value))
+                        }
+                        className="space-y-2"
+                      >
+                        {Array.from(
+                          { length: currentQuestion.rating_scale_max - currentQuestion.rating_scale_min + 1 },
+                          (_, i) => currentQuestion.rating_scale_min + i
+                        ).map((value, index) => (
+                          <div
+                            key={value}
+                            className="flex items-center space-x-3 rounded-lg border p-3 cursor-pointer hover:bg-muted/50"
+                          >
+                            <RadioGroupItem value={value.toString()} id={`rating-${value}`} />
+                            <Label
+                              htmlFor={`rating-${value}`}
+                              className="flex-1 cursor-pointer flex items-center gap-2"
+                            >
+                              <div className="flex items-center gap-1">
+                                {Array.from({ length: value }, (_, i) => (
+                                  <Star key={i} className="h-4 w-4 fill-warning text-warning" />
+                                ))}
+                              </div>
+                              <span className="text-sm">
+                                {currentQuestion.rating_labels[index] || `${value}`}
+                              </span>
+                            </Label>
+                          </div>
+                        ))}
+                      </RadioGroup>
+                    </div>
+                  )}
+
+                  {currentQuestion.question_type === "text" && (
+                    <div className="space-y-3">
+                      <Textarea
+                        value={responses[currentQuestion.id]?.text || ""}
+                        onChange={(e) => handleTextChange(currentQuestion.id, e.target.value)}
+                        placeholder="Enter your response..."
+                        rows={4}
+                      />
                       <AIWritingAssistant
                         text={responses[currentQuestion.id]?.text || ""}
                         questionContext={currentQuestion.question_text}
                         raterCategory={reviewerType}
                         responseId={currentQuestion.id}
                         onApplySuggestion={(suggestion, newText) => handleTextChange(currentQuestion.id, newText)}
-                        showCompact
                       />
-                    )}
-                  </div>
-                )}
-              </div>
-            )}
+                    </div>
+                  )}
 
-            <Separator />
+                  {/* Comments section for rating questions */}
+                  {currentQuestion.question_type === "rating" && (
+                    <div className="space-y-2 pt-4">
+                      <Label className="text-sm text-muted-foreground">
+                        Additional Comments (Optional)
+                      </Label>
+                      <Textarea
+                        value={responses[currentQuestion.id]?.text || ""}
+                        onChange={(e) => handleTextChange(currentQuestion.id, e.target.value)}
+                        placeholder="Add any additional feedback..."
+                        rows={3}
+                      />
+                      {(responses[currentQuestion.id]?.text?.length || 0) >= 30 && (
+                        <AIWritingAssistant
+                          text={responses[currentQuestion.id]?.text || ""}
+                          questionContext={currentQuestion.question_text}
+                          raterCategory={reviewerType}
+                          responseId={currentQuestion.id}
+                          onApplySuggestion={(suggestion, newText) => handleTextChange(currentQuestion.id, newText)}
+                          showCompact
+                        />
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
 
-            {/* Navigation */}
-            <div className="flex items-center justify-between">
-              <Button
-                variant="outline"
-                onClick={() => setCurrentIndex((prev) => Math.max(0, prev - 1))}
-                disabled={currentIndex === 0}
-              >
-                <ChevronLeft className="mr-2 h-4 w-4" />
-                Previous
-              </Button>
+              <Separator />
 
-              <div className="flex items-center gap-2">
-                <Button variant="outline" onClick={handleSaveProgress} disabled={saving}>
-                  Save Progress
+              {/* Navigation */}
+              <div className="flex items-center justify-between">
+                <Button
+                  variant="outline"
+                  onClick={() => setCurrentIndex((prev) => Math.max(0, prev - 1))}
+                  disabled={currentIndex === 0}
+                >
+                  <ChevronLeft className="mr-2 h-4 w-4" />
+                  Previous
                 </Button>
-                {currentIndex === questions.length - 1 ? (
-                  <Button onClick={handleSubmit} disabled={saving}>
-                    {saving ? (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    ) : (
-                      <Check className="mr-2 h-4 w-4" />
-                    )}
-                    Submit Feedback
+
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" onClick={handleSaveProgress} disabled={saving}>
+                    Save Progress
                   </Button>
-                ) : (
-                  <Button
-                    onClick={() => setCurrentIndex((prev) => Math.min(questions.length - 1, prev + 1))}
-                  >
-                    Next
-                    <ChevronRight className="ml-2 h-4 w-4" />
-                  </Button>
-                )}
+                  {currentIndex === questions.length - 1 ? (
+                    <Button onClick={handleSubmit} disabled={saving}>
+                      {saving ? (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      ) : (
+                        <Check className="mr-2 h-4 w-4" />
+                      )}
+                      Submit Feedback
+                    </Button>
+                  ) : (
+                    <Button
+                      onClick={() => setCurrentIndex((prev) => Math.min(questions.length - 1, prev + 1))}
+                    >
+                      Next
+                      <ChevronRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
               </div>
             </div>
+          </ConsentGate>
+        ) : (
+          <div className="py-12 text-center text-muted-foreground">
+            Loading cycle information...
           </div>
         )}
       </DialogContent>

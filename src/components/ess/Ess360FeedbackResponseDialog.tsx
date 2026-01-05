@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { format } from "date-fns";
 import {
   Dialog,
@@ -19,6 +19,8 @@ import type { My360Request } from "@/hooks/useMy360FeedbackRequests";
 import { use360CycleQuestions, useSubmit360Feedback } from "@/hooks/useMy360FeedbackRequests";
 import { BARSRatingScale } from "@/components/feedback/questions/BARSRatingScale";
 import { QuestionAnchors } from "@/hooks/useBehavioralAnchors";
+import { ConsentGate } from "@/components/feedback/governance";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Ess360FeedbackResponseDialogProps {
   open: boolean;
@@ -42,6 +44,26 @@ export function Ess360FeedbackResponseDialog({
   
   const [responses, setResponses] = useState<Record<string, QuestionResponse>>({});
   const [submitting, setSubmitting] = useState(false);
+  const [companyId, setCompanyId] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Fetch company_id for the cycle
+    const fetchCompanyId = async () => {
+      const { data } = await supabase
+        .from("feedback_360_cycles")
+        .select("company_id")
+        .eq("id", request.cycle_id)
+        .single();
+      
+      if (data) {
+        setCompanyId(data.company_id);
+      }
+    };
+    
+    if (request.cycle_id) {
+      fetchCompanyId();
+    }
+  }, [request.cycle_id]);
 
   const updateResponse = (questionId: string, field: "rating" | "comment", value: any) => {
     setResponses(prev => ({
@@ -160,52 +182,58 @@ export function Ess360FeedbackResponseDialog({
                 <p className="text-muted-foreground">No questions configured for this cycle.</p>
               </CardContent>
             </Card>
-          ) : (
-            questions.map((question, index) => (
-              <Card key={question.id}>
-                <CardContent className="pt-6">
-                  <div className="space-y-4">
-                    <div className="flex items-start gap-2">
-                      <span className="font-medium text-muted-foreground">{index + 1}.</span>
-                      <div className="flex-1">
-                        <Label className="text-base font-medium">
-                          {question.question_text}
-                          {question.is_required && (
-                            <span className="text-destructive ml-1">*</span>
-                          )}
-                        </Label>
+          ) : companyId ? (
+            <ConsentGate cycleId={request.cycle_id} companyId={companyId}>
+              {questions.map((question, index) => (
+                <Card key={question.id}>
+                  <CardContent className="pt-6">
+                    <div className="space-y-4">
+                      <div className="flex items-start gap-2">
+                        <span className="font-medium text-muted-foreground">{index + 1}.</span>
+                        <div className="flex-1">
+                          <Label className="text-base font-medium">
+                            {question.question_text}
+                            {question.is_required && (
+                              <span className="text-destructive ml-1">*</span>
+                            )}
+                          </Label>
+                        </div>
                       </div>
-                    </div>
 
-                    {(question.question_type === "rating" || question.question_type === "scale") && (
-                      renderRatingScale(question, question.id)
-                    )}
+                      {(question.question_type === "rating" || question.question_type === "scale") && (
+                        renderRatingScale(question, question.id)
+                      )}
 
-                    {question.question_type === "text" && (
-                      <Textarea
-                        placeholder="Enter your response..."
-                        value={responses[question.id]?.comment || ""}
-                        onChange={(e) => updateResponse(question.id, "comment", e.target.value)}
-                        rows={3}
-                      />
-                    )}
-
-                    {(question.question_type === "rating" || question.question_type === "scale") && (
-                      <div className="pt-2">
-                        <Label className="text-sm text-muted-foreground">Additional comments (optional)</Label>
+                      {question.question_type === "text" && (
                         <Textarea
-                          placeholder="Add any additional context..."
+                          placeholder="Enter your response..."
                           value={responses[question.id]?.comment || ""}
                           onChange={(e) => updateResponse(question.id, "comment", e.target.value)}
-                          rows={2}
-                          className="mt-1"
+                          rows={3}
                         />
-                      </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            ))
+                      )}
+
+                      {(question.question_type === "rating" || question.question_type === "scale") && (
+                        <div className="pt-2">
+                          <Label className="text-sm text-muted-foreground">Additional comments (optional)</Label>
+                          <Textarea
+                            placeholder="Add any additional context..."
+                            value={responses[question.id]?.comment || ""}
+                            onChange={(e) => updateResponse(question.id, "comment", e.target.value)}
+                            rows={2}
+                            className="mt-1"
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </ConsentGate>
+          ) : (
+            <div className="flex items-center justify-center py-8">
+              <Skeleton className="h-4 w-32" />
+            </div>
           )}
         </div>
 
