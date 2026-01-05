@@ -200,7 +200,37 @@ export function useWorkflow() {
       }
 
       if (step.approver_type === "position" && step.approver_position_id) {
-        const { data: positionHolder } = await supabase
+        // First, check for someone acting in this position (takes precedence)
+        const { data: actingHolder } = await supabase
+          .from("employee_positions")
+          .select("employee_id")
+          .eq("position_id", step.approver_position_id)
+          .eq("is_active", true)
+          .eq("assignment_type", "acting")
+          .or("end_date.is.null,end_date.gte." + new Date().toISOString().split("T")[0])
+          .limit(1)
+          .single();
+
+        if (actingHolder?.employee_id) {
+          return actingHolder.employee_id;
+        }
+
+        // Fall back to primary position holder
+        const { data: primaryHolder } = await supabase
+          .from("employee_positions")
+          .select("employee_id")
+          .eq("position_id", step.approver_position_id)
+          .eq("is_active", true)
+          .eq("assignment_type", "primary")
+          .limit(1)
+          .single();
+
+        if (primaryHolder?.employee_id) {
+          return primaryHolder.employee_id;
+        }
+
+        // Last resort: any active holder
+        const { data: anyHolder } = await supabase
           .from("employee_positions")
           .select("employee_id")
           .eq("position_id", step.approver_position_id)
@@ -208,8 +238,8 @@ export function useWorkflow() {
           .limit(1)
           .single();
 
-        if (positionHolder?.employee_id) {
-          return positionHolder.employee_id;
+        if (anyHolder?.employee_id) {
+          return anyHolder.employee_id;
         }
       }
 
