@@ -186,6 +186,7 @@ import LeaveEncashmentPage from "./pages/leave/LeaveEncashmentPage";
 import LeaveLiabilityPage from "./pages/leave/LeaveLiabilityPage";
 import LeaveProrataSettingsPage from "./pages/leave/LeaveProrataSettingsPage";
 import MaternityLeavePage from "./pages/leave/MaternityLeavePage";
+import LeaveCompliancePage from "./pages/leave/LeaveCompliancePage";
 
 
 import CompensationDashboardPage from "./pages/compensation/CompensationDashboardPage";
@@ -2246,6 +2247,14 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="leave">
                   <MaternityLeavePage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/leave/compliance"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="leave">
+                  <LeaveCompliancePage />
                 </ProtectedRoute>
               }
             />
