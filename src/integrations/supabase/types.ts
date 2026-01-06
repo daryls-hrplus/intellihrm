@@ -22670,61 +22670,79 @@ export type Database = {
         Row: {
           anchor_display_mode: string | null
           behavioral_anchors: Json | null
+          bias_risk_category: string | null
           category_id: string | null
           choices: Json | null
           company_id: string
           competency_id: string | null
           created_at: string
+          deprecated_at: string | null
           display_order: number
+          framework_id: string | null
           id: string
           is_active: boolean
           is_required: boolean
           question_text: string
           question_text_en: string | null
           question_type: string
+          question_version: number | null
           rating_scale_labels: Json | null
           rating_scale_max: number | null
           rating_scale_min: number | null
+          replacement_question_id: string | null
+          signal_types: string[] | null
           updated_at: string
         }
         Insert: {
           anchor_display_mode?: string | null
           behavioral_anchors?: Json | null
+          bias_risk_category?: string | null
           category_id?: string | null
           choices?: Json | null
           company_id: string
           competency_id?: string | null
           created_at?: string
+          deprecated_at?: string | null
           display_order?: number
+          framework_id?: string | null
           id?: string
           is_active?: boolean
           is_required?: boolean
           question_text: string
           question_text_en?: string | null
           question_type?: string
+          question_version?: number | null
           rating_scale_labels?: Json | null
           rating_scale_max?: number | null
           rating_scale_min?: number | null
+          replacement_question_id?: string | null
+          signal_types?: string[] | null
           updated_at?: string
         }
         Update: {
           anchor_display_mode?: string | null
           behavioral_anchors?: Json | null
+          bias_risk_category?: string | null
           category_id?: string | null
           choices?: Json | null
           company_id?: string
           competency_id?: string | null
           created_at?: string
+          deprecated_at?: string | null
           display_order?: number
+          framework_id?: string | null
           id?: string
           is_active?: boolean
           is_required?: boolean
           question_text?: string
           question_text_en?: string | null
           question_type?: string
+          question_version?: number | null
           rating_scale_labels?: Json | null
           rating_scale_max?: number | null
           rating_scale_min?: number | null
+          replacement_question_id?: string | null
+          signal_types?: string[] | null
           updated_at?: string
         }
         Relationships: [
@@ -22749,6 +22767,13 @@ export type Database = {
             referencedRelation: "competencies"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "feedback_360_questions_framework_id_fkey"
+            columns: ["framework_id"]
+            isOneToOne: false
+            referencedRelation: "feedback_frameworks"
+            referencedColumns: ["id"]
+          },
         ]
       }
       feedback_360_rater_categories: {
@@ -22760,9 +22785,13 @@ export type Database = {
           created_at: string
           description: string | null
           display_order: number
+          external_consent_required: boolean | null
+          external_invitation_template: string | null
+          external_reminder_template: string | null
           id: string
           is_active: boolean
           is_anonymous: boolean
+          is_external: boolean | null
           is_required: boolean
           max_raters: number | null
           min_raters: number
@@ -22778,9 +22807,13 @@ export type Database = {
           created_at?: string
           description?: string | null
           display_order?: number
+          external_consent_required?: boolean | null
+          external_invitation_template?: string | null
+          external_reminder_template?: string | null
           id?: string
           is_active?: boolean
           is_anonymous?: boolean
+          is_external?: boolean | null
           is_required?: boolean
           max_raters?: number | null
           min_raters?: number
@@ -22796,9 +22829,13 @@ export type Database = {
           created_at?: string
           description?: string | null
           display_order?: number
+          external_consent_required?: boolean | null
+          external_invitation_template?: string | null
+          external_reminder_template?: string | null
           id?: string
           is_active?: boolean
           is_anonymous?: boolean
+          is_external?: boolean | null
           is_required?: boolean
           max_raters?: number | null
           min_raters?: number
@@ -22818,11 +22855,19 @@ export type Database = {
       }
       feedback_360_requests: {
         Row: {
+          access_token: string | null
+          access_token_expires_at: string | null
+          consent_given: boolean | null
+          consent_given_at: string | null
           created_at: string
           cycle_id: string
           decline_reason: string | null
           declined_at: string | null
           due_date: string
+          external_email: string | null
+          external_name: string | null
+          external_organization: string | null
+          external_relationship: string | null
           id: string
           invited_at: string
           is_mandatory: boolean
@@ -22838,11 +22883,19 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          access_token?: string | null
+          access_token_expires_at?: string | null
+          consent_given?: boolean | null
+          consent_given_at?: string | null
           created_at?: string
           cycle_id: string
           decline_reason?: string | null
           declined_at?: string | null
           due_date: string
+          external_email?: string | null
+          external_name?: string | null
+          external_organization?: string | null
+          external_relationship?: string | null
           id?: string
           invited_at?: string
           is_mandatory?: boolean
@@ -22858,11 +22911,19 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          access_token?: string | null
+          access_token_expires_at?: string | null
+          consent_given?: boolean | null
+          consent_given_at?: string | null
           created_at?: string
           cycle_id?: string
           decline_reason?: string | null
           declined_at?: string | null
           due_date?: string
+          external_email?: string | null
+          external_name?: string | null
+          external_organization?: string | null
+          external_relationship?: string | null
           id?: string
           invited_at?: string
           is_mandatory?: boolean
@@ -23286,6 +23347,62 @@ export type Database = {
           },
         ]
       }
+      feedback_frameworks: {
+        Row: {
+          company_id: string | null
+          created_at: string | null
+          description: string | null
+          effective_from: string | null
+          effective_until: string | null
+          framework_type: string
+          id: string
+          is_active: boolean | null
+          name: string
+          name_en: string | null
+          status: string | null
+          updated_at: string | null
+          version: string | null
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          effective_from?: string | null
+          effective_until?: string | null
+          framework_type: string
+          id?: string
+          is_active?: boolean | null
+          name: string
+          name_en?: string | null
+          status?: string | null
+          updated_at?: string | null
+          version?: string | null
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          effective_from?: string | null
+          effective_until?: string | null
+          framework_type?: string
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          name_en?: string | null
+          status?: string | null
+          updated_at?: string | null
+          version?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedback_frameworks_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       feedback_investigation_access_log: {
         Row: {
           accessed_by: string
@@ -23557,6 +23674,44 @@ export type Database = {
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      feedback_reporting_dimensions: {
+        Row: {
+          company_id: string | null
+          created_at: string | null
+          dimension_name: string
+          dimension_source: string
+          id: string
+          is_active: boolean | null
+          min_group_size: number | null
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string | null
+          dimension_name: string
+          dimension_source: string
+          id?: string
+          is_active?: boolean | null
+          min_group_size?: number | null
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string | null
+          dimension_name?: string
+          dimension_source?: string
+          id?: string
+          is_active?: boolean | null
+          min_group_size?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedback_reporting_dimensions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
             referencedColumns: ["id"]
           },
         ]
@@ -42774,6 +42929,62 @@ export type Database = {
           },
         ]
       }
+      org_signal_aggregates: {
+        Row: {
+          aggregation_dimension: string
+          anonymity_threshold_met: boolean | null
+          avg_score: number | null
+          company_id: string | null
+          computed_at: string | null
+          dimension_value: string
+          id: string
+          period_end: string
+          period_start: string
+          sample_size: number | null
+          signal_type: string
+          trend_direction: string | null
+          trend_percentage: number | null
+        }
+        Insert: {
+          aggregation_dimension: string
+          anonymity_threshold_met?: boolean | null
+          avg_score?: number | null
+          company_id?: string | null
+          computed_at?: string | null
+          dimension_value: string
+          id?: string
+          period_end: string
+          period_start: string
+          sample_size?: number | null
+          signal_type: string
+          trend_direction?: string | null
+          trend_percentage?: number | null
+        }
+        Update: {
+          aggregation_dimension?: string
+          anonymity_threshold_met?: boolean | null
+          avg_score?: number | null
+          company_id?: string | null
+          computed_at?: string | null
+          dimension_value?: string
+          id?: string
+          period_end?: string
+          period_start?: string
+          sample_size?: number | null
+          signal_type?: string
+          trend_direction?: string | null
+          trend_percentage?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_signal_aggregates_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       overall_rating_mappings: {
         Row: {
           company_id: string
@@ -50703,6 +50914,99 @@ export type Database = {
             columns: ["requested_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rater_exceptions: {
+        Row: {
+          created_at: string | null
+          exception_type: string
+          handled_at: string | null
+          handled_by: string | null
+          id: string
+          reason: string | null
+          replacement_rater_id: string | null
+          request_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          exception_type: string
+          handled_at?: string | null
+          handled_by?: string | null
+          id?: string
+          reason?: string | null
+          replacement_rater_id?: string | null
+          request_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          exception_type?: string
+          handled_at?: string | null
+          handled_by?: string | null
+          id?: string
+          reason?: string | null
+          replacement_rater_id?: string | null
+          request_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rater_exceptions_handled_by_fkey"
+            columns: ["handled_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rater_exceptions_replacement_rater_id_fkey"
+            columns: ["replacement_rater_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rater_exceptions_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "feedback_360_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rater_relationships: {
+        Row: {
+          confidence_weight: number | null
+          created_at: string | null
+          id: string
+          interaction_frequency: string | null
+          relationship_duration_months: number | null
+          relationship_type: string | null
+          request_id: string | null
+        }
+        Insert: {
+          confidence_weight?: number | null
+          created_at?: string | null
+          id?: string
+          interaction_frequency?: string | null
+          relationship_duration_months?: number | null
+          relationship_type?: string | null
+          request_id?: string | null
+        }
+        Update: {
+          confidence_weight?: number | null
+          created_at?: string | null
+          id?: string
+          interaction_frequency?: string | null
+          relationship_duration_months?: number | null
+          relationship_type?: string | null
+          request_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rater_relationships_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "feedback_360_requests"
             referencedColumns: ["id"]
           },
         ]
