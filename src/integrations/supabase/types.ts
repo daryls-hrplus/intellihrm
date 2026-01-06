@@ -12099,8 +12099,89 @@ export type Database = {
           },
         ]
       }
+      device_sync_queue: {
+        Row: {
+          attempts: number | null
+          company_id: string | null
+          completed_at: string | null
+          created_at: string | null
+          device_user_id: string
+          employee_id: string | null
+          error_message: string | null
+          id: string
+          last_attempt_at: string | null
+          priority: number | null
+          source_device_id: string | null
+          status: string
+          sync_type: string
+          target_device_id: string | null
+        }
+        Insert: {
+          attempts?: number | null
+          company_id?: string | null
+          completed_at?: string | null
+          created_at?: string | null
+          device_user_id: string
+          employee_id?: string | null
+          error_message?: string | null
+          id?: string
+          last_attempt_at?: string | null
+          priority?: number | null
+          source_device_id?: string | null
+          status?: string
+          sync_type?: string
+          target_device_id?: string | null
+        }
+        Update: {
+          attempts?: number | null
+          company_id?: string | null
+          completed_at?: string | null
+          created_at?: string | null
+          device_user_id?: string
+          employee_id?: string | null
+          error_message?: string | null
+          id?: string
+          last_attempt_at?: string | null
+          priority?: number | null
+          source_device_id?: string | null
+          status?: string
+          sync_type?: string
+          target_device_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "device_sync_queue_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "device_sync_queue_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "device_sync_queue_source_device_id_fkey"
+            columns: ["source_device_id"]
+            isOneToOne: false
+            referencedRelation: "timeclock_devices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "device_sync_queue_target_device_id_fkey"
+            columns: ["target_device_id"]
+            isOneToOne: false
+            referencedRelation: "timeclock_devices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       device_user_mappings: {
         Row: {
+          biometric_template: string | null
           card_number: string | null
           company_id: string | null
           created_at: string | null
@@ -12111,11 +12192,15 @@ export type Database = {
           face_template_exists: boolean | null
           fingerprint_count: number | null
           id: string
+          is_primary_device: boolean | null
           is_synced: boolean | null
           last_synced_at: string | null
+          template_type: string | null
+          template_version: string | null
           updated_at: string | null
         }
         Insert: {
+          biometric_template?: string | null
           card_number?: string | null
           company_id?: string | null
           created_at?: string | null
@@ -12126,11 +12211,15 @@ export type Database = {
           face_template_exists?: boolean | null
           fingerprint_count?: number | null
           id?: string
+          is_primary_device?: boolean | null
           is_synced?: boolean | null
           last_synced_at?: string | null
+          template_type?: string | null
+          template_version?: string | null
           updated_at?: string | null
         }
         Update: {
+          biometric_template?: string | null
           card_number?: string | null
           company_id?: string | null
           created_at?: string | null
@@ -12141,8 +12230,11 @@ export type Database = {
           face_template_exists?: boolean | null
           fingerprint_count?: number | null
           id?: string
+          is_primary_device?: boolean | null
           is_synced?: boolean | null
           last_synced_at?: string | null
+          template_type?: string | null
+          template_version?: string | null
           updated_at?: string | null
         }
         Relationships: [

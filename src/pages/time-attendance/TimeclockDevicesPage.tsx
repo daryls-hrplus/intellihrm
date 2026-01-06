@@ -352,6 +352,89 @@ export default function TimeclockDevicesPage() {
     toast({ title: "Mapping Updated" });
   };
 
+  const handleSyncAllUsersToDevice = async (device: TimeclockDevice) => {
+    if (!profile?.company_id || !profile?.id) return;
+    
+    setIsSyncing({ ...isSyncing, [`${device.id}-push`]: true });
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('zkteco-device-sync', {
+        body: {
+          action: 'sync_all_users_to_device',
+          device_id: device.id,
+          company_id: profile.company_id,
+          user_id: profile.id
+        }
+      });
+
+      if (error) throw error;
+
+      if (data.success) {
+        toast({ 
+          title: "Users Synced to Device", 
+          description: `${data.pushed} users pushed, ${data.failed} failed`,
+        });
+        loadDeviceDetails(device.id);
+      } else {
+        toast({ 
+          title: "Sync Failed", 
+          description: data.error || "Could not sync users to device",
+          variant: "destructive"
+        });
+      }
+    } catch (error: unknown) {
+      const errMsg = error instanceof Error ? error.message : 'Unknown error';
+      toast({ title: "Error", description: errMsg, variant: "destructive" });
+    } finally {
+      setIsSyncing({ ...isSyncing, [`${device.id}-push`]: false });
+    }
+  };
+
+  const handlePushUserToDevices = async (employeeId: string, sourceDeviceId: string, targetDeviceIds: string[]) => {
+    if (!profile?.company_id || !profile?.id || targetDeviceIds.length === 0) return;
+    
+    setIsSyncing({ ...isSyncing, [`push-${employeeId}`]: true });
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('zkteco-device-sync', {
+        body: {
+          action: 'push_user_to_devices',
+          device_id: sourceDeviceId,
+          company_id: profile.company_id,
+          user_id: profile.id,
+          options: {
+            employee_id: employeeId,
+            source_device_id: sourceDeviceId,
+            target_device_ids: targetDeviceIds
+          }
+        }
+      });
+
+      if (error) throw error;
+
+      if (data.success) {
+        toast({ 
+          title: "User Pushed to Devices", 
+          description: data.message,
+        });
+        if (selectedDevice) {
+          loadDeviceDetails(selectedDevice.id);
+        }
+      } else {
+        toast({ 
+          title: "Push Failed", 
+          description: data.error || "Could not push user to devices",
+          variant: "destructive"
+        });
+      }
+    } catch (error: unknown) {
+      const errMsg = error instanceof Error ? error.message : 'Unknown error';
+      toast({ title: "Error", description: errMsg, variant: "destructive" });
+    } finally {
+      setIsSyncing({ ...isSyncing, [`push-${employeeId}`]: false });
+    }
+  };
+
   if (isLoading) {
     return (
       <AppLayout>
@@ -519,9 +602,12 @@ export default function TimeclockDevicesPage() {
           </DialogHeader>
           
           <Tabs defaultValue="users" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
+            <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="users" className="flex items-center gap-2">
                 <Users className="h-4 w-4" /> User Mappings
+              </TabsTrigger>
+              <TabsTrigger value="cross-sync" className="flex items-center gap-2">
+                <Link className="h-4 w-4" /> Cross-Device Sync
               </TabsTrigger>
               <TabsTrigger value="logs" className="flex items-center gap-2">
                 <History className="h-4 w-4" /> Sync History
@@ -593,7 +679,93 @@ export default function TimeclockDevicesPage() {
                 </Table>
               </ScrollArea>
             </TabsContent>
-            
+
+            <TabsContent value="cross-sync" className="mt-4">
+              <div className="space-y-4">
+                <Card className="border-dashed">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <RefreshCw className="h-4 w-4" />
+                      Pull Users from Other Devices
+                    </CardTitle>
+                    <CardDescription>
+                      Sync all registered users from other devices to this one. Employees only need to register once.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Button 
+                      onClick={() => selectedDevice && handleSyncAllUsersToDevice(selectedDevice)}
+                      disabled={isSyncing[`${selectedDevice?.id}-push`]}
+                    >
+                      {isSyncing[`${selectedDevice?.id}-push`] ? (
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      ) : (
+                        <Users className="h-4 w-4 mr-2" />
+                      )}
+                      Sync All Users to This Device
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-dashed">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <Link className="h-4 w-4" />
+                      Push Individual User to Other Devices
+                    </CardTitle>
+                    <CardDescription>
+                      Select a user registered on this device to push to other devices.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {userMappings.filter(m => m.employee_id).length === 0 ? (
+                      <p className="text-sm text-muted-foreground">
+                        No mapped users on this device. Map employees in the "User Mappings" tab first.
+                      </p>
+                    ) : (
+                      <div className="space-y-3">
+                        {userMappings.filter(m => m.employee_id).map((mapping) => (
+                          <div key={mapping.id} className="flex items-center justify-between p-3 rounded-lg border bg-muted/30">
+                            <div>
+                              <p className="font-medium">{mapping.device_user_name || `User ${mapping.device_user_id}`}</p>
+                              <p className="text-sm text-muted-foreground">
+                                {mapping.fingerprint_count} fingerprints • ID: {mapping.device_user_id}
+                              </p>
+                            </div>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                const otherDeviceIds = devices
+                                  .filter(d => d.id !== selectedDevice?.id && d.is_active && d.ip_address)
+                                  .map(d => d.id);
+                                if (mapping.employee_id && selectedDevice) {
+                                  handlePushUserToDevices(mapping.employee_id, selectedDevice.id, otherDeviceIds);
+                                }
+                              }}
+                              disabled={isSyncing[`push-${mapping.employee_id}`] || devices.filter(d => d.id !== selectedDevice?.id).length === 0}
+                            >
+                              {isSyncing[`push-${mapping.employee_id}`] ? (
+                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                              ) : (
+                                <RefreshCw className="h-4 w-4 mr-2" />
+                              )}
+                              Push to All Devices
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+
+                <div className="text-xs text-muted-foreground bg-muted/50 p-3 rounded-lg">
+                  <strong>How it works:</strong> When an employee registers their fingerprint on one device, 
+                  you can push their credentials to all other devices so they don't need to register again. 
+                  This saves time and ensures consistent user IDs across all terminals.
+                </div>
+              </div>
+            </TabsContent>
             <TabsContent value="logs" className="mt-4">
               <ScrollArea className="h-[300px]">
                 <Table>
