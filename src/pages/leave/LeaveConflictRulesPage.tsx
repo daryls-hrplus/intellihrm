@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Edit2, Trash2, Users, AlertTriangle, Loader2 } from "lucide-react";
+import { Plus, Edit2, Trash2, Users, AlertTriangle, Loader2, Building2 } from "lucide-react";
 import { useLeaveConflictRules, LeaveConflictRule } from "@/hooks/useLeaveEnhancements";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/hooks/useLanguage";
@@ -20,21 +20,35 @@ import { useQuery } from "@tanstack/react-query";
 
 export default function LeaveConflictRulesPage() {
   const { t } = useLanguage();
-  const { company } = useAuth();
-  const { conflictRules, isLoading, createRule, updateRule, deleteRule } = useLeaveConflictRules(company?.id);
+  const { company, user } = useAuth();
+  const [selectedCompanyId, setSelectedCompanyId] = useState(company?.id || "");
   
-  const { data: departments = [] } = useQuery({
-    queryKey: ["departments", company?.id],
+  const { data: companies = [] } = useQuery({
+    queryKey: ["companies-list"],
     queryFn: async () => {
       const { data } = await supabase
-        .from("departments")
+        .from("companies")
         .select("id, name")
-        .eq("company_id", company?.id)
         .eq("is_active", true)
         .order("name");
       return data || [];
     },
-    enabled: !!company?.id,
+  });
+
+  const { conflictRules, isLoading, createRule, updateRule, deleteRule } = useLeaveConflictRules(selectedCompanyId || company?.id);
+  
+  const { data: departments = [] } = useQuery({
+    queryKey: ["departments", selectedCompanyId || company?.id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("departments")
+        .select("id, name")
+        .eq("company_id", selectedCompanyId || company?.id)
+        .eq("is_active", true)
+        .order("name");
+      return data || [];
+    },
+    enabled: !!(selectedCompanyId || company?.id),
   });
 
   const [showDialog, setShowDialog] = useState(false);
@@ -125,10 +139,23 @@ export default function LeaveConflictRulesPage() {
             </h1>
             <p className="text-muted-foreground">Configure team coverage requirements and concurrent leave limits</p>
           </div>
-          <Button onClick={() => { resetForm(); setShowDialog(true); }}>
-            <Plus className="h-4 w-4 mr-2" />
-            Add Rule
-          </Button>
+          <div className="flex items-center gap-3">
+            <Select value={selectedCompanyId || company?.id || ""} onValueChange={setSelectedCompanyId}>
+              <SelectTrigger className="w-[220px]">
+                <Building2 className="h-4 w-4 mr-2" />
+                <SelectValue placeholder="Select company" />
+              </SelectTrigger>
+              <SelectContent>
+                {companies.map((c: any) => (
+                  <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button onClick={() => { resetForm(); setShowDialog(true); }} disabled={!selectedCompanyId && !company?.id}>
+              <Plus className="h-4 w-4 mr-2" />
+              Add Rule
+            </Button>
+          </div>
         </div>
 
         <Card>
