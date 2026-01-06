@@ -84,18 +84,21 @@ export default function TerritoriesPage() {
     { label: "Territories" },
   ];
 
-  const { data: territories, isLoading } = useQuery({
+  const { data: territories, isLoading, error: territoriesError } = useQuery({
     queryKey: ["territories"],
     queryFn: async () => {
+      // NOTE: We intentionally avoid PostgREST relationship joins here.
+      // The self-referential FK relationship cache can be unavailable in some environments,
+      // which causes a hard 400 and an empty UI.
       const { data, error } = await supabase
         .from("territories")
-        .select(`
-          *,
-          parent_territory:territories!territories_parent_territory_id_fkey(name)
-        `)
+        .select("*")
         .order("name");
 
       if (error) throw error;
+
+      const base = (data as Territory[]) ?? [];
+      const territoryNameById = new Map(base.map((t) => [t.id, t.name]));
 
       // Get company counts
       const { data: companyCounts } = await supabase
@@ -108,8 +111,11 @@ export default function TerritoriesPage() {
         countMap.set(c.territory_id, (countMap.get(c.territory_id) || 0) + 1);
       });
 
-      return (data as Territory[]).map((t) => ({
+      return base.map((t) => ({
         ...t,
+        parent_territory: t.parent_territory_id
+          ? [{ name: territoryNameById.get(t.parent_territory_id) ?? "Unknown" }]
+          : null,
         companies_count: countMap.get(t.id) || 0,
       }));
     },
@@ -400,6 +406,10 @@ export default function TerritoriesPage() {
             {isLoading ? (
               <div className="flex items-center justify-center py-8">
                 <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+              </div>
+            ) : territoriesError ? (
+              <div className="text-center py-8 text-destructive">
+                Failed to load territories. Please refresh.
               </div>
             ) : territories?.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
