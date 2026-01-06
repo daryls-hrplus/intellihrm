@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Layers, Lock, Copy, Settings, ArrowRight } from 'lucide-react';
-import { LearningObjectives, TipCallout, WarningCallout, InfoCallout } from '../../../manual/components';
+import { LearningObjectives, TipCallout, WarningCallout, InfoCallout, ScreenshotPlaceholder } from '../../../manual/components';
 
 const roleTypes = [
   {
@@ -112,6 +112,12 @@ export function UsersRoleArchitecture() {
           </div>
         </CardContent>
       </Card>
+
+      <ScreenshotPlaceholder
+        caption="Figure 3.2.1: Role types overview showing System, Seeded, and Custom role categories"
+        alt="Roles list view with filter tabs for System, Seeded, and Custom roles with color-coded badges"
+        aspectRatio="wide"
+      />
 
       <Card>
         <CardHeader>

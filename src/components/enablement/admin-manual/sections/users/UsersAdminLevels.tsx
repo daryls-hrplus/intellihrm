@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Shield, Crown, UserCog, Users, Lock, CheckCircle, XCircle } from 'lucide-react';
-import { LearningObjectives, TipCallout, WarningCallout, InfoCallout } from '../../../manual/components';
+import { LearningObjectives, TipCallout, WarningCallout, InfoCallout, ScreenshotPlaceholder } from '../../../manual/components';
 
 const adminLevels = [
   {
@@ -137,6 +137,12 @@ export function UsersAdminLevels() {
           </div>
         </CardContent>
       </Card>
+
+      <ScreenshotPlaceholder
+        caption="Figure 3.1.1: Administrator hierarchy pyramid showing the four-tier access model"
+        alt="Visual pyramid showing Super Admin at top, followed by Security Admin, Module Admin, and HR Admin/User at base"
+        aspectRatio="wide"
+      />
 
       {adminLevels.map((level) => {
         const IconComponent = level.icon;

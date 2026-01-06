@@ -15,7 +15,7 @@ import {
   CheckCircle, Circle, ArrowLeft, Sparkles, Building
 } from 'lucide-react';
 import { ADMIN_SECURITY_MANUAL_STRUCTURE } from '@/types/adminSecurityManual';
-import { AdminManualOverviewSection, AdminManualFoundationSection, AdminManualUsersSection, AdminManualSecuritySection } from '@/components/enablement/admin-manual';
+import { AdminManualOverviewSection, AdminManualFoundationSection, AdminManualUsersSection, AdminManualSecuritySection, AdminManualSystemSection } from '@/components/enablement/admin-manual';
 
 const SECTION_ICONS: Record<string, React.ReactNode> = {
   'admin-part-1': <BookOpen className="h-5 w-5" />,
@@ -143,16 +143,7 @@ export default function AdminSecurityManualPage() {
       case 'admin-part-4':
         return <AdminManualSecuritySection />;
       case 'admin-part-5':
-        return (
-          <Card>
-            <CardHeader>
-              <CardTitle>Part 5: System Configuration</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">System settings and customization content coming soon...</p>
-            </CardContent>
-          </Card>
-        );
+        return <AdminManualSystemSection />;
       case 'admin-part-6':
         return (
           <Card>

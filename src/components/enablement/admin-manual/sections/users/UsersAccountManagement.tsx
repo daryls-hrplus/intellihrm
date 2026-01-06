@@ -8,7 +8,8 @@ import {
   BusinessRules,
   TipCallout, 
   WarningCallout,
-  InfoCallout 
+  InfoCallout,
+  ScreenshotPlaceholder 
 } from '../../../manual/components';
 import type { Step, FieldDefinition, BusinessRule } from '../../../manual/components';
 
@@ -191,6 +192,12 @@ export function UsersAccountManagement() {
           </div>
         </CardContent>
       </Card>
+
+      <ScreenshotPlaceholder
+        caption="Figure 3.6.1: User Accounts list with status indicators"
+        alt="User Accounts data grid showing email, name, roles, status badge, and last login timestamp"
+        aspectRatio="wide"
+      />
 
       <FieldReferenceTable
         title="User Account Field Reference"

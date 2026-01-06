@@ -2,6 +2,7 @@ import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Shield, Key, AlertTriangle, CheckCircle } from 'lucide-react';
+import { ScreenshotPlaceholder } from '../../../manual/components';
 
 export function SecurityAuthentication() {
   return (
@@ -58,6 +59,12 @@ export function SecurityAuthentication() {
           </TableBody>
         </Table>
       </div>
+
+      <ScreenshotPlaceholder
+        caption="Figure 4.1.1: Authentication Settings configuration page"
+        alt="SSO configuration form showing IdP selection, metadata upload, and attribute mapping fields"
+        aspectRatio="wide"
+      />
 
       <div className="space-y-4">
         <h4 className="font-semibold">SSO Configuration Steps</h4>

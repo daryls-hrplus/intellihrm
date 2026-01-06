@@ -2,6 +2,7 @@ import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Clock, Monitor, Shield, AlertTriangle } from 'lucide-react';
+import { ScreenshotPlaceholder } from '../../../manual/components';
 
 export function SecuritySessionManagement() {
   return (
@@ -59,6 +60,12 @@ export function SecuritySessionManagement() {
           </TableBody>
         </Table>
       </div>
+
+      <ScreenshotPlaceholder
+        caption="Figure 4.4.1: Session management and timeout configuration"
+        alt="Session settings page showing idle timeout, absolute timeout, and concurrent session policy options"
+        aspectRatio="wide"
+      />
 
       <div className="space-y-4">
         <h4 className="font-semibold">Concurrent Session Policy</h4>

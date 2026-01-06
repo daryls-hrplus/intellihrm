@@ -2,6 +2,7 @@ import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { BarChart3, Shield, TrendingUp, AlertTriangle, CheckCircle, Activity } from 'lucide-react';
+import { ScreenshotPlaceholder } from '../../../manual/components';
 
 export function SecurityMonitoringDashboard() {
   return (
@@ -51,6 +52,12 @@ export function SecurityMonitoringDashboard() {
           </div>
         </div>
       </div>
+
+      <ScreenshotPlaceholder
+        caption="Figure 4.7.1: Security Monitoring Dashboard overview"
+        alt="Security dashboard showing login metrics, failed attempts chart, MFA adoption rate, and compliance indicators"
+        aspectRatio="wide"
+      />
 
       <div className="space-y-4">
         <h4 className="font-semibold">Key Performance Indicators (KPIs)</h4>

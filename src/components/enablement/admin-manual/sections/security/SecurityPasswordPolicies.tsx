@@ -2,6 +2,7 @@ import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Shield, Lock, CheckCircle, XCircle } from 'lucide-react';
+import { ScreenshotPlaceholder } from '../../../manual/components';
 
 export function SecurityPasswordPolicies() {
   return (
@@ -65,6 +66,12 @@ export function SecurityPasswordPolicies() {
           </TableBody>
         </Table>
       </div>
+
+      <ScreenshotPlaceholder
+        caption="Figure 4.3.1: Password policy configuration interface"
+        alt="Password settings form showing minimum length, complexity options, expiry settings, and lockout policy"
+        aspectRatio="wide"
+      />
 
       <div className="space-y-4">
         <h4 className="font-semibold">Password Expiry Settings</h4>

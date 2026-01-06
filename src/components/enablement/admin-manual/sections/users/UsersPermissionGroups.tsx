@@ -8,7 +8,8 @@ import {
   ConfigurationExample,
   BusinessRules,
   TipCallout, 
-  InfoCallout 
+  InfoCallout,
+  ScreenshotPlaceholder 
 } from '../../../manual/components';
 import type { Step, FieldDefinition, ExampleConfig, BusinessRule } from '../../../manual/components';
 
@@ -272,6 +273,12 @@ export function UsersPermissionGroups() {
           </div>
         </CardContent>
       </Card>
+
+      <ScreenshotPlaceholder
+        caption="Figure 3.4.1: Permission Groups list showing static and dynamic groups"
+        alt="Permission Groups data grid with columns for name, type, member count, and assigned roles"
+        aspectRatio="wide"
+      />
 
       <FieldReferenceTable
         title="Permission Group Field Reference"

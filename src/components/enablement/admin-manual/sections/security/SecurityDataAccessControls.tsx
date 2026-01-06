@@ -2,6 +2,7 @@ import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Shield, Eye, EyeOff, Lock, Download, AlertTriangle } from 'lucide-react';
+import { ScreenshotPlaceholder } from '../../../manual/components';
 
 export function SecurityDataAccessControls() {
   return (
@@ -67,6 +68,12 @@ export function SecurityDataAccessControls() {
           </TableBody>
         </Table>
       </div>
+
+      <ScreenshotPlaceholder
+        caption="Figure 4.5.1: Data classification and PII access configuration"
+        alt="Data access controls showing classification levels, field masking options, and export restrictions"
+        aspectRatio="wide"
+      />
 
       <div className="space-y-4">
         <h4 className="font-semibold">PII Field Masking</h4>
