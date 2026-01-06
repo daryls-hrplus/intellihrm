@@ -3870,7 +3870,11 @@ export type Database = {
           exception_date: string
           exception_type: string
           id: string
+          leave_request_id: string | null
+          leave_type_id: string | null
           original_time: string | null
+          payroll_processed: boolean | null
+          payroll_processed_at: string | null
           reason: string | null
           review_notes: string | null
           reviewed_at: string | null
@@ -3896,7 +3900,11 @@ export type Database = {
           exception_date: string
           exception_type: string
           id?: string
+          leave_request_id?: string | null
+          leave_type_id?: string | null
           original_time?: string | null
+          payroll_processed?: boolean | null
+          payroll_processed_at?: string | null
           reason?: string | null
           review_notes?: string | null
           reviewed_at?: string | null
@@ -3922,7 +3930,11 @@ export type Database = {
           exception_date?: string
           exception_type?: string
           id?: string
+          leave_request_id?: string | null
+          leave_type_id?: string | null
           original_time?: string | null
+          payroll_processed?: boolean | null
+          payroll_processed_at?: string | null
           reason?: string | null
           review_notes?: string | null
           reviewed_at?: string | null
@@ -3951,6 +3963,20 @@ export type Database = {
             columns: ["employee_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_exceptions_leave_request_id_fkey"
+            columns: ["leave_request_id"]
+            isOneToOne: false
+            referencedRelation: "leave_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_exceptions_leave_type_id_fkey"
+            columns: ["leave_type_id"]
+            isOneToOne: false
+            referencedRelation: "leave_types"
             referencedColumns: ["id"]
           },
           {
@@ -59721,6 +59747,90 @@ export type Database = {
           },
         ]
       }
+      timekeeper_period_finalizations: {
+        Row: {
+          absences_excused: number | null
+          absences_unexcused: number | null
+          company_id: string
+          created_at: string
+          department_id: string | null
+          employee_ids: string[] | null
+          finalized_at: string | null
+          id: string
+          leave_transactions_created: number | null
+          notes: string | null
+          period_end: string
+          period_start: string
+          sent_to_payroll_at: string | null
+          status: string
+          timekeeper_id: string
+          total_employees: number | null
+          total_overtime_hours: number | null
+          total_regular_hours: number | null
+          updated_at: string
+          validation_errors: Json | null
+        }
+        Insert: {
+          absences_excused?: number | null
+          absences_unexcused?: number | null
+          company_id: string
+          created_at?: string
+          department_id?: string | null
+          employee_ids?: string[] | null
+          finalized_at?: string | null
+          id?: string
+          leave_transactions_created?: number | null
+          notes?: string | null
+          period_end: string
+          period_start: string
+          sent_to_payroll_at?: string | null
+          status?: string
+          timekeeper_id: string
+          total_employees?: number | null
+          total_overtime_hours?: number | null
+          total_regular_hours?: number | null
+          updated_at?: string
+          validation_errors?: Json | null
+        }
+        Update: {
+          absences_excused?: number | null
+          absences_unexcused?: number | null
+          company_id?: string
+          created_at?: string
+          department_id?: string | null
+          employee_ids?: string[] | null
+          finalized_at?: string | null
+          id?: string
+          leave_transactions_created?: number | null
+          notes?: string | null
+          period_end?: string
+          period_start?: string
+          sent_to_payroll_at?: string | null
+          status?: string
+          timekeeper_id?: string
+          total_employees?: number | null
+          total_overtime_hours?: number | null
+          total_regular_hours?: number | null
+          updated_at?: string
+          validation_errors?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "timekeeper_period_finalizations_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timekeeper_period_finalizations_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       timesheet_entries: {
         Row: {
           approved_at: string | null
@@ -59854,8 +59964,13 @@ export type Database = {
           company_id: string
           created_at: string
           employee_id: string
+          finalized_at: string | null
+          finalized_by: string | null
           id: string
+          leave_sync_at: string | null
+          leave_sync_status: string | null
           notes: string | null
+          pay_period_id: string | null
           period_end: string
           period_start: string
           rejection_reason: string | null
@@ -59872,8 +59987,13 @@ export type Database = {
           company_id: string
           created_at?: string
           employee_id: string
+          finalized_at?: string | null
+          finalized_by?: string | null
           id?: string
+          leave_sync_at?: string | null
+          leave_sync_status?: string | null
           notes?: string | null
+          pay_period_id?: string | null
           period_end: string
           period_start: string
           rejection_reason?: string | null
@@ -59890,8 +60010,13 @@ export type Database = {
           company_id?: string
           created_at?: string
           employee_id?: string
+          finalized_at?: string | null
+          finalized_by?: string | null
           id?: string
+          leave_sync_at?: string | null
+          leave_sync_status?: string | null
           notes?: string | null
+          pay_period_id?: string | null
           period_end?: string
           period_start?: string
           rejection_reason?: string | null

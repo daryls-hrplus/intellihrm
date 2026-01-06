@@ -12,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format, startOfWeek } from "date-fns";
 import { formatDateForDisplay } from "@/utils/dateUtils";
-import { Users, Clock, CheckCircle, XCircle, AlertTriangle, Timer, ClipboardList, Eye, UserCheck, Edit2, UserX, RefreshCw } from "lucide-react";
+import { Users, Clock, CheckCircle, XCircle, AlertTriangle, Timer, ClipboardList, Eye, UserCheck, Edit2, UserX, RefreshCw, CalendarCheck } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -20,6 +20,7 @@ import { useLanguage } from "@/hooks/useLanguage";
 import { PunchDetailDialog } from "@/components/time-attendance/PunchDetailDialog";
 import { PunchOverrideDialog } from "@/components/time-attendance/PunchOverrideDialog";
 import { AbsenceHandlingDialog } from "@/components/time-attendance/AbsenceHandlingDialog";
+import { PeriodFinalizationCard } from "@/components/time-attendance/PeriodFinalizationCard";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface AssignedEmployee {
@@ -106,6 +107,7 @@ export default function MssTimeAttendancePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedEmployee, setSelectedEmployee] = useState<string>("all");
   const [isDetectingAbsences, setIsDetectingAbsences] = useState(false);
+  const [companyId, setCompanyId] = useState<string | null>(null);
   
   const [reviewDialog, setReviewDialog] = useState(false);
   const [selectedTimesheet, setSelectedTimesheet] = useState<TimesheetSubmission | null>(null);
@@ -124,8 +126,21 @@ export default function MssTimeAttendancePage() {
   useEffect(() => {
     if (user) {
       loadAssignedEmployees();
+      loadCompanyId();
     }
   }, [user]);
+
+  const loadCompanyId = async () => {
+    if (!user) return;
+    const { data } = await supabase
+      .from('profiles')
+      .select('company_id')
+      .eq('id', user.id)
+      .single();
+    if (data?.company_id) {
+      setCompanyId(data.company_id);
+    }
+  };
 
   useEffect(() => {
     if (assignedEmployees.length > 0) {
@@ -531,6 +546,10 @@ export default function MssTimeAttendancePage() {
                 <Badge variant="destructive" className="ml-1">{pendingExceptions}</Badge>
               )}
             </TabsTrigger>
+            <TabsTrigger value="finalize" className="gap-2">
+              <CalendarCheck className="h-4 w-4" />
+              Finalize Period
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="entries">
@@ -880,6 +899,14 @@ export default function MssTimeAttendancePage() {
                 )}
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="finalize">
+            <PeriodFinalizationCard
+              companyId={companyId}
+              assignedEmployees={assignedEmployees.map(e => ({ id: e.id, full_name: e.full_name }))}
+              onFinalized={loadTeamData}
+            />
           </TabsContent>
         </Tabs>
 

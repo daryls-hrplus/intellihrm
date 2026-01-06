@@ -383,3 +383,6 @@ verify_jwt = false
 
 [functions.detect-absences]
 verify_jwt = false
+
+[functions.finalize-time-records]
+verify_jwt = false
