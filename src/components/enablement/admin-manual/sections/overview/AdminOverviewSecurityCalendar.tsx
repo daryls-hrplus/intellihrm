@@ -286,9 +286,9 @@ export function AdminOverviewSecurityCalendar() {
             <div>
               <span className="font-semibold text-sm text-foreground">Industry Standard</span>
               <p className="text-sm text-muted-foreground mt-1">
-                This security calendar aligns with enterprise best practices from SAP SuccessFactors, 
-                Workday, and Oracle HCM. The quarterly access certification cycle is required by 
-                most financial services regulators and is a SOC 2 Type II requirement.
+                This security calendar aligns with enterprise best practices. The quarterly access 
+                certification cycle is required by most financial services regulators and is a 
+                SOC 2 Type II requirement.
               </p>
             </div>
           </div>

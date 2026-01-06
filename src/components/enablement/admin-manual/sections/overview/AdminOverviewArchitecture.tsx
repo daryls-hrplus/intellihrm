@@ -30,8 +30,7 @@ export function AdminOverviewArchitecture() {
           </h3>
           <p className="text-muted-foreground mb-4">
             HRplus Admin & Security is built on a modern, cloud-native architecture designed for 
-            enterprise scalability, security, and compliance. The architecture follows industry 
-            patterns from SAP SuccessFactors, Workday, and Oracle HCM.
+            enterprise scalability, security, and compliance.
           </p>
           
           {/* Architecture Diagram Placeholder */}
@@ -299,9 +298,9 @@ export function AdminOverviewArchitecture() {
             <div>
               <span className="font-semibold text-sm text-foreground">Industry Standard</span>
               <p className="text-sm text-muted-foreground mt-1">
-                This architecture follows enterprise HRMS patterns established by SAP SuccessFactors, 
-                Workday, and Oracle HCM. The multi-tenant design with strong isolation is required 
-                for SOC 2 Type II compliance and meets GDPR data protection requirements.
+                This architecture follows enterprise HRMS patterns. The multi-tenant design with 
+                strong isolation is required for SOC 2 Type II compliance and meets GDPR data 
+                protection requirements.
               </p>
             </div>
           </div>
