@@ -10,6 +10,7 @@ import {
   BusinessRules,
   TipCallout,
   InfoCallout,
+  ScreenshotPlaceholder,
   type Step,
   type FieldDefinition,
   type ExampleConfig,
@@ -197,6 +198,12 @@ export function FoundationDivisions() {
         </CardContent>
       </Card>
 
+      <ScreenshotPlaceholder
+        caption="Figure 2.5.1: Divisions navigation in Admin → Organization menu"
+        alt="Admin menu with Organization submenu expanded and Divisions option highlighted"
+        aspectRatio="wide"
+      />
+
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -235,9 +242,21 @@ export function FoundationDivisions() {
         fields={divisionFields}
       />
 
+      <ScreenshotPlaceholder
+        caption="Figure 2.5.2: Divisions list showing company groupings"
+        alt="Divisions data grid with columns for name, code, company, division head, and department count"
+        aspectRatio="wide"
+      />
+
       <StepByStep
         title="Creating a Division"
         steps={creationSteps}
+      />
+
+      <ScreenshotPlaceholder
+        caption="Figure 2.5.3: Division creation form with division head assignment"
+        alt="Division creation form showing name, code, company selector, and division head employee lookup"
+        aspectRatio="wide"
       />
 
       <ConfigurationExample

@@ -10,6 +10,7 @@ import {
   BusinessRules,
   TipCallout,
   WarningCallout,
+  ScreenshotPlaceholder,
   type Step,
   type FieldDefinition,
   type ExampleConfig,
@@ -235,6 +236,12 @@ export function FoundationDepartments() {
         </CardContent>
       </Card>
 
+      <ScreenshotPlaceholder
+        caption="Figure 2.6.1: Departments navigation in Admin → Organization menu"
+        alt="Admin menu with Organization submenu expanded and Departments option highlighted"
+        aspectRatio="wide"
+      />
+
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -274,6 +281,12 @@ export function FoundationDepartments() {
         fields={departmentFields}
       />
 
+      <ScreenshotPlaceholder
+        caption="Figure 2.6.2: Departments list with tree view showing nested structure"
+        alt="Departments data grid with expandable tree showing parent-child relationships and cost centers"
+        aspectRatio="wide"
+      />
+
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -305,9 +318,21 @@ export function FoundationDepartments() {
         steps={creationSteps}
       />
 
+      <ScreenshotPlaceholder
+        caption="Figure 2.6.3: Department creation form with cost center configuration"
+        alt="Department creation form showing name, code, parent department, cost center, and GL code fields"
+        aspectRatio="wide"
+      />
+
       <ConfigurationExample
         title="Department Configuration Examples"
         examples={configExamples}
+      />
+
+      <ScreenshotPlaceholder
+        caption="Figure 2.6.4: Nested department structure in org chart view"
+        alt="Visual org chart showing Production department with nested Assembly and Quality Control sub-departments"
+        aspectRatio="wide"
       />
 
       <BusinessRules
