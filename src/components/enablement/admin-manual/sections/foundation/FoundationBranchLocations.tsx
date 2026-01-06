@@ -11,6 +11,7 @@ import {
   TipCallout,
   WarningCallout,
   InfoCallout,
+  ScreenshotPlaceholder,
   type Step,
   type FieldDefinition,
   type ExampleConfig,
@@ -297,6 +298,12 @@ export function FoundationBranchLocations() {
         </CardContent>
       </Card>
 
+      <ScreenshotPlaceholder
+        caption="Figure 2.8.1: Branch Locations navigation in Admin → Organization menu"
+        alt="Admin menu with Organization submenu expanded and Branch Locations option highlighted"
+        aspectRatio="wide"
+      />
+
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -325,6 +332,12 @@ export function FoundationBranchLocations() {
       <FieldReferenceTable
         title="Location Field Reference"
         fields={locationFields}
+      />
+
+      <ScreenshotPlaceholder
+        caption="Figure 2.8.2: Branch Locations list with map view toggle"
+        alt="Locations data grid with columns for name, address, timezone, and geofence status, plus map toggle button"
+        aspectRatio="wide"
       />
 
       <Card>
@@ -367,6 +380,18 @@ export function FoundationBranchLocations() {
       <StepByStep
         title="Creating a Branch Location"
         steps={creationSteps}
+      />
+
+      <ScreenshotPlaceholder
+        caption="Figure 2.8.3: Location creation form with address fields"
+        alt="Location creation form showing name, address lines, city, parish, country, and timezone selector"
+        aspectRatio="wide"
+      />
+
+      <ScreenshotPlaceholder
+        caption="Figure 2.8.4: Geofencing configuration with map picker"
+        alt="Interactive map showing location pin with adjustable geofence radius circle and coordinate inputs"
+        aspectRatio="wide"
       />
 
       <ConfigurationExample

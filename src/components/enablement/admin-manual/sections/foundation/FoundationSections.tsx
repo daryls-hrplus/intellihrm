@@ -10,6 +10,7 @@ import {
   BusinessRules,
   TipCallout,
   InfoCallout,
+  ScreenshotPlaceholder,
   type Step,
   type FieldDefinition,
   type ExampleConfig,
@@ -189,6 +190,12 @@ export function FoundationSections() {
         </CardContent>
       </Card>
 
+      <ScreenshotPlaceholder
+        caption="Figure 2.7.1: Sections navigation in Admin → Organization menu"
+        alt="Admin menu with Organization submenu expanded and Sections option highlighted"
+        aspectRatio="wide"
+      />
+
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -227,9 +234,21 @@ export function FoundationSections() {
         fields={sectionFields}
       />
 
+      <ScreenshotPlaceholder
+        caption="Figure 2.7.2: Sections list filtered by department"
+        alt="Sections data grid showing section name, code, department, supervisor, and employee count"
+        aspectRatio="wide"
+      />
+
       <StepByStep
         title="Creating a Section"
         steps={creationSteps}
+      />
+
+      <ScreenshotPlaceholder
+        caption="Figure 2.7.3: Section creation form with supervisor assignment"
+        alt="Section creation form showing name, code, department selector, and supervisor employee lookup"
+        aspectRatio="wide"
       />
 
       <ConfigurationExample

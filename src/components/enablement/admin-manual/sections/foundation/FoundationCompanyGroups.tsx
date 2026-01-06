@@ -10,6 +10,7 @@ import {
   BusinessRules,
   TipCallout,
   InfoCallout,
+  ScreenshotPlaceholder,
   type Step,
   type FieldDefinition,
   type ExampleConfig,
@@ -225,9 +226,21 @@ export function FoundationCompanyGroups() {
         </CardContent>
       </Card>
 
+      <ScreenshotPlaceholder
+        caption="Figure 2.3.1: Company Groups navigation path in Admin menu"
+        alt="Admin menu with Organization expanded and Company Groups highlighted"
+        aspectRatio="wide"
+      />
+
       <FieldReferenceTable
         title="Company Group Field Reference"
         fields={companyGroupFields}
+      />
+
+      <ScreenshotPlaceholder
+        caption="Figure 2.3.2: Company Groups list showing holding structure hierarchy"
+        alt="Company Groups data grid with columns for name, code, territory, holding status, and child companies count"
+        aspectRatio="wide"
       />
 
       <Card>
@@ -260,9 +273,21 @@ export function FoundationCompanyGroups() {
         steps={creationSteps}
       />
 
+      <ScreenshotPlaceholder
+        caption="Figure 2.3.3: Company Group creation form with shared settings options"
+        alt="Company Group form showing name, code, territory selector, holding company toggle, and shared settings checkboxes"
+        aspectRatio="wide"
+      />
+
       <ConfigurationExample
         title="Company Group Configuration Examples"
         examples={configExamples}
+      />
+
+      <ScreenshotPlaceholder
+        caption="Figure 2.3.4: Shared settings inheritance view between group and companies"
+        alt="Visual diagram showing settings flowing from Company Group to child companies with override indicators"
+        aspectRatio="wide"
       />
 
       <BusinessRules

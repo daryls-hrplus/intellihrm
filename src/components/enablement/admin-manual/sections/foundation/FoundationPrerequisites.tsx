@@ -16,6 +16,7 @@ import {
   WarningCallout,
   TipCallout,
   FieldReferenceTable,
+  ScreenshotPlaceholder,
   type FieldDefinition
 } from '../../../manual/components';
 import { FeatureStatusBadge } from '../../components';
@@ -152,6 +153,12 @@ export function FoundationPrerequisites() {
             Incomplete prerequisite data is the #1 cause of implementation delays. 
             Allocate 2-3 days for data gathering before starting configuration.
           </WarningCallout>
+
+          <ScreenshotPlaceholder
+            caption="Figure 2.1.1: Implementation kickoff checklist view"
+            alt="Implementation checklist showing prerequisite items with status indicators"
+            aspectRatio="wide"
+          />
         </CardContent>
       </Card>
 
@@ -183,6 +190,12 @@ export function FoundationPrerequisites() {
       <FieldReferenceTable
         title="Document Checklist"
         fields={documentChecklist}
+      />
+
+      <ScreenshotPlaceholder
+        caption="Figure 2.1.2: Document upload interface for prerequisite files"
+        alt="Document upload area showing drag-and-drop interface for registration certificates and organizational charts"
+        aspectRatio="wide"
       />
 
       <Card>
@@ -225,6 +238,12 @@ export function FoundationPrerequisites() {
           </div>
         </CardContent>
       </Card>
+
+      <ScreenshotPlaceholder
+        caption="Figure 2.1.3: Regional configuration selector showing Caribbean, Africa, and Global options"
+        alt="Regional setup wizard with country selection and compliance requirement indicators"
+        aspectRatio="wide"
+      />
 
       <TipCallout title="Implementation Best Practice">
         Create a shared folder with all prerequisite documents before your kickoff meeting. 

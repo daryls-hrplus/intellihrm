@@ -10,6 +10,7 @@ import {
   BusinessRules,
   TipCallout,
   WarningCallout,
+  ScreenshotPlaceholder,
   type Step,
   type FieldDefinition,
   type ExampleConfig,
@@ -216,9 +217,21 @@ export function FoundationTerritories() {
         </CardContent>
       </Card>
 
+      <ScreenshotPlaceholder
+        caption="Figure 2.2.1: Navigating to Territories from Admin → Organization menu"
+        alt="Admin menu expanded showing Organization submenu with Territories option highlighted"
+        aspectRatio="wide"
+      />
+
       <FieldReferenceTable
         title="Territory Field Reference"
         fields={territoryFields}
+      />
+
+      <ScreenshotPlaceholder
+        caption="Figure 2.2.2: Territories list view showing existing territories with countries"
+        alt="Territories data grid with columns for name, code, countries, currency, and status"
+        aspectRatio="wide"
       />
 
       <StepByStep
@@ -226,9 +239,21 @@ export function FoundationTerritories() {
         steps={creationSteps}
       />
 
+      <ScreenshotPlaceholder
+        caption="Figure 2.2.3: Territory creation form with country multi-select"
+        alt="Territory creation form showing name, code, country selection dropdown, and currency/timezone fields"
+        aspectRatio="wide"
+      />
+
       <ConfigurationExample
         title="Territory Configuration Examples"
         examples={configExamples}
+      />
+
+      <ScreenshotPlaceholder
+        caption="Figure 2.2.4: Successfully created territory with Active status"
+        alt="Territory detail view showing Caribbean Region territory with assigned countries and settings"
+        aspectRatio="wide"
       />
 
       <BusinessRules

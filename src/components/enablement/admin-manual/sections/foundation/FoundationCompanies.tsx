@@ -11,6 +11,7 @@ import {
   TipCallout,
   WarningCallout,
   InfoCallout,
+  ScreenshotPlaceholder,
   type Step,
   type FieldDefinition,
   type ExampleConfig,
@@ -283,6 +284,12 @@ export function FoundationCompanies() {
         </CardContent>
       </Card>
 
+      <ScreenshotPlaceholder
+        caption="Figure 2.4.1: Companies list view showing all legal entities"
+        alt="Companies data grid with columns for name, code, country, registration number, and status"
+        aspectRatio="wide"
+      />
+
       <FieldReferenceTable
         title="Company Core Fields"
         fields={companyFields}
@@ -377,9 +384,27 @@ export function FoundationCompanies() {
         steps={creationSteps}
       />
 
+      <ScreenshotPlaceholder
+        caption="Figure 2.4.2: Company creation wizard - Basic Information step"
+        alt="Company creation form showing legal name, registration number, tax ID, and country selection fields"
+        aspectRatio="wide"
+      />
+
+      <ScreenshotPlaceholder
+        caption="Figure 2.4.3: Company creation wizard - Statutory Registrations step"
+        alt="Form showing country-specific statutory fields like NIS, NHT, SSNIT based on selected country"
+        aspectRatio="wide"
+      />
+
       <ConfigurationExample
         title="Company Configuration Examples"
         examples={configExamples}
+      />
+
+      <ScreenshotPlaceholder
+        caption="Figure 2.4.4: Completed company with all statutory registrations"
+        alt="Company detail view showing all configured fields including statutory body registrations"
+        aspectRatio="wide"
       />
 
       <BusinessRules
