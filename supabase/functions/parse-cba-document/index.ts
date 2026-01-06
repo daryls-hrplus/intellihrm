@@ -5,6 +5,10 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Supported rule types in the current schema
+const SUPPORTED_RULE_TYPES = ['overtime', 'shift_differential', 'rest_period', 'break_time', 'max_hours', 'holiday_pay', 'on_call'];
+const SUPPORTED_DAY_TYPES = ['regular', 'weekend', 'holiday', 'night', 'all'];
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -26,21 +30,22 @@ serve(async (req) => {
 
     const systemPrompt = `You are an expert at analyzing Collective Bargaining Agreement (CBA) documents and extracting time and attendance rules.
 
-Extract ALL time-related rules from the document, including:
-- Overtime rates and thresholds
-- Shift differentials (night, weekend, holiday)
-- Maximum working hours (per day, per week)
-- Minimum rest periods between shifts
-- Break time requirements
-- Holiday pay rules
-- On-call pay rules
+IMPORTANT: Analyze the document thoroughly and categorize rules into TWO groups:
+1. SUPPORTED RULES - Rules that fit these predefined types:
+   - Rule types: overtime, shift_differential, rest_period, break_time, max_hours, holiday_pay, on_call
+   - Day types: regular, weekend, holiday, night, all
 
-For each rule, identify:
-1. Rule name (descriptive)
-2. Rule type (overtime, shift_differential, rest_period, break_time, max_hours, holiday_pay, on_call)
-3. Day type it applies to (regular, weekend, holiday, night, all)
-4. Numeric value (e.g., overtime multiplier like 1.5, or max hours like 8)
-5. Text value for conditions or descriptions`;
+2. UNSUPPORTED RULES - Rules that don't fit the schema above. Examples:
+   - Callback pay, standby pay, split shift premium
+   - Tiered/progressive overtime rates (e.g., 1.5x first 2 hours, 2x thereafter)
+   - Consecutive day bonuses
+   - Public holiday vs regular holiday distinctions
+   - Complex conditional rules (weekly hour thresholds, etc.)
+
+For each rule found, assess:
+- Whether it fits the supported schema
+- Confidence score (0-1) for extraction accuracy
+- Any data loss if using a workaround for unsupported rules`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -52,31 +57,32 @@ For each rule, identify:
         model: "google/gemini-2.5-flash",
         messages: [
           { role: "system", content: systemPrompt },
-          { role: "user", content: `Please analyze this CBA document and extract all time-related rules:\n\n${documentContent}` }
+          { role: "user", content: `Please analyze this CBA document and extract all time-related rules, categorizing them as supported or unsupported:\n\n${documentContent}` }
         ],
         tools: [
           {
             type: "function",
             function: {
               name: "extract_cba_rules",
-              description: "Extract CBA time rules from the document",
+              description: "Extract CBA time rules from the document with gap detection",
               parameters: {
                 type: "object",
                 properties: {
                   rules: {
                     type: "array",
+                    description: "Rules that fit the supported schema",
                     items: {
                       type: "object",
                       properties: {
                         rule_name: { type: "string", description: "Descriptive name for the rule" },
                         rule_type: { 
                           type: "string", 
-                          enum: ["overtime", "shift_differential", "rest_period", "break_time", "max_hours", "holiday_pay", "on_call"],
+                          enum: SUPPORTED_RULE_TYPES,
                           description: "Type of time rule"
                         },
                         day_type: { 
                           type: "string", 
-                          enum: ["regular", "weekend", "holiday", "night", "all"],
+                          enum: SUPPORTED_DAY_TYPES,
                           description: "What type of day/shift this applies to"
                         },
                         value_numeric: { 
@@ -94,11 +100,57 @@ For each rule, identify:
                         confidence: {
                           type: "number",
                           description: "Confidence score 0-1 of extraction accuracy"
+                        },
+                        approximation_warning: {
+                          type: "string",
+                          description: "Warning if this rule is a simplification of a more complex original rule"
                         }
                       },
                       required: ["rule_name", "rule_type", "day_type", "priority", "confidence"],
                       additionalProperties: false
                     }
+                  },
+                  unsupported_rules: {
+                    type: "array",
+                    description: "Rules that cannot be expressed with the current schema",
+                    items: {
+                      type: "object",
+                      properties: {
+                        original_text: { type: "string", description: "Original text from the document" },
+                        suggested_type: { type: "string", description: "What type this rule should be (e.g., callback_pay, tiered_overtime)" },
+                        reason: { type: "string", description: "Why this doesn't fit the current schema" },
+                        workaround: { type: "string", description: "How it could be partially modeled using existing types" },
+                        data_loss_warning: { type: "string", description: "What functionality is lost if using the workaround" }
+                      },
+                      required: ["original_text", "suggested_type", "reason"],
+                      additionalProperties: false
+                    }
+                  },
+                  extension_suggestions: {
+                    type: "array",
+                    description: "Suggestions for extending the module to support found rules",
+                    items: {
+                      type: "object",
+                      properties: {
+                        feature: { type: "string", description: "Feature name to add" },
+                        description: { type: "string", description: "What this feature would enable" },
+                        priority: { type: "string", enum: ["low", "medium", "high", "critical"], description: "Importance level" },
+                        affected_rules: { type: "array", items: { type: "string" }, description: "Which unsupported rules this would fix" }
+                      },
+                      required: ["feature", "description", "priority"],
+                      additionalProperties: false
+                    }
+                  },
+                  schema_gaps: {
+                    type: "object",
+                    description: "Identified gaps in the current schema",
+                    properties: {
+                      missing_rule_types: { type: "array", items: { type: "string" }, description: "Rule types not in current schema" },
+                      missing_day_types: { type: "array", items: { type: "string" }, description: "Day types not in current schema" },
+                      missing_conditions: { type: "array", items: { type: "string" }, description: "Conditional logic not supported" },
+                      missing_formulas: { type: "array", items: { type: "string" }, description: "Complex calculations not supported" }
+                    },
+                    additionalProperties: false
                   },
                   summary: {
                     type: "string",
@@ -108,9 +160,18 @@ For each rule, identify:
                     type: "array",
                     items: { type: "string" },
                     description: "Any ambiguities or potential conflicts found"
+                  },
+                  complexity_assessment: {
+                    type: "object",
+                    properties: {
+                      overall_complexity: { type: "string", enum: ["simple", "moderate", "complex", "requires_extension"] },
+                      coverage_percentage: { type: "number", description: "Percentage of document rules that can be fully supported (0-100)" },
+                      recommendation: { type: "string", description: "AI recommendation for proceeding" }
+                    },
+                    additionalProperties: false
                   }
                 },
-                required: ["rules", "summary"],
+                required: ["rules", "unsupported_rules", "summary", "complexity_assessment"],
                 additionalProperties: false
               }
             }
@@ -149,13 +210,20 @@ For each rule, identify:
 
     const extractedData = JSON.parse(toolCall.function.arguments);
     
-    console.log(`Extracted ${extractedData.rules?.length || 0} rules from CBA document`);
+    const supportedCount = extractedData.rules?.length || 0;
+    const unsupportedCount = extractedData.unsupported_rules?.length || 0;
+    
+    console.log(`Extracted ${supportedCount} supported rules, ${unsupportedCount} unsupported rules from CBA document`);
 
     return new Response(JSON.stringify({
       success: true,
       rules: extractedData.rules || [],
+      unsupported_rules: extractedData.unsupported_rules || [],
+      extension_suggestions: extractedData.extension_suggestions || [],
+      schema_gaps: extractedData.schema_gaps || {},
       summary: extractedData.summary || "",
       warnings: extractedData.warnings || [],
+      complexity_assessment: extractedData.complexity_assessment || { overall_complexity: "simple", coverage_percentage: 100 },
       agreementId,
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

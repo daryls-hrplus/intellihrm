@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -16,11 +16,13 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Progress } from "@/components/ui/progress";
+import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { 
   Scale, Plus, Search, FileText, Clock, AlertTriangle, Upload, Brain, 
-  Play, CheckCircle, XCircle, Sparkles, RefreshCw, FileUp
+  Play, CheckCircle, XCircle, Sparkles, RefreshCw, FileUp, AlertCircle,
+  Lightbulb, PuzzleIcon, Send, Info, TriangleAlert
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -47,6 +49,8 @@ interface CBATimeRule {
   priority: number;
   is_active: boolean;
   created_at: string;
+  approximation_warning?: string | null;
+  confidence_score?: number | null;
 }
 
 interface ExtractedRule {
@@ -58,6 +62,35 @@ interface ExtractedRule {
   priority: number;
   confidence: number;
   selected?: boolean;
+  approximation_warning?: string;
+}
+
+interface UnsupportedRule {
+  original_text: string;
+  suggested_type: string;
+  reason: string;
+  workaround?: string;
+  data_loss_warning?: string;
+}
+
+interface ExtensionSuggestion {
+  feature: string;
+  description: string;
+  priority: string;
+  affected_rules?: string[];
+}
+
+interface SchemaGaps {
+  missing_rule_types?: string[];
+  missing_day_types?: string[];
+  missing_conditions?: string[];
+  missing_formulas?: string[];
+}
+
+interface ComplexityAssessment {
+  overall_complexity: string;
+  coverage_percentage: number;
+  recommendation?: string;
 }
 
 interface SimulationResult {
@@ -70,9 +103,11 @@ interface SimulationResult {
     rule_type: string;
     effect: string;
     violation?: boolean;
+    is_approximation?: boolean;
   }[];
   total_pay_multiplier: number;
   violations: string[];
+  limitations?: string[];
 }
 
 const breadcrumbItems = [
@@ -81,20 +116,40 @@ const breadcrumbItems = [
 ];
 
 export default function CBATimeRulesPage() {
-  const { company } = useAuth();
+  const { company, user } = useAuth();
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedAgreement, setSelectedAgreement] = useState<CBAAgreement | null>(null);
   const [showRuleDialog, setShowRuleDialog] = useState(false);
   const [showUploadDialog, setShowUploadDialog] = useState(false);
   const [showSimulationDialog, setShowSimulationDialog] = useState(false);
-  const [activeTab, setActiveTab] = useState("rules");
+  const [showExtensionRequestDialog, setShowExtensionRequestDialog] = useState(false);
+  const [activeTab, setActiveTab] = useState("upload");
   const [documentText, setDocumentText] = useState("");
+  
+  // Extraction state
   const [extractedRules, setExtractedRules] = useState<ExtractedRule[]>([]);
+  const [unsupportedRules, setUnsupportedRules] = useState<UnsupportedRule[]>([]);
+  const [extensionSuggestions, setExtensionSuggestions] = useState<ExtensionSuggestion[]>([]);
+  const [schemaGaps, setSchemaGaps] = useState<SchemaGaps>({});
+  const [complexityAssessment, setComplexityAssessment] = useState<ComplexityAssessment | null>(null);
   const [extractionSummary, setExtractionSummary] = useState("");
   const [extractionWarnings, setExtractionWarnings] = useState<string[]>([]);
+  
+  // Simulation state
   const [simulationResults, setSimulationResults] = useState<SimulationResult[]>([]);
   const [simulationSummary, setSimulationSummary] = useState<Record<string, unknown> | null>(null);
+  const [simulationLimitations, setSimulationLimitations] = useState<string[]>([]);
+  
+  // Extension request form
+  const [extensionRequest, setExtensionRequest] = useState({
+    request_type: "rule_type",
+    suggested_value: "",
+    impact_description: "",
+    priority: "medium"
+  });
+  const [selectedUnsupportedRule, setSelectedUnsupportedRule] = useState<UnsupportedRule | null>(null);
+  
   const [newRule, setNewRule] = useState({
     rule_name: "",
     rule_type: "overtime",
@@ -132,7 +187,7 @@ export default function CBATimeRulesPage() {
     enabled: !!selectedAgreement?.id,
   });
 
-  // AI Document Extraction
+  // AI Document Extraction with gap detection
   const extractMutation = useMutation({
     mutationFn: async () => {
       if (!documentText.trim()) throw new Error("Please paste document content");
@@ -152,14 +207,31 @@ export default function CBATimeRulesPage() {
     onSuccess: (data) => {
       const rulesWithSelection = (data.rules || []).map((r: ExtractedRule) => ({ ...r, selected: true }));
       setExtractedRules(rulesWithSelection);
+      setUnsupportedRules(data.unsupported_rules || []);
+      setExtensionSuggestions(data.extension_suggestions || []);
+      setSchemaGaps(data.schema_gaps || {});
+      setComplexityAssessment(data.complexity_assessment || null);
       setExtractionSummary(data.summary || "");
       setExtractionWarnings(data.warnings || []);
-      toast.success(`Extracted ${rulesWithSelection.length} rules from document`);
+      
+      const supportedCount = rulesWithSelection.length;
+      const unsupportedCount = (data.unsupported_rules || []).length;
+      
+      if (unsupportedCount > 0) {
+        toast.warning(`Extracted ${supportedCount} rules. ${unsupportedCount} rules need review.`);
+      } else {
+        toast.success(`Extracted ${supportedCount} rules from document`);
+      }
+      
+      // Move to review tab
+      if (rulesWithSelection.length > 0 || unsupportedCount > 0) {
+        setActiveTab("review");
+      }
     },
     onError: (error) => toast.error(`Extraction failed: ${error.message}`),
   });
 
-  // Save extracted rules
+  // Save extracted rules with approximation tracking
   const saveExtractedRulesMutation = useMutation({
     mutationFn: async () => {
       if (!selectedAgreement) throw new Error("No agreement selected");
@@ -175,22 +247,66 @@ export default function CBATimeRulesPage() {
         value_text: rule.value_text || null,
         priority: rule.priority,
         is_active: true,
+        approximation_warning: rule.approximation_warning || null,
+        confidence_score: rule.confidence || null,
       }));
 
       const { error } = await supabase.from("cba_time_rules").insert(rulesToInsert);
       if (error) throw error;
+      
+      // Save unsupported rules for tracking
+      if (unsupportedRules.length > 0) {
+        const unsupportedToInsert = unsupportedRules.map(rule => ({
+          company_id: company?.id,
+          agreement_id: selectedAgreement.id,
+          original_text: rule.original_text,
+          suggested_type: rule.suggested_type,
+          reason: rule.reason,
+          workaround: rule.workaround || null,
+          data_loss_warning: rule.data_loss_warning || null,
+        }));
+        
+        await supabase.from("cba_unsupported_rules").insert(unsupportedToInsert);
+      }
     },
     onSuccess: () => {
       toast.success("Rules saved successfully");
       setShowUploadDialog(false);
-      setExtractedRules([]);
-      setDocumentText("");
+      resetExtractionState();
       queryClient.invalidateQueries({ queryKey: ["cba-time-rules"] });
     },
     onError: (error) => toast.error(`Save failed: ${error.message}`),
   });
 
-  // Simulation
+  // Create extension request
+  const createExtensionRequestMutation = useMutation({
+    mutationFn: async () => {
+      if (!extensionRequest.suggested_value.trim()) throw new Error("Please specify the extension needed");
+      
+      const { error } = await supabase.from("cba_extension_requests").insert({
+        company_id: company?.id,
+        agreement_id: selectedAgreement?.id,
+        request_type: extensionRequest.request_type,
+        suggested_value: extensionRequest.suggested_value,
+        original_document_excerpt: selectedUnsupportedRule?.original_text || null,
+        ai_analysis: selectedUnsupportedRule?.reason || null,
+        impact_description: extensionRequest.impact_description || null,
+        priority: extensionRequest.priority,
+        created_by: user?.id,
+      });
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Extension request submitted");
+      setShowExtensionRequestDialog(false);
+      setSelectedUnsupportedRule(null);
+      setExtensionRequest({ request_type: "rule_type", suggested_value: "", impact_description: "", priority: "medium" });
+    },
+    onError: (error) => toast.error(`Failed to submit request: ${error.message}`),
+  });
+
+  // Simulation with gap awareness
   const simulateMutation = useMutation({
     mutationFn: async () => {
       const { data, error } = await supabase.functions.invoke("simulate-cba-rules", {
@@ -208,8 +324,15 @@ export default function CBATimeRulesPage() {
     onSuccess: (data) => {
       setSimulationResults(data.results || []);
       setSimulationSummary(data.summary || null);
+      setSimulationLimitations(data.simulation_limitations || []);
       setShowSimulationDialog(true);
-      toast.success("Simulation complete");
+      
+      const accuracy = data.summary?.simulation_accuracy || 100;
+      if (accuracy < 100) {
+        toast.warning(`Simulation ${accuracy}% complete - some rules could not be tested`);
+      } else {
+        toast.success("Simulation complete");
+      }
     },
     onError: (error) => toast.error(`Simulation failed: ${error.message}`),
   });
@@ -246,6 +369,18 @@ export default function CBATimeRulesPage() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["cba-time-rules"] }),
   });
 
+  const resetExtractionState = () => {
+    setExtractedRules([]);
+    setUnsupportedRules([]);
+    setExtensionSuggestions([]);
+    setSchemaGaps({});
+    setComplexityAssessment(null);
+    setDocumentText("");
+    setExtractionSummary("");
+    setExtractionWarnings([]);
+    setActiveTab("upload");
+  };
+
   const filteredAgreements = agreements.filter(a =>
     a.agreement_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     a.union_name?.toLowerCase().includes(searchTerm.toLowerCase())
@@ -269,6 +404,21 @@ export default function CBATimeRulesPage() {
   const toggleExtractedRule = (index: number) => {
     setExtractedRules(prev => prev.map((r, i) => i === index ? { ...r, selected: !r.selected } : r));
   };
+
+  const openExtensionRequest = (unsupported?: UnsupportedRule) => {
+    if (unsupported) {
+      setSelectedUnsupportedRule(unsupported);
+      setExtensionRequest({
+        request_type: "rule_type",
+        suggested_value: unsupported.suggested_type,
+        impact_description: unsupported.data_loss_warning || "",
+        priority: "high"
+      });
+    }
+    setShowExtensionRequestDialog(true);
+  };
+
+  const hasApproximations = rules.some(r => r.approximation_warning);
 
   return (
     <AppLayout>
@@ -355,6 +505,12 @@ export default function CBATimeRulesPage() {
                   <CardTitle className="flex items-center gap-2">
                     <Clock className="h-5 w-5" />
                     Time Rules
+                    {hasApproximations && (
+                      <Badge variant="outline" className="ml-2 text-orange-600 border-orange-300">
+                        <TriangleAlert className="h-3 w-3 mr-1" />
+                        Has Approximations
+                      </Badge>
+                    )}
                   </CardTitle>
                   <CardDescription>
                     {selectedAgreement ? `Rules for ${selectedAgreement.agreement_name}` : "Select an agreement"}
@@ -398,18 +554,38 @@ export default function CBATimeRulesPage() {
                         <TableHead>Type</TableHead>
                         <TableHead>Day Type</TableHead>
                         <TableHead className="text-center">Multiplier</TableHead>
-                        <TableHead className="text-center">Value</TableHead>
+                        <TableHead className="text-center">Confidence</TableHead>
                         <TableHead>Active</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {rules.map((rule) => (
                         <TableRow key={rule.id}>
-                          <TableCell><p className="font-medium">{rule.rule_name}</p></TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <p className="font-medium">{rule.rule_name}</p>
+                              {rule.approximation_warning && (
+                                <Badge variant="outline" className="text-orange-600 border-orange-300 text-xs">
+                                  <TriangleAlert className="h-3 w-3 mr-1" />
+                                  Approx
+                                </Badge>
+                              )}
+                            </div>
+                            {rule.approximation_warning && (
+                              <p className="text-xs text-orange-600 mt-1">{rule.approximation_warning}</p>
+                            )}
+                          </TableCell>
                           <TableCell><Badge variant="outline">{rule.rule_type}</Badge></TableCell>
                           <TableCell>{getConditionDisplay(rule)}</TableCell>
                           <TableCell className="text-center">{rule.value_numeric ? `${rule.value_numeric}x` : "—"}</TableCell>
-                          <TableCell className="text-center">{rule.value_text || "—"}</TableCell>
+                          <TableCell className="text-center">
+                            {rule.confidence_score ? (
+                              <div className="flex items-center justify-center gap-1">
+                                <Progress value={(rule.confidence_score) * 100} className="w-12 h-2" />
+                                <span className="text-xs">{Math.round((rule.confidence_score) * 100)}%</span>
+                              </div>
+                            ) : "—"}
+                          </TableCell>
                           <TableCell>
                             <Switch checked={rule.is_active} onCheckedChange={(checked) => toggleRuleMutation.mutate({ ruleId: rule.id, isActive: checked })} />
                           </TableCell>
@@ -423,19 +599,23 @@ export default function CBATimeRulesPage() {
           </Card>
         </div>
 
-        {/* AI Upload Dialog */}
-        <Dialog open={showUploadDialog} onOpenChange={setShowUploadDialog}>
-          <DialogContent className="max-w-3xl max-h-[90vh]">
+        {/* AI Upload Dialog with Gap Detection */}
+        <Dialog open={showUploadDialog} onOpenChange={(open) => { setShowUploadDialog(open); if (!open) resetExtractionState(); }}>
+          <DialogContent className="max-w-4xl max-h-[90vh]">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <Brain className="h-5 w-5 text-primary" />
                 AI Rule Extraction
               </DialogTitle>
+              <DialogDescription>
+                Upload CBA document text to automatically extract time rules. The AI will identify both supported and unsupported rules.
+              </DialogDescription>
             </DialogHeader>
             <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="upload">1. Upload Document</TabsTrigger>
-                <TabsTrigger value="review" disabled={extractedRules.length === 0}>2. Review Rules</TabsTrigger>
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="upload">1. Upload</TabsTrigger>
+                <TabsTrigger value="review" disabled={extractedRules.length === 0 && unsupportedRules.length === 0}>2. Review</TabsTrigger>
+                <TabsTrigger value="gaps" disabled={unsupportedRules.length === 0}>3. Gaps ({unsupportedRules.length})</TabsTrigger>
               </TabsList>
 
               <TabsContent value="upload" className="space-y-4">
@@ -448,7 +628,7 @@ export default function CBATimeRulesPage() {
                     className="min-h-[300px] font-mono text-sm"
                   />
                   <p className="text-xs text-muted-foreground">
-                    Tip: Copy and paste from PDF or Word documents. The AI will identify all time-related rules.
+                    The AI will categorize rules as supported or unsupported based on current system capabilities.
                   </p>
                 </div>
                 <Button onClick={() => extractMutation.mutate()} disabled={extractMutation.isPending || !documentText.trim()} className="w-full">
@@ -467,12 +647,36 @@ export default function CBATimeRulesPage() {
               </TabsContent>
 
               <TabsContent value="review" className="space-y-4">
+                {/* Complexity Assessment */}
+                {complexityAssessment && (
+                  <div className={`p-3 rounded-lg border ${
+                    complexityAssessment.coverage_percentage >= 90 ? 'bg-green-500/10 border-green-500/20' :
+                    complexityAssessment.coverage_percentage >= 70 ? 'bg-yellow-500/10 border-yellow-500/20' :
+                    'bg-red-500/10 border-red-500/20'
+                  }`}>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium">Schema Coverage</span>
+                      <Badge variant={
+                        complexityAssessment.coverage_percentage >= 90 ? "default" :
+                        complexityAssessment.coverage_percentage >= 70 ? "secondary" : "destructive"
+                      }>
+                        {complexityAssessment.coverage_percentage}% Supported
+                      </Badge>
+                    </div>
+                    <Progress value={complexityAssessment.coverage_percentage} className="h-2 mb-2" />
+                    {complexityAssessment.recommendation && (
+                      <p className="text-xs text-muted-foreground">{complexityAssessment.recommendation}</p>
+                    )}
+                  </div>
+                )}
+                
                 {extractionSummary && (
                   <div className="p-3 bg-muted rounded-lg">
                     <p className="text-sm font-medium mb-1">Summary</p>
                     <p className="text-sm text-muted-foreground">{extractionSummary}</p>
                   </div>
                 )}
+                
                 {extractionWarnings.length > 0 && (
                   <div className="p-3 bg-orange-500/10 rounded-lg border border-orange-500/20">
                     <p className="text-sm font-medium mb-1 text-orange-600 flex items-center gap-1">
@@ -483,6 +687,7 @@ export default function CBATimeRulesPage() {
                     </ul>
                   </div>
                 )}
+                
                 <ScrollArea className="h-[300px] border rounded-lg">
                   <Table>
                     <TableHeader>
@@ -496,30 +701,173 @@ export default function CBATimeRulesPage() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {extractedRules.map((rule, idx) => (
-                        <TableRow key={idx} className={rule.selected ? "" : "opacity-50"}>
-                          <TableCell>
-                            <Switch checked={rule.selected} onCheckedChange={() => toggleExtractedRule(idx)} />
-                          </TableCell>
-                          <TableCell className="font-medium">{rule.rule_name}</TableCell>
-                          <TableCell><Badge variant="outline">{rule.rule_type}</Badge></TableCell>
-                          <TableCell>{rule.day_type}</TableCell>
-                          <TableCell>{rule.value_numeric || rule.value_text || "—"}</TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              <Progress value={(rule.confidence || 0) * 100} className="w-16 h-2" />
-                              <span className="text-xs">{Math.round((rule.confidence || 0) * 100)}%</span>
-                            </div>
+                      {extractedRules.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                            No supported rules extracted
                           </TableCell>
                         </TableRow>
-                      ))}
+                      ) : (
+                        extractedRules.map((rule, idx) => (
+                          <TableRow key={idx} className={rule.selected ? "" : "opacity-50"}>
+                            <TableCell>
+                              <Switch checked={rule.selected} onCheckedChange={() => toggleExtractedRule(idx)} />
+                            </TableCell>
+                            <TableCell>
+                              <p className="font-medium">{rule.rule_name}</p>
+                              {rule.approximation_warning && (
+                                <p className="text-xs text-orange-600 mt-1">⚠️ {rule.approximation_warning}</p>
+                              )}
+                            </TableCell>
+                            <TableCell><Badge variant="outline">{rule.rule_type}</Badge></TableCell>
+                            <TableCell>{rule.day_type}</TableCell>
+                            <TableCell>{rule.value_numeric || rule.value_text || "—"}</TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-2">
+                                <Progress value={(rule.confidence || 0) * 100} className="w-16 h-2" />
+                                <span className="text-xs">{Math.round((rule.confidence || 0) * 100)}%</span>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      )}
                     </TableBody>
                   </Table>
                 </ScrollArea>
+                
                 <div className="flex justify-between">
                   <Button variant="outline" onClick={() => setActiveTab("upload")}>Back</Button>
+                  <div className="flex gap-2">
+                    {unsupportedRules.length > 0 && (
+                      <Button variant="outline" onClick={() => setActiveTab("gaps")}>
+                        <AlertCircle className="h-4 w-4 mr-2" />
+                        Review Gaps ({unsupportedRules.length})
+                      </Button>
+                    )}
+                    <Button onClick={() => saveExtractedRulesMutation.mutate()} disabled={saveExtractedRulesMutation.isPending || extractedRules.filter(r => r.selected).length === 0}>
+                      {saveExtractedRulesMutation.isPending ? "Saving..." : `Save ${extractedRules.filter(r => r.selected).length} Rules`}
+                    </Button>
+                  </div>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="gaps" className="space-y-4">
+                <div className="p-3 bg-orange-500/10 rounded-lg border border-orange-500/20">
+                  <div className="flex items-start gap-2">
+                    <AlertCircle className="h-5 w-5 text-orange-600 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-medium text-orange-600">Unsupported Rules Detected</p>
+                      <p className="text-sm text-muted-foreground">
+                        These rules from your CBA cannot be fully expressed with the current system. 
+                        You can request an extension or apply a workaround.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <ScrollArea className="h-[280px]">
+                  <div className="space-y-3 pr-4">
+                    {unsupportedRules.map((rule, idx) => (
+                      <Card key={idx} className="border-orange-200">
+                        <CardContent className="p-4">
+                          <div className="flex items-start justify-between mb-2">
+                            <Badge variant="outline" className="text-orange-600">{rule.suggested_type}</Badge>
+                            <Button size="sm" variant="outline" onClick={() => openExtensionRequest(rule)}>
+                              <Send className="h-3 w-3 mr-1" />
+                              Request Extension
+                            </Button>
+                          </div>
+                          <p className="text-sm font-medium mb-1">{rule.original_text}</p>
+                          <p className="text-xs text-muted-foreground mb-2"><strong>Why unsupported:</strong> {rule.reason}</p>
+                          {rule.workaround && (
+                            <div className="p-2 bg-muted rounded text-xs">
+                              <strong>Workaround:</strong> {rule.workaround}
+                              {rule.data_loss_warning && (
+                                <p className="text-orange-600 mt-1">⚠️ {rule.data_loss_warning}</p>
+                              )}
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </ScrollArea>
+
+                {/* Schema Gaps Summary */}
+                {Object.keys(schemaGaps).length > 0 && (
+                  <>
+                    <Separator />
+                    <div>
+                      <p className="text-sm font-medium mb-2 flex items-center gap-2">
+                        <PuzzleIcon className="h-4 w-4" />
+                        Schema Gaps Identified
+                      </p>
+                      <div className="grid grid-cols-2 gap-2">
+                        {schemaGaps.missing_rule_types && schemaGaps.missing_rule_types.length > 0 && (
+                          <div className="p-2 bg-muted rounded text-xs">
+                            <strong>Missing Rule Types:</strong>
+                            <div className="flex flex-wrap gap-1 mt-1">
+                              {schemaGaps.missing_rule_types.map((t, i) => (
+                                <Badge key={i} variant="secondary" className="text-xs">{t}</Badge>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        {schemaGaps.missing_day_types && schemaGaps.missing_day_types.length > 0 && (
+                          <div className="p-2 bg-muted rounded text-xs">
+                            <strong>Missing Day Types:</strong>
+                            <div className="flex flex-wrap gap-1 mt-1">
+                              {schemaGaps.missing_day_types.map((t, i) => (
+                                <Badge key={i} variant="secondary" className="text-xs">{t}</Badge>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        {schemaGaps.missing_conditions && schemaGaps.missing_conditions.length > 0 && (
+                          <div className="p-2 bg-muted rounded text-xs">
+                            <strong>Missing Conditions:</strong>
+                            <div className="flex flex-wrap gap-1 mt-1">
+                              {schemaGaps.missing_conditions.map((t, i) => (
+                                <Badge key={i} variant="secondary" className="text-xs">{t}</Badge>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {/* Extension Suggestions */}
+                {extensionSuggestions.length > 0 && (
+                  <>
+                    <Separator />
+                    <div>
+                      <p className="text-sm font-medium mb-2 flex items-center gap-2">
+                        <Lightbulb className="h-4 w-4" />
+                        AI Extension Suggestions
+                      </p>
+                      <div className="space-y-2">
+                        {extensionSuggestions.map((sug, idx) => (
+                          <div key={idx} className="p-2 bg-primary/5 rounded border border-primary/10 text-sm">
+                            <div className="flex items-center justify-between">
+                              <span className="font-medium">{sug.feature}</span>
+                              <Badge variant={sug.priority === 'critical' ? 'destructive' : sug.priority === 'high' ? 'default' : 'secondary'}>
+                                {sug.priority}
+                              </Badge>
+                            </div>
+                            <p className="text-xs text-muted-foreground mt-1">{sug.description}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                <div className="flex justify-between">
+                  <Button variant="outline" onClick={() => setActiveTab("review")}>Back to Review</Button>
                   <Button onClick={() => saveExtractedRulesMutation.mutate()} disabled={saveExtractedRulesMutation.isPending || extractedRules.filter(r => r.selected).length === 0}>
-                    {saveExtractedRulesMutation.isPending ? "Saving..." : `Save ${extractedRules.filter(r => r.selected).length} Rules`}
+                    Save Supported Rules ({extractedRules.filter(r => r.selected).length})
                   </Button>
                 </div>
               </TabsContent>
@@ -527,7 +875,79 @@ export default function CBATimeRulesPage() {
           </DialogContent>
         </Dialog>
 
-        {/* Simulation Dialog */}
+        {/* Extension Request Dialog */}
+        <Dialog open={showExtensionRequestDialog} onOpenChange={setShowExtensionRequestDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Send className="h-5 w-5" />
+                Request Module Extension
+              </DialogTitle>
+              <DialogDescription>
+                Submit a request to add support for this rule type
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              {selectedUnsupportedRule && (
+                <div className="p-3 bg-muted rounded-lg text-sm">
+                  <p className="font-medium">Original Rule:</p>
+                  <p className="text-muted-foreground">{selectedUnsupportedRule.original_text}</p>
+                </div>
+              )}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Request Type</Label>
+                  <Select value={extensionRequest.request_type} onValueChange={(v) => setExtensionRequest({ ...extensionRequest, request_type: v })}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="rule_type">New Rule Type</SelectItem>
+                      <SelectItem value="day_type">New Day Type</SelectItem>
+                      <SelectItem value="condition">New Condition</SelectItem>
+                      <SelectItem value="formula">Complex Formula</SelectItem>
+                      <SelectItem value="other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Priority</Label>
+                  <Select value={extensionRequest.priority} onValueChange={(v) => setExtensionRequest({ ...extensionRequest, priority: v })}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="low">Low</SelectItem>
+                      <SelectItem value="medium">Medium</SelectItem>
+                      <SelectItem value="high">High</SelectItem>
+                      <SelectItem value="critical">Critical</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Suggested Value/Name</Label>
+                <Input 
+                  value={extensionRequest.suggested_value} 
+                  onChange={(e) => setExtensionRequest({ ...extensionRequest, suggested_value: e.target.value })} 
+                  placeholder="e.g., callback_pay, tiered_overtime"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Impact Description</Label>
+                <Textarea 
+                  value={extensionRequest.impact_description} 
+                  onChange={(e) => setExtensionRequest({ ...extensionRequest, impact_description: e.target.value })} 
+                  placeholder="Describe what functionality is lost without this extension..."
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowExtensionRequestDialog(false)}>Cancel</Button>
+              <Button onClick={() => createExtensionRequestMutation.mutate()} disabled={createExtensionRequestMutation.isPending || !extensionRequest.suggested_value.trim()}>
+                {createExtensionRequestMutation.isPending ? "Submitting..." : "Submit Request"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Simulation Dialog with Limitations */}
         <Dialog open={showSimulationDialog} onOpenChange={setShowSimulationDialog}>
           <DialogContent className="max-w-4xl max-h-[90vh]">
             <DialogHeader>
@@ -536,8 +956,21 @@ export default function CBATimeRulesPage() {
                 Rule Simulation Results
               </DialogTitle>
             </DialogHeader>
+            
+            {/* Simulation Limitations Warning */}
+            {simulationLimitations.length > 0 && (
+              <div className="p-3 bg-orange-500/10 rounded-lg border border-orange-500/20 mb-4">
+                <p className="text-sm font-medium text-orange-600 flex items-center gap-1 mb-1">
+                  <Info className="h-4 w-4" /> Simulation Limitations
+                </p>
+                <ul className="text-xs text-muted-foreground list-disc list-inside">
+                  {simulationLimitations.map((l, i) => <li key={i}>{l}</li>)}
+                </ul>
+              </div>
+            )}
+            
             {simulationSummary && (
-              <div className="grid grid-cols-4 gap-4 mb-4">
+              <div className="grid grid-cols-5 gap-4 mb-4">
                 <div className="p-3 bg-muted rounded-lg text-center">
                   <p className="text-2xl font-bold">{(simulationSummary as any).total_entries}</p>
                   <p className="text-xs text-muted-foreground">Entries Analyzed</p>
@@ -552,10 +985,18 @@ export default function CBATimeRulesPage() {
                 </div>
                 <div className="p-3 bg-red-500/10 rounded-lg text-center">
                   <p className="text-2xl font-bold text-red-600">{(simulationSummary as any).violations}</p>
-                  <p className="text-xs text-muted-foreground">Violations Found</p>
+                  <p className="text-xs text-muted-foreground">Violations</p>
+                </div>
+                <div className={`p-3 rounded-lg text-center ${
+                  (simulationSummary as any).simulation_accuracy >= 90 ? 'bg-green-500/10' :
+                  (simulationSummary as any).simulation_accuracy >= 70 ? 'bg-yellow-500/10' : 'bg-red-500/10'
+                }`}>
+                  <p className="text-2xl font-bold">{(simulationSummary as any).simulation_accuracy || 100}%</p>
+                  <p className="text-xs text-muted-foreground">Accuracy</p>
                 </div>
               </div>
             )}
+            
             <ScrollArea className="h-[400px] border rounded-lg">
               <Table>
                 <TableHeader>
@@ -565,7 +1006,7 @@ export default function CBATimeRulesPage() {
                     <TableHead>Hours</TableHead>
                     <TableHead>Rules Applied</TableHead>
                     <TableHead>Multiplier</TableHead>
-                    <TableHead>Violations</TableHead>
+                    <TableHead>Status</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -584,8 +1025,13 @@ export default function CBATimeRulesPage() {
                         <TableCell>
                           <div className="flex flex-wrap gap-1">
                             {result.rules_applied.map((r, i) => (
-                              <Badge key={i} variant={r.violation ? "destructive" : "outline"} className="text-xs">
+                              <Badge 
+                                key={i} 
+                                variant={r.violation ? "destructive" : "outline"} 
+                                className={`text-xs ${r.is_approximation ? 'border-orange-300' : ''}`}
+                              >
                                 {r.rule_name}
+                                {r.is_approximation && " ⚠️"}
                               </Badge>
                             ))}
                           </div>
@@ -599,7 +1045,12 @@ export default function CBATimeRulesPage() {
                           {result.violations.length > 0 ? (
                             <Badge variant="destructive" className="text-xs">
                               <XCircle className="h-3 w-3 mr-1" />
-                              {result.violations.length}
+                              {result.violations.length} violation(s)
+                            </Badge>
+                          ) : result.limitations && result.limitations.length > 0 ? (
+                            <Badge variant="outline" className="text-xs text-orange-600">
+                              <Info className="h-3 w-3 mr-1" />
+                              Limited
                             </Badge>
                           ) : (
                             <CheckCircle className="h-4 w-4 text-green-500" />
@@ -639,6 +1090,8 @@ export default function CBATimeRulesPage() {
                       <SelectItem value="rest_period">Rest Period</SelectItem>
                       <SelectItem value="break_time">Break Time</SelectItem>
                       <SelectItem value="max_hours">Max Hours</SelectItem>
+                      <SelectItem value="holiday_pay">Holiday Pay</SelectItem>
+                      <SelectItem value="on_call">On Call</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

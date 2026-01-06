@@ -7039,6 +7039,81 @@ export type Database = {
           },
         ]
       }
+      cba_extension_requests: {
+        Row: {
+          agreement_id: string | null
+          ai_analysis: string | null
+          company_id: string | null
+          created_at: string | null
+          created_by: string | null
+          id: string
+          impact_description: string | null
+          implementation_notes: string | null
+          original_document_excerpt: string | null
+          priority: string | null
+          request_type: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string | null
+          suggested_value: string
+          updated_at: string | null
+          workaround_applied: string | null
+        }
+        Insert: {
+          agreement_id?: string | null
+          ai_analysis?: string | null
+          company_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          impact_description?: string | null
+          implementation_notes?: string | null
+          original_document_excerpt?: string | null
+          priority?: string | null
+          request_type: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string | null
+          suggested_value: string
+          updated_at?: string | null
+          workaround_applied?: string | null
+        }
+        Update: {
+          agreement_id?: string | null
+          ai_analysis?: string | null
+          company_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          impact_description?: string | null
+          implementation_notes?: string | null
+          original_document_excerpt?: string | null
+          priority?: string | null
+          request_type?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string | null
+          suggested_value?: string
+          updated_at?: string | null
+          workaround_applied?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cba_extension_requests_agreement_id_fkey"
+            columns: ["agreement_id"]
+            isOneToOne: false
+            referencedRelation: "cba_agreements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cba_extension_requests_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cba_negotiations: {
         Row: {
           agenda: string | null
@@ -7292,10 +7367,13 @@ export type Database = {
       cba_time_rules: {
         Row: {
           agreement_id: string
+          approximation_warning: string | null
           condition_json: Json | null
+          confidence_score: number | null
           created_at: string
           id: string
           is_active: boolean | null
+          original_extraction: Json | null
           priority: number | null
           rule_name: string
           rule_type: string
@@ -7304,10 +7382,13 @@ export type Database = {
         }
         Insert: {
           agreement_id: string
+          approximation_warning?: string | null
           condition_json?: Json | null
+          confidence_score?: number | null
           created_at?: string
           id?: string
           is_active?: boolean | null
+          original_extraction?: Json | null
           priority?: number | null
           rule_name: string
           rule_type: string
@@ -7316,10 +7397,13 @@ export type Database = {
         }
         Update: {
           agreement_id?: string
+          approximation_warning?: string | null
           condition_json?: Json | null
+          confidence_score?: number | null
           created_at?: string
           id?: string
           is_active?: boolean | null
+          original_extraction?: Json | null
           priority?: number | null
           rule_name?: string
           rule_type?: string
@@ -7332,6 +7416,70 @@ export type Database = {
             columns: ["agreement_id"]
             isOneToOne: false
             referencedRelation: "cba_agreements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cba_unsupported_rules: {
+        Row: {
+          agreement_id: string | null
+          company_id: string | null
+          created_at: string | null
+          data_loss_warning: string | null
+          extension_request_id: string | null
+          id: string
+          is_resolved: boolean | null
+          original_text: string
+          reason: string
+          suggested_type: string | null
+          workaround: string | null
+        }
+        Insert: {
+          agreement_id?: string | null
+          company_id?: string | null
+          created_at?: string | null
+          data_loss_warning?: string | null
+          extension_request_id?: string | null
+          id?: string
+          is_resolved?: boolean | null
+          original_text: string
+          reason: string
+          suggested_type?: string | null
+          workaround?: string | null
+        }
+        Update: {
+          agreement_id?: string | null
+          company_id?: string | null
+          created_at?: string | null
+          data_loss_warning?: string | null
+          extension_request_id?: string | null
+          id?: string
+          is_resolved?: boolean | null
+          original_text?: string
+          reason?: string
+          suggested_type?: string | null
+          workaround?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cba_unsupported_rules_agreement_id_fkey"
+            columns: ["agreement_id"]
+            isOneToOne: false
+            referencedRelation: "cba_agreements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cba_unsupported_rules_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cba_unsupported_rules_extension_request_id_fkey"
+            columns: ["extension_request_id"]
+            isOneToOne: false
+            referencedRelation: "cba_extension_requests"
             referencedColumns: ["id"]
           },
         ]
