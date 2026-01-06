@@ -5,24 +5,28 @@ import { useToast } from "@/hooks/use-toast";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from "date-fns";
+import { format, startOfWeek } from "date-fns";
 import { formatDateForDisplay } from "@/utils/dateUtils";
-import { Users, Clock, CheckCircle, XCircle, AlertTriangle, Timer, Calendar, ClipboardList } from "lucide-react";
+import { Users, Clock, CheckCircle, XCircle, AlertTriangle, Timer, ClipboardList, Eye, UserCheck } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useLanguage } from "@/hooks/useLanguage";
+import { PunchDetailDialog } from "@/components/time-attendance/PunchDetailDialog";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
-interface DirectReport {
+interface AssignedEmployee {
   id: string;
   full_name: string;
   email: string;
-  employee_id: string | null;
+  department_name: string | null;
+  assignment_type: string;
+  source: 'direct_report' | 'timekeeper';
 }
 
 interface TeamTimeEntry {
@@ -30,8 +34,30 @@ interface TeamTimeEntry {
   employee_id: string;
   clock_in: string;
   clock_out: string | null;
+  rounded_clock_in: string | null;
+  rounded_clock_out: string | null;
+  clock_in_location: string | null;
+  clock_out_location: string | null;
+  clock_in_latitude: number | null;
+  clock_in_longitude: number | null;
+  clock_out_latitude: number | null;
+  clock_out_longitude: number | null;
+  clock_in_photo_url: string | null;
+  clock_out_photo_url: string | null;
+  clock_in_within_geofence: boolean | null;
+  clock_out_within_geofence: boolean | null;
+  clock_in_face_verified: boolean | null;
+  clock_out_face_verified: boolean | null;
+  clock_in_method: string | null;
+  clock_out_method: string | null;
   total_hours: number | null;
+  regular_hours: number | null;
+  overtime_hours: number | null;
   status: string;
+  scheduled_start: string | null;
+  scheduled_end: string | null;
+  break_duration_minutes: number | null;
+  rounding_rule_applied: string | null;
   employee: { full_name: string };
 }
 
@@ -58,10 +84,10 @@ interface AttendanceException {
 
 export default function MssTimeAttendancePage() {
   const { t } = useLanguage();
-  const { user, profile } = useAuth();
+  const { user } = useAuth();
   const { toast } = useToast();
   
-  const [directReports, setDirectReports] = useState<DirectReport[]>([]);
+  const [assignedEmployees, setAssignedEmployees] = useState<AssignedEmployee[]>([]);
   const [teamEntries, setTeamEntries] = useState<TeamTimeEntry[]>([]);
   const [timesheets, setTimesheets] = useState<TimesheetSubmission[]>([]);
   const [exceptions, setExceptions] = useState<AttendanceException[]>([]);
@@ -73,63 +99,109 @@ export default function MssTimeAttendancePage() {
   const [reviewNotes, setReviewNotes] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
 
+  const [punchDetailOpen, setPunchDetailOpen] = useState(false);
+  const [selectedPunch, setSelectedPunch] = useState<TeamTimeEntry | null>(null);
+
   useEffect(() => {
     if (user) {
-      loadDirectReports();
+      loadAssignedEmployees();
     }
   }, [user]);
 
   useEffect(() => {
-    if (directReports.length > 0) {
+    if (assignedEmployees.length > 0) {
       loadTeamData();
     }
-  }, [directReports, selectedEmployee]);
+  }, [assignedEmployees, selectedEmployee]);
 
-  const loadDirectReports = async () => {
+  const loadAssignedEmployees = async () => {
     if (!user) return;
 
     try {
-      const { data } = await supabase.rpc("get_manager_direct_reports", {
+      const employees: AssignedEmployee[] = [];
+
+      // Load direct reports (manager hierarchy)
+      const { data: directReports } = await supabase.rpc("get_manager_direct_reports", {
         p_manager_id: user.id,
       });
 
-      const reports = (data || []).map((r: { employee_id: string; employee_name: string; employee_email: string }) => ({
-        id: r.employee_id,
-        full_name: r.employee_name,
-        email: r.employee_email,
-        employee_id: null,
-      }));
+      if (directReports) {
+        directReports.forEach((r: { employee_id: string; employee_name: string; employee_email: string }) => {
+          employees.push({
+            id: r.employee_id,
+            full_name: r.employee_name,
+            email: r.employee_email,
+            department_name: null,
+            assignment_type: 'direct_report',
+            source: 'direct_report',
+          });
+        });
+      }
 
-      setDirectReports(reports);
+      // Load timekeeper assignments
+      const { data: timekeeperEmployees } = await supabase.rpc("get_timekeeper_employees", {
+        p_timekeeper_id: user.id,
+      });
+
+      if (timekeeperEmployees) {
+        timekeeperEmployees.forEach((r: { employee_id: string; employee_name: string; employee_email: string; department_name: string; assignment_type: string }) => {
+          // Check if already added as direct report
+          if (!employees.some(e => e.id === r.employee_id)) {
+            employees.push({
+              id: r.employee_id,
+              full_name: r.employee_name,
+              email: r.employee_email,
+              department_name: r.department_name,
+              assignment_type: r.assignment_type,
+              source: 'timekeeper',
+            });
+          }
+        });
+      }
+
+      setAssignedEmployees(employees);
       
-      // If no direct reports, stop loading immediately
-      if (reports.length === 0) {
+      if (employees.length === 0) {
         setIsLoading(false);
       }
     } catch (error) {
-      console.error("Error loading direct reports:", error);
+      console.error("Error loading assigned employees:", error);
       setIsLoading(false);
     }
   };
 
   const loadTeamData = async () => {
-    if (directReports.length === 0) {
+    if (assignedEmployees.length === 0) {
       setIsLoading(false);
       return;
     }
     
     setIsLoading(true);
     const reportIds = selectedEmployee === "all" 
-      ? directReports.map((r) => r.id)
+      ? assignedEmployees.map((r) => r.id)
       : [selectedEmployee];
 
     try {
       const weekStart = startOfWeek(new Date(), { weekStartsOn: 1 });
 
-      // Load team time entries
+      // Load team time entries with full details
       const { data: entries } = await supabase
         .from("time_clock_entries")
-        .select("*, employee:profiles!time_clock_entries_employee_id_fkey(full_name)")
+        .select(`
+          id, employee_id, clock_in, clock_out, 
+          rounded_clock_in, rounded_clock_out,
+          clock_in_location, clock_out_location,
+          clock_in_latitude, clock_in_longitude,
+          clock_out_latitude, clock_out_longitude,
+          clock_in_photo_url, clock_out_photo_url,
+          clock_in_within_geofence, clock_out_within_geofence,
+          clock_in_face_verified, clock_out_face_verified,
+          clock_in_method, clock_out_method,
+          total_hours, regular_hours, overtime_hours,
+          status, scheduled_start, scheduled_end,
+          break_duration_minutes, rounding_rule_applied,
+          employee:profiles!time_clock_entries_employee_id_fkey(full_name)
+        `)
         .in("employee_id", reportIds)
         .gte("clock_in", weekStart.toISOString())
         .order("clock_in", { ascending: false });
@@ -231,7 +303,27 @@ export default function MssTimeAttendancePage() {
     return <Badge className={colors[status] || "bg-muted"}>{status}</Badge>;
   };
 
+  const getSourceBadge = (emp: AssignedEmployee) => {
+    if (emp.source === 'direct_report') {
+      return (
+        <Badge variant="outline" className="text-xs bg-blue-500/10 text-blue-600">
+          <Users className="h-3 w-3 mr-1" />
+          Direct Report
+        </Badge>
+      );
+    }
+    return (
+      <Badge variant="outline" className="text-xs bg-purple-500/10 text-purple-600">
+        <UserCheck className="h-3 w-3 mr-1" />
+        {emp.assignment_type === 'department' ? 'Department' : 
+         emp.assignment_type === 'branch_location' ? 'Location' : 'Assigned'}
+      </Badge>
+    );
+  };
+
   // Summary stats
+  const directReportCount = assignedEmployees.filter(e => e.source === 'direct_report').length;
+  const timekeeperCount = assignedEmployees.filter(e => e.source === 'timekeeper').length;
   const clockedInCount = teamEntries.filter((e) => !e.clock_out).length;
   const pendingTimesheets = timesheets.length;
   const pendingExceptions = exceptions.length;
@@ -252,14 +344,19 @@ export default function MssTimeAttendancePage() {
             <p className="text-muted-foreground">{t("mss.teamTimeAttendance.subtitle")}</p>
           </div>
           <Select value={selectedEmployee} onValueChange={setSelectedEmployee}>
-            <SelectTrigger className="w-[200px]">
+            <SelectTrigger className="w-[250px]">
               <SelectValue placeholder="Filter by employee" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Direct Reports</SelectItem>
-              {directReports.map((report) => (
-                <SelectItem key={report.id} value={report.id}>
-                  {report.full_name}
+              <SelectItem value="all">All Employees ({assignedEmployees.length})</SelectItem>
+              {assignedEmployees.map((emp) => (
+                <SelectItem key={emp.id} value={emp.id}>
+                  <div className="flex items-center gap-2">
+                    <span>{emp.full_name}</span>
+                    {emp.source === 'timekeeper' && (
+                      <UserCheck className="h-3 w-3 text-purple-500" />
+                    )}
+                  </div>
                 </SelectItem>
               ))}
             </SelectContent>
@@ -267,15 +364,26 @@ export default function MssTimeAttendancePage() {
         </div>
 
         {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">Direct Reports</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex items-center gap-2">
-                <Users className="h-5 w-5 text-primary" />
-                <span className="text-2xl font-bold">{directReports.length}</span>
+                <Users className="h-5 w-5 text-blue-600" />
+                <span className="text-2xl font-bold">{directReportCount}</span>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Assigned (Timekeeper)</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center gap-2">
+                <UserCheck className="h-5 w-5 text-purple-600" />
+                <span className="text-2xl font-bold">{timekeeperCount}</span>
               </div>
             </CardContent>
           </Card>
@@ -352,10 +460,13 @@ export default function MssTimeAttendancePage() {
                       <TableRow>
                         <TableHead>Employee</TableHead>
                         <TableHead>Date</TableHead>
-                        <TableHead>Clock In</TableHead>
-                        <TableHead>Clock Out</TableHead>
+                        <TableHead>Actual In</TableHead>
+                        <TableHead>Rounded In</TableHead>
+                        <TableHead>Actual Out</TableHead>
+                        <TableHead>Rounded Out</TableHead>
                         <TableHead>Hours</TableHead>
                         <TableHead>Status</TableHead>
+                        <TableHead className="w-[50px]"></TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -365,10 +476,64 @@ export default function MssTimeAttendancePage() {
                           <TableCell>{format(new Date(entry.clock_in), "EEE, MMM d")}</TableCell>
                           <TableCell>{format(new Date(entry.clock_in), "h:mm a")}</TableCell>
                           <TableCell>
+                            {entry.rounded_clock_in ? (
+                              <span className="text-primary font-medium">
+                                {format(new Date(entry.rounded_clock_in), "h:mm a")}
+                              </span>
+                            ) : "-"}
+                          </TableCell>
+                          <TableCell>
                             {entry.clock_out ? format(new Date(entry.clock_out), "h:mm a") : "-"}
                           </TableCell>
-                          <TableCell>{entry.total_hours?.toFixed(2) || "-"}</TableCell>
-                          <TableCell>{getStatusBadge(entry.status)}</TableCell>
+                          <TableCell>
+                            {entry.rounded_clock_out ? (
+                              <span className="text-primary font-medium">
+                                {format(new Date(entry.rounded_clock_out), "h:mm a")}
+                              </span>
+                            ) : "-"}
+                          </TableCell>
+                          <TableCell>
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger>
+                                  <span>{entry.total_hours?.toFixed(2) || "-"}</span>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <div className="text-xs space-y-1">
+                                    <p>Regular: {entry.regular_hours?.toFixed(2) || '0.00'}h</p>
+                                    <p>Overtime: {entry.overtime_hours?.toFixed(2) || '0.00'}h</p>
+                                  </div>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-1">
+                              {getStatusBadge(entry.status)}
+                              {entry.clock_in_within_geofence === false && (
+                                <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger>
+                                      <AlertTriangle className="h-4 w-4 text-orange-500" />
+                                    </TooltipTrigger>
+                                    <TooltipContent>Outside geofence</TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => {
+                                setSelectedPunch(entry);
+                                setPunchDetailOpen(true);
+                              }}
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                          </TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
@@ -542,6 +707,13 @@ export default function MssTimeAttendancePage() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        {/* Punch Detail Dialog */}
+        <PunchDetailDialog
+          open={punchDetailOpen}
+          onOpenChange={setPunchDetailOpen}
+          punch={selectedPunch}
+        />
       </div>
     </AppLayout>
   );
