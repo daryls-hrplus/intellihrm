@@ -410,6 +410,7 @@ serve(async (req) => {
         }
 
         // Get user mappings to convert device user IDs to employee IDs
+        // First, check device_user_mappings table
         const { data: mappings } = await supabase
           .from('device_user_mappings')
           .select('device_user_id, employee_id')
@@ -417,12 +418,30 @@ serve(async (req) => {
 
         const mappingLookup = new Map(mappings?.map(m => [m.device_user_id, m.employee_id]) || []);
 
+        // Also get employees with time_clock_id set (direct matching)
+        const { data: employeesWithClockId } = await supabase
+          .from('profiles')
+          .select('id, time_clock_id')
+          .eq('company_id', company_id)
+          .not('time_clock_id', 'is', null);
+
+        // Create lookup from time_clock_id to employee_id
+        const clockIdLookup = new Map(
+          (employeesWithClockId || []).map(e => [e.time_clock_id, e.id])
+        );
+
         let synced = 0;
         let failed = 0;
         const errors: string[] = [];
 
         for (const log of logsResult.logs || []) {
-          const employeeId = mappingLookup.get(log.userId);
+          // Try to find employee by: 1) device mapping, 2) time_clock_id on profile
+          let employeeId = mappingLookup.get(log.userId);
+          
+          if (!employeeId) {
+            // Try matching by time_clock_id field on profiles
+            employeeId = clockIdLookup.get(log.userId);
+          }
           
           if (!employeeId) {
             errors.push(`No mapping for device user ${log.userId}`);
