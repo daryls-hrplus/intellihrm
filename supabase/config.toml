@@ -398,3 +398,6 @@ verify_jwt = false
 
 [functions.simulate-cba-rules]
 verify_jwt = false
+
+[functions.zkteco-device-sync]
+verify_jwt = false
