@@ -38,6 +38,7 @@ import {
   Network,
   Users,
   Target,
+  Shield,
 } from "lucide-react";
 import { ContentWorkflowBoard } from "@/components/enablement/ContentWorkflowBoard";
 import { ReleaseManager } from "@/components/enablement/ReleaseManager";
@@ -241,6 +242,14 @@ export default function EnablementHubPage() {
     {
       titleKey: "Administrator Manuals",
       items: [
+        {
+          title: "Admin & Security - Administrator Guide",
+          description: "Enterprise-grade administration and security configuration guide",
+          href: "/enablement/manuals/admin-security",
+          icon: Shield,
+          color: "bg-red-500/10 text-red-600",
+          badge: "55 Sections",
+        },
         {
           title: "Performance Appraisal - Administrator Guide",
           description: "Comprehensive administrator guide for the Performance Appraisal module",
