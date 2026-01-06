@@ -15,6 +15,7 @@ import {
   type ExampleConfig,
   type BusinessRule
 } from '../../../manual/components';
+import { FeatureStatusBadge } from '../../components';
 
 const sectionFields: FieldDefinition[] = [
   {
@@ -160,6 +161,7 @@ export function FoundationSections() {
           <CardTitle className="flex items-center gap-2">
             <Users2 className="h-5 w-5 text-primary" />
             Understanding Sections
+            <FeatureStatusBadge status="implemented" size="sm" />
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -170,7 +172,10 @@ export function FoundationSections() {
           </p>
           
           <div className="p-4 rounded-lg border bg-muted/30">
-            <h4 className="font-medium mb-2">Hierarchy Position</h4>
+            <h4 className="font-medium mb-2 flex items-center gap-2">
+              Hierarchy Position
+              <FeatureStatusBadge status="implemented" size="sm" />
+            </h4>
             <div className="flex items-center gap-2 text-sm flex-wrap">
               <Badge variant="outline">Company</Badge>
               <ArrowRight className="h-4 w-4" />
@@ -186,7 +191,10 @@ export function FoundationSections() {
 
       <Card>
         <CardHeader>
-          <CardTitle>When to Use Sections</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            When to Use Sections
+            <FeatureStatusBadge status="recommended" size="sm" />
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-2">

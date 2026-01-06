@@ -15,6 +15,7 @@ import {
   type ExampleConfig,
   type BusinessRule
 } from '../../../manual/components';
+import { FeatureStatusBadge } from '../../components';
 
 const territoryFields: FieldDefinition[] = [
   {
@@ -172,6 +173,7 @@ export function FoundationTerritories() {
           <CardTitle className="flex items-center gap-2">
             <Globe className="h-5 w-5 text-primary" />
             Understanding Territories
+            <FeatureStatusBadge status="implemented" size="sm" />
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -184,19 +186,28 @@ export function FoundationTerritories() {
           
           <div className="grid gap-4 md:grid-cols-3 mt-4">
             <div className="p-4 rounded-lg border bg-muted/30">
-              <h4 className="font-medium mb-2">Purpose</h4>
+              <h4 className="font-medium mb-2 flex items-center gap-2">
+                Purpose
+                <FeatureStatusBadge status="implemented" size="sm" />
+              </h4>
               <p className="text-sm text-muted-foreground">
                 Regional grouping for reporting, compliance aggregation, and default settings
               </p>
             </div>
             <div className="p-4 rounded-lg border bg-muted/30">
-              <h4 className="font-medium mb-2">Hierarchy Position</h4>
+              <h4 className="font-medium mb-2 flex items-center gap-2">
+                Hierarchy Position
+                <FeatureStatusBadge status="implemented" size="sm" />
+              </h4>
               <p className="text-sm text-muted-foreground">
                 Top level: Territory → Company Group → Company → Division → Department
               </p>
             </div>
             <div className="p-4 rounded-lg border bg-muted/30">
-              <h4 className="font-medium mb-2">Optional?</h4>
+              <h4 className="font-medium mb-2 flex items-center gap-2">
+                Optional?
+                <FeatureStatusBadge status="recommended" size="sm" />
+              </h4>
               <p className="text-sm text-muted-foreground">
                 Yes - single-country operations can skip directly to Company Group
               </p>
