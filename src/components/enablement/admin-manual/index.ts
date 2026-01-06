@@ -5,3 +5,4 @@ export { AdminManualSecuritySection } from './AdminManualSecuritySection';
 export { AdminManualSystemSection } from './AdminManualSystemSection';
 export { AdminManualAIGovernanceSection } from './AdminManualAIGovernanceSection';
 export { AdminManualComplianceSection } from './AdminManualComplianceSection';
+export { AdminManualTroubleshootingSection } from './AdminManualTroubleshootingSection';
