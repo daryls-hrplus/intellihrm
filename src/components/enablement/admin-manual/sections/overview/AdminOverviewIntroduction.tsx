@@ -31,10 +31,9 @@ export function AdminOverviewIntroduction() {
             <div>
               <h3 className="font-semibold text-lg mb-2">Executive Summary</h3>
               <p className="text-muted-foreground leading-relaxed">
-                The HRplus Admin & Security module is the foundational layer of your enterprise HRMS, 
+                The HRplus Admin & Security module is the foundational layer of your HRMS, 
                 providing comprehensive organization structure management, role-based access control, 
-                and security governance. Built to meet SAP SuccessFactors, Workday, and Oracle HCM 
-                standards, it ensures your HR data is protected while enabling efficient operations 
+                and security governance. It ensures your HR data is protected while enabling efficient operations 
                 across the Caribbean, Africa, and global regions.
               </p>
               <div className="mt-4 grid md:grid-cols-4 gap-4">
@@ -293,7 +292,7 @@ export function AdminOverviewIntroduction() {
                 <BookOpen className="h-4 w-4 text-blue-600 dark:text-blue-400 mt-0.5" />
                 <div>
                   <span className="font-semibold text-sm text-foreground">Industry Standard</span>
-                  <p className="text-xs text-muted-foreground mt-1">Alignment with SAP/Workday/Oracle best practices</p>
+                  <p className="text-xs text-muted-foreground mt-1">Alignment with industry best practices</p>
                 </div>
               </div>
             </div>

@@ -141,22 +141,22 @@ const configExamples: ExampleConfig[] = [
 const businessRules: BusinessRule[] = [
   {
     rule: "Company groups must have unique codes across the system",
-    enforcement: "hard",
+    enforcement: "System",
     description: "Prevents duplicate identifiers for integration reliability"
   },
   {
     rule: "Shared settings cascade to all child companies",
-    enforcement: "soft",
+    enforcement: "Policy",
     description: "Child companies can override inherited settings with approval"
   },
   {
     rule: "Holding company flag affects financial consolidation",
-    enforcement: "advisory",
+    enforcement: "Advisory",
     description: "Enables specific consolidation reports when set"
   },
   {
     rule: "Deletion requires no active child companies",
-    enforcement: "hard",
+    enforcement: "System",
     description: "Must reassign or archive child companies first"
   }
 ];

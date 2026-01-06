@@ -170,32 +170,32 @@ const configExamples: ExampleConfig[] = [
 const businessRules: BusinessRule[] = [
   {
     rule: "Department codes must be unique within a company",
-    enforcement: "hard",
+    enforcement: "System",
     description: "Required for payroll and reporting accuracy"
   },
   {
     rule: "Cost center is required for payroll integration",
-    enforcement: "hard",
+    enforcement: "System",
     description: "Enables cost allocation in financial systems"
   },
   {
     rule: "Department head must be an employee in the same company",
-    enforcement: "hard",
+    enforcement: "System",
     description: "Ensures valid organizational reporting"
   },
   {
     rule: "At least one department required before adding employees",
-    enforcement: "hard",
+    enforcement: "System",
     description: "Employees must be assigned to a department"
   },
   {
     rule: "Circular parent relationships are prevented",
-    enforcement: "hard",
+    enforcement: "System",
     description: "A department cannot be its own ancestor"
   },
   {
     rule: "Deleting department requires reassigning employees",
-    enforcement: "hard",
+    enforcement: "System",
     description: "All employees must be moved first"
   }
 ];

@@ -123,22 +123,22 @@ const configExamples: ExampleConfig[] = [
 const businessRules: BusinessRule[] = [
   {
     rule: "Section codes must be unique within a department",
-    enforcement: "hard",
+    enforcement: "System",
     description: "Prevents duplicate identifiers"
   },
   {
     rule: "Sections are optional in the hierarchy",
-    enforcement: "advisory",
+    enforcement: "Advisory",
     description: "Employees can be assigned directly to departments"
   },
   {
     rule: "Section supervisor must be in the same department",
-    enforcement: "hard",
+    enforcement: "System",
     description: "Ensures valid reporting relationships"
   },
   {
     rule: "Deleting section requires reassigning employees",
-    enforcement: "hard",
+    enforcement: "System",
     description: "Employees must be moved to department or another section"
   }
 ];
