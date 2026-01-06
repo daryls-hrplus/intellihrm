@@ -30,7 +30,8 @@ import {
   CalendarClock,
   LayoutGrid,
   List,
-  GitBranch
+  GitBranch,
+  Banknote
 } from "lucide-react";
 import { format, differenceInDays, startOfYear, isPast, isToday, isFuture, parseISO, getYear } from "date-fns";
 import { formatDateForDisplay } from "@/utils/dateUtils";
@@ -66,6 +67,7 @@ import { toast } from "sonner";
 import { LeaveWorkflowProgressDialog } from "@/components/leave/LeaveWorkflowProgressDialog";
 import { LeaveBalanceSummary } from "@/components/leave/LeaveBalanceSummary";
 import { LeaveCalendar } from "@/components/leave/LeaveCalendar";
+import { LeaveEncashmentDialog } from "@/components/leave/LeaveEncashmentDialog";
 
 export default function EssLeavePage() {
   const { t } = useLanguage();
@@ -102,6 +104,7 @@ export default function EssLeavePage() {
   const { startWorkflow, isLoading: workflowLoading } = useWorkflow();
   
   const [showApplyDialog, setShowApplyDialog] = useState(false);
+  const [showEncashmentDialog, setShowEncashmentDialog] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [selectedYear, setSelectedYear] = useState<string>(new Date().getFullYear().toString());
   const [balanceYear, setBalanceYear] = useState<string>(new Date().getFullYear().toString());
@@ -423,10 +426,18 @@ export default function EssLeavePage() {
               <p className="text-muted-foreground">{t("pages.myLeave.subtitle")}</p>
             </div>
           </div>
-          <Button onClick={() => setShowApplyDialog(true)}>
-            <CalendarPlus className="mr-2 h-4 w-4" />
-            {t("pages.myLeave.applyLeave")}
-          </Button>
+          <div className="flex items-center gap-2">
+            {leaveTypes.some(lt => lt.can_be_encashed) && (
+              <Button variant="outline" onClick={() => setShowEncashmentDialog(true)}>
+                <Banknote className="mr-2 h-4 w-4" />
+                Encash Leave
+              </Button>
+            )}
+            <Button onClick={() => setShowApplyDialog(true)}>
+              <CalendarPlus className="mr-2 h-4 w-4" />
+              {t("pages.myLeave.applyLeave")}
+            </Button>
+          </div>
         </div>
 
         <Tabs defaultValue="balances" className="space-y-4">
@@ -1145,6 +1156,14 @@ export default function EssLeavePage() {
           leaveRequestNumber={selectedRequestForProgress.number}
         />
       )}
+
+      {/* Leave Encashment Dialog */}
+      <LeaveEncashmentDialog
+        open={showEncashmentDialog}
+        onOpenChange={setShowEncashmentDialog}
+        leaveBalances={leaveBalances}
+        leaveTypes={leaveTypes}
+      />
     </AppLayout>
   );
 }
