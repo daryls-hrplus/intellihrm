@@ -327,15 +327,10 @@ export default function LeaveDashboardPage() {
       ]),
     },
     {
-      titleKey: "Planning",
-      items: filterByAccess([
-        allModules.liability,
-      ]),
-    },
-    {
       titleKey: "Analytics",
       items: filterByAccess([
         allModules.analytics,
+        allModules.liability,
       ]),
     },
     {
