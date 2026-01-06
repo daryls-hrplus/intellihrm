@@ -9,7 +9,9 @@ import {
   SecuritySessionManagement,
   SecurityDataAccessControls,
   SecurityAuditLogging,
-  SecurityMonitoringDashboard
+  SecurityMonitoringDashboard,
+  SecurityIPAccessControls,
+  SecurityDSAR
 } from './sections/security';
 
 const SECURITY_SECTIONS = [
@@ -68,6 +70,22 @@ const SECURITY_SECTIONS = [
     description: 'Real-time metrics, failed login tracking, and compliance indicators',
     readTimeMin: 10,
     Component: SecurityMonitoringDashboard,
+  },
+  {
+    id: 'admin-sec-4-8',
+    sectionNumber: '4.8',
+    title: 'IP Access Controls',
+    description: 'IP whitelisting, blacklisting, and geo-restriction configuration',
+    readTimeMin: 8,
+    Component: SecurityIPAccessControls,
+  },
+  {
+    id: 'admin-sec-4-9',
+    sectionNumber: '4.9',
+    title: 'Data Subject Access Requests',
+    description: 'GDPR DSAR workflow, data export, and right to erasure',
+    readTimeMin: 12,
+    Component: SecurityDSAR,
   },
 ] as const;
 

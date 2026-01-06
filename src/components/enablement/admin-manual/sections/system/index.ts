@@ -4,3 +4,8 @@ export { SystemCurrencies } from './SystemCurrencies';
 export { SystemCustomFields } from './SystemCustomFields';
 export { SystemNotifications } from './SystemNotifications';
 export { SystemDashboardOrdering } from './SystemDashboardOrdering';
+export { SystemBulkOperations } from './SystemBulkOperations';
+export { SystemBranding } from './SystemBranding';
+export { SystemTemplates } from './SystemTemplates';
+export { SystemWorkflows } from './SystemWorkflows';
+export { SystemScheduledAutomation } from './SystemScheduledAutomation';
