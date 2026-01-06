@@ -15,6 +15,7 @@ import {
   type ExampleConfig,
   type BusinessRule
 } from '../../../manual/components';
+import { FeatureStatusBadge } from '../../components';
 
 const departmentFields: FieldDefinition[] = [
   {
@@ -217,6 +218,7 @@ export function FoundationDepartments() {
           <CardTitle className="flex items-center gap-2">
             <Users className="h-5 w-5 text-primary" />
             Understanding Departments
+            <FeatureStatusBadge status="implemented" size="sm" />
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -238,19 +240,26 @@ export function FoundationDepartments() {
           <CardTitle className="flex items-center gap-2">
             <DollarSign className="h-5 w-5 text-primary" />
             Financial Integration
+            <FeatureStatusBadge status="implemented" size="sm" />
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-2">
             <div className="p-4 rounded-lg border">
-              <h4 className="font-medium mb-2">Cost Center</h4>
+              <h4 className="font-medium mb-2 flex items-center gap-2">
+                Cost Center
+                <FeatureStatusBadge status="implemented" size="sm" />
+              </h4>
               <p className="text-sm text-muted-foreground">
                 Links to your finance system for cost allocation. All employee costs 
                 (salary, benefits, training) are charged to this code.
               </p>
             </div>
             <div className="p-4 rounded-lg border">
-              <h4 className="font-medium mb-2">GL Code</h4>
+              <h4 className="font-medium mb-2 flex items-center gap-2">
+                GL Code
+                <FeatureStatusBadge status="implemented" size="sm" />
+              </h4>
               <p className="text-sm text-muted-foreground">
                 General Ledger code for payroll journal entries. Enables automated 
                 posting to your accounting system.
@@ -267,7 +276,10 @@ export function FoundationDepartments() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Nested Department Structures</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            Nested Department Structures
+            <FeatureStatusBadge status="implemented" size="sm" />
+          </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-sm text-muted-foreground">

@@ -16,6 +16,7 @@ import {
   type ExampleConfig,
   type BusinessRule
 } from '../../../manual/components';
+import { FeatureStatusBadge } from '../../components';
 
 const companyFields: FieldDefinition[] = [
   {
@@ -264,6 +265,7 @@ export function FoundationCompanies() {
           <CardTitle className="flex items-center gap-2">
             <Building2 className="h-5 w-5 text-primary" />
             Understanding Companies
+            <FeatureStatusBadge status="implemented" size="sm" />
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -286,6 +288,20 @@ export function FoundationCompanies() {
         fields={companyFields}
       />
 
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            Statutory Registration Fields
+            <FeatureStatusBadge status="implemented" size="sm" />
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground mb-4">
+            Fields displayed vary based on selected country. All statutory fields support regional compliance.
+          </p>
+        </CardContent>
+      </Card>
+
       <FieldReferenceTable
         title="Statutory Registration Fields (Country-Specific)"
         fields={statutoryFields}
@@ -296,6 +312,7 @@ export function FoundationCompanies() {
           <CardTitle className="flex items-center gap-2">
             <Globe className="h-5 w-5 text-primary" />
             Country-Specific Requirements
+            <FeatureStatusBadge status="implemented" size="sm" />
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -303,6 +320,7 @@ export function FoundationCompanies() {
             <div className="p-4 rounded-lg border">
               <h4 className="font-medium mb-2 flex items-center gap-2">
                 <Badge variant="outline">Jamaica</Badge>
+                <FeatureStatusBadge status="implemented" size="sm" />
               </h4>
               <ul className="text-sm space-y-1 text-muted-foreground">
                 <li>• TRN (Tax Registration Number)</li>
@@ -315,6 +333,7 @@ export function FoundationCompanies() {
             <div className="p-4 rounded-lg border">
               <h4 className="font-medium mb-2 flex items-center gap-2">
                 <Badge variant="outline">Trinidad & Tobago</Badge>
+                <FeatureStatusBadge status="implemented" size="sm" />
               </h4>
               <ul className="text-sm space-y-1 text-muted-foreground">
                 <li>• BIR (Board of Inland Revenue) File No.</li>
@@ -326,6 +345,7 @@ export function FoundationCompanies() {
             <div className="p-4 rounded-lg border">
               <h4 className="font-medium mb-2 flex items-center gap-2">
                 <Badge variant="outline">Ghana</Badge>
+                <FeatureStatusBadge status="implemented" size="sm" />
               </h4>
               <ul className="text-sm space-y-1 text-muted-foreground">
                 <li>• TIN (Tax Identification Number)</li>
@@ -338,6 +358,7 @@ export function FoundationCompanies() {
             <div className="p-4 rounded-lg border">
               <h4 className="font-medium mb-2 flex items-center gap-2">
                 <Badge variant="outline">Nigeria</Badge>
+                <FeatureStatusBadge status="implemented" size="sm" />
               </h4>
               <ul className="text-sm space-y-1 text-muted-foreground">
                 <li>• TIN (Tax Identification Number)</li>

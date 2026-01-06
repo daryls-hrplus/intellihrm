@@ -15,6 +15,7 @@ import {
   type ExampleConfig,
   type BusinessRule
 } from '../../../manual/components';
+import { FeatureStatusBadge } from '../../components';
 
 const companyGroupFields: FieldDefinition[] = [
   {
@@ -162,11 +163,11 @@ const businessRules: BusinessRule[] = [
 ];
 
 const sharedSettingsOptions = [
-  { setting: "Leave Policies", description: "Standardize leave types and accrual rules" },
-  { setting: "Security Settings", description: "Unified password and MFA policies" },
-  { setting: "AI Governance", description: "Common AI usage limits and guardrails" },
-  { setting: "Notification Templates", description: "Consistent communication branding" },
-  { setting: "Approval Workflows", description: "Standardized approval routing" }
+  { setting: "Leave Policies", description: "Standardize leave types and accrual rules", status: 'implemented' as const },
+  { setting: "Security Settings", description: "Unified password and MFA policies", status: 'implemented' as const },
+  { setting: "AI Governance", description: "Common AI usage limits and guardrails", status: 'implemented' as const },
+  { setting: "Notification Templates", description: "Consistent communication branding", status: 'implemented' as const },
+  { setting: "Approval Workflows", description: "Standardized approval routing", status: 'implemented' as const }
 ];
 
 export function FoundationCompanyGroups() {
@@ -186,6 +187,7 @@ export function FoundationCompanyGroups() {
           <CardTitle className="flex items-center gap-2">
             <Building className="h-5 w-5 text-primary" />
             Understanding Company Groups
+            <FeatureStatusBadge status="implemented" size="sm" />
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -201,6 +203,7 @@ export function FoundationCompanyGroups() {
               <h4 className="font-medium mb-2 flex items-center gap-2">
                 <Link className="h-4 w-4 text-blue-500" />
                 Holding Company Mode
+                <FeatureStatusBadge status="implemented" size="sm" />
               </h4>
               <p className="text-sm text-muted-foreground">
                 For parent companies with subsidiaries. Enables consolidated financial 
@@ -211,6 +214,7 @@ export function FoundationCompanyGroups() {
               <h4 className="font-medium mb-2 flex items-center gap-2">
                 <Settings className="h-4 w-4 text-green-500" />
                 Settings Inheritance
+                <FeatureStatusBadge status="implemented" size="sm" />
               </h4>
               <p className="text-sm text-muted-foreground">
                 Shared settings cascade to child companies, ensuring consistency 
@@ -228,7 +232,10 @@ export function FoundationCompanyGroups() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Shared Settings Options</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            Shared Settings Options
+            <FeatureStatusBadge status="implemented" size="sm" />
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid gap-3">
@@ -238,7 +245,10 @@ export function FoundationCompanyGroups() {
                   <h4 className="font-medium text-sm">{opt.setting}</h4>
                   <p className="text-sm text-muted-foreground">{opt.description}</p>
                 </div>
-                <Badge variant="secondary">Inheritable</Badge>
+                <div className="flex items-center gap-2">
+                  <FeatureStatusBadge status={opt.status} size="sm" />
+                  <Badge variant="secondary">Inheritable</Badge>
+                </div>
               </div>
             ))}
           </div>

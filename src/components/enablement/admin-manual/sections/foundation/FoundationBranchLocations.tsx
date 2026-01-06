@@ -16,6 +16,7 @@ import {
   type ExampleConfig,
   type BusinessRule
 } from '../../../manual/components';
+import { FeatureStatusBadge } from '../../components';
 
 const locationFields: FieldDefinition[] = [
   {
@@ -226,12 +227,12 @@ const businessRules: BusinessRule[] = [
 ];
 
 const locationTypes = [
-  { type: "Headquarters", description: "Main corporate office, typically one per company" },
-  { type: "Branch Office", description: "Regional or local office" },
-  { type: "Warehouse", description: "Storage and distribution facility" },
-  { type: "Manufacturing Plant", description: "Production facility" },
-  { type: "Retail Store", description: "Customer-facing retail location" },
-  { type: "Remote Site", description: "Project or temporary location" }
+  { type: "Headquarters", description: "Main corporate office, typically one per company", status: 'implemented' as const },
+  { type: "Branch Office", description: "Regional or local office", status: 'implemented' as const },
+  { type: "Warehouse", description: "Storage and distribution facility", status: 'implemented' as const },
+  { type: "Manufacturing Plant", description: "Production facility", status: 'implemented' as const },
+  { type: "Retail Store", description: "Customer-facing retail location", status: 'implemented' as const },
+  { type: "Remote Site", description: "Project or temporary location", status: 'implemented' as const }
 ];
 
 export function FoundationBranchLocations() {
@@ -251,6 +252,7 @@ export function FoundationBranchLocations() {
           <CardTitle className="flex items-center gap-2">
             <MapPin className="h-5 w-5 text-primary" />
             Understanding Branch Locations
+            <FeatureStatusBadge status="implemented" size="sm" />
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -263,21 +265,30 @@ export function FoundationBranchLocations() {
           <div className="grid gap-4 md:grid-cols-3 mt-4">
             <div className="p-4 rounded-lg border bg-muted/30">
               <Clock className="h-5 w-5 text-primary mb-2" />
-              <h4 className="font-medium text-sm">Timezone Accuracy</h4>
+              <h4 className="font-medium text-sm flex items-center gap-2">
+                Timezone Accuracy
+                <FeatureStatusBadge status="implemented" size="sm" />
+              </h4>
               <p className="text-xs text-muted-foreground">
                 Correct timezone ensures shift times and overtime are calculated properly
               </p>
             </div>
             <div className="p-4 rounded-lg border bg-muted/30">
               <Navigation className="h-5 w-5 text-primary mb-2" />
-              <h4 className="font-medium text-sm">Geofencing</h4>
+              <h4 className="font-medium text-sm flex items-center gap-2">
+                Geofencing
+                <FeatureStatusBadge status="implemented" size="sm" />
+              </h4>
               <p className="text-xs text-muted-foreground">
                 GPS validation ensures employees clock in from valid locations
               </p>
             </div>
             <div className="p-4 rounded-lg border bg-muted/30">
               <Globe className="h-5 w-5 text-primary mb-2" />
-              <h4 className="font-medium text-sm">Multi-Location</h4>
+              <h4 className="font-medium text-sm flex items-center gap-2">
+                Multi-Location
+                <FeatureStatusBadge status="implemented" size="sm" />
+              </h4>
               <p className="text-xs text-muted-foreground">
                 Support for employees working across multiple locations
               </p>
@@ -288,7 +299,10 @@ export function FoundationBranchLocations() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Location Types</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            Location Types
+            <FeatureStatusBadge status="implemented" size="sm" />
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid gap-3">
@@ -298,7 +312,10 @@ export function FoundationBranchLocations() {
                   <h4 className="font-medium text-sm">{loc.type}</h4>
                   <p className="text-sm text-muted-foreground">{loc.description}</p>
                 </div>
-                <Badge variant="secondary">{loc.type.charAt(0)}</Badge>
+                <div className="flex items-center gap-2">
+                  <FeatureStatusBadge status={loc.status} size="sm" />
+                  <Badge variant="secondary">{loc.type.charAt(0)}</Badge>
+                </div>
               </div>
             ))}
           </div>
@@ -315,6 +332,7 @@ export function FoundationBranchLocations() {
           <CardTitle className="flex items-center gap-2">
             <Navigation className="h-5 w-5 text-primary" />
             Geofencing Configuration
+            <FeatureStatusBadge status="implemented" size="sm" />
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">

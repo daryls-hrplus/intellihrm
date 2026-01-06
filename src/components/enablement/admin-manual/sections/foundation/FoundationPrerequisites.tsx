@@ -18,54 +18,59 @@ import {
   FieldReferenceTable,
   type FieldDefinition
 } from '../../../manual/components';
+import { FeatureStatusBadge } from '../../components';
 
 const prerequisiteCategories = [
   {
     category: "Company Registration Details",
     icon: Building2,
     color: "text-blue-600",
+    status: 'implemented' as const,
     items: [
-      "Legal company name(s) and registration numbers",
-      "Tax identification numbers (TIN/VAT)",
-      "Business registration certificates",
-      "Statutory body affiliations (NIS, NHT, etc.)",
-      "Industry classification codes"
+      { text: "Legal company name(s) and registration numbers", status: 'implemented' as const },
+      { text: "Tax identification numbers (TIN/VAT)", status: 'implemented' as const },
+      { text: "Business registration certificates", status: 'recommended' as const },
+      { text: "Statutory body affiliations (NIS, NHT, etc.)", status: 'implemented' as const },
+      { text: "Industry classification codes", status: 'implemented' as const }
     ]
   },
   {
     category: "Organizational Chart",
     icon: Users,
     color: "text-green-600",
+    status: 'implemented' as const,
     items: [
-      "Complete hierarchy from CEO to frontline",
-      "Department and section structure",
-      "Reporting relationships",
-      "Cost center assignments",
-      "Position titles and grades"
+      { text: "Complete hierarchy from CEO to frontline", status: 'recommended' as const },
+      { text: "Department and section structure", status: 'implemented' as const },
+      { text: "Reporting relationships", status: 'implemented' as const },
+      { text: "Cost center assignments", status: 'implemented' as const },
+      { text: "Position titles and grades", status: 'implemented' as const }
     ]
   },
   {
     category: "Geographic Footprint",
     icon: Globe,
     color: "text-purple-600",
+    status: 'implemented' as const,
     items: [
-      "Countries of operation",
-      "Physical office locations",
-      "Time zones for each location",
-      "Address formats by country",
-      "Currency requirements"
+      { text: "Countries of operation", status: 'implemented' as const },
+      { text: "Physical office locations", status: 'implemented' as const },
+      { text: "Time zones for each location", status: 'implemented' as const },
+      { text: "Address formats by country", status: 'implemented' as const },
+      { text: "Currency requirements", status: 'implemented' as const }
     ]
   },
   {
     category: "Regulatory Requirements",
     icon: Shield,
     color: "text-amber-600",
+    status: 'recommended' as const,
     items: [
-      "Labor law compliance requirements",
-      "Data protection regulations (GDPR, local laws)",
-      "Industry-specific regulations",
-      "Union agreements (if applicable)",
-      "Statutory reporting obligations"
+      { text: "Labor law compliance requirements", status: 'recommended' as const },
+      { text: "Data protection regulations (GDPR, local laws)", status: 'recommended' as const },
+      { text: "Industry-specific regulations", status: 'recommended' as const },
+      { text: "Union agreements (if applicable)", status: 'recommended' as const },
+      { text: "Statutory reporting obligations", status: 'recommended' as const }
     ]
   }
 ];
@@ -132,6 +137,7 @@ export function FoundationPrerequisites() {
           <CardTitle className="flex items-center gap-2">
             <FileText className="h-5 w-5 text-primary" />
             Prerequisites Overview
+            <FeatureStatusBadge status="recommended" size="sm" />
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -156,6 +162,7 @@ export function FoundationPrerequisites() {
               <CardTitle className="flex items-center gap-2 text-lg">
                 <cat.icon className={`h-5 w-5 ${cat.color}`} />
                 {cat.category}
+                <FeatureStatusBadge status={cat.status} size="sm" />
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -163,7 +170,8 @@ export function FoundationPrerequisites() {
                 {cat.items.map((item, idx) => (
                   <li key={idx} className="flex items-start gap-2 text-sm">
                     <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
-                    <span>{item}</span>
+                    <span className="flex-1">{item.text}</span>
+                    <FeatureStatusBadge status={item.status} size="sm" />
                   </li>
                 ))}
               </ul>
@@ -182,6 +190,7 @@ export function FoundationPrerequisites() {
           <CardTitle className="flex items-center gap-2">
             <MapPin className="h-5 w-5 text-primary" />
             Regional Considerations
+            <FeatureStatusBadge status="implemented" size="sm" />
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
