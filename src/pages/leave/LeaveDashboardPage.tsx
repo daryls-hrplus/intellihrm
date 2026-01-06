@@ -32,6 +32,12 @@ import {
   Calculator,
   BarChart3,
   Timer,
+  Ban,
+  Users,
+  Banknote,
+  FileSpreadsheet,
+  Percent,
+  CalendarRange,
 } from "lucide-react";
 
 interface Company {
@@ -253,6 +259,55 @@ export default function LeaveDashboardPage() {
       color: "bg-violet-500/10 text-violet-600",
       tabCode: "analytics",
     },
+    // New Enhancement Modules
+    blackoutPeriods: {
+      title: t("leave.modules.blackoutPeriods", "Blackout Periods"),
+      description: t("leave.modules.blackoutPeriodsDesc", "Configure periods when leave requests are restricted"),
+      href: "/leave/blackout-periods",
+      icon: Ban,
+      color: "bg-red-500/10 text-red-600",
+      tabCode: "blackout_periods",
+    },
+    conflictRules: {
+      title: t("leave.modules.conflictRules", "Conflict Rules"),
+      description: t("leave.modules.conflictRulesDesc", "Set team overlap limits and conflict detection rules"),
+      href: "/leave/conflict-rules",
+      icon: Users,
+      color: "bg-orange-500/10 text-orange-600",
+      tabCode: "conflict_rules",
+    },
+    encashment: {
+      title: t("leave.modules.encashment", "Leave Encashment"),
+      description: t("leave.modules.encashmentDesc", "Process leave encashment requests and payouts"),
+      href: "/leave/encashment",
+      icon: Banknote,
+      color: "bg-green-500/10 text-green-600",
+      tabCode: "encashment",
+    },
+    liability: {
+      title: t("leave.modules.liability", "Leave Liability"),
+      description: t("leave.modules.liabilityDesc", "View leave liability reports and financial impact"),
+      href: "/leave/liability",
+      icon: FileSpreadsheet,
+      color: "bg-blue-500/10 text-blue-600",
+      tabCode: "liability",
+    },
+    prorataSettings: {
+      title: t("leave.modules.prorataSettings", "Pro-rata Settings"),
+      description: t("leave.modules.prorataSettingsDesc", "Configure pro-rata entitlement calculations"),
+      href: "/leave/prorata-settings",
+      icon: Percent,
+      color: "bg-purple-500/10 text-purple-600",
+      tabCode: "prorata_settings",
+    },
+    planner: {
+      title: t("leave.modules.planner", "Leave Planner"),
+      description: t("leave.modules.plannerDesc", "Plan and schedule future leave requests"),
+      href: "/leave/planner",
+      icon: CalendarRange,
+      color: "bg-teal-500/10 text-teal-600",
+      tabCode: "planner",
+    },
   };
 
   // Filter by permissions
@@ -277,6 +332,14 @@ export default function LeaveDashboardPage() {
         allModules.balanceAdjustments,
         allModules.compensatoryTime,
         allModules.balanceRecalculation,
+        allModules.encashment,
+      ]),
+    },
+    {
+      titleKey: "Planning",
+      items: filterByAccess([
+        allModules.planner,
+        allModules.liability,
       ]),
     },
     {
@@ -295,6 +358,9 @@ export default function LeaveDashboardPage() {
         allModules.holidays,
         allModules.compTimePolicies,
         allModules.scheduleConfig,
+        allModules.blackoutPeriods,
+        allModules.conflictRules,
+        allModules.prorataSettings,
       ]),
     },
   ];
