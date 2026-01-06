@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
@@ -22,7 +23,7 @@ import { format } from "date-fns";
 import { 
   Scale, Plus, Search, FileText, Clock, AlertTriangle, Upload, Brain, 
   Play, CheckCircle, XCircle, Sparkles, RefreshCw, FileUp, AlertCircle,
-  Lightbulb, PuzzleIcon, Send, Info, TriangleAlert
+  Lightbulb, PuzzleIcon, Send, Info, TriangleAlert, ExternalLink
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -117,6 +118,7 @@ const breadcrumbItems = [
 
 export default function CBATimeRulesPage() {
   const { company, user } = useAuth();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedAgreement, setSelectedAgreement] = useState<CBAAgreement | null>(null);
@@ -185,6 +187,21 @@ export default function CBATimeRulesPage() {
       return (data || []) as unknown as CBATimeRule[];
     },
     enabled: !!selectedAgreement?.id,
+  });
+
+  // Fetch pending extension requests count
+  const { data: pendingExtensionsCount = 0 } = useQuery({
+    queryKey: ["cba-extension-requests-count", company?.id],
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from("cba_extension_requests")
+        .select("*", { count: "exact", head: true })
+        .eq("company_id", company?.id)
+        .eq("status", "pending");
+      if (error) throw error;
+      return count || 0;
+    },
+    enabled: !!company?.id,
   });
 
   // AI Document Extraction with gap detection
@@ -432,18 +449,27 @@ export default function CBATimeRulesPage() {
               Collective Bargaining Agreement time and attendance rules
             </p>
           </div>
-          {selectedAgreement && (
-            <div className="flex items-center gap-2">
-              <Button variant="outline" onClick={() => setShowUploadDialog(true)}>
-                <Sparkles className="h-4 w-4 mr-2" />
-                AI Extract Rules
-              </Button>
-              <Button variant="outline" onClick={() => simulateMutation.mutate()} disabled={simulateMutation.isPending || rules.length === 0}>
-                <Play className="h-4 w-4 mr-2" />
-                {simulateMutation.isPending ? "Running..." : "Simulate"}
-              </Button>
-            </div>
-          )}
+          <div className="flex items-center gap-2">
+            <Button variant="outline" onClick={() => navigate("/time-attendance/cba-extensions")}>
+              <PuzzleIcon className="h-4 w-4 mr-2" />
+              Extension Requests
+              {pendingExtensionsCount > 0 && (
+                <Badge variant="destructive" className="ml-2">{pendingExtensionsCount}</Badge>
+              )}
+            </Button>
+            {selectedAgreement && (
+              <>
+                <Button variant="outline" onClick={() => setShowUploadDialog(true)}>
+                  <Sparkles className="h-4 w-4 mr-2" />
+                  AI Extract Rules
+                </Button>
+                <Button variant="outline" onClick={() => simulateMutation.mutate()} disabled={simulateMutation.isPending || rules.length === 0}>
+                  <Play className="h-4 w-4 mr-2" />
+                  {simulateMutation.isPending ? "Running..." : "Simulate"}
+                </Button>
+              </>
+            )}
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
