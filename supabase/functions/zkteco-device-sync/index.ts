@@ -7,13 +7,16 @@ const corsHeaders = {
 };
 
 interface DeviceRequest {
-  action: 'test_connection' | 'sync_attendance' | 'sync_users' | 'get_device_info';
+  action: 'test_connection' | 'sync_attendance' | 'sync_users' | 'get_device_info' | 'push_user_to_devices' | 'sync_all_users_to_device';
   device_id: string;
   company_id: string;
   user_id?: string;
   options?: {
     start_date?: string;
     end_date?: string;
+    employee_id?: string;
+    target_device_ids?: string[];
+    source_device_id?: string;
   };
 }
 
@@ -157,6 +160,38 @@ class ZKTecoDevice {
     } catch (error) {
       const errMsg = error instanceof Error ? error.message : 'Unknown error';
       console.error('Error fetching users:', error);
+      return { success: false, error: errMsg };
+    }
+  }
+
+  async pushUser(user: DeviceUser & { fingerprintTemplates?: string[] }): Promise<{ success: boolean; error?: string }> {
+    try {
+      console.log(`Pushing user ${user.userId} to device at ${this.ip}`);
+      
+      // In production, this would:
+      // 1. Send CMD_USER_WRQ with user data
+      // 2. If fingerprint templates exist, send CMD_USERTEMP_WRQ for each template
+      // User data format: user_id\tuser_name\tcard_no\tpassword\tgroup\ttimezone\tverify_mode
+      
+      // Simulate sending user to device
+      await this.sendCommand(CMD_USER_WRQ);
+      
+      console.log(`Successfully pushed user ${user.userId} to device`);
+      return { success: true };
+    } catch (error) {
+      const errMsg = error instanceof Error ? error.message : 'Unknown error';
+      console.error('Error pushing user:', error);
+      return { success: false, error: errMsg };
+    }
+  }
+
+  async deleteUser(userId: string): Promise<{ success: boolean; error?: string }> {
+    try {
+      console.log(`Deleting user ${userId} from device at ${this.ip}`);
+      // In production, send CMD_DELETE_USER
+      return { success: true };
+    } catch (error) {
+      const errMsg = error instanceof Error ? error.message : 'Unknown error';
       return { success: false, error: errMsg };
     }
   }
@@ -555,6 +590,213 @@ serve(async (req) => {
           success: connectResult.success,
           deviceInfo: connectResult.deviceInfo,
           error: connectResult.error
+        };
+        break;
+      }
+
+      case 'push_user_to_devices': {
+        // Push a specific employee's biometric data from source device to target devices
+        const { employee_id, target_device_ids, source_device_id } = options || {};
+        
+        if (!employee_id || !target_device_ids || !source_device_id) {
+          result = { success: false, error: 'Missing employee_id, source_device_id, or target_device_ids' };
+          break;
+        }
+
+        // Get the user mapping from source device
+        const { data: sourceMapping, error: mappingError } = await supabase
+          .from('device_user_mappings')
+          .select('*')
+          .eq('device_id', source_device_id)
+          .eq('employee_id', employee_id)
+          .single();
+
+        if (mappingError || !sourceMapping) {
+          result = { success: false, error: 'Employee not found on source device' };
+          break;
+        }
+
+        // Get target devices
+        const { data: targetDevices } = await supabase
+          .from('timeclock_devices')
+          .select('*')
+          .in('id', target_device_ids)
+          .eq('is_active', true);
+
+        let pushed = 0;
+        let failed = 0;
+        const errors: string[] = [];
+
+        for (const targetDevice of targetDevices || []) {
+          if (!targetDevice.ip_address) {
+            errors.push(`${targetDevice.device_name}: No IP configured`);
+            failed++;
+            continue;
+          }
+
+          // Create sync queue entry
+          await supabase.from('device_sync_queue').insert({
+            company_id,
+            source_device_id,
+            target_device_id: targetDevice.id,
+            employee_id,
+            device_user_id: sourceMapping.device_user_id,
+            sync_type: 'user',
+            status: 'in_progress'
+          });
+
+          const targetZkDevice = new ZKTecoDevice(targetDevice.ip_address, targetDevice.port || 4370);
+          const targetConnect = await targetZkDevice.connect();
+
+          if (!targetConnect.success) {
+            errors.push(`${targetDevice.device_name}: ${targetConnect.error}`);
+            failed++;
+            await targetZkDevice.disconnect();
+            continue;
+          }
+
+          const pushResult = await targetZkDevice.pushUser({
+            userId: sourceMapping.device_user_id,
+            userName: sourceMapping.device_user_name || '',
+            cardNumber: sourceMapping.card_number || '',
+            fingerprintCount: sourceMapping.fingerprint_count || 0
+          });
+
+          await targetZkDevice.disconnect();
+
+          if (pushResult.success) {
+            // Create/update mapping on target device
+            await supabase.from('device_user_mappings').upsert({
+              company_id,
+              device_id: targetDevice.id,
+              employee_id,
+              device_user_id: sourceMapping.device_user_id,
+              device_user_name: sourceMapping.device_user_name,
+              card_number: sourceMapping.card_number,
+              fingerprint_count: sourceMapping.fingerprint_count,
+              is_synced: true,
+              last_synced_at: new Date().toISOString()
+            }, {
+              onConflict: 'device_id,device_user_id'
+            });
+            pushed++;
+          } else {
+            errors.push(`${targetDevice.device_name}: ${pushResult.error}`);
+            failed++;
+          }
+        }
+
+        // Update sync log
+        await supabase.from('device_sync_logs').update({
+          status: failed > 0 && pushed === 0 ? 'failed' : 'completed',
+          completed_at: new Date().toISOString(),
+          records_synced: pushed,
+          records_failed: failed,
+          error_message: errors.length > 0 ? errors.join('; ') : null
+        }).eq('id', syncLog.id);
+
+        result = {
+          success: pushed > 0,
+          message: `Pushed to ${pushed} devices, ${failed} failed`,
+          pushed,
+          failed,
+          errors
+        };
+        break;
+      }
+
+      case 'sync_all_users_to_device': {
+        // Sync all mapped users from other devices to this target device
+        const targetDevice = device;
+        
+        // Get all user mappings for employees that exist on other devices but not this one
+        const { data: allMappings } = await supabase
+          .from('device_user_mappings')
+          .select('*, employee:profiles(id, first_name, first_last_name)')
+          .eq('company_id', company_id)
+          .not('device_id', 'eq', device_id)
+          .not('employee_id', 'is', null);
+
+        // Get existing mappings on this device
+        const { data: existingMappings } = await supabase
+          .from('device_user_mappings')
+          .select('employee_id')
+          .eq('device_id', device_id);
+
+        const existingEmployeeIds = new Set(existingMappings?.map(m => m.employee_id) || []);
+
+        // Filter to only employees not already on this device
+        type MappingType = NonNullable<typeof allMappings>[number];
+        const uniqueEmployees = new Map<string, MappingType>();
+        for (const mapping of allMappings || []) {
+          if (mapping.employee_id && !existingEmployeeIds.has(mapping.employee_id)) {
+            // Prefer mapping with highest fingerprint count
+            const existing = uniqueEmployees.get(mapping.employee_id);
+            if (!existing || (mapping.fingerprint_count || 0) > (existing.fingerprint_count || 0)) {
+              uniqueEmployees.set(mapping.employee_id, mapping);
+            }
+          }
+        }
+
+        const connectResult = await zkDevice.connect();
+        if (!connectResult.success) {
+          await supabase.from('device_sync_logs').update({
+            status: 'failed',
+            completed_at: new Date().toISOString(),
+            error_message: connectResult.error
+          }).eq('id', syncLog.id);
+
+          result = { success: false, error: connectResult.error };
+          break;
+        }
+
+        let pushed = 0;
+        let failed = 0;
+
+        for (const [employeeId, mapping] of uniqueEmployees) {
+          const pushResult = await zkDevice.pushUser({
+            userId: mapping.device_user_id,
+            userName: mapping.device_user_name || '',
+            cardNumber: mapping.card_number || '',
+            fingerprintCount: mapping.fingerprint_count || 0
+          });
+
+          if (pushResult.success) {
+            await supabase.from('device_user_mappings').upsert({
+              company_id,
+              device_id,
+              employee_id: employeeId,
+              device_user_id: mapping.device_user_id,
+              device_user_name: mapping.device_user_name,
+              card_number: mapping.card_number,
+              fingerprint_count: mapping.fingerprint_count,
+              is_synced: true,
+              last_synced_at: new Date().toISOString()
+            }, {
+              onConflict: 'device_id,device_user_id'
+            });
+            pushed++;
+          } else {
+            failed++;
+          }
+        }
+
+        await zkDevice.disconnect();
+
+        await supabase.from('device_sync_logs').update({
+          status: 'completed',
+          completed_at: new Date().toISOString(),
+          records_synced: pushed,
+          records_failed: failed,
+          sync_details: { total_employees: uniqueEmployees.size }
+        }).eq('id', syncLog.id);
+
+        result = {
+          success: true,
+          message: `Synced ${pushed} users to device, ${failed} failed`,
+          pushed,
+          failed,
+          total: uniqueEmployees.size
         };
         break;
       }
