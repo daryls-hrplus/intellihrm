@@ -37933,6 +37933,626 @@ export type Database = {
         }
         Relationships: []
       }
+      maternity_compliance_rules: {
+        Row: {
+          birth_certificate_deadline_days: number | null
+          country_code: string
+          created_at: string
+          dismissal_protection_weeks: number | null
+          extension_allowed: boolean | null
+          id: string
+          is_active: boolean | null
+          job_protection_weeks: number | null
+          last_updated: string | null
+          legal_minimum_weeks: number
+          legal_payment_percentage: number | null
+          legislation_reference: string | null
+          mandatory_postnatal_weeks: number | null
+          mandatory_prenatal_weeks: number | null
+          max_extension_weeks: number | null
+          medical_certificate_required: boolean | null
+          notes: string | null
+          nursing_break_duration_minutes: number | null
+          nursing_breaks_daily: number | null
+          nursing_breaks_until_months: number | null
+          region: string
+          required_documents: Json | null
+          unpaid_extension_allowed: boolean | null
+          updated_at: string
+        }
+        Insert: {
+          birth_certificate_deadline_days?: number | null
+          country_code: string
+          created_at?: string
+          dismissal_protection_weeks?: number | null
+          extension_allowed?: boolean | null
+          id?: string
+          is_active?: boolean | null
+          job_protection_weeks?: number | null
+          last_updated?: string | null
+          legal_minimum_weeks: number
+          legal_payment_percentage?: number | null
+          legislation_reference?: string | null
+          mandatory_postnatal_weeks?: number | null
+          mandatory_prenatal_weeks?: number | null
+          max_extension_weeks?: number | null
+          medical_certificate_required?: boolean | null
+          notes?: string | null
+          nursing_break_duration_minutes?: number | null
+          nursing_breaks_daily?: number | null
+          nursing_breaks_until_months?: number | null
+          region: string
+          required_documents?: Json | null
+          unpaid_extension_allowed?: boolean | null
+          updated_at?: string
+        }
+        Update: {
+          birth_certificate_deadline_days?: number | null
+          country_code?: string
+          created_at?: string
+          dismissal_protection_weeks?: number | null
+          extension_allowed?: boolean | null
+          id?: string
+          is_active?: boolean | null
+          job_protection_weeks?: number | null
+          last_updated?: string | null
+          legal_minimum_weeks?: number
+          legal_payment_percentage?: number | null
+          legislation_reference?: string | null
+          mandatory_postnatal_weeks?: number | null
+          mandatory_prenatal_weeks?: number | null
+          max_extension_weeks?: number | null
+          medical_certificate_required?: boolean | null
+          notes?: string | null
+          nursing_break_duration_minutes?: number | null
+          nursing_breaks_daily?: number | null
+          nursing_breaks_until_months?: number | null
+          region?: string
+          required_documents?: Json | null
+          unpaid_extension_allowed?: boolean | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      maternity_documents: {
+        Row: {
+          company_id: string
+          created_at: string
+          document_name: string
+          document_type: string
+          expiry_date: string | null
+          file_path: string
+          file_size: number | null
+          id: string
+          is_verified: boolean | null
+          issue_date: string | null
+          maternity_request_id: string
+          mime_type: string | null
+          updated_at: string
+          uploaded_by: string | null
+          verification_notes: string | null
+          verified_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          document_name: string
+          document_type: string
+          expiry_date?: string | null
+          file_path: string
+          file_size?: number | null
+          id?: string
+          is_verified?: boolean | null
+          issue_date?: string | null
+          maternity_request_id: string
+          mime_type?: string | null
+          updated_at?: string
+          uploaded_by?: string | null
+          verification_notes?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          document_name?: string
+          document_type?: string
+          expiry_date?: string | null
+          file_path?: string
+          file_size?: number | null
+          id?: string
+          is_verified?: boolean | null
+          issue_date?: string | null
+          maternity_request_id?: string
+          mime_type?: string | null
+          updated_at?: string
+          uploaded_by?: string | null
+          verification_notes?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "maternity_documents_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maternity_documents_maternity_request_id_fkey"
+            columns: ["maternity_request_id"]
+            isOneToOne: false
+            referencedRelation: "maternity_leave_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maternity_documents_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maternity_documents_verified_by_fkey"
+            columns: ["verified_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      maternity_leave_requests: {
+        Row: {
+          actual_delivery_date: string | null
+          actual_return_date: string | null
+          approved_at: string | null
+          approved_by: string | null
+          company_id: string
+          compliance_notes: string | null
+          compliance_region: string | null
+          country_code: string | null
+          created_at: string
+          created_by: string | null
+          current_phase: string | null
+          employee_id: string
+          employer_topup_percentage: number | null
+          employer_topup_weeks: number | null
+          expected_due_date: string
+          id: string
+          leave_request_id: string | null
+          notes: string | null
+          number_of_children: number | null
+          payment_config_id: string | null
+          phased_return_enabled: boolean | null
+          phased_return_plan_id: string | null
+          planned_return_date: string | null
+          postnatal_end_date: string | null
+          postnatal_start_date: string | null
+          pregnancy_confirmation_date: string | null
+          prenatal_end_date: string | null
+          prenatal_start_date: string | null
+          status: string | null
+          statutory_payment_weeks: number | null
+          total_leave_days: number | null
+          updated_at: string
+        }
+        Insert: {
+          actual_delivery_date?: string | null
+          actual_return_date?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          company_id: string
+          compliance_notes?: string | null
+          compliance_region?: string | null
+          country_code?: string | null
+          created_at?: string
+          created_by?: string | null
+          current_phase?: string | null
+          employee_id: string
+          employer_topup_percentage?: number | null
+          employer_topup_weeks?: number | null
+          expected_due_date: string
+          id?: string
+          leave_request_id?: string | null
+          notes?: string | null
+          number_of_children?: number | null
+          payment_config_id?: string | null
+          phased_return_enabled?: boolean | null
+          phased_return_plan_id?: string | null
+          planned_return_date?: string | null
+          postnatal_end_date?: string | null
+          postnatal_start_date?: string | null
+          pregnancy_confirmation_date?: string | null
+          prenatal_end_date?: string | null
+          prenatal_start_date?: string | null
+          status?: string | null
+          statutory_payment_weeks?: number | null
+          total_leave_days?: number | null
+          updated_at?: string
+        }
+        Update: {
+          actual_delivery_date?: string | null
+          actual_return_date?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          company_id?: string
+          compliance_notes?: string | null
+          compliance_region?: string | null
+          country_code?: string | null
+          created_at?: string
+          created_by?: string | null
+          current_phase?: string | null
+          employee_id?: string
+          employer_topup_percentage?: number | null
+          employer_topup_weeks?: number | null
+          expected_due_date?: string
+          id?: string
+          leave_request_id?: string | null
+          notes?: string | null
+          number_of_children?: number | null
+          payment_config_id?: string | null
+          phased_return_enabled?: boolean | null
+          phased_return_plan_id?: string | null
+          planned_return_date?: string | null
+          postnatal_end_date?: string | null
+          postnatal_start_date?: string | null
+          pregnancy_confirmation_date?: string | null
+          prenatal_end_date?: string | null
+          prenatal_start_date?: string | null
+          status?: string | null
+          statutory_payment_weeks?: number | null
+          total_leave_days?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "maternity_leave_requests_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maternity_leave_requests_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maternity_leave_requests_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maternity_leave_requests_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maternity_leave_requests_leave_request_id_fkey"
+            columns: ["leave_request_id"]
+            isOneToOne: false
+            referencedRelation: "leave_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      maternity_payment_configs: {
+        Row: {
+          company_id: string
+          config_name: string
+          country_code: string
+          created_at: string
+          effective_from: string | null
+          effective_to: string | null
+          employer_topup_cap: number | null
+          employer_topup_enabled: boolean | null
+          employer_topup_percentage: number | null
+          employer_topup_weeks: number | null
+          flexible_allocation: boolean | null
+          id: string
+          is_active: boolean | null
+          minimum_service_months: number | null
+          postnatal_weeks: number | null
+          prenatal_weeks: number | null
+          probation_eligible: boolean | null
+          statutory_cap_amount: number | null
+          statutory_cap_currency: string | null
+          statutory_leave_weeks: number
+          statutory_paid_by: string | null
+          statutory_payment_percentage: number | null
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          config_name: string
+          country_code: string
+          created_at?: string
+          effective_from?: string | null
+          effective_to?: string | null
+          employer_topup_cap?: number | null
+          employer_topup_enabled?: boolean | null
+          employer_topup_percentage?: number | null
+          employer_topup_weeks?: number | null
+          flexible_allocation?: boolean | null
+          id?: string
+          is_active?: boolean | null
+          minimum_service_months?: number | null
+          postnatal_weeks?: number | null
+          prenatal_weeks?: number | null
+          probation_eligible?: boolean | null
+          statutory_cap_amount?: number | null
+          statutory_cap_currency?: string | null
+          statutory_leave_weeks: number
+          statutory_paid_by?: string | null
+          statutory_payment_percentage?: number | null
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          config_name?: string
+          country_code?: string
+          created_at?: string
+          effective_from?: string | null
+          effective_to?: string | null
+          employer_topup_cap?: number | null
+          employer_topup_enabled?: boolean | null
+          employer_topup_percentage?: number | null
+          employer_topup_weeks?: number | null
+          flexible_allocation?: boolean | null
+          id?: string
+          is_active?: boolean | null
+          minimum_service_months?: number | null
+          postnatal_weeks?: number | null
+          prenatal_weeks?: number | null
+          probation_eligible?: boolean | null
+          statutory_cap_amount?: number | null
+          statutory_cap_currency?: string | null
+          statutory_leave_weeks?: number
+          statutory_paid_by?: string | null
+          statutory_payment_percentage?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "maternity_payment_configs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      maternity_payments: {
+        Row: {
+          company_id: string
+          created_at: string
+          currency: string | null
+          employee_id: string
+          employer_topup_amount: number | null
+          id: string
+          maternity_request_id: string
+          notes: string | null
+          paid_at: string | null
+          payment_period_end: string
+          payment_period_start: string
+          payment_source: string | null
+          payment_type: string | null
+          payroll_run_id: string | null
+          processed_at: string | null
+          status: string | null
+          statutory_amount: number | null
+          total_amount: number
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          currency?: string | null
+          employee_id: string
+          employer_topup_amount?: number | null
+          id?: string
+          maternity_request_id: string
+          notes?: string | null
+          paid_at?: string | null
+          payment_period_end: string
+          payment_period_start: string
+          payment_source?: string | null
+          payment_type?: string | null
+          payroll_run_id?: string | null
+          processed_at?: string | null
+          status?: string | null
+          statutory_amount?: number | null
+          total_amount: number
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          currency?: string | null
+          employee_id?: string
+          employer_topup_amount?: number | null
+          id?: string
+          maternity_request_id?: string
+          notes?: string | null
+          paid_at?: string | null
+          payment_period_end?: string
+          payment_period_start?: string
+          payment_source?: string | null
+          payment_type?: string | null
+          payroll_run_id?: string | null
+          processed_at?: string | null
+          status?: string | null
+          statutory_amount?: number | null
+          total_amount?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "maternity_payments_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maternity_payments_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maternity_payments_maternity_request_id_fkey"
+            columns: ["maternity_request_id"]
+            isOneToOne: false
+            referencedRelation: "maternity_leave_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      maternity_return_plans: {
+        Row: {
+          accommodations_notes: string | null
+          company_id: string
+          created_at: string
+          employee_id: string
+          flexible_hours_required: boolean | null
+          full_time_return_date: string | null
+          hr_approved: boolean | null
+          hr_approved_at: string | null
+          hr_approved_by: string | null
+          id: string
+          manager_approved: boolean | null
+          manager_approved_at: string | null
+          manager_approved_by: string | null
+          maternity_request_id: string
+          notes: string | null
+          nursing_room_required: boolean | null
+          phase_1_duration_weeks: number | null
+          phase_1_hours_per_week: number | null
+          phase_1_start_date: string | null
+          phase_2_duration_weeks: number | null
+          phase_2_hours_per_week: number | null
+          phase_2_start_date: string | null
+          phase_3_duration_weeks: number | null
+          phase_3_hours_per_week: number | null
+          phase_3_start_date: string | null
+          plan_type: string | null
+          planned_return_date: string
+          remote_work_days: number | null
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          accommodations_notes?: string | null
+          company_id: string
+          created_at?: string
+          employee_id: string
+          flexible_hours_required?: boolean | null
+          full_time_return_date?: string | null
+          hr_approved?: boolean | null
+          hr_approved_at?: string | null
+          hr_approved_by?: string | null
+          id?: string
+          manager_approved?: boolean | null
+          manager_approved_at?: string | null
+          manager_approved_by?: string | null
+          maternity_request_id: string
+          notes?: string | null
+          nursing_room_required?: boolean | null
+          phase_1_duration_weeks?: number | null
+          phase_1_hours_per_week?: number | null
+          phase_1_start_date?: string | null
+          phase_2_duration_weeks?: number | null
+          phase_2_hours_per_week?: number | null
+          phase_2_start_date?: string | null
+          phase_3_duration_weeks?: number | null
+          phase_3_hours_per_week?: number | null
+          phase_3_start_date?: string | null
+          plan_type?: string | null
+          planned_return_date: string
+          remote_work_days?: number | null
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          accommodations_notes?: string | null
+          company_id?: string
+          created_at?: string
+          employee_id?: string
+          flexible_hours_required?: boolean | null
+          full_time_return_date?: string | null
+          hr_approved?: boolean | null
+          hr_approved_at?: string | null
+          hr_approved_by?: string | null
+          id?: string
+          manager_approved?: boolean | null
+          manager_approved_at?: string | null
+          manager_approved_by?: string | null
+          maternity_request_id?: string
+          notes?: string | null
+          nursing_room_required?: boolean | null
+          phase_1_duration_weeks?: number | null
+          phase_1_hours_per_week?: number | null
+          phase_1_start_date?: string | null
+          phase_2_duration_weeks?: number | null
+          phase_2_hours_per_week?: number | null
+          phase_2_start_date?: string | null
+          phase_3_duration_weeks?: number | null
+          phase_3_hours_per_week?: number | null
+          phase_3_start_date?: string | null
+          plan_type?: string | null
+          planned_return_date?: string
+          remote_work_days?: number | null
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "maternity_return_plans_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maternity_return_plans_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maternity_return_plans_hr_approved_by_fkey"
+            columns: ["hr_approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maternity_return_plans_manager_approved_by_fkey"
+            columns: ["manager_approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maternity_return_plans_maternity_request_id_fkey"
+            columns: ["maternity_request_id"]
+            isOneToOne: false
+            referencedRelation: "maternity_leave_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mentorship_pairings: {
         Row: {
           created_at: string
