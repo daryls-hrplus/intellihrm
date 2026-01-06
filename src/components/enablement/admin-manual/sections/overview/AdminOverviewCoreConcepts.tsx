@@ -5,6 +5,7 @@ import {
   Clock, Layers, Shield, Users, Key, Lock, Eye, 
   Building, FileCheck, AlertTriangle
 } from 'lucide-react';
+import { FeatureStatusBadge } from '../../components';
 
 export function AdminOverviewCoreConcepts() {
   return (
@@ -27,6 +28,7 @@ export function AdminOverviewCoreConcepts() {
           <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
             <Users className="h-5 w-5 text-primary" />
             Administrator Hierarchy
+            <FeatureStatusBadge status="implemented" size="sm" />
           </h3>
           <p className="text-muted-foreground mb-4">
             HRplus implements a tiered administrator model following the principle of least privilege. 
@@ -39,32 +41,70 @@ export function AdminOverviewCoreConcepts() {
                 title: 'Super Admin',
                 color: 'bg-red-500/10 border-red-500/20 text-red-700 dark:text-red-400',
                 icon: Shield,
-                capabilities: ['Full system access', 'Emergency break-glass', 'SSO configuration', 'AI governance', 'Compliance oversight'],
-                restrictions: ['Actions fully audited', 'MFA required', 'Limited to 1-2 per organization']
+                capabilities: [
+                  { text: 'Full system access', status: 'implemented' as const },
+                  { text: 'Emergency break-glass', status: 'implemented' as const },
+                  { text: 'SSO configuration', status: 'implemented' as const },
+                  { text: 'AI governance', status: 'implemented' as const },
+                  { text: 'Compliance oversight', status: 'implemented' as const }
+                ],
+                restrictions: [
+                  { text: 'Actions fully audited', status: 'implemented' as const },
+                  { text: 'MFA required', status: 'recommended' as const },
+                  { text: 'Limited to 1-2 per organization', status: 'recommended' as const }
+                ]
               },
               {
                 level: 'Level 2',
                 title: 'Security Admin',
                 color: 'bg-amber-500/10 border-amber-500/20 text-amber-700 dark:text-amber-400',
                 icon: Lock,
-                capabilities: ['Role management', 'Permission configuration', 'Access certification', 'Security monitoring', 'Audit log review'],
-                restrictions: ['Cannot modify own permissions', 'Cannot access AI governance', 'Requires Super Admin approval for sensitive changes']
+                capabilities: [
+                  { text: 'Role management', status: 'implemented' as const },
+                  { text: 'Permission configuration', status: 'implemented' as const },
+                  { text: 'Access certification', status: 'implemented' as const },
+                  { text: 'Security monitoring', status: 'implemented' as const },
+                  { text: 'Audit log review', status: 'implemented' as const }
+                ],
+                restrictions: [
+                  { text: 'Cannot modify own permissions', status: 'recommended' as const },
+                  { text: 'Cannot access AI governance', status: 'implemented' as const },
+                  { text: 'Requires Super Admin approval for sensitive changes', status: 'recommended' as const }
+                ]
               },
               {
                 level: 'Level 3',
                 title: 'HR Admin',
                 color: 'bg-blue-500/10 border-blue-500/20 text-blue-700 dark:text-blue-400',
                 icon: Users,
-                capabilities: ['User account management', 'Module configuration', 'Reporting & analytics', 'Workflow management', 'Notification settings'],
-                restrictions: ['Cannot modify security policies', 'Limited PII access', 'Cannot create admin roles']
+                capabilities: [
+                  { text: 'User account management', status: 'implemented' as const },
+                  { text: 'Module configuration', status: 'implemented' as const },
+                  { text: 'Reporting & analytics', status: 'implemented' as const },
+                  { text: 'Workflow management', status: 'implemented' as const },
+                  { text: 'Notification settings', status: 'implemented' as const }
+                ],
+                restrictions: [
+                  { text: 'Cannot modify security policies', status: 'implemented' as const },
+                  { text: 'Limited PII access', status: 'implemented' as const },
+                  { text: 'Cannot create admin roles', status: 'implemented' as const }
+                ]
               },
               {
                 level: 'Level 4',
                 title: 'Module Admin',
                 color: 'bg-green-500/10 border-green-500/20 text-green-700 dark:text-green-400',
                 icon: Layers,
-                capabilities: ['Module-specific configuration', 'Module reporting', 'User support within module'],
-                restrictions: ['Access limited to assigned modules', 'Cannot modify org structure', 'Reports to HR Admin or Security Admin']
+                capabilities: [
+                  { text: 'Module-specific configuration', status: 'implemented' as const },
+                  { text: 'Module reporting', status: 'implemented' as const },
+                  { text: 'User support within module', status: 'implemented' as const }
+                ],
+                restrictions: [
+                  { text: 'Access limited to assigned modules', status: 'implemented' as const },
+                  { text: 'Cannot modify org structure', status: 'implemented' as const },
+                  { text: 'Reports to HR Admin or Security Admin', status: 'recommended' as const }
+                ]
               }
             ].map((admin, i) => (
               <div key={i} className={`p-4 rounded-lg border ${admin.color}`}>
@@ -82,7 +122,8 @@ export function AdminOverviewCoreConcepts() {
                           {admin.capabilities.map((cap, j) => (
                             <li key={j} className="flex items-center gap-1">
                               <span className="w-1 h-1 rounded-full bg-green-500" />
-                              {cap}
+                              <span className="flex-1">{cap.text}</span>
+                              <FeatureStatusBadge status={cap.status} size="sm" />
                             </li>
                           ))}
                         </ul>
@@ -93,7 +134,8 @@ export function AdminOverviewCoreConcepts() {
                           {admin.restrictions.map((res, j) => (
                             <li key={j} className="flex items-center gap-1">
                               <span className="w-1 h-1 rounded-full bg-amber-500" />
-                              {res}
+                              <span className="flex-1">{res.text}</span>
+                              <FeatureStatusBadge status={res.status} size="sm" />
                             </li>
                           ))}
                         </ul>
@@ -113,6 +155,7 @@ export function AdminOverviewCoreConcepts() {
           <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
             <Key className="h-5 w-5 text-primary" />
             Permission Model (Role-Based Permissions)
+            <FeatureStatusBadge status="implemented" size="sm" />
           </h3>
           <p className="text-muted-foreground mb-4">
             HRplus uses a Role-Based Permission (RBP) model aligned with enterprise security 
@@ -125,20 +168,24 @@ export function AdminOverviewCoreConcepts() {
                   <th className="border p-3 text-left font-medium">Permission Level</th>
                   <th className="border p-3 text-left font-medium">Description</th>
                   <th className="border p-3 text-left font-medium">Example</th>
+                  <th className="border p-3 text-center font-medium">Status</th>
                 </tr>
               </thead>
               <tbody>
                 {[
-                  { level: 'Module', description: 'Access to entire functional modules', example: 'Access to Workforce, Payroll, or Performance' },
-                  { level: 'Tab', description: 'Access to specific tabs within a module', example: 'Can view Employees tab but not Transactions tab' },
-                  { level: 'Action (CRUD)', description: 'Create, Read, Update, Delete operations', example: 'Can view employees but cannot edit' },
-                  { level: 'Field', description: 'Access to specific data fields', example: 'Cannot see salary or banking fields' },
-                  { level: 'Record', description: 'Access to specific records based on criteria', example: 'Can only see employees in own department' }
+                  { level: 'Module', description: 'Access to entire functional modules', example: 'Access to Workforce, Payroll, or Performance', status: 'implemented' as const },
+                  { level: 'Tab', description: 'Access to specific tabs within a module', example: 'Can view Employees tab but not Transactions tab', status: 'implemented' as const },
+                  { level: 'Action (CRUD)', description: 'Create, Read, Update, Delete operations', example: 'Can view employees but cannot edit', status: 'implemented' as const },
+                  { level: 'Field', description: 'Access to specific data fields', example: 'Cannot see salary or banking fields', status: 'implemented' as const },
+                  { level: 'Record', description: 'Access to specific records based on criteria', example: 'Can only see employees in own department', status: 'implemented' as const }
                 ].map((row, i) => (
                   <tr key={i} className={i % 2 === 0 ? 'bg-background' : 'bg-muted/30'}>
                     <td className="border p-3 font-medium">{row.level}</td>
                     <td className="border p-3 text-muted-foreground">{row.description}</td>
                     <td className="border p-3 text-muted-foreground">{row.example}</td>
+                    <td className="border p-3 text-center">
+                      <FeatureStatusBadge status={row.status} size="sm" />
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -167,6 +214,7 @@ export function AdminOverviewCoreConcepts() {
           <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
             <Shield className="h-5 w-5 text-primary" />
             Security Domains
+            <FeatureStatusBadge status="implemented" size="sm" />
           </h3>
           <p className="text-muted-foreground mb-4">
             Admin & Security is organized into five core security domains, each with its own 
@@ -180,7 +228,11 @@ export function AdminOverviewCoreConcepts() {
                 risk: 'Critical',
                 riskColor: 'bg-red-500',
                 description: 'How users prove their identity (login, SSO, MFA)',
-                controls: ['SSO with SAML 2.0', 'MFA enforcement', 'Password policies']
+                controls: [
+                  { text: 'SSO with SAML 2.0', status: 'implemented' as const },
+                  { text: 'MFA enforcement', status: 'implemented' as const },
+                  { text: 'Password policies', status: 'implemented' as const }
+                ]
               },
               { 
                 domain: 'Authorization', 
@@ -188,7 +240,11 @@ export function AdminOverviewCoreConcepts() {
                 risk: 'Critical',
                 riskColor: 'bg-red-500',
                 description: 'What users can access and do in the system',
-                controls: ['Role-based permissions', 'Granular access', 'Least privilege']
+                controls: [
+                  { text: 'Role-based permissions', status: 'implemented' as const },
+                  { text: 'Granular access', status: 'implemented' as const },
+                  { text: 'Least privilege', status: 'recommended' as const }
+                ]
               },
               { 
                 domain: 'Audit', 
@@ -196,7 +252,11 @@ export function AdminOverviewCoreConcepts() {
                 risk: 'High',
                 riskColor: 'bg-amber-500',
                 description: 'Tracking who did what, when, and where',
-                controls: ['Audit logging', 'Retention policies', 'Alert thresholds']
+                controls: [
+                  { text: 'Audit logging', status: 'implemented' as const },
+                  { text: 'Retention policies', status: 'recommended' as const },
+                  { text: 'Alert thresholds', status: 'recommended' as const }
+                ]
               },
               { 
                 domain: 'Data Protection', 
@@ -204,7 +264,11 @@ export function AdminOverviewCoreConcepts() {
                 risk: 'Critical',
                 riskColor: 'bg-red-500',
                 description: 'Safeguarding sensitive employee information',
-                controls: ['PII classification', 'Data masking', 'Export controls']
+                controls: [
+                  { text: 'PII classification', status: 'implemented' as const },
+                  { text: 'Data masking', status: 'implemented' as const },
+                  { text: 'Export controls', status: 'implemented' as const }
+                ]
               },
               { 
                 domain: 'Session Management', 
@@ -212,7 +276,11 @@ export function AdminOverviewCoreConcepts() {
                 risk: 'Medium',
                 riskColor: 'bg-yellow-500',
                 description: 'Managing active user sessions and timeouts',
-                controls: ['Idle timeout', 'Concurrent limits', 'Forced logout']
+                controls: [
+                  { text: 'Idle timeout', status: 'implemented' as const },
+                  { text: 'Concurrent limits', status: 'recommended' as const },
+                  { text: 'Forced logout', status: 'implemented' as const }
+                ]
               }
             ].map((domain, i) => (
               <Card key={i} className="relative overflow-hidden">
@@ -228,8 +296,12 @@ export function AdminOverviewCoreConcepts() {
                       <p className="text-sm text-muted-foreground mb-2">{domain.description}</p>
                       <div className="flex flex-wrap gap-1">
                         {domain.controls.map((control, j) => (
-                          <Badge key={j} variant="secondary" className="text-xs">
-                            {control}
+                          <Badge 
+                            key={j} 
+                            variant="secondary" 
+                            className={`text-xs ${control.status === 'implemented' ? 'bg-green-500/10 border-green-500/30' : 'bg-blue-500/10 border-blue-500/30'}`}
+                          >
+                            {control.text}
                           </Badge>
                         ))}
                       </div>
@@ -248,6 +320,7 @@ export function AdminOverviewCoreConcepts() {
           <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
             <Building className="h-5 w-5 text-primary" />
             Organization Hierarchy
+            <FeatureStatusBadge status="implemented" size="sm" />
           </h3>
           <p className="text-muted-foreground mb-4">
             HRplus supports a flexible multi-level organization structure that can accommodate 

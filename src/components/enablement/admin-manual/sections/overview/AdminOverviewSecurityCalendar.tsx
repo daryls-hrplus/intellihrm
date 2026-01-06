@@ -3,8 +3,9 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { 
   Clock, Calendar, CheckCircle, AlertTriangle, FileCheck,
-  Shield, Users, Eye, RefreshCw
+  Shield, Users, Eye, RefreshCw, Star
 } from 'lucide-react';
+import { FeatureStatusBadge } from '../../components';
 
 export function AdminOverviewSecurityCalendar() {
   return (
@@ -22,6 +23,24 @@ export function AdminOverviewSecurityCalendar() {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-8">
+        {/* Section Status Indicator */}
+        <div className="p-4 bg-blue-500/5 border border-blue-500/20 rounded-lg">
+          <div className="flex items-start gap-3">
+            <Star className="h-5 w-5 text-blue-500 mt-0.5" />
+            <div>
+              <h4 className="font-medium text-foreground mb-1 flex items-center gap-2">
+                Operational Best Practices
+                <FeatureStatusBadge status="recommended" size="sm" />
+              </h4>
+              <p className="text-sm text-muted-foreground">
+                This section describes recommended security operational practices. HRplus provides the 
+                tools (dashboards, audit logs, reporting) to support these activities, but the cadence 
+                and processes should be adapted to your organization's needs and compliance requirements.
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* Introduction */}
         <div className="p-6 bg-primary/5 border border-primary/20 rounded-lg">
           <div className="flex items-start gap-3">
@@ -45,6 +64,7 @@ export function AdminOverviewSecurityCalendar() {
           <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
             <RefreshCw className="h-5 w-5 text-primary" />
             Annual Security Cycle
+            <FeatureStatusBadge status="recommended" size="sm" />
           </h3>
           <div className="grid md:grid-cols-4 gap-4">
             {[
@@ -122,6 +142,7 @@ export function AdminOverviewSecurityCalendar() {
           <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
             <Calendar className="h-5 w-5 text-primary" />
             Monthly Security Activities
+            <FeatureStatusBadge status="recommended" size="sm" />
           </h3>
           <div className="overflow-x-auto">
             <table className="w-full text-sm border-collapse">
@@ -131,6 +152,7 @@ export function AdminOverviewSecurityCalendar() {
                   <th className="border p-3 text-left font-medium">Owner</th>
                   <th className="border p-3 text-left font-medium">Description</th>
                   <th className="border p-3 text-left font-medium">Output</th>
+                  <th className="border p-3 text-center font-medium">System Support</th>
                 </tr>
               </thead>
               <tbody>
@@ -139,31 +161,36 @@ export function AdminOverviewSecurityCalendar() {
                     activity: 'Security Dashboard Review', 
                     owner: 'Security Admin',
                     description: 'Review failed logins, permission changes, suspicious activity',
-                    output: 'Monthly security report'
+                    output: 'Monthly security report',
+                    systemSupport: 'implemented' as const
                   },
                   { 
                     activity: 'Access Request Audit', 
                     owner: 'Security Admin',
                     description: 'Verify all approved requests were appropriate',
-                    output: 'Access audit log'
+                    output: 'Access audit log',
+                    systemSupport: 'implemented' as const
                   },
                   { 
                     activity: 'New User Review', 
                     owner: 'HR Admin',
                     description: 'Confirm new accounts have correct permissions',
-                    output: 'New user checklist'
+                    output: 'New user checklist',
+                    systemSupport: 'implemented' as const
                   },
                   { 
                     activity: 'Termination Audit', 
                     owner: 'HR Admin',
                     description: 'Verify terminated users had access revoked',
-                    output: 'Termination compliance report'
+                    output: 'Termination compliance report',
+                    systemSupport: 'implemented' as const
                   },
                   { 
                     activity: 'Password Policy Check', 
                     owner: 'Security Admin',
                     description: 'Review password expiration and compliance',
-                    output: 'Password health report'
+                    output: 'Password health report',
+                    systemSupport: 'implemented' as const
                   }
                 ].map((row, i) => (
                   <tr key={i} className={i % 2 === 0 ? 'bg-background' : 'bg-muted/30'}>
@@ -171,6 +198,9 @@ export function AdminOverviewSecurityCalendar() {
                     <td className="border p-3 text-muted-foreground">{row.owner}</td>
                     <td className="border p-3 text-muted-foreground">{row.description}</td>
                     <td className="border p-3 text-muted-foreground">{row.output}</td>
+                    <td className="border p-3 text-center">
+                      <FeatureStatusBadge status={row.systemSupport} size="sm" />
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -185,21 +215,23 @@ export function AdminOverviewSecurityCalendar() {
           <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
             <Eye className="h-5 w-5 text-primary" />
             Weekly Monitoring Checklist
+            <FeatureStatusBadge status="recommended" size="sm" />
           </h3>
           <div className="grid md:grid-cols-2 gap-4">
             {[
-              { task: 'Review failed login attempts', icon: AlertTriangle, priority: 'High' },
-              { task: 'Check pending access requests', icon: Users, priority: 'High' },
-              { task: 'Review permission change logs', icon: Shield, priority: 'Medium' },
-              { task: 'Monitor AI usage patterns', icon: Eye, priority: 'Medium' },
-              { task: 'Verify backup completion', icon: CheckCircle, priority: 'High' },
-              { task: 'Check security alerts', icon: AlertTriangle, priority: 'High' }
+              { task: 'Review failed login attempts', icon: AlertTriangle, priority: 'High', systemSupport: 'implemented' as const },
+              { task: 'Check pending access requests', icon: Users, priority: 'High', systemSupport: 'implemented' as const },
+              { task: 'Review permission change logs', icon: Shield, priority: 'Medium', systemSupport: 'implemented' as const },
+              { task: 'Monitor AI usage patterns', icon: Eye, priority: 'Medium', systemSupport: 'implemented' as const },
+              { task: 'Verify backup completion', icon: CheckCircle, priority: 'High', systemSupport: 'recommended' as const },
+              { task: 'Check security alerts', icon: AlertTriangle, priority: 'High', systemSupport: 'implemented' as const }
             ].map((item, i) => (
               <div key={i} className="flex items-center gap-3 p-3 border rounded-lg">
                 <item.icon className={`h-5 w-5 ${
                   item.priority === 'High' ? 'text-red-500' : 'text-amber-500'
                 }`} />
                 <span className="flex-1 text-sm">{item.task}</span>
+                <FeatureStatusBadge status={item.systemSupport} size="sm" />
                 <Badge variant={item.priority === 'High' ? 'destructive' : 'outline'} className="text-xs">
                   {item.priority}
                 </Badge>
@@ -215,6 +247,7 @@ export function AdminOverviewSecurityCalendar() {
           <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
             <FileCheck className="h-5 w-5 text-primary" />
             Compliance Requirements by Framework
+            <FeatureStatusBadge status="recommended" size="sm" />
           </h3>
           <div className="space-y-4">
             {[

@@ -5,6 +5,7 @@ import {
   Clock, Users, Shield, Lock, Settings, Wrench,
   ArrowRight, CheckCircle
 } from 'lucide-react';
+import { FeatureStatusBadge } from '../../components';
 
 export function AdminOverviewPersonas() {
   return (
@@ -42,7 +43,10 @@ export function AdminOverviewPersonas() {
                   <CardTitle className="text-lg">Super Admin</CardTitle>
                   <CardDescription>Highest authority with full system governance</CardDescription>
                 </div>
-                <Badge variant="outline" className="ml-auto">1-2 per organization</Badge>
+                <div className="ml-auto flex items-center gap-2">
+                  <Badge variant="outline">1-2 per organization</Badge>
+                  <FeatureStatusBadge status="recommended" size="sm" />
+                </div>
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -56,7 +60,10 @@ export function AdminOverviewPersonas() {
                   </ul>
                 </div>
                 <div>
-                  <h4 className="text-sm font-medium mb-2">Key Responsibilities</h4>
+                  <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
+                    Key Responsibilities
+                    <FeatureStatusBadge status="implemented" size="sm" />
+                  </h4>
                   <ul className="text-sm text-muted-foreground space-y-1">
                     <li>• SSO & authentication setup</li>
                     <li>• AI governance oversight</li>
@@ -65,7 +72,10 @@ export function AdminOverviewPersonas() {
                   </ul>
                 </div>
                 <div>
-                  <h4 className="text-sm font-medium mb-2">Typical Workflow</h4>
+                  <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
+                    Typical Workflow
+                    <FeatureStatusBadge status="recommended" size="sm" />
+                  </h4>
                   <ul className="text-sm text-muted-foreground space-y-1">
                     <li>• Weekly security dashboard review</li>
                     <li>• Monthly compliance checks</li>
@@ -102,7 +112,10 @@ export function AdminOverviewPersonas() {
                   <CardTitle className="text-lg">Security Admin</CardTitle>
                   <CardDescription>Manages access control and security policies</CardDescription>
                 </div>
-                <Badge variant="outline" className="ml-auto">2-5 per organization</Badge>
+                <div className="ml-auto flex items-center gap-2">
+                  <Badge variant="outline">2-5 per organization</Badge>
+                  <FeatureStatusBadge status="recommended" size="sm" />
+                </div>
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -116,7 +129,10 @@ export function AdminOverviewPersonas() {
                   </ul>
                 </div>
                 <div>
-                  <h4 className="text-sm font-medium mb-2">Key Responsibilities</h4>
+                  <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
+                    Key Responsibilities
+                    <FeatureStatusBadge status="implemented" size="sm" />
+                  </h4>
                   <ul className="text-sm text-muted-foreground space-y-1">
                     <li>• Role creation & management</li>
                     <li>• Permission configuration</li>
@@ -125,7 +141,10 @@ export function AdminOverviewPersonas() {
                   </ul>
                 </div>
                 <div>
-                  <h4 className="text-sm font-medium mb-2">Typical Workflow</h4>
+                  <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
+                    Typical Workflow
+                    <FeatureStatusBadge status="recommended" size="sm" />
+                  </h4>
                   <ul className="text-sm text-muted-foreground space-y-1">
                     <li>• Daily access request queue</li>
                     <li>• Weekly failed login review</li>
@@ -162,7 +181,10 @@ export function AdminOverviewPersonas() {
                   <CardTitle className="text-lg">HR Admin</CardTitle>
                   <CardDescription>Manages HR operations and user accounts</CardDescription>
                 </div>
-                <Badge variant="outline" className="ml-auto">5-20 per organization</Badge>
+                <div className="ml-auto flex items-center gap-2">
+                  <Badge variant="outline">5-20 per organization</Badge>
+                  <FeatureStatusBadge status="recommended" size="sm" />
+                </div>
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -176,7 +198,10 @@ export function AdminOverviewPersonas() {
                   </ul>
                 </div>
                 <div>
-                  <h4 className="text-sm font-medium mb-2">Key Responsibilities</h4>
+                  <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
+                    Key Responsibilities
+                    <FeatureStatusBadge status="implemented" size="sm" />
+                  </h4>
                   <ul className="text-sm text-muted-foreground space-y-1">
                     <li>• User account provisioning</li>
                     <li>• Organization updates</li>
@@ -185,7 +210,10 @@ export function AdminOverviewPersonas() {
                   </ul>
                 </div>
                 <div>
-                  <h4 className="text-sm font-medium mb-2">Typical Workflow</h4>
+                  <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
+                    Typical Workflow
+                    <FeatureStatusBadge status="recommended" size="sm" />
+                  </h4>
                   <ul className="text-sm text-muted-foreground space-y-1">
                     <li>• Daily new hire setup</li>
                     <li>• Weekly org changes</li>
@@ -236,7 +264,10 @@ export function AdminOverviewPersonas() {
                   </ul>
                 </div>
                 <div>
-                  <h4 className="text-sm font-medium mb-2">Key Responsibilities</h4>
+                  <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
+                    Key Responsibilities
+                    <FeatureStatusBadge status="implemented" size="sm" />
+                  </h4>
                   <ul className="text-sm text-muted-foreground space-y-1">
                     <li>• Full system configuration</li>
                     <li>• Data migration</li>
@@ -245,7 +276,10 @@ export function AdminOverviewPersonas() {
                   </ul>
                 </div>
                 <div>
-                  <h4 className="text-sm font-medium mb-2">Typical Workflow</h4>
+                  <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
+                    Typical Workflow
+                    <FeatureStatusBadge status="recommended" size="sm" />
+                  </h4>
                   <ul className="text-sm text-muted-foreground space-y-1">
                     <li>• Phase 1: Foundation setup</li>
                     <li>• Phase 2: Module config</li>
@@ -279,6 +313,7 @@ export function AdminOverviewPersonas() {
           <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
             <Settings className="h-5 w-5 text-primary" />
             Access Level Summary
+            <FeatureStatusBadge status="implemented" size="sm" />
           </h3>
           <div className="overflow-x-auto">
             <table className="w-full text-sm border-collapse">
