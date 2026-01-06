@@ -12,13 +12,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format, startOfWeek } from "date-fns";
 import { formatDateForDisplay } from "@/utils/dateUtils";
-import { Users, Clock, CheckCircle, XCircle, AlertTriangle, Timer, ClipboardList, Eye, UserCheck, Edit2 } from "lucide-react";
+import { Users, Clock, CheckCircle, XCircle, AlertTriangle, Timer, ClipboardList, Eye, UserCheck, Edit2, UserX, RefreshCw } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useLanguage } from "@/hooks/useLanguage";
 import { PunchDetailDialog } from "@/components/time-attendance/PunchDetailDialog";
 import { PunchOverrideDialog } from "@/components/time-attendance/PunchOverrideDialog";
+import { AbsenceHandlingDialog } from "@/components/time-attendance/AbsenceHandlingDialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface AssignedEmployee {
@@ -86,7 +87,10 @@ interface AttendanceException {
   exception_type: string;
   reason: string | null;
   status: string;
+  shift_id: string | null;
+  scheduled_time: string | null;
   employee: { full_name: string };
+  shifts?: { name: string; start_time: string; end_time: string };
 }
 
 export default function MssTimeAttendancePage() {
@@ -98,8 +102,10 @@ export default function MssTimeAttendancePage() {
   const [teamEntries, setTeamEntries] = useState<TeamTimeEntry[]>([]);
   const [timesheets, setTimesheets] = useState<TimesheetSubmission[]>([]);
   const [exceptions, setExceptions] = useState<AttendanceException[]>([]);
+  const [absences, setAbsences] = useState<AttendanceException[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedEmployee, setSelectedEmployee] = useState<string>("all");
+  const [isDetectingAbsences, setIsDetectingAbsences] = useState(false);
   
   const [reviewDialog, setReviewDialog] = useState(false);
   const [selectedTimesheet, setSelectedTimesheet] = useState<TimesheetSubmission | null>(null);
@@ -111,6 +117,9 @@ export default function MssTimeAttendancePage() {
 
   const [overrideDialogOpen, setOverrideDialogOpen] = useState(false);
   const [punchToOverride, setPunchToOverride] = useState<TeamTimeEntry | null>(null);
+
+  const [absenceDialogOpen, setAbsenceDialogOpen] = useState(false);
+  const [selectedAbsence, setSelectedAbsence] = useState<AttendanceException | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -230,19 +239,80 @@ export default function MssTimeAttendancePage() {
 
       setTimesheets((sheets || []) as TimesheetSubmission[]);
 
-      // Load attendance exceptions
+      // Load attendance exceptions (non-absence types)
       const { data: excs } = await supabase
         .from("attendance_exceptions")
-        .select("*, employee:profiles!attendance_exceptions_employee_id_fkey(full_name)")
+        .select("*, employee:profiles!attendance_exceptions_employee_id_fkey(full_name), shifts(name, start_time, end_time)")
         .in("employee_id", reportIds)
         .eq("status", "pending")
+        .not("exception_type", "in", '("absent","no_show","unexcused_absence","excused_absence")')
         .order("exception_date", { ascending: false });
 
       setExceptions((excs || []) as AttendanceException[]);
+
+      // Load absences (absent, no_show, unexcused_absence types)
+      const { data: absenceData } = await supabase
+        .from("attendance_exceptions")
+        .select("*, employee:profiles!attendance_exceptions_employee_id_fkey(full_name), shifts(name, start_time, end_time)")
+        .in("employee_id", reportIds)
+        .eq("status", "pending")
+        .in("exception_type", ["absent", "no_show", "unexcused_absence"])
+        .order("exception_date", { ascending: false });
+
+      setAbsences((absenceData || []) as AttendanceException[]);
     } catch (error) {
       console.error("Error loading team data:", error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleDetectAbsences = async () => {
+    if (!user) return;
+    setIsDetectingAbsences(true);
+
+    try {
+      // Get company_id from first assigned employee or user profile
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('company_id')
+        .eq('id', user.id)
+        .single();
+
+      if (!profile?.company_id) {
+        toast({ title: "Error", description: "Company not found", variant: "destructive" });
+        return;
+      }
+
+      // Call the detect-absences edge function for yesterday
+      const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+      
+      const { data, error } = await supabase.functions.invoke('detect-absences', {
+        body: {
+          companyId: profile.company_id,
+          targetDate: yesterday,
+          createExceptions: true
+        }
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Absence Detection Complete",
+        description: data.message || `Found ${data.absencesDetected} absences`,
+      });
+
+      // Reload data
+      loadTeamData();
+    } catch (error) {
+      console.error("Error detecting absences:", error);
+      toast({
+        title: "Error",
+        description: "Failed to detect absences",
+        variant: "destructive"
+      });
+    } finally {
+      setIsDetectingAbsences(false);
     }
   };
 
@@ -440,6 +510,13 @@ export default function MssTimeAttendancePage() {
               <Timer className="h-4 w-4" />
               Time Entries
             </TabsTrigger>
+            <TabsTrigger value="absences" className="gap-2">
+              <UserX className="h-4 w-4" />
+              Absences
+              {absences.length > 0 && (
+                <Badge variant="destructive" className="ml-1">{absences.length}</Badge>
+              )}
+            </TabsTrigger>
             <TabsTrigger value="timesheets" className="gap-2">
               <ClipboardList className="h-4 w-4" />
               Timesheet Approvals
@@ -603,6 +680,86 @@ export default function MssTimeAttendancePage() {
                                 </Tooltip>
                               </TooltipProvider>
                             </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="absences">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle className="flex items-center gap-2">
+                  <UserX className="h-5 w-5 text-destructive" />
+                  Absences - Employees Who Didn't Punch
+                </CardTitle>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleDetectAbsences}
+                  disabled={isDetectingAbsences}
+                >
+                  <RefreshCw className={`h-4 w-4 mr-2 ${isDetectingAbsences ? 'animate-spin' : ''}`} />
+                  {isDetectingAbsences ? 'Detecting...' : 'Detect Absences'}
+                </Button>
+              </CardHeader>
+              <CardContent>
+                {isLoading ? (
+                  <div className="text-center py-8 text-muted-foreground">Loading...</div>
+                ) : absences.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <UserX className="h-12 w-12 mx-auto mb-2 text-muted-foreground/50" />
+                    <p>No pending absences</p>
+                    <p className="text-sm mt-1">Click "Detect Absences" to scan for employees who were scheduled but didn't punch</p>
+                  </div>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Employee</TableHead>
+                        <TableHead>Date</TableHead>
+                        <TableHead>Scheduled Shift</TableHead>
+                        <TableHead>Type</TableHead>
+                        <TableHead>Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {absences.map((absence) => (
+                        <TableRow key={absence.id}>
+                          <TableCell className="font-medium">{absence.employee?.full_name}</TableCell>
+                          <TableCell>{formatDateForDisplay(absence.exception_date)}</TableCell>
+                          <TableCell>
+                            {absence.shifts ? (
+                              <div className="text-sm">
+                                <span className="font-medium">{absence.shifts.name}</span>
+                                <span className="text-muted-foreground ml-2">
+                                  {absence.shifts.start_time} - {absence.shifts.end_time}
+                                </span>
+                              </div>
+                            ) : (
+                              <span className="text-muted-foreground">-</span>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="destructive">
+                              {absence.exception_type.replace(/_/g, ' ')}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                setSelectedAbsence(absence);
+                                setAbsenceDialogOpen(true);
+                              }}
+                            >
+                              Handle
+                            </Button>
                           </TableCell>
                         </TableRow>
                       ))}
@@ -790,6 +947,14 @@ export default function MssTimeAttendancePage() {
           open={overrideDialogOpen}
           onOpenChange={setOverrideDialogOpen}
           punch={punchToOverride}
+          onSuccess={loadTeamData}
+        />
+
+        {/* Absence Handling Dialog */}
+        <AbsenceHandlingDialog
+          open={absenceDialogOpen}
+          onOpenChange={setAbsenceDialogOpen}
+          absence={selectedAbsence}
           onSuccess={loadTeamData}
         />
       </div>
