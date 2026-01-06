@@ -100,7 +100,7 @@ export function MaternityLeaveDetails({ requestId, onBack }: Props) {
           <div>
             <h1 className="text-2xl font-bold flex items-center gap-2">
               <Baby className="h-6 w-6 text-pink-500" />
-              {request.employee?.first_name} {request.employee?.last_name}
+              {request.employee?.full_name}
             </h1>
             <p className="text-muted-foreground">
               Maternity Leave Request • {request.employee?.employee_id}

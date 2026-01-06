@@ -68,8 +68,7 @@ export interface MaternityLeaveRequest {
   // Joined fields
   employee?: {
     id: string;
-    first_name: string;
-    last_name: string;
+    full_name: string;
     employee_id?: string;
   };
 }
@@ -208,8 +207,14 @@ export interface MaternityLeaveFormData {
   pregnancy_confirmation_date?: string;
   number_of_children: number;
   prenatal_start_date?: string;
+  prenatal_end_date?: string;
+  postnatal_start_date?: string;
   postnatal_end_date?: string;
+  planned_return_date?: string;
+  total_leave_days?: number;
+  statutory_payment_weeks?: number;
   country_code: string;
+  compliance_region?: ComplianceRegion;
   payment_config_id?: string;
   phased_return_enabled: boolean;
   notes?: string;
