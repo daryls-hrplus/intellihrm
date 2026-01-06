@@ -180,8 +180,13 @@ import LeaveBalanceAdjustmentsPage from "./pages/leave/LeaveBalanceAdjustmentsPa
 import EmployeeLeaveRecordsPage from "./pages/leave/EmployeeLeaveRecordsPage";
 import EmployeeLeaveBalancesPage from "./pages/leave/EmployeeLeaveBalancesPage";
 import LeaveYearsPage from "./pages/leave/LeaveYearsPage";
+import LeaveBlackoutPeriodsPage from "./pages/leave/LeaveBlackoutPeriodsPage";
+import LeaveConflictRulesPage from "./pages/leave/LeaveConflictRulesPage";
+import LeaveEncashmentPage from "./pages/leave/LeaveEncashmentPage";
+import LeaveLiabilityPage from "./pages/leave/LeaveLiabilityPage";
+import LeaveProrataSettingsPage from "./pages/leave/LeaveProrataSettingsPage";
+import LeavePlannerPage from "./pages/leave/LeavePlannerPage";
 
-// Compensation pages
 import CompensationDashboardPage from "./pages/compensation/CompensationDashboardPage";
 import PayElementsPage from "./pages/compensation/PayElementsPage";
 import SalaryGradesPage from "./pages/compensation/SalaryGradesPage";
@@ -2195,7 +2200,54 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
-
+            <Route
+              path="/leave/blackout-periods"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="leave">
+                  <LeaveBlackoutPeriodsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/leave/conflict-rules"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="leave">
+                  <LeaveConflictRulesPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/leave/encashment"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="leave">
+                  <LeaveEncashmentPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/leave/liability"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="leave">
+                  <LeaveLiabilityPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/leave/prorata-settings"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="leave">
+                  <LeaveProrataSettingsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/leave/planner"
+              element={
+                <ProtectedRoute moduleCode="leave">
+                  <LeavePlannerPage />
+                </ProtectedRoute>
+              }
+            />
             <Route
               path="/payroll"
               element={
