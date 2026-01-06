@@ -389,3 +389,24 @@ verify_jwt = false
 
 [functions.process-timesheet-approval]
 verify_jwt = false
+
+[functions.feedback-narrative-analyzer]
+verify_jwt = false
+
+[functions.feedback-bias-detector]
+verify_jwt = false
+
+[functions.feedback-coaching-assistant]
+verify_jwt = false
+
+[functions.feedback-theme-clusterer]
+verify_jwt = false
+
+[functions.feedback-readiness-scorer]
+verify_jwt = false
+
+[functions.feedback-external-invite]
+verify_jwt = false
+
+[functions.feedback-analytics-aggregator]
+verify_jwt = false
