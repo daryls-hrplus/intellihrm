@@ -257,12 +257,12 @@ export default function LeaveConflictRulesPage() {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Department</Label>
-                <Select value={formData.department_id} onValueChange={(v) => setFormData({ ...formData, department_id: v })}>
+                <Select value={formData.department_id || "all"} onValueChange={(v) => setFormData({ ...formData, department_id: v === "all" ? "" : v })}>
                   <SelectTrigger>
                     <SelectValue placeholder="All departments" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Departments</SelectItem>
+                    <SelectItem value="all">All Departments</SelectItem>
                     {departments.map((dept: any) => (
                       <SelectItem key={dept.id} value={dept.id}>{dept.name}</SelectItem>
                     ))}
