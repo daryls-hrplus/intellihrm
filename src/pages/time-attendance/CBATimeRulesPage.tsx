@@ -126,6 +126,7 @@ export default function CBATimeRulesPage() {
   const [showUploadDialog, setShowUploadDialog] = useState(false);
   const [showSimulationDialog, setShowSimulationDialog] = useState(false);
   const [showExtensionRequestDialog, setShowExtensionRequestDialog] = useState(false);
+  const [showAddAgreementDialog, setShowAddAgreementDialog] = useState(false);
   const [activeTab, setActiveTab] = useState("upload");
   const [documentText, setDocumentText] = useState("");
   
@@ -159,6 +160,14 @@ export default function CBATimeRulesPage() {
     overtime_multiplier: "1.5",
     max_hours_per_day: "8",
     description: "",
+  });
+
+  const [newAgreement, setNewAgreement] = useState({
+    agreement_name: "",
+    agreement_code: "",
+    union_name: "",
+    effective_from: "",
+    effective_to: "",
   });
 
   const { data: agreements = [], isLoading } = useQuery({
@@ -378,6 +387,36 @@ export default function CBATimeRulesPage() {
     onError: (error) => toast.error(`Failed: ${error.message}`),
   });
 
+  // Create new CBA Agreement
+  const createAgreementMutation = useMutation({
+    mutationFn: async () => {
+      if (!newAgreement.agreement_name.trim()) throw new Error("Agreement name is required");
+      if (!newAgreement.effective_from) throw new Error("Effective from date is required");
+      
+      const { data, error } = await supabase.from("cba_agreements").insert({
+        company_id: company?.id,
+        agreement_name: newAgreement.agreement_name,
+        agreement_code: newAgreement.agreement_code || null,
+        union_name: newAgreement.union_name || null,
+        effective_from: newAgreement.effective_from,
+        effective_to: newAgreement.effective_to || null,
+        is_active: true,
+      }).select().single();
+      
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (data) => {
+      toast.success("CBA Agreement created");
+      setShowAddAgreementDialog(false);
+      setNewAgreement({ agreement_name: "", agreement_code: "", union_name: "", effective_from: "", effective_to: "" });
+      queryClient.invalidateQueries({ queryKey: ["cba-agreements"] });
+      // Auto-select the new agreement
+      setSelectedAgreement(data as CBAAgreement);
+    },
+    onError: (error) => toast.error(`Failed: ${error.message}`),
+  });
+
   const toggleRuleMutation = useMutation({
     mutationFn: async ({ ruleId, isActive }: { ruleId: string; isActive: boolean }) => {
       const { error } = await supabase.from("cba_time_rules").update({ is_active: isActive }).eq("id", ruleId);
@@ -476,11 +515,18 @@ export default function CBATimeRulesPage() {
           {/* Agreements List */}
           <Card className="lg:col-span-1">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Scale className="h-5 w-5" />
-                CBA Agreements
-              </CardTitle>
-              <CardDescription>Select an agreement to manage its rules</CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <Scale className="h-5 w-5" />
+                    CBA Agreements
+                  </CardTitle>
+                  <CardDescription>Select an agreement to manage its rules</CardDescription>
+                </div>
+                <Button size="sm" onClick={() => setShowAddAgreementDialog(true)}>
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
               <div className="relative mb-4">
@@ -1153,6 +1199,82 @@ export default function CBATimeRulesPage() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowRuleDialog(false)}>Cancel</Button>
               <Button onClick={() => addRuleMutation.mutate()} disabled={addRuleMutation.isPending || !newRule.rule_name}>Add Rule</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add CBA Agreement Dialog */}
+        <Dialog open={showAddAgreementDialog} onOpenChange={setShowAddAgreementDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Scale className="h-5 w-5" />
+                Add CBA Agreement
+              </DialogTitle>
+              <DialogDescription>
+                Create a new Collective Bargaining Agreement. After creating, you can extract time rules from your document.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Agreement Name *</Label>
+                <Input 
+                  value={newAgreement.agreement_name} 
+                  onChange={(e) => setNewAgreement({ ...newAgreement, agreement_name: e.target.value })} 
+                  placeholder="e.g., SEIU Local 1000 Master Agreement"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Agreement Code</Label>
+                  <Input 
+                    value={newAgreement.agreement_code} 
+                    onChange={(e) => setNewAgreement({ ...newAgreement, agreement_code: e.target.value })} 
+                    placeholder="e.g., CBA-2024-001"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Union Name</Label>
+                  <Input 
+                    value={newAgreement.union_name} 
+                    onChange={(e) => setNewAgreement({ ...newAgreement, union_name: e.target.value })} 
+                    placeholder="e.g., SEIU Local 1000"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Effective From *</Label>
+                  <Input 
+                    type="date"
+                    value={newAgreement.effective_from} 
+                    onChange={(e) => setNewAgreement({ ...newAgreement, effective_from: e.target.value })} 
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Effective To</Label>
+                  <Input 
+                    type="date"
+                    value={newAgreement.effective_to} 
+                    onChange={(e) => setNewAgreement({ ...newAgreement, effective_to: e.target.value })} 
+                  />
+                </div>
+              </div>
+              <div className="p-3 bg-muted rounded-lg text-sm">
+                <p className="font-medium mb-1">Next Steps</p>
+                <p className="text-muted-foreground">
+                  After creating the agreement, click "AI Extract Rules" to paste your CBA document and automatically extract time and attendance rules.
+                </p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAddAgreementDialog(false)}>Cancel</Button>
+              <Button 
+                onClick={() => createAgreementMutation.mutate()} 
+                disabled={createAgreementMutation.isPending || !newAgreement.agreement_name.trim() || !newAgreement.effective_from}
+              >
+                {createAgreementMutation.isPending ? "Creating..." : "Create Agreement"}
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
