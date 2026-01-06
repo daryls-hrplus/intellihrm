@@ -38,6 +38,7 @@ import {
   FileSpreadsheet,
   Percent,
   Baby,
+  ShieldCheck,
 } from "lucide-react";
 
 interface Company {
@@ -308,6 +309,14 @@ export default function LeaveDashboardPage() {
       color: "bg-pink-500/10 text-pink-600",
       tabCode: "maternity_leave",
     },
+    compliance: {
+      title: "Leave Compliance",
+      description: "Policy acknowledgments, medical verification, Bradford Factor, and audit trails",
+      href: "/leave/compliance",
+      icon: ShieldCheck,
+      color: "bg-indigo-500/10 text-indigo-600",
+      tabCode: "compliance",
+    },
   };
 
   // Filter by permissions
@@ -341,6 +350,12 @@ export default function LeaveDashboardPage() {
       items: filterByAccess([
         allModules.analytics,
         allModules.liability,
+      ]),
+    },
+    {
+      titleKey: "Compliance",
+      items: filterByAccess([
+        allModules.compliance,
       ]),
     },
     {
