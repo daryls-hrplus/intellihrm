@@ -8,7 +8,12 @@ import {
   SystemCurrencies,
   SystemCustomFields,
   SystemNotifications,
-  SystemDashboardOrdering
+  SystemDashboardOrdering,
+  SystemBulkOperations,
+  SystemBranding,
+  SystemTemplates,
+  SystemWorkflows,
+  SystemScheduledAutomation
 } from './sections/system';
 
 const SYSTEM_SECTIONS = [
@@ -59,6 +64,46 @@ const SYSTEM_SECTIONS = [
     description: 'Configure default dashboard layouts by role',
     readTimeMin: 8,
     Component: SystemDashboardOrdering,
+  },
+  {
+    id: 'admin-sec-5-7',
+    sectionNumber: '5.7',
+    title: 'Bulk Operations',
+    description: 'Import, export, and batch update capabilities',
+    readTimeMin: 10,
+    Component: SystemBulkOperations,
+  },
+  {
+    id: 'admin-sec-5-8',
+    sectionNumber: '5.8',
+    title: 'Branding & Theming',
+    description: 'Customize logos, colors, and visual identity',
+    readTimeMin: 8,
+    Component: SystemBranding,
+  },
+  {
+    id: 'admin-sec-5-9',
+    sectionNumber: '5.9',
+    title: 'Communication Templates',
+    description: 'Letter templates and email notification configuration',
+    readTimeMin: 12,
+    Component: SystemTemplates,
+  },
+  {
+    id: 'admin-sec-5-10',
+    sectionNumber: '5.10',
+    title: 'Workflow Configuration',
+    description: 'Approval chains and routing rules',
+    readTimeMin: 15,
+    Component: SystemWorkflows,
+  },
+  {
+    id: 'admin-sec-5-11',
+    sectionNumber: '5.11',
+    title: 'Scheduled Automation',
+    description: 'Scheduled reports, reminders, and background jobs',
+    readTimeMin: 10,
+    Component: SystemScheduledAutomation,
   },
 ] as const;
 

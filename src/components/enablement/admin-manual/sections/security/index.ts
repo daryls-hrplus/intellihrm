@@ -5,3 +5,5 @@ export { SecuritySessionManagement } from './SecuritySessionManagement';
 export { SecurityDataAccessControls } from './SecurityDataAccessControls';
 export { SecurityAuditLogging } from './SecurityAuditLogging';
 export { SecurityMonitoringDashboard } from './SecurityMonitoringDashboard';
+export { SecurityIPAccessControls } from './SecurityIPAccessControls';
+export { SecurityDSAR } from './SecurityDSAR';
