@@ -51,6 +51,19 @@ export default function LeaveConflictRulesPage() {
     enabled: !!(selectedCompanyId || company?.id),
   });
 
+  const { data: jobs = [] } = useQuery({
+    queryKey: ["jobs", selectedCompanyId || company?.id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("jobs")
+        .select("id, name, code")
+        .eq("company_id", selectedCompanyId || company?.id)
+        .order("name");
+      return data || [];
+    },
+    enabled: !!(selectedCompanyId || company?.id),
+  });
+
   const [showDialog, setShowDialog] = useState(false);
   const [editingItem, setEditingItem] = useState<LeaveConflictRule | null>(null);
   const [formData, setFormData] = useState({
@@ -65,6 +78,7 @@ export default function LeaveConflictRulesPage() {
     min_coverage_required: 1,
     is_warning_only: true,
     is_active: true,
+    critical_role_ids: [] as string[],
   });
 
   const handleEdit = (item: LeaveConflictRule) => {
@@ -81,6 +95,7 @@ export default function LeaveConflictRulesPage() {
       min_coverage_required: item.min_coverage_required,
       is_warning_only: item.is_warning_only,
       is_active: item.is_active,
+      critical_role_ids: item.critical_role_ids || [],
     });
     setShowDialog(true);
   };
@@ -120,6 +135,7 @@ export default function LeaveConflictRulesPage() {
       min_coverage_required: 1,
       is_warning_only: true,
       is_active: true,
+      critical_role_ids: [],
     });
   };
 
@@ -333,6 +349,44 @@ export default function LeaveConflictRulesPage() {
                     value={formData.block_threshold_percentage}
                     onChange={(e) => setFormData({ ...formData, block_threshold_percentage: parseFloat(e.target.value) || 0 })}
                   />
+                </div>
+              </div>
+            ) : formData.rule_type === 'critical_roles' ? (
+              <div className="space-y-2">
+                <Label>Critical Roles/Jobs *</Label>
+                <p className="text-xs text-muted-foreground mb-2">Select jobs that must always have coverage</p>
+                <div className="border rounded-md p-3 max-h-40 overflow-y-auto space-y-2">
+                  {jobs.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">No jobs found for this company</p>
+                  ) : (
+                    jobs.map((job: any) => (
+                      <label key={job.id} className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={formData.critical_role_ids.includes(job.id)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setFormData({ ...formData, critical_role_ids: [...formData.critical_role_ids, job.id] });
+                            } else {
+                              setFormData({ ...formData, critical_role_ids: formData.critical_role_ids.filter(id => id !== job.id) });
+                            }
+                          }}
+                          className="rounded border-input"
+                        />
+                        <span className="text-sm">{job.name} {job.code && <span className="text-muted-foreground">({job.code})</span>}</span>
+                      </label>
+                    ))
+                  )}
+                </div>
+                <div className="space-y-2 mt-3">
+                  <Label>Min Coverage Required</Label>
+                  <Input
+                    type="number"
+                    min={1}
+                    value={formData.min_coverage_required}
+                    onChange={(e) => setFormData({ ...formData, min_coverage_required: parseInt(e.target.value) || 1 })}
+                  />
+                  <p className="text-xs text-muted-foreground">Minimum number of employees in critical roles that must be present</p>
                 </div>
               </div>
             ) : (
