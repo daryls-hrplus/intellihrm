@@ -15,6 +15,9 @@ interface PunchDetails {
   clock_out: string | null;
   rounded_clock_in: string | null;
   rounded_clock_out: string | null;
+  override_clock_in?: string | null;
+  override_clock_out?: string | null;
+  override_reason?: string | null;
   clock_in_location: string | null;
   clock_out_location: string | null;
   clock_in_latitude: number | null;
@@ -32,6 +35,9 @@ interface PunchDetails {
   total_hours: number | null;
   regular_hours: number | null;
   overtime_hours: number | null;
+  payable_hours?: number | null;
+  payable_regular_hours?: number | null;
+  payable_overtime_hours?: number | null;
   status: string;
   scheduled_start: string | null;
   scheduled_end: string | null;
@@ -60,6 +66,7 @@ export function PunchDetailDialog({ open, onOpenChange, punch }: PunchDetailDial
   };
 
   const hasRounding = punch.rounded_clock_in || punch.rounded_clock_out;
+  const hasOverride = punch.override_clock_in || punch.override_clock_out;
   const clockInDiff = punch.rounded_clock_in && punch.clock_in 
     ? Math.round((new Date(punch.rounded_clock_in).getTime() - new Date(punch.clock_in).getTime()) / 60000)
     : 0;
@@ -277,6 +284,40 @@ export function PunchDetailDialog({ open, onOpenChange, punch }: PunchDetailDial
             </Card>
           </div>
 
+          {/* Override Info (if present) */}
+          {hasOverride && (
+            <Card className="border-orange-500/30 bg-orange-500/5">
+              <CardContent className="pt-4">
+                <div className="flex items-center gap-2 mb-3 text-sm font-medium text-orange-600">
+                  <AlertTriangle className="h-4 w-4" />
+                  Timekeeper Override Applied
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  {punch.override_clock_in && (
+                    <div>
+                      <span className="text-muted-foreground">Override Clock In:</span>
+                      <p className="font-semibold text-orange-600">{formatTime(punch.override_clock_in)}</p>
+                    </div>
+                  )}
+                  {punch.override_clock_out && (
+                    <div>
+                      <span className="text-muted-foreground">Override Clock Out:</span>
+                      <p className="font-semibold text-orange-600">{formatTime(punch.override_clock_out)}</p>
+                    </div>
+                  )}
+                </div>
+                
+                {punch.override_reason && (
+                  <div className="mt-3 pt-3 border-t border-orange-500/20">
+                    <span className="text-xs text-muted-foreground">Reason:</span>
+                    <p className="text-sm">{punch.override_reason}</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
           {/* Hours Summary */}
           <Card>
             <CardContent className="pt-4">
@@ -284,23 +325,34 @@ export function PunchDetailDialog({ open, onOpenChange, punch }: PunchDetailDial
                 <CalendarClock className="h-4 w-4" />
                 Hours Summary
                 {hasRounding && (
-                  <Badge variant="secondary" className="text-xs ml-auto">
+                  <Badge variant="secondary" className="text-xs">
                     Rounding Applied
+                  </Badge>
+                )}
+                {hasOverride && (
+                  <Badge variant="outline" className="text-xs bg-orange-500/10 text-orange-600 ml-auto">
+                    Override Applied
                   </Badge>
                 )}
               </div>
               
               <div className="grid grid-cols-4 gap-4 text-center">
                 <div>
-                  <p className="text-2xl font-bold">{punch.total_hours?.toFixed(2) || '-'}</p>
-                  <p className="text-xs text-muted-foreground">Total Hours</p>
+                  <p className={`text-2xl font-bold ${hasOverride ? 'text-orange-600' : ''}`}>
+                    {(punch.payable_hours || punch.total_hours)?.toFixed(2) || '-'}
+                  </p>
+                  <p className="text-xs text-muted-foreground">Payable Hours</p>
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-green-600">{punch.regular_hours?.toFixed(2) || '-'}</p>
+                  <p className="text-2xl font-bold text-green-600">
+                    {(punch.payable_regular_hours || punch.regular_hours)?.toFixed(2) || '-'}
+                  </p>
                   <p className="text-xs text-muted-foreground">Regular</p>
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-orange-600">{punch.overtime_hours?.toFixed(2) || '0.00'}</p>
+                  <p className="text-2xl font-bold text-orange-600">
+                    {(punch.payable_overtime_hours || punch.overtime_hours)?.toFixed(2) || '0.00'}
+                  </p>
                   <p className="text-xs text-muted-foreground">Overtime</p>
                 </div>
                 <div>
