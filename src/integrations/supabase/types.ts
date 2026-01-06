@@ -5765,6 +5765,56 @@ export type Database = {
           },
         ]
       }
+      bradford_factor_thresholds: {
+        Row: {
+          action_required: string | null
+          company_id: string
+          created_at: string
+          id: string
+          is_active: boolean
+          max_score: number | null
+          min_score: number
+          notification_recipients: string[] | null
+          risk_level: string
+          threshold_name: string
+          updated_at: string
+        }
+        Insert: {
+          action_required?: string | null
+          company_id: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          max_score?: number | null
+          min_score: number
+          notification_recipients?: string[] | null
+          risk_level: string
+          threshold_name: string
+          updated_at?: string
+        }
+        Update: {
+          action_required?: string | null
+          company_id?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          max_score?: number | null
+          min_score?: number
+          notification_recipients?: string[] | null
+          risk_level?: string
+          threshold_name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bradford_factor_thresholds_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       calibration_adjustments: {
         Row: {
           adjusted_at: string | null
@@ -12442,6 +12492,82 @@ export type Database = {
           {
             foreignKeyName: "employee_biometric_templates_enrolled_by_fkey"
             columns: ["enrolled_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      employee_bradford_scores: {
+        Row: {
+          bradford_score: number
+          calculated_at: string
+          calculated_by: string | null
+          calculation_period_end: string
+          calculation_period_start: string
+          company_id: string
+          created_at: string
+          employee_id: string
+          id: string
+          notes: string | null
+          previous_score: number | null
+          risk_level: string
+          total_absence_days: number
+          total_absence_spells: number
+          trend: string | null
+        }
+        Insert: {
+          bradford_score?: number
+          calculated_at?: string
+          calculated_by?: string | null
+          calculation_period_end: string
+          calculation_period_start: string
+          company_id: string
+          created_at?: string
+          employee_id: string
+          id?: string
+          notes?: string | null
+          previous_score?: number | null
+          risk_level?: string
+          total_absence_days?: number
+          total_absence_spells?: number
+          trend?: string | null
+        }
+        Update: {
+          bradford_score?: number
+          calculated_at?: string
+          calculated_by?: string | null
+          calculation_period_end?: string
+          calculation_period_start?: string
+          company_id?: string
+          created_at?: string
+          employee_id?: string
+          id?: string
+          notes?: string | null
+          previous_score?: number | null
+          risk_level?: string
+          total_absence_days?: number
+          total_absence_spells?: number
+          trend?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_bradford_scores_calculated_by_fkey"
+            columns: ["calculated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_bradford_scores_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_bradford_scores_employee_id_fkey"
+            columns: ["employee_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -34572,6 +34698,148 @@ export type Database = {
           },
         ]
       }
+      leave_policy_acknowledgments: {
+        Row: {
+          acknowledged_at: string
+          company_id: string
+          created_at: string
+          employee_id: string
+          id: string
+          ip_address: string | null
+          policy_id: string | null
+          policy_name: string
+          policy_type: string
+          policy_version: number
+          signature_data: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          acknowledged_at?: string
+          company_id: string
+          created_at?: string
+          employee_id: string
+          id?: string
+          ip_address?: string | null
+          policy_id?: string | null
+          policy_name: string
+          policy_type: string
+          policy_version?: number
+          signature_data?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          acknowledged_at?: string
+          company_id?: string
+          created_at?: string
+          employee_id?: string
+          id?: string
+          ip_address?: string | null
+          policy_id?: string | null
+          policy_name?: string
+          policy_type?: string
+          policy_version?: number
+          signature_data?: string | null
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leave_policy_acknowledgments_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leave_policy_acknowledgments_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      leave_policy_versions: {
+        Row: {
+          approval_required: boolean | null
+          approved_at: string | null
+          approved_by: string | null
+          change_summary: string | null
+          change_type: string
+          changed_at: string
+          changed_by: string | null
+          company_id: string
+          created_at: string
+          effective_from: string | null
+          effective_to: string | null
+          id: string
+          policy_data: Json
+          policy_id: string
+          policy_name: string
+          policy_type: string
+          version_number: number
+        }
+        Insert: {
+          approval_required?: boolean | null
+          approved_at?: string | null
+          approved_by?: string | null
+          change_summary?: string | null
+          change_type: string
+          changed_at?: string
+          changed_by?: string | null
+          company_id: string
+          created_at?: string
+          effective_from?: string | null
+          effective_to?: string | null
+          id?: string
+          policy_data: Json
+          policy_id: string
+          policy_name: string
+          policy_type: string
+          version_number?: number
+        }
+        Update: {
+          approval_required?: boolean | null
+          approved_at?: string | null
+          approved_by?: string | null
+          change_summary?: string | null
+          change_type?: string
+          changed_at?: string
+          changed_by?: string | null
+          company_id?: string
+          created_at?: string
+          effective_from?: string | null
+          effective_to?: string | null
+          id?: string
+          policy_data?: Json
+          policy_id?: string
+          policy_name?: string
+          policy_type?: string
+          version_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leave_policy_versions_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leave_policy_versions_changed_by_fkey"
+            columns: ["changed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leave_policy_versions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       leave_prorata_settings: {
         Row: {
           apply_to_first_year_only: boolean
@@ -38549,6 +38817,100 @@ export type Database = {
             columns: ["maternity_request_id"]
             isOneToOne: false
             referencedRelation: "maternity_leave_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      medical_certificate_verifications: {
+        Row: {
+          certificate_file_name: string | null
+          certificate_url: string | null
+          company_id: string
+          created_at: string
+          diagnosis_code: string | null
+          employee_id: string
+          followup_notes: string | null
+          followup_required: boolean | null
+          id: string
+          issue_date: string | null
+          issuing_doctor: string | null
+          leave_request_id: string
+          medical_facility: string | null
+          rejection_reason: string | null
+          updated_at: string
+          valid_from: string | null
+          valid_to: string | null
+          verification_notes: string | null
+          verification_status: string
+          verified_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          certificate_file_name?: string | null
+          certificate_url?: string | null
+          company_id: string
+          created_at?: string
+          diagnosis_code?: string | null
+          employee_id: string
+          followup_notes?: string | null
+          followup_required?: boolean | null
+          id?: string
+          issue_date?: string | null
+          issuing_doctor?: string | null
+          leave_request_id: string
+          medical_facility?: string | null
+          rejection_reason?: string | null
+          updated_at?: string
+          valid_from?: string | null
+          valid_to?: string | null
+          verification_notes?: string | null
+          verification_status?: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          certificate_file_name?: string | null
+          certificate_url?: string | null
+          company_id?: string
+          created_at?: string
+          diagnosis_code?: string | null
+          employee_id?: string
+          followup_notes?: string | null
+          followup_required?: boolean | null
+          id?: string
+          issue_date?: string | null
+          issuing_doctor?: string | null
+          leave_request_id?: string
+          medical_facility?: string | null
+          rejection_reason?: string | null
+          updated_at?: string
+          valid_from?: string | null
+          valid_to?: string | null
+          verification_notes?: string | null
+          verification_status?: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "medical_certificate_verifications_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "medical_certificate_verifications_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "medical_certificate_verifications_verified_by_fkey"
+            columns: ["verified_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
