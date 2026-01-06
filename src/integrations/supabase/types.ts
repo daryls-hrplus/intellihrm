@@ -4047,6 +4047,91 @@ export type Database = {
           },
         ]
       }
+      attendance_regularization_requests: {
+        Row: {
+          company_id: string
+          created_at: string
+          employee_id: string
+          id: string
+          original_clock_in: string | null
+          original_clock_out: string | null
+          reason: string
+          regularization_type: string
+          request_date: string
+          requested_clock_in: string | null
+          requested_clock_out: string | null
+          review_notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          supporting_document_url: string | null
+          time_entry_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          employee_id: string
+          id?: string
+          original_clock_in?: string | null
+          original_clock_out?: string | null
+          reason: string
+          regularization_type: string
+          request_date: string
+          requested_clock_in?: string | null
+          requested_clock_out?: string | null
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          supporting_document_url?: string | null
+          time_entry_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          employee_id?: string
+          id?: string
+          original_clock_in?: string | null
+          original_clock_out?: string | null
+          reason?: string
+          regularization_type?: string
+          request_date?: string
+          requested_clock_in?: string | null
+          requested_clock_out?: string | null
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          supporting_document_url?: string | null
+          time_entry_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attendance_regularization_requests_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_regularization_requests_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_regularization_requests_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       attendance_summary: {
         Row: {
           actual_clock_in: string | null
@@ -6722,6 +6807,62 @@ export type Database = {
           },
         ]
       }
+      cba_agreements: {
+        Row: {
+          agreement_code: string | null
+          agreement_name: string
+          applies_to_departments: string[] | null
+          applies_to_job_grades: string[] | null
+          company_id: string
+          created_at: string
+          document_url: string | null
+          effective_from: string
+          effective_to: string | null
+          id: string
+          is_active: boolean | null
+          union_name: string | null
+          updated_at: string
+        }
+        Insert: {
+          agreement_code?: string | null
+          agreement_name: string
+          applies_to_departments?: string[] | null
+          applies_to_job_grades?: string[] | null
+          company_id: string
+          created_at?: string
+          document_url?: string | null
+          effective_from: string
+          effective_to?: string | null
+          id?: string
+          is_active?: boolean | null
+          union_name?: string | null
+          updated_at?: string
+        }
+        Update: {
+          agreement_code?: string | null
+          agreement_name?: string
+          applies_to_departments?: string[] | null
+          applies_to_job_grades?: string[] | null
+          company_id?: string
+          created_at?: string
+          document_url?: string | null
+          effective_from?: string
+          effective_to?: string | null
+          id?: string
+          is_active?: boolean | null
+          union_name?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cba_agreements_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cba_amendments: {
         Row: {
           affected_articles: string[] | null
@@ -7144,6 +7285,53 @@ export type Database = {
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cba_time_rules: {
+        Row: {
+          agreement_id: string
+          condition_json: Json | null
+          created_at: string
+          id: string
+          is_active: boolean | null
+          priority: number | null
+          rule_name: string
+          rule_type: string
+          value_numeric: number | null
+          value_text: string | null
+        }
+        Insert: {
+          agreement_id: string
+          condition_json?: Json | null
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          priority?: number | null
+          rule_name: string
+          rule_type: string
+          value_numeric?: number | null
+          value_text?: string | null
+        }
+        Update: {
+          agreement_id?: string
+          condition_json?: Json | null
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          priority?: number | null
+          rule_name?: string
+          rule_type?: string
+          value_numeric?: number | null
+          value_text?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cba_time_rules_agreement_id_fkey"
+            columns: ["agreement_id"]
+            isOneToOne: false
+            referencedRelation: "cba_agreements"
             referencedColumns: ["id"]
           },
         ]
@@ -17580,6 +17768,93 @@ export type Database = {
           },
         ]
       }
+      employee_wellness_indicators: {
+        Row: {
+          ai_analysis: string | null
+          ai_confidence_score: number | null
+          ai_recommendations: Json | null
+          assessment_date: string
+          avg_daily_hours_last_30_days: number | null
+          avg_daily_hours_last_7_days: number | null
+          burnout_risk_score: number | null
+          calculated_at: string | null
+          company_id: string
+          consecutive_work_days: number | null
+          created_at: string
+          employee_id: string
+          fatigue_risk_score: number | null
+          id: string
+          missed_breaks_last_7_days: number | null
+          overall_wellness_score: number | null
+          rest_violations_last_30_days: number | null
+          risk_level: string | null
+          total_overtime_hours_last_30_days: number | null
+          total_overtime_hours_last_7_days: number | null
+          updated_at: string
+        }
+        Insert: {
+          ai_analysis?: string | null
+          ai_confidence_score?: number | null
+          ai_recommendations?: Json | null
+          assessment_date?: string
+          avg_daily_hours_last_30_days?: number | null
+          avg_daily_hours_last_7_days?: number | null
+          burnout_risk_score?: number | null
+          calculated_at?: string | null
+          company_id: string
+          consecutive_work_days?: number | null
+          created_at?: string
+          employee_id: string
+          fatigue_risk_score?: number | null
+          id?: string
+          missed_breaks_last_7_days?: number | null
+          overall_wellness_score?: number | null
+          rest_violations_last_30_days?: number | null
+          risk_level?: string | null
+          total_overtime_hours_last_30_days?: number | null
+          total_overtime_hours_last_7_days?: number | null
+          updated_at?: string
+        }
+        Update: {
+          ai_analysis?: string | null
+          ai_confidence_score?: number | null
+          ai_recommendations?: Json | null
+          assessment_date?: string
+          avg_daily_hours_last_30_days?: number | null
+          avg_daily_hours_last_7_days?: number | null
+          burnout_risk_score?: number | null
+          calculated_at?: string | null
+          company_id?: string
+          consecutive_work_days?: number | null
+          created_at?: string
+          employee_id?: string
+          fatigue_risk_score?: number | null
+          id?: string
+          missed_breaks_last_7_days?: number | null
+          overall_wellness_score?: number | null
+          rest_violations_last_30_days?: number | null
+          risk_level?: string | null
+          total_overtime_hours_last_30_days?: number | null
+          total_overtime_hours_last_7_days?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_wellness_indicators_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_wellness_indicators_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       employee_work_history: {
         Row: {
           achievements: string | null
@@ -23053,6 +23328,143 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      flex_time_balances: {
+        Row: {
+          balance_hours: number
+          company_id: string
+          created_at: string
+          employee_id: string
+          expiry_date: string | null
+          id: string
+          is_active: boolean | null
+          last_accrual_date: string | null
+          max_accrual_hours: number | null
+          min_balance_hours: number | null
+          updated_at: string
+        }
+        Insert: {
+          balance_hours?: number
+          company_id: string
+          created_at?: string
+          employee_id: string
+          expiry_date?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_accrual_date?: string | null
+          max_accrual_hours?: number | null
+          min_balance_hours?: number | null
+          updated_at?: string
+        }
+        Update: {
+          balance_hours?: number
+          company_id?: string
+          created_at?: string
+          employee_id?: string
+          expiry_date?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_accrual_date?: string | null
+          max_accrual_hours?: number | null
+          min_balance_hours?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "flex_time_balances_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "flex_time_balances_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      flex_time_transactions: {
+        Row: {
+          approved_by: string | null
+          balance_after: number
+          balance_before: number
+          balance_id: string
+          company_id: string
+          created_at: string
+          description: string | null
+          employee_id: string
+          hours: number
+          id: string
+          reference_id: string | null
+          reference_type: string | null
+          transaction_date: string
+          transaction_type: string
+        }
+        Insert: {
+          approved_by?: string | null
+          balance_after: number
+          balance_before: number
+          balance_id: string
+          company_id: string
+          created_at?: string
+          description?: string | null
+          employee_id: string
+          hours: number
+          id?: string
+          reference_id?: string | null
+          reference_type?: string | null
+          transaction_date?: string
+          transaction_type: string
+        }
+        Update: {
+          approved_by?: string | null
+          balance_after?: number
+          balance_before?: number
+          balance_id?: string
+          company_id?: string
+          created_at?: string
+          description?: string | null
+          employee_id?: string
+          hours?: number
+          id?: string
+          reference_id?: string | null
+          reference_type?: string | null
+          transaction_date?: string
+          transaction_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "flex_time_transactions_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "flex_time_transactions_balance_id_fkey"
+            columns: ["balance_id"]
+            isOneToOne: false
+            referencedRelation: "flex_time_balances"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "flex_time_transactions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "flex_time_transactions_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       flight_risk_assessments: {
         Row: {
@@ -33234,6 +33646,71 @@ export type Database = {
           },
         ]
       }
+      labor_compliance_rules: {
+        Row: {
+          applies_to_employee_types: string[] | null
+          company_id: string
+          country_code: string
+          created_at: string
+          effective_from: string
+          effective_to: string | null
+          id: string
+          is_active: boolean | null
+          legal_reference: string | null
+          penalty_description: string | null
+          region_code: string | null
+          rule_name: string
+          rule_type: string
+          threshold_unit: string | null
+          threshold_value: number
+          updated_at: string
+        }
+        Insert: {
+          applies_to_employee_types?: string[] | null
+          company_id: string
+          country_code: string
+          created_at?: string
+          effective_from?: string
+          effective_to?: string | null
+          id?: string
+          is_active?: boolean | null
+          legal_reference?: string | null
+          penalty_description?: string | null
+          region_code?: string | null
+          rule_name: string
+          rule_type: string
+          threshold_unit?: string | null
+          threshold_value: number
+          updated_at?: string
+        }
+        Update: {
+          applies_to_employee_types?: string[] | null
+          company_id?: string
+          country_code?: string
+          created_at?: string
+          effective_from?: string
+          effective_to?: string | null
+          id?: string
+          is_active?: boolean | null
+          legal_reference?: string | null
+          penalty_description?: string | null
+          region_code?: string | null
+          rule_name?: string
+          rule_type?: string
+          threshold_unit?: string | null
+          threshold_value?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "labor_compliance_rules_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       learning_path_courses: {
         Row: {
           course_id: string
@@ -42302,6 +42779,104 @@ export type Database = {
           {
             foreignKeyName: "overtime_requests_employee_id_fkey"
             columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      overtime_risk_alerts: {
+        Row: {
+          acknowledged_at: string | null
+          acknowledged_by: string | null
+          alert_type: string
+          company_id: string
+          created_at: string
+          current_hours: number | null
+          employee_id: string
+          id: string
+          is_acknowledged: boolean | null
+          is_resolved: boolean | null
+          limit_hours: number | null
+          message: string
+          percentage_used: number | null
+          period_end: string | null
+          period_start: string | null
+          resolution_notes: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          severity: string
+          title: string
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          alert_type: string
+          company_id: string
+          created_at?: string
+          current_hours?: number | null
+          employee_id: string
+          id?: string
+          is_acknowledged?: boolean | null
+          is_resolved?: boolean | null
+          limit_hours?: number | null
+          message: string
+          percentage_used?: number | null
+          period_end?: string | null
+          period_start?: string | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string
+          title: string
+        }
+        Update: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          alert_type?: string
+          company_id?: string
+          created_at?: string
+          current_hours?: number | null
+          employee_id?: string
+          id?: string
+          is_acknowledged?: boolean | null
+          is_resolved?: boolean | null
+          limit_hours?: number | null
+          message?: string
+          percentage_used?: number | null
+          period_end?: string | null
+          period_start?: string | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "overtime_risk_alerts_acknowledged_by_fkey"
+            columns: ["acknowledged_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "overtime_risk_alerts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "overtime_risk_alerts_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "overtime_risk_alerts_resolved_by_fkey"
+            columns: ["resolved_by"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -58002,6 +58577,72 @@ export type Database = {
             columns: ["requester_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      time_attendance_audit_log: {
+        Row: {
+          action: string
+          actor_id: string
+          actor_role: string | null
+          changes_json: Json | null
+          company_id: string
+          created_at: string
+          entity_id: string
+          entity_type: string
+          id: string
+          ip_address: unknown
+          new_values: Json | null
+          old_values: Json | null
+          reason: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          action: string
+          actor_id: string
+          actor_role?: string | null
+          changes_json?: Json | null
+          company_id: string
+          created_at?: string
+          entity_id: string
+          entity_type: string
+          id?: string
+          ip_address?: unknown
+          new_values?: Json | null
+          old_values?: Json | null
+          reason?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          action?: string
+          actor_id?: string
+          actor_role?: string | null
+          changes_json?: Json | null
+          company_id?: string
+          created_at?: string
+          entity_id?: string
+          entity_type?: string
+          id?: string
+          ip_address?: unknown
+          new_values?: Json | null
+          old_values?: Json | null
+          reason?: string | null
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "time_attendance_audit_log_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "time_attendance_audit_log_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
             referencedColumns: ["id"]
           },
         ]
