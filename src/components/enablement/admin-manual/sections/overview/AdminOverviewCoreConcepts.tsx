@@ -115,8 +115,8 @@ export function AdminOverviewCoreConcepts() {
             Permission Model (Role-Based Permissions)
           </h3>
           <p className="text-muted-foreground mb-4">
-            HRplus uses a Role-Based Permission (RBP) model aligned with SAP SuccessFactors and 
-            Workday security best practices. Permissions are granted at multiple levels:
+            HRplus uses a Role-Based Permission (RBP) model aligned with enterprise security 
+            best practices. Permissions are granted at multiple levels:
           </p>
           <div className="overflow-x-auto">
             <table className="w-full text-sm border-collapse">
@@ -152,9 +152,8 @@ export function AdminOverviewCoreConcepts() {
               <div>
                 <span className="font-semibold text-sm text-foreground">Industry Standard</span>
                 <p className="text-sm text-muted-foreground mt-1">
-                  This RBP model follows the same patterns used in SAP SuccessFactors Permission Groups 
-                  and Workday Security Groups. Permissions are additive—users receive the union of all 
-                  permissions from their assigned roles.
+                  This RBP model follows enterprise-grade permission patterns. Permissions are 
+                  additive—users receive the union of all permissions from their assigned roles.
                 </p>
               </div>
             </div>
