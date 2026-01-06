@@ -200,27 +200,27 @@ const configExamples: ExampleConfig[] = [
 const businessRules: BusinessRule[] = [
   {
     rule: "Location codes must be unique within a company",
-    enforcement: "hard",
+    enforcement: "System",
     description: "Required for attendance and reporting"
   },
   {
     rule: "Timezone is required for attendance calculations",
-    enforcement: "hard",
+    enforcement: "System",
     description: "Ensures shift times are calculated correctly"
   },
   {
     rule: "Geofencing requires valid GPS coordinates",
-    enforcement: "hard",
+    enforcement: "System",
     description: "Latitude must be -90 to 90, Longitude -180 to 180"
   },
   {
     rule: "At least one location recommended before employees",
-    enforcement: "advisory",
+    enforcement: "Advisory",
     description: "Enables accurate attendance tracking"
   },
   {
     rule: "Deactivating location requires reassigning employees",
-    enforcement: "soft",
+    enforcement: "Policy",
     description: "Warning if employees are assigned"
   }
 ];

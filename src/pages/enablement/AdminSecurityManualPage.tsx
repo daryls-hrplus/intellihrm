@@ -235,7 +235,7 @@ export default function AdminSecurityManualPage() {
                 <div>
                   <h1 className="text-xl font-bold">Admin & Security Administrator Manual</h1>
                   <p className="text-sm text-muted-foreground">
-                    Enterprise-grade administration and security configuration guide
+                    Administration and security configuration guide
                   </p>
                 </div>
               </div>

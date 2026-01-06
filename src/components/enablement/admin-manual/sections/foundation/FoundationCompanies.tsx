@@ -222,27 +222,27 @@ const configExamples: ExampleConfig[] = [
 const businessRules: BusinessRule[] = [
   {
     rule: "Company code must be unique across the entire system",
-    enforcement: "hard",
+    enforcement: "System",
     description: "Ensures unique identification for integrations"
   },
   {
     rule: "Country selection determines available statutory fields",
-    enforcement: "hard",
+    enforcement: "System",
     description: "System shows only relevant statutory registrations"
   },
   {
     rule: "Registration and Tax ID formats are validated by country",
-    enforcement: "soft",
+    enforcement: "Policy",
     description: "Warning if format doesn't match expected pattern"
   },
   {
     rule: "At least one department must be created after company setup",
-    enforcement: "advisory",
+    enforcement: "Advisory",
     description: "Required before employees can be assigned"
   },
   {
     rule: "Company deactivation requires no active employees",
-    enforcement: "hard",
+    enforcement: "System",
     description: "All employees must be terminated or transferred first"
   }
 ];

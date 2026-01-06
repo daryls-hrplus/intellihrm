@@ -135,22 +135,22 @@ const configExamples: ExampleConfig[] = [
 const businessRules: BusinessRule[] = [
   {
     rule: "A country can only belong to one territory",
-    enforcement: "hard",
+    enforcement: "System",
     description: "System prevents duplicate country assignments across territories"
   },
   {
     rule: "At least one country must be selected",
-    enforcement: "hard",
+    enforcement: "System",
     description: "Territories cannot exist without assigned countries"
   },
   {
     rule: "Default currency must be available in all selected countries",
-    enforcement: "soft",
+    enforcement: "Policy",
     description: "Warning displayed if currency may cause conversion issues"
   },
   {
     rule: "Territory deletion requires no active company groups",
-    enforcement: "hard",
+    enforcement: "System",
     description: "Must reassign or delete child company groups first"
   }
 ];

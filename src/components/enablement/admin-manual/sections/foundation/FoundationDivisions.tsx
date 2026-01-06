@@ -131,22 +131,22 @@ const configExamples: ExampleConfig[] = [
 const businessRules: BusinessRule[] = [
   {
     rule: "Division codes must be unique within a company",
-    enforcement: "hard",
+    enforcement: "System",
     description: "Prevents duplicate identifiers"
   },
   {
     rule: "Division head must be an active employee in the company",
-    enforcement: "hard",
+    enforcement: "System",
     description: "Ensures valid reporting relationships"
   },
   {
     rule: "Divisions are optional in the hierarchy",
-    enforcement: "advisory",
+    enforcement: "Advisory",
     description: "Can be skipped for simpler organizations"
   },
   {
     rule: "Deleting a division requires reassigning child departments",
-    enforcement: "hard",
+    enforcement: "System",
     description: "Departments must be moved to another division or directly under company"
   }
 ];
