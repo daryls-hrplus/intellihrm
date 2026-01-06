@@ -18,9 +18,10 @@ interface IndicatorDefinition {
   company_id: string | null;
   code: string;
   name: string;
+  category: string;
   description: string | null;
-  calculation_method: string | null;
-  threshold_levels: { low: number; medium: number; high: number } | null;
+  calculation_method: string;
+  threshold_levels: Record<string, any> | null;
   applies_to: string[] | null;
   is_active: boolean;
   created_at: string;
@@ -44,8 +45,9 @@ export function IndicatorDefinitionsManager({ companyId }: IndicatorDefinitionsM
   const [formData, setFormData] = useState({
     code: '',
     name: '',
+    category: 'readiness',
     description: '',
-    calculation_method: '',
+    calculation_method: 'weighted_average',
     threshold_low: 30,
     threshold_medium: 60,
     threshold_high: 80,
@@ -68,32 +70,33 @@ export function IndicatorDefinitionsManager({ companyId }: IndicatorDefinitionsM
   });
 
   const saveMutation = useMutation({
-    mutationFn: async (data: typeof formData & { id?: string }) => {
-      const payload = {
+    mutationFn: async (formInput: typeof formData & { id?: string }) => {
+      const payload: any = {
         company_id: companyId,
-        code: data.code,
-        name: data.name,
-        description: data.description || null,
-        calculation_method: data.calculation_method || null,
+        code: formInput.code,
+        name: formInput.name,
+        category: formInput.category,
+        description: formInput.description || null,
+        calculation_method: formInput.calculation_method,
         threshold_levels: {
-          low: data.threshold_low,
-          medium: data.threshold_medium,
-          high: data.threshold_high
+          low: formInput.threshold_low,
+          medium: formInput.threshold_medium,
+          high: formInput.threshold_high
         },
-        applies_to: data.applies_to.length > 0 ? data.applies_to : null,
-        is_active: data.is_active
+        applies_to: formInput.applies_to.length > 0 ? formInput.applies_to : null,
+        is_active: formInput.is_active
       };
 
-      if (data.id) {
+      if (formInput.id) {
         const { error } = await supabase
           .from('talent_indicator_definitions')
           .update(payload)
-          .eq('id', data.id);
+          .eq('id', formInput.id);
         if (error) throw error;
       } else {
         const { error } = await supabase
           .from('talent_indicator_definitions')
-          .insert(payload);
+          .insert([payload]);
         if (error) throw error;
       }
     },
@@ -140,8 +143,9 @@ export function IndicatorDefinitionsManager({ companyId }: IndicatorDefinitionsM
     setFormData({
       code: '',
       name: '',
+      category: 'readiness',
       description: '',
-      calculation_method: '',
+      calculation_method: 'weighted_average',
       threshold_low: 30,
       threshold_medium: 60,
       threshold_high: 80,
@@ -155,8 +159,9 @@ export function IndicatorDefinitionsManager({ companyId }: IndicatorDefinitionsM
     setFormData({
       code: indicator.code,
       name: indicator.name,
+      category: indicator.category || 'readiness',
       description: indicator.description || '',
-      calculation_method: indicator.calculation_method || '',
+      calculation_method: indicator.calculation_method || 'weighted_average',
       threshold_low: indicator.threshold_levels?.low || 30,
       threshold_medium: indicator.threshold_levels?.medium || 60,
       threshold_high: indicator.threshold_levels?.high || 80,
