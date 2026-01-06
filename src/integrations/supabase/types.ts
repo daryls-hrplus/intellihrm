@@ -33733,6 +33733,332 @@ export type Database = {
           },
         ]
       }
+      leave_blackout_periods: {
+        Row: {
+          applies_to_all: boolean
+          company_id: string
+          created_at: string
+          created_by: string | null
+          department_ids: string[] | null
+          description: string | null
+          end_date: string
+          id: string
+          is_active: boolean
+          is_hard_block: boolean
+          is_recurring: boolean
+          leave_type_ids: string[] | null
+          name: string
+          override_approver_role: string | null
+          position_ids: string[] | null
+          recurrence_pattern: string | null
+          requires_override_approval: boolean
+          start_date: string
+          updated_at: string
+        }
+        Insert: {
+          applies_to_all?: boolean
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          department_ids?: string[] | null
+          description?: string | null
+          end_date: string
+          id?: string
+          is_active?: boolean
+          is_hard_block?: boolean
+          is_recurring?: boolean
+          leave_type_ids?: string[] | null
+          name: string
+          override_approver_role?: string | null
+          position_ids?: string[] | null
+          recurrence_pattern?: string | null
+          requires_override_approval?: boolean
+          start_date: string
+          updated_at?: string
+        }
+        Update: {
+          applies_to_all?: boolean
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          department_ids?: string[] | null
+          description?: string | null
+          end_date?: string
+          id?: string
+          is_active?: boolean
+          is_hard_block?: boolean
+          is_recurring?: boolean
+          leave_type_ids?: string[] | null
+          name?: string
+          override_approver_role?: string | null
+          position_ids?: string[] | null
+          recurrence_pattern?: string | null
+          requires_override_approval?: boolean
+          start_date?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leave_blackout_periods_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leave_blackout_periods_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      leave_cancellation_requests: {
+        Row: {
+          company_id: string
+          created_at: string
+          employee_id: string
+          id: string
+          leave_request_id: string
+          reason: string
+          requested_at: string
+          review_notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          employee_id: string
+          id?: string
+          leave_request_id: string
+          reason: string
+          requested_at?: string
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          employee_id?: string
+          id?: string
+          leave_request_id?: string
+          reason?: string
+          requested_at?: string
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leave_cancellation_requests_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leave_cancellation_requests_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leave_cancellation_requests_leave_request_id_fkey"
+            columns: ["leave_request_id"]
+            isOneToOne: false
+            referencedRelation: "leave_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leave_cancellation_requests_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      leave_conflict_rules: {
+        Row: {
+          block_threshold_percentage: number | null
+          company_id: string
+          created_at: string
+          critical_role_ids: string[] | null
+          department_id: string | null
+          description: string | null
+          id: string
+          is_active: boolean
+          is_warning_only: boolean
+          max_concurrent_count: number | null
+          max_concurrent_percentage: number | null
+          min_coverage_required: number | null
+          name: string
+          rule_type: string
+          updated_at: string
+          warning_threshold_percentage: number | null
+        }
+        Insert: {
+          block_threshold_percentage?: number | null
+          company_id: string
+          created_at?: string
+          critical_role_ids?: string[] | null
+          department_id?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          is_warning_only?: boolean
+          max_concurrent_count?: number | null
+          max_concurrent_percentage?: number | null
+          min_coverage_required?: number | null
+          name: string
+          rule_type?: string
+          updated_at?: string
+          warning_threshold_percentage?: number | null
+        }
+        Update: {
+          block_threshold_percentage?: number | null
+          company_id?: string
+          created_at?: string
+          critical_role_ids?: string[] | null
+          department_id?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          is_warning_only?: boolean
+          max_concurrent_count?: number | null
+          max_concurrent_percentage?: number | null
+          min_coverage_required?: number | null
+          name?: string
+          rule_type?: string
+          updated_at?: string
+          warning_threshold_percentage?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leave_conflict_rules_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leave_conflict_rules_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      leave_encashment_requests: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          company_id: string
+          created_at: string
+          currency: string | null
+          days_requested: number
+          employee_id: string
+          id: string
+          leave_type_id: string
+          leave_year_id: string | null
+          paid_at: string | null
+          payroll_run_id: string | null
+          rate_per_day: number | null
+          reason: string | null
+          rejection_reason: string | null
+          status: string
+          total_amount: number | null
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          company_id: string
+          created_at?: string
+          currency?: string | null
+          days_requested: number
+          employee_id: string
+          id?: string
+          leave_type_id: string
+          leave_year_id?: string | null
+          paid_at?: string | null
+          payroll_run_id?: string | null
+          rate_per_day?: number | null
+          reason?: string | null
+          rejection_reason?: string | null
+          status?: string
+          total_amount?: number | null
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          company_id?: string
+          created_at?: string
+          currency?: string | null
+          days_requested?: number
+          employee_id?: string
+          id?: string
+          leave_type_id?: string
+          leave_year_id?: string | null
+          paid_at?: string | null
+          payroll_run_id?: string | null
+          rate_per_day?: number | null
+          reason?: string | null
+          rejection_reason?: string | null
+          status?: string
+          total_amount?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leave_encashment_requests_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leave_encashment_requests_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leave_encashment_requests_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leave_encashment_requests_leave_type_id_fkey"
+            columns: ["leave_type_id"]
+            isOneToOne: false
+            referencedRelation: "leave_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leave_encashment_requests_leave_year_id_fkey"
+            columns: ["leave_year_id"]
+            isOneToOne: false
+            referencedRelation: "leave_years"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       leave_holidays: {
         Row: {
           applies_to_all: boolean
@@ -33785,6 +34111,89 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      leave_liability_snapshots: {
+        Row: {
+          avg_daily_rate: number | null
+          company_id: string
+          created_at: string
+          currency: string | null
+          department_id: string | null
+          generated_by: string | null
+          id: string
+          leave_type_id: string | null
+          notes: string | null
+          snapshot_date: string
+          total_days_accrued: number
+          total_days_balance: number
+          total_days_used: number
+          total_employees: number
+          total_liability_amount: number | null
+        }
+        Insert: {
+          avg_daily_rate?: number | null
+          company_id: string
+          created_at?: string
+          currency?: string | null
+          department_id?: string | null
+          generated_by?: string | null
+          id?: string
+          leave_type_id?: string | null
+          notes?: string | null
+          snapshot_date: string
+          total_days_accrued?: number
+          total_days_balance?: number
+          total_days_used?: number
+          total_employees?: number
+          total_liability_amount?: number | null
+        }
+        Update: {
+          avg_daily_rate?: number | null
+          company_id?: string
+          created_at?: string
+          currency?: string | null
+          department_id?: string | null
+          generated_by?: string | null
+          id?: string
+          leave_type_id?: string | null
+          notes?: string | null
+          snapshot_date?: string
+          total_days_accrued?: number
+          total_days_balance?: number
+          total_days_used?: number
+          total_employees?: number
+          total_liability_amount?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leave_liability_snapshots_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leave_liability_snapshots_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leave_liability_snapshots_generated_by_fkey"
+            columns: ["generated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leave_liability_snapshots_leave_type_id_fkey"
+            columns: ["leave_type_id"]
+            isOneToOne: false
+            referencedRelation: "leave_types"
             referencedColumns: ["id"]
           },
         ]
@@ -34069,6 +34478,210 @@ export type Database = {
             columns: ["payroll_run_id"]
             isOneToOne: false
             referencedRelation: "payroll_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      leave_plan_items: {
+        Row: {
+          color: string | null
+          company_id: string
+          created_at: string
+          employee_id: string
+          id: string
+          is_tentative: boolean
+          leave_request_id: string | null
+          leave_type_id: string
+          leave_year_id: string | null
+          notes: string | null
+          planned_days: number
+          planned_end_date: string
+          planned_start_date: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          color?: string | null
+          company_id: string
+          created_at?: string
+          employee_id: string
+          id?: string
+          is_tentative?: boolean
+          leave_request_id?: string | null
+          leave_type_id: string
+          leave_year_id?: string | null
+          notes?: string | null
+          planned_days: number
+          planned_end_date: string
+          planned_start_date: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          color?: string | null
+          company_id?: string
+          created_at?: string
+          employee_id?: string
+          id?: string
+          is_tentative?: boolean
+          leave_request_id?: string | null
+          leave_type_id?: string
+          leave_year_id?: string | null
+          notes?: string | null
+          planned_days?: number
+          planned_end_date?: string
+          planned_start_date?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leave_plan_items_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leave_plan_items_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leave_plan_items_leave_request_id_fkey"
+            columns: ["leave_request_id"]
+            isOneToOne: false
+            referencedRelation: "leave_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leave_plan_items_leave_type_id_fkey"
+            columns: ["leave_type_id"]
+            isOneToOne: false
+            referencedRelation: "leave_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leave_plan_items_leave_year_id_fkey"
+            columns: ["leave_year_id"]
+            isOneToOne: false
+            referencedRelation: "leave_years"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      leave_prorata_settings: {
+        Row: {
+          apply_to_first_year_only: boolean
+          calculation_method: string
+          company_id: string
+          created_at: string
+          id: string
+          include_join_month: boolean
+          is_active: boolean
+          leave_type_id: string
+          min_service_days_for_accrual: number | null
+          rounding_method: string
+          rounding_precision: number
+          updated_at: string
+        }
+        Insert: {
+          apply_to_first_year_only?: boolean
+          calculation_method?: string
+          company_id: string
+          created_at?: string
+          id?: string
+          include_join_month?: boolean
+          is_active?: boolean
+          leave_type_id: string
+          min_service_days_for_accrual?: number | null
+          rounding_method?: string
+          rounding_precision?: number
+          updated_at?: string
+        }
+        Update: {
+          apply_to_first_year_only?: boolean
+          calculation_method?: string
+          company_id?: string
+          created_at?: string
+          id?: string
+          include_join_month?: boolean
+          is_active?: boolean
+          leave_type_id?: string
+          min_service_days_for_accrual?: number | null
+          rounding_method?: string
+          rounding_precision?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leave_prorata_settings_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leave_prorata_settings_leave_type_id_fkey"
+            columns: ["leave_type_id"]
+            isOneToOne: false
+            referencedRelation: "leave_types"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      leave_request_attachments: {
+        Row: {
+          attachment_type: string | null
+          created_at: string
+          description: string | null
+          file_name: string
+          file_path: string
+          file_size: number | null
+          file_type: string | null
+          id: string
+          leave_request_id: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          attachment_type?: string | null
+          created_at?: string
+          description?: string | null
+          file_name: string
+          file_path: string
+          file_size?: number | null
+          file_type?: string | null
+          id?: string
+          leave_request_id: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          attachment_type?: string | null
+          created_at?: string
+          description?: string | null
+          file_name?: string
+          file_path?: string
+          file_size?: number | null
+          file_type?: string | null
+          id?: string
+          leave_request_id?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leave_request_attachments_leave_request_id_fkey"
+            columns: ["leave_request_id"]
+            isOneToOne: false
+            referencedRelation: "leave_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leave_request_attachments_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
