@@ -5,6 +5,7 @@ import {
   Clock, Database, Server, Shield, Globe, Layers, 
   Lock, RefreshCw, FileCheck
 } from 'lucide-react';
+import { FeatureStatusBadge } from '../../components';
 
 export function AdminOverviewArchitecture() {
   return (
@@ -27,6 +28,7 @@ export function AdminOverviewArchitecture() {
           <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
             <Layers className="h-5 w-5 text-primary" />
             Architecture Overview
+            <FeatureStatusBadge status="implemented" size="sm" />
           </h3>
           <p className="text-muted-foreground mb-4">
             HRplus Admin & Security is built on a modern, cloud-native architecture designed for 
@@ -80,6 +82,7 @@ export function AdminOverviewArchitecture() {
           <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
             <Database className="h-5 w-5 text-primary" />
             Multi-Tenancy Design
+            <FeatureStatusBadge status="implemented" size="sm" />
           </h3>
           <p className="text-muted-foreground mb-4">
             HRplus uses a shared database, separate schema approach to multi-tenancy. This provides 
@@ -91,20 +94,20 @@ export function AdminOverviewArchitecture() {
                 title: 'Data Isolation',
                 icon: Lock,
                 points: [
-                  'Company-level data segregation',
-                  'Row-Level Security (RLS) policies',
-                  'Encrypted data at rest and in transit',
-                  'Tenant-specific encryption keys'
+                  { text: 'Company-level data segregation', status: 'implemented' as const },
+                  { text: 'Row-Level Security (RLS) policies', status: 'implemented' as const },
+                  { text: 'Encrypted data at rest and in transit', status: 'implemented' as const },
+                  { text: 'Tenant-specific encryption keys', status: 'recommended' as const }
                 ]
               },
               {
                 title: 'Shared Infrastructure',
                 icon: Server,
                 points: [
-                  'Common application codebase',
-                  'Shared compute resources',
-                  'Centralized security updates',
-                  'Unified compliance controls'
+                  { text: 'Common application codebase', status: 'implemented' as const },
+                  { text: 'Shared compute resources', status: 'implemented' as const },
+                  { text: 'Centralized security updates', status: 'implemented' as const },
+                  { text: 'Unified compliance controls', status: 'implemented' as const }
                 ]
               }
             ].map((section, i) => (
@@ -118,7 +121,8 @@ export function AdminOverviewArchitecture() {
                         {section.points.map((point, j) => (
                           <li key={j} className="flex items-center gap-2">
                             <span className="w-1 h-1 rounded-full bg-primary" />
-                            {point}
+                            <span className="flex-1">{point.text}</span>
+                            <FeatureStatusBadge status={point.status} size="sm" />
                           </li>
                         ))}
                       </ul>
@@ -137,6 +141,7 @@ export function AdminOverviewArchitecture() {
           <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
             <Database className="h-5 w-5 text-primary" />
             Core Data Entities
+            <FeatureStatusBadge status="implemented" size="sm" />
           </h3>
           <p className="text-muted-foreground mb-4">
             The Admin & Security module manages several core entities that are referenced 
@@ -150,22 +155,26 @@ export function AdminOverviewArchitecture() {
                   <th className="border p-3 text-left font-medium">Table</th>
                   <th className="border p-3 text-left font-medium">Purpose</th>
                   <th className="border p-3 text-left font-medium">Key Relationships</th>
+                  <th className="border p-3 text-center font-medium">Status</th>
                 </tr>
               </thead>
               <tbody>
                 {[
-                  { entity: 'Company', table: 'companies', purpose: 'Legal entity definition', relations: 'company_groups, departments' },
-                  { entity: 'Department', table: 'departments', purpose: 'Business unit grouping', relations: 'companies, sections, positions' },
-                  { entity: 'Role', table: 'roles', purpose: 'Permission template', relations: 'role_pii_access, role_container_access' },
-                  { entity: 'User Profile', table: 'profiles', purpose: 'User account data', relations: 'user_roles, auth.users' },
-                  { entity: 'Audit Log', table: 'audit_logs', purpose: 'Activity tracking', relations: 'profiles, companies' },
-                  { entity: 'Permission', table: 'module_permissions', purpose: 'Granular access rules', relations: 'roles, role_permissions' }
+                  { entity: 'Company', table: 'companies', purpose: 'Legal entity definition', relations: 'company_groups, departments', status: 'implemented' as const },
+                  { entity: 'Department', table: 'departments', purpose: 'Business unit grouping', relations: 'companies, sections, positions', status: 'implemented' as const },
+                  { entity: 'Role', table: 'roles', purpose: 'Permission template', relations: 'role_pii_access, role_container_access', status: 'implemented' as const },
+                  { entity: 'User Profile', table: 'profiles', purpose: 'User account data', relations: 'user_roles, auth.users', status: 'implemented' as const },
+                  { entity: 'Audit Log', table: 'audit_logs', purpose: 'Activity tracking', relations: 'profiles, companies', status: 'implemented' as const },
+                  { entity: 'Permission', table: 'module_permissions', purpose: 'Granular access rules', relations: 'roles, role_permissions', status: 'implemented' as const }
                 ].map((row, i) => (
                   <tr key={i} className={i % 2 === 0 ? 'bg-background' : 'bg-muted/30'}>
                     <td className="border p-3 font-medium">{row.entity}</td>
                     <td className="border p-3 font-mono text-xs text-muted-foreground">{row.table}</td>
                     <td className="border p-3 text-muted-foreground">{row.purpose}</td>
                     <td className="border p-3 font-mono text-xs text-muted-foreground">{row.relations}</td>
+                    <td className="border p-3 text-center">
+                      <FeatureStatusBadge status={row.status} size="sm" />
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -190,24 +199,28 @@ export function AdminOverviewArchitecture() {
                 boundary: 'Network Perimeter',
                 description: 'WAF, DDoS protection, IP allowlisting',
                 level: 'Infrastructure',
+                status: 'recommended' as const,
                 controls: ['TLS 1.3 encryption', 'Rate limiting', 'Geo-blocking']
               },
               {
                 boundary: 'Authentication Gateway',
                 description: 'Identity verification before system access',
                 level: 'Identity',
+                status: 'implemented' as const,
                 controls: ['SSO/SAML', 'MFA', 'Session management']
               },
               {
                 boundary: 'Authorization Layer',
                 description: 'Permission checks on every request',
                 level: 'Access',
+                status: 'implemented' as const,
                 controls: ['RBP enforcement', 'API security', 'Resource scoping']
               },
               {
                 boundary: 'Data Layer',
                 description: 'Protection of stored data',
                 level: 'Data',
+                status: 'implemented' as const,
                 controls: ['RLS policies', 'Encryption at rest', 'Field masking']
               }
             ].map((boundary, i) => (
@@ -219,6 +232,7 @@ export function AdminOverviewArchitecture() {
                   <div className="flex items-center gap-2 mb-1">
                     <h4 className="font-medium">{boundary.boundary}</h4>
                     <Badge variant="outline">{boundary.level}</Badge>
+                    <FeatureStatusBadge status={boundary.status} size="sm" />
                   </div>
                   <p className="text-sm text-muted-foreground mb-2">{boundary.description}</p>
                   <div className="flex flex-wrap gap-1">
@@ -248,7 +262,10 @@ export function AdminOverviewArchitecture() {
           <div className="grid md:grid-cols-2 gap-4">
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-base">Internal Module Integration</CardTitle>
+                <div className="flex items-center gap-2">
+                  <CardTitle className="text-base">Internal Module Integration</CardTitle>
+                  <FeatureStatusBadge status="implemented" size="sm" />
+                </div>
               </CardHeader>
               <CardContent className="pt-0">
                 <ul className="space-y-2 text-sm text-muted-foreground">
@@ -269,20 +286,23 @@ export function AdminOverviewArchitecture() {
             </Card>
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-base">External System Integration</CardTitle>
+                <div className="flex items-center gap-2">
+                  <CardTitle className="text-base">External System Integration</CardTitle>
+                  <FeatureStatusBadge status="recommended" size="sm" />
+                </div>
               </CardHeader>
               <CardContent className="pt-0">
                 <ul className="space-y-2 text-sm text-muted-foreground">
                   {[
-                    'Identity Providers → SSO via SAML 2.0, OAuth',
-                    'Active Directory → User provisioning sync',
-                    'SIEM Systems → Security event forwarding',
-                    'Audit Platforms → Compliance log export',
-                    'HR Systems → Organization data sync'
+                    { text: 'Identity Providers → SSO via SAML 2.0, OAuth', status: 'implemented' as const },
+                    { text: 'Active Directory → User provisioning sync', status: 'recommended' as const },
+                    { text: 'SIEM Systems → Security event forwarding', status: 'recommended' as const },
+                    { text: 'Audit Platforms → Compliance log export', status: 'recommended' as const },
+                    { text: 'HR Systems → Organization data sync', status: 'recommended' as const }
                   ].map((item, i) => (
                     <li key={i} className="flex items-center gap-2">
-                      <span className="w-1 h-1 rounded-full bg-blue-500" />
-                      {item}
+                      <span className={`w-1 h-1 rounded-full ${item.status === 'implemented' ? 'bg-green-500' : 'bg-blue-500'}`} />
+                      {item.text}
                     </li>
                   ))}
                 </ul>

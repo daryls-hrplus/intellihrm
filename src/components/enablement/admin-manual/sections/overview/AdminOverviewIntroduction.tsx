@@ -3,8 +3,9 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { 
   BookOpen, Target, Users, Shield, CheckCircle, Lightbulb, 
-  Building, Clock, GraduationCap, FileText, HelpCircle, Lock
+  Building, Clock, GraduationCap, FileText, HelpCircle, Lock, Star
 } from 'lucide-react';
+import { FeatureStatusBadge } from '../../components';
 
 export function AdminOverviewIntroduction() {
   return (
@@ -37,21 +38,33 @@ export function AdminOverviewIntroduction() {
                 across the Caribbean, Africa, and global regions.
               </p>
               <div className="mt-4 grid md:grid-cols-4 gap-4">
-                <div className="text-center p-3 bg-background rounded-lg">
+                <div className="text-center p-3 bg-background rounded-lg relative">
+                  <div className="absolute -top-2 -right-2">
+                    <FeatureStatusBadge status="implemented" size="sm" />
+                  </div>
                   <div className="text-2xl font-bold text-primary">100%</div>
                   <div className="text-xs text-muted-foreground">Audit trail coverage</div>
                 </div>
-                <div className="text-center p-3 bg-background rounded-lg">
+                <div className="text-center p-3 bg-background rounded-lg relative">
+                  <div className="absolute -top-2 -right-2">
+                    <FeatureStatusBadge status="recommended" size="sm" />
+                  </div>
                   <div className="text-2xl font-bold text-primary">99.9%</div>
-                  <div className="text-xs text-muted-foreground">Uptime SLA</div>
+                  <div className="text-xs text-muted-foreground">Uptime SLA Target</div>
                 </div>
-                <div className="text-center p-3 bg-background rounded-lg">
+                <div className="text-center p-3 bg-background rounded-lg relative">
+                  <div className="absolute -top-2 -right-2">
+                    <FeatureStatusBadge status="recommended" size="sm" />
+                  </div>
                   <div className="text-2xl font-bold text-primary">SOC 2</div>
-                  <div className="text-xs text-muted-foreground">Type II Certified</div>
+                  <div className="text-xs text-muted-foreground">Alignment Goal</div>
                 </div>
-                <div className="text-center p-3 bg-background rounded-lg">
+                <div className="text-center p-3 bg-background rounded-lg relative">
+                  <div className="absolute -top-2 -right-2">
+                    <FeatureStatusBadge status="recommended" size="sm" />
+                  </div>
                   <div className="text-2xl font-bold text-primary">ISO 42001</div>
-                  <div className="text-xs text-muted-foreground">AI Governance</div>
+                  <div className="text-xs text-muted-foreground">AI Governance Goal</div>
                 </div>
               </div>
             </div>
@@ -70,17 +83,18 @@ export function AdminOverviewIntroduction() {
               proper governance, organizations face data breaches, compliance violations, and 
               operational inefficiencies. The HRplus Admin & Security module addresses these challenges:
             </p>
-            <ul className="space-y-2 list-none pl-0">
+            <ul className="space-y-3 list-none pl-0">
               {[
-                'Role-Based Permissions (RBP) ensuring least-privilege access across all modules',
-                'Multi-level organization hierarchy supporting global, regional, and local operations',
-                'Comprehensive audit trails meeting SOC 2, GDPR, and regional compliance requirements',
-                'AI governance framework with ISO 42001 alignment for responsible AI deployment',
-                'Single sign-on (SSO) and multi-factor authentication (MFA) for enterprise security'
+                { text: 'Role-Based Permissions (RBP) ensuring least-privilege access across all modules', status: 'implemented' as const },
+                { text: 'Multi-level organization hierarchy supporting global, regional, and local operations', status: 'implemented' as const },
+                { text: 'Comprehensive audit trails meeting SOC 2, GDPR, and regional compliance requirements', status: 'implemented' as const },
+                { text: 'AI governance framework with ISO 42001 alignment for responsible AI deployment', status: 'implemented' as const },
+                { text: 'Single sign-on (SSO) and multi-factor authentication (MFA) for enterprise security', status: 'implemented' as const }
               ].map((item, i) => (
                 <li key={i} className="flex items-start gap-2">
                   <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                  <span>{item}</span>
+                  <span className="flex-1">{item.text}</span>
+                  <FeatureStatusBadge status={item.status} size="sm" />
                 </li>
               ))}
             </ul>
@@ -190,10 +204,13 @@ export function AdminOverviewIntroduction() {
                     <Shield className="h-5 w-5 text-primary" />
                   </div>
                   <div>
-                    <h4 className="font-medium">Enterprise-Grade Security</h4>
+                    <div className="flex items-center gap-2 mb-1">
+                      <h4 className="font-medium">Enterprise-Grade Security</h4>
+                      <FeatureStatusBadge status="implemented" size="sm" />
+                    </div>
                     <p className="text-sm text-muted-foreground mt-1">
-                      SOC 2 Type II certified with comprehensive audit trails, 
-                      MFA enforcement, and SSO integration for enterprise identity providers.
+                      Comprehensive audit trails, MFA enforcement, and SSO integration 
+                      for enterprise identity providers.
                     </p>
                   </div>
                 </div>
@@ -206,7 +223,10 @@ export function AdminOverviewIntroduction() {
                     <Lock className="h-5 w-5 text-blue-500" />
                   </div>
                   <div>
-                    <h4 className="font-medium">Granular Access Control</h4>
+                    <div className="flex items-center gap-2 mb-1">
+                      <h4 className="font-medium">Granular Access Control</h4>
+                      <FeatureStatusBadge status="implemented" size="sm" />
+                    </div>
                     <p className="text-sm text-muted-foreground mt-1">
                       Role-Based Permissions (RBP) at module, tab, action, and field levels. 
                       PII masking and data classification for sensitive information.
@@ -222,7 +242,10 @@ export function AdminOverviewIntroduction() {
                     <Building className="h-5 w-5 text-green-500" />
                   </div>
                   <div>
-                    <h4 className="font-medium">Regional Compliance</h4>
+                    <div className="flex items-center gap-2 mb-1">
+                      <h4 className="font-medium">Regional Compliance</h4>
+                      <FeatureStatusBadge status="recommended" size="sm" />
+                    </div>
                     <p className="text-sm text-muted-foreground mt-1">
                       Built-in support for Caribbean, African, and global compliance. 
                       GDPR, local data protection laws, and industry-specific requirements.
@@ -268,7 +291,25 @@ export function AdminOverviewIntroduction() {
         {/* Document Conventions */}
         <div>
           <h3 className="text-lg font-semibold mb-4">Document Conventions</h3>
-          <div className="grid md:grid-cols-2 gap-4">
+          <div className="grid md:grid-cols-3 gap-4">
+            <div className="p-4 border-l-4 border-l-green-500 bg-muted/50 rounded-r-lg">
+              <div className="flex items-start gap-2">
+                <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400 mt-0.5" />
+                <div>
+                  <span className="font-semibold text-sm text-foreground">Implemented</span>
+                  <p className="text-xs text-muted-foreground mt-1">Feature exists in the HRplus system</p>
+                </div>
+              </div>
+            </div>
+            <div className="p-4 border-l-4 border-l-blue-500 bg-muted/50 rounded-r-lg">
+              <div className="flex items-start gap-2">
+                <Star className="h-4 w-4 text-blue-600 dark:text-blue-400 mt-0.5" />
+                <div>
+                  <span className="font-semibold text-sm text-foreground">Recommended</span>
+                  <p className="text-xs text-muted-foreground mt-1">Industry best practice or operational guidance</p>
+                </div>
+              </div>
+            </div>
             <div className="p-4 border-l-4 border-l-amber-500 bg-muted/50 rounded-r-lg">
               <div className="flex items-start gap-2">
                 <Lightbulb className="h-4 w-4 text-amber-600 dark:text-amber-400 mt-0.5" />
@@ -278,6 +319,8 @@ export function AdminOverviewIntroduction() {
                 </div>
               </div>
             </div>
+          </div>
+          <div className="grid md:grid-cols-3 gap-4 mt-4">
             <div className="p-4 border-l-4 border-l-red-500 bg-muted/50 rounded-r-lg">
               <div className="flex items-start gap-2">
                 <HelpCircle className="h-4 w-4 text-red-600 dark:text-red-400 mt-0.5" />
@@ -287,9 +330,9 @@ export function AdminOverviewIntroduction() {
                 </div>
               </div>
             </div>
-            <div className="p-4 border-l-4 border-l-blue-500 bg-muted/50 rounded-r-lg">
+            <div className="p-4 border-l-4 border-l-purple-500 bg-muted/50 rounded-r-lg">
               <div className="flex items-start gap-2">
-                <BookOpen className="h-4 w-4 text-blue-600 dark:text-blue-400 mt-0.5" />
+                <BookOpen className="h-4 w-4 text-purple-600 dark:text-purple-400 mt-0.5" />
                 <div>
                   <span className="font-semibold text-sm text-foreground">Industry Standard</span>
                   <p className="text-xs text-muted-foreground mt-1">Alignment with industry best practices</p>
