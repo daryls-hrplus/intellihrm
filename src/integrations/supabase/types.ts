@@ -3861,6 +3861,8 @@ export type Database = {
       }
       attendance_exceptions: {
         Row: {
+          actual_time: string | null
+          auto_resolved: boolean | null
           company_id: string
           corrected_time: string | null
           created_at: string
@@ -3873,12 +3875,20 @@ export type Database = {
           review_notes: string | null
           reviewed_at: string | null
           reviewed_by: string | null
+          schedule_id: string | null
+          scheduled_time: string | null
+          severity: string | null
+          shift_id: string | null
           status: string
           time_clock_entry_id: string | null
+          time_entry_id: string | null
           updated_at: string
+          variance_minutes: number | null
           workflow_instance_id: string | null
         }
         Insert: {
+          actual_time?: string | null
+          auto_resolved?: boolean | null
           company_id: string
           corrected_time?: string | null
           created_at?: string
@@ -3891,12 +3901,20 @@ export type Database = {
           review_notes?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
+          schedule_id?: string | null
+          scheduled_time?: string | null
+          severity?: string | null
+          shift_id?: string | null
           status?: string
           time_clock_entry_id?: string | null
+          time_entry_id?: string | null
           updated_at?: string
+          variance_minutes?: number | null
           workflow_instance_id?: string | null
         }
         Update: {
+          actual_time?: string | null
+          auto_resolved?: boolean | null
           company_id?: string
           corrected_time?: string | null
           created_at?: string
@@ -3909,9 +3927,15 @@ export type Database = {
           review_notes?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
+          schedule_id?: string | null
+          scheduled_time?: string | null
+          severity?: string | null
+          shift_id?: string | null
           status?: string
           time_clock_entry_id?: string | null
+          time_entry_id?: string | null
           updated_at?: string
+          variance_minutes?: number | null
           workflow_instance_id?: string | null
         }
         Relationships: [
@@ -3937,8 +3961,22 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "attendance_exceptions_shift_id_fkey"
+            columns: ["shift_id"]
+            isOneToOne: false
+            referencedRelation: "shifts"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "attendance_exceptions_time_clock_entry_id_fkey"
             columns: ["time_clock_entry_id"]
+            isOneToOne: false
+            referencedRelation: "time_clock_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_exceptions_time_entry_id_fkey"
+            columns: ["time_entry_id"]
             isOneToOne: false
             referencedRelation: "time_clock_entries"
             referencedColumns: ["id"]
@@ -12025,6 +12063,50 @@ export type Database = {
             columns: ["source_cycle_id"]
             isOneToOne: false
             referencedRelation: "feedback_360_cycles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      device_polling_config: {
+        Row: {
+          company_id: string | null
+          created_at: string | null
+          id: string
+          is_enabled: boolean | null
+          last_poll_at: string | null
+          next_poll_at: string | null
+          poll_failures: number | null
+          polling_interval_minutes: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string | null
+          id?: string
+          is_enabled?: boolean | null
+          last_poll_at?: string | null
+          next_poll_at?: string | null
+          poll_failures?: number | null
+          polling_interval_minutes?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string | null
+          id?: string
+          is_enabled?: boolean | null
+          last_poll_at?: string | null
+          next_poll_at?: string | null
+          poll_failures?: number | null
+          polling_interval_minutes?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "device_polling_config_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "companies"
             referencedColumns: ["id"]
           },
         ]
@@ -59081,6 +59163,7 @@ export type Database = {
           adjustment_reason: string | null
           break_duration_minutes: number | null
           break_end: string | null
+          break_minutes_expected: number | null
           break_start: string | null
           clock_in: string
           clock_in_accuracy_meters: number | null
@@ -59107,10 +59190,13 @@ export type Database = {
           company_id: string
           created_at: string
           employee_id: string
+          exceptions_detected: string[] | null
           face_verified: boolean | null
           geofence_violation_notes: string | null
           id: string
           is_split_shift: boolean | null
+          match_quality: string | null
+          matched_at: string | null
           notes: string | null
           overtime_hours: number | null
           parent_entry_id: string | null
@@ -59120,6 +59206,8 @@ export type Database = {
           rounded_clock_out: string | null
           rounding_rule_applied: string | null
           schedule_id: string | null
+          scheduled_end: string | null
+          scheduled_start: string | null
           shift_differential: number | null
           shift_differential_amount: number | null
           shift_differential_id: string | null
@@ -59136,6 +59224,7 @@ export type Database = {
           adjustment_reason?: string | null
           break_duration_minutes?: number | null
           break_end?: string | null
+          break_minutes_expected?: number | null
           break_start?: string | null
           clock_in: string
           clock_in_accuracy_meters?: number | null
@@ -59162,10 +59251,13 @@ export type Database = {
           company_id: string
           created_at?: string
           employee_id: string
+          exceptions_detected?: string[] | null
           face_verified?: boolean | null
           geofence_violation_notes?: string | null
           id?: string
           is_split_shift?: boolean | null
+          match_quality?: string | null
+          matched_at?: string | null
           notes?: string | null
           overtime_hours?: number | null
           parent_entry_id?: string | null
@@ -59175,6 +59267,8 @@ export type Database = {
           rounded_clock_out?: string | null
           rounding_rule_applied?: string | null
           schedule_id?: string | null
+          scheduled_end?: string | null
+          scheduled_start?: string | null
           shift_differential?: number | null
           shift_differential_amount?: number | null
           shift_differential_id?: string | null
@@ -59191,6 +59285,7 @@ export type Database = {
           adjustment_reason?: string | null
           break_duration_minutes?: number | null
           break_end?: string | null
+          break_minutes_expected?: number | null
           break_start?: string | null
           clock_in?: string
           clock_in_accuracy_meters?: number | null
@@ -59217,10 +59312,13 @@ export type Database = {
           company_id?: string
           created_at?: string
           employee_id?: string
+          exceptions_detected?: string[] | null
           face_verified?: boolean | null
           geofence_violation_notes?: string | null
           id?: string
           is_split_shift?: boolean | null
+          match_quality?: string | null
+          matched_at?: string | null
           notes?: string | null
           overtime_hours?: number | null
           parent_entry_id?: string | null
@@ -59230,6 +59328,8 @@ export type Database = {
           rounded_clock_out?: string | null
           rounding_rule_applied?: string | null
           schedule_id?: string | null
+          scheduled_end?: string | null
+          scheduled_start?: string | null
           shift_differential?: number | null
           shift_differential_amount?: number | null
           shift_differential_id?: string | null
