@@ -389,3 +389,12 @@ verify_jwt = false
 
 [functions.generate-workflow-diagram]
 verify_jwt = false
+
+[functions.analyze-wellness]
+verify_jwt = false
+
+[functions.parse-cba-document]
+verify_jwt = false
+
+[functions.simulate-cba-rules]
+verify_jwt = false
