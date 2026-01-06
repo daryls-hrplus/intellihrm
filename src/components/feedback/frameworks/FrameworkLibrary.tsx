@@ -237,10 +237,6 @@ export function FrameworkLibrary({ companyId }: FrameworkLibraryProps) {
                         Status: {selectedFramework.status}
                       </div>
                     </div>
-                            </ul>
-                          )}
-                        </div>
-                      ))}
                   </div>
                 </div>
               </div>

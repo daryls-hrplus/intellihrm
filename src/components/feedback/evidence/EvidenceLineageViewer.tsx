@@ -212,7 +212,7 @@ export function EvidenceLineageViewer({ employeeId, signalId }: EvidenceLineageV
                   {currentSnapshot.rater_breakdown &&
                   Object.keys(currentSnapshot.rater_breakdown).length > 0 ? (
                     <div className="space-y-3">
-                      {Object.entries(currentSnapshot.rater_breakdown).map(([group, data]) => (
+                      {Object.entries(currentSnapshot.rater_breakdown as Record<string, { avg: number; count: number }>).map(([group, data]) => (
                         <div key={group}>
                           <div className="flex justify-between text-sm mb-1">
                             <span className="capitalize">{group.replace('_', ' ')}</span>
