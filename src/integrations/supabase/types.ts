@@ -59198,8 +59198,16 @@ export type Database = {
           match_quality: string | null
           matched_at: string | null
           notes: string | null
+          override_at: string | null
+          override_by: string | null
+          override_clock_in: string | null
+          override_clock_out: string | null
+          override_reason: string | null
           overtime_hours: number | null
           parent_entry_id: string | null
+          payable_hours: number | null
+          payable_overtime_hours: number | null
+          payable_regular_hours: number | null
           project_id: string | null
           regular_hours: number | null
           rounded_clock_in: string | null
@@ -59259,8 +59267,16 @@ export type Database = {
           match_quality?: string | null
           matched_at?: string | null
           notes?: string | null
+          override_at?: string | null
+          override_by?: string | null
+          override_clock_in?: string | null
+          override_clock_out?: string | null
+          override_reason?: string | null
           overtime_hours?: number | null
           parent_entry_id?: string | null
+          payable_hours?: number | null
+          payable_overtime_hours?: number | null
+          payable_regular_hours?: number | null
           project_id?: string | null
           regular_hours?: number | null
           rounded_clock_in?: string | null
@@ -59320,8 +59336,16 @@ export type Database = {
           match_quality?: string | null
           matched_at?: string | null
           notes?: string | null
+          override_at?: string | null
+          override_by?: string | null
+          override_clock_in?: string | null
+          override_clock_out?: string | null
+          override_reason?: string | null
           overtime_hours?: number | null
           parent_entry_id?: string | null
+          payable_hours?: number | null
+          payable_overtime_hours?: number | null
+          payable_regular_hours?: number | null
           project_id?: string | null
           regular_hours?: number | null
           rounded_clock_in?: string | null
@@ -59372,6 +59396,13 @@ export type Database = {
           {
             foreignKeyName: "time_clock_entries_employee_id_fkey"
             columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "time_clock_entries_override_by_fkey"
+            columns: ["override_by"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]

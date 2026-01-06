@@ -12,12 +12,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format, startOfWeek } from "date-fns";
 import { formatDateForDisplay } from "@/utils/dateUtils";
-import { Users, Clock, CheckCircle, XCircle, AlertTriangle, Timer, ClipboardList, Eye, UserCheck } from "lucide-react";
+import { Users, Clock, CheckCircle, XCircle, AlertTriangle, Timer, ClipboardList, Eye, UserCheck, Edit2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useLanguage } from "@/hooks/useLanguage";
 import { PunchDetailDialog } from "@/components/time-attendance/PunchDetailDialog";
+import { PunchOverrideDialog } from "@/components/time-attendance/PunchOverrideDialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface AssignedEmployee {
@@ -36,6 +37,9 @@ interface TeamTimeEntry {
   clock_out: string | null;
   rounded_clock_in: string | null;
   rounded_clock_out: string | null;
+  override_clock_in: string | null;
+  override_clock_out: string | null;
+  override_reason: string | null;
   clock_in_location: string | null;
   clock_out_location: string | null;
   clock_in_latitude: number | null;
@@ -53,6 +57,9 @@ interface TeamTimeEntry {
   total_hours: number | null;
   regular_hours: number | null;
   overtime_hours: number | null;
+  payable_hours: number | null;
+  payable_regular_hours: number | null;
+  payable_overtime_hours: number | null;
   status: string;
   scheduled_start: string | null;
   scheduled_end: string | null;
@@ -101,6 +108,9 @@ export default function MssTimeAttendancePage() {
 
   const [punchDetailOpen, setPunchDetailOpen] = useState(false);
   const [selectedPunch, setSelectedPunch] = useState<TeamTimeEntry | null>(null);
+
+  const [overrideDialogOpen, setOverrideDialogOpen] = useState(false);
+  const [punchToOverride, setPunchToOverride] = useState<TeamTimeEntry | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -190,6 +200,7 @@ export default function MssTimeAttendancePage() {
         .select(`
           id, employee_id, clock_in, clock_out, 
           rounded_clock_in, rounded_clock_out,
+          override_clock_in, override_clock_out, override_reason,
           clock_in_location, clock_out_location,
           clock_in_latitude, clock_in_longitude,
           clock_out_latitude, clock_out_longitude,
@@ -198,6 +209,7 @@ export default function MssTimeAttendancePage() {
           clock_in_face_verified, clock_out_face_verified,
           clock_in_method, clock_out_method,
           total_hours, regular_hours, overtime_hours,
+          payable_hours, payable_regular_hours, payable_overtime_hours,
           status, scheduled_start, scheduled_end,
           break_duration_minutes, rounding_rule_applied,
           employee:profiles!time_clock_entries_employee_id_fkey(full_name)
@@ -461,47 +473,74 @@ export default function MssTimeAttendancePage() {
                         <TableHead>Employee</TableHead>
                         <TableHead>Date</TableHead>
                         <TableHead>Actual In</TableHead>
-                        <TableHead>Rounded In</TableHead>
                         <TableHead>Actual Out</TableHead>
-                        <TableHead>Rounded Out</TableHead>
-                        <TableHead>Hours</TableHead>
+                        <TableHead>Override In</TableHead>
+                        <TableHead>Override Out</TableHead>
+                        <TableHead>Payable Hrs</TableHead>
                         <TableHead>Status</TableHead>
-                        <TableHead className="w-[50px]"></TableHead>
+                        <TableHead className="w-[80px]">Actions</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {teamEntries.map((entry) => (
-                        <TableRow key={entry.id}>
+                        <TableRow key={entry.id} className={entry.override_clock_in ? "bg-yellow-500/5" : ""}>
                           <TableCell className="font-medium">{entry.employee?.full_name}</TableCell>
                           <TableCell>{format(new Date(entry.clock_in), "EEE, MMM d")}</TableCell>
-                          <TableCell>{format(new Date(entry.clock_in), "h:mm a")}</TableCell>
-                          <TableCell>
-                            {entry.rounded_clock_in ? (
-                              <span className="text-primary font-medium">
-                                {format(new Date(entry.rounded_clock_in), "h:mm a")}
-                              </span>
-                            ) : "-"}
-                          </TableCell>
-                          <TableCell>
+                          <TableCell className="text-muted-foreground">{format(new Date(entry.clock_in), "h:mm a")}</TableCell>
+                          <TableCell className="text-muted-foreground">
                             {entry.clock_out ? format(new Date(entry.clock_out), "h:mm a") : "-"}
                           </TableCell>
                           <TableCell>
-                            {entry.rounded_clock_out ? (
-                              <span className="text-primary font-medium">
-                                {format(new Date(entry.rounded_clock_out), "h:mm a")}
-                              </span>
-                            ) : "-"}
+                            {entry.override_clock_in ? (
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger>
+                                    <span className="text-orange-600 font-medium">
+                                      {format(new Date(entry.override_clock_in), "h:mm a")}
+                                    </span>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p className="text-xs max-w-[200px]">{entry.override_reason}</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+                            ) : (
+                              <span className="text-muted-foreground">-</span>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            {entry.override_clock_out ? (
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger>
+                                    <span className="text-orange-600 font-medium">
+                                      {format(new Date(entry.override_clock_out), "h:mm a")}
+                                    </span>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p className="text-xs max-w-[200px]">{entry.override_reason}</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+                            ) : (
+                              <span className="text-muted-foreground">-</span>
+                            )}
                           </TableCell>
                           <TableCell>
                             <TooltipProvider>
                               <Tooltip>
                                 <TooltipTrigger>
-                                  <span>{entry.total_hours?.toFixed(2) || "-"}</span>
+                                  <span className={entry.override_clock_in ? "font-semibold text-orange-600" : ""}>
+                                    {entry.payable_hours?.toFixed(2) || entry.total_hours?.toFixed(2) || "-"}
+                                  </span>
                                 </TooltipTrigger>
                                 <TooltipContent>
                                   <div className="text-xs space-y-1">
-                                    <p>Regular: {entry.regular_hours?.toFixed(2) || '0.00'}h</p>
-                                    <p>Overtime: {entry.overtime_hours?.toFixed(2) || '0.00'}h</p>
+                                    <p>Regular: {(entry.payable_regular_hours || entry.regular_hours)?.toFixed(2) || '0.00'}h</p>
+                                    <p>Overtime: {(entry.payable_overtime_hours || entry.overtime_hours)?.toFixed(2) || '0.00'}h</p>
+                                    {entry.override_clock_in && (
+                                      <p className="text-orange-500 pt-1 border-t">Override applied</p>
+                                    )}
                                   </div>
                                 </TooltipContent>
                               </Tooltip>
@@ -510,6 +549,11 @@ export default function MssTimeAttendancePage() {
                           <TableCell>
                             <div className="flex items-center gap-1">
                               {getStatusBadge(entry.status)}
+                              {entry.override_clock_in && (
+                                <Badge variant="outline" className="text-xs bg-orange-500/10 text-orange-600">
+                                  Override
+                                </Badge>
+                              )}
                               {entry.clock_in_within_geofence === false && (
                                 <TooltipProvider>
                                   <Tooltip>
@@ -523,16 +567,42 @@ export default function MssTimeAttendancePage() {
                             </div>
                           </TableCell>
                           <TableCell>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => {
-                                setSelectedPunch(entry);
-                                setPunchDetailOpen(true);
-                              }}
-                            >
-                              <Eye className="h-4 w-4" />
-                            </Button>
+                            <div className="flex gap-1">
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      onClick={() => {
+                                        setSelectedPunch(entry);
+                                        setPunchDetailOpen(true);
+                                      }}
+                                    >
+                                      <Eye className="h-4 w-4" />
+                                    </Button>
+                                  </TooltipTrigger>
+                                  <TooltipContent>View Details</TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      onClick={() => {
+                                        setPunchToOverride(entry);
+                                        setOverrideDialogOpen(true);
+                                      }}
+                                    >
+                                      <Edit2 className="h-4 w-4" />
+                                    </Button>
+                                  </TooltipTrigger>
+                                  <TooltipContent>Override Time</TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+                            </div>
                           </TableCell>
                         </TableRow>
                       ))}
@@ -713,6 +783,14 @@ export default function MssTimeAttendancePage() {
           open={punchDetailOpen}
           onOpenChange={setPunchDetailOpen}
           punch={selectedPunch}
+        />
+
+        {/* Punch Override Dialog */}
+        <PunchOverrideDialog
+          open={overrideDialogOpen}
+          onOpenChange={setOverrideDialogOpen}
+          punch={punchToOverride}
+          onSuccess={loadTeamData}
         />
       </div>
     </AppLayout>
