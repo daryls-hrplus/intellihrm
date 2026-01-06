@@ -25,6 +25,17 @@ interface Exception {
   varianceMinutes: number;
 }
 
+interface RoundingRule {
+  id: string;
+  shift_id: string | null;
+  rule_type: string; // 'clock_in', 'clock_out', 'both'
+  rounding_interval: number; // in minutes (e.g., 5, 6, 15)
+  rounding_direction: string; // 'nearest', 'up', 'down', 'favor_employer', 'favor_employee'
+  grace_period_minutes: number;
+  grace_period_direction: string; // 'before', 'after', 'both'
+  apply_to_overtime: boolean;
+}
+
 // Tolerance settings (in minutes)
 const LATE_THRESHOLD = 5; // Grace period for clock-in
 const EARLY_LEAVE_THRESHOLD = 5; // Grace period for clock-out
@@ -98,6 +109,22 @@ serve(async (req) => {
       .eq('company_id', companyId)
       .in('employee_id', employeeIds);
 
+    // Get rounding rules for the company
+    const { data: roundingRules } = await supabase
+      .from('shift_rounding_rules')
+      .select('*')
+      .eq('company_id', companyId)
+      .eq('is_active', true);
+
+    // Create lookup: shift_id -> rounding rules (null shift_id = company default)
+    const roundingRulesMap = new Map<string | null, RoundingRule[]>();
+    for (const rule of (roundingRules || []) as RoundingRule[]) {
+      const key = rule.shift_id;
+      const existing = roundingRulesMap.get(key) || [];
+      existing.push(rule);
+      roundingRulesMap.set(key, existing);
+    }
+
     const results: MatchResult[] = [];
     const exceptionsToCreate: Omit<Exception & { 
       company_id: string;
@@ -168,13 +195,36 @@ serve(async (req) => {
         }
       }
 
-      // Calculate hours
+      // Apply rounding rules
+      let roundedClockIn = clockIn;
+      let roundedClockOut = clockOut;
+      let appliedRoundingRuleId: string | null = null;
+
+      if (matchedShift) {
+        // Get rounding rules: first check shift-specific, then company default (null shift_id)
+        const shiftRules = roundingRulesMap.get(matchedShift.id) || [];
+        const companyRules = roundingRulesMap.get(null) || [];
+        const applicableRules = shiftRules.length > 0 ? shiftRules : companyRules;
+
+        for (const rule of applicableRules) {
+          if (rule.rule_type === 'clock_in' || rule.rule_type === 'both') {
+            roundedClockIn = applyRounding(clockIn, scheduledStart!, rule);
+            appliedRoundingRuleId = rule.id;
+          }
+          if ((rule.rule_type === 'clock_out' || rule.rule_type === 'both') && clockOut) {
+            roundedClockOut = applyRounding(clockOut, scheduledEnd!, rule);
+            appliedRoundingRuleId = rule.id;
+          }
+        }
+      }
+
+      // Calculate hours using rounded times
       let regularHours = 0;
       let overtimeHours = 0;
       let breakMinutes = entry.break_duration_minutes || 0;
 
-      if (clockOut) {
-        const totalMinutes = (clockOut.getTime() - clockIn.getTime()) / 60000 - breakMinutes;
+      if (roundedClockOut) {
+        const totalMinutes = (roundedClockOut.getTime() - roundedClockIn.getTime()) / 60000 - breakMinutes;
         const totalHours = totalMinutes / 60;
 
         // Standard work day is 8 hours
@@ -270,7 +320,7 @@ serve(async (req) => {
         }
       }
 
-      // Update entry with match data
+      // Update entry with match data including rounded times
       await supabase
         .from('time_clock_entries')
         .update({
@@ -279,6 +329,9 @@ serve(async (req) => {
           match_quality: matchQuality,
           scheduled_start: scheduledStart?.toISOString() || null,
           scheduled_end: scheduledEnd?.toISOString() || null,
+          rounded_clock_in: roundedClockIn.toISOString(),
+          rounded_clock_out: roundedClockOut?.toISOString() || null,
+          rounding_rule_applied: appliedRoundingRuleId,
           break_minutes_expected: matchedShift?.break_duration_minutes || null,
           regular_hours: regularHours,
           overtime_hours: overtimeHours,
@@ -357,5 +410,73 @@ function parseTimeToDate(timeStr: string, referenceDate: Date): Date {
   const [hours, minutes] = timeStr.split(':').map(Number);
   const result = new Date(referenceDate);
   result.setHours(hours, minutes, 0, 0);
+  return result;
+}
+
+function applyRounding(actualTime: Date, scheduledTime: Date, rule: RoundingRule): Date {
+  const interval = rule.rounding_interval; // in minutes
+  const gracePeriod = rule.grace_period_minutes || 0;
+  const direction = rule.rounding_direction;
+  const graceDirection = rule.grace_period_direction;
+  
+  // Calculate variance from scheduled time
+  const varianceMinutes = (actualTime.getTime() - scheduledTime.getTime()) / 60000;
+  
+  // Check if within grace period - if so, round to scheduled time
+  if (gracePeriod > 0) {
+    if (graceDirection === 'before' && varianceMinutes < 0 && Math.abs(varianceMinutes) <= gracePeriod) {
+      return new Date(scheduledTime);
+    }
+    if (graceDirection === 'after' && varianceMinutes > 0 && varianceMinutes <= gracePeriod) {
+      return new Date(scheduledTime);
+    }
+    if (graceDirection === 'both' && Math.abs(varianceMinutes) <= gracePeriod) {
+      return new Date(scheduledTime);
+    }
+  }
+  
+  // Apply rounding based on interval and direction
+  const actualMinutes = actualTime.getHours() * 60 + actualTime.getMinutes();
+  let roundedMinutes: number;
+  
+  switch (direction) {
+    case 'nearest':
+      roundedMinutes = Math.round(actualMinutes / interval) * interval;
+      break;
+    case 'up':
+      roundedMinutes = Math.ceil(actualMinutes / interval) * interval;
+      break;
+    case 'down':
+      roundedMinutes = Math.floor(actualMinutes / interval) * interval;
+      break;
+    case 'favor_employer':
+      // For clock-in: round up (later start = less pay)
+      // For clock-out: round down (earlier end = less pay)
+      // We determine this by checking if actual is before or after scheduled
+      if (varianceMinutes < 0) {
+        // Early arrival - round up to scheduled or later
+        roundedMinutes = Math.ceil(actualMinutes / interval) * interval;
+      } else {
+        // Late arrival or late departure - round down
+        roundedMinutes = Math.floor(actualMinutes / interval) * interval;
+      }
+      break;
+    case 'favor_employee':
+      // For clock-in: round down (earlier start = more pay)
+      // For clock-out: round up (later end = more pay)
+      if (varianceMinutes < 0) {
+        // Early arrival - round down to capture early time
+        roundedMinutes = Math.floor(actualMinutes / interval) * interval;
+      } else {
+        // Late departure - round up
+        roundedMinutes = Math.ceil(actualMinutes / interval) * interval;
+      }
+      break;
+    default:
+      roundedMinutes = actualMinutes;
+  }
+  
+  const result = new Date(actualTime);
+  result.setHours(Math.floor(roundedMinutes / 60), roundedMinutes % 60, 0, 0);
   return result;
 }
