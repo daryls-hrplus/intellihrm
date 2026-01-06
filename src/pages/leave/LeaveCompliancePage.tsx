@@ -8,7 +8,8 @@ import { PolicyAcknowledgmentTracker } from "@/components/leave/compliance/Polic
 import { MedicalCertificateVerification } from "@/components/leave/compliance/MedicalCertificateVerification";
 import { BradfordFactorAnalysis } from "@/components/leave/compliance/BradfordFactorAnalysis";
 import { LeavePolicyVersionHistory } from "@/components/leave/compliance/LeavePolicyVersionHistory";
-import { FileCheck, Stethoscope, Calculator, History } from "lucide-react";
+import { ComplianceAlerts } from "@/components/leave/compliance/ComplianceAlerts";
+import { FileCheck, Stethoscope, Calculator, History, Bell } from "lucide-react";
 
 export default function LeaveCompliancePage() {
   const { company, isAdmin } = useAuth();
@@ -46,15 +47,19 @@ export default function LeaveCompliancePage() {
         )}
       </div>
 
-      <Tabs defaultValue="acknowledgments" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+      <Tabs defaultValue="alerts" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-5">
+          <TabsTrigger value="alerts" className="flex items-center gap-2">
+            <Bell className="h-4 w-4" />
+            Alerts
+          </TabsTrigger>
           <TabsTrigger value="acknowledgments" className="flex items-center gap-2">
             <FileCheck className="h-4 w-4" />
-            Policy Acknowledgments
+            Acknowledgments
           </TabsTrigger>
           <TabsTrigger value="medical" className="flex items-center gap-2">
             <Stethoscope className="h-4 w-4" />
-            Medical Certificates
+            Medical Certs
           </TabsTrigger>
           <TabsTrigger value="bradford" className="flex items-center gap-2">
             <Calculator className="h-4 w-4" />
@@ -65,6 +70,10 @@ export default function LeaveCompliancePage() {
             Policy History
           </TabsTrigger>
         </TabsList>
+
+        <TabsContent value="alerts">
+          <ComplianceAlerts companyId={selectedCompanyId} />
+        </TabsContent>
 
         <TabsContent value="acknowledgments">
           <PolicyAcknowledgmentTracker companyId={selectedCompanyId} />

@@ -34014,6 +34014,91 @@ export type Database = {
           },
         ]
       }
+      leave_compliance_alerts: {
+        Row: {
+          actual_value: number | null
+          alert_type: string
+          company_id: string
+          created_at: string
+          employee_id: string | null
+          entity_id: string | null
+          entity_type: string | null
+          id: string
+          is_read: boolean
+          is_resolved: boolean
+          message: string
+          resolution_notes: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          severity: string
+          threshold_value: number | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          actual_value?: number | null
+          alert_type: string
+          company_id: string
+          created_at?: string
+          employee_id?: string | null
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          is_read?: boolean
+          is_resolved?: boolean
+          message: string
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string
+          threshold_value?: number | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          actual_value?: number | null
+          alert_type?: string
+          company_id?: string
+          created_at?: string
+          employee_id?: string | null
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          is_read?: boolean
+          is_resolved?: boolean
+          message?: string
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string
+          threshold_value?: number | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leave_compliance_alerts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leave_compliance_alerts_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leave_compliance_alerts_resolved_by_fkey"
+            columns: ["resolved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       leave_conflict_rules: {
         Row: {
           block_threshold_percentage: number | null
@@ -34701,43 +34786,52 @@ export type Database = {
       leave_policy_acknowledgments: {
         Row: {
           acknowledged_at: string
+          acknowledgment_due_date: string | null
           company_id: string
           created_at: string
           employee_id: string
           id: string
           ip_address: string | null
+          is_required: boolean | null
           policy_id: string | null
           policy_name: string
           policy_type: string
           policy_version: number
+          reminder_sent_at: string | null
           signature_data: string | null
           user_agent: string | null
         }
         Insert: {
           acknowledged_at?: string
+          acknowledgment_due_date?: string | null
           company_id: string
           created_at?: string
           employee_id: string
           id?: string
           ip_address?: string | null
+          is_required?: boolean | null
           policy_id?: string | null
           policy_name: string
           policy_type: string
           policy_version?: number
+          reminder_sent_at?: string | null
           signature_data?: string | null
           user_agent?: string | null
         }
         Update: {
           acknowledged_at?: string
+          acknowledgment_due_date?: string | null
           company_id?: string
           created_at?: string
           employee_id?: string
           id?: string
           ip_address?: string | null
+          is_required?: boolean | null
           policy_id?: string | null
           policy_name?: string
           policy_type?: string
           policy_version?: number
+          reminder_sent_at?: string | null
           signature_data?: string | null
           user_agent?: string | null
         }
