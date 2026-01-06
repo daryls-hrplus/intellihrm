@@ -33,16 +33,12 @@ export function WorkforceAnalyticsDashboard({ companyId }: WorkforceAnalyticsDas
   const { data: orgAggregates, isLoading } = useQuery({
     queryKey: ['org-signal-aggregates', companyId, selectedCycle, selectedDimension],
     queryFn: async () => {
-      let query = supabase
+      const { data, error } = await supabase
         .from('org_signal_aggregates')
         .select('*')
-        .eq('company_id', companyId);
-
-      if (selectedCycle !== 'all') {
-        query = query.eq('cycle_id', selectedCycle);
-      }
-
-      const { data, error } = await query.order('aggregation_dimension').order('dimension_value');
+        .eq('company_id', companyId)
+        .order('aggregation_dimension')
+        .order('dimension_value');
       if (error) throw error;
       return data;
     },
@@ -283,17 +279,16 @@ export function WorkforceAnalyticsDashboard({ companyId }: WorkforceAnalyticsDas
                     </div>
                     <div className="space-y-2">
                       {aggregates.map((agg) => (
-                          <div key={agg.id} className="flex items-center gap-3">
-                            <span className="text-sm w-32 truncate">
-                              {agg.signal_type || 'Unknown'}
-                            </span>
-                            <Progress value={(agg.avg_score || 0) * 20} className="flex-1" />
-                            <span className="text-sm font-medium w-12 text-right">
-                              {agg.avg_score?.toFixed(1) || '-'}
-                            </span>
-                          </div>
-                        ));
-                      })}
+                        <div key={agg.id} className="flex items-center gap-3">
+                          <span className="text-sm w-32 truncate">
+                            {agg.signal_type || 'Unknown'}
+                          </span>
+                          <Progress value={(agg.avg_score || 0) * 20} className="flex-1" />
+                          <span className="text-sm font-medium w-12 text-right">
+                            {agg.avg_score?.toFixed(1) || '-'}
+                          </span>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 ))}
