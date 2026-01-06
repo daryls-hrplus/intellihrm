@@ -32,7 +32,7 @@ export function useMaternityLeaveRequests(companyId?: string) {
       const employeeIds = [...new Set(data.map(r => r.employee_id))];
       const { data: employees } = await supabase
         .from("profiles")
-        .select("id, first_name, email, employee_id")
+        .select("id, full_name, employee_id")
         .in("id", employeeIds);
       
       const employeeMap = new Map(employees?.map(e => [e.id, e]) || []);
@@ -40,8 +40,9 @@ export function useMaternityLeaveRequests(companyId?: string) {
       return data.map(r => ({
         ...r,
         employee: employeeMap.get(r.employee_id) ? {
-          ...employeeMap.get(r.employee_id),
-          last_name: ""
+          id: employeeMap.get(r.employee_id)!.id,
+          full_name: employeeMap.get(r.employee_id)!.full_name || "",
+          employee_id: employeeMap.get(r.employee_id)!.employee_id || undefined
         } : undefined
       })) as MaternityLeaveRequest[];
     },
@@ -64,13 +65,17 @@ export function useMaternityLeaveRequest(id: string) {
       // Fetch employee separately
       const { data: employee } = await supabase
         .from("profiles")
-        .select("id, first_name, email, employee_id")
+        .select("id, full_name, employee_id")
         .eq("id", data.employee_id)
         .single();
       
       return {
         ...data,
-        employee: employee ? { ...employee, last_name: "" } : undefined
+        employee: employee ? {
+          id: employee.id,
+          full_name: employee.full_name || "",
+          employee_id: employee.employee_id || undefined
+        } : undefined
       } as MaternityLeaveRequest;
     },
     enabled: !!id,

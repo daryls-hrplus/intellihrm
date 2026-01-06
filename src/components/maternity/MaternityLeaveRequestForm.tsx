@@ -69,13 +69,13 @@ export function MaternityLeaveRequestForm({ companyId, onCancel, onSuccess }: Pr
     queryFn: async () => {
       const { data, error } = await supabase
         .from("profiles")
-        .select("id, first_name, last_name, employee_id, gender")
+        .select("id, full_name, employee_id, gender")
         .eq("company_id", companyId)
         .eq("is_active", true)
         .in("gender", ["Female", "female", "F"])
-        .order("first_name");
+        .order("full_name");
       if (error) throw error;
-      return data;
+      return data || [];
     },
     enabled: !!companyId,
   });
@@ -192,7 +192,7 @@ export function MaternityLeaveRequestForm({ companyId, onCancel, onSuccess }: Pr
                   <SelectContent>
                     {employees.map((emp) => (
                       <SelectItem key={emp.id} value={emp.id}>
-                        {emp.first_name} {emp.last_name}
+                        {emp.full_name}
                         {emp.employee_id && ` (${emp.employee_id})`}
                       </SelectItem>
                     ))}

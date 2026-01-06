@@ -22,6 +22,8 @@ import { format, differenceInDays } from "date-fns";
 import { useMaternityLeaveRequests } from "@/hooks/useMaternityLeave";
 import { MaternityLeaveRequestForm } from "./MaternityLeaveRequestForm";
 import { MaternityLeaveDetails } from "./MaternityLeaveDetails";
+import { MaternityCompliancePanel } from "./MaternityCompliancePanel";
+import { MaternityPaymentConfigPanel } from "./MaternityPaymentConfigPanel";
 import { STATUS_LABELS, type MaternityLeaveStatus } from "@/types/maternityLeave";
 
 const statusColors: Record<MaternityLeaveStatus, string> = {
@@ -35,15 +37,14 @@ const statusColors: Record<MaternityLeaveStatus, string> = {
 };
 
 export function MaternityLeaveDashboard({ companyId: propCompanyId }: { companyId?: string } = {}) {
-  const { company } = useCompany();
-  const [selectedCompanyId, setSelectedCompanyId] = useState<string>(company?.id || "");
+  const [selectedCompanyId, setSelectedCompanyId] = useState<string>(propCompanyId || "");
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [selectedRequestId, setSelectedRequestId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("requests");
 
-  const effectiveCompanyId = selectedCompanyId || company?.id;
+  const effectiveCompanyId = selectedCompanyId || propCompanyId;
 
   const { data: companies = [] } = useQuery({
     queryKey: ["companies-list"],
@@ -63,8 +64,7 @@ export function MaternityLeaveDashboard({ companyId: propCompanyId }: { companyI
   const filteredRequests = requests.filter((req) => {
     const matchesSearch =
       !searchTerm ||
-      req.employee?.first_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      req.employee?.last_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      req.employee?.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       req.employee?.employee_id?.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesStatus = statusFilter === "all" || req.status === statusFilter;
@@ -272,7 +272,7 @@ export function MaternityLeaveDashboard({ companyId: propCompanyId }: { companyI
                         </div>
                         <div>
                           <p className="font-medium">
-                            {request.employee?.first_name} {request.employee?.last_name}
+                            {request.employee?.full_name}
                           </p>
                           <div className="flex items-center gap-3 text-sm text-muted-foreground">
                             <span className="flex items-center gap-1">
