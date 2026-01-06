@@ -157,14 +157,14 @@ export function BradfordFactorAnalysis({ companyId }: BradfordFactorAnalysisProp
   return (
     <div className="space-y-6">
       {/* Info Banner */}
-      <Card className="bg-blue-50 dark:bg-blue-950/20 border-blue-200">
+      <Card className="bg-primary/5 border-primary/20">
         <CardContent className="p-4">
           <div className="flex items-start gap-3">
-            <Info className="h-5 w-5 text-blue-600 mt-0.5" />
+            <Info className="h-5 w-5 text-primary mt-0.5" />
             <div>
-              <h4 className="font-medium text-blue-800 dark:text-blue-200">Bradford Factor Formula</h4>
-              <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">
-                <strong>B = S² × D</strong> where S = number of separate absence spells and D = total days absent.
+              <h4 className="font-medium text-foreground">Bradford Factor Formula</h4>
+              <p className="text-sm text-muted-foreground mt-1">
+                <strong className="text-foreground">B = S² × D</strong> where S = number of separate absence spells and D = total days absent.
                 This formula places greater weight on frequent short-term absences compared to fewer longer absences.
               </p>
             </div>
