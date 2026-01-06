@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -8,19 +9,57 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Edit2, Trash2, Calendar, ShieldAlert, Loader2 } from "lucide-react";
+import { Plus, Edit2, Trash2, Calendar, ShieldAlert, Loader2, Building2, Users } from "lucide-react";
 import { useLeaveBlackouts, LeaveBlackoutPeriod } from "@/hooks/useLeaveEnhancements";
 import { useAuth } from "@/contexts/AuthContext";
 import { formatDateForDisplay } from "@/utils/dateUtils";
 import { useLanguage } from "@/hooks/useLanguage";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function LeaveBlackoutPeriodsPage() {
   const { t } = useLanguage();
   const { company } = useAuth();
-  const { blackoutPeriods, isLoading, createBlackout, updateBlackout, deleteBlackout } = useLeaveBlackouts(company?.id);
+  const [selectedCompanyId, setSelectedCompanyId] = useState(company?.id || "");
+  const [selectedDepartmentId, setSelectedDepartmentId] = useState("");
+
+  const { data: companies = [] } = useQuery({
+    queryKey: ["companies-list"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("companies")
+        .select("id, name")
+        .eq("is_active", true)
+        .order("name");
+      return data || [];
+    },
+  });
+
+  const effectiveCompanyId = selectedCompanyId || company?.id;
+
+  const { data: departments = [] } = useQuery({
+    queryKey: ["departments", effectiveCompanyId],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("departments")
+        .select("id, name")
+        .eq("company_id", effectiveCompanyId)
+        .eq("is_active", true)
+        .order("name");
+      return data || [];
+    },
+    enabled: !!effectiveCompanyId,
+  });
+
+  const { blackoutPeriods, isLoading, createBlackout, updateBlackout, deleteBlackout } = useLeaveBlackouts(effectiveCompanyId);
   
+  // Filter by department if selected
+  const filteredBlackouts = selectedDepartmentId 
+    ? blackoutPeriods.filter(b => b.department_ids?.includes(selectedDepartmentId) || b.applies_to_all)
+    : blackoutPeriods;
+
   const [showDialog, setShowDialog] = useState(false);
   const [editingItem, setEditingItem] = useState<LeaveBlackoutPeriod | null>(null);
   const [formData, setFormData] = useState({
@@ -28,6 +67,7 @@ export default function LeaveBlackoutPeriodsPage() {
     description: "",
     start_date: "",
     end_date: "",
+    department_ids: [] as string[],
     applies_to_all: true,
     is_hard_block: false,
     requires_override_approval: true,
@@ -42,6 +82,7 @@ export default function LeaveBlackoutPeriodsPage() {
       description: item.description || "",
       start_date: item.start_date,
       end_date: item.end_date,
+      department_ids: item.department_ids || [],
       applies_to_all: item.applies_to_all,
       is_hard_block: item.is_hard_block,
       requires_override_approval: item.requires_override_approval,
@@ -74,6 +115,7 @@ export default function LeaveBlackoutPeriodsPage() {
       description: "",
       start_date: "",
       end_date: "",
+      department_ids: [],
       applies_to_all: true,
       is_hard_block: false,
       requires_override_approval: true,
@@ -98,10 +140,35 @@ export default function LeaveBlackoutPeriodsPage() {
             </h1>
             <p className="text-muted-foreground">Configure dates when leave requests are restricted or blocked</p>
           </div>
-          <Button onClick={() => { resetForm(); setShowDialog(true); }}>
-            <Plus className="h-4 w-4 mr-2" />
-            Add Blackout Period
-          </Button>
+          <div className="flex items-center gap-3">
+            <Select value={selectedCompanyId || company?.id || ""} onValueChange={(v) => { setSelectedCompanyId(v); setSelectedDepartmentId(""); }}>
+              <SelectTrigger className="w-[200px]">
+                <Building2 className="h-4 w-4 mr-2" />
+                <SelectValue placeholder="Select company" />
+              </SelectTrigger>
+              <SelectContent>
+                {companies.map((c: any) => (
+                  <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={selectedDepartmentId || "all"} onValueChange={(v) => setSelectedDepartmentId(v === "all" ? "" : v)}>
+              <SelectTrigger className="w-[180px]">
+                <Users className="h-4 w-4 mr-2" />
+                <SelectValue placeholder="All departments" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Departments</SelectItem>
+                {departments.map((d: any) => (
+                  <SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button onClick={() => { resetForm(); setShowDialog(true); }} disabled={!effectiveCompanyId}>
+              <Plus className="h-4 w-4 mr-2" />
+              Add Blackout Period
+            </Button>
+          </div>
         </div>
 
         <Card>
@@ -110,7 +177,7 @@ export default function LeaveBlackoutPeriodsPage() {
               <div className="flex items-center justify-center py-12">
                 <Loader2 className="h-6 w-6 animate-spin" />
               </div>
-            ) : blackoutPeriods.length === 0 ? (
+            ) : filteredBlackouts.length === 0 ? (
               <div className="text-center py-12 text-muted-foreground">
                 <ShieldAlert className="h-12 w-12 mx-auto mb-3 opacity-50" />
                 <p>No blackout periods configured</p>
@@ -127,7 +194,7 @@ export default function LeaveBlackoutPeriodsPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {blackoutPeriods.map((item) => (
+                  {filteredBlackouts.map((item) => (
                     <TableRow key={item.id}>
                       <TableCell>
                         <div>
