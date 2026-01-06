@@ -441,6 +441,7 @@ import LaborCompliancePage from "./pages/time-attendance/LaborCompliancePage";
 import FlexTimePage from "./pages/time-attendance/FlexTimePage";
 import AttendanceRegularizationPage from "./pages/time-attendance/AttendanceRegularizationPage";
 import CBATimeRulesPage from "./pages/time-attendance/CBATimeRulesPage";
+import CBAExtensionsPage from "./pages/time-attendance/CBAExtensionsPage";
 import TimeAuditTrailPage from "./pages/time-attendance/TimeAuditTrailPage";
 import ShiftSwapsPage from "./pages/time-attendance/ShiftSwapsPage";
 import ShiftDifferentialsPage from "./pages/time/ShiftDifferentialsPage";
