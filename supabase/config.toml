@@ -401,3 +401,9 @@ verify_jwt = false
 
 [functions.zkteco-device-sync]
 verify_jwt = false
+
+[functions.poll-timeclock-devices]
+verify_jwt = false
+
+[functions.match-attendance-schedules]
+verify_jwt = false
