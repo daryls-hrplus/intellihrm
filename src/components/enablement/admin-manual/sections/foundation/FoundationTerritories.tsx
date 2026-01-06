@@ -17,6 +17,7 @@ import {
   type BusinessRule
 } from '../../../manual/components';
 import { FeatureStatusBadge } from '../../components';
+import territoriesListMockup from '@/assets/manual-mockups/territories-list.png';
 
 const territoryFields: FieldDefinition[] = [
   {
@@ -232,6 +233,7 @@ export function FoundationTerritories() {
         caption="Figure 2.2.2: Territories list view showing existing territories with countries"
         alt="Territories data grid with columns for name, code, countries, currency, and status"
         aspectRatio="wide"
+        imageSrc={territoriesListMockup}
       />
 
       <StepByStep
