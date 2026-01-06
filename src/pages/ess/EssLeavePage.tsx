@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useLeaveManagement, LeaveBalance } from "@/hooks/useLeaveManagement";
 import { useLeaveYearAllocations } from "@/hooks/useLeaveYearAllocations";
+import { useLeaveEncashment } from "@/hooks/useLeaveEnhancements";
 import { useWorkflow } from "@/hooks/useWorkflow";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/hooks/useLanguage";
@@ -102,6 +103,7 @@ export default function EssLeavePage() {
     loadingRequests 
   } = useLeaveManagement();
   const { startWorkflow, isLoading: workflowLoading } = useWorkflow();
+  const { encashmentRequests, isLoading: loadingEncashment } = useLeaveEncashment();
   
   const [showApplyDialog, setShowApplyDialog] = useState(false);
   const [showEncashmentDialog, setShowEncashmentDialog] = useState(false);
@@ -446,6 +448,9 @@ export default function EssLeavePage() {
             <TabsTrigger value="taken">Leave Taken</TabsTrigger>
             <TabsTrigger value="calendar">Leave Calendar</TabsTrigger>
             <TabsTrigger value="requests">Request History</TabsTrigger>
+            {leaveTypes.some(lt => lt.can_be_encashed) && (
+              <TabsTrigger value="encashment">Encashment History</TabsTrigger>
+            )}
           </TabsList>
 
           <TabsContent value="calendar">
@@ -873,6 +878,75 @@ export default function EssLeavePage() {
               </Table>
             </Card>
           </TabsContent>
+
+          {/* Encashment History Tab */}
+          {leaveTypes.some(lt => lt.can_be_encashed) && (
+            <TabsContent value="encashment">
+              <Card>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Leave Type</TableHead>
+                      <TableHead>Days</TableHead>
+                      <TableHead>Amount</TableHead>
+                      <TableHead>Status</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {loadingEncashment ? (
+                      <TableRow>
+                        <TableCell colSpan={5} className="text-center py-8">
+                          <Loader2 className="h-5 w-5 animate-spin mx-auto text-muted-foreground" />
+                        </TableCell>
+                      </TableRow>
+                    ) : encashmentRequests.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                          <Banknote className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                          <p>No encashment requests yet.</p>
+                          <p className="text-xs">Click "Encash Leave" to convert leave to cash.</p>
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      encashmentRequests.map((request) => (
+                        <TableRow key={request.id}>
+                          <TableCell>{formatDateForDisplay(request.created_at, "MMM d, yyyy")}</TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <span>{request.leave_type?.name || "Unknown"}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell>{request.days_requested} days</TableCell>
+                          <TableCell>
+                            {request.total_amount ? (
+                              <span className="font-medium">${request.total_amount.toFixed(2)}</span>
+                            ) : request.rate_per_day && request.days_requested ? (
+                              <span className="text-muted-foreground">
+                                ~${(request.rate_per_day * request.days_requested).toFixed(2)}
+                              </span>
+                            ) : (
+                              <span className="text-muted-foreground">Pending</span>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={
+                              request.status === 'paid' ? 'default' :
+                              request.status === 'approved' ? 'secondary' :
+                              request.status === 'pending' ? 'outline' :
+                              'destructive'
+                            }>
+                              {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
+                            </Badge>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </Card>
+            </TabsContent>
+          )}
         </Tabs>
       </div>
 
