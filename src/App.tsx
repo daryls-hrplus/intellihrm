@@ -2023,6 +2023,7 @@ const App = () => (
             <Route path="/time-attendance/flex-time" element={<ProtectedRoute moduleCode="time_attendance"><FlexTimePage /></ProtectedRoute>} />
             <Route path="/time-attendance/regularization" element={<ProtectedRoute moduleCode="time_attendance"><AttendanceRegularizationPage /></ProtectedRoute>} />
             <Route path="/time-attendance/cba-rules" element={<ProtectedRoute moduleCode="time_attendance"><CBATimeRulesPage /></ProtectedRoute>} />
+            <Route path="/time-attendance/cba-extensions" element={<ProtectedRoute moduleCode="time_attendance"><CBAExtensionsPage /></ProtectedRoute>} />
             <Route path="/time-attendance/audit-trail" element={<ProtectedRoute moduleCode="time_attendance"><TimeAuditTrailPage /></ProtectedRoute>} />
             <Route path="/time-attendance/shift-swaps" element={<ProtectedRoute moduleCode="time_attendance"><ShiftSwapsPage /></ProtectedRoute>} />
             <Route

@@ -7,13 +7,17 @@ const corsHeaders = {
 };
 
 interface CBARule {
+  id?: string;
   rule_name: string;
   rule_type: string;
-  day_type: string;
+  day_type?: string;
+  condition_json?: Record<string, unknown> | null;
   value_numeric: number | null;
   value_text: string | null;
   priority: number;
   is_active: boolean;
+  approximation_warning?: string | null;
+  confidence_score?: number | null;
 }
 
 interface TimeEntry {
@@ -37,10 +41,15 @@ interface SimulationResult {
     additional_pay_multiplier?: number;
     violation?: boolean;
     violation_message?: string;
+    is_approximation?: boolean;
   }[];
   total_pay_multiplier: number;
   violations: string[];
+  limitations: string[];
 }
+
+// Supported rule types for full simulation
+const SUPPORTED_SIMULATION_TYPES = ['overtime', 'shift_differential', 'max_hours', 'rest_period'];
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -84,11 +93,22 @@ serve(async (req) => {
         success: true,
         message: "No active rules to simulate",
         results: [],
-        summary: { total_entries: 0, violations: 0, rules_applied: 0 }
+        summary: { total_entries: 0, violations: 0, rules_applied: 0 },
+        simulation_limitations: ["No active rules to simulate"]
       }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    // Analyze rule simulation capabilities
+    const simulatableRules = activeRules.filter(r => SUPPORTED_SIMULATION_TYPES.includes(r.rule_type));
+    const unsimulatedRuleTypes = [...new Set(activeRules.filter(r => !SUPPORTED_SIMULATION_TYPES.includes(r.rule_type)).map(r => r.rule_type))];
+    const approximatedRules = activeRules.filter(r => r.approximation_warning);
+    
+    // Calculate simulation accuracy
+    const simulationAccuracy = activeRules.length > 0 
+      ? Math.round((simulatableRules.length / activeRules.length) * 100) 
+      : 100;
 
     // Get time entries for simulation
     const fromDate = dateFrom || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
@@ -102,7 +122,7 @@ serve(async (req) => {
         clock_in, 
         clock_out, 
         total_hours,
-        profiles!time_clock_entries_employee_id_fkey(full_name)
+        profiles!time_clock_entries_employee_id_fkey(full_name, first_name, last_name)
       `)
       .eq("company_id", companyId)
       .gte("clock_in", `${fromDate}T00:00:00`)
@@ -136,15 +156,29 @@ serve(async (req) => {
 
       const rulesApplied: SimulationResult["rules_applied"] = [];
       const violations: string[] = [];
+      const limitations: string[] = [];
       let payMultiplier = 1.0;
 
       for (const rule of activeRules) {
+        // Get day type from rule - check both old and new schema
+        const ruleDayType = rule.day_type || 
+          (rule.condition_json && typeof rule.condition_json === 'object' 
+            ? (rule.condition_json as Record<string, unknown>).day_type as string 
+            : 'all');
+        
         // Check if rule applies to this day type
-        if (rule.day_type !== "all" && rule.day_type !== entryDayType) {
+        if (ruleDayType !== "all" && ruleDayType !== entryDayType) {
           continue;
         }
 
         const hoursWorked = entry.total_hours || 0;
+        const isApproximation = !!rule.approximation_warning;
+
+        // Check if this rule type can be simulated
+        if (!SUPPORTED_SIMULATION_TYPES.includes(rule.rule_type)) {
+          limitations.push(`Rule '${rule.rule_name}' (type: ${rule.rule_type}) cannot be simulated - manual review required`);
+          continue;
+        }
 
         switch (rule.rule_type) {
           case "overtime": {
@@ -157,6 +191,7 @@ serve(async (req) => {
                 rule_type: rule.rule_type,
                 effect: `${overtimeHours.toFixed(1)} hours overtime at ${multiplier}x`,
                 additional_pay_multiplier: multiplier,
+                is_approximation: isApproximation
               });
               payMultiplier = Math.max(payMultiplier, multiplier);
               totalRulesApplied++;
@@ -165,14 +200,16 @@ serve(async (req) => {
           }
 
           case "shift_differential": {
-            if ((rule.day_type === "night" && isNight) || 
-                (rule.day_type === "weekend" && isWeekend)) {
+            if ((ruleDayType === "night" && isNight) || 
+                (ruleDayType === "weekend" && isWeekend) ||
+                ruleDayType === "all") {
               const multiplier = rule.value_numeric || 1.1;
               rulesApplied.push({
                 rule_name: rule.rule_name,
                 rule_type: rule.rule_type,
                 effect: `Shift differential ${multiplier}x applied`,
                 additional_pay_multiplier: multiplier,
+                is_approximation: isApproximation
               });
               payMultiplier = Math.max(payMultiplier, multiplier);
               totalRulesApplied++;
@@ -190,6 +227,7 @@ serve(async (req) => {
                 effect: violationMsg,
                 violation: true,
                 violation_message: violationMsg,
+                is_approximation: isApproximation
               });
               violations.push(violationMsg);
               totalViolations++;
@@ -199,43 +237,57 @@ serve(async (req) => {
           }
 
           case "rest_period": {
-            // Would need to check previous shift - simplified for demo
+            // Would need to check previous shift - add limitation
+            limitations.push(`Rest period rule '${rule.rule_name}' requires multi-day analysis`);
             rulesApplied.push({
               rule_name: rule.rule_name,
               rule_type: rule.rule_type,
               effect: `Rest period rule checked (requires multi-day analysis)`,
+              is_approximation: isApproximation
             });
             totalRulesApplied++;
             break;
           }
-
-          default:
-            // Other rule types
-            if (rule.value_numeric || rule.value_text) {
-              rulesApplied.push({
-                rule_name: rule.rule_name,
-                rule_type: rule.rule_type,
-                effect: rule.value_text || `Value: ${rule.value_numeric}`,
-              });
-              totalRulesApplied++;
-            }
         }
       }
 
-      if (rulesApplied.length > 0 || violations.length > 0) {
+      // Add warning for approximated rules that were applied
+      for (const rule of approximatedRules) {
+        if (rulesApplied.some(ar => ar.rule_name === rule.rule_name)) {
+          limitations.push(`⚠️ '${rule.rule_name}' is an approximation: ${rule.approximation_warning}`);
+        }
+      }
+
+      if (rulesApplied.length > 0 || violations.length > 0 || limitations.length > 0) {
+        const profile = entry.profiles as { full_name?: string; first_name?: string; last_name?: string } | null;
+        const employeeName = profile?.full_name || 
+          (profile?.first_name && profile?.last_name ? `${profile.first_name} ${profile.last_name}` : "Unknown");
+        
         results.push({
           employee_id: entry.employee_id,
-          employee_name: (entry as any).profiles?.full_name || "Unknown",
+          employee_name: employeeName,
           date: entry.clock_in.split("T")[0],
           hours_worked: entry.total_hours || 0,
           rules_applied: rulesApplied,
           total_pay_multiplier: payMultiplier,
           violations,
+          limitations: [...new Set(limitations)]
         });
       }
     }
 
-    console.log(`Simulation complete: ${results.length} entries affected, ${totalViolations} violations`);
+    console.log(`Simulation complete: ${results.length} entries affected, ${totalViolations} violations, ${simulationAccuracy}% accuracy`);
+
+    // Build simulation limitations summary
+    const simulationLimitations: string[] = [];
+    
+    if (unsimulatedRuleTypes.length > 0) {
+      simulationLimitations.push(`Cannot simulate rule types: ${unsimulatedRuleTypes.join(', ')}`);
+    }
+    
+    if (approximatedRules.length > 0) {
+      simulationLimitations.push(`${approximatedRules.length} rule(s) are approximations of more complex original rules`);
+    }
 
     return new Response(JSON.stringify({
       success: true,
@@ -246,8 +298,20 @@ serve(async (req) => {
         violations: totalViolations,
         rules_applied: totalRulesApplied,
         date_range: { from: fromDate, to: toDate },
-        rules_tested: activeRules.length,
-      }
+        rules_tested: simulatableRules.length,
+        total_rules: activeRules.length,
+        simulation_accuracy: simulationAccuracy,
+        accuracy_explanation: simulationAccuracy < 100 
+          ? `Only ${simulatableRules.length} of ${activeRules.length} rules can be fully simulated`
+          : "All rules fully simulated"
+      },
+      simulation_limitations: simulationLimitations,
+      unsimulated_rule_types: unsimulatedRuleTypes,
+      approximated_rules: approximatedRules.map(r => ({
+        rule_name: r.rule_name,
+        warning: r.approximation_warning,
+        confidence: r.confidence_score
+      }))
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
