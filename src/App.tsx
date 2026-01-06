@@ -435,6 +435,14 @@ import LiveAttendancePage from "./pages/time-attendance/LiveAttendancePage";
 import PunchImportPage from "./pages/time-attendance/PunchImportPage";
 import AttendanceAnalyticsPage from "./pages/time-attendance/AttendanceAnalyticsPage";
 import AbsenteeismCostPage from "./pages/time-attendance/AbsenteeismCostPage";
+import WellnessMonitoringPage from "./pages/time-attendance/WellnessMonitoringPage";
+import OvertimeAlertsPage from "./pages/time-attendance/OvertimeAlertsPage";
+import LaborCompliancePage from "./pages/time-attendance/LaborCompliancePage";
+import FlexTimePage from "./pages/time-attendance/FlexTimePage";
+import AttendanceRegularizationPage from "./pages/time-attendance/AttendanceRegularizationPage";
+import CBATimeRulesPage from "./pages/time-attendance/CBATimeRulesPage";
+import TimeAuditTrailPage from "./pages/time-attendance/TimeAuditTrailPage";
+import ShiftSwapsPage from "./pages/time-attendance/ShiftSwapsPage";
 import ShiftDifferentialsPage from "./pages/time/ShiftDifferentialsPage";
 import GeofenceLocationsPage from "./pages/time/GeofenceLocationsPage";
 import FaceVerificationPage from "./pages/time/FaceVerificationPage";
@@ -2009,6 +2017,14 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
+            <Route path="/time-attendance/wellness" element={<ProtectedRoute moduleCode="time_attendance"><WellnessMonitoringPage /></ProtectedRoute>} />
+            <Route path="/time-attendance/overtime-alerts" element={<ProtectedRoute moduleCode="time_attendance"><OvertimeAlertsPage /></ProtectedRoute>} />
+            <Route path="/time-attendance/labor-compliance" element={<ProtectedRoute moduleCode="time_attendance"><LaborCompliancePage /></ProtectedRoute>} />
+            <Route path="/time-attendance/flex-time" element={<ProtectedRoute moduleCode="time_attendance"><FlexTimePage /></ProtectedRoute>} />
+            <Route path="/time-attendance/regularization" element={<ProtectedRoute moduleCode="time_attendance"><AttendanceRegularizationPage /></ProtectedRoute>} />
+            <Route path="/time-attendance/cba-rules" element={<ProtectedRoute moduleCode="time_attendance"><CBATimeRulesPage /></ProtectedRoute>} />
+            <Route path="/time-attendance/audit-trail" element={<ProtectedRoute moduleCode="time_attendance"><TimeAuditTrailPage /></ProtectedRoute>} />
+            <Route path="/time-attendance/shift-swaps" element={<ProtectedRoute moduleCode="time_attendance"><ShiftSwapsPage /></ProtectedRoute>} />
             <Route
               path="/time/shift-differentials"
               element={
