@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -9,18 +10,34 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Calculator, Save, Loader2, Info } from "lucide-react";
+import { Calculator, Save, Loader2, Info, Building2 } from "lucide-react";
 import { useLeaveProrataSettings, LeaveProrataSettings } from "@/hooks/useLeaveEnhancements";
 import { useLeaveManagement } from "@/hooks/useLeaveManagement";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/hooks/useLanguage";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function LeaveProrataSettingsPage() {
   const { t } = useLanguage();
   const { company } = useAuth();
-  const { prorataSettings, isLoading, upsertSettings } = useLeaveProrataSettings(company?.id);
-  const { leaveTypes } = useLeaveManagement(company?.id);
+  const [selectedCompanyId, setSelectedCompanyId] = useState(company?.id || "");
+
+  const { data: companies = [] } = useQuery({
+    queryKey: ["companies-list"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("companies")
+        .select("id, name")
+        .eq("is_active", true)
+        .order("name");
+      return data || [];
+    },
+  });
+
+  const effectiveCompanyId = selectedCompanyId || company?.id;
+  const { prorataSettings, isLoading, upsertSettings } = useLeaveProrataSettings(effectiveCompanyId);
+  const { leaveTypes } = useLeaveManagement(effectiveCompanyId);
   
   const [editingTypeId, setEditingTypeId] = useState<string | null>(null);
   const [formData, setFormData] = useState<Partial<LeaveProrataSettings>>({});
@@ -70,6 +87,17 @@ export default function LeaveProrataSettingsPage() {
             </h1>
             <p className="text-muted-foreground">Configure how leave entitlements are calculated for mid-year joiners</p>
           </div>
+          <Select value={selectedCompanyId || company?.id || ""} onValueChange={setSelectedCompanyId}>
+            <SelectTrigger className="w-[220px]">
+              <Building2 className="h-4 w-4 mr-2" />
+              <SelectValue placeholder="Select company" />
+            </SelectTrigger>
+            <SelectContent>
+              {companies.map((c: any) => (
+                <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         <Alert>
