@@ -13,7 +13,7 @@ export function AdminManualComplianceSection() {
   return (
     <div className="space-y-8">
       {/* Section Header */}
-      <Card>
+      <Card id="admin-part-7" data-manual-anchor="admin-part-7">
         <CardHeader>
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-lg bg-orange-500/10">

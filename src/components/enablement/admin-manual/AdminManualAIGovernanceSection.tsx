@@ -13,7 +13,7 @@ export function AdminManualAIGovernanceSection() {
   return (
     <div className="space-y-8">
       {/* Section Header */}
-      <Card>
+      <Card id="admin-part-6" data-manual-anchor="admin-part-6">
         <CardHeader>
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-lg bg-purple-500/10">
