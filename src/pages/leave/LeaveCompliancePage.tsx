@@ -4,12 +4,19 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { AppLayout } from "@/components/layout/AppLayout";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { PolicyAcknowledgmentTracker } from "@/components/leave/compliance/PolicyAcknowledgmentTracker";
 import { MedicalCertificateVerification } from "@/components/leave/compliance/MedicalCertificateVerification";
 import { BradfordFactorAnalysis } from "@/components/leave/compliance/BradfordFactorAnalysis";
 import { LeavePolicyVersionHistory } from "@/components/leave/compliance/LeavePolicyVersionHistory";
 import { ComplianceAlerts } from "@/components/leave/compliance/ComplianceAlerts";
 import { FileCheck, Stethoscope, Calculator, History, Bell } from "lucide-react";
+
+const breadcrumbItems = [
+  { label: "Leave Management", href: "/leave" },
+  { label: "Leave Compliance" },
+];
 
 export default function LeaveCompliancePage() {
   const { company, isAdmin } = useAuth();
@@ -25,14 +32,17 @@ export default function LeaveCompliancePage() {
   });
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Leave Compliance</h1>
-          <p className="text-muted-foreground">
-            Policy acknowledgments, medical verification, absence analysis, and audit trails
-          </p>
-        </div>
+    <AppLayout>
+      <div className="space-y-6">
+        <Breadcrumbs items={breadcrumbItems} />
+        
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold">Leave Compliance</h1>
+            <p className="text-muted-foreground">
+              Policy acknowledgments, medical verification, absence analysis, and audit trails
+            </p>
+          </div>
         {isAdmin && companies.length > 0 && (
           <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
             <SelectTrigger className="w-[250px]">
@@ -91,6 +101,7 @@ export default function LeaveCompliancePage() {
           <LeavePolicyVersionHistory companyId={selectedCompanyId} />
         </TabsContent>
       </Tabs>
-    </div>
+      </div>
+    </AppLayout>
   );
 }
