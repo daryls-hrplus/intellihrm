@@ -343,6 +343,28 @@ serve(async (req) => {
       );
     }
 
+    // Determine approval workflow levels for this period
+    // Check if any shifts used by employees have multi-level approvals
+    const { data: shiftApprovals } = await supabase
+      .from('shift_approval_levels')
+      .select('approval_level, approver_id, shift_id')
+      .eq('company_id', companyId)
+      .eq('is_active', true)
+      .order('approval_level', { ascending: true });
+
+    let maxApprovalLevels = 1;
+    let firstLevelApprover = null;
+    let workflowStatus = 'approved_for_payroll';
+
+    if (shiftApprovals && shiftApprovals.length > 0) {
+      maxApprovalLevels = Math.max(...shiftApprovals.map(a => a.approval_level));
+      const level1Approvers = shiftApprovals.filter(a => a.approval_level === 1);
+      if (level1Approvers.length > 0) {
+        firstLevelApprover = level1Approvers[0].approver_id;
+        workflowStatus = 'pending_level_1';
+      }
+    }
+
     // Create finalization record
     const { data: finalization, error: finError } = await supabase
       .from('timekeeper_period_finalizations')
@@ -353,7 +375,11 @@ serve(async (req) => {
         period_end: periodEnd,
         department_id: departmentId,
         employee_ids: employeeFilter,
-        status: 'finalized',
+        status: maxApprovalLevels > 1 ? 'pending_approval' : 'finalized',
+        workflow_status: workflowStatus,
+        current_approval_level: 1,
+        max_approval_levels: maxApprovalLevels,
+        current_approver_id: firstLevelApprover,
         total_employees: summary.totalEmployees,
         total_regular_hours: summary.totalRegularHours,
         total_overtime_hours: summary.totalOvertimeHours,
@@ -442,12 +468,18 @@ serve(async (req) => {
 
     console.log('Finalization complete');
 
+    const responseMessage = maxApprovalLevels > 1
+      ? `Successfully finalized ${summary.totalEmployees} employees. Sent to Level 1 approver for review.`
+      : `Successfully finalized ${summary.totalEmployees} employees with ${summary.leaveTransactions.length} leave transactions. Ready for payroll.`;
+
     return new Response(
       JSON.stringify({ 
         success: true, 
         finalizationId: finalization.id,
         summary,
-        message: `Successfully finalized ${summary.totalEmployees} employees with ${summary.leaveTransactions.length} leave transactions`
+        workflowStatus,
+        maxApprovalLevels,
+        message: responseMessage
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );

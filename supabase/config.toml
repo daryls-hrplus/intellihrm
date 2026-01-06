@@ -386,3 +386,6 @@ verify_jwt = false
 
 [functions.finalize-time-records]
 verify_jwt = false
+
+[functions.process-timesheet-approval]
+verify_jwt = false

@@ -12,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format, startOfWeek } from "date-fns";
 import { formatDateForDisplay } from "@/utils/dateUtils";
-import { Users, Clock, CheckCircle, XCircle, AlertTriangle, Timer, ClipboardList, Eye, UserCheck, Edit2, UserX, RefreshCw, CalendarCheck } from "lucide-react";
+import { Users, Clock, CheckCircle, XCircle, AlertTriangle, Timer, ClipboardList, Eye, UserCheck, Edit2, UserX, RefreshCw, CalendarCheck, CheckSquare, Settings } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -21,6 +21,8 @@ import { PunchDetailDialog } from "@/components/time-attendance/PunchDetailDialo
 import { PunchOverrideDialog } from "@/components/time-attendance/PunchOverrideDialog";
 import { AbsenceHandlingDialog } from "@/components/time-attendance/AbsenceHandlingDialog";
 import { PeriodFinalizationCard } from "@/components/time-attendance/PeriodFinalizationCard";
+import { ApprovalWorkflowCard } from "@/components/time-attendance/ApprovalWorkflowCard";
+import { ShiftApprovalSetup } from "@/components/time-attendance/ShiftApprovalSetup";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface AssignedEmployee {
@@ -550,6 +552,14 @@ export default function MssTimeAttendancePage() {
               <CalendarCheck className="h-4 w-4" />
               Finalize Period
             </TabsTrigger>
+            <TabsTrigger value="approvals" className="gap-2">
+              <CheckSquare className="h-4 w-4" />
+              Pending Approvals
+            </TabsTrigger>
+            <TabsTrigger value="approval-setup" className="gap-2">
+              <Settings className="h-4 w-4" />
+              Approval Setup
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="entries">
@@ -907,6 +917,17 @@ export default function MssTimeAttendancePage() {
               assignedEmployees={assignedEmployees.map(e => ({ id: e.id, full_name: e.full_name }))}
               onFinalized={loadTeamData}
             />
+          </TabsContent>
+
+          <TabsContent value="approvals">
+            <ApprovalWorkflowCard
+              companyId={companyId}
+              currentUserId={user?.id || null}
+            />
+          </TabsContent>
+
+          <TabsContent value="approval-setup">
+            <ShiftApprovalSetup companyId={companyId} />
           </TabsContent>
         </Tabs>
 
