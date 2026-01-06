@@ -59590,6 +59590,106 @@ export type Database = {
           },
         ]
       }
+      timekeeper_assignments: {
+        Row: {
+          assignment_type: string
+          branch_location_id: string | null
+          can_approve_timesheets: boolean
+          can_edit_punches: boolean
+          can_manage_exceptions: boolean
+          company_id: string
+          created_at: string
+          created_by: string | null
+          department_id: string | null
+          effective_date: string
+          employee_id: string | null
+          end_date: string | null
+          id: string
+          is_primary: boolean | null
+          timekeeper_id: string
+          updated_at: string
+        }
+        Insert: {
+          assignment_type: string
+          branch_location_id?: string | null
+          can_approve_timesheets?: boolean
+          can_edit_punches?: boolean
+          can_manage_exceptions?: boolean
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          department_id?: string | null
+          effective_date?: string
+          employee_id?: string | null
+          end_date?: string | null
+          id?: string
+          is_primary?: boolean | null
+          timekeeper_id: string
+          updated_at?: string
+        }
+        Update: {
+          assignment_type?: string
+          branch_location_id?: string | null
+          can_approve_timesheets?: boolean
+          can_edit_punches?: boolean
+          can_manage_exceptions?: boolean
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          department_id?: string | null
+          effective_date?: string
+          employee_id?: string | null
+          end_date?: string | null
+          id?: string
+          is_primary?: boolean | null
+          timekeeper_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "timekeeper_assignments_branch_location_id_fkey"
+            columns: ["branch_location_id"]
+            isOneToOne: false
+            referencedRelation: "company_branch_locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timekeeper_assignments_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timekeeper_assignments_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timekeeper_assignments_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timekeeper_assignments_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timekeeper_assignments_timekeeper_id_fkey"
+            columns: ["timekeeper_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       timesheet_entries: {
         Row: {
           approved_at: string | null
@@ -63907,6 +64007,16 @@ export type Database = {
         Returns: {
           bill_rate: number
           cost_rate: number
+        }[]
+      }
+      get_timekeeper_employees: {
+        Args: { p_timekeeper_id: string }
+        Returns: {
+          assignment_type: string
+          department_name: string
+          employee_email: string
+          employee_id: string
+          employee_name: string
         }[]
       }
       get_user_app_version: { Args: never; Returns: string }
