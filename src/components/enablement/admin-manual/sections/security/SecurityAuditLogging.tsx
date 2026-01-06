@@ -2,6 +2,7 @@ import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { FileText, Shield, Clock, Bell, AlertTriangle } from 'lucide-react';
+import { ScreenshotPlaceholder } from '../../../manual/components';
 
 export function SecurityAuditLogging() {
   return (
@@ -71,6 +72,12 @@ export function SecurityAuditLogging() {
           </TableBody>
         </Table>
       </div>
+
+      <ScreenshotPlaceholder
+        caption="Figure 4.6.1: Audit log configuration and retention settings"
+        alt="Audit logging configuration showing event categories, retention periods, and alert threshold settings"
+        aspectRatio="wide"
+      />
 
       <div className="space-y-4">
         <h4 className="font-semibold">Audit Log Fields</h4>

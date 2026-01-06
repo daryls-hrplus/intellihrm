@@ -7,7 +7,8 @@ import {
   ConfigurationExample,
   BusinessRules,
   TipCallout, 
-  InfoCallout 
+  InfoCallout,
+  ScreenshotPlaceholder 
 } from '../../../manual/components';
 import type { Step, ExampleConfig, BusinessRule } from '../../../manual/components';
 
@@ -159,6 +160,12 @@ export function UsersAccessRequest() {
           </div>
         </CardContent>
       </Card>
+
+      <ScreenshotPlaceholder
+        caption="Figure 3.7.1: Access Request workflow with approval stages"
+        alt="Access request form showing role selection, justification field, and approval chain preview"
+        aspectRatio="wide"
+      />
 
       <Card>
         <CardHeader>

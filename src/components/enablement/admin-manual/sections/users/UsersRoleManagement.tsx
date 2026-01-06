@@ -7,7 +7,8 @@ import {
   FieldReferenceTable, 
   BusinessRules,
   TipCallout, 
-  WarningCallout 
+  WarningCallout,
+  ScreenshotPlaceholder 
 } from '../../../manual/components';
 import type { Step, FieldDefinition, BusinessRule } from '../../../manual/components';
 
@@ -205,9 +206,21 @@ export function UsersRoleManagement() {
         </CardContent>
       </Card>
 
+      <ScreenshotPlaceholder
+        caption="Figure 3.3.1: Roles list page showing role management actions"
+        alt="Roles data grid with columns for name, type, users count, and action buttons for view, clone, and delete"
+        aspectRatio="wide"
+      />
+
       <FieldReferenceTable
         title="Role Field Reference"
         fields={roleFields}
+      />
+
+      <ScreenshotPlaceholder
+        caption="Figure 3.3.2: Role creation wizard showing permission configuration tabs"
+        alt="Role creation form with tabs for Basic Info, Menu Access, Container Access, Action Permissions, and PII Access"
+        aspectRatio="wide"
       />
 
       <StepByStep

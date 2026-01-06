@@ -8,7 +8,8 @@ import {
   ConfigurationExample,
   BusinessRules,
   TipCallout, 
-  WarningCallout 
+  WarningCallout,
+  ScreenshotPlaceholder 
 } from '../../../manual/components';
 import type { Step, FieldDefinition, ExampleConfig, BusinessRule } from '../../../manual/components';
 
@@ -292,6 +293,12 @@ export function UsersAutoApproval() {
           </div>
         </CardContent>
       </Card>
+
+      <ScreenshotPlaceholder
+        caption="Figure 3.8.1: Auto-Approval Rules configuration interface"
+        alt="Auto-approval rules list showing rule name, trigger roles, criteria, and active status toggle"
+        aspectRatio="wide"
+      />
 
       <FieldReferenceTable
         title="Auto-Approval Rule Fields"

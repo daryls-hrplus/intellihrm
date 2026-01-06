@@ -2,6 +2,7 @@ import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Shield, Smartphone, Key, AlertTriangle } from 'lucide-react';
+import { ScreenshotPlaceholder } from '../../../manual/components';
 
 export function SecurityMFA() {
   return (
@@ -64,6 +65,12 @@ export function SecurityMFA() {
           </TableBody>
         </Table>
       </div>
+
+      <ScreenshotPlaceholder
+        caption="Figure 4.2.1: MFA policy configuration and enforcement settings"
+        alt="MFA settings page showing enforcement options, allowed methods, and grace period configuration"
+        aspectRatio="wide"
+      />
 
       <div className="space-y-4">
         <h4 className="font-semibold">MFA Policy Configuration</h4>

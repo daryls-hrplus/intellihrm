@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Lock, Eye, Edit, Plus, Trash2, Download, CheckCircle } from 'lucide-react';
-import { LearningObjectives, TipCallout, WarningCallout, InfoCallout } from '../../../manual/components';
+import { LearningObjectives, TipCallout, WarningCallout, InfoCallout, ScreenshotPlaceholder } from '../../../manual/components';
 
 const crudPermissions = [
   { action: 'View', icon: Eye, color: 'text-blue-500', description: 'Read access to records' },
@@ -71,6 +71,12 @@ export function UsersGranularPermissions() {
           </div>
         </CardContent>
       </Card>
+
+      <ScreenshotPlaceholder
+        caption="Figure 3.5.1: Role permission configuration showing CRUD action toggles"
+        alt="Permission matrix interface with entity rows and View/Create/Edit/Delete/Export columns with toggle switches"
+        aspectRatio="wide"
+      />
 
       <Card>
         <CardHeader>
