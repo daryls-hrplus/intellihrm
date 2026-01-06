@@ -185,7 +185,7 @@ import LeaveConflictRulesPage from "./pages/leave/LeaveConflictRulesPage";
 import LeaveEncashmentPage from "./pages/leave/LeaveEncashmentPage";
 import LeaveLiabilityPage from "./pages/leave/LeaveLiabilityPage";
 import LeaveProrataSettingsPage from "./pages/leave/LeaveProrataSettingsPage";
-import LeavePlannerPage from "./pages/leave/LeavePlannerPage";
+
 
 import CompensationDashboardPage from "./pages/compensation/CompensationDashboardPage";
 import PayElementsPage from "./pages/compensation/PayElementsPage";
@@ -2237,14 +2237,6 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="leave">
                   <LeaveProrataSettingsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/leave/planner"
-              element={
-                <ProtectedRoute moduleCode="leave">
-                  <LeavePlannerPage />
                 </ProtectedRoute>
               }
             />

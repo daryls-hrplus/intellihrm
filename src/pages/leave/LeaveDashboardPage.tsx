@@ -37,7 +37,6 @@ import {
   Banknote,
   FileSpreadsheet,
   Percent,
-  CalendarRange,
 } from "lucide-react";
 
 interface Company {
@@ -300,14 +299,6 @@ export default function LeaveDashboardPage() {
       color: "bg-purple-500/10 text-purple-600",
       tabCode: "prorata_settings",
     },
-    planner: {
-      title: t("leave.modules.planner", "Leave Planner"),
-      description: t("leave.modules.plannerDesc", "Plan and schedule future leave requests"),
-      href: "/leave/planner",
-      icon: CalendarRange,
-      color: "bg-teal-500/10 text-teal-600",
-      tabCode: "planner",
-    },
   };
 
   // Filter by permissions
@@ -338,7 +329,6 @@ export default function LeaveDashboardPage() {
     {
       titleKey: "Planning",
       items: filterByAccess([
-        allModules.planner,
         allModules.liability,
       ]),
     },
