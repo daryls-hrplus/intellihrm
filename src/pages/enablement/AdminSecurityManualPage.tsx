@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { ADMIN_SECURITY_MANUAL_STRUCTURE } from '@/types/adminSecurityManual';
 import { AdminManualOverviewSection, AdminManualFoundationSection, AdminManualUsersSection, AdminManualSecuritySection, AdminManualSystemSection, AdminManualAIGovernanceSection, AdminManualComplianceSection, AdminManualTroubleshootingSection } from '@/components/enablement/admin-manual';
+import { AdminManualQuickReference, AdminManualArchitectureDiagrams, AdminManualGlossary } from '@/components/enablement/admin-manual/sections/supplementary';
 
 const SECTION_ICONS: Record<string, React.ReactNode> = {
   'admin-part-1': <BookOpen className="h-5 w-5" />,
@@ -133,6 +134,17 @@ export default function AdminSecurityManualPage() {
   };
 
   const renderSectionContent = () => {
+    // Handle supplementary sections
+    if (selectedSectionId === 'quick-ref') {
+      return <AdminManualQuickReference />;
+    }
+    if (selectedSectionId === 'diagrams') {
+      return <AdminManualArchitectureDiagrams />;
+    }
+    if (selectedSectionId === 'glossary') {
+      return <AdminManualGlossary />;
+    }
+
     switch (activePartId) {
       case 'admin-part-1':
         return <AdminManualOverviewSection />;
