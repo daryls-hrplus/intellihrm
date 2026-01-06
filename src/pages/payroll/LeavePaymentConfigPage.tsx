@@ -365,7 +365,7 @@ const LeavePaymentConfigPage: React.FC = () => {
     const payload = {
       company_id: selectedCompany,
       leave_type_id: mappingForm.leave_type_id,
-      pay_element_id: mappingForm.pay_element_id || null,
+      pay_element_id: mappingForm.pay_element_id === 'none' ? null : mappingForm.pay_element_id || null,
       payroll_code: mappingForm.payroll_code,
       description: mappingForm.description || null,
       start_date: mappingForm.start_date,
@@ -795,7 +795,7 @@ const LeavePaymentConfigPage: React.FC = () => {
                   <SelectValue placeholder="Select pay element" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">None</SelectItem>
+                  <SelectItem value="none">None</SelectItem>
                   {payElements.map(pe => (
                     <SelectItem key={pe.id} value={pe.id}>{pe.name} ({pe.code})</SelectItem>
                   ))}
