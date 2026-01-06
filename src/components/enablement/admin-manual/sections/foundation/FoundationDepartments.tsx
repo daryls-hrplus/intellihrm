@@ -17,7 +17,6 @@ import {
   type BusinessRule
 } from '../../../manual/components';
 import { FeatureStatusBadge } from '../../components';
-import departmentsListMockup from '@/assets/manual-mockups/departments-list.png';
 
 const departmentFields: FieldDefinition[] = [
   {
@@ -286,7 +285,6 @@ export function FoundationDepartments() {
         caption="Figure 2.6.2: Departments list with tree view showing nested structure"
         alt="Departments data grid with expandable tree showing parent-child relationships and cost centers"
         aspectRatio="wide"
-        imageSrc={departmentsListMockup}
       />
 
       <Card>
