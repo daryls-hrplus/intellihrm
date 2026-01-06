@@ -37,6 +37,7 @@ import {
   Banknote,
   FileSpreadsheet,
   Percent,
+  Baby,
 } from "lucide-react";
 
 interface Company {
@@ -299,6 +300,14 @@ export default function LeaveDashboardPage() {
       color: "bg-purple-500/10 text-purple-600",
       tabCode: "prorata_settings",
     },
+    maternityLeave: {
+      title: "Maternity Leave",
+      description: "Manage maternity leave requests, payments, and return-to-work planning",
+      href: "/leave/maternity",
+      icon: Baby,
+      color: "bg-pink-500/10 text-pink-600",
+      tabCode: "maternity_leave",
+    },
   };
 
   // Filter by permissions
@@ -324,6 +333,7 @@ export default function LeaveDashboardPage() {
         allModules.compensatoryTime,
         allModules.balanceRecalculation,
         allModules.encashment,
+        allModules.maternityLeave,
       ]),
     },
     {
