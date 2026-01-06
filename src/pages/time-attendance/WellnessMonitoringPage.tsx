@@ -29,6 +29,12 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
+interface AIRecommendation {
+  priority: string;
+  for_employee: string;
+  for_manager?: string;
+}
+
 interface WellnessIndicator {
   id: string;
   employee_id: string;
@@ -43,7 +49,7 @@ interface WellnessIndicator {
   overall_wellness_score: number;
   risk_level: string;
   ai_analysis: string | null;
-  ai_recommendations: unknown;
+  ai_recommendations: AIRecommendation[] | null;
   ai_confidence_score: number | null;
   calculated_at: string;
   profiles?: { full_name: string; email: string; avatar_url: string };
@@ -99,15 +105,13 @@ export default function WellnessMonitoringPage() {
 
   const analyzeAllMutation = useMutation({
     mutationFn: async () => {
-      const { data: employees } = await supabase
-        .from("profiles")
-        .select("id")
-        .eq("company_id", company?.id)
-        .eq("status", "active");
+      const { data, error } = await (supabase
+        .from("profiles" as const)
+        .select("id") as unknown as Promise<{ data: { id: string }[] | null; error: unknown }>);
 
-      if (!employees) return;
+      if (error || !data) return;
 
-      for (const emp of employees.slice(0, 20)) { // Limit to 20 for performance
+      for (const emp of data.slice(0, 20)) { // Limit to 20 for performance
         await supabase.functions.invoke("analyze-wellness", {
           body: { employeeId: emp.id, companyId: company?.id },
         });
@@ -412,7 +416,7 @@ export default function WellnessMonitoringPage() {
                         {selectedIndicator.ai_analysis}
                       </p>
 
-                      {selectedIndicator.ai_recommendations && (
+                      {selectedIndicator.ai_recommendations && selectedIndicator.ai_recommendations.length > 0 && (
                         <div className="space-y-2">
                           <h5 className="text-sm font-medium">Recommendations</h5>
                           {selectedIndicator.ai_recommendations.map((rec, idx) => (
