@@ -45161,6 +45161,82 @@ export type Database = {
         }
         Relationships: []
       }
+      payroll_summary_records: {
+        Row: {
+          company_id: string
+          created_at: string | null
+          currency: string | null
+          employee_id: string
+          finalization_id: string
+          gross_amount: number | null
+          hours: number
+          id: string
+          multiplier: number | null
+          pay_element: Database["public"]["Enums"]["pay_element_type"]
+          period_end: string
+          period_start: string
+          rate: number | null
+          source_records: Json | null
+          updated_at: string | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string | null
+          currency?: string | null
+          employee_id: string
+          finalization_id: string
+          gross_amount?: number | null
+          hours?: number
+          id?: string
+          multiplier?: number | null
+          pay_element: Database["public"]["Enums"]["pay_element_type"]
+          period_end: string
+          period_start: string
+          rate?: number | null
+          source_records?: Json | null
+          updated_at?: string | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string | null
+          currency?: string | null
+          employee_id?: string
+          finalization_id?: string
+          gross_amount?: number | null
+          hours?: number
+          id?: string
+          multiplier?: number | null
+          pay_element?: Database["public"]["Enums"]["pay_element_type"]
+          period_end?: string
+          period_start?: string
+          rate?: number | null
+          source_records?: Json | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payroll_summary_records_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payroll_summary_records_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payroll_summary_records_finalization_id_fkey"
+            columns: ["finalization_id"]
+            isOneToOne: false
+            referencedRelation: "timekeeper_period_finalizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payroll_tax_brackets: {
         Row: {
           created_at: string
@@ -55028,6 +55104,61 @@ export type Database = {
           },
         ]
       }
+      shift_approval_levels: {
+        Row: {
+          approval_level: number
+          approver_id: string
+          company_id: string
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          shift_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          approval_level: number
+          approver_id: string
+          company_id: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          shift_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          approval_level?: number
+          approver_id?: string
+          company_id?: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          shift_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shift_approval_levels_approver_id_fkey"
+            columns: ["approver_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shift_approval_levels_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shift_approval_levels_shift_id_fkey"
+            columns: ["shift_id"]
+            isOneToOne: false
+            referencedRelation: "shifts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       shift_bidding_periods: {
         Row: {
           allocation_method: string
@@ -59753,14 +59884,22 @@ export type Database = {
           absences_unexcused: number | null
           company_id: string
           created_at: string
+          current_approval_level: number | null
+          current_approver_id: string | null
           department_id: string | null
           employee_ids: string[] | null
           finalized_at: string | null
           id: string
           leave_transactions_created: number | null
+          max_approval_levels: number | null
+          next_approver_id: string | null
           notes: string | null
+          payroll_summary_created_at: string | null
           period_end: string
           period_start: string
+          rejected_at: string | null
+          rejected_by: string | null
+          rejection_reason: string | null
           sent_to_payroll_at: string | null
           status: string
           timekeeper_id: string
@@ -59769,20 +59908,31 @@ export type Database = {
           total_regular_hours: number | null
           updated_at: string
           validation_errors: Json | null
+          workflow_status:
+            | Database["public"]["Enums"]["approval_workflow_status"]
+            | null
         }
         Insert: {
           absences_excused?: number | null
           absences_unexcused?: number | null
           company_id: string
           created_at?: string
+          current_approval_level?: number | null
+          current_approver_id?: string | null
           department_id?: string | null
           employee_ids?: string[] | null
           finalized_at?: string | null
           id?: string
           leave_transactions_created?: number | null
+          max_approval_levels?: number | null
+          next_approver_id?: string | null
           notes?: string | null
+          payroll_summary_created_at?: string | null
           period_end: string
           period_start: string
+          rejected_at?: string | null
+          rejected_by?: string | null
+          rejection_reason?: string | null
           sent_to_payroll_at?: string | null
           status?: string
           timekeeper_id: string
@@ -59791,20 +59941,31 @@ export type Database = {
           total_regular_hours?: number | null
           updated_at?: string
           validation_errors?: Json | null
+          workflow_status?:
+            | Database["public"]["Enums"]["approval_workflow_status"]
+            | null
         }
         Update: {
           absences_excused?: number | null
           absences_unexcused?: number | null
           company_id?: string
           created_at?: string
+          current_approval_level?: number | null
+          current_approver_id?: string | null
           department_id?: string | null
           employee_ids?: string[] | null
           finalized_at?: string | null
           id?: string
           leave_transactions_created?: number | null
+          max_approval_levels?: number | null
+          next_approver_id?: string | null
           notes?: string | null
+          payroll_summary_created_at?: string | null
           period_end?: string
           period_start?: string
+          rejected_at?: string | null
+          rejected_by?: string | null
+          rejection_reason?: string | null
           sent_to_payroll_at?: string | null
           status?: string
           timekeeper_id?: string
@@ -59813,6 +59974,9 @@ export type Database = {
           total_regular_hours?: number | null
           updated_at?: string
           validation_errors?: Json | null
+          workflow_status?:
+            | Database["public"]["Enums"]["approval_workflow_status"]
+            | null
         }
         Relationships: [
           {
@@ -59823,10 +59987,76 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "timekeeper_period_finalizations_current_approver_id_fkey"
+            columns: ["current_approver_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "timekeeper_period_finalizations_department_id_fkey"
             columns: ["department_id"]
             isOneToOne: false
             referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timekeeper_period_finalizations_next_approver_id_fkey"
+            columns: ["next_approver_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timekeeper_period_finalizations_rejected_by_fkey"
+            columns: ["rejected_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      timesheet_approval_history: {
+        Row: {
+          action: string
+          approval_level: number
+          approved_at: string | null
+          approver_id: string
+          comments: string | null
+          finalization_id: string
+          id: string
+        }
+        Insert: {
+          action: string
+          approval_level: number
+          approved_at?: string | null
+          approver_id: string
+          comments?: string | null
+          finalization_id: string
+          id?: string
+        }
+        Update: {
+          action?: string
+          approval_level?: number
+          approved_at?: string | null
+          approver_id?: string
+          comments?: string | null
+          finalization_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "timesheet_approval_history_approver_id_fkey"
+            columns: ["approver_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timesheet_approval_history_finalization_id_fkey"
+            columns: ["finalization_id"]
+            isOneToOne: false
+            referencedRelation: "timekeeper_period_finalizations"
             referencedColumns: ["id"]
           },
         ]
@@ -64417,6 +64647,13 @@ export type Database = {
         | "improvement_trend"
         | "competency_gap"
         | "goal_not_met"
+      approval_workflow_status:
+        | "pending_level_1"
+        | "pending_level_2"
+        | "pending_level_3"
+        | "approved_for_payroll"
+        | "sent_to_payroll"
+        | "rejected"
       audit_action:
         | "CREATE"
         | "UPDATE"
@@ -64544,6 +64781,19 @@ export type Database = {
         | "overtime_status"
         | "overpayment_reason"
       message_status: "sent" | "delivered" | "read"
+      pay_element_type:
+        | "regular_time"
+        | "overtime_1_5x"
+        | "overtime_2x"
+        | "overtime_3x"
+        | "holiday_pay"
+        | "holiday_overtime"
+        | "night_differential"
+        | "weekend_premium"
+        | "paid_leave"
+        | "unpaid_deduction"
+        | "sick_leave"
+        | "other"
       performance_risk_level: "low" | "medium" | "high" | "critical"
       performance_risk_type:
         | "chronic_underperformance"
@@ -64768,6 +65018,14 @@ export const Constants = {
         "competency_gap",
         "goal_not_met",
       ],
+      approval_workflow_status: [
+        "pending_level_1",
+        "pending_level_2",
+        "pending_level_3",
+        "approved_for_payroll",
+        "sent_to_payroll",
+        "rejected",
+      ],
       audit_action: [
         "CREATE",
         "UPDATE",
@@ -64905,6 +65163,20 @@ export const Constants = {
         "overpayment_reason",
       ],
       message_status: ["sent", "delivered", "read"],
+      pay_element_type: [
+        "regular_time",
+        "overtime_1_5x",
+        "overtime_2x",
+        "overtime_3x",
+        "holiday_pay",
+        "holiday_overtime",
+        "night_differential",
+        "weekend_premium",
+        "paid_leave",
+        "unpaid_deduction",
+        "sick_leave",
+        "other",
+      ],
       performance_risk_level: ["low", "medium", "high", "critical"],
       performance_risk_type: [
         "chronic_underperformance",
