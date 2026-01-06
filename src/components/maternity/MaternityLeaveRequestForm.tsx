@@ -145,7 +145,7 @@ export function MaternityLeaveRequestForm({ companyId, onCancel, onSuccess }: Pr
       planned_return_date: leaveDates ? format(leaveDates.plannedReturn, "yyyy-MM-dd") : undefined,
       total_leave_days: leaveDates?.totalDays,
       statutory_payment_weeks: complianceRule?.legal_minimum_weeks,
-      payment_config_id: paymentConfigId || undefined,
+      payment_config_id: paymentConfigId === "statutory_only" ? undefined : paymentConfigId || undefined,
       phased_return_enabled: phasedReturnEnabled,
       notes: notes || undefined,
     });
@@ -317,7 +317,7 @@ export function MaternityLeaveRequestForm({ companyId, onCancel, onSuccess }: Pr
                     <SelectValue placeholder="Select payment configuration (optional)" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Use Statutory Only</SelectItem>
+                    <SelectItem value="statutory_only">Use Statutory Only</SelectItem>
                     {paymentConfigs
                       .filter((c) => c.country_code === countryCode)
                       .map((config) => (
