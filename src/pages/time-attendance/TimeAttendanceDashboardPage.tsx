@@ -269,6 +269,62 @@ export default function TimeAttendanceDashboardPage() {
       color: "bg-red-500/10 text-red-600",
       tabCode: "absenteeism_cost",
     },
+    wellness: {
+      title: "Wellness Monitoring",
+      description: "AI-powered fatigue detection and burnout risk analysis",
+      icon: UserCheck,
+      href: "/time-attendance/wellness",
+      color: "bg-pink-500/10 text-pink-600",
+      tabCode: "wellness",
+    },
+    overtimeAlerts: {
+      title: "Overtime Alerts",
+      description: "Proactive overtime risk notifications",
+      icon: AlertCircle,
+      href: "/time-attendance/overtime-alerts",
+      color: "bg-orange-500/10 text-orange-600",
+      tabCode: "overtime_alerts",
+    },
+    laborCompliance: {
+      title: "Labor Compliance",
+      description: "Multi-country labor law compliance",
+      icon: Settings,
+      href: "/time-attendance/labor-compliance",
+      color: "bg-blue-500/10 text-blue-600",
+      tabCode: "labor_compliance",
+    },
+    flexTime: {
+      title: "Flex Time",
+      description: "Manage flexible working hour balances",
+      icon: Clock,
+      href: "/time-attendance/flex-time",
+      color: "bg-violet-500/10 text-violet-600",
+      tabCode: "flex_time",
+    },
+    regularization: {
+      title: "Regularization",
+      description: "Attendance correction requests",
+      icon: ClipboardList,
+      href: "/time-attendance/regularization",
+      color: "bg-cyan-500/10 text-cyan-600",
+      tabCode: "regularization",
+    },
+    cbaRules: {
+      title: "CBA Time Rules",
+      description: "Collective bargaining agreement rules",
+      icon: Sliders,
+      href: "/time-attendance/cba-rules",
+      color: "bg-amber-500/10 text-amber-600",
+      tabCode: "cba_rules",
+    },
+    auditTrail: {
+      title: "Audit Trail",
+      description: "Complete time & attendance change history",
+      icon: Clock,
+      href: "/time-attendance/audit-trail",
+      color: "bg-slate-500/10 text-slate-600",
+      tabCode: "audit_trail",
+    },
   };
 
   // Filter by permissions
@@ -318,10 +374,22 @@ export default function TimeAttendanceDashboardPage() {
       ]),
     },
     {
-      titleKey: "Analytics",
+      titleKey: "Analytics & Intelligence",
       items: filterByAccess([
         allModules.analytics,
         allModules.absenteeismCost,
+        allModules.wellness,
+        allModules.overtimeAlerts,
+      ]),
+    },
+    {
+      titleKey: "Compliance & Governance",
+      items: filterByAccess([
+        allModules.laborCompliance,
+        allModules.flexTime,
+        allModules.regularization,
+        allModules.cbaRules,
+        allModules.auditTrail,
       ]),
     },
   ];
