@@ -12029,6 +12029,146 @@ export type Database = {
           },
         ]
       }
+      device_sync_logs: {
+        Row: {
+          company_id: string | null
+          completed_at: string | null
+          created_at: string | null
+          device_id: string | null
+          error_message: string | null
+          id: string
+          records_failed: number | null
+          records_synced: number | null
+          started_at: string | null
+          status: string
+          sync_details: Json | null
+          sync_type: string
+          triggered_by: string | null
+        }
+        Insert: {
+          company_id?: string | null
+          completed_at?: string | null
+          created_at?: string | null
+          device_id?: string | null
+          error_message?: string | null
+          id?: string
+          records_failed?: number | null
+          records_synced?: number | null
+          started_at?: string | null
+          status?: string
+          sync_details?: Json | null
+          sync_type?: string
+          triggered_by?: string | null
+        }
+        Update: {
+          company_id?: string | null
+          completed_at?: string | null
+          created_at?: string | null
+          device_id?: string | null
+          error_message?: string | null
+          id?: string
+          records_failed?: number | null
+          records_synced?: number | null
+          started_at?: string | null
+          status?: string
+          sync_details?: Json | null
+          sync_type?: string
+          triggered_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "device_sync_logs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "device_sync_logs_device_id_fkey"
+            columns: ["device_id"]
+            isOneToOne: false
+            referencedRelation: "timeclock_devices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "device_sync_logs_triggered_by_fkey"
+            columns: ["triggered_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      device_user_mappings: {
+        Row: {
+          card_number: string | null
+          company_id: string | null
+          created_at: string | null
+          device_id: string | null
+          device_user_id: string
+          device_user_name: string | null
+          employee_id: string | null
+          face_template_exists: boolean | null
+          fingerprint_count: number | null
+          id: string
+          is_synced: boolean | null
+          last_synced_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          card_number?: string | null
+          company_id?: string | null
+          created_at?: string | null
+          device_id?: string | null
+          device_user_id: string
+          device_user_name?: string | null
+          employee_id?: string | null
+          face_template_exists?: boolean | null
+          fingerprint_count?: number | null
+          id?: string
+          is_synced?: boolean | null
+          last_synced_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          card_number?: string | null
+          company_id?: string | null
+          created_at?: string | null
+          device_id?: string | null
+          device_user_id?: string
+          device_user_name?: string | null
+          employee_id?: string | null
+          face_template_exists?: boolean | null
+          fingerprint_count?: number | null
+          id?: string
+          is_synced?: boolean | null
+          last_synced_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "device_user_mappings_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "device_user_mappings_device_id_fkey"
+            columns: ["device_id"]
+            isOneToOne: false
+            referencedRelation: "timeclock_devices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "device_user_mappings_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       divisions: {
         Row: {
           code: string
@@ -59098,6 +59238,7 @@ export type Database = {
       timeclock_devices: {
         Row: {
           api_key: string | null
+          communication_key: string | null
           company_id: string
           created_at: string
           device_code: string
@@ -59113,13 +59254,16 @@ export type Database = {
           manufacturer: string | null
           model: string | null
           pending_punches: number | null
+          port: number | null
           serial_number: string | null
           settings: Json | null
           sync_status: string | null
+          timezone: string | null
           updated_at: string
         }
         Insert: {
           api_key?: string | null
+          communication_key?: string | null
           company_id: string
           created_at?: string
           device_code: string
@@ -59135,13 +59279,16 @@ export type Database = {
           manufacturer?: string | null
           model?: string | null
           pending_punches?: number | null
+          port?: number | null
           serial_number?: string | null
           settings?: Json | null
           sync_status?: string | null
+          timezone?: string | null
           updated_at?: string
         }
         Update: {
           api_key?: string | null
+          communication_key?: string | null
           company_id?: string
           created_at?: string
           device_code?: string
@@ -59157,9 +59304,11 @@ export type Database = {
           manufacturer?: string | null
           model?: string | null
           pending_punches?: number | null
+          port?: number | null
           serial_number?: string | null
           settings?: Json | null
           sync_status?: string | null
+          timezone?: string | null
           updated_at?: string
         }
         Relationships: [
