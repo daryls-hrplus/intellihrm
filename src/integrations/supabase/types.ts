@@ -21548,6 +21548,79 @@ export type Database = {
           },
         ]
       }
+      ess_approval_policies: {
+        Row: {
+          approval_mode: string
+          company_id: string | null
+          country_code: string | null
+          created_at: string
+          created_by: string | null
+          effective_date: string | null
+          field_name: string | null
+          id: string
+          is_active: boolean | null
+          notification_only: boolean | null
+          request_type: string
+          requires_documentation: boolean | null
+          updated_at: string
+          workflow_template_id: string | null
+        }
+        Insert: {
+          approval_mode?: string
+          company_id?: string | null
+          country_code?: string | null
+          created_at?: string
+          created_by?: string | null
+          effective_date?: string | null
+          field_name?: string | null
+          id?: string
+          is_active?: boolean | null
+          notification_only?: boolean | null
+          request_type: string
+          requires_documentation?: boolean | null
+          updated_at?: string
+          workflow_template_id?: string | null
+        }
+        Update: {
+          approval_mode?: string
+          company_id?: string | null
+          country_code?: string | null
+          created_at?: string
+          created_by?: string | null
+          effective_date?: string | null
+          field_name?: string | null
+          id?: string
+          is_active?: boolean | null
+          notification_only?: boolean | null
+          request_type?: string
+          requires_documentation?: boolean | null
+          updated_at?: string
+          workflow_template_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ess_approval_policies_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ess_approval_policies_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ess_approval_policies_workflow_template_id_fkey"
+            columns: ["workflow_template_id"]
+            isOneToOne: false
+            referencedRelation: "workflow_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       evidence_usage_audit: {
         Row: {
           action: string
