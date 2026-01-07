@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { usePageAudit } from "@/hooks/usePageAudit";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
@@ -50,6 +51,7 @@ const CLAIM_TYPES = ['medical', 'dental', 'vision', 'prescription', 'wellness', 
 const STATUS_OPTIONS = ['submitted', 'processing', 'approved', 'denied', 'paid'];
 
 export default function BenefitClaimsPage() {
+  usePageAudit('benefit_claims', 'Benefits');
   const { t } = useTranslation();
   const { user, isAdmin, hasRole } = useAuth();
   const canManage = isAdmin || hasRole('hr_manager');

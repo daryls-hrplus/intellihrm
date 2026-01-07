@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { usePageAudit } from "@/hooks/usePageAudit";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { GroupedModuleCards, ModuleSection, GroupedModuleItem } from "@/components/ui/GroupedModuleCards";
 import { EmployeeRODWidget } from "@/components/ess/EmployeeRODWidget";
@@ -49,6 +50,7 @@ import {
 } from "lucide-react";
 
 export default function EmployeeSelfServicePage() {
+  usePageAudit('ess_dashboard', 'ESS');
   const { t } = useTranslation();
   const { hasTabAccess } = useGranularPermissions();
   const { data: sectionBadges = {} } = useEssPendingActions();

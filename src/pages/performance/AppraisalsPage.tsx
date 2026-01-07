@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { usePageAudit } from "@/hooks/usePageAudit";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -90,6 +91,7 @@ const statusColors: Record<string, string> = {
 };
 
 export default function AppraisalsPage() {
+  usePageAudit('appraisals', 'Performance');
   const { t } = useLanguage();
   const navigate = useNavigate();
   const { user, company, isAdmin, isHRManager } = useAuth();

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { usePageAudit } from "@/hooks/usePageAudit";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useQuery } from "@tanstack/react-query";
@@ -10,6 +11,7 @@ import { ERCasesTab } from "@/components/employee-relations/ERCasesTab";
 import { AlertTriangle } from "lucide-react";
 
 export default function ERCasesPage() {
+  usePageAudit('er_cases', 'Employee Relations');
   const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>(searchParams.get("company") || "");

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { usePageAudit } from "@/hooks/usePageAudit";
 import { useHSE, HSEIncident } from "@/hooks/useHSE";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -75,6 +76,7 @@ const treatmentOptions = [
 ];
 
 export default function HSEIncidentsPage() {
+  usePageAudit('hse_incidents', 'HSE');
   const { t } = useLanguage();
   const [companyId, setCompanyId] = useState<string>("");
   const [searchTerm, setSearchTerm] = useState("");

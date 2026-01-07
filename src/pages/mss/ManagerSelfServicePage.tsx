@@ -1,6 +1,7 @@
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { useLanguage } from "@/hooks/useLanguage";
+import { usePageAudit } from "@/hooks/usePageAudit";
 import { GroupedModuleCards, ModuleSection, GroupedModuleItem } from "@/components/ui/GroupedModuleCards";
 import { TeamLeaveIntelligence } from "@/components/mss/TeamLeaveIntelligence";
 import { ManagerRODWidget } from "@/components/mss/ManagerRODWidget";
@@ -34,6 +35,7 @@ import {
 } from "lucide-react";
 
 export default function ManagerSelfServicePage() {
+  usePageAudit('mss_dashboard', 'MSS');
   const { t } = useLanguage();
   const { hasTabAccess } = useGranularPermissions();
   const { user, company } = useAuth();

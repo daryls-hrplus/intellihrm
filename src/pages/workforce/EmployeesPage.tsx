@@ -1,6 +1,7 @@
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { useState, useEffect, useRef, useMemo } from "react";
+import { usePageAudit } from "@/hooks/usePageAudit";
 import { useNavigate } from "react-router-dom";
 import { useAuditLog } from "@/hooks/useAuditLog";
 import { usePiiVisibility } from "@/hooks/usePiiVisibility";
@@ -87,6 +88,7 @@ interface Company {
 }
 
 export default function EmployeesPage() {
+  usePageAudit('employees', 'Workforce');
   const { t } = useLanguage();
   const [searchQuery, setSearchQuery] = useState("");
   const [employees, setEmployees] = useState<Employee[]>([]);
