@@ -61,11 +61,17 @@ import {
   Activity,
   AlertTriangle,
   Info,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
 } from "lucide-react";
 import { AuditLogDiffView } from "@/components/admin/audit/AuditLogDiffView";
 import { AuditLogTrendChart } from "@/components/admin/audit/AuditLogTrendChart";
 import { getRiskLevel, getRiskBadgeStyles, getEntityLink, formatEntityType } from "@/utils/auditLogUtils";
 import { Link } from "react-router-dom";
+
+type SortField = 'created_at' | 'user_name' | 'action' | 'risk' | 'entity_type' | 'entity_name';
+type SortDirection = 'asc' | 'desc';
 
 type AuditAction = 'CREATE' | 'UPDATE' | 'DELETE' | 'VIEW' | 'EXPORT' | 'LOGIN' | 'LOGOUT';
 
@@ -130,6 +136,8 @@ export default function AdminAuditLogsPage() {
   const [totalCount, setTotalCount] = useState(0);
   const [entityTypes, setEntityTypes] = useState<string[]>([]);
   const [users, setUsers] = useState<UserOption[]>([]);
+  const [sortField, setSortField] = useState<SortField>('created_at');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
   const [summaryStats, setSummaryStats] = useState<SummaryStats>({
     total: 0,
     creates: 0,
@@ -173,11 +181,17 @@ export default function AdminAuditLogsPage() {
     return query;
   };
 
+  // Risk level priority for sorting
+  const riskPriority: Record<string, number> = { critical: 0, high: 1, medium: 2, low: 3 };
+
   const fetchLogs = async () => {
     setLoading(true);
     try {
+      // Determine DB sort field (risk is computed client-side)
+      const dbSortField = sortField === 'risk' || sortField === 'user_name' ? 'created_at' : sortField;
+      
       const query = buildBaseQuery()
-        .order('created_at', { ascending: false })
+        .order(dbSortField, { ascending: sortDirection === 'asc' })
         .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1);
 
       const { data, error, count } = await query;
@@ -202,12 +216,29 @@ export default function AdminAuditLogsPage() {
         }
       }
 
-      const logsWithUsers: AuditLog[] = (data || []).map(log => ({
+      let logsWithUsers: AuditLog[] = (data || []).map(log => ({
         ...log,
         action: log.action as AuditAction,
         user_email: log.user_id ? profiles[log.user_id]?.email : undefined,
         user_name: log.user_id ? profiles[log.user_id]?.full_name : undefined,
       }));
+
+      // Client-side sorting for computed fields
+      if (sortField === 'risk') {
+        logsWithUsers.sort((a, b) => {
+          const riskA = riskPriority[getRiskLevel(a.action, a.entity_type)] ?? 4;
+          const riskB = riskPriority[getRiskLevel(b.action, b.entity_type)] ?? 4;
+          return sortDirection === 'asc' ? riskA - riskB : riskB - riskA;
+        });
+      } else if (sortField === 'user_name') {
+        logsWithUsers.sort((a, b) => {
+          const nameA = (a.user_name || '').toLowerCase();
+          const nameB = (b.user_name || '').toLowerCase();
+          return sortDirection === 'asc' 
+            ? nameA.localeCompare(nameB) 
+            : nameB.localeCompare(nameA);
+        });
+      }
 
       setLogs(logsWithUsers);
       setTotalCount(count || 0);
@@ -388,7 +419,40 @@ export default function AdminAuditLogsPage() {
   useEffect(() => {
     fetchLogs();
     fetchSummaryStats();
-  }, [page, actionFilter, entityFilter, userFilter, dateFrom, dateTo, searchQuery]);
+  }, [page, actionFilter, entityFilter, userFilter, dateFrom, dateTo, searchQuery, sortField, sortDirection]);
+
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('desc');
+    }
+    setPage(0);
+  };
+
+  const SortableHeader = ({ field, children }: { field: SortField; children: React.ReactNode }) => {
+    const isActive = sortField === field;
+    return (
+      <TableHead 
+        className="cursor-pointer hover:bg-muted/50 select-none transition-colors"
+        onClick={() => handleSort(field)}
+      >
+        <div className="flex items-center gap-1">
+          {children}
+          {isActive ? (
+            sortDirection === 'asc' ? (
+              <ArrowUp className="h-4 w-4" />
+            ) : (
+              <ArrowDown className="h-4 w-4" />
+            )
+          ) : (
+            <ArrowUpDown className="h-4 w-4 text-muted-foreground/50" />
+          )}
+        </div>
+      </TableHead>
+    );
+  };
 
   const clearFilters = () => {
     setSearchQuery("");
@@ -806,12 +870,12 @@ export default function AdminAuditLogsPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Timestamp</TableHead>
-                  <TableHead>User</TableHead>
-                  <TableHead>Action</TableHead>
-                  <TableHead>Risk</TableHead>
-                  <TableHead>Entity Type</TableHead>
-                  <TableHead>Entity Name</TableHead>
+                  <SortableHeader field="created_at">Timestamp</SortableHeader>
+                  <SortableHeader field="user_name">User</SortableHeader>
+                  <SortableHeader field="action">Action</SortableHeader>
+                  <SortableHeader field="risk">Risk</SortableHeader>
+                  <SortableHeader field="entity_type">Entity Type</SortableHeader>
+                  <SortableHeader field="entity_name">Entity Name</SortableHeader>
                   <TableHead className="text-right">Details</TableHead>
                 </TableRow>
               </TableHeader>
