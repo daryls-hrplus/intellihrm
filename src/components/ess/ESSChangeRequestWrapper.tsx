@@ -203,51 +203,55 @@ export function ESSChangeRequestWrapper({
             {/* Render the form/content */}
             {children}
 
-            {/* Document Upload */}
-            {requiresDocumentation && (
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <Label>Supporting Documents</Label>
-                  <Badge variant="outline" className="text-xs">
+            {/* Document Upload - Show for HR Review or Workflow modes */}
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <Label>Supporting Documents</Label>
+                {requiresDocumentation ? (
+                  <Badge variant="outline" className="text-xs text-destructive border-destructive/50">
                     <AlertTriangle className="h-3 w-3 mr-1" />
                     Required
                   </Badge>
-                </div>
-                
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  className="hidden"
-                  multiple
-                  accept=".pdf,.jpg,.jpeg,.png,.gif,.doc,.docx"
-                  onChange={handleFileSelect}
-                />
-                
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="w-full"
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  <Upload className="h-4 w-4 mr-2" />
-                  Upload Documents
-                </Button>
-
-                {files.length > 0 && (
-                  <div className="space-y-2 mt-2">
-                    {files.map((file, index) => (
-                      <div key={index} className="flex items-center gap-2 p-2 bg-muted rounded-md">
-                        <FileUp className="h-4 w-4" />
-                        <span className="text-sm flex-1 truncate">{file.name}</span>
-                        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => removeFile(index)}>
-                          <X className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
+                ) : (
+                  <Badge variant="outline" className="text-xs text-muted-foreground">
+                    Optional
+                  </Badge>
                 )}
               </div>
-            )}
+              
+              <input
+                ref={fileInputRef}
+                type="file"
+                className="hidden"
+                multiple
+                accept=".pdf,.jpg,.jpeg,.png,.gif,.doc,.docx"
+                onChange={handleFileSelect}
+              />
+              
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <Upload className="h-4 w-4 mr-2" />
+                Upload Documents
+              </Button>
+
+              {files.length > 0 && (
+                <div className="space-y-2 mt-2">
+                  {files.map((file, index) => (
+                    <div key={index} className="flex items-center gap-2 p-2 bg-muted rounded-md">
+                      <FileUp className="h-4 w-4" />
+                      <span className="text-sm flex-1 truncate">{file.name}</span>
+                      <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => removeFile(index)}>
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
 
             {/* Notes */}
             <div className="space-y-2">
