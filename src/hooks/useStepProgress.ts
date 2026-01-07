@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useAuditLog } from '@/hooks/useAuditLog';
 
 export interface StepProgress {
   id: string;
@@ -33,6 +34,7 @@ export function useStepProgress(phaseId?: string) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { user, profile } = useAuth();
+  const { logAction } = useAuditLog();
 
   const companyId = profile?.company_id;
 
@@ -119,9 +121,20 @@ export function useStepProgress(phaseId?: string) {
         .eq('id', existing.id);
 
       if (updateError) throw updateError;
+
+      // Audit log for step status change
+      await logAction({
+        action: 'UPDATE',
+        entityType: 'implementation_step',
+        entityId: existing.id,
+        entityName: `Phase ${phaseId} - Step ${stepOrder}`,
+        oldValues: { is_completed: !isComplete },
+        newValues: { is_completed: isComplete },
+        metadata: { phase_id: phaseId, step_order: stepOrder }
+      });
     } else {
       // Insert new record
-      const { error: insertError } = await supabase
+      const { data: insertData, error: insertError } = await supabase
         .from('implementation_step_progress')
         .insert({
           company_id: companyId,
@@ -131,9 +144,21 @@ export function useStepProgress(phaseId?: string) {
           completed_at: isComplete ? new Date().toISOString() : null,
           completed_by: isComplete ? user.id : null,
           notes: notes || null
-        });
+        })
+        .select('id')
+        .single();
 
       if (insertError) throw insertError;
+
+      // Audit log for new step progress
+      await logAction({
+        action: 'CREATE',
+        entityType: 'implementation_step',
+        entityId: insertData?.id,
+        entityName: `Phase ${phaseId} - Step ${stepOrder}`,
+        newValues: { is_completed: isComplete },
+        metadata: { phase_id: phaseId, step_order: stepOrder }
+      });
     }
 
     await fetchProgress();
