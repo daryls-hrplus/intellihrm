@@ -6,9 +6,9 @@ import { User, Shield, Clock, ArrowRight } from 'lucide-react';
 export const ESSOverview: React.FC = () => {
   return (
     <div className="space-y-6">
-      <div className="prose prose-slate dark:prose-invert max-w-none">
-        <h3 className="text-xl font-semibold mb-4">Overview</h3>
-        <p>
+      <div className="max-w-none">
+        <h3 className="text-xl font-semibold mb-4 text-foreground">Overview</h3>
+        <p className="text-foreground leading-relaxed">
           Employee Self-Service (ESS) empowers employees to manage their own workforce data, reducing 
           administrative burden on HR while increasing data accuracy and employee engagement. The ESS 
           portal provides controlled access to personal information, qualifications, and career tools.
