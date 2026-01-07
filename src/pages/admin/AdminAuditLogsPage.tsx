@@ -28,11 +28,18 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
-import { formatDateForDisplay, getTodayString } from "@/utils/dateUtils";
+import { formatDateForDisplay } from "@/utils/dateUtils";
 import { Json } from "@/integrations/supabase/types";
+import { cn } from "@/lib/utils";
 import {
   Search,
   Filter,
@@ -46,7 +53,18 @@ import {
   RefreshCw,
   ChevronLeft,
   ChevronRight,
+  CalendarIcon,
+  X,
+  ExternalLink,
+  Shield,
+  Users,
+  Activity,
+  AlertTriangle,
 } from "lucide-react";
+import { AuditLogDiffView } from "@/components/admin/audit/AuditLogDiffView";
+import { AuditLogTrendChart } from "@/components/admin/audit/AuditLogTrendChart";
+import { getRiskLevel, getRiskBadgeStyles, getEntityLink, formatEntityType } from "@/utils/auditLogUtils";
+import { Link } from "react-router-dom";
 
 type AuditAction = 'CREATE' | 'UPDATE' | 'DELETE' | 'VIEW' | 'EXPORT' | 'LOGIN' | 'LOGOUT';
 
@@ -67,6 +85,24 @@ interface AuditLog {
   user_name?: string | null;
 }
 
+interface SummaryStats {
+  total: number;
+  creates: number;
+  updates: number;
+  deletes: number;
+  views: number;
+  exports: number;
+  logins: number;
+  uniqueUsers: number;
+  highRiskEvents: number;
+}
+
+interface UserOption {
+  id: string;
+  name: string;
+  email: string;
+}
+
 const actionConfig: Record<AuditAction, { label: string; icon: React.ElementType; color: string }> = {
   CREATE: { label: 'Created', icon: Plus, color: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' },
   UPDATE: { label: 'Updated', icon: Pencil, color: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300' },
@@ -85,36 +121,63 @@ export default function AdminAuditLogsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [actionFilter, setActionFilter] = useState<AuditAction | "all">("all");
   const [entityFilter, setEntityFilter] = useState<string>("all");
+  const [userFilter, setUserFilter] = useState<string>("all");
+  const [dateFrom, setDateFrom] = useState<Date | undefined>();
+  const [dateTo, setDateTo] = useState<Date | undefined>();
   const [selectedLog, setSelectedLog] = useState<AuditLog | null>(null);
   const [page, setPage] = useState(0);
   const [totalCount, setTotalCount] = useState(0);
   const [entityTypes, setEntityTypes] = useState<string[]>([]);
+  const [users, setUsers] = useState<UserOption[]>([]);
+  const [summaryStats, setSummaryStats] = useState<SummaryStats>({
+    total: 0,
+    creates: 0,
+    updates: 0,
+    deletes: 0,
+    views: 0,
+    exports: 0,
+    logins: 0,
+    uniqueUsers: 0,
+    highRiskEvents: 0,
+  });
   const [isExporting, setIsExporting] = useState(false);
   const { toast } = useToast();
   const { logView, logExport } = useAuditLog();
   const hasLoggedView = useRef(false);
 
+  const buildBaseQuery = () => {
+    let query = supabase.from('audit_logs').select('*', { count: 'exact' });
+
+    if (actionFilter !== 'all') {
+      query = query.eq('action', actionFilter);
+    }
+    if (entityFilter !== 'all') {
+      query = query.eq('entity_type', entityFilter);
+    }
+    if (userFilter !== 'all') {
+      query = query.eq('user_id', userFilter);
+    }
+    if (dateFrom) {
+      query = query.gte('created_at', dateFrom.toISOString());
+    }
+    if (dateTo) {
+      const endOfDay = new Date(dateTo);
+      endOfDay.setHours(23, 59, 59, 999);
+      query = query.lte('created_at', endOfDay.toISOString());
+    }
+    if (searchQuery) {
+      query = query.or(`entity_name.ilike.%${searchQuery}%,entity_type.ilike.%${searchQuery}%,entity_id.ilike.%${searchQuery}%`);
+    }
+
+    return query;
+  };
+
   const fetchLogs = async () => {
     setLoading(true);
     try {
-      // Build query
-      let query = supabase
-        .from('audit_logs')
-        .select('*', { count: 'exact' })
+      const query = buildBaseQuery()
         .order('created_at', { ascending: false })
         .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1);
-
-      if (actionFilter !== 'all') {
-        query = query.eq('action', actionFilter);
-      }
-
-      if (entityFilter !== 'all') {
-        query = query.eq('entity_type', entityFilter);
-      }
-
-      if (searchQuery) {
-        query = query.or(`entity_name.ilike.%${searchQuery}%,entity_type.ilike.%${searchQuery}%,entity_id.ilike.%${searchQuery}%`);
-      }
 
       const { data, error, count } = await query;
 
@@ -159,6 +222,84 @@ export default function AdminAuditLogsPage() {
     }
   };
 
+  const fetchSummaryStats = async () => {
+    try {
+      // Get counts by action
+      const actions: AuditAction[] = ['CREATE', 'UPDATE', 'DELETE', 'VIEW', 'EXPORT', 'LOGIN'];
+      const counts: Record<string, number> = {};
+
+      for (const action of actions) {
+        let query = supabase
+          .from('audit_logs')
+          .select('*', { count: 'exact', head: true })
+          .eq('action', action);
+
+        if (entityFilter !== 'all') query = query.eq('entity_type', entityFilter);
+        if (userFilter !== 'all') query = query.eq('user_id', userFilter);
+        if (dateFrom) query = query.gte('created_at', dateFrom.toISOString());
+        if (dateTo) {
+          const endOfDay = new Date(dateTo);
+          endOfDay.setHours(23, 59, 59, 999);
+          query = query.lte('created_at', endOfDay.toISOString());
+        }
+        if (searchQuery) {
+          query = query.or(`entity_name.ilike.%${searchQuery}%,entity_type.ilike.%${searchQuery}%,entity_id.ilike.%${searchQuery}%`);
+        }
+
+        const { count } = await query;
+        counts[action] = count || 0;
+      }
+
+      // Get unique users count
+      let userQuery = supabase
+        .from('audit_logs')
+        .select('user_id');
+
+      if (entityFilter !== 'all') userQuery = userQuery.eq('entity_type', entityFilter);
+      if (userFilter !== 'all') userQuery = userQuery.eq('user_id', userFilter);
+      if (dateFrom) userQuery = userQuery.gte('created_at', dateFrom.toISOString());
+      if (dateTo) {
+        const endOfDay = new Date(dateTo);
+        endOfDay.setHours(23, 59, 59, 999);
+        userQuery = userQuery.lte('created_at', endOfDay.toISOString());
+      }
+
+      const { data: userData } = await userQuery;
+      const uniqueUsers = new Set((userData || []).map(u => u.user_id).filter(Boolean)).size;
+
+      // Count high-risk events (deletes on sensitive data, exports of PII)
+      let highRiskQuery = supabase
+        .from('audit_logs')
+        .select('*', { count: 'exact', head: true })
+        .in('action', ['DELETE', 'EXPORT']);
+
+      if (dateFrom) highRiskQuery = highRiskQuery.gte('created_at', dateFrom.toISOString());
+      if (dateTo) {
+        const endOfDay = new Date(dateTo);
+        endOfDay.setHours(23, 59, 59, 999);
+        highRiskQuery = highRiskQuery.lte('created_at', endOfDay.toISOString());
+      }
+
+      const { count: highRiskCount } = await highRiskQuery;
+
+      const total = Object.values(counts).reduce((a, b) => a + b, 0);
+
+      setSummaryStats({
+        total,
+        creates: counts.CREATE || 0,
+        updates: counts.UPDATE || 0,
+        deletes: counts.DELETE || 0,
+        views: counts.VIEW || 0,
+        exports: counts.EXPORT || 0,
+        logins: counts.LOGIN || 0,
+        uniqueUsers,
+        highRiskEvents: highRiskCount || 0,
+      });
+    } catch (error) {
+      console.error('Error fetching summary stats:', error);
+    }
+  };
+
   const fetchEntityTypes = async () => {
     try {
       const { data } = await supabase
@@ -175,9 +316,39 @@ export default function AdminAuditLogsPage() {
     }
   };
 
+  const fetchUsers = async () => {
+    try {
+      const { data } = await supabase
+        .from('audit_logs')
+        .select('user_id')
+        .limit(1000);
+
+      if (data) {
+        const userIds = [...new Set(data.map(d => d.user_id).filter(Boolean))] as string[];
+        
+        if (userIds.length > 0) {
+          const { data: profileData } = await supabase
+            .from('profiles')
+            .select('id, email, full_name')
+            .in('id', userIds);
+
+          if (profileData) {
+            setUsers(profileData.map(p => ({
+              id: p.id,
+              name: p.full_name || 'Unknown',
+              email: p.email,
+            })));
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching users:', error);
+    }
+  };
+
   useEffect(() => {
     fetchEntityTypes();
-    // Log view on mount
+    fetchUsers();
     if (!hasLoggedView.current) {
       hasLoggedView.current = true;
       logView('audit_logs', undefined, 'Audit Logs');
@@ -186,36 +357,28 @@ export default function AdminAuditLogsPage() {
 
   useEffect(() => {
     fetchLogs();
-  }, [page, actionFilter, entityFilter, searchQuery]);
+    fetchSummaryStats();
+  }, [page, actionFilter, entityFilter, userFilter, dateFrom, dateTo, searchQuery]);
 
-  const formatEntityType = (type: string) => {
-    return type
-      .split('_')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ');
+  const clearFilters = () => {
+    setSearchQuery("");
+    setActionFilter("all");
+    setEntityFilter("all");
+    setUserFilter("all");
+    setDateFrom(undefined);
+    setDateTo(undefined);
+    setPage(0);
   };
+
+  const hasActiveFilters = searchQuery || actionFilter !== 'all' || entityFilter !== 'all' || 
+    userFilter !== 'all' || dateFrom || dateTo;
 
   const exportToCSV = async () => {
     setIsExporting(true);
     try {
-      // Fetch all logs with current filters (up to 10000 records)
-      let query = supabase
-        .from('audit_logs')
-        .select('*')
+      let query = buildBaseQuery()
         .order('created_at', { ascending: false })
         .limit(10000);
-
-      if (actionFilter !== 'all') {
-        query = query.eq('action', actionFilter);
-      }
-
-      if (entityFilter !== 'all') {
-        query = query.eq('entity_type', entityFilter);
-      }
-
-      if (searchQuery) {
-        query = query.or(`entity_name.ilike.%${searchQuery}%,entity_type.ilike.%${searchQuery}%,entity_id.ilike.%${searchQuery}%`);
-      }
 
       const { data, error } = await query;
 
@@ -254,6 +417,7 @@ export default function AdminAuditLogsPage() {
         'User Name',
         'User Email',
         'Action',
+        'Risk Level',
         'Entity Type',
         'Entity ID',
         'Entity Name',
@@ -265,12 +429,14 @@ export default function AdminAuditLogsPage() {
       const rows = data.map(log => {
         const userName = log.user_id ? profiles[log.user_id]?.full_name || '' : '';
         const userEmail = log.user_id ? profiles[log.user_id]?.email || '' : '';
+        const riskLevel = getRiskLevel(log.action, log.entity_type);
         
         return [
           format(new Date(log.created_at), 'yyyy-MM-dd HH:mm:ss'),
           `"${userName.replace(/"/g, '""')}"`,
           `"${userEmail.replace(/"/g, '""')}"`,
           log.action,
+          riskLevel.toUpperCase(),
           log.entity_type,
           log.entity_id || '',
           `"${(log.entity_name || '').replace(/"/g, '""')}"`,
@@ -299,6 +465,9 @@ export default function AdminAuditLogsPage() {
         filters: {
           action: actionFilter,
           entity: entityFilter,
+          user: userFilter,
+          dateFrom: dateFrom?.toISOString(),
+          dateTo: dateTo?.toISOString(),
           search: searchQuery,
         },
       });
@@ -335,7 +504,7 @@ export default function AdminAuditLogsPage() {
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Audit Logs</h1>
             <p className="text-muted-foreground">
-              Track all user actions across the system
+              Enterprise-grade activity tracking and compliance monitoring
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -354,36 +523,59 @@ export default function AdminAuditLogsPage() {
           </div>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {/* Activity Trend Chart */}
+        <AuditLogTrendChart 
+          dateFrom={dateFrom} 
+          dateTo={dateTo}
+          actionFilter={actionFilter}
+          entityFilter={entityFilter}
+        />
+
+        {/* Summary Stats */}
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           <Card>
             <CardContent className="pt-4">
-              <div className="text-2xl font-bold">{totalCount}</div>
-              <p className="text-xs text-muted-foreground">Total Events</p>
+              <div className="flex items-center gap-2">
+                <Activity className="h-4 w-4 text-muted-foreground" />
+                <span className="text-xs text-muted-foreground">Total Events</span>
+              </div>
+              <div className="text-2xl font-bold mt-1">{summaryStats.total.toLocaleString()}</div>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="pt-4">
-              <div className="text-2xl font-bold">
-                {logs.filter(l => l.action === 'CREATE').length}
+              <div className="flex items-center gap-2">
+                <Plus className="h-4 w-4 text-green-600" />
+                <span className="text-xs text-muted-foreground">Creates</span>
               </div>
-              <p className="text-xs text-muted-foreground">Creates (this page)</p>
+              <div className="text-2xl font-bold mt-1">{summaryStats.creates.toLocaleString()}</div>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="pt-4">
-              <div className="text-2xl font-bold">
-                {logs.filter(l => l.action === 'UPDATE').length}
+              <div className="flex items-center gap-2">
+                <Pencil className="h-4 w-4 text-blue-600" />
+                <span className="text-xs text-muted-foreground">Updates</span>
               </div>
-              <p className="text-xs text-muted-foreground">Updates (this page)</p>
+              <div className="text-2xl font-bold mt-1">{summaryStats.updates.toLocaleString()}</div>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="pt-4">
-              <div className="text-2xl font-bold">
-                {logs.filter(l => l.action === 'DELETE').length}
+              <div className="flex items-center gap-2">
+                <Users className="h-4 w-4 text-muted-foreground" />
+                <span className="text-xs text-muted-foreground">Unique Users</span>
               </div>
-              <p className="text-xs text-muted-foreground">Deletes (this page)</p>
+              <div className="text-2xl font-bold mt-1">{summaryStats.uniqueUsers}</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-4">
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="h-4 w-4 text-orange-600" />
+                <span className="text-xs text-muted-foreground">High Risk Events</span>
+              </div>
+              <div className="text-2xl font-bold mt-1 text-orange-600">{summaryStats.highRiskEvents}</div>
             </CardContent>
           </Card>
         </div>
@@ -391,60 +583,153 @@ export default function AdminAuditLogsPage() {
         {/* Filters */}
         <Card>
           <CardContent className="pt-4">
-            <div className="flex flex-col md:flex-row gap-4">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search by entity name, type, or ID..."
-                  value={searchQuery}
-                  onChange={(e) => {
-                    setSearchQuery(e.target.value);
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col md:flex-row gap-4">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search by entity name, type, or ID..."
+                    value={searchQuery}
+                    onChange={(e) => {
+                      setSearchQuery(e.target.value);
+                      setPage(0);
+                    }}
+                    className="pl-9"
+                  />
+                </div>
+                
+                {/* Date From */}
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full md:w-[160px] justify-start text-left font-normal",
+                        !dateFrom && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {dateFrom ? format(dateFrom, "MMM d, yyyy") : "From date"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={dateFrom}
+                      onSelect={(date) => {
+                        setDateFrom(date);
+                        setPage(0);
+                      }}
+                      initialFocus
+                      className={cn("p-3 pointer-events-auto")}
+                    />
+                  </PopoverContent>
+                </Popover>
+
+                {/* Date To */}
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full md:w-[160px] justify-start text-left font-normal",
+                        !dateTo && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {dateTo ? format(dateTo, "MMM d, yyyy") : "To date"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={dateTo}
+                      onSelect={(date) => {
+                        setDateTo(date);
+                        setPage(0);
+                      }}
+                      initialFocus
+                      className={cn("p-3 pointer-events-auto")}
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+
+              <div className="flex flex-col md:flex-row gap-4">
+                {/* User Filter */}
+                <Select
+                  value={userFilter}
+                  onValueChange={(value) => {
+                    setUserFilter(value);
                     setPage(0);
                   }}
-                  className="pl-9"
-                />
+                >
+                  <SelectTrigger className="w-full md:w-[200px]">
+                    <Users className="h-4 w-4 mr-2" />
+                    <SelectValue placeholder="User" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Users</SelectItem>
+                    {users.map(user => (
+                      <SelectItem key={user.id} value={user.id}>
+                        {user.name} ({user.email})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                {/* Action Filter */}
+                <Select
+                  value={actionFilter}
+                  onValueChange={(value) => {
+                    setActionFilter(value as AuditAction | "all");
+                    setPage(0);
+                  }}
+                >
+                  <SelectTrigger className="w-full md:w-[180px]">
+                    <Filter className="h-4 w-4 mr-2" />
+                    <SelectValue placeholder="Action" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Actions</SelectItem>
+                    <SelectItem value="CREATE">Created</SelectItem>
+                    <SelectItem value="UPDATE">Updated</SelectItem>
+                    <SelectItem value="DELETE">Deleted</SelectItem>
+                    <SelectItem value="VIEW">Viewed</SelectItem>
+                    <SelectItem value="EXPORT">Exported</SelectItem>
+                    <SelectItem value="LOGIN">Login</SelectItem>
+                    <SelectItem value="LOGOUT">Logout</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                {/* Entity Filter */}
+                <Select
+                  value={entityFilter}
+                  onValueChange={(value) => {
+                    setEntityFilter(value);
+                    setPage(0);
+                  }}
+                >
+                  <SelectTrigger className="w-full md:w-[180px]">
+                    <SelectValue placeholder="Entity Type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Entities</SelectItem>
+                    {entityTypes.map(type => (
+                      <SelectItem key={type} value={type}>
+                        {formatEntityType(type)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                {hasActiveFilters && (
+                  <Button variant="ghost" onClick={clearFilters} className="md:ml-auto">
+                    <X className="h-4 w-4 mr-2" />
+                    Clear Filters
+                  </Button>
+                )}
               </div>
-              <Select
-                value={actionFilter}
-                onValueChange={(value) => {
-                  setActionFilter(value as AuditAction | "all");
-                  setPage(0);
-                }}
-              >
-                <SelectTrigger className="w-full md:w-[180px]">
-                  <Filter className="h-4 w-4 mr-2" />
-                  <SelectValue placeholder="Action" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Actions</SelectItem>
-                  <SelectItem value="CREATE">Created</SelectItem>
-                  <SelectItem value="UPDATE">Updated</SelectItem>
-                  <SelectItem value="DELETE">Deleted</SelectItem>
-                  <SelectItem value="VIEW">Viewed</SelectItem>
-                  <SelectItem value="EXPORT">Exported</SelectItem>
-                  <SelectItem value="LOGIN">Login</SelectItem>
-                  <SelectItem value="LOGOUT">Logout</SelectItem>
-                </SelectContent>
-              </Select>
-              <Select
-                value={entityFilter}
-                onValueChange={(value) => {
-                  setEntityFilter(value);
-                  setPage(0);
-                }}
-              >
-                <SelectTrigger className="w-full md:w-[180px]">
-                  <SelectValue placeholder="Entity Type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Entities</SelectItem>
-                  {entityTypes.map(type => (
-                    <SelectItem key={type} value={type}>
-                      {formatEntityType(type)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
             </div>
           </CardContent>
         </Card>
@@ -461,6 +746,7 @@ export default function AdminAuditLogsPage() {
                   <TableHead>Timestamp</TableHead>
                   <TableHead>User</TableHead>
                   <TableHead>Action</TableHead>
+                  <TableHead>Risk</TableHead>
                   <TableHead>Entity Type</TableHead>
                   <TableHead>Entity Name</TableHead>
                   <TableHead className="text-right">Details</TableHead>
@@ -469,13 +755,13 @@ export default function AdminAuditLogsPage() {
               <TableBody>
                 {loading ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center py-8">
+                    <TableCell colSpan={7} className="text-center py-8">
                       <RefreshCw className="h-6 w-6 animate-spin mx-auto text-muted-foreground" />
                     </TableCell>
                   </TableRow>
                 ) : logs.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                    <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
                       No audit logs found
                     </TableCell>
                   </TableRow>
@@ -483,6 +769,7 @@ export default function AdminAuditLogsPage() {
                   logs.map((log) => {
                     const config = actionConfig[log.action];
                     const Icon = config.icon;
+                    const riskLevel = getRiskLevel(log.action, log.entity_type);
                     return (
                       <TableRow key={log.id}>
                         <TableCell className="whitespace-nowrap">
@@ -502,6 +789,15 @@ export default function AdminAuditLogsPage() {
                           <Badge className={config.color} variant="secondary">
                             <Icon className="h-3 w-3 mr-1" />
                             {config.label}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Badge 
+                            variant="outline" 
+                            className={cn("text-xs", getRiskBadgeStyles(riskLevel))}
+                          >
+                            <Shield className="h-3 w-3 mr-1" />
+                            {riskLevel}
                           </Badge>
                         </TableCell>
                         <TableCell>{formatEntityType(log.entity_type)}</TableCell>
@@ -558,75 +854,94 @@ export default function AdminAuditLogsPage() {
 
         {/* Detail Dialog */}
         <Dialog open={!!selectedLog} onOpenChange={() => setSelectedLog(null)}>
-          <DialogContent className="max-w-4xl max-h-[80vh]">
+          <DialogContent className="max-w-4xl max-h-[85vh]">
             <DialogHeader>
-              <DialogTitle>Audit Log Details</DialogTitle>
+              <DialogTitle className="flex items-center gap-2">
+                Audit Log Details
+                {selectedLog && (
+                  <Badge 
+                    variant="outline" 
+                    className={cn("ml-2", getRiskBadgeStyles(getRiskLevel(selectedLog.action, selectedLog.entity_type)))}
+                  >
+                    <Shield className="h-3 w-3 mr-1" />
+                    {getRiskLevel(selectedLog.action, selectedLog.entity_type)} risk
+                  </Badge>
+                )}
+              </DialogTitle>
             </DialogHeader>
             {selectedLog && (
-              <ScrollArea className="max-h-[60vh]">
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
+              <ScrollArea className="max-h-[65vh]">
+                <div className="space-y-6">
+                  {/* Summary Grid */}
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4 p-4 bg-muted/50 rounded-lg">
                     <div>
-                      <label className="text-sm font-medium text-muted-foreground">Timestamp</label>
-                      <p>{formatDateForDisplay(selectedLog.created_at, 'PPpp')}</p>
+                      <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Timestamp</label>
+                      <p className="mt-1">{formatDateForDisplay(selectedLog.created_at, 'PPpp')}</p>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-muted-foreground">User</label>
-                      <p>{selectedLog.user_name || selectedLog.user_email || selectedLog.user_id || 'System'}</p>
+                      <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">User</label>
+                      <p className="mt-1">{selectedLog.user_name || selectedLog.user_email || selectedLog.user_id || 'System'}</p>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-muted-foreground">Action</label>
-                      <p>
+                      <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Action</label>
+                      <p className="mt-1">
                         <Badge className={actionConfig[selectedLog.action].color} variant="secondary">
                           {actionConfig[selectedLog.action].label}
                         </Badge>
                       </p>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-muted-foreground">Entity Type</label>
-                      <p>{formatEntityType(selectedLog.entity_type)}</p>
+                      <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Entity Type</label>
+                      <p className="mt-1">{formatEntityType(selectedLog.entity_type)}</p>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-muted-foreground">Entity ID</label>
-                      <p className="font-mono text-sm">{selectedLog.entity_id || '-'}</p>
+                      <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Entity ID</label>
+                      <p className="mt-1 font-mono text-sm">{selectedLog.entity_id || '-'}</p>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-muted-foreground">Entity Name</label>
-                      <p>{selectedLog.entity_name || '-'}</p>
+                      <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Entity Name</label>
+                      <div className="mt-1 flex items-center gap-2">
+                        <span>{selectedLog.entity_name || '-'}</span>
+                        {getEntityLink(selectedLog.entity_type, selectedLog.entity_id) && (
+                          <Link 
+                            to={getEntityLink(selectedLog.entity_type, selectedLog.entity_id)!}
+                            className="text-primary hover:underline inline-flex items-center gap-1"
+                          >
+                            <ExternalLink className="h-3 w-3" />
+                            View
+                          </Link>
+                        )}
+                      </div>
                     </div>
                   </div>
 
-                  {selectedLog.old_values && (
-                    <div>
-                      <label className="text-sm font-medium text-muted-foreground">Previous Values</label>
-                      <pre className="mt-1 p-3 bg-muted rounded-md text-sm overflow-auto">
-                        {JSON.stringify(selectedLog.old_values, null, 2)}
-                      </pre>
-                    </div>
-                  )}
+                  {/* Data Changes - Visual Diff */}
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground block mb-3">Data Changes</label>
+                    <AuditLogDiffView 
+                      oldValues={selectedLog.old_values}
+                      newValues={selectedLog.new_values}
+                      action={selectedLog.action}
+                    />
+                  </div>
 
-                  {selectedLog.new_values && (
+                  {/* Metadata */}
+                  {selectedLog.metadata && Object.keys(selectedLog.metadata as object).length > 0 && (
                     <div>
-                      <label className="text-sm font-medium text-muted-foreground">New Values</label>
-                      <pre className="mt-1 p-3 bg-muted rounded-md text-sm overflow-auto">
-                        {JSON.stringify(selectedLog.new_values, null, 2)}
-                      </pre>
-                    </div>
-                  )}
-
-                  {selectedLog.metadata && (
-                    <div>
-                      <label className="text-sm font-medium text-muted-foreground">Metadata</label>
-                      <pre className="mt-1 p-3 bg-muted rounded-md text-sm overflow-auto">
+                      <label className="text-sm font-medium text-muted-foreground block mb-2">Additional Metadata</label>
+                      <pre className="p-3 bg-muted rounded-md text-sm overflow-auto">
                         {JSON.stringify(selectedLog.metadata, null, 2)}
                       </pre>
                     </div>
                   )}
 
+                  {/* User Agent */}
                   {selectedLog.user_agent && (
                     <div>
-                      <label className="text-sm font-medium text-muted-foreground">User Agent</label>
-                      <p className="text-sm text-muted-foreground break-all">{selectedLog.user_agent}</p>
+                      <label className="text-sm font-medium text-muted-foreground block mb-2">User Agent</label>
+                      <p className="text-sm text-muted-foreground break-all bg-muted p-3 rounded-md">
+                        {selectedLog.user_agent}
+                      </p>
                     </div>
                   )}
                 </div>
