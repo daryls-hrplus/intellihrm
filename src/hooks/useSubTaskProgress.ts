@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useAuditLog } from "@/hooks/useAuditLog";
 
 export type SubTaskStatus = 'pending' | 'completed' | 'not_applicable' | 'deferred' | 'blocked';
 
@@ -31,6 +32,7 @@ export function useSubTaskProgress(companyId: string | undefined, phaseId: strin
   const [subTasks, setSubTasks] = useState<SubTaskProgress[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
+  const { logAction } = useAuditLog();
 
   useEffect(() => {
     if (!companyId) {
@@ -115,6 +117,9 @@ export function useSubTaskProgress(companyId: string | undefined, phaseId: strin
         updateData.completed_at = null;
       }
 
+      // Get the old status for audit
+      const oldTask = subTasks.find(t => t.sub_task_order === subTaskOrder);
+
       const { error } = await supabase
         .from('implementation_sub_tasks')
         .update(updateData)
@@ -124,6 +129,21 @@ export function useSubTaskProgress(companyId: string | undefined, phaseId: strin
         .eq('sub_task_order', subTaskOrder);
 
       if (error) throw error;
+
+      // Audit log for sub-task status change
+      await logAction({
+        action: 'UPDATE',
+        entityType: 'implementation_sub_task',
+        entityId: oldTask?.id,
+        entityName: oldTask?.sub_task_name || `Sub-task ${subTaskOrder}`,
+        oldValues: { status: oldTask?.status },
+        newValues: { status, blocker_reason: blockerReason },
+        metadata: { 
+          phase_id: phaseId, 
+          step_order: stepOrder, 
+          sub_task_order: subTaskOrder 
+        }
+      });
 
       setSubTasks(prev => prev.map(task => 
         task.sub_task_order === subTaskOrder 
