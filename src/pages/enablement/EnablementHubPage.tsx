@@ -244,7 +244,7 @@ export default function EnablementHubPage() {
       items: [
         {
           title: "Admin & Security - Administrator Guide",
-          description: "Enterprise-grade administration and security configuration guide",
+          description: "Administration and security configuration guide",
           href: "/enablement/manuals/admin-security",
           icon: Shield,
           color: "bg-red-500/10 text-red-600",
