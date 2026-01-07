@@ -1,7 +1,31 @@
-import { AlertTriangle, Info, Lightbulb, FileText, CheckCircle, AlertCircle } from 'lucide-react';
+import { 
+  AlertTriangle, 
+  Info, 
+  Lightbulb, 
+  FileText, 
+  CheckCircle, 
+  AlertCircle,
+  Shield,
+  Building,
+  Link2,
+  Lock,
+  Sparkles
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-type CalloutVariant = 'info' | 'warning' | 'tip' | 'note' | 'prerequisite' | 'success';
+type CalloutVariant = 
+  | 'info' 
+  | 'warning' 
+  | 'tip' 
+  | 'note' 
+  | 'prerequisite' 
+  | 'success'
+  | 'critical'
+  | 'compliance'
+  | 'industry'
+  | 'integration'
+  | 'security'
+  | 'future';
 
 interface CalloutProps {
   variant?: CalloutVariant;
@@ -46,6 +70,42 @@ const variantConfig = {
     bg: 'bg-muted/50',
     icon: CheckCircle,
     iconColor: 'text-green-600 dark:text-green-400',
+  },
+  critical: {
+    border: 'border-l-red-500',
+    bg: 'bg-muted/50',
+    icon: AlertTriangle,
+    iconColor: 'text-red-600 dark:text-red-400',
+  },
+  compliance: {
+    border: 'border-l-red-500',
+    bg: 'bg-muted/50',
+    icon: Shield,
+    iconColor: 'text-red-600 dark:text-red-400',
+  },
+  industry: {
+    border: 'border-l-blue-500',
+    bg: 'bg-muted/50',
+    icon: Building,
+    iconColor: 'text-blue-600 dark:text-blue-400',
+  },
+  integration: {
+    border: 'border-l-violet-500',
+    bg: 'bg-muted/50',
+    icon: Link2,
+    iconColor: 'text-violet-600 dark:text-violet-400',
+  },
+  security: {
+    border: 'border-l-red-500',
+    bg: 'bg-muted/50',
+    icon: Lock,
+    iconColor: 'text-red-600 dark:text-red-400',
+  },
+  future: {
+    border: 'border-l-indigo-500',
+    bg: 'bg-muted/50',
+    icon: Sparkles,
+    iconColor: 'text-indigo-600 dark:text-indigo-400',
   },
 };
 
@@ -94,4 +154,28 @@ export function NoteCallout({ title, children, className }: Omit<CalloutProps, '
 
 export function SuccessCallout({ title, children, className }: Omit<CalloutProps, 'variant'>) {
   return <Callout variant="success" title={title} className={className}>{children}</Callout>;
+}
+
+export function CriticalCallout({ title, children, className }: Omit<CalloutProps, 'variant'>) {
+  return <Callout variant="critical" title={title} className={className}>{children}</Callout>;
+}
+
+export function ComplianceCallout({ title, children, className }: Omit<CalloutProps, 'variant'>) {
+  return <Callout variant="compliance" title={title} className={className}>{children}</Callout>;
+}
+
+export function IndustryCallout({ title, children, className }: Omit<CalloutProps, 'variant'>) {
+  return <Callout variant="industry" title={title} className={className}>{children}</Callout>;
+}
+
+export function IntegrationCallout({ title, children, className }: Omit<CalloutProps, 'variant'>) {
+  return <Callout variant="integration" title={title} className={className}>{children}</Callout>;
+}
+
+export function SecurityCallout({ title, children, className }: Omit<CalloutProps, 'variant'>) {
+  return <Callout variant="security" title={title} className={className}>{children}</Callout>;
+}
+
+export function FutureCallout({ title, children, className }: Omit<CalloutProps, 'variant'>) {
+  return <Callout variant="future" title={title} className={className}>{children}</Callout>;
 }
