@@ -144,10 +144,26 @@ export function StepCard({
                     {subTaskDefinitions.length} sub-tasks
                   </Badge>
                 )}
+                {/* Step status badges based on sub-task rollup */}
+                {hasSubTasks && subTaskRollupStatus === 'not_started' && !isComplete && (
+                  <Badge variant="outline" className="text-xs px-1.5 py-0 text-muted-foreground">
+                    Not Started
+                  </Badge>
+                )}
+                {hasSubTasks && subTaskRollupStatus === 'in_progress' && !isComplete && (
+                  <Badge className="text-xs px-1.5 py-0 bg-blue-500">
+                    In Progress
+                  </Badge>
+                )}
                 {hasSubTasks && subTaskRollupStatus === 'blocked' && (
                   <Badge variant="destructive" className="text-xs px-1.5 py-0 gap-1">
                     <AlertCircle className="h-3 w-3" />
                     Blocked
+                  </Badge>
+                )}
+                {hasSubTasks && subTaskRollupStatus === 'deferred' && (
+                  <Badge variant="outline" className="text-xs px-1.5 py-0 text-orange-500 border-orange-500">
+                    Deferred
                   </Badge>
                 )}
               </div>
