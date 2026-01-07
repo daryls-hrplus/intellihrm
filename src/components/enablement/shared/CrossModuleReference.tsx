@@ -11,6 +11,7 @@ interface CrossModuleReferenceProps {
   sectionTitle: string;
   description: string;
   manualPath?: string;
+  href?: string;
   className?: string;
 }
 
@@ -59,13 +60,18 @@ export function CrossModuleReference({
   sectionTitle,
   description,
   manualPath,
+  href,
   className
 }: CrossModuleReferenceProps) {
   const config = referenceConfig[type];
   const Icon = config.icon;
 
+  const isClickable = manualPath || href;
+
   const handleClick = () => {
-    if (manualPath) {
+    if (href) {
+      window.location.href = href;
+    } else if (manualPath) {
       // Navigate to the specific manual section
       window.location.href = `${manualPath}#${sectionId}`;
     }
@@ -77,12 +83,12 @@ export function CrossModuleReference({
         'flex items-start gap-3 p-3 rounded-lg border transition-colors',
         config.bgClass,
         config.borderClass,
-        manualPath && 'cursor-pointer hover:border-primary/50',
+        isClickable && 'cursor-pointer hover:border-primary/50',
         className
       )}
-      onClick={manualPath ? handleClick : undefined}
-      role={manualPath ? 'button' : undefined}
-      tabIndex={manualPath ? 0 : undefined}
+      onClick={isClickable ? handleClick : undefined}
+      role={isClickable ? 'button' : undefined}
+      tabIndex={isClickable ? 0 : undefined}
     >
       <div className={cn('mt-0.5 flex-shrink-0', config.iconClass)}>
         <Icon className="h-4 w-4" />
@@ -104,7 +110,7 @@ export function CrossModuleReference({
           {description}
         </p>
       </div>
-      {manualPath && (
+      {isClickable && (
         <ExternalLink className="h-4 w-4 text-muted-foreground flex-shrink-0 mt-0.5" />
       )}
     </div>
