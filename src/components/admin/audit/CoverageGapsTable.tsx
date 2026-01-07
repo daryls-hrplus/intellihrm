@@ -19,7 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { CoverageGap, formatEntityType } from "@/utils/auditCoverageUtils";
-import { AlertTriangle, Search, FileCode, ChevronDown, ChevronUp } from "lucide-react";
+import { Clock, Search, FileCode, ChevronDown, ChevronUp } from "lucide-react";
 
 interface CoverageGapsTableProps {
   gaps: CoverageGap[];
@@ -62,17 +62,17 @@ export function CoverageGapsTable({ gaps, isLoading }: CoverageGapsTableProps) {
       <Card>
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2">
-            <AlertTriangle className="h-5 w-5 text-success" />
-            Coverage Gaps
+            <Clock className="h-5 w-5 text-success" />
+            Pending Activation
           </CardTitle>
           <CardDescription>
-            All entity types are properly tracked!
+            All pages have been visited and are logging!
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-center p-8 text-muted-foreground">
             <span className="text-success font-medium">
-              ✓ No coverage gaps detected
+              ✓ All audit hooks are active
             </span>
           </div>
         </CardContent>
@@ -90,9 +90,9 @@ export function CoverageGapsTable({ gaps, isLoading }: CoverageGapsTableProps) {
             onClick={() => setExpanded(!expanded)}
           >
             <CardTitle className="text-lg flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-warning" />
-              Coverage Gaps
-              <Badge variant="secondary" className="ml-2">
+              <Clock className="h-5 w-5 text-info" />
+              Pending Activation
+              <Badge variant="outline" className="ml-2">
                 {gaps.length}
               </Badge>
               {expanded ? (
@@ -104,7 +104,7 @@ export function CoverageGapsTable({ gaps, isLoading }: CoverageGapsTableProps) {
           </Button>
         </div>
         <CardDescription>
-          Entity types that need audit hook implementation or mapping updates
+          Pages with audit hooks that haven't been visited yet. They will start logging on first visit.
         </CardDescription>
       </CardHeader>
       
@@ -132,14 +132,14 @@ export function CoverageGapsTable({ gaps, isLoading }: CoverageGapsTableProps) {
                 ))}
               </SelectContent>
             </Select>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-[150px]">
                 <SelectValue placeholder="All Status" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="missing_data">Missing Data</SelectItem>
-                <SelectItem value="orphaned">Orphaned</SelectItem>
+                <SelectItem value="missing_data">Pending</SelectItem>
+                <SelectItem value="orphaned">Unmapped</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -176,13 +176,16 @@ export function CoverageGapsTable({ gaps, isLoading }: CoverageGapsTableProps) {
                       </TableCell>
                       <TableCell>
                         <Badge 
-                          variant={gap.status === 'missing_data' ? 'secondary' : 'destructive'}
+                          variant="outline"
+                          className={gap.status === 'missing_data' ? 'border-info text-info' : ''}
                         >
-                          {gap.status === 'missing_data' ? 'No Data' : 'Orphaned'}
+                          {gap.status === 'missing_data' ? 'Pending' : 'Unmapped'}
                         </Badge>
                       </TableCell>
                       <TableCell className="hidden md:table-cell text-sm text-muted-foreground max-w-xs truncate">
-                        {gap.recommendation}
+                        {gap.status === 'missing_data' 
+                          ? 'Visit page to activate logging' 
+                          : gap.recommendation}
                       </TableCell>
                     </TableRow>
                   ))

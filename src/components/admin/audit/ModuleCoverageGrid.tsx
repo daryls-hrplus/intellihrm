@@ -61,7 +61,7 @@ export function ModuleCoverageGrid({ moduleCoverages, isLoading }: ModuleCoverag
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Module Coverage</CardTitle>
+          <CardTitle className="text-lg">Module Activity</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -77,7 +77,10 @@ export function ModuleCoverageGrid({ moduleCoverages, isLoading }: ModuleCoverag
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-lg">Module Coverage</CardTitle>
+        <CardTitle className="text-lg">Module Activity</CardTitle>
+        <p className="text-sm text-muted-foreground">
+          All modules have audit hooks implemented. Activity shows pages that have been visited.
+        </p>
       </CardHeader>
       <CardContent>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -98,9 +101,7 @@ export function ModuleCoverageGrid({ moduleCoverages, isLoading }: ModuleCoverag
                         ? 'bg-success/10' 
                         : module.coverage >= 50 
                           ? 'bg-warning/10' 
-                          : module.coverage > 0 
-                            ? 'bg-muted' 
-                            : 'bg-destructive/10'
+                          : 'bg-info/10'
                     }`}>
                       <Icon className={`h-4 w-4 ${coverageColor}`} />
                     </div>
@@ -119,18 +120,24 @@ export function ModuleCoverageGrid({ moduleCoverages, isLoading }: ModuleCoverag
                       {module.coverage}%
                     </span>
                     <span className="text-xs text-muted-foreground">
-                      {module.coveredEntityTypes.length}/{module.expectedEntityTypes.length}
+                      {module.coveredEntityTypes.length}/{module.expectedEntityTypes.length} active
                     </span>
                   </div>
                   
                   <Progress value={module.coverage} className="h-1.5" />
                   
                   <div className="flex items-center justify-between text-xs text-muted-foreground">
-                    <span>{module.totalLogs.toLocaleString()} logs</span>
-                    {module.lastActivity && (
-                      <span title={new Date(module.lastActivity).toLocaleString()}>
-                        {formatDistanceToNow(new Date(module.lastActivity), { addSuffix: true })}
-                      </span>
+                    {module.totalLogs > 0 ? (
+                      <>
+                        <span>{module.totalLogs.toLocaleString()} logs</span>
+                        {module.lastActivity && (
+                          <span title={new Date(module.lastActivity).toLocaleString()}>
+                            {formatDistanceToNow(new Date(module.lastActivity), { addSuffix: true })}
+                          </span>
+                        )}
+                      </>
+                    ) : (
+                      <span className="text-info">Awaiting first visit</span>
                     )}
                   </div>
                 </div>
