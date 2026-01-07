@@ -286,7 +286,21 @@ export default function WorkforceManualPage() {
 
                     <Separator className="my-3" />
 
-                    {/* Quick Reference & Supplementary (placeholder) */}
+                    {/* Related Manuals */}
+                    <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide px-2 mb-2">
+                      Related Manuals
+                    </div>
+                    <button
+                      className="w-full flex items-center gap-2 p-2 rounded-lg text-left text-sm transition-colors hover:bg-muted text-muted-foreground"
+                      onClick={() => navigate('/enablement/manuals/hr-hub')}
+                    >
+                      <Link2 className="h-4 w-4 text-purple-500" />
+                      <span>HR Hub Admin Manual</span>
+                    </button>
+
+                    <Separator className="my-3" />
+
+                    {/* Quick Reference & Supplementary */}
                     <button
                       className="w-full flex items-center gap-2 p-2 rounded-lg text-left text-sm transition-colors hover:bg-muted text-muted-foreground"
                     >
