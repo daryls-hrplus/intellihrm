@@ -205,6 +205,7 @@
   },
 "hrHub": {
     "title": "Centre RH",
+    "dailyOperations": "Opérations Quotidiennes",
     "communicationSupportCenter": "Centre de Communication et Support",
     "communicationsReminders": "Notifications et Rappels",
     "communicationsRemindersDesc": "Gérez les modèles, les règles d'automatisation, l'envoi d'emails et les notifications in-app",

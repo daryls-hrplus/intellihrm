@@ -5020,8 +5020,9 @@
       "urgent": "Urgent"
     }
   },
-  "hrHub": {
+"hrHub": {
     "title": "HR Hub",
+    "dailyOperations": "Daily Operations",
     "subtitle": "Central hub for HR utilities",
     "commandCenter": "HR Command Center",
     "commandCenterSubtitle": "Central hub for all HR utilities and tasks",

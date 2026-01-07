@@ -71,6 +71,7 @@
   },
 "hrHub": {
     "title": "人力资源中心",
+    "dailyOperations": "日常操作",
     "communicationSupportCenter": "沟通与支持中心",
     "communicationsReminders": "通知与提醒",
     "communicationsRemindersDesc": "管理模板、自动化规则、邮件发送和应用内通知",

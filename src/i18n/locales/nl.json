@@ -71,6 +71,7 @@
   },
 "hrHub": {
     "title": "HR Hub",
+    "dailyOperations": "Dagelijkse Operaties",
     "communicationsReminders": "Meldingen & Herinneringen",
     "communicationsRemindersDesc": "Beheer sjablonen, automatiseringsregels, e-mailbezorging en in-app meldingen",
     "transactionWorkflowSettings": {
