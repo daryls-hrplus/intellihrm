@@ -5,3 +5,4 @@ export { WorkforceManualEmployeeManagementSection } from './WorkforceManualEmplo
 export { WorkforceManualLifecycleWorkflowsSection } from './WorkforceManualLifecycleWorkflowsSection';
 export { WorkforceManualPositionControlSection } from './WorkforceManualPositionControlSection';
 export { WorkforceManualAnalyticsSection } from './WorkforceManualAnalyticsSection';
+export { WorkforceManualESSMSSSection } from './WorkforceManualESSMSSSection';
