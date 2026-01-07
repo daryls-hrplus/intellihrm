@@ -60,6 +60,7 @@ import SubscriptionManagementPage from "./pages/admin/SubscriptionManagementPage
 import MFASettingsPage from "./pages/admin/MFASettingsPage";
 import SSOSettingsPage from "./pages/admin/SSOSettingsPage";
 import PasswordPoliciesPage from "./pages/admin/PasswordPoliciesPage";
+import SessionManagementPage from "./pages/admin/SessionManagementPage";
 import StaffLoanDesignDocumentPage from "./pages/documents/StaffLoanDesignDocumentPage";
 import AIGovernancePage from "./pages/admin/AIGovernancePage";
 import TranslationsPage from "./pages/admin/TranslationsPage";
@@ -1565,6 +1566,14 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin"]}>
                   <PasswordPoliciesPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/session-management"
+              element={
+                <ProtectedRoute requiredRoles={["admin"]}>
+                  <SessionManagementPage />
                 </ProtectedRoute>
               }
             />

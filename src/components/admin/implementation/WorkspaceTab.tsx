@@ -181,26 +181,40 @@ export function WorkspaceTab({ phases, activePhase, onPhaseChange }: WorkspaceTa
               </Badge>
             )}
 
-            {/* Step Cards */}
+            {/* Step Cards with Sub-Section Headers */}
             <ScrollArea className="h-[450px] pr-4">
               <div className="space-y-3">
-                {currentPhase.items.map((item) => {
+                {currentPhase.items.map((item, index) => {
                   const mapping = getStepMapping(currentPhase.id, item.order);
                   const stepProgress = getStepProgress(currentPhase.id, item.order);
                   
+                  // Check if this is the first item of a new sub-section
+                  const previousMapping = index > 0 ? getStepMapping(currentPhase.id, currentPhase.items[index - 1].order) : null;
+                  const showSubSectionHeader = mapping?.subSection && mapping.subSection !== previousMapping?.subSection;
+                  
                   return (
-                    <StepCard
-                      key={item.order}
-                      phaseId={currentPhase.id}
-                      step={item}
-                      mapping={mapping}
-                      stepProgress={stepProgress}
-                      isComplete={isStepComplete(currentPhase.id, item.order)}
-                      isLoading={isLoading}
-                      onToggleComplete={(complete) => toggleStepComplete(currentPhase.id, item.order, complete)}
-                      onUpdateNotes={(notes) => updateStepNotes(currentPhase.id, item.order, notes)}
-                      onImportClick={mapping?.importType ? () => handleImportClick(currentPhase.id, item.order, mapping.importType!) : undefined}
-                    />
+                    <div key={item.order}>
+                      {showSubSectionHeader && (
+                        <div className="flex items-center gap-2 py-3 mt-2 first:mt-0">
+                          <div className="h-px flex-1 bg-border" />
+                          <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-2">
+                            {mapping.subSection}
+                          </span>
+                          <div className="h-px flex-1 bg-border" />
+                        </div>
+                      )}
+                      <StepCard
+                        phaseId={currentPhase.id}
+                        step={item}
+                        mapping={mapping}
+                        stepProgress={stepProgress}
+                        isComplete={isStepComplete(currentPhase.id, item.order)}
+                        isLoading={isLoading}
+                        onToggleComplete={(complete) => toggleStepComplete(currentPhase.id, item.order, complete)}
+                        onUpdateNotes={(notes) => updateStepNotes(currentPhase.id, item.order, notes)}
+                        onImportClick={mapping?.importType ? () => handleImportClick(currentPhase.id, item.order, mapping.importType!) : undefined}
+                      />
+                    </div>
                   );
                 })}
               </div>
