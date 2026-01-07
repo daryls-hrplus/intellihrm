@@ -6,9 +6,9 @@ import { UserPlus, CheckSquare, Calendar, MessageSquare } from 'lucide-react';
 export const TeamOnboardingOversight: React.FC = () => {
   return (
     <div className="space-y-6">
-      <div className="prose prose-slate dark:prose-invert max-w-none">
-        <h3 className="text-xl font-semibold mb-4">Overview</h3>
-        <p>
+      <div className="max-w-none">
+        <h3 className="text-xl font-semibold mb-4 text-foreground">Overview</h3>
+        <p className="text-foreground leading-relaxed">
           Managers play a critical role in onboarding success. The Team Onboarding Oversight feature 
           provides managers with visibility into new hire progress, assigned tasks, and tools to 
           actively participate in welcoming and integrating new team members.

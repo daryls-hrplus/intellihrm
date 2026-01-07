@@ -6,9 +6,9 @@ import { TrendingUp, Target, BookOpen, Compass } from 'lucide-react';
 export const MyCareerPaths: React.FC = () => {
   return (
     <div className="space-y-6">
-      <div className="prose prose-slate dark:prose-invert max-w-none">
-        <h3 className="text-xl font-semibold mb-4">Overview</h3>
-        <p>
+      <div className="max-w-none">
+        <h3 className="text-xl font-semibold mb-4 text-foreground">Overview</h3>
+        <p className="text-foreground leading-relaxed">
           My Career Paths enables employees to explore progression opportunities within the organization. 
           Based on their current role, skills, and qualifications, employees can view potential next roles, 
           understand skill gaps, and access development resources.

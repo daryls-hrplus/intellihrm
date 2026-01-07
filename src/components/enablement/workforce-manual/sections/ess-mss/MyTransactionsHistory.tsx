@@ -6,9 +6,9 @@ import { History, Download } from 'lucide-react';
 export const MyTransactionsHistory: React.FC = () => {
   return (
     <div className="space-y-6">
-      <div className="prose prose-slate dark:prose-invert max-w-none">
-        <h3 className="text-xl font-semibold mb-4">Overview</h3>
-        <p>
+      <div className="max-w-none">
+        <h3 className="text-xl font-semibold mb-4 text-foreground">Overview</h3>
+        <p className="text-foreground leading-relaxed">
           Employees can view their complete employment transaction history, providing transparency into 
           all changes that have occurred throughout their tenure. This includes role changes, transfers, 
           promotions, compensation adjustments, and organizational movements.

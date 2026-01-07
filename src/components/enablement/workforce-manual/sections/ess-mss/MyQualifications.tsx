@@ -6,9 +6,9 @@ import { GraduationCap, Award, FileCheck, Clock } from 'lucide-react';
 export const MyQualifications: React.FC = () => {
   return (
     <div className="space-y-6">
-      <div className="prose prose-slate dark:prose-invert max-w-none">
-        <h3 className="text-xl font-semibold mb-4">Overview</h3>
-        <p>
+      <div className="max-w-none">
+        <h3 className="text-xl font-semibold mb-4 text-foreground">Overview</h3>
+        <p className="text-foreground leading-relaxed">
           Employees can self-manage their qualifications including certifications, educational credentials, 
           professional licenses, and memberships. This creates a dynamic skills inventory that feeds into 
           workforce planning and career pathing.
