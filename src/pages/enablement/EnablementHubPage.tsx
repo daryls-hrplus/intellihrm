@@ -274,6 +274,14 @@ export default function EnablementHubPage() {
           color: "bg-green-500/10 text-green-600",
           badge: "24 Sections",
         },
+        {
+          title: "HR Hub - Administrator Guide",
+          description: "Comprehensive guide for HR Hub configuration and management",
+          href: "/enablement/manuals/hr-hub",
+          icon: HelpCircle,
+          color: "bg-purple-500/10 text-purple-600",
+          badge: "32 Sections",
+        },
       ],
     },
     {
