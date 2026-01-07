@@ -206,7 +206,7 @@
 "hrHub": {
     "title": "Centre RH",
     "communicationSupportCenter": "Centre de Communication et Support",
-    "communicationsReminders": "Communications et Rappels",
+    "communicationsReminders": "Notifications et Rappels",
     "communicationsRemindersDesc": "Gérez les modèles, les règles d'automatisation, l'envoi d'emails et les notifications in-app",
     "transactionWorkflowSettings": {
       "title": "Paramètres des Flux de Transactions",

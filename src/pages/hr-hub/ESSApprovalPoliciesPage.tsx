@@ -153,13 +153,13 @@ export default function ESSApprovalPoliciesPage() {
           </AlertDescription>
         </Alert>
 
-        {/* Cross-reference to Communications & Reminders */}
+        {/* Cross-reference to Notifications & Reminders */}
         <SeeAlsoReference
           moduleCode="HR_HUB"
-          moduleName="Communications & Reminders"
+          moduleName="Notifications & Reminders"
           sectionId="notification-settings"
           sectionTitle="Manage Approval Notifications"
-          description="Set up email and in-app notifications for approval requests, configure reminders, and define escalation rules in the Communications & Reminders module."
+          description="Set up email and in-app notifications for approval requests, configure reminders, and define escalation rules in the Notifications & Reminders module."
         />
 
         {/* Seed Default Policies CTA */}
