@@ -129,6 +129,7 @@ import EmployeeAssignmentsPage from "./pages/workforce/EmployeeAssignmentsPage";
 import EmployeeTransactionsPage from "./pages/workforce/EmployeeTransactionsPage";
 import WorkforceForecastingPage from "./pages/workforce/WorkforceForecastingPage";
 import IntranetAdminPage from "./pages/hr-hub/IntranetAdminPage";
+import CompanyCommunicationsPage from "./pages/hr-hub/CompanyCommunicationsPage";
 import JobFamiliesPage from "./pages/workforce/JobFamiliesPage";
 import JobsPage from "./pages/workforce/JobsPage";
 import CompetenciesPage from "./pages/workforce/CompetenciesPage";
@@ -1732,6 +1733,14 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
                   <IntranetAdminPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/hr-hub/company-communications"
+              element={
+                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
+                  <CompanyCommunicationsPage />
                 </ProtectedRoute>
               }
             />
