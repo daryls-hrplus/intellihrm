@@ -84,6 +84,7 @@ import {
   MexicanPayrollAuditDashboard,
   MexicanRegulatoryCalendar
 } from "@/components/payroll/mexico";
+import { usePageAudit } from "@/hooks/usePageAudit";
 
 interface Company {
   id: string;
@@ -162,6 +163,7 @@ const featureCards: FeatureCard[] = [
 ];
 
 export default function MexicoPayrollPage() {
+  usePageAudit('mexico_payroll', 'Payroll');
   const [companies, setCompanies] = useState<Company[]>([]);
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");

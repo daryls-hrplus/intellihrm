@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { useCountryStatutories, usePayGroups } from "@/hooks/useCountryStatutories";
+import { usePageAudit } from "@/hooks/usePageAudit";
 
 interface Company {
   id: string;
@@ -91,6 +92,7 @@ interface ParsedPayrollRow {
 }
 
 const HistoricalPayrollImportPage: React.FC = () => {
+  usePageAudit('historical_payroll_import', 'Payroll');
   const { t } = useTranslation();
   const fileInputRef = useRef<HTMLInputElement>(null);
   

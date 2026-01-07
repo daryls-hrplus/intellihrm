@@ -34,6 +34,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Globe, Calendar, Edit2, Plus, Search } from "lucide-react";
+import { usePageAudit } from "@/hooks/usePageAudit";
 
 interface CountryFiscalYear {
   id: string;
@@ -77,6 +78,7 @@ const DATE_FORMATS = [
 ];
 
 export default function CountryPayrollYearSetupPage() {
+  usePageAudit('country_payroll_year_setup', 'Payroll');
   const { t } = useTranslation();
   const [countries, setCountries] = useState<CountryFiscalYear[]>([]);
   const [isLoading, setIsLoading] = useState(true);

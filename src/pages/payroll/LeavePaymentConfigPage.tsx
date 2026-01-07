@@ -17,6 +17,7 @@ import { Plus, Edit, Trash2, Settings, ArrowLeft, ChevronDown, ChevronRight } fr
 import { useNavigate } from 'react-router-dom';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { getTodayString } from '@/utils/dateUtils';
+import { usePageAudit } from '@/hooks/usePageAudit';
 
 interface LeaveType {
   id: string;
@@ -74,6 +75,7 @@ interface LeavePayrollMapping {
 }
 
 const LeavePaymentConfigPage: React.FC = () => {
+  usePageAudit('leave_payment_config', 'Payroll');
   const { t } = useLanguage();
   const navigate = useNavigate();
   

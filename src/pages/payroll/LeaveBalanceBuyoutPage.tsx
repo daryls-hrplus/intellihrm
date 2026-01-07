@@ -15,6 +15,7 @@ import { Plus, Edit, Trash2, Upload, FileText, Check, X, DollarSign } from "luci
 import { getTodayString, formatDateForDisplay } from "@/utils/dateUtils";
 import { formatCurrency } from "@/hooks/useCurrencies";
 import { useCompanyCurrencyList } from "@/hooks/useCompanyCurrencies";
+import { usePageAudit } from "@/hooks/usePageAudit";
 
 interface LeaveBuyout {
   id: string;
@@ -66,6 +67,7 @@ interface PayPeriod {
 }
 
 export default function LeaveBalanceBuyoutPage() {
+  usePageAudit('leave_balance_buyout', 'Payroll');
   const { t } = useTranslation();
   const [selectedCompany, setSelectedCompany] = useState<string>("");
   const { currencies } = useCompanyCurrencyList(selectedCompany || undefined);

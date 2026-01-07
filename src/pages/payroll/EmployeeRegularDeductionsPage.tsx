@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Plus, Trash2, Pencil, Repeat, Search, Target, Calendar } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { usePageAudit } from "@/hooks/usePageAudit";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { formatDateForDisplay, getTodayString } from "@/utils/dateUtils";
@@ -61,6 +62,7 @@ interface Currency {
 }
 
 export default function EmployeeRegularDeductionsPage() {
+  usePageAudit('employee_regular_deductions', 'Payroll');
   const { t } = useTranslation();
   const [companies, setCompanies] = useState<Company[]>([]);
   const [employees, setEmployees] = useState<Employee[]>([]);
