@@ -86,7 +86,7 @@ export default function HRHubDashboardPage() {
     },
     // Section 3: Publishing & Content
     {
-      titleKey: "hrHub.publishingContent",
+      titleKey: "hrHub.documentCenter",
       items: [
         { titleKey: "hrHub.companyDocuments", descKey: "hrHub.companyDocumentsDesc", icon: FolderOpen, href: "/admin/documents", badge: null },
         { titleKey: "hrHub.policyDocuments", descKey: "hrHub.policyDocumentsDesc", icon: FileStack, href: "/admin/policy-documents", badge: null },
