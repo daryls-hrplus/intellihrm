@@ -1,7 +1,7 @@
 import React from 'react';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { ScreenshotPlaceholder } from '@/components/enablement/manual/components/ScreenshotPlaceholder';
-import { History, FileText, Download } from 'lucide-react';
+import { FeatureCard, SecurityCallout } from '@/components/enablement/manual/components';
+import { History, Download } from 'lucide-react';
 
 export const MyTransactionsHistory: React.FC = () => {
   return (
@@ -75,23 +75,17 @@ export const MyTransactionsHistory: React.FC = () => {
         alt="Screenshot showing employee's employment transaction history in chronological timeline format"
       />
 
-      <div className="flex items-center gap-4 p-4 bg-blue-50 dark:bg-blue-950/30 rounded-lg">
-        <Download className="h-8 w-8 text-blue-600" />
-        <div>
-          <h4 className="font-semibold text-blue-900 dark:text-blue-100">Export Options</h4>
-          <p className="text-sm text-blue-700 dark:text-blue-300">
-            Employees can download their transaction history as PDF for personal records or 
-            employment verification purposes.
-          </p>
-        </div>
-      </div>
+      <FeatureCard 
+        variant="primary" 
+        icon={Download} 
+        title="Export Options"
+        description="Employees can download their transaction history as PDF for personal records or employment verification purposes."
+      />
 
-      <Alert>
-        <AlertDescription>
-          <strong>Privacy Note:</strong> Compensation details in transaction history respect company 
-          privacy settings. Some organizations may choose to show or hide salary information in ESS.
-        </AlertDescription>
-      </Alert>
+      <SecurityCallout title="Privacy Note">
+        Compensation details in transaction history respect company 
+        privacy settings. Some organizations may choose to show or hide salary information in ESS.
+      </SecurityCallout>
     </div>
   );
 };
