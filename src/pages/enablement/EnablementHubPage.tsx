@@ -266,6 +266,14 @@ export default function EnablementHubPage() {
           color: "bg-green-500/10 text-green-600",
           badge: "24 Sections",
         },
+        {
+          title: "Workforce - Administrator Guide",
+          description: "Comprehensive guide for Workforce module configuration and management",
+          href: "/enablement/manuals/workforce",
+          icon: Users,
+          color: "bg-blue-500/10 text-blue-600",
+          badge: "80 Sections",
+        },
       ],
     },
     {
