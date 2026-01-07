@@ -14,7 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Plus, Settings, Trash2, Edit, Loader2, Info, Sparkles } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-
+import { SeeAlsoReference } from "@/components/enablement/shared/CrossModuleReference";
 const REQUEST_TYPES = [
   // Low Risk
   { value: 'emergency_contact', label: 'Emergency Contact', risk: 'low' },
@@ -152,6 +152,16 @@ export default function ESSApprovalPoliciesPage() {
             {t("hrHub.essApprovalPolicies.infoMessage")}
           </AlertDescription>
         </Alert>
+
+        {/* Cross-reference to Communications & Reminders */}
+        <SeeAlsoReference
+          moduleCode="HR_HUB"
+          moduleName="Communications & Reminders"
+          sectionId="notification-settings"
+          sectionTitle="Notification Settings"
+          description="Configure email and in-app notifications for approval requests, including reminders and escalation rules."
+          manualPath="/hr-hub/communications-reminders"
+        />
 
         {/* Seed Default Policies CTA */}
         {hasNoPolicies && (
