@@ -14,7 +14,8 @@ import { ReminderEmailTemplates } from '@/components/reminders/ReminderEmailTemp
 import { NotificationLogPanel } from '@/components/reminders/NotificationLogPanel';
 import { useReminders } from '@/hooks/useReminders';
 import { supabase } from '@/integrations/supabase/client';
-import { Bell, Settings, List, Loader2, FileText, Send, MessageSquare } from 'lucide-react';
+import { Bell, Settings, List, Loader2, FileText, Send, Info } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { DeliveryTrackingDashboard } from '@/components/reminders/DeliveryTrackingDashboard';
 import { toast } from 'sonner';
 
@@ -155,36 +156,68 @@ export default function HRRemindersPage() {
         />
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList>
-            <TabsTrigger value="notifications" className="flex items-center gap-2">
-              <MessageSquare className="h-4 w-4" />
-              Notifications
-            </TabsTrigger>
-            <TabsTrigger value="templates" className="flex items-center gap-2">
-              <FileText className="h-4 w-4" />
-              Templates
-            </TabsTrigger>
-            <TabsTrigger value="rules" className="flex items-center gap-2">
-              <Settings className="h-4 w-4" />
-              Automation Rules
-            </TabsTrigger>
-            <TabsTrigger value="reminders" className="flex items-center gap-2">
-              <List className="h-4 w-4" />
-              Reminder Queue
-            </TabsTrigger>
-            <TabsTrigger value="delivery" className="flex items-center gap-2">
-              <Send className="h-4 w-4" />
-              Delivery Log
-            </TabsTrigger>
-          </TabsList>
+          <TooltipProvider>
+            <TabsList>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <TabsTrigger value="templates" className="flex items-center gap-2">
+                    <FileText className="h-4 w-4" />
+                    Templates
+                  </TabsTrigger>
+                </TooltipTrigger>
+                <TooltipContent>Email content templates for reminder messages</TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <TabsTrigger value="rules" className="flex items-center gap-2">
+                    <Settings className="h-4 w-4" />
+                    Automation Rules
+                  </TabsTrigger>
+                </TooltipTrigger>
+                <TooltipContent>Rules that trigger reminders based on events</TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <TabsTrigger value="reminders" className="flex items-center gap-2">
+                    <List className="h-4 w-4" />
+                    Reminder Queue
+                  </TabsTrigger>
+                </TooltipTrigger>
+                <TooltipContent>Pending and completed scheduled reminders</TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <TabsTrigger value="delivery" className="flex items-center gap-2">
+                    <Send className="h-4 w-4" />
+                    Email Delivery
+                  </TabsTrigger>
+                </TooltipTrigger>
+                <TooltipContent>Track email/SMS delivery status for scheduled reminders</TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <TabsTrigger value="notifications" className="flex items-center gap-2">
+                    <Bell className="h-4 w-4" />
+                    In-App Alerts
+                  </TabsTrigger>
+                </TooltipTrigger>
+                <TooltipContent>Real-time alerts in the employee notification bell</TooltipContent>
+              </Tooltip>
+            </TabsList>
+          </TooltipProvider>
 
           <TabsContent value="notifications" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>System Notifications</CardTitle>
-                <p className="text-sm text-muted-foreground">
-                  View all system notifications sent to employees (ESS approvals, workflow updates, etc.)
-                </p>
+                <div className="flex items-start gap-3">
+                  <Bell className="h-5 w-5 text-primary mt-0.5" />
+                  <div>
+                    <CardTitle>In-App Notifications</CardTitle>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Real-time alerts that appear in the employee notification bell icon (ESS approvals, workflow updates, system alerts)
+                    </p>
+                  </div>
+                </div>
               </CardHeader>
               <CardContent>
                 <NotificationLogPanel companyId={selectedCompanyId === 'all' ? undefined : selectedCompanyId} />
@@ -274,10 +307,15 @@ export default function HRRemindersPage() {
           <TabsContent value="delivery" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Delivery Log</CardTitle>
-                <p className="text-sm text-muted-foreground">
-                  Monitor notification delivery status across all reminder types
-                </p>
+                <div className="flex items-start gap-3">
+                  <Send className="h-5 w-5 text-primary mt-0.5" />
+                  <div>
+                    <CardTitle>Email & SMS Delivery</CardTitle>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Track email and SMS delivery status for scheduled reminders. Retry failed deliveries.
+                    </p>
+                  </div>
+                </div>
               </CardHeader>
               <CardContent>
                 <DeliveryTrackingDashboard companyId={selectedCompanyId} />
