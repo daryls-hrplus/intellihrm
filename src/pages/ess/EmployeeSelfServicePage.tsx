@@ -47,6 +47,7 @@ import {
   Compass,
   Route,
   Lightbulb,
+  GitPullRequest,
 } from "lucide-react";
 
 export default function EmployeeSelfServicePage() {
@@ -152,7 +153,12 @@ export default function EmployeeSelfServicePage() {
     },
     {
       titleKey: "Tasks & Approvals",
-      items: filterByAccess([allModules.approvals, allModules.delegates, allModules.reminders]),
+      items: filterByAccess([
+        allModules.approvals, 
+        allModules.delegates, 
+        allModules.reminders,
+        { title: "My Change Requests", description: "Track your submitted data change requests", href: "/ess/my-change-requests", icon: GitPullRequest, color: "bg-amber-500/10 text-amber-600", tabCode: "ess-change-requests" },
+      ]),
     },
     {
       titleKey: "Help & Settings",
