@@ -16,10 +16,19 @@ import { Plus, Settings, Trash2, Edit, Loader2, Info, Sparkles } from "lucide-re
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const REQUEST_TYPES = [
-  { value: 'personal_contact', label: 'Personal Contact (Phone, Email)' },
-  { value: 'emergency_contact', label: 'Emergency Contact' },
-  { value: 'address', label: 'Address' },
-  { value: 'qualification', label: 'Qualification / Certification' },
+  // Low Risk
+  { value: 'emergency_contact', label: 'Emergency Contact', risk: 'low' },
+  { value: 'address', label: 'Address', risk: 'low' },
+  { value: 'medical_info', label: 'Medical Information', risk: 'low' },
+  // Medium Risk
+  { value: 'personal_contact', label: 'Personal Contact (Phone, Email)', risk: 'medium' },
+  { value: 'qualification', label: 'Qualification / Certification', risk: 'medium' },
+  { value: 'dependent', label: 'Dependents', risk: 'medium' },
+  { value: 'marital_status', label: 'Marital Status', risk: 'medium' },
+  { value: 'government_id', label: 'Government IDs', risk: 'medium' },
+  { value: 'name_change', label: 'Name Change', risk: 'medium' },
+  // High Risk
+  { value: 'banking', label: 'Banking Details', risk: 'high' },
 ];
 
 const APPROVAL_MODES: { value: ApprovalMode; label: string; description: string }[] = [

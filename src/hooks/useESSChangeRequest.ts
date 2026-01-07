@@ -3,8 +3,20 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
+export type ESSRequestType = 
+  | 'personal_contact' 
+  | 'emergency_contact' 
+  | 'address' 
+  | 'qualification'
+  | 'banking'
+  | 'name_change'
+  | 'dependent'
+  | 'government_id'
+  | 'medical_info'
+  | 'marital_status';
+
 export interface ChangeRequestData {
-  request_type: 'personal_contact' | 'emergency_contact' | 'address' | 'qualification';
+  request_type: ESSRequestType;
   entity_id?: string | null;
   entity_table: string;
   change_action: 'create' | 'update' | 'delete';
