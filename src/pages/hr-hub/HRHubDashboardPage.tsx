@@ -32,6 +32,7 @@ import {
   Brain,
   UserCog,
   Settings,
+  Mail,
 } from "lucide-react";
 
 // Hub sections and quick actions are now defined inside the component for i18n
@@ -68,15 +69,15 @@ export default function HRHubDashboardPage() {
       items: [
         { titleKey: "hrHub.essChangeRequests", descKey: "hrHub.essChangeRequestsDesc", icon: UserCog, href: "/hr-hub/ess-change-requests", badge: null, pendingCount: pendingESSCount },
         { titleKey: "hrHub.tasks", descKey: "hrHub.tasksDesc", icon: CheckSquare, href: "/hr-hub/tasks", badge: null },
-        { titleKey: "hrHub.reminders", descKey: "hrHub.remindersDesc", icon: Megaphone, href: "/hr-hub/reminders", badge: null },
         { titleKey: "hrHub.calendar", descKey: "hrHub.calendarDesc", icon: Calendar, href: "/hr-hub/calendar", badge: null },
         { titleKey: "hrHub.milestones", descKey: "hrHub.milestonesDesc", icon: Gift, href: "/hr-hub/milestones", badge: null },
       ],
     },
-    // Section 2: Communication & Support
+    // Section 2: Communication & Support Center
     {
-      titleKey: "hrHub.communicationSupport",
+      titleKey: "hrHub.communicationSupportCenter",
       items: [
+        { titleKey: "hrHub.communicationsReminders", descKey: "hrHub.communicationsRemindersDesc", icon: Mail, href: "/hr-hub/reminders", badge: null },
         { titleKey: "hrHub.employeeDirectory", descKey: "hrHub.employeeDirectoryDesc", icon: Users, href: "/ess/directory?from=hr-hub", badge: null },
         { titleKey: "hrHub.helpDesk", descKey: "hrHub.helpDeskDesc", icon: Headset, href: "/admin/helpdesk", badge: null },
         { titleKey: "hrHub.announcements", descKey: "hrHub.announcementsDesc", icon: Megaphone, href: "/admin/announcements", badge: null },
