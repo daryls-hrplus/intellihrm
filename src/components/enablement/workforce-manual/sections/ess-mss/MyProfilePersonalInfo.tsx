@@ -1,6 +1,6 @@
 import React from 'react';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { ScreenshotPlaceholder } from '@/components/enablement/manual/components/ScreenshotPlaceholder';
+import { WarningCallout, InfoCallout } from '@/components/enablement/manual/components';
 import { CheckCircle } from 'lucide-react';
 
 export const MyProfilePersonalInfo: React.FC = () => {
@@ -22,19 +22,19 @@ export const MyProfilePersonalInfo: React.FC = () => {
             <h5 className="font-medium text-sm mb-2">Contact Information</h5>
             <ul className="space-y-1 text-sm">
               <li className="flex items-center gap-2">
-                <CheckCircle className="h-3 w-3 text-green-600" />
+                <CheckCircle className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
                 Personal email address
               </li>
               <li className="flex items-center gap-2">
-                <CheckCircle className="h-3 w-3 text-green-600" />
+                <CheckCircle className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
                 Mobile phone number
               </li>
               <li className="flex items-center gap-2">
-                <CheckCircle className="h-3 w-3 text-green-600" />
+                <CheckCircle className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
                 Home phone number
               </li>
               <li className="flex items-center gap-2">
-                <CheckCircle className="h-3 w-3 text-green-600" />
+                <CheckCircle className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
                 Mailing address
               </li>
             </ul>
@@ -43,15 +43,15 @@ export const MyProfilePersonalInfo: React.FC = () => {
             <h5 className="font-medium text-sm mb-2">Emergency Contacts</h5>
             <ul className="space-y-1 text-sm">
               <li className="flex items-center gap-2">
-                <CheckCircle className="h-3 w-3 text-green-600" />
+                <CheckCircle className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
                 Primary emergency contact
               </li>
               <li className="flex items-center gap-2">
-                <CheckCircle className="h-3 w-3 text-green-600" />
+                <CheckCircle className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
                 Secondary emergency contact
               </li>
               <li className="flex items-center gap-2">
-                <CheckCircle className="h-3 w-3 text-green-600" />
+                <CheckCircle className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
                 Relationship & phone numbers
               </li>
             </ul>
@@ -59,30 +59,25 @@ export const MyProfilePersonalInfo: React.FC = () => {
         </div>
       </div>
 
-      <div className="bg-amber-50 dark:bg-amber-950/30 p-4 rounded-lg border border-amber-200 dark:border-amber-800">
-        <h4 className="font-semibold text-amber-900 dark:text-amber-100 mb-2">Fields Requiring Approval</h4>
-        <p className="text-sm text-amber-700 dark:text-amber-300 mb-2">
-          Changes to the following fields are routed through HR approval:
-        </p>
-        <ul className="text-sm text-amber-700 dark:text-amber-300 list-disc list-inside">
+      <WarningCallout title="Fields Requiring Approval">
+        <p className="mb-2">Changes to the following fields are routed through HR approval:</p>
+        <ul className="list-disc list-inside space-y-1">
           <li>Legal name changes (requires documentation)</li>
           <li>Marital status updates</li>
           <li>Bank account changes (routed to Payroll)</li>
           <li>Tax withholding updates</li>
         </ul>
-      </div>
+      </WarningCallout>
 
       <ScreenshotPlaceholder 
         caption="My Profile - Personal Information editing screen"
         alt="Screenshot of employee personal information form with editable fields and approval indicators"
       />
 
-      <Alert>
-        <AlertDescription>
-          <strong>Audit Trail:</strong> All profile changes are logged with timestamps and the previous 
-          values are retained for historical reference and compliance.
-        </AlertDescription>
-      </Alert>
+      <InfoCallout title="Audit Trail">
+        All profile changes are logged with timestamps and the previous 
+        values are retained for historical reference and compliance.
+      </InfoCallout>
     </div>
   );
 };

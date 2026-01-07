@@ -1,6 +1,6 @@
 import React from 'react';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { ScreenshotPlaceholder } from '@/components/enablement/manual/components/ScreenshotPlaceholder';
+import { FeatureCard, FeatureCardGrid, ComplianceCallout } from '@/components/enablement/manual/components';
 import { UserMinus, ClipboardList, Key, FileText } from 'lucide-react';
 
 export const TeamOffboardingOversight: React.FC = () => {
@@ -15,60 +15,50 @@ export const TeamOffboardingOversight: React.FC = () => {
         </p>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-4">
-        <div className="p-4 bg-red-50 dark:bg-red-950/30 rounded-lg border border-red-200 dark:border-red-800">
-          <UserMinus className="h-6 w-6 text-red-600 mb-2" />
-          <h4 className="font-semibold text-red-900 dark:text-red-100 mb-2">Departure Visibility</h4>
-          <ul className="text-sm text-red-700 dark:text-red-300 space-y-1">
+      <FeatureCardGrid columns={2}>
+        <FeatureCard variant="warning" icon={UserMinus} title="Departure Visibility">
+          <ul className="space-y-1 mt-2">
             <li>• Departing employees list</li>
             <li>• Last working day countdown</li>
             <li>• Resignation vs. termination type</li>
             <li>• Exit reason categories</li>
           </ul>
-        </div>
-        <div className="p-4 bg-amber-50 dark:bg-amber-950/30 rounded-lg border border-amber-200 dark:border-amber-800">
-          <ClipboardList className="h-6 w-6 text-amber-600 mb-2" />
-          <h4 className="font-semibold text-amber-900 dark:text-amber-100 mb-2">Manager Checklist</h4>
-          <ul className="text-sm text-amber-700 dark:text-amber-300 space-y-1">
+        </FeatureCard>
+        <FeatureCard variant="orange" icon={ClipboardList} title="Manager Checklist">
+          <ul className="space-y-1 mt-2">
             <li>• Knowledge transfer plan</li>
             <li>• Work redistribution</li>
             <li>• Client handover</li>
             <li>• Exit interview scheduling</li>
           </ul>
-        </div>
-      </div>
+        </FeatureCard>
+      </FeatureCardGrid>
 
       <div className="bg-muted/30 p-4 rounded-lg">
         <h4 className="font-semibold mb-3">Manager Offboarding Responsibilities</h4>
-        <div className="grid md:grid-cols-3 gap-4">
-          <div className="p-3 bg-background rounded border">
-            <Key className="h-5 w-5 text-primary mb-2" />
-            <h5 className="font-medium text-sm mb-1">Access & Assets</h5>
-            <ul className="text-xs space-y-1">
+        <FeatureCardGrid columns={3}>
+          <FeatureCard variant="neutral" icon={Key} title="Access & Assets">
+            <ul className="text-xs space-y-1 mt-2">
               <li>• Confirm equipment return</li>
               <li>• Verify access revocation</li>
               <li>• Collect badges/keys</li>
             </ul>
-          </div>
-          <div className="p-3 bg-background rounded border">
-            <FileText className="h-5 w-5 text-primary mb-2" />
-            <h5 className="font-medium text-sm mb-1">Documentation</h5>
-            <ul className="text-xs space-y-1">
+          </FeatureCard>
+          <FeatureCard variant="neutral" icon={FileText} title="Documentation">
+            <ul className="text-xs space-y-1 mt-2">
               <li>• Process documentation</li>
               <li>• Project status notes</li>
               <li>• Contact handover</li>
             </ul>
-          </div>
-          <div className="p-3 bg-background rounded border">
-            <UserMinus className="h-5 w-5 text-primary mb-2" />
-            <h5 className="font-medium text-sm mb-1">Team Impact</h5>
-            <ul className="text-xs space-y-1">
+          </FeatureCard>
+          <FeatureCard variant="neutral" icon={UserMinus} title="Team Impact">
+            <ul className="text-xs space-y-1 mt-2">
               <li>• Team communication</li>
               <li>• Workload rebalancing</li>
               <li>• Backfill request</li>
             </ul>
-          </div>
-        </div>
+          </FeatureCard>
+        </FeatureCardGrid>
       </div>
 
       <ScreenshotPlaceholder 
@@ -102,12 +92,10 @@ export const TeamOffboardingOversight: React.FC = () => {
         </div>
       </div>
 
-      <Alert>
-        <AlertDescription>
-          <strong>Compliance:</strong> Manager task completion is tracked for compliance reporting. 
-          Incomplete offboarding tasks trigger escalation workflows.
-        </AlertDescription>
-      </Alert>
+      <ComplianceCallout title="Compliance">
+        Manager task completion is tracked for compliance reporting. 
+        Incomplete offboarding tasks trigger escalation workflows.
+      </ComplianceCallout>
     </div>
   );
 };

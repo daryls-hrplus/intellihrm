@@ -1,6 +1,6 @@
 import React from 'react';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { ScreenshotPlaceholder } from '@/components/enablement/manual/components/ScreenshotPlaceholder';
+import { FeatureCard, FeatureCardGrid, TipCallout } from '@/components/enablement/manual/components';
 import { Users, Eye, Bell, BarChart3 } from 'lucide-react';
 
 export const ManagerTeamView: React.FC = () => {
@@ -15,28 +15,36 @@ export const ManagerTeamView: React.FC = () => {
         </p>
       </div>
 
-      <div className="grid md:grid-cols-4 gap-4">
-        <div className="p-4 bg-blue-50 dark:bg-blue-950/30 rounded-lg border border-blue-200 dark:border-blue-800 text-center">
-          <Users className="h-8 w-8 text-blue-600 mx-auto mb-2" />
-          <h4 className="font-semibold text-blue-900 dark:text-blue-100">Team Roster</h4>
-          <p className="text-xs text-blue-700 dark:text-blue-300 mt-1">Direct & indirect reports</p>
-        </div>
-        <div className="p-4 bg-green-50 dark:bg-green-950/30 rounded-lg border border-green-200 dark:border-green-800 text-center">
-          <Eye className="h-8 w-8 text-green-600 mx-auto mb-2" />
-          <h4 className="font-semibold text-green-900 dark:text-green-100">Quick View</h4>
-          <p className="text-xs text-green-700 dark:text-green-300 mt-1">Employee profiles at a glance</p>
-        </div>
-        <div className="p-4 bg-purple-50 dark:bg-purple-950/30 rounded-lg border border-purple-200 dark:border-purple-800 text-center">
-          <Bell className="h-8 w-8 text-purple-600 mx-auto mb-2" />
-          <h4 className="font-semibold text-purple-900 dark:text-purple-100">Alerts</h4>
-          <p className="text-xs text-purple-700 dark:text-purple-300 mt-1">Pending actions & reminders</p>
-        </div>
-        <div className="p-4 bg-orange-50 dark:bg-orange-950/30 rounded-lg border border-orange-200 dark:border-orange-800 text-center">
-          <BarChart3 className="h-8 w-8 text-orange-600 mx-auto mb-2" />
-          <h4 className="font-semibold text-orange-900 dark:text-orange-100">Analytics</h4>
-          <p className="text-xs text-orange-700 dark:text-orange-300 mt-1">Team metrics & trends</p>
-        </div>
-      </div>
+      <FeatureCardGrid columns={4}>
+        <FeatureCard 
+          variant="primary" 
+          icon={Users} 
+          title="Team Roster"
+          description="Direct & indirect reports"
+          centered
+        />
+        <FeatureCard 
+          variant="success" 
+          icon={Eye} 
+          title="Quick View"
+          description="Employee profiles at a glance"
+          centered
+        />
+        <FeatureCard 
+          variant="purple" 
+          icon={Bell} 
+          title="Alerts"
+          description="Pending actions & reminders"
+          centered
+        />
+        <FeatureCard 
+          variant="orange" 
+          icon={BarChart3} 
+          title="Analytics"
+          description="Team metrics & trends"
+          centered
+        />
+      </FeatureCardGrid>
 
       <div className="bg-muted/30 p-4 rounded-lg">
         <h4 className="font-semibold mb-3">Manager Actions Available</h4>
@@ -75,26 +83,24 @@ export const ManagerTeamView: React.FC = () => {
         </div>
         <div className="p-4 grid md:grid-cols-3 gap-4 text-center">
           <div>
-            <div className="text-2xl font-bold text-green-600">92%</div>
+            <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">92%</div>
             <div className="text-xs text-muted-foreground">Training Compliance</div>
           </div>
           <div>
-            <div className="text-2xl font-bold text-blue-600">4.2</div>
+            <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">4.2</div>
             <div className="text-xs text-muted-foreground">Avg Performance Rating</div>
           </div>
           <div>
-            <div className="text-2xl font-bold text-amber-600">3</div>
+            <div className="text-2xl font-bold text-amber-600 dark:text-amber-400">3</div>
             <div className="text-xs text-muted-foreground">Pending Approvals</div>
           </div>
         </div>
       </div>
 
-      <Alert>
-        <AlertDescription>
-          <strong>Delegation Support:</strong> Managers can delegate MSS responsibilities to deputies 
-          during absences, with full audit trail of delegated actions.
-        </AlertDescription>
-      </Alert>
+      <TipCallout title="Delegation Support">
+        Managers can delegate MSS responsibilities to deputies 
+        during absences, with full audit trail of delegated actions.
+      </TipCallout>
     </div>
   );
 };

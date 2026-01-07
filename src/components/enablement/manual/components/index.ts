@@ -21,3 +21,24 @@ export {
   SecurityCallout,
   FutureCallout
 } from './Callout';
+export { 
+  FeatureCard, 
+  PrimaryFeatureCard, 
+  SuccessFeatureCard, 
+  InfoFeatureCard, 
+  WarningFeatureCard, 
+  PurpleFeatureCard, 
+  OrangeFeatureCard,
+  type FeatureCardVariant 
+} from './FeatureCard';
+export { FeatureCardGrid } from './FeatureCardGrid';
+export { 
+  StatusBadge, 
+  HighStatusBadge, 
+  MediumStatusBadge, 
+  LowStatusBadge, 
+  CriticalStatusBadge, 
+  InfoStatusBadge,
+  type StatusBadgeVariant 
+} from './StatusBadge';
+export { DesignSystemGuide } from './DesignSystemGuide';
