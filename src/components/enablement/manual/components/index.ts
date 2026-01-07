@@ -13,5 +13,11 @@ export {
   WarningCallout, 
   TipCallout, 
   NoteCallout, 
-  SuccessCallout 
+  SuccessCallout,
+  CriticalCallout,
+  ComplianceCallout,
+  IndustryCallout,
+  IntegrationCallout,
+  SecurityCallout,
+  FutureCallout
 } from './Callout';
