@@ -205,6 +205,7 @@
   },
 "hrHub": {
     "title": "Centro HR",
+    "dailyOperations": "Operaciones Diarias",
     "communicationSupportCenter": "Centro de Comunicación y Soporte",
     "communicationsReminders": "Notificaciones y Recordatorios",
     "communicationsRemindersDesc": "Gestione plantillas, reglas de automatización, envío de correos y notificaciones en la aplicación",

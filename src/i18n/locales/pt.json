@@ -71,6 +71,7 @@
   },
 "hrHub": {
     "title": "Central RH",
+    "dailyOperations": "Operações Diárias",
     "communicationsReminders": "Notificações e Lembretes",
     "communicationsRemindersDesc": "Gerencie modelos, regras de automação, entrega de e-mails e notificações no aplicativo",
     "transactionWorkflowSettings": {
