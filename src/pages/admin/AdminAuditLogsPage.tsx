@@ -852,6 +852,13 @@ export default function AdminAuditLogsPage() {
                   value={moduleFilter}
                   onValueChange={(value) => {
                     setModuleFilter(value);
+                    // Reset entity filter if it doesn't belong to the new module
+                    if (value !== 'all' && entityFilter !== 'all') {
+                      const entityModule = getModuleFromEntityType(entityFilter);
+                      if (entityModule !== value) {
+                        setEntityFilter('all');
+                      }
+                    }
                     setPage(0);
                   }}
                 >
@@ -868,7 +875,7 @@ export default function AdminAuditLogsPage() {
                   </SelectContent>
                 </Select>
 
-                {/* Entity Filter */}
+                {/* Entity Filter - filtered by selected module */}
                 <Select
                   value={entityFilter}
                   onValueChange={(value) => {
@@ -881,11 +888,13 @@ export default function AdminAuditLogsPage() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Entities</SelectItem>
-                    {entityTypes.map(type => (
-                      <SelectItem key={type} value={type}>
-                        {formatEntityType(type)}
-                      </SelectItem>
-                    ))}
+                    {entityTypes
+                      .filter(type => moduleFilter === 'all' || getModuleFromEntityType(type) === moduleFilter)
+                      .map(type => (
+                        <SelectItem key={type} value={type}>
+                          {formatEntityType(type)}
+                        </SelectItem>
+                      ))}
                   </SelectContent>
                 </Select>
 
