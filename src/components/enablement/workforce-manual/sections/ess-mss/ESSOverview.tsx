@@ -1,7 +1,7 @@
 import React from 'react';
 import { ScreenshotPlaceholder } from '@/components/enablement/manual/components/ScreenshotPlaceholder';
-import { FeatureCard, FeatureCardGrid, IntegrationCallout } from '@/components/enablement/manual/components';
-import { User, Shield, Clock, ArrowRight } from 'lucide-react';
+import { FeatureCard, FeatureCardGrid, IntegrationCallout, InfoCallout } from '@/components/enablement/manual/components';
+import { User, Shield, Clock, ArrowRight, BookOpen } from 'lucide-react';
 
 export const ESSOverview: React.FC = () => {
   return (
@@ -37,23 +37,23 @@ export const ESSOverview: React.FC = () => {
       </FeatureCardGrid>
 
       <div className="bg-muted/30 p-4 rounded-lg">
-        <h4 className="font-semibold mb-3">ESS Module Components</h4>
+        <h4 className="font-semibold mb-3 text-foreground">ESS Module Components</h4>
         <div className="grid md:grid-cols-2 gap-3">
           <div className="flex items-center gap-2">
             <ArrowRight className="h-4 w-4 text-primary" />
-            <span className="text-sm"><strong>My Profile:</strong> Personal & contact information</span>
+            <span className="text-sm text-foreground"><strong>My Profile:</strong> Personal & contact information</span>
           </div>
           <div className="flex items-center gap-2">
             <ArrowRight className="h-4 w-4 text-primary" />
-            <span className="text-sm"><strong>My Qualifications:</strong> Certifications & education</span>
+            <span className="text-sm text-foreground"><strong>My Qualifications:</strong> Certifications & education</span>
           </div>
           <div className="flex items-center gap-2">
             <ArrowRight className="h-4 w-4 text-primary" />
-            <span className="text-sm"><strong>My Transactions:</strong> Employment history & changes</span>
+            <span className="text-sm text-foreground"><strong>My Transactions:</strong> Employment history & changes</span>
           </div>
           <div className="flex items-center gap-2">
             <ArrowRight className="h-4 w-4 text-primary" />
-            <span className="text-sm"><strong>My Career:</strong> Career paths & progression</span>
+            <span className="text-sm text-foreground"><strong>My Career:</strong> Career paths & progression</span>
           </div>
         </div>
       </div>
@@ -63,10 +63,27 @@ export const ESSOverview: React.FC = () => {
         alt="Screenshot of the Employee Self-Service dashboard showing quick actions and pending items"
       />
 
+      <div className="bg-muted/30 p-4 rounded-lg">
+        <h4 className="font-semibold mb-3 text-foreground flex items-center gap-2">
+          <BookOpen className="h-4 w-4" /> Workforce Manual Linkages
+        </h4>
+        <div className="grid md:grid-cols-2 gap-3 text-sm text-foreground">
+          <div><strong>Part 2:</strong> Org structure powers hierarchy display</div>
+          <div><strong>Part 3:</strong> Job architecture defines career paths</div>
+          <div><strong>Part 4:</strong> Employee data is source for My Profile</div>
+          <div><strong>Part 5:</strong> Lifecycle events shown in My Transactions</div>
+        </div>
+      </div>
+
       <IntegrationCallout title="Cross-Module Integration">
         ESS connects to Leave Management, Benefits Enrollment, 
         Learning Portal, and Performance modules for a unified employee experience.
       </IntegrationCallout>
+
+      <InfoCallout title="Full ESS Manual">
+        This section covers workforce-related ESS features. For comprehensive coverage of all 
+        ESS capabilities including pay, benefits, leave, and performance, see the dedicated ESS Manual.
+      </InfoCallout>
     </div>
   );
 };

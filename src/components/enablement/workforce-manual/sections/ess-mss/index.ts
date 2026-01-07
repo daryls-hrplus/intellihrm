@@ -8,3 +8,8 @@ export { ManagerTeamView } from './ManagerTeamView';
 export { TeamOnboardingOversight } from './TeamOnboardingOversight';
 export { TeamOffboardingOversight } from './TeamOffboardingOversight';
 export { RecruitmentIntegration } from './RecruitmentIntegration';
+
+// New workforce linkage sections
+export { MyCompetenciesSkills } from './MyCompetenciesSkills';
+export { TeamAnalyticsAccess } from './TeamAnalyticsAccess';
+export { PositionRequestInitiation } from './PositionRequestInitiation';
