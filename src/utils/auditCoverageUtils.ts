@@ -1,10 +1,18 @@
-import { moduleMapping, getModuleFromEntityType, getEntityTypesForModule } from './auditModuleMapping';
+import { moduleMapping, getModuleFromEntityType } from './auditModuleMapping';
+import { 
+  auditedEntityTypes, 
+  getRegisteredModules, 
+  getRegisteredEntityTypesForModule,
+  isEntityTypeRegistered,
+  getTotalRegisteredEntityTypes
+} from './auditEntityRegistry';
 
 export interface ModuleCoverage {
   module: string;
-  expectedEntityTypes: string[];
-  coveredEntityTypes: string[];
-  coverage: number;
+  implementedEntityTypes: string[];  // From registry (code-based)
+  activeEntityTypes: string[];       // From database (data-based)
+  implementationCoverage: number;    // Always 100% if in registry
+  activityLevel: number;             // % of implemented types with logs
   lastActivity?: string;
   totalLogs: number;
 }
@@ -12,54 +20,66 @@ export interface ModuleCoverage {
 export interface CoverageGap {
   entityType: string;
   module: string;
-  status: 'missing_data' | 'orphaned';
+  status: 'pending_activation' | 'orphaned' | 'not_implemented';
   recommendation: string;
 }
 
 export interface AuditCoverageMetrics {
+  // Implementation metrics (code-based)
   totalModules: number;
-  modulesWithCoverage: number;
+  totalImplementedTypes: number;
+  implementationCoverage: number;     // Always 100% when registry matches code
+  
+  // Activity metrics (data-based)
+  activeEntityTypes: number;
+  overallActivityLevel: number;
+  modulesWithActivity: number;
+  
+  // Legacy compatibility
   totalEntityTypes: number;
   coveredEntityTypes: number;
   overallCoverage: number;
+  modulesWithCoverage: number;
+  
   moduleCoverages: ModuleCoverage[];
   coverageGaps: CoverageGap[];
 }
 
 /**
- * Get all unique modules from the module mapping
+ * Get all unique modules from the entity registry
  */
 export function getAllModules(): string[] {
-  const modules = new Set(Object.values(moduleMapping));
-  return Array.from(modules).sort();
+  return getRegisteredModules();
 }
 
 /**
- * Calculate coverage metrics for all modules
+ * Calculate coverage metrics using registry-first approach
+ * Implementation = based on code registry (static)
+ * Activity = based on database logs (dynamic)
  */
 export function calculateCoverageMetrics(
-  auditedEntityTypes: Map<string, { count: number; lastActivity: string }>,
+  auditedFromDB: Map<string, { count: number; lastActivity: string }>,
   orphanedEntityTypes: string[] = []
 ): AuditCoverageMetrics {
-  const allModules = getAllModules();
+  const allModules = getRegisteredModules();
   const moduleCoverages: ModuleCoverage[] = [];
   const coverageGaps: CoverageGap[] = [];
   
-  let totalExpected = 0;
-  let totalCovered = 0;
-  let modulesWithCoverage = 0;
+  let totalImplemented = getTotalRegisteredEntityTypes();
+  let totalActive = 0;
+  let modulesWithActivity = 0;
 
-  // Calculate coverage per module
+  // Calculate per module
   for (const module of allModules) {
-    const expectedTypes = getEntityTypesForModule(module);
-    const coveredTypes = expectedTypes.filter(type => auditedEntityTypes.has(type));
+    const implementedTypes = getRegisteredEntityTypesForModule(module);
+    const activeTypes = implementedTypes.filter(type => auditedFromDB.has(type));
     
-    // Get last activity for this module
+    // Get activity metrics
     let lastActivity: string | undefined;
     let totalLogs = 0;
     
-    for (const type of coveredTypes) {
-      const data = auditedEntityTypes.get(type);
+    for (const type of activeTypes) {
+      const data = auditedFromDB.get(type);
       if (data) {
         totalLogs += data.count;
         if (!lastActivity || data.lastActivity > lastActivity) {
@@ -68,62 +88,73 @@ export function calculateCoverageMetrics(
       }
     }
 
-    const coverage = expectedTypes.length > 0 
-      ? Math.round((coveredTypes.length / expectedTypes.length) * 100)
+    const activityLevel = implementedTypes.length > 0 
+      ? Math.round((activeTypes.length / implementedTypes.length) * 100)
       : 0;
 
     moduleCoverages.push({
       module,
-      expectedEntityTypes: expectedTypes,
-      coveredEntityTypes: coveredTypes,
-      coverage,
+      implementedEntityTypes: implementedTypes,
+      activeEntityTypes: activeTypes,
+      implementationCoverage: 100, // Always 100% if in registry
+      activityLevel,
       lastActivity,
       totalLogs,
     });
 
-    totalExpected += expectedTypes.length;
-    totalCovered += coveredTypes.length;
-    if (coveredTypes.length > 0) {
-      modulesWithCoverage++;
+    totalActive += activeTypes.length;
+    if (activeTypes.length > 0) {
+      modulesWithActivity++;
     }
 
-    // Find gaps (expected but not covered)
-    for (const type of expectedTypes) {
-      if (!auditedEntityTypes.has(type)) {
+    // Find pending activation (implemented but no logs yet)
+    for (const type of implementedTypes) {
+      if (!auditedFromDB.has(type)) {
         coverageGaps.push({
           entityType: type,
           module,
-          status: 'missing_data',
-          recommendation: `Add usePageAudit hook to the ${formatEntityType(type)} page`,
+          status: 'pending_activation',
+          recommendation: `Visit the ${formatEntityType(type)} page to activate logging`,
         });
       }
     }
   }
 
-  // Find orphaned entity types (in audit logs but not in mapping)
+  // Find orphaned entity types (in audit logs but not in registry)
   for (const type of orphanedEntityTypes) {
-    const module = getModuleFromEntityType(type);
-    if (module === 'Unknown') {
+    if (!isEntityTypeRegistered(type)) {
+      const module = getModuleFromEntityType(type);
       coverageGaps.push({
         entityType: type,
-        module: 'Unknown',
+        module: module === 'Other' ? 'Unknown' : module,
         status: 'orphaned',
-        recommendation: `Add "${type}" to auditModuleMapping.ts`,
+        recommendation: `Add "${type}" to auditEntityRegistry.ts`,
       });
     }
   }
 
-  const overallCoverage = totalExpected > 0 
-    ? Math.round((totalCovered / totalExpected) * 100)
+  const overallActivityLevel = totalImplemented > 0 
+    ? Math.round((totalActive / totalImplemented) * 100)
     : 0;
 
   return {
+    // Implementation metrics
     totalModules: allModules.length,
-    modulesWithCoverage,
-    totalEntityTypes: totalExpected,
-    coveredEntityTypes: totalCovered,
-    overallCoverage,
-    moduleCoverages: moduleCoverages.sort((a, b) => b.coverage - a.coverage),
+    totalImplementedTypes: totalImplemented,
+    implementationCoverage: 100, // Registry = code = 100% implemented
+    
+    // Activity metrics  
+    activeEntityTypes: totalActive,
+    overallActivityLevel,
+    modulesWithActivity,
+    
+    // Legacy compatibility (map to new names)
+    totalEntityTypes: totalImplemented,
+    coveredEntityTypes: totalActive,
+    overallCoverage: overallActivityLevel,
+    modulesWithCoverage: modulesWithActivity,
+    
+    moduleCoverages: moduleCoverages.sort((a, b) => b.activityLevel - a.activityLevel),
     coverageGaps: coverageGaps.sort((a, b) => a.module.localeCompare(b.module)),
   };
 }
