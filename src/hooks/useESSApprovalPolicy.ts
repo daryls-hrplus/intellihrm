@@ -36,10 +36,19 @@ export interface PolicyFormData {
 
 // Default policies to seed if none exist
 const DEFAULT_POLICIES: Omit<PolicyFormData, 'company_id'>[] = [
-  { request_type: 'personal_contact', approval_mode: 'hr_review', notification_only: false },
+  // Low Risk - Auto Approve
   { request_type: 'emergency_contact', approval_mode: 'auto_approve', notification_only: true },
   { request_type: 'address', approval_mode: 'auto_approve', notification_only: true },
-  { request_type: 'qualification', approval_mode: 'hr_review', notification_only: false },
+  { request_type: 'medical_info', approval_mode: 'auto_approve', notification_only: true },
+  // Medium Risk - HR Review
+  { request_type: 'personal_contact', approval_mode: 'hr_review', notification_only: false },
+  { request_type: 'qualification', approval_mode: 'hr_review', notification_only: false, requires_documentation: true },
+  { request_type: 'dependent', approval_mode: 'hr_review', notification_only: true, requires_documentation: true },
+  { request_type: 'marital_status', approval_mode: 'hr_review', notification_only: true, requires_documentation: true },
+  { request_type: 'government_id', approval_mode: 'hr_review', notification_only: true, requires_documentation: true },
+  { request_type: 'name_change', approval_mode: 'hr_review', notification_only: true, requires_documentation: true },
+  // High Risk - Workflow
+  { request_type: 'banking', approval_mode: 'workflow', notification_only: true, requires_documentation: true },
 ];
 
 export function useESSApprovalPolicies() {
