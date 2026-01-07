@@ -7,41 +7,42 @@ export interface StepMapping {
   importType?: string;
   isRequired?: boolean;
   estimatedMinutes?: number;
+  subSection?: string;
 }
 
 // Maps phase ID to step mappings with admin routes and import types
 export const PHASE_STEP_MAPPINGS: Record<string, StepMapping[]> = {
   foundation: [
     // 1A: Prerequisites
-    { order: 1, area: "Prerequisites Checklist", adminRoute: "/admin/prerequisites", isRequired: true, estimatedMinutes: 30 },
+    { order: 1, area: "Prerequisites Checklist", adminRoute: "/admin/implementation-handbook", isRequired: true, estimatedMinutes: 30, subSection: "1A: Prerequisites" },
     // 1B: Security Foundation (must configure BEFORE creating users)
-    { order: 2, area: "Authentication Settings", adminRoute: "/admin/security/authentication", isRequired: true, estimatedMinutes: 25 },
-    { order: 3, area: "MFA Configuration", adminRoute: "/admin/security/mfa", isRequired: true, estimatedMinutes: 20 },
-    { order: 4, area: "Password Policies", adminRoute: "/admin/security/password-policies", isRequired: true, estimatedMinutes: 15 },
-    { order: 5, area: "Session Management", adminRoute: "/admin/security/sessions", isRequired: true, estimatedMinutes: 15 },
-    { order: 6, area: "Audit Logging", adminRoute: "/admin/security/audit", isRequired: true, estimatedMinutes: 20 },
+    { order: 2, area: "Authentication Settings", adminRoute: "/admin/sso-settings", isRequired: true, estimatedMinutes: 25, subSection: "1B: Security Foundation" },
+    { order: 3, area: "MFA Configuration", adminRoute: "/admin/mfa-settings", isRequired: true, estimatedMinutes: 20, subSection: "1B: Security Foundation" },
+    { order: 4, area: "Password Policies", adminRoute: "/admin/password-policies", isRequired: true, estimatedMinutes: 15, subSection: "1B: Security Foundation" },
+    { order: 5, area: "Session Management", adminRoute: "/admin/session-management", isRequired: true, estimatedMinutes: 15, subSection: "1B: Security Foundation" },
+    { order: 6, area: "Audit Logging", adminRoute: "/admin/audit-logs", isRequired: true, estimatedMinutes: 20, subSection: "1B: Security Foundation" },
     // 1C: Organization Structure
-    { order: 7, area: "Territories", adminRoute: "/admin/territories", isRequired: true, estimatedMinutes: 15 },
-    { order: 8, area: "Company Groups", adminRoute: "/admin/company-groups", isRequired: true, estimatedMinutes: 10 },
-    { order: 9, area: "Companies", adminRoute: "/admin/companies", importType: "companies", isRequired: true, estimatedMinutes: 20 },
-    { order: 10, area: "Divisions", adminRoute: "/admin/divisions", importType: "divisions", isRequired: false, estimatedMinutes: 15 },
-    { order: 11, area: "Departments", adminRoute: "/admin/departments", importType: "departments", isRequired: true, estimatedMinutes: 20 },
-    { order: 12, area: "Sections", adminRoute: "/admin/sections", importType: "sections", isRequired: false, estimatedMinutes: 15 },
-    { order: 13, area: "Branch Locations", adminRoute: "/admin/branch-locations", importType: "branch_locations", isRequired: false, estimatedMinutes: 15 },
+    { order: 7, area: "Territories", adminRoute: "/admin/territories", isRequired: true, estimatedMinutes: 15, subSection: "1C: Organization Structure" },
+    { order: 8, area: "Company Groups", adminRoute: "/admin/company-groups", isRequired: true, estimatedMinutes: 10, subSection: "1C: Organization Structure" },
+    { order: 9, area: "Companies", adminRoute: "/admin/companies", importType: "companies", isRequired: true, estimatedMinutes: 20, subSection: "1C: Organization Structure" },
+    { order: 10, area: "Divisions", adminRoute: "/admin/divisions", importType: "divisions", isRequired: false, estimatedMinutes: 15, subSection: "1C: Organization Structure" },
+    { order: 11, area: "Departments", adminRoute: "/admin/departments", importType: "departments", isRequired: true, estimatedMinutes: 20, subSection: "1C: Organization Structure" },
+    { order: 12, area: "Sections", adminRoute: "/admin/sections", importType: "sections", isRequired: false, estimatedMinutes: 15, subSection: "1C: Organization Structure" },
+    { order: 13, area: "Branch Locations", adminRoute: "/admin/branch-locations", importType: "branch_locations", isRequired: false, estimatedMinutes: 15, subSection: "1C: Organization Structure" },
     // 1D: System Configuration
-    { order: 14, area: "System Settings", adminRoute: "/admin/system-settings", isRequired: true, estimatedMinutes: 20 },
-    { order: 15, area: "Lookup Values", adminRoute: "/admin/lookup-values", isRequired: true, estimatedMinutes: 45 },
-    { order: 16, area: "Currencies", adminRoute: "/admin/currencies", isRequired: false, estimatedMinutes: 10 },
-    { order: 17, area: "Custom Fields", adminRoute: "/admin/custom-fields", isRequired: false, estimatedMinutes: 25 },
-    { order: 18, area: "Notifications", adminRoute: "/admin/notifications", isRequired: true, estimatedMinutes: 20 },
+    { order: 14, area: "System Settings", adminRoute: "/admin/system-settings", isRequired: true, estimatedMinutes: 20, subSection: "1D: System Configuration" },
+    { order: 15, area: "Lookup Values", adminRoute: "/admin/lookup-values", isRequired: true, estimatedMinutes: 45, subSection: "1D: System Configuration" },
+    { order: 16, area: "Currencies", adminRoute: "/admin/currencies", isRequired: false, estimatedMinutes: 10, subSection: "1D: System Configuration" },
+    { order: 17, area: "Custom Fields", adminRoute: "/admin/custom-fields", isRequired: false, estimatedMinutes: 25, subSection: "1D: System Configuration" },
+    { order: 18, area: "Notifications", adminRoute: "/admin/notifications", isRequired: true, estimatedMinutes: 20, subSection: "1D: System Configuration" },
     // 1E: Users & Roles (configure permissions BEFORE creating users)
-    { order: 19, area: "Permission Groups", adminRoute: "/admin/permission-groups", isRequired: true, estimatedMinutes: 25 },
-    { order: 20, area: "Granular Permissions", adminRoute: "/admin/granular-permissions", isRequired: false, estimatedMinutes: 30 },
-    { order: 21, area: "Role Architecture", adminRoute: "/admin/role-architecture", isRequired: true, estimatedMinutes: 20 },
-    { order: 22, area: "Role Management", adminRoute: "/admin/roles", isRequired: true, estimatedMinutes: 30 },
-    { order: 23, area: "Users", adminRoute: "/admin/users", isRequired: true, estimatedMinutes: 20 },
-    { order: 24, area: "Access Request Workflow", adminRoute: "/admin/access-requests", isRequired: false, estimatedMinutes: 15 },
-    { order: 25, area: "Data Access Controls", adminRoute: "/admin/data-access", isRequired: true, estimatedMinutes: 20 },
+    { order: 19, area: "Permission Groups", adminRoute: "/admin/permissions-summary", isRequired: true, estimatedMinutes: 25, subSection: "1E: Users & Roles" },
+    { order: 20, area: "Granular Permissions", adminRoute: "/admin/granular-permissions", isRequired: false, estimatedMinutes: 30, subSection: "1E: Users & Roles" },
+    { order: 21, area: "Role Architecture", adminRoute: "/admin/roles", isRequired: true, estimatedMinutes: 20, subSection: "1E: Users & Roles" },
+    { order: 22, area: "Role Management", adminRoute: "/admin/roles", isRequired: true, estimatedMinutes: 30, subSection: "1E: Users & Roles" },
+    { order: 23, area: "Users", adminRoute: "/admin/users", isRequired: true, estimatedMinutes: 20, subSection: "1E: Users & Roles" },
+    { order: 24, area: "Access Request Workflow", adminRoute: "/admin/access-requests", isRequired: false, estimatedMinutes: 15, subSection: "1E: Users & Roles" },
+    { order: 25, area: "Data Access Controls", adminRoute: "/admin/pii-access", isRequired: true, estimatedMinutes: 20, subSection: "1E: Users & Roles" },
   ],
   workforce: [
     { order: 1, area: "Job Families", adminRoute: "/admin/job-families", importType: "job_families", isRequired: true, estimatedMinutes: 15 },
