@@ -13820,6 +13820,7 @@ export type Database = {
           company_id: string | null
           created_at: string
           current_values: Json | null
+          document_urls: string[] | null
           employee_id: string
           entity_id: string | null
           entity_table: string
@@ -13841,6 +13842,7 @@ export type Database = {
           company_id?: string | null
           created_at?: string
           current_values?: Json | null
+          document_urls?: string[] | null
           employee_id: string
           entity_id?: string | null
           entity_table: string
@@ -13862,6 +13864,7 @@ export type Database = {
           company_id?: string | null
           created_at?: string
           current_values?: Json | null
+          document_urls?: string[] | null
           employee_id?: string
           entity_id?: string | null
           entity_table?: string
