@@ -11,6 +11,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Clock, FileUp, X, Upload, Info, AlertTriangle, Loader2 } from "lucide-react";
+import { ESS_SUPPORTING_DOCUMENTS_BUCKET } from "@/config/storageBuckets";
 
 interface ESSChangeRequestWrapperProps {
   requestType: ESSRequestType;
@@ -86,16 +87,17 @@ export function ESSChangeRequestWrapper({
       const filePath = `${employeeId}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
       
       const { error: uploadError } = await supabase.storage
-        .from("ess-change-documents")
+        .from(ESS_SUPPORTING_DOCUMENTS_BUCKET)
         .upload(filePath, file);
       
       if (uploadError) {
         console.error("Upload error:", uploadError);
-        throw new Error(`Failed to upload ${file.name}`);
+        toast.error(uploadError.message || `Failed to upload ${file.name}`);
+        throw new Error(uploadError.message || `Failed to upload ${file.name}`);
       }
       
       const { data: urlData } = supabase.storage
-        .from("ess-change-documents")
+        .from(ESS_SUPPORTING_DOCUMENTS_BUCKET)
         .getPublicUrl(filePath);
       
       uploadedUrls.push(urlData.publicUrl);
@@ -148,8 +150,9 @@ export function ESSChangeRequestWrapper({
       setNotes("");
       setFiles([]);
       onSuccess?.();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Submit error:", error);
+      toast.error(error?.message || "Failed to submit for approval");
     } finally {
       setIsUploading(false);
     }
