@@ -64,7 +64,9 @@ import {
   ArrowUpDown,
   ArrowUp,
   ArrowDown,
+  LayoutGrid,
 } from "lucide-react";
+import { subDays, startOfMonth } from "date-fns";
 import { AuditLogDiffView } from "@/components/admin/audit/AuditLogDiffView";
 import { AuditLogTrendChart } from "@/components/admin/audit/AuditLogTrendChart";
 import { getRiskLevel, getRiskBadgeStyles, getEntityLink, formatEntityType } from "@/utils/auditLogUtils";
@@ -131,6 +133,7 @@ export default function AdminAuditLogsPage() {
   const [entityFilter, setEntityFilter] = useState<string>("all");
   const [moduleFilter, setModuleFilter] = useState<string>("all");
   const [userFilter, setUserFilter] = useState<string>("all");
+  const [riskFilter, setRiskFilter] = useState<string>("all");
   const [dateFrom, setDateFrom] = useState<Date | undefined>();
   const [dateTo, setDateTo] = useState<Date | undefined>();
   const [selectedLog, setSelectedLog] = useState<AuditLog | null>(null);
@@ -477,13 +480,43 @@ export default function AdminAuditLogsPage() {
     setEntityFilter("all");
     setModuleFilter("all");
     setUserFilter("all");
+    setRiskFilter("all");
     setDateFrom(undefined);
     setDateTo(undefined);
     setPage(0);
   };
 
   const hasActiveFilters = searchQuery || actionFilter !== 'all' || entityFilter !== 'all' || 
-    moduleFilter !== 'all' || userFilter !== 'all' || dateFrom || dateTo;
+    moduleFilter !== 'all' || userFilter !== 'all' || riskFilter !== 'all' || dateFrom || dateTo;
+
+  // Apply client-side risk filter
+  const filteredLogs = riskFilter === 'all' 
+    ? logs 
+    : logs.filter(log => getRiskLevel(log.action, log.entity_type) === riskFilter);
+
+  // Quick date preset handlers
+  const setDatePreset = (preset: 'today' | 'last7' | 'last30' | 'thisMonth') => {
+    const today = new Date();
+    switch (preset) {
+      case 'today':
+        setDateFrom(today);
+        setDateTo(today);
+        break;
+      case 'last7':
+        setDateFrom(subDays(today, 7));
+        setDateTo(today);
+        break;
+      case 'last30':
+        setDateFrom(subDays(today, 30));
+        setDateTo(today);
+        break;
+      case 'thisMonth':
+        setDateFrom(startOfMonth(today));
+        setDateTo(today);
+        break;
+    }
+    setPage(0);
+  };
 
   const exportToCSV = async () => {
     setIsExporting(true);
@@ -729,8 +762,9 @@ export default function AdminAuditLogsPage() {
         <Card>
           <CardContent className="pt-4">
             <div className="flex flex-col gap-4">
-              <div className="flex flex-col md:flex-row gap-4">
-                <div className="relative flex-1">
+              {/* Row 1: Search + Quick Date Presets + Date Range */}
+              <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
+                <div className="relative flex-1 min-w-0">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     placeholder="Search by entity name, type, or ID..."
@@ -742,6 +776,42 @@ export default function AdminAuditLogsPage() {
                     className="pl-9"
                   />
                 </div>
+
+                {/* Quick Date Presets */}
+                <div className="flex gap-1">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => setDatePreset('today')}
+                    className="text-xs"
+                  >
+                    Today
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => setDatePreset('last7')}
+                    className="text-xs"
+                  >
+                    7 Days
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => setDatePreset('last30')}
+                    className="text-xs"
+                  >
+                    30 Days
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => setDatePreset('thisMonth')}
+                    className="text-xs"
+                  >
+                    This Month
+                  </Button>
+                </div>
                 
                 {/* Date From */}
                 <Popover>
@@ -749,12 +819,12 @@ export default function AdminAuditLogsPage() {
                     <Button
                       variant="outline"
                       className={cn(
-                        "w-full md:w-[160px] justify-start text-left font-normal",
+                        "w-full md:w-[140px] justify-start text-left font-normal",
                         !dateFrom && "text-muted-foreground"
                       )}
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
-                      {dateFrom ? format(dateFrom, "MMM d, yyyy") : "From date"}
+                      {dateFrom ? format(dateFrom, "MMM d, yyyy") : "From"}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
@@ -777,12 +847,12 @@ export default function AdminAuditLogsPage() {
                     <Button
                       variant="outline"
                       className={cn(
-                        "w-full md:w-[160px] justify-start text-left font-normal",
+                        "w-full md:w-[140px] justify-start text-left font-normal",
                         !dateTo && "text-muted-foreground"
                       )}
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
-                      {dateTo ? format(dateTo, "MMM d, yyyy") : "To date"}
+                      {dateTo ? format(dateTo, "MMM d, yyyy") : "To"}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
@@ -800,53 +870,11 @@ export default function AdminAuditLogsPage() {
                 </Popover>
               </div>
 
-              <div className="flex flex-col md:flex-row gap-4">
-                {/* User Filter */}
-                <Select
-                  value={userFilter}
-                  onValueChange={(value) => {
-                    setUserFilter(value);
-                    setPage(0);
-                  }}
-                >
-                  <SelectTrigger className="w-full md:w-[200px]">
-                    <Users className="h-4 w-4 mr-2" />
-                    <SelectValue placeholder="User" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Users</SelectItem>
-                    {users.map(user => (
-                      <SelectItem key={user.id} value={user.id}>
-                        {user.name} ({user.email})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-
-                {/* Action Filter */}
-                <Select
-                  value={actionFilter}
-                  onValueChange={(value) => {
-                    setActionFilter(value as AuditAction | "all");
-                    setPage(0);
-                  }}
-                >
-                  <SelectTrigger className="w-full md:w-[180px]">
-                    <Filter className="h-4 w-4 mr-2" />
-                    <SelectValue placeholder="Action" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Actions</SelectItem>
-                    <SelectItem value="CREATE">Created</SelectItem>
-                    <SelectItem value="UPDATE">Updated</SelectItem>
-                    <SelectItem value="DELETE">Deleted</SelectItem>
-                    <SelectItem value="VIEW">Viewed</SelectItem>
-                    <SelectItem value="EXPORT">Exported</SelectItem>
-                    <SelectItem value="LOGIN">Login</SelectItem>
-                    <SelectItem value="LOGOUT">Logout</SelectItem>
-                  </SelectContent>
-                </Select>
-
+              {/* Row 2: Filters in logical order - Scope → Activity → Who */}
+              <div className="flex flex-col md:flex-row gap-4 items-start md:items-center flex-wrap">
+                {/* Scope Group */}
+                <span className="text-xs text-muted-foreground hidden md:block font-medium">Scope:</span>
+                
                 {/* Module Filter */}
                 <Select
                   value={moduleFilter}
@@ -862,7 +890,8 @@ export default function AdminAuditLogsPage() {
                     setPage(0);
                   }}
                 >
-                  <SelectTrigger className="w-full md:w-[180px]">
+                  <SelectTrigger className="w-full md:w-[160px]">
+                    <LayoutGrid className="h-4 w-4 mr-2" />
                     <SelectValue placeholder="Module" />
                   </SelectTrigger>
                   <SelectContent>
@@ -883,7 +912,7 @@ export default function AdminAuditLogsPage() {
                     setPage(0);
                   }}
                 >
-                  <SelectTrigger className="w-full md:w-[180px]">
+                  <SelectTrigger className="w-full md:w-[160px]">
                     <SelectValue placeholder="Entity Type" />
                   </SelectTrigger>
                   <SelectContent>
@@ -895,6 +924,85 @@ export default function AdminAuditLogsPage() {
                           {formatEntityType(type)}
                         </SelectItem>
                       ))}
+                  </SelectContent>
+                </Select>
+
+                {/* Separator */}
+                <div className="hidden md:block w-px h-8 bg-border" />
+
+                {/* Activity Group */}
+                <span className="text-xs text-muted-foreground hidden md:block font-medium">Activity:</span>
+
+                {/* Action Filter */}
+                <Select
+                  value={actionFilter}
+                  onValueChange={(value) => {
+                    setActionFilter(value as AuditAction | "all");
+                    setPage(0);
+                  }}
+                >
+                  <SelectTrigger className="w-full md:w-[140px]">
+                    <Filter className="h-4 w-4 mr-2" />
+                    <SelectValue placeholder="Action" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Actions</SelectItem>
+                    <SelectItem value="CREATE">Created</SelectItem>
+                    <SelectItem value="UPDATE">Updated</SelectItem>
+                    <SelectItem value="DELETE">Deleted</SelectItem>
+                    <SelectItem value="VIEW">Viewed</SelectItem>
+                    <SelectItem value="EXPORT">Exported</SelectItem>
+                    <SelectItem value="LOGIN">Login</SelectItem>
+                    <SelectItem value="LOGOUT">Logout</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                {/* Risk Filter */}
+                <Select
+                  value={riskFilter}
+                  onValueChange={(value) => {
+                    setRiskFilter(value);
+                    setPage(0);
+                  }}
+                >
+                  <SelectTrigger className="w-full md:w-[140px]">
+                    <Shield className="h-4 w-4 mr-2" />
+                    <SelectValue placeholder="Risk" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Risk</SelectItem>
+                    <SelectItem value="low">Low</SelectItem>
+                    <SelectItem value="medium">Medium</SelectItem>
+                    <SelectItem value="high">High</SelectItem>
+                    <SelectItem value="critical">Critical</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                {/* Separator */}
+                <div className="hidden md:block w-px h-8 bg-border" />
+
+                {/* Who Group */}
+                <span className="text-xs text-muted-foreground hidden md:block font-medium">Who:</span>
+
+                {/* User Filter */}
+                <Select
+                  value={userFilter}
+                  onValueChange={(value) => {
+                    setUserFilter(value);
+                    setPage(0);
+                  }}
+                >
+                  <SelectTrigger className="w-full md:w-[180px]">
+                    <Users className="h-4 w-4 mr-2" />
+                    <SelectValue placeholder="User" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Users</SelectItem>
+                    {users.map(user => (
+                      <SelectItem key={user.id} value={user.id}>
+                        {user.name} ({user.email})
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
 
@@ -935,14 +1043,14 @@ export default function AdminAuditLogsPage() {
                       <RefreshCw className="h-6 w-6 animate-spin mx-auto text-muted-foreground" />
                     </TableCell>
                   </TableRow>
-                ) : logs.length === 0 ? (
+                ) : filteredLogs.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
                       No audit logs found
                     </TableCell>
                   </TableRow>
                 ) : (
-                  logs.map((log) => {
+                  filteredLogs.map((log) => {
                     const config = actionConfig[log.action];
                     const Icon = config.icon;
                     const riskLevel = getRiskLevel(log.action, log.entity_type);
