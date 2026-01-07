@@ -8,8 +8,10 @@ import { ReminderRulesManager } from '@/components/reminders/ReminderRulesManage
 import { EmployeeRemindersList } from '@/components/reminders/EmployeeRemindersList';
 import { supabase } from '@/integrations/supabase/client';
 import { Bell, Settings, List, Loader2 } from 'lucide-react';
+import { usePageAudit } from '@/hooks/usePageAudit';
 
 export default function AdminRemindersPage() {
+  usePageAudit('reminders', 'Admin');
   const [companies, setCompanies] = useState<{ id: string; name: string }[]>([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>('all');
   const [loading, setLoading] = useState(true);

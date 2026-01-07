@@ -9,6 +9,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { AccessRequestsAnalytics } from "@/components/admin/AccessRequestsAnalytics";
 import { useTranslation } from "react-i18next";
 import { GroupedModuleCards, ModuleSection, GroupedModuleItem } from "@/components/ui/GroupedModuleCards";
+import { usePageAudit } from "@/hooks/usePageAudit";
 import { useTenantContext } from "@/hooks/useTenantContext";
 import {
   Building,
@@ -172,6 +173,7 @@ interface PiiAlertStats {
 }
 
 export default function AdminDashboardPage() {
+  usePageAudit('admin_dashboard', 'Admin');
   const { t } = useTranslation();
   const { hasTabAccess } = useGranularPermissions();
   const { isHRPlusInternal } = useTenantContext();

@@ -2,6 +2,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { LookupValuesManagement } from "@/components/admin/LookupValuesManagement";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
+import { usePageAudit } from "@/hooks/usePageAudit";
 
 const breadcrumbs = [
   { label: "Admin", href: "/admin" },
@@ -9,6 +10,7 @@ const breadcrumbs = [
 ];
 
 export default function AdminLookupValuesPage() {
+  usePageAudit('lookup_values', 'Admin');
   return (
     <AppLayout>
       <div className="space-y-6">

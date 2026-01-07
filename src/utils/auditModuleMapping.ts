@@ -485,12 +485,64 @@ export const moduleMapping: Record<string, string> = {
   // Profile
   'profile': 'Profile',
   'profiles': 'Profile',
+  'privacy': 'Profile',
 
   // Security
   'security': 'Security',
   'auth': 'Security',
   'login': 'Security',
   'logout': 'Security',
+
+  // System Module
+  'system': 'System',
+  'api': 'System',
+  'agents': 'System',
+
+  // Workflow Module
+  'approvals': 'Workflow',
+
+  // Help Module
+  'help': 'Help',
+
+  // Enablement Module
+  'enablement': 'Enablement',
+  'implementation': 'Enablement',
+  'documentation': 'Enablement',
+
+  // HR Hub Module
+  'hr_dashboard': 'HR Hub',
+  'hr_calendar': 'HR Hub',
+  'hr_milestones': 'HR Hub',
+  'hr_reminders': 'HR Hub',
+  'hr_tasks': 'HR Hub',
+  'hr_import': 'HR Hub',
+  'compliance': 'HR Hub',
+  'government_ids': 'HR Hub',
+  'integrations': 'HR Hub',
+  'intranet': 'HR Hub',
+  'sop': 'HR Hub',
+  'sentiment': 'HR Hub',
+  'workflow': 'HR Hub',
+
+  // Strategic Planning Module
+  'strategic_planning': 'Strategic Planning',
+  'scenario_planning': 'Strategic Planning',
+  'org_design': 'Strategic Planning',
+
+  // Insights Module
+  'talent_insights': 'Insights',
+  'compensation_insights': 'Insights',
+  'operational_insights': 'Insights',
+
+  // Additional Time Module Entities
+  'cost_allocation': 'Time & Attendance',
+  'face_verification': 'Time & Attendance',
+  'project_costs': 'Time & Attendance',
+  'shift_differentials': 'Time & Attendance',
+
+  // Additional Admin Entities
+  'admin_dashboard': 'Admin',
+  'pii_access': 'Admin',
 };
 
 export const availableModules = [
@@ -514,6 +566,13 @@ export const availableModules = [
   'Reporting',
   'Profile',
   'Security',
+  'System',
+  'Workflow',
+  'Help',
+  'Enablement',
+  'HR Hub',
+  'Strategic Planning',
+  'Insights',
 ];
 
 /**

@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { toast } from "sonner";
 import { Settings, Mail, Eye, EyeOff, Save, Loader2, ShieldAlert, ArrowLeft, Send, CheckCircle, XCircle, Calendar, BarChart3, AlertTriangle, Video, FileText, MapPin } from "lucide-react";
 import { NavLink } from "react-router-dom";
+import { usePageAudit } from "@/hooks/usePageAudit";
 
 interface SystemSetting {
   id: string;
@@ -19,6 +20,7 @@ interface SystemSetting {
 }
 
 export default function AdminSettingsPage() {
+  usePageAudit('settings', 'Admin');
   const { user } = useAuth();
   const [settings, setSettings] = useState<SystemSetting[]>([]);
   const [isLoading, setIsLoading] = useState(true);
