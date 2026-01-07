@@ -90,6 +90,7 @@ const getAdminModuleSections = (
     // Section 3: Security & Governance
     security: [
       { title: t("admin.modules.auditLogs.title"), description: t("admin.modules.auditLogs.description"), href: "/admin/audit-logs", icon: FileText, color: "bg-secondary/10 text-secondary-foreground", tabCode: "audit-logs" },
+      { title: "Audit Coverage", description: "Monitor audit system health and coverage across modules", href: "/admin/audit-coverage", icon: BarChart2, color: "bg-teal-500/10 text-teal-600", tabCode: "audit-coverage" },
       { title: t("admin.modules.piiAccess.title"), description: t("admin.modules.piiAccess.description"), href: "/admin/pii-access", icon: Eye, color: "bg-amber-500/10 text-amber-600", tabCode: "pii-access" },
       { title: "AI Security Violations", description: "Monitor attempted unauthorized AI access", href: "/admin/ai-security-violations", icon: ShieldAlert, color: "bg-red-500/10 text-red-600", tabCode: "ai-security-violations" },
       { title: "AI Governance", description: "ISO 42001 AI risk management & human oversight", href: "/admin/ai-governance", icon: Brain, color: "bg-purple-500/10 text-purple-600", tabCode: "ai-governance" },
