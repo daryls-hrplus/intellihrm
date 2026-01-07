@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { usePageAudit } from '@/hooks/usePageAudit';
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { AppLayout } from "@/components/layout/AppLayout";
@@ -87,6 +88,7 @@ const DEFAULT_TIER: Partial<OvertimeRateTier> = {
 };
 
 export default function PaymentRulesConfigPage() {
+  usePageAudit('payment_rules_config', 'Payroll');
   const [selectedCompany, setSelectedCompany] = useState<string | null>(null);
   const [rules, setRules] = useState<PayrollRule[]>([]);
   const [tiers, setTiers] = useState<OvertimeRateTier[]>([]);

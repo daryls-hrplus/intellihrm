@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppLayout } from '@/components/layout/AppLayout';
+import { usePageAudit } from '@/hooks/usePageAudit';
 import { Breadcrumbs } from '@/components/ui/breadcrumbs';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -92,6 +93,7 @@ interface ConditionFormData {
 
 const GLOverrideRulesPage = () => {
   const { t } = useTranslation();
+  usePageAudit('gl_override_rules', 'Payroll');
   const { selectedCompanyId, setSelectedCompanyId } = usePayrollFilters();
   const { isLoading, fetchOverrideRules, createOverrideRule, updateOverrideRule, deleteOverrideRule, toggleRuleActive } = useGLOverrideRules();
   

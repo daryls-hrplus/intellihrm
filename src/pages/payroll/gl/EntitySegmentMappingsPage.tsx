@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppLayout } from '@/components/layout/AppLayout';
+import { usePageAudit } from '@/hooks/usePageAudit';
 import { Breadcrumbs } from '@/components/ui/breadcrumbs';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -55,6 +56,7 @@ interface EntityOption {
 
 const EntitySegmentMappingsPage = () => {
   const { t } = useTranslation();
+  usePageAudit('entity_segment_mappings', 'Payroll');
   const { selectedCompanyId, setSelectedCompanyId } = usePayrollFilters();
   const [segments, setSegments] = useState<Segment[]>([]);
   const [mappings, setMappings] = useState<EntityMapping[]>([]);

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { usePageAudit } from '@/hooks/usePageAudit';
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -73,6 +74,7 @@ interface ArchivePreview {
 
 export default function PayrollArchiveSettingsPage() {
   const { t } = useTranslation();
+  usePageAudit('payroll_archive_settings', 'Payroll');
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
   const [settings, setSettings] = useState<ArchiveSettings | null>(null);

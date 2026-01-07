@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { getTodayString } from '@/utils/dateUtils';
+import { usePageAudit } from '@/hooks/usePageAudit';
 import { Breadcrumbs } from '@/components/ui/breadcrumbs';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -48,6 +49,7 @@ interface ReallocationTarget {
 
 const CostReallocationsPage = () => {
   const { t } = useTranslation();
+  usePageAudit('cost_reallocations', 'Payroll');
   const { selectedCompanyId, setSelectedCompanyId } = usePayrollFilters();
   const [reallocations, setReallocations] = useState<Reallocation[]>([]);
   const [targets, setTargets] = useState<Record<string, ReallocationTarget[]>>({});

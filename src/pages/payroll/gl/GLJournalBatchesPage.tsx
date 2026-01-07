@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppLayout } from '@/components/layout/AppLayout';
+import { usePageAudit } from '@/hooks/usePageAudit';
 import { Breadcrumbs } from '@/components/ui/breadcrumbs';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -68,6 +69,7 @@ interface CostCenter {
 
 const GLJournalBatchesPage = () => {
   const { t } = useTranslation();
+  usePageAudit('gl_journal_batches', 'Payroll');
   const { selectedCompanyId, setSelectedCompanyId } = usePayrollFilters();
   const [batches, setBatches] = useState<JournalBatch[]>([]);
   const [entries, setEntries] = useState<Record<string, JournalEntry[]>>({});

@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { AppLayout } from '@/components/layout/AppLayout';
+import { usePageAudit } from '@/hooks/usePageAudit';
 import { Breadcrumbs } from '@/components/ui/breadcrumbs';
 import { 
   BookOpen, 
@@ -16,6 +17,7 @@ import { DraggableModuleCards, ModuleCardItem } from '@/components/ui/DraggableM
 
 const GLDashboardPage = () => {
   const { t } = useTranslation();
+  usePageAudit('gl_interface_dashboard', 'Payroll');
 
   const features: ModuleCardItem[] = [
     {

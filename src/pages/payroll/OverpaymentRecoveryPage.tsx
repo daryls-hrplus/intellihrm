@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { usePageAudit } from '@/hooks/usePageAudit';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -51,6 +52,7 @@ const priorityConfig = {
 
 export default function OverpaymentRecoveryPage() {
   const navigate = useNavigate();
+  usePageAudit('overpayment_recovery', 'Payroll');
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedCompany, setSelectedCompany] = useState<string>("");
   const [searchTerm, setSearchTerm] = useState("");
