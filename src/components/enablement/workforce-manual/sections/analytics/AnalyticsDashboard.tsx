@@ -1,8 +1,8 @@
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Info, TrendingUp, Users, BarChart3, PieChart, Activity } from 'lucide-react';
+import { Users, Activity, PieChart, TrendingUp, BarChart3 } from 'lucide-react';
 import { ScreenshotPlaceholder } from '@/components/enablement/manual/components/ScreenshotPlaceholder';
+import { FeatureCard, FeatureCardGrid, InfoCallout } from '@/components/enablement/manual/components';
 
 export function AnalyticsDashboard() {
   return (
@@ -18,109 +18,61 @@ export function AnalyticsDashboard() {
 
       <section>
         <h3 className="text-lg font-semibold mb-3">Key Metrics Categories</h3>
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base flex items-center gap-2">
-                <Users className="h-4 w-4 text-primary" />
-                Headcount Metrics
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="text-sm text-muted-foreground">
-              <ul className="space-y-1">
-                <li>• Total headcount by entity</li>
-                <li>• FTE vs contractor ratio</li>
-                <li>• Headcount trend (YoY)</li>
-                <li>• New hires vs terminations</li>
-              </ul>
-            </CardContent>
-          </Card>
+        <FeatureCardGrid columns={3}>
+          <FeatureCard variant="primary" icon={Users} title="Headcount Metrics">
+            <ul className="space-y-1 mt-2">
+              <li>• Total headcount by entity</li>
+              <li>• FTE vs contractor ratio</li>
+              <li>• Headcount trend (YoY)</li>
+              <li>• New hires vs terminations</li>
+            </ul>
+          </FeatureCard>
 
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base flex items-center gap-2">
-                <Activity className="h-4 w-4 text-amber-500" />
-                Turnover Analytics
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="text-sm text-muted-foreground">
-              <ul className="space-y-1">
-                <li>• Voluntary vs involuntary</li>
-                <li>• Regretted attrition rate</li>
-                <li>• Turnover by department</li>
-                <li>• Tenure distribution</li>
-              </ul>
-            </CardContent>
-          </Card>
+          <FeatureCard variant="warning" icon={Activity} title="Turnover Analytics">
+            <ul className="space-y-1 mt-2">
+              <li>• Voluntary vs involuntary</li>
+              <li>• Regretted attrition rate</li>
+              <li>• Turnover by department</li>
+              <li>• Tenure distribution</li>
+            </ul>
+          </FeatureCard>
 
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base flex items-center gap-2">
-                <PieChart className="h-4 w-4 text-green-500" />
-                Diversity Metrics
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="text-sm text-muted-foreground">
-              <ul className="space-y-1">
-                <li>• Gender distribution</li>
-                <li>• Age demographics</li>
-                <li>• Ethnicity representation</li>
-                <li>• Leadership diversity</li>
-              </ul>
-            </CardContent>
-          </Card>
+          <FeatureCard variant="success" icon={PieChart} title="Diversity Metrics">
+            <ul className="space-y-1 mt-2">
+              <li>• Gender distribution</li>
+              <li>• Age demographics</li>
+              <li>• Ethnicity representation</li>
+              <li>• Leadership diversity</li>
+            </ul>
+          </FeatureCard>
 
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base flex items-center gap-2">
-                <TrendingUp className="h-4 w-4 text-blue-500" />
-                Movement Metrics
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="text-sm text-muted-foreground">
-              <ul className="space-y-1">
-                <li>• Internal mobility rate</li>
-                <li>• Promotion velocity</li>
-                <li>• Transfer patterns</li>
-                <li>• Career progression</li>
-              </ul>
-            </CardContent>
-          </Card>
+          <FeatureCard variant="info" icon={TrendingUp} title="Movement Metrics">
+            <ul className="space-y-1 mt-2">
+              <li>• Internal mobility rate</li>
+              <li>• Promotion velocity</li>
+              <li>• Transfer patterns</li>
+              <li>• Career progression</li>
+            </ul>
+          </FeatureCard>
 
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base flex items-center gap-2">
-                <BarChart3 className="h-4 w-4 text-purple-500" />
-                Compensation Insights
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="text-sm text-muted-foreground">
-              <ul className="space-y-1">
-                <li>• Compa-ratio distribution</li>
-                <li>• Pay equity analysis</li>
-                <li>• Cost per employee</li>
-                <li>• Budget utilization</li>
-              </ul>
-            </CardContent>
-          </Card>
+          <FeatureCard variant="purple" icon={BarChart3} title="Compensation Insights">
+            <ul className="space-y-1 mt-2">
+              <li>• Compa-ratio distribution</li>
+              <li>• Pay equity analysis</li>
+              <li>• Cost per employee</li>
+              <li>• Budget utilization</li>
+            </ul>
+          </FeatureCard>
 
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base flex items-center gap-2">
-                <Users className="h-4 w-4 text-red-500" />
-                Span of Control
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="text-sm text-muted-foreground">
-              <ul className="space-y-1">
-                <li>• Manager-to-IC ratio</li>
-                <li>• Org depth analysis</li>
-                <li>• Team size distribution</li>
-                <li>• Reporting structure</li>
-              </ul>
-            </CardContent>
-          </Card>
-        </div>
+          <FeatureCard variant="orange" icon={Users} title="Span of Control">
+            <ul className="space-y-1 mt-2">
+              <li>• Manager-to-IC ratio</li>
+              <li>• Org depth analysis</li>
+              <li>• Team size distribution</li>
+              <li>• Reporting structure</li>
+            </ul>
+          </FeatureCard>
+        </FeatureCardGrid>
       </section>
 
       <ScreenshotPlaceholder
@@ -164,15 +116,11 @@ export function AnalyticsDashboard() {
         alt="Filter panel showing dimension selectors and widget arrangement options"
       />
 
-      <Alert className="border-primary/20 bg-primary/5">
-        <Info className="h-4 w-4" />
-        <AlertTitle>Executive View</AlertTitle>
-        <AlertDescription>
-          Role-based dashboard views ensure executives see strategic metrics while 
-          HR partners access operational details. Configure view permissions in 
-          Admin → Analytics → Dashboard Access.
-        </AlertDescription>
-      </Alert>
+      <InfoCallout title="Executive View">
+        Role-based dashboard views ensure executives see strategic metrics while 
+        HR partners access operational details. Configure view permissions in 
+        Admin → Analytics → Dashboard Access.
+      </InfoCallout>
     </div>
   );
 }

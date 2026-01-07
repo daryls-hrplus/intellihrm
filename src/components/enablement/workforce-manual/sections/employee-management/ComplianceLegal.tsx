@@ -1,6 +1,6 @@
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Shield, AlertTriangle, CheckCircle2 } from 'lucide-react';
 import { ScreenshotPlaceholder } from '@/components/enablement/manual/components/ScreenshotPlaceholder';
+import { FeatureCard, FeatureCardGrid, CriticalCallout } from '@/components/enablement/manual/components';
+import { Shield, CheckCircle2 } from 'lucide-react';
 
 export function ComplianceLegal() {
   return (
@@ -15,28 +15,20 @@ export function ComplianceLegal() {
 
       <section>
         <h3 className="text-lg font-semibold mb-3">Compliance Areas</h3>
-        <div className="space-y-4">
-          <div className="border rounded-lg p-4">
-            <h4 className="font-medium mb-2 flex items-center gap-2">
-              <Shield className="h-4 w-4 text-primary" />
-              Regulatory Compliance
-            </h4>
-            <p className="text-sm text-muted-foreground">
+        <FeatureCardGrid columns={2}>
+          <FeatureCard variant="primary" icon={Shield} title="Regulatory Compliance">
+            <p className="mt-2">
               Track mandatory certifications, licenses, and regulatory requirements 
               specific to employee roles and jurisdictions.
             </p>
-          </div>
-          <div className="border rounded-lg p-4">
-            <h4 className="font-medium mb-2 flex items-center gap-2">
-              <CheckCircle2 className="h-4 w-4 text-green-500" />
-              Mandatory Training
-            </h4>
-            <p className="text-sm text-muted-foreground">
+          </FeatureCard>
+          <FeatureCard variant="success" icon={CheckCircle2} title="Mandatory Training">
+            <p className="mt-2">
               Monitor completion of required training (harassment prevention, 
               safety training, etc.) with due date tracking.
             </p>
-          </div>
-        </div>
+          </FeatureCard>
+        </FeatureCardGrid>
       </section>
 
       <ScreenshotPlaceholder
@@ -44,14 +36,10 @@ export function ComplianceLegal() {
         alt="Compliance tracker showing regulatory requirements and mandatory training status"
       />
 
-      <Alert variant="destructive" className="border-destructive/20">
-        <AlertTriangle className="h-4 w-4" />
-        <AlertTitle>Audit Trail</AlertTitle>
-        <AlertDescription>
-          All compliance status changes are logged with timestamps and responsible 
-          parties for regulatory audit requirements.
-        </AlertDescription>
-      </Alert>
+      <CriticalCallout title="Audit Trail">
+        All compliance status changes are logged with timestamps and responsible 
+        parties for regulatory audit requirements.
+      </CriticalCallout>
     </div>
   );
 }

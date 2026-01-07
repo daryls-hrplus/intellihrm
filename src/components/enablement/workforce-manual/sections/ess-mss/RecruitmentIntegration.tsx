@@ -1,6 +1,6 @@
 import React from 'react';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { ScreenshotPlaceholder } from '@/components/enablement/manual/components/ScreenshotPlaceholder';
+import { FeatureCard, FeatureCardGrid, IntegrationCallout } from '@/components/enablement/manual/components';
 import { UserSearch, ClipboardCheck, Calendar, ThumbsUp } from 'lucide-react';
 
 export const RecruitmentIntegration: React.FC = () => {
@@ -15,28 +15,36 @@ export const RecruitmentIntegration: React.FC = () => {
         </p>
       </div>
 
-      <div className="grid md:grid-cols-4 gap-4">
-        <div className="p-4 bg-blue-50 dark:bg-blue-950/30 rounded-lg border border-blue-200 dark:border-blue-800 text-center">
-          <UserSearch className="h-8 w-8 text-blue-600 mx-auto mb-2" />
-          <h4 className="font-semibold text-sm text-blue-900 dark:text-blue-100">Requisitions</h4>
-          <p className="text-xs text-blue-700 dark:text-blue-300 mt-1">Create & track job requests</p>
-        </div>
-        <div className="p-4 bg-green-50 dark:bg-green-950/30 rounded-lg border border-green-200 dark:border-green-800 text-center">
-          <ClipboardCheck className="h-8 w-8 text-green-600 mx-auto mb-2" />
-          <h4 className="font-semibold text-sm text-green-900 dark:text-green-100">Candidates</h4>
-          <p className="text-xs text-green-700 dark:text-green-300 mt-1">Review applicant profiles</p>
-        </div>
-        <div className="p-4 bg-purple-50 dark:bg-purple-950/30 rounded-lg border border-purple-200 dark:border-purple-800 text-center">
-          <Calendar className="h-8 w-8 text-purple-600 mx-auto mb-2" />
-          <h4 className="font-semibold text-sm text-purple-900 dark:text-purple-100">Interviews</h4>
-          <p className="text-xs text-purple-700 dark:text-purple-300 mt-1">Schedule & provide feedback</p>
-        </div>
-        <div className="p-4 bg-orange-50 dark:bg-orange-950/30 rounded-lg border border-orange-200 dark:border-orange-800 text-center">
-          <ThumbsUp className="h-8 w-8 text-orange-600 mx-auto mb-2" />
-          <h4 className="font-semibold text-sm text-orange-900 dark:text-orange-100">Decisions</h4>
-          <p className="text-xs text-orange-700 dark:text-orange-300 mt-1">Approve offers & hires</p>
-        </div>
-      </div>
+      <FeatureCardGrid columns={4}>
+        <FeatureCard 
+          variant="primary" 
+          icon={UserSearch} 
+          title="Requisitions"
+          description="Create & track job requests"
+          centered
+        />
+        <FeatureCard 
+          variant="success" 
+          icon={ClipboardCheck} 
+          title="Candidates"
+          description="Review applicant profiles"
+          centered
+        />
+        <FeatureCard 
+          variant="purple" 
+          icon={Calendar} 
+          title="Interviews"
+          description="Schedule & provide feedback"
+          centered
+        />
+        <FeatureCard 
+          variant="orange" 
+          icon={ThumbsUp} 
+          title="Decisions"
+          description="Approve offers & hires"
+          centered
+        />
+      </FeatureCardGrid>
 
       <div className="bg-muted/30 p-4 rounded-lg">
         <h4 className="font-semibold mb-3">Manager Hiring Activities</h4>
@@ -76,22 +84,22 @@ export const RecruitmentIntegration: React.FC = () => {
         <div className="p-4">
           <div className="flex justify-between items-center text-center">
             <div className="flex-1">
-              <div className="text-2xl font-bold text-blue-600">12</div>
+              <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">12</div>
               <div className="text-xs text-muted-foreground">Applied</div>
             </div>
             <div className="text-muted-foreground">→</div>
             <div className="flex-1">
-              <div className="text-2xl font-bold text-purple-600">5</div>
+              <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">5</div>
               <div className="text-xs text-muted-foreground">Screened</div>
             </div>
             <div className="text-muted-foreground">→</div>
             <div className="flex-1">
-              <div className="text-2xl font-bold text-amber-600">3</div>
+              <div className="text-2xl font-bold text-amber-600 dark:text-amber-400">3</div>
               <div className="text-xs text-muted-foreground">Interview</div>
             </div>
             <div className="text-muted-foreground">→</div>
             <div className="flex-1">
-              <div className="text-2xl font-bold text-green-600">1</div>
+              <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">1</div>
               <div className="text-xs text-muted-foreground">Offer</div>
             </div>
           </div>
@@ -99,18 +107,14 @@ export const RecruitmentIntegration: React.FC = () => {
       </div>
 
       <div className="grid md:grid-cols-2 gap-4">
-        <Alert>
-          <AlertDescription>
-            <strong>Recruitment Module Link:</strong> Full recruitment functionality is available in 
-            the Recruitment & Onboarding module. MSS provides a streamlined manager view.
-          </AlertDescription>
-        </Alert>
-        <Alert>
-          <AlertDescription>
-            <strong>Position Control:</strong> Requisitions are linked to approved positions from 
-            Position Control (Chapter 6) ensuring headcount governance.
-          </AlertDescription>
-        </Alert>
+        <IntegrationCallout title="Recruitment Module Link">
+          Full recruitment functionality is available in 
+          the Recruitment & Onboarding module. MSS provides a streamlined manager view.
+        </IntegrationCallout>
+        <IntegrationCallout title="Position Control">
+          Requisitions are linked to approved positions from 
+          Position Control (Chapter 6) ensuring headcount governance.
+        </IntegrationCallout>
       </div>
     </div>
   );

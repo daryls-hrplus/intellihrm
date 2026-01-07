@@ -1,8 +1,13 @@
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Info, Brain, TrendingUp, TrendingDown, Target, AlertTriangle, Sparkles } from 'lucide-react';
+import { TrendingUp, TrendingDown, Target, Sparkles } from 'lucide-react';
 import { ScreenshotPlaceholder } from '@/components/enablement/manual/components/ScreenshotPlaceholder';
+import { 
+  FeatureCard, 
+  FeatureCardGrid, 
+  CriticalCallout, 
+  InfoCallout 
+} from '@/components/enablement/manual/components';
 
 export function WorkforceForecasting() {
   return (
@@ -18,55 +23,39 @@ export function WorkforceForecasting() {
 
       <section>
         <h3 className="text-lg font-semibold mb-3">Prediction Models</h3>
-        <div className="grid md:grid-cols-2 gap-4">
-          <Card className="border-amber-200 bg-amber-50/50 dark:bg-amber-900/10">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base flex items-center gap-2">
-                <TrendingDown className="h-4 w-4 text-amber-500" />
-                Attrition Prediction
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="text-sm">
-              <p className="text-muted-foreground mb-3">
-                Identify employees at risk of leaving based on behavioral patterns and historical data.
-              </p>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span>Model Accuracy</span>
-                  <Badge variant="outline">85-92%</Badge>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span>Prediction Window</span>
-                  <Badge variant="outline">3-12 months</Badge>
-                </div>
+        <FeatureCardGrid columns={2}>
+          <FeatureCard variant="warning" icon={TrendingDown} title="Attrition Prediction">
+            <p className="mb-3">
+              Identify employees at risk of leaving based on behavioral patterns and historical data.
+            </p>
+            <div className="space-y-2 text-sm">
+              <div className="flex items-center justify-between">
+                <span>Model Accuracy</span>
+                <Badge variant="outline">85-92%</Badge>
               </div>
-            </CardContent>
-          </Card>
+              <div className="flex items-center justify-between">
+                <span>Prediction Window</span>
+                <Badge variant="outline">3-12 months</Badge>
+              </div>
+            </div>
+          </FeatureCard>
 
-          <Card className="border-green-200 bg-green-50/50 dark:bg-green-900/10">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base flex items-center gap-2">
-                <TrendingUp className="h-4 w-4 text-green-500" />
-                Growth Modeling
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="text-sm">
-              <p className="text-muted-foreground mb-3">
-                Project future headcount needs based on business growth patterns and hiring trends.
-              </p>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span>Forecast Range</span>
-                  <Badge variant="outline">6-24 months</Badge>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span>Scenario Support</span>
-                  <Badge variant="outline">Multiple</Badge>
-                </div>
+          <FeatureCard variant="success" icon={TrendingUp} title="Growth Modeling">
+            <p className="mb-3">
+              Project future headcount needs based on business growth patterns and hiring trends.
+            </p>
+            <div className="space-y-2 text-sm">
+              <div className="flex items-center justify-between">
+                <span>Forecast Range</span>
+                <Badge variant="outline">6-24 months</Badge>
               </div>
-            </CardContent>
-          </Card>
-        </div>
+              <div className="flex items-center justify-between">
+                <span>Scenario Support</span>
+                <Badge variant="outline">Multiple</Badge>
+              </div>
+            </div>
+          </FeatureCard>
+        </FeatureCardGrid>
       </section>
 
       <ScreenshotPlaceholder
@@ -128,7 +117,7 @@ export function WorkforceForecasting() {
 
           <div className="border rounded-lg p-4">
             <div className="flex items-start gap-3">
-              <Target className="h-5 w-5 text-blue-500 mt-0.5" />
+              <Target className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5" />
               <div>
                 <h4 className="font-medium">Skills Gap Forecasting</h4>
                 <p className="text-sm text-muted-foreground">
@@ -146,23 +135,15 @@ export function WorkforceForecasting() {
         alt="Recommendation panel showing suggested actions for at-risk employees"
       />
 
-      <Alert variant="destructive" className="border-destructive/20">
-        <AlertTriangle className="h-4 w-4" />
-        <AlertTitle>Ethical AI Usage</AlertTitle>
-        <AlertDescription>
-          Attrition predictions should inform proactive retention efforts, not 
-          punitive actions. All AI recommendations require human review before action.
-        </AlertDescription>
-      </Alert>
+      <CriticalCallout title="Ethical AI Usage">
+        Attrition predictions should inform proactive retention efforts, not 
+        punitive actions. All AI recommendations require human review before action.
+      </CriticalCallout>
 
-      <Alert className="border-primary/20 bg-primary/5">
-        <Brain className="h-4 w-4" />
-        <AlertTitle>Model Transparency</AlertTitle>
-        <AlertDescription>
-          All predictions include explainability reports showing contributing factors 
-          and confidence levels. View model details in Admin → AI → Model Registry.
-        </AlertDescription>
-      </Alert>
+      <InfoCallout title="Model Transparency">
+        All predictions include explainability reports showing contributing factors 
+        and confidence levels. View model details in Admin → AI → Model Registry.
+      </InfoCallout>
     </div>
   );
 }

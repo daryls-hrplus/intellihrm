@@ -1,7 +1,7 @@
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
-import { Info, Layers, Filter, BarChart3, Table, PieChart, LineChart, Download } from 'lucide-react';
+import { Layers, Filter, BarChart3, Table, PieChart, LineChart, Download } from 'lucide-react';
 import { ScreenshotPlaceholder } from '@/components/enablement/manual/components/ScreenshotPlaceholder';
+import { FeatureCard, FeatureCardGrid, InfoCallout } from '@/components/enablement/manual/components';
 
 export function CustomReportBuilder() {
   return (
@@ -17,15 +17,9 @@ export function CustomReportBuilder() {
 
       <section>
         <h3 className="text-lg font-semibold mb-3">Report Builder Components</h3>
-        <div className="grid md:grid-cols-3 gap-4">
-          <div className="border rounded-lg p-4">
-            <h4 className="font-medium mb-2 flex items-center gap-2">
-              <Layers className="h-4 w-4 text-primary" />
-              Data Fields
-            </h4>
-            <p className="text-sm text-muted-foreground mb-2">
-              Drag-and-drop available fields from data catalog:
-            </p>
+        <FeatureCardGrid columns={3}>
+          <FeatureCard variant="primary" icon={Layers} title="Data Fields">
+            <p className="mb-2">Drag-and-drop available fields from data catalog:</p>
             <div className="flex flex-wrap gap-1">
               <Badge variant="secondary" className="text-xs">Employee</Badge>
               <Badge variant="secondary" className="text-xs">Position</Badge>
@@ -33,40 +27,28 @@ export function CustomReportBuilder() {
               <Badge variant="secondary" className="text-xs">Compensation</Badge>
               <Badge variant="secondary" className="text-xs">Performance</Badge>
             </div>
-          </div>
+          </FeatureCard>
 
-          <div className="border rounded-lg p-4">
-            <h4 className="font-medium mb-2 flex items-center gap-2">
-              <Filter className="h-4 w-4 text-blue-500" />
-              Filters & Conditions
-            </h4>
-            <p className="text-sm text-muted-foreground mb-2">
-              Apply business logic:
-            </p>
-            <ul className="space-y-1 text-sm text-muted-foreground">
+          <FeatureCard variant="info" icon={Filter} title="Filters & Conditions">
+            <p className="mb-2">Apply business logic:</p>
+            <ul className="space-y-1">
               <li>• Equals, contains, between</li>
               <li>• AND/OR logic</li>
               <li>• Date ranges</li>
               <li>• Null handling</li>
             </ul>
-          </div>
+          </FeatureCard>
 
-          <div className="border rounded-lg p-4">
-            <h4 className="font-medium mb-2 flex items-center gap-2">
-              <BarChart3 className="h-4 w-4 text-green-500" />
-              Aggregations
-            </h4>
-            <p className="text-sm text-muted-foreground mb-2">
-              Calculate metrics:
-            </p>
-            <ul className="space-y-1 text-sm text-muted-foreground">
+          <FeatureCard variant="success" icon={BarChart3} title="Aggregations">
+            <p className="mb-2">Calculate metrics:</p>
+            <ul className="space-y-1">
               <li>• Count, Sum, Average</li>
               <li>• Min, Max, Median</li>
               <li>• Percentages</li>
               <li>• Running totals</li>
             </ul>
-          </div>
-        </div>
+          </FeatureCard>
+        </FeatureCardGrid>
       </section>
 
       <ScreenshotPlaceholder
@@ -76,31 +58,12 @@ export function CustomReportBuilder() {
 
       <section>
         <h3 className="text-lg font-semibold mb-3">Visualization Types</h3>
-        <div className="grid md:grid-cols-4 gap-4">
-          <div className="border rounded-lg p-4 text-center">
-            <Table className="h-8 w-8 mx-auto text-primary mb-2" />
-            <h4 className="font-medium text-sm">Data Table</h4>
-            <p className="text-xs text-muted-foreground">Sortable, exportable rows</p>
-          </div>
-
-          <div className="border rounded-lg p-4 text-center">
-            <BarChart3 className="h-8 w-8 mx-auto text-blue-500 mb-2" />
-            <h4 className="font-medium text-sm">Bar Chart</h4>
-            <p className="text-xs text-muted-foreground">Comparisons, rankings</p>
-          </div>
-
-          <div className="border rounded-lg p-4 text-center">
-            <LineChart className="h-8 w-8 mx-auto text-green-500 mb-2" />
-            <h4 className="font-medium text-sm">Line Chart</h4>
-            <p className="text-xs text-muted-foreground">Trends over time</p>
-          </div>
-
-          <div className="border rounded-lg p-4 text-center">
-            <PieChart className="h-8 w-8 mx-auto text-amber-500 mb-2" />
-            <h4 className="font-medium text-sm">Pie Chart</h4>
-            <p className="text-xs text-muted-foreground">Composition, distribution</p>
-          </div>
-        </div>
+        <FeatureCardGrid columns={4}>
+          <FeatureCard variant="primary" icon={Table} title="Data Table" description="Sortable, exportable rows" centered />
+          <FeatureCard variant="info" icon={BarChart3} title="Bar Chart" description="Comparisons, rankings" centered />
+          <FeatureCard variant="success" icon={LineChart} title="Line Chart" description="Trends over time" centered />
+          <FeatureCard variant="warning" icon={PieChart} title="Pie Chart" description="Composition, distribution" centered />
+        </FeatureCardGrid>
       </section>
 
       <section>
@@ -170,14 +133,10 @@ export function CustomReportBuilder() {
         </div>
       </section>
 
-      <Alert className="border-primary/20 bg-primary/5">
-        <Info className="h-4 w-4" />
-        <AlertTitle>Saved Reports</AlertTitle>
-        <AlertDescription>
-          Custom reports can be saved to personal or shared folders. Shared reports 
-          inherit the creator's data access permissions unless explicitly configured.
-        </AlertDescription>
-      </Alert>
+      <InfoCallout title="Saved Reports">
+        Custom reports can be saved to personal or shared folders. Shared reports 
+        inherit the creator's data access permissions unless explicitly configured.
+      </InfoCallout>
     </div>
   );
 }
