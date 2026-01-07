@@ -31692,6 +31692,73 @@ export type Database = {
           },
         ]
       }
+      implementation_step_progress: {
+        Row: {
+          company_id: string | null
+          completed_at: string | null
+          completed_by: string | null
+          created_at: string | null
+          id: string
+          is_completed: boolean | null
+          notes: string | null
+          phase_id: string
+          step_order: number
+          uncompleted_at: string | null
+          uncompleted_by: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          company_id?: string | null
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string | null
+          id?: string
+          is_completed?: boolean | null
+          notes?: string | null
+          phase_id: string
+          step_order: number
+          uncompleted_at?: string | null
+          uncompleted_by?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          company_id?: string | null
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string | null
+          id?: string
+          is_completed?: boolean | null
+          notes?: string | null
+          phase_id?: string
+          step_order?: number
+          uncompleted_at?: string | null
+          uncompleted_by?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "implementation_step_progress_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "implementation_step_progress_completed_by_fkey"
+            columns: ["completed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "implementation_step_progress_uncompleted_by_fkey"
+            columns: ["uncompleted_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       import_batches: {
         Row: {
           committed_at: string | null
