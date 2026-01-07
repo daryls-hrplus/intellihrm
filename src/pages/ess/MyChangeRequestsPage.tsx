@@ -23,6 +23,7 @@ interface ChangeRequest {
   new_values: Record<string, any>;
   status: string;
   review_notes: string | null;
+  request_notes: string | null;
   document_urls: string[] | null;
   created_at: string;
   applied_at: string | null;
@@ -283,6 +284,13 @@ export default function MyChangeRequestsPage() {
                         </div>
                       ))}
                     </div>
+                  </div>
+                )}
+
+                {selectedRequest.request_notes && (
+                  <div>
+                    <span className="text-sm text-muted-foreground mb-2 block">Your Notes</span>
+                    <p className="text-sm p-3 bg-muted rounded-md">{selectedRequest.request_notes}</p>
                   </div>
                 )}
 
