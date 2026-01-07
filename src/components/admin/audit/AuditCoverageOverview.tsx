@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Layers, CheckCircle2, Clock, Activity } from "lucide-react";
+import { CheckCircle2, Clock, Activity, Layers } from "lucide-react";
 import { AuditCoverageMetrics, getCoverageColor } from "@/utils/auditCoverageUtils";
 
 interface AuditCoverageOverviewProps {
@@ -9,6 +9,8 @@ interface AuditCoverageOverviewProps {
 }
 
 export function AuditCoverageOverview({ metrics, isLoading }: AuditCoverageOverviewProps) {
+  const pendingCount = metrics.coverageGaps.filter(g => g.status === 'pending_activation').length;
+  
   const cards = [
     {
       label: "Implementation",
@@ -20,20 +22,20 @@ export function AuditCoverageOverview({ metrics, isLoading }: AuditCoverageOverv
     },
     {
       label: "Activity Score",
-      value: `${metrics.overallCoverage}%`,
-      subtitle: `${metrics.coveredEntityTypes} of ${metrics.totalEntityTypes} pages active`,
+      value: `${metrics.overallActivityLevel}%`,
+      subtitle: `${metrics.activeEntityTypes} of ${metrics.totalImplementedTypes} pages active`,
       icon: Activity,
-      color: getCoverageColor(metrics.overallCoverage),
-      bgColor: metrics.overallCoverage >= 90 
+      color: getCoverageColor(metrics.overallActivityLevel),
+      bgColor: metrics.overallActivityLevel >= 90 
         ? "bg-success/10" 
-        : metrics.overallCoverage >= 50 
+        : metrics.overallActivityLevel >= 50 
           ? "bg-warning/10" 
           : "bg-info/10",
-      progress: metrics.overallCoverage,
+      progress: metrics.overallActivityLevel,
     },
     {
       label: "Pending Activation",
-      value: `${metrics.coverageGaps.filter(g => g.status === 'missing_data').length}`,
+      value: `${pendingCount}`,
       subtitle: "pages awaiting first visit",
       icon: Clock,
       color: "text-info",

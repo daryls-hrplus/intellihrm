@@ -132,13 +132,13 @@ export function CoverageGapsTable({ gaps, isLoading }: CoverageGapsTableProps) {
                 ))}
               </SelectContent>
             </Select>
-                <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-[150px]">
                 <SelectValue placeholder="All Status" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="missing_data">Pending</SelectItem>
+                <SelectItem value="pending_activation">Pending</SelectItem>
                 <SelectItem value="orphaned">Unmapped</SelectItem>
               </SelectContent>
             </Select>
@@ -177,13 +177,13 @@ export function CoverageGapsTable({ gaps, isLoading }: CoverageGapsTableProps) {
                       <TableCell>
                         <Badge 
                           variant="outline"
-                          className={gap.status === 'missing_data' ? 'border-info text-info' : ''}
+                          className={gap.status === 'pending_activation' ? 'border-info text-info' : ''}
                         >
-                          {gap.status === 'missing_data' ? 'Pending' : 'Unmapped'}
+                          {gap.status === 'pending_activation' ? 'Pending' : 'Unmapped'}
                         </Badge>
                       </TableCell>
                       <TableCell className="hidden md:table-cell text-sm text-muted-foreground max-w-xs truncate">
-                        {gap.status === 'missing_data' 
+                        {gap.status === 'pending_activation' 
                           ? 'Visit page to activate logging' 
                           : gap.recommendation}
                       </TableCell>

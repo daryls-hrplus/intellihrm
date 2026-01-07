@@ -71,14 +71,14 @@ export default function AuditCoveragePage() {
           <AuditHealthChart volumeData={volumeData} isLoading={loading} />
           
           {/* Quick Stats */}
-          {metrics && (
+            {metrics && (
             <div className="grid gap-4">
               {/* Most Active Modules */}
               <div className="p-4 rounded-lg border bg-card">
                 <h3 className="font-medium mb-3">Most Active</h3>
                 <div className="space-y-2">
                   {metrics.moduleCoverages
-                    .filter(m => m.coverage > 0)
+                    .filter(m => m.activityLevel > 0)
                     .slice(0, 5)
                     .map(module => (
                       <div 
@@ -87,13 +87,13 @@ export default function AuditCoveragePage() {
                       >
                         <span>{module.module}</span>
                         <span className={`font-medium ${
-                          module.coverage >= 90 
+                          module.activityLevel >= 90 
                             ? 'text-success' 
-                            : module.coverage >= 50 
+                            : module.activityLevel >= 50 
                               ? 'text-warning' 
                               : 'text-muted-foreground'
                         }`}>
-                          {module.coverage}%
+                          {module.activityLevel}%
                         </span>
                       </div>
                     ))}
@@ -105,7 +105,7 @@ export default function AuditCoveragePage() {
                 <h3 className="font-medium mb-3">Pending Activation</h3>
                 <div className="space-y-2">
                   {metrics.moduleCoverages
-                    .filter(m => m.coverage === 0)
+                    .filter(m => m.activityLevel === 0)
                     .slice(0, 5)
                     .map(module => (
                       <div 
@@ -118,7 +118,7 @@ export default function AuditCoveragePage() {
                         </span>
                       </div>
                     ))}
-                  {metrics.moduleCoverages.filter(m => m.coverage === 0).length === 0 && (
+                  {metrics.moduleCoverages.filter(m => m.activityLevel === 0).length === 0 && (
                     <p className="text-sm text-muted-foreground">
                       All modules have activity
                     </p>
