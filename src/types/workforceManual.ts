@@ -474,20 +474,6 @@ export const WORKFORCE_MANUAL_STRUCTURE: ManualSection[] = [
       {
         id: 'wf-sec-4-6',
         sectionNumber: '4.6',
-        title: 'Employee Transactions',
-        description: 'Promotions, transfers, demotions, grade changes, transaction workflow',
-        contentLevel: 'procedure',
-        estimatedReadTime: 12,
-        targetRoles: ['HR Admin'],
-        industryContext: {
-          frequency: 'Per transaction',
-          timing: 'As needed',
-          benchmark: 'Transaction audit trail'
-        }
-      },
-      {
-        id: 'wf-sec-4-7',
-        sectionNumber: '4.7',
         title: 'Multi-Position Employees',
         description: 'Managing employees with concurrent positions, FTE split allocation',
         contentLevel: 'procedure',
@@ -500,22 +486,22 @@ export const WORKFORCE_MANUAL_STRUCTURE: ManualSection[] = [
         }
       },
       {
-        id: 'wf-sec-4-8',
-        sectionNumber: '4.8',
-        title: 'Banking & Payment Setup',
-        description: 'Bank account details, payment methods, pay group assignment',
+        id: 'wf-sec-4-7',
+        sectionNumber: '4.7',
+        title: 'Employee Transactions',
+        description: 'Promotions, transfers, demotions, grade changes, transaction workflow',
         contentLevel: 'procedure',
-        estimatedReadTime: 8,
-        targetRoles: ['HR Ops', 'Payroll'],
+        estimatedReadTime: 12,
+        targetRoles: ['HR Admin'],
         industryContext: {
-          frequency: 'Per employee, updates as needed',
-          timing: 'Pre-first payroll',
-          benchmark: 'Payroll integration'
+          frequency: 'Per transaction',
+          timing: 'As needed',
+          benchmark: 'Transaction audit trail'
         }
       },
       {
-        id: 'wf-sec-4-9',
-        sectionNumber: '4.9',
+        id: 'wf-sec-4-8',
+        sectionNumber: '4.8',
         title: 'Government IDs Management',
         description: 'ID documents, passport, permits, country-specific IDs, expiry tracking',
         contentLevel: 'procedure',
@@ -528,36 +514,8 @@ export const WORKFORCE_MANUAL_STRUCTURE: ManualSection[] = [
         }
       },
       {
-        id: 'wf-sec-4-10',
-        sectionNumber: '4.10',
-        title: 'Dependents & Beneficiaries',
-        description: 'Family member records for benefits enrollment, relationship types',
-        contentLevel: 'procedure',
-        estimatedReadTime: 8,
-        targetRoles: ['HR Ops', 'Employee'],
-        industryContext: {
-          frequency: 'Life events',
-          timing: 'Open enrollment, life changes',
-          benchmark: 'Benefits integration'
-        }
-      },
-      {
-        id: 'wf-sec-4-11',
-        sectionNumber: '4.11',
-        title: 'Medical Information',
-        description: 'Emergency medical data, blood type, allergies, health conditions',
-        contentLevel: 'procedure',
-        estimatedReadTime: 6,
-        targetRoles: ['HR Ops', 'H&S'],
-        industryContext: {
-          frequency: 'Initial capture, updates',
-          timing: 'Onboarding',
-          benchmark: 'H&S compliance'
-        }
-      },
-      {
-        id: 'wf-sec-4-12',
-        sectionNumber: '4.12',
+        id: 'wf-sec-4-9',
+        sectionNumber: '4.9',
         title: 'Immigration & Work Permits',
         description: 'Visa types, permit expiry, travel documents, work authorization',
         contentLevel: 'procedure',
@@ -570,64 +528,8 @@ export const WORKFORCE_MANUAL_STRUCTURE: ManualSection[] = [
         }
       },
       {
-        id: 'wf-sec-4-13',
-        sectionNumber: '4.13',
-        title: 'Employee Languages',
-        description: 'Language proficiency tracking, reading/writing/speaking levels',
-        contentLevel: 'procedure',
-        estimatedReadTime: 6,
-        targetRoles: ['HR Ops', 'Employee'],
-        industryContext: {
-          frequency: 'Initial setup, updates',
-          timing: 'Onboarding, skill reviews',
-          benchmark: 'Multi-language workforce support'
-        }
-      },
-      {
-        id: 'wf-sec-4-14',
-        sectionNumber: '4.14',
-        title: 'Employee Skills & Competencies',
-        description: 'Skill inventory, competency assessments, proficiency levels',
-        contentLevel: 'procedure',
-        estimatedReadTime: 10,
-        targetRoles: ['HR Admin', 'Manager'],
-        industryContext: {
-          frequency: 'Quarterly/annual review',
-          timing: 'Performance cycles',
-          benchmark: 'Competency-based talent management'
-        }
-      },
-      {
-        id: 'wf-sec-4-15',
-        sectionNumber: '4.15',
-        title: 'Skill Gap Analysis',
-        description: 'Identifying skill gaps, development needs, learning recommendations',
-        contentLevel: 'procedure',
-        estimatedReadTime: 8,
-        targetRoles: ['HR Admin', 'L&D'],
-        industryContext: {
-          frequency: 'Periodic analysis',
-          timing: 'Career planning, succession',
-          benchmark: 'Skills-based workforce planning'
-        }
-      },
-      {
-        id: 'wf-sec-4-16',
-        sectionNumber: '4.16',
-        title: 'Credentials & Memberships',
-        description: 'Professional memberships, industry credentials, association affiliations',
-        contentLevel: 'procedure',
-        estimatedReadTime: 6,
-        targetRoles: ['HR Ops', 'Employee'],
-        industryContext: {
-          frequency: 'Periodic updates',
-          timing: 'Renewals, new certifications',
-          benchmark: 'Professional development tracking'
-        }
-      },
-      {
-        id: 'wf-sec-4-17',
-        sectionNumber: '4.17',
+        id: 'wf-sec-4-10',
+        sectionNumber: '4.10',
         title: 'Background Checks',
         description: 'Pre-employment screening, ongoing checks, verification status',
         contentLevel: 'procedure',
@@ -640,8 +542,8 @@ export const WORKFORCE_MANUAL_STRUCTURE: ManualSection[] = [
         }
       },
       {
-        id: 'wf-sec-4-18',
-        sectionNumber: '4.18',
+        id: 'wf-sec-4-11',
+        sectionNumber: '4.11',
         title: 'References & Verifications',
         description: 'Reference check management, employment verification tracking',
         contentLevel: 'procedure',
@@ -654,8 +556,120 @@ export const WORKFORCE_MANUAL_STRUCTURE: ManualSection[] = [
         }
       },
       {
+        id: 'wf-sec-4-12',
+        sectionNumber: '4.12',
+        title: 'Banking & Payment Setup',
+        description: 'Bank account details, payment methods, pay group assignment',
+        contentLevel: 'procedure',
+        estimatedReadTime: 8,
+        targetRoles: ['HR Ops', 'Payroll'],
+        industryContext: {
+          frequency: 'Per employee, updates as needed',
+          timing: 'Pre-first payroll',
+          benchmark: 'Payroll integration'
+        }
+      },
+      {
+        id: 'wf-sec-4-13',
+        sectionNumber: '4.13',
+        title: 'Dependents & Beneficiaries',
+        description: 'Family member records for benefits enrollment, relationship types',
+        contentLevel: 'procedure',
+        estimatedReadTime: 8,
+        targetRoles: ['HR Ops', 'Employee'],
+        industryContext: {
+          frequency: 'Life events',
+          timing: 'Open enrollment, life changes',
+          benchmark: 'Benefits integration'
+        }
+      },
+      {
+        id: 'wf-sec-4-14',
+        sectionNumber: '4.14',
+        title: 'Employee Benefits Enrollment',
+        description: 'Benefits plan assignment, enrollment periods, coverage details',
+        contentLevel: 'procedure',
+        estimatedReadTime: 10,
+        targetRoles: ['HR Ops', 'Benefits Admin'],
+        industryContext: {
+          frequency: 'Open enrollment, life events',
+          timing: 'Annual enrollment, qualifying events',
+          benchmark: 'Benefits administration'
+        }
+      },
+      {
+        id: 'wf-sec-4-15',
+        sectionNumber: '4.15',
+        title: 'Medical Information',
+        description: 'Emergency medical data, blood type, allergies, health conditions',
+        contentLevel: 'procedure',
+        estimatedReadTime: 6,
+        targetRoles: ['HR Ops', 'H&S'],
+        industryContext: {
+          frequency: 'Initial capture, updates',
+          timing: 'Onboarding',
+          benchmark: 'H&S compliance'
+        }
+      },
+      {
+        id: 'wf-sec-4-16',
+        sectionNumber: '4.16',
+        title: 'Employee Languages',
+        description: 'Language proficiency tracking, reading/writing/speaking levels',
+        contentLevel: 'procedure',
+        estimatedReadTime: 6,
+        targetRoles: ['HR Ops', 'Employee'],
+        industryContext: {
+          frequency: 'Initial setup, updates',
+          timing: 'Onboarding, skill reviews',
+          benchmark: 'Multi-language workforce support'
+        }
+      },
+      {
+        id: 'wf-sec-4-17',
+        sectionNumber: '4.17',
+        title: 'Employee Skills & Competencies',
+        description: 'Skill inventory, competency assessments, proficiency levels',
+        contentLevel: 'procedure',
+        estimatedReadTime: 10,
+        targetRoles: ['HR Admin', 'Manager'],
+        industryContext: {
+          frequency: 'Quarterly/annual review',
+          timing: 'Performance cycles',
+          benchmark: 'Competency-based talent management'
+        }
+      },
+      {
+        id: 'wf-sec-4-18',
+        sectionNumber: '4.18',
+        title: 'Skill Gap Analysis',
+        description: 'Identifying skill gaps, development needs, learning recommendations',
+        contentLevel: 'procedure',
+        estimatedReadTime: 8,
+        targetRoles: ['HR Admin', 'L&D'],
+        industryContext: {
+          frequency: 'Periodic analysis',
+          timing: 'Career planning, succession',
+          benchmark: 'Skills-based workforce planning'
+        }
+      },
+      {
         id: 'wf-sec-4-19',
         sectionNumber: '4.19',
+        title: 'Credentials & Memberships',
+        description: 'Professional memberships, industry credentials, association affiliations',
+        contentLevel: 'procedure',
+        estimatedReadTime: 6,
+        targetRoles: ['HR Ops', 'Employee'],
+        industryContext: {
+          frequency: 'Periodic updates',
+          timing: 'Renewals, new certifications',
+          benchmark: 'Professional development tracking'
+        }
+      },
+      {
+        id: 'wf-sec-4-20',
+        sectionNumber: '4.20',
         title: 'Employee Documents',
         description: 'Document management, document types, expiry tracking, compliance documents',
         contentLevel: 'procedure',
@@ -668,8 +682,8 @@ export const WORKFORCE_MANUAL_STRUCTURE: ManualSection[] = [
         }
       },
       {
-        id: 'wf-sec-4-20',
-        sectionNumber: '4.20',
+        id: 'wf-sec-4-21',
+        sectionNumber: '4.21',
         title: 'Agreements & Signatures',
         description: 'Employment agreements, policy acknowledgments, e-signature tracking',
         contentLevel: 'procedure',
@@ -679,20 +693,6 @@ export const WORKFORCE_MANUAL_STRUCTURE: ManualSection[] = [
           frequency: 'Per agreement',
           timing: 'Hire, policy updates',
           benchmark: 'Legal compliance, e-signature'
-        }
-      },
-      {
-        id: 'wf-sec-4-21',
-        sectionNumber: '4.21',
-        title: 'Compliance & Legal',
-        description: 'Legal compliance tracking, regulatory requirements, audit-ready records',
-        contentLevel: 'procedure',
-        estimatedReadTime: 8,
-        targetRoles: ['HR Admin', 'Compliance'],
-        industryContext: {
-          frequency: 'Ongoing monitoring',
-          timing: 'Audit cycles',
-          benchmark: 'Regulatory compliance'
         }
       },
       {
@@ -712,15 +712,15 @@ export const WORKFORCE_MANUAL_STRUCTURE: ManualSection[] = [
       {
         id: 'wf-sec-4-23',
         sectionNumber: '4.23',
-        title: 'Employee Benefits Enrollment',
-        description: 'Benefits plan assignment, enrollment periods, coverage details',
+        title: 'Compliance & Legal',
+        description: 'Legal compliance tracking, regulatory requirements, audit-ready records',
         contentLevel: 'procedure',
-        estimatedReadTime: 10,
-        targetRoles: ['HR Ops', 'Benefits Admin'],
+        estimatedReadTime: 8,
+        targetRoles: ['HR Admin', 'Compliance'],
         industryContext: {
-          frequency: 'Open enrollment, life events',
-          timing: 'Annual enrollment, qualifying events',
-          benchmark: 'Benefits administration'
+          frequency: 'Ongoing monitoring',
+          timing: 'Audit cycles',
+          benchmark: 'Regulatory compliance'
         }
       },
       {
