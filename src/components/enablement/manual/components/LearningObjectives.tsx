@@ -15,7 +15,7 @@ export function LearningObjectives({ objectives }: LearningObjectivesProps) {
       <ul className="space-y-2">
         {objectives.map((objective, index) => (
           <li key={index} className="flex items-start gap-2 text-sm text-foreground">
-            <span className="w-5 h-5 rounded-full border-2 border-primary text-primary flex items-center justify-center text-xs font-semibold flex-shrink-0 mt-0.5">
+            <span className="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-semibold flex-shrink-0 mt-0.5">
               {index + 1}
             </span>
             <span>{objective}</span>
