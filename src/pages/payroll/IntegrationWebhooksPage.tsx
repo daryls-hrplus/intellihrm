@@ -1,8 +1,11 @@
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { IntegrationWebhooks } from "@/components/payroll/IntegrationWebhooks";
+import { usePageAudit } from "@/hooks/usePageAudit";
 
 export default function IntegrationWebhooksPage() {
+  usePageAudit('integration_webhooks', 'Payroll');
+  
   return (
     <AppLayout>
       <div className="container mx-auto py-6 space-y-6">
