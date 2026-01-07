@@ -151,7 +151,7 @@ export function LifecycleAnalytics() {
       />
 
       <LearningObjectives
-        items={[
+        objectives={[
           "Navigate the onboarding analytics dashboard",
           "Identify bottlenecks and improvement opportunities",
           "Generate and schedule lifecycle reports",

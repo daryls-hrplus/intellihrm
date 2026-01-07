@@ -142,7 +142,7 @@ export function ManagerOnboardingView() {
       />
 
       <LearningObjectives
-        items={[
+        objectives={[
           "Navigate the manager onboarding dashboard",
           "Complete manager-assigned onboarding tasks",
           "Monitor new hire progress and identify at-risk employees",

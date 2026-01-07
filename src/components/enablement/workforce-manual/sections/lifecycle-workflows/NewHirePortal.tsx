@@ -116,7 +116,7 @@ export function NewHirePortal() {
       />
 
       <LearningObjectives
-        items={[
+        objectives={[
           "Guide new employees through the self-service portal",
           "Configure pre-boarding vs. post-start task visibility",
           "Troubleshoot common employee portal issues",
