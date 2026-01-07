@@ -205,6 +205,9 @@
   },
 "hrHub": {
     "title": "Centro HR",
+    "communicationSupportCenter": "Centro de Comunicación y Soporte",
+    "communicationsReminders": "Comunicaciones y Recordatorios",
+    "communicationsRemindersDesc": "Gestione plantillas, reglas de automatización, envío de correos y notificaciones en la aplicación",
     "transactionWorkflowSettings": {
       "title": "Configuración de Flujos de Transacciones",
       "subtitle": "Configure qué tipos de transacciones de empleados requieren aprobación de flujo de trabajo por empresa",
