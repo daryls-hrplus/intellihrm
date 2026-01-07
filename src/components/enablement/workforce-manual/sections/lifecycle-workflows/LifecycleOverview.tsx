@@ -1,4 +1,5 @@
 import { LearningObjectives } from './LearningObjectives';
+import { ScreenshotPlaceholder } from '@/components/enablement/manual/components/ScreenshotPlaceholder';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Lightbulb, ArrowRight } from 'lucide-react';
 
@@ -102,6 +103,11 @@ export function LifecycleOverview() {
           </table>
         </div>
       </div>
+
+      <ScreenshotPlaceholder
+        caption="Figure 5.1: Employee Lifecycle workflow overview showing stages from pre-hire to offboarding"
+        alt="Lifecycle workflow diagram with stakeholder responsibilities at each stage"
+      />
 
       <LearningObjectives
         title="Lifecycle Workflow Integrations"

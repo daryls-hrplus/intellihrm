@@ -1,4 +1,5 @@
 import { LearningObjectives } from './LearningObjectives';
+import { ScreenshotPlaceholder } from '@/components/enablement/manual/components/ScreenshotPlaceholder';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Lightbulb, Users, ClipboardCheck, MessageSquare, Calendar } from 'lucide-react';
 
@@ -119,6 +120,11 @@ export function ManagerOnboardingView() {
         </div>
       </div>
 
+      <ScreenshotPlaceholder
+        caption="Figure 5.5a: Manager dashboard showing new hire progress and milestone tracking"
+        alt="MSS onboarding view with team overview and completion metrics"
+      />
+
       <div className="space-y-4">
         <h4 className="font-semibold">Completing Manager Tasks</h4>
         <ol className="list-decimal list-inside space-y-2 text-sm text-muted-foreground">
@@ -130,6 +136,11 @@ export function ManagerOnboardingView() {
           <li>Escalate concerns to HR if employee is struggling</li>
         </ol>
       </div>
+
+      <ScreenshotPlaceholder
+        caption="Figure 5.5b: Manager task completion interface with check-in documentation"
+        alt="Manager completing onboarding tasks with notes and milestone sign-off"
+      />
 
       <LearningObjectives
         items={[

@@ -1,4 +1,5 @@
 import { LearningObjectives } from './LearningObjectives';
+import { ScreenshotPlaceholder } from '@/components/enablement/manual/components/ScreenshotPlaceholder';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertTriangle, CheckCircle2, Clock, User } from 'lucide-react';
 
@@ -49,6 +50,11 @@ export function OnboardingTaskManagement() {
           <li>Email notifications sent to all task owners</li>
         </ol>
       </div>
+
+      <ScreenshotPlaceholder
+        caption="Figure 5.4a: Active onboarding instances list with progress tracking"
+        alt="Onboarding dashboard showing employee cards with completion percentages"
+      />
 
       <div className="space-y-4">
         <h4 className="font-semibold">Task Management Features</h4>
@@ -128,6 +134,11 @@ export function OnboardingTaskManagement() {
           </table>
         </div>
       </div>
+
+      <ScreenshotPlaceholder
+        caption="Figure 5.4b: Task completion interface with evidence and verification options"
+        alt="Task detail view showing completion methods and required documentation"
+      />
 
       <LearningObjectives
         items={[

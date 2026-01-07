@@ -1,4 +1,5 @@
 import { LearningObjectives } from './LearningObjectives';
+import { ScreenshotPlaceholder } from '@/components/enablement/manual/components/ScreenshotPlaceholder';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertTriangle, Key, Package, FileText, UserMinus } from 'lucide-react';
 
@@ -110,6 +111,11 @@ export function OffboardingWorkflowDesign() {
         </ol>
       </div>
 
+      <ScreenshotPlaceholder
+        caption="Figure 5.6a: Offboarding template configuration with clearance checklist categories"
+        alt="Template setup showing security, asset, documentation, and knowledge transfer tasks"
+      />
+
       <div className="space-y-4">
         <h4 className="font-semibold">Task Timeline Example</h4>
         <div className="overflow-x-auto">
@@ -163,6 +169,11 @@ export function OffboardingWorkflowDesign() {
           </table>
         </div>
       </div>
+
+      <ScreenshotPlaceholder
+        caption="Figure 5.6b: Offboarding task timeline showing owner assignments and priorities"
+        alt="Separation workflow with day-by-day task schedule and escalation rules"
+      />
 
       <LearningObjectives
         items={[
