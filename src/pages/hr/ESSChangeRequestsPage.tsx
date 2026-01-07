@@ -190,7 +190,7 @@ export default function ESSChangeRequestsPage() {
       
       // Send notification to employee
       if (selectedRequest) {
-        await sendNotification({
+        const result = await sendNotification({
           notificationType: 'approved',
           employeeId: selectedRequest.employee_id,
           requestId: selectedRequest.id,
@@ -199,6 +199,9 @@ export default function ESSChangeRequestsPage() {
           reviewerNotes: variables.notes || undefined,
           reviewerName: profile?.full_name || undefined,
         });
+        if (!result.success) {
+          toast.warning(`Request approved, but notification failed: ${result.error || 'Unknown error'}`);
+        }
       }
       
       closeDialogs();
@@ -230,7 +233,7 @@ export default function ESSChangeRequestsPage() {
       
       // Send notification to employee
       if (selectedRequest) {
-        await sendNotification({
+        const result = await sendNotification({
           notificationType: 'rejected',
           employeeId: selectedRequest.employee_id,
           requestId: selectedRequest.id,
@@ -239,6 +242,9 @@ export default function ESSChangeRequestsPage() {
           reviewerNotes: variables.notes,
           reviewerName: profile?.full_name || undefined,
         });
+        if (!result.success) {
+          toast.warning(`Request rejected, but notification failed: ${result.error || 'Unknown error'}`);
+        }
       }
       
       closeDialogs();
@@ -267,7 +273,7 @@ export default function ESSChangeRequestsPage() {
       
       // Send notification to employee
       if (selectedRequest) {
-        await sendNotification({
+        const result = await sendNotification({
           notificationType: 'info_required',
           employeeId: selectedRequest.employee_id,
           requestId: selectedRequest.id,
@@ -276,6 +282,9 @@ export default function ESSChangeRequestsPage() {
           reviewerNotes: variables.notes,
           reviewerName: profile?.full_name || undefined,
         });
+        if (!result.success) {
+          toast.warning(`Info request sent, but notification failed: ${result.error || 'Unknown error'}`);
+        }
       }
       
       closeDialogs();

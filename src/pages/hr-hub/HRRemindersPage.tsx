@@ -11,9 +11,10 @@ import { AIRecommendationsPanel } from '@/components/reminders/AIRecommendations
 import { ReminderWelcomeBanner } from '@/components/reminders/ReminderWelcomeBanner';
 import { ReminderAIDashboard } from '@/components/reminders/ReminderAIDashboard';
 import { ReminderEmailTemplates } from '@/components/reminders/ReminderEmailTemplates';
+import { NotificationLogPanel } from '@/components/reminders/NotificationLogPanel';
 import { useReminders } from '@/hooks/useReminders';
 import { supabase } from '@/integrations/supabase/client';
-import { Bell, Settings, List, Loader2, FileText, Sparkles, Send } from 'lucide-react';
+import { Bell, Settings, List, Loader2, FileText, Send, MessageSquare } from 'lucide-react';
 import { DeliveryTrackingDashboard } from '@/components/reminders/DeliveryTrackingDashboard';
 import { toast } from 'sonner';
 
@@ -123,9 +124,9 @@ export default function HRRemindersPage() {
           <div>
             <h1 className="text-3xl font-bold flex items-center gap-2">
               <Bell className="h-8 w-8" />
-              {t('hrHub.reminders')}
+              Communications & Reminders
             </h1>
-            <p className="text-muted-foreground">{t('hrHub.remindersDesc')}</p>
+            <p className="text-muted-foreground">Manage notifications, reminders, and templates</p>
           </div>
           <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
             <SelectTrigger className="w-[220px]">
@@ -155,6 +156,10 @@ export default function HRRemindersPage() {
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList>
+            <TabsTrigger value="notifications" className="flex items-center gap-2">
+              <MessageSquare className="h-4 w-4" />
+              Notifications
+            </TabsTrigger>
             <TabsTrigger value="templates" className="flex items-center gap-2">
               <FileText className="h-4 w-4" />
               Templates
@@ -172,6 +177,20 @@ export default function HRRemindersPage() {
               Delivery Log
             </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="notifications" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>System Notifications</CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  View all system notifications sent to employees (ESS approvals, workflow updates, etc.)
+                </p>
+              </CardHeader>
+              <CardContent>
+                <NotificationLogPanel companyId={selectedCompanyId === 'all' ? undefined : selectedCompanyId} />
+              </CardContent>
+            </Card>
+          </TabsContent>
 
           <TabsContent value="templates" className="space-y-6">
             <Card>
