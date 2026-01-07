@@ -1,7 +1,9 @@
-import { LearningObjectives } from './LearningObjectives';
-import { ScreenshotPlaceholder } from '@/components/enablement/manual/components/ScreenshotPlaceholder';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AlertTriangle, CheckCircle2, Clock, User } from 'lucide-react';
+import { 
+  WarningCallout, 
+  LearningObjectives, 
+  ScreenshotPlaceholder 
+} from '@/components/enablement/manual/components';
+import { CheckCircle2, Clock, User, AlertTriangle } from 'lucide-react';
 
 export function OnboardingTaskManagement() {
   return (
@@ -12,13 +14,10 @@ export function OnboardingTaskManagement() {
         escalation to ensure timely completion.
       </p>
 
-      <Alert>
-        <AlertTriangle className="h-4 w-4" />
-        <AlertDescription>
-          <strong>Critical:</strong> Overdue compliance tasks trigger automatic escalation to 
-          HR leadership. Ensure task owners have proper notification settings enabled.
-        </AlertDescription>
-      </Alert>
+      <WarningCallout title="Critical">
+        Overdue compliance tasks trigger automatic escalation to HR leadership. Ensure task 
+        owners have proper notification settings enabled.
+      </WarningCallout>
 
       <div className="space-y-4">
         <h4 className="font-semibold">Task Lifecycle</h4>

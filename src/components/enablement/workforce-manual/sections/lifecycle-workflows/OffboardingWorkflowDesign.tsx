@@ -1,7 +1,10 @@
-import { LearningObjectives } from './LearningObjectives';
-import { ScreenshotPlaceholder } from '@/components/enablement/manual/components/ScreenshotPlaceholder';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AlertTriangle, Key, Package, FileText, UserMinus } from 'lucide-react';
+import { 
+  CriticalCallout, 
+  LearningObjectives, 
+  ScreenshotPlaceholder 
+} from '@/components/enablement/manual/components';
+import { Key, Package, FileText, UserMinus } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
 export function OffboardingWorkflowDesign() {
   return (
@@ -12,26 +15,22 @@ export function OffboardingWorkflowDesign() {
         contract end) with appropriate workflows for each.
       </p>
 
-      <Alert variant="destructive">
-        <AlertTriangle className="h-4 w-4" />
-        <AlertDescription>
-          <strong>Compliance Critical:</strong> Offboarding workflows include access revocation, 
-          asset recovery, and final pay calculations. Incomplete offboarding creates security 
-          and legal risks.
-        </AlertDescription>
-      </Alert>
+      <CriticalCallout title="Compliance Critical">
+        Offboarding workflows include access revocation, asset recovery, and final pay calculations. 
+        Incomplete offboarding creates security and legal risks.
+      </CriticalCallout>
 
       <div className="space-y-4">
         <h4 className="font-semibold">Offboarding Template Types</h4>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {[
-            { type: 'Voluntary Resignation', desc: 'Standard notice period process', color: 'bg-blue-100 text-blue-800' },
-            { type: 'Involuntary Termination', desc: 'Immediate separation process', color: 'bg-red-100 text-red-800' },
-            { type: 'Retirement', desc: 'Extended transition process', color: 'bg-green-100 text-green-800' },
-            { type: 'Contract End', desc: 'Scheduled separation process', color: 'bg-purple-100 text-purple-800' }
+            { type: 'Voluntary Resignation', desc: 'Standard notice period process', variant: 'default' as const },
+            { type: 'Involuntary Termination', desc: 'Immediate separation process', variant: 'destructive' as const },
+            { type: 'Retirement', desc: 'Extended transition process', variant: 'secondary' as const },
+            { type: 'Contract End', desc: 'Scheduled separation process', variant: 'outline' as const }
           ].map((item, idx) => (
             <div key={idx} className="border rounded-lg p-4">
-              <span className={`px-2 py-1 rounded text-xs font-medium ${item.color}`}>{item.type}</span>
+              <Badge variant={item.variant}>{item.type}</Badge>
               <p className="text-sm text-muted-foreground mt-2">{item.desc}</p>
             </div>
           ))}

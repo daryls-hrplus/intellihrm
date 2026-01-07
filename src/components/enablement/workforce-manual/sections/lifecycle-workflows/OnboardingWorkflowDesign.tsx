@@ -1,7 +1,9 @@
-import { LearningObjectives } from './LearningObjectives';
-import { ScreenshotPlaceholder } from '@/components/enablement/manual/components/ScreenshotPlaceholder';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Lightbulb, Settings } from 'lucide-react';
+import { 
+  TipCallout, 
+  LearningObjectives, 
+  ScreenshotPlaceholder 
+} from '@/components/enablement/manual/components';
+import { Settings } from 'lucide-react';
 
 export function OnboardingWorkflowDesign() {
   return (
@@ -12,13 +14,10 @@ export function OnboardingWorkflowDesign() {
         maintaining compliance and consistency.
       </p>
 
-      <Alert>
-        <Lightbulb className="h-4 w-4" />
-        <AlertDescription>
-          <strong>Best Practice:</strong> Create role-specific templates (Executive, Professional, 
-          Field Worker) rather than one-size-fits-all to improve relevance and completion rates.
-        </AlertDescription>
-      </Alert>
+      <TipCallout title="Best Practice">
+        Create role-specific templates (Executive, Professional, Field Worker) rather than 
+        one-size-fits-all to improve relevance and completion rates.
+      </TipCallout>
 
       <div className="space-y-4">
         <h4 className="font-semibold">Template Configuration</h4>

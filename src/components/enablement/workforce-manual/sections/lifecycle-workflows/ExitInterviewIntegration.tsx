@@ -1,7 +1,9 @@
-import { LearningObjectives } from './LearningObjectives';
-import { ScreenshotPlaceholder } from '@/components/enablement/manual/components/ScreenshotPlaceholder';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Lightbulb, MessageSquare, BarChart3, TrendingUp } from 'lucide-react';
+import { 
+  TipCallout, 
+  LearningObjectives, 
+  ScreenshotPlaceholder 
+} from '@/components/enablement/manual/components';
+import { MessageSquare, BarChart3, TrendingUp } from 'lucide-react';
 
 export function ExitInterviewIntegration() {
   return (
@@ -12,13 +14,10 @@ export function ExitInterviewIntegration() {
         and organizational improvement areas.
       </p>
 
-      <Alert>
-        <Lightbulb className="h-4 w-4" />
-        <AlertDescription>
-          <strong>Best Practice:</strong> Conduct exit interviews 2-3 days before the last day, 
-          not on the final day when employees may be distracted or rushed.
-        </AlertDescription>
-      </Alert>
+      <TipCallout title="Best Practice">
+        Conduct exit interviews 2-3 days before the last day, not on the final day when 
+        employees may be distracted or rushed.
+      </TipCallout>
 
       <div className="space-y-4">
         <h4 className="font-semibold">Exit Interview Process</h4>
@@ -116,19 +115,19 @@ export function ExitInterviewIntegration() {
         <div className="border rounded-lg p-4 bg-muted/30">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
             <div>
-              <div className="text-2xl font-bold text-red-600">45%</div>
+              <div className="text-2xl font-bold text-destructive">45%</div>
               <div className="text-sm text-muted-foreground">Compensation Related</div>
             </div>
             <div>
-              <div className="text-2xl font-bold text-orange-600">28%</div>
+              <div className="text-2xl font-bold text-warning">28%</div>
               <div className="text-sm text-muted-foreground">Career Growth</div>
             </div>
             <div>
-              <div className="text-2xl font-bold text-blue-600">15%</div>
+              <div className="text-2xl font-bold text-primary">15%</div>
               <div className="text-sm text-muted-foreground">Manager Issues</div>
             </div>
             <div>
-              <div className="text-2xl font-bold text-green-600">12%</div>
+              <div className="text-2xl font-bold text-success">12%</div>
               <div className="text-sm text-muted-foreground">Work-Life Balance</div>
             </div>
           </div>

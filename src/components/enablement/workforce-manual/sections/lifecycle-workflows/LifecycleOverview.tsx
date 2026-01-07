@@ -1,7 +1,11 @@
-import { LearningObjectives } from './LearningObjectives';
-import { ScreenshotPlaceholder } from '@/components/enablement/manual/components/ScreenshotPlaceholder';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Lightbulb, ArrowRight } from 'lucide-react';
+import { 
+  InfoCallout, 
+  LearningObjectives, 
+  ScreenshotPlaceholder,
+  FeatureCard,
+  FeatureCardGrid
+} from '@/components/enablement/manual/components';
+import { ArrowRight } from 'lucide-react';
 
 export function LifecycleOverview() {
   return (
@@ -12,47 +16,44 @@ export function LifecycleOverview() {
         and a positive employee experience throughout their tenure.
       </p>
 
-      <Alert>
-        <Lightbulb className="h-4 w-4" />
-        <AlertDescription>
-          <strong>Industry Benchmark:</strong> Organizations with structured lifecycle workflows 
-          see 82% higher new hire retention and 70% faster time-to-productivity according to SHRM research.
-        </AlertDescription>
-      </Alert>
+      <InfoCallout title="Industry Benchmark">
+        Organizations with structured lifecycle workflows see 82% higher new hire retention 
+        and 70% faster time-to-productivity according to SHRM research.
+      </InfoCallout>
 
       <div className="space-y-4">
         <h4 className="font-semibold">Lifecycle Stages</h4>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {[
-            { stage: 'Pre-Hire', desc: 'Offer acceptance, background checks, pre-start coordination', color: 'bg-blue-500' },
-            { stage: 'Onboarding', desc: '30-60-90 day integration, training, compliance', color: 'bg-green-500' },
-            { stage: 'Active Employment', desc: 'Development, performance, career progression', color: 'bg-purple-500' },
-            { stage: 'Offboarding', desc: 'Exit process, knowledge transfer, separation', color: 'bg-orange-500' }
-          ].map((item, idx) => (
-            <div key={idx} className="border rounded-lg p-4">
-              <div className={`w-3 h-3 rounded-full ${item.color} mb-2`} />
-              <h5 className="font-medium">{item.stage}</h5>
-              <p className="text-sm text-muted-foreground">{item.desc}</p>
-            </div>
-          ))}
-        </div>
+        <FeatureCardGrid columns={4}>
+          <FeatureCard variant="primary" title="Pre-Hire">
+            Offer acceptance, background checks, pre-start coordination
+          </FeatureCard>
+          <FeatureCard variant="success" title="Onboarding">
+            30-60-90 day integration, training, compliance
+          </FeatureCard>
+          <FeatureCard variant="purple" title="Active Employment">
+            Development, performance, career progression
+          </FeatureCard>
+          <FeatureCard variant="warning" title="Offboarding">
+            Exit process, knowledge transfer, separation
+          </FeatureCard>
+        </FeatureCardGrid>
       </div>
 
       <div className="space-y-4">
         <h4 className="font-semibold">Lifecycle Workflow Architecture</h4>
         <div className="bg-muted/50 rounded-lg p-4">
           <div className="flex flex-wrap items-center justify-center gap-2 text-sm">
-            <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded">Offer Accepted</span>
+            <span className="px-3 py-1 bg-primary/10 text-primary rounded">Offer Accepted</span>
             <ArrowRight className="h-4 w-4 text-muted-foreground" />
-            <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded">Pre-Boarding Tasks</span>
+            <span className="px-3 py-1 bg-primary/10 text-primary rounded">Pre-Boarding Tasks</span>
             <ArrowRight className="h-4 w-4 text-muted-foreground" />
-            <span className="px-3 py-1 bg-green-100 text-green-800 rounded">Day 1 Onboarding</span>
+            <span className="px-3 py-1 bg-success/10 text-success rounded">Day 1 Onboarding</span>
             <ArrowRight className="h-4 w-4 text-muted-foreground" />
-            <span className="px-3 py-1 bg-green-100 text-green-800 rounded">30-60-90 Milestones</span>
+            <span className="px-3 py-1 bg-success/10 text-success rounded">30-60-90 Milestones</span>
             <ArrowRight className="h-4 w-4 text-muted-foreground" />
-            <span className="px-3 py-1 bg-purple-100 text-purple-800 rounded">Probation Complete</span>
+            <span className="px-3 py-1 bg-purple-500/10 text-purple-700 dark:text-purple-300 rounded">Probation Complete</span>
             <ArrowRight className="h-4 w-4 text-muted-foreground" />
-            <span className="px-3 py-1 bg-purple-100 text-purple-800 rounded">Active Employee</span>
+            <span className="px-3 py-1 bg-purple-500/10 text-purple-700 dark:text-purple-300 rounded">Active Employee</span>
           </div>
         </div>
       </div>

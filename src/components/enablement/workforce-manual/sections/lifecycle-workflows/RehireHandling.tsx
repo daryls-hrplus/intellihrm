@@ -1,7 +1,11 @@
-import { LearningObjectives } from './LearningObjectives';
-import { ScreenshotPlaceholder } from '@/components/enablement/manual/components/ScreenshotPlaceholder';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AlertTriangle, UserPlus, History } from 'lucide-react';
+import { 
+  WarningCallout, 
+  LearningObjectives, 
+  ScreenshotPlaceholder,
+  FeatureCard,
+  FeatureCardGrid
+} from '@/components/enablement/manual/components';
+import { UserPlus, History } from 'lucide-react';
 
 export function RehireHandling() {
   return (
@@ -12,60 +16,44 @@ export function RehireHandling() {
         configurable rehire workflows.
       </p>
 
-      <Alert>
-        <AlertTriangle className="h-4 w-4" />
-        <AlertDescription>
-          <strong>Important:</strong> Rehire eligibility and seniority calculation rules vary by 
-          company policy and local labor law. Configure these settings before processing rehires.
-        </AlertDescription>
-      </Alert>
+      <WarningCallout title="Important">
+        Rehire eligibility and seniority calculation rules vary by company policy and local 
+        labor law. Configure these settings before processing rehires.
+      </WarningCallout>
 
       <div className="space-y-4">
         <h4 className="font-semibold">Rehire Types</h4>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {[
-            { 
-              type: 'Boomerang Employee', 
-              desc: 'Former employee returning after voluntary departure',
-              considerations: 'Prior performance, reason for leaving, time gap'
-            },
-            { 
-              type: 'Seasonal Rehire', 
-              desc: 'Employee returning for recurring seasonal work',
-              considerations: 'Seniority continuity, benefits bridging'
-            },
-            { 
-              type: 'Contract Renewal', 
-              desc: 'Contract employee with new engagement',
-              considerations: 'Gap in service, contractor status'
-            }
-          ].map((item, idx) => (
-            <div key={idx} className="border rounded-lg p-4">
-              <h5 className="font-medium">{item.type}</h5>
-              <p className="text-sm text-muted-foreground mt-1">{item.desc}</p>
-              <p className="text-xs text-muted-foreground mt-2">
-                <strong>Considerations:</strong> {item.considerations}
-              </p>
-            </div>
-          ))}
-        </div>
+        <FeatureCardGrid columns={3}>
+          <FeatureCard variant="primary" title="Boomerang Employee">
+            <p className="text-sm">Former employee returning after voluntary departure</p>
+            <p className="text-xs mt-2"><strong>Considerations:</strong> Prior performance, reason for leaving, time gap</p>
+          </FeatureCard>
+          <FeatureCard variant="warning" title="Seasonal Rehire">
+            <p className="text-sm">Employee returning for recurring seasonal work</p>
+            <p className="text-xs mt-2"><strong>Considerations:</strong> Seniority continuity, benefits bridging</p>
+          </FeatureCard>
+          <FeatureCard variant="info" title="Contract Renewal">
+            <p className="text-sm">Contract employee with new engagement</p>
+            <p className="text-xs mt-2"><strong>Considerations:</strong> Gap in service, contractor status</p>
+          </FeatureCard>
+        </FeatureCardGrid>
       </div>
 
       <div className="space-y-4">
         <h4 className="font-semibold">Rehire Eligibility</h4>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="border rounded-lg p-4 bg-green-50 border-green-200">
-            <h5 className="font-medium text-green-800 mb-2">✓ Eligible for Rehire</h5>
-            <ul className="text-sm space-y-1 text-green-700">
+          <div className="border rounded-lg p-4 bg-success/5 border-success/20">
+            <h5 className="font-medium text-success mb-2">✓ Eligible for Rehire</h5>
+            <ul className="text-sm space-y-1 text-muted-foreground">
               <li>• Voluntary resignation with proper notice</li>
               <li>• Good performance standing at departure</li>
               <li>• No policy violations on record</li>
               <li>• Passed required waiting period (if any)</li>
             </ul>
           </div>
-          <div className="border rounded-lg p-4 bg-red-50 border-red-200">
-            <h5 className="font-medium text-red-800 mb-2">✗ Not Eligible for Rehire</h5>
-            <ul className="text-sm space-y-1 text-red-700">
+          <div className="border rounded-lg p-4 bg-destructive/5 border-destructive/20">
+            <h5 className="font-medium text-destructive mb-2">✗ Not Eligible for Rehire</h5>
+            <ul className="text-sm space-y-1 text-muted-foreground">
               <li>• Termination for cause</li>
               <li>• Serious policy violations</li>
               <li>• Abandonment of position</li>
