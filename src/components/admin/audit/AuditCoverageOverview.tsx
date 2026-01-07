@@ -1,7 +1,8 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { CheckCircle2, Clock, Activity, Layers } from "lucide-react";
+import { CheckCircle2, Clock, Activity, AlertCircle } from "lucide-react";
 import { AuditCoverageMetrics, getCoverageColor } from "@/utils/auditCoverageUtils";
+import { getInstrumentationCounts } from "@/utils/pageInstrumentationRegistry";
 
 interface AuditCoverageOverviewProps {
   metrics: AuditCoverageMetrics;
@@ -10,20 +11,39 @@ interface AuditCoverageOverviewProps {
 
 export function AuditCoverageOverview({ metrics, isLoading }: AuditCoverageOverviewProps) {
   const pendingCount = metrics.coverageGaps.filter(g => g.status === 'pending_activation').length;
+  const instrumentationCounts = getInstrumentationCounts();
+  const implementationPercentage = Math.round((instrumentationCounts.instrumented / instrumentationCounts.total) * 100);
   
   const cards = [
     {
       label: "Implementation",
-      value: `${metrics.totalModules}/${metrics.totalModules}`,
-      subtitle: "All modules have audit hooks",
+      value: `${implementationPercentage}%`,
+      subtitle: `${instrumentationCounts.instrumented} of ${instrumentationCounts.total} pages have hooks`,
       icon: CheckCircle2,
-      color: "text-success",
-      bgColor: "bg-success/10",
+      color: implementationPercentage >= 90 ? "text-success" : implementationPercentage >= 50 ? "text-warning" : "text-destructive",
+      bgColor: implementationPercentage >= 90 ? "bg-success/10" : implementationPercentage >= 50 ? "bg-warning/10" : "bg-destructive/10",
+      progress: implementationPercentage,
+    },
+    {
+      label: "Not Implemented",
+      value: `${instrumentationCounts.notInstrumented}`,
+      subtitle: "pages need usePageAudit hooks",
+      icon: AlertCircle,
+      color: instrumentationCounts.notInstrumented > 0 ? "text-destructive" : "text-success",
+      bgColor: instrumentationCounts.notInstrumented > 0 ? "bg-destructive/10" : "bg-success/10",
+    },
+    {
+      label: "Pending Activation",
+      value: `${pendingCount}`,
+      subtitle: "instrumented pages awaiting visit",
+      icon: Clock,
+      color: "text-info",
+      bgColor: "bg-info/10",
     },
     {
       label: "Activity Score",
       value: `${metrics.overallActivityLevel}%`,
-      subtitle: `${metrics.activeEntityTypes} of ${metrics.totalImplementedTypes} pages active`,
+      subtitle: `${metrics.activeEntityTypes} of ${metrics.totalImplementedTypes} types active`,
       icon: Activity,
       color: getCoverageColor(metrics.overallActivityLevel),
       bgColor: metrics.overallActivityLevel >= 90 
@@ -32,22 +52,6 @@ export function AuditCoverageOverview({ metrics, isLoading }: AuditCoverageOverv
           ? "bg-warning/10" 
           : "bg-info/10",
       progress: metrics.overallActivityLevel,
-    },
-    {
-      label: "Pending Activation",
-      value: `${pendingCount}`,
-      subtitle: "pages awaiting first visit",
-      icon: Clock,
-      color: "text-info",
-      bgColor: "bg-info/10",
-    },
-    {
-      label: "Active This Week",
-      value: metrics.moduleCoverages.reduce((sum, m) => sum + m.totalLogs, 0).toLocaleString(),
-      subtitle: "audit log entries",
-      icon: Layers,
-      color: "text-primary",
-      bgColor: "bg-primary/10",
     },
   ];
 
