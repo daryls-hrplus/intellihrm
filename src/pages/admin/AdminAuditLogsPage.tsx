@@ -60,6 +60,7 @@ import {
   Users,
   Activity,
   AlertTriangle,
+  Info,
 } from "lucide-react";
 import { AuditLogDiffView } from "@/components/admin/audit/AuditLogDiffView";
 import { AuditLogTrendChart } from "@/components/admin/audit/AuditLogTrendChart";
@@ -267,17 +268,46 @@ export default function AdminAuditLogsPage() {
       const { data: userData } = await userQuery;
       const uniqueUsers = new Set((userData || []).map(u => u.user_id).filter(Boolean)).size;
 
-      // Count high-risk events (deletes on sensitive data, exports of PII)
+      // Count high/critical risk events based on action + entity type hints
+      // High risk:
+      // - EXPORT of PII-like entities
+      // - UPDATE of payroll/compensation/bank-like entities
+      // Critical:
+      // - DELETE of sensitive entities
+      const sensitiveHints = ['payroll', 'compensation', 'salary', 'bank', 'employee', 'profile', 'user', 'role', 'permission', 'company', 'auth', 'credential', 'secret'];
+      const piiHints = ['employee', 'profile', 'candidate', 'application', 'payroll', 'compensation', 'bank', 'users'];
+      const updateSensitiveHints = ['payroll', 'compensation', 'salary', 'bank'];
+
       let highRiskQuery = supabase
         .from('audit_logs')
-        .select('*', { count: 'exact', head: true })
-        .in('action', ['DELETE', 'EXPORT']);
+        .select('*', { count: 'exact', head: true });
 
+      if (actionFilter !== 'all') highRiskQuery = highRiskQuery.eq('action', actionFilter);
+      if (entityFilter !== 'all') highRiskQuery = highRiskQuery.eq('entity_type', entityFilter);
+      if (userFilter !== 'all') highRiskQuery = highRiskQuery.eq('user_id', userFilter);
       if (dateFrom) highRiskQuery = highRiskQuery.gte('created_at', dateFrom.toISOString());
       if (dateTo) {
         const endOfDay = new Date(dateTo);
         endOfDay.setHours(23, 59, 59, 999);
         highRiskQuery = highRiskQuery.lte('created_at', endOfDay.toISOString());
+      }
+
+      // NOTE: we intentionally avoid applying searchQuery here because PostgREST only supports a single OR filter per request.
+      // Risk is still fully visible per-row in the table via the Risk badge.
+
+      const highRiskOrParts: string[] = [];
+      for (const hint of piiHints) {
+        highRiskOrParts.push(`and(action.eq.EXPORT,entity_type.ilike.%${hint}%)`);
+      }
+      for (const hint of updateSensitiveHints) {
+        highRiskOrParts.push(`and(action.eq.UPDATE,entity_type.ilike.%${hint}%)`);
+      }
+      for (const hint of sensitiveHints) {
+        highRiskOrParts.push(`and(action.eq.DELETE,entity_type.ilike.%${hint}%)`);
+      }
+
+      if (highRiskOrParts.length > 0) {
+        highRiskQuery = highRiskQuery.or(highRiskOrParts.join(','));
       }
 
       const { count: highRiskCount } = await highRiskQuery;
@@ -574,6 +604,39 @@ export default function AdminAuditLogsPage() {
               <div className="flex items-center gap-2">
                 <AlertTriangle className="h-4 w-4 text-orange-600" />
                 <span className="text-xs text-muted-foreground">High Risk Events</span>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-6 w-6">
+                      <Info className="h-4 w-4 text-muted-foreground" />
+                      <span className="sr-only">What counts as high risk?</span>
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-[360px]" align="start">
+                    <div className="space-y-2 text-sm">
+                      <p className="font-medium">How “High Risk” is determined</p>
+                      <p className="text-muted-foreground">
+                        Risk is inferred from the <span className="font-medium">action</span> and the
+                        <span className="font-medium"> entity type</span>.
+                      </p>
+                      <div className="space-y-1">
+                        <p className="font-medium">High</p>
+                        <ul className="list-disc pl-5 text-muted-foreground">
+                          <li>Exporting PII-like entities (employees, candidates, payroll, etc.)</li>
+                          <li>Updating payroll/compensation/bank-like entities</li>
+                        </ul>
+                      </div>
+                      <div className="space-y-1">
+                        <p className="font-medium">Critical</p>
+                        <ul className="list-disc pl-5 text-muted-foreground">
+                          <li>Deleting sensitive entities (payroll, compensation, access control, company data)</li>
+                        </ul>
+                      </div>
+                      <p className="text-muted-foreground">
+                        You can always see the calculated risk per event in the <span className="font-medium">Risk</span> column.
+                      </p>
+                    </div>
+                  </PopoverContent>
+                </Popover>
               </div>
               <div className="text-2xl font-bold mt-1 text-orange-600">{summaryStats.highRiskEvents}</div>
             </CardContent>
@@ -854,7 +917,7 @@ export default function AdminAuditLogsPage() {
 
         {/* Detail Dialog */}
         <Dialog open={!!selectedLog} onOpenChange={() => setSelectedLog(null)}>
-          <DialogContent className="max-w-5xl w-[95vw] max-h-[90vh] overflow-hidden flex flex-col">
+          <DialogContent className="max-w-5xl w-[95vw] h-[90vh] overflow-hidden !flex !flex-col">
             <DialogHeader className="flex-shrink-0">
               <DialogTitle className="flex items-center gap-2">
                 Audit Log Details
@@ -870,8 +933,8 @@ export default function AdminAuditLogsPage() {
               </DialogTitle>
             </DialogHeader>
             {selectedLog && (
-              <ScrollArea className="flex-1 min-h-0 pr-4">
-                <div className="space-y-6">
+              <ScrollArea className="flex-1 min-h-0">
+                <div className="space-y-6 pb-6">
                   {/* Summary Grid */}
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4 p-4 bg-muted/50 rounded-lg">
                     <div>
