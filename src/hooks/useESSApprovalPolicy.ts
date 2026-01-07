@@ -174,15 +174,19 @@ export function useESSApprovalPolicies() {
 
 // Hook for looking up the approval policy for a specific request type
 export function useApprovalPolicyLookup(requestType: string) {
-  const { company } = useAuth();
+  const { company, profile } = useAuth();
+  
+  // Use company.id or fall back to profile.company_id for reliable lookup
+  const companyId = company?.id || profile?.company_id;
 
-  const { data: policy } = useQuery({
-    queryKey: ["ess-approval-policy-lookup", company?.id, requestType],
+  const { data: policy, isLoading: isPolicyLoading } = useQuery({
+    queryKey: ["ess-approval-policy-lookup", companyId, requestType],
     queryFn: async () => {
+      if (!companyId) return null;
       const { data, error } = await supabase
         .from("ess_approval_policies")
         .select("*")
-        .eq("company_id", company?.id)
+        .eq("company_id", companyId)
         .eq("request_type", requestType)
         .eq("is_active", true)
         .maybeSingle();
@@ -190,15 +194,16 @@ export function useApprovalPolicyLookup(requestType: string) {
       if (error) throw error;
       return data as ESSApprovalPolicy | null;
     },
-    enabled: !!company?.id && !!requestType,
+    enabled: !!companyId && !!requestType,
   });
 
-  // Default to hr_review if no policy configured
+  // Default to hr_review if no policy configured (safe default)
   const effectiveMode: ApprovalMode = policy?.approval_mode || 'hr_review';
   const notificationOnly = policy?.notification_only || false;
 
   return {
     policy,
+    isPolicyLoading,
     approvalMode: effectiveMode,
     requiresDocumentation: policy?.requires_documentation || false,
     notificationOnly,

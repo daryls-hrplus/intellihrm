@@ -109,6 +109,19 @@ export default function ESSChangeRequestsPage() {
         } else if (request.entity_table === "employee_emergency_contacts") {
           const { error } = await supabase.from("employee_emergency_contacts").update(newValues as any).eq("id", request.entity_id);
           if (error) throw error;
+        } else if (request.entity_table === "profiles") {
+          // Only allow updating specific whitelisted fields on profiles
+          const allowedFields = ["full_name", "first_name", "last_name"];
+          const safeUpdate: Record<string, any> = {};
+          for (const field of allowedFields) {
+            if (newValues[field] !== undefined) {
+              safeUpdate[field] = newValues[field];
+            }
+          }
+          if (Object.keys(safeUpdate).length > 0) {
+            const { error } = await supabase.from("profiles").update(safeUpdate).eq("id", request.entity_id);
+            if (error) throw error;
+          }
         }
       } else if (request.change_action === "delete" && request.entity_id) {
         if (request.entity_table === "employee_contacts") {
@@ -183,6 +196,13 @@ export default function ESSChangeRequestsPage() {
       personal_contact: "Personal Contact",
       emergency_contact: "Emergency Contact",
       address: "Address",
+      name_change: "Name Change",
+      banking: "Banking Details",
+      qualification: "Qualification",
+      dependent: "Dependent",
+      government_id: "Government ID",
+      medical_info: "Medical Information",
+      marital_status: "Marital Status",
     };
     return labels[type] || type;
   };
