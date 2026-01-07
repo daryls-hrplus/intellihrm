@@ -854,8 +854,8 @@ export default function AdminAuditLogsPage() {
 
         {/* Detail Dialog */}
         <Dialog open={!!selectedLog} onOpenChange={() => setSelectedLog(null)}>
-          <DialogContent className="max-w-4xl max-h-[85vh]">
-            <DialogHeader>
+          <DialogContent className="max-w-5xl w-[95vw] max-h-[90vh] overflow-hidden flex flex-col">
+            <DialogHeader className="flex-shrink-0">
               <DialogTitle className="flex items-center gap-2">
                 Audit Log Details
                 {selectedLog && (
@@ -870,7 +870,7 @@ export default function AdminAuditLogsPage() {
               </DialogTitle>
             </DialogHeader>
             {selectedLog && (
-              <ScrollArea className="max-h-[65vh]">
+              <ScrollArea className="flex-1 min-h-0 pr-4">
                 <div className="space-y-6">
                   {/* Summary Grid */}
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4 p-4 bg-muted/50 rounded-lg">
