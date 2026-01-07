@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { usePageAudit } from "@/hooks/usePageAudit";
 import { getTodayString } from "@/utils/dateUtils";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Card, CardContent } from "@/components/ui/card";
@@ -44,6 +45,7 @@ interface Company {
 }
 
 export default function SalaryGradesPage() {
+  usePageAudit('salary_grades', 'Compensation');
   const { t } = useTranslation();
   const {
     isLoading,

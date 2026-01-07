@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { usePageAudit } from "@/hooks/usePageAudit";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -54,6 +55,7 @@ interface Course {
 }
 
 export default function CourseCatalogPage() {
+  usePageAudit('course_catalog', 'Training');
   const { user } = useAuth();
   const { t } = useLanguage();
   const { toast } = useToast();

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { usePageAudit } from "@/hooks/usePageAudit";
 import { useLeaveManagement, LeaveAccrualRule } from "@/hooks/useLeaveManagement";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/hooks/useLanguage";
@@ -56,6 +57,7 @@ import {
 } from "@/components/ui/alert-dialog";
 
 export default function LeaveAccrualRulesPage() {
+  usePageAudit('leave_accrual_rules', 'Leave');
   const queryClient = useQueryClient();
   const { t } = useLanguage();
   const { company, isAdmin, hasRole } = useAuth();

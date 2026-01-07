@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { usePageAudit } from "@/hooks/usePageAudit";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { useLanguage } from "@/hooks/useLanguage";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -15,6 +16,7 @@ interface Company {
 }
 
 export default function SuccessionPlansPage() {
+  usePageAudit('succession_plans', 'Succession');
   const { t } = useLanguage();
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");

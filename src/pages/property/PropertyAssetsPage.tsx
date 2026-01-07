@@ -1,11 +1,13 @@
 import { AppLayout } from "@/components/layout/AppLayout";
 import { LeaveCompanyFilter, useLeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
+import { usePageAudit } from "@/hooks/usePageAudit";
 import PropertyItemsTab from "@/components/property/PropertyItemsTab";
 import { useLanguage } from "@/hooks/useLanguage";
 import { Laptop, ChevronRight } from "lucide-react";
 import { NavLink } from "react-router-dom";
 
 export default function PropertyAssetsPage() {
+  usePageAudit('property_assets', 'Property');
   const { t } = useLanguage();
   const { selectedCompanyId, setSelectedCompanyId } = useLeaveCompanyFilter();
 
