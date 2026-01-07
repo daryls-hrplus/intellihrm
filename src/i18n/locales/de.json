@@ -71,6 +71,7 @@
   },
 "hrHub": {
     "title": "HR-Zentrum",
+    "documentCenter": "Dokumentenzentrum",
     "transactionWorkflowSettings": {
       "title": "Transaktions-Workflow-Einstellungen",
       "subtitle": "Konfigurieren Sie, welche Mitarbeitertransaktionstypen eine Workflow-Genehmigung pro Unternehmen erfordern",
