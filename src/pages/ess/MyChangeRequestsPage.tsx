@@ -96,6 +96,13 @@ export default function MyChangeRequestsPage() {
             Rejected
           </Badge>
         );
+      case "info_required":
+        return (
+          <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
+            <Clock className="h-3 w-3 mr-1" />
+            Info Required
+          </Badge>
+        );
       default:
         return <Badge variant="secondary">{status}</Badge>;
     }
@@ -133,6 +140,11 @@ export default function MyChangeRequestsPage() {
             {request.status === "rejected" && request.review_notes && (
               <p className="text-sm text-destructive mt-2">
                 Reason: {request.review_notes}
+              </p>
+            )}
+            {request.status === "info_required" && request.review_notes && (
+              <p className="text-sm text-amber-600 mt-2">
+                Info needed: {request.review_notes}
               </p>
             )}
           </div>

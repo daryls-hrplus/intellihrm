@@ -10,13 +10,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Check, X, FileText, RefreshCw, AlertTriangle } from "lucide-react";
+import { Check, X, FileText, RefreshCw, AlertTriangle, HelpCircle } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { RequestMetricsCards } from "@/components/hr/ess-requests/RequestMetricsCards";
 import { RequestFilters } from "@/components/hr/ess-requests/RequestFilters";
 import { RequestTableRow } from "@/components/hr/ess-requests/RequestTableRow";
 import { RequestDetailsDialog } from "@/components/hr/ess-requests/RequestDetailsDialog";
+import { useESSNotifications } from "@/hooks/useESSNotifications";
 
 interface ChangeRequest {
   id: string;
@@ -48,12 +49,14 @@ interface ChangeRequest {
 }
 
 export default function ESSChangeRequestsPage() {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const queryClient = useQueryClient();
+  const { sendNotification } = useESSNotifications();
   const [selectedRequest, setSelectedRequest] = useState<ChangeRequest | null>(null);
   const [reviewNotes, setReviewNotes] = useState("");
   const [isApproveDialogOpen, setIsApproveDialogOpen] = useState(false);
   const [isRejectDialogOpen, setIsRejectDialogOpen] = useState(false);
+  const [isRequestInfoDialogOpen, setIsRequestInfoDialogOpen] = useState(false);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState<string>("pending");
   const [typeFilter, setTypeFilter] = useState<string>("all");
@@ -181,9 +184,23 @@ export default function ESSChangeRequestsPage() {
 
       if (updateError) throw updateError;
     },
-    onSuccess: () => {
+    onSuccess: async (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["ess-change-requests"] });
       toast.success("Change request approved and applied");
+      
+      // Send notification to employee
+      if (selectedRequest) {
+        await sendNotification({
+          notificationType: 'approved',
+          employeeId: selectedRequest.employee_id,
+          requestId: selectedRequest.id,
+          requestType: selectedRequest.request_type,
+          changeAction: selectedRequest.change_action,
+          reviewerNotes: variables.notes || undefined,
+          reviewerName: profile?.full_name || undefined,
+        });
+      }
+      
       closeDialogs();
     },
     onError: (error) => {
@@ -207,17 +224,69 @@ export default function ESSChangeRequestsPage() {
 
       if (error) throw error;
     },
-    onSuccess: () => {
+    onSuccess: async (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["ess-change-requests"] });
       toast.success("Change request rejected");
+      
+      // Send notification to employee
+      if (selectedRequest) {
+        await sendNotification({
+          notificationType: 'rejected',
+          employeeId: selectedRequest.employee_id,
+          requestId: selectedRequest.id,
+          requestType: selectedRequest.request_type,
+          changeAction: selectedRequest.change_action,
+          reviewerNotes: variables.notes,
+          reviewerName: profile?.full_name || undefined,
+        });
+      }
+      
       closeDialogs();
     },
     onError: () => toast.error("Failed to reject change request"),
   });
 
+  // Request info mutation
+  const requestInfoMutation = useMutation({
+    mutationFn: async ({ requestId, notes }: { requestId: string; notes: string }) => {
+      const { error } = await supabase
+        .from("employee_data_change_requests")
+        .update({
+          status: "info_required",
+          reviewed_at: new Date().toISOString(),
+          reviewed_by: user?.id,
+          review_notes: notes,
+        })
+        .eq("id", requestId);
+
+      if (error) throw error;
+    },
+    onSuccess: async (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["ess-change-requests"] });
+      toast.success("Information request sent to employee");
+      
+      // Send notification to employee
+      if (selectedRequest) {
+        await sendNotification({
+          notificationType: 'info_required',
+          employeeId: selectedRequest.employee_id,
+          requestId: selectedRequest.id,
+          requestType: selectedRequest.request_type,
+          changeAction: selectedRequest.change_action,
+          reviewerNotes: variables.notes,
+          reviewerName: profile?.full_name || undefined,
+        });
+      }
+      
+      closeDialogs();
+    },
+    onError: () => toast.error("Failed to request additional information"),
+  });
+
   const closeDialogs = () => {
     setIsApproveDialogOpen(false);
     setIsRejectDialogOpen(false);
+    setIsRequestInfoDialogOpen(false);
     setIsViewDialogOpen(false);
     setSelectedRequest(null);
     setReviewNotes("");
@@ -345,6 +414,10 @@ export default function ESSChangeRequestsPage() {
                         setSelectedRequest(request);
                         setIsRejectDialogOpen(true);
                       }}
+                      onRequestInfo={() => {
+                        setSelectedRequest(request);
+                        setIsRequestInfoDialogOpen(true);
+                      }}
                       getRequestTypeLabel={getRequestTypeLabel}
                       getActionLabel={getActionLabel}
                     />
@@ -367,6 +440,10 @@ export default function ESSChangeRequestsPage() {
           onReject={() => {
             setIsViewDialogOpen(false);
             setIsRejectDialogOpen(true);
+          }}
+          onRequestInfo={() => {
+            setIsViewDialogOpen(false);
+            setIsRequestInfoDialogOpen(true);
           }}
           getRequestTypeLabel={getRequestTypeLabel}
           getActionLabel={getActionLabel}
@@ -462,6 +539,53 @@ export default function ESSChangeRequestsPage() {
               >
                 <X className="h-4 w-4 mr-2" />
                 Reject Request
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Request Info Dialog */}
+        <Dialog open={isRequestInfoDialogOpen} onOpenChange={setIsRequestInfoDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Request Additional Information</DialogTitle>
+              <DialogDescription>
+                Specify what additional information you need from the employee.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <Alert>
+                <HelpCircle className="h-4 w-4" />
+                <AlertDescription>
+                  The employee will be notified and asked to provide the requested information.
+                </AlertDescription>
+              </Alert>
+              <div className="grid gap-2">
+                <Label>What information is needed? *</Label>
+                <Textarea
+                  value={reviewNotes}
+                  onChange={(e) => setReviewNotes(e.target.value)}
+                  placeholder="Describe what additional documents or details are required..."
+                  rows={4}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={closeDialogs}>Cancel</Button>
+              <Button
+                variant="secondary"
+                onClick={() => {
+                  if (selectedRequest) {
+                    requestInfoMutation.mutate({
+                      requestId: selectedRequest.id,
+                      notes: reviewNotes,
+                    });
+                  }
+                }}
+                disabled={requestInfoMutation.isPending || !reviewNotes.trim()}
+              >
+                <HelpCircle className="h-4 w-4 mr-2" />
+                Request Information
               </Button>
             </DialogFooter>
           </DialogContent>
