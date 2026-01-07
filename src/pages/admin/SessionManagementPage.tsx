@@ -25,6 +25,7 @@ import {
   LogOut
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { usePageAudit } from "@/hooks/usePageAudit";
 
 interface SessionSettings {
   idleTimeoutMinutes: number;
@@ -93,6 +94,7 @@ const mockActiveSessions: ActiveSession[] = [
 ];
 
 export default function SessionManagementPage() {
+  usePageAudit('sessions', 'Admin');
   const { t } = useTranslation();
   const [settings, setSettings] = useState<SessionSettings>(defaultSettings);
   const [activeSessions, setActiveSessions] = useState<ActiveSession[]>(mockActiveSessions);

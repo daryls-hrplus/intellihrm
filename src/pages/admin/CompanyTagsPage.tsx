@@ -37,6 +37,7 @@ import {
 } from "@/components/ui/table";
 import { Tag, Plus, Pencil, Trash2, Loader2, Building2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { usePageAudit } from "@/hooks/usePageAudit";
 
 interface CompanyTag {
   id: string;
@@ -60,6 +61,7 @@ const breadcrumbItems = [
 ];
 
 export default function CompanyTagsPage() {
+  usePageAudit('company_tags', 'Admin');
   const [tags, setTags] = useState<CompanyTag[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);

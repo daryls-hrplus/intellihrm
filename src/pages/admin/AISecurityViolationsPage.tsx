@@ -18,6 +18,7 @@ import {
   FileText,
   X,
 } from "lucide-react";
+import { usePageAudit } from "@/hooks/usePageAudit";
 
 interface Violation {
   id: string;
@@ -57,6 +58,7 @@ const violationTypeLabels: Record<string, string> = {
 };
 
 export default function AISecurityViolationsPage() {
+  usePageAudit('ai_security', 'Admin');
   const [violations, setViolations] = useState<Violation[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");

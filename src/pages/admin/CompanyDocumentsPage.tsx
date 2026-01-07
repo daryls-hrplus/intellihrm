@@ -16,6 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { formatDateForDisplay } from "@/utils/dateUtils";
 import { Plus, FileText, Download, Trash2, Globe, Lock, Upload, X, Loader2, Building2 } from "lucide-react";
+import { usePageAudit } from "@/hooks/usePageAudit";
 
 interface Company {
   id: string;
@@ -51,6 +52,7 @@ const DOCUMENT_CATEGORIES = [
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
 export default function CompanyDocumentsPage() {
+  usePageAudit('company_documents', 'Admin');
   const { user, profile } = useAuth();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);

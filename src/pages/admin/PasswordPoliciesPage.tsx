@@ -26,6 +26,7 @@ import {
   Info
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { usePageAudit } from "@/hooks/usePageAudit";
 
 interface PasswordPolicy {
   id: string;
@@ -47,6 +48,7 @@ interface PasswordPolicy {
 }
 
 export default function PasswordPoliciesPage() {
+  usePageAudit('password_policies', 'Admin');
   const { t } = useTranslation();
   const { user } = useAuth();
   const [policy, setPolicy] = useState<PasswordPolicy | null>(null);

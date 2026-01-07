@@ -4,8 +4,10 @@ import { useLanguage } from "@/hooks/useLanguage";
 import { UserPlus } from "lucide-react";
 import { ReferralProgramTab } from "@/components/recruitment/ReferralProgramTab";
 import { LeaveCompanyFilter, useLeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
+import { usePageAudit } from "@/hooks/usePageAudit";
 
 export default function ReferralsPage() {
+  usePageAudit('referrals', 'Recruitment');
   const { t } = useLanguage();
   const { selectedCompanyId, setSelectedCompanyId } = useLeaveCompanyFilter();
 

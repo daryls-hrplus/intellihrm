@@ -4,8 +4,10 @@ import { useLanguage } from "@/hooks/useLanguage";
 import { FlaskConical } from "lucide-react";
 import { AssessmentsTab } from "@/components/recruitment/AssessmentsTab";
 import { LeaveCompanyFilter, useLeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
+import { usePageAudit } from "@/hooks/usePageAudit";
 
 export default function AssessmentsPage() {
+  usePageAudit('assessments', 'Recruitment');
   const { t } = useLanguage();
   const { selectedCompanyId, setSelectedCompanyId } = useLeaveCompanyFilter();
 

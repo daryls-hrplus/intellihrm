@@ -29,6 +29,7 @@ import {
   ExternalLink
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { usePageAudit } from "@/hooks/usePageAudit";
 
 interface SSOProvider {
   id: string;
@@ -62,6 +63,7 @@ const defaultProvider: Partial<SSOProvider> = {
 };
 
 export default function SSOSettingsPage() {
+  usePageAudit('sso_settings', 'Admin');
   const { t } = useTranslation();
   const { company, isAdmin } = useAuth();
   const [providers, setProviders] = useState<SSOProvider[]>([]);

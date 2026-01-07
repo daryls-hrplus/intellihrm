@@ -22,6 +22,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { formatDateForDisplay } from "@/utils/dateUtils";
+import { usePageAudit } from "@/hooks/usePageAudit";
 
 interface LetterTemplate {
   id: string;
@@ -66,6 +67,7 @@ const DEFAULT_VARIABLES = [
 ];
 
 export default function AdminLetterTemplatesPage() {
+  usePageAudit('letter_templates', 'Admin');
   const { user } = useAuth();
   const [templates, setTemplates] = useState<LetterTemplate[]>([]);
   const [pendingLetters, setPendingLetters] = useState<GeneratedLetter[]>([]);

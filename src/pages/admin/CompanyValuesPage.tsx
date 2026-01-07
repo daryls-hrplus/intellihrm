@@ -27,8 +27,10 @@ import { useValuesAssessment } from '@/hooks/performance/useValuesAssessment';
 
 import { CompanyValue, BehavioralIndicator } from '@/types/valuesAssessment';
 import { LeaveCompanyFilter, useLeaveCompanyFilter } from '@/components/leave/LeaveCompanyFilter';
+import { usePageAudit } from "@/hooks/usePageAudit";
 
 export default function CompanyValuesPage() {
+  usePageAudit('company_values', 'Admin');
   const { selectedCompanyId, setSelectedCompanyId } = useLeaveCompanyFilter();
   const {
     values,

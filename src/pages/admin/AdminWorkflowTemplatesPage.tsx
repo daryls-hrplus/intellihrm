@@ -27,6 +27,7 @@ import { WorkflowAnalyticsDashboard } from "@/components/workflow/WorkflowAnalyt
 import { WorkflowAuditTrail } from "@/components/workflow/WorkflowAuditTrail";
 import { WorkflowDelegationManager } from "@/components/workflow/WorkflowDelegationManager";
 import { BarChart3, History, UserCheck } from "lucide-react";
+import { usePageAudit } from "@/hooks/usePageAudit";
 
 const WORKFLOW_CATEGORIES: { value: WorkflowCategory; label: string }[] = [
   // Employee Transactions
@@ -72,6 +73,7 @@ const ESCALATION_ACTIONS = [
 ];
 
 export default function AdminWorkflowTemplatesPage() {
+  usePageAudit('workflow_templates', 'Admin');
   const { user } = useAuth();
   const [templates, setTemplates] = useState<WorkflowTemplate[]>([]);
   const [selectedTemplate, setSelectedTemplate] = useState<WorkflowTemplate | null>(null);

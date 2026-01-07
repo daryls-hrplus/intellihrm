@@ -18,6 +18,7 @@ import { Switch } from "@/components/ui/switch";
 import { format } from "date-fns";
 import { formatDateForDisplay } from "@/utils/dateUtils";
 import { Plus, Megaphone, Pin, Edit, Trash2, Building2 } from "lucide-react";
+import { usePageAudit } from "@/hooks/usePageAudit";
 
 interface Company {
   id: string;
@@ -40,6 +41,7 @@ interface Announcement {
 }
 
 export default function CompanyAnnouncementsPage() {
+  usePageAudit('announcements', 'Admin');
   const { t } = useTranslation();
   const { user, profile } = useAuth();
   const { toast } = useToast();
