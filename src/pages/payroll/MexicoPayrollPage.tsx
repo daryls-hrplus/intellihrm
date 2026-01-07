@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { usePageAudit } from "@/hooks/usePageAudit";
 import { 
   Building2, 
   Users, 
@@ -84,7 +85,6 @@ import {
   MexicanPayrollAuditDashboard,
   MexicanRegulatoryCalendar
 } from "@/components/payroll/mexico";
-import { usePageAudit } from "@/hooks/usePageAudit";
 
 interface Company {
   id: string;

@@ -15,6 +15,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
 import { usePayrollFilters } from "@/components/payroll/PayrollFilters";
 import { useAuth } from "@/contexts/AuthContext";
+import { usePageAudit } from "@/hooks/usePageAudit";
 import { toast } from "sonner";
 import { 
   Calendar, 
@@ -72,6 +73,7 @@ interface FiscalYearConfig {
 }
 
 export default function YearEndPayrollClosingPage() {
+  usePageAudit('year_end_payroll_closing', 'Payroll');
   const { selectedCompanyId } = usePayrollFilters();
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);

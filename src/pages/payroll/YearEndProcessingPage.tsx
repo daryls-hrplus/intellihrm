@@ -13,9 +13,11 @@ import { usePayroll, PayrollYearEnd } from "@/hooks/usePayroll";
 import { PayrollFilters, usePayrollFilters } from "@/components/payroll/PayrollFilters";
 import { Plus, FileCheck, Calendar, DollarSign, Users, AlertCircle, CheckCircle } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { usePageAudit } from "@/hooks/usePageAudit";
 
 export default function YearEndProcessingPage() {
   const { t } = useTranslation();
+  usePageAudit('year_end_processing', 'Payroll');
   const { selectedCompanyId, setSelectedCompanyId } = usePayrollFilters();
   const {
     isLoading,
