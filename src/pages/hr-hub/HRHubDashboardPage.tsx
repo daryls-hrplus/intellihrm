@@ -80,15 +80,14 @@ export default function HRHubDashboardPage() {
         { titleKey: "hrHub.employeeDirectory", descKey: "hrHub.employeeDirectoryDesc", icon: Users, href: "/ess/directory?from=hr-hub", badge: null },
         { titleKey: "hrHub.helpDesk", descKey: "hrHub.helpDeskDesc", icon: Headset, href: "/admin/helpdesk", badge: null },
         { titleKey: "hrHub.communicationsReminders", descKey: "hrHub.communicationsRemindersDesc", icon: Mail, href: "/hr-hub/reminders", badge: null },
-        { titleKey: "hrHub.announcements", descKey: "hrHub.announcementsDesc", icon: Megaphone, href: "/admin/announcements", badge: null },
+        { titleKey: "hrHub.companyComms.title", descKey: "hrHub.companyComms.description", icon: Megaphone, href: "/hr-hub/company-communications", badge: null },
         { titleKey: "hrHub.knowledgeBase", descKey: "hrHub.knowledgeBaseDesc", icon: BookOpen, href: "/admin/knowledge-base", badge: null },
       ],
     },
-    // Section 3: Publishing & Content (NEW - content management)
+    // Section 3: Publishing & Content
     {
       titleKey: "hrHub.publishingContent",
       items: [
-        { titleKey: "hrHub.intranetAdmin.title", descKey: "hrHub.intranetAdmin.description", icon: Megaphone, href: "/hr-hub/intranet-admin", badge: null },
         { titleKey: "hrHub.companyDocuments", descKey: "hrHub.companyDocumentsDesc", icon: FolderOpen, href: "/admin/documents", badge: null },
         { titleKey: "hrHub.policyDocuments", descKey: "hrHub.policyDocumentsDesc", icon: FileStack, href: "/admin/policy-documents", badge: null },
         { titleKey: "hrHub.letterTemplates", descKey: "hrHub.letterTemplatesDesc", icon: FileText, href: "/admin/letter-templates", badge: null },
@@ -136,7 +135,7 @@ export default function HRHubDashboardPage() {
   ];
 
   const quickActions = [
-    { titleKey: "hrHub.newAnnouncement", icon: Megaphone, href: "/admin/announcements" },
+    { titleKey: "hrHub.newAnnouncement", icon: Megaphone, href: "/hr-hub/company-communications" },
     { titleKey: "hrHub.createLetter", icon: FileText, href: "/admin/letter-templates" },
     { titleKey: "hrHub.viewTickets", icon: Headset, href: "/admin/helpdesk" },
     { titleKey: "hrHub.addEvent", icon: Calendar, href: "/hr-hub/calendar" },
