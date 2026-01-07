@@ -71,6 +71,8 @@
   },
 "hrHub": {
     "title": "Central RH",
+    "communicationsReminders": "Notificações e Lembretes",
+    "communicationsRemindersDesc": "Gerencie modelos, regras de automação, entrega de e-mails e notificações no aplicativo",
     "transactionWorkflowSettings": {
       "title": "Configurações de Fluxo de Transações",
       "subtitle": "Configure quais tipos de transações de funcionários requerem aprovação de fluxo de trabalho por empresa",

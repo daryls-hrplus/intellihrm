@@ -71,6 +71,8 @@
   },
 "hrHub": {
     "title": "HR Hub",
+    "communicationsReminders": "Meldingen & Herinneringen",
+    "communicationsRemindersDesc": "Beheer sjablonen, automatiseringsregels, e-mailbezorging en in-app meldingen",
     "transactionWorkflowSettings": {
       "title": "Transactie Workflow Instellingen",
       "subtitle": "Configureer welke medewerker transactietypes workflow-goedkeuring vereisen per bedrijf",

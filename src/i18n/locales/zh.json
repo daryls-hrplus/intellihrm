@@ -72,7 +72,7 @@
 "hrHub": {
     "title": "人力资源中心",
     "communicationSupportCenter": "沟通与支持中心",
-    "communicationsReminders": "通讯与提醒",
+    "communicationsReminders": "通知与提醒",
     "communicationsRemindersDesc": "管理模板、自动化规则、邮件发送和应用内通知",
     "transactionWorkflowSettings": {
       "title": "交易工作流设置",
