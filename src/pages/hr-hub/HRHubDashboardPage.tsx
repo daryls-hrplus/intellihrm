@@ -82,18 +82,18 @@ export default function HRHubDashboardPage() {
       ],
     },
     {
-      titleKey: "hrHub.tasksEvents",
+      titleKey: "hrHub.tasksEventsApprovals",
       items: [
         { titleKey: "hrHub.calendar", descKey: "hrHub.calendarDesc", icon: Calendar, href: "/hr-hub/calendar", badge: null },
         { titleKey: "hrHub.tasks", descKey: "hrHub.tasksDesc", icon: CheckSquare, href: "/hr-hub/tasks", badge: null },
         { titleKey: "hrHub.milestones", descKey: "hrHub.milestonesDesc", icon: Gift, href: "/hr-hub/milestones", badge: null },
         { titleKey: "hrHub.reminders", descKey: "hrHub.remindersDesc", icon: Megaphone, href: "/hr-hub/reminders", badge: null },
+        { titleKey: "hrHub.essChangeRequests", descKey: "hrHub.essChangeRequestsDesc", icon: UserCog, href: "/hr-hub/ess-change-requests", badge: null, pendingCount: pendingESSCount },
       ],
     },
     {
       titleKey: "hrHub.complianceWorkflows",
       items: [
-        { titleKey: "hrHub.essChangeRequests", descKey: "hrHub.essChangeRequestsDesc", icon: UserCog, href: "/hr-hub/ess-change-requests", badge: null, pendingCount: pendingESSCount },
         { titleKey: "hrHub.essApprovalPolicies.title", descKey: "hrHub.essApprovalPolicies.shortDesc", icon: Settings, href: "/hr-hub/ess-approval-policies", badge: null },
         { titleKey: "hrHub.compliance", descKey: "hrHub.complianceDesc", icon: ShieldCheck, href: "/hr-hub/compliance", badge: null },
         { titleKey: "hrHub.integrationHub", descKey: "hrHub.integrationHubDesc", icon: GitBranch, href: "/hr-hub/integrations", badge: null },
