@@ -4,3 +4,4 @@ export { WorkforceManualJobArchitectureSection } from './WorkforceManualJobArchi
 export { WorkforceManualEmployeeManagementSection } from './WorkforceManualEmployeeManagementSection';
 export { WorkforceManualLifecycleWorkflowsSection } from './WorkforceManualLifecycleWorkflowsSection';
 export { WorkforceManualPositionControlSection } from './WorkforceManualPositionControlSection';
+export { WorkforceManualAnalyticsSection } from './WorkforceManualAnalyticsSection';
