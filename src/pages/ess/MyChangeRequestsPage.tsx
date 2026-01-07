@@ -70,8 +70,8 @@ export default function MyChangeRequestsPage() {
     enabled: !!profile?.id,
   });
 
-  const pendingRequests = requests?.filter((r) => r.status === "pending") || [];
-  const completedRequests = requests?.filter((r) => r.status !== "pending") || [];
+  const pendingRequests = requests?.filter((r) => r.status === "pending" || r.status === "info_required") || [];
+  const completedRequests = requests?.filter((r) => r.status === "applied" || r.status === "rejected") || [];
 
   const getStatusBadge = (status: string) => {
     switch (status) {
