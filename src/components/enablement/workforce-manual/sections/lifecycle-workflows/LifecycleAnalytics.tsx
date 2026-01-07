@@ -1,7 +1,9 @@
-import { LearningObjectives } from './LearningObjectives';
-import { ScreenshotPlaceholder } from '@/components/enablement/manual/components/ScreenshotPlaceholder';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Lightbulb, BarChart3, TrendingUp, Clock, Users } from 'lucide-react';
+import { 
+  TipCallout, 
+  LearningObjectives, 
+  ScreenshotPlaceholder 
+} from '@/components/enablement/manual/components';
+import { BarChart3, TrendingUp, Clock, Users } from 'lucide-react';
 
 export function LifecycleAnalytics() {
   return (
@@ -11,13 +13,10 @@ export function LifecycleAnalytics() {
         and turnover patterns. These metrics help HR optimize processes and improve employee experience.
       </p>
 
-      <Alert>
-        <Lightbulb className="h-4 w-4" />
-        <AlertDescription>
-          <strong>Key Insight:</strong> Organizations that track onboarding completion rates and 
-          correlate them with retention see 50% improvement in new hire success rates.
-        </AlertDescription>
-      </Alert>
+      <TipCallout title="Key Insight">
+        Organizations that track onboarding completion rates and correlate them with retention 
+        see 50% improvement in new hire success rates.
+      </TipCallout>
 
       <div className="space-y-4">
         <h4 className="font-semibold">Key Lifecycle Metrics</h4>
@@ -53,7 +52,7 @@ export function LifecycleAnalytics() {
                 ].map((item, idx) => (
                   <div key={idx} className="flex items-center gap-2">
                     <span className="text-sm w-32">{item.phase}</span>
-                    <div className="flex-1 bg-gray-200 rounded-full h-2">
+                    <div className="flex-1 bg-muted rounded-full h-2">
                       <div 
                         className="bg-primary h-2 rounded-full" 
                         style={{ width: `${item.completion}%` }} 

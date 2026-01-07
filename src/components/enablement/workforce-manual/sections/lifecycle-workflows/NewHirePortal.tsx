@@ -1,7 +1,9 @@
-import { LearningObjectives } from './LearningObjectives';
-import { ScreenshotPlaceholder } from '@/components/enablement/manual/components/ScreenshotPlaceholder';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Lightbulb, CheckCircle, FileText, GraduationCap, UserCircle } from 'lucide-react';
+import { 
+  TipCallout, 
+  LearningObjectives, 
+  ScreenshotPlaceholder 
+} from '@/components/enablement/manual/components';
+import { CheckCircle, FileText, GraduationCap, UserCircle } from 'lucide-react';
 
 export function NewHirePortal() {
   return (
@@ -11,13 +13,10 @@ export function NewHirePortal() {
         to complete their onboarding tasks, access company information, and track their integration progress.
       </p>
 
-      <Alert>
-        <Lightbulb className="h-4 w-4" />
-        <AlertDescription>
-          <strong>Day-1 Readiness:</strong> Employees can access the portal before their official 
-          start date to complete pre-boarding tasks, reducing day-1 administrative burden.
-        </AlertDescription>
-      </Alert>
+      <TipCallout title="Day-1 Readiness">
+        Employees can access the portal before their official start date to complete pre-boarding 
+        tasks, reducing day-1 administrative burden.
+      </TipCallout>
 
       <div className="space-y-4">
         <h4 className="font-semibold">Portal Features</h4>

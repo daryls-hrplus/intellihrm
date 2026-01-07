@@ -1,7 +1,9 @@
-import { LearningObjectives } from './LearningObjectives';
-import { ScreenshotPlaceholder } from '@/components/enablement/manual/components/ScreenshotPlaceholder';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Lightbulb, Users, ClipboardCheck, MessageSquare, Calendar } from 'lucide-react';
+import { 
+  InfoCallout, 
+  LearningObjectives, 
+  ScreenshotPlaceholder 
+} from '@/components/enablement/manual/components';
+import { Users, ClipboardCheck, MessageSquare, Calendar } from 'lucide-react';
 
 export function ManagerOnboardingView() {
   return (
@@ -11,13 +13,10 @@ export function ManagerOnboardingView() {
         members' integration progress, complete manager-specific tasks, and ensure successful team integration.
       </p>
 
-      <Alert>
-        <Lightbulb className="h-4 w-4" />
-        <AlertDescription>
-          <strong>Manager Impact:</strong> Research shows that manager involvement in onboarding 
-          increases new hire engagement by 3.4x. MSS makes this involvement structured and trackable.
-        </AlertDescription>
-      </Alert>
+      <InfoCallout title="Manager Impact">
+        Research shows that manager involvement in onboarding increases new hire engagement 
+        by 3.4x. MSS makes this involvement structured and trackable.
+      </InfoCallout>
 
       <div className="space-y-4">
         <h4 className="font-semibold">Manager Dashboard Features</h4>
@@ -99,21 +98,21 @@ export function ManagerOnboardingView() {
               <span>Overall Progress</span>
               <span>68%</span>
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
+            <div className="w-full bg-muted rounded-full h-2">
               <div className="bg-primary h-2 rounded-full" style={{ width: '68%' }} />
             </div>
           </div>
           <div className="grid grid-cols-3 gap-4 mt-4 text-center text-sm">
             <div>
-              <div className="font-medium text-green-600">12</div>
+              <div className="font-medium text-success">12</div>
               <div className="text-muted-foreground">Completed</div>
             </div>
             <div>
-              <div className="font-medium text-blue-600">4</div>
+              <div className="font-medium text-primary">4</div>
               <div className="text-muted-foreground">In Progress</div>
             </div>
             <div>
-              <div className="font-medium text-gray-600">6</div>
+              <div className="font-medium text-muted-foreground">6</div>
               <div className="text-muted-foreground">Pending</div>
             </div>
           </div>
