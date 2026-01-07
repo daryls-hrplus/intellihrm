@@ -17,6 +17,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Plus, Edit2, Trash2, Info, User, PiggyBank, Home, GraduationCap } from "lucide-react";
 import { toast } from "sonner";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { usePageAudit } from "@/hooks/usePageAudit";
 
 interface TaxReliefScheme {
   id: string;
@@ -85,6 +86,7 @@ const getFlagEmoji = (countryCode: string): string => {
 };
 
 export default function TaxReliefSchemesPage() {
+  usePageAudit('tax_relief_schemes', 'Payroll');
   const { t } = useTranslation();
   const [schemes, setSchemes] = useState<TaxReliefScheme[]>([]);
   const [loading, setLoading] = useState(true);

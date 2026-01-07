@@ -21,6 +21,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { usePageAudit } from "@/hooks/usePageAudit";
 
 interface SemiMonthlyRule {
   id?: string;
@@ -63,6 +64,7 @@ interface DeductionConfig {
 }
 
 export default function SemiMonthlyPayrollRulesPage() {
+  usePageAudit('semi_monthly_payroll_rules', 'Payroll');
   const { t } = useTranslation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();

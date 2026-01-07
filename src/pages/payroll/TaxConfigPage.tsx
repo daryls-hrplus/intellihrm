@@ -19,6 +19,7 @@ import { toast } from "sonner";
 import { TaxBracketUpload } from "@/components/payroll/TaxBracketUpload";
 import { getTodayString } from "@/utils/dateUtils";
 import { getCountryName } from "@/lib/countries";
+import { usePageAudit } from "@/hooks/usePageAudit";
 
 interface StatutoryDeductionType {
   id: string;
@@ -55,6 +56,7 @@ interface StatutoryRateBand {
 }
 
 export default function TaxConfigPage() {
+  usePageAudit('tax_config', 'Payroll');
   const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);

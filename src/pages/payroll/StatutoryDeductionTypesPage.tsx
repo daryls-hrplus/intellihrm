@@ -23,6 +23,7 @@ import { ComprehensiveStatutoryDocumentation } from "@/components/payroll/Compre
 import { StatutoryReportingDocuments } from "@/components/payroll/StatutoryReportingDocuments";
 import { StatutoryReportPrint } from "@/components/payroll/StatutoryReportPrint";
 import { getTodayString } from "@/utils/dateUtils";
+import { usePageAudit } from "@/hooks/usePageAudit";
 
 interface StatutoryDeductionType {
   id: string;
@@ -57,6 +58,7 @@ const STATUTORY_TYPES = [
 ];
 
 export default function StatutoryDeductionTypesPage() {
+  usePageAudit('statutory_deduction_types', 'Payroll');
   const { t } = useTranslation();
   const [items, setItems] = useState<StatutoryDeductionType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
