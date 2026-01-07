@@ -62,6 +62,18 @@ export default function HRHubDashboardPage() {
   });
 
   const hubSections = [
+    // Section 1: Tasks, Events & Approvals (Daily actions - most used)
+    {
+      titleKey: "hrHub.tasksEventsApprovals",
+      items: [
+        { titleKey: "hrHub.essChangeRequests", descKey: "hrHub.essChangeRequestsDesc", icon: UserCog, href: "/hr-hub/ess-change-requests", badge: null, pendingCount: pendingESSCount },
+        { titleKey: "hrHub.tasks", descKey: "hrHub.tasksDesc", icon: CheckSquare, href: "/hr-hub/tasks", badge: null },
+        { titleKey: "hrHub.reminders", descKey: "hrHub.remindersDesc", icon: Megaphone, href: "/hr-hub/reminders", badge: null },
+        { titleKey: "hrHub.calendar", descKey: "hrHub.calendarDesc", icon: Calendar, href: "/hr-hub/calendar", badge: null },
+        { titleKey: "hrHub.milestones", descKey: "hrHub.milestonesDesc", icon: Gift, href: "/hr-hub/milestones", badge: null },
+      ],
+    },
+    // Section 2: Communication & Support
     {
       titleKey: "hrHub.communicationSupport",
       items: [
@@ -69,41 +81,39 @@ export default function HRHubDashboardPage() {
         { titleKey: "hrHub.helpDesk", descKey: "hrHub.helpDeskDesc", icon: Headset, href: "/admin/helpdesk", badge: null },
         { titleKey: "hrHub.announcements", descKey: "hrHub.announcementsDesc", icon: Megaphone, href: "/admin/announcements", badge: null },
         { titleKey: "hrHub.knowledgeBase", descKey: "hrHub.knowledgeBaseDesc", icon: BookOpen, href: "/admin/knowledge-base", badge: null },
-        { titleKey: "hrHub.intranetAdmin.title", descKey: "hrHub.intranetAdmin.description", icon: Megaphone, href: "/hr-hub/intranet-admin", badge: null },
       ],
     },
+    // Section 3: Publishing & Content (NEW - content management)
     {
-      titleKey: "hrHub.documentsTemplates",
+      titleKey: "hrHub.publishingContent",
       items: [
-        { titleKey: "hrHub.letterTemplates", descKey: "hrHub.letterTemplatesDesc", icon: FileText, href: "/admin/letter-templates", badge: null },
+        { titleKey: "hrHub.intranetAdmin.title", descKey: "hrHub.intranetAdmin.description", icon: Megaphone, href: "/hr-hub/intranet-admin", badge: null },
         { titleKey: "hrHub.companyDocuments", descKey: "hrHub.companyDocumentsDesc", icon: FolderOpen, href: "/admin/documents", badge: null },
         { titleKey: "hrHub.policyDocuments", descKey: "hrHub.policyDocumentsDesc", icon: FileStack, href: "/admin/policy-documents", badge: null },
+        { titleKey: "hrHub.letterTemplates", descKey: "hrHub.letterTemplatesDesc", icon: FileText, href: "/admin/letter-templates", badge: null },
         { titleKey: "hrHub.formsLibrary", descKey: "hrHub.formsLibraryDesc", icon: ClipboardList, href: "/hr-hub/forms", badge: "hrHub.comingSoon" },
       ],
     },
+    // Section 4: Compliance & Governance
     {
-      titleKey: "hrHub.tasksEventsApprovals",
+      titleKey: "hrHub.complianceGovernance",
       items: [
-        { titleKey: "hrHub.calendar", descKey: "hrHub.calendarDesc", icon: Calendar, href: "/hr-hub/calendar", badge: null },
-        { titleKey: "hrHub.tasks", descKey: "hrHub.tasksDesc", icon: CheckSquare, href: "/hr-hub/tasks", badge: null },
-        { titleKey: "hrHub.milestones", descKey: "hrHub.milestonesDesc", icon: Gift, href: "/hr-hub/milestones", badge: null },
-        { titleKey: "hrHub.reminders", descKey: "hrHub.remindersDesc", icon: Megaphone, href: "/hr-hub/reminders", badge: null },
-        { titleKey: "hrHub.essChangeRequests", descKey: "hrHub.essChangeRequestsDesc", icon: UserCog, href: "/hr-hub/ess-change-requests", badge: null, pendingCount: pendingESSCount },
-      ],
-    },
-    {
-      titleKey: "hrHub.complianceWorkflows",
-      items: [
-        { titleKey: "hrHub.essApprovalPolicies.title", descKey: "hrHub.essApprovalPolicies.shortDesc", icon: Settings, href: "/hr-hub/ess-approval-policies", badge: null },
         { titleKey: "hrHub.compliance", descKey: "hrHub.complianceDesc", icon: ShieldCheck, href: "/hr-hub/compliance", badge: null },
         { titleKey: "hrHub.integrationHub", descKey: "hrHub.integrationHubDesc", icon: GitBranch, href: "/hr-hub/integrations", badge: null },
+      ],
+    },
+    // Section 5: Workflow Configuration
+    {
+      titleKey: "hrHub.workflowConfiguration",
+      items: [
         { titleKey: "hrHub.workflowTemplates", descKey: "hrHub.workflowTemplatesDesc", icon: GitBranch, href: "/admin/workflow-templates", badge: null },
         { titleKey: "hrHub.transactionWorkflowSettings.title", descKey: "hrHub.transactionWorkflowSettings.shortDesc", icon: FileText, href: "/hr-hub/transaction-workflow-settings", badge: null },
         { titleKey: "hrHub.approvalDelegations", descKey: "hrHub.approvalDelegationsDesc", icon: UserCheck, href: "/admin/delegations", badge: null },
-        { titleKey: "hrHub.scheduledReports", descKey: "hrHub.scheduledReportsDesc", icon: BarChart3, href: "/admin/scheduled-reports", badge: null },
         { titleKey: "hrHub.sopManagement.title", descKey: "hrHub.sopManagement.description", icon: Bot, href: "/hr-hub/sop-management", badge: null },
+        { titleKey: "hrHub.essApprovalPolicies.title", descKey: "hrHub.essApprovalPolicies.shortDesc", icon: Settings, href: "/hr-hub/ess-approval-policies", badge: null },
       ],
     },
+    // Section 6: Organization & Configuration
     {
       titleKey: "hrHub.organizationConfiguration",
       items: [
@@ -113,11 +123,13 @@ export default function HRHubDashboardPage() {
         { titleKey: "hrHub.dataImport.title", descKey: "hrHub.dataImport.shortDesc", icon: Upload, href: "/hr-hub/data-import", badge: null },
       ],
     },
+    // Section 7: Analytics & Insights
     {
       titleKey: "hrHub.analyticsInsights",
       items: [
         { titleKey: "hrHub.sentimentMonitoring", descKey: "hrHub.sentimentMonitoringDesc", icon: Brain, href: "/hr-hub/sentiment-monitoring", badge: null },
         { titleKey: "hrHub.recognitionAnalytics", descKey: "hrHub.recognitionAnalyticsDesc", icon: Gift, href: "/hr-hub/recognition-analytics", badge: null },
+        { titleKey: "hrHub.scheduledReports", descKey: "hrHub.scheduledReportsDesc", icon: BarChart3, href: "/admin/scheduled-reports", badge: null },
       ],
     },
   ];
