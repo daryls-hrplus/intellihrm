@@ -1,0 +1,27 @@
+// Employee Management Section Components - Part 4
+export { EmployeeRecordCreation } from './EmployeeRecordCreation';
+export { PersonalInformationManagement } from './PersonalInformationManagement';
+export { ProfessionalDetailsWorkHistory } from './ProfessionalDetailsWorkHistory';
+export { EmploymentAssignments } from './EmploymentAssignments';
+export { AssignmentTypes } from './AssignmentTypes';
+export { EmployeeTransactions } from './EmployeeTransactions';
+export { MultiPositionEmployees } from './MultiPositionEmployees';
+export { BankingPaymentSetup } from './BankingPaymentSetup';
+export { GovernmentIdsManagement } from './GovernmentIdsManagement';
+export { DependentsBeneficiaries } from './DependentsBeneficiaries';
+export { MedicalInformation } from './MedicalInformation';
+export { ImmigrationWorkPermits } from './ImmigrationWorkPermits';
+export { EmployeeLanguages } from './EmployeeLanguages';
+export { EmployeeSkillsCompetencies } from './EmployeeSkillsCompetencies';
+export { SkillGapAnalysis } from './SkillGapAnalysis';
+export { CredentialsMemberships } from './CredentialsMemberships';
+export { BackgroundChecks } from './BackgroundChecks';
+export { ReferencesVerifications } from './ReferencesVerifications';
+export { EmployeeDocuments } from './EmployeeDocuments';
+export { AgreementsSignatures } from './AgreementsSignatures';
+export { ComplianceLegal } from './ComplianceLegal';
+export { EvidencePortfolio } from './EvidencePortfolio';
+export { EmployeeBenefitsEnrollment } from './EmployeeBenefitsEnrollment';
+export { EmployeeInterestsPreferences } from './EmployeeInterestsPreferences';
+export { CountrySpecificDataExtensions } from './CountrySpecificDataExtensions';
+export { EmployeeDirectory } from './EmployeeDirectory';
