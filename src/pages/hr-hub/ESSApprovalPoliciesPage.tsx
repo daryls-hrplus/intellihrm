@@ -158,9 +158,8 @@ export default function ESSApprovalPoliciesPage() {
           moduleCode="HR_HUB"
           moduleName="Communications & Reminders"
           sectionId="notification-settings"
-          sectionTitle="Notification Settings"
-          description="Configure email and in-app notifications for approval requests, including reminders and escalation rules."
-          manualPath="/hr-hub/communications-reminders"
+          sectionTitle="Manage Approval Notifications"
+          description="Set up email and in-app notifications for approval requests, configure reminders, and define escalation rules in the Communications & Reminders module."
         />
 
         {/* Seed Default Policies CTA */}
