@@ -110,15 +110,17 @@ export function LifecycleOverview() {
         alt="Lifecycle workflow diagram with stakeholder responsibilities at each stage"
       />
 
-      <LearningObjectives
-        title="Lifecycle Workflow Integrations"
-        items={[
-          "Recruitment → Onboarding trigger on hire",
-          "Performance → Probation reviews integration",
-          "Learning → Mandatory training assignments",
-          "IT/HR Hub → Access provisioning workflows"
-        ]}
-      />
+      <div className="space-y-2">
+        <h4 className="font-semibold text-sm">Lifecycle Workflow Integrations</h4>
+        <LearningObjectives
+          objectives={[
+            "Recruitment → Onboarding trigger on hire",
+            "Performance → Probation reviews integration",
+            "Learning → Mandatory training assignments",
+            "IT/HR Hub → Access provisioning workflows"
+          ]}
+        />
+      </div>
     </div>
   );
 }

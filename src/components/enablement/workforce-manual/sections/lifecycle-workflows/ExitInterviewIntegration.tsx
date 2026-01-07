@@ -143,7 +143,7 @@ export function ExitInterviewIntegration() {
       />
 
       <LearningObjectives
-        items={[
+        objectives={[
           "Configure exit interview questionnaires",
           "Set up automated scheduling and notifications",
           "Analyze exit interview trends for retention insights",

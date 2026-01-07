@@ -131,7 +131,7 @@ export function OnboardingWorkflowDesign() {
       />
 
       <LearningObjectives
-        items={[
+        objectives={[
           "Create and configure onboarding templates by role type",
           "Design 30-60-90 day milestone frameworks",
           "Assign tasks with appropriate owners and due dates",

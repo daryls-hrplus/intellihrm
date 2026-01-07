@@ -175,7 +175,7 @@ export function OffboardingWorkflowDesign() {
       />
 
       <LearningObjectives
-        items={[
+        objectives={[
           "Create offboarding templates by separation type",
           "Configure clearance checklists with appropriate owners",
           "Set up access revocation and asset recovery workflows",

@@ -158,7 +158,7 @@ export function RehireHandling() {
       />
 
       <LearningObjectives
-        items={[
+        objectives={[
           "Configure rehire eligibility rules",
           "Process rehires with appropriate seniority calculation",
           "Understand data continuity for returning employees",

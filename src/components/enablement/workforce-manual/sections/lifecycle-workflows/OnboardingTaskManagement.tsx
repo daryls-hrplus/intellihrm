@@ -140,7 +140,7 @@ export function OnboardingTaskManagement() {
       />
 
       <LearningObjectives
-        items={[
+        objectives={[
           "Initiate onboarding instances for new employees",
           "Monitor task progress and identify at-risk items",
           "Handle task escalations and reassignments",
