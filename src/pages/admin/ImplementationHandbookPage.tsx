@@ -4,10 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
 import { 
   Download, 
-  FileText, 
   CheckCircle2, 
   ArrowRight,
   Settings,
@@ -15,22 +13,24 @@ import {
   DollarSign,
   Clock,
   Heart,
-  GraduationCap,
   Target,
-  TrendingUp,
   Briefcase,
-  Shield,
-  MessageSquare,
-  Package,
   Layers,
   CreditCard,
   Globe,
   MapPin,
-  Brain
+  Brain,
+  Wrench,
+  BookOpen,
+  Network,
+  Rocket
 } from "lucide-react";
 import { toast } from "sonner";
 import jsPDF from "jspdf";
 import { useTranslation } from "react-i18next";
+import { WorkspaceTab } from "@/components/admin/implementation/WorkspaceTab";
+import { ReadinessTab } from "@/components/admin/implementation/ReadinessTab";
+import { DependencyTab } from "@/components/admin/implementation/DependencyTab";
 
 interface PhaseItem {
   order: number;
