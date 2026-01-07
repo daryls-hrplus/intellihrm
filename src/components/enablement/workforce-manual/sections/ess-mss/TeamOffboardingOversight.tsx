@@ -6,9 +6,9 @@ import { UserMinus, ClipboardList, Key, FileText } from 'lucide-react';
 export const TeamOffboardingOversight: React.FC = () => {
   return (
     <div className="space-y-6">
-      <div className="prose prose-slate dark:prose-invert max-w-none">
-        <h3 className="text-xl font-semibold mb-4">Overview</h3>
-        <p>
+      <div className="max-w-none">
+        <h3 className="text-xl font-semibold mb-4 text-foreground">Overview</h3>
+        <p className="text-foreground leading-relaxed">
           When team members depart, managers are responsible for ensuring smooth knowledge transfer, 
           asset recovery, and maintaining team continuity. The Team Offboarding Oversight feature 
           guides managers through their responsibilities in the exit process.

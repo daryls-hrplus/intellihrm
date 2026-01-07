@@ -6,9 +6,9 @@ import { UserSearch, ClipboardCheck, Calendar, ThumbsUp } from 'lucide-react';
 export const RecruitmentIntegration: React.FC = () => {
   return (
     <div className="space-y-6">
-      <div className="prose prose-slate dark:prose-invert max-w-none">
-        <h3 className="text-xl font-semibold mb-4">Overview</h3>
-        <p>
+      <div className="max-w-none">
+        <h3 className="text-xl font-semibold mb-4 text-foreground">Overview</h3>
+        <p className="text-foreground leading-relaxed">
           Managers are key stakeholders in the hiring process. The Recruitment Integration feature 
           within MSS allows managers to participate in hiring activities for their team, from 
           requisition creation through candidate selection and offer approval.

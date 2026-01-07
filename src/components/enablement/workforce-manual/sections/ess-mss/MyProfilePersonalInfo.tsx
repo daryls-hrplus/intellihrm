@@ -6,9 +6,9 @@ import { CheckCircle } from 'lucide-react';
 export const MyProfilePersonalInfo: React.FC = () => {
   return (
     <div className="space-y-6">
-      <div className="prose prose-slate dark:prose-invert max-w-none">
-        <h3 className="text-xl font-semibold mb-4">Overview</h3>
-        <p>
+      <div className="max-w-none">
+        <h3 className="text-xl font-semibold mb-4 text-foreground">Overview</h3>
+        <p className="text-foreground leading-relaxed">
           The My Profile section allows employees to view and update their personal information including 
           contact details, emergency contacts, and addresses. Changes to sensitive fields trigger approval 
           workflows to maintain data integrity.

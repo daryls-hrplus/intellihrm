@@ -6,9 +6,9 @@ import { Users, Eye, Bell, BarChart3 } from 'lucide-react';
 export const ManagerTeamView: React.FC = () => {
   return (
     <div className="space-y-6">
-      <div className="prose prose-slate dark:prose-invert max-w-none">
-        <h3 className="text-xl font-semibold mb-4">Overview</h3>
-        <p>
+      <div className="max-w-none">
+        <h3 className="text-xl font-semibold mb-4 text-foreground">Overview</h3>
+        <p className="text-foreground leading-relaxed">
           Manager Self-Service (MSS) provides managers with a comprehensive view of their direct reports 
           and extended team. The Team View is the central hub for accessing employee information, 
           initiating transactions, and monitoring team health indicators.
