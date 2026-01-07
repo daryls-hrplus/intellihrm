@@ -329,6 +329,7 @@ const dependencies = [
 export default function ImplementationHandbookPage() {
   const { t } = useTranslation();
   const [activePhase, setActivePhase] = useState("foundation");
+  const [activeTab, setActiveTab] = useState("workspace");
   const contentRef = useRef<HTMLDivElement>(null);
 
   const exportToPDF = () => {
@@ -453,124 +454,168 @@ export default function ImplementationHandbookPage() {
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Implementation Handbook</h1>
           <p className="text-muted-foreground">
-            Step-by-step guide for configuring HRplus Cerebra
+            Interactive workspace for configuring HRplus Cerebra
           </p>
         </div>
-        <Button onClick={exportToPDF} className="gap-2">
+        <Button onClick={exportToPDF} variant="outline" className="gap-2">
           <Download className="h-4 w-4" />
           Export PDF
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6" ref={contentRef}>
-        {/* Phase Navigation */}
-        <Card className="lg:col-span-1">
-          <CardHeader>
-            <CardTitle className="text-lg">Implementation Phases</CardTitle>
-          </CardHeader>
-          <CardContent className="p-0">
-            <ScrollArea className="h-[600px]">
-              <div className="space-y-1 p-4 pt-0">
-                {phases.map((phase, index) => {
-                  const Icon = phase.icon;
-                  return (
-                    <button
-                      key={phase.id}
-                      onClick={() => setActivePhase(phase.id)}
-                      className={`w-full flex items-center gap-3 p-3 rounded-lg text-left transition-colors ${
-                        activePhase === phase.id
-                          ? "bg-primary text-primary-foreground"
-                          : "hover:bg-muted"
-                      }`}
-                    >
-                      <div className={`flex items-center justify-center w-8 h-8 rounded-full ${
-                        activePhase === phase.id 
-                          ? "bg-primary-foreground/20" 
-                          : "bg-muted"
-                      }`}>
-                        <Icon className="h-4 w-4" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium truncate">Phase {index + 1}</p>
-                        <p className={`text-xs truncate ${
-                          activePhase === phase.id 
-                            ? "text-primary-foreground/80" 
-                            : "text-muted-foreground"
-                        }`}>
-                          {phase.title.replace(`Phase ${index + 1}: `, "")}
-                        </p>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            </ScrollArea>
-          </CardContent>
-        </Card>
+      {/* Main Tabs */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:inline-grid">
+          <TabsTrigger value="workspace" className="gap-2">
+            <Wrench className="h-4 w-4" />
+            <span className="hidden sm:inline">Workspace</span>
+          </TabsTrigger>
+          <TabsTrigger value="reference" className="gap-2">
+            <BookOpen className="h-4 w-4" />
+            <span className="hidden sm:inline">Reference</span>
+          </TabsTrigger>
+          <TabsTrigger value="dependencies" className="gap-2">
+            <Network className="h-4 w-4" />
+            <span className="hidden sm:inline">Dependencies</span>
+          </TabsTrigger>
+          <TabsTrigger value="readiness" className="gap-2">
+            <Rocket className="h-4 w-4" />
+            <span className="hidden sm:inline">Readiness</span>
+          </TabsTrigger>
+        </TabsList>
 
-        {/* Phase Details */}
-        <Card className="lg:col-span-3">
-          <CardHeader>
-            <div className="flex items-center gap-3">
-              {currentPhase && <currentPhase.icon className="h-6 w-6 text-primary" />}
-              <div>
-                <CardTitle>{currentPhase?.title}</CardTitle>
-                <CardDescription>{currentPhase?.description}</CardDescription>
-              </div>
-            </div>
-            {currentPhase?.prerequisite && (
-              <Badge variant="outline" className="w-fit mt-2">
-                Prerequisite: {currentPhase.prerequisite}
-              </Badge>
-            )}
-          </CardHeader>
-          <CardContent>
-            <ScrollArea className="h-[500px] pr-4">
-              <div className="space-y-3">
-                {currentPhase?.items.map((item, index) => (
-                  <div
-                    key={index}
-                    className="flex items-start gap-4 p-4 rounded-lg border bg-card hover:bg-muted/50 transition-colors"
-                  >
-                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary font-semibold text-sm">
-                      {item.order}
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-medium">{item.area}</p>
-                      <p className="text-sm text-muted-foreground">{item.description}</p>
-                    </div>
-                    <CheckCircle2 className="h-5 w-5 text-muted-foreground/30" />
+        {/* Workspace Tab - Interactive Implementation */}
+        <TabsContent value="workspace" className="mt-6">
+          <WorkspaceTab 
+            phases={phases} 
+            activePhase={activePhase} 
+            onPhaseChange={setActivePhase} 
+          />
+        </TabsContent>
+
+        {/* Reference Tab - Original Static View */}
+        <TabsContent value="reference" className="mt-6">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6" ref={contentRef}>
+            {/* Phase Navigation */}
+            <Card className="lg:col-span-1">
+              <CardHeader>
+                <CardTitle className="text-lg">Implementation Phases</CardTitle>
+              </CardHeader>
+              <CardContent className="p-0">
+                <ScrollArea className="h-[600px]">
+                  <div className="space-y-1 p-4 pt-0">
+                    {phases.map((phase, index) => {
+                      const Icon = phase.icon;
+                      return (
+                        <button
+                          key={phase.id}
+                          onClick={() => setActivePhase(phase.id)}
+                          className={`w-full flex items-center gap-3 p-3 rounded-lg text-left transition-colors ${
+                            activePhase === phase.id
+                              ? "bg-primary text-primary-foreground"
+                              : "hover:bg-muted"
+                          }`}
+                        >
+                          <div className={`flex items-center justify-center w-8 h-8 rounded-full ${
+                            activePhase === phase.id 
+                              ? "bg-primary-foreground/20" 
+                              : "bg-muted"
+                          }`}>
+                            <Icon className="h-4 w-4" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium truncate">Phase {index + 1}</p>
+                            <p className={`text-xs truncate ${
+                              activePhase === phase.id 
+                                ? "text-primary-foreground/80" 
+                                : "text-muted-foreground"
+                            }`}>
+                              {phase.title.replace(`Phase ${index + 1}: `, "")}
+                            </p>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </ScrollArea>
+              </CardContent>
+            </Card>
+
+            {/* Phase Details */}
+            <Card className="lg:col-span-3">
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  {currentPhase && <currentPhase.icon className="h-6 w-6 text-primary" />}
+                  <div>
+                    <CardTitle>{currentPhase?.title}</CardTitle>
+                    <CardDescription>{currentPhase?.description}</CardDescription>
+                  </div>
+                </div>
+                {currentPhase?.prerequisite && (
+                  <Badge variant="outline" className="w-fit mt-2">
+                    Prerequisite: {currentPhase.prerequisite}
+                  </Badge>
+                )}
+              </CardHeader>
+              <CardContent>
+                <ScrollArea className="h-[500px] pr-4">
+                  <div className="space-y-3">
+                    {currentPhase?.items.map((item, index) => (
+                      <div
+                        key={index}
+                        className="flex items-start gap-4 p-4 rounded-lg border bg-card hover:bg-muted/50 transition-colors"
+                      >
+                        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary font-semibold text-sm">
+                          {item.order}
+                        </div>
+                        <div className="flex-1">
+                          <p className="font-medium">{item.area}</p>
+                          <p className="text-sm text-muted-foreground">{item.description}</p>
+                        </div>
+                        <CheckCircle2 className="h-5 w-5 text-muted-foreground/30" />
+                      </div>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Dependencies Summary in Reference Tab */}
+          <Card className="mt-6">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <ArrowRight className="h-5 w-5" />
+                Key Dependencies Summary
+              </CardTitle>
+              <CardDescription>
+                Understanding which modules depend on others helps plan implementation order
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {dependencies.map((dep, index) => (
+                  <div key={index} className="flex items-center gap-3 p-3 rounded-lg border">
+                    <Badge variant="secondary">{dep.module}</Badge>
+                    <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm text-muted-foreground">{dep.dependsOn}</span>
                   </div>
                 ))}
               </div>
-            </ScrollArea>
-          </CardContent>
-        </Card>
-      </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-      {/* Dependencies Summary */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <ArrowRight className="h-5 w-5" />
-            Key Dependencies Summary
-          </CardTitle>
-          <CardDescription>
-            Understanding which modules depend on others helps plan implementation order
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {dependencies.map((dep, index) => (
-              <div key={index} className="flex items-center gap-3 p-3 rounded-lg border">
-                <Badge variant="secondary">{dep.module}</Badge>
-                <ArrowRight className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm text-muted-foreground">{dep.dependsOn}</span>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+        {/* Dependencies Tab */}
+        <TabsContent value="dependencies" className="mt-6">
+          <DependencyTab dependencies={dependencies} />
+        </TabsContent>
+
+        {/* Readiness Tab */}
+        <TabsContent value="readiness" className="mt-6">
+          <ReadinessTab />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
