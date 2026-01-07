@@ -1,5 +1,6 @@
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Info, Users } from 'lucide-react';
+import { ScreenshotPlaceholder } from '@/components/enablement/manual/components/ScreenshotPlaceholder';
 
 export function MultiPositionEmployees() {
   return (
@@ -32,6 +33,11 @@ export function MultiPositionEmployees() {
           </div>
         </div>
       </section>
+
+      <ScreenshotPlaceholder
+        caption="Figure 4.5: Multi-Position Assignment configuration with FTE split"
+        alt="Position assignment dialog showing primary and secondary positions with FTE percentages"
+      />
 
       <Alert className="border-primary/20 bg-primary/5">
         <Info className="h-4 w-4" />

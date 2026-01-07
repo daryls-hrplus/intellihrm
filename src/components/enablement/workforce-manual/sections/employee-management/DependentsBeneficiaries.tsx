@@ -1,5 +1,6 @@
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Info, Users, Heart } from 'lucide-react';
+import { ScreenshotPlaceholder } from '@/components/enablement/manual/components/ScreenshotPlaceholder';
 
 export function DependentsBeneficiaries() {
   return (
@@ -42,6 +43,11 @@ export function DependentsBeneficiaries() {
           </div>
         </div>
       </section>
+
+      <ScreenshotPlaceholder
+        caption="Figure 4.24: Dependents and Beneficiaries configuration"
+        alt="Dependent list showing family members with relationship types and eligibility status"
+      />
 
       <Alert className="border-primary/20 bg-primary/5">
         <Info className="h-4 w-4" />

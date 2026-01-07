@@ -1,5 +1,6 @@
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Shield, CreditCard } from 'lucide-react';
+import { ScreenshotPlaceholder } from '@/components/enablement/manual/components/ScreenshotPlaceholder';
 
 export function BankingPaymentSetup() {
   return (
@@ -36,6 +37,11 @@ export function BankingPaymentSetup() {
           </div>
         </div>
       </section>
+
+      <ScreenshotPlaceholder
+        caption="Figure 4.10: Banking and Payment Setup form"
+        alt="Bank account configuration showing account details and payment split options"
+      />
 
       <Alert variant="destructive" className="border-destructive/20">
         <Shield className="h-4 w-4" />

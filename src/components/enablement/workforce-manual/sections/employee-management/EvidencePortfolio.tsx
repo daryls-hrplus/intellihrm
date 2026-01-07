@@ -1,5 +1,6 @@
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Info, ClipboardCheck, Award } from 'lucide-react';
+import { ScreenshotPlaceholder } from '@/components/enablement/manual/components/ScreenshotPlaceholder';
 
 export function EvidencePortfolio() {
   return (
@@ -41,6 +42,11 @@ export function EvidencePortfolio() {
           </div>
         </div>
       </section>
+
+      <ScreenshotPlaceholder
+        caption="Figure 4.18: Evidence Portfolio with work samples and achievements"
+        alt="Portfolio view showing uploaded evidence with validation status"
+      />
 
       <Alert className="border-primary/20 bg-primary/5">
         <Info className="h-4 w-4" />
