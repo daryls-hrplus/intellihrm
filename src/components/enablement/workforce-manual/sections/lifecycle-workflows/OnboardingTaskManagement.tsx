@@ -1,4 +1,4 @@
-import { IntegrationReference } from '@/components/enablement/shared';
+import { LearningObjectives } from './LearningObjectives';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertTriangle, CheckCircle2, Clock, User } from 'lucide-react';
 
@@ -129,8 +129,7 @@ export function OnboardingTaskManagement() {
         </div>
       </div>
 
-      <IntegrationReference
-        title="Learning Objectives"
+      <LearningObjectives
         items={[
           "Initiate onboarding instances for new employees",
           "Monitor task progress and identify at-risk items",

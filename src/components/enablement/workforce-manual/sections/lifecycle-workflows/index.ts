@@ -1,0 +1,11 @@
+// Part 5: Employee Lifecycle Workflows
+export { LifecycleOverview } from './LifecycleOverview';
+export { OnboardingWorkflowDesign } from './OnboardingWorkflowDesign';
+export { OnboardingTaskManagement } from './OnboardingTaskManagement';
+export { NewHirePortal } from './NewHirePortal';
+export { ManagerOnboardingView } from './ManagerOnboardingView';
+export { OffboardingWorkflowDesign } from './OffboardingWorkflowDesign';
+export { ExitInterviewIntegration } from './ExitInterviewIntegration';
+export { RehireHandling } from './RehireHandling';
+export { LifecycleAnalytics } from './LifecycleAnalytics';
+export { LearningObjectives } from './LearningObjectives';

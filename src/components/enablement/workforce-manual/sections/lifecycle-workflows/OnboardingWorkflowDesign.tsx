@@ -1,4 +1,4 @@
-import { IntegrationReference } from '@/components/enablement/shared';
+import { LearningObjectives } from './LearningObjectives';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Lightbulb, Settings } from 'lucide-react';
 
@@ -120,8 +120,7 @@ export function OnboardingWorkflowDesign() {
         </div>
       </div>
 
-      <IntegrationReference
-        title="Learning Objectives"
+      <LearningObjectives
         items={[
           "Create and configure onboarding templates by role type",
           "Design 30-60-90 day milestone frameworks",

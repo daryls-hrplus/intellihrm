@@ -1,4 +1,4 @@
-import { IntegrationReference } from '@/components/enablement/shared';
+import { LearningObjectives } from './LearningObjectives';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Lightbulb, Users, ClipboardCheck, MessageSquare, Calendar } from 'lucide-react';
 
@@ -131,8 +131,7 @@ export function ManagerOnboardingView() {
         </ol>
       </div>
 
-      <IntegrationReference
-        title="Learning Objectives"
+      <LearningObjectives
         items={[
           "Navigate the manager onboarding dashboard",
           "Complete manager-assigned onboarding tasks",

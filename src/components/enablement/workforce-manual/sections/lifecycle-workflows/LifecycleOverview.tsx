@@ -1,4 +1,4 @@
-import { IntegrationReference } from '@/components/enablement/shared';
+import { LearningObjectives } from './LearningObjectives';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Lightbulb, ArrowRight } from 'lucide-react';
 
@@ -103,7 +103,7 @@ export function LifecycleOverview() {
         </div>
       </div>
 
-      <IntegrationReference
+      <LearningObjectives
         title="Lifecycle Workflow Integrations"
         items={[
           "Recruitment → Onboarding trigger on hire",

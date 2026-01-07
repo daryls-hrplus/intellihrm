@@ -1,4 +1,4 @@
-import { IntegrationReference } from '@/components/enablement/shared';
+import { LearningObjectives } from './LearningObjectives';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Lightbulb, BarChart3, TrendingUp, Clock, Users } from 'lucide-react';
 
@@ -140,8 +140,7 @@ export function LifecycleAnalytics() {
         </ol>
       </div>
 
-      <IntegrationReference
-        title="Learning Objectives"
+      <LearningObjectives
         items={[
           "Navigate the onboarding analytics dashboard",
           "Identify bottlenecks and improvement opportunities",
