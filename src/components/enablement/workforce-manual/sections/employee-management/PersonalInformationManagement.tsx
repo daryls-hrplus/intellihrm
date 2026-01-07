@@ -1,6 +1,7 @@
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle2, Info, Phone, MapPin, Users, Shield } from 'lucide-react';
+import { ScreenshotPlaceholder } from '@/components/enablement/manual/components/ScreenshotPlaceholder';
 
 export function PersonalInformationManagement() {
   return (
@@ -56,6 +57,11 @@ export function PersonalInformationManagement() {
           </div>
         </div>
       </section>
+
+      <ScreenshotPlaceholder
+        caption="Figure 4.2: Personal Information tab with contact details and emergency contacts"
+        alt="Employee personal information form showing contact fields and emergency contacts section"
+      />
 
       <Alert className="border-primary/20 bg-primary/5">
         <Shield className="h-4 w-4" />

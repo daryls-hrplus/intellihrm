@@ -1,5 +1,6 @@
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Shield, Stethoscope } from 'lucide-react';
+import { ScreenshotPlaceholder } from '@/components/enablement/manual/components/ScreenshotPlaceholder';
 
 export function MedicalInformation() {
   return (
@@ -35,6 +36,11 @@ export function MedicalInformation() {
           </div>
         </div>
       </section>
+
+      <ScreenshotPlaceholder
+        caption="Figure 4.4: Medical Information form with emergency health data"
+        alt="Medical profile form showing blood type, allergies, and fitness for duty fields"
+      />
 
       <Alert variant="destructive" className="border-destructive/20">
         <Shield className="h-4 w-4" />

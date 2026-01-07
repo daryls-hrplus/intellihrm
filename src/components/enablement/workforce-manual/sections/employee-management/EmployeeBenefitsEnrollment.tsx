@@ -1,5 +1,6 @@
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Info, Heart, Calendar } from 'lucide-react';
+import { ScreenshotPlaceholder } from '@/components/enablement/manual/components/ScreenshotPlaceholder';
 
 export function EmployeeBenefitsEnrollment() {
   return (
@@ -41,6 +42,11 @@ export function EmployeeBenefitsEnrollment() {
           </div>
         </div>
       </section>
+
+      <ScreenshotPlaceholder
+        caption="Figure 4.11: Benefits Enrollment dashboard with plan selection"
+        alt="Benefits enrollment view showing available plans and coverage options"
+      />
 
       <Alert className="border-primary/20 bg-primary/5">
         <Info className="h-4 w-4" />

@@ -2,6 +2,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { AlertTriangle, IdCard } from 'lucide-react';
+import { ScreenshotPlaceholder } from '@/components/enablement/manual/components/ScreenshotPlaceholder';
 
 export function GovernmentIdsManagement() {
   return (
@@ -53,6 +54,11 @@ export function GovernmentIdsManagement() {
           </TableBody>
         </Table>
       </section>
+
+      <ScreenshotPlaceholder
+        caption="Figure 4.19: Government IDs management with expiry tracking"
+        alt="ID management view showing document types and expiration dates"
+      />
 
       <Alert className="border-amber-500/20 bg-amber-50 dark:bg-amber-900/10">
         <AlertTriangle className="h-4 w-4 text-amber-500" />

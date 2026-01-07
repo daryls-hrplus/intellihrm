@@ -2,6 +2,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Info, Globe } from 'lucide-react';
+import { ScreenshotPlaceholder } from '@/components/enablement/manual/components/ScreenshotPlaceholder';
 
 export function EmployeeLanguages() {
   return (
@@ -53,6 +54,11 @@ export function EmployeeLanguages() {
           </TableBody>
         </Table>
       </section>
+
+      <ScreenshotPlaceholder
+        caption="Figure 4.14: Language proficiency configuration"
+        alt="Languages form showing proficiency levels for multiple languages"
+      />
 
       <Alert className="border-primary/20 bg-primary/5">
         <Info className="h-4 w-4" />

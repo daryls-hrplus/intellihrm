@@ -2,6 +2,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Info, Briefcase } from 'lucide-react';
+import { ScreenshotPlaceholder } from '@/components/enablement/manual/components/ScreenshotPlaceholder';
 
 export function EmploymentAssignments() {
   return (
@@ -43,6 +44,11 @@ export function EmploymentAssignments() {
           </TableBody>
         </Table>
       </section>
+
+      <ScreenshotPlaceholder
+        caption="Figure 4.17: Employment Assignments configuration"
+        alt="Assignment form showing position selection and FTE allocation"
+      />
 
       <Alert className="border-primary/20 bg-primary/5">
         <Info className="h-4 w-4" />

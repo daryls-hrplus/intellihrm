@@ -1,5 +1,6 @@
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { ScreenshotPlaceholder } from '@/components/enablement/manual/components/ScreenshotPlaceholder';
 
 export function AssignmentTypes() {
   return (
@@ -51,6 +52,11 @@ export function AssignmentTypes() {
           </TableBody>
         </Table>
       </section>
+
+      <ScreenshotPlaceholder
+        caption="Figure 4.25: Assignment Types configuration"
+        alt="Assignment type settings showing permanent, contract, and temporary options"
+      />
     </div>
   );
 }

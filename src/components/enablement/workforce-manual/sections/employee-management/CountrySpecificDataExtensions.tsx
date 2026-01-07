@@ -2,6 +2,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Info, Globe } from 'lucide-react';
+import { ScreenshotPlaceholder } from '@/components/enablement/manual/components/ScreenshotPlaceholder';
 
 export function CountrySpecificDataExtensions() {
   return (
@@ -53,6 +54,11 @@ export function CountrySpecificDataExtensions() {
           </TableBody>
         </Table>
       </section>
+
+      <ScreenshotPlaceholder
+        caption="Figure 4.22: Country-Specific Data Extensions for Mexico"
+        alt="Mexico-specific tab showing RFC, CURP, and IMSS fields"
+      />
 
       <Alert className="border-primary/20 bg-primary/5">
         <Info className="h-4 w-4" />

@@ -3,6 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Info, Briefcase, GraduationCap, Award, Building2, Calendar, CheckCircle2 } from 'lucide-react';
 import { IntegrationReference } from '@/components/enablement/shared';
+import { ScreenshotPlaceholder } from '@/components/enablement/manual/components/ScreenshotPlaceholder';
 
 export function ProfessionalDetailsWorkHistory() {
   return (
@@ -181,6 +182,11 @@ export function ProfessionalDetailsWorkHistory() {
           </div>
         </div>
       </section>
+
+      <ScreenshotPlaceholder
+        caption="Figure 4.3: Professional Information tab with work history and education records"
+        alt="Professional details view showing prior employment timeline and education history"
+      />
 
       <Alert className="border-primary/20 bg-primary/5">
         <Info className="h-4 w-4" />

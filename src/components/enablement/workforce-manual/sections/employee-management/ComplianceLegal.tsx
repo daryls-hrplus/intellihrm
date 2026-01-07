@@ -1,5 +1,6 @@
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Shield, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { ScreenshotPlaceholder } from '@/components/enablement/manual/components/ScreenshotPlaceholder';
 
 export function ComplianceLegal() {
   return (
@@ -37,6 +38,11 @@ export function ComplianceLegal() {
           </div>
         </div>
       </section>
+
+      <ScreenshotPlaceholder
+        caption="Figure 4.9: Compliance and Legal tracking dashboard"
+        alt="Compliance tracker showing regulatory requirements and mandatory training status"
+      />
 
       <Alert variant="destructive" className="border-destructive/20">
         <AlertTriangle className="h-4 w-4" />

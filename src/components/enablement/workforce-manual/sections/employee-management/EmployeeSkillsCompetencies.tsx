@@ -1,5 +1,6 @@
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Info, Award, Target } from 'lucide-react';
+import { ScreenshotPlaceholder } from '@/components/enablement/manual/components/ScreenshotPlaceholder';
 
 export function EmployeeSkillsCompetencies() {
   return (
@@ -41,6 +42,11 @@ export function EmployeeSkillsCompetencies() {
           </div>
         </div>
       </section>
+
+      <ScreenshotPlaceholder
+        caption="Figure 4.15: Skills and Competencies assessment view"
+        alt="Competency matrix showing technical and behavioral skill ratings"
+      />
 
       <Alert className="border-primary/20 bg-primary/5">
         <Info className="h-4 w-4" />

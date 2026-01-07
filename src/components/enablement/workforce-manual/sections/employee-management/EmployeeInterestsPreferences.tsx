@@ -1,5 +1,6 @@
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Info, Sparkles, Users } from 'lucide-react';
+import { ScreenshotPlaceholder } from '@/components/enablement/manual/components/ScreenshotPlaceholder';
 
 export function EmployeeInterestsPreferences() {
   return (
@@ -35,6 +36,11 @@ export function EmployeeInterestsPreferences() {
           </div>
         </div>
       </section>
+
+      <ScreenshotPlaceholder
+        caption="Figure 4.8: Employee Interests and Preferences configuration"
+        alt="Interests form showing category selection for sports, arts, and technology hobbies"
+      />
 
       <Alert className="border-primary/20 bg-primary/5">
         <Info className="h-4 w-4" />

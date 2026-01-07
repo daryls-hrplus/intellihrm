@@ -2,6 +2,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { AlertTriangle, Plane } from 'lucide-react';
+import { ScreenshotPlaceholder } from '@/components/enablement/manual/components/ScreenshotPlaceholder';
 
 export function ImmigrationWorkPermits() {
   return (
@@ -48,6 +49,11 @@ export function ImmigrationWorkPermits() {
           </TableBody>
         </Table>
       </section>
+
+      <ScreenshotPlaceholder
+        caption="Figure 4.20: Immigration and Work Permits tracking"
+        alt="Work permit list showing visa types, expiry dates, and alert priorities"
+      />
 
       <Alert variant="destructive" className="border-destructive/20">
         <AlertTriangle className="h-4 w-4" />

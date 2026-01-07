@@ -1,6 +1,7 @@
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Info, FileSignature, CheckCircle2 } from 'lucide-react';
+import { ScreenshotPlaceholder } from '@/components/enablement/manual/components/ScreenshotPlaceholder';
 
 export function AgreementsSignatures() {
   return (
@@ -42,6 +43,11 @@ export function AgreementsSignatures() {
           </div>
         </div>
       </section>
+
+      <ScreenshotPlaceholder
+        caption="Figure 4.26: Agreements and Signatures management"
+        alt="Agreement list showing contracts and policy acknowledgments with signature status"
+      />
 
       <Alert className="border-primary/20 bg-primary/5">
         <Info className="h-4 w-4" />

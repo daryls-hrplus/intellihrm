@@ -2,6 +2,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Shield, CheckCircle2, Clock } from 'lucide-react';
+import { ScreenshotPlaceholder } from '@/components/enablement/manual/components/ScreenshotPlaceholder';
 
 export function BackgroundChecks() {
   return (
@@ -48,6 +49,11 @@ export function BackgroundChecks() {
           </TableBody>
         </Table>
       </section>
+
+      <ScreenshotPlaceholder
+        caption="Figure 4.21: Background Checks status and results"
+        alt="Background check dashboard showing check types and verification status"
+      />
 
       <Alert className="border-primary/20 bg-primary/5">
         <Shield className="h-4 w-4" />

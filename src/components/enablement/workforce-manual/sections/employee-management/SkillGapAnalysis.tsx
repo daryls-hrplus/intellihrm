@@ -1,5 +1,6 @@
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Info, TrendingDown, BookOpen } from 'lucide-react';
+import { ScreenshotPlaceholder } from '@/components/enablement/manual/components/ScreenshotPlaceholder';
 
 export function SkillGapAnalysis() {
   return (
@@ -37,6 +38,11 @@ export function SkillGapAnalysis() {
           </div>
         </div>
       </section>
+
+      <ScreenshotPlaceholder
+        caption="Figure 4.7: Skill Gap Analysis dashboard with development recommendations"
+        alt="Gap analysis view showing current vs required skill levels with learning suggestions"
+      />
 
       <Alert className="border-primary/20 bg-primary/5">
         <Info className="h-4 w-4" />

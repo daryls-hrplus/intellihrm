@@ -2,6 +2,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { CheckCircle2, AlertTriangle, Info, Users, Hash, IdCard, UserPlus } from 'lucide-react';
+import { ScreenshotPlaceholder } from '@/components/enablement/manual/components/ScreenshotPlaceholder';
 
 export function EmployeeRecordCreation() {
   return (
@@ -176,6 +177,11 @@ export function EmployeeRecordCreation() {
           </li>
         </ol>
       </section>
+
+      <ScreenshotPlaceholder
+        caption="Figure 4.1: Employee Record Creation dialog with identifiers configuration"
+        alt="Employee creation form showing name fields, identifiers, and employment status"
+      />
 
       <Alert variant="destructive" className="border-destructive/20">
         <AlertTriangle className="h-4 w-4" />
