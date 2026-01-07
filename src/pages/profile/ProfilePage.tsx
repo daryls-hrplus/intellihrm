@@ -23,6 +23,7 @@ import {
   Globe,
   Clock,
   Languages,
+  Info,
 } from "lucide-react";
 import {
   Select,
@@ -32,6 +33,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Link } from "react-router-dom";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useESSGatedSave } from "@/hooks/useESSGatedSave";
+import { ESSGatedSaveDialog, PendingApprovalBadge } from "@/components/ess/ESSGatedSaveDialog";
 
 // Common timezones grouped by region
 const TIMEZONES = [
@@ -123,6 +127,9 @@ export default function ProfilePage() {
   const [isUploading, setIsUploading] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [approvalDialogOpen, setApprovalDialogOpen] = useState(false);
+  const [pendingNameChange, setPendingNameChange] = useState<{ current: string; new: string } | null>(null);
+  const [originalName, setOriginalName] = useState<string>("");
 
   const [formData, setFormData] = useState<ProfileFormData>({
     full_name: "",
@@ -138,6 +145,31 @@ export default function ProfilePage() {
     time_format: "12h",
   });
 
+  // Use gated save for name changes
+  const {
+    requiresApproval: nameRequiresApproval,
+    requiresDocumentation: nameRequiresDocumentation,
+    isDocumentationOptional: nameDocumentationOptional,
+    approvalMode: nameApprovalMode,
+    canDirectEdit,
+    isSubmitting: isNameSubmitting,
+    gatedSave: gatedNameSave,
+    isPending: hasNamePending,
+  } = useESSGatedSave({
+    requestType: 'name_change',
+    entityId: user?.id || null,
+    entityTable: 'profiles',
+    changeAction: 'update',
+    employeeId: user?.id || "",
+    onDirectSave: async (newValues) => {
+      const { error } = await supabase
+        .from("profiles")
+        .update({ full_name: newValues.full_name })
+        .eq("id", user?.id);
+      if (error) throw error;
+    },
+  });
+
   // Detect timezone from browser on mount
   useEffect(() => {
     const detectedTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -146,8 +178,9 @@ export default function ProfilePage() {
     // Only set defaults if profile doesn't have values
     if (profile) {
       const profileData = profile as any;
+      const currentName = profile.full_name || "";
       setFormData({
-        full_name: profile.full_name || "",
+        full_name: currentName,
         phone: "",
         address: "",
         department: "",
@@ -159,6 +192,7 @@ export default function ProfilePage() {
         date_format: profileData.date_format || "MM/DD/YYYY",
         time_format: profileData.time_format || "12h",
       });
+      setOriginalName(currentName);
       setAvatarUrl(profile.avatar_url);
       
       // Log profile view
@@ -270,26 +304,77 @@ export default function ProfilePage() {
       return;
     }
 
+    // Check if name has changed
+    const nameChanged = formData.full_name !== originalName;
+
     setIsLoading(true);
 
     try {
-      const { error } = await supabase
-        .from("profiles")
-        .update({ 
-          full_name: formData.full_name,
-          timezone: formData.timezone,
-          preferred_language: formData.preferred_language,
-          date_format: formData.date_format,
-          time_format: formData.time_format,
-        })
-        .eq("id", user.id);
+      // If name changed and approval is required, show approval dialog
+      if (nameChanged && nameRequiresApproval) {
+        setPendingNameChange({
+          current: originalName,
+          new: formData.full_name,
+        });
+        setApprovalDialogOpen(true);
+        
+        // Save only non-name fields directly
+        const { error } = await supabase
+          .from("profiles")
+          .update({ 
+            timezone: formData.timezone,
+            preferred_language: formData.preferred_language,
+            date_format: formData.date_format,
+            time_format: formData.time_format,
+          })
+          .eq("id", user.id);
 
-      if (error) throw error;
+        if (error) throw error;
 
-      toast({
-        title: "Profile updated",
-        description: "Your profile has been updated successfully.",
-      });
+        toast({
+          title: "Settings updated",
+          description: "Your preferences have been saved. Name change requires approval.",
+        });
+      } else if (nameChanged) {
+        // Name changed but no approval required - use gated save
+        await gatedNameSave({
+          currentValues: { full_name: originalName },
+          newValues: { full_name: formData.full_name },
+        });
+
+        // Also save other fields
+        const { error } = await supabase
+          .from("profiles")
+          .update({ 
+            timezone: formData.timezone,
+            preferred_language: formData.preferred_language,
+            date_format: formData.date_format,
+            time_format: formData.time_format,
+          })
+          .eq("id", user.id);
+
+        if (error) throw error;
+        
+        setOriginalName(formData.full_name);
+      } else {
+        // No name change - just save other fields directly
+        const { error } = await supabase
+          .from("profiles")
+          .update({ 
+            timezone: formData.timezone,
+            preferred_language: formData.preferred_language,
+            date_format: formData.date_format,
+            time_format: formData.time_format,
+          })
+          .eq("id", user.id);
+
+        if (error) throw error;
+
+        toast({
+          title: "Profile updated",
+          description: "Your profile has been updated successfully.",
+        });
+      }
     } catch (error) {
       console.error("Error updating profile:", error);
       toast({
@@ -300,6 +385,21 @@ export default function ProfilePage() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleNameApprovalSubmit = async (notes: string, documentUrls: string[]) => {
+    if (!pendingNameChange) return;
+
+    await gatedNameSave({
+      currentValues: { full_name: pendingNameChange.current },
+      newValues: { full_name: pendingNameChange.new },
+      notes,
+      documentUrls,
+    });
+
+    // Revert form to original name since it's pending
+    setFormData(prev => ({ ...prev, full_name: pendingNameChange.current }));
+    setPendingNameChange(null);
   };
 
   const getInitials = (name: string | null) => {
@@ -429,6 +529,16 @@ export default function ProfilePage() {
 
         {/* Edit Form */}
         <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Name change approval info */}
+          {nameRequiresApproval && !canDirectEdit && (
+            <Alert>
+              <Info className="h-4 w-4" />
+              <AlertDescription>
+                Name changes require {nameApprovalMode === 'workflow' ? 'workflow' : 'HR'} approval before taking effect.
+              </AlertDescription>
+            </Alert>
+          )}
+
           {/* Personal Information */}
           <div className="rounded-xl border border-border bg-card p-6 shadow-card animate-slide-up" style={{ animationDelay: "100ms" }}>
             <h3 className="mb-4 text-lg font-semibold text-card-foreground">
@@ -436,9 +546,12 @@ export default function ProfilePage() {
             </h3>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">
-                  Full Name *
-                </label>
+                <div className="flex items-center gap-2">
+                  <label className="text-sm font-medium text-foreground">
+                    Full Name *
+                  </label>
+                  {hasNamePending && <PendingApprovalBadge />}
+                </div>
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   <input
@@ -447,8 +560,9 @@ export default function ProfilePage() {
                     value={formData.full_name}
                     onChange={handleChange}
                     placeholder="John Doe"
+                    disabled={hasNamePending}
                     className={cn(
-                      "h-11 w-full rounded-lg border bg-background pl-10 pr-4 text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20",
+                      "h-11 w-full rounded-lg border bg-background pl-10 pr-4 text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:opacity-50 disabled:cursor-not-allowed",
                       errors.full_name ? "border-destructive" : "border-input"
                     )}
                   />
@@ -713,6 +827,40 @@ export default function ProfilePage() {
             </button>
           </div>
         </form>
+
+        {/* Name Change Approval Dialog */}
+        <ESSGatedSaveDialog
+          open={approvalDialogOpen}
+          onOpenChange={(open) => {
+            setApprovalDialogOpen(open);
+            if (!open) {
+              setPendingNameChange(null);
+              // Revert form to original name
+              setFormData(prev => ({ ...prev, full_name: originalName }));
+            }
+          }}
+          title="Submit Name Change"
+          description="This change requires approval before taking effect"
+          approvalMode={nameApprovalMode}
+          requiresDocumentation={nameRequiresDocumentation}
+          isDocumentationOptional={nameDocumentationOptional}
+          onSubmit={handleNameApprovalSubmit}
+          isSubmitting={isNameSubmitting}
+          employeeId={user?.id || ""}
+        >
+          {pendingNameChange && (
+            <div className="p-3 bg-muted rounded-lg text-sm space-y-2">
+              <div className="flex items-center gap-2">
+                <span className="text-muted-foreground">Current Name:</span>
+                <span className="line-through">{pendingNameChange.current || "(empty)"}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-muted-foreground">New Name:</span>
+                <span className="font-medium text-primary">{pendingNameChange.new}</span>
+              </div>
+            </div>
+          )}
+        </ESSGatedSaveDialog>
       </div>
     </AppLayout>
   );
