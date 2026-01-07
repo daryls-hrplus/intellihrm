@@ -13826,6 +13826,7 @@ export type Database = {
           entity_table: string
           id: string
           new_values: Json
+          request_notes: string | null
           request_type: string
           requested_at: string
           requested_by: string
@@ -13848,6 +13849,7 @@ export type Database = {
           entity_table: string
           id?: string
           new_values: Json
+          request_notes?: string | null
           request_type: string
           requested_at?: string
           requested_by: string
@@ -13870,6 +13872,7 @@ export type Database = {
           entity_table?: string
           id?: string
           new_values?: Json
+          request_notes?: string | null
           request_type?: string
           requested_at?: string
           requested_by?: string

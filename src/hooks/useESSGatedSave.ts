@@ -37,6 +37,12 @@ export interface UseESSGatedSaveProps {
   changeAction: 'create' | 'update' | 'delete';
   onDirectSave: (newValues: Record<string, any>) => Promise<void>;
   employeeId?: string;
+  /**
+   * When true, forces the approval workflow even for HR/Admin users
+   * when they are editing their own data (ESS self-service mode).
+   * Default: true for ESS pages
+   */
+  enforceForSelf?: boolean;
 }
 
 export function useESSGatedSave({
@@ -46,10 +52,14 @@ export function useESSGatedSave({
   changeAction,
   onDirectSave,
   employeeId: propEmployeeId,
+  enforceForSelf = true,
 }: UseESSGatedSaveProps) {
   const { user, profile, isAdmin, isHRManager, company } = useAuth();
   const queryClient = useQueryClient();
   const employeeId = propEmployeeId || profile?.id || "";
+  
+  // Use profile.company_id as fallback for reliable policy lookup
+  const companyId = company?.id || profile?.company_id || null;
   
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -61,8 +71,12 @@ export function useESSGatedSave({
     policy
   } = useApprovalPolicyLookup(requestType);
 
-  // Check if user can directly edit (HR/Admin)
-  const canDirectEdit = isAdmin || isHRManager;
+  // Determine if user is editing their own data
+  const isEditingSelf = employeeId === user?.id;
+
+  // Check if user can directly edit (HR/Admin editing someone else's data)
+  // When enforceForSelf is true and user is editing their own data, they must follow the workflow
+  const canDirectEdit = (isAdmin || isHRManager) && (!enforceForSelf || !isEditingSelf);
 
   // Fetch pending change requests for this employee
   const { data: pendingRequests, refetch: refetchPending } = useQuery({
@@ -120,19 +134,20 @@ export function useESSGatedSave({
     }) => {
       if (!user?.id) throw new Error("Not authenticated");
       
+      // Clean newValues - don't include internal fields in the actual values
+      const cleanNewValues = { ...data.newValues };
+      
       const payload = {
         employee_id: employeeId,
-        company_id: company?.id || null,
+        company_id: companyId,
         request_type: requestType,
         entity_id: entityId || null,
         entity_table: entityTable,
         change_action: changeAction,
         current_values: data.currentValues || null,
-        new_values: {
-          ...data.newValues,
-          ...(data.notes ? { _notes: data.notes } : {}),
-          ...(data.documentUrls?.length ? { _document_urls: data.documentUrls } : {}),
-        },
+        new_values: cleanNewValues,
+        document_urls: data.documentUrls || null,
+        request_notes: data.notes || null,
         status: 'pending',
         requested_by: user.id,
       };
@@ -161,7 +176,7 @@ export function useESSGatedSave({
       
       const payload = {
         employee_id: employeeId,
-        company_id: company?.id || null,
+        company_id: companyId,
         request_type: requestType,
         entity_id: entityId || null,
         entity_table: entityTable,
@@ -192,7 +207,7 @@ export function useESSGatedSave({
     setIsSubmitting(true);
     
     try {
-      // Case 1: User can directly edit (HR/Admin) - always save directly
+      // Case 1: User can directly edit (HR/Admin editing someone else) - always save directly
       if (canDirectEdit) {
         await onDirectSave(newValues);
         toast.success("Changes saved successfully");
