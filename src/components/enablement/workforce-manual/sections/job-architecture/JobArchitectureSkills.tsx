@@ -137,7 +137,7 @@ export function JobArchitectureSkills() {
           <div className="grid gap-4 md:grid-cols-2">
             {capabilityTypes.map((item) => (
               <div key={item.type} className={`p-4 rounded-lg border ${item.color}`}>
-                <h5 className="font-semibold mb-2">{item.type}s</h5>
+                <h5 className="font-semibold mb-2">{item.type === 'Competency' ? 'Competencies' : `${item.type}s`}</h5>
                 <p className="text-sm mb-2">{item.description}</p>
                 <p className="text-xs italic">Examples: {item.examples}</p>
               </div>
