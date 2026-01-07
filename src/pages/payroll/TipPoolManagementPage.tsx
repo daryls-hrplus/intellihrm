@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import { formatDateForDisplay, getTodayString } from "@/utils/dateUtils";
 import { useNavigate } from "react-router-dom";
 import { PayrollFilters, usePayrollFilters } from "@/components/payroll/PayrollFilters";
+import { usePageAudit } from "@/hooks/usePageAudit";
 
 interface PoolFormData {
   name: string;
@@ -32,6 +33,7 @@ interface PoolFormData {
 }
 
 export default function TipPoolManagementPage() {
+  usePageAudit('tip_pool_management', 'Payroll');
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { selectedCompanyId, setSelectedCompanyId } = usePayrollFilters();

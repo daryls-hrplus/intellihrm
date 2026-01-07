@@ -19,6 +19,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useTimeClockPayrollSync } from "@/hooks/useTimeClockPayrollSync";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { usePageAudit } from "@/hooks/usePageAudit";
 import { 
   Clock, 
   RefreshCw, 
@@ -70,6 +71,7 @@ interface SyncLog {
 }
 
 export default function TimePayrollSyncPage() {
+  usePageAudit('time_payroll_sync', 'Payroll');
   const { profile } = useAuth();
   const companyId = profile?.company_id;
 
