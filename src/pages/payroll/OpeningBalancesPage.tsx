@@ -22,6 +22,7 @@ import { formatDateForDisplay } from "@/utils/dateUtils";
 import { useNavigate } from "react-router-dom";
 import { useCountryStatutories, usePayGroups } from "@/hooks/useCountryStatutories";
 import { DynamicStatutoryFields } from "@/components/payroll/DynamicStatutoryFields";
+import { usePageAudit } from "@/hooks/usePageAudit";
 
 interface Company {
   id: string;
@@ -85,6 +86,7 @@ const currentYear = new Date().getFullYear();
 const taxYears = Array.from({ length: 5 }, (_, i) => currentYear - i);
 
 const OpeningBalancesPage: React.FC = () => {
+  usePageAudit('opening_balances', 'Payroll');
   const { t } = useTranslation();
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);

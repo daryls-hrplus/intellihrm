@@ -41,6 +41,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { getTodayString, formatDateForDisplay } from "@/utils/dateUtils";
+import { usePageAudit } from "@/hooks/usePageAudit";
 
 interface BenefitPlan {
   id: string;
@@ -70,6 +71,7 @@ interface BenefitPayrollMapping {
 }
 
 export default function BenefitPayrollMappingsPage() {
+  usePageAudit('benefit_payroll_mappings', 'Payroll');
   const navigate = useNavigate();
   const { t } = useLanguage();
   const [companies, setCompanies] = useState<{ id: string; name: string }[]>([]);

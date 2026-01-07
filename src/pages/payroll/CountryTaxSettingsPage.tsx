@@ -14,8 +14,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Plus, Edit, Globe, Calculator, RefreshCcw } from "lucide-react";
+import { usePageAudit } from "@/hooks/usePageAudit";
 import { 
-  fetchAllCountryTaxSettings, 
+  fetchAllCountryTaxSettings,
   upsertCountryTaxSettings, 
   CountryTaxSettings 
 } from "@/utils/payroll/countryTaxSettings";
@@ -57,6 +58,7 @@ const initialFormData: FormData = {
 };
 
 export default function CountryTaxSettingsPage() {
+  usePageAudit('country_tax_settings', 'Payroll');
   const queryClient = useQueryClient();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [formData, setFormData] = useState<FormData>(initialFormData);

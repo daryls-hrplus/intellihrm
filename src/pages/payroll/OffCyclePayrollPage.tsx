@@ -32,6 +32,7 @@ import {
   CreditCard,
 } from "lucide-react";
 import { formatDateForDisplay } from "@/utils/dateUtils";
+import { usePageAudit } from "@/hooks/usePageAudit";
 
 interface Employee {
   id: string;
@@ -78,6 +79,7 @@ interface OffCycleRun {
 }
 
 export default function OffCyclePayrollPage() {
+  usePageAudit('off_cycle_payroll', 'Payroll');
   const { t } = useTranslation();
   const { user } = useAuth();
   const { selectedCompanyId, setSelectedCompanyId, selectedPayGroupId, setSelectedPayGroupId } = usePayrollFilters();

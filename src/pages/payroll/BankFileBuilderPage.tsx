@@ -31,6 +31,7 @@ import {
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { usePageAudit } from "@/hooks/usePageAudit";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
@@ -75,6 +76,7 @@ interface PayrollRun {
 }
 
 export default function BankFileBuilderPage() {
+  usePageAudit('bank_file_builder', 'Payroll');
   const { t } = useTranslation();
   const { user } = useAuth();
   const permissions = useUserPermissionContext();
