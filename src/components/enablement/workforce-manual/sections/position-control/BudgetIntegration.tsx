@@ -14,6 +14,7 @@ import {
   FileSpreadsheet
 } from "lucide-react";
 import { LearningObjectives } from "../lifecycle-workflows/LearningObjectives";
+import { ScreenshotPlaceholder } from "@/components/enablement/manual/components/ScreenshotPlaceholder";
 
 export function BudgetIntegration() {
   return (
@@ -192,6 +193,10 @@ export function BudgetIntegration() {
               </tbody>
             </table>
           </div>
+          <ScreenshotPlaceholder
+            caption="Figure 6.7a: Budget vs Actual analysis showing headcount variance by department"
+            alt="Budget variance table with headcount and cost impact columns"
+          />
         </CardContent>
       </Card>
 
@@ -329,6 +334,10 @@ export function BudgetIntegration() {
               <Badge variant="destructive">Escalate to Executive</Badge>
             </div>
           </div>
+          <ScreenshotPlaceholder
+            caption="Figure 6.7b: Budget alert configuration with threshold settings"
+            alt="Alert thresholds for budget utilization warnings and escalations"
+          />
         </CardContent>
       </Card>
 

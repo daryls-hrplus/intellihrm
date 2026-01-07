@@ -20,6 +20,7 @@ import {
   AlertTriangle
 } from "lucide-react";
 import { LearningObjectives } from "../lifecycle-workflows/LearningObjectives";
+import { ScreenshotPlaceholder } from "@/components/enablement/manual/components/ScreenshotPlaceholder";
 
 export function ScenarioPlanning() {
   return (
@@ -239,6 +240,10 @@ export function ScenarioPlanning() {
               </div>
             </div>
           </div>
+          <ScreenshotPlaceholder
+            caption="Figure 6.6a: Scenario configuration with parameter sliders and template selection"
+            alt="Scenario planning interface with growth, attrition, and budget parameters"
+          />
         </CardContent>
       </Card>
 
@@ -363,6 +368,10 @@ export function ScenarioPlanning() {
               </p>
             </div>
           </div>
+          <ScreenshotPlaceholder
+            caption="Figure 6.6b: Multi-scenario comparison chart with export options"
+            alt="Scenario comparison visualization showing headcount trajectories"
+          />
         </CardContent>
       </Card>
 

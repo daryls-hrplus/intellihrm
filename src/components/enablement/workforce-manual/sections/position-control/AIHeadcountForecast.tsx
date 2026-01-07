@@ -16,6 +16,7 @@ import {
   RefreshCw
 } from "lucide-react";
 import { LearningObjectives } from "../lifecycle-workflows/LearningObjectives";
+import { ScreenshotPlaceholder } from "@/components/enablement/manual/components/ScreenshotPlaceholder";
 
 export function AIHeadcountForecast() {
   return (
@@ -180,6 +181,10 @@ export function AIHeadcountForecast() {
               headcount increase of +16 FTE."
             </p>
           </div>
+          <ScreenshotPlaceholder
+            caption="Figure 6.5a: AI-generated headcount forecast with monthly predictions and summary"
+            alt="AI forecast output showing predicted requests, net change, and narrative summary"
+          />
         </CardContent>
       </Card>
 
@@ -341,6 +346,10 @@ export function AIHeadcountForecast() {
               and identify areas where the model needs adjustment.
             </p>
           </div>
+          <ScreenshotPlaceholder
+            caption="Figure 6.5b: Saved forecasts comparison view for accuracy tracking"
+            alt="Side-by-side forecast comparison with variance analysis"
+          />
         </CardContent>
       </Card>
 

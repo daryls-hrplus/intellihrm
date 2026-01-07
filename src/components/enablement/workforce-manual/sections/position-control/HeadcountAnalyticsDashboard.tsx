@@ -14,6 +14,7 @@ import {
   PieChart
 } from "lucide-react";
 import { LearningObjectives } from "../lifecycle-workflows/LearningObjectives";
+import { ScreenshotPlaceholder } from "@/components/enablement/manual/components/ScreenshotPlaceholder";
 
 export function HeadcountAnalyticsDashboard() {
   return (
@@ -98,6 +99,10 @@ export function HeadcountAnalyticsDashboard() {
               <p className="text-xs text-muted-foreground mt-1">Avg 4.2 days to process</p>
             </div>
           </div>
+          <ScreenshotPlaceholder
+            caption="Figure 6.4a: Key Performance Indicators showing headcount metrics at a glance"
+            alt="Analytics dashboard KPI cards with authorized, filled, and vacancy counts"
+          />
         </CardContent>
       </Card>
 
@@ -198,6 +203,10 @@ export function HeadcountAnalyticsDashboard() {
               </div>
             ))}
           </div>
+          <ScreenshotPlaceholder
+            caption="Figure 6.4b: Department headcount comparison with fill rate visualization"
+            alt="Bar chart showing authorized vs filled positions by department"
+          />
         </CardContent>
       </Card>
 
