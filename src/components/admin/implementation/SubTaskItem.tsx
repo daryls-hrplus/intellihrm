@@ -59,8 +59,9 @@ export function SubTaskItem({ subTask, onUpdateStatus, isUpdating }: SubTaskItem
         <StatusIcon className={`h-4 w-4 ${currentStatus.color}`} />
         
         {/* Task Name */}
-        <span className={`flex-1 text-sm ${subTask.status === 'completed' ? 'line-through text-muted-foreground' : ''}`}>
+        <span className={`flex-1 text-sm ${subTask.status === 'completed' ? 'line-through text-muted-foreground' : ''} ${!subTask.is_required ? 'text-muted-foreground' : ''}`}>
           {subTask.sub_task_name}
+          {!subTask.is_required && <span className="ml-2 text-xs italic">(Optional)</span>}
         </span>
 
         {/* Status Dropdown */}

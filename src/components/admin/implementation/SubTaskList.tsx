@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { SubTaskItem } from "./SubTaskItem";
-import { useSubTaskProgress, SubTaskDefinition } from "@/hooks/useSubTaskProgress";
+import { useSubTaskProgress, SubTaskDefinition, StepRollupStatus } from "@/hooks/useSubTaskProgress";
 import { Loader2 } from "lucide-react";
 
 interface SubTaskListProps {
@@ -10,16 +10,18 @@ interface SubTaskListProps {
   phaseId: string;
   stepOrder: number;
   subTaskDefinitions?: SubTaskDefinition[];
+  onStepStatusChange?: (status: StepRollupStatus) => void;
 }
 
-export function SubTaskList({ companyId, phaseId, stepOrder, subTaskDefinitions }: SubTaskListProps) {
+export function SubTaskList({ companyId, phaseId, stepOrder, subTaskDefinitions, onStepStatusChange }: SubTaskListProps) {
   const [isUpdating, setIsUpdating] = useState(false);
   const { 
     subTasks, 
     isLoading, 
     initializeSubTasks, 
     updateSubTaskStatus, 
-    getCompletionStats 
+    getCompletionStats,
+    calculateStepStatus,
   } = useSubTaskProgress(companyId, phaseId, stepOrder);
 
   useEffect(() => {
@@ -27,6 +29,13 @@ export function SubTaskList({ companyId, phaseId, stepOrder, subTaskDefinitions 
       initializeSubTasks(subTaskDefinitions);
     }
   }, [subTaskDefinitions, subTasks.length, isLoading]);
+
+  // Notify parent of status changes
+  useEffect(() => {
+    if (subTasks.length > 0 && onStepStatusChange) {
+      onStepStatusChange(calculateStepStatus());
+    }
+  }, [subTasks, onStepStatusChange, calculateStepStatus]);
 
   const handleUpdateStatus = async (order: number, status: Parameters<typeof updateSubTaskStatus>[1], notes?: string, blockerReason?: string) => {
     setIsUpdating(true);
@@ -61,16 +70,21 @@ export function SubTaskList({ companyId, phaseId, stepOrder, subTaskDefinitions 
       <div className="flex items-center gap-3">
         <Progress value={stats.percentage} className="flex-1 h-2" />
         <span className="text-sm font-medium text-muted-foreground">
-          {stats.completed}/{stats.total}
+          {stats.requiredCompleted}/{stats.required} required
         </span>
-        {stats.blocked > 0 && (
+        {stats.requiredBlocked > 0 && (
           <Badge variant="destructive" className="text-xs">
-            {stats.blocked} blocked
+            {stats.requiredBlocked} blocked
           </Badge>
         )}
-        {stats.deferred > 0 && (
+        {stats.stepStatus === 'completed' && (
+          <Badge className="text-xs bg-green-500">
+            Ready
+          </Badge>
+        )}
+        {stats.stepStatus === 'deferred' && (
           <Badge variant="outline" className="text-xs text-orange-500 border-orange-500">
-            {stats.deferred} deferred
+            Deferred
           </Badge>
         )}
       </div>

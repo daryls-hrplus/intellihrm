@@ -18,11 +18,14 @@ export interface SubTaskProgress {
   sub_task_order: number;
   sub_task_name: string;
   status: SubTaskStatus;
+  is_required: boolean;
   notes: string | null;
   blocker_reason: string | null;
   completed_by: string | null;
   completed_at: string | null;
 }
+
+export type StepRollupStatus = 'not_started' | 'in_progress' | 'completed' | 'blocked' | 'deferred';
 
 export function useSubTaskProgress(companyId: string | undefined, phaseId: string, stepOrder: number) {
   const [subTasks, setSubTasks] = useState<SubTaskProgress[]>([]);
@@ -69,6 +72,7 @@ export function useSubTaskProgress(companyId: string | undefined, phaseId: strin
         step_order: stepOrder,
         sub_task_order: def.order,
         sub_task_name: def.name,
+        is_required: def.isRequired ?? true,
         status: 'pending' as SubTaskStatus,
       }));
 
@@ -141,20 +145,50 @@ export function useSubTaskProgress(companyId: string | undefined, phaseId: strin
     }
   };
 
+  const calculateStepStatus = (): StepRollupStatus => {
+    if (subTasks.length === 0) return 'not_started';
+
+    const requiredTasks = subTasks.filter(t => t.is_required);
+    
+    // Any required blocked = step blocked
+    if (requiredTasks.some(t => t.status === 'blocked')) return 'blocked';
+    
+    // All required deferred = step deferred
+    if (requiredTasks.length > 0 && requiredTasks.every(t => t.status === 'deferred')) return 'deferred';
+    
+    // All required resolved = step complete
+    const allRequiredResolved = requiredTasks.every(t => 
+      t.status === 'completed' || t.status === 'not_applicable'
+    );
+    if (allRequiredResolved && requiredTasks.length > 0) return 'completed';
+    
+    // Any work started = in progress
+    if (subTasks.some(t => t.status !== 'pending')) return 'in_progress';
+    
+    return 'not_started';
+  };
+
   const getCompletionStats = () => {
-    const total = subTasks.length;
-    const completed = subTasks.filter(t => t.status === 'completed' || t.status === 'not_applicable').length;
-    const blocked = subTasks.filter(t => t.status === 'blocked').length;
-    const deferred = subTasks.filter(t => t.status === 'deferred').length;
-    const pending = subTasks.filter(t => t.status === 'pending').length;
+    const required = subTasks.filter(t => t.is_required);
+    const optional = subTasks.filter(t => !t.is_required);
+    
+    const requiredCompleted = required.filter(t => 
+      t.status === 'completed' || t.status === 'not_applicable'
+    ).length;
+    
+    const requiredBlocked = required.filter(t => t.status === 'blocked').length;
+    const stepStatus = calculateStepStatus();
     
     return {
-      total,
-      completed,
-      blocked,
-      deferred,
-      pending,
-      percentage: total > 0 ? Math.round((completed / total) * 100) : 0,
+      total: subTasks.length,
+      required: required.length,
+      requiredCompleted,
+      requiredBlocked,
+      optional: optional.length,
+      optionalCompleted: optional.filter(t => t.status === 'completed').length,
+      canComplete: requiredBlocked === 0 && requiredCompleted === required.length,
+      stepStatus,
+      percentage: required.length > 0 ? Math.round((requiredCompleted / required.length) * 100) : 0,
     };
   };
 
@@ -164,6 +198,7 @@ export function useSubTaskProgress(companyId: string | undefined, phaseId: strin
     initializeSubTasks,
     updateSubTaskStatus,
     getCompletionStats,
+    calculateStepStatus,
     refetch: fetchSubTasks,
   };
 }

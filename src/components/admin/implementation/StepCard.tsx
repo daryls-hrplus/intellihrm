@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -14,7 +14,8 @@ import {
   Clock,
   MessageSquare,
   User,
-  ListChecks
+  ListChecks,
+  AlertCircle
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
@@ -22,6 +23,8 @@ import type { StepMapping } from "@/data/implementationMappings";
 import type { StepProgress } from "@/hooks/useStepProgress";
 import { SubTaskList } from "./SubTaskList";
 import { getSubTasksForStep } from "@/data/subTaskDefinitions";
+import type { StepRollupStatus } from "@/hooks/useSubTaskProgress";
+import { useToast } from "@/hooks/use-toast";
 
 interface PhaseItem {
   order: number;
@@ -57,6 +60,8 @@ export function StepCard({
   const [isExpanded, setIsExpanded] = useState(false);
   const [notes, setNotes] = useState(stepProgress?.notes || "");
   const [isSavingNotes, setIsSavingNotes] = useState(false);
+  const [subTaskRollupStatus, setSubTaskRollupStatus] = useState<StepRollupStatus>('not_started');
+  const { toast } = useToast();
   
   const subTaskDefinitions = getSubTasksForStep(phaseId, step.order);
   const hasSubTasks = subTaskDefinitions.length > 0;
@@ -75,6 +80,23 @@ export function StepCard({
   const handleToggle = async () => {
     await onToggleComplete(!isComplete);
   };
+
+  const handleSubTaskStatusChange = useCallback(async (status: StepRollupStatus) => {
+    setSubTaskRollupStatus(status);
+    
+    // Auto-complete when all required sub-tasks are resolved
+    if (status === 'completed' && !isComplete) {
+      await onToggleComplete(true);
+      toast({
+        title: "Step auto-completed",
+        description: "All required sub-tasks have been resolved",
+      });
+    }
+    // Uncomplete if sub-tasks are no longer all resolved
+    else if (status !== 'completed' && isComplete && hasSubTasks) {
+      await onToggleComplete(false);
+    }
+  }, [isComplete, hasSubTasks, onToggleComplete, toast]);
 
   return (
     <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
@@ -120,6 +142,12 @@ export function StepCard({
                   <Badge variant="secondary" className="text-xs px-1.5 py-0 gap-1">
                     <ListChecks className="h-3 w-3" />
                     {subTaskDefinitions.length} sub-tasks
+                  </Badge>
+                )}
+                {hasSubTasks && subTaskRollupStatus === 'blocked' && (
+                  <Badge variant="destructive" className="text-xs px-1.5 py-0 gap-1">
+                    <AlertCircle className="h-3 w-3" />
+                    Blocked
                   </Badge>
                 )}
               </div>
@@ -184,6 +212,7 @@ export function StepCard({
                       phaseId={phaseId}
                       stepOrder={step.order}
                       subTaskDefinitions={subTaskDefinitions}
+                      onStepStatusChange={handleSubTaskStatusChange}
                     />
                   </TabsContent>
                   <TabsContent value="notes">
