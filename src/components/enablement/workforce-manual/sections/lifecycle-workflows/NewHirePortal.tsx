@@ -1,4 +1,4 @@
-import { IntegrationReference } from '@/components/enablement/shared';
+import { LearningObjectives } from './LearningObjectives';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Lightbulb, CheckCircle, FileText, GraduationCap, UserCircle } from 'lucide-react';
 
@@ -105,8 +105,7 @@ export function NewHirePortal() {
         </ul>
       </div>
 
-      <IntegrationReference
-        title="Learning Objectives"
+      <LearningObjectives
         items={[
           "Guide new employees through the self-service portal",
           "Configure pre-boarding vs. post-start task visibility",

@@ -1,4 +1,4 @@
-import { IntegrationReference } from '@/components/enablement/shared';
+import { LearningObjectives } from './LearningObjectives';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Lightbulb, MessageSquare, BarChart3, TrendingUp } from 'lucide-react';
 
@@ -132,8 +132,7 @@ export function ExitInterviewIntegration() {
         </div>
       </div>
 
-      <IntegrationReference
-        title="Learning Objectives"
+      <LearningObjectives
         items={[
           "Configure exit interview questionnaires",
           "Set up automated scheduling and notifications",

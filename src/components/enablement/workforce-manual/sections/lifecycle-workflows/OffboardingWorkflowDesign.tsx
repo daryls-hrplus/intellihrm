@@ -1,4 +1,4 @@
-import { IntegrationReference } from '@/components/enablement/shared';
+import { LearningObjectives } from './LearningObjectives';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertTriangle, Key, Package, FileText, UserMinus } from 'lucide-react';
 
@@ -164,8 +164,7 @@ export function OffboardingWorkflowDesign() {
         </div>
       </div>
 
-      <IntegrationReference
-        title="Learning Objectives"
+      <LearningObjectives
         items={[
           "Create offboarding templates by separation type",
           "Configure clearance checklists with appropriate owners",

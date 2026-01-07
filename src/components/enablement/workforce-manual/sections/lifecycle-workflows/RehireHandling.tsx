@@ -1,6 +1,6 @@
-import { IntegrationReference } from '@/components/enablement/shared';
+import { LearningObjectives } from './LearningObjectives';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AlertTriangle, UserPlus, History, Calculator } from 'lucide-react';
+import { AlertTriangle, UserPlus, History } from 'lucide-react';
 
 export function RehireHandling() {
   return (
@@ -158,8 +158,7 @@ export function RehireHandling() {
         </div>
       </div>
 
-      <IntegrationReference
-        title="Learning Objectives"
+      <LearningObjectives
         items={[
           "Configure rehire eligibility rules",
           "Process rehires with appropriate seniority calculation",
