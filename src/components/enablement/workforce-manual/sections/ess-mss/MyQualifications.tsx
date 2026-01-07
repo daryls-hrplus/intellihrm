@@ -1,6 +1,6 @@
 import React from 'react';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { ScreenshotPlaceholder } from '@/components/enablement/manual/components/ScreenshotPlaceholder';
+import { FeatureCard, FeatureCardGrid, IntegrationCallout } from '@/components/enablement/manual/components';
 import { GraduationCap, Award, FileCheck, Clock } from 'lucide-react';
 
 export const MyQualifications: React.FC = () => {
@@ -15,48 +15,40 @@ export const MyQualifications: React.FC = () => {
         </p>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-4">
-        <div className="p-4 bg-blue-50 dark:bg-blue-950/30 rounded-lg border border-blue-200 dark:border-blue-800">
-          <GraduationCap className="h-6 w-6 text-blue-600 mb-2" />
-          <h4 className="font-semibold text-blue-900 dark:text-blue-100 mb-2">Education</h4>
-          <ul className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
+      <FeatureCardGrid columns={2}>
+        <FeatureCard variant="primary" icon={GraduationCap} title="Education">
+          <ul className="space-y-1 mt-2">
             <li>• Degrees and diplomas</li>
             <li>• Institution and graduation date</li>
             <li>• Field of study / major</li>
             <li>• Upload transcripts</li>
           </ul>
-        </div>
-        <div className="p-4 bg-green-50 dark:bg-green-950/30 rounded-lg border border-green-200 dark:border-green-800">
-          <Award className="h-6 w-6 text-green-600 mb-2" />
-          <h4 className="font-semibold text-green-900 dark:text-green-100 mb-2">Certifications</h4>
-          <ul className="text-sm text-green-700 dark:text-green-300 space-y-1">
+        </FeatureCard>
+        <FeatureCard variant="success" icon={Award} title="Certifications">
+          <ul className="space-y-1 mt-2">
             <li>• Professional certifications</li>
             <li>• Issuing body and date earned</li>
             <li>• Expiration date tracking</li>
             <li>• Renewal reminders</li>
           </ul>
-        </div>
-        <div className="p-4 bg-purple-50 dark:bg-purple-950/30 rounded-lg border border-purple-200 dark:border-purple-800">
-          <FileCheck className="h-6 w-6 text-purple-600 mb-2" />
-          <h4 className="font-semibold text-purple-900 dark:text-purple-100 mb-2">Licenses</h4>
-          <ul className="text-sm text-purple-700 dark:text-purple-300 space-y-1">
+        </FeatureCard>
+        <FeatureCard variant="purple" icon={FileCheck} title="Licenses">
+          <ul className="space-y-1 mt-2">
             <li>• Professional licenses</li>
             <li>• License number and jurisdiction</li>
             <li>• Validity period</li>
             <li>• Compliance alerts</li>
           </ul>
-        </div>
-        <div className="p-4 bg-orange-50 dark:bg-orange-950/30 rounded-lg border border-orange-200 dark:border-orange-800">
-          <Clock className="h-6 w-6 text-orange-600 mb-2" />
-          <h4 className="font-semibold text-orange-900 dark:text-orange-100 mb-2">Memberships</h4>
-          <ul className="text-sm text-orange-700 dark:text-orange-300 space-y-1">
+        </FeatureCard>
+        <FeatureCard variant="orange" icon={Clock} title="Memberships">
+          <ul className="space-y-1 mt-2">
             <li>• Professional associations</li>
             <li>• Membership ID and level</li>
             <li>• Renewal tracking</li>
             <li>• Sponsorship records</li>
           </ul>
-        </div>
-      </div>
+        </FeatureCard>
+      </FeatureCardGrid>
 
       <ScreenshotPlaceholder 
         caption="My Qualifications - Managing certifications with expiry tracking"
@@ -76,12 +68,10 @@ export const MyQualifications: React.FC = () => {
         </ol>
       </div>
 
-      <Alert>
-        <AlertDescription>
-          <strong>Skills Integration:</strong> Verified qualifications automatically map to the skills 
-          framework, updating the employee's skill profile and competency levels.
-        </AlertDescription>
-      </Alert>
+      <IntegrationCallout title="Skills Integration">
+        Verified qualifications automatically map to the skills 
+        framework, updating the employee's skill profile and competency levels.
+      </IntegrationCallout>
     </div>
   );
 };
