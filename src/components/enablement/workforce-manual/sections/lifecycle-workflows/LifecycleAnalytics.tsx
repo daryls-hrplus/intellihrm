@@ -1,4 +1,5 @@
 import { LearningObjectives } from './LearningObjectives';
+import { ScreenshotPlaceholder } from '@/components/enablement/manual/components/ScreenshotPlaceholder';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Lightbulb, BarChart3, TrendingUp, Clock, Users } from 'lucide-react';
 
@@ -82,6 +83,11 @@ export function LifecycleAnalytics() {
         </div>
       </div>
 
+      <ScreenshotPlaceholder
+        caption="Figure 5.9a: Onboarding analytics dashboard with completion rates and bottleneck identification"
+        alt="Analytics dashboard showing phase completion percentages and delayed tasks"
+      />
+
       <div className="space-y-4">
         <h4 className="font-semibold">Available Reports</h4>
         <div className="overflow-x-auto">
@@ -139,6 +145,11 @@ export function LifecycleAnalytics() {
           <li>Export reports in Excel, PDF, or schedule automated delivery</li>
         </ol>
       </div>
+
+      <ScreenshotPlaceholder
+        caption="Figure 5.9b: Lifecycle reports library with export and scheduling options"
+        alt="Report configuration showing available lifecycle reports and delivery settings"
+      />
 
       <LearningObjectives
         items={[

@@ -1,4 +1,5 @@
 import { LearningObjectives } from './LearningObjectives';
+import { ScreenshotPlaceholder } from '@/components/enablement/manual/components/ScreenshotPlaceholder';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Lightbulb, Settings } from 'lucide-react';
 
@@ -103,6 +104,11 @@ export function OnboardingWorkflowDesign() {
         </ol>
       </div>
 
+      <ScreenshotPlaceholder
+        caption="Figure 5.2a: Onboarding template creation dialog with phase and task configuration"
+        alt="Template setup form showing 30-60-90 day framework options"
+      />
+
       <div className="space-y-4">
         <h4 className="font-semibold">Task Assignment Rules</h4>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -119,6 +125,11 @@ export function OnboardingWorkflowDesign() {
           ))}
         </div>
       </div>
+
+      <ScreenshotPlaceholder
+        caption="Figure 5.2b: Task assignment rules by owner type (HR, Manager, Employee)"
+        alt="Onboarding task categories with example tasks for each stakeholder"
+      />
 
       <LearningObjectives
         items={[

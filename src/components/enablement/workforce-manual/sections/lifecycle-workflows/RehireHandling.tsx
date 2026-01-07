@@ -1,4 +1,5 @@
 import { LearningObjectives } from './LearningObjectives';
+import { ScreenshotPlaceholder } from '@/components/enablement/manual/components/ScreenshotPlaceholder';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertTriangle, UserPlus, History } from 'lucide-react';
 
@@ -126,6 +127,11 @@ export function RehireHandling() {
         </ol>
       </div>
 
+      <ScreenshotPlaceholder
+        caption="Figure 5.8a: Rehire process workflow showing eligibility check and seniority options"
+        alt="Rehire initiation form with former employee lookup and calculation methods"
+      />
+
       <div className="space-y-4">
         <h4 className="font-semibold">Data Continuity</h4>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -157,6 +163,11 @@ export function RehireHandling() {
           </div>
         </div>
       </div>
+
+      <ScreenshotPlaceholder
+        caption="Figure 5.8b: Rehired employee record showing preserved and refreshed data elements"
+        alt="Employee profile with historical employment periods and current assignment"
+      />
 
       <LearningObjectives
         items={[

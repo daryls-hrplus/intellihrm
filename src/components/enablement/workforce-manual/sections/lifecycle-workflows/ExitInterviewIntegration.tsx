@@ -1,4 +1,5 @@
 import { LearningObjectives } from './LearningObjectives';
+import { ScreenshotPlaceholder } from '@/components/enablement/manual/components/ScreenshotPlaceholder';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Lightbulb, MessageSquare, BarChart3, TrendingUp } from 'lucide-react';
 
@@ -105,6 +106,11 @@ export function ExitInterviewIntegration() {
         </ol>
       </div>
 
+      <ScreenshotPlaceholder
+        caption="Figure 5.7a: Exit interview questionnaire configuration with topic categories"
+        alt="Exit interview setup showing standard questions and scheduling rules"
+      />
+
       <div className="space-y-4">
         <h4 className="font-semibold">Exit Interview Analytics</h4>
         <div className="border rounded-lg p-4 bg-muted/30">
@@ -131,6 +137,11 @@ export function ExitInterviewIntegration() {
           </p>
         </div>
       </div>
+
+      <ScreenshotPlaceholder
+        caption="Figure 5.7b: Exit interview analytics dashboard with departure reason trends"
+        alt="Analytics view showing departure reasons distribution and trend analysis"
+      />
 
       <LearningObjectives
         items={[

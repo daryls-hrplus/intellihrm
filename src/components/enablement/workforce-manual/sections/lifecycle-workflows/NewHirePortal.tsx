@@ -1,4 +1,5 @@
 import { LearningObjectives } from './LearningObjectives';
+import { ScreenshotPlaceholder } from '@/components/enablement/manual/components/ScreenshotPlaceholder';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Lightbulb, CheckCircle, FileText, GraduationCap, UserCircle } from 'lucide-react';
 
@@ -65,6 +66,11 @@ export function NewHirePortal() {
         </div>
       </div>
 
+      <ScreenshotPlaceholder
+        caption="Figure 5.3a: New Hire Portal task view with completion status indicators"
+        alt="Employee self-service portal showing task list with due dates and status badges"
+      />
+
       <div className="space-y-4">
         <h4 className="font-semibold">Self-Service Capabilities</h4>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -104,6 +110,11 @@ export function NewHirePortal() {
           <li>Offline access for reference materials</li>
         </ul>
       </div>
+
+      <ScreenshotPlaceholder
+        caption="Figure 5.3b: Mobile-responsive new hire portal with document upload capabilities"
+        alt="Mobile view of the onboarding portal with touch-friendly task completion"
+      />
 
       <LearningObjectives
         items={[
