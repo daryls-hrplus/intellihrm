@@ -3,8 +3,10 @@ import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { ScheduledOrgReports } from "@/components/admin/ScheduledOrgReports";
 import { useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { usePageAudit } from "@/hooks/usePageAudit";
 
 export default function AdminScheduledReportsPage() {
+  usePageAudit('scheduled_reports', 'Admin');
   const { t } = useTranslation();
   const location = useLocation();
   const state = location.state as { 

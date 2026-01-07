@@ -10,6 +10,7 @@ import { AIGuardrailsConfigPanel } from "@/components/ai/AIGuardrailsConfigPanel
 import { AIExplainabilityPanel } from "@/components/ai/AIExplainabilityPanel";
 import { AIScheduledJobsPanel } from "@/components/ai/AIScheduledJobsPanel";
 import { AIComplianceReportsPanel } from "@/components/ai/AIComplianceReportsPanel";
+import { usePageAudit } from "@/hooks/usePageAudit";
 import {
   Shield, 
   AlertTriangle, 
@@ -41,6 +42,7 @@ import { format, subDays } from "date-fns";
 const RISK_COLORS = ["#22c55e", "#eab308", "#f97316", "#ef4444"];
 
 export default function AIGovernancePage() {
+  usePageAudit('ai_governance', 'Admin');
   const { 
     riskAssessments, 
     biasIncidents, 
