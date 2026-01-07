@@ -65,6 +65,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { formatDateForDisplay } from "@/utils/dateUtils";
+import { usePageAudit } from "@/hooks/usePageAudit";
 
 interface PolicyCategory {
   id: string;
@@ -115,6 +116,7 @@ interface Company {
 }
 
 export default function AdminPolicyDocumentsPage() {
+  usePageAudit('policy_documents', 'Admin');
   const { user } = useAuth();
   const navigate = useNavigate();
   const [documents, setDocuments] = useState<PolicyDocument[]>([]);

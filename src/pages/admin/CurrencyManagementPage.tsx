@@ -17,6 +17,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { Plus, Edit2, Trash2, DollarSign, ArrowRightLeft, Building2, Globe } from "lucide-react";
 import { getTodayString, formatDateForDisplay } from "@/utils/dateUtils";
+import { usePageAudit } from "@/hooks/usePageAudit";
 
 interface Currency {
   id: string;
@@ -41,6 +42,7 @@ interface ExchangeRate {
 }
 
 export default function CurrencyManagementPage() {
+  usePageAudit('currencies', 'Admin');
   const { t } = useLanguage();
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState("currencies");

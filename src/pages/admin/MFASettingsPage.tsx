@@ -15,6 +15,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { Loader2, Shield, Users, ShieldCheck, ShieldOff, Building2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { usePageAudit } from "@/hooks/usePageAudit";
 
 interface MFASettings {
   id?: string;
@@ -37,6 +38,7 @@ interface UserMFAStatus {
 }
 
 export default function MFASettingsPage() {
+  usePageAudit('mfa_settings', 'Admin');
   const { t } = useTranslation();
   const { company, isAdmin } = useAuth();
   const [settings, setSettings] = useState<MFASettings | null>(null);

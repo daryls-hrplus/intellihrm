@@ -47,6 +47,7 @@ import { NavLink } from "react-router-dom";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { RequestHistoryTimeline } from "@/components/admin/RequestHistoryTimeline";
+import { usePageAudit } from "@/hooks/usePageAudit";
 
 const MENU_MODULES = [
   { code: "dashboard", name: "Dashboard" },
@@ -76,6 +77,7 @@ interface AccessRequest {
 }
 
 export default function AdminAccessRequestsPage() {
+  usePageAudit('access_requests', 'Admin');
   const { user } = useAuth();
   const [requests, setRequests] = useState<AccessRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);

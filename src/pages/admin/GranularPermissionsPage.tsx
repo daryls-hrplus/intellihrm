@@ -42,6 +42,7 @@ import {
 import { cn } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { usePageAudit } from "@/hooks/usePageAudit";
 
 interface Role {
   id: string;
@@ -152,6 +153,7 @@ const breadcrumbItems = [
 ];
 
 export default function GranularPermissionsPage() {
+  usePageAudit('permissions', 'Admin');
   const [searchParams] = useSearchParams();
   const roleIdFromUrl = searchParams.get("role");
   

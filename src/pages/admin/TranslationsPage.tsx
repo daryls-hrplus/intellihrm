@@ -49,6 +49,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
+import { usePageAudit } from "@/hooks/usePageAudit";
 
 const ITEMS_PER_PAGE = 20;
 const AI_BATCH_SIZE = 20; // Process translations in batches
@@ -69,6 +70,7 @@ const emptyTranslation: TranslationInput = {
 };
 
 export default function TranslationsPage() {
+  usePageAudit('translations', 'Admin');
   const { toast } = useToast();
   const {
     translations,

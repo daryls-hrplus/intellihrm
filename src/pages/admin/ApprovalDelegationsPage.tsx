@@ -19,6 +19,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { isBefore, isAfter } from "date-fns";
 import { formatDateForDisplay, parseLocalDate } from "@/utils/dateUtils";
 import { Plus, UserCheck, Calendar, Trash2 } from "lucide-react";
+import { usePageAudit } from "@/hooks/usePageAudit";
 
 interface Delegation {
   id: string;
@@ -36,6 +37,7 @@ interface Employee {
 }
 
 export default function ApprovalDelegationsPage() {
+  usePageAudit('approval_delegations', 'Admin');
   const { user, profile } = useAuth();
   const { toast } = useToast();
   

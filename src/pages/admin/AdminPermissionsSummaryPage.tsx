@@ -25,6 +25,7 @@ import { Loader2, Search, Users, Shield, CheckCircle, XCircle, Download } from "
 import { cn } from "@/lib/utils";
 import { getTodayString } from "@/utils/dateUtils";
 import { format } from "date-fns";
+import { usePageAudit } from "@/hooks/usePageAudit";
 
 const MENU_MODULES = [
   { code: "dashboard", label: "Dashboard", short: "Dash" },
@@ -72,6 +73,7 @@ const breadcrumbItems = [
 ];
 
 export default function AdminPermissionsSummaryPage() {
+  usePageAudit('permissions', 'Admin');
   const [users, setUsers] = useState<UserPermission[]>([]);
   const [roles, setRoles] = useState<Role[]>([]);
   const [isLoading, setIsLoading] = useState(true);

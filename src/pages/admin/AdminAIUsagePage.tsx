@@ -16,6 +16,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Bot, Users, TrendingUp, Activity, Settings, Search, Edit2, DollarSign, Calendar, Volume2, VolumeX, Key } from "lucide-react";
 import { format, parseISO } from "date-fns";
+import { usePageAudit } from "@/hooks/usePageAudit";
 
 interface AIBudgetTier {
   id: string;
@@ -85,6 +86,7 @@ interface MonthlyUsage {
 }
 
 export default function AdminAIUsagePage() {
+  usePageAudit('ai_usage', 'Admin');
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");

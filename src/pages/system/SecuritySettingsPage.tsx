@@ -2,8 +2,10 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Shield } from "lucide-react";
+import { usePageAudit } from "@/hooks/usePageAudit";
 
 export default function SecuritySettingsPage() {
+  usePageAudit('security', 'System');
   return (
     <AppLayout>
       <div className="container mx-auto py-6 space-y-6">

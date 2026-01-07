@@ -4,8 +4,10 @@ import { useLanguage } from "@/hooks/useLanguage";
 import { Award } from "lucide-react";
 import { OfferManagementTab } from "@/components/recruitment/OfferManagementTab";
 import { LeaveCompanyFilter, useLeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
+import { usePageAudit } from "@/hooks/usePageAudit";
 
 export default function OffersPage() {
+  usePageAudit('offers', 'Recruitment');
   const { t } = useLanguage();
   const { selectedCompanyId, setSelectedCompanyId } = useLeaveCompanyFilter();
 

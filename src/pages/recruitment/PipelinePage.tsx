@@ -4,8 +4,10 @@ import { useLanguage } from "@/hooks/useLanguage";
 import { TrendingUp } from "lucide-react";
 import { CandidatePipelineTab } from "@/components/recruitment/CandidatePipelineTab";
 import { LeaveCompanyFilter, useLeaveCompanyFilter } from "@/components/leave/LeaveCompanyFilter";
+import { usePageAudit } from "@/hooks/usePageAudit";
 
 export default function PipelinePage() {
+  usePageAudit('pipeline', 'Recruitment');
   const { t } = useLanguage();
   const { selectedCompanyId, setSelectedCompanyId } = useLeaveCompanyFilter();
 
