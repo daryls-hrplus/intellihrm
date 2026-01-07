@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Check, X, Paperclip, AlertTriangle } from "lucide-react";
+import { Check, X, Paperclip, AlertTriangle, HelpCircle } from "lucide-react";
 import { format, differenceInHours } from "date-fns";
 
 interface ChangeRequest {
@@ -29,6 +29,7 @@ interface RequestTableRowProps {
   onView: () => void;
   onApprove: () => void;
   onReject: () => void;
+  onRequestInfo?: () => void;
   getRequestTypeLabel: (type: string) => string;
   getActionLabel: (action: string) => string;
 }
@@ -40,6 +41,7 @@ export function RequestTableRow({
   onView,
   onApprove,
   onReject,
+  onRequestInfo,
   getRequestTypeLabel,
   getActionLabel,
 }: RequestTableRowProps) {
@@ -65,9 +67,25 @@ export function RequestTableRow({
       approved: "default",
       applied: "default",
       rejected: "destructive",
+      info_required: "outline",
       cancelled: "outline",
     };
-    return <Badge variant={variants[status] || "outline"} className="capitalize">{status}</Badge>;
+    const labels: Record<string, string> = {
+      pending: "pending",
+      approved: "approved",
+      applied: "applied",
+      rejected: "rejected",
+      info_required: "info required",
+      cancelled: "cancelled",
+    };
+    return (
+      <Badge 
+        variant={variants[status] || "outline"} 
+        className={status === 'info_required' ? 'bg-amber-100 text-amber-700 border-amber-300 dark:bg-amber-900/30 dark:text-amber-400' : 'capitalize'}
+      >
+        {labels[status] || status}
+      </Badge>
+    );
   };
 
   return (
@@ -136,6 +154,20 @@ export function RequestTableRow({
           </Button>
           {request.status === "pending" && (
             <>
+              {onRequestInfo && (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button size="sm" variant="outline" onClick={onRequestInfo}>
+                        <HelpCircle className="h-4 w-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Request more information</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
               <Button size="sm" variant="default" onClick={onApprove}>
                 <Check className="h-4 w-4" />
               </Button>

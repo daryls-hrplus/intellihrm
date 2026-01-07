@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ArrowRight, FileText, ExternalLink, Download, Clock, CheckCircle2, XCircle, User, Shield, MessageSquare } from "lucide-react";
+import { ArrowRight, FileText, ExternalLink, Download, Clock, CheckCircle2, XCircle, User, Shield, MessageSquare, HelpCircle } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
 import { useApprovalPolicyLookup } from "@/hooks/useESSApprovalPolicy";
 
@@ -38,6 +38,7 @@ interface RequestDetailsDialogProps {
   onClose: () => void;
   onApprove: () => void;
   onReject: () => void;
+  onRequestInfo?: () => void;
   getRequestTypeLabel: (type: string) => string;
   getActionLabel: (action: string) => string;
 }
@@ -48,6 +49,7 @@ export function RequestDetailsDialog({
   onClose,
   onApprove,
   onReject,
+  onRequestInfo,
   getRequestTypeLabel,
   getActionLabel,
 }: RequestDetailsDialogProps) {
@@ -60,17 +62,26 @@ export function RequestDetailsDialog({
     'Unknown Employee';
 
   const getStatusBadge = (status: string) => {
-    const config: Record<string, { variant: "default" | "secondary" | "destructive" | "outline"; icon: React.ReactNode }> = {
+    const config: Record<string, { variant: "default" | "secondary" | "destructive" | "outline"; icon: React.ReactNode; className?: string }> = {
       pending: { variant: "secondary", icon: <Clock className="h-3 w-3 mr-1" /> },
       approved: { variant: "default", icon: <CheckCircle2 className="h-3 w-3 mr-1" /> },
       applied: { variant: "default", icon: <CheckCircle2 className="h-3 w-3 mr-1" /> },
       rejected: { variant: "destructive", icon: <XCircle className="h-3 w-3 mr-1" /> },
+      info_required: { variant: "outline", icon: <HelpCircle className="h-3 w-3 mr-1" />, className: "bg-amber-100 text-amber-700 border-amber-300 dark:bg-amber-900/30 dark:text-amber-400" },
       cancelled: { variant: "outline", icon: <XCircle className="h-3 w-3 mr-1" /> },
     };
-    const { variant, icon } = config[status] || { variant: "outline" as const, icon: null };
+    const { variant, icon, className } = config[status] || { variant: "outline" as const, icon: null };
+    const labels: Record<string, string> = {
+      pending: "pending",
+      approved: "approved",
+      applied: "applied",
+      rejected: "rejected",
+      info_required: "info required",
+      cancelled: "cancelled",
+    };
     return (
-      <Badge variant={variant} className="capitalize">
-        {icon}{status}
+      <Badge variant={variant} className={className || "capitalize"}>
+        {icon}{labels[status] || status}
       </Badge>
     );
   };
@@ -150,9 +161,16 @@ export function RequestDetailsDialog({
       icon: <FileText className="h-3 w-3" />,
       completed: true,
     }] : []),
+    ...(request.status === 'info_required' ? [{
+      label: "Additional Info Requested",
+      timestamp: request.reviewed_at,
+      icon: <HelpCircle className="h-3 w-3" />,
+      completed: true,
+    }] : []),
     {
       label: request.status === 'pending' ? "Awaiting HR Review" : 
-             request.status === 'rejected' ? "Rejected by HR" : "Reviewed by HR",
+             request.status === 'rejected' ? "Rejected by HR" : 
+             request.status === 'info_required' ? "Awaiting Employee Response" : "Reviewed by HR",
       timestamp: request.reviewed_at,
       icon: <User className="h-3 w-3" />,
       completed: request.status !== 'pending',
@@ -313,6 +331,12 @@ export function RequestDetailsDialog({
             <Button variant="outline" onClick={onClose}>
               Close
             </Button>
+            {onRequestInfo && (
+              <Button variant="secondary" onClick={onRequestInfo}>
+                <HelpCircle className="h-4 w-4 mr-2" />
+                Request Info
+              </Button>
+            )}
             <Button variant="destructive" onClick={onReject}>
               Reject
             </Button>

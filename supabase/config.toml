@@ -410,3 +410,6 @@ verify_jwt = false
 
 [functions.feedback-analytics-aggregator]
 verify_jwt = false
+
+[functions.send-ess-notification]
+verify_jwt = false
