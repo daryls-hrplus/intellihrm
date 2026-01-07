@@ -68,9 +68,10 @@ import {
 import { AuditLogDiffView } from "@/components/admin/audit/AuditLogDiffView";
 import { AuditLogTrendChart } from "@/components/admin/audit/AuditLogTrendChart";
 import { getRiskLevel, getRiskBadgeStyles, getEntityLink, formatEntityType } from "@/utils/auditLogUtils";
+import { getModuleFromEntityType, getEntityTypesForModule, availableModules } from "@/utils/auditModuleMapping";
 import { Link } from "react-router-dom";
 
-type SortField = 'created_at' | 'user_name' | 'action' | 'risk' | 'entity_type' | 'entity_name';
+type SortField = 'created_at' | 'user_name' | 'action' | 'risk' | 'module' | 'entity_type' | 'entity_name';
 type SortDirection = 'asc' | 'desc';
 
 type AuditAction = 'CREATE' | 'UPDATE' | 'DELETE' | 'VIEW' | 'EXPORT' | 'LOGIN' | 'LOGOUT';
@@ -128,6 +129,7 @@ export default function AdminAuditLogsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [actionFilter, setActionFilter] = useState<AuditAction | "all">("all");
   const [entityFilter, setEntityFilter] = useState<string>("all");
+  const [moduleFilter, setModuleFilter] = useState<string>("all");
   const [userFilter, setUserFilter] = useState<string>("all");
   const [dateFrom, setDateFrom] = useState<Date | undefined>();
   const [dateTo, setDateTo] = useState<Date | undefined>();
@@ -163,6 +165,13 @@ export default function AdminAuditLogsPage() {
     if (entityFilter !== 'all') {
       query = query.eq('entity_type', entityFilter);
     }
+    // Module filter - filter by entity types that belong to the selected module
+    if (moduleFilter !== 'all') {
+      const moduleEntityTypes = getEntityTypesForModule(moduleFilter);
+      if (moduleEntityTypes.length > 0) {
+        query = query.in('entity_type', moduleEntityTypes);
+      }
+    }
     if (userFilter !== 'all') {
       query = query.eq('user_id', userFilter);
     }
@@ -187,8 +196,8 @@ export default function AdminAuditLogsPage() {
   const fetchLogs = async () => {
     setLoading(true);
     try {
-      // Determine DB sort field (risk is computed client-side)
-      const dbSortField = sortField === 'risk' || sortField === 'user_name' ? 'created_at' : sortField;
+      // Determine DB sort field (risk/module are computed client-side)
+      const dbSortField = sortField === 'risk' || sortField === 'user_name' || sortField === 'module' ? 'created_at' : sortField;
       
       const query = buildBaseQuery()
         .order(dbSortField, { ascending: sortDirection === 'asc' })
@@ -237,6 +246,14 @@ export default function AdminAuditLogsPage() {
           return sortDirection === 'asc' 
             ? nameA.localeCompare(nameB) 
             : nameB.localeCompare(nameA);
+        });
+      } else if (sortField === 'module') {
+        logsWithUsers.sort((a, b) => {
+          const moduleA = getModuleFromEntityType(a.entity_type).toLowerCase();
+          const moduleB = getModuleFromEntityType(b.entity_type).toLowerCase();
+          return sortDirection === 'asc' 
+            ? moduleA.localeCompare(moduleB) 
+            : moduleB.localeCompare(moduleA);
         });
       }
 
@@ -419,7 +436,7 @@ export default function AdminAuditLogsPage() {
   useEffect(() => {
     fetchLogs();
     fetchSummaryStats();
-  }, [page, actionFilter, entityFilter, userFilter, dateFrom, dateTo, searchQuery, sortField, sortDirection]);
+  }, [page, actionFilter, entityFilter, moduleFilter, userFilter, dateFrom, dateTo, searchQuery, sortField, sortDirection]);
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -458,6 +475,7 @@ export default function AdminAuditLogsPage() {
     setSearchQuery("");
     setActionFilter("all");
     setEntityFilter("all");
+    setModuleFilter("all");
     setUserFilter("all");
     setDateFrom(undefined);
     setDateTo(undefined);
@@ -465,7 +483,7 @@ export default function AdminAuditLogsPage() {
   };
 
   const hasActiveFilters = searchQuery || actionFilter !== 'all' || entityFilter !== 'all' || 
-    userFilter !== 'all' || dateFrom || dateTo;
+    moduleFilter !== 'all' || userFilter !== 'all' || dateFrom || dateTo;
 
   const exportToCSV = async () => {
     setIsExporting(true);
@@ -829,6 +847,27 @@ export default function AdminAuditLogsPage() {
                   </SelectContent>
                 </Select>
 
+                {/* Module Filter */}
+                <Select
+                  value={moduleFilter}
+                  onValueChange={(value) => {
+                    setModuleFilter(value);
+                    setPage(0);
+                  }}
+                >
+                  <SelectTrigger className="w-full md:w-[180px]">
+                    <SelectValue placeholder="Module" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Modules</SelectItem>
+                    {availableModules.map(module => (
+                      <SelectItem key={module} value={module}>
+                        {module}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
                 {/* Entity Filter */}
                 <Select
                   value={entityFilter}
@@ -874,6 +913,7 @@ export default function AdminAuditLogsPage() {
                   <SortableHeader field="user_name">User</SortableHeader>
                   <SortableHeader field="action">Action</SortableHeader>
                   <SortableHeader field="risk">Risk</SortableHeader>
+                  <SortableHeader field="module">Module</SortableHeader>
                   <SortableHeader field="entity_type">Entity Type</SortableHeader>
                   <SortableHeader field="entity_name">Entity Name</SortableHeader>
                   <TableHead className="text-right">Details</TableHead>
@@ -882,13 +922,13 @@ export default function AdminAuditLogsPage() {
               <TableBody>
                 {loading ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center py-8">
+                    <TableCell colSpan={8} className="text-center py-8">
                       <RefreshCw className="h-6 w-6 animate-spin mx-auto text-muted-foreground" />
                     </TableCell>
                   </TableRow>
                 ) : logs.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                    <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
                       No audit logs found
                     </TableCell>
                   </TableRow>
@@ -925,6 +965,11 @@ export default function AdminAuditLogsPage() {
                           >
                             <Shield className="h-3 w-3 mr-1" />
                             {riskLevel}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="secondary" className="text-xs">
+                            {getModuleFromEntityType(log.entity_type)}
                           </Badge>
                         </TableCell>
                         <TableCell>{formatEntityType(log.entity_type)}</TableCell>
