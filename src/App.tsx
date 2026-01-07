@@ -554,6 +554,7 @@ import AdminRemindersPage from "./pages/admin/AdminRemindersPage";
 // ESS & MSS Reminders
 import MyRemindersPage from "./pages/ess/MyRemindersPage";
 import MssRemindersPage from "./pages/mss/MssRemindersPage";
+import MyChangeRequestsPage from "./pages/ess/MyChangeRequestsPage";
 
 import AdminWorkflowTemplatesPage from "./pages/admin/AdminWorkflowTemplatesPage";
 import MyApprovalsPage from "./pages/workflow/MyApprovalsPage";
@@ -887,6 +888,14 @@ const App = () => (
               element={
                 <ProtectedRoute moduleCode="ess">
                   <MyRemindersPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/ess/my-change-requests"
+              element={
+                <ProtectedRoute moduleCode="ess">
+                  <MyChangeRequestsPage />
                 </ProtectedRoute>
               }
             />
