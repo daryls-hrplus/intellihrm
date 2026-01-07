@@ -13,7 +13,7 @@ import {
 
 const POSITION_CONTROL_SECTIONS = [
   {
-    id: 'wf-6-1',
+    id: 'wf-sec-6-1',
     num: '6.1',
     title: 'Position Control Overview',
     desc: 'Position-based vs headcount-based planning fundamentals',
@@ -21,7 +21,7 @@ const POSITION_CONTROL_SECTIONS = [
     Component: PositionControlOverview
   },
   {
-    id: 'wf-6-2',
+    id: 'wf-sec-6-2',
     num: '6.2',
     title: 'Vacancy Management',
     desc: 'Tracking open positions and time-to-fill metrics',
@@ -29,7 +29,7 @@ const POSITION_CONTROL_SECTIONS = [
     Component: VacancyManagement
   },
   {
-    id: 'wf-6-3',
+    id: 'wf-sec-6-3',
     num: '6.3',
     title: 'Headcount Requests',
     desc: 'Request workflow for new positions or backfills',
@@ -37,7 +37,7 @@ const POSITION_CONTROL_SECTIONS = [
     Component: HeadcountRequests
   },
   {
-    id: 'wf-6-4',
+    id: 'wf-sec-6-4',
     num: '6.4',
     title: 'Headcount Analytics Dashboard',
     desc: 'Current vs budgeted headcount with variance analysis',
@@ -45,7 +45,7 @@ const POSITION_CONTROL_SECTIONS = [
     Component: HeadcountAnalyticsDashboard
   },
   {
-    id: 'wf-6-5',
+    id: 'wf-sec-6-5',
     num: '6.5',
     title: 'AI-Powered Headcount Forecast',
     desc: 'Predictive headcount modeling with ML-based scenarios',
@@ -53,7 +53,7 @@ const POSITION_CONTROL_SECTIONS = [
     Component: AIHeadcountForecast
   },
   {
-    id: 'wf-6-6',
+    id: 'wf-sec-6-6',
     num: '6.6',
     title: 'Scenario Planning',
     desc: 'What-if analysis for restructuring and cost simulation',
@@ -61,7 +61,7 @@ const POSITION_CONTROL_SECTIONS = [
     Component: ScenarioPlanning
   },
   {
-    id: 'wf-6-7',
+    id: 'wf-sec-6-7',
     num: '6.7',
     title: 'Budget Integration',
     desc: 'Linking headcount to financial budgets and systems',
@@ -69,7 +69,7 @@ const POSITION_CONTROL_SECTIONS = [
     Component: BudgetIntegration
   },
   {
-    id: 'wf-6-8',
+    id: 'wf-sec-6-8',
     num: '6.8',
     title: 'Freeze & Thaw Controls',
     desc: 'Implementing hiring freezes with exception handling',
@@ -114,7 +114,7 @@ export function WorkforceManualPositionControlSection() {
 
       {/* Section Cards */}
       {POSITION_CONTROL_SECTIONS.map((section) => (
-        <Card key={section.id} id={section.id}>
+        <Card key={section.id} id={section.id} data-manual-anchor={section.id}>
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle className="text-lg">
