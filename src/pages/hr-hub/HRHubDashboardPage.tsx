@@ -31,6 +31,7 @@ import {
   Upload,
   Brain,
   UserCog,
+  Settings,
 } from "lucide-react";
 
 // Hub sections and quick actions are now defined inside the component for i18n
@@ -93,6 +94,7 @@ export default function HRHubDashboardPage() {
       titleKey: "hrHub.complianceWorkflows",
       items: [
         { titleKey: "hrHub.essChangeRequests", descKey: "hrHub.essChangeRequestsDesc", icon: UserCog, href: "/hr-hub/ess-change-requests", badge: null, pendingCount: pendingESSCount },
+        { titleKey: "hrHub.essApprovalPolicies.title", descKey: "hrHub.essApprovalPolicies.shortDesc", icon: Settings, href: "/hr-hub/ess-approval-policies", badge: null },
         { titleKey: "hrHub.compliance", descKey: "hrHub.complianceDesc", icon: ShieldCheck, href: "/hr-hub/compliance", badge: null },
         { titleKey: "hrHub.integrationHub", descKey: "hrHub.integrationHubDesc", icon: GitBranch, href: "/hr-hub/integrations", badge: null },
         { titleKey: "hrHub.workflowTemplates", descKey: "hrHub.workflowTemplatesDesc", icon: GitBranch, href: "/admin/workflow-templates", badge: null },
