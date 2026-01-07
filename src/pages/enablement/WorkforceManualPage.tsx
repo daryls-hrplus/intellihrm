@@ -15,9 +15,12 @@ import {
   BookOpen, CheckCircle, Circle, ArrowLeft, Sparkles
 } from 'lucide-react';
 import { WORKFORCE_MANUAL_STRUCTURE } from '@/types/workforceManual';
-import { WorkforceManualOverviewSection } from '@/components/enablement/workforce-manual/WorkforceManualOverviewSection';
-import { WorkforceManualFoundationSection } from '@/components/enablement/workforce-manual/WorkforceManualFoundationSection';
-import { WorkforceManualJobArchitectureSection } from '@/components/enablement/workforce-manual/WorkforceManualJobArchitectureSection';
+import { 
+  WorkforceManualOverviewSection,
+  WorkforceManualFoundationSection,
+  WorkforceManualJobArchitectureSection,
+  WorkforceManualEmployeeManagementSection
+} from '@/components/enablement/workforce-manual';
 
 const SECTION_ICONS: Record<string, React.ReactNode> = {
   'wf-part-1': <BookOpen className="h-5 w-5" />,
@@ -133,8 +136,9 @@ export default function WorkforceManualPage() {
         return <WorkforceManualFoundationSection />;
       case 'wf-part-3':
         return <WorkforceManualJobArchitectureSection />;
-      // Parts 4-10 will be added in subsequent phases
       case 'wf-part-4':
+        return <WorkforceManualEmployeeManagementSection />;
+      // Parts 5-10 will be added in subsequent phases
       case 'wf-part-5':
       case 'wf-part-6':
       case 'wf-part-7':
