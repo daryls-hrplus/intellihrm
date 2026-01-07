@@ -33,7 +33,7 @@ export function HeadcountRequests() {
       </div>
 
       <LearningObjectives
-        objectives={[
+        items={[
           "Create headcount change requests",
           "Understand approval routing logic",
           "Track request status and history",

@@ -32,7 +32,7 @@ export function HeadcountAnalyticsDashboard() {
       </div>
 
       <LearningObjectives
-        objectives={[
+        items={[
           "Navigate the Headcount Analytics dashboard",
           "Interpret variance analysis reports",
           "Export analytics data for reporting",
