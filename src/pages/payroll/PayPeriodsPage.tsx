@@ -17,6 +17,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
+import { usePageAudit } from "@/hooks/usePageAudit";
 
 interface PayPeriod {
   id: string;
@@ -40,6 +41,8 @@ interface PayPeriod {
 
 export default function PayPeriodsPage() {
   const { t } = useTranslation();
+  usePageAudit('pay_periods', 'Payroll');
+  
   const queryClient = useQueryClient();
   const { selectedCompanyId, setSelectedCompanyId, selectedPayGroupId, setSelectedPayGroupId } = usePayrollFilters();
   const currentYear = new Date().getFullYear();

@@ -23,6 +23,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useRetroactivePay, RetroactivePayCalculation, RetroactivePayConfig } from "@/hooks/useRetroactivePay";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ChevronDown, ChevronRight } from "lucide-react";
+import { usePageAudit } from "@/hooks/usePageAudit";
 
 interface GroupedCalculations {
   employeeId: string;
@@ -44,6 +45,8 @@ interface YearCycleGroup {
 }
 
 export default function RetroactivePayGeneratePage() {
+  usePageAudit('retroactive_pay_generate', 'Payroll');
+  
   const navigate = useNavigate();
   const { configId } = useParams<{ configId: string }>();
   const queryClient = useQueryClient();

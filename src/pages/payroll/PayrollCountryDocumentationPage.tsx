@@ -22,6 +22,7 @@ import {
   Info
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { usePageAudit } from "@/hooks/usePageAudit";
 
 // Country name mapping
 const COUNTRY_NAMES: Record<string, string> = {
@@ -68,6 +69,8 @@ const COUNTRY_REGIONS: Record<string, string> = {
 };
 
 export default function PayrollCountryDocumentationPage() {
+  usePageAudit('payroll_country_documentation', 'Payroll');
+  
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedRegion, setSelectedRegion] = useState<string>("all");

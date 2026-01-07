@@ -11,9 +11,12 @@ import { FileSpreadsheet, TrendingUp, DollarSign, Users, Calendar, Download, Spa
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
 import { useTranslation } from "react-i18next";
 import { AIReportBuilder } from "@/components/payroll/AIReportBuilder";
+import { usePageAudit } from "@/hooks/usePageAudit";
 
 export default function PayrollReportsPage() {
   const { t } = useTranslation();
+  usePageAudit('payroll_reports', 'Payroll');
+  
   const { selectedCompanyId, setSelectedCompanyId } = usePayrollFilters();
   const { fetchPayrollAnalytics, isLoading } = usePayroll();
   

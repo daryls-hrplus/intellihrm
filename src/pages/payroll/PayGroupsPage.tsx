@@ -18,6 +18,7 @@ import { formatDateForDisplay, getTodayString } from "@/utils/dateUtils";
 import { useNavigate } from "react-router-dom";
 import { PayrollFilters, usePayrollFilters } from "@/components/payroll/PayrollFilters";
 import { useTranslation } from "react-i18next";
+import { usePageAudit } from "@/hooks/usePageAudit";
 
 interface PayGroupFormData {
   name: string;
@@ -36,6 +37,8 @@ interface PayGroupFormData {
 
 export default function PayGroupsPage() {
   const { t } = useTranslation();
+  usePageAudit('pay_groups', 'Payroll');
+  
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { selectedCompanyId, setSelectedCompanyId } = usePayrollFilters();

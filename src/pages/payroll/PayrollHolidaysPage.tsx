@@ -44,6 +44,7 @@ import { Plus, CalendarDays, PartyPopper, Globe, Building2, Filter } from "lucid
 import { format } from "date-fns";
 import { formatDateForDisplay, toDateString } from "@/utils/dateUtils";
 import { cn } from "@/lib/utils";
+import { usePageAudit } from "@/hooks/usePageAudit";
 
 // Common countries list - can be extended or pulled from lookup values
 const COUNTRIES = [
@@ -71,6 +72,8 @@ const COUNTRIES = [
 
 export default function PayrollHolidaysPage() {
   const { t } = useLanguage();
+  usePageAudit('payroll_holidays', 'Payroll');
+  
   const { company } = useAuth();
   const { selectedCompanyId, setSelectedCompanyId } = useLeaveCompanyFilter();
   const { holidays, countryHolidays, loadingHolidays, loadingCountryHolidays, createHoliday, createCountryHoliday } = useLeaveManagement(selectedCompanyId);

@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { formatDateForDisplay, getTodayString } from "@/utils/dateUtils";
 import { Receipt, DollarSign, CheckCircle, Eye, FileText, ExternalLink } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { usePageAudit } from "@/hooks/usePageAudit";
 
 interface ExpenseClaim {
   id: string;
@@ -55,6 +56,8 @@ interface Company {
 
 export default function PayrollExpenseClaimsPage() {
   const { t } = useTranslation();
+  usePageAudit('payroll_expense_claims', 'Payroll');
+  
   const { user } = useAuth();
   const { toast } = useToast();
   

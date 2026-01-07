@@ -45,6 +45,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { format, formatDistanceToNow } from "date-fns";
+import { usePageAudit } from "@/hooks/usePageAudit";
 
 interface PayrollActivity {
   id: string;
@@ -63,6 +64,8 @@ interface PayrollActivity {
 
 export default function PayrollDashboardPage() {
   const { t } = useTranslation();
+  usePageAudit('payroll_dashboard', 'Payroll');
+  
   const navigate = useNavigate();
   const { hasTabAccess } = useGranularPermissions();
 

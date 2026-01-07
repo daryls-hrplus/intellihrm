@@ -22,9 +22,12 @@ import { useTranslation } from "react-i18next";
 import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
 import { toast } from "sonner";
+import { usePageAudit } from "@/hooks/usePageAudit";
 
 export default function PayslipsPage() {
   const { t } = useTranslation();
+  usePageAudit('payslips', 'Payroll');
+  
   const { user, company } = useAuth();
   const { fetchPayslips, isLoading } = usePayroll();
   const { fetchDefaultTemplate } = usePayslipTemplates();
