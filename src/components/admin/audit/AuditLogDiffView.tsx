@@ -1,12 +1,4 @@
 import { Json } from "@/integrations/supabase/types";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight, Minus, Plus } from "lucide-react";
 
@@ -46,30 +38,27 @@ export function AuditLogDiffView({ oldValues, newValues, action }: AuditLogDiffV
   if (action === 'CREATE') {
     return (
       <div className="space-y-3">
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Plus className="h-4 w-4 text-green-600" />
-          <span>New record created with the following values:</span>
+        <div className="flex items-center gap-2 text-sm font-medium">
+          <Plus className="h-4 w-4 text-green-700" />
+          <span>New record created:</span>
         </div>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-1/3">Field</TableHead>
-              <TableHead>Value</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {Object.entries(newObj).map(([key, value]) => (
-              <TableRow key={key}>
-                <TableCell className="font-medium">{formatFieldName(key)}</TableCell>
-                <TableCell className="text-green-600 dark:text-green-400">
-                  <pre className="text-xs whitespace-pre-wrap font-mono bg-green-50 dark:bg-green-950/30 p-2 rounded">
-                    {formatValue(value)}
-                  </pre>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+        <div className="border rounded-lg overflow-hidden">
+          {Object.entries(newObj).map(([key, value], idx) => (
+            <div 
+              key={key} 
+              className={`flex ${idx !== 0 ? 'border-t' : ''}`}
+            >
+              <div className="w-1/3 px-4 py-3 bg-muted font-medium text-sm">
+                {formatFieldName(key)}
+              </div>
+              <div className="w-2/3 px-4 py-3 bg-green-100 dark:bg-green-900/40">
+                <code className="text-sm text-green-800 dark:text-green-200 whitespace-pre-wrap break-all">
+                  {formatValue(value)}
+                </code>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
@@ -78,30 +67,27 @@ export function AuditLogDiffView({ oldValues, newValues, action }: AuditLogDiffV
   if (action === 'DELETE') {
     return (
       <div className="space-y-3">
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Minus className="h-4 w-4 text-red-600" />
-          <span>Record deleted with the following values:</span>
+        <div className="flex items-center gap-2 text-sm font-medium">
+          <Minus className="h-4 w-4 text-red-700" />
+          <span>Record deleted:</span>
         </div>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-1/3">Field</TableHead>
-              <TableHead>Value</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {Object.entries(oldObj).map(([key, value]) => (
-              <TableRow key={key}>
-                <TableCell className="font-medium">{formatFieldName(key)}</TableCell>
-                <TableCell className="text-red-600 dark:text-red-400">
-                  <pre className="text-xs whitespace-pre-wrap font-mono bg-red-50 dark:bg-red-950/30 p-2 rounded line-through">
-                    {formatValue(value)}
-                  </pre>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+        <div className="border rounded-lg overflow-hidden">
+          {Object.entries(oldObj).map(([key, value], idx) => (
+            <div 
+              key={key} 
+              className={`flex ${idx !== 0 ? 'border-t' : ''}`}
+            >
+              <div className="w-1/3 px-4 py-3 bg-muted font-medium text-sm">
+                {formatFieldName(key)}
+              </div>
+              <div className="w-2/3 px-4 py-3 bg-red-100 dark:bg-red-900/40">
+                <code className="text-sm text-red-800 dark:text-red-200 line-through whitespace-pre-wrap break-all">
+                  {formatValue(value)}
+                </code>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
@@ -118,69 +104,69 @@ export function AuditLogDiffView({ oldValues, newValues, action }: AuditLogDiffV
     <div className="space-y-4">
       {changedKeys.length > 0 && (
         <div className="space-y-3">
-          <div className="flex items-center gap-2">
-            <Badge variant="outline" className="text-blue-600 border-blue-200 bg-blue-50 dark:bg-blue-950/30">
-              {changedKeys.length} field{changedKeys.length > 1 ? 's' : ''} changed
-            </Badge>
+          <Badge variant="secondary" className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+            {changedKeys.length} field{changedKeys.length > 1 ? 's' : ''} changed
+          </Badge>
+          
+          <div className="border rounded-lg overflow-hidden">
+            {/* Header */}
+            <div className="flex bg-muted border-b font-medium text-sm">
+              <div className="w-1/4 px-4 py-2">Field</div>
+              <div className="w-5/12 px-4 py-2">Before</div>
+              <div className="w-auto px-2 py-2"></div>
+              <div className="w-5/12 px-4 py-2">After</div>
+            </div>
+            
+            {/* Rows */}
+            {changedKeys.map((key, idx) => (
+              <div 
+                key={key} 
+                className={`flex items-stretch ${idx !== 0 ? 'border-t' : ''}`}
+              >
+                <div className="w-1/4 px-4 py-3 bg-muted/50 font-medium text-sm flex items-center">
+                  {formatFieldName(key)}
+                </div>
+                <div className="w-5/12 px-4 py-3 bg-red-50 dark:bg-red-950/50 flex items-center">
+                  <code className="text-sm text-red-800 dark:text-red-300 font-semibold whitespace-pre-wrap break-all">
+                    {formatValue(oldObj[key])}
+                  </code>
+                </div>
+                <div className="w-auto px-2 py-3 flex items-center justify-center bg-muted/30">
+                  <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                </div>
+                <div className="w-5/12 px-4 py-3 bg-green-50 dark:bg-green-950/50 flex items-center">
+                  <code className="text-sm text-green-800 dark:text-green-300 font-semibold whitespace-pre-wrap break-all">
+                    {formatValue(newObj[key])}
+                  </code>
+                </div>
+              </div>
+            ))}
           </div>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-1/4">Field</TableHead>
-                <TableHead className="w-5/12">Before</TableHead>
-                <TableHead className="w-auto px-2"></TableHead>
-                <TableHead className="w-5/12">After</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {changedKeys.map((key) => (
-                <TableRow key={key} className="bg-yellow-50/50 dark:bg-yellow-950/10">
-                  <TableCell className="font-medium">{formatFieldName(key)}</TableCell>
-                  <TableCell>
-                    <pre className="text-xs whitespace-pre-wrap font-mono text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/30 p-2 rounded">
-                      {formatValue(oldObj[key])}
-                    </pre>
-                  </TableCell>
-                  <TableCell className="px-2">
-                    <ArrowRight className="h-4 w-4 text-muted-foreground" />
-                  </TableCell>
-                  <TableCell>
-                    <pre className="text-xs whitespace-pre-wrap font-mono text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-950/30 p-2 rounded">
-                      {formatValue(newObj[key])}
-                    </pre>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
         </div>
       )}
 
       {unchangedKeys.length > 0 && (
         <details className="text-sm">
-          <summary className="cursor-pointer text-muted-foreground hover:text-foreground">
+          <summary className="cursor-pointer text-muted-foreground hover:text-foreground py-2">
             Show {unchangedKeys.length} unchanged field{unchangedKeys.length > 1 ? 's' : ''}
           </summary>
-          <Table className="mt-2">
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-1/3">Field</TableHead>
-                <TableHead>Value</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {unchangedKeys.map((key) => (
-                <TableRow key={key} className="opacity-60">
-                  <TableCell className="font-medium">{formatFieldName(key)}</TableCell>
-                  <TableCell>
-                    <pre className="text-xs whitespace-pre-wrap font-mono">
-                      {formatValue(oldObj[key])}
-                    </pre>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <div className="border rounded-lg overflow-hidden mt-2">
+            {unchangedKeys.map((key, idx) => (
+              <div 
+                key={key} 
+                className={`flex ${idx !== 0 ? 'border-t' : ''} opacity-70`}
+              >
+                <div className="w-1/3 px-4 py-2 bg-muted font-medium text-sm">
+                  {formatFieldName(key)}
+                </div>
+                <div className="w-2/3 px-4 py-2">
+                  <code className="text-sm whitespace-pre-wrap break-all">
+                    {formatValue(oldObj[key])}
+                  </code>
+                </div>
+              </div>
+            ))}
+          </div>
         </details>
       )}
     </div>
