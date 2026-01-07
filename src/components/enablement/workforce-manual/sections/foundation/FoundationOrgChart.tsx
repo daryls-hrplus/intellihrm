@@ -151,7 +151,6 @@ export function FoundationOrgChart() {
       <StepByStep
         title="Viewing the Org Chart"
         steps={viewingSteps}
-        icon={<Eye className="h-5 w-5" />}
       />
 
       <ScreenshotPlaceholder
@@ -163,7 +162,6 @@ export function FoundationOrgChart() {
       <StepByStep
         title="As-of Date Navigation"
         steps={asOfDateSteps}
-        icon={<Calendar className="h-5 w-5" />}
       />
 
       <Card>
@@ -210,7 +208,6 @@ export function FoundationOrgChart() {
       <StepByStep
         title="Using Comparison Mode"
         steps={comparisonSteps}
-        icon={<GitCompare className="h-5 w-5" />}
       />
 
       <ScreenshotPlaceholder
@@ -222,7 +219,6 @@ export function FoundationOrgChart() {
       <StepByStep
         title="Exporting Org Charts"
         steps={exportSteps}
-        icon={<Download className="h-5 w-5" />}
       />
 
       <InfoCallout title="Position vs. Employee">
