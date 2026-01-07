@@ -116,6 +116,12 @@ export function StepCard({
                     {mapping.estimatedMinutes}m
                   </Badge>
                 )}
+                {hasSubTasks && (
+                  <Badge variant="secondary" className="text-xs px-1.5 py-0 gap-1">
+                    <ListChecks className="h-3 w-3" />
+                    {subTaskDefinitions.length} sub-tasks
+                  </Badge>
+                )}
               </div>
               <p className="text-sm text-muted-foreground">{step.description}</p>
               
