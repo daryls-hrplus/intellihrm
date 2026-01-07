@@ -13,6 +13,7 @@ import { PiggyBank, Users, BarChart3, Settings, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { SavingsProgramsList } from "@/components/payroll/savings/SavingsProgramsList";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
+import { usePageAudit } from "@/hooks/usePageAudit";
 
 interface Company {
   id: string;
@@ -20,6 +21,7 @@ interface Company {
 }
 
 export default function SavingsProgramsPage() {
+  usePageAudit('savings_programs', 'Payroll');
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
   const [isLoadingCompanies, setIsLoadingCompanies] = useState(true);

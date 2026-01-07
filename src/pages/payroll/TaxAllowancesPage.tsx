@@ -16,6 +16,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useTranslation } from "react-i18next";
 import { getTodayString, formatDateForDisplay } from "@/utils/dateUtils";
+import { usePageAudit } from "@/hooks/usePageAudit";
 
 interface TaxAllowance {
   id: string;
@@ -46,6 +47,7 @@ interface Employee {
 }
 
 export default function TaxAllowancesPage() {
+  usePageAudit('tax_allowances', 'Payroll');
   const { t } = useTranslation();
   const { toast } = useToast();
   const [allowances, setAllowances] = useState<TaxAllowance[]>([]);

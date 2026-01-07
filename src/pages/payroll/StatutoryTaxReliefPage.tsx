@@ -17,6 +17,7 @@ import { Plus, Edit2, Trash2, Info, Calculator } from "lucide-react";
 import { toast } from "sonner";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { usePageAudit } from "@/hooks/usePageAudit";
 
 interface TaxReliefRule {
   id: string;
@@ -53,6 +54,7 @@ const getCountryName = (code: string) => {
 };
 
 export default function StatutoryTaxReliefPage() {
+  usePageAudit('statutory_tax_relief', 'Payroll');
   const { t } = useTranslation();
   const [rules, setRules] = useState<TaxReliefRule[]>([]);
   const [loading, setLoading] = useState(true);

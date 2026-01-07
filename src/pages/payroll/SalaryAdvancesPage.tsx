@@ -16,6 +16,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useSalaryAdvances, SalaryAdvance } from "@/hooks/useSalaryAdvances";
 import { SalaryAdvancePayrollQueue } from "@/components/payroll/SalaryAdvancePayrollQueue";
 import { formatDateForDisplay, getTodayString } from "@/utils/dateUtils";
+import { usePageAudit } from "@/hooks/usePageAudit";
 import { 
   DollarSign, 
   Plus, 
@@ -37,6 +38,7 @@ interface Company {
 }
 
 export default function SalaryAdvancesPage() {
+  usePageAudit('salary_advances', 'Payroll');
   const { t } = useTranslation();
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedCompany, setSelectedCompany] = useState<string>("");

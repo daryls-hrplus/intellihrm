@@ -41,6 +41,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { getTodayString, formatDateForDisplay } from "@/utils/dateUtils";
+import { usePageAudit } from "@/hooks/usePageAudit";
 
 interface StatutoryType {
   id: string;
@@ -72,6 +73,7 @@ interface StatutoryPayElementMapping {
 }
 
 export default function StatutoryPayElementMappingsPage() {
+  usePageAudit('statutory_pay_element_mappings', 'Payroll');
   const navigate = useNavigate();
   const { t } = useLanguage();
   const [companies, setCompanies] = useState<{ id: string; name: string; country: string | null }[]>([]);
