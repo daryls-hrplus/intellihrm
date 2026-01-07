@@ -1,18 +1,30 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Clock } from 'lucide-react';
+import {
+  FoundationPrerequisites,
+  FoundationTerritories,
+  FoundationCompanyGroups,
+  FoundationCompanies,
+  FoundationDivisions,
+  FoundationDepartments,
+  FoundationSections,
+  FoundationBranchLocations,
+  FoundationOrgChart,
+  FoundationGovernance
+} from './sections/foundation';
 
 const FOUNDATION_SECTIONS = [
-  { id: 'wf-sec-2-1', num: '2.1', title: 'Prerequisites Checklist', desc: 'Dependencies, data requirements, legal entity information', time: 8 },
-  { id: 'wf-sec-2-2', num: '2.2', title: 'Territories Configuration', desc: 'Geographic regions for grouping companies', time: 8 },
-  { id: 'wf-sec-2-3', num: '2.3', title: 'Company Groups Setup', desc: 'Holding company structures and inheritance', time: 8 },
-  { id: 'wf-sec-2-4', num: '2.4', title: 'Companies Configuration', desc: 'Legal entity setup with country requirements', time: 12 },
-  { id: 'wf-sec-2-5', num: '2.5', title: 'Divisions Configuration', desc: 'Optional layer for large enterprises', time: 6 },
-  { id: 'wf-sec-2-6', num: '2.6', title: 'Departments Configuration', desc: 'Business unit setup with cost centers', time: 10 },
-  { id: 'wf-sec-2-7', num: '2.7', title: 'Sections Configuration', desc: 'Sub-department team groupings', time: 6 },
-  { id: 'wf-sec-2-8', num: '2.8', title: 'Branch Locations Setup', desc: 'Physical offices with geofencing', time: 10 },
-  { id: 'wf-sec-2-9', num: '2.9', title: 'Org Chart Configuration', desc: 'Visualization and display options', time: 6 },
-  { id: 'wf-sec-2-10', num: '2.10', title: 'Governance & Board Setup', desc: 'Company boards and management teams', time: 8 },
+  { id: 'wf-sec-2-1', num: '2.1', title: 'Prerequisites Checklist', desc: 'Dependencies, data requirements, legal entity information', time: 8, Component: FoundationPrerequisites },
+  { id: 'wf-sec-2-2', num: '2.2', title: 'Territories Configuration', desc: 'Geographic regions for grouping companies', time: 8, Component: FoundationTerritories },
+  { id: 'wf-sec-2-3', num: '2.3', title: 'Company Groups Setup', desc: 'Holding company structures and inheritance', time: 8, Component: FoundationCompanyGroups },
+  { id: 'wf-sec-2-4', num: '2.4', title: 'Companies Configuration', desc: 'Legal entity setup with country requirements', time: 12, Component: FoundationCompanies },
+  { id: 'wf-sec-2-5', num: '2.5', title: 'Divisions Configuration', desc: 'Optional layer for large enterprises', time: 6, Component: FoundationDivisions },
+  { id: 'wf-sec-2-6', num: '2.6', title: 'Departments Configuration', desc: 'Business unit setup with cost centers', time: 10, Component: FoundationDepartments },
+  { id: 'wf-sec-2-7', num: '2.7', title: 'Sections Configuration', desc: 'Sub-department team groupings', time: 6, Component: FoundationSections },
+  { id: 'wf-sec-2-8', num: '2.8', title: 'Branch Locations Setup', desc: 'Physical offices with geofencing', time: 10, Component: FoundationBranchLocations },
+  { id: 'wf-sec-2-9', num: '2.9', title: 'Org Chart Configuration', desc: 'Visualization and display options', time: 6, Component: FoundationOrgChart },
+  { id: 'wf-sec-2-10', num: '2.10', title: 'Governance & Board Setup', desc: 'Company boards and management teams', time: 8, Component: FoundationGovernance },
 ];
 
 export function WorkforceManualFoundationSection() {
@@ -46,9 +58,7 @@ export function WorkforceManualFoundationSection() {
             <CardDescription>{section.desc}</CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-muted-foreground">
-              Detailed documentation for this section is under development.
-            </p>
+            <section.Component />
           </CardContent>
         </Card>
       ))}
