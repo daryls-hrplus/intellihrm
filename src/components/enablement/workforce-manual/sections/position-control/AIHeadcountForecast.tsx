@@ -34,7 +34,7 @@ export function AIHeadcountForecast() {
       </div>
 
       <LearningObjectives
-        objectives={[
+        items={[
           "Generate AI-powered headcount forecasts",
           "Interpret confidence levels and predictions",
           "Save and compare forecast versions",

@@ -32,7 +32,7 @@ export function PositionControlOverview() {
       </div>
 
       <LearningObjectives
-        objectives={[
+        items={[
           "Understand position control methodology",
           "Compare position-based vs headcount-based approaches",
           "Learn authorized headcount management",

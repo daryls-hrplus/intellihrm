@@ -32,7 +32,7 @@ export function VacancyManagement() {
       </div>
 
       <LearningObjectives
-        objectives={[
+        items={[
           "Navigate the Vacancy Dashboard",
           "Understand vacancy tracking metrics",
           "Integrate with recruitment pipeline",

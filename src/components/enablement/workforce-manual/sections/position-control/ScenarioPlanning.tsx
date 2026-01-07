@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 import { LearningObjectives } from "../lifecycle-workflows/LearningObjectives";
 
-export function ScenarioPlanningSection() {
+export function ScenarioPlanning() {
   return (
     <div className="space-y-8">
       {/* Section Header */}
@@ -38,7 +38,7 @@ export function ScenarioPlanningSection() {
       </div>
 
       <LearningObjectives
-        objectives={[
+        items={[
           "Create and configure workforce scenarios",
           "Run simulations and analyze results",
           "Compare multiple scenarios side-by-side",

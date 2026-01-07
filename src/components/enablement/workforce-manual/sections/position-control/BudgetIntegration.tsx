@@ -32,7 +32,7 @@ export function BudgetIntegration() {
       </div>
 
       <LearningObjectives
-        objectives={[
+        items={[
           "Understand headcount-to-budget linkage",
           "Configure cost center alignment",
           "Monitor budget vs actual variance",

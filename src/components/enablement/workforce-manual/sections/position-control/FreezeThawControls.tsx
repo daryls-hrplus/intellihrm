@@ -33,7 +33,7 @@ export function FreezeThawControls() {
       </div>
 
       <LearningObjectives
-        objectives={[
+        items={[
           "Understand freeze types and their impact",
           "Configure organization-wide hiring controls",
           "Manage exception requests during freezes",
