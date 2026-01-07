@@ -4,6 +4,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/hooks/useLanguage";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   Headset,
   FileText,
@@ -27,6 +30,7 @@ import {
   Users,
   Upload,
   Brain,
+  UserCog,
 } from "lucide-react";
 
 // Hub sections and quick actions are now defined inside the component for i18n
@@ -34,6 +38,27 @@ import {
 export default function HRHubDashboardPage() {
   const navigate = useNavigate();
   const { t } = useLanguage();
+  const { company } = useAuth();
+
+  // Fetch pending ESS change requests count
+  const { data: pendingESSCount = 0 } = useQuery({
+    queryKey: ["pending-ess-change-requests-count", company?.id],
+    queryFn: async () => {
+      const query = supabase
+        .from("employee_data_change_requests")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "pending");
+      
+      if (company?.id) {
+        query.eq("company_id", company.id);
+      }
+      
+      const { count, error } = await query;
+      if (error) throw error;
+      return count || 0;
+    },
+    enabled: true,
+  });
 
   const hubSections = [
     {
@@ -67,6 +92,7 @@ export default function HRHubDashboardPage() {
     {
       titleKey: "hrHub.complianceWorkflows",
       items: [
+        { titleKey: "hrHub.essChangeRequests", descKey: "hrHub.essChangeRequestsDesc", icon: UserCog, href: "/hr-hub/ess-change-requests", badge: null, pendingCount: pendingESSCount },
         { titleKey: "hrHub.compliance", descKey: "hrHub.complianceDesc", icon: ShieldCheck, href: "/hr-hub/compliance", badge: null },
         { titleKey: "hrHub.integrationHub", descKey: "hrHub.integrationHubDesc", icon: GitBranch, href: "/hr-hub/integrations", badge: null },
         { titleKey: "hrHub.workflowTemplates", descKey: "hrHub.workflowTemplatesDesc", icon: GitBranch, href: "/admin/workflow-templates", badge: null },
@@ -167,6 +193,11 @@ export default function HRHubDashboardPage() {
                         {item.badge && (
                           <Badge variant="secondary" className="text-xs">
                             {t(item.badge)}
+                          </Badge>
+                        )}
+                        {"pendingCount" in item && item.pendingCount > 0 && (
+                          <Badge variant="destructive" className="text-xs">
+                            {item.pendingCount}
                           </Badge>
                         )}
                       </div>
