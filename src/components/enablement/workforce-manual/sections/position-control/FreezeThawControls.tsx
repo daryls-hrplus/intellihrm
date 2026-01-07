@@ -15,6 +15,7 @@ import {
   Lock
 } from "lucide-react";
 import { LearningObjectives } from "../lifecycle-workflows/LearningObjectives";
+import { ScreenshotPlaceholder } from "@/components/enablement/manual/components/ScreenshotPlaceholder";
 
 export function FreezeThawControls() {
   return (
@@ -224,6 +225,10 @@ export function FreezeThawControls() {
               an exception if needed.
             </p>
           </div>
+          <ScreenshotPlaceholder
+            caption="Figure 6.8a: System behavior matrix during different freeze types"
+            alt="Freeze impact table showing allowed and blocked actions per freeze type"
+          />
         </CardContent>
       </Card>
 
@@ -316,6 +321,10 @@ export function FreezeThawControls() {
               roles only → Week 3: backfills allowed → Week 5: all hiring open).
             </p>
           </div>
+          <ScreenshotPlaceholder
+            caption="Figure 6.8b: Thaw process configuration with phased rollout options"
+            alt="Thaw scheduling interface showing gradual restriction release timeline"
+          />
         </CardContent>
       </Card>
 

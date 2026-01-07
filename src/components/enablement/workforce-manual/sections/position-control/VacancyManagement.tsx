@@ -14,6 +14,7 @@ import {
   BarChart3
 } from "lucide-react";
 import { LearningObjectives } from "../lifecycle-workflows/LearningObjectives";
+import { ScreenshotPlaceholder } from "@/components/enablement/manual/components/ScreenshotPlaceholder";
 
 export function VacancyManagement() {
   return (
@@ -77,6 +78,10 @@ export function VacancyManagement() {
               <div className="text-sm text-muted-foreground">Fill Rate</div>
             </div>
           </div>
+          <ScreenshotPlaceholder
+            caption="Figure 6.2a: Vacancy Dashboard showing real-time position status and fill rates"
+            alt="Vacancy Dashboard with authorized, filled, and open vacancy counts"
+          />
         </CardContent>
       </Card>
 
@@ -289,6 +294,10 @@ export function VacancyManagement() {
               automatically when positions are filled.
             </p>
           </div>
+          <ScreenshotPlaceholder
+            caption="Figure 6.2b: Recruitment pipeline integration showing vacancy-to-requisition flow"
+            alt="Cross-module view of vacancy linked to job requisition"
+          />
         </CardContent>
       </Card>
 

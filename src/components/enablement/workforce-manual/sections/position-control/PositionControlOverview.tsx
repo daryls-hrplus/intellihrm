@@ -14,6 +14,7 @@ import {
   Brain
 } from "lucide-react";
 import { LearningObjectives } from "../lifecycle-workflows/LearningObjectives";
+import { ScreenshotPlaceholder } from "@/components/enablement/manual/components/ScreenshotPlaceholder";
 
 export function PositionControlOverview() {
   return (
@@ -68,6 +69,10 @@ export function PositionControlOverview() {
               </div>
             </div>
           </div>
+          <ScreenshotPlaceholder
+            caption="Figure 6.1a: Position Control overview screen showing authorized vs filled positions"
+            alt="Position Control dashboard with position lifecycle states"
+          />
         </CardContent>
       </Card>
 
@@ -285,6 +290,10 @@ export function PositionControlOverview() {
               </ul>
             </div>
           </div>
+          <ScreenshotPlaceholder
+            caption="Figure 6.1b: Position Control navigation and key metrics display"
+            alt="HRplus Position Control navigation showing fill rates and vacancy counts"
+          />
         </CardContent>
       </Card>
 

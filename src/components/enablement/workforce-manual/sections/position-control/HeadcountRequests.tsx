@@ -15,6 +15,7 @@ import {
   PenLine
 } from "lucide-react";
 import { LearningObjectives } from "../lifecycle-workflows/LearningObjectives";
+import { ScreenshotPlaceholder } from "@/components/enablement/manual/components/ScreenshotPlaceholder";
 
 export function HeadcountRequests() {
   return (
@@ -191,6 +192,10 @@ export function HeadcountRequests() {
               </div>
             </div>
           </div>
+          <ScreenshotPlaceholder
+            caption="Figure 6.3a: Headcount request creation form with position selection and justification"
+            alt="New headcount request form showing all required fields"
+          />
         </CardContent>
       </Card>
 
@@ -338,6 +343,10 @@ export function HeadcountRequests() {
               </div>
             </div>
           </div>
+          <ScreenshotPlaceholder
+            caption="Figure 6.3b: Request history and audit trail with timestamped approvals"
+            alt="Headcount request audit trail showing approval workflow progression"
+          />
         </CardContent>
       </Card>
 
