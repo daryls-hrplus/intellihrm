@@ -31767,6 +31767,7 @@ export type Database = {
           completed_by: string | null
           created_at: string
           id: string
+          is_required: boolean | null
           notes: string | null
           phase_id: string
           status: string
@@ -31782,6 +31783,7 @@ export type Database = {
           completed_by?: string | null
           created_at?: string
           id?: string
+          is_required?: boolean | null
           notes?: string | null
           phase_id: string
           status?: string
@@ -31797,6 +31799,7 @@ export type Database = {
           completed_by?: string | null
           created_at?: string
           id?: string
+          is_required?: boolean | null
           notes?: string | null
           phase_id?: string
           status?: string
