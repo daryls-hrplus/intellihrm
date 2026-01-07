@@ -221,6 +221,7 @@ export function useStepProgress(phaseId?: string) {
     progress,
     isLoading,
     error,
+    companyId,
     refetch: fetchProgress,
     toggleStepComplete,
     updateStepNotes,

@@ -41,7 +41,8 @@ export function WorkspaceTab({ phases, activePhase, onPhaseChange }: WorkspaceTa
     isStepComplete, 
     getStepProgress,
     getPhaseProgress,
-    getOverallProgress 
+    getOverallProgress,
+    companyId
   } = useStepProgress();
 
   const currentPhase = phases.find(p => p.id === activePhase);
@@ -213,6 +214,7 @@ export function WorkspaceTab({ phases, activePhase, onPhaseChange }: WorkspaceTa
                         onToggleComplete={(complete) => toggleStepComplete(currentPhase.id, item.order, complete)}
                         onUpdateNotes={(notes) => updateStepNotes(currentPhase.id, item.order, notes)}
                         onImportClick={mapping?.importType ? () => handleImportClick(currentPhase.id, item.order, mapping.importType!) : undefined}
+                        companyId={companyId}
                       />
                     </div>
                   );
