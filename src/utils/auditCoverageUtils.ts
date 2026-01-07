@@ -138,30 +138,30 @@ export function formatEntityType(entityType: string): string {
 }
 
 /**
- * Get coverage status color
+ * Get activity status color (0% is info/blue, not destructive)
  */
 export function getCoverageColor(coverage: number): string {
   if (coverage >= 90) return 'text-success';
   if (coverage >= 50) return 'text-warning';
-  return 'text-destructive';
+  if (coverage > 0) return 'text-muted-foreground';
+  return 'text-info';
 }
 
 /**
- * Get coverage badge variant
+ * Get activity badge variant (0% is outline/info, not destructive)
  */
 export function getCoverageBadgeVariant(coverage: number): 'default' | 'secondary' | 'destructive' | 'outline' {
   if (coverage >= 90) return 'default';
   if (coverage >= 50) return 'secondary';
-  if (coverage > 0) return 'outline';
-  return 'destructive';
+  return 'outline';
 }
 
 /**
- * Get status label for coverage
+ * Get status label for activity (not "coverage")
  */
 export function getCoverageStatusLabel(coverage: number): string {
-  if (coverage >= 90) return 'Full Coverage';
+  if (coverage >= 90) return 'Active';
   if (coverage >= 50) return 'Partial';
-  if (coverage > 0) return 'Low';
-  return 'No Coverage';
+  if (coverage > 0) return 'Low Activity';
+  return 'Pending';
 }

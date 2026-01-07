@@ -28,9 +28,9 @@ export default function AuditCoveragePage() {
               <Shield className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight">Audit Coverage</h1>
+              <h1 className="text-2xl font-bold tracking-tight">Audit Activity</h1>
               <p className="text-sm text-muted-foreground">
-                Monitor audit system health and coverage across all modules
+                All modules have audit hooks implemented. Activity shows pages visited.
               </p>
             </div>
           </div>
@@ -73,9 +73,9 @@ export default function AuditCoveragePage() {
           {/* Quick Stats */}
           {metrics && (
             <div className="grid gap-4">
-              {/* Top Covered Modules */}
+              {/* Most Active Modules */}
               <div className="p-4 rounded-lg border bg-card">
-                <h3 className="font-medium mb-3">Top Covered Modules</h3>
+                <h3 className="font-medium mb-3">Most Active</h3>
                 <div className="space-y-2">
                   {metrics.moduleCoverages
                     .filter(m => m.coverage > 0)
@@ -91,7 +91,7 @@ export default function AuditCoveragePage() {
                             ? 'text-success' 
                             : module.coverage >= 50 
                               ? 'text-warning' 
-                              : 'text-destructive'
+                              : 'text-muted-foreground'
                         }`}>
                           {module.coverage}%
                         </span>
@@ -100,12 +100,12 @@ export default function AuditCoveragePage() {
                 </div>
               </div>
               
-              {/* Modules Needing Attention */}
+              {/* Pending Activation */}
               <div className="p-4 rounded-lg border bg-card">
-                <h3 className="font-medium mb-3">Needs Attention</h3>
+                <h3 className="font-medium mb-3">Pending Activation</h3>
                 <div className="space-y-2">
                   {metrics.moduleCoverages
-                    .filter(m => m.coverage < 50 && m.coverage > 0)
+                    .filter(m => m.coverage === 0)
                     .slice(0, 5)
                     .map(module => (
                       <div 
@@ -113,14 +113,14 @@ export default function AuditCoveragePage() {
                         className="flex items-center justify-between text-sm"
                       >
                         <span>{module.module}</span>
-                        <span className="text-warning font-medium">
-                          {module.coverage}%
+                        <span className="text-info font-medium">
+                          Awaiting visits
                         </span>
                       </div>
                     ))}
-                  {metrics.moduleCoverages.filter(m => m.coverage < 50 && m.coverage > 0).length === 0 && (
+                  {metrics.moduleCoverages.filter(m => m.coverage === 0).length === 0 && (
                     <p className="text-sm text-muted-foreground">
-                      All active modules have good coverage
+                      All modules have activity
                     </p>
                   )}
                 </div>

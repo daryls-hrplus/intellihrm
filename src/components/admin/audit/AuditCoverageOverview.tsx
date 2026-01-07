@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Layers, CheckCircle2, AlertTriangle, Activity } from "lucide-react";
+import { Layers, CheckCircle2, Clock, Activity } from "lucide-react";
 import { AuditCoverageMetrics, getCoverageColor } from "@/utils/auditCoverageUtils";
 
 interface AuditCoverageOverviewProps {
@@ -11,50 +11,41 @@ interface AuditCoverageOverviewProps {
 export function AuditCoverageOverview({ metrics, isLoading }: AuditCoverageOverviewProps) {
   const cards = [
     {
-      label: "Coverage Score",
-      value: `${metrics.overallCoverage}%`,
-      subtitle: `${metrics.coveredEntityTypes} of ${metrics.totalEntityTypes} entity types`,
+      label: "Implementation",
+      value: `${metrics.totalModules}/${metrics.totalModules}`,
+      subtitle: "All modules have audit hooks",
       icon: CheckCircle2,
+      color: "text-success",
+      bgColor: "bg-success/10",
+    },
+    {
+      label: "Activity Score",
+      value: `${metrics.overallCoverage}%`,
+      subtitle: `${metrics.coveredEntityTypes} of ${metrics.totalEntityTypes} pages active`,
+      icon: Activity,
       color: getCoverageColor(metrics.overallCoverage),
       bgColor: metrics.overallCoverage >= 90 
         ? "bg-success/10" 
         : metrics.overallCoverage >= 50 
           ? "bg-warning/10" 
-          : "bg-destructive/10",
+          : "bg-info/10",
       progress: metrics.overallCoverage,
     },
     {
-      label: "Modules Tracked",
-      value: `${metrics.modulesWithCoverage}`,
-      subtitle: `of ${metrics.totalModules} total modules`,
-      icon: Layers,
-      color: "text-primary",
-      bgColor: "bg-primary/10",
-      progress: Math.round((metrics.modulesWithCoverage / metrics.totalModules) * 100),
-    },
-    {
-      label: "Coverage Gaps",
-      value: `${metrics.coverageGaps.length}`,
-      subtitle: "entity types need attention",
-      icon: AlertTriangle,
-      color: metrics.coverageGaps.length > 20 
-        ? "text-destructive" 
-        : metrics.coverageGaps.length > 10 
-          ? "text-warning" 
-          : "text-muted-foreground",
-      bgColor: metrics.coverageGaps.length > 20 
-        ? "bg-destructive/10" 
-        : metrics.coverageGaps.length > 10 
-          ? "bg-warning/10" 
-          : "bg-muted/10",
+      label: "Pending Activation",
+      value: `${metrics.coverageGaps.filter(g => g.status === 'missing_data').length}`,
+      subtitle: "pages awaiting first visit",
+      icon: Clock,
+      color: "text-info",
+      bgColor: "bg-info/10",
     },
     {
       label: "Active This Week",
       value: metrics.moduleCoverages.reduce((sum, m) => sum + m.totalLogs, 0).toLocaleString(),
       subtitle: "audit log entries",
-      icon: Activity,
-      color: "text-info",
-      bgColor: "bg-info/10",
+      icon: Layers,
+      color: "text-primary",
+      bgColor: "bg-primary/10",
     },
   ];
 
