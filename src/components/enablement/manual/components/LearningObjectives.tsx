@@ -4,6 +4,15 @@ interface LearningObjectivesProps {
   objectives: string[];
 }
 
+const numberColors = [
+  'bg-blue-600 text-white',
+  'bg-emerald-600 text-white',
+  'bg-teal-600 text-white',
+  'bg-amber-600 text-white',
+  'bg-purple-600 text-white',
+  'bg-rose-600 text-white',
+];
+
 export function LearningObjectives({ objectives }: LearningObjectivesProps) {
   return (
     <div className="p-4 border-l-4 border-l-primary bg-muted/50 rounded-r-lg my-4">
@@ -15,7 +24,7 @@ export function LearningObjectives({ objectives }: LearningObjectivesProps) {
       <ul className="space-y-2">
         {objectives.map((objective, index) => (
           <li key={index} className="flex items-start gap-2 text-sm text-foreground">
-            <span className="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-semibold flex-shrink-0 mt-0.5">
+            <span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-semibold flex-shrink-0 mt-0.5 ${numberColors[index % numberColors.length]}`}>
               {index + 1}
             </span>
             <span>{objective}</span>
