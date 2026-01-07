@@ -5,6 +5,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   CheckCircle2, 
   ExternalLink, 
@@ -12,12 +13,15 @@ import {
   ChevronDown, 
   Clock,
   MessageSquare,
-  User
+  User,
+  ListChecks
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
 import type { StepMapping } from "@/data/implementationMappings";
 import type { StepProgress } from "@/hooks/useStepProgress";
+import { SubTaskList } from "./SubTaskList";
+import { getSubTasksForStep } from "@/data/subTaskDefinitions";
 
 interface PhaseItem {
   order: number;
@@ -35,6 +39,7 @@ interface StepCardProps {
   onToggleComplete: (complete: boolean) => Promise<void>;
   onUpdateNotes: (notes: string) => Promise<void>;
   onImportClick?: () => void;
+  companyId?: string;
 }
 
 export function StepCard({
@@ -46,11 +51,15 @@ export function StepCard({
   isLoading,
   onToggleComplete,
   onUpdateNotes,
-  onImportClick
+  onImportClick,
+  companyId
 }: StepCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [notes, setNotes] = useState(stepProgress?.notes || "");
   const [isSavingNotes, setIsSavingNotes] = useState(false);
+  
+  const subTaskDefinitions = getSubTasksForStep(phaseId, step.order);
+  const hasSubTasks = subTaskDefinitions.length > 0;
 
   const handleNotesBlur = async () => {
     if (notes !== (stepProgress?.notes || "")) {
@@ -150,24 +159,62 @@ export function StepCard({
 
           {/* Expanded Content */}
           <CollapsibleContent>
-            <div className="mt-4 pt-4 border-t space-y-3">
-              <div>
-                <label className="text-sm font-medium flex items-center gap-1 mb-2">
-                  <MessageSquare className="h-3 w-3" />
-                  Implementation Notes
-                </label>
-                <Textarea
-                  placeholder="Add notes about this step's implementation..."
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  onBlur={handleNotesBlur}
-                  disabled={isSavingNotes}
-                  className="min-h-[80px]"
-                />
-                {isSavingNotes && (
-                  <p className="text-xs text-muted-foreground mt-1">Saving...</p>
-                )}
-              </div>
+            <div className="mt-4 pt-4 border-t">
+              {hasSubTasks ? (
+                <Tabs defaultValue="subtasks" className="w-full">
+                  <TabsList className="grid w-full grid-cols-2 mb-4">
+                    <TabsTrigger value="subtasks" className="gap-1">
+                      <ListChecks className="h-3 w-3" />
+                      Sub-Tasks ({subTaskDefinitions.length})
+                    </TabsTrigger>
+                    <TabsTrigger value="notes" className="gap-1">
+                      <MessageSquare className="h-3 w-3" />
+                      Notes
+                    </TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="subtasks">
+                    <SubTaskList
+                      companyId={companyId}
+                      phaseId={phaseId}
+                      stepOrder={step.order}
+                      subTaskDefinitions={subTaskDefinitions}
+                    />
+                  </TabsContent>
+                  <TabsContent value="notes">
+                    <div>
+                      <Textarea
+                        placeholder="Add notes about this step's implementation..."
+                        value={notes}
+                        onChange={(e) => setNotes(e.target.value)}
+                        onBlur={handleNotesBlur}
+                        disabled={isSavingNotes}
+                        className="min-h-[80px]"
+                      />
+                      {isSavingNotes && (
+                        <p className="text-xs text-muted-foreground mt-1">Saving...</p>
+                      )}
+                    </div>
+                  </TabsContent>
+                </Tabs>
+              ) : (
+                <div>
+                  <label className="text-sm font-medium flex items-center gap-1 mb-2">
+                    <MessageSquare className="h-3 w-3" />
+                    Implementation Notes
+                  </label>
+                  <Textarea
+                    placeholder="Add notes about this step's implementation..."
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                    onBlur={handleNotesBlur}
+                    disabled={isSavingNotes}
+                    className="min-h-[80px]"
+                  />
+                  {isSavingNotes && (
+                    <p className="text-xs text-muted-foreground mt-1">Saving...</p>
+                  )}
+                </div>
+              )}
             </div>
           </CollapsibleContent>
         </CardContent>

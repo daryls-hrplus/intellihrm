@@ -31759,6 +31759,69 @@ export type Database = {
           },
         ]
       }
+      implementation_sub_tasks: {
+        Row: {
+          blocker_reason: string | null
+          company_id: string
+          completed_at: string | null
+          completed_by: string | null
+          created_at: string
+          id: string
+          notes: string | null
+          phase_id: string
+          status: string
+          step_order: number
+          sub_task_name: string
+          sub_task_order: number
+          updated_at: string
+        }
+        Insert: {
+          blocker_reason?: string | null
+          company_id: string
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          phase_id: string
+          status?: string
+          step_order: number
+          sub_task_name: string
+          sub_task_order: number
+          updated_at?: string
+        }
+        Update: {
+          blocker_reason?: string | null
+          company_id?: string
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          phase_id?: string
+          status?: string
+          step_order?: number
+          sub_task_name?: string
+          sub_task_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "implementation_sub_tasks_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "implementation_sub_tasks_completed_by_fkey"
+            columns: ["completed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       import_batches: {
         Row: {
           committed_at: string | null
