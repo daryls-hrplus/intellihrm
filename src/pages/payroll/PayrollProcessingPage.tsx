@@ -45,6 +45,7 @@ import {
   Globe,
 } from "lucide-react";
 import { formatDateForDisplay } from "@/utils/dateUtils";
+import { usePageAudit } from "@/hooks/usePageAudit";
 
 interface ExtendedPayrollRun extends PayrollRun {
   calculation_started_at?: string | null;
@@ -217,6 +218,8 @@ function NetPayWithCurrencySplit({
 
 export default function PayrollProcessingPage() {
   const { t } = useTranslation();
+  usePageAudit('payroll_processing', 'Payroll');
+  
   const { hasRole } = useAuth();
   const { selectedCompanyId, setSelectedCompanyId, selectedPayGroupId, setSelectedPayGroupId } = usePayrollFilters();
   const {

@@ -28,6 +28,7 @@ import { formatDateForDisplay, getTodayString } from "@/utils/dateUtils";
 import { useNavigate } from "react-router-dom";
 import { PayrollFilters, usePayrollFilters } from "@/components/payroll/PayrollFilters";
 import { useRetroactivePay, RetroactivePayConfig, RetroactivePayConfigItem } from "@/hooks/useRetroactivePay";
+import { usePageAudit } from "@/hooks/usePageAudit";
 
 interface ConfigFormData {
   config_name: string;
@@ -47,6 +48,8 @@ interface ItemFormData {
 }
 
 export default function RetroactivePayConfigPage() {
+  usePageAudit('retroactive_pay_config', 'Payroll');
+  
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { selectedCompanyId, setSelectedCompanyId } = usePayrollFilters();

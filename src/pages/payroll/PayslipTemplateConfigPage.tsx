@@ -16,9 +16,11 @@ import { usePayrollFilters } from "@/components/payroll/PayrollFilters";
 import { FileText, Palette, Eye, Settings2, Upload, Save, Star, Trash2, Sparkles, MessageSquare, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { usePageAudit } from "@/hooks/usePageAudit";
 
 export default function PayslipTemplateConfigPage() {
   const { t } = useTranslation();
+  usePageAudit('payslip_template_config', 'Payroll');
   const { selectedCompanyId } = usePayrollFilters();
   const { 
     isLoading, 
