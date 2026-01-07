@@ -55,7 +55,7 @@ export default function ESSChangeRequestsPage() {
         .select(`
           *,
           employee:profiles!employee_data_change_requests_employee_id_fkey(
-            id, first_name, last_name, employee_id
+            id, first_name, first_last_name, full_name, employee_id
           )
         `)
         .order("requested_at", { ascending: false });
@@ -358,7 +358,7 @@ export default function ESSChangeRequestsPage() {
                           <User className="h-4 w-4 text-muted-foreground" />
                           <div>
                             <p className="font-medium">
-                              {request.employee?.first_name} {request.employee?.last_name}
+                              {request.employee?.full_name || `${request.employee?.first_name || ''} ${request.employee?.first_last_name || ''}`.trim() || 'Unknown'}
                             </p>
                             <p className="text-xs text-muted-foreground">
                               {request.employee?.employee_id}
