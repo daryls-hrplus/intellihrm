@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppLayout } from '@/components/layout/AppLayout';
+import { usePageAudit } from '@/hooks/usePageAudit';
 import { Breadcrumbs } from '@/components/ui/breadcrumbs';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -51,6 +52,7 @@ interface SegmentValue {
 
 const CostCentersPage = () => {
   const { t } = useTranslation();
+  usePageAudit('cost_centers', 'Payroll');
   const { selectedCompanyId, setSelectedCompanyId } = usePayrollFilters();
   const [costCenters, setCostCenters] = useState<CostCenter[]>([]);
   const [segments, setSegments] = useState<Segment[]>([]);

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { usePageAudit } from '@/hooks/usePageAudit';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -57,6 +58,7 @@ interface EmployeePosition {
 
 export default function PayPeriodPayrollEntriesPage() {
   const { t } = useTranslation();
+  usePageAudit('pay_period_payroll_entries', 'Payroll');
   const [companies, setCompanies] = useState<Company[]>([]);
   const [payGroups, setPayGroups] = useState<PayGroup[]>([]);
   const [payPeriods, setPayPeriods] = useState<PayPeriod[]>([]);
