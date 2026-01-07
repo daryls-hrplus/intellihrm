@@ -9,10 +9,14 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2, Building2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Building2, Clock, Info } from "lucide-react";
 import { getTodayString } from "@/utils/dateUtils";
 import { useCompanyCurrencyList } from "@/hooks/useCompanyCurrencies";
+import { useESSGatedSave } from "@/hooks/useESSGatedSave";
+import { useAuth } from "@/contexts/AuthContext";
+import { ESSGatedSaveDialog, PendingApprovalBadge } from "@/components/ess/ESSGatedSaveDialog";
 
 interface BankAccount {
   id: string;
@@ -49,12 +53,95 @@ interface EmployeeBankAccountsTabProps {
 }
 
 export function EmployeeBankAccountsTab({ employeeId, companyId: propCompanyId }: EmployeeBankAccountsTabProps) {
+  const { profile } = useAuth();
   const [accounts, setAccounts] = useState<BankAccount[]>([]);
   const [employeeCompanyId, setEmployeeCompanyId] = useState<string | undefined>(propCompanyId);
   const { currencies } = useCompanyCurrencyList(employeeCompanyId);
   const [isLoading, setIsLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingAccount, setEditingAccount] = useState<BankAccount | null>(null);
+  const [approvalDialogOpen, setApprovalDialogOpen] = useState(false);
+  const [pendingFormData, setPendingFormData] = useState<BankFormData | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<BankAccount | null>(null);
+
+  // Use gated save hook for banking changes
+  const {
+    requiresApproval,
+    requiresDocumentation,
+    isDocumentationOptional,
+    approvalMode,
+    canDirectEdit,
+    isSubmitting,
+    gatedSave,
+    hasPendingRequest,
+    refetchPending,
+  } = useESSGatedSave({
+    requestType: 'banking',
+    entityId: editingAccount?.id || null,
+    entityTable: 'employee_bank_accounts',
+    changeAction: editingAccount ? 'update' : 'create',
+    employeeId,
+    onDirectSave: async (newValues) => {
+      // Direct save implementation (used when HR/Admin or auto-approve)
+      if (editingAccount) {
+        const { error } = await supabase
+          .from("employee_bank_accounts")
+          .update({
+            bank_name: newValues.bank_name,
+            account_holder_name: newValues.account_holder_name,
+            account_number: newValues.account_number,
+            routing_number: newValues.routing_number || null,
+            iban: newValues.iban || null,
+            swift_code: newValues.swift_code || null,
+            account_type: newValues.account_type,
+            is_primary: newValues.is_primary,
+            currency: newValues.currency,
+            effective_date: newValues.effective_date,
+            end_date: newValues.end_date || null,
+          })
+          .eq("id", editingAccount.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from("employee_bank_accounts")
+          .insert([{
+            employee_id: employeeId,
+            bank_name: newValues.bank_name,
+            account_holder_name: newValues.account_holder_name,
+            account_number: newValues.account_number,
+            routing_number: newValues.routing_number || null,
+            iban: newValues.iban || null,
+            swift_code: newValues.swift_code || null,
+            account_type: newValues.account_type,
+            is_primary: newValues.is_primary,
+            currency: newValues.currency,
+            effective_date: newValues.effective_date,
+            end_date: newValues.end_date || null,
+          }]);
+        if (error) throw error;
+      }
+      
+      fetchAccounts();
+    },
+  });
+
+  // Separate hook instance for delete operations
+  const deleteGatedSave = useESSGatedSave({
+    requestType: 'banking',
+    entityId: deleteTarget?.id || null,
+    entityTable: 'employee_bank_accounts',
+    changeAction: 'delete',
+    employeeId,
+    onDirectSave: async () => {
+      if (!deleteTarget) return;
+      const { error } = await supabase
+        .from("employee_bank_accounts")
+        .delete()
+        .eq("id", deleteTarget.id);
+      if (error) throw error;
+      fetchAccounts();
+    },
+  });
 
   const form = useForm<BankFormData>({
     defaultValues: {
@@ -100,6 +187,7 @@ export function EmployeeBankAccountsTab({ employeeId, companyId: propCompanyId }
       setAccounts(data || []);
     }
     setIsLoading(false);
+    refetchPending();
   };
 
   useEffect(() => {
@@ -109,7 +197,8 @@ export function EmployeeBankAccountsTab({ employeeId, companyId: propCompanyId }
 
   const handleSubmit = async (data: BankFormData) => {
     try {
-      if (data.is_primary) {
+      // Handle primary account toggle
+      if (data.is_primary && !editingAccount?.is_primary) {
         await supabase
           .from("employee_bank_accounts")
           .update({ is_primary: false })
@@ -124,34 +213,82 @@ export function EmployeeBankAccountsTab({ employeeId, companyId: propCompanyId }
         end_date: data.end_date || null,
       };
 
-      if (editingAccount) {
-        const { error } = await supabase
-          .from("employee_bank_accounts")
-          .update(payload)
-          .eq("id", editingAccount.id);
-
-        if (error) throw error;
-        toast.success("Bank account updated");
-      } else {
-        const { error } = await supabase.from("employee_bank_accounts").insert({
-          employee_id: employeeId,
-          ...payload,
-        });
-
-        if (error) throw error;
-        toast.success("Bank account added");
+      // If approval is required, show the approval dialog
+      if (requiresApproval) {
+        setPendingFormData(data);
+        setDialogOpen(false);
+        setApprovalDialogOpen(true);
+        return;
       }
+
+      // Otherwise, use gated save (which handles HR/Admin or auto-approve)
+      await gatedSave({
+        currentValues: editingAccount ? {
+          bank_name: editingAccount.bank_name,
+          account_holder_name: editingAccount.account_holder_name,
+          account_number: editingAccount.account_number,
+          routing_number: editingAccount.routing_number,
+          iban: editingAccount.iban,
+          swift_code: editingAccount.swift_code,
+          account_type: editingAccount.account_type,
+          is_primary: editingAccount.is_primary,
+          currency: editingAccount.currency,
+          effective_date: editingAccount.effective_date,
+          end_date: editingAccount.end_date,
+        } : null,
+        newValues: payload,
+      });
 
       setDialogOpen(false);
       setEditingAccount(null);
       form.reset();
-      fetchAccounts();
     } catch (error) {
-      toast.error("Failed to save bank account");
+      console.error("Submit error:", error);
     }
   };
 
+  const handleApprovalSubmit = async (notes: string, documentUrls: string[]) => {
+    if (!pendingFormData) return;
+
+    const payload = {
+      ...pendingFormData,
+      routing_number: pendingFormData.routing_number || null,
+      iban: pendingFormData.iban || null,
+      swift_code: pendingFormData.swift_code || null,
+      end_date: pendingFormData.end_date || null,
+    };
+
+    await gatedSave({
+      currentValues: editingAccount ? {
+        bank_name: editingAccount.bank_name,
+        account_holder_name: editingAccount.account_holder_name,
+        account_number: editingAccount.account_number,
+        routing_number: editingAccount.routing_number,
+        iban: editingAccount.iban,
+        swift_code: editingAccount.swift_code,
+        account_type: editingAccount.account_type,
+        is_primary: editingAccount.is_primary,
+        currency: editingAccount.currency,
+        effective_date: editingAccount.effective_date,
+        end_date: editingAccount.end_date,
+      } : null,
+      newValues: payload,
+      notes,
+      documentUrls,
+    });
+
+    setPendingFormData(null);
+    setEditingAccount(null);
+    form.reset();
+  };
+
   const handleEdit = (account: BankAccount) => {
+    // Check if there's a pending request for this account
+    if (hasPendingRequest(account.id, 'employee_bank_accounts')) {
+      toast.info("This account has a pending change request");
+      return;
+    }
+
     setEditingAccount(account);
     form.reset({
       bank_name: account.bank_name,
@@ -169,13 +306,38 @@ export function EmployeeBankAccountsTab({ employeeId, companyId: propCompanyId }
     setDialogOpen(true);
   };
 
-  const handleDelete = async (id: string) => {
-    const { error } = await supabase.from("employee_bank_accounts").delete().eq("id", id);
-    if (error) {
+  const handleDelete = async (account: BankAccount) => {
+    // Check if there's a pending request for this account
+    if (hasPendingRequest(account.id, 'employee_bank_accounts')) {
+      toast.info("This account has a pending change request");
+      return;
+    }
+
+    if (!confirm("Are you sure you want to delete this bank account?")) return;
+
+    setDeleteTarget(account);
+    
+    try {
+      if (deleteGatedSave.requiresApproval) {
+        // Submit deletion request
+        await deleteGatedSave.gatedSave({
+          currentValues: {
+            bank_name: account.bank_name,
+            account_holder_name: account.account_holder_name,
+            account_number: account.account_number,
+          },
+          newValues: { _deleted: true },
+        });
+      } else {
+        await deleteGatedSave.gatedSave({
+          currentValues: null,
+          newValues: {},
+        });
+      }
+    } catch (error) {
       toast.error("Failed to delete bank account");
-    } else {
-      toast.success("Bank account deleted");
-      fetchAccounts();
+    } finally {
+      setDeleteTarget(null);
     }
   };
 
@@ -204,6 +366,16 @@ export function EmployeeBankAccountsTab({ employeeId, companyId: propCompanyId }
 
   return (
     <div className="space-y-4">
+      {/* Show info alert if approval is required */}
+      {requiresApproval && !canDirectEdit && (
+        <Alert>
+          <Info className="h-4 w-4" />
+          <AlertDescription>
+            Changes to bank accounts require {approvalMode === 'workflow' ? 'workflow' : 'HR'} approval before taking effect.
+          </AlertDescription>
+        </Alert>
+      )}
+
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-medium">Bank Accounts</h3>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
@@ -395,7 +567,9 @@ export function EmployeeBankAccountsTab({ employeeId, companyId: propCompanyId }
                   <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
                     Cancel
                   </Button>
-                  <Button type="submit">Save</Button>
+                  <Button type="submit" disabled={isSubmitting}>
+                    {requiresApproval ? "Continue" : "Save"}
+                  </Button>
                 </div>
               </form>
             </Form>
@@ -414,49 +588,91 @@ export function EmployeeBankAccountsTab({ employeeId, companyId: propCompanyId }
         </Card>
       ) : (
         <div className="grid gap-4">
-          {accounts.map((account) => (
-            <Card key={account.id}>
-              <CardHeader className="pb-2">
-                <div className="flex justify-between items-start">
-                  <div className="flex items-center gap-2">
-                    <CardTitle className="text-base">{account.bank_name}</CardTitle>
-                    {account.is_primary && <Badge variant="default">Primary</Badge>}
-                    <Badge variant="outline" className="capitalize">{account.account_type}</Badge>
-                  </div>
-                  <div className="flex gap-1">
-                    <Button variant="ghost" size="icon" onClick={() => handleEdit(account)}>
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button variant="ghost" size="icon" onClick={() => handleDelete(account.id)}>
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 gap-2 text-sm">
-                  <div>
-                    <span className="text-muted-foreground">Account Holder:</span>{" "}
-                    {account.account_holder_name}
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground">Account:</span>{" "}
-                    {maskAccountNumber(account.account_number)}
-                  </div>
-                  {account.routing_number && (
-                    <div>
-                      <span className="text-muted-foreground">Routing:</span> {account.routing_number}
+          {accounts.map((account) => {
+            const isPending = hasPendingRequest(account.id, 'employee_bank_accounts');
+            
+            return (
+              <Card key={account.id} className={isPending ? "opacity-75" : ""}>
+                <CardHeader className="pb-2">
+                  <div className="flex justify-between items-start">
+                    <div className="flex items-center gap-2">
+                      <CardTitle className="text-base">{account.bank_name}</CardTitle>
+                      {account.is_primary && <Badge variant="default">Primary</Badge>}
+                      <Badge variant="outline" className="capitalize">{account.account_type}</Badge>
+                      {isPending && <PendingApprovalBadge />}
                     </div>
-                  )}
-                  <div>
-                    <span className="text-muted-foreground">Currency:</span> {account.currency}
+                    <div className="flex gap-1">
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        onClick={() => handleEdit(account)}
+                        disabled={isPending}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        onClick={() => handleDelete(account)}
+                        disabled={isPending}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    <div>
+                      <span className="text-muted-foreground">Account Holder:</span>{" "}
+                      {account.account_holder_name}
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Account:</span>{" "}
+                      {maskAccountNumber(account.account_number)}
+                    </div>
+                    {account.routing_number && (
+                      <div>
+                        <span className="text-muted-foreground">Routing:</span> {account.routing_number}
+                      </div>
+                    )}
+                    <div>
+                      <span className="text-muted-foreground">Currency:</span> {account.currency}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       )}
+
+      {/* Approval Dialog */}
+      <ESSGatedSaveDialog
+        open={approvalDialogOpen}
+        onOpenChange={(open) => {
+          setApprovalDialogOpen(open);
+          if (!open) {
+            setPendingFormData(null);
+          }
+        }}
+        title={editingAccount ? "Submit Bank Account Changes" : "Submit New Bank Account"}
+        description="This change requires approval before taking effect"
+        approvalMode={approvalMode}
+        requiresDocumentation={requiresDocumentation}
+        isDocumentationOptional={isDocumentationOptional}
+        onSubmit={handleApprovalSubmit}
+        isSubmitting={isSubmitting}
+        employeeId={employeeId}
+      >
+        {pendingFormData && (
+          <div className="p-3 bg-muted rounded-lg text-sm space-y-1">
+            <p><span className="text-muted-foreground">Bank:</span> {pendingFormData.bank_name}</p>
+            <p><span className="text-muted-foreground">Account:</span> ****{pendingFormData.account_number.slice(-4)}</p>
+            <p><span className="text-muted-foreground">Type:</span> {pendingFormData.account_type}</p>
+          </div>
+        )}
+      </ESSGatedSaveDialog>
     </div>
   );
 }
