@@ -82,10 +82,13 @@ const statusColors: Record<string, string> = {
   archived: "bg-slate-500/10 text-slate-600 border-slate-200",
 };
 
+type PrimaryTabType = "operations" | "monitoring" | "configuration";
+
 export default function AdminHelpdeskPage() {
   const { t } = useTranslation();
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const [primaryTab, setPrimaryTab] = useState<PrimaryTabType>("operations");
   const [selectedTicket, setSelectedTicket] = useState<any>(null);
   const [commentText, setCommentText] = useState("");
   const [filter, setFilter] = useState<string>("all");
@@ -447,58 +450,49 @@ export default function AdminHelpdeskPage() {
           </div>
         </div>
 
-        <Tabs defaultValue="tickets" className="space-y-4">
-          <TabsList className="h-auto flex-wrap items-center">
-            {/* Operations */}
-            <TabsTrigger value="tickets" className="flex items-center gap-2">
-              <Ticket className="h-4 w-4" />
-              Tickets
-            </TabsTrigger>
-            <TabsTrigger value="agents" className="flex items-center gap-2">
-              <Users className="h-4 w-4" />
-              Agents
-            </TabsTrigger>
-            
-            <div className="mx-2 h-5 w-px bg-muted-foreground/40 hidden sm:block" />
-            
-            {/* Monitoring */}
-            <TabsTrigger value="analytics" className="flex items-center gap-2">
-              <PieChart className="h-4 w-4" />
-              Analytics
-            </TabsTrigger>
-            <TabsTrigger value="sla-metrics" className="flex items-center gap-2">
-              <TrendingUp className="h-4 w-4" />
-              SLA Metrics
-            </TabsTrigger>
-            <TabsTrigger value="satisfaction" className="flex items-center gap-2">
-              <Star className="h-4 w-4" />
-              Satisfaction
-            </TabsTrigger>
-            
-            <div className="mx-2 h-5 w-px bg-muted-foreground/40 hidden sm:block" />
-            
-            {/* Configuration */}
-            <TabsTrigger value="escalation" className="flex items-center gap-2">
-              <AlertTriangle className="h-4 w-4" />
-              Escalation
-            </TabsTrigger>
-            <TabsTrigger value="auto-assign" className="flex items-center gap-2">
-              <UserCog className="h-4 w-4" />
-              Auto-Assign
-            </TabsTrigger>
-            <TabsTrigger value="sla-config" className="flex items-center gap-2">
-              <Settings className="h-4 w-4" />
-              SLA Config
-            </TabsTrigger>
-            <TabsTrigger value="categories" className="flex items-center gap-2">
-              <FolderCog className="h-4 w-4" />
-              Categories
-            </TabsTrigger>
-            <TabsTrigger value="templates" className="flex items-center gap-2">
-              <FileText className="h-4 w-4" />
-              Templates
-            </TabsTrigger>
-          </TabsList>
+        {/* Primary Tabs - Section Selection */}
+        <div className="space-y-4">
+          <Tabs value={primaryTab} onValueChange={(v) => setPrimaryTab(v as PrimaryTabType)}>
+            <TabsList className="bg-muted/50 p-1.5 h-auto">
+              <TabsTrigger 
+                value="operations" 
+                className="flex items-center gap-2 text-sm font-semibold px-4 py-2.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+              >
+                <Ticket className="h-4 w-4" />
+                Operations
+              </TabsTrigger>
+              <TabsTrigger 
+                value="monitoring" 
+                className="flex items-center gap-2 text-sm font-semibold px-4 py-2.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+              >
+                <BarChart3 className="h-4 w-4" />
+                Monitoring
+              </TabsTrigger>
+              <TabsTrigger 
+                value="configuration" 
+                className="flex items-center gap-2 text-sm font-semibold px-4 py-2.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+              >
+                <Settings className="h-4 w-4" />
+                Configuration
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+
+          <Separator />
+
+          {/* Secondary Tabs - Operations */}
+          {primaryTab === "operations" && (
+            <Tabs defaultValue="tickets" className="space-y-4">
+              <TabsList className="h-auto">
+                <TabsTrigger value="tickets" className="flex items-center gap-2">
+                  <Ticket className="h-4 w-4" />
+                  Tickets
+                </TabsTrigger>
+                <TabsTrigger value="agents" className="flex items-center gap-2">
+                  <Users className="h-4 w-4" />
+                  Agents
+                </TabsTrigger>
+              </TabsList>
 
           <TabsContent value="tickets" className="space-y-6">
 
@@ -999,42 +993,92 @@ export default function AdminHelpdeskPage() {
         </Dialog>
           </TabsContent>
 
-          <TabsContent value="sla-metrics">
-            <SlaMetricsDashboard />
-          </TabsContent>
+              <TabsContent value="agents">
+                <AgentPerformanceDashboard />
+              </TabsContent>
+            </Tabs>
+          )}
 
-          <TabsContent value="analytics">
-            <TicketAnalytics />
-          </TabsContent>
+          {/* Secondary Tabs - Monitoring */}
+          {primaryTab === "monitoring" && (
+            <Tabs defaultValue="analytics" className="space-y-4">
+              <TabsList className="h-auto">
+                <TabsTrigger value="analytics" className="flex items-center gap-2">
+                  <PieChart className="h-4 w-4" />
+                  Analytics
+                </TabsTrigger>
+                <TabsTrigger value="sla-metrics" className="flex items-center gap-2">
+                  <TrendingUp className="h-4 w-4" />
+                  SLA Metrics
+                </TabsTrigger>
+                <TabsTrigger value="satisfaction" className="flex items-center gap-2">
+                  <Star className="h-4 w-4" />
+                  Satisfaction
+                </TabsTrigger>
+              </TabsList>
 
-          <TabsContent value="sla-config">
-            <SlaConfigurationPanel />
-          </TabsContent>
+              <TabsContent value="analytics">
+                <TicketAnalytics />
+              </TabsContent>
 
-          <TabsContent value="escalation">
-            <EscalationRulesPanel />
-          </TabsContent>
+              <TabsContent value="sla-metrics">
+                <SlaMetricsDashboard />
+              </TabsContent>
 
-          <TabsContent value="auto-assign">
-            <CategoryAssignmentPanel />
-          </TabsContent>
+              <TabsContent value="satisfaction">
+                <SatisfactionAnalytics />
+              </TabsContent>
+            </Tabs>
+          )}
 
-          <TabsContent value="agents">
-            <AgentPerformanceDashboard />
-          </TabsContent>
+          {/* Secondary Tabs - Configuration */}
+          {primaryTab === "configuration" && (
+            <Tabs defaultValue="escalation" className="space-y-4">
+              <TabsList className="h-auto">
+                <TabsTrigger value="escalation" className="flex items-center gap-2">
+                  <AlertTriangle className="h-4 w-4" />
+                  Escalation
+                </TabsTrigger>
+                <TabsTrigger value="auto-assign" className="flex items-center gap-2">
+                  <UserCog className="h-4 w-4" />
+                  Auto-Assign
+                </TabsTrigger>
+                <TabsTrigger value="sla-config" className="flex items-center gap-2">
+                  <Settings className="h-4 w-4" />
+                  SLA Config
+                </TabsTrigger>
+                <TabsTrigger value="categories" className="flex items-center gap-2">
+                  <FolderCog className="h-4 w-4" />
+                  Categories
+                </TabsTrigger>
+                <TabsTrigger value="templates" className="flex items-center gap-2">
+                  <FileText className="h-4 w-4" />
+                  Templates
+                </TabsTrigger>
+              </TabsList>
 
-          <TabsContent value="satisfaction">
-            <SatisfactionAnalytics />
-          </TabsContent>
+              <TabsContent value="escalation">
+                <EscalationRulesPanel />
+              </TabsContent>
 
-          <TabsContent value="categories">
-            <CategoryManagementPanel />
-          </TabsContent>
+              <TabsContent value="auto-assign">
+                <CategoryAssignmentPanel />
+              </TabsContent>
 
-          <TabsContent value="templates">
-            <CannedResponseManagementPanel />
-          </TabsContent>
-        </Tabs>
+              <TabsContent value="sla-config">
+                <SlaConfigurationPanel />
+              </TabsContent>
+
+              <TabsContent value="categories">
+                <CategoryManagementPanel />
+              </TabsContent>
+
+              <TabsContent value="templates">
+                <CannedResponseManagementPanel />
+              </TabsContent>
+            </Tabs>
+          )}
+        </div>
 
         {/* Mass Ticket Dialog */}
         <MassTicketDialog open={massTicketOpen} onOpenChange={setMassTicketOpen} />
