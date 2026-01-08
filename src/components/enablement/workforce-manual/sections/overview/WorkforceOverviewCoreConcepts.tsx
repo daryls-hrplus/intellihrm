@@ -27,7 +27,7 @@ export function WorkforceOverviewCoreConcepts() {
             Organization Hierarchy Model
           </h3>
           <p className="text-muted-foreground mb-4">
-            HRplus uses a 10-level organizational hierarchy that supports multi-territory, multi-company 
+            Intelli HRM uses a 10-level organizational hierarchy that supports multi-territory, multi-company 
             operations. Each level inherits settings from its parent and can override specific configurations.
           </p>
           

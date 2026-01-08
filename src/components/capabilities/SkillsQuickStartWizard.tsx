@@ -350,7 +350,7 @@ export function SkillsQuickStartWizard({
             effective_from: new Date().toISOString().split('T')[0],
             created_by: user.id,
             metadata: {
-              source: 'HRplus Quick Start Wizard',
+            source: 'Intelli HRM Quick Start Wizard',
               master_skill_id: skill.id,
               original_source: skill.source,
               proficiency_level: profLevel,
@@ -411,7 +411,7 @@ export function SkillsQuickStartWizard({
             effective_from: new Date().toISOString().split('T')[0],
             created_by: user.id,
             metadata: {
-              source: 'HRplus Quick Start Wizard',
+              source: 'Intelli HRM Quick Start Wizard',
               master_competency_id: comp.id,
               original_source: comp.source,
               proficiency_level: profLevel,
@@ -592,7 +592,7 @@ export function SkillsQuickStartWizard({
             Capability Library Import Wizard
           </DialogTitle>
           <DialogDescription>
-            Import skills and competencies from the HRplus library
+            Import skills and competencies from the Intelli HRM library
           </DialogDescription>
         </DialogHeader>
 

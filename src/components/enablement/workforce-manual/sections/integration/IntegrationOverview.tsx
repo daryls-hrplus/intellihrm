@@ -135,7 +135,7 @@ export function IntegrationOverview() {
           <div>
             <h2 className="text-2xl font-bold">9.1 Integration Overview</h2>
             <p className="text-muted-foreground">
-              How workforce data flows to and from other HRplus modules
+              How workforce data flows to and from other Intelli HRM modules
             </p>
           </div>
         </div>
@@ -152,7 +152,7 @@ export function IntegrationOverview() {
         <CardContent className="space-y-4">
           <p className="text-muted-foreground">
             The Workforce module serves as the <strong>master data repository</strong> for the entire 
-            HRplus ecosystem. Employee records, organizational structure, job architecture, and position 
+            Intelli HRM ecosystem. Employee records, organizational structure, job architecture, and position 
             data originate here and flow to all downstream modules.
           </p>
           <p className="text-muted-foreground">
@@ -233,7 +233,7 @@ export function IntegrationOverview() {
 
       {/* Callouts */}
       <TipCallout title="Integration Sequence">
-        When implementing HRplus, configure the Workforce module first. All downstream modules 
+        When implementing Intelli HRM, configure the Workforce module first. All downstream modules 
         (Leave, Benefits, Payroll, Performance) depend on Workforce data being complete and accurate.
       </TipCallout>
 
