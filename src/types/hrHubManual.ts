@@ -30,9 +30,10 @@ export interface HRHubManualSection extends ManualSection {
   crossModuleReferences?: CrossModuleReference[];
 }
 
-// HR Hub Manual Structure - 8 Parts
+// HR Hub Manual Structure - 8 Parts (Implementation-First Order)
+// Order: Overview → Foundation Setup → Compliance/Workflows → Content → Communication → Daily Operations → Analytics → Troubleshooting
 export const HR_HUB_MANUAL_STRUCTURE: HRHubManualSection[] = [
-  // Part 1: Module Overview
+  // Part 1: Module Overview (unchanged)
   {
     id: 'hh-part-1',
     sectionNumber: '1',
@@ -100,291 +101,19 @@ export const HR_HUB_MANUAL_STRUCTURE: HRHubManualSection[] = [
       }
     ]
   },
-  // Part 2: Communication & Support Setup
+  // Part 2: Organization Configuration (moved from Part 6 - FOUNDATIONAL SETUP)
   {
     id: 'hh-part-2',
     sectionNumber: '2',
-    title: 'Communication & Support Setup',
-    description: 'Help desk, announcements, knowledge base, and intranet configuration',
-    contentLevel: 'procedure',
-    estimatedReadTime: 45,
-    targetRoles: ['HR Admin', 'Consultant'],
-    subsections: [
-      {
-        id: 'hh-sec-2-1',
-        sectionNumber: '2.1',
-        title: 'Help Desk Configuration',
-        description: 'Ticket categories, SLAs, routing rules, escalation paths',
-        contentLevel: 'procedure',
-        estimatedReadTime: 12,
-        targetRoles: ['HR Admin'],
-        industryContext: {
-          frequency: 'Initial setup, periodic review',
-          timing: 'Pre-launch',
-          benchmark: 'HR service desk best practices'
-        }
-      },
-      {
-        id: 'hh-sec-2-2',
-        sectionNumber: '2.2',
-        title: 'Company Communications',
-        description: 'Announcements, photo gallery, blog posts, and intranet content',
-        contentLevel: 'procedure',
-        estimatedReadTime: 12,
-        targetRoles: ['HR Admin', 'Communications'],
-        industryContext: {
-          frequency: 'Ongoing',
-          timing: 'As needed',
-          benchmark: 'Internal communications strategy'
-        }
-      },
-      {
-        id: 'hh-sec-2-3',
-        sectionNumber: '2.3',
-        title: 'Knowledge Base Setup',
-        description: 'Article categories, search optimization, content governance',
-        contentLevel: 'procedure',
-        estimatedReadTime: 12,
-        targetRoles: ['HR Admin'],
-        industryContext: {
-          frequency: 'Initial setup, ongoing maintenance',
-          timing: 'Pre-launch',
-          benchmark: 'Self-service HR knowledge management'
-        }
-      },
-      {
-        id: 'hh-sec-2-4',
-        sectionNumber: '2.4',
-        title: 'Notifications & Reminders',
-        description: 'AI-powered automation rules, email templates, delivery tracking, in-app alerts',
-        contentLevel: 'procedure',
-        estimatedReadTime: 15,
-        targetRoles: ['HR Admin'],
-        industryContext: {
-          frequency: 'Initial setup, periodic review',
-          timing: 'Pre-launch and ongoing',
-          benchmark: 'Proactive HR communication automation'
-        }
-      }
-    ]
-  },
-  // Part 3: Documents & Templates
-  {
-    id: 'hh-part-3',
-    sectionNumber: '3',
-    title: 'Documents & Templates',
-    description: 'Letter templates, policy documents, forms library, and SOP management',
-    contentLevel: 'procedure',
-    estimatedReadTime: 60,
-    targetRoles: ['HR Admin', 'HR Ops'],
-    subsections: [
-      {
-        id: 'hh-sec-3-1',
-        sectionNumber: '3.1',
-        title: 'Letter Templates',
-        description: 'Employment letters, offer templates, termination notices',
-        contentLevel: 'procedure',
-        estimatedReadTime: 15,
-        targetRoles: ['HR Admin'],
-        industryContext: {
-          frequency: 'Initial setup, legal updates',
-          timing: 'Pre-launch',
-          benchmark: 'Compliant HR correspondence'
-        }
-      },
-      {
-        id: 'hh-sec-3-2',
-        sectionNumber: '3.2',
-        title: 'Policy Documents',
-        description: 'Policy versioning, acknowledgment tracking, distribution',
-        contentLevel: 'procedure',
-        estimatedReadTime: 15,
-        targetRoles: ['HR Admin', 'Compliance'],
-        industryContext: {
-          frequency: 'Annual review, regulatory updates',
-          timing: 'Ongoing',
-          benchmark: 'Policy lifecycle management'
-        }
-      },
-      {
-        id: 'hh-sec-3-3',
-        sectionNumber: '3.3',
-        title: 'Forms Library',
-        description: 'Digital forms, approval workflows, submission tracking',
-        contentLevel: 'procedure',
-        estimatedReadTime: 12,
-        targetRoles: ['HR Admin'],
-        industryContext: {
-          frequency: 'Initial setup, updates as needed',
-          timing: 'Pre-launch',
-          benchmark: 'Paperless HR processes'
-        }
-      },
-      {
-        id: 'hh-sec-3-4',
-        sectionNumber: '3.4',
-        title: 'SOP Management',
-        description: 'Standard operating procedures, version control, role-based access',
-        contentLevel: 'procedure',
-        estimatedReadTime: 18,
-        targetRoles: ['HR Admin', 'Operations'],
-        industryContext: {
-          frequency: 'Initial setup, periodic updates',
-          timing: 'Pre-launch and ongoing',
-          benchmark: 'ISO 9001 process documentation'
-        }
-      }
-    ]
-  },
-  // Part 4: Tasks & Events Management
-  {
-    id: 'hh-part-4',
-    sectionNumber: '4',
-    title: 'Tasks & Events Management',
-    description: 'Calendar setup, task management, milestones, and reminders',
-    contentLevel: 'procedure',
-    estimatedReadTime: 40,
-    targetRoles: ['HR Admin', 'Manager'],
-    subsections: [
-      {
-        id: 'hh-sec-4-1',
-        sectionNumber: '4.1',
-        title: 'Calendar Setup',
-        description: 'Company calendar, holidays, location-specific events',
-        contentLevel: 'procedure',
-        estimatedReadTime: 10,
-        targetRoles: ['HR Admin'],
-        industryContext: {
-          frequency: 'Annual setup',
-          timing: 'Pre-fiscal year',
-          benchmark: 'Multi-location calendar management'
-        }
-      },
-      {
-        id: 'hh-sec-4-2',
-        sectionNumber: '4.2',
-        title: 'Task Management',
-        description: 'Task templates, assignments, due dates, notifications',
-        contentLevel: 'procedure',
-        estimatedReadTime: 12,
-        targetRoles: ['HR Admin', 'Manager'],
-        industryContext: {
-          frequency: 'Ongoing',
-          timing: 'As needed',
-          benchmark: 'HR workflow automation'
-        }
-      },
-      {
-        id: 'hh-sec-4-3',
-        sectionNumber: '4.3',
-        title: 'Milestones Configuration',
-        description: 'Employee lifecycle milestones, anniversary tracking, alerts',
-        contentLevel: 'procedure',
-        estimatedReadTime: 10,
-        targetRoles: ['HR Admin'],
-        industryContext: {
-          frequency: 'Initial setup',
-          timing: 'Pre-launch',
-          benchmark: 'Employee experience touchpoints'
-        }
-      },
-      {
-        id: 'hh-sec-4-4',
-        sectionNumber: '4.4',
-        title: 'Reminders Configuration',
-        description: 'Automated reminders, escalation rules, notification channels',
-        contentLevel: 'procedure',
-        estimatedReadTime: 8,
-        targetRoles: ['HR Admin'],
-        industryContext: {
-          frequency: 'Initial setup, periodic review',
-          timing: 'Pre-launch',
-          benchmark: 'Proactive HR communication'
-        }
-      }
-    ]
-  },
-  // Part 5: Compliance & Workflows
-  {
-    id: 'hh-part-5',
-    sectionNumber: '5',
-    title: 'Compliance & Workflows',
-    description: 'Compliance tracker, transaction workflows, and approval delegations',
-    contentLevel: 'procedure',
-    estimatedReadTime: 75,
-    targetRoles: ['HR Admin', 'Compliance Officer', 'Consultant'],
-    subsections: [
-      {
-        id: 'hh-sec-5-1',
-        sectionNumber: '5.1',
-        title: 'Compliance Tracker Setup',
-        description: 'Regulatory requirements, deadline tracking, audit preparation',
-        contentLevel: 'procedure',
-        estimatedReadTime: 20,
-        targetRoles: ['HR Admin', 'Compliance'],
-        industryContext: {
-          frequency: 'Initial setup, regulatory updates',
-          timing: 'Pre-launch',
-          benchmark: 'Labor law compliance across jurisdictions'
-        }
-      },
-      {
-        id: 'hh-sec-5-2',
-        sectionNumber: '5.2',
-        title: 'Transaction Workflow Settings',
-        description: 'Approval chains, parallel/sequential flows, escalation rules',
-        contentLevel: 'procedure',
-        estimatedReadTime: 25,
-        targetRoles: ['HR Admin', 'Consultant'],
-        industryContext: {
-          frequency: 'Initial setup, org changes',
-          timing: 'Pre-launch',
-          benchmark: 'Enterprise workflow automation'
-        }
-      },
-      {
-        id: 'hh-sec-5-3',
-        sectionNumber: '5.3',
-        title: 'Approval Delegations',
-        description: 'Delegation rules, temporary assignments, out-of-office handling',
-        contentLevel: 'procedure',
-        estimatedReadTime: 15,
-        targetRoles: ['HR Admin'],
-        industryContext: {
-          frequency: 'Ongoing',
-          timing: 'As needed',
-          benchmark: 'Business continuity in approvals'
-        }
-      },
-      {
-        id: 'hh-sec-5-4',
-        sectionNumber: '5.4',
-        title: 'Audit Trail & Reporting',
-        description: 'Compliance reports, audit logs, regulatory submissions',
-        contentLevel: 'procedure',
-        estimatedReadTime: 15,
-        targetRoles: ['HR Admin', 'Compliance', 'Auditor'],
-        industryContext: {
-          frequency: 'Quarterly, annually',
-          timing: 'Audit cycles',
-          benchmark: 'SOC 2, ISO 27001 compliance'
-        }
-      }
-    ]
-  },
-  // Part 6: Organization Configuration
-  {
-    id: 'hh-part-6',
-    sectionNumber: '6',
     title: 'Organization Configuration',
-    description: 'Lookup values, government ID types, data import, and integrations',
+    description: 'Lookup values, government ID types, data import, and integrations - foundational setup required before all other modules',
     contentLevel: 'procedure',
     estimatedReadTime: 50,
     targetRoles: ['Super Admin', 'HR Admin', 'Consultant'],
     subsections: [
       {
-        id: 'hh-sec-6-1',
-        sectionNumber: '6.1',
+        id: 'hh-sec-2-1',
+        sectionNumber: '2.1',
         title: 'Lookup Values Management',
         description: 'Custom dropdowns, status values, category management',
         contentLevel: 'procedure',
@@ -397,8 +126,8 @@ export const HR_HUB_MANUAL_STRUCTURE: HRHubManualSection[] = [
         }
       },
       {
-        id: 'hh-sec-6-2',
-        sectionNumber: '6.2',
+        id: 'hh-sec-2-2',
+        sectionNumber: '2.2',
         title: 'Government ID Types',
         description: 'Country-specific ID configurations, validation rules',
         contentLevel: 'procedure',
@@ -411,8 +140,8 @@ export const HR_HUB_MANUAL_STRUCTURE: HRHubManualSection[] = [
         }
       },
       {
-        id: 'hh-sec-6-3',
-        sectionNumber: '6.3',
+        id: 'hh-sec-2-3',
+        sectionNumber: '2.3',
         title: 'Data Import Tools',
         description: 'Bulk imports, data validation, error handling',
         contentLevel: 'procedure',
@@ -425,8 +154,8 @@ export const HR_HUB_MANUAL_STRUCTURE: HRHubManualSection[] = [
         }
       },
       {
-        id: 'hh-sec-6-4',
-        sectionNumber: '6.4',
+        id: 'hh-sec-2-4',
+        sectionNumber: '2.4',
         title: 'Integration Settings',
         description: 'External system connections, API configurations, webhooks',
         contentLevel: 'procedure',
@@ -440,7 +169,293 @@ export const HR_HUB_MANUAL_STRUCTURE: HRHubManualSection[] = [
       }
     ]
   },
-  // Part 7: Analytics & Insights
+  // Part 3: Compliance & Workflows (moved from Part 5 - MUST be configured before daily operations)
+  {
+    id: 'hh-part-3',
+    sectionNumber: '3',
+    title: 'Compliance & Workflows',
+    description: 'ESS approval policies, SOP management, workflow templates, and approval delegations - configure before referencing in daily operations',
+    contentLevel: 'procedure',
+    estimatedReadTime: 75,
+    targetRoles: ['HR Admin', 'Compliance Officer', 'Consultant'],
+    subsections: [
+      {
+        id: 'hh-sec-3-1',
+        sectionNumber: '3.1',
+        title: 'ESS Approval Policies',
+        description: 'Employee self-service approval modes, auto-approve rules, escalation paths',
+        contentLevel: 'procedure',
+        estimatedReadTime: 15,
+        targetRoles: ['HR Admin', 'Consultant'],
+        industryContext: {
+          frequency: 'Initial setup, policy updates',
+          timing: 'Pre-launch',
+          benchmark: 'Employee self-service governance'
+        }
+      },
+      {
+        id: 'hh-sec-3-2',
+        sectionNumber: '3.2',
+        title: 'SOP Management',
+        description: 'Standard operating procedures, version control, role-based access, AI generation',
+        contentLevel: 'procedure',
+        estimatedReadTime: 18,
+        targetRoles: ['HR Admin', 'Operations'],
+        industryContext: {
+          frequency: 'Initial setup, periodic updates',
+          timing: 'Pre-launch and ongoing',
+          benchmark: 'ISO 9001 process documentation'
+        }
+      },
+      {
+        id: 'hh-sec-3-3',
+        sectionNumber: '3.3',
+        title: 'Transaction Workflow Settings',
+        description: 'Approval chains, parallel/sequential flows, escalation rules',
+        contentLevel: 'procedure',
+        estimatedReadTime: 25,
+        targetRoles: ['HR Admin', 'Consultant'],
+        industryContext: {
+          frequency: 'Initial setup, org changes',
+          timing: 'Pre-launch',
+          benchmark: 'Enterprise workflow automation'
+        }
+      },
+      {
+        id: 'hh-sec-3-4',
+        sectionNumber: '3.4',
+        title: 'Approval Delegations',
+        description: 'Delegation rules, temporary assignments, out-of-office handling',
+        contentLevel: 'procedure',
+        estimatedReadTime: 12,
+        targetRoles: ['HR Admin'],
+        industryContext: {
+          frequency: 'Ongoing',
+          timing: 'As needed',
+          benchmark: 'Business continuity in approvals'
+        }
+      },
+      {
+        id: 'hh-sec-3-5',
+        sectionNumber: '3.5',
+        title: 'Compliance Tracker Setup',
+        description: 'Regulatory requirements, deadline tracking, audit preparation',
+        contentLevel: 'procedure',
+        estimatedReadTime: 20,
+        targetRoles: ['HR Admin', 'Compliance'],
+        industryContext: {
+          frequency: 'Initial setup, regulatory updates',
+          timing: 'Pre-launch',
+          benchmark: 'Labor law compliance across jurisdictions'
+        }
+      },
+      {
+        id: 'hh-sec-3-6',
+        sectionNumber: '3.6',
+        title: 'Audit Trail & Reporting',
+        description: 'Compliance reports, audit logs, regulatory submissions',
+        contentLevel: 'procedure',
+        estimatedReadTime: 15,
+        targetRoles: ['HR Admin', 'Compliance', 'Auditor'],
+        industryContext: {
+          frequency: 'Quarterly, annually',
+          timing: 'Audit cycles',
+          benchmark: 'SOC 2, ISO 27001 compliance'
+        }
+      }
+    ]
+  },
+  // Part 4: Documents & Templates (moved from Part 3)
+  {
+    id: 'hh-part-4',
+    sectionNumber: '4',
+    title: 'Documents & Templates',
+    description: 'Letter templates, policy documents, and forms library - uses workflows configured in Chapter 3',
+    contentLevel: 'procedure',
+    estimatedReadTime: 45,
+    targetRoles: ['HR Admin', 'HR Ops'],
+    subsections: [
+      {
+        id: 'hh-sec-4-1',
+        sectionNumber: '4.1',
+        title: 'Letter Templates',
+        description: 'Employment letters, offer templates, termination notices',
+        contentLevel: 'procedure',
+        estimatedReadTime: 15,
+        targetRoles: ['HR Admin'],
+        industryContext: {
+          frequency: 'Initial setup, legal updates',
+          timing: 'Pre-launch',
+          benchmark: 'Compliant HR correspondence'
+        }
+      },
+      {
+        id: 'hh-sec-4-2',
+        sectionNumber: '4.2',
+        title: 'Policy Documents',
+        description: 'Policy versioning, acknowledgment tracking, distribution',
+        contentLevel: 'procedure',
+        estimatedReadTime: 15,
+        targetRoles: ['HR Admin', 'Compliance'],
+        industryContext: {
+          frequency: 'Annual review, regulatory updates',
+          timing: 'Ongoing',
+          benchmark: 'Policy lifecycle management'
+        }
+      },
+      {
+        id: 'hh-sec-4-3',
+        sectionNumber: '4.3',
+        title: 'Forms Library',
+        description: 'Digital forms, approval workflows, submission tracking',
+        contentLevel: 'procedure',
+        estimatedReadTime: 12,
+        targetRoles: ['HR Admin'],
+        industryContext: {
+          frequency: 'Initial setup, updates as needed',
+          timing: 'Pre-launch',
+          benchmark: 'Paperless HR processes'
+        }
+      }
+    ]
+  },
+  // Part 5: Communication & Support Setup (moved from Part 2)
+  {
+    id: 'hh-part-5',
+    sectionNumber: '5',
+    title: 'Communication & Support Setup',
+    description: 'Help desk, announcements, knowledge base, and notifications - references policies and SOPs from Chapter 3',
+    contentLevel: 'procedure',
+    estimatedReadTime: 50,
+    targetRoles: ['HR Admin', 'Consultant'],
+    subsections: [
+      {
+        id: 'hh-sec-5-1',
+        sectionNumber: '5.1',
+        title: 'Help Desk Configuration',
+        description: 'Ticket categories, SLAs, routing rules, escalation paths',
+        contentLevel: 'procedure',
+        estimatedReadTime: 12,
+        targetRoles: ['HR Admin'],
+        industryContext: {
+          frequency: 'Initial setup, periodic review',
+          timing: 'Pre-launch',
+          benchmark: 'HR service desk best practices'
+        }
+      },
+      {
+        id: 'hh-sec-5-2',
+        sectionNumber: '5.2',
+        title: 'Company Communications',
+        description: 'Announcements, photo gallery, blog posts, and intranet content',
+        contentLevel: 'procedure',
+        estimatedReadTime: 12,
+        targetRoles: ['HR Admin', 'Communications'],
+        industryContext: {
+          frequency: 'Ongoing',
+          timing: 'As needed',
+          benchmark: 'Internal communications strategy'
+        }
+      },
+      {
+        id: 'hh-sec-5-3',
+        sectionNumber: '5.3',
+        title: 'Knowledge Base Setup',
+        description: 'Article categories, search optimization, content governance, SOP links',
+        contentLevel: 'procedure',
+        estimatedReadTime: 12,
+        targetRoles: ['HR Admin'],
+        industryContext: {
+          frequency: 'Initial setup, ongoing maintenance',
+          timing: 'Pre-launch',
+          benchmark: 'Self-service HR knowledge management'
+        }
+      },
+      {
+        id: 'hh-sec-5-4',
+        sectionNumber: '5.4',
+        title: 'Notifications & Reminders',
+        description: 'AI-powered automation rules, email templates, delivery tracking, in-app alerts',
+        contentLevel: 'procedure',
+        estimatedReadTime: 15,
+        targetRoles: ['HR Admin'],
+        industryContext: {
+          frequency: 'Initial setup, periodic review',
+          timing: 'Pre-launch and ongoing',
+          benchmark: 'Proactive HR communication automation'
+        }
+      }
+    ]
+  },
+  // Part 6: Tasks & Events Management (moved from Part 4)
+  {
+    id: 'hh-part-6',
+    sectionNumber: '6',
+    title: 'Tasks & Events Management',
+    description: 'Calendar setup, task management, milestones, and reminders - daily operations using all prior configurations',
+    contentLevel: 'procedure',
+    estimatedReadTime: 40,
+    targetRoles: ['HR Admin', 'Manager'],
+    subsections: [
+      {
+        id: 'hh-sec-6-1',
+        sectionNumber: '6.1',
+        title: 'Calendar Setup',
+        description: 'Company calendar, holidays, location-specific events',
+        contentLevel: 'procedure',
+        estimatedReadTime: 10,
+        targetRoles: ['HR Admin'],
+        industryContext: {
+          frequency: 'Annual setup',
+          timing: 'Pre-fiscal year',
+          benchmark: 'Multi-location calendar management'
+        }
+      },
+      {
+        id: 'hh-sec-6-2',
+        sectionNumber: '6.2',
+        title: 'Task Management',
+        description: 'Task templates, assignments, due dates, notifications',
+        contentLevel: 'procedure',
+        estimatedReadTime: 12,
+        targetRoles: ['HR Admin', 'Manager'],
+        industryContext: {
+          frequency: 'Ongoing',
+          timing: 'As needed',
+          benchmark: 'HR workflow automation'
+        }
+      },
+      {
+        id: 'hh-sec-6-3',
+        sectionNumber: '6.3',
+        title: 'Milestones Configuration',
+        description: 'Employee lifecycle milestones, anniversary tracking, alerts',
+        contentLevel: 'procedure',
+        estimatedReadTime: 10,
+        targetRoles: ['HR Admin'],
+        industryContext: {
+          frequency: 'Initial setup',
+          timing: 'Pre-launch',
+          benchmark: 'Employee experience touchpoints'
+        }
+      },
+      {
+        id: 'hh-sec-6-4',
+        sectionNumber: '6.4',
+        title: 'Reminders Configuration',
+        description: 'Automated reminders, escalation rules, notification channels',
+        contentLevel: 'procedure',
+        estimatedReadTime: 8,
+        targetRoles: ['HR Admin'],
+        industryContext: {
+          frequency: 'Initial setup, periodic review',
+          timing: 'Pre-launch',
+          benchmark: 'Proactive HR communication'
+        }
+      }
+    ]
+  },
+  // Part 7: Analytics & Insights (unchanged position)
   {
     id: 'hh-part-7',
     sectionNumber: '7',
@@ -494,7 +509,7 @@ export const HR_HUB_MANUAL_STRUCTURE: HRHubManualSection[] = [
       }
     ]
   },
-  // Part 8: Troubleshooting & Best Practices
+  // Part 8: Troubleshooting & Best Practices (unchanged position)
   {
     id: 'hh-part-8',
     sectionNumber: '8',
@@ -550,18 +565,10 @@ export const HR_HUB_MANUAL_STRUCTURE: HRHubManualSection[] = [
   }
 ];
 
-// Cross-module reference types
-export interface CrossModuleReference {
-  moduleCode: 'workforce' | 'appraisals' | 'recruitment' | 'learning' | 'payroll' | 'time_attendance';
-  sectionId: string;
-  referenceType: 'prerequisite' | 'dependency' | 'see_also' | 'integration';
-  description: string;
-}
-
-// Section-level cross-module references map
+// Section-level cross-module references map (updated for new section IDs)
 // Key: HR Hub section ID, Value: array of cross-module references
 export const HR_HUB_CROSS_REFERENCES: Record<string, CrossModuleReference[]> = {
-  'hh-sec-3-4': [
+  'hh-sec-3-2': [
     {
       moduleCode: 'workforce',
       sectionId: 'wf-sec-2-1',
@@ -569,7 +576,7 @@ export const HR_HUB_CROSS_REFERENCES: Record<string, CrossModuleReference[]> = {
       description: 'SOPs reference organization structure defined in Workforce'
     }
   ],
-  'hh-sec-4-1': [
+  'hh-sec-6-1': [
     {
       moduleCode: 'workforce',
       sectionId: 'wf-sec-2-8',
@@ -577,7 +584,7 @@ export const HR_HUB_CROSS_REFERENCES: Record<string, CrossModuleReference[]> = {
       description: 'Calendar events linked to branch locations in Workforce'
     }
   ],
-  'hh-sec-5-1': [
+  'hh-sec-3-5': [
     {
       moduleCode: 'workforce',
       sectionId: 'wf-sec-2-4',
@@ -591,7 +598,7 @@ export const HR_HUB_CROSS_REFERENCES: Record<string, CrossModuleReference[]> = {
       description: 'Certification expiry feeds into compliance tracking'
     }
   ],
-  'hh-sec-5-2': [
+  'hh-sec-3-3': [
     {
       moduleCode: 'workforce',
       sectionId: 'wf-sec-2-6',
@@ -601,16 +608,16 @@ export const HR_HUB_CROSS_REFERENCES: Record<string, CrossModuleReference[]> = {
   ]
 };
 
-// Module integration map for visual diagrams
+// Module integration map for visual diagrams (updated for new section IDs)
 export const HR_HUB_MODULE_INTEGRATIONS = {
   workforce: {
     moduleName: 'Workforce',
     integrationPoints: [
-      { hrHubSection: 'hh-sec-3-4', workforceSection: 'wf-sec-2-1', type: 'dependency' as const, label: 'Org structure for SOPs' },
-      { hrHubSection: 'hh-sec-4-1', workforceSection: 'wf-sec-2-8', type: 'dependency' as const, label: 'Branch locations for calendar' },
-      { hrHubSection: 'hh-sec-5-1', workforceSection: 'wf-sec-2-4', type: 'prerequisite' as const, label: 'Company setup for compliance' },
-      { hrHubSection: 'hh-sec-5-1', workforceSection: 'wf-sec-3-5', type: 'integration' as const, label: 'Certification expiry alerts' },
-      { hrHubSection: 'hh-sec-5-2', workforceSection: 'wf-sec-2-6', type: 'dependency' as const, label: 'Department hierarchy for workflows' }
+      { hrHubSection: 'hh-sec-3-2', workforceSection: 'wf-sec-2-1', type: 'dependency' as const, label: 'Org structure for SOPs' },
+      { hrHubSection: 'hh-sec-6-1', workforceSection: 'wf-sec-2-8', type: 'dependency' as const, label: 'Branch locations for calendar' },
+      { hrHubSection: 'hh-sec-3-5', workforceSection: 'wf-sec-2-4', type: 'prerequisite' as const, label: 'Company setup for compliance' },
+      { hrHubSection: 'hh-sec-3-5', workforceSection: 'wf-sec-3-5', type: 'integration' as const, label: 'Certification expiry alerts' },
+      { hrHubSection: 'hh-sec-3-3', workforceSection: 'wf-sec-2-6', type: 'dependency' as const, label: 'Department hierarchy for workflows' }
     ]
   }
 };

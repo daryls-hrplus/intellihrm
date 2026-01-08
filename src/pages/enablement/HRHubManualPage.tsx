@@ -15,17 +15,22 @@ import {
   BookOpen, CheckCircle, Circle, ArrowLeft, Sparkles, Link2
 } from 'lucide-react';
 import { HR_HUB_MANUAL_STRUCTURE } from '@/types/hrHubManual';
-import { HRHubManualOverviewSection, HRHubManualCommunicationSection } from '@/components/enablement/hr-hub-manual';
+import { 
+  HRHubManualOverviewSection, 
+  HRHubManualCommunicationSection 
+} from '@/components/enablement/hr-hub-manual';
 
+// Icons mapped to new chapter order:
+// 1. Overview, 2. Org Config, 3. Compliance/Workflows, 4. Documents, 5. Communication, 6. Tasks, 7. Analytics, 8. Troubleshooting
 const SECTION_ICONS: Record<string, React.ReactNode> = {
   'hh-part-1': <BookOpen className="h-5 w-5" />,
-  'hh-part-2': <MessageSquare className="h-5 w-5" />,
-  'hh-part-3': <FileText className="h-5 w-5" />,
-  'hh-part-4': <Calendar className="h-5 w-5" />,
-  'hh-part-5': <Shield className="h-5 w-5" />,
-  'hh-part-6': <Database className="h-5 w-5" />,
-  'hh-part-7': <BarChart3 className="h-5 w-5" />,
-  'hh-part-8': <AlertTriangle className="h-5 w-5" />
+  'hh-part-2': <Database className="h-5 w-5" />,      // Org Config
+  'hh-part-3': <Shield className="h-5 w-5" />,        // Compliance & Workflows
+  'hh-part-4': <FileText className="h-5 w-5" />,      // Documents
+  'hh-part-5': <MessageSquare className="h-5 w-5" />, // Communication
+  'hh-part-6': <Calendar className="h-5 w-5" />,      // Tasks & Events
+  'hh-part-7': <BarChart3 className="h-5 w-5" />,     // Analytics
+  'hh-part-8': <AlertTriangle className="h-5 w-5" />  // Troubleshooting
 };
 
 export default function HRHubManualPage() {
@@ -125,24 +130,44 @@ export default function HRHubManualPage() {
     switch (activePartId) {
       case 'hh-part-1':
         return <HRHubManualOverviewSection />;
-      case 'hh-part-2':
+      case 'hh-part-5':
+        // Communication is now Chapter 5
         return <HRHubManualCommunicationSection />;
-      // Parts 3-8 will be added in subsequent phases
+      // Chapters 2, 3, 4, 6, 7, 8 - Coming Soon placeholders
+      case 'hh-part-2':
       case 'hh-part-3':
       case 'hh-part-4':
-      case 'hh-part-5':
       case 'hh-part-6':
       case 'hh-part-7':
       case 'hh-part-8':
+        const currentPart = HR_HUB_MANUAL_STRUCTURE.find(s => s.id === activePartId);
         return (
           <Card>
             <CardHeader>
-              <CardTitle>Coming Soon</CardTitle>
+              <div className="flex items-center gap-3">
+                {SECTION_ICONS[activePartId]}
+                <div>
+                  <CardTitle>Chapter {currentPart?.sectionNumber}: {currentPart?.title}</CardTitle>
+                  <p className="text-sm text-muted-foreground mt-1">{currentPart?.description}</p>
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
-              <p className="text-muted-foreground">
-                This section is under development. Check back soon for comprehensive documentation.
-              </p>
+              <div className="bg-muted/50 rounded-lg p-6 text-center">
+                <Sparkles className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-semibold mb-2">Coming Soon</h3>
+                <p className="text-muted-foreground max-w-md mx-auto">
+                  This chapter is under development. The content will cover:
+                </p>
+                <ul className="mt-4 space-y-2 text-sm text-left max-w-md mx-auto">
+                  {currentPart?.subsections?.map((sub) => (
+                    <li key={sub.id} className="flex items-start gap-2">
+                      <Circle className="h-4 w-4 mt-0.5 text-muted-foreground" />
+                      <span><strong>{sub.sectionNumber}</strong> {sub.title}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </CardContent>
           </Card>
         );

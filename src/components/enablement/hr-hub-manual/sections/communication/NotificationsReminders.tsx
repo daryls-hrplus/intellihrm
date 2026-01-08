@@ -49,7 +49,7 @@ export function NotificationsReminders() {
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-1">
                 <CardTitle>Notifications & Reminders</CardTitle>
-                <Badge variant="outline" className="text-xs">Section 2.4</Badge>
+                <Badge variant="outline" className="text-xs">Section 5.4</Badge>
                 <div className="flex items-center gap-1 text-muted-foreground text-xs">
                   <Clock className="h-3 w-3" />
                   <span>~15 min</span>
