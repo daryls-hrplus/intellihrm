@@ -8,6 +8,8 @@ export interface StepMapping {
   isRequired?: boolean;
   estimatedMinutes?: number;
   subSection?: string;
+  sourceManual?: 'workforce' | 'hr-hub' | 'appraisals' | 'admin-security';
+  sourceSection?: string;
 }
 
 // Maps phase ID to step mappings with admin routes and import types
@@ -45,17 +47,32 @@ export const PHASE_STEP_MAPPINGS: Record<string, StepMapping[]> = {
     { order: 25, area: "Data Access Controls", adminRoute: "/admin/pii-access", isRequired: true, estimatedMinutes: 20, subSection: "1E: Users & Roles" },
   ],
   workforce: [
-    { order: 1, area: "Job Families", adminRoute: "/admin/job-families", importType: "job_families", isRequired: true, estimatedMinutes: 15 },
-    { order: 2, area: "Jobs", adminRoute: "/admin/jobs", importType: "jobs", isRequired: true, estimatedMinutes: 30 },
-    { order: 3, area: "Responsibilities", adminRoute: "/admin/responsibilities", importType: "responsibilities", isRequired: false, estimatedMinutes: 20 },
-    { order: 4, area: "Competencies & Levels", adminRoute: "/admin/competencies", importType: "competencies", isRequired: false, estimatedMinutes: 25 },
-    { order: 5, area: "Job Competencies", adminRoute: "/admin/job-competencies", isRequired: false, estimatedMinutes: 20 },
-    { order: 6, area: "Job Goals", adminRoute: "/admin/job-goals", isRequired: false, estimatedMinutes: 15 },
-    { order: 7, area: "Positions", adminRoute: "/admin/positions", importType: "positions", isRequired: true, estimatedMinutes: 30 },
-    { order: 8, area: "Employees", adminRoute: "/admin/employees", importType: "employees", isRequired: true, estimatedMinutes: 45 },
-    { order: 9, area: "Employee Assignments", adminRoute: "/admin/employee-assignments", importType: "employee_assignments", isRequired: true, estimatedMinutes: 30 },
-    { order: 10, area: "Onboarding Templates", adminRoute: "/admin/onboarding-templates", isRequired: false, estimatedMinutes: 30 },
-    { order: 11, area: "Offboarding Templates", adminRoute: "/admin/offboarding-templates", isRequired: false, estimatedMinutes: 30 },
+    // 2A: Job Architecture (from Workforce Manual Part 3)
+    { order: 1, area: "Job Families", adminRoute: "/admin/job-families", importType: "job_families", isRequired: true, estimatedMinutes: 15, subSection: "2A: Job Architecture", sourceManual: "workforce", sourceSection: "Part 3.1" },
+    { order: 2, area: "Jobs", adminRoute: "/admin/jobs", importType: "jobs", isRequired: true, estimatedMinutes: 30, subSection: "2A: Job Architecture", sourceManual: "workforce", sourceSection: "Part 3.2" },
+    { order: 3, area: "Responsibilities", adminRoute: "/admin/responsibilities", importType: "responsibilities", isRequired: false, estimatedMinutes: 20, subSection: "2A: Job Architecture", sourceManual: "workforce", sourceSection: "Part 3.3" },
+    { order: 4, area: "Skills & Competencies", adminRoute: "/admin/competencies", importType: "competencies", isRequired: false, estimatedMinutes: 25, subSection: "2A: Job Architecture", sourceManual: "workforce", sourceSection: "Part 3.4" },
+    { order: 5, area: "Qualifications", adminRoute: "/admin/qualifications", isRequired: false, estimatedMinutes: 20, subSection: "2A: Job Architecture", sourceManual: "workforce", sourceSection: "Part 3.5" },
+    { order: 6, area: "Job-Competency Mapping", adminRoute: "/admin/job-competencies", isRequired: false, estimatedMinutes: 20, subSection: "2A: Job Architecture", sourceManual: "workforce", sourceSection: "Part 3.6" },
+    { order: 7, area: "Job Goals", adminRoute: "/admin/job-goals", isRequired: false, estimatedMinutes: 15, subSection: "2A: Job Architecture", sourceManual: "workforce", sourceSection: "Part 3.7" },
+    // 2B: Position Management (from Workforce Manual Part 6)
+    { order: 8, area: "Positions", adminRoute: "/admin/positions", importType: "positions", isRequired: true, estimatedMinutes: 30, subSection: "2B: Position Management", sourceManual: "workforce", sourceSection: "Part 6.1" },
+    { order: 9, area: "Position Budgeting", adminRoute: "/admin/position-budgeting", isRequired: false, estimatedMinutes: 20, subSection: "2B: Position Management", sourceManual: "workforce", sourceSection: "Part 6.2" },
+    { order: 10, area: "Position-to-Job Mapping", adminRoute: "/admin/positions", isRequired: true, estimatedMinutes: 15, subSection: "2B: Position Management", sourceManual: "workforce", sourceSection: "Part 6.3" },
+    // 2C: Employee Records (from Workforce Manual Part 4)
+    { order: 11, area: "Employee Record Creation", adminRoute: "/admin/employees", importType: "employees", isRequired: true, estimatedMinutes: 45, subSection: "2C: Employee Records", sourceManual: "workforce", sourceSection: "Part 4.1" },
+    { order: 12, area: "Personal Information", adminRoute: "/admin/employees", isRequired: true, estimatedMinutes: 20, subSection: "2C: Employee Records", sourceManual: "workforce", sourceSection: "Part 4.2" },
+    { order: 13, area: "Employment Assignments", adminRoute: "/admin/employee-assignments", importType: "employee_assignments", isRequired: true, estimatedMinutes: 30, subSection: "2C: Employee Records", sourceManual: "workforce", sourceSection: "Part 4.3" },
+    { order: 14, area: "Government IDs", adminRoute: "/admin/employees", isRequired: false, estimatedMinutes: 15, subSection: "2C: Employee Records", sourceManual: "workforce", sourceSection: "Part 4.4" },
+    { order: 15, area: "Banking & Payment", adminRoute: "/admin/employees", isRequired: true, estimatedMinutes: 20, subSection: "2C: Employee Records", sourceManual: "workforce", sourceSection: "Part 4.5" },
+    { order: 16, area: "Dependents & Beneficiaries", adminRoute: "/admin/employees", isRequired: false, estimatedMinutes: 20, subSection: "2C: Employee Records", sourceManual: "workforce", sourceSection: "Part 4.6" },
+    // 2D: Lifecycle Workflows (from Workforce Manual Part 5)
+    { order: 17, area: "Onboarding Workflow Design", adminRoute: "/admin/onboarding-templates", isRequired: false, estimatedMinutes: 30, subSection: "2D: Lifecycle Workflows", sourceManual: "workforce", sourceSection: "Part 5.1" },
+    { order: 18, area: "Onboarding Task Templates", adminRoute: "/admin/onboarding-templates", isRequired: false, estimatedMinutes: 25, subSection: "2D: Lifecycle Workflows", sourceManual: "workforce", sourceSection: "Part 5.2" },
+    { order: 19, area: "New Hire Portal", adminRoute: "/admin/onboarding-portal", isRequired: false, estimatedMinutes: 20, subSection: "2D: Lifecycle Workflows", sourceManual: "workforce", sourceSection: "Part 5.3" },
+    { order: 20, area: "Offboarding Workflow", adminRoute: "/admin/offboarding-templates", isRequired: false, estimatedMinutes: 30, subSection: "2D: Lifecycle Workflows", sourceManual: "workforce", sourceSection: "Part 5.4" },
+    { order: 21, area: "Exit Interview Integration", adminRoute: "/admin/exit-interviews", isRequired: false, estimatedMinutes: 15, subSection: "2D: Lifecycle Workflows", sourceManual: "workforce", sourceSection: "Part 5.5" },
+    { order: 22, area: "Rehire Handling", adminRoute: "/admin/rehire-settings", isRequired: false, estimatedMinutes: 15, subSection: "2D: Lifecycle Workflows", sourceManual: "workforce", sourceSection: "Part 5.6" },
   ],
   compensation: [
     { order: 1, area: "Pay Elements", adminRoute: "/admin/pay-elements", importType: "pay_elements", isRequired: true, estimatedMinutes: 30 },
@@ -115,20 +132,41 @@ export const PHASE_STEP_MAPPINGS: Record<string, StepMapping[]> = {
     { order: 4, area: "Company Property", adminRoute: "/admin/company-property", isRequired: false, estimatedMinutes: 25 },
   ],
   "hr-hub": [
-    { order: 1, area: "Dashboard Module Ordering", adminRoute: "/admin/dashboard-config", isRequired: false, estimatedMinutes: 10 },
-    { order: 2, area: "Workflow Templates", adminRoute: "/admin/workflow-templates", isRequired: true, estimatedMinutes: 45 },
-    { order: 3, area: "Letter Templates", adminRoute: "/admin/letter-templates", isRequired: false, estimatedMinutes: 30 },
-    { order: 4, area: "Policy Documents", adminRoute: "/admin/policies", isRequired: false, estimatedMinutes: 30 },
-    { order: 5, area: "SOPs", adminRoute: "/admin/sops", isRequired: false, estimatedMinutes: 45 },
-    { order: 6, area: "Knowledge Base", adminRoute: "/admin/knowledge-base", isRequired: false, estimatedMinutes: 30 },
-    { order: 7, area: "Reminder Rules", adminRoute: "/admin/reminder-rules", isRequired: false, estimatedMinutes: 20 },
-    { order: 8, area: "Scheduled Reports", adminRoute: "/admin/scheduled-reports", isRequired: false, estimatedMinutes: 25 },
-    { order: 9, area: "AI Budget Tiers", adminRoute: "/admin/ai-budget-tiers", isRequired: false, estimatedMinutes: 15 },
-    { order: 10, area: "AI User Settings", adminRoute: "/admin/ai-user-settings", isRequired: false, estimatedMinutes: 20 },
-    { order: 11, area: "AI Guardrails", adminRoute: "/admin/ai-guardrails", isRequired: false, estimatedMinutes: 25 },
-    { order: 12, area: "AI Voice Settings", adminRoute: "/admin/ai-voice-settings", isRequired: false, estimatedMinutes: 10 },
-    { order: 13, area: "AI System Settings", adminRoute: "/admin/ai-system-settings", isRequired: false, estimatedMinutes: 15 },
-    { order: 14, area: "AI Usage Monitoring", adminRoute: "/admin/ai-usage", isRequired: false, estimatedMinutes: 10 },
+    // 8A: Organization Setup (from HR Hub Manual Chapter 2)
+    { order: 1, area: "Lookup Values Setup", adminRoute: "/admin/lookup-values", isRequired: true, estimatedMinutes: 30, subSection: "8A: Organization Setup", sourceManual: "hr-hub", sourceSection: "Ch 2.1" },
+    { order: 2, area: "Government ID Types", adminRoute: "/admin/government-id-types", isRequired: false, estimatedMinutes: 15, subSection: "8A: Organization Setup", sourceManual: "hr-hub", sourceSection: "Ch 2.2" },
+    { order: 3, area: "Data Import Configuration", adminRoute: "/admin/data-imports", isRequired: false, estimatedMinutes: 25, subSection: "8A: Organization Setup", sourceManual: "hr-hub", sourceSection: "Ch 2.3" },
+    { order: 4, area: "Integration Settings", adminRoute: "/admin/integrations", isRequired: false, estimatedMinutes: 30, subSection: "8A: Organization Setup", sourceManual: "hr-hub", sourceSection: "Ch 2.4" },
+    // 8B: Compliance & Workflows (from HR Hub Manual Chapter 3)
+    { order: 5, area: "Workflow Templates", adminRoute: "/admin/workflow-templates", isRequired: true, estimatedMinutes: 45, subSection: "8B: Compliance & Workflows", sourceManual: "hr-hub", sourceSection: "Ch 3.1" },
+    { order: 6, area: "Transaction Workflow Settings", adminRoute: "/admin/workflow-templates", isRequired: false, estimatedMinutes: 30, subSection: "8B: Compliance & Workflows", sourceManual: "hr-hub", sourceSection: "Ch 3.2" },
+    { order: 7, area: "Approval Delegations", adminRoute: "/admin/delegations", isRequired: false, estimatedMinutes: 20, subSection: "8B: Compliance & Workflows", sourceManual: "hr-hub", sourceSection: "Ch 3.3" },
+    { order: 8, area: "SOP Management", adminRoute: "/admin/sops", isRequired: false, estimatedMinutes: 45, subSection: "8B: Compliance & Workflows", sourceManual: "hr-hub", sourceSection: "Ch 3.4" },
+    { order: 9, area: "ESS Approval Policies", adminRoute: "/admin/ess-policies", isRequired: false, estimatedMinutes: 25, subSection: "8B: Compliance & Workflows", sourceManual: "hr-hub", sourceSection: "Ch 3.5" },
+    { order: 10, area: "Compliance Tracker", adminRoute: "/admin/compliance-tracker", isRequired: false, estimatedMinutes: 35, subSection: "8B: Compliance & Workflows", sourceManual: "hr-hub", sourceSection: "Ch 3.6" },
+    // 8C: Document Center (from HR Hub Manual Chapter 4)
+    { order: 11, area: "Company Documents", adminRoute: "/admin/company-documents", isRequired: false, estimatedMinutes: 25, subSection: "8C: Document Center", sourceManual: "hr-hub", sourceSection: "Ch 4.1" },
+    { order: 12, area: "Policy Documents", adminRoute: "/admin/policies", isRequired: false, estimatedMinutes: 30, subSection: "8C: Document Center", sourceManual: "hr-hub", sourceSection: "Ch 4.2" },
+    { order: 13, area: "Letter Templates", adminRoute: "/admin/letter-templates", isRequired: false, estimatedMinutes: 30, subSection: "8C: Document Center", sourceManual: "hr-hub", sourceSection: "Ch 4.3" },
+    { order: 14, area: "Forms Library", adminRoute: "/admin/forms", isRequired: false, estimatedMinutes: 25, subSection: "8C: Document Center", sourceManual: "hr-hub", sourceSection: "Ch 4.4" },
+    // 8D: Communication & Support (from HR Hub Manual Chapter 5)
+    { order: 15, area: "Employee Directory", adminRoute: "/admin/directory-settings", isRequired: false, estimatedMinutes: 15, subSection: "8D: Communication & Support", sourceManual: "hr-hub", sourceSection: "Ch 5.1" },
+    { order: 16, area: "Notifications & Reminders", adminRoute: "/admin/reminder-rules", isRequired: false, estimatedMinutes: 25, subSection: "8D: Communication & Support", sourceManual: "hr-hub", sourceSection: "Ch 5.2" },
+    { order: 17, area: "Company Communications", adminRoute: "/admin/announcements", isRequired: false, estimatedMinutes: 20, subSection: "8D: Communication & Support", sourceManual: "hr-hub", sourceSection: "Ch 5.3" },
+    { order: 18, area: "Knowledge Base", adminRoute: "/admin/knowledge-base", isRequired: false, estimatedMinutes: 30, subSection: "8D: Communication & Support", sourceManual: "hr-hub", sourceSection: "Ch 5.4" },
+    // 8E: Daily Operations (from HR Hub Manual Chapter 6)
+    { order: 19, area: "Help Desk Setup", adminRoute: "/admin/help-desk", isRequired: false, estimatedMinutes: 30, subSection: "8E: Daily Operations", sourceManual: "hr-hub", sourceSection: "Ch 6.1" },
+    { order: 20, area: "ESS Change Requests", adminRoute: "/admin/change-requests", isRequired: false, estimatedMinutes: 25, subSection: "8E: Daily Operations", sourceManual: "hr-hub", sourceSection: "Ch 6.2" },
+    { order: 21, area: "HR Tasks & Recurring Tasks", adminRoute: "/admin/hr-tasks", isRequired: false, estimatedMinutes: 25, subSection: "8E: Daily Operations", sourceManual: "hr-hub", sourceSection: "Ch 6.3" },
+    { order: 22, area: "HR Calendar", adminRoute: "/admin/hr-calendar", isRequired: false, estimatedMinutes: 20, subSection: "8E: Daily Operations", sourceManual: "hr-hub", sourceSection: "Ch 6.4" },
+    { order: 23, area: "Milestones Dashboard", adminRoute: "/admin/milestones", isRequired: false, estimatedMinutes: 15, subSection: "8E: Daily Operations", sourceManual: "hr-hub", sourceSection: "Ch 6.5" },
+    // 8F: AI Configuration
+    { order: 24, area: "AI Budget Tiers", adminRoute: "/admin/ai-budget-tiers", isRequired: false, estimatedMinutes: 15, subSection: "8F: AI Configuration", sourceManual: "hr-hub", sourceSection: "Ch 7.1" },
+    { order: 25, area: "AI User Settings", adminRoute: "/admin/ai-user-settings", isRequired: false, estimatedMinutes: 20, subSection: "8F: AI Configuration", sourceManual: "hr-hub", sourceSection: "Ch 7.2" },
+    { order: 26, area: "AI Guardrails", adminRoute: "/admin/ai-guardrails", isRequired: false, estimatedMinutes: 25, subSection: "8F: AI Configuration", sourceManual: "hr-hub", sourceSection: "Ch 7.3" },
+    { order: 27, area: "AI Voice Settings", adminRoute: "/admin/ai-voice-settings", isRequired: false, estimatedMinutes: 10, subSection: "8F: AI Configuration", sourceManual: "hr-hub", sourceSection: "Ch 7.4" },
+    { order: 28, area: "AI System Settings", adminRoute: "/admin/ai-system-settings", isRequired: false, estimatedMinutes: 15, subSection: "8F: AI Configuration", sourceManual: "hr-hub", sourceSection: "Ch 7.5" },
+    { order: 29, area: "AI Usage Monitoring", adminRoute: "/admin/ai-usage", isRequired: false, estimatedMinutes: 10, subSection: "8F: AI Configuration", sourceManual: "hr-hub", sourceSection: "Ch 7.6" },
   ],
   billing: [
     { order: 1, area: "Subscription Tiers", adminRoute: "/admin/subscription-tiers", isRequired: false, estimatedMinutes: 20 },
