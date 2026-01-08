@@ -133,7 +133,7 @@ export default function AdminHelpdeskPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("ticket_categories")
-        .select("id, name, code")
+        .select("id, name, code, visible_to_employees, visible_to_hr_only, icon")
         .eq("is_active", true)
         .order("display_order");
       if (error) throw error;
@@ -904,6 +904,36 @@ export default function AdminHelpdeskPage() {
 
                     {/* Add Comment */}
                     <div className="mt-3 space-y-2">
+                      {/* Canned Response Picker */}
+                      {cannedResponses.length > 0 && (
+                        <div className="flex items-center gap-2 mb-2">
+                          <Select
+                            value=""
+                            onValueChange={(responseId) => {
+                              const response = cannedResponses.find((r: any) => r.id === responseId);
+                              if (response) {
+                                // Replace variables in the template
+                                let content = response.content;
+                                content = content.replace(/\{employee_name\}/g, selectedTicket.requester?.full_name || "");
+                                content = content.replace(/\{ticket_number\}/g, selectedTicket.ticket_number || "");
+                                setCommentText(content);
+                              }
+                            }}
+                          >
+                            <SelectTrigger className="w-[200px] h-8">
+                              <SelectValue placeholder="Use template..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {cannedResponses.map((response: any) => (
+                                <SelectItem key={response.id} value={response.id}>
+                                  {response.title}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <span className="text-xs text-muted-foreground">Insert a canned response</span>
+                        </div>
+                      )}
                       <Textarea
                         placeholder="Add a comment..."
                         value={commentText}
@@ -1021,7 +1051,14 @@ export default function AdminHelpdeskPage() {
                     </SelectTrigger>
                     <SelectContent>
                       {categories.map((cat: any) => (
-                        <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
+                        <SelectItem key={cat.id} value={cat.id}>
+                          <span className="flex items-center gap-2">
+                            {cat.name}
+                            {cat.visible_to_hr_only && (
+                              <span className="text-xs bg-orange-100 text-orange-700 px-1.5 py-0.5 rounded">HR Only</span>
+                            )}
+                          </span>
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>

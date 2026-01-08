@@ -66,7 +66,12 @@ export default function NewTicketPage() {
 
   const fetchOptions = async () => {
     const [categoriesRes, prioritiesRes, profilesRes, ticketCountsRes] = await Promise.all([
-      supabase.from("ticket_categories").select("id, name, code, description, default_assignee_id, default_priority_id").eq("is_active", true),
+      supabase
+        .from("ticket_categories")
+        .select("id, name, code, description, default_assignee_id, default_priority_id")
+        .eq("is_active", true)
+        .eq("visible_to_employees", true)  // Only show employee-visible categories
+        .order("display_order"),
       supabase.from("ticket_priorities").select("*").eq("is_active", true).order("display_order"),
       supabase.from("profiles").select("id, full_name, email"),
       supabase.from("tickets").select("assignee_id").in("status", ["open", "in_progress", "pending"]),
