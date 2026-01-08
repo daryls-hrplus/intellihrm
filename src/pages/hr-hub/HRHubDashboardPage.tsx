@@ -62,14 +62,81 @@ export default function HRHubDashboardPage() {
     enabled: true,
   });
 
+  // Fetch open tickets count for Help Desk
+  const { data: openTicketsCount = 0 } = useQuery({
+    queryKey: ["open-tickets-count", company?.id],
+    queryFn: async () => {
+      const query = supabase
+        .from("tickets")
+        .select("id", { count: "exact", head: true })
+        .in("status", ["open", "in_progress"]);
+      
+      if (company?.id) {
+        query.eq("company_id", company.id);
+      }
+      
+      const { count, error } = await query;
+      if (error) throw error;
+      return count || 0;
+    },
+    enabled: true,
+  });
+
+  // Fetch overdue tasks count
+  const { data: overdueTasksCount = 0 } = useQuery({
+    queryKey: ["overdue-tasks-count", company?.id],
+    queryFn: async () => {
+      const today = new Date().toISOString().split("T")[0];
+      const query = supabase
+        .from("hr_tasks")
+        .select("id", { count: "exact", head: true })
+        .neq("status", "completed")
+        .lt("due_date", today);
+      
+      if (company?.id) {
+        query.eq("company_id", company.id);
+      }
+      
+      const { count, error } = await query;
+      if (error) throw error;
+      return count || 0;
+    },
+    enabled: true,
+  });
+
+  // Fetch expiring compliance items count (due within 30 days)
+  const { data: expiringComplianceCount = 0 } = useQuery({
+    queryKey: ["expiring-compliance-count", company?.id],
+    queryFn: async () => {
+      const today = new Date();
+      const thirtyDaysFromNow = new Date(today);
+      thirtyDaysFromNow.setDate(today.getDate() + 30);
+      
+      const query = supabase
+        .from("compliance_items")
+        .select("id", { count: "exact", head: true })
+        .neq("status", "completed")
+        .lte("deadline", thirtyDaysFromNow.toISOString().split("T")[0]);
+      
+      if (company?.id) {
+        query.eq("company_id", company.id);
+      }
+      
+      const { count, error } = await query;
+      if (error) throw error;
+      return count || 0;
+    },
+    enabled: true,
+  });
+
   const hubSections = [
     // Section 1: Daily Operations (most used daily actions)
     {
       titleKey: "hrHub.dailyOperations",
       items: [
-        { titleKey: "hrHub.helpDesk", descKey: "hrHub.helpDeskDesc", icon: Headset, href: "/admin/helpdesk", badge: null },
+        { titleKey: "hrHub.helpDesk", descKey: "hrHub.helpDeskDesc", icon: Headset, href: "/admin/helpdesk", badge: null, pendingCount: openTicketsCount },
         { titleKey: "hrHub.essChangeRequests", descKey: "hrHub.essChangeRequestsDesc", icon: UserCog, href: "/hr-hub/ess-change-requests", badge: null, pendingCount: pendingESSCount },
-        { titleKey: "hrHub.tasks", descKey: "hrHub.tasksDesc", icon: CheckSquare, href: "/hr-hub/tasks", badge: null },
+        { titleKey: "hrHub.tasks", descKey: "hrHub.tasksDesc", icon: CheckSquare, href: "/hr-hub/tasks", badge: null, pendingCount: overdueTasksCount },
         { titleKey: "hrHub.calendar", descKey: "hrHub.calendarDesc", icon: Calendar, href: "/hr-hub/calendar", badge: null },
         { titleKey: "hrHub.milestones", descKey: "hrHub.milestonesDesc", icon: Gift, href: "/hr-hub/milestones", badge: null },
       ],
@@ -98,7 +165,7 @@ export default function HRHubDashboardPage() {
     {
       titleKey: "hrHub.complianceGovernance",
       items: [
-        { titleKey: "hrHub.compliance", descKey: "hrHub.complianceDesc", icon: ShieldCheck, href: "/hr-hub/compliance", badge: null },
+        { titleKey: "hrHub.compliance", descKey: "hrHub.complianceDesc", icon: ShieldCheck, href: "/hr-hub/compliance", badge: null, pendingCount: expiringComplianceCount },
         { titleKey: "hrHub.integrationHub", descKey: "hrHub.integrationHubDesc", icon: GitBranch, href: "/hr-hub/integrations", badge: null },
       ],
     },
