@@ -8,7 +8,7 @@ import {
   WorkflowTemplatesSetup,
   ApprovalDelegationsSetup,
   ComplianceTrackerSetup,
-  PolicyDocumentsSetup
+  IntegrationHubSetup
 } from './sections/compliance';
 
 export function HRHubManualComplianceSection() {
@@ -59,32 +59,32 @@ export function HRHubManualComplianceSection() {
           <div className="mt-4 p-3 rounded-lg bg-muted/50 border-l-4 border-purple-500">
             <p className="text-sm font-medium">Configuration Order</p>
             <p className="text-xs text-muted-foreground mt-1">
-              For best results, configure in this order: Workflow Templates → Transaction Workflow Settings → ESS Approval Policies → Compliance Tracker
+              For best results, configure in this order: Workflow Templates → Transaction Workflow Settings → Approval Delegations → ESS Approval Policies → Compliance Tracker
             </p>
           </div>
         </CardContent>
       </Card>
 
-      {/* Section 3.1: ESS Approval Policies */}
-      <ESSApprovalPoliciesSetup />
-
-      {/* Section 3.2: SOP Management */}
-      <SOPManagementSetup />
-
-      {/* Section 3.3: Transaction Workflow Settings */}
-      <TransactionWorkflowSettingsSetup />
-
-      {/* Section 3.4: Workflow Templates */}
+      {/* Section 3.1: Workflow Templates */}
       <WorkflowTemplatesSetup />
 
-      {/* Section 3.5: Approval Delegations */}
+      {/* Section 3.2: Transaction Workflow Settings */}
+      <TransactionWorkflowSettingsSetup />
+
+      {/* Section 3.3: Approval Delegations */}
       <ApprovalDelegationsSetup />
+
+      {/* Section 3.4: SOP Management */}
+      <SOPManagementSetup />
+
+      {/* Section 3.5: ESS Approval Policies */}
+      <ESSApprovalPoliciesSetup />
 
       {/* Section 3.6: Compliance Tracker */}
       <ComplianceTrackerSetup />
 
-      {/* Section 3.7: Policy Documents & AI Rules */}
-      <PolicyDocumentsSetup />
+      {/* Section 3.7: Integration Hub */}
+      <IntegrationHubSetup />
     </div>
   );
 }

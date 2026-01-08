@@ -120,10 +120,10 @@ const approvalFlowDiagram = `flowchart TD
 
 export function WorkflowTemplatesSetup() {
   return (
-    <div className="space-y-6" data-manual-anchor="hh-sec-3-4">
+    <div className="space-y-6" data-manual-anchor="hh-sec-3-1">
       {/* Section Header */}
       <div className="flex items-center gap-3">
-        <Badge variant="outline" className="text-purple-600 border-purple-300">Section 3.4</Badge>
+        <Badge variant="outline" className="text-purple-600 border-purple-300">Section 3.1</Badge>
         <Badge variant="secondary" className="gap-1">
           <Clock className="h-3 w-3" />
           15 min read

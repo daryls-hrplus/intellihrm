@@ -76,10 +76,10 @@ const policyFields = [
 
 export function ESSApprovalPoliciesSetup() {
   return (
-    <div className="space-y-6" data-manual-anchor="hh-sec-3-1">
+    <div className="space-y-6" data-manual-anchor="hh-sec-3-5">
       {/* Section Header */}
       <div className="flex items-center gap-3">
-        <Badge variant="outline" className="text-purple-600 border-purple-300">Section 3.1</Badge>
+        <Badge variant="outline" className="text-purple-600 border-purple-300">Section 3.5</Badge>
         <Badge variant="secondary" className="gap-1">
           <Clock className="h-3 w-3" />
           8 min read

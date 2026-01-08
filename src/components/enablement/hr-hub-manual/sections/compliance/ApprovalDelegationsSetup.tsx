@@ -67,10 +67,10 @@ const delegationFields = [
 
 export function ApprovalDelegationsSetup() {
   return (
-    <div className="space-y-6" data-manual-anchor="hh-sec-3-5">
+    <div className="space-y-6" data-manual-anchor="hh-sec-3-3">
       {/* Section Header */}
       <div className="flex items-center gap-3">
-        <Badge variant="outline" className="text-purple-600 border-purple-300">Section 3.5</Badge>
+        <Badge variant="outline" className="text-purple-600 border-purple-300">Section 3.3</Badge>
         <Badge variant="secondary" className="gap-1">
           <Clock className="h-3 w-3" />
           6 min read
