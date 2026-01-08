@@ -109,7 +109,7 @@ export function HelpDeskSetup() {
         </TabsList>
 
         {/* Operations Tab */}
-        <TabsContent value="operations" className="space-y-6">
+        <TabsContent value="operations" id="hh-sec-6-1-1" data-manual-anchor="hh-sec-6-1-1" className="space-y-6">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -290,7 +290,7 @@ export function HelpDeskSetup() {
         </TabsContent>
 
         {/* Monitoring Tab */}
-        <TabsContent value="monitoring" className="space-y-6">
+        <TabsContent value="monitoring" id="hh-sec-6-1-2" data-manual-anchor="hh-sec-6-1-2" className="space-y-6">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -375,7 +375,7 @@ export function HelpDeskSetup() {
         </TabsContent>
 
         {/* Configuration Tab */}
-        <TabsContent value="configuration" className="space-y-6">
+        <TabsContent value="configuration" id="hh-sec-6-1-3" data-manual-anchor="hh-sec-6-1-3" className="space-y-6">
           {/* Categories */}
           <Card>
             <CardHeader>

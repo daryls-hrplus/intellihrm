@@ -107,7 +107,7 @@ export function CompanyCommunications() {
         </TabsList>
 
         {/* Announcements Tab */}
-        <TabsContent value="announcements" className="space-y-6">
+        <TabsContent value="announcements" id="hh-sec-5-3-1" data-manual-anchor="hh-sec-5-3-1" className="space-y-6">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -231,7 +231,7 @@ export function CompanyCommunications() {
         </TabsContent>
 
         {/* Gallery Tab */}
-        <TabsContent value="gallery" className="space-y-6">
+        <TabsContent value="gallery" id="hh-sec-5-3-2" data-manual-anchor="hh-sec-5-3-2" className="space-y-6">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -295,7 +295,7 @@ export function CompanyCommunications() {
         </TabsContent>
 
         {/* Blog Tab */}
-        <TabsContent value="blog" className="space-y-6">
+        <TabsContent value="blog" id="hh-sec-5-3-3" data-manual-anchor="hh-sec-5-3-3" className="space-y-6">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">

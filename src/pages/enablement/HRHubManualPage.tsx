@@ -286,22 +286,41 @@ export default function HRHubManualPage() {
                           <CollapsibleContent>
                             <div className="ml-6 pl-2 border-l space-y-1 mt-1">
                               {section.subsections.map((sub) => (
-                                <button
-                                  key={sub.id}
-                                  className={`w-full flex items-center gap-2 p-1.5 rounded text-left text-xs transition-colors
-                                    ${selectedSectionId === sub.id 
-                                      ? 'bg-purple-500/10 text-purple-600 font-medium' 
-                                      : 'text-muted-foreground hover:text-foreground hover:bg-muted'
-                                    }`}
-                                  onClick={() => scrollToSection(sub.id)}
-                                >
-                                  {completedSections.includes(sub.id) ? (
-                                    <CheckCircle className="h-3 w-3 text-green-500 flex-shrink-0" />
-                                  ) : (
-                                    <Circle className="h-3 w-3 flex-shrink-0" />
+                                <div key={sub.id}>
+                                  <button
+                                    className={`w-full flex items-center gap-2 p-1.5 rounded text-left text-xs transition-colors
+                                      ${selectedSectionId === sub.id 
+                                        ? 'bg-purple-500/10 text-purple-600 font-medium' 
+                                        : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                                      }`}
+                                    onClick={() => scrollToSection(sub.id)}
+                                  >
+                                    {completedSections.includes(sub.id) ? (
+                                      <CheckCircle className="h-3 w-3 text-green-500 flex-shrink-0" />
+                                    ) : (
+                                      <Circle className="h-3 w-3 flex-shrink-0" />
+                                    )}
+                                    <span className="truncate">{sub.sectionNumber} {sub.title}</span>
+                                  </button>
+                                  {/* Third-level subsections */}
+                                  {sub.subsections && sub.subsections.length > 0 && (
+                                    <div className="ml-4 pl-2 border-l space-y-0.5 mt-0.5">
+                                      {sub.subsections.map((thirdLevel) => (
+                                        <button
+                                          key={thirdLevel.id}
+                                          className={`w-full flex items-center gap-1.5 p-1 rounded text-left text-[10px] transition-colors
+                                            ${selectedSectionId === thirdLevel.id 
+                                              ? 'bg-purple-500/10 text-purple-600 font-medium' 
+                                              : 'text-muted-foreground/80 hover:text-foreground hover:bg-muted'
+                                            }`}
+                                          onClick={() => scrollToSection(thirdLevel.id)}
+                                        >
+                                          <span className="truncate">{thirdLevel.sectionNumber} {thirdLevel.title}</span>
+                                        </button>
+                                      ))}
+                                    </div>
                                   )}
-                                  <span className="truncate">{sub.sectionNumber} {sub.title}</span>
-                                </button>
+                                </div>
                               ))}
                             </div>
                           </CollapsibleContent>

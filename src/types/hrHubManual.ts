@@ -397,7 +397,36 @@ export const HR_HUB_MANUAL_STRUCTURE: HRHubManualSection[] = [
           frequency: 'Ongoing',
           timing: 'As needed',
           benchmark: 'Internal communications strategy'
-        }
+        },
+        subsections: [
+          {
+            id: 'hh-sec-5-3-1',
+            sectionNumber: '5.3.1',
+            title: 'Announcements',
+            description: 'Company-wide and targeted announcements with pinning',
+            contentLevel: 'procedure',
+            estimatedReadTime: 4,
+            targetRoles: ['HR Admin', 'Communications']
+          },
+          {
+            id: 'hh-sec-5-3-2',
+            sectionNumber: '5.3.2',
+            title: 'Photo Gallery',
+            description: 'Event albums and company photo management',
+            contentLevel: 'procedure',
+            estimatedReadTime: 4,
+            targetRoles: ['HR Admin', 'Communications']
+          },
+          {
+            id: 'hh-sec-5-3-3',
+            sectionNumber: '5.3.3',
+            title: 'Blog Posts',
+            description: 'Long-form content with SEO-friendly slugs',
+            contentLevel: 'procedure',
+            estimatedReadTime: 4,
+            targetRoles: ['HR Admin', 'Communications']
+          }
+        ]
       },
       {
         id: 'hh-sec-5-4',
@@ -411,7 +440,27 @@ export const HR_HUB_MANUAL_STRUCTURE: HRHubManualSection[] = [
           frequency: 'Initial setup, ongoing maintenance',
           timing: 'Pre-launch',
           benchmark: 'Self-service HR knowledge management'
-        }
+        },
+        subsections: [
+          {
+            id: 'hh-sec-5-4-1',
+            sectionNumber: '5.4.1',
+            title: 'Categories',
+            description: 'Knowledge base category organization',
+            contentLevel: 'procedure',
+            estimatedReadTime: 6,
+            targetRoles: ['HR Admin']
+          },
+          {
+            id: 'hh-sec-5-4-2',
+            sectionNumber: '5.4.2',
+            title: 'Articles',
+            description: 'Article creation, publishing, and governance',
+            contentLevel: 'procedure',
+            estimatedReadTime: 6,
+            targetRoles: ['HR Admin']
+          }
+        ]
       }
     ]
   },
@@ -437,7 +486,36 @@ export const HR_HUB_MANUAL_STRUCTURE: HRHubManualSection[] = [
           frequency: 'Daily operations',
           timing: 'Ongoing',
           benchmark: 'HR service delivery'
-        }
+        },
+        subsections: [
+          {
+            id: 'hh-sec-6-1-1',
+            sectionNumber: '6.1.1',
+            title: 'Operations',
+            description: 'Ticket queue management, comments, canned responses',
+            contentLevel: 'procedure',
+            estimatedReadTime: 5,
+            targetRoles: ['HR Admin']
+          },
+          {
+            id: 'hh-sec-6-1-2',
+            sectionNumber: '6.1.2',
+            title: 'Monitoring',
+            description: 'SLA metrics, satisfaction analytics, breach tracking',
+            contentLevel: 'procedure',
+            estimatedReadTime: 4,
+            targetRoles: ['HR Admin']
+          },
+          {
+            id: 'hh-sec-6-1-3',
+            sectionNumber: '6.1.3',
+            title: 'Configuration',
+            description: 'Categories, SLA settings, canned responses, escalation',
+            contentLevel: 'procedure',
+            estimatedReadTime: 5,
+            targetRoles: ['HR Admin']
+          }
+        ]
       },
       {
         id: 'hh-sec-6-2',
@@ -493,7 +571,36 @@ export const HR_HUB_MANUAL_STRUCTURE: HRHubManualSection[] = [
           frequency: 'Daily review',
           timing: 'Ongoing',
           benchmark: 'Employee experience touchpoints'
-        }
+        },
+        subsections: [
+          {
+            id: 'hh-sec-6-5-1',
+            sectionNumber: '6.5.1',
+            title: 'Dashboard Views',
+            description: 'Upcoming, today, and monthly milestone views',
+            contentLevel: 'procedure',
+            estimatedReadTime: 3,
+            targetRoles: ['HR Admin', 'Manager']
+          },
+          {
+            id: 'hh-sec-6-5-2',
+            sectionNumber: '6.5.2',
+            title: 'Milestone Types',
+            description: 'Birthdays, anniversaries, probation configuration',
+            contentLevel: 'procedure',
+            estimatedReadTime: 3,
+            targetRoles: ['HR Admin']
+          },
+          {
+            id: 'hh-sec-6-5-3',
+            sectionNumber: '6.5.3',
+            title: 'Configuration',
+            description: 'Privacy controls and recognition integration',
+            contentLevel: 'procedure',
+            estimatedReadTime: 2,
+            targetRoles: ['HR Admin']
+          }
+        ]
       }
     ]
   },
