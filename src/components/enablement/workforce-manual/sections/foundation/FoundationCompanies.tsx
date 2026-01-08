@@ -254,7 +254,7 @@ export function FoundationCompanies() {
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-muted-foreground">
-            Companies represent individual legal entities in HRplus—the core unit for 
+            Companies represent individual legal entities in Intelli HRM—the core unit for 
             payroll, compliance, and organizational structure. Each company must be 
             registered in a specific country and configured with local statutory requirements.
           </p>
