@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { 
   User, Users, UserCog, Shield, 
-  MessageSquare, FileText, CheckCircle, Repeat
+  MessageSquare, FileText, CheckCircle, Repeat, UserCheck, Activity
 } from 'lucide-react';
 
 interface PersonaCardProps {
@@ -98,9 +98,13 @@ export function HRHubPersonas() {
         'Submit help desk tickets',
         'View and acknowledge policies',
         'Access personal documents',
-        'Check request status'
+        'Check request status',
+        'Submit personal data change requests',
+        'Search employee directory',
+        'View company announcements',
+        'Acknowledge policies and documents'
       ],
-      primaryModules: ['Knowledge Base', 'Help Desk', 'Documents', 'Intranet']
+      primaryModules: ['Knowledge Base', 'Help Desk', 'Documents', 'Intranet', 'ESS Change Requests', 'Employee Directory', 'Company Communications']
     },
     {
       icon: Users,
@@ -122,9 +126,12 @@ export function HRHubPersonas() {
         'Access team-specific SOPs',
         'View and complete assigned HR tasks',
         'Collaborate on tasks via comments',
-        'Track task progress for team'
+        'Track task progress for team',
+        'Approve ESS change requests for team',
+        'View team sentiment indicators',
+        'Access recognition analytics for team'
       ],
-      primaryModules: ['Workflows', 'Milestones', 'Compliance', 'HR Tasks']
+      primaryModules: ['Workflows', 'Milestones', 'Compliance', 'HR Tasks', 'ESS Approvals', 'Sentiment Analytics']
     },
     {
       icon: UserCog,
@@ -149,9 +156,17 @@ export function HRHubPersonas() {
         'Create and manage recurring task schedules',
         'Assign tasks to team members',
         'Monitor task completion and overdue items',
-        'Review task activity logs'
+        'Review task activity logs',
+        'Process ESS change requests',
+        'Configure ESS approval policies',
+        'Manage integration connections',
+        'Configure government ID types',
+        'Run bulk data imports',
+        'Schedule automated reports',
+        'Monitor employee sentiment',
+        'Manage company communications'
       ],
-      primaryModules: ['All HR Hub Modules', 'Analytics', 'Configuration', 'HR Tasks']
+      primaryModules: ['All HR Hub Modules', 'Analytics', 'Configuration', 'HR Tasks', 'ESS Approval Policies', 'Integration Hub', 'Data Import', 'Scheduled Reports']
     },
     {
       icon: Shield,
@@ -309,6 +324,145 @@ export function HRHubPersonas() {
                   <h4 className="font-medium">Task completed with audit trail</h4>
                   <p className="text-sm text-muted-foreground">
                     Full history preserved for compliance review
+                  </p>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Additional User Journeys */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <UserCheck className="h-5 w-5 text-rose-500" />
+              Journey: ESS Data Change
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex items-start gap-4">
+                <div className="flex items-center justify-center h-8 w-8 rounded-full bg-rose-500 text-white text-sm font-medium flex-shrink-0">
+                  1
+                </div>
+                <div>
+                  <h4 className="font-medium">Employee submits bank detail change</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Via ESS self-service portal
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-start gap-4">
+                <div className="flex items-center justify-center h-8 w-8 rounded-full bg-rose-500 text-white text-sm font-medium flex-shrink-0">
+                  2
+                </div>
+                <div>
+                  <h4 className="font-medium">System checks approval policy</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Bank changes require HR approval per policy
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-start gap-4">
+                <div className="flex items-center justify-center h-8 w-8 rounded-full bg-rose-500 text-white text-sm font-medium flex-shrink-0">
+                  3
+                </div>
+                <div>
+                  <h4 className="font-medium">HR receives notification</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Reviews change with verification note
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-start gap-4">
+                <div className="flex items-center justify-center h-8 w-8 rounded-full bg-rose-500 text-white text-sm font-medium flex-shrink-0">
+                  4
+                </div>
+                <div>
+                  <h4 className="font-medium">HR approves change</h4>
+                  <p className="text-sm text-muted-foreground">
+                    System updates employee record
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-start gap-4">
+                <div className="flex items-center justify-center h-8 w-8 rounded-full bg-rose-500 text-white text-sm font-medium flex-shrink-0">
+                  5
+                </div>
+                <div>
+                  <h4 className="font-medium">Confirmation sent to employee</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Full audit trail preserved for compliance
+                  </p>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Activity className="h-5 w-5 text-amber-500" />
+              Journey: Sentiment Monitoring
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex items-start gap-4">
+                <div className="flex items-center justify-center h-8 w-8 rounded-full bg-amber-500 text-white text-sm font-medium flex-shrink-0">
+                  1
+                </div>
+                <div>
+                  <h4 className="font-medium">System analyzes feedback</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Help desk tickets and employee feedback analyzed
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-start gap-4">
+                <div className="flex items-center justify-center h-8 w-8 rounded-full bg-amber-500 text-white text-sm font-medium flex-shrink-0">
+                  2
+                </div>
+                <div>
+                  <h4 className="font-medium">AI detects negative trend</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Sentiment trend detected in department
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-start gap-4">
+                <div className="flex items-center justify-center h-8 w-8 rounded-full bg-amber-500 text-white text-sm font-medium flex-shrink-0">
+                  3
+                </div>
+                <div>
+                  <h4 className="font-medium">HR Admin receives alert</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Alert on sentiment dashboard with details
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-start gap-4">
+                <div className="flex items-center justify-center h-8 w-8 rounded-full bg-amber-500 text-white text-sm font-medium flex-shrink-0">
+                  4
+                </div>
+                <div>
+                  <h4 className="font-medium">Follow-up task created</h4>
+                  <p className="text-sm text-muted-foreground">
+                    HRBP schedules team pulse check
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-start gap-4">
+                <div className="flex items-center justify-center h-8 w-8 rounded-full bg-green-500 text-white text-sm font-medium flex-shrink-0">
+                  5
+                </div>
+                <div>
+                  <h4 className="font-medium">Resolution documented</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Sentiment tracked over time for improvement
                   </p>
                 </div>
               </div>
