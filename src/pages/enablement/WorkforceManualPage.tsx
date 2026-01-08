@@ -340,45 +340,6 @@ export default function WorkforceManualPage() {
             {renderSectionContent()}
           </div>
 
-          {/* Right Sidebar - Section Info */}
-          <div className="w-64 flex-shrink-0 hidden xl:block">
-            <Card className="sticky top-28">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base">Section Info</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4 text-sm">
-                {WORKFORCE_MANUAL_STRUCTURE.find(s => s.id === selectedSectionId || 
-                  s.subsections?.some(sub => sub.id === selectedSectionId)) && (
-                  <>
-                    <div>
-                      <span className="text-muted-foreground">Current Part:</span>
-                      <p className="font-medium mt-1">
-                        {WORKFORCE_MANUAL_STRUCTURE.find(s => s.id === activePartId)?.title}
-                      </p>
-                    </div>
-                    <Separator />
-                    <div>
-                      <span className="text-muted-foreground">Estimated Time:</span>
-                      <p className="font-medium mt-1">
-                        {WORKFORCE_MANUAL_STRUCTURE.find(s => s.id === activePartId)?.estimatedReadTime} minutes
-                      </p>
-                    </div>
-                    <Separator />
-                    <div>
-                      <span className="text-muted-foreground">Target Roles:</span>
-                      <div className="flex flex-wrap gap-1 mt-1">
-                        {WORKFORCE_MANUAL_STRUCTURE.find(s => s.id === activePartId)?.targetRoles.map((role, i) => (
-                          <Badge key={i} variant="secondary" className="text-xs">
-                            {role}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  </>
-                )}
-              </CardContent>
-            </Card>
-          </div>
         </div>
       </div>
     </div>
