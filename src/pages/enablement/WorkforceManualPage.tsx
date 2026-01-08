@@ -25,7 +25,11 @@ import {
   WorkforceManualAnalyticsSection,
   WorkforceManualESSMSSSection,
   WorkforceManualIntegrationSection,
-  WorkforceManualTroubleshootingSection
+  WorkforceManualTroubleshootingSection,
+  WorkforceManualQuickReference,
+  WorkforceManualArchitectureDiagrams,
+  WorkforceManualGlossary,
+  WorkforceManualVersionHistory
 } from '@/components/enablement/workforce-manual';
 
 const SECTION_ICONS: Record<string, React.ReactNode> = {
@@ -51,6 +55,10 @@ export default function WorkforceManualPage() {
   const contentRef = useRef<HTMLDivElement>(null);
 
   const activePartId = useMemo(() => {
+    // Handle supplementary sections
+    if (['quick-ref', 'diagrams', 'glossary', 'version-history'].includes(selectedSectionId)) {
+      return selectedSectionId;
+    }
     const parentPart = WORKFORCE_MANUAL_STRUCTURE.find(
       (s) => s.id === selectedSectionId || s.subsections?.some((sub) => sub.id === selectedSectionId)
     );
@@ -156,6 +164,14 @@ export default function WorkforceManualPage() {
         return <WorkforceManualIntegrationSection />;
       case 'wf-part-10':
         return <WorkforceManualTroubleshootingSection />;
+      case 'quick-ref':
+        return <WorkforceManualQuickReference />;
+      case 'diagrams':
+        return <WorkforceManualArchitectureDiagrams />;
+      case 'glossary':
+        return <WorkforceManualGlossary />;
+      case 'version-history':
+        return <WorkforceManualVersionHistory />;
       default:
         return <WorkforceManualOverviewSection />;
     }
@@ -305,22 +321,32 @@ export default function WorkforceManualPage() {
 
                     {/* Quick Reference & Supplementary */}
                     <button
-                      className="w-full flex items-center gap-2 p-2 rounded-lg text-left text-sm transition-colors hover:bg-muted text-muted-foreground"
+                      className={`w-full flex items-center gap-2 p-2 rounded-lg text-left text-sm transition-colors hover:bg-muted ${activePartId === 'quick-ref' ? 'bg-primary/10 text-primary font-medium' : 'text-muted-foreground'}`}
+                      onClick={() => scrollToSection('quick-ref')}
                     >
                       <Sparkles className="h-4 w-4 text-amber-500" />
                       <span>Quick Reference Cards</span>
                     </button>
                     <button
-                      className="w-full flex items-center gap-2 p-2 rounded-lg text-left text-sm transition-colors hover:bg-muted text-muted-foreground"
+                      className={`w-full flex items-center gap-2 p-2 rounded-lg text-left text-sm transition-colors hover:bg-muted ${activePartId === 'diagrams' ? 'bg-primary/10 text-primary font-medium' : 'text-muted-foreground'}`}
+                      onClick={() => scrollToSection('diagrams')}
                     >
                       <Layers className="h-4 w-4 text-blue-500" />
                       <span>Architecture Diagrams</span>
                     </button>
                     <button
-                      className="w-full flex items-center gap-2 p-2 rounded-lg text-left text-sm transition-colors hover:bg-muted text-muted-foreground"
+                      className={`w-full flex items-center gap-2 p-2 rounded-lg text-left text-sm transition-colors hover:bg-muted ${activePartId === 'glossary' ? 'bg-primary/10 text-primary font-medium' : 'text-muted-foreground'}`}
+                      onClick={() => scrollToSection('glossary')}
                     >
                       <BookOpen className="h-4 w-4 text-green-500" />
                       <span>Glossary</span>
+                    </button>
+                    <button
+                      className={`w-full flex items-center gap-2 p-2 rounded-lg text-left text-sm transition-colors hover:bg-muted ${activePartId === 'version-history' ? 'bg-primary/10 text-primary font-medium' : 'text-muted-foreground'}`}
+                      onClick={() => scrollToSection('version-history')}
+                    >
+                      <HistoryIcon className="h-4 w-4 text-orange-500" />
+                      <span>Version History</span>
                     </button>
                   </div>
                 </ScrollArea>
