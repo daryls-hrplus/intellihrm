@@ -44,7 +44,7 @@ export function SkillGapAnalysis() {
         alt="Gap analysis view showing current vs required skill levels with learning suggestions"
       />
 
-      <Alert className="border-primary/20 bg-primary/5">
+      <Alert className="border-border bg-muted/50">
         <Info className="h-4 w-4" />
         <AlertTitle>Succession Planning</AlertTitle>
         <AlertDescription>

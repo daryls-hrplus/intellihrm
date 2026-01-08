@@ -141,7 +141,7 @@ export function ScheduledReportsConfig() {
         alt="Step-by-step report creation showing template selection, filters, and scheduling options"
       />
 
-      <Alert className="border-primary/20 bg-primary/5">
+      <Alert className="border-border bg-muted/50">
         <Info className="h-4 w-4" />
         <AlertTitle>Data Security</AlertTitle>
         <AlertDescription>

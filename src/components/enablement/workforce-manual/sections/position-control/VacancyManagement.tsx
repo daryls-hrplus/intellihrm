@@ -284,11 +284,11 @@ export function VacancyManagement() {
               </p>
             </div>
           </div>
-          <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-            <h4 className="font-semibold text-blue-800 dark:text-blue-200 mb-2">
+          <div className="bg-muted/50 border border-border rounded-lg p-4">
+            <h4 className="font-semibold mb-2">
               Cross-Module Link
             </h4>
-            <p className="text-sm text-blue-700 dark:text-blue-300">
+            <p className="text-sm text-muted-foreground">
               Navigate to <strong>Recruitment → Job Requisitions</strong> to see all active 
               requisitions linked to vacant positions. The requisition status updates 
               automatically when positions are filled.
@@ -304,7 +304,7 @@ export function VacancyManagement() {
       <Separator />
 
       {/* Industry Context */}
-      <Card className="border-primary/20 bg-primary/5">
+      <Card className="border-border bg-muted/50">
         <CardHeader>
           <CardTitle className="text-lg">Industry Context</CardTitle>
         </CardHeader>

@@ -215,11 +215,11 @@ export function FreezeThawControls() {
               </tbody>
             </table>
           </div>
-          <div className="mt-4 p-4 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg">
-            <h4 className="font-semibold text-amber-800 dark:text-amber-200 mb-2">
+          <div className="mt-4 p-4 bg-muted/50 border border-border rounded-lg">
+            <h4 className="font-semibold mb-2">
               User Experience
             </h4>
-            <p className="text-sm text-amber-700 dark:text-amber-300">
+            <p className="text-sm text-muted-foreground">
               When users attempt blocked actions during a freeze, they see a clear 
               message explaining the freeze is active, its scope, and how to request 
               an exception if needed.
@@ -311,11 +311,11 @@ export function FreezeThawControls() {
               </p>
             </div>
           </div>
-          <div className="bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-lg p-4">
-            <h4 className="font-semibold text-green-800 dark:text-green-200 mb-2">
+          <div className="bg-muted/50 border border-border rounded-lg p-4">
+            <h4 className="font-semibold mb-2">
               Phased Thaw Option
             </h4>
-            <p className="text-sm text-green-700 dark:text-green-300">
+            <p className="text-sm text-muted-foreground">
               For gradual return to normal hiring, configure a phased thaw that 
               progressively loosens restrictions over time (e.g., Week 1: critical 
               roles only → Week 3: backfills allowed → Week 5: all hiring open).
@@ -393,7 +393,7 @@ export function FreezeThawControls() {
       <Separator />
 
       {/* Industry Context */}
-      <Card className="border-primary/20 bg-primary/5">
+      <Card className="border-border bg-muted/50">
         <CardHeader>
           <CardTitle className="text-lg">Industry Context</CardTitle>
         </CardHeader>

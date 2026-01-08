@@ -56,7 +56,7 @@ export function PositionControlOverview() {
             budgeted, authorized, and linked to the organizational structure before any 
             hire can be made.
           </p>
-          <div className="bg-primary/5 border border-primary/20 rounded-lg p-4">
+          <div className="bg-muted/50 border border-border rounded-lg p-4">
             <div className="flex items-start gap-3">
               <Lightbulb className="h-5 w-5 text-primary mt-1" />
               <div>
@@ -248,11 +248,11 @@ export function PositionControlOverview() {
               </tbody>
             </table>
           </div>
-          <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg p-4">
-            <h4 className="font-semibold text-amber-800 dark:text-amber-200 mb-2">
+          <div className="bg-muted/50 border border-border rounded-lg p-4">
+            <h4 className="font-semibold mb-2">
               Overstaffed Positions
             </h4>
-            <p className="text-sm text-amber-700 dark:text-amber-300">
+            <p className="text-sm text-muted-foreground">
               When filled count exceeds authorized headcount, the position is flagged as 
               "overstaffed." This may occur during transitions or when temporary assignments 
               are made. The system tracks this for compliance and budget review.
@@ -300,7 +300,7 @@ export function PositionControlOverview() {
       <Separator />
 
       {/* Industry Context */}
-      <Card className="border-primary/20 bg-primary/5">
+      <Card className="border-border bg-muted/50">
         <CardHeader>
           <CardTitle className="text-lg">Industry Context</CardTitle>
         </CardHeader>

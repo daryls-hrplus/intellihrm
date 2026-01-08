@@ -353,7 +353,7 @@ export function HeadcountRequests() {
       <Separator />
 
       {/* Industry Context */}
-      <Card className="border-primary/20 bg-primary/5">
+      <Card className="border-border bg-muted/50">
         <CardHeader>
           <CardTitle className="text-lg">Industry Context</CardTitle>
         </CardHeader>
