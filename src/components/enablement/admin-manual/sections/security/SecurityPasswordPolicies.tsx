@@ -9,7 +9,7 @@ export function SecurityPasswordPolicies() {
     <div className="space-y-6">
       <p className="text-muted-foreground">
         Configure password policies to ensure strong authentication while maintaining usability.
-        HRplus follows NIST 800-63B guidelines for modern password security standards.
+        Intelli HRM follows NIST 800-63B guidelines for modern password security standards.
       </p>
 
       <Alert>
@@ -100,7 +100,7 @@ export function SecurityPasswordPolicies() {
       <div className="space-y-4">
         <h4 className="font-semibold">Blocked Passwords</h4>
         <p className="text-sm text-muted-foreground">
-          HRplus maintains a blocklist of commonly compromised passwords. Users cannot set passwords that:
+          Intelli HRM maintains a blocklist of commonly compromised passwords. Users cannot set passwords that:
         </p>
         <div className="grid grid-cols-2 gap-4 text-sm">
           <div className="flex items-center gap-2">
@@ -117,7 +117,7 @@ export function SecurityPasswordPolicies() {
           </div>
           <div className="flex items-center gap-2">
             <XCircle className="h-4 w-4 text-red-500" />
-            <span>Contain company name or HRplus</span>
+            <span>Contain company name or Intelli HRM</span>
           </div>
         </div>
       </div>

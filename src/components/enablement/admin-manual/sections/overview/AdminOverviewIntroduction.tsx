@@ -17,7 +17,7 @@ export function AdminOverviewIntroduction() {
           <Clock className="h-3 w-3" />
           <span>10 min read</span>
         </div>
-        <CardTitle className="text-2xl">Introduction to Admin & Security in HRplus</CardTitle>
+        <CardTitle className="text-2xl">Introduction to Admin & Security in Intelli HRM</CardTitle>
         <CardDescription>
           Executive summary, business value, and key differentiators
         </CardDescription>
@@ -32,7 +32,7 @@ export function AdminOverviewIntroduction() {
             <div>
               <h3 className="font-semibold text-lg mb-2">Executive Summary</h3>
               <p className="text-muted-foreground leading-relaxed">
-                The HRplus Admin & Security module is the foundational layer of your HRMS, 
+                The Intelli HRM Admin & Security module is the foundational layer of your HRMS, 
                 providing comprehensive organization structure management, role-based access control, 
                 and security governance. It ensures your HR data is protected while enabling efficient operations 
                 across the Caribbean, Africa, and global regions.
@@ -81,7 +81,7 @@ export function AdminOverviewIntroduction() {
             <p className="mb-4">
               Enterprise HR systems require robust administration and security foundations. Without 
               proper governance, organizations face data breaches, compliance violations, and 
-              operational inefficiencies. The HRplus Admin & Security module addresses these challenges:
+              operational inefficiencies. The Intelli HRM Admin & Security module addresses these challenges:
             </p>
             <ul className="space-y-3 list-none pl-0">
               {[
@@ -297,7 +297,7 @@ export function AdminOverviewIntroduction() {
                 <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400 mt-0.5" />
                 <div>
                   <span className="font-semibold text-sm text-foreground">Implemented</span>
-                  <p className="text-xs text-muted-foreground mt-1">Feature exists in the HRplus system</p>
+                  <p className="text-xs text-muted-foreground mt-1">Feature exists in the Intelli HRM system</p>
                 </div>
               </div>
             </div>

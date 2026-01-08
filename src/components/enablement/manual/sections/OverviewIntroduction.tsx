@@ -16,7 +16,7 @@ export function OverviewIntroduction() {
           <Clock className="h-3 w-3" />
           <span>8 min read</span>
         </div>
-        <CardTitle className="text-2xl">Introduction to Appraisals in HRplus</CardTitle>
+        <CardTitle className="text-2xl">Introduction to Appraisals in Intelli HRM</CardTitle>
         <CardDescription>
           Purpose, positioning, and key differentiators of the Appraisals module
         </CardDescription>
@@ -31,7 +31,7 @@ export function OverviewIntroduction() {
             <div>
               <h3 className="font-semibold text-lg mb-2">Executive Summary</h3>
               <p className="text-muted-foreground leading-relaxed">
-                The HRplus Appraisals module is an enterprise-grade performance evaluation system designed 
+                The Intelli HRM Appraisals module is an enterprise-grade performance evaluation system designed 
                 to support organizations in conducting fair, transparent, and developmentally-focused 
                 performance reviews. Built with AI-first principles, it goes beyond traditional performance 
                 management to provide predictive insights, automated workflows, and seamless integration 
@@ -65,7 +65,7 @@ export function OverviewIntroduction() {
             <p className="mb-4">
               Performance management is a critical driver of organizational success, yet many enterprises 
               struggle with inconsistent evaluations, manager bias, and disconnected HR processes. The 
-              HRplus Appraisals module addresses these challenges by providing:
+              Intelli HRM Appraisals module addresses these challenges by providing:
             </p>
             <ul className="space-y-2 list-none pl-0">
               {[

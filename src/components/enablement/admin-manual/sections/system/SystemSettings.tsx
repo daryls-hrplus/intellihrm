@@ -8,7 +8,7 @@ export function SystemSettings() {
     <div className="space-y-8">
       <LearningObjectives
         objectives={[
-          "Configure global system settings for your HRplus instance",
+          "Configure global system settings for your Intelli HRM instance",
           "Set regional defaults for date, time, and number formats",
           "Manage system-wide feature toggles and preferences",
           "Understand the impact of settings on all users"
@@ -24,7 +24,7 @@ export function SystemSettings() {
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-muted-foreground">
-            System Settings control the fundamental behavior of your HRplus instance. 
+            System Settings control the fundamental behavior of your Intelli HRM instance. 
             These settings affect all users and should be configured during initial 
             implementation. Changes should follow change management procedures.
           </p>

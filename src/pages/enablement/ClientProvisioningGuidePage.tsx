@@ -105,7 +105,7 @@ export default function ClientProvisioningGuidePage() {
           </CardHeader>
           <CardContent>
             <p className="text-foreground">
-              The Demo Tenant Provisioning System allows HRplus administrators to manage demo registrations, 
+              The Demo Tenant Provisioning System allows Intelli HRM administrators to manage demo registrations, 
               provision new demo environments, and convert successful demos to production tenants.
             </p>
           </CardContent>

@@ -6,7 +6,7 @@ const VERSION_HISTORY = [
   {
     version: '1.3.0',
     date: '2026-01-02',
-    author: 'HRplus Team',
+    author: 'Intelli HRM Team',
     changes: [
       'Comprehensive Part 8 Troubleshooting expansion (8 subsections)',
       'Updated RLS policies documentation to reflect actual implementation (14 policies)',
@@ -21,7 +21,7 @@ const VERSION_HISTORY = [
   {
     version: '1.2.0',
     date: '2025-12-20',
-    author: 'HRplus Team',
+    author: 'Intelli HRM Team',
     changes: [
       'Added navigation paths to all sections',
       'Added version history tracking',
@@ -32,7 +32,7 @@ const VERSION_HISTORY = [
   {
     version: '1.1.0',
     date: '2025-12-15',
-    author: 'HRplus Team',
+    author: 'Intelli HRM Team',
     changes: [
       'Added AI Feedback Assistant documentation',
       'Added bias detection guidelines',
@@ -43,7 +43,7 @@ const VERSION_HISTORY = [
   {
     version: '1.0.0',
     date: '2025-11-01',
-    author: 'HRplus Team',
+    author: 'Intelli HRM Team',
     changes: [
       'Initial release of Appraisals Administrator Manual',
       'Core setup and configuration documentation',

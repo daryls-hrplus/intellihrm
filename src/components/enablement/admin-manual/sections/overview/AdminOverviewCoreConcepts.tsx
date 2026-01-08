@@ -31,7 +31,7 @@ export function AdminOverviewCoreConcepts() {
             <FeatureStatusBadge status="implemented" size="sm" />
           </h3>
           <p className="text-muted-foreground mb-4">
-            HRplus implements a tiered administrator model following the principle of least privilege. 
+            Intelli HRM implements a tiered administrator model following the principle of least privilege. 
             Each level has specific capabilities and restrictions:
           </p>
           <div className="grid gap-4">
@@ -158,7 +158,7 @@ export function AdminOverviewCoreConcepts() {
             <FeatureStatusBadge status="implemented" size="sm" />
           </h3>
           <p className="text-muted-foreground mb-4">
-            HRplus uses a Role-Based Permission (RBP) model aligned with enterprise security 
+            Intelli HRM uses a Role-Based Permission (RBP) model aligned with enterprise security 
             best practices. Permissions are granted at multiple levels:
           </p>
           <div className="overflow-x-auto">
@@ -323,7 +323,7 @@ export function AdminOverviewCoreConcepts() {
             <FeatureStatusBadge status="implemented" size="sm" />
           </h3>
           <p className="text-muted-foreground mb-4">
-            HRplus supports a flexible multi-level organization structure that can accommodate 
+            Intelli HRM supports a flexible multi-level organization structure that can accommodate 
             global enterprises with complex reporting relationships:
           </p>
           <div className="space-y-2">

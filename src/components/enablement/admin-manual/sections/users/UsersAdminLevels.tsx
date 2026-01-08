@@ -114,7 +114,7 @@ export function UsersAdminLevels() {
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-muted-foreground">
-            HRplus implements a <strong>four-tier administrator hierarchy</strong> based on the 
+            Intelli HRM implements a <strong>four-tier administrator hierarchy</strong> based on the 
             principle of least privilege. Each level provides progressively broader access, 
             with corresponding accountability and audit requirements.
           </p>

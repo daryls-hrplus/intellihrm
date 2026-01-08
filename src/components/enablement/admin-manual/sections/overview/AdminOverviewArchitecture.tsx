@@ -31,7 +31,7 @@ export function AdminOverviewArchitecture() {
             <FeatureStatusBadge status="implemented" size="sm" />
           </h3>
           <p className="text-muted-foreground mb-4">
-            HRplus Admin & Security is built on a modern, cloud-native architecture designed for 
+            Intelli HRM Admin & Security is built on a modern, cloud-native architecture designed for 
             enterprise scalability, security, and compliance.
           </p>
           
@@ -85,7 +85,7 @@ export function AdminOverviewArchitecture() {
             <FeatureStatusBadge status="implemented" size="sm" />
           </h3>
           <p className="text-muted-foreground mb-4">
-            HRplus uses a shared database, separate schema approach to multi-tenancy. This provides 
+            Intelli HRM uses a shared database, separate schema approach to multi-tenancy. This provides 
             strong data isolation while maintaining operational efficiency:
           </p>
           <div className="grid md:grid-cols-2 gap-4">
@@ -145,7 +145,7 @@ export function AdminOverviewArchitecture() {
           </h3>
           <p className="text-muted-foreground mb-4">
             The Admin & Security module manages several core entities that are referenced 
-            throughout the HRplus ecosystem:
+            throughout the Intelli HRM ecosystem:
           </p>
           <div className="overflow-x-auto">
             <table className="w-full text-sm border-collapse">
@@ -257,7 +257,7 @@ export function AdminOverviewArchitecture() {
             Integration Points
           </h3>
           <p className="text-muted-foreground mb-4">
-            Admin & Security integrates with other HRplus modules and external systems:
+            Admin & Security integrates with other Intelli HRM modules and external systems:
           </p>
           <div className="grid md:grid-cols-2 gap-4">
             <Card>

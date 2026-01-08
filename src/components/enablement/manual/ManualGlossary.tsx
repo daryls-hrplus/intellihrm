@@ -13,7 +13,7 @@ const GLOSSARY_TERMS = [
   },
   {
     term: 'CRGV Model',
-    definition: 'The weighted scoring methodology used in HRplus: Competencies (C), Responsibilities (R), Goals (G), and Values (V).',
+    definition: 'The weighted scoring methodology used in Intelli HRM: Competencies (C), Responsibilities (R), Goals (G), and Values (V).',
     category: 'Core',
   },
   {
