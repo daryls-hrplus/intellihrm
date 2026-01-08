@@ -20,9 +20,10 @@ import {
   HRHubManualOrganizationSection,
   HRHubManualComplianceSection,
   HRHubManualDocumentsSection,
-  HRHubManualCommunicationSection 
+  HRHubManualCommunicationSection,
+  HRHubManualOperationsSection,
+  HRHubManualAnalyticsSection
 } from '@/components/enablement/hr-hub-manual';
-import { HRHubManualOperationsSection } from '@/components/enablement/hr-hub-manual/HRHubManualOperationsSection';
 
 // Icons mapped to new chapter order:
 // 1. Overview, 2. Org Config, 3. Compliance/Workflows, 4. Documents, 5. Communication, 6. Tasks, 7. Analytics, 8. Troubleshooting
@@ -149,8 +150,9 @@ export default function HRHubManualPage() {
         return <HRHubManualCommunicationSection />;
       case 'hh-part-6':
         return <HRHubManualOperationsSection />;
-      // Chapters 7, 8 - Coming Soon placeholders
       case 'hh-part-7':
+        return <HRHubManualAnalyticsSection />;
+      // Chapter 8 - Coming Soon placeholder
       case 'hh-part-8':
         const currentPart = HR_HUB_MANUAL_STRUCTURE.find(s => s.id === activePartId);
         return (
