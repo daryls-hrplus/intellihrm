@@ -16,7 +16,8 @@ import {
 } from 'lucide-react';
 import { HR_HUB_MANUAL_STRUCTURE } from '@/types/hrHubManual';
 import { 
-  HRHubManualOverviewSection, 
+  HRHubManualOverviewSection,
+  HRHubManualOrganizationSection,
   HRHubManualCommunicationSection 
 } from '@/components/enablement/hr-hub-manual';
 
@@ -130,11 +131,11 @@ export default function HRHubManualPage() {
     switch (activePartId) {
       case 'hh-part-1':
         return <HRHubManualOverviewSection />;
-      case 'hh-part-5':
-        // Communication is now Chapter 5
-        return <HRHubManualCommunicationSection />;
-      // Chapters 2, 3, 4, 6, 7, 8 - Coming Soon placeholders
       case 'hh-part-2':
+        return <HRHubManualOrganizationSection />;
+      case 'hh-part-5':
+        return <HRHubManualCommunicationSection />;
+      // Chapters 3, 4, 6, 7, 8 - Coming Soon placeholders
       case 'hh-part-3':
       case 'hh-part-4':
       case 'hh-part-6':
