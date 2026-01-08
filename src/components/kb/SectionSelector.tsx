@@ -15,17 +15,9 @@ import {
   Folder
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import type { ManualSection } from "@/types/kb.types";
 
-export interface ManualSection {
-  id: string;
-  title: string;
-  parentId: string | null;
-  order: number;
-  content?: string;
-  status?: 'new' | 'changed' | 'unchanged' | 'published';
-  lastPublishedAt?: string;
-  children?: ManualSection[];
-}
+export type { ManualSection };
 
 interface SectionSelectorProps {
   sections: ManualSection[];
