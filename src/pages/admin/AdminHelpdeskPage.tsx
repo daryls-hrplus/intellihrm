@@ -47,6 +47,7 @@ import {
   EyeOff,
   FileText,
 } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
 import { formatDistanceToNow, differenceInHours, isPast, addHours } from "date-fns";
 import { formatDateForDisplay } from "@/utils/dateUtils";
 import {
@@ -432,7 +433,7 @@ export default function AdminHelpdeskPage() {
         </div>
 
         <Tabs defaultValue="tickets" className="space-y-4">
-          <TabsList>
+          <TabsList className="h-auto flex-wrap">
             {/* Operations */}
             <TabsTrigger value="tickets" className="flex items-center gap-2">
               <Ticket className="h-4 w-4" />
@@ -442,6 +443,9 @@ export default function AdminHelpdeskPage() {
               <Users className="h-4 w-4" />
               Agents
             </TabsTrigger>
+            
+            <Separator orientation="vertical" className="mx-2 h-6 hidden sm:block" />
+            
             {/* Monitoring */}
             <TabsTrigger value="analytics" className="flex items-center gap-2">
               <PieChart className="h-4 w-4" />
@@ -455,6 +459,9 @@ export default function AdminHelpdeskPage() {
               <Star className="h-4 w-4" />
               Satisfaction
             </TabsTrigger>
+            
+            <Separator orientation="vertical" className="mx-2 h-6 hidden sm:block" />
+            
             {/* Configuration */}
             <TabsTrigger value="escalation" className="flex items-center gap-2">
               <AlertTriangle className="h-4 w-4" />
