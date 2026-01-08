@@ -19,6 +19,7 @@ import {
   HRHubManualOverviewSection,
   HRHubManualOrganizationSection,
   HRHubManualComplianceSection,
+  HRHubManualDocumentsSection,
   HRHubManualCommunicationSection 
 } from '@/components/enablement/hr-hub-manual';
 
@@ -136,10 +137,11 @@ export default function HRHubManualPage() {
         return <HRHubManualOrganizationSection />;
       case 'hh-part-3':
         return <HRHubManualComplianceSection />;
+      case 'hh-part-4':
+        return <HRHubManualDocumentsSection />;
       case 'hh-part-5':
         return <HRHubManualCommunicationSection />;
-      // Chapters 4, 6, 7, 8 - Coming Soon placeholders
-      case 'hh-part-4':
+      // Chapters 6, 7, 8 - Coming Soon placeholders
       case 'hh-part-6':
       case 'hh-part-7':
       case 'hh-part-8':
