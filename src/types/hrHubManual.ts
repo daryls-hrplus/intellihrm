@@ -415,70 +415,84 @@ export const HR_HUB_MANUAL_STRUCTURE: HRHubManualSection[] = [
       }
     ]
   },
-  // Part 6: Tasks & Events Management (moved from Part 4)
+  // Part 6: Daily Operations (matches app interface)
   {
     id: 'hh-part-6',
     sectionNumber: '6',
-    title: 'Tasks & Events Management',
-    description: 'Calendar setup, task management, milestones, and reminders - daily operations using all prior configurations',
+    title: 'Daily Operations',
+    description: 'Help desk, employee change requests, task management, calendar, and milestones',
     contentLevel: 'procedure',
-    estimatedReadTime: 40,
+    estimatedReadTime: 55,
     targetRoles: ['HR Admin', 'Manager'],
     subsections: [
       {
         id: 'hh-sec-6-1',
         sectionNumber: '6.1',
-        title: 'Calendar Setup',
-        description: 'Company calendar, holidays, location-specific events',
+        title: 'Help Desk',
+        description: 'Ticket management, SLA tracking, canned responses, analytics',
         contentLevel: 'procedure',
-        estimatedReadTime: 10,
+        estimatedReadTime: 12,
         targetRoles: ['HR Admin'],
         industryContext: {
-          frequency: 'Annual setup',
-          timing: 'Pre-fiscal year',
-          benchmark: 'Multi-location calendar management'
+          frequency: 'Daily operations',
+          timing: 'Ongoing',
+          benchmark: 'HR service delivery'
         }
       },
       {
         id: 'hh-sec-6-2',
         sectionNumber: '6.2',
-        title: 'Task Management',
-        description: 'Task templates, assignments, due dates, notifications',
+        title: 'ESS Change Requests',
+        description: 'Employee self-service data changes with approval workflows',
         contentLevel: 'procedure',
-        estimatedReadTime: 12,
-        targetRoles: ['HR Admin', 'Manager'],
+        estimatedReadTime: 15,
+        targetRoles: ['HR Admin'],
         industryContext: {
-          frequency: 'Ongoing',
-          timing: 'As needed',
-          benchmark: 'HR workflow automation'
+          frequency: 'Daily operations',
+          timing: 'Ongoing',
+          benchmark: 'Employee self-service governance'
         }
       },
       {
         id: 'hh-sec-6-3',
         sectionNumber: '6.3',
-        title: 'Milestones Configuration',
-        description: 'Employee lifecycle milestones, anniversary tracking, alerts',
+        title: 'HR Tasks',
+        description: 'Task assignment, recurring tasks, priority management',
         contentLevel: 'procedure',
         estimatedReadTime: 10,
-        targetRoles: ['HR Admin'],
+        targetRoles: ['HR Admin', 'Manager'],
         industryContext: {
-          frequency: 'Initial setup',
-          timing: 'Pre-launch',
-          benchmark: 'Employee experience touchpoints'
+          frequency: 'Daily operations',
+          timing: 'Ongoing',
+          benchmark: 'HR workflow automation'
         }
       },
       {
         id: 'hh-sec-6-4',
         sectionNumber: '6.4',
-        title: 'Reminders Configuration',
-        description: 'Automated reminders, escalation rules, notification channels',
+        title: 'HR Calendar',
+        description: 'Company events, holidays, meetings, training sessions',
         contentLevel: 'procedure',
-        estimatedReadTime: 8,
+        estimatedReadTime: 10,
         targetRoles: ['HR Admin'],
         industryContext: {
-          frequency: 'Initial setup, periodic review',
-          timing: 'Pre-launch',
-          benchmark: 'Proactive HR communication'
+          frequency: 'Annual setup, ongoing',
+          timing: 'Pre-fiscal year',
+          benchmark: 'Multi-location calendar management'
+        }
+      },
+      {
+        id: 'hh-sec-6-5',
+        sectionNumber: '6.5',
+        title: 'Milestones Dashboard',
+        description: 'Birthdays, anniversaries, probation endings tracking',
+        contentLevel: 'procedure',
+        estimatedReadTime: 8,
+        targetRoles: ['HR Admin', 'Manager'],
+        industryContext: {
+          frequency: 'Daily review',
+          timing: 'Ongoing',
+          benchmark: 'Employee experience touchpoints'
         }
       }
     ]
