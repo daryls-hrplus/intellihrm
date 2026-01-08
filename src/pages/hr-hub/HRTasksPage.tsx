@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -6,7 +6,7 @@ import { useLanguage } from "@/hooks/useLanguage";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,9 +14,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { formatDateForDisplay } from "@/utils/dateUtils";
-import { Plus, CheckSquare, Clock, AlertCircle, User, Building2 } from "lucide-react";
+import { Plus, CheckSquare, Clock, AlertCircle, Building2, Search, CalendarDays, X } from "lucide-react";
 
 interface Company {
   id: string;
@@ -38,17 +37,10 @@ interface HRTask {
 }
 
 const priorities = [
-  { value: "low", label: "Low", color: "bg-gray-500" },
-  { value: "medium", label: "Medium", color: "bg-yellow-500" },
+  { value: "low", label: "Low", color: "bg-slate-500" },
+  { value: "medium", label: "Medium", color: "bg-amber-500" },
   { value: "high", label: "High", color: "bg-orange-500" },
   { value: "urgent", label: "Urgent", color: "bg-red-500" },
-];
-
-const statuses = [
-  { value: "pending", label: "Pending" },
-  { value: "in_progress", label: "In Progress" },
-  { value: "completed", label: "Completed" },
-  { value: "cancelled", label: "Cancelled" },
 ];
 
 // Helper to avoid deep type instantiation
@@ -64,8 +56,9 @@ export default function HRTasksPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [activeTab, setActiveTab] = useState("all");
+  const [statusFilter, setStatusFilter] = useState<string>("active");
   const [selectedCompany, setSelectedCompany] = useState<string>("all");
+  const [searchTerm, setSearchTerm] = useState("");
 
   const [formData, setFormData] = useState({
     title: "",
@@ -146,28 +139,42 @@ export default function HRTasksPage() {
     }
   };
 
-  const filteredTasks = tasks.filter(task => {
-    // Company filter
-    if (selectedCompany !== "all" && task.company_id !== selectedCompany) return false;
-    
-    // Status filter
-    if (activeTab === "all") return task.status !== "completed";
-    if (activeTab === "completed") return task.status === "completed";
-    if (activeTab === "overdue") {
-      return task.due_date && new Date(task.due_date) < new Date() && task.status !== "completed";
-    }
-    return true;
-  });
-
-  const getPriorityColor = (priority: string) =>
-    priorities.find(p => p.value === priority)?.color || "bg-gray-500";
-
-  const stats = {
-    total: tasks.filter(t => t.status !== "completed").length,
-    urgent: tasks.filter(t => t.priority === "urgent" && t.status !== "completed").length,
+  const stats = useMemo(() => ({
+    active: tasks.filter(t => t.status !== "completed").length,
     overdue: tasks.filter(t => t.due_date && new Date(t.due_date) < new Date() && t.status !== "completed").length,
     completed: tasks.filter(t => t.status === "completed").length,
-  };
+  }), [tasks]);
+
+  const filteredTasks = useMemo(() => {
+    let result = tasks;
+
+    // Search filter
+    if (searchTerm) {
+      result = result.filter(t => 
+        t.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        t.description?.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    // Company filter
+    if (selectedCompany !== "all") {
+      result = result.filter(t => t.company_id === selectedCompany);
+    }
+    
+    // Status filter
+    if (statusFilter === "active") {
+      result = result.filter(t => t.status !== "completed");
+    } else if (statusFilter === "completed") {
+      result = result.filter(t => t.status === "completed");
+    } else if (statusFilter === "overdue") {
+      result = result.filter(t => t.due_date && new Date(t.due_date) < new Date() && t.status !== "completed");
+    }
+
+    return result;
+  }, [tasks, searchTerm, selectedCompany, statusFilter]);
+
+  const getPriorityColor = (priority: string) =>
+    priorities.find(p => p.value === priority)?.color || "bg-slate-500";
 
   const priorityLabels: Record<string, string> = {
     low: t("helpdesk.priorities.low"),
@@ -176,153 +183,175 @@ export default function HRTasksPage() {
     urgent: t("helpdesk.priorities.urgent"),
   };
 
+  const isOverdue = (dueDate: string | null, status: string) => {
+    return dueDate && new Date(dueDate) < new Date() && status !== "completed";
+  };
+
   const breadcrumbItems = [
     { label: t("hrHub.title"), href: "/hr-hub" },
     { label: t("hrHub.tasks") },
   ];
+
+  const hasFilters = searchTerm || selectedCompany !== "all";
+
+  const clearFilters = () => {
+    setSearchTerm("");
+    setSelectedCompany("all");
+  };
 
   return (
     <AppLayout>
       <div className="container mx-auto py-6 space-y-6">
         <Breadcrumbs items={breadcrumbItems} />
 
-        <div className="flex items-center justify-between">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold">{t("hrHub.tasks")}</h1>
-            <p className="text-muted-foreground">{t("hrHub.tasksSubtitle")}</p>
+            <h1 className="text-2xl font-semibold">{t("hrHub.tasks")}</h1>
+            <p className="text-sm text-muted-foreground">{t("hrHub.tasksSubtitle")}</p>
           </div>
-          <div className="flex gap-2 items-center">
-            <Select value={selectedCompany} onValueChange={setSelectedCompany}>
-              <SelectTrigger className="w-[180px]">
-                <Building2 className="h-4 w-4 mr-2" />
-                <SelectValue placeholder="All Companies" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Companies</SelectItem>
-                {companies.map((company) => (
-                  <SelectItem key={company.id} value={company.id}>{company.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Button onClick={() => setDialogOpen(true)}>
-              <Plus className="h-4 w-4 mr-2" />
-              {t("hrHub.addTask")}
+          <Button onClick={() => setDialogOpen(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            {t("hrHub.addTask")}
+          </Button>
+        </div>
+
+        {/* Stats Cards - Compact */}
+        <div className="grid grid-cols-3 gap-3">
+          <button
+            onClick={() => setStatusFilter("active")}
+            className={`p-4 rounded-lg border text-left transition-all ${
+              statusFilter === "active" ? "border-primary bg-primary/5 ring-1 ring-primary" : "hover:bg-muted/50"
+            }`}
+          >
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-md bg-primary/10">
+                <CheckSquare className="h-4 w-4 text-primary" />
+              </div>
+              <div>
+                <p className="text-xl font-semibold">{stats.active}</p>
+                <p className="text-xs text-muted-foreground">{t("hrHub.activeTasks")}</p>
+              </div>
+            </div>
+          </button>
+
+          <button
+            onClick={() => setStatusFilter("overdue")}
+            className={`p-4 rounded-lg border text-left transition-all ${
+              statusFilter === "overdue" ? "border-orange-500 bg-orange-500/5 ring-1 ring-orange-500" : "hover:bg-muted/50"
+            }`}
+          >
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-md bg-orange-500/10">
+                <AlertCircle className="h-4 w-4 text-orange-500" />
+              </div>
+              <div>
+                <p className="text-xl font-semibold">{stats.overdue}</p>
+                <p className="text-xs text-muted-foreground">{t("hrHub.overdue")}</p>
+              </div>
+            </div>
+          </button>
+
+          <button
+            onClick={() => setStatusFilter("completed")}
+            className={`p-4 rounded-lg border text-left transition-all ${
+              statusFilter === "completed" ? "border-green-500 bg-green-500/5 ring-1 ring-green-500" : "hover:bg-muted/50"
+            }`}
+          >
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-md bg-green-500/10">
+                <CheckSquare className="h-4 w-4 text-green-500" />
+              </div>
+              <div>
+                <p className="text-xl font-semibold">{stats.completed}</p>
+                <p className="text-xs text-muted-foreground">{t("hrHub.completed")}</p>
+              </div>
+            </div>
+          </button>
+        </div>
+
+        {/* Filters */}
+        <div className="flex flex-col sm:flex-row gap-3">
+          <div className="relative flex-1 max-w-sm">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search tasks..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-9"
+            />
+          </div>
+          <Select value={selectedCompany} onValueChange={setSelectedCompany}>
+            <SelectTrigger className="w-[180px]">
+              <Building2 className="h-4 w-4 mr-2 text-muted-foreground" />
+              <SelectValue placeholder="All Companies" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Companies</SelectItem>
+              {companies.map((company) => (
+                <SelectItem key={company.id} value={company.id}>{company.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {hasFilters && (
+            <Button variant="ghost" size="sm" onClick={clearFilters} className="h-10 px-3">
+              <X className="h-4 w-4 mr-1" />
+              Clear
             </Button>
-          </div>
+          )}
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-primary/10">
-                  <CheckSquare className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">{stats.total}</p>
-                  <p className="text-sm text-muted-foreground">{t("hrHub.activeTasks")}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-red-500/10">
-                  <AlertCircle className="h-5 w-5 text-red-500" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">{stats.urgent}</p>
-                  <p className="text-sm text-muted-foreground">{t("hrHub.urgent")}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-orange-500/10">
-                  <Clock className="h-5 w-5 text-orange-500" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">{stats.overdue}</p>
-                  <p className="text-sm text-muted-foreground">{t("hrHub.overdue")}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-green-500/10">
-                  <CheckSquare className="h-5 w-5 text-green-500" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">{stats.completed}</p>
-                  <p className="text-sm text-muted-foreground">{t("hrHub.completed")}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
+        {/* Task List */}
         <Card>
-          <CardHeader>
-            <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList>
-                <TabsTrigger value="all">{t("common.active")} ({stats.total})</TabsTrigger>
-                <TabsTrigger value="overdue">{t("hrHub.overdue")} ({stats.overdue})</TabsTrigger>
-                <TabsTrigger value="completed">{t("hrHub.completed")} ({stats.completed})</TabsTrigger>
-              </TabsList>
-            </Tabs>
-          </CardHeader>
-          <CardContent>
+          <CardContent className="p-0">
             {isLoading ? (
               <div className="text-center py-12 text-muted-foreground">{t("common.loading")}</div>
             ) : filteredTasks.length === 0 ? (
               <div className="text-center py-12 text-muted-foreground">
-                <CheckSquare className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>{t("hrHub.noTasksFound")}</p>
+                <CheckSquare className="h-10 w-10 mx-auto mb-3 opacity-40" />
+                <p className="text-sm">{t("hrHub.noTasksFound")}</p>
               </div>
             ) : (
-              <div className="space-y-3">
+              <div className="divide-y">
                 {filteredTasks.map((task) => (
                   <div
                     key={task.id}
-                    className={`flex items-start gap-4 p-4 rounded-lg border transition-colors ${
-                      task.status === "completed" ? "bg-muted/50 opacity-60" : "hover:bg-muted/30"
+                    className={`flex items-start gap-4 p-4 transition-colors ${
+                      task.status === "completed" ? "bg-muted/30" : "hover:bg-muted/20"
                     }`}
                   >
                     <Checkbox
                       checked={task.status === "completed"}
                       onCheckedChange={() => toggleTaskComplete(task.id, task.status)}
-                      className="mt-1"
+                      className="mt-0.5"
                     />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <h3 className={`font-medium ${task.status === "completed" ? "line-through" : ""}`}>
+                        <span className={`font-medium ${task.status === "completed" ? "line-through text-muted-foreground" : ""}`}>
                           {task.title}
-                        </h3>
-                        <Badge className={`${getPriorityColor(task.priority)} text-white`}>
+                        </span>
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium text-white ${getPriorityColor(task.priority)}`}>
                           {priorityLabels[task.priority]}
-                        </Badge>
-                        {task.company && (
-                          <Badge variant="outline" className="gap-1">
-                            <Building2 className="h-3 w-3" />
-                            {task.company.name}
-                          </Badge>
-                        )}
+                        </span>
                       </div>
                       {task.description && (
-                        <p className="text-sm text-muted-foreground mt-1">{task.description}</p>
+                        <p className="text-sm text-muted-foreground mt-1 line-clamp-1">{task.description}</p>
                       )}
-                      {task.due_date && (
-                        <div className="flex items-center gap-1 text-sm text-muted-foreground mt-2">
-                          <Clock className="h-3 w-3" />
-                          {t("hrHub.due")}: {formatDateForDisplay(task.due_date)}
-                        </div>
-                      )}
+                      <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
+                        {task.company && (
+                          <span className="flex items-center gap-1">
+                            <Building2 className="h-3 w-3" />
+                            {task.company.name}
+                          </span>
+                        )}
+                        {task.due_date && (
+                          <span className={`flex items-center gap-1 ${isOverdue(task.due_date, task.status) ? "text-orange-600 font-medium" : ""}`}>
+                            <CalendarDays className="h-3 w-3" />
+                            {formatDateForDisplay(task.due_date)}
+                            {isOverdue(task.due_date, task.status) && " (Overdue)"}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -331,14 +360,15 @@ export default function HRTasksPage() {
           </CardContent>
         </Card>
 
+        {/* Add Task Dialog */}
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogContent>
+          <DialogContent className="sm:max-w-md">
             <DialogHeader>
               <DialogTitle>{t("hrHub.addTask")}</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
-              <div>
-                <Label>Company *</Label>
+              <div className="space-y-2">
+                <Label>{t("common.company")} *</Label>
                 <Select value={formData.company_id} onValueChange={(v) => setFormData({ ...formData, company_id: v })}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select company" />
@@ -350,7 +380,8 @@ export default function HRTasksPage() {
                   </SelectContent>
                 </Select>
               </div>
-              <div>
+
+              <div className="space-y-2">
                 <Label>{t("common.name")} *</Label>
                 <Input
                   value={formData.title}
@@ -358,9 +389,10 @@ export default function HRTasksPage() {
                   placeholder={t("hrHub.taskTitle")}
                 />
               </div>
+
               <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label>{t("helpdesk.priorities.medium")}</Label>
+                <div className="space-y-2">
+                  <Label>{t("helpdesk.priority")}</Label>
                   <Select value={formData.priority} onValueChange={(v) => setFormData({ ...formData, priority: v })}>
                     <SelectTrigger>
                       <SelectValue />
@@ -372,7 +404,7 @@ export default function HRTasksPage() {
                     </SelectContent>
                   </Select>
                 </div>
-                <div>
+                <div className="space-y-2">
                   <Label>{t("hrHub.dueDate")}</Label>
                   <Input
                     type="date"
@@ -381,18 +413,22 @@ export default function HRTasksPage() {
                   />
                 </div>
               </div>
-              <div>
+
+              <div className="space-y-2">
                 <Label>{t("common.description")}</Label>
                 <Textarea
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   placeholder={t("hrHub.taskDescription")}
+                  rows={3}
                 />
               </div>
             </div>
-            <DialogFooter>
+            <DialogFooter className="gap-2 sm:gap-0">
               <Button variant="outline" onClick={() => setDialogOpen(false)}>{t("common.cancel")}</Button>
-              <Button onClick={handleSubmit}>{t("hrHub.createTask")}</Button>
+              <Button onClick={handleSubmit} disabled={isSubmitting}>
+                {isSubmitting ? "Creating..." : t("hrHub.createTask")}
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
