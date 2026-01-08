@@ -17,7 +17,9 @@ import {
   Trash2,
   Pin,
   Building2,
-  Globe
+  Globe,
+  Eye,
+  CheckCircle2
 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -50,9 +52,12 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 import { formatDateForDisplay } from "@/utils/dateUtils";
 import { RichTextEditor } from "@/components/intranet/RichTextEditor";
 import { usePageAudit } from "@/hooks/usePageAudit";
+import { useAnnouncementStats } from "@/hooks/useAnnouncementReads";
 
 interface Company {
   id: string;
@@ -119,6 +124,10 @@ export default function CompanyCommunicationsPage() {
   const [loading, setLoading] = useState(true);
   const [selectedCompanyFilter, setSelectedCompanyFilter] = useState<string>("all");
   
+  // Get announcement IDs for stats
+  const companyAnnouncementIds = announcements.filter(a => a.source === "company").map(a => a.id);
+  const { stats: announcementStats } = useAnnouncementStats(companyAnnouncementIds);
+  
   // Announcement form state
   const [announcementDialogOpen, setAnnouncementDialogOpen] = useState(false);
   const [editingAnnouncement, setEditingAnnouncement] = useState<UnifiedAnnouncement | null>(null);
@@ -129,6 +138,7 @@ export default function CompanyCommunicationsPage() {
     priority: "normal",
     is_pinned: false,
     is_active: true,
+    requires_acknowledgement: false,
     company_id: "",
     target_departments: [] as string[],
     visibility: "company" as "company" | "departments",
@@ -336,6 +346,7 @@ export default function CompanyCommunicationsPage() {
       priority: "normal",
       is_pinned: false,
       is_active: true,
+      requires_acknowledgement: false,
       company_id: "",
       target_departments: [],
       visibility: "company",
@@ -353,6 +364,7 @@ export default function CompanyCommunicationsPage() {
       priority: item.priority || "normal",
       is_pinned: item.is_pinned,
       is_active: item.is_active,
+      requires_acknowledgement: false,
       company_id: item.company_id || "",
       target_departments: item.target_departments || [],
       visibility: item.target_departments && item.target_departments.length > 0 ? "departments" : "company",

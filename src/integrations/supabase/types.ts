@@ -1975,6 +1975,41 @@ export type Database = {
           },
         ]
       }
+      announcement_reads: {
+        Row: {
+          acknowledged_at: string | null
+          announcement_id: string
+          created_at: string | null
+          id: string
+          read_at: string | null
+          user_id: string
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          announcement_id: string
+          created_at?: string | null
+          id?: string
+          read_at?: string | null
+          user_id: string
+        }
+        Update: {
+          acknowledged_at?: string | null
+          announcement_id?: string
+          created_at?: string | null
+          id?: string
+          read_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "announcement_reads_announcement_id_fkey"
+            columns: ["announcement_id"]
+            isOneToOne: false
+            referencedRelation: "company_announcements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       application_features: {
         Row: {
           created_at: string
@@ -8482,6 +8517,7 @@ export type Database = {
           is_pinned: boolean | null
           priority: string | null
           publish_at: string | null
+          requires_acknowledgement: boolean | null
           target_audience: string | null
           target_departments: string[] | null
           target_roles: string[] | null
@@ -8499,6 +8535,7 @@ export type Database = {
           is_pinned?: boolean | null
           priority?: string | null
           publish_at?: string | null
+          requires_acknowledgement?: boolean | null
           target_audience?: string | null
           target_departments?: string[] | null
           target_roles?: string[] | null
@@ -8516,6 +8553,7 @@ export type Database = {
           is_pinned?: boolean | null
           priority?: string | null
           publish_at?: string | null
+          requires_acknowledgement?: boolean | null
           target_audience?: string | null
           target_departments?: string[] | null
           target_roles?: string[] | null
