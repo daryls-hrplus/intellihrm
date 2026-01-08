@@ -94,12 +94,12 @@ const addDocumentSteps = [
 
 export function CompanyDocumentsSetup() {
   return (
-    <div className="space-y-6" data-manual-anchor="hh-sec-4-4">
+    <div className="space-y-6" data-manual-anchor="hh-sec-4-1">
       {/* Section Header */}
       <div className="flex items-start justify-between">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <Badge variant="outline">Section 4.4</Badge>
+            <Badge variant="outline">Section 4.1</Badge>
             <Badge variant="secondary">10 min read</Badge>
           </div>
           <h2 className="text-2xl font-bold">Company Documents</h2>

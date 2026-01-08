@@ -57,17 +57,17 @@ export function HRHubManualDocumentsSection() {
         </CardContent>
       </Card>
 
-      {/* Section 4.1: Letter Templates */}
-      <LetterTemplatesSetup />
+      {/* Section 4.1: Company Documents */}
+      <CompanyDocumentsSetup />
 
       {/* Section 4.2: Policy Documents */}
       <PolicyDocumentsSetup />
 
-      {/* Section 4.3: Forms Library */}
-      <FormsLibrarySetup />
+      {/* Section 4.3: Letter Templates */}
+      <LetterTemplatesSetup />
 
-      {/* Section 4.4: Company Documents */}
-      <CompanyDocumentsSetup />
+      {/* Section 4.4: Forms Library */}
+      <FormsLibrarySetup />
     </div>
   );
 }
