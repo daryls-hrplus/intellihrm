@@ -115,7 +115,7 @@ export function SOPManagementSetup() {
         <CardContent className="space-y-6">
           <p className="text-foreground">
             Standard Operating Procedures (SOPs) are documented instructions that ensure consistent execution 
-            of business processes. In HRplus, SOPs serve a dual purpose: they provide reference documentation 
+            of business processes. In Intelli HRM, SOPs serve a dual purpose: they provide reference documentation 
             for employees AND feed contextual guidance to the AI Assistant.
           </p>
 

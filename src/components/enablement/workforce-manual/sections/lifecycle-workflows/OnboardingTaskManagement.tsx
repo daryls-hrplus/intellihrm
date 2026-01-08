@@ -10,7 +10,7 @@ export function OnboardingTaskManagement() {
     <div className="space-y-6">
       <p className="text-muted-foreground">
         Once an onboarding instance is initiated for an employee, tasks are distributed to the 
-        appropriate stakeholders. HRplus provides comprehensive task tracking, reminders, and 
+        appropriate stakeholders. Intelli HRM provides comprehensive task tracking, reminders, and 
         escalation to ensure timely completion.
       </p>
 

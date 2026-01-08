@@ -53,7 +53,7 @@ export function AIGuidelinesDialog({ open, onOpenChange }: AIGuidelinesDialogPro
             {t("ai.guidelines.title", "AI Assistant Guidelines")}
           </DialogTitle>
           <DialogDescription>
-            {t("ai.guidelines.subtitle", "Understanding how the HRplus Cerebra AI Assistant works and protects your data")}
+            {t("ai.guidelines.subtitle", "Understanding how the Intelli HRM AI Assistant works and protects your data")}
           </DialogDescription>
         </DialogHeader>
         

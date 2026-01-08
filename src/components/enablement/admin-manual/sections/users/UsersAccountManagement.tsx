@@ -174,7 +174,7 @@ export function UsersAccountManagement() {
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-muted-foreground">
-            User accounts in HRplus are always linked to employee records. The account 
+            User accounts in Intelli HRM are always linked to employee records. The account 
             lifecycle follows the employee journey from onboarding through offboarding.
           </p>
           
@@ -308,7 +308,7 @@ export function UsersAccountManagement() {
       <InfoCallout title="SSO Integration">
         If SSO is enabled, users authenticate through your identity provider. Password 
         management is handled externally, but role assignment and account status are 
-        still managed in HRplus.
+        still managed in Intelli HRM.
       </InfoCallout>
     </div>
   );

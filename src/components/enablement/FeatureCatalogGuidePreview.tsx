@@ -259,7 +259,7 @@ const GUIDE_TEMPLATES: GuideTemplate[] = [
 export function FeatureCatalogGuidePreview({ open, onOpenChange }: FeatureCatalogGuidePreviewProps) {
   const [activeTab, setActiveTab] = useState("template");
   const [selectedTemplate, setSelectedTemplate] = useState<string>("complete");
-  const [customTitle, setCustomTitle] = useState("HRplus Cerebra Feature Guide");
+  const [customTitle, setCustomTitle] = useState("Intelli HRM Feature Guide");
   const [customSubtitle, setCustomSubtitle] = useState("Complete Platform Capability Reference");
   const [includeDate, setIncludeDate] = useState(true);
   const [includePageNumbers, setIncludePageNumbers] = useState(true);
@@ -272,7 +272,7 @@ export function FeatureCatalogGuidePreview({ open, onOpenChange }: FeatureCatalo
   const [primaryColor, setPrimaryColor] = useState("#7c3aed");
   const [secondaryColor, setSecondaryColor] = useState("#4f46e5");
   const [accentColor, setAccentColor] = useState("#10b981");
-  const [companyName, setCompanyName] = useState("HRplus Cerebra");
+  const [companyName, setCompanyName] = useState("Intelli HRM");
   const [colorsInitialized, setColorsInitialized] = useState(false);
   
   // Load saved brand colors when available
@@ -321,7 +321,7 @@ export function FeatureCatalogGuidePreview({ open, onOpenChange }: FeatureCatalo
       const header = !isFirstPage ? `
         <div class="page-header">
           <div class="header-left">
-            <span class="company-badge">${companyName || 'HRplus Cerebra'}</span>
+            <span class="company-badge">${companyName || 'Intelli HRM'}</span>
             <span class="section-label">${sectionTitle}</span>
           </div>
           <div class="header-right">${includeDate ? new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : ''}</div>
@@ -330,7 +330,7 @@ export function FeatureCatalogGuidePreview({ open, onOpenChange }: FeatureCatalo
       
       const footer = `
         <div class="page-footer">
-          <span class="footer-left">© ${new Date().getFullYear()} ${companyName || 'HRplus Cerebra'}. All rights reserved. | CONFIDENTIAL</span>
+          <span class="footer-left">© ${new Date().getFullYear()} ${companyName || 'Intelli HRM'}. All rights reserved. | CONFIDENTIAL</span>
           <span class="footer-right">${includePageNumbers ? `Page ${pageNum} of ${totalPages}` : ''}</span>
         </div>
       `;
@@ -667,7 +667,7 @@ export function FeatureCatalogGuidePreview({ open, onOpenChange }: FeatureCatalo
   const renderDocumentHeader = (pageNum: number, sectionTitle: string) => `
     <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; margin-bottom: 20px; border-bottom: 2px solid ${primaryColor}10;">
       <div style="display: flex; align-items: center; gap: 12px;">
-        <div style="background: linear-gradient(135deg, ${primaryColor}, ${secondaryColor}); color: white; padding: 6px 12px; border-radius: 4px; font-size: 11px; font-weight: 600;">${companyName || 'HRplus Cerebra'}</div>
+        <div style="background: linear-gradient(135deg, ${primaryColor}, ${secondaryColor}); color: white; padding: 6px 12px; border-radius: 4px; font-size: 11px; font-weight: 600;">${companyName || 'Intelli HRM'}</div>
         <div style="font-size: 11px; color: #64748b;">${sectionTitle}</div>
       </div>
       <div style="font-size: 10px; color: #94a3b8;">${includeDate ? new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : ''}</div>
@@ -677,7 +677,7 @@ export function FeatureCatalogGuidePreview({ open, onOpenChange }: FeatureCatalo
   // Professional document footer with page X of Y
   const renderDocumentFooter = (pageNum: number, totalPages: number) => `
     <div style="margin-top: 40px; padding-top: 16px; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
-      <div style="font-size: 10px; color: #64748b;">© ${new Date().getFullYear()} ${companyName || 'HRplus Cerebra'}. All rights reserved. | CONFIDENTIAL</div>
+      <div style="font-size: 10px; color: #64748b;">© ${new Date().getFullYear()} ${companyName || 'Intelli HRM'}. All rights reserved. | CONFIDENTIAL</div>
       <div style="font-size: 10px; color: #64748b;">${includePageNumbers ? `Page ${pageNum} of ${totalPages}` : ''}</div>
     </div>
   `;
@@ -692,7 +692,7 @@ export function FeatureCatalogGuidePreview({ open, onOpenChange }: FeatureCatalo
       
       <!-- Company Logo Area -->
       <div style="margin-bottom: 40px;">
-        <div style="display: inline-block; background: white; color: ${primaryColor}; padding: 12px 24px; border-radius: 8px; font-weight: 700; font-size: 18px;">${companyName || 'HRplus Cerebra'}</div>
+        <div style="display: inline-block; background: white; color: ${primaryColor}; padding: 12px 24px; border-radius: 8px; font-weight: 700; font-size: 18px;">${companyName || 'Intelli HRM'}</div>
       </div>
       
       <h1 style="font-size: 42px; font-weight: 700; margin-bottom: 16px; line-height: 1.2;">${customTitle}</h1>
@@ -818,13 +818,13 @@ export function FeatureCatalogGuidePreview({ open, onOpenChange }: FeatureCatalo
       
       <div style="margin-bottom: 24px;">
         <p style="font-size: 14px; line-height: 1.7; margin-bottom: 12px; color: #1e293b;">
-          HRplus Cerebra is an enterprise-grade Human Resource Management System designed to transform workforce management 
+          Intelli HRM is an enterprise-grade Human Resource Management System designed to transform workforce management 
           through intelligent automation and AI-powered insights. Purpose-built for the Caribbean, Africa, and global expansion, 
           the platform delivers deep regional compliance alongside sophisticated cross-module orchestration.
         </p>
         <p style="font-size: 14px; line-height: 1.7; color: #1e293b;">
           With <strong>${aiPoweredCount} AI-powered features</strong> and <strong>${uniqueCount} market differentiators</strong>, 
-          HRplus Cerebra goes beyond traditional HRIS solutions to deliver predictive insights, prescriptive recommendations, 
+          Intelli HRM goes beyond traditional HRIS solutions to deliver predictive insights, prescriptive recommendations, 
           and automated actions across the entire employee lifecycle.
         </p>
       </div>
@@ -1086,7 +1086,7 @@ export function FeatureCatalogGuidePreview({ open, onOpenChange }: FeatureCatalo
         <!-- AI Capabilities Summary -->
         <div style="margin-bottom: 20px; padding: 16px; background: linear-gradient(135deg, #7c3aed08 0%, #4f46e508 100%); border-radius: 10px; border: 2px solid #7c3aed30;">
           <h3 style="font-size: 16px; font-weight: 600; color: #7c3aed; margin-bottom: 12px;">🧠 AI-First Architecture</h3>
-          <p style="font-size: 13px; color: #475569; margin-bottom: 12px;">HRplus Cerebra embeds AI across every module, not as an afterthought but as a core design principle.</p>
+          <p style="font-size: 13px; color: #475569; margin-bottom: 12px;">Intelli HRM embeds AI across every module, not as an afterthought but as a core design principle.</p>
           <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
             <div style="background: white; padding: 10px; border-radius: 6px; text-align: center;">
               <div style="font-size: 20px; margin-bottom: 6px;">🔮</div>
@@ -1221,7 +1221,7 @@ export function FeatureCatalogGuidePreview({ open, onOpenChange }: FeatureCatalo
           className="text-white px-3 py-1.5 rounded text-xs font-semibold"
           style={{ background: `linear-gradient(135deg, ${primaryColor}, ${secondaryColor})` }}
         >
-          {companyName || 'HRplus Cerebra'}
+          {companyName || 'Intelli HRM'}
         </div>
         <span className="text-xs text-slate-500">{sectionTitle}</span>
       </div>
@@ -1237,7 +1237,7 @@ export function FeatureCatalogGuidePreview({ open, onOpenChange }: FeatureCatalo
   const PreviewDocumentFooter = ({ pageNum, totalPages }: { pageNum: number; totalPages: number }) => (
     <div className="mt-8 pt-4 border-t border-slate-200 flex justify-between items-center">
       <span className="text-[10px] text-slate-500">
-        © {new Date().getFullYear()} {companyName || 'HRplus Cerebra'}. All rights reserved. | CONFIDENTIAL
+        © {new Date().getFullYear()} {companyName || 'Intelli HRM'}. All rights reserved. | CONFIDENTIAL
       </span>
       {includePageNumbers && (
         <span className="text-[10px] text-slate-500">Page {pageNum} of {totalPages}</span>
@@ -1263,7 +1263,7 @@ export function FeatureCatalogGuidePreview({ open, onOpenChange }: FeatureCatalo
         {/* Company logo area */}
         <div className="mb-8">
           <div className="inline-block bg-white px-6 py-3 rounded-lg font-bold text-lg" style={{ color: primaryColor }}>
-            {companyName || 'HRplus Cerebra'}
+            {companyName || 'Intelli HRM'}
           </div>
         </div>
         
@@ -1371,13 +1371,13 @@ export function FeatureCatalogGuidePreview({ open, onOpenChange }: FeatureCatalo
           
           <div className="prose max-w-none mb-6">
             <p className="text-base leading-relaxed mb-4">
-              HRplus Cerebra is an enterprise-grade Human Resource Management System designed to transform workforce management 
+              Intelli HRM is an enterprise-grade Human Resource Management System designed to transform workforce management 
               through intelligent automation and AI-powered insights. Purpose-built for the Caribbean, Africa, and global expansion, 
               the platform delivers deep regional compliance alongside sophisticated cross-module orchestration.
             </p>
             <p className="text-base leading-relaxed">
               With <strong>{aiPoweredCount} AI-powered features</strong> and <strong>{uniqueCount} market differentiators</strong>, 
-              HRplus Cerebra goes beyond traditional HRIS solutions to deliver predictive insights, prescriptive recommendations, 
+              Intelli HRM goes beyond traditional HRIS solutions to deliver predictive insights, prescriptive recommendations, 
               and automated actions across the entire employee lifecycle.
             </p>
           </div>
@@ -1896,7 +1896,7 @@ export function FeatureCatalogGuidePreview({ open, onOpenChange }: FeatureCatalo
 
       {/* Footer */}
       <div className="footer text-center p-6 border-t text-sm text-muted-foreground">
-        <p>© {new Date().getFullYear()} HRplus Cerebra. All rights reserved.</p>
+        <p>© {new Date().getFullYear()} Intelli HRM. All rights reserved.</p>
         {includeDate && <p className="mt-1">Document generated on {new Date().toLocaleDateString()}</p>}
       </div>
     </div>

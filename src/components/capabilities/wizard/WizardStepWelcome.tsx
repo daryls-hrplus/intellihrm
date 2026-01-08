@@ -52,7 +52,7 @@ export function WizardStepWelcome({ onNext, onCancel }: WizardStepWelcomeProps) 
         </h2>
         <p className="text-muted-foreground max-w-md mx-auto">
           Build your skills and competencies library in minutes by importing 
-          pre-curated capabilities from the HRplus library, tailored for 
+          pre-curated capabilities from the Intelli HRM library, tailored for 
           Caribbean and African enterprises.
         </p>
       </div>
