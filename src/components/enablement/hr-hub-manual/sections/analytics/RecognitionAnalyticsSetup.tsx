@@ -61,7 +61,7 @@ export const RecognitionAnalyticsSetup: React.FC = () => {
       </IndustryCallout>
 
       {/* Core Metrics Dashboard */}
-      <Card>
+      <Card id="hh-sec-7-2-1" data-manual-anchor="hh-sec-7-2-1" className="scroll-mt-36">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <BarChart3 className="h-5 w-5 text-primary" />
@@ -146,7 +146,7 @@ export const RecognitionAnalyticsSetup: React.FC = () => {
       </Card>
 
       {/* Recognition by Type */}
-      <Card>
+      <Card id="hh-sec-7-2-2" data-manual-anchor="hh-sec-7-2-2" className="scroll-mt-36">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Award className="h-5 w-5 text-primary" />
@@ -216,7 +216,7 @@ export const RecognitionAnalyticsSetup: React.FC = () => {
       </Card>
 
       {/* Company Values Alignment */}
-      <Card>
+      <Card id="hh-sec-7-2-3" data-manual-anchor="hh-sec-7-2-3" className="scroll-mt-36">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Heart className="h-5 w-5 text-primary" />
@@ -257,7 +257,7 @@ export const RecognitionAnalyticsSetup: React.FC = () => {
       </Card>
 
       {/* Recognition Leaderboard */}
-      <Card>
+      <Card id="hh-sec-7-2-4" data-manual-anchor="hh-sec-7-2-4" className="scroll-mt-36">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Trophy className="h-5 w-5 text-primary" />
@@ -334,7 +334,7 @@ export const RecognitionAnalyticsSetup: React.FC = () => {
       </Card>
 
       {/* Department Analysis */}
-      <Card>
+      <Card id="hh-sec-7-2-5" data-manual-anchor="hh-sec-7-2-5" className="scroll-mt-36">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Building2 className="h-5 w-5 text-primary" />
@@ -391,7 +391,7 @@ export const RecognitionAnalyticsSetup: React.FC = () => {
       </Card>
 
       {/* Industry Benchmarks */}
-      <Card>
+      <Card id="hh-sec-7-2-6" data-manual-anchor="hh-sec-7-2-6" className="scroll-mt-36">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <BarChart3 className="h-5 w-5 text-primary" />
