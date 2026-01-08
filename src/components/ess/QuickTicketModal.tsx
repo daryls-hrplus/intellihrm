@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Dialog,
   DialogContent,
@@ -18,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2, Send, CheckCircle2 } from "lucide-react";
+import { Loader2, Send, CheckCircle2, Paperclip, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -47,6 +47,7 @@ interface TicketPriority {
 export function QuickTicketModal({ open, onOpenChange }: QuickTicketModalProps) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [categories, setCategories] = useState<TicketCategory[]>([]);
   const [priorities, setPriorities] = useState<TicketPriority[]>([]);
@@ -57,6 +58,7 @@ export function QuickTicketModal({ open, onOpenChange }: QuickTicketModalProps) 
   const [description, setDescription] = useState("");
   const [categoryId, setCategoryId] = useState("");
   const [priorityId, setPriorityId] = useState("");
+  const [attachments, setAttachments] = useState<File[]>([]);
 
   useEffect(() => {
     if (open) {
@@ -94,10 +96,50 @@ export function QuickTicketModal({ open, onOpenChange }: QuickTicketModalProps) 
     }
   };
 
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    const validFiles = files.filter((f) => f.size <= 10 * 1024 * 1024); // 10MB limit
+    if (validFiles.length !== files.length) {
+      toast.error("Some files exceeded 10MB limit");
+    }
+    setAttachments((prev) => [...prev, ...validFiles]);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const removeAttachment = (index: number) => {
+    setAttachments((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const uploadAttachments = async (ticketId: string) => {
+    const uploadedFiles = [];
+    for (const file of attachments) {
+      const filePath = `${user?.id}/${ticketId}/${Date.now()}-${file.name}`;
+      const { error } = await supabase.storage
+        .from("ticket-attachments")
+        .upload(filePath, file);
+
+      if (error) throw error;
+
+      const { data: urlData } = supabase.storage
+        .from("ticket-attachments")
+        .getPublicUrl(filePath);
+
+      uploadedFiles.push({
+        name: file.name,
+        size: file.size,
+        type: file.type,
+        url: urlData.publicUrl,
+        path: filePath,
+      });
+    }
+    return uploadedFiles;
+  };
+
   const resetForm = () => {
     setSubject("");
     setDescription("");
     setCategoryId("");
+    setAttachments([]);
     const medium = priorities.find((p) => p.code === "medium");
     setPriorityId(medium?.id || "");
   };
@@ -119,20 +161,33 @@ export function QuickTicketModal({ open, onOpenChange }: QuickTicketModalProps) 
         autoAssigneeId = category?.default_assignee_id || null;
       }
 
-      const { error } = await supabase.from("tickets").insert({
-        subject: subject.trim(),
-        description: description.trim(),
-        category_id: categoryId || null,
-        priority_id: priorityId || null,
-        requester_id: user?.id,
-        assignee_id: autoAssigneeId,
-      } as any);
+      const { data, error } = await supabase
+        .from("tickets")
+        .insert({
+          subject: subject.trim(),
+          description: description.trim(),
+          category_id: categoryId || null,
+          priority_id: priorityId || null,
+          requester_id: user?.id,
+          assignee_id: autoAssigneeId,
+        } as any)
+        .select()
+        .single();
 
       if (error) throw error;
 
+      // Upload attachments if any
+      if (attachments.length > 0) {
+        const uploadedAttachments = await uploadAttachments(data.id);
+        await supabase
+          .from("tickets")
+          .update({ attachments: uploadedAttachments } as any)
+          .eq("id", data.id);
+      }
+
       setIsSuccess(true);
       queryClient.invalidateQueries({ queryKey: ["my-tickets"] });
-      
+
       // Auto-close after showing success
       setTimeout(() => {
         resetForm();
@@ -239,6 +294,52 @@ export function QuickTicketModal({ open, onOpenChange }: QuickTicketModalProps) 
               rows={4}
               maxLength={2000}
             />
+          </div>
+
+          {/* Attachments Section */}
+          <div className="space-y-2">
+            <Label>Attachments</Label>
+            <div className="flex items-center gap-2">
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleFileSelect}
+                className="hidden"
+                multiple
+                accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <Paperclip className="h-4 w-4 mr-2" />
+                Add Files
+              </Button>
+              <span className="text-xs text-muted-foreground">Max 10MB per file</span>
+            </div>
+
+            {attachments.length > 0 && (
+              <div className="flex flex-wrap gap-2 mt-2">
+                {attachments.map((file, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center gap-2 bg-muted px-3 py-1.5 rounded-md text-sm"
+                  >
+                    <Paperclip className="h-3.5 w-3.5 text-muted-foreground" />
+                    <span className="max-w-[150px] truncate">{file.name}</span>
+                    <button
+                      type="button"
+                      onClick={() => removeAttachment(index)}
+                      className="text-muted-foreground hover:text-destructive"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           <DialogFooter>
