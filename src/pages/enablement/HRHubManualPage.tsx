@@ -12,7 +12,7 @@ import {
   Book, Search, Clock, ChevronRight, ChevronDown,
   FileText, Layers, Settings, Users, MessageSquare, Calendar,
   Shield, Database, BarChart3, AlertTriangle,
-  BookOpen, CheckCircle, Circle, ArrowLeft, Sparkles, Link2
+  BookOpen, CheckCircle, Circle, ArrowLeft, Sparkles, Link2, GitBranch
 } from 'lucide-react';
 import { HR_HUB_MANUAL_STRUCTURE } from '@/types/hrHubManual';
 import { 
@@ -23,7 +23,10 @@ import {
   HRHubManualCommunicationSection,
   HRHubManualOperationsSection,
   HRHubManualAnalyticsSection,
-  HRHubManualTroubleshootingSection
+  HRHubManualTroubleshootingSection,
+  HRHubManualQuickReference,
+  HRHubManualArchitectureDiagrams,
+  HRHubManualGlossary
 } from '@/components/enablement/hr-hub-manual';
 
 // Icons mapped to new chapter order:
@@ -155,6 +158,12 @@ export default function HRHubManualPage() {
         return <HRHubManualAnalyticsSection />;
       case 'hh-part-8':
         return <HRHubManualTroubleshootingSection />;
+      case 'quick-ref':
+        return <HRHubManualQuickReference />;
+      case 'diagrams':
+        return <HRHubManualArchitectureDiagrams />;
+      case 'glossary':
+        return <HRHubManualGlossary />;
       default:
         return <HRHubManualOverviewSection />;
     }
@@ -323,13 +332,22 @@ export default function HRHubManualPage() {
 
                     {/* Quick Reference */}
                     <button
-                      className="w-full flex items-center gap-2 p-2 rounded-lg text-left text-sm transition-colors hover:bg-muted text-muted-foreground"
+                      className={`w-full flex items-center gap-2 p-2 rounded-lg text-left text-sm transition-colors hover:bg-muted ${activePartId === 'quick-ref' ? 'bg-purple-500/10 text-purple-600 font-medium' : 'text-muted-foreground'}`}
+                      onClick={() => scrollToSection('quick-ref')}
                     >
                       <Sparkles className="h-4 w-4 text-amber-500" />
                       <span>Quick Reference Cards</span>
                     </button>
                     <button
-                      className="w-full flex items-center gap-2 p-2 rounded-lg text-left text-sm transition-colors hover:bg-muted text-muted-foreground"
+                      className={`w-full flex items-center gap-2 p-2 rounded-lg text-left text-sm transition-colors hover:bg-muted ${activePartId === 'diagrams' ? 'bg-purple-500/10 text-purple-600 font-medium' : 'text-muted-foreground'}`}
+                      onClick={() => scrollToSection('diagrams')}
+                    >
+                      <GitBranch className="h-4 w-4 text-cyan-500" />
+                      <span>Architecture Diagrams</span>
+                    </button>
+                    <button
+                      className={`w-full flex items-center gap-2 p-2 rounded-lg text-left text-sm transition-colors hover:bg-muted ${activePartId === 'glossary' ? 'bg-purple-500/10 text-purple-600 font-medium' : 'text-muted-foreground'}`}
+                      onClick={() => scrollToSection('glossary')}
                     >
                       <BookOpen className="h-4 w-4 text-green-500" />
                       <span>Glossary</span>

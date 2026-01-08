@@ -6,3 +6,6 @@ export { HRHubManualCommunicationSection } from './HRHubManualCommunicationSecti
 export { HRHubManualOperationsSection } from './HRHubManualOperationsSection';
 export { HRHubManualAnalyticsSection } from './HRHubManualAnalyticsSection';
 export { HRHubManualTroubleshootingSection } from './HRHubManualTroubleshootingSection';
+
+// Supplementary sections
+export { HRHubManualQuickReference, HRHubManualArchitectureDiagrams, HRHubManualGlossary } from './sections/supplementary';
