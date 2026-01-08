@@ -51,7 +51,7 @@ export function RequestFilters({
         <SelectContent>
           <SelectItem value="all">All Statuses</SelectItem>
           <SelectItem value="pending">Pending</SelectItem>
-          <SelectItem value="approved">Approved</SelectItem>
+          <SelectItem value="info_required">Info Required</SelectItem>
           <SelectItem value="applied">Applied</SelectItem>
           <SelectItem value="rejected">Rejected</SelectItem>
           <SelectItem value="cancelled">Cancelled</SelectItem>
