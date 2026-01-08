@@ -104,14 +104,12 @@ export function TransactionWorkflowSettingsSetup() {
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="prose prose-sm max-w-none dark:prose-invert">
-            <p>
-              Transaction Workflow Settings control which employee lifecycle transactions require approval 
-              workflows before taking effect. This is separate from ESS Approval Policies (which govern 
-              employee self-service changes) and applies to HR-initiated transactions like hires, promotions, 
-              and terminations.
-            </p>
-          </div>
+          <p className="text-foreground">
+            Transaction Workflow Settings control which employee lifecycle transactions require approval 
+            workflows before taking effect. This is separate from ESS Approval Policies (which govern 
+            employee self-service changes) and applies to HR-initiated transactions like hires, promotions, 
+            and terminations.
+          </p>
 
           <InfoCallout title="Company-Specific Configuration">
             Settings are configured per company. Select the appropriate company from the dropdown before 

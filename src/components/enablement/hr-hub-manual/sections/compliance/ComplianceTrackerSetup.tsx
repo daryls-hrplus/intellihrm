@@ -112,13 +112,11 @@ export function ComplianceTrackerSetup() {
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="prose prose-sm max-w-none dark:prose-invert">
-            <p>
-              The Compliance Tracker helps organizations monitor and manage regulatory requirements 
-              across multiple jurisdictions. Track deadlines, assign responsibility, and maintain 
-              visibility into your compliance posture with real-time dashboards.
-            </p>
-          </div>
+          <p className="text-foreground">
+            The Compliance Tracker helps organizations monitor and manage regulatory requirements 
+            across multiple jurisdictions. Track deadlines, assign responsibility, and maintain 
+            visibility into your compliance posture with real-time dashboards.
+          </p>
 
           <InfoCallout title="Multi-Jurisdiction Support">
             For organizations operating across the Caribbean, Africa, and other regions, the 

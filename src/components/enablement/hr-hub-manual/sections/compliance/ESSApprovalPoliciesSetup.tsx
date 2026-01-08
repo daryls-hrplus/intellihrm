@@ -101,13 +101,11 @@ export function ESSApprovalPoliciesSetup() {
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="prose prose-sm max-w-none dark:prose-invert">
-            <p>
-              ESS Approval Policies govern how changes submitted through Employee Self-Service are processed. 
-              By configuring policies for each request type, organizations can balance employee autonomy with 
-              compliance requirements and fraud prevention.
-            </p>
-          </div>
+          <p className="text-foreground">
+            ESS Approval Policies govern how changes submitted through Employee Self-Service are processed. 
+            By configuring policies for each request type, organizations can balance employee autonomy with 
+            compliance requirements and fraud prevention.
+          </p>
 
           <InfoCallout title="Why ESS Approval Policies Matter">
             Without proper policies, sensitive data changes (like banking details) could be applied immediately, 

@@ -145,13 +145,11 @@ export function WorkflowTemplatesSetup() {
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="prose prose-sm max-w-none dark:prose-invert">
-            <p>
-              Workflow Templates define the approval chains used when transactions require governance. 
-              Each template specifies a sequence of approval steps, who can approve at each step, and 
-              what happens if approvers don't respond in time.
-            </p>
-          </div>
+          <p className="text-foreground">
+            Workflow Templates define the approval chains used when transactions require governance. 
+            Each template specifies a sequence of approval steps, who can approve at each step, and 
+            what happens if approvers don't respond in time.
+          </p>
 
           <InfoCallout title="Template Dependency">
             Workflow Templates must be created BEFORE configuring Transaction Workflow Settings. 
