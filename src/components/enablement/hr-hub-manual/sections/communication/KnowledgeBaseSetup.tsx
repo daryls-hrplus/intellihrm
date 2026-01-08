@@ -103,7 +103,7 @@ export function KnowledgeBaseSetup() {
         </TabsList>
 
         {/* Categories Tab */}
-        <TabsContent value="categories" className="space-y-6">
+        <TabsContent value="categories" id="hh-sec-5-4-1" data-manual-anchor="hh-sec-5-4-1" className="space-y-6">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -212,7 +212,7 @@ export function KnowledgeBaseSetup() {
         </TabsContent>
 
         {/* Articles Tab */}
-        <TabsContent value="articles" className="space-y-6">
+        <TabsContent value="articles" id="hh-sec-5-4-2" data-manual-anchor="hh-sec-5-4-2" className="space-y-6">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
