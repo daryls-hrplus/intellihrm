@@ -1033,20 +1033,8 @@ export default function AdminHelpdeskPage() {
 
           {/* Secondary Tabs - Configuration */}
           {primaryTab === "configuration" && (
-            <Tabs defaultValue="escalation" className="space-y-4">
+            <Tabs defaultValue="categories" className="space-y-4">
               <TabsList className="h-auto">
-                <TabsTrigger value="escalation" className="flex items-center gap-2">
-                  <AlertTriangle className="h-4 w-4" />
-                  Escalation
-                </TabsTrigger>
-                <TabsTrigger value="auto-assign" className="flex items-center gap-2">
-                  <UserCog className="h-4 w-4" />
-                  Auto-Assign
-                </TabsTrigger>
-                <TabsTrigger value="sla-config" className="flex items-center gap-2">
-                  <Settings className="h-4 w-4" />
-                  SLA Config
-                </TabsTrigger>
                 <TabsTrigger value="categories" className="flex items-center gap-2">
                   <FolderCog className="h-4 w-4" />
                   Categories
@@ -1055,19 +1043,19 @@ export default function AdminHelpdeskPage() {
                   <FileText className="h-4 w-4" />
                   Templates
                 </TabsTrigger>
+                <TabsTrigger value="sla-config" className="flex items-center gap-2">
+                  <Settings className="h-4 w-4" />
+                  SLA Config
+                </TabsTrigger>
+                <TabsTrigger value="escalation" className="flex items-center gap-2">
+                  <AlertTriangle className="h-4 w-4" />
+                  Escalation
+                </TabsTrigger>
+                <TabsTrigger value="auto-assign" className="flex items-center gap-2">
+                  <UserCog className="h-4 w-4" />
+                  Auto-Assign
+                </TabsTrigger>
               </TabsList>
-
-              <TabsContent value="escalation">
-                <EscalationRulesPanel />
-              </TabsContent>
-
-              <TabsContent value="auto-assign">
-                <CategoryAssignmentPanel />
-              </TabsContent>
-
-              <TabsContent value="sla-config">
-                <SlaConfigurationPanel />
-              </TabsContent>
 
               <TabsContent value="categories">
                 <CategoryManagementPanel />
@@ -1075,6 +1063,18 @@ export default function AdminHelpdeskPage() {
 
               <TabsContent value="templates">
                 <CannedResponseManagementPanel />
+              </TabsContent>
+
+              <TabsContent value="sla-config">
+                <SlaConfigurationPanel />
+              </TabsContent>
+
+              <TabsContent value="escalation">
+                <EscalationRulesPanel />
+              </TabsContent>
+
+              <TabsContent value="auto-assign">
+                <CategoryAssignmentPanel />
               </TabsContent>
             </Tabs>
           )}
