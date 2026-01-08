@@ -1643,9 +1643,6 @@ export function usePayroll() {
               .limit(1);
             
             if (!existingBatch || existingBatch.length === 0) {
-              // Dynamically import to avoid circular dependencies
-              const { useGLCalculation } = await import("@/hooks/useGLCalculation");
-              
               // Fetch mappings and create entries directly
               const { data: mappings } = await supabase
                 .from("gl_account_mappings")
