@@ -14,8 +14,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
+import { DatePicker } from "@/components/ui/date-picker";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { formatDateForDisplay } from "@/utils/dateUtils";
-import { Plus, CheckSquare, Clock, AlertCircle, Building2, Search, CalendarDays, X } from "lucide-react";
+import { Plus, CheckSquare, Clock, AlertCircle, Building2, Search, CalendarDays, X, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 
 interface Company {
   id: string;
@@ -59,6 +61,7 @@ export default function HRTasksPage() {
   const [statusFilter, setStatusFilter] = useState<string>("active");
   const [selectedCompany, setSelectedCompany] = useState<string>("all");
   const [searchTerm, setSearchTerm] = useState("");
+  const [editingTask, setEditingTask] = useState<HRTask | null>(null);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -96,33 +99,76 @@ export default function HRTasksPage() {
   };
 
   const handleSubmit = async () => {
-    if (!formData.title || !formData.company_id) {
-      toast({ title: t("common.error"), description: "Title and company are required", variant: "destructive" });
+    if (!formData.title || !formData.company_id || !formData.due_date) {
+      toast({ title: t("common.error"), description: "Title, company, and due date are required", variant: "destructive" });
       return;
     }
 
     setIsSubmitting(true);
     try {
-      const res: any = await query("hr_tasks").insert({
-        title: formData.title,
-        description: formData.description || null,
-        priority: formData.priority,
-        due_date: formData.due_date || null,
-        company_id: formData.company_id,
-        created_by: profile?.id,
-      });
+      if (editingTask) {
+        const res: any = await query("hr_tasks")
+          .update({
+            title: formData.title,
+            description: formData.description || null,
+            priority: formData.priority,
+            due_date: formData.due_date,
+            company_id: formData.company_id,
+          })
+          .eq("id", editingTask.id);
 
-      if (res.error) throw res.error;
+        if (res.error) throw res.error;
+        toast({ title: t("common.success"), description: t("common.saved") });
+      } else {
+        const res: any = await query("hr_tasks").insert({
+          title: formData.title,
+          description: formData.description || null,
+          priority: formData.priority,
+          due_date: formData.due_date,
+          company_id: formData.company_id,
+          created_by: profile?.id,
+        });
 
-      toast({ title: t("common.success"), description: t("common.created") });
-      setDialogOpen(false);
-      setFormData({ title: "", description: "", priority: "medium", due_date: "", company_id: "" });
+        if (res.error) throw res.error;
+        toast({ title: t("common.success"), description: t("common.created") });
+      }
+
+      closeDialog();
       loadTasks();
     } catch (error) {
-      toast({ title: t("common.error"), description: "Failed to create task", variant: "destructive" });
+      toast({ title: t("common.error"), description: "Failed to save task", variant: "destructive" });
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleEdit = (task: HRTask) => {
+    setEditingTask(task);
+    setFormData({
+      title: task.title,
+      description: task.description || "",
+      priority: task.priority,
+      due_date: task.due_date || "",
+      company_id: task.company_id || "",
+    });
+    setDialogOpen(true);
+  };
+
+  const handleDelete = async (taskId: string) => {
+    try {
+      const res: any = await query("hr_tasks").delete().eq("id", taskId);
+      if (res.error) throw res.error;
+      toast({ title: t("common.success"), description: t("common.deleted") });
+      loadTasks();
+    } catch (error) {
+      toast({ title: t("common.error"), description: "Failed to delete task", variant: "destructive" });
+    }
+  };
+
+  const closeDialog = () => {
+    setDialogOpen(false);
+    setEditingTask(null);
+    setFormData({ title: "", description: "", priority: "medium", due_date: "", company_id: "" });
   };
 
   const toggleTaskComplete = async (taskId: string, currentStatus: string) => {
@@ -353,6 +399,23 @@ export default function HRTasksPage() {
                         )}
                       </div>
                     </div>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => handleEdit(task)}>
+                          <Pencil className="h-4 w-4 mr-2" />
+                          {t("common.edit")}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleDelete(task.id)} className="text-destructive">
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          {t("common.delete")}
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
                 ))}
               </div>
@@ -360,11 +423,11 @@ export default function HRTasksPage() {
           </CardContent>
         </Card>
 
-        {/* Add Task Dialog */}
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        {/* Add/Edit Task Dialog */}
+        <Dialog open={dialogOpen} onOpenChange={closeDialog}>
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
-              <DialogTitle>{t("hrHub.addTask")}</DialogTitle>
+              <DialogTitle>{editingTask ? t("common.edit") : t("hrHub.addTask")}</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
               <div className="space-y-2">
@@ -405,11 +468,12 @@ export default function HRTasksPage() {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label>{t("hrHub.dueDate")}</Label>
-                  <Input
-                    type="date"
+                  <Label>{t("hrHub.dueDate")} *</Label>
+                  <DatePicker
                     value={formData.due_date}
-                    onChange={(e) => setFormData({ ...formData, due_date: e.target.value })}
+                    onChange={(date) => setFormData({ ...formData, due_date: date ? date.toISOString().split("T")[0] : "" })}
+                    placeholder="Select due date"
+                    fromDate={new Date()}
                   />
                 </div>
               </div>
@@ -425,9 +489,9 @@ export default function HRTasksPage() {
               </div>
             </div>
             <DialogFooter className="gap-2 sm:gap-0">
-              <Button variant="outline" onClick={() => setDialogOpen(false)}>{t("common.cancel")}</Button>
+              <Button variant="outline" onClick={closeDialog}>{t("common.cancel")}</Button>
               <Button onClick={handleSubmit} disabled={isSubmitting}>
-                {isSubmitting ? "Creating..." : t("hrHub.createTask")}
+                {isSubmitting ? t("common.saving") : editingTask ? t("common.save") : t("hrHub.createTask")}
               </Button>
             </DialogFooter>
           </DialogContent>
