@@ -506,12 +506,15 @@ export default function HRTasksPage() {
 
               <div className="space-y-2">
                 <Label>{t("common.assignedTo")}</Label>
-                <Select value={formData.assigned_to} onValueChange={(v) => setFormData({ ...formData, assigned_to: v })}>
+                <Select 
+                  value={formData.assigned_to || "__unassigned__"} 
+                  onValueChange={(v) => setFormData({ ...formData, assigned_to: v === "__unassigned__" ? "" : v })}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Select team member" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Unassigned</SelectItem>
+                    <SelectItem value="__unassigned__">Unassigned</SelectItem>
                     {teamMembers.map((member) => (
                       <SelectItem key={member.id} value={member.id}>{member.full_name || "Unnamed"}</SelectItem>
                     ))}
