@@ -24,6 +24,9 @@ import { EscalationRulesPanel } from "@/components/helpdesk/EscalationRulesPanel
 import { CategoryAssignmentPanel } from "@/components/helpdesk/CategoryAssignmentPanel";
 import { SatisfactionAnalytics } from "@/components/helpdesk/SatisfactionAnalytics";
 import { AgentPerformanceDashboard } from "@/components/helpdesk/AgentPerformanceDashboard";
+import { CategoryManagementPanel } from "@/components/helpdesk/CategoryManagementPanel";
+import { MassTicketDialog } from "@/components/helpdesk/MassTicketDialog";
+import { DocumentLinkPicker } from "@/components/helpdesk/DocumentLinkPicker";
 import {
   Ticket,
   Clock,
@@ -46,6 +49,9 @@ import {
   Eye,
   EyeOff,
   FileText,
+  FolderCog,
+  UsersRound,
+  Link2,
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { formatDistanceToNow, differenceInHours, isPast, addHours } from "date-fns";
@@ -87,6 +93,8 @@ export default function AdminHelpdeskPage() {
   const [isCreating, setIsCreating] = useState(false);
   const [archiveTicketId, setArchiveTicketId] = useState<string | null>(null);
   const [showInternalNotes, setShowInternalNotes] = useState(true);
+  const [massTicketOpen, setMassTicketOpen] = useState(false);
+  const [documentPickerOpen, setDocumentPickerOpen] = useState(false);
   const [newTicket, setNewTicket] = useState({
     subject: "",
     description: "",
@@ -426,10 +434,16 @@ export default function AdminHelpdeskPage() {
             <h1 className="text-3xl font-bold tracking-tight">{t("hrHub.helpDesk")}</h1>
             <p className="text-muted-foreground">{t("hrHub.helpDeskDesc")}</p>
           </div>
-          <Button onClick={() => setCreateDialogOpen(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            Create Ticket
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => setMassTicketOpen(true)}>
+              <UsersRound className="h-4 w-4 mr-2" />
+              Mass Ticket
+            </Button>
+            <Button onClick={() => setCreateDialogOpen(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              Create Ticket
+            </Button>
+          </div>
         </div>
 
         <Tabs defaultValue="tickets" className="space-y-4">
@@ -474,6 +488,10 @@ export default function AdminHelpdeskPage() {
             <TabsTrigger value="sla-config" className="flex items-center gap-2">
               <Settings className="h-4 w-4" />
               SLA Config
+            </TabsTrigger>
+            <TabsTrigger value="categories" className="flex items-center gap-2">
+              <FolderCog className="h-4 w-4" />
+              Categories
             </TabsTrigger>
           </TabsList>
 
@@ -1003,7 +1021,14 @@ export default function AdminHelpdeskPage() {
           <TabsContent value="satisfaction">
             <SatisfactionAnalytics />
           </TabsContent>
+
+          <TabsContent value="categories">
+            <CategoryManagementPanel />
+          </TabsContent>
         </Tabs>
+
+        {/* Mass Ticket Dialog */}
+        <MassTicketDialog open={massTicketOpen} onOpenChange={setMassTicketOpen} />
 
         {/* Create Ticket Dialog */}
         <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
