@@ -41,7 +41,7 @@ export const ADMIN_SECURITY_MANUAL_STRUCTURE: ManualSection[] = [
       {
         id: 'admin-sec-1-1',
         sectionNumber: '1.1',
-        title: 'Introduction to Admin & Security in HRplus',
+        title: 'Introduction to Admin & Security in Intelli HRM',
         description: 'Executive summary, business value, and key differentiators',
         contentLevel: 'overview',
         estimatedReadTime: 10,

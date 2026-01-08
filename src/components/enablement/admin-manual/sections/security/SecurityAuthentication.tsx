@@ -71,7 +71,7 @@ export function SecurityAuthentication() {
         <ol className="list-decimal list-inside space-y-2 text-sm text-muted-foreground">
           <li>Navigate to Admin → Security → Authentication Settings</li>
           <li>Select your Identity Provider from the dropdown</li>
-          <li>Download the HRplus SP metadata XML file</li>
+          <li>Download the Intelli HRM SP metadata XML file</li>
           <li>Configure the IdP application using the SP metadata</li>
           <li>Upload the IdP metadata XML or enter details manually</li>
           <li>Configure attribute mappings (email, name, employee ID)</li>
@@ -94,7 +94,7 @@ export function SecurityAuthentication() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>HRplus Attribute</TableHead>
+              <TableHead>Intelli HRM Attribute</TableHead>
               <TableHead>Common IdP Claim</TableHead>
               <TableHead>Required</TableHead>
             </TableRow>

@@ -33,7 +33,7 @@ export function AdminOverviewSecurityCalendar() {
                 <FeatureStatusBadge status="recommended" size="sm" />
               </h4>
               <p className="text-sm text-muted-foreground">
-                This section describes recommended security operational practices. HRplus provides the 
+                This section describes recommended security operational practices. Intelli HRM provides the 
                 tools (dashboards, audit logs, reporting) to support these activities, but the cadence 
                 and processes should be adapted to your organization's needs and compliance requirements.
               </p>

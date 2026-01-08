@@ -120,7 +120,7 @@ export const APPRAISALS_MANUAL_STRUCTURE: ManualSection[] = [
       {
         id: 'sec-1-1',
         sectionNumber: '1.1',
-        title: 'Introduction to Appraisals in HRplus',
+        title: 'Introduction to Appraisals in Intelli HRM',
         description: 'Purpose, positioning, and key differentiators of the Appraisals module',
         contentLevel: 'overview',
         estimatedReadTime: 10,

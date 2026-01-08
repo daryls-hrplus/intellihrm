@@ -254,7 +254,7 @@ export function FoundationCompanies() {
     <div className="space-y-8">
       <LearningObjectives
         objectives={[
-          "Create and configure legal entity companies in HRplus",
+          "Create and configure legal entity companies in Intelli HRM",
           "Enter correct statutory body registrations by country",
           "Configure financial settings including currency and fiscal year",
           "Understand country-specific requirements for Caribbean and Africa"
@@ -271,7 +271,7 @@ export function FoundationCompanies() {
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-muted-foreground">
-            Companies in HRplus represent individual legal entities - the registered 
+            Companies in Intelli HRM represent individual legal entities - the registered 
             businesses where employees are hired and paid. Each company has its own 
             statutory registrations, payroll configuration, and compliance requirements.
           </p>

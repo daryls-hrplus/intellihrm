@@ -258,7 +258,7 @@ export function AdminOverviewPersonas() {
                 <div>
                   <h4 className="text-sm font-medium mb-2">Profile</h4>
                   <ul className="text-sm text-muted-foreground space-y-1">
-                    <li>• HRplus Partner</li>
+                    <li>• Intelli HRM Partner</li>
                     <li>• Technical Consultant</li>
                     <li>• Solution Architect</li>
                   </ul>

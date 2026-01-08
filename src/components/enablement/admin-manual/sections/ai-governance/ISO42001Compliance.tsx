@@ -8,7 +8,7 @@ export function ISO42001Compliance() {
   return (
     <div className="space-y-6">
       <p className="text-muted-foreground">
-        ISO/IEC 42001 is the international standard for AI Management Systems. HRplus provides built-in tools 
+        ISO/IEC 42001 is the international standard for AI Management Systems. Intelli HRM provides built-in tools 
         to help organizations achieve and maintain compliance with AI governance requirements.
       </p>
 
@@ -115,7 +115,7 @@ export function ISO42001Compliance() {
             <TableRow>
               <TableHead>Governance Area</TableHead>
               <TableHead>Requirements</TableHead>
-              <TableHead>HRplus Implementation</TableHead>
+              <TableHead>Intelli HRM Implementation</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

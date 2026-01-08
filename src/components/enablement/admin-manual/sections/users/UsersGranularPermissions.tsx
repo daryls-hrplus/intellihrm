@@ -52,7 +52,7 @@ export function UsersGranularPermissions() {
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-muted-foreground">
-            HRplus implements <strong>granular Role-Based Permissions (RBP)</strong> that control 
+            Intelli HRM implements <strong>granular Role-Based Permissions (RBP)</strong> that control 
             access at multiple levels: module, entity, action, and field. This ensures users 
             see only what they need for their job functions.
           </p>

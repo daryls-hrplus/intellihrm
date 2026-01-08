@@ -362,7 +362,7 @@ Cycle Configuration ──► Participant Enrollment ──► Self-Assessment  
             Configuration Options
           </h3>
           <p className="text-muted-foreground mb-4">
-            The following timeline elements can be configured per cycle in HRplus:
+            The following timeline elements can be configured per cycle in Intelli HRM:
           </p>
           <div className="grid md:grid-cols-2 gap-4">
             {[

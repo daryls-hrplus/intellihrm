@@ -46,7 +46,7 @@ export function SystemCustomFields() {
     <div className="space-y-8">
       <LearningObjectives
         objectives={[
-          "Create custom fields to extend HRplus entities",
+          "Create custom fields to extend Intelli HRM entities",
           "Configure field types and validation rules",
           "Set up role-based field visibility",
           "Include custom fields in reports and exports"
@@ -62,7 +62,7 @@ export function SystemCustomFields() {
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-muted-foreground">
-            Custom Fields allow you to extend HRplus entities with organization-specific 
+            Custom Fields allow you to extend Intelli HRM entities with organization-specific 
             data points without requiring code changes. These fields integrate seamlessly 
             with forms, reports, and workflows.
           </p>

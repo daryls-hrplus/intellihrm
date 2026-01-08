@@ -26,7 +26,7 @@ export function OverviewCoreConcepts() {
             The CRGV Model - Deep Dive
           </h3>
           <p className="text-muted-foreground mb-4">
-            HRplus uses the Competencies-Responsibilities-Goals-Values (CRGV) model as the foundation for 
+            Intelli HRM uses the Competencies-Responsibilities-Goals-Values (CRGV) model as the foundation for 
             comprehensive performance evaluation. Each component captures a different dimension of employee 
             contribution and can be weighted differently based on organizational priorities.
           </p>

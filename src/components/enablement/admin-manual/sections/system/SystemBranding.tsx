@@ -22,7 +22,7 @@ export function SystemBranding() {
   return (
     <div className="space-y-6">
       <p className="text-muted-foreground">
-        Customize the visual appearance of HRplus to match your organization's brand identity. 
+        Customize the visual appearance of Intelli HRM to match your organization's brand identity. 
         Changes apply system-wide across all users and exported documents.
       </p>
 

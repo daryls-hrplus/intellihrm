@@ -25,7 +25,7 @@ export function SystemCurrencies() {
         <CardContent className="space-y-4">
           <p className="text-muted-foreground">
             Currency configuration is essential for organizations operating across 
-            multiple countries. HRplus supports multi-currency operations for 
+            multiple countries. Intelli HRM supports multi-currency operations for 
             payroll, compensation benchmarking, and financial reporting.
           </p>
           

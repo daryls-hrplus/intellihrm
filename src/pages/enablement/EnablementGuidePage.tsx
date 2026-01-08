@@ -124,7 +124,7 @@ export default function EnablementGuidePage() {
               </CardHeader>
               <CardContent className="prose prose-sm dark:prose-invert max-w-none">
                 <p>
-                  The Enablement Hub is HRplus Cerebra's central platform for creating, managing, and
+                  The Enablement Hub is Intelli HRM's central platform for creating, managing, and
                   distributing training content and documentation. Following <strong>industry-proven
                   methodology</strong>, we implement a release-driven content strategy that
                   ensures all stakeholders receive timely, accurate enablement materials.

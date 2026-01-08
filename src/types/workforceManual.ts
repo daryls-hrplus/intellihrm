@@ -32,7 +32,7 @@ export const WORKFORCE_MANUAL_STRUCTURE: ManualSection[] = [
       {
         id: 'wf-sec-1-1',
         sectionNumber: '1.1',
-        title: 'Introduction to Workforce in HRplus',
+        title: 'Introduction to Workforce in Intelli HRM',
         description: 'Executive summary, business value, and key differentiators',
         contentLevel: 'overview',
         estimatedReadTime: 10,

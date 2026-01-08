@@ -28,8 +28,8 @@ const accessIssues: TroubleshootingItem[] = [
   },
   {
     issue: "SSO login fails with 'Identity not found' error",
-    cause: "The user's SSO identity hasn't been linked to their HRplus account, or the email/identifier doesn't match.",
-    solution: "Ensure the user exists in HRplus with the exact email used in the SSO provider. Check Admin → Users → [User] → SSO Settings to verify the identity mapping."
+    cause: "The user's SSO identity hasn't been linked to their Intelli HRM account, or the email/identifier doesn't match.",
+    solution: "Ensure the user exists in Intelli HRM with the exact email used in the SSO provider. Check Admin → Users → [User] → SSO Settings to verify the identity mapping."
   },
   {
     issue: "User's permissions don't update after role change",
@@ -210,7 +210,7 @@ export function TroubleshootingAccess() {
               <div className="border rounded-lg p-4">
                 <h5 className="font-medium text-sm mb-3 flex items-center gap-2">
                   <CheckCircle className="h-4 w-4 text-green-500" />
-                  Verify in HRplus
+                  Verify in Intelli HRM
                 </h5>
                 <ul className="text-sm space-y-2 text-muted-foreground">
                   <li>• User account exists and is active</li>
@@ -225,7 +225,7 @@ export function TroubleshootingAccess() {
                   Verify in Identity Provider
                 </h5>
                 <ul className="text-sm space-y-2 text-muted-foreground">
-                  <li>• User is assigned to HRplus application</li>
+                  <li>• User is assigned to Intelli HRM application</li>
                   <li>• User's account is active in IdP</li>
                   <li>• Required attributes are being sent</li>
                   <li>• SAML assertion is properly signed</li>
