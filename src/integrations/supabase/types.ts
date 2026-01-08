@@ -28886,6 +28886,54 @@ export type Database = {
           },
         ]
       }
+      hr_task_comments: {
+        Row: {
+          comment_text: string
+          comment_type: string | null
+          created_at: string
+          id: string
+          metadata: Json | null
+          task_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          comment_text: string
+          comment_type?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          task_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          comment_text?: string
+          comment_type?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          task_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hr_task_comments_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "hr_tasks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hr_task_comments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       hr_tasks: {
         Row: {
           assigned_to: string | null

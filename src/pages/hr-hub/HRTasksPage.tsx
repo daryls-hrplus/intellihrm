@@ -17,7 +17,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { DatePicker } from "@/components/ui/date-picker";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { formatDateForDisplay } from "@/utils/dateUtils";
-import { Plus, CheckSquare, Clock, AlertCircle, Building2, Search, CalendarDays, X, MoreHorizontal, Pencil, Trash2, User, Repeat } from "lucide-react";
+import { Plus, CheckSquare, Clock, AlertCircle, Building2, Search, CalendarDays, X, MoreHorizontal, Pencil, Trash2, User, Repeat, MessageSquare } from "lucide-react";
+import { HRTaskDetailDialog } from "@/components/hr-hub/HRTaskDetailDialog";
 
 interface Company {
   id: string;
@@ -81,6 +82,8 @@ export default function HRTasksPage() {
   const [selectedCompany, setSelectedCompany] = useState<string>("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [editingTask, setEditingTask] = useState<HRTask | null>(null);
+  const [selectedTask, setSelectedTask] = useState<HRTask | null>(null);
+  const [detailDialogOpen, setDetailDialogOpen] = useState(false);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -401,14 +404,19 @@ export default function HRTasksPage() {
                 {filteredTasks.map((task) => (
                   <div
                     key={task.id}
-                    className={`flex items-start gap-4 p-4 transition-colors ${
+                    className={`flex items-start gap-4 p-4 transition-colors cursor-pointer ${
                       task.status === "completed" ? "bg-muted/30" : "hover:bg-muted/20"
                     }`}
+                    onClick={() => {
+                      setSelectedTask(task);
+                      setDetailDialogOpen(true);
+                    }}
                   >
                     <Checkbox
                       checked={task.status === "completed"}
                       onCheckedChange={() => toggleTaskComplete(task.id, task.status)}
                       className="mt-0.5"
+                      onClick={(e) => e.stopPropagation()}
                     />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
@@ -457,13 +465,17 @@ export default function HRTasksPage() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => handleEdit(task)}>
+                        <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleEdit(task); }}>
                           <Pencil className="h-4 w-4 mr-2" />
                           {t("common.edit")}
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleDelete(task.id)} className="text-destructive">
+                        <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleDelete(task.id); }} className="text-destructive">
                           <Trash2 className="h-4 w-4 mr-2" />
                           {t("common.delete")}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setSelectedTask(task); setDetailDialogOpen(true); }}>
+                          <MessageSquare className="h-4 w-4 mr-2" />
+                          View Comments
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -592,6 +604,12 @@ export default function HRTasksPage() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+        {/* Task Detail Dialog with Comments */}
+        <HRTaskDetailDialog
+          task={selectedTask}
+          open={detailDialogOpen}
+          onOpenChange={setDetailDialogOpen}
+        />
       </div>
     </AppLayout>
   );
