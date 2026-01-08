@@ -4,10 +4,11 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { ManualPublishCard } from "@/components/kb/ManualPublishCard";
+import { PublishWizard } from "@/components/kb/PublishWizard";
 import { useManualPublishing, MANUAL_CONFIGS } from "@/hooks/useManualPublishing";
 import { Upload, CheckCircle2, Clock, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
@@ -15,6 +16,8 @@ import { toast } from "sonner";
 export default function ManualPublishingPage() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("all");
+  const [wizardOpen, setWizardOpen] = useState(false);
+  const [selectedManual, setSelectedManual] = useState<typeof MANUAL_CONFIGS[0] | null>(null);
   const { publishedManuals, isLoading, getManualStatus } = useManualPublishing();
 
   // Calculate stats
@@ -40,7 +43,11 @@ export default function ManualPublishingPage() {
   });
 
   const handlePublish = (manualId: string) => {
-    toast.info("Publishing wizard coming soon - database schema is ready!");
+    const manual = MANUAL_CONFIGS.find(m => m.id === manualId);
+    if (manual) {
+      setSelectedManual(manual);
+      setWizardOpen(true);
+    }
   };
 
   const handleSync = (manualId: string) => {
@@ -187,6 +194,23 @@ export default function ManualPublishingPage() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Publish Wizard */}
+        {selectedManual && (
+          <PublishWizard
+            open={wizardOpen}
+            onOpenChange={setWizardOpen}
+            manualId={selectedManual.id}
+            manualName={selectedManual.name}
+            sourceVersion={selectedManual.version}
+            currentPublishedVersion={getManualStatus(selectedManual.id).publishedVersion || undefined}
+            sectionsCount={selectedManual.sectionsCount}
+            onPublishComplete={() => {
+              setWizardOpen(false);
+              setSelectedManual(null);
+            }}
+          />
+        )}
       </div>
     </AppLayout>
   );
