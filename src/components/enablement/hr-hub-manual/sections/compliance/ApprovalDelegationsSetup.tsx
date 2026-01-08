@@ -92,13 +92,11 @@ export function ApprovalDelegationsSetup() {
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="prose prose-sm max-w-none dark:prose-invert">
-            <p>
-              Approval Delegations allow users to temporarily transfer their approval responsibilities 
-              to a colleague during planned absences. This ensures workflows continue to progress 
-              even when key approvers are unavailable, preventing bottlenecks and delays.
-            </p>
-          </div>
+          <p className="text-foreground">
+            Approval Delegations allow users to temporarily transfer their approval responsibilities 
+            to a colleague during planned absences. This ensures workflows continue to progress 
+            even when key approvers are unavailable, preventing bottlenecks and delays.
+          </p>
 
           <InfoCallout title="Scope of Delegation">
             Delegations transfer only YOUR pending approvals to the delegate. They do not transfer 

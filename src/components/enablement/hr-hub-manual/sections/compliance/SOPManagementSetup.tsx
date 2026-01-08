@@ -113,13 +113,11 @@ export function SOPManagementSetup() {
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="prose prose-sm max-w-none dark:prose-invert">
-            <p>
-              Standard Operating Procedures (SOPs) are documented instructions that ensure consistent execution 
-              of business processes. In HRplus, SOPs serve a dual purpose: they provide reference documentation 
-              for employees AND feed contextual guidance to the AI Assistant.
-            </p>
-          </div>
+          <p className="text-foreground">
+            Standard Operating Procedures (SOPs) are documented instructions that ensure consistent execution 
+            of business processes. In HRplus, SOPs serve a dual purpose: they provide reference documentation 
+            for employees AND feed contextual guidance to the AI Assistant.
+          </p>
 
           <InfoCallout title="AI Integration">
             When employees interact with the AI Assistant, it uses SOPs associated with the relevant task type 

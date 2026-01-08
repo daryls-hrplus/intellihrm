@@ -124,13 +124,11 @@ export function PolicyDocumentsSetup() {
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="prose prose-sm max-w-none dark:prose-invert">
-            <p>
-              Policy Documents enable organizations to upload their policies and have AI automatically 
-              extract enforceable rules. These rules can then be applied during transactions to ensure 
-              compliance, warn users of potential issues, or provide contextual information.
-            </p>
-          </div>
+          <p className="text-foreground">
+            Policy Documents enable organizations to upload their policies and have AI automatically 
+            extract enforceable rules. These rules can then be applied during transactions to ensure 
+            compliance, warn users of potential issues, or provide contextual information.
+          </p>
 
           <InfoCallout title="AI-Powered Processing">
             When you upload a policy document, the AI reads the content, identifies rules and requirements, 
