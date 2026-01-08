@@ -89,7 +89,7 @@ export function PositionControlOverview() {
             <div className="space-y-4">
               <div className="flex items-center gap-2">
                 <Badge className="bg-primary">Position-Based</Badge>
-                <span className="text-sm text-muted-foreground">(HRplus Default)</span>
+                <span className="text-sm text-muted-foreground">(Intelli HRM Default)</span>
               </div>
               <ul className="space-y-3">
                 <li className="flex items-start gap-3">
@@ -261,12 +261,12 @@ export function PositionControlOverview() {
         </CardContent>
       </Card>
 
-      {/* HRplus Navigation */}
+      {/* Intelli HRM Navigation */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Brain className="h-5 w-5 text-primary" />
-            Position Control in HRplus
+            Position Control in Intelli HRM
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -292,7 +292,7 @@ export function PositionControlOverview() {
           </div>
           <ScreenshotPlaceholder
             caption="Figure 6.1b: Position Control navigation and key metrics display"
-            alt="HRplus Position Control navigation showing fill rates and vacancy counts"
+            alt="Intelli HRM Position Control navigation showing fill rates and vacancy counts"
           />
         </CardContent>
       </Card>

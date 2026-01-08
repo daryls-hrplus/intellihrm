@@ -115,7 +115,7 @@ const getAdminModuleSections = (
     documentation: [
       { title: "Implementation Handbook", description: "Step-by-step guide for configuring all modules", href: "/admin/implementation-handbook", icon: BookOpen, color: "bg-rose-500/10 text-rose-600", tabCode: "implementation-handbook" },
       { title: "Modules Brochure", description: "Comprehensive guide to all modules and features", href: "/admin/modules-brochure", icon: Layers, color: "bg-green-500/10 text-green-600", tabCode: "modules-brochure" },
-      { title: "Features Brochure", description: "Marketing summary of HRplus Cerebra capabilities", href: "/admin/features-brochure", icon: FileSpreadsheet, color: "bg-blue-500/10 text-blue-600", tabCode: "features-brochure" },
+      { title: "Features Brochure", description: "Marketing summary of Intelli HRM capabilities", href: "/admin/features-brochure", icon: FileSpreadsheet, color: "bg-blue-500/10 text-blue-600", tabCode: "features-brochure" },
       // Enablement Center - only visible for HRplus internal tenants
       ...(isHRPlusInternal ? [{
         title: "Enablement Center",

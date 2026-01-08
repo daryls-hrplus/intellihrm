@@ -148,7 +148,7 @@ export function NotificationOrchestration() {
           </p>
           <p className="text-muted-foreground">
             This orchestration integrates with the HR Hub notification system to provide 
-            consistent messaging across all HRplus modules while using workforce org hierarchy 
+            consistent messaging across all Intelli HRM modules while using workforce org hierarchy 
             data to route notifications to the right recipients.
           </p>
         </CardContent>

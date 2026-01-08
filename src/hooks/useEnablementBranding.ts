@@ -12,10 +12,10 @@ export interface BrandColors {
 }
 
 const DEFAULT_BRAND_COLORS: BrandColors = {
-  primaryColor: "#2F7AC3", // HRplus Moderate Azure
-  secondaryColor: "#0C4277", // HRplus Dark Azure
+  primaryColor: "#2F7AC3", // Intelli HRM Moderate Azure
+  secondaryColor: "#0C4277", // Intelli HRM Dark Azure
   accentColor: "#17A584", // Teal (unique differentiator)
-  companyName: "HRplus Cerebra",
+  companyName: "Intelli HRM",
   logoUrl: undefined,
 };
 

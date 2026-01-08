@@ -37,7 +37,7 @@ export function SystemLookupValues() {
     <div className="space-y-8">
       <LearningObjectives
         objectives={[
-          "Understand the purpose of lookup values in HRplus",
+          "Understand the purpose of lookup values in Intelli HRM",
           "Add, modify, and deactivate lookup values",
           "Manage category-specific dropdown options",
           "Maintain data consistency across the system"
@@ -53,7 +53,7 @@ export function SystemLookupValues() {
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-muted-foreground">
-            Lookup Values are the dropdown options used throughout HRplus. 
+            Lookup Values are the dropdown options used throughout Intelli HRM. 
             Standardizing these values ensures data consistency and enables 
             accurate reporting across your organization.
           </p>

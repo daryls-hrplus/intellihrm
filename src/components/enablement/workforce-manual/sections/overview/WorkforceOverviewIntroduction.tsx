@@ -17,7 +17,7 @@ export function WorkforceOverviewIntroduction() {
           <Clock className="h-3 w-3" />
           <span>10 min read</span>
         </div>
-        <CardTitle className="text-2xl">Introduction to Workforce in HRplus</CardTitle>
+        <CardTitle className="text-2xl">Introduction to Workforce in Intelli HRM</CardTitle>
         <CardDescription>Executive summary, business value, and key differentiators</CardDescription>
       </CardHeader>
       <CardContent className="space-y-8">
@@ -30,7 +30,7 @@ export function WorkforceOverviewIntroduction() {
             <div>
               <h3 className="font-semibold text-lg mb-2">Executive Summary</h3>
               <p className="text-muted-foreground leading-relaxed">
-                The HRplus Workforce module is the foundational core of your HRMS, managing the complete 
+                The Intelli HRM Workforce module is the foundational core of your HRMS, managing the complete 
                 organizational structure from territories to individual employee records. It provides 
                 position-based headcount control, comprehensive job architecture, and seamless employee 
                 lifecycle management across the Caribbean, Africa, and global regions.
@@ -67,7 +67,7 @@ export function WorkforceOverviewIntroduction() {
             <p className="mb-4">
               Effective workforce management is the cornerstone of HR operations. Without a solid foundation, 
               organizations struggle with data inconsistencies, compliance gaps, and operational inefficiencies. 
-              The HRplus Workforce module delivers:
+              The Intelli HRM Workforce module delivers:
             </p>
             <ul className="space-y-3 list-none pl-0">
               {[

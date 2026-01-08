@@ -96,9 +96,9 @@ export default function DemoExpiredPage() {
             <Button
               variant="outline"
               className="w-full"
-              onClick={() => {
+            onClick={() => {
                 // This would typically open a support contact form or send an extension request
-                window.location.href = `mailto:sales@hrplus.net?subject=Demo Extension Request - ${registration?.company_name || "Demo"}&body=Hello,%0A%0AI would like to request an extension for my demo.%0A%0ADemo ID: ${demoId}%0ACompany: ${registration?.company_name || "N/A"}%0A%0AThank you.`;
+                window.location.href = `mailto:sales@intellihrm.net?subject=Demo Extension Request - ${registration?.company_name || "Demo"}&body=Hello,%0A%0AI would like to request an extension for my demo.%0A%0ADemo ID: ${demoId}%0ACompany: ${registration?.company_name || "N/A"}%0A%0AThank you.`;
               }}
             >
               <RefreshCw className="mr-2 h-4 w-4" />
@@ -108,8 +108,8 @@ export default function DemoExpiredPage() {
 
           <p className="text-center text-xs text-muted-foreground">
             Questions? Contact{" "}
-            <a href="mailto:support@hrplus.net" className="text-primary hover:underline">
-              support@hrplus.net
+            <a href="mailto:support@intellihrm.net" className="text-primary hover:underline">
+              support@intellihrm.net
             </a>
           </p>
         </CardContent>

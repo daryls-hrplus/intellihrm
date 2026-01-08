@@ -128,7 +128,7 @@ export function UsersRoleArchitecture() {
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-muted-foreground">
-            HRplus uses a <strong>five-layer permission model</strong> that provides granular 
+            Intelli HRM uses a <strong>five-layer permission model</strong> that provides granular 
             control over what users can see and do. Each layer builds upon the previous, 
             creating a comprehensive security framework.
           </p>

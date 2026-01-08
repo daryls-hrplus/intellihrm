@@ -26,9 +26,9 @@ export function WorkforceManualIntegrationSection() {
                 <Link2 className="h-6 w-6 text-primary" />
               </div>
               <div>
-                <CardTitle className="text-2xl">Part 9: Integration & Cross-Module Impacts</CardTitle>
+              <CardTitle className="text-2xl">Part 9: Integration & Cross-Module Impacts</CardTitle>
                 <p className="text-muted-foreground mt-1">
-                  How workforce data flows to and from other HRplus modules
+                  How workforce data flows to and from other Intelli HRM modules
                 </p>
               </div>
             </div>
