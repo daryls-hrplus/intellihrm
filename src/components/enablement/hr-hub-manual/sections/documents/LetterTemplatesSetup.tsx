@@ -146,7 +146,7 @@ export function LetterTemplatesSetup() {
               <div>
                 <h4 className="font-medium">Variable Substitution</h4>
                 <p className="text-sm text-muted-foreground mt-1">
-                  {{employee_name}} becomes "John Smith" automatically
+                  {"{{employee_name}}"} becomes "John Smith" automatically
                 </p>
               </div>
             </div>
