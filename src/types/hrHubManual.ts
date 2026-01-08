@@ -626,7 +626,63 @@ export const HR_HUB_MANUAL_STRUCTURE: HRHubManualSection[] = [
           frequency: 'Continuous monitoring',
           timing: 'Post-launch',
           benchmark: 'Employee experience measurement'
-        }
+        },
+        subsections: [
+          {
+            id: 'hh-sec-7-1-1',
+            sectionNumber: '7.1.1',
+            title: 'Executive KPI Dashboard',
+            description: 'eNPS, sentiment percentage, engagement scores',
+            contentLevel: 'procedure',
+            estimatedReadTime: 3,
+            targetRoles: ['HR Admin', 'HR Leader']
+          },
+          {
+            id: 'hh-sec-7-1-2',
+            sectionNumber: '7.1.2',
+            title: 'Trend Analysis',
+            description: 'Time-based sentiment and engagement tracking',
+            contentLevel: 'procedure',
+            estimatedReadTime: 2,
+            targetRoles: ['HR Admin', 'HR Leader']
+          },
+          {
+            id: 'hh-sec-7-1-3',
+            sectionNumber: '7.1.3',
+            title: 'Department Comparison',
+            description: 'Cross-department benchmarking and variance analysis',
+            contentLevel: 'procedure',
+            estimatedReadTime: 2,
+            targetRoles: ['HR Admin', 'HR Leader']
+          },
+          {
+            id: 'hh-sec-7-1-4',
+            sectionNumber: '7.1.4',
+            title: 'Priority Alerts',
+            description: 'Automated alert system and escalation paths',
+            contentLevel: 'procedure',
+            estimatedReadTime: 2,
+            targetRoles: ['HR Admin', 'HR Leader']
+          },
+          {
+            id: 'hh-sec-7-1-5',
+            sectionNumber: '7.1.5',
+            title: 'AI-Generated Insights',
+            description: 'Focus areas, quick wins, and recommendations',
+            contentLevel: 'procedure',
+            estimatedReadTime: 2,
+            targetRoles: ['HR Admin', 'HR Leader']
+          },
+          {
+            id: 'hh-sec-7-1-6',
+            sectionNumber: '7.1.6',
+            title: 'Best Practices',
+            description: 'Survey frequency, action planning, industry benchmarks',
+            contentLevel: 'procedure',
+            estimatedReadTime: 1,
+            targetRoles: ['HR Admin', 'HR Leader']
+          }
+        ]
       },
       {
         id: 'hh-sec-7-2',
@@ -640,7 +696,63 @@ export const HR_HUB_MANUAL_STRUCTURE: HRHubManualSection[] = [
           frequency: 'Monthly review',
           timing: 'Ongoing',
           benchmark: 'Recognition program effectiveness'
-        }
+        },
+        subsections: [
+          {
+            id: 'hh-sec-7-2-1',
+            sectionNumber: '7.2.1',
+            title: 'Core Metrics Dashboard',
+            description: 'Total recognitions, givers, receivers, and points',
+            contentLevel: 'procedure',
+            estimatedReadTime: 2,
+            targetRoles: ['HR Admin']
+          },
+          {
+            id: 'hh-sec-7-2-2',
+            sectionNumber: '7.2.2',
+            title: 'Recognition by Type',
+            description: 'Award type distribution and analysis',
+            contentLevel: 'procedure',
+            estimatedReadTime: 2,
+            targetRoles: ['HR Admin']
+          },
+          {
+            id: 'hh-sec-7-2-3',
+            sectionNumber: '7.2.3',
+            title: 'Values Alignment',
+            description: 'Company values reinforcement tracking',
+            contentLevel: 'procedure',
+            estimatedReadTime: 2,
+            targetRoles: ['HR Admin']
+          },
+          {
+            id: 'hh-sec-7-2-4',
+            sectionNumber: '7.2.4',
+            title: 'Recognition Leaderboard',
+            description: 'Top givers and receivers ranking',
+            contentLevel: 'procedure',
+            estimatedReadTime: 2,
+            targetRoles: ['HR Admin']
+          },
+          {
+            id: 'hh-sec-7-2-5',
+            sectionNumber: '7.2.5',
+            title: 'Department Analysis',
+            description: 'Cross-department recognition patterns',
+            contentLevel: 'procedure',
+            estimatedReadTime: 1,
+            targetRoles: ['HR Admin']
+          },
+          {
+            id: 'hh-sec-7-2-6',
+            sectionNumber: '7.2.6',
+            title: 'Benchmarks & Best Practices',
+            description: 'Industry targets and recommendations',
+            contentLevel: 'procedure',
+            estimatedReadTime: 1,
+            targetRoles: ['HR Admin']
+          }
+        ]
       },
       {
         id: 'hh-sec-7-3',
@@ -654,7 +766,54 @@ export const HR_HUB_MANUAL_STRUCTURE: HRHubManualSection[] = [
           frequency: 'Initial setup, periodic updates',
           timing: 'Post-launch',
           benchmark: 'Executive HR reporting'
-        }
+        },
+        subsections: [
+          {
+            id: 'hh-sec-7-3-1',
+            sectionNumber: '7.3.1',
+            title: 'Scheduled Reports',
+            description: 'Daily, weekly, and monthly report automation',
+            contentLevel: 'procedure',
+            estimatedReadTime: 3,
+            targetRoles: ['HR Admin']
+          },
+          {
+            id: 'hh-sec-7-3-2',
+            sectionNumber: '7.3.2',
+            title: 'Report Content Options',
+            description: 'Positions, employees, and changes toggles',
+            contentLevel: 'procedure',
+            estimatedReadTime: 2,
+            targetRoles: ['HR Admin']
+          },
+          {
+            id: 'hh-sec-7-3-3',
+            sectionNumber: '7.3.3',
+            title: 'Schedule Management',
+            description: 'Create, edit, pause, and delete schedules',
+            contentLevel: 'procedure',
+            estimatedReadTime: 3,
+            targetRoles: ['HR Admin']
+          },
+          {
+            id: 'hh-sec-7-3-4',
+            sectionNumber: '7.3.4',
+            title: 'Manual Report Sending',
+            description: 'On-demand report generation and delivery',
+            contentLevel: 'procedure',
+            estimatedReadTime: 2,
+            targetRoles: ['HR Admin']
+          },
+          {
+            id: 'hh-sec-7-3-5',
+            sectionNumber: '7.3.5',
+            title: 'Advanced Features',
+            description: 'Future dashboard customization roadmap',
+            contentLevel: 'procedure',
+            estimatedReadTime: 3,
+            targetRoles: ['HR Admin']
+          }
+        ]
       }
     ]
   },

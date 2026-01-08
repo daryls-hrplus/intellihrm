@@ -64,7 +64,7 @@ export const SentimentMonitoringSetup: React.FC = () => {
       </IndustryCallout>
 
       {/* Executive KPI Dashboard */}
-      <Card>
+      <Card id="hh-sec-7-1-1" data-manual-anchor="hh-sec-7-1-1" className="scroll-mt-36">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Target className="h-5 w-5 text-primary" />
@@ -218,7 +218,7 @@ export const SentimentMonitoringSetup: React.FC = () => {
       </Card>
 
       {/* Trend Analysis */}
-      <Card>
+      <Card id="hh-sec-7-1-2" data-manual-anchor="hh-sec-7-1-2" className="scroll-mt-36">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <TrendingUp className="h-5 w-5 text-primary" />
@@ -276,7 +276,7 @@ export const SentimentMonitoringSetup: React.FC = () => {
       </Card>
 
       {/* Department Comparison */}
-      <Card>
+      <Card id="hh-sec-7-1-3" data-manual-anchor="hh-sec-7-1-3" className="scroll-mt-36">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Building2 className="h-5 w-5 text-primary" />
@@ -331,7 +331,7 @@ export const SentimentMonitoringSetup: React.FC = () => {
       </Card>
 
       {/* Priority Alerts */}
-      <Card>
+      <Card id="hh-sec-7-1-4" data-manual-anchor="hh-sec-7-1-4" className="scroll-mt-36">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <AlertTriangle className="h-5 w-5 text-primary" />
@@ -397,7 +397,7 @@ export const SentimentMonitoringSetup: React.FC = () => {
       </Card>
 
       {/* AI-Generated Insights */}
-      <Card>
+      <Card id="hh-sec-7-1-5" data-manual-anchor="hh-sec-7-1-5" className="scroll-mt-36">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Brain className="h-5 w-5 text-primary" />
@@ -457,7 +457,7 @@ export const SentimentMonitoringSetup: React.FC = () => {
       </Card>
 
       {/* Best Practices */}
-      <Card>
+      <Card id="hh-sec-7-1-6" data-manual-anchor="hh-sec-7-1-6" className="scroll-mt-36">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <CheckCircle2 className="h-5 w-5 text-primary" />

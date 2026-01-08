@@ -64,7 +64,7 @@ export const DashboardConfigurationSetup: React.FC = () => {
       </InfoCallout>
 
       {/* Scheduled Org Reports */}
-      <Card>
+      <Card id="hh-sec-7-3-1" data-manual-anchor="hh-sec-7-3-1" className="scroll-mt-36">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Calendar className="h-5 w-5 text-primary" />
@@ -180,7 +180,7 @@ export const DashboardConfigurationSetup: React.FC = () => {
       </Card>
 
       {/* Report Content Options */}
-      <Card>
+      <Card id="hh-sec-7-3-2" data-manual-anchor="hh-sec-7-3-2" className="scroll-mt-36">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <FileText className="h-5 w-5 text-primary" />
@@ -242,7 +242,7 @@ export const DashboardConfigurationSetup: React.FC = () => {
       </Card>
 
       {/* Schedule Management */}
-      <Card>
+      <Card id="hh-sec-7-3-3" data-manual-anchor="hh-sec-7-3-3" className="scroll-mt-36">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Settings className="h-5 w-5 text-primary" />
@@ -315,7 +315,7 @@ export const DashboardConfigurationSetup: React.FC = () => {
       </Card>
 
       {/* Manual Report Sending */}
-      <Card>
+      <Card id="hh-sec-7-3-4" data-manual-anchor="hh-sec-7-3-4" className="scroll-mt-36">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Send className="h-5 w-5 text-primary" />
@@ -372,7 +372,7 @@ export const DashboardConfigurationSetup: React.FC = () => {
       </Card>
 
       {/* Report Customization Roadmap */}
-      <Card>
+      <Card id="hh-sec-7-3-5" data-manual-anchor="hh-sec-7-3-5" className="scroll-mt-36">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <LayoutDashboard className="h-5 w-5 text-primary" />
