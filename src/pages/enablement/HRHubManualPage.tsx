@@ -15,7 +15,7 @@ import {
   BookOpen, CheckCircle, Circle, ArrowLeft, Sparkles, Link2
 } from 'lucide-react';
 import { HR_HUB_MANUAL_STRUCTURE } from '@/types/hrHubManual';
-import { HRHubManualOverviewSection } from '@/components/enablement/hr-hub-manual/HRHubManualOverviewSection';
+import { HRHubManualOverviewSection, HRHubManualCommunicationSection } from '@/components/enablement/hr-hub-manual';
 
 const SECTION_ICONS: Record<string, React.ReactNode> = {
   'hh-part-1': <BookOpen className="h-5 w-5" />,
@@ -125,8 +125,9 @@ export default function HRHubManualPage() {
     switch (activePartId) {
       case 'hh-part-1':
         return <HRHubManualOverviewSection />;
-      // Parts 2-8 will be added in subsequent phases
       case 'hh-part-2':
+        return <HRHubManualCommunicationSection />;
+      // Parts 3-8 will be added in subsequent phases
       case 'hh-part-3':
       case 'hh-part-4':
       case 'hh-part-5':
