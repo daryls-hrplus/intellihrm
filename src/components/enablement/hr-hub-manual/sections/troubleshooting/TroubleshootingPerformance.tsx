@@ -127,7 +127,7 @@ export function TroubleshootingPerformance() {
         </CardHeader>
         <CardContent className="space-y-8">
           {/* Performance Issues */}
-          <div id="hh-sec-8-2-issues" data-manual-anchor="hh-sec-8-2-issues">
+          <div id="hh-sec-8-2-1" data-manual-anchor="hh-sec-8-2-1">
             <TroubleshootingSection 
               items={performanceIssues}
               title="Performance Issues & Solutions"
@@ -135,7 +135,7 @@ export function TroubleshootingPerformance() {
           </div>
 
           {/* Health Metrics */}
-          <div id="hh-sec-8-2-metrics" data-manual-anchor="hh-sec-8-2-metrics">
+          <div id="hh-sec-8-2-2" data-manual-anchor="hh-sec-8-2-2">
             <h4 className="font-medium mb-4 flex items-center gap-2">
               <Gauge className="h-4 w-4 text-blue-500" />
               Performance Health Metrics
@@ -176,7 +176,7 @@ export function TroubleshootingPerformance() {
           />
 
           {/* Optimization Strategies */}
-          <div id="hh-sec-8-2-strategies" data-manual-anchor="hh-sec-8-2-strategies">
+          <div id="hh-sec-8-2-3" data-manual-anchor="hh-sec-8-2-3">
             <h4 className="font-medium mb-4 flex items-center gap-2">
               <Zap className="h-4 w-4 text-amber-500" />
               Optimization Strategies by Category
@@ -202,7 +202,7 @@ export function TroubleshootingPerformance() {
           </div>
 
           {/* Maintenance Schedule */}
-          <div id="hh-sec-8-2-maintenance" data-manual-anchor="hh-sec-8-2-maintenance">
+          <div id="hh-sec-8-2-4" data-manual-anchor="hh-sec-8-2-4">
             <h4 className="font-medium mb-4 flex items-center gap-2">
               <Clock className="h-4 w-4 text-primary" />
               Recommended Maintenance Schedule

@@ -132,7 +132,7 @@ export function TroubleshootingSecurity() {
         </CardHeader>
         <CardContent className="space-y-8">
           {/* Access Issues */}
-          <div id="hh-sec-8-3-access" data-manual-anchor="hh-sec-8-3-access">
+          <div id="hh-sec-8-3-1" data-manual-anchor="hh-sec-8-3-1">
             <TroubleshootingSection 
               items={accessIssues}
               title="Access & Authentication Issues"
@@ -140,7 +140,7 @@ export function TroubleshootingSecurity() {
           </div>
 
           {/* Data Security Issues */}
-          <div id="hh-sec-8-3-data" data-manual-anchor="hh-sec-8-3-data">
+          <div id="hh-sec-8-3-2" data-manual-anchor="hh-sec-8-3-2">
             <TroubleshootingSection 
               items={dataSecurityIssues}
               title="Data Security Issues"
@@ -153,7 +153,7 @@ export function TroubleshootingSecurity() {
           />
 
           {/* Security Checklist */}
-          <div id="hh-sec-8-3-checklist" data-manual-anchor="hh-sec-8-3-checklist">
+          <div id="hh-sec-8-3-3" data-manual-anchor="hh-sec-8-3-3">
             <h4 className="font-medium mb-4 flex items-center gap-2">
               <Lock className="h-4 w-4 text-primary" />
               Security Best Practices Checklist
@@ -185,7 +185,7 @@ export function TroubleshootingSecurity() {
           </div>
 
           {/* Incident Response */}
-          <div id="hh-sec-8-3-incident" data-manual-anchor="hh-sec-8-3-incident">
+          <div id="hh-sec-8-3-4" data-manual-anchor="hh-sec-8-3-4">
             <h4 className="font-medium mb-4 flex items-center gap-2">
               <AlertTriangle className="h-4 w-4 text-destructive" />
               Security Incident Response Procedure
@@ -216,7 +216,7 @@ export function TroubleshootingSecurity() {
           />
 
           {/* GDPR/Compliance Considerations */}
-          <div id="hh-sec-8-3-compliance" data-manual-anchor="hh-sec-8-3-compliance">
+          <div id="hh-sec-8-3-5" data-manual-anchor="hh-sec-8-3-5">
             <h4 className="font-medium mb-4 flex items-center gap-2">
               <Eye className="h-4 w-4 text-blue-500" />
               Data Protection & Compliance
