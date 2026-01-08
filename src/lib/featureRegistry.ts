@@ -1,4 +1,4 @@
-// Comprehensive Feature Registry for HRplus Cerebra
+// Comprehensive Feature Registry for Intelli HRM
 // Single source of truth for all module features, organized by business groupings
 // Canonical 25-module taxonomy with proper sub-module hierarchy
 

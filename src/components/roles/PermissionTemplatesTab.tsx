@@ -215,7 +215,7 @@ export function PermissionTemplatesTab() {
 
                     {role.tenant_visibility !== "all" && (
                       <div className="text-xs text-muted-foreground">
-                        Visibility: {role.tenant_visibility === "hrplus_internal" ? "HRplus Internal Only" : "Client Only"}
+                        Visibility: {role.tenant_visibility === "hrplus_internal" ? "Intelli HRM Internal Only" : "Client Only"}
                       </div>
                     )}
                   </div>

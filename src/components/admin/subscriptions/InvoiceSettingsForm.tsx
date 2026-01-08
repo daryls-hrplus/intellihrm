@@ -158,7 +158,7 @@ export function InvoiceSettingsForm() {
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="company_name">Company Name</Label>
-                <Input id="company_name" {...register('company_name')} placeholder="HRplus Cerebra" />
+                <Input id="company_name" {...register('company_name')} placeholder="Intelli HRM" />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="company_email">Email</Label>

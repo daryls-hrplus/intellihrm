@@ -1,4 +1,4 @@
-// Application metadata definitions for HRplus Cerebra modules and features
+// Application metadata definitions for Intelli HRM modules and features
 // This provides structured information about the application for documentation generation
 
 export interface ModuleMetadata {

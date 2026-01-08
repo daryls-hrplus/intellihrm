@@ -9,7 +9,7 @@ export function OnboardingWorkflowDesign() {
   return (
     <div className="space-y-6">
       <p className="text-muted-foreground">
-        Onboarding templates define the structured process for integrating new employees. HRplus supports 
+        Onboarding templates define the structured process for integrating new employees. Intelli HRM supports 
         multiple templates per company, job family, or role type, enabling tailored experiences while 
         maintaining compliance and consistency.
       </p>

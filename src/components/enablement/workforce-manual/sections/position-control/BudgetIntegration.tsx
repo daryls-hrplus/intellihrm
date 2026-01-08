@@ -51,7 +51,7 @@ export function BudgetIntegration() {
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-muted-foreground">
-            Every position in HRplus can be linked to financial budgets through cost 
+            Every position in Intelli HRM can be linked to financial budgets through cost 
             centers and salary projections. This enables real-time budget tracking 
             as headcount changes occur.
           </p>
@@ -252,7 +252,7 @@ export function BudgetIntegration() {
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-muted-foreground">
-            HRplus supports integration with external financial systems for 
+            Intelli HRM supports integration with external financial systems for 
             bidirectional budget synchronization:
           </p>
           <div className="grid md:grid-cols-2 gap-4">

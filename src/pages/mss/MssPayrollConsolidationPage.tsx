@@ -29,7 +29,7 @@ export default function MssPayrollConsolidationPage() {
   // Mock data for manager's team across entities
   const teamByEntity = [
     { 
-      entity: "HRPlus México", 
+      entity: "Intelli HRM México", 
       code: "MX-001",
       headcount: 24,
       grossPay: 485000,
@@ -39,7 +39,7 @@ export default function MssPayrollConsolidationPage() {
       variance: 2.3
     },
     { 
-      entity: "HRPlus Jamaica", 
+      entity: "Intelli HRM Jamaica", 
       code: "JM-001",
       headcount: 12,
       grossPay: 180000,
@@ -49,7 +49,7 @@ export default function MssPayrollConsolidationPage() {
       variance: -1.2
     },
     { 
-      entity: "HRPlus Ghana", 
+      entity: "Intelli HRM Ghana", 
       code: "GH-001",
       headcount: 8,
       grossPay: 95000,

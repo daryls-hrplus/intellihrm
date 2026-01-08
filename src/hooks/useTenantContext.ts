@@ -14,7 +14,7 @@ interface TenantContext {
 
 /**
  * Hook to determine the current user's tenant type and application version.
- * This is used to control visibility of HRplus-internal features like the Enablement Center.
+ * This is used to control visibility of Intelli HRM-internal features like the Enablement Center.
  */
 export function useTenantContext(): TenantContext {
   const { user, company } = useAuth();

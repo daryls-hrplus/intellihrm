@@ -285,7 +285,7 @@ export function IndustrySelector({
                 {currentIndustry.name} - Occupations
               </h3>
               <p className="text-sm text-muted-foreground">
-                Select occupations to import their associated skills from the HRplus library
+                Select occupations to import their associated skills from the Intelli HRM library
               </p>
             </div>
             <div className="flex gap-2">

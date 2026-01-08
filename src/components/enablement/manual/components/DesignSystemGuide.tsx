@@ -31,7 +31,7 @@ export function DesignSystemGuide() {
       <Card>
         <CardHeader>
           <Badge variant="outline" className="w-fit mb-2">Design System</Badge>
-          <CardTitle className="text-2xl">HRplus Implementation Manual Design System</CardTitle>
+          <CardTitle className="text-2xl">Intelli HRM Implementation Manual Design System</CardTitle>
           <CardDescription>
             Comprehensive reference for all standardized components used across implementation manuals.
             All colors are semantic, accessible, and support dark mode.

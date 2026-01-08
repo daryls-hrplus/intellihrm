@@ -114,7 +114,7 @@ export function JobArchitectureResponsibilities() {
         <CardContent className="space-y-4">
           <p className="text-muted-foreground">
             Responsibilities define the key duties and accountabilities for each job. 
-            HRplus uses a library approach where generic responsibilities are created 
+            Intelli HRM uses a library approach where generic responsibilities are created 
             once and linked to multiple jobs, ensuring consistency while allowing 
             job-specific customization.
           </p>

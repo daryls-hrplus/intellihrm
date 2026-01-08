@@ -261,7 +261,7 @@ export function HRHubArchitecture() {
               <div>
                 <h4 className="font-medium">Integrations → External Systems</h4>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Data flows between HRplus and payroll, ATS, benefits, and other external 
+                  Data flows between Intelli HRM and payroll, ATS, benefits, and other external 
                   systems through the Integration Hub.
                 </p>
               </div>

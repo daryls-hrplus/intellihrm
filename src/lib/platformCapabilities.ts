@@ -1,4 +1,4 @@
-// Platform Capabilities Registry - HRplus Cerebra Differentiators
+// Platform Capabilities Registry - Intelli HRM Differentiators
 // Decision-maker focused terminology for competitive positioning
 
 export type CapabilityCategory = 

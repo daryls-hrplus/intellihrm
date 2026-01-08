@@ -10,7 +10,7 @@ export function BIIntegration() {
       <section>
         <h3 className="text-lg font-semibold mb-3">Overview</h3>
         <p className="text-muted-foreground mb-4">
-          BI Integration enables connecting HRplus workforce data to external Business 
+          BI Integration enables connecting Intelli HRM workforce data to external Business 
           Intelligence tools. Export data to Power BI, Tableau, and other analytics 
           platforms for advanced visualization and cross-functional analysis.
         </p>

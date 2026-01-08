@@ -184,7 +184,7 @@ export function JobArchitectureJobs() {
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-muted-foreground">
-            HRplus includes AI capabilities to accelerate job configuration:
+            Intelli HRM includes AI capabilities to accelerate job configuration:
           </p>
           <div className="grid gap-4 md:grid-cols-2">
             <div className="p-4 rounded-lg border">

@@ -9,7 +9,7 @@ export function ComplianceReporting() {
     <div className="space-y-6">
       <p className="text-muted-foreground">
         Compliance reporting provides evidence of control effectiveness for auditors and regulators. 
-        HRplus generates reports aligned with SOC 2, ISO 27001, and regional compliance frameworks.
+        Intelli HRM generates reports aligned with SOC 2, ISO 27001, and regional compliance frameworks.
       </p>
 
       <Alert>
@@ -34,7 +34,7 @@ export function ComplianceReporting() {
             <TableRow>
               <TableHead>Framework</TableHead>
               <TableHead>Control Areas</TableHead>
-              <TableHead>HRplus Coverage</TableHead>
+              <TableHead>Intelli HRM Coverage</TableHead>
               <TableHead>Report Types</TableHead>
             </TableRow>
           </TableHeader>
@@ -114,7 +114,7 @@ export function ComplianceReporting() {
 
       <ScreenshotPlaceholder
         caption="Figure 7.4.2: Control matrix with evidence mapping"
-        alt="Detailed control matrix showing SOC 2 controls mapped to HRplus features and evidence"
+        alt="Detailed control matrix showing SOC 2 controls mapped to Intelli HRM features and evidence"
         aspectRatio="wide"
       />
 
