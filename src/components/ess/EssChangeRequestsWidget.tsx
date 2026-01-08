@@ -77,12 +77,12 @@ export function EssChangeRequestsWidget() {
   const hasUrgent = infoRequired.length > 0;
 
   return (
-    <Card className={hasUrgent ? "border-amber-200 dark:border-amber-800 bg-amber-50/50 dark:bg-amber-950/20" : "border-slate-200 dark:border-slate-700"}>
+    <Card className={hasUrgent ? "border-orange-300 dark:border-orange-700 bg-orange-50 dark:bg-orange-950/30" : ""}>
       <CardHeader className="pb-3">
-        <CardTitle className={`flex items-center gap-2 ${hasUrgent ? "text-amber-800 dark:text-amber-200" : ""}`}>
+        <CardTitle className={`flex items-center gap-2 ${hasUrgent ? "text-orange-700 dark:text-orange-300" : ""}`}>
           <GitPullRequest className="h-5 w-5" />
           Change Request Actions
-          <Badge variant="secondary" className={hasUrgent ? "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200" : ""}>
+          <Badge variant="secondary" className={hasUrgent ? "bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300" : ""}>
             {requests.length} pending
           </Badge>
         </CardTitle>
@@ -91,7 +91,7 @@ export function EssChangeRequestsWidget() {
         {/* Info Required Section - Urgent */}
         {infoRequired.length > 0 && (
           <div className="space-y-2">
-            <div className="flex items-center gap-2 text-sm font-medium text-amber-700 dark:text-amber-300">
+          <div className="flex items-center gap-2 text-sm font-medium text-orange-600 dark:text-orange-400">
               <AlertCircle className="h-4 w-4" />
               Response Required
             </div>
@@ -137,12 +137,12 @@ function RequestCard({ request, variant, onAction }: { request: ChangeRequest; v
     <div
       className={`flex items-center justify-between p-3 rounded-lg border ${
         variant === "urgent"
-          ? "bg-amber-100/50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800"
+          ? "bg-orange-50 dark:bg-orange-950/30 border-orange-200 dark:border-orange-800"
           : "bg-muted/30 border-border"
       }`}
     >
       <div className="flex items-center gap-3 min-w-0 flex-1">
-        <div className={`p-2 rounded-md ${variant === "urgent" ? "bg-amber-200/50 dark:bg-amber-800/30" : "bg-muted"}`}>
+        <div className={`p-2 rounded-md ${variant === "urgent" ? "bg-orange-100 dark:bg-orange-900/50" : "bg-muted"}`}>
           <Icon className="h-4 w-4" />
         </div>
         <div className="min-w-0 flex-1">
@@ -151,7 +151,7 @@ function RequestCard({ request, variant, onAction }: { request: ChangeRequest; v
             <span className="text-xs text-muted-foreground">• {actionLabel}</span>
           </div>
           {variant === "urgent" && request.review_notes && (
-            <p className="text-xs text-amber-700 dark:text-amber-300 truncate mt-0.5">
+            <p className="text-xs text-orange-600 dark:text-orange-400 truncate mt-0.5">
               Info needed: {request.review_notes}
             </p>
           )}
