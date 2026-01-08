@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,9 +11,11 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2, FileText, Search, Eye } from "lucide-react";
+import { Plus, Pencil, Trash2, FileText, Search, Eye, Sparkles, ChevronDown, AlertTriangle, Loader2, Check, X } from "lucide-react";
 import { formatDateForDisplay } from "@/utils/dateUtils";
+import { useTemplateAI } from "@/hooks/useTemplateAI";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -50,6 +52,8 @@ export function CannedResponseManagementPanel() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [existingOpen, setExistingOpen] = useState(false);
+  const [improvedContent, setImprovedContent] = useState<string | null>(null);
   const [editingResponse, setEditingResponse] = useState<CannedResponse | null>(null);
   const [formData, setFormData] = useState({
     title: "",
@@ -57,6 +61,8 @@ export function CannedResponseManagementPanel() {
     category_id: "",
     is_active: true,
   });
+
+  const { isGenerating, isImproving, suggestions, suggestTemplates, improveContent, clearSuggestions } = useTemplateAI();
 
   const { data: responses = [], isLoading } = useQuery({
     queryKey: ["canned-responses-admin"],
@@ -140,6 +146,9 @@ export function CannedResponseManagementPanel() {
     setDialogOpen(false);
     setEditingResponse(null);
     setFormData({ title: "", content: "", category_id: "", is_active: true });
+    setImprovedContent(null);
+    setExistingOpen(false);
+    clearSuggestions();
   };
 
   const handleEdit = (response: CannedResponse) => {
@@ -177,6 +186,64 @@ export function CannedResponseManagementPanel() {
       r.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       r.content.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  // Templates for the selected category
+  const templatesForCategory = useMemo(() => {
+    if (!formData.category_id) {
+      return responses.filter((r) => !r.category_id);
+    }
+    return responses.filter((r) => r.category_id === formData.category_id);
+  }, [responses, formData.category_id]);
+
+  // Check for similar title
+  const hasSimilarTitle = useMemo(() => {
+    if (!formData.title.trim()) return false;
+    const lowerTitle = formData.title.toLowerCase().trim();
+    return templatesForCategory.some(
+      (t) =>
+        t.id !== editingResponse?.id &&
+        (t.title.toLowerCase().includes(lowerTitle) || lowerTitle.includes(t.title.toLowerCase()))
+    );
+  }, [templatesForCategory, formData.title, editingResponse]);
+
+  const selectedCategoryName = useMemo(() => {
+    if (!formData.category_id) return "All Categories";
+    return categories.find((c) => c.id === formData.category_id)?.name || "Selected Category";
+  }, [formData.category_id, categories]);
+
+  const handleSuggestTemplates = async () => {
+    const existingTitles = templatesForCategory.map((t) => t.title);
+    await suggestTemplates(selectedCategoryName, existingTitles);
+  };
+
+  const handleImproveContent = async () => {
+    if (!formData.content.trim()) {
+      toast.error("Please enter some content first");
+      return;
+    }
+    const result = await improveContent(formData.content);
+    if (result) {
+      setImprovedContent(result);
+    }
+  };
+
+  const acceptImprovedContent = () => {
+    if (improvedContent) {
+      setFormData((prev) => ({ ...prev, content: improvedContent }));
+      setImprovedContent(null);
+      toast.success("Improved content applied");
+    }
+  };
+
+  const applySuggestion = (suggestion: { title: string; content: string }) => {
+    setFormData((prev) => ({
+      ...prev,
+      title: suggestion.title,
+      content: suggestion.content,
+    }));
+    clearSuggestions();
+    toast.success("Template suggestion applied");
+  };
 
   const getPreviewContent = () => {
     return formData.content
@@ -301,23 +368,36 @@ export function CannedResponseManagementPanel() {
               {editingResponse ? "Edit Template" : "Create Template"}
             </DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
+          <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-2">
             <div>
-              <Label>
-                Title <span className="text-destructive">*</span>
-              </Label>
+              <div className="flex items-center gap-2">
+                <Label>
+                  Title <span className="text-destructive">*</span>
+                </Label>
+                {hasSimilarTitle && (
+                  <Badge variant="outline" className="text-amber-600 border-amber-300 bg-amber-50">
+                    <AlertTriangle className="h-3 w-3 mr-1" />
+                    Similar exists
+                  </Badge>
+                )}
+              </div>
               <Input
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                 placeholder="e.g., Leave Balance Inquiry"
+                className={hasSimilarTitle ? "border-amber-300" : ""}
               />
             </div>
 
             <div>
               <Label>Category</Label>
-            <Select
+              <Select
                 value={formData.category_id || "__all__"}
-                onValueChange={(v) => setFormData({ ...formData, category_id: v === "__all__" ? "" : v })}
+                onValueChange={(v) => {
+                  setFormData({ ...formData, category_id: v === "__all__" ? "" : v });
+                  setExistingOpen(true);
+                  clearSuggestions();
+                }}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="All Categories" />
@@ -336,17 +416,142 @@ export function CannedResponseManagementPanel() {
               </p>
             </div>
 
+            {/* Existing Templates Section */}
+            {templatesForCategory.length > 0 && (
+              <Collapsible open={existingOpen} onOpenChange={setExistingOpen}>
+                <CollapsibleTrigger asChild>
+                  <Button variant="ghost" size="sm" className="w-full justify-between px-3 py-2 h-auto bg-muted/50 hover:bg-muted">
+                    <span className="flex items-center gap-2 text-sm">
+                      <FileText className="h-4 w-4" />
+                      Existing Templates ({templatesForCategory.length})
+                    </span>
+                    <ChevronDown className={`h-4 w-4 transition-transform ${existingOpen ? "rotate-180" : ""}`} />
+                  </Button>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="mt-2">
+                  <div className="border rounded-md p-2 space-y-1 max-h-32 overflow-y-auto bg-background">
+                    {templatesForCategory.map((t) => (
+                      <div key={t.id} className="text-sm px-2 py-1 rounded hover:bg-muted flex items-center justify-between group">
+                        <span className="truncate">{t.title}</span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-6 px-2 opacity-0 group-hover:opacity-100"
+                          onClick={() => {
+                            setFormData({ ...formData, title: t.title, content: t.content });
+                            toast.info("Template loaded - modify as needed");
+                          }}
+                        >
+                          Use as base
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
+            )}
+
+            {/* AI Suggestions Button */}
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handleSuggestTemplates}
+              disabled={isGenerating}
+              className="w-full"
+            >
+              {isGenerating ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Generating suggestions...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="h-4 w-4 mr-2" />
+                  Suggest Templates for {selectedCategoryName}
+                </>
+              )}
+            </Button>
+
+            {/* AI Suggestions Display */}
+            {suggestions.length > 0 && (
+              <div className="border rounded-md p-3 space-y-2 bg-gradient-to-br from-purple-50/50 to-blue-50/50 dark:from-purple-950/20 dark:to-blue-950/20">
+                <Label className="text-sm flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 text-purple-500" />
+                  AI Suggestions
+                </Label>
+                <div className="space-y-2 max-h-48 overflow-y-auto">
+                  {suggestions.map((s, idx) => (
+                    <div key={idx} className="p-2 rounded-md bg-background border hover:border-primary/50 cursor-pointer" onClick={() => applySuggestion(s)}>
+                      <p className="font-medium text-sm">{s.title}</p>
+                      <p className="text-xs text-muted-foreground mt-1">{s.useCase}</p>
+                    </div>
+                  ))}
+                </div>
+                <Button variant="ghost" size="sm" onClick={clearSuggestions} className="w-full">
+                  Dismiss suggestions
+                </Button>
+              </div>
+            )}
+
             <div>
-              <Label>
-                Content <span className="text-destructive">*</span>
-              </Label>
+              <div className="flex items-center justify-between mb-1">
+                <Label>
+                  Content <span className="text-destructive">*</span>
+                </Label>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleImproveContent}
+                  disabled={isImproving || !formData.content.trim()}
+                >
+                  {isImproving ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                      Improving...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="h-4 w-4 mr-1" />
+                      AI Improve
+                    </>
+                  )}
+                </Button>
+              </div>
               <Textarea
                 value={formData.content}
-                onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                onChange={(e) => {
+                  setFormData({ ...formData, content: e.target.value });
+                  setImprovedContent(null);
+                }}
                 placeholder="Type your response template here..."
                 rows={6}
               />
             </div>
+
+            {/* Improved Content Comparison */}
+            {improvedContent && (
+              <div className="border rounded-md p-3 space-y-2 bg-gradient-to-br from-green-50/50 to-emerald-50/50 dark:from-green-950/20 dark:to-emerald-950/20">
+                <Label className="text-sm flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 text-green-500" />
+                  Improved Version
+                </Label>
+                <div className="p-2 rounded-md bg-background border text-sm whitespace-pre-wrap max-h-40 overflow-y-auto">
+                  {improvedContent}
+                </div>
+                <div className="flex gap-2">
+                  <Button size="sm" onClick={acceptImprovedContent} className="flex-1">
+                    <Check className="h-4 w-4 mr-1" />
+                    Accept
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={() => setImprovedContent(null)} className="flex-1">
+                    <X className="h-4 w-4 mr-1" />
+                    Keep Original
+                  </Button>
+                </div>
+              </div>
+            )}
 
             <div>
               <Label className="text-sm text-muted-foreground">Available Variables</Label>
