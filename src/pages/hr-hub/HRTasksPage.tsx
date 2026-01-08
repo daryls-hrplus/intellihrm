@@ -17,7 +17,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { DatePicker } from "@/components/ui/date-picker";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { formatDateForDisplay } from "@/utils/dateUtils";
-import { Plus, CheckSquare, Clock, AlertCircle, Building2, Search, CalendarDays, X, MoreHorizontal, Pencil, Trash2, User } from "lucide-react";
+import { Plus, CheckSquare, Clock, AlertCircle, Building2, Search, CalendarDays, X, MoreHorizontal, Pencil, Trash2, User, Repeat } from "lucide-react";
 
 interface Company {
   id: string;
@@ -40,6 +40,8 @@ interface HRTask {
   company_id: string | null;
   created_at: string;
   completed_at: string | null;
+  is_recurring: boolean | null;
+  recurrence_pattern: string | null;
   company?: { name: string } | null;
   assignee?: { full_name: string } | null;
 }
@@ -49,6 +51,16 @@ const priorities = [
   { value: "medium", label: "Medium", color: "bg-amber-500" },
   { value: "high", label: "High", color: "bg-orange-500" },
   { value: "urgent", label: "Urgent", color: "bg-red-500" },
+];
+
+const recurrenceOptions = [
+  { value: "none", label: "No Recurrence" },
+  { value: "daily", label: "Daily" },
+  { value: "weekly", label: "Weekly" },
+  { value: "biweekly", label: "Every 2 Weeks" },
+  { value: "monthly", label: "Monthly" },
+  { value: "quarterly", label: "Quarterly" },
+  { value: "yearly", label: "Yearly" },
 ];
 
 // Helper to avoid deep type instantiation
@@ -77,6 +89,8 @@ export default function HRTasksPage() {
     due_date: "",
     company_id: "",
     assigned_to: "",
+    is_recurring: false,
+    recurrence_pattern: "none",
   });
 
   useEffect(() => {
@@ -138,6 +152,7 @@ export default function HRTasksPage() {
         if (res.error) throw res.error;
         toast({ title: t("common.success"), description: t("common.saved") });
       } else {
+        const isRecurring = formData.recurrence_pattern !== "none";
         const res: any = await query("hr_tasks").insert({
           title: formData.title,
           description: formData.description || null,
@@ -146,6 +161,8 @@ export default function HRTasksPage() {
           company_id: formData.company_id,
           assigned_to: formData.assigned_to || null,
           created_by: profile?.id,
+          is_recurring: isRecurring,
+          recurrence_pattern: isRecurring ? formData.recurrence_pattern : null,
         });
 
         if (res.error) throw res.error;
@@ -170,6 +187,8 @@ export default function HRTasksPage() {
       due_date: task.due_date || "",
       company_id: task.company_id || "",
       assigned_to: task.assigned_to || "",
+      is_recurring: task.is_recurring || false,
+      recurrence_pattern: task.recurrence_pattern || "none",
     });
     setDialogOpen(true);
   };
@@ -188,7 +207,7 @@ export default function HRTasksPage() {
   const closeDialog = () => {
     setDialogOpen(false);
     setEditingTask(null);
-    setFormData({ title: "", description: "", priority: "medium", due_date: "", company_id: "", assigned_to: "" });
+    setFormData({ title: "", description: "", priority: "medium", due_date: "", company_id: "", assigned_to: "", is_recurring: false, recurrence_pattern: "none" });
   };
 
   const toggleTaskComplete = async (taskId: string, currentStatus: string) => {
@@ -399,6 +418,12 @@ export default function HRTasksPage() {
                         <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium text-white ${getPriorityColor(task.priority)}`}>
                           {priorityLabels[task.priority]}
                         </span>
+                        {task.is_recurring && (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-primary/10 text-primary">
+                            <Repeat className="h-3 w-3" />
+                            {recurrenceOptions.find(r => r.value === task.recurrence_pattern)?.label || "Recurring"}
+                          </span>
+                        )}
                       </div>
                       {task.description && (
                         <p className="text-sm text-muted-foreground mt-1 line-clamp-1">{task.description}</p>
@@ -505,7 +530,7 @@ export default function HRTasksPage() {
               </div>
 
               <div className="space-y-2">
-                <Label>{t("common.assignedTo")}</Label>
+                <Label>{t("helpdesk.assignedTo")}</Label>
                 <Select 
                   value={formData.assigned_to || "__unassigned__"} 
                   onValueChange={(v) => setFormData({ ...formData, assigned_to: v === "__unassigned__" ? "" : v })}
@@ -521,6 +546,33 @@ export default function HRTasksPage() {
                   </SelectContent>
                 </Select>
               </div>
+
+              {!editingTask && (
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-2">
+                    <Repeat className="h-4 w-4" />
+                    Recurrence
+                  </Label>
+                  <Select 
+                    value={formData.recurrence_pattern} 
+                    onValueChange={(v) => setFormData({ ...formData, recurrence_pattern: v, is_recurring: v !== "none" })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {recurrenceOptions.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {formData.recurrence_pattern !== "none" && (
+                    <p className="text-xs text-muted-foreground">
+                      This task will be automatically recreated {formData.recurrence_pattern} after completion.
+                    </p>
+                  )}
+                </div>
+              )}
 
               <div className="space-y-2">
                 <Label>{t("common.description")}</Label>

@@ -28896,7 +28896,11 @@ export type Database = {
           description: string | null
           due_date: string | null
           id: string
+          is_recurring: boolean | null
+          parent_recurring_task_id: string | null
           priority: string
+          recurrence_end_date: string | null
+          recurrence_pattern: string | null
           status: string
           title: string
           updated_at: string
@@ -28910,7 +28914,11 @@ export type Database = {
           description?: string | null
           due_date?: string | null
           id?: string
+          is_recurring?: boolean | null
+          parent_recurring_task_id?: string | null
           priority?: string
+          recurrence_end_date?: string | null
+          recurrence_pattern?: string | null
           status?: string
           title: string
           updated_at?: string
@@ -28924,7 +28932,11 @@ export type Database = {
           description?: string | null
           due_date?: string | null
           id?: string
+          is_recurring?: boolean | null
+          parent_recurring_task_id?: string | null
           priority?: string
+          recurrence_end_date?: string | null
+          recurrence_pattern?: string | null
           status?: string
           title?: string
           updated_at?: string
@@ -28949,6 +28961,13 @@ export type Database = {
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hr_tasks_parent_recurring_task_id_fkey"
+            columns: ["parent_recurring_task_id"]
+            isOneToOne: false
+            referencedRelation: "hr_tasks"
             referencedColumns: ["id"]
           },
         ]
