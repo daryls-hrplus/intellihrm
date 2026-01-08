@@ -39,7 +39,7 @@ export function MultiPositionEmployees() {
         alt="Position assignment dialog showing primary and secondary positions with FTE percentages"
       />
 
-      <Alert className="border-primary/20 bg-primary/5">
+      <Alert className="border-border bg-muted/50">
         <Info className="h-4 w-4" />
         <AlertTitle>Payroll Impact</AlertTitle>
         <AlertDescription>

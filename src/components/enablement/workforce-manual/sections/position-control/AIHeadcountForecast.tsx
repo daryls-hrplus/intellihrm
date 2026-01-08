@@ -63,12 +63,12 @@ export function AIHeadcountForecast() {
               Workforce → Headcount Forecast
             </code>
           </div>
-          <div className="bg-pink-50 dark:bg-pink-950/30 border border-pink-200 dark:border-pink-800 rounded-lg p-4">
+          <div className="bg-muted/50 border border-border rounded-lg p-4">
             <div className="flex items-start gap-3">
               <Brain className="h-5 w-5 text-pink-500 mt-0.5" />
               <div>
-                <h4 className="font-semibold text-pink-800 dark:text-pink-200">How It Works</h4>
-                <p className="text-sm text-pink-700 dark:text-pink-300">
+                <h4 className="font-semibold">How It Works</h4>
+                <p className="text-sm text-muted-foreground">
                   The system uses machine learning models trained on your organization's 
                   historical data, including request volumes, approval patterns, attrition 
                   rates, and seasonal hiring cycles to generate accurate predictions.
@@ -336,11 +336,11 @@ export function AIHeadcountForecast() {
               </p>
             </div>
           </div>
-          <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-            <h4 className="font-semibold text-blue-800 dark:text-blue-200 mb-2">
+          <div className="bg-muted/50 border border-border rounded-lg p-4">
+            <h4 className="font-semibold mb-2">
               Forecast Accuracy Tracking
             </h4>
-            <p className="text-sm text-blue-700 dark:text-blue-300">
+            <p className="text-sm text-muted-foreground">
               Over time, compare past forecasts against actual outcomes to measure 
               AI accuracy. This helps calibrate confidence in future predictions 
               and identify areas where the model needs adjustment.
@@ -356,7 +356,7 @@ export function AIHeadcountForecast() {
       <Separator />
 
       {/* Industry Context */}
-      <Card className="border-primary/20 bg-primary/5">
+      <Card className="border-border bg-muted/50">
         <CardHeader>
           <CardTitle className="text-lg">Industry Context</CardTitle>
         </CardHeader>

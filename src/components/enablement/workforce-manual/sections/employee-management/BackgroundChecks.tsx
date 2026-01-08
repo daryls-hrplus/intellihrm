@@ -55,7 +55,7 @@ export function BackgroundChecks() {
         alt="Background check dashboard showing check types and verification status"
       />
 
-      <Alert className="border-primary/20 bg-primary/5">
+      <Alert className="border-border bg-muted/50">
         <Shield className="h-4 w-4" />
         <AlertTitle>Compliance Note</AlertTitle>
         <AlertDescription>

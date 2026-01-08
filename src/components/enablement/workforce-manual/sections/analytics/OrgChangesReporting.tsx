@@ -126,7 +126,7 @@ export function OrgChangesReporting() {
         alt="Audit log showing timestamped changes with user, reason, and before/after values"
       />
 
-      <Alert className="border-primary/20 bg-primary/5">
+      <Alert className="border-border bg-muted/50">
         <Info className="h-4 w-4" />
         <AlertTitle>Regulatory Compliance</AlertTitle>
         <AlertDescription>

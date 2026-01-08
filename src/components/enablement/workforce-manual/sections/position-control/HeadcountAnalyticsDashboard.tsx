@@ -154,9 +154,9 @@ export function HeadcountAnalyticsDashboard() {
               </tbody>
             </table>
           </div>
-          <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-            <h4 className="font-semibold text-blue-800 dark:text-blue-200 mb-2">Chart Visualization</h4>
-            <p className="text-sm text-blue-700 dark:text-blue-300">
+          <div className="bg-muted/50 border border-border rounded-lg p-4">
+            <h4 className="font-semibold mb-2">Chart Visualization</h4>
+            <p className="text-sm text-muted-foreground">
               The dashboard includes interactive area charts showing request volume and 
               net headcount change over time. Hover over data points to see detailed 
               breakdowns.
@@ -299,7 +299,7 @@ export function HeadcountAnalyticsDashboard() {
       <Separator />
 
       {/* Industry Context */}
-      <Card className="border-primary/20 bg-primary/5">
+      <Card className="border-border bg-muted/50">
         <CardHeader>
           <CardTitle className="text-lg">Industry Context</CardTitle>
         </CardHeader>

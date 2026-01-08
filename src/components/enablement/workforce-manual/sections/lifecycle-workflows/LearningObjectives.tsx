@@ -7,7 +7,7 @@ interface LearningObjectivesProps {
 
 export function LearningObjectives({ title = "Learning Objectives", items }: LearningObjectivesProps) {
   return (
-    <div className="bg-primary/5 border border-primary/20 rounded-lg p-4">
+    <div className="bg-muted/50 border border-border rounded-lg p-4">
       <div className="flex items-center gap-2 mb-3">
         <Target className="h-4 w-4 text-primary" />
         <span className="font-medium text-sm">{title}</span>

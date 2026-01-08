@@ -60,8 +60,8 @@ export function GovernmentIdsManagement() {
         alt="ID management view showing document types and expiration dates"
       />
 
-      <Alert className="border-amber-500/20 bg-amber-50 dark:bg-amber-900/10">
-        <AlertTriangle className="h-4 w-4 text-amber-500" />
+      <Alert className="border-border bg-muted/50">
+        <AlertTriangle className="h-4 w-4" />
         <AlertTitle>Expiry Alerts</AlertTitle>
         <AlertDescription>
           Configure expiry alerts in HR Hub → Compliance Tracker. Default alerts trigger 

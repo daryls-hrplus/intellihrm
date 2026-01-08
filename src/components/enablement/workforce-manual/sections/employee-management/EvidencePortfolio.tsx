@@ -48,7 +48,7 @@ export function EvidencePortfolio() {
         alt="Portfolio view showing uploaded evidence with validation status"
       />
 
-      <Alert className="border-primary/20 bg-primary/5">
+      <Alert className="border-border bg-muted/50">
         <Info className="h-4 w-4" />
         <AlertTitle>Validation Workflow</AlertTitle>
         <AlertDescription>

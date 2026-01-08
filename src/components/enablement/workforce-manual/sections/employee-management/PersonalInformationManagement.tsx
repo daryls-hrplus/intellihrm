@@ -63,7 +63,7 @@ export function PersonalInformationManagement() {
         alt="Employee personal information form showing contact fields and emergency contacts section"
       />
 
-      <Alert className="border-primary/20 bg-primary/5">
+      <Alert className="border-border bg-muted/50">
         <Shield className="h-4 w-4" />
         <AlertTitle>PII Protection</AlertTitle>
         <AlertDescription>

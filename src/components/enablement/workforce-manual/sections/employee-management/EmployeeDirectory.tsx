@@ -48,7 +48,7 @@ export function EmployeeDirectory() {
         alt="Directory search interface showing employee cards with contact information"
       />
 
-      <Alert className="border-primary/20 bg-primary/5">
+      <Alert className="border-border bg-muted/50">
         <Info className="h-4 w-4" />
         <AlertTitle>Configuration</AlertTitle>
         <AlertDescription>

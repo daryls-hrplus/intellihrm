@@ -67,7 +67,7 @@ export function EmployeeTransactions() {
         alt="Transaction log showing promotions, transfers, and grade changes with dates"
       />
 
-      <Alert className="border-primary/20 bg-primary/5">
+      <Alert className="border-border bg-muted/50">
         <Info className="h-4 w-4" />
         <AlertTitle>Effective Dating</AlertTitle>
         <AlertDescription>
