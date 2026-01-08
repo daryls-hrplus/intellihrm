@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { 
   BookOpen, FileText, MessageSquare, Shield, 
-  Workflow, Database, Bell, Search
+  Workflow, Database, Bell, Search, CheckSquare, Repeat, Activity
 } from 'lucide-react';
 import { NoteCallout } from '@/components/enablement/manual/components/Callout';
 
@@ -71,6 +71,30 @@ export function HRHubConcepts() {
       term: 'Intranet',
       definition: 'Internal company portal with pages, navigation, and role-based content visibility.',
       example: 'Company news, HR policies landing page, benefits enrollment portal.'
+    },
+    {
+      icon: CheckSquare,
+      color: 'text-indigo-500',
+      bgColor: 'bg-indigo-500/10',
+      term: 'HR Tasks',
+      definition: 'Centralized task management for HR operations with priority levels, due dates, team assignment, and collaboration features.',
+      example: 'Monthly payroll review task assigned to Payroll Manager with comments for team collaboration.'
+    },
+    {
+      icon: Repeat,
+      color: 'text-teal-500',
+      bgColor: 'bg-teal-500/10',
+      term: 'Recurring Tasks',
+      definition: 'Automated task creation on defined schedules (daily, weekly, biweekly, monthly, quarterly, yearly) for repetitive HR activities.',
+      example: 'Quarterly compliance review tasks auto-generated 30 days before each quarter end.'
+    },
+    {
+      icon: Activity,
+      color: 'text-emerald-500',
+      bgColor: 'bg-emerald-500/10',
+      term: 'Task Activity Log',
+      definition: 'Collaborative discussion threads on tasks enabling team communication, progress updates, and audit trail of task lifecycle.',
+      example: 'HR team discusses completion steps on an onboarding task with timestamps and user attribution.'
     }
   ];
 
@@ -171,6 +195,24 @@ export function HRHubConcepts() {
             <p className="text-sm text-muted-foreground">
               Compliance tracker monitors deadlines, sends proactive reminders, and logs 
               all actions for audit purposes.
+            </p>
+
+            <div className="flex items-center gap-4 p-4 rounded-lg border bg-muted/30">
+              <div className="flex items-center gap-2 text-sm flex-wrap">
+                <Badge variant="outline">Recurring Pattern</Badge>
+                <span className="text-muted-foreground">→</span>
+                <Badge variant="outline">HR Task Created</Badge>
+                <span className="text-muted-foreground">→</span>
+                <Badge variant="outline">Team Assignment</Badge>
+                <span className="text-muted-foreground">→</span>
+                <Badge variant="outline">Comments</Badge>
+                <span className="text-muted-foreground">→</span>
+                <Badge variant="outline">Completion</Badge>
+              </div>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Recurring task patterns auto-create tasks on schedule. Team members collaborate 
+              via comments, track progress, and complete with full audit trail.
             </p>
           </div>
         </CardContent>

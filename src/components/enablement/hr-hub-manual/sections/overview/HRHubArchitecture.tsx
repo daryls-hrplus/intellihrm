@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { 
   Building2, FileText, ArrowRight, Database, 
-  Users, BarChart3, Shield, Settings
+  Users, BarChart3, Shield, Settings, CheckSquare
 } from 'lucide-react';
 import { ModuleIntegrationMap } from '@/components/enablement/shared';
 import { WarningCallout, InfoCallout } from '@/components/enablement/manual/components/Callout';
@@ -101,7 +101,7 @@ export function HRHubArchitecture() {
                 <FileText className="h-4 w-4" />
                 HR Hub Core Layer
               </h4>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
                 <div className="p-2 bg-background rounded border text-center text-sm">
                   Help Desk
                 </div>
@@ -113,6 +113,9 @@ export function HRHubArchitecture() {
                 </div>
                 <div className="p-2 bg-background rounded border text-center text-sm">
                   Compliance
+                </div>
+                <div className="p-2 bg-background rounded border text-center text-sm">
+                  Task Comments
                 </div>
               </div>
             </div>
@@ -127,7 +130,7 @@ export function HRHubArchitecture() {
                 <Settings className="h-4 w-4" />
                 Automation Layer
               </h4>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
                 <div className="p-2 bg-background rounded border text-center text-sm">
                   Workflows
                 </div>
@@ -139,6 +142,9 @@ export function HRHubArchitecture() {
                 </div>
                 <div className="p-2 bg-background rounded border text-center text-sm">
                   Tasks
+                </div>
+                <div className="p-2 bg-background rounded border text-center text-sm">
+                  Recurring Tasks
                 </div>
               </div>
             </div>
@@ -206,6 +212,16 @@ export function HRHubArchitecture() {
                 <p className="text-sm text-muted-foreground mt-1">
                   Holiday calendars and events are location-aware. Branch setup in Workforce 
                   enables location-specific event management.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-start gap-4 p-4 rounded-lg border">
+              <CheckSquare className="h-5 w-5 text-indigo-500 mt-0.5 flex-shrink-0" />
+              <div>
+                <h4 className="font-medium">Tasks → Team Profiles</h4>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Task assignment uses active employee profiles. Recurring tasks respect 
+                  company and team structure for automatic routing.
                 </p>
               </div>
             </div>
