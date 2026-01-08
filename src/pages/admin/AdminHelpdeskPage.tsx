@@ -444,7 +444,7 @@ export default function AdminHelpdeskPage() {
               Agents
             </TabsTrigger>
             
-            <div className="mx-2 h-6 w-px bg-border hidden sm:block" />
+            <div className="mx-2 h-5 w-px bg-muted-foreground/40 hidden sm:block" />
             
             {/* Monitoring */}
             <TabsTrigger value="analytics" className="flex items-center gap-2">
@@ -460,7 +460,7 @@ export default function AdminHelpdeskPage() {
               Satisfaction
             </TabsTrigger>
             
-            <div className="mx-2 h-6 w-px bg-border hidden sm:block" />
+            <div className="mx-2 h-5 w-px bg-muted-foreground/40 hidden sm:block" />
             
             {/* Configuration */}
             <TabsTrigger value="escalation" className="flex items-center gap-2">
