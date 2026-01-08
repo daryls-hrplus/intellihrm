@@ -1,11 +1,6 @@
 import React from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  Ticket, 
-  Megaphone, 
-  Book, 
-  Bell 
-} from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Clock } from 'lucide-react';
 import { 
   HelpDeskConfiguration,
   CompanyCommunications,
@@ -15,54 +10,42 @@ import {
 
 export function HRHubManualCommunicationSection() {
   return (
-    <div className="space-y-6">
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold mb-2">Chapter 2: Communication & Support Setup</h2>
+    <div className="space-y-12">
+      {/* Chapter Header */}
+      <div className="mb-8">
+        <div className="flex items-center gap-3 mb-4">
+          <Badge variant="outline" className="text-sm">Chapter 2</Badge>
+          <div className="flex items-center gap-1 text-muted-foreground text-sm">
+            <Clock className="h-4 w-4" />
+            <span>~50 min read</span>
+          </div>
+        </div>
+        <h2 className="text-2xl font-bold mb-2">Communication & Support Setup</h2>
         <p className="text-muted-foreground">
-          Configure Help Desk operations, company communications, knowledge base, and notification systems.
+          Configure Help Desk operations, company communications, knowledge base, and notification systems 
+          for proactive HR service delivery.
         </p>
       </div>
 
-      <Tabs defaultValue="helpdesk" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="helpdesk" className="flex items-center gap-2">
-            <Ticket className="h-4 w-4" />
-            <span className="hidden sm:inline">Help Desk</span>
-            <span className="sm:hidden">2.1</span>
-          </TabsTrigger>
-          <TabsTrigger value="communications" className="flex items-center gap-2">
-            <Megaphone className="h-4 w-4" />
-            <span className="hidden sm:inline">Communications</span>
-            <span className="sm:hidden">2.2</span>
-          </TabsTrigger>
-          <TabsTrigger value="knowledge" className="flex items-center gap-2">
-            <Book className="h-4 w-4" />
-            <span className="hidden sm:inline">Knowledge Base</span>
-            <span className="sm:hidden">2.3</span>
-          </TabsTrigger>
-          <TabsTrigger value="notifications" className="flex items-center gap-2">
-            <Bell className="h-4 w-4" />
-            <span className="hidden sm:inline">Notifications</span>
-            <span className="sm:hidden">2.4</span>
-          </TabsTrigger>
-        </TabsList>
+      {/* Section 2.1: Help Desk Configuration */}
+      <section data-manual-anchor="hh-sec-2-1">
+        <HelpDeskConfiguration />
+      </section>
 
-        <TabsContent value="helpdesk">
-          <HelpDeskConfiguration />
-        </TabsContent>
+      {/* Section 2.2: Company Communications */}
+      <section data-manual-anchor="hh-sec-2-2">
+        <CompanyCommunications />
+      </section>
 
-        <TabsContent value="communications">
-          <CompanyCommunications />
-        </TabsContent>
+      {/* Section 2.3: Knowledge Base Setup */}
+      <section data-manual-anchor="hh-sec-2-3">
+        <KnowledgeBaseSetup />
+      </section>
 
-        <TabsContent value="knowledge">
-          <KnowledgeBaseSetup />
-        </TabsContent>
-
-        <TabsContent value="notifications">
-          <NotificationsReminders />
-        </TabsContent>
-      </Tabs>
+      {/* Section 2.4: Notifications & Reminders */}
+      <section data-manual-anchor="hh-sec-2-4">
+        <NotificationsReminders />
+      </section>
     </div>
   );
 }

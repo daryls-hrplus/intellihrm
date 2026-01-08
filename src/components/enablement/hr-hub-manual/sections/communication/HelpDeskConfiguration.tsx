@@ -37,9 +37,16 @@ export function HelpDeskConfiguration() {
             <div className="p-2 rounded-lg bg-primary/10">
               <Ticket className="h-6 w-6 text-primary" />
             </div>
-            <div>
-              <CardTitle>2.1 Help Desk Configuration</CardTitle>
-              <p className="text-sm text-muted-foreground mt-1">
+            <div className="flex-1">
+              <div className="flex items-center gap-3 mb-1">
+                <CardTitle>Help Desk Configuration</CardTitle>
+                <Badge variant="outline" className="text-xs">Section 2.1</Badge>
+                <div className="flex items-center gap-1 text-muted-foreground text-xs">
+                  <Clock className="h-3 w-3" />
+                  <span>~12 min</span>
+                </div>
+              </div>
+              <p className="text-sm text-muted-foreground">
                 Complete HR Help Desk administration and ticket management
               </p>
             </div>

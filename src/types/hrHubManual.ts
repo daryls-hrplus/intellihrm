@@ -127,10 +127,10 @@ export const HR_HUB_MANUAL_STRUCTURE: HRHubManualSection[] = [
       {
         id: 'hh-sec-2-2',
         sectionNumber: '2.2',
-        title: 'Announcements Management',
-        description: 'Company-wide communications, targeted messaging, scheduling',
+        title: 'Company Communications',
+        description: 'Announcements, photo gallery, blog posts, and intranet content',
         contentLevel: 'procedure',
-        estimatedReadTime: 10,
+        estimatedReadTime: 12,
         targetRoles: ['HR Admin', 'Communications'],
         industryContext: {
           frequency: 'Ongoing',
@@ -155,15 +155,15 @@ export const HR_HUB_MANUAL_STRUCTURE: HRHubManualSection[] = [
       {
         id: 'hh-sec-2-4',
         sectionNumber: '2.4',
-        title: 'Intranet Administration',
-        description: 'Page structure, navigation, content publishing',
+        title: 'Notifications & Reminders',
+        description: 'AI-powered automation rules, email templates, delivery tracking, in-app alerts',
         contentLevel: 'procedure',
-        estimatedReadTime: 11,
+        estimatedReadTime: 15,
         targetRoles: ['HR Admin'],
         industryContext: {
-          frequency: 'Ongoing',
-          timing: 'Post initial setup',
-          benchmark: 'Digital workplace platforms'
+          frequency: 'Initial setup, periodic review',
+          timing: 'Pre-launch and ongoing',
+          benchmark: 'Proactive HR communication automation'
         }
       }
     ]

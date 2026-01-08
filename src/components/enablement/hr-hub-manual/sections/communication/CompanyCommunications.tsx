@@ -16,7 +16,8 @@ import {
   AlertCircle,
   Star,
   Users,
-  Globe
+  Globe,
+  Clock
 } from 'lucide-react';
 import { 
   InfoCallout, 
@@ -34,9 +35,16 @@ export function CompanyCommunications() {
             <div className="p-2 rounded-lg bg-primary/10">
               <Megaphone className="h-6 w-6 text-primary" />
             </div>
-            <div>
-              <CardTitle>2.2 Company Communications</CardTitle>
-              <p className="text-sm text-muted-foreground mt-1">
+            <div className="flex-1">
+              <div className="flex items-center gap-3 mb-1">
+                <CardTitle>Company Communications</CardTitle>
+                <Badge variant="outline" className="text-xs">Section 2.2</Badge>
+                <div className="flex items-center gap-1 text-muted-foreground text-xs">
+                  <Clock className="h-3 w-3" />
+                  <span>~12 min</span>
+                </div>
+              </div>
+              <p className="text-sm text-muted-foreground">
                 Intranet administration for announcements, galleries, and blog posts
               </p>
             </div>
@@ -44,7 +52,7 @@ export function CompanyCommunications() {
         </CardHeader>
         <CardContent>
           <p className="text-muted-foreground mb-4">
-            The Intranet Administration module provides centralized tools for internal 
+            The Company Communications module provides centralized tools for internal 
             communications. Create company-wide or targeted announcements, manage photo 
             galleries for company events, and publish blog posts for employee engagement.
           </p>
