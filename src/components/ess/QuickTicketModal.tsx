@@ -72,7 +72,9 @@ export function QuickTicketModal({ open, onOpenChange }: QuickTicketModalProps) 
       supabase
         .from("ticket_categories")
         .select("id, name, code, default_assignee_id, default_priority_id")
-        .eq("is_active", true),
+        .eq("is_active", true)
+        .eq("visible_to_employees", true)  // Only show employee-visible categories
+        .order("display_order"),
       supabase
         .from("ticket_priorities")
         .select("id, name, code, color")

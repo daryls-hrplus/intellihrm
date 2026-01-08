@@ -59525,9 +59525,14 @@ export type Database = {
           default_assignee_id: string | null
           default_priority_id: string | null
           description: string | null
+          display_order: number | null
+          icon: string | null
           id: string
           is_active: boolean
           name: string
+          parent_category_id: string | null
+          visible_to_employees: boolean | null
+          visible_to_hr_only: boolean | null
         }
         Insert: {
           code: string
@@ -59535,9 +59540,14 @@ export type Database = {
           default_assignee_id?: string | null
           default_priority_id?: string | null
           description?: string | null
+          display_order?: number | null
+          icon?: string | null
           id?: string
           is_active?: boolean
           name: string
+          parent_category_id?: string | null
+          visible_to_employees?: boolean | null
+          visible_to_hr_only?: boolean | null
         }
         Update: {
           code?: string
@@ -59545,9 +59555,14 @@ export type Database = {
           default_assignee_id?: string | null
           default_priority_id?: string | null
           description?: string | null
+          display_order?: number | null
+          icon?: string | null
           id?: string
           is_active?: boolean
           name?: string
+          parent_category_id?: string | null
+          visible_to_employees?: boolean | null
+          visible_to_hr_only?: boolean | null
         }
         Relationships: [
           {
@@ -59562,6 +59577,13 @@ export type Database = {
             columns: ["default_priority_id"]
             isOneToOne: false
             referencedRelation: "ticket_priorities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ticket_categories_parent_category_id_fkey"
+            columns: ["parent_category_id"]
+            isOneToOne: false
+            referencedRelation: "ticket_categories"
             referencedColumns: ["id"]
           },
         ]
