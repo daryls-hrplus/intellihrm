@@ -2,10 +2,10 @@ import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Clock } from 'lucide-react';
 import { 
-  HelpDeskConfiguration,
+  EmployeeDirectorySetup,
+  NotificationsReminders,
   CompanyCommunications,
-  KnowledgeBaseSetup,
-  NotificationsReminders
+  KnowledgeBaseSetup
 } from './sections/communication';
 
 export function HRHubManualCommunicationSection() {
@@ -17,34 +17,34 @@ export function HRHubManualCommunicationSection() {
           <Badge variant="outline" className="text-sm">Chapter 5</Badge>
           <div className="flex items-center gap-1 text-muted-foreground text-sm">
             <Clock className="h-4 w-4" />
-            <span>~50 min read</span>
+            <span>~45 min read</span>
           </div>
         </div>
-        <h2 className="text-2xl font-bold mb-2">Communication & Support Setup</h2>
+        <h2 className="text-2xl font-bold mb-2">Communication & Support Center</h2>
         <p className="text-muted-foreground">
-          Configure Help Desk operations, company communications, knowledge base, and notification systems 
-          for proactive HR service delivery. References policies and SOPs configured in Chapter 3.
+          Configure the employee directory, notifications, company communications, and knowledge base 
+          to enable self-service access to information and streamline internal communications.
         </p>
       </div>
 
-      {/* Section 5.1: Help Desk Configuration */}
+      {/* Section 5.1: Employee Directory */}
       <section data-manual-anchor="hh-sec-5-1">
-        <HelpDeskConfiguration />
+        <EmployeeDirectorySetup />
       </section>
 
-      {/* Section 5.2: Company Communications */}
+      {/* Section 5.2: Notifications & Reminders */}
       <section data-manual-anchor="hh-sec-5-2">
+        <NotificationsReminders />
+      </section>
+
+      {/* Section 5.3: Company Communications */}
+      <section data-manual-anchor="hh-sec-5-3">
         <CompanyCommunications />
       </section>
 
-      {/* Section 5.3: Knowledge Base Setup */}
-      <section data-manual-anchor="hh-sec-5-3">
-        <KnowledgeBaseSetup />
-      </section>
-
-      {/* Section 5.4: Notifications & Reminders */}
+      {/* Section 5.4: Knowledge Base */}
       <section data-manual-anchor="hh-sec-5-4">
-        <NotificationsReminders />
+        <KnowledgeBaseSetup />
       </section>
     </div>
   );

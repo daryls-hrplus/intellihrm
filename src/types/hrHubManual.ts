@@ -347,33 +347,47 @@ export const HR_HUB_MANUAL_STRUCTURE: HRHubManualSection[] = [
       }
     ]
   },
-  // Part 5: Communication & Support Setup (moved from Part 2)
+  // Part 5: Communication & Support Center (moved from Part 2)
   {
     id: 'hh-part-5',
     sectionNumber: '5',
-    title: 'Communication & Support Setup',
-    description: 'Help desk, announcements, knowledge base, and notifications - references policies and SOPs from Chapter 3',
+    title: 'Communication & Support Center',
+    description: 'Employee directory, notifications, company communications, and knowledge base for self-service access',
     contentLevel: 'procedure',
-    estimatedReadTime: 50,
+    estimatedReadTime: 45,
     targetRoles: ['HR Admin', 'Consultant'],
     subsections: [
       {
         id: 'hh-sec-5-1',
         sectionNumber: '5.1',
-        title: 'Help Desk Configuration',
-        description: 'Ticket categories, SLAs, routing rules, escalation paths',
+        title: 'Employee Directory',
+        description: 'Find and connect with colleagues, search and filtering, privacy controls',
         contentLevel: 'procedure',
-        estimatedReadTime: 12,
+        estimatedReadTime: 10,
         targetRoles: ['HR Admin'],
         industryContext: {
-          frequency: 'Initial setup, periodic review',
+          frequency: 'Initial setup, ongoing maintenance',
           timing: 'Pre-launch',
-          benchmark: 'HR service desk best practices'
+          benchmark: 'Employee self-service directory'
         }
       },
       {
         id: 'hh-sec-5-2',
         sectionNumber: '5.2',
+        title: 'Notifications & Reminders',
+        description: 'AI-powered automation rules, email templates, delivery tracking, in-app alerts',
+        contentLevel: 'procedure',
+        estimatedReadTime: 15,
+        targetRoles: ['HR Admin'],
+        industryContext: {
+          frequency: 'Initial setup, periodic review',
+          timing: 'Pre-launch and ongoing',
+          benchmark: 'Proactive HR communication automation'
+        }
+      },
+      {
+        id: 'hh-sec-5-3',
+        sectionNumber: '5.3',
         title: 'Company Communications',
         description: 'Announcements, photo gallery, blog posts, and intranet content',
         contentLevel: 'procedure',
@@ -386,9 +400,9 @@ export const HR_HUB_MANUAL_STRUCTURE: HRHubManualSection[] = [
         }
       },
       {
-        id: 'hh-sec-5-3',
-        sectionNumber: '5.3',
-        title: 'Knowledge Base Setup',
+        id: 'hh-sec-5-4',
+        sectionNumber: '5.4',
+        title: 'Knowledge Base',
         description: 'Article categories, search optimization, content governance, SOP links',
         contentLevel: 'procedure',
         estimatedReadTime: 12,
@@ -397,20 +411,6 @@ export const HR_HUB_MANUAL_STRUCTURE: HRHubManualSection[] = [
           frequency: 'Initial setup, ongoing maintenance',
           timing: 'Pre-launch',
           benchmark: 'Self-service HR knowledge management'
-        }
-      },
-      {
-        id: 'hh-sec-5-4',
-        sectionNumber: '5.4',
-        title: 'Notifications & Reminders',
-        description: 'AI-powered automation rules, email templates, delivery tracking, in-app alerts',
-        contentLevel: 'procedure',
-        estimatedReadTime: 15,
-        targetRoles: ['HR Admin'],
-        industryContext: {
-          frequency: 'Initial setup, periodic review',
-          timing: 'Pre-launch and ongoing',
-          benchmark: 'Proactive HR communication automation'
         }
       }
     ]

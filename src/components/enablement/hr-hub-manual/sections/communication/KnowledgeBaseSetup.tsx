@@ -38,7 +38,7 @@ export function KnowledgeBaseSetup() {
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-1">
                 <CardTitle>Knowledge Base Setup</CardTitle>
-                <Badge variant="outline" className="text-xs">Section 5.3</Badge>
+                <Badge variant="outline" className="text-xs">Section 5.4</Badge>
                 <div className="flex items-center gap-1 text-muted-foreground text-xs">
                   <Clock className="h-3 w-3" />
                   <span>~12 min</span>
