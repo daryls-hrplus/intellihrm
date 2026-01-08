@@ -279,12 +279,12 @@ export const HR_HUB_MANUAL_STRUCTURE: HRHubManualSection[] = [
       }
     ]
   },
-  // Part 4: Documents & Templates (moved from Part 3)
+  // Part 4: Document Center (moved from Part 3)
   {
     id: 'hh-part-4',
     sectionNumber: '4',
-    title: 'Documents & Templates',
-    description: 'Letter templates, policy documents, and forms library - uses workflows configured in Chapter 3',
+    title: 'Document Center',
+    description: 'Company documents, policy documents, letter templates, and forms library - uses workflows configured in Chapter 3',
     contentLevel: 'procedure',
     estimatedReadTime: 45,
     targetRoles: ['HR Admin', 'HR Ops'],

@@ -26,9 +26,9 @@ export function HRHubManualDocumentsSection() {
                   45 min read
                 </Badge>
               </div>
-              <CardTitle className="text-2xl">Documents & Templates</CardTitle>
+              <CardTitle className="text-2xl">Document Center</CardTitle>
               <p className="text-muted-foreground mt-1">
-                Letter templates, policy documents, forms library, and company document management
+                Company documents, policy documents, letter templates, and forms library
               </p>
             </div>
           </div>
