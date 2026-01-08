@@ -42,8 +42,10 @@ import {
   Users,
   Plus,
   Building2,
-  Edit,
-  Trash2,
+  Archive,
+  Eye,
+  EyeOff,
+  FileText,
 } from "lucide-react";
 import { formatDistanceToNow, differenceInHours, isPast, addHours } from "date-fns";
 import { formatDateForDisplay } from "@/utils/dateUtils";
@@ -69,6 +71,7 @@ const statusColors: Record<string, string> = {
   pending: "bg-orange-500/10 text-orange-600 border-orange-200",
   resolved: "bg-green-500/10 text-green-600 border-green-200",
   closed: "bg-gray-500/10 text-gray-600 border-gray-200",
+  archived: "bg-slate-500/10 text-slate-600 border-slate-200",
 };
 
 export default function AdminHelpdeskPage() {
@@ -81,9 +84,8 @@ export default function AdminHelpdeskPage() {
   const [companyFilter, setCompanyFilter] = useState<string>("all");
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
-  const [isEditMode, setIsEditMode] = useState(false);
-  const [editData, setEditData] = useState({ subject: "", description: "" });
-  const [deleteTicketId, setDeleteTicketId] = useState<string | null>(null);
+  const [archiveTicketId, setArchiveTicketId] = useState<string | null>(null);
+  const [showInternalNotes, setShowInternalNotes] = useState(true);
   const [newTicket, setNewTicket] = useState({
     subject: "",
     description: "",
@@ -281,45 +283,45 @@ export default function AdminHelpdeskPage() {
     onError: (error: any) => toast.error(error.message),
   });
 
-  const deleteTicketMutation = useMutation({
+  const archiveTicketMutation = useMutation({
     mutationFn: async (ticketId: string) => {
-      const { error } = await supabase.from("tickets").delete().eq("id", ticketId);
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      // Log the archive action
+      await supabase.from("ticket_audit_log").insert({
+        ticket_id: ticketId,
+        changed_by: user?.id,
+        change_type: "archived",
+        old_value: "active",
+        new_value: "archived",
+      });
+      
+      const { error } = await supabase.from("tickets").update({ status: "archived" }).eq("id", ticketId);
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-tickets"] });
       setSelectedTicket(null);
-      setDeleteTicketId(null);
-      toast.success("Ticket deleted");
+      setArchiveTicketId(null);
+      toast.success("Ticket archived");
     },
     onError: (error: any) => toast.error(error.message),
   });
 
-  const handleEditTicket = async () => {
-    if (!selectedTicket || !editData.subject || !editData.description) {
-      toast.error("Subject and description are required");
-      return;
-    }
+  // Fetch canned responses
+  const { data: cannedResponses = [] } = useQuery({
+    queryKey: ["canned-responses"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("canned_responses")
+        .select("*")
+        .eq("is_active", true)
+        .order("title");
+      if (error) throw error;
+      return data;
+    },
+  });
 
-    updateTicketMutation.mutate({
-      id: selectedTicket.id,
-      updates: {
-        subject: editData.subject,
-        description: editData.description,
-      },
-    });
-    
-    setSelectedTicket({ ...selectedTicket, subject: editData.subject, description: editData.description });
-    setIsEditMode(false);
-  };
-
-  const startEditMode = () => {
-    setEditData({
-      subject: selectedTicket.subject,
-      description: selectedTicket.description,
-    });
-    setIsEditMode(true);
-  };
   const getSlaStatus = (ticket: any) => {
     if (!ticket.priority) return { response: "unknown", resolution: "unknown" };
     
@@ -741,7 +743,7 @@ export default function AdminHelpdeskPage() {
         </Card>
 
         {/* Ticket Detail Dialog */}
-        <Dialog open={!!selectedTicket} onOpenChange={(open) => { if (!open) { setSelectedTicket(null); setIsEditMode(false); } }}>
+        <Dialog open={!!selectedTicket} onOpenChange={(open) => { if (!open) { setSelectedTicket(null); } }}>
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             {selectedTicket && (
               <>
@@ -749,18 +751,16 @@ export default function AdminHelpdeskPage() {
                   <div className="flex items-center justify-between">
                     <DialogTitle className="flex items-center gap-2">
                       <span className="font-mono text-sm text-muted-foreground">{selectedTicket.ticket_number}</span>
-                      {isEditMode ? "Edit Ticket" : selectedTicket.subject}
+                      {selectedTicket.subject}
                     </DialogTitle>
-                    {!isEditMode && (
-                      <div className="flex gap-2">
-                        <Button size="sm" variant="ghost" onClick={startEditMode}>
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button size="sm" variant="ghost" onClick={() => setDeleteTicketId(selectedTicket.id)}>
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
-                      </div>
-                    )}
+                    <Button 
+                      size="sm" 
+                      variant="ghost" 
+                      onClick={() => setArchiveTicketId(selectedTicket.id)}
+                      title="Archive ticket"
+                    >
+                      <Archive className="h-4 w-4 text-muted-foreground" />
+                    </Button>
                   </div>
                 </DialogHeader>
 
@@ -800,6 +800,7 @@ export default function AdminHelpdeskPage() {
                           <SelectItem value="pending">Pending</SelectItem>
                           <SelectItem value="resolved">Resolved</SelectItem>
                           <SelectItem value="closed">Closed</SelectItem>
+                          <SelectItem value="archived">Archived</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -856,41 +857,16 @@ export default function AdminHelpdeskPage() {
                     </div>
                   )}
 
-                  {/* Description / Edit Form */}
-                  {isEditMode ? (
-                    <div className="space-y-4">
-                      <div>
-                        <Label>Subject</Label>
-                        <Input
-                          value={editData.subject}
-                          onChange={(e) => setEditData({ ...editData, subject: e.target.value })}
-                        />
-                      </div>
-                      <div>
-                        <Label>Description</Label>
-                        <Textarea
-                          value={editData.description}
-                          onChange={(e) => setEditData({ ...editData, description: e.target.value })}
-                          rows={4}
-                        />
-                      </div>
-                      <div className="flex gap-2">
-                        <Button size="sm" onClick={handleEditTicket} disabled={updateTicketMutation.isPending}>
-                          {updateTicketMutation.isPending ? "Saving..." : "Save Changes"}
-                        </Button>
-                        <Button size="sm" variant="outline" onClick={() => setIsEditMode(false)}>
-                          Cancel
-                        </Button>
-                      </div>
+                  {/* Description (read-only - original ticket content is immutable) */}
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-1">Original Request</p>
+                    <div className="p-3 rounded-lg border bg-muted/30">
+                      <p className="text-sm whitespace-pre-wrap">{selectedTicket.description}</p>
                     </div>
-                  ) : (
-                    <div>
-                      <p className="text-sm text-muted-foreground mb-1">Description</p>
-                      <div className="p-3 rounded-lg border bg-background">
-                        <p className="text-sm whitespace-pre-wrap">{selectedTicket.description}</p>
-                      </div>
-                    </div>
-                  )}
+                    <p className="text-xs text-muted-foreground mt-1 italic">
+                      Original ticket content cannot be modified to maintain data integrity
+                    </p>
+                  </div>
 
                   {/* Comments */}
                   <div>
@@ -1077,22 +1053,21 @@ export default function AdminHelpdeskPage() {
           </DialogContent>
         </Dialog>
 
-        {/* Delete Confirmation Dialog */}
-        <AlertDialog open={!!deleteTicketId} onOpenChange={(open) => !open && setDeleteTicketId(null)}>
+        {/* Archive Confirmation Dialog */}
+        <AlertDialog open={!!archiveTicketId} onOpenChange={(open) => !open && setArchiveTicketId(null)}>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Delete Ticket</AlertDialogTitle>
+              <AlertDialogTitle>Archive Ticket</AlertDialogTitle>
               <AlertDialogDescription>
-                Are you sure you want to delete this ticket? This action cannot be undone.
+                Are you sure you want to archive this ticket? Archived tickets are hidden from the main view but can still be accessed for audit purposes.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
               <AlertDialogAction
-                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                onClick={() => deleteTicketId && deleteTicketMutation.mutate(deleteTicketId)}
+                onClick={() => archiveTicketId && archiveTicketMutation.mutate(archiveTicketId)}
               >
-                {deleteTicketMutation.isPending ? "Deleting..." : "Delete"}
+                {archiveTicketMutation.isPending ? "Archiving..." : "Archive"}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
