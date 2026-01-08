@@ -413,3 +413,6 @@ verify_jwt = false
 
 [functions.send-ess-notification]
 verify_jwt = false
+
+[functions.template-ai-helper]
+verify_jwt = false
