@@ -62,28 +62,32 @@ export function RequestTableRow({
   const hasDocuments = request.document_urls && request.document_urls.length > 0;
 
   const getStatusBadge = (status: string) => {
-    const variants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
-      pending: "secondary",
-      approved: "default",
-      applied: "default",
-      rejected: "destructive",
-      info_required: "outline",
-      cancelled: "outline",
+    const statusConfig: Record<string, { label: string; className: string }> = {
+      pending: { 
+        label: "Pending", 
+        className: "bg-slate-100 text-slate-700 border-slate-300 dark:bg-slate-800 dark:text-slate-300" 
+      },
+      applied: { 
+        label: "Applied", 
+        className: "bg-emerald-100 text-emerald-800 border-emerald-300 dark:bg-emerald-900/40 dark:text-emerald-300" 
+      },
+      rejected: { 
+        label: "Rejected", 
+        className: "bg-red-100 text-red-800 border-red-300 dark:bg-red-900/40 dark:text-red-300" 
+      },
+      info_required: { 
+        label: "Info Required", 
+        className: "bg-amber-100 text-amber-800 border-amber-400 dark:bg-amber-900/40 dark:text-amber-300" 
+      },
+      cancelled: { 
+        label: "Cancelled", 
+        className: "bg-gray-100 text-gray-700 border-gray-300 dark:bg-gray-800 dark:text-gray-300" 
+      },
     };
-    const labels: Record<string, string> = {
-      pending: "pending",
-      approved: "approved",
-      applied: "applied",
-      rejected: "rejected",
-      info_required: "info required",
-      cancelled: "cancelled",
-    };
+    const config = statusConfig[status] || { label: status, className: "" };
     return (
-      <Badge 
-        variant={variants[status] || "outline"} 
-        className={status === 'info_required' ? 'bg-amber-100 text-amber-700 border-amber-300 dark:bg-amber-900/30 dark:text-amber-400' : 'capitalize'}
-      >
-        {labels[status] || status}
+      <Badge variant="outline" className={config.className}>
+        {config.label}
       </Badge>
     );
   };
@@ -111,7 +115,7 @@ export function RequestTableRow({
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger>
-                  <Badge variant="outline" className="text-amber-600 border-amber-300 text-xs">
+                  <Badge variant="outline" className="bg-orange-100 text-orange-800 border-orange-400 dark:bg-orange-900/40 dark:text-orange-300 text-xs">
                     <AlertTriangle className="h-3 w-3 mr-1" />
                     High Risk
                   </Badge>

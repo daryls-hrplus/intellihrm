@@ -62,26 +62,37 @@ export function RequestDetailsDialog({
     'Unknown Employee';
 
   const getStatusBadge = (status: string) => {
-    const config: Record<string, { variant: "default" | "secondary" | "destructive" | "outline"; icon: React.ReactNode; className?: string }> = {
-      pending: { variant: "secondary", icon: <Clock className="h-3 w-3 mr-1" /> },
-      approved: { variant: "default", icon: <CheckCircle2 className="h-3 w-3 mr-1" /> },
-      applied: { variant: "default", icon: <CheckCircle2 className="h-3 w-3 mr-1" /> },
-      rejected: { variant: "destructive", icon: <XCircle className="h-3 w-3 mr-1" /> },
-      info_required: { variant: "outline", icon: <HelpCircle className="h-3 w-3 mr-1" />, className: "bg-amber-100 text-amber-700 border-amber-300 dark:bg-amber-900/30 dark:text-amber-400" },
-      cancelled: { variant: "outline", icon: <XCircle className="h-3 w-3 mr-1" /> },
+    const statusConfig: Record<string, { label: string; icon: React.ReactNode; className: string }> = {
+      pending: { 
+        label: "Pending", 
+        icon: <Clock className="h-3 w-3 mr-1" />,
+        className: "bg-slate-100 text-slate-700 border-slate-300 dark:bg-slate-800 dark:text-slate-300" 
+      },
+      applied: { 
+        label: "Applied", 
+        icon: <CheckCircle2 className="h-3 w-3 mr-1" />,
+        className: "bg-emerald-100 text-emerald-800 border-emerald-300 dark:bg-emerald-900/40 dark:text-emerald-300" 
+      },
+      rejected: { 
+        label: "Rejected", 
+        icon: <XCircle className="h-3 w-3 mr-1" />,
+        className: "bg-red-100 text-red-800 border-red-300 dark:bg-red-900/40 dark:text-red-300" 
+      },
+      info_required: { 
+        label: "Info Required", 
+        icon: <HelpCircle className="h-3 w-3 mr-1" />,
+        className: "bg-amber-100 text-amber-800 border-amber-400 dark:bg-amber-900/40 dark:text-amber-300" 
+      },
+      cancelled: { 
+        label: "Cancelled", 
+        icon: <XCircle className="h-3 w-3 mr-1" />,
+        className: "bg-gray-100 text-gray-700 border-gray-300 dark:bg-gray-800 dark:text-gray-300" 
+      },
     };
-    const { variant, icon, className } = config[status] || { variant: "outline" as const, icon: null };
-    const labels: Record<string, string> = {
-      pending: "pending",
-      approved: "approved",
-      applied: "applied",
-      rejected: "rejected",
-      info_required: "info required",
-      cancelled: "cancelled",
-    };
+    const config = statusConfig[status] || { label: status, icon: null, className: "" };
     return (
-      <Badge variant={variant} className={className || "capitalize"}>
-        {icon}{labels[status] || status}
+      <Badge variant="outline" className={config.className}>
+        {config.icon}{config.label}
       </Badge>
     );
   };
