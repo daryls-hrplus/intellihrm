@@ -24,7 +24,8 @@ import {
   WorkforceManualPositionControlSection,
   WorkforceManualAnalyticsSection,
   WorkforceManualESSMSSSection,
-  WorkforceManualIntegrationSection
+  WorkforceManualIntegrationSection,
+  WorkforceManualTroubleshootingSection
 } from '@/components/enablement/workforce-manual';
 
 const SECTION_ICONS: Record<string, React.ReactNode> = {
@@ -154,18 +155,7 @@ export default function WorkforceManualPage() {
       case 'wf-part-9':
         return <WorkforceManualIntegrationSection />;
       case 'wf-part-10':
-        return (
-          <Card>
-            <CardHeader>
-              <CardTitle>Coming Soon</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">
-                This section is under development. Check back soon for comprehensive documentation.
-              </p>
-            </CardContent>
-          </Card>
-        );
+        return <WorkforceManualTroubleshootingSection />;
       default:
         return <WorkforceManualOverviewSection />;
     }

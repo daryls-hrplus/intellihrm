@@ -7,3 +7,4 @@ export { WorkforceManualPositionControlSection } from './WorkforceManualPosition
 export { WorkforceManualAnalyticsSection } from './WorkforceManualAnalyticsSection';
 export { WorkforceManualESSMSSSection } from './WorkforceManualESSMSSSection';
 export { WorkforceManualIntegrationSection } from './WorkforceManualIntegrationSection';
+export { WorkforceManualTroubleshootingSection } from './WorkforceManualTroubleshootingSection';
