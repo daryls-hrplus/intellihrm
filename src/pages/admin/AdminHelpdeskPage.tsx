@@ -433,22 +433,29 @@ export default function AdminHelpdeskPage() {
 
         <Tabs defaultValue="tickets" className="space-y-4">
           <TabsList>
+            {/* Operations */}
             <TabsTrigger value="tickets" className="flex items-center gap-2">
               <Ticket className="h-4 w-4" />
               Tickets
+            </TabsTrigger>
+            <TabsTrigger value="agents" className="flex items-center gap-2">
+              <Users className="h-4 w-4" />
+              Agents
+            </TabsTrigger>
+            {/* Monitoring */}
+            <TabsTrigger value="analytics" className="flex items-center gap-2">
+              <PieChart className="h-4 w-4" />
+              Analytics
             </TabsTrigger>
             <TabsTrigger value="sla-metrics" className="flex items-center gap-2">
               <TrendingUp className="h-4 w-4" />
               SLA Metrics
             </TabsTrigger>
-            <TabsTrigger value="analytics" className="flex items-center gap-2">
-              <PieChart className="h-4 w-4" />
-              Analytics
+            <TabsTrigger value="satisfaction" className="flex items-center gap-2">
+              <Star className="h-4 w-4" />
+              Satisfaction
             </TabsTrigger>
-            <TabsTrigger value="sla-config" className="flex items-center gap-2">
-              <Settings className="h-4 w-4" />
-              SLA Config
-            </TabsTrigger>
+            {/* Configuration */}
             <TabsTrigger value="escalation" className="flex items-center gap-2">
               <AlertTriangle className="h-4 w-4" />
               Escalation
@@ -457,13 +464,9 @@ export default function AdminHelpdeskPage() {
               <UserCog className="h-4 w-4" />
               Auto-Assign
             </TabsTrigger>
-            <TabsTrigger value="agents" className="flex items-center gap-2">
-              <Users className="h-4 w-4" />
-              Agents
-            </TabsTrigger>
-            <TabsTrigger value="satisfaction" className="flex items-center gap-2">
-              <Star className="h-4 w-4" />
-              Satisfaction
+            <TabsTrigger value="sla-config" className="flex items-center gap-2">
+              <Settings className="h-4 w-4" />
+              SLA Config
             </TabsTrigger>
           </TabsList>
 
