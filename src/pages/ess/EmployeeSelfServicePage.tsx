@@ -4,6 +4,7 @@ import { usePageAudit } from "@/hooks/usePageAudit";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { GroupedModuleCards, ModuleSection, GroupedModuleItem } from "@/components/ui/GroupedModuleCards";
 import { EmployeeRODWidget } from "@/components/ess/EmployeeRODWidget";
+import { EssChangeRequestsWidget } from "@/components/ess/EssChangeRequestsWidget";
 import { EssPendingAppraisalActions } from "@/components/ess/EssPendingAppraisalActions";
 import { ESSAIDashboard } from "@/components/ess/ESSAIDashboard";
 import { useGranularPermissions } from "@/hooks/useGranularPermissions";
@@ -187,6 +188,9 @@ export default function EmployeeSelfServicePage() {
 
         {/* Pending Resumption of Duty */}
         <EmployeeRODWidget />
+
+        {/* Pending Change Requests */}
+        <EssChangeRequestsWidget />
 
         {/* Pending Appraisal Actions */}
         <EssPendingAppraisalActions />

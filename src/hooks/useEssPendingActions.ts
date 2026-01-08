@@ -121,6 +121,37 @@ export function useEssPendingActions() {
         };
       }
 
+      // Fetch pending ESS change requests
+      const { count: pendingChangeRequests } = await supabase
+        .from("employee_data_change_requests")
+        .select("*", { count: "exact", head: true })
+        .eq("employee_id", user.id)
+        .eq("status", "pending");
+
+      const { count: infoRequiredRequests } = await supabase
+        .from("employee_data_change_requests")
+        .select("*", { count: "exact", head: true })
+        .eq("employee_id", user.id)
+        .eq("status", "info_required");
+
+      const totalChangeRequests = (pendingChangeRequests || 0) + (infoRequiredRequests || 0);
+
+      if (totalChangeRequests > 0) {
+        if (infoRequiredRequests && infoRequiredRequests > 0) {
+          badges["Tasks & Approvals"] = {
+            count: infoRequiredRequests,
+            label: `${infoRequiredRequests} response required`,
+            variant: "warning",
+          };
+        } else {
+          badges["Tasks & Approvals"] = {
+            count: pendingChangeRequests || 0,
+            label: `${pendingChangeRequests} pending`,
+            variant: "default",
+          };
+        }
+      }
+
       return badges;
     },
     enabled: !!user?.id,
