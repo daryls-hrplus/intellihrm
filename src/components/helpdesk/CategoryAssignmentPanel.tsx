@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Users, Briefcase, AlertCircle, CheckCircle, Loader2 } from "lucide-react";
+import { Users, Briefcase, AlertCircle, CheckCircle, Loader2, Lock, Eye } from "lucide-react";
 
 interface Category {
   id: string;
@@ -19,6 +19,10 @@ interface Category {
   default_assignee_id: string | null;
   default_priority_id: string | null;
   is_active: boolean;
+  visible_to_employees: boolean | null;
+  visible_to_hr_only: boolean | null;
+  display_order: number | null;
+  icon: string | null;
 }
 
 interface Agent {
@@ -38,6 +42,7 @@ export function CategoryAssignmentPanel() {
       const { data, error } = await supabase
         .from("ticket_categories")
         .select("*")
+        .order("display_order")
         .order("name");
       if (error) throw error;
       return data as Category[];
@@ -204,6 +209,7 @@ export function CategoryAssignmentPanel() {
             <TableHeader>
               <TableRow>
                 <TableHead>Category</TableHead>
+                <TableHead>Visibility</TableHead>
                 <TableHead>Default Assignee</TableHead>
                 <TableHead>Default Priority</TableHead>
                 <TableHead>Status</TableHead>
@@ -216,6 +222,25 @@ export function CategoryAssignmentPanel() {
                     <div>
                       <p className="font-medium">{category.name}</p>
                       <p className="text-xs text-muted-foreground">{category.code}</p>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex flex-col gap-1">
+                      {category.visible_to_hr_only ? (
+                        <Badge variant="outline" className="bg-orange-500/10 text-orange-600 border-orange-200 w-fit">
+                          <Lock className="h-3 w-3 mr-1" />
+                          HR Only
+                        </Badge>
+                      ) : category.visible_to_employees ? (
+                        <Badge variant="outline" className="bg-blue-500/10 text-blue-600 border-blue-200 w-fit">
+                          <Eye className="h-3 w-3 mr-1" />
+                          Employee Visible
+                        </Badge>
+                      ) : (
+                        <Badge variant="outline" className="bg-gray-500/10 text-gray-600 w-fit">
+                          Hidden
+                        </Badge>
+                      )}
                     </div>
                   </TableCell>
                   <TableCell>
