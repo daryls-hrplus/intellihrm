@@ -71,17 +71,21 @@ serve(async (req) => {
     }
 
     const firstName = profile?.first_name || profile?.full_name?.split(" ")[0] || "there";
-    const timeZone = profile?.timezone || "UTC";
+    const timeZone = profile?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
 
-    const today = new Date();
-    
     // Get local hour using Intl.DateTimeFormat for timezone support
-    const localHour = parseInt(
-      new Intl.DateTimeFormat("en-US", { hour: "numeric", hour12: false, timeZone }).format(today)
-    );
+    let localHour: number;
+    try {
+      localHour = parseInt(
+        new Intl.DateTimeFormat("en-US", { hour: "numeric", hour12: false, timeZone }).format(new Date())
+      );
+    } catch {
+      // Fallback to UTC if timezone is invalid
+      localHour = new Date().getUTCHours();
+    }
     const timeGreeting = localHour < 12 ? "Good morning" : localHour < 17 ? "Good afternoon" : "Good evening";
 
-    // Collect pending tasks in parallel
+    const today = new Date();
     const [
       pendingCheckIns,
       pendingAcknowledgments,

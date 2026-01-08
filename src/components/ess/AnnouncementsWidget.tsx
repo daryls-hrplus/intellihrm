@@ -113,7 +113,29 @@ export function AnnouncementsWidget() {
   }
 
   if (relevantAnnouncements.length === 0) {
-    return null; // Hide widget when no relevant announcements
+    return (
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base font-medium flex items-center gap-2">
+            <Megaphone className="h-4 w-4 text-primary" />
+            Announcements
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground text-center py-4">
+            No new announcements
+          </p>
+          <Button
+            variant="ghost"
+            className="w-full text-sm"
+            onClick={() => navigate("/ess/announcements")}
+          >
+            View All Announcements
+            <ChevronRight className="h-4 w-4 ml-1" />
+          </Button>
+        </CardContent>
+      </Card>
+    );
   }
 
   return (
