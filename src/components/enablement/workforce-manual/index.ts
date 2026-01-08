@@ -8,3 +8,9 @@ export { WorkforceManualAnalyticsSection } from './WorkforceManualAnalyticsSecti
 export { WorkforceManualESSMSSSection } from './WorkforceManualESSMSSSection';
 export { WorkforceManualIntegrationSection } from './WorkforceManualIntegrationSection';
 export { WorkforceManualTroubleshootingSection } from './WorkforceManualTroubleshootingSection';
+export { 
+  WorkforceManualQuickReference,
+  WorkforceManualArchitectureDiagrams,
+  WorkforceManualGlossary,
+  WorkforceManualVersionHistory
+} from './sections/supplementary';
