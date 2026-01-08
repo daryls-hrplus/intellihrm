@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Card, CardContent } from "@/components/ui/card";
@@ -8,13 +8,17 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { FileText, Clock, CheckCircle, XCircle, Loader2, Eye, FileIcon, ExternalLink, Ban } from "lucide-react";
+import { FileText, Clock, CheckCircle, XCircle, Loader2, Eye, FileIcon, ExternalLink, Ban, Send, Upload, X, AlertCircle } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { formatDateForDisplay } from "@/utils/dateUtils";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { ESS_SUPPORTING_DOCUMENTS_BUCKET } from "@/config/storageBuckets";
 
 interface ChangeRequest {
   id: string;
@@ -57,6 +61,11 @@ export default function MyChangeRequestsPage() {
   const queryClient = useQueryClient();
   const [selectedRequest, setSelectedRequest] = useState<ChangeRequest | null>(null);
   const [requestToCancel, setRequestToCancel] = useState<ChangeRequest | null>(null);
+  const [requestToResubmit, setRequestToResubmit] = useState<ChangeRequest | null>(null);
+  const [resubmitNotes, setResubmitNotes] = useState("");
+  const [resubmitFiles, setResubmitFiles] = useState<File[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [activeTab, setActiveTab] = useState("pending");
 
   const { data: requests, isLoading } = useQuery({
@@ -98,6 +107,43 @@ export default function MyChangeRequestsPage() {
     },
   });
 
+  // Resubmit request mutation
+  const resubmitMutation = useMutation({
+    mutationFn: async ({ requestId, notes, documentUrls }: { requestId: string; notes: string; documentUrls: string[] }) => {
+      // Get existing document URLs
+      const existingDocs = requestToResubmit?.document_urls || [];
+      const allDocs = [...existingDocs, ...documentUrls];
+      
+      // Update request notes - append to existing notes
+      const existingNotes = requestToResubmit?.request_notes || "";
+      const updatedNotes = existingNotes 
+        ? `${existingNotes}\n\n--- Resubmission Response ---\n${notes}`
+        : notes;
+
+      const { error } = await supabase
+        .from("employee_data_change_requests")
+        .update({ 
+          status: "pending",
+          request_notes: updatedNotes,
+          document_urls: allDocs.length > 0 ? allDocs : null,
+          reviewed_at: null,
+          review_notes: null,
+        })
+        .eq("id", requestId)
+        .eq("employee_id", profile?.id);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["my-change-requests", profile?.id] });
+      toast.success("Request resubmitted successfully");
+      handleCloseResubmitDialog();
+    },
+    onError: (error: any) => {
+      toast.error(error?.message || "Failed to resubmit request");
+    },
+  });
+
   const handleCancelRequest = (request: ChangeRequest) => {
     setRequestToCancel(request);
   };
@@ -105,6 +151,89 @@ export default function MyChangeRequestsPage() {
   const confirmCancelRequest = () => {
     if (requestToCancel) {
       cancelMutation.mutate(requestToCancel.id);
+    }
+  };
+
+  const handleOpenResubmitDialog = (request: ChangeRequest) => {
+    setRequestToResubmit(request);
+    setResubmitNotes("");
+    setResubmitFiles([]);
+  };
+
+  const handleCloseResubmitDialog = () => {
+    setRequestToResubmit(null);
+    setResubmitNotes("");
+    setResubmitFiles([]);
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFiles = Array.from(e.target.files || []);
+    const validFiles = selectedFiles.filter((file) => {
+      const validTypes = ["application/pdf", "image/jpeg", "image/png", "image/gif", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"];
+      if (!validTypes.includes(file.type)) {
+        toast.error(`Invalid file type: ${file.name}`);
+        return false;
+      }
+      if (file.size > 10 * 1024 * 1024) {
+        toast.error(`File too large: ${file.name} (max 10MB)`);
+        return false;
+      }
+      return true;
+    });
+    setResubmitFiles((prev) => [...prev, ...validFiles]);
+  };
+
+  const removeFile = (index: number) => {
+    setResubmitFiles((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const uploadFiles = async (): Promise<string[]> => {
+    if (resubmitFiles.length === 0) return [];
+    
+    const uploadedUrls: string[] = [];
+    
+    for (const file of resubmitFiles) {
+      const fileExt = file.name.split(".").pop();
+      const filePath = `${profile?.id}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from(ESS_SUPPORTING_DOCUMENTS_BUCKET)
+        .upload(filePath, file);
+      
+      if (uploadError) {
+        console.error("Upload error:", uploadError);
+        throw new Error(`Failed to upload ${file.name}`);
+      }
+      
+      const { data: urlData } = supabase.storage
+        .from(ESS_SUPPORTING_DOCUMENTS_BUCKET)
+        .getPublicUrl(filePath);
+      
+      uploadedUrls.push(urlData.publicUrl);
+    }
+    
+    return uploadedUrls;
+  };
+
+  const handleResubmit = async () => {
+    if (!requestToResubmit) return;
+    if (!resubmitNotes.trim()) {
+      toast.error("Please provide additional information");
+      return;
+    }
+
+    try {
+      setIsUploading(true);
+      const documentUrls = await uploadFiles();
+      await resubmitMutation.mutateAsync({
+        requestId: requestToResubmit.id,
+        notes: resubmitNotes,
+        documentUrls,
+      });
+    } catch (error: any) {
+      console.error("Resubmit error:", error);
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -198,6 +327,17 @@ export default function MyChangeRequestsPage() {
             <Button variant="ghost" size="icon" onClick={() => setSelectedRequest(request)}>
               <Eye className="h-4 w-4" />
             </Button>
+            {request.status === "info_required" && (
+              <Button 
+                variant="default" 
+                size="sm"
+                onClick={() => handleOpenResubmitDialog(request)}
+                className="gap-1"
+              >
+                <Send className="h-3 w-3" />
+                Respond
+              </Button>
+            )}
             {(request.status === "pending" || request.status === "info_required") && (
               <Button 
                 variant="ghost" 
@@ -430,6 +570,107 @@ export default function MyChangeRequestsPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Resubmit Dialog */}
+      <Dialog open={!!requestToResubmit} onOpenChange={() => handleCloseResubmitDialog()}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Respond to Information Request</DialogTitle>
+            <DialogDescription>
+              Provide the additional information requested by HR for your{" "}
+              <span className="font-medium">
+                {requestToResubmit && (REQUEST_TYPE_LABELS[requestToResubmit.request_type] || requestToResubmit.request_type)}
+              </span>{" "}
+              change request.
+            </DialogDescription>
+          </DialogHeader>
+
+          {requestToResubmit && (
+            <div className="space-y-4">
+              {/* HR's Request */}
+              {requestToResubmit.review_notes && (
+                <Alert className="bg-amber-50 border-amber-200 dark:bg-amber-900/20 dark:border-amber-800">
+                  <AlertCircle className="h-4 w-4 text-amber-600" />
+                  <AlertDescription className="text-amber-800 dark:text-amber-300">
+                    <span className="font-medium">HR requested:</span> {requestToResubmit.review_notes}
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              {/* Response Notes */}
+              <div className="space-y-2">
+                <Label htmlFor="resubmit-notes">Your Response *</Label>
+                <Textarea
+                  id="resubmit-notes"
+                  value={resubmitNotes}
+                  onChange={(e) => setResubmitNotes(e.target.value)}
+                  placeholder="Provide the additional information requested..."
+                  rows={4}
+                />
+              </div>
+
+              {/* Document Upload */}
+              <div className="space-y-2">
+                <Label>Additional Documents (Optional)</Label>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  className="hidden"
+                  multiple
+                  accept=".pdf,.jpg,.jpeg,.png,.gif,.doc,.docx"
+                  onChange={handleFileSelect}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <Upload className="h-4 w-4 mr-2" />
+                  Upload Documents
+                </Button>
+
+                {resubmitFiles.length > 0 && (
+                  <div className="space-y-2 mt-2">
+                    {resubmitFiles.map((file, index) => (
+                      <div key={index} className="flex items-center gap-2 p-2 bg-muted rounded-md">
+                        <FileIcon className="h-4 w-4" />
+                        <span className="text-sm flex-1 truncate">{file.name}</span>
+                        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => removeFile(index)}>
+                          <X className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {requestToResubmit.document_urls && requestToResubmit.document_urls.length > 0 && (
+                  <p className="text-xs text-muted-foreground">
+                    {requestToResubmit.document_urls.length} existing document(s) will be retained
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => handleCloseResubmitDialog()}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleResubmit} 
+              disabled={isUploading || resubmitMutation.isPending || !resubmitNotes.trim()}
+            >
+              {(isUploading || resubmitMutation.isPending) ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <Send className="h-4 w-4 mr-2" />
+              )}
+              Resubmit Request
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AppLayout>
   );
 }
