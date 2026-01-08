@@ -813,7 +813,7 @@ export const APPRAISALS_MANUAL_STRUCTURE: ManualSection[] = [
     id: 'part-7',
     sectionNumber: '7',
     title: 'Integration & Downstream Impacts',
-    description: 'How appraisal data flows to other HRplus modules',
+    description: 'How appraisal data flows to other Intelli HRM modules',
     contentLevel: 'reference',
     estimatedReadTime: 40,
     targetRoles: ['Admin', 'Consultant'],

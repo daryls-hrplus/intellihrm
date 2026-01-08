@@ -106,7 +106,7 @@ export function InvoicePreview({ invoice }: InvoicePreviewProps) {
         <div className="flex justify-between items-start mb-8">
           <div>
             <h1 className="text-2xl font-bold text-primary">
-              {settings?.company_name || 'HRplus Cerebra'}
+              {settings?.company_name || 'Intelli HRM'}
             </h1>
             {settings?.company_address && (
               <p className="text-muted-foreground mt-1">{settings.company_address}</p>

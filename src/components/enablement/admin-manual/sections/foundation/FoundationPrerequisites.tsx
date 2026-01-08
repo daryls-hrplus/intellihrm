@@ -143,7 +143,7 @@ export function FoundationPrerequisites() {
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-muted-foreground">
-            Before configuring the organizational foundation in HRplus, you must gather 
+            Before configuring the organizational foundation in Intelli HRM, you must gather 
             comprehensive information about your company structure, geographic presence, 
             and regulatory obligations. This preparation ensures a smooth setup process 
             and prevents rework.

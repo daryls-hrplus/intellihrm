@@ -1,4 +1,4 @@
-// Implementation Tracking Types for HRplus
+// Implementation Tracking Types for Intelli HRM
 // Tracks module/feature implementation progress separate from tour completion
 
 export type ImplementationStatus = 'not_started' | 'in_progress' | 'completed' | 'on_hold';

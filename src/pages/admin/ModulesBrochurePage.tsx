@@ -210,7 +210,7 @@ const ModulesBrochurePage = () => {
     pdf.setTextColor(255, 255, 255);
     pdf.setFontSize(36);
     pdf.setFont("helvetica", "bold");
-    pdf.text("HRplus Cerebra", pageWidth / 2, pageHeight / 2 - 20, { align: "center" });
+    pdf.text("Intelli HRM", pageWidth / 2, pageHeight / 2 - 20, { align: "center" });
     
     pdf.setFontSize(20);
     pdf.setFont("helvetica", "normal");
@@ -336,9 +336,9 @@ const ModulesBrochurePage = () => {
     pdf.rect(0, pageHeight - 20, pageWidth, 20, "F");
     pdf.setTextColor(255, 255, 255);
     pdf.setFontSize(10);
-    pdf.text("www.hrpluscerebra.com | sales@hrpluscerebra.com", pageWidth / 2, pageHeight - 10, { align: "center" });
+    pdf.text("www.intellihrm.net | sales@intellihrm.net", pageWidth / 2, pageHeight - 10, { align: "center" });
 
-    pdf.save("HRplus-Cerebra-Modules-Brochure.pdf");
+    pdf.save("Intelli-HRM-Modules-Brochure.pdf");
   };
 
   return (
@@ -354,7 +354,7 @@ const ModulesBrochurePage = () => {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold">Modules Brochure</h1>
-            <p className="text-muted-foreground">Comprehensive guide to all HRplus Cerebra modules</p>
+            <p className="text-muted-foreground">Comprehensive guide to all Intelli HRM modules</p>
           </div>
           <Button onClick={exportToPDF} className="gap-2">
             <Download className="h-4 w-4" />

@@ -10,7 +10,7 @@ export function EmployeeRecordCreation() {
       <section>
         <h3 className="text-lg font-semibold mb-3">Overview</h3>
         <p className="text-muted-foreground mb-4">
-          Employee record creation establishes the foundational data for each employee in HRplus. 
+          Employee record creation establishes the foundational data for each employee in Intelli HRM. 
           This section covers creating new profiles, required vs optional fields, and configuring 
           employee identifiers that ensure unique tracking across the system.
         </p>
@@ -28,7 +28,7 @@ export function EmployeeRecordCreation() {
       <section>
         <h3 className="text-lg font-semibold mb-3">Employee Identifiers</h3>
         <p className="text-muted-foreground mb-4">
-          HRplus supports multiple identifier types for flexible employee tracking:
+          Intelli HRM supports multiple identifier types for flexible employee tracking:
         </p>
         
         <Table>

@@ -218,7 +218,7 @@ export function FoundationDepartments() {
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-muted-foreground">
-            Departments are the core organizational unit in HRplus, representing 
+            Departments are the core organizational unit in Intelli HRM, representing 
             functional business units with cost center ownership. Every company 
             must have at least one department, and all positions are assigned 
             to departments.
@@ -291,7 +291,7 @@ export function FoundationDepartments() {
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-muted-foreground">
-            HRplus supports multi-level department hierarchies. Use Parent Department 
+            Intelli HRM supports multi-level department hierarchies. Use Parent Department 
             to create structures like:
           </p>
           <div className="p-4 bg-muted/30 rounded-lg font-mono text-sm">

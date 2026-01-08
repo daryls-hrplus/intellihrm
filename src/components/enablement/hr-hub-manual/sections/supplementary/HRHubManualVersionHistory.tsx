@@ -6,7 +6,7 @@ const VERSION_HISTORY = [
   {
     version: '1.3.0',
     date: '2026-01-08',
-    author: 'HRplus Team',
+    author: 'Intelli HRM Team',
     type: 'major',
     changes: [
       'Added comprehensive Appendix section with Architecture Diagrams',
@@ -19,7 +19,7 @@ const VERSION_HISTORY = [
   {
     version: '1.2.0',
     date: '2025-12-28',
-    author: 'HRplus Team',
+    author: 'Intelli HRM Team',
     type: 'minor',
     changes: [
       'Added Part 7: Analytics & Reporting section',
@@ -32,7 +32,7 @@ const VERSION_HISTORY = [
   {
     version: '1.1.0',
     date: '2025-12-15',
-    author: 'HRplus Team',
+    author: 'Intelli HRM Team',
     type: 'minor',
     changes: [
       'Added Knowledge Base management documentation',
@@ -45,7 +45,7 @@ const VERSION_HISTORY = [
   {
     version: '1.0.0',
     date: '2025-11-20',
-    author: 'HRplus Team',
+    author: 'Intelli HRM Team',
     type: 'major',
     changes: [
       'Initial release of HR Hub Administrator Manual',
@@ -225,7 +225,7 @@ export function HRHubManualVersionHistory() {
             </div>
             <div className="space-y-2">
               <p className="text-sm font-medium">Document Owner</p>
-              <p className="text-lg text-muted-foreground">HRplus Documentation Team</p>
+              <p className="text-lg text-muted-foreground">Intelli HRM Documentation Team</p>
             </div>
             <div className="space-y-2">
               <p className="text-sm font-medium">Review Cycle</p>

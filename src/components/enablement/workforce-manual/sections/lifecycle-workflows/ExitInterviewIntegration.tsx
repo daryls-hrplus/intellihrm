@@ -9,7 +9,7 @@ export function ExitInterviewIntegration() {
   return (
     <div className="space-y-6">
       <p className="text-muted-foreground">
-        Exit interviews provide valuable insights into employee departures. HRplus automates the 
+        Exit interviews provide valuable insights into employee departures. Intelli HRM automates the 
         scheduling, collection, and analysis of exit interview data to identify retention opportunities 
         and organizational improvement areas.
       </p>

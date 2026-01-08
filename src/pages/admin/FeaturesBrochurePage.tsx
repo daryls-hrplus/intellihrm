@@ -101,7 +101,7 @@ const FeaturesBrochurePage = () => {
     pdf.setTextColor(255, 255, 255);
     pdf.setFontSize(28);
     pdf.setFont("helvetica", "bold");
-    pdf.text("HRplus Cerebra", pageWidth / 2, 25, { align: "center" });
+    pdf.text("Intelli HRM", pageWidth / 2, 25, { align: "center" });
     pdf.setFontSize(14);
     pdf.setFont("helvetica", "normal");
     pdf.text("Enterprise Human Resource Management System", pageWidth / 2, 35, { align: "center" });
@@ -192,7 +192,7 @@ const FeaturesBrochurePage = () => {
     pdf.setTextColor(30, 30, 30);
     pdf.setFontSize(14);
     pdf.setFont("helvetica", "bold");
-    pdf.text("Why Choose HRplus Cerebra?", margin, yPos + 5);
+    pdf.text("Why Choose Intelli HRM?", margin, yPos + 5);
     yPos += 12;
 
     const benefits = [
@@ -215,9 +215,9 @@ const FeaturesBrochurePage = () => {
     pdf.rect(0, pageHeight - 20, pageWidth, 20, "F");
     pdf.setTextColor(255, 255, 255);
     pdf.setFontSize(10);
-    pdf.text("www.hrpluscerebra.com | sales@hrpluscerebra.com", pageWidth / 2, pageHeight - 10, { align: "center" });
+    pdf.text("www.intellihrm.net | sales@intellihrm.net", pageWidth / 2, pageHeight - 10, { align: "center" });
 
-    pdf.save("HRplus-Cerebra-Features-Brochure.pdf");
+    pdf.save("Intelli-HRM-Features-Brochure.pdf");
   };
 
   return (
@@ -233,7 +233,7 @@ const FeaturesBrochurePage = () => {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold">Features Brochure</h1>
-            <p className="text-muted-foreground">Marketing summary of HRplus Cerebra capabilities</p>
+            <p className="text-muted-foreground">Marketing summary of Intelli HRM capabilities</p>
           </div>
           <Button onClick={exportToPDF} className="gap-2">
             <Download className="h-4 w-4" />
@@ -245,7 +245,7 @@ const FeaturesBrochurePage = () => {
           {/* Hero Section */}
           <Card className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white overflow-hidden">
             <CardContent className="p-8 text-center">
-              <h2 className="text-4xl font-bold mb-2">HRplus Cerebra</h2>
+              <h2 className="text-4xl font-bold mb-2">Intelli HRM</h2>
               <p className="text-xl opacity-90">Enterprise Human Resource Management System</p>
               <p className="mt-4 text-lg opacity-80 italic">
                 Empowering organizations with intelligent, scalable HR solutions
@@ -304,7 +304,7 @@ const FeaturesBrochurePage = () => {
           {/* Why Choose Section */}
           <Card className="bg-muted/50">
             <CardContent className="p-6">
-              <h3 className="text-xl font-bold mb-4">Why Choose HRplus Cerebra?</h3>
+              <h3 className="text-xl font-bold mb-4">Why Choose Intelli HRM?</h3>
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="flex items-start gap-3">
                   <Zap className="h-5 w-5 text-green-600 mt-0.5" />

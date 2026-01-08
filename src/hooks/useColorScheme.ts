@@ -15,14 +15,14 @@ export interface ColorScheme {
 }
 
 export const DEFAULT_COLORS = {
-  // Light mode - HRplus Brand Colors
+  // Light mode - Intelli HRM Brand Colors
   background: "210 20% 98%",
   foreground: "222 47% 11%",
   card: "0 0% 100%",
   "card-foreground": "222 47% 11%",
   popover: "0 0% 100%",
   "popover-foreground": "222 47% 11%",
-  // HRplus Moderate Azure (#2F7AC3)
+  // Intelli HRM Moderate Azure (#2F7AC3)
   primary: "210 61% 47%",
   "primary-foreground": "0 0% 100%",
   secondary: "210 30% 95%",
@@ -44,7 +44,7 @@ export const DEFAULT_COLORS = {
   border: "210 32% 91%",
   input: "210 32% 91%",
   ring: "210 61% 47%",
-  // Sidebar - HRplus Dark Azure (#0C4277)
+  // Sidebar - Intelli HRM Dark Azure (#0C4277)
   "sidebar-background": "211 81% 26%",
   "sidebar-foreground": "210 40% 98%",
   "sidebar-primary": "210 61% 55%",

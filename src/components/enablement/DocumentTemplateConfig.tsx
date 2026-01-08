@@ -449,7 +449,7 @@ export function DocumentTemplateConfig({
                     <div className="space-y-2">
                       <Label>Company Name</Label>
                       <Input
-                        placeholder="HRplus Cerebra"
+                        placeholder="Intelli HRM"
                         value={customTemplate.branding.companyName || ''}
                         onChange={(e) => handleBrandingChange('companyName', e.target.value)}
                       />

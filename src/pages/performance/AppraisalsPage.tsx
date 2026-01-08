@@ -694,7 +694,7 @@ export default function AppraisalsPage() {
             <div className="space-y-6">
               {/* AI Transparency Banner - ISO 42001 */}
               <AITransparencyBanner
-                modelName="HRplus Talent Risk Analyzer"
+                modelName="Intelli HRM Talent Risk Analyzer"
                 lastAnalysisDate={storedRisks?.[0]?.last_analyzed_at}
                 confidenceLevel={riskSummary?.critical > 0 ? "high" : "medium"}
                 humanReviewRequired={riskSummary?.critical > 0 || riskSummary?.high > 0}

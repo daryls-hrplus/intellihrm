@@ -69,7 +69,7 @@ const GLOSSARY_TERMS: GlossaryTerm[] = [
   { term: 'Recognition Leaderboard', definition: 'Ranking display showing top recognized employees or departments over a period.', category: 'analytics' },
 
   // Integration
-  { term: 'Integration Hub', definition: 'Central dashboard for managing connections between HR Hub and external systems or other HRplus modules.', category: 'integration' },
+  { term: 'Integration Hub', definition: 'Central dashboard for managing connections between HR Hub and external systems or other Intelli HRM modules.', category: 'integration' },
   { term: 'Data Import', definition: 'Process of loading bulk data into HR Hub from external files or systems with mapping and validation.', category: 'integration' },
   { term: 'Import Mapping', definition: 'Configuration defining how columns in source files correspond to HR Hub fields during data import.', category: 'integration' },
   { term: 'API Webhook', definition: 'HTTP callback that sends real-time data to external systems when specific events occur in HR Hub.', category: 'integration' },
