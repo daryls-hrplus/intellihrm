@@ -5,6 +5,10 @@ import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { GroupedModuleCards, ModuleSection, GroupedModuleItem } from "@/components/ui/GroupedModuleCards";
 import { ESSAIDashboard } from "@/components/ess/ESSAIDashboard";
 import { InboxQuickSummary } from "@/components/ess/InboxQuickSummary";
+import { AnnouncementsWidget } from "@/components/ess/AnnouncementsWidget";
+import { RemindersWidget } from "@/components/ess/RemindersWidget";
+import { QuickActionsPanel } from "@/components/ess/QuickActionsPanel";
+import { ImportantDatesStrip } from "@/components/ess/ImportantDatesStrip";
 import { useGranularPermissions } from "@/hooks/useGranularPermissions";
 import { useEssPendingActions } from "@/hooks/useEssPendingActions";
 import {
@@ -186,8 +190,23 @@ export default function EmployeeSelfServicePage() {
         {/* AI-Powered Dashboard */}
         <ESSAIDashboard />
 
-        {/* Inbox Quick Summary */}
-        <InboxQuickSummary />
+        {/* Quick Actions Panel - Only shows when actions are required */}
+        <QuickActionsPanel />
+
+        {/* Important Dates Strip */}
+        <ImportantDatesStrip />
+
+        {/* Dashboard Widgets Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {/* Inbox Quick Summary */}
+          <InboxQuickSummary />
+          
+          {/* Announcements Widget */}
+          <AnnouncementsWidget />
+          
+          {/* Reminders Widget */}
+          <RemindersWidget />
+        </div>
 
         <GroupedModuleCards sections={sections} sectionBadges={sectionBadges} defaultOpen={false} showToggleButton />
       </div>

@@ -13,10 +13,10 @@ export interface EssSectionBadges {
 }
 
 export function useEssPendingActions() {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
 
   return useQuery({
-    queryKey: ["ess-pending-actions", user?.id],
+    queryKey: ["ess-pending-actions", user?.id, profile?.company_id],
     queryFn: async (): Promise<EssSectionBadges> => {
       if (!user?.id) return {};
 
@@ -147,6 +147,49 @@ export function useEssPendingActions() {
           badges["Tasks & Approvals"] = {
             count: pendingChangeRequests || 0,
             label: `${pendingChangeRequests} pending`,
+            variant: "default",
+          };
+        }
+      }
+
+      // NEW: Fetch unread/unacknowledged announcements for Help & Settings badge
+      if (profile?.company_id) {
+        const now = new Date().toISOString();
+        
+        const { data: announcements } = await supabase
+          .from("company_announcements")
+          .select("id, requires_acknowledgement")
+          .eq("company_id", profile.company_id)
+          .eq("is_active", true)
+          .or(`publish_at.is.null,publish_at.lte.${now}`)
+          .or(`expire_at.is.null,expire_at.gte.${now}`);
+
+        const { data: reads } = await supabase
+          .from("announcement_reads")
+          .select("announcement_id, acknowledged_at")
+          .eq("user_id", user.id);
+
+        const readMap = new Map((reads || []).map(r => [r.announcement_id, r]));
+        const announcementsList = announcements || [];
+        
+        // Count unread announcements
+        const unreadCount = announcementsList.filter(a => !readMap.has(a.id)).length;
+        
+        // Count announcements requiring acknowledgement but not yet acknowledged
+        const needsAckCount = announcementsList.filter(a => 
+          a.requires_acknowledgement && (!readMap.get(a.id)?.acknowledged_at)
+        ).length;
+
+        if (needsAckCount > 0) {
+          badges["Help & Settings"] = {
+            count: needsAckCount,
+            label: `${needsAckCount} action required`,
+            variant: "warning",
+          };
+        } else if (unreadCount > 0) {
+          badges["Help & Settings"] = {
+            count: unreadCount,
+            label: `${unreadCount} unread`,
             variant: "default",
           };
         }
