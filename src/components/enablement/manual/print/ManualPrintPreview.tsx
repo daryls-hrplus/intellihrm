@@ -851,7 +851,7 @@ export function ManualPrintPreview({
                 <ChapterTitlePage
                   chapterNumber={1}
                   title="Module Overview & Conceptual Foundation"
-                  description="Understanding the architecture and philosophy behind the HRplus Appraisals module"
+                  description="Understanding the architecture and philosophy behind the Intelli HRM Appraisals module"
                   brandColors={brandColors}
                   style={settings.branding.coverStyle}
                 />
@@ -913,9 +913,9 @@ export function ManualPrintPreview({
                   className="prose prose-sm max-w-none"
                   style={{ fontFamily: settings.formatting.fontFamily }}
                 >
-                  <h3 className="text-lg font-semibold mb-3">1.1 Introduction to Appraisals in HRplus</h3>
+                  <h3 className="text-lg font-semibold mb-3">1.1 Introduction to Appraisals in Intelli HRM</h3>
                   <p className="text-muted-foreground leading-relaxed mb-4">
-                    The HRplus Performance Appraisals module is a comprehensive, enterprise-grade solution designed to manage the complete performance evaluation lifecycle. This module integrates seamlessly with other HRplus components to create an intelligent talent management ecosystem.
+                    The Intelli HRM Performance Appraisals module is a comprehensive, enterprise-grade solution designed to manage the complete performance evaluation lifecycle. This module integrates seamlessly with other Intelli HRM components to create an intelligent talent management ecosystem.
                   </p>
                   <p className="text-muted-foreground leading-relaxed mb-4">
                     Built with AI-first principles, the module provides predictive insights, prescriptive recommendations, and automated actions to reduce administrative burden while improving evaluation quality and objectivity.

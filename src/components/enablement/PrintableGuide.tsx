@@ -35,8 +35,8 @@ export const PrintableGuide = forwardRef<HTMLDivElement, PrintableGuideProps>(
         <div className="page cover-page flex flex-col items-center justify-center min-h-[100vh] text-center p-16">
           <div className="mb-8">
             <img
-              src="/hrplus-logo.png"
-              alt="HRplus Cerebra"
+              src="/intellihrm-logo.png"
+              alt="Intelli HRM Cerebra"
               className="h-24 mx-auto"
               onError={(e) => {
                 const target = e.target as HTMLImageElement;
@@ -57,7 +57,7 @@ export const PrintableGuide = forwardRef<HTMLDivElement, PrintableGuideProps>(
             Industry-Aligned Methodology
           </p>
           <div className="mt-16 text-sm text-gray-400">
-            <p>HRplus Cerebra</p>
+            <p>Intelli HRM Cerebra</p>
             <p>Version {new Date().getFullYear()}.1</p>
             <p>Last Updated: {new Date().toLocaleDateString()}</p>
           </div>
@@ -97,7 +97,7 @@ export const PrintableGuide = forwardRef<HTMLDivElement, PrintableGuideProps>(
           </div>
           
           <p className="text-lg mb-6 leading-relaxed">
-            The Enablement Hub is HRplus Cerebra's central platform for creating, managing, and
+            The Enablement Hub is Intelli HRM Cerebra's central platform for creating, managing, and
             distributing training content and documentation. Following industry-proven
             methodology, we implement a release-driven content strategy that
             ensures all stakeholders receive timely, accurate enablement materials.

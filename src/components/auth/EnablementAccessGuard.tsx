@@ -9,7 +9,7 @@ interface EnablementAccessGuardProps {
 
 /**
  * Guard component that restricts access to the Enablement Center.
- * Only users in HRplus internal tenants can access enablement authoring features.
+ * Only users in Intelli HRM internal tenants can access enablement authoring features.
  * Client tenants are redirected to the Help Center for read-only content access.
  */
 export function EnablementAccessGuard({ children }: EnablementAccessGuardProps) {
@@ -27,7 +27,7 @@ export function EnablementAccessGuard({ children }: EnablementAccessGuardProps) 
   }
 
   // Access rules:
-  // - HRplus internal tenants: always allowed
+  // - Intelli HRM internal tenants: always allowed
   // - Explicit roles: enablement_admin and system_admin can access from any tenant
   const canAccess =
     isHRPlusInternal || hasRole("enablement_admin") || hasRole("system_admin");

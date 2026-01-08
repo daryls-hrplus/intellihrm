@@ -129,7 +129,7 @@ export function JobArchitectureOverview() {
       </Card>
 
       <InfoCallout title="Industry Alignment">
-        HRplus job architecture follows industry best practices aligned with frameworks 
+        Intelli HRM job architecture follows industry best practices aligned with frameworks 
         from Workday, SAP SuccessFactors, and O*NET. This ensures compatibility with 
         standard job libraries and benchmarking data sources.
       </InfoCallout>

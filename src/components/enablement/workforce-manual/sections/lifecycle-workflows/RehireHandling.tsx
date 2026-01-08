@@ -12,7 +12,7 @@ export function RehireHandling() {
     <div className="space-y-6">
       <p className="text-muted-foreground">
         Rehiring former employees requires special handling to maintain historical data integrity, 
-        calculate seniority correctly, and apply appropriate onboarding processes. HRplus provides 
+        calculate seniority correctly, and apply appropriate onboarding processes. Intelli HRM provides 
         configurable rehire workflows.
       </p>
 

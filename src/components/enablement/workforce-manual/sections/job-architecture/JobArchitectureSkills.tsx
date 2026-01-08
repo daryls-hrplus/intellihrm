@@ -130,7 +130,7 @@ export function JobArchitectureSkills() {
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-muted-foreground">
-            HRplus uses a unified capability framework that distinguishes between 
+            Intelli HRM uses a unified capability framework that distinguishes between 
             Skills (what you know) and Competencies (how you work). Both use the 
             same proficiency scale for consistency.
           </p>

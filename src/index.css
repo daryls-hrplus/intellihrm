@@ -15,7 +15,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
 
-    /* HRplus Moderate Azure - Primary brand color */
+    /* Intelli HRM Moderate Azure - Primary brand color */
     --primary: 210 61% 47%;
     --primary-foreground: 0 0% 100%;
 
@@ -48,7 +48,7 @@
 
     --radius: 0.5rem;
 
-    /* HRplus Dark Azure - Sidebar brand color */
+    /* Intelli HRM Dark Azure - Sidebar brand color */
     --sidebar-background: 211 81% 26%;
     --sidebar-foreground: 210 40% 98%;
     --sidebar-primary: 210 61% 55%;
@@ -58,7 +58,7 @@
     --sidebar-border: 211 81% 35%;
     --sidebar-ring: 210 61% 55%;
 
-    /* Custom tokens - Updated for HRplus brand */
+    /* Custom tokens - Updated for Intelli HRM brand */
     --gradient-primary: linear-gradient(135deg, hsl(210 61% 47%), hsl(211 81% 26%));
     --gradient-sidebar: linear-gradient(180deg, hsl(211 81% 26%), hsl(211 81% 20%));
     --gradient-card-hover: linear-gradient(135deg, hsl(210 61% 97%), hsl(210 61% 94%));
@@ -79,7 +79,7 @@
     --popover: 222 47% 9%;
     --popover-foreground: 210 40% 98%;
 
-    /* HRplus Moderate Azure - slightly brighter for dark mode */
+    /* Intelli HRM Moderate Azure - slightly brighter for dark mode */
     --primary: 210 61% 52%;
     --primary-foreground: 0 0% 100%;
 

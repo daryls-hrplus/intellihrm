@@ -19,7 +19,7 @@ interface AITransparencyBannerProps {
 }
 
 export function AITransparencyBanner({
-  modelName = "HRplus AI Risk Analyzer",
+  modelName = "Intelli HRM AI Risk Analyzer",
   lastAnalysisDate,
   confidenceLevel = "medium",
   humanReviewRequired = false,

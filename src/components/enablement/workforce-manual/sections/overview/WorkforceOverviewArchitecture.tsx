@@ -121,7 +121,7 @@ export function WorkforceOverviewArchitecture() {
             Module Integration Points
           </h3>
           <p className="text-muted-foreground mb-4">
-            Workforce data flows to and from other HRplus modules. Understanding these integration 
+            Workforce data flows to and from other Intelli HRM modules. Understanding these integration 
             points is critical for system configuration.
           </p>
           

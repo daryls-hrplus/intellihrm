@@ -10,7 +10,7 @@ export function OffboardingWorkflowDesign() {
   return (
     <div className="space-y-6">
       <p className="text-muted-foreground">
-        Offboarding templates ensure consistent, compliant separation processes. HRplus supports 
+        Offboarding templates ensure consistent, compliant separation processes. Intelli HRM supports 
         multiple templates for different separation types (resignation, termination, retirement, 
         contract end) with appropriate workflows for each.
       </p>

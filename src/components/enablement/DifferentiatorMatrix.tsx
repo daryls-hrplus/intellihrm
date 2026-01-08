@@ -336,7 +336,7 @@ function DifferentiatorDot({ level }: { level: 'standard' | 'advanced' | 'unique
           </div>
         </TooltipTrigger>
         <TooltipContent>
-          {level === 'unique' && 'Market differentiator - unique to HRplus Cerebra'}
+          {level === 'unique' && 'Market differentiator - unique to Intelli HRM Cerebra'}
           {level === 'advanced' && 'Advanced feature with competitive advantage'}
           {level === 'standard' && 'Core HR functionality'}
         </TooltipContent>

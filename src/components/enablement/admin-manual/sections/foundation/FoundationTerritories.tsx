@@ -179,7 +179,7 @@ export function FoundationTerritories() {
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-muted-foreground">
-            Territories represent the highest level of organizational hierarchy in HRplus, 
+            Territories represent the highest level of organizational hierarchy in Intelli HRM, 
             grouping countries into manageable regions. They are particularly useful for 
             multinational organizations that need to aggregate reporting, manage regional 
             compliance, and set consistent defaults across countries.

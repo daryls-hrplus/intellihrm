@@ -335,7 +335,7 @@ export default function DemoConversionPage() {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Subdomain</span>
-                      <span>{registration.assigned_subdomain}.hrplus.app</span>
+                      <span>{registration.assigned_subdomain}.intellihrm.app</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Modules</span>
