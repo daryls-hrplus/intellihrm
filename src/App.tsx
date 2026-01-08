@@ -101,6 +101,7 @@ import WorkforceManualPage from "./pages/enablement/WorkforceManualPage";
 import HRHubManualPage from "./pages/enablement/HRHubManualPage";
 import ClientProvisioningGuidePage from "./pages/enablement/ClientProvisioningGuidePage";
 import ClientProvisioningTestingPage from "./pages/enablement/ClientProvisioningTestingPage";
+import ManualPublishingPage from "./pages/enablement/ManualPublishingPage";
 
 // Marketing pages
 import { MarketingLayout } from "./components/marketing/MarketingLayout";
@@ -4662,6 +4663,16 @@ const App = () => (
                 <ProtectedRoute requiredRoles={["admin"]}>
                   <EnablementAccessGuard>
                     <ClientProvisioningTestingPage />
+                  </EnablementAccessGuard>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/enablement/manual-publishing"
+              element={
+                <ProtectedRoute requiredRoles={["admin"]}>
+                  <EnablementAccessGuard>
+                    <ManualPublishingPage />
                   </EnablementAccessGuard>
                 </ProtectedRoute>
               }
