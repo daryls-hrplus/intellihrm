@@ -77,12 +77,12 @@ export function EssChangeRequestsWidget() {
   const hasUrgent = infoRequired.length > 0;
 
   return (
-    <Card className={hasUrgent ? "border-orange-300 dark:border-orange-700 bg-orange-50 dark:bg-orange-950/30" : ""}>
+    <Card className="border-l-4 border-l-primary">
       <CardHeader className="pb-3">
-        <CardTitle className={`flex items-center gap-2 ${hasUrgent ? "text-orange-700 dark:text-orange-300" : ""}`}>
-          <GitPullRequest className="h-5 w-5" />
+        <CardTitle className="flex items-center gap-2">
+          <GitPullRequest className="h-5 w-5 text-primary" />
           Change Request Actions
-          <Badge variant="secondary" className={hasUrgent ? "bg-orange-100 text-orange-700 dark:bg-orange-900 dark:text-orange-300" : ""}>
+          <Badge variant={hasUrgent ? "destructive" : "secondary"}>
             {requests.length} pending
           </Badge>
         </CardTitle>
@@ -91,7 +91,7 @@ export function EssChangeRequestsWidget() {
         {/* Info Required Section - Urgent */}
         {infoRequired.length > 0 && (
           <div className="space-y-2">
-          <div className="flex items-center gap-2 text-sm font-medium text-orange-600 dark:text-orange-400">
+          <div className="flex items-center gap-2 text-sm font-medium text-destructive">
               <AlertCircle className="h-4 w-4" />
               Response Required
             </div>
@@ -137,12 +137,12 @@ function RequestCard({ request, variant, onAction }: { request: ChangeRequest; v
     <div
       className={`flex items-center justify-between p-3 rounded-lg border ${
         variant === "urgent"
-          ? "bg-orange-50 dark:bg-orange-950/30 border-orange-200 dark:border-orange-800"
-          : "bg-muted/30 border-border"
+          ? "bg-destructive/5 border-destructive/20"
+          : "bg-muted/50 border-border"
       }`}
     >
       <div className="flex items-center gap-3 min-w-0 flex-1">
-        <div className={`p-2 rounded-md ${variant === "urgent" ? "bg-orange-100 dark:bg-orange-900/50" : "bg-muted"}`}>
+        <div className={`p-2 rounded-md ${variant === "urgent" ? "bg-destructive/10 text-destructive" : "bg-muted"}`}>
           <Icon className="h-4 w-4" />
         </div>
         <div className="min-w-0 flex-1">
@@ -151,7 +151,7 @@ function RequestCard({ request, variant, onAction }: { request: ChangeRequest; v
             <span className="text-xs text-muted-foreground">• {actionLabel}</span>
           </div>
           {variant === "urgent" && request.review_notes && (
-            <p className="text-xs text-orange-600 dark:text-orange-400 truncate mt-0.5">
+            <p className="text-xs text-destructive truncate mt-0.5">
               Info needed: {request.review_notes}
             </p>
           )}
