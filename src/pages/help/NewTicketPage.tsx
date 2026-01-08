@@ -274,10 +274,15 @@ export default function NewTicketPage() {
                     <SelectTrigger>
                       <SelectValue placeholder="Select category" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="max-h-[300px]">
                       {categories.map((cat) => (
                         <SelectItem key={cat.id} value={cat.id}>
-                          {cat.name}
+                          <div className="flex flex-col items-start">
+                            <span>{cat.name}</span>
+                            {cat.description && (
+                              <span className="text-xs text-muted-foreground line-clamp-1 max-w-[250px]">{cat.description}</span>
+                            )}
+                          </div>
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -306,6 +311,12 @@ export default function NewTicketPage() {
                   </Select>
                 </div>
               </div>
+
+              {categoryId && categories.find(c => c.id === categoryId)?.description && (
+                <p className="text-sm text-muted-foreground bg-muted/50 p-2 rounded-md">
+                  {categories.find(c => c.id === categoryId)?.description}
+                </p>
+              )}
 
               <div className="space-y-2">
                 <Label htmlFor="description">Description *</Label>

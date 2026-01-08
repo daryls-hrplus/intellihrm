@@ -253,7 +253,7 @@ export function QuickTicketModal({ open, onOpenChange }: QuickTicketModalProps) 
                 <SelectTrigger>
                   <SelectValue placeholder="Select category" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="max-h-[250px]">
                   {categories.map((cat) => (
                     <SelectItem key={cat.id} value={cat.id}>
                       {cat.name}
