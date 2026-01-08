@@ -182,38 +182,10 @@ export const HR_HUB_MANUAL_STRUCTURE: HRHubManualSection[] = [
       {
         id: 'hh-sec-3-1',
         sectionNumber: '3.1',
-        title: 'ESS Approval Policies',
-        description: 'Employee self-service approval modes, auto-approve rules, escalation paths',
+        title: 'Workflow Templates',
+        description: 'Reusable approval workflow patterns, sequential and parallel routing',
         contentLevel: 'procedure',
         estimatedReadTime: 15,
-        targetRoles: ['HR Admin', 'Consultant'],
-        industryContext: {
-          frequency: 'Initial setup, policy updates',
-          timing: 'Pre-launch',
-          benchmark: 'Employee self-service governance'
-        }
-      },
-      {
-        id: 'hh-sec-3-2',
-        sectionNumber: '3.2',
-        title: 'SOP Management',
-        description: 'Standard operating procedures, version control, role-based access, AI generation',
-        contentLevel: 'procedure',
-        estimatedReadTime: 18,
-        targetRoles: ['HR Admin', 'Operations'],
-        industryContext: {
-          frequency: 'Initial setup, periodic updates',
-          timing: 'Pre-launch and ongoing',
-          benchmark: 'ISO 9001 process documentation'
-        }
-      },
-      {
-        id: 'hh-sec-3-3',
-        sectionNumber: '3.3',
-        title: 'Transaction Workflow Settings',
-        description: 'Approval chains, parallel/sequential flows, escalation rules',
-        contentLevel: 'procedure',
-        estimatedReadTime: 25,
         targetRoles: ['HR Admin', 'Consultant'],
         industryContext: {
           frequency: 'Initial setup, org changes',
@@ -222,8 +194,22 @@ export const HR_HUB_MANUAL_STRUCTURE: HRHubManualSection[] = [
         }
       },
       {
-        id: 'hh-sec-3-4',
-        sectionNumber: '3.4',
+        id: 'hh-sec-3-2',
+        sectionNumber: '3.2',
+        title: 'Transaction Workflow Settings',
+        description: 'Map workflow templates to transaction types, escalation rules',
+        contentLevel: 'procedure',
+        estimatedReadTime: 20,
+        targetRoles: ['HR Admin', 'Consultant'],
+        industryContext: {
+          frequency: 'Initial setup, org changes',
+          timing: 'Pre-launch',
+          benchmark: 'Enterprise workflow automation'
+        }
+      },
+      {
+        id: 'hh-sec-3-3',
+        sectionNumber: '3.3',
         title: 'Approval Delegations',
         description: 'Delegation rules, temporary assignments, out-of-office handling',
         contentLevel: 'procedure',
@@ -236,9 +222,37 @@ export const HR_HUB_MANUAL_STRUCTURE: HRHubManualSection[] = [
         }
       },
       {
+        id: 'hh-sec-3-4',
+        sectionNumber: '3.4',
+        title: 'SOP Management',
+        description: 'Standard operating procedures, version control, role-based access, AI generation',
+        contentLevel: 'procedure',
+        estimatedReadTime: 18,
+        targetRoles: ['HR Admin', 'Operations'],
+        industryContext: {
+          frequency: 'Initial setup, periodic updates',
+          timing: 'Pre-launch and ongoing',
+          benchmark: 'ISO 9001 process documentation'
+        }
+      },
+      {
         id: 'hh-sec-3-5',
         sectionNumber: '3.5',
-        title: 'Compliance Tracker Setup',
+        title: 'ESS Approval Policies',
+        description: 'Employee self-service approval modes, auto-approve rules, escalation paths',
+        contentLevel: 'procedure',
+        estimatedReadTime: 15,
+        targetRoles: ['HR Admin', 'Consultant'],
+        industryContext: {
+          frequency: 'Initial setup, policy updates',
+          timing: 'Pre-launch',
+          benchmark: 'Employee self-service governance'
+        }
+      },
+      {
+        id: 'hh-sec-3-6',
+        sectionNumber: '3.6',
+        title: 'Compliance Tracker',
         description: 'Regulatory requirements, deadline tracking, audit preparation',
         contentLevel: 'procedure',
         estimatedReadTime: 20,
@@ -250,17 +264,17 @@ export const HR_HUB_MANUAL_STRUCTURE: HRHubManualSection[] = [
         }
       },
       {
-        id: 'hh-sec-3-6',
-        sectionNumber: '3.6',
-        title: 'Audit Trail & Reporting',
-        description: 'Compliance reports, audit logs, regulatory submissions',
+        id: 'hh-sec-3-7',
+        sectionNumber: '3.7',
+        title: 'Integration Hub',
+        description: 'Cross-module integration monitoring, approval activity tracking',
         contentLevel: 'procedure',
         estimatedReadTime: 15,
-        targetRoles: ['HR Admin', 'Compliance', 'Auditor'],
+        targetRoles: ['HR Admin', 'Consultant'],
         industryContext: {
-          frequency: 'Quarterly, annually',
-          timing: 'Audit cycles',
-          benchmark: 'SOC 2, ISO 27001 compliance'
+          frequency: 'Ongoing monitoring',
+          timing: 'Post-launch',
+          benchmark: 'Cross-module orchestration visibility'
         }
       }
     ]
@@ -278,22 +292,22 @@ export const HR_HUB_MANUAL_STRUCTURE: HRHubManualSection[] = [
       {
         id: 'hh-sec-4-1',
         sectionNumber: '4.1',
-        title: 'Letter Templates',
-        description: 'Employment letters, offer templates, termination notices',
+        title: 'Company Documents',
+        description: 'Centralized company document repository, version control, access management',
         contentLevel: 'procedure',
-        estimatedReadTime: 15,
+        estimatedReadTime: 12,
         targetRoles: ['HR Admin'],
         industryContext: {
-          frequency: 'Initial setup, legal updates',
+          frequency: 'Initial setup, ongoing updates',
           timing: 'Pre-launch',
-          benchmark: 'Compliant HR correspondence'
+          benchmark: 'Enterprise document management'
         }
       },
       {
         id: 'hh-sec-4-2',
         sectionNumber: '4.2',
         title: 'Policy Documents',
-        description: 'Policy versioning, acknowledgment tracking, distribution',
+        description: 'Policy versioning, acknowledgment tracking, AI-powered processing',
         contentLevel: 'procedure',
         estimatedReadTime: 15,
         targetRoles: ['HR Admin', 'Compliance'],
@@ -306,6 +320,20 @@ export const HR_HUB_MANUAL_STRUCTURE: HRHubManualSection[] = [
       {
         id: 'hh-sec-4-3',
         sectionNumber: '4.3',
+        title: 'Letter Templates',
+        description: 'Employment letters, offer templates, variable substitution',
+        contentLevel: 'procedure',
+        estimatedReadTime: 15,
+        targetRoles: ['HR Admin'],
+        industryContext: {
+          frequency: 'Initial setup, legal updates',
+          timing: 'Pre-launch',
+          benchmark: 'Compliant HR correspondence'
+        }
+      },
+      {
+        id: 'hh-sec-4-4',
+        sectionNumber: '4.4',
         title: 'Forms Library',
         description: 'Digital forms, approval workflows, submission tracking',
         contentLevel: 'procedure',
