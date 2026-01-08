@@ -105,8 +105,9 @@ export function ESSAIDashboard() {
     setError(null);
 
     try {
+      const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
       const { data, error: fnError } = await supabase.functions.invoke("ess-ai-dashboard", {
-        body: { userId: user.id, companyId: company.id },
+        body: { userId: user.id, companyId: company.id, timeZone },
       });
 
       if (fnError) throw fnError;

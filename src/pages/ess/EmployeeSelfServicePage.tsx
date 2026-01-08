@@ -6,7 +6,6 @@ import { GroupedModuleCards, ModuleSection, GroupedModuleItem } from "@/componen
 import { ESSAIDashboard } from "@/components/ess/ESSAIDashboard";
 import { InboxQuickSummary } from "@/components/ess/InboxQuickSummary";
 import { AnnouncementsWidget } from "@/components/ess/AnnouncementsWidget";
-import { QuickActionsPanel } from "@/components/ess/QuickActionsPanel";
 import { useGranularPermissions } from "@/hooks/useGranularPermissions";
 import { useEssPendingActions } from "@/hooks/useEssPendingActions";
 import {
@@ -187,9 +186,6 @@ export default function EmployeeSelfServicePage() {
 
         {/* AI-Powered Dashboard */}
         <ESSAIDashboard />
-
-        {/* Quick Actions Panel - Only shows when actions are required */}
-        <QuickActionsPanel />
 
         {/* Dashboard Widgets Grid - 2 columns */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
