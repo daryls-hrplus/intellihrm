@@ -1,6 +1,5 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { 
   Book, 
@@ -89,274 +88,276 @@ export function KnowledgeBaseSetup() {
         </CardContent>
       </Card>
 
-      {/* Knowledge Base Tabs */}
-      <Tabs defaultValue="categories" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="categories" className="flex items-center gap-2">
-            <FolderOpen className="h-4 w-4" />
+      {/* Section 5.4.1: Categories */}
+      <div id="hh-sec-5-4-1" data-manual-anchor="hh-sec-5-4-1" className="space-y-6 scroll-mt-36">
+        <div className="flex items-center gap-3 mb-4">
+          <Badge variant="secondary" className="text-xs">5.4.1</Badge>
+          <h3 className="text-lg font-semibold flex items-center gap-2">
+            <FolderOpen className="h-5 w-5 text-primary" />
             Categories
-          </TabsTrigger>
-          <TabsTrigger value="articles" className="flex items-center gap-2">
-            <FileText className="h-4 w-4" />
-            Articles
-          </TabsTrigger>
-        </TabsList>
+          </h3>
+        </div>
 
-        {/* Categories Tab */}
-        <TabsContent value="categories" id="hh-sec-5-4-1" data-manual-anchor="hh-sec-5-4-1" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <FolderOpen className="h-5 w-5 text-primary" />
-                Category Management
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <FolderOpen className="h-5 w-5 text-primary" />
+              Category Management
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <p className="text-sm text-muted-foreground">
+              Categories organize knowledge base articles into logical groupings. 
+              A well-structured category hierarchy helps employees find information quickly.
+            </p>
+
+            {/* Creating Categories */}
+            <div className="space-y-4">
+              <h4 className="font-semibold flex items-center gap-2">
+                <Plus className="h-4 w-4" />
+                Creating a Category
+              </h4>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b">
+                      <th className="text-left py-2 px-3 font-medium">Field</th>
+                      <th className="text-left py-2 px-3 font-medium">Required</th>
+                      <th className="text-left py-2 px-3 font-medium">Description</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y">
+                    <tr>
+                      <td className="py-2 px-3 font-medium">Name</td>
+                      <td className="py-2 px-3"><Badge>Required</Badge></td>
+                      <td className="py-2 px-3 text-muted-foreground">Display name (e.g., "Leave & Time Off")</td>
+                    </tr>
+                    <tr>
+                      <td className="py-2 px-3 font-medium">Slug</td>
+                      <td className="py-2 px-3"><Badge variant="secondary">Auto</Badge></td>
+                      <td className="py-2 px-3 text-muted-foreground">URL-friendly identifier (auto-generated from name)</td>
+                    </tr>
+                    <tr>
+                      <td className="py-2 px-3 font-medium">Description</td>
+                      <td className="py-2 px-3"><Badge variant="outline">Optional</Badge></td>
+                      <td className="py-2 px-3 text-muted-foreground">Brief explanation of category contents</td>
+                    </tr>
+                    <tr>
+                      <td className="py-2 px-3 font-medium">Icon</td>
+                      <td className="py-2 px-3"><Badge variant="outline">Optional</Badge></td>
+                      <td className="py-2 px-3 text-muted-foreground">Visual identifier from icon library</td>
+                    </tr>
+                    <tr>
+                      <td className="py-2 px-3 font-medium">Display Order</td>
+                      <td className="py-2 px-3"><Badge variant="outline">Optional</Badge></td>
+                      <td className="py-2 px-3 text-muted-foreground">Sort position in category list (lower = higher)</td>
+                    </tr>
+                    <tr>
+                      <td className="py-2 px-3 font-medium">Active</td>
+                      <td className="py-2 px-3"><Badge variant="secondary">Default: Yes</Badge></td>
+                      <td className="py-2 px-3 text-muted-foreground">Toggle visibility to employees</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Recommended Categories */}
+            <div className="space-y-4">
+              <h4 className="font-semibold">Recommended Category Structure</h4>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                {[
+                  { name: 'Getting Started', icon: '🚀' },
+                  { name: 'Leave & Time Off', icon: '🏖️' },
+                  { name: 'Benefits', icon: '💊' },
+                  { name: 'Payroll', icon: '💰' },
+                  { name: 'Policies', icon: '📋' },
+                  { name: 'Training', icon: '📚' },
+                  { name: 'IT & Systems', icon: '💻' },
+                  { name: 'Compliance', icon: '✅' },
+                  { name: 'FAQs', icon: '❓' }
+                ].map(cat => (
+                  <div key={cat.name} className="p-3 rounded-lg border bg-card flex items-center gap-2">
+                    <span>{cat.icon}</span>
+                    <span className="text-sm">{cat.name}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Activate/Deactivate */}
+            <div className="space-y-4">
+              <h4 className="font-semibold flex items-center gap-2">
+                <Eye className="h-4 w-4" />
+                Activating/Deactivating Categories
+              </h4>
               <p className="text-sm text-muted-foreground">
-                Categories organize knowledge base articles into logical groupings. 
-                A well-structured category hierarchy helps employees find information quickly.
+                Inactive categories are hidden from employees but retained in the system. 
+                Use this to temporarily hide categories during content updates or for 
+                seasonal content.
               </p>
+              <WarningCallout title="Articles in Inactive Categories">
+                When a category is deactivated, all articles within it become hidden 
+                from employees, even if the articles are marked as published.
+              </WarningCallout>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
-              {/* Creating Categories */}
-              <div className="space-y-4">
-                <h4 className="font-semibold flex items-center gap-2">
-                  <Plus className="h-4 w-4" />
-                  Creating a Category
-                </h4>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b">
-                        <th className="text-left py-2 px-3 font-medium">Field</th>
-                        <th className="text-left py-2 px-3 font-medium">Required</th>
-                        <th className="text-left py-2 px-3 font-medium">Description</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y">
-                      <tr>
-                        <td className="py-2 px-3 font-medium">Name</td>
-                        <td className="py-2 px-3"><Badge>Required</Badge></td>
-                        <td className="py-2 px-3 text-muted-foreground">Display name (e.g., "Leave & Time Off")</td>
-                      </tr>
-                      <tr>
-                        <td className="py-2 px-3 font-medium">Slug</td>
-                        <td className="py-2 px-3"><Badge variant="secondary">Auto</Badge></td>
-                        <td className="py-2 px-3 text-muted-foreground">URL-friendly identifier (auto-generated from name)</td>
-                      </tr>
-                      <tr>
-                        <td className="py-2 px-3 font-medium">Description</td>
-                        <td className="py-2 px-3"><Badge variant="outline">Optional</Badge></td>
-                        <td className="py-2 px-3 text-muted-foreground">Brief explanation of category contents</td>
-                      </tr>
-                      <tr>
-                        <td className="py-2 px-3 font-medium">Icon</td>
-                        <td className="py-2 px-3"><Badge variant="outline">Optional</Badge></td>
-                        <td className="py-2 px-3 text-muted-foreground">Visual identifier from icon library</td>
-                      </tr>
-                      <tr>
-                        <td className="py-2 px-3 font-medium">Display Order</td>
-                        <td className="py-2 px-3"><Badge variant="outline">Optional</Badge></td>
-                        <td className="py-2 px-3 text-muted-foreground">Sort position in category list (lower = higher)</td>
-                      </tr>
-                      <tr>
-                        <td className="py-2 px-3 font-medium">Active</td>
-                        <td className="py-2 px-3"><Badge variant="secondary">Default: Yes</Badge></td>
-                        <td className="py-2 px-3 text-muted-foreground">Toggle visibility to employees</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
+      {/* Section 5.4.2: Articles */}
+      <div id="hh-sec-5-4-2" data-manual-anchor="hh-sec-5-4-2" className="space-y-6 scroll-mt-36">
+        <div className="flex items-center gap-3 mb-4">
+          <Badge variant="secondary" className="text-xs">5.4.2</Badge>
+          <h3 className="text-lg font-semibold flex items-center gap-2">
+            <FileText className="h-5 w-5 text-primary" />
+            Articles
+          </h3>
+        </div>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5 text-primary" />
+              Article Management
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* Creating Articles */}
+            <div className="space-y-4">
+              <h4 className="font-semibold flex items-center gap-2">
+                <Plus className="h-4 w-4" />
+                Creating an Article
+              </h4>
+              <div className="p-4 rounded-lg border bg-muted/30">
+                <ol className="text-sm space-y-2 list-decimal list-inside">
+                  <li>Navigate to Knowledge Base Admin → Articles tab</li>
+                  <li>Click "New Article" button</li>
+                  <li>Enter article title (auto-generates slug)</li>
+                  <li>Select category from dropdown</li>
+                  <li>Write excerpt (short preview text)</li>
+                  <li>Compose content using Markdown or rich text editor</li>
+                  <li>Add relevant tags (comma-separated)</li>
+                  <li>Set publishing options (Draft/Published, Featured)</li>
+                  <li>Save article</li>
+                </ol>
               </div>
+            </div>
 
-              {/* Recommended Categories */}
-              <div className="space-y-4">
-                <h4 className="font-semibold">Recommended Category Structure</h4>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                  {[
-                    { name: 'Getting Started', icon: '🚀' },
-                    { name: 'Leave & Time Off', icon: '🏖️' },
-                    { name: 'Benefits', icon: '💊' },
-                    { name: 'Payroll', icon: '💰' },
-                    { name: 'Policies', icon: '📋' },
-                    { name: 'Training', icon: '📚' },
-                    { name: 'IT & Systems', icon: '💻' },
-                    { name: 'Compliance', icon: '✅' },
-                    { name: 'FAQs', icon: '❓' }
-                  ].map(cat => (
-                    <div key={cat.name} className="p-3 rounded-lg border bg-card flex items-center gap-2">
-                      <span>{cat.icon}</span>
-                      <span className="text-sm">{cat.name}</span>
-                    </div>
-                  ))}
-                </div>
+            {/* Article Fields */}
+            <div className="space-y-4">
+              <h4 className="font-semibold">Article Fields Reference</h4>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b">
+                      <th className="text-left py-2 px-3 font-medium">Field</th>
+                      <th className="text-left py-2 px-3 font-medium">Description</th>
+                      <th className="text-left py-2 px-3 font-medium">Best Practice</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y">
+                    <tr>
+                      <td className="py-2 px-3 font-medium">Title</td>
+                      <td className="py-2 px-3 text-muted-foreground">Article headline</td>
+                      <td className="py-2 px-3 text-muted-foreground">Clear, descriptive, under 60 chars</td>
+                    </tr>
+                    <tr>
+                      <td className="py-2 px-3 font-medium">Slug</td>
+                      <td className="py-2 px-3 text-muted-foreground">URL path segment</td>
+                      <td className="py-2 px-3 text-muted-foreground">Auto-generated, edit for SEO</td>
+                    </tr>
+                    <tr>
+                      <td className="py-2 px-3 font-medium">Category</td>
+                      <td className="py-2 px-3 text-muted-foreground">Primary classification</td>
+                      <td className="py-2 px-3 text-muted-foreground">One category per article</td>
+                    </tr>
+                    <tr>
+                      <td className="py-2 px-3 font-medium">Excerpt</td>
+                      <td className="py-2 px-3 text-muted-foreground">Preview text in listings</td>
+                      <td className="py-2 px-3 text-muted-foreground">150-200 chars, summarize value</td>
+                    </tr>
+                    <tr>
+                      <td className="py-2 px-3 font-medium">Content</td>
+                      <td className="py-2 px-3 text-muted-foreground">Full article body</td>
+                      <td className="py-2 px-3 text-muted-foreground">Use headings, lists, links</td>
+                    </tr>
+                    <tr>
+                      <td className="py-2 px-3 font-medium">Tags</td>
+                      <td className="py-2 px-3 text-muted-foreground">Secondary keywords</td>
+                      <td className="py-2 px-3 text-muted-foreground">3-5 relevant terms</td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
+            </div>
 
-              {/* Activate/Deactivate */}
-              <div className="space-y-4">
-                <h4 className="font-semibold flex items-center gap-2">
-                  <Eye className="h-4 w-4" />
-                  Activating/Deactivating Categories
-                </h4>
-                <p className="text-sm text-muted-foreground">
-                  Inactive categories are hidden from employees but retained in the system. 
-                  Use this to temporarily hide categories during content updates or for 
-                  seasonal content.
-                </p>
-                <WarningCallout title="Articles in Inactive Categories">
-                  When a category is deactivated, all articles within it become hidden 
-                  from employees, even if the articles are marked as published.
-                </WarningCallout>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Articles Tab */}
-        <TabsContent value="articles" id="hh-sec-5-4-2" data-manual-anchor="hh-sec-5-4-2" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <FileText className="h-5 w-5 text-primary" />
-                Article Management
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Creating Articles */}
-              <div className="space-y-4">
-                <h4 className="font-semibold flex items-center gap-2">
-                  <Plus className="h-4 w-4" />
-                  Creating an Article
-                </h4>
-                <div className="p-4 rounded-lg border bg-muted/30">
-                  <ol className="text-sm space-y-2 list-decimal list-inside">
-                    <li>Navigate to Knowledge Base Admin → Articles tab</li>
-                    <li>Click "New Article" button</li>
-                    <li>Enter article title (auto-generates slug)</li>
-                    <li>Select category from dropdown</li>
-                    <li>Write excerpt (short preview text)</li>
-                    <li>Compose content using Markdown or rich text editor</li>
-                    <li>Add relevant tags (comma-separated)</li>
-                    <li>Set publishing options (Draft/Published, Featured)</li>
-                    <li>Save article</li>
-                  </ol>
-                </div>
-              </div>
-
-              {/* Article Fields */}
-              <div className="space-y-4">
-                <h4 className="font-semibold">Article Fields Reference</h4>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b">
-                        <th className="text-left py-2 px-3 font-medium">Field</th>
-                        <th className="text-left py-2 px-3 font-medium">Description</th>
-                        <th className="text-left py-2 px-3 font-medium">Best Practice</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y">
-                      <tr>
-                        <td className="py-2 px-3 font-medium">Title</td>
-                        <td className="py-2 px-3 text-muted-foreground">Article headline</td>
-                        <td className="py-2 px-3 text-muted-foreground">Clear, descriptive, under 60 chars</td>
-                      </tr>
-                      <tr>
-                        <td className="py-2 px-3 font-medium">Slug</td>
-                        <td className="py-2 px-3 text-muted-foreground">URL path segment</td>
-                        <td className="py-2 px-3 text-muted-foreground">Auto-generated, edit for SEO</td>
-                      </tr>
-                      <tr>
-                        <td className="py-2 px-3 font-medium">Category</td>
-                        <td className="py-2 px-3 text-muted-foreground">Primary classification</td>
-                        <td className="py-2 px-3 text-muted-foreground">One category per article</td>
-                      </tr>
-                      <tr>
-                        <td className="py-2 px-3 font-medium">Excerpt</td>
-                        <td className="py-2 px-3 text-muted-foreground">Preview text in listings</td>
-                        <td className="py-2 px-3 text-muted-foreground">150-200 chars, summarize value</td>
-                      </tr>
-                      <tr>
-                        <td className="py-2 px-3 font-medium">Content</td>
-                        <td className="py-2 px-3 text-muted-foreground">Full article body</td>
-                        <td className="py-2 px-3 text-muted-foreground">Use headings, lists, links</td>
-                      </tr>
-                      <tr>
-                        <td className="py-2 px-3 font-medium">Tags</td>
-                        <td className="py-2 px-3 text-muted-foreground">Secondary keywords</td>
-                        <td className="py-2 px-3 text-muted-foreground">3-5 relevant terms</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              {/* Publishing Controls */}
-              <div className="space-y-4">
-                <h4 className="font-semibold flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4" />
-                  Publishing Controls
-                </h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="p-4 rounded-lg border bg-card">
-                    <div className="flex items-center gap-2 mb-2">
-                      <EyeOff className="h-4 w-4 text-muted-foreground" />
-                      <h5 className="font-medium">Draft</h5>
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      Work in progress. Only visible to administrators. 
-                      Use for content review before publishing.
-                    </p>
+            {/* Publishing Controls */}
+            <div className="space-y-4">
+              <h4 className="font-semibold flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4" />
+                Publishing Controls
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="p-4 rounded-lg border bg-card">
+                  <div className="flex items-center gap-2 mb-2">
+                    <EyeOff className="h-4 w-4 text-muted-foreground" />
+                    <h5 className="font-medium">Draft</h5>
                   </div>
-                  <div className="p-4 rounded-lg border border-green-200 bg-green-50 dark:bg-green-950/20 dark:border-green-800">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Eye className="h-4 w-4 text-green-500" />
-                      <h5 className="font-medium text-green-700 dark:text-green-300">Published</h5>
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      Live and visible to all employees. Appears in search 
-                      results and category listings.
-                    </p>
+                  <p className="text-sm text-muted-foreground">
+                    Work in progress. Only visible to administrators. 
+                    Use for content review before publishing.
+                  </p>
+                </div>
+                <div className="p-4 rounded-lg border border-green-200 bg-green-50 dark:bg-green-950/20 dark:border-green-800">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Eye className="h-4 w-4 text-green-500" />
+                    <h5 className="font-medium text-green-700 dark:text-green-300">Published</h5>
                   </div>
+                  <p className="text-sm text-muted-foreground">
+                    Live and visible to all employees. Appears in search 
+                    results and category listings.
+                  </p>
                 </div>
               </div>
+            </div>
 
-              {/* Featured Flag */}
-              <div className="space-y-4">
-                <h4 className="font-semibold flex items-center gap-2">
-                  <Star className="h-4 w-4" />
-                  Featured Articles
-                </h4>
-                <p className="text-sm text-muted-foreground">
-                  Mark articles as "Featured" to display them prominently on the Knowledge 
-                  Base homepage. Use for high-value content like onboarding guides or 
-                  frequently referenced policies.
-                </p>
-                <TipCallout title="Feature Rotation">
-                  Rotate featured articles periodically to keep the homepage fresh 
-                  and draw attention to different content areas.
-                </TipCallout>
-              </div>
+            {/* Featured Flag */}
+            <div className="space-y-4">
+              <h4 className="font-semibold flex items-center gap-2">
+                <Star className="h-4 w-4" />
+                Featured Articles
+              </h4>
+              <p className="text-sm text-muted-foreground">
+                Mark articles as "Featured" to display them prominently on the Knowledge 
+                Base homepage. Use for high-value content like onboarding guides or 
+                frequently referenced policies.
+              </p>
+              <TipCallout title="Feature Rotation">
+                Rotate featured articles periodically to keep the homepage fresh 
+                and draw attention to different content areas.
+              </TipCallout>
+            </div>
 
-              {/* View Tracking */}
-              <div className="space-y-4">
-                <h4 className="font-semibold flex items-center gap-2">
-                  <Eye className="h-4 w-4" />
-                  View Count Tracking
-                </h4>
-                <p className="text-sm text-muted-foreground">
-                  Each article tracks view counts automatically. Use this data to:
-                </p>
-                <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside ml-4">
-                  <li>Identify popular content for prominent placement</li>
-                  <li>Find underperforming articles needing improvement</li>
-                  <li>Understand employee information needs</li>
-                  <li>Prioritize content updates</li>
-                </ul>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+            {/* View Tracking */}
+            <div className="space-y-4">
+              <h4 className="font-semibold flex items-center gap-2">
+                <Eye className="h-4 w-4" />
+                View Count Tracking
+              </h4>
+              <p className="text-sm text-muted-foreground">
+                Each article tracks view counts automatically. Use this data to:
+              </p>
+              <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside ml-4">
+                <li>Identify popular content for prominent placement</li>
+                <li>Find underperforming articles needing improvement</li>
+                <li>Understand employee information needs</li>
+                <li>Prioritize content updates</li>
+              </ul>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Content Governance */}
       <Card className="border-l-4 border-l-amber-500">
