@@ -433,7 +433,7 @@ export default function AdminHelpdeskPage() {
         </div>
 
         <Tabs defaultValue="tickets" className="space-y-4">
-          <TabsList className="h-auto flex-wrap">
+          <TabsList className="h-auto flex-wrap items-center">
             {/* Operations */}
             <TabsTrigger value="tickets" className="flex items-center gap-2">
               <Ticket className="h-4 w-4" />
@@ -444,7 +444,7 @@ export default function AdminHelpdeskPage() {
               Agents
             </TabsTrigger>
             
-            <Separator orientation="vertical" className="mx-2 h-6 hidden sm:block" />
+            <div className="mx-2 h-6 w-px bg-border hidden sm:block" />
             
             {/* Monitoring */}
             <TabsTrigger value="analytics" className="flex items-center gap-2">
@@ -460,7 +460,7 @@ export default function AdminHelpdeskPage() {
               Satisfaction
             </TabsTrigger>
             
-            <Separator orientation="vertical" className="mx-2 h-6 hidden sm:block" />
+            <div className="mx-2 h-6 w-px bg-border hidden sm:block" />
             
             {/* Configuration */}
             <TabsTrigger value="escalation" className="flex items-center gap-2">
