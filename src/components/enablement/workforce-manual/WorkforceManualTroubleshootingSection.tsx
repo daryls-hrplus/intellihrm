@@ -75,42 +75,42 @@ export function WorkforceManualTroubleshootingSection() {
       </Card>
 
       {/* Section 10.1: Configuration Issues */}
-      <div data-manual-anchor="wf-section-10-1">
+      <div data-manual-anchor="wf-sec-10-1">
         <ConfigurationIssues />
       </div>
 
       {/* Section 10.2: Employee Data Problems */}
-      <div data-manual-anchor="wf-section-10-2">
+      <div data-manual-anchor="wf-sec-10-2">
         <EmployeeDataProblems />
       </div>
 
       {/* Section 10.3: Lifecycle Workflow Issues */}
-      <div data-manual-anchor="wf-section-10-3">
+      <div data-manual-anchor="wf-sec-10-3">
         <LifecycleWorkflowIssues />
       </div>
 
       {/* Section 10.4: Best Practices Guide */}
-      <div data-manual-anchor="wf-section-10-4">
+      <div data-manual-anchor="wf-sec-10-4">
         <BestPracticesGuide />
       </div>
 
       {/* Section 10.5: Security & Access Control */}
-      <div data-manual-anchor="wf-section-10-5">
+      <div data-manual-anchor="wf-sec-10-5">
         <SecurityAccessControl />
       </div>
 
       {/* Section 10.6: Compliance & Audit Checklist */}
-      <div data-manual-anchor="wf-section-10-6">
+      <div data-manual-anchor="wf-sec-10-6">
         <ComplianceAuditChecklist />
       </div>
 
       {/* Section 10.7: Performance Optimization */}
-      <div data-manual-anchor="wf-section-10-7">
+      <div data-manual-anchor="wf-sec-10-7">
         <PerformanceOptimization />
       </div>
 
       {/* Section 10.8: Escalation Procedures */}
-      <div data-manual-anchor="wf-section-10-8">
+      <div data-manual-anchor="wf-sec-10-8">
         <EscalationProcedures />
       </div>
     </div>
