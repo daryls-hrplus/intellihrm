@@ -48,7 +48,9 @@ export default function HRHubManualPage() {
 
   const activePartId = useMemo(() => {
     const parentPart = HR_HUB_MANUAL_STRUCTURE.find(
-      (s) => s.id === selectedSectionId || s.subsections?.some((sub) => sub.id === selectedSectionId)
+      (s) => s.id === selectedSectionId || 
+             s.subsections?.some((sub) => sub.id === selectedSectionId) ||
+             s.subsections?.some((sub) => sub.subsections?.some((third) => third.id === selectedSectionId))
     );
     return parentPart?.id ?? selectedSectionId;
   }, [selectedSectionId]);
@@ -56,8 +58,11 @@ export default function HRHubManualPage() {
   const scrollToSection = (sectionId: string) => {
     setSelectedSectionId(sectionId);
 
+    // Find the first-level parent (chapter)
     const parentPart = HR_HUB_MANUAL_STRUCTURE.find(
-      (s) => s.id === sectionId || s.subsections?.some((sub) => sub.id === sectionId)
+      (s) => s.id === sectionId || 
+             s.subsections?.some((sub) => sub.id === sectionId) ||
+             s.subsections?.some((sub) => sub.subsections?.some((third) => third.id === sectionId))
     );
 
     if (parentPart && !expandedSections.includes(parentPart.id)) {
