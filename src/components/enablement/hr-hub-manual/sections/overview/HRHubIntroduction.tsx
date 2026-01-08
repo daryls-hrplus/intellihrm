@@ -63,7 +63,8 @@ export function HRHubIntroduction() {
               <div>
                 <h4 className="font-medium">Task & Event Orchestration</h4>
                 <p className="text-sm text-muted-foreground mt-1">
-                  Calendars, milestones, reminders, and automated task workflows
+                  HR tasks with recurring automation, team collaboration via comments, 
+                  milestones, reminders, and calendar management
                 </p>
               </div>
             </div>
@@ -86,7 +87,7 @@ export function HRHubIntroduction() {
           <CardTitle>Business Value</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             <div className="text-center p-4">
               <div className="text-3xl font-bold text-purple-500">60%</div>
               <div className="text-sm text-muted-foreground mt-1">
@@ -103,6 +104,12 @@ export function HRHubIntroduction() {
               <div className="text-3xl font-bold text-blue-500">100%</div>
               <div className="text-sm text-muted-foreground mt-1">
                 Policy acknowledgment tracking
+              </div>
+            </div>
+            <div className="text-center p-4">
+              <div className="text-3xl font-bold text-orange-500">40%</div>
+              <div className="text-sm text-muted-foreground mt-1">
+                Reduction in missed HR deadlines
               </div>
             </div>
           </div>

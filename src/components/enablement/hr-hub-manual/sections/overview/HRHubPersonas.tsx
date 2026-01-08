@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { 
   User, Users, UserCog, Shield, 
-  MessageSquare, FileText, BarChart3, CheckCircle
+  MessageSquare, FileText, CheckCircle, Repeat
 } from 'lucide-react';
 
 interface PersonaCardProps {
@@ -112,16 +112,19 @@ export function HRHubPersonas() {
         'Visibility into team requests',
         'Streamlined approval workflows',
         'Team milestone tracking',
-        'Department-specific content'
+        'Task progress visibility'
       ],
       capabilities: [
         'Approve team transactions',
         'View team compliance status',
         'Receive milestone notifications',
         'Delegate approvals when away',
-        'Access team-specific SOPs'
+        'Access team-specific SOPs',
+        'View and complete assigned HR tasks',
+        'Collaborate on tasks via comments',
+        'Track task progress for team'
       ],
-      primaryModules: ['Workflows', 'Milestones', 'Compliance', 'Tasks']
+      primaryModules: ['Workflows', 'Milestones', 'Compliance', 'HR Tasks']
     },
     {
       icon: UserCog,
@@ -133,7 +136,7 @@ export function HRHubPersonas() {
         'Efficient content management',
         'Workflow configuration',
         'Compliance monitoring',
-        'Analytics and reporting'
+        'Task management and tracking'
       ],
       capabilities: [
         'Configure help desk categories and SLAs',
@@ -142,9 +145,13 @@ export function HRHubPersonas() {
         'Set up compliance requirements',
         'Design approval workflows',
         'Configure milestones and reminders',
-        'View HR Hub analytics'
+        'View HR Hub analytics',
+        'Create and manage recurring task schedules',
+        'Assign tasks to team members',
+        'Monitor task completion and overdue items',
+        'Review task activity logs'
       ],
-      primaryModules: ['All HR Hub Modules', 'Analytics', 'Configuration']
+      primaryModules: ['All HR Hub Modules', 'Analytics', 'Configuration', 'HR Tasks']
     },
     {
       icon: Shield,
@@ -193,74 +200,122 @@ export function HRHubPersonas() {
         ))}
       </div>
 
-      {/* User Journey Example */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <MessageSquare className="h-5 w-5 text-primary" />
-            Example Journey: Employee Leave Policy Inquiry
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div className="flex items-start gap-4">
-              <div className="flex items-center justify-center h-8 w-8 rounded-full bg-blue-500 text-white text-sm font-medium flex-shrink-0">
-                1
+      {/* User Journey Examples */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <MessageSquare className="h-5 w-5 text-primary" />
+              Journey: Leave Policy Inquiry
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex items-start gap-4">
+                <div className="flex items-center justify-center h-8 w-8 rounded-full bg-blue-500 text-white text-sm font-medium flex-shrink-0">
+                  1
+                </div>
+                <div>
+                  <h4 className="font-medium">Employee searches Knowledge Base</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Types "maternity leave" in the search bar
+                  </p>
+                </div>
               </div>
-              <div>
-                <h4 className="font-medium">Employee searches Knowledge Base</h4>
-                <p className="text-sm text-muted-foreground">
-                  Types "maternity leave" in the search bar
-                </p>
+              <div className="flex items-start gap-4">
+                <div className="flex items-center justify-center h-8 w-8 rounded-full bg-blue-500 text-white text-sm font-medium flex-shrink-0">
+                  2
+                </div>
+                <div>
+                  <h4 className="font-medium">AI suggests relevant articles</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Finds policy article with eligibility and process
+                  </p>
+                </div>
               </div>
-            </div>
-            <div className="flex items-start gap-4">
-              <div className="flex items-center justify-center h-8 w-8 rounded-full bg-blue-500 text-white text-sm font-medium flex-shrink-0">
-                2
+              <div className="flex items-start gap-4">
+                <div className="flex items-center justify-center h-8 w-8 rounded-full bg-blue-500 text-white text-sm font-medium flex-shrink-0">
+                  3
+                </div>
+                <div>
+                  <h4 className="font-medium">Employee needs clarification</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Submits help desk ticket with context preserved
+                  </p>
+                </div>
               </div>
-              <div>
-                <h4 className="font-medium">AI suggests relevant articles</h4>
-                <p className="text-sm text-muted-foreground">
-                  Finds "Maternity Leave Policy" article with eligibility and process
-                </p>
-              </div>
-            </div>
-            <div className="flex items-start gap-4">
-              <div className="flex items-center justify-center h-8 w-8 rounded-full bg-blue-500 text-white text-sm font-medium flex-shrink-0">
-                3
-              </div>
-              <div>
-                <h4 className="font-medium">Employee needs clarification</h4>
-                <p className="text-sm text-muted-foreground">
-                  Submits help desk ticket directly from article with context preserved
-                </p>
-              </div>
-            </div>
-            <div className="flex items-start gap-4">
-              <div className="flex items-center justify-center h-8 w-8 rounded-full bg-green-500 text-white text-sm font-medium flex-shrink-0">
-                4
-              </div>
-              <div>
-                <h4 className="font-medium">HR responds within SLA</h4>
-                <p className="text-sm text-muted-foreground">
-                  Ticket routed to Benefits team, resolved with personalized answer
-                </p>
-              </div>
-            </div>
-            <div className="flex items-start gap-4">
-              <div className="flex items-center justify-center h-8 w-8 rounded-full bg-purple-500 text-white text-sm font-medium flex-shrink-0">
-                5
-              </div>
-              <div>
-                <h4 className="font-medium">Analytics captured</h4>
-                <p className="text-sm text-muted-foreground">
-                  HR sees trend of maternity leave inquiries, updates article content
-                </p>
+              <div className="flex items-start gap-4">
+                <div className="flex items-center justify-center h-8 w-8 rounded-full bg-green-500 text-white text-sm font-medium flex-shrink-0">
+                  4
+                </div>
+                <div>
+                  <h4 className="font-medium">HR responds within SLA</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Ticket routed to Benefits team, resolved
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Repeat className="h-5 w-5 text-teal-500" />
+              Journey: Recurring Compliance Task
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex items-start gap-4">
+                <div className="flex items-center justify-center h-8 w-8 rounded-full bg-purple-500 text-white text-sm font-medium flex-shrink-0">
+                  1
+                </div>
+                <div>
+                  <h4 className="font-medium">HR Admin creates recurring task</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Quarterly compliance review with recurrence pattern
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-start gap-4">
+                <div className="flex items-center justify-center h-8 w-8 rounded-full bg-purple-500 text-white text-sm font-medium flex-shrink-0">
+                  2
+                </div>
+                <div>
+                  <h4 className="font-medium">System auto-creates task</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Task assigned to Compliance Officer on schedule
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-start gap-4">
+                <div className="flex items-center justify-center h-8 w-8 rounded-full bg-purple-500 text-white text-sm font-medium flex-shrink-0">
+                  3
+                </div>
+                <div>
+                  <h4 className="font-medium">Team collaborates via comments</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Assignee adds progress updates, manager reviews
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-start gap-4">
+                <div className="flex items-center justify-center h-8 w-8 rounded-full bg-green-500 text-white text-sm font-medium flex-shrink-0">
+                  4
+                </div>
+                <div>
+                  <h4 className="font-medium">Task completed with audit trail</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Full history preserved for compliance review
+                  </p>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
