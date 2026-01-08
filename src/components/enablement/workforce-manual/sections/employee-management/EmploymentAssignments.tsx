@@ -11,7 +11,7 @@ export function EmploymentAssignments() {
         <h3 className="text-lg font-semibold mb-3">Overview</h3>
         <p className="text-muted-foreground mb-4">
           Employment assignments link employees to positions within the organizational structure. 
-          HRplus supports primary, secondary, and acting assignments for flexible workforce modeling.
+          Intelli HRM supports primary, secondary, and acting assignments for flexible workforce modeling.
         </p>
       </section>
 

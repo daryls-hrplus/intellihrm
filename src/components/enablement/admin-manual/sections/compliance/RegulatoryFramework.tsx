@@ -8,15 +8,15 @@ export function RegulatoryFramework() {
   return (
     <div className="space-y-6">
       <p className="text-muted-foreground">
-        HRplus operates across multiple regulatory jurisdictions, each with specific data protection and labor law requirements.
-        This section provides an overview of key regulations and how HRplus supports compliance.
+        Intelli HRM operates across multiple regulatory jurisdictions, each with specific data protection and labor law requirements.
+        This section provides an overview of key regulations and how Intelli HRM supports compliance.
       </p>
 
       <Alert>
         <Globe className="h-4 w-4" />
         <AlertTitle>Multi-Jurisdictional Compliance</AlertTitle>
         <AlertDescription>
-          HRplus is designed to support compliance across Caribbean, African, and international regulatory frameworks.
+          Intelli HRM is designed to support compliance across Caribbean, African, and international regulatory frameworks.
           Country-specific settings automatically apply relevant requirements.
         </AlertDescription>
       </Alert>
@@ -35,7 +35,7 @@ export function RegulatoryFramework() {
               <TableHead>Regulation</TableHead>
               <TableHead>Jurisdiction</TableHead>
               <TableHead>Key Requirements</TableHead>
-              <TableHead>HRplus Controls</TableHead>
+              <TableHead>Intelli HRM Controls</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -147,7 +147,7 @@ export function RegulatoryFramework() {
         <AlertTriangle className="h-4 w-4" />
         <AlertTitle>Regulatory Updates</AlertTitle>
         <AlertDescription>
-          Regulations change frequently. Subscribe to HRplus regulatory updates to receive notifications when 
+          Regulations change frequently. Subscribe to Intelli HRM regulatory updates to receive notifications when 
           compliance requirements are updated. Review the compliance dashboard quarterly for any changes.
         </AlertDescription>
       </Alert>

@@ -224,7 +224,7 @@ export function FoundationDepartments() {
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-muted-foreground">
-            Departments are the <strong>mandatory core organizational units</strong> in HRplus. 
+            Departments are the <strong>mandatory core organizational units</strong> in Intelli HRM. 
             They represent functional areas where employees work, managers lead, and costs 
             are tracked. Every employee must be assigned to a department.
           </p>
@@ -296,7 +296,7 @@ export function FoundationDepartments() {
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-sm text-muted-foreground">
-            HRplus supports nested departments for complex organizations. Use the 
+            Intelli HRM supports nested departments for complex organizations. Use the 
             "Parent Department" field to create hierarchies within departments.
           </p>
           <div className="p-4 rounded-lg border bg-muted/30">

@@ -233,7 +233,7 @@
     "footerDisclaimer": "AI responses are for guidance only. Consult HR for official decisions.",
     "guidelines": {
       "title": "AI Assistant Guidelines",
-      "subtitle": "Understanding how the HRplus Cerebra AI Assistant works and protects your data",
+      "subtitle": "Understanding how the Intelli HRM Cerebra AI Assistant works and protects your data",
       "roleAccess": {
         "title": "Role-Based Access Control",
         "description": "The AI respects your user role and permissions. Information provided is tailored to your access level within the organization. Admin and HR users may see more detailed information than regular employees."

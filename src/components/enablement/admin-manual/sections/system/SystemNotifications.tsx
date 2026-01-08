@@ -24,7 +24,7 @@ export function SystemNotifications() {
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-muted-foreground">
-            HRplus sends notifications for workflow events, approvals, deadlines, 
+            Intelli HRM sends notifications for workflow events, approvals, deadlines, 
             and system alerts. Configure templates and delivery preferences to 
             ensure effective communication without notification fatigue.
           </p>
@@ -41,7 +41,7 @@ export function SystemNotifications() {
               <MessageSquare className="h-5 w-5 text-green-500 mb-2" />
               <h4 className="font-medium text-sm">In-App</h4>
               <p className="text-xs text-muted-foreground">
-                Real-time alerts within HRplus
+                Real-time alerts within Intelli HRM
               </p>
             </div>
             <div className="p-4 rounded-lg border">

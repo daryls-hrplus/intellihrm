@@ -111,12 +111,12 @@ const getAdminModuleSections = (
       { title: "Custom Fields", description: "Define custom fields for forms across the application", href: "/admin/custom-fields", icon: Cog, color: "bg-pink-500/10 text-pink-600", tabCode: "custom-fields" },
     ],
     // Section 8: Documentation & Enablement
-    // Enablement Center is only visible to HRplus internal tenants
+    // Enablement Center is only visible to Intelli HRM internal tenants
     documentation: [
       { title: "Implementation Handbook", description: "Step-by-step guide for configuring all modules", href: "/admin/implementation-handbook", icon: BookOpen, color: "bg-rose-500/10 text-rose-600", tabCode: "implementation-handbook" },
       { title: "Modules Brochure", description: "Comprehensive guide to all modules and features", href: "/admin/modules-brochure", icon: Layers, color: "bg-green-500/10 text-green-600", tabCode: "modules-brochure" },
       { title: "Features Brochure", description: "Marketing summary of Intelli HRM capabilities", href: "/admin/features-brochure", icon: FileSpreadsheet, color: "bg-blue-500/10 text-blue-600", tabCode: "features-brochure" },
-      // Enablement Center - only visible for HRplus internal tenants
+      // Enablement Center - only visible for Intelli HRM internal tenants
       ...(isHRPlusInternal ? [{
         title: "Enablement Center",
         description: "AI-powered documentation and training content generation",
