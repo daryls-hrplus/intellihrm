@@ -240,6 +240,18 @@ export default function EnablementHubPage() {
       ],
     },
     {
+      titleKey: "Manual Publishing",
+      items: [
+        {
+          title: "Publish to Help Center",
+          description: "Publish manuals with version control and approval workflow",
+          href: "/enablement/manual-publishing",
+          icon: Upload,
+          color: "bg-emerald-500/10 text-emerald-500",
+        },
+      ],
+    },
+    {
       titleKey: "Administrator Manuals",
       items: [
         {
