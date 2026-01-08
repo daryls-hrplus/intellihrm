@@ -6,6 +6,7 @@ import { GroupedModuleCards, ModuleSection, GroupedModuleItem } from "@/componen
 import { ESSAIDashboard } from "@/components/ess/ESSAIDashboard";
 import { InboxQuickSummary } from "@/components/ess/InboxQuickSummary";
 import { AnnouncementsWidget } from "@/components/ess/AnnouncementsWidget";
+import { HelpDeskWidget } from "@/components/ess/HelpDeskWidget";
 import { useGranularPermissions } from "@/hooks/useGranularPermissions";
 import { useEssPendingActions } from "@/hooks/useEssPendingActions";
 import {
@@ -187,10 +188,11 @@ export default function EmployeeSelfServicePage() {
         {/* AI-Powered Dashboard */}
         <ESSAIDashboard />
 
-        {/* Dashboard Widgets Grid - 2 columns */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Dashboard Widgets Grid - 3 columns */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <InboxQuickSummary />
           <AnnouncementsWidget />
+          <HelpDeskWidget />
         </div>
 
         <GroupedModuleCards sections={sections} sectionBadges={sectionBadges} defaultOpen={false} showToggleButton />
