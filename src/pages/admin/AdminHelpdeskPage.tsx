@@ -27,6 +27,7 @@ import { AgentPerformanceDashboard } from "@/components/helpdesk/AgentPerformanc
 import { CategoryManagementPanel } from "@/components/helpdesk/CategoryManagementPanel";
 import { MassTicketDialog } from "@/components/helpdesk/MassTicketDialog";
 import { DocumentLinkPicker } from "@/components/helpdesk/DocumentLinkPicker";
+import { CannedResponseManagementPanel } from "@/components/helpdesk/CannedResponseManagementPanel";
 import {
   Ticket,
   Clock,
@@ -492,6 +493,10 @@ export default function AdminHelpdeskPage() {
             <TabsTrigger value="categories" className="flex items-center gap-2">
               <FolderCog className="h-4 w-4" />
               Categories
+            </TabsTrigger>
+            <TabsTrigger value="templates" className="flex items-center gap-2">
+              <FileText className="h-4 w-4" />
+              Templates
             </TabsTrigger>
           </TabsList>
 
@@ -1024,6 +1029,10 @@ export default function AdminHelpdeskPage() {
 
           <TabsContent value="categories">
             <CategoryManagementPanel />
+          </TabsContent>
+
+          <TabsContent value="templates">
+            <CannedResponseManagementPanel />
           </TabsContent>
         </Tabs>
 
