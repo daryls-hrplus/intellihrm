@@ -15,7 +15,8 @@ import {
   Plus,
   Edit,
   Trash2,
-  ArrowUpDown
+  ArrowUpDown,
+  Clock
 } from 'lucide-react';
 import { 
   InfoCallout, 
@@ -34,9 +35,16 @@ export function KnowledgeBaseSetup() {
             <div className="p-2 rounded-lg bg-primary/10">
               <Book className="h-6 w-6 text-primary" />
             </div>
-            <div>
-              <CardTitle>2.3 Knowledge Base Setup</CardTitle>
-              <p className="text-sm text-muted-foreground mt-1">
+            <div className="flex-1">
+              <div className="flex items-center gap-3 mb-1">
+                <CardTitle>Knowledge Base Setup</CardTitle>
+                <Badge variant="outline" className="text-xs">Section 2.3</Badge>
+                <div className="flex items-center gap-1 text-muted-foreground text-xs">
+                  <Clock className="h-3 w-3" />
+                  <span>~12 min</span>
+                </div>
+              </div>
+              <p className="text-sm text-muted-foreground">
                 Self-service knowledge base for employee information access
               </p>
             </div>
