@@ -40,9 +40,12 @@ import {
   Users,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { SectionSelector, ManualSection } from "./SectionSelector";
+import { SectionSelector } from "./SectionSelector";
+import type { ManualSection } from "@/types/kb.types";
 import { ManualToKBTransformer } from "@/services/kb/ManualToKBTransformer";
 import { ManualPublishService } from "@/services/kb/ManualPublishService";
+import { AIChangelogGenerator } from "./AIChangelogGenerator";
+import { SmartVersionSelector } from "./SmartVersionSelector";
 import { toast } from "sonner";
 
 interface PublishWizardProps {
@@ -56,7 +59,7 @@ interface PublishWizardProps {
   onPublishComplete?: () => void;
 }
 
-type VersionType = 'major' | 'minor' | 'patch';
+type VersionType = 'initial' | 'major' | 'minor' | 'patch';
 
 interface ChangelogEntry {
   id: string;
@@ -89,7 +92,8 @@ export function PublishWizard({
   const [selectedSections, setSelectedSections] = useState<string[]>([]);
 
   // Step 2: Version
-  const [versionType, setVersionType] = useState<VersionType>('minor');
+  const isFirstPublication = !currentPublishedVersion;
+  const [versionType, setVersionType] = useState<VersionType>(isFirstPublication ? 'initial' : 'minor');
   const [changelog, setChangelog] = useState<ChangelogEntry[]>([
     { id: '1', text: '' },
   ]);
@@ -100,7 +104,12 @@ export function PublishWizard({
   const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
 
   // Computed values
-  const [nextVersion, setNextVersion] = useState<string>('');
+  const [nextVersions, setNextVersions] = useState({
+    initial: '1.0.0',
+    major: '1.0.0',
+    minor: '1.0.0',
+    patch: '1.0.0',
+  });
 
   // Initialize sections
   useEffect(() => {
@@ -115,15 +124,17 @@ export function PublishWizard({
       // Load categories
       loadCategories();
 
-      // Calculate next version
-      calculateNextVersion(versionType);
+      // Calculate all version options
+      calculateAllVersions();
     }
   }, [open, manualId, sectionsCount]);
 
-  // Update next version when type changes
+  // Update version type when first publication status changes
   useEffect(() => {
-    calculateNextVersion(versionType);
-  }, [versionType, currentPublishedVersion]);
+    if (isFirstPublication) {
+      setVersionType('initial');
+    }
+  }, [isFirstPublication]);
 
   const loadCategories = async () => {
     // For demo, use mock categories
@@ -143,10 +154,22 @@ export function PublishWizard({
     else setTargetCategory('getting-started');
   };
 
-  const calculateNextVersion = async (type: VersionType) => {
-    const version = await ManualPublishService.getNextVersion(manualId, type);
-    setNextVersion(version);
+  const calculateAllVersions = async () => {
+    const [major, minor, patch] = await Promise.all([
+      ManualPublishService.getNextVersion(manualId, 'major'),
+      ManualPublishService.getNextVersion(manualId, 'minor'),
+      ManualPublishService.getNextVersion(manualId, 'patch'),
+    ]);
+    setNextVersions({
+      initial: '1.0.0',
+      major,
+      minor,
+      patch,
+    });
   };
+
+  // Get current version based on selection
+  const currentVersion = nextVersions[versionType];
 
   // Navigation
   const canProceed = (): boolean => {
@@ -213,13 +236,13 @@ export function PublishWizard({
         manualName,
         targetCategoryId: targetCategory,
         sourceVersion,
-        publishVersion: nextVersion,
+        publishVersion: currentVersion,
         changelog: changelogTexts,
         sections: selectedSections,
       }, 'current-user'); // TODO: Get actual user ID
 
       if (result.success) {
-        toast.success(`Published ${manualName} as v${nextVersion}`);
+        toast.success(`Published ${manualName} as v${currentVersion}`);
         onPublishComplete?.();
         handleClose();
       } else {
@@ -264,60 +287,37 @@ export function PublishWizard({
               </p>
             </div>
 
-            {/* Version Type */}
+            {/* Version Type - Smart Selector */}
             <div className="space-y-3">
               <Label>Version Type</Label>
-              <RadioGroup
+              <SmartVersionSelector
                 value={versionType}
-                onValueChange={(v) => setVersionType(v as VersionType)}
-                className="space-y-2"
-              >
-                <div className="flex items-start gap-3 p-3 border rounded-lg hover:bg-muted/50 cursor-pointer">
-                  <RadioGroupItem value="major" id="major" className="mt-1" />
-                  <div className="flex-1">
-                    <label htmlFor="major" className="font-medium cursor-pointer">
-                      Major Update
-                    </label>
-                    <p className="text-sm text-muted-foreground">
-                      Breaking changes or significant restructure
-                    </p>
-                  </div>
-                  <Badge variant="outline">v{nextVersion.split('.')[0]}.0.0</Badge>
-                </div>
-                <div className="flex items-start gap-3 p-3 border rounded-lg hover:bg-muted/50 cursor-pointer">
-                  <RadioGroupItem value="minor" id="minor" className="mt-1" />
-                  <div className="flex-1">
-                    <label htmlFor="minor" className="font-medium cursor-pointer">
-                      Minor Update
-                    </label>
-                    <p className="text-sm text-muted-foreground">
-                      New content or feature updates
-                    </p>
-                  </div>
-                  <Badge variant="outline" className="bg-primary/10">
-                    v{versionType === 'minor' ? nextVersion : `${nextVersion.split('.')[0]}.${parseInt(nextVersion.split('.')[1] || '0') + 1}.0`}
-                  </Badge>
-                </div>
-                <div className="flex items-start gap-3 p-3 border rounded-lg hover:bg-muted/50 cursor-pointer">
-                  <RadioGroupItem value="patch" id="patch" className="mt-1" />
-                  <div className="flex-1">
-                    <label htmlFor="patch" className="font-medium cursor-pointer">
-                      Patch Update
-                    </label>
-                    <p className="text-sm text-muted-foreground">
-                      Bug fixes and minor corrections
-                    </p>
-                  </div>
-                  <Badge variant="outline">v{versionType === 'patch' ? nextVersion : `${nextVersion.split('.')[0]}.${nextVersion.split('.')[1]}.${parseInt(nextVersion.split('.')[2] || '0') + 1}`}</Badge>
-                </div>
-              </RadioGroup>
+                onChange={setVersionType}
+                isFirstPublication={isFirstPublication}
+                nextVersions={nextVersions}
+                recommendedType={isFirstPublication ? 'initial' : 'minor'}
+              />
             </div>
 
             <Separator />
 
             {/* Changelog */}
             <div className="space-y-3">
-              <Label>Changelog</Label>
+              <div className="flex items-center justify-between">
+                <Label>Changelog</Label>
+                <AIChangelogGenerator
+                  manualId={manualId}
+                  manualName={manualName}
+                  selectedSections={selectedSections}
+                  sectionTitles={sections.filter(s => selectedSections.includes(s.id)).map(s => s.title)}
+                  versionType={versionType === 'initial' ? 'major' : versionType}
+                  previousVersion={currentPublishedVersion}
+                  isFirstPublication={isFirstPublication}
+                  onChangelogGenerated={(entries) => {
+                    setChangelog(entries.map((text, i) => ({ id: String(i + 1), text })));
+                  }}
+                />
+              </div>
               <div className="space-y-2">
                 {changelog.map((entry, index) => (
                   <div key={entry.id} className="flex items-center gap-2">
@@ -424,7 +424,7 @@ export function PublishWizard({
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Version</span>
-                  <Badge>v{nextVersion}</Badge>
+                  <Badge>v{currentVersion}</Badge>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Sections</span>

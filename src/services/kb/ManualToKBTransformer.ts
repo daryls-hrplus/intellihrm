@@ -7,8 +7,6 @@ import type {
   ManualSectionDefinition 
 } from "@/types/kb.types";
 
-export type { TransformedArticle, ManualDefinition, ManualSectionDefinition };
-
 export class ManualToKBTransformer {
   /**
    * Transform manual sections to KB articles

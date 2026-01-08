@@ -17,8 +17,6 @@ import {
 import { cn } from "@/lib/utils";
 import type { ManualSection } from "@/types/kb.types";
 
-export type { ManualSection };
-
 interface SectionSelectorProps {
   sections: ManualSection[];
   selectedSections: string[];
