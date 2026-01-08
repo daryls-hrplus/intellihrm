@@ -4,11 +4,10 @@ import {
   GraduationCap, BookOpen, Target, Users, ArrowRight,
   CheckCircle, AlertCircle, Lightbulb
 } from 'lucide-react';
-import { FeatureCardGrid, PrimaryFeatureCard, SecondaryFeatureCard, InfoFeatureCard } from '@/components/enablement/manual/components/FeatureCard';
-import { InfoCallout, TipCallout, WarningCallout, FutureCallout } from '@/components/enablement/manual/components/Callout';
+import { FeatureCard } from '@/components/enablement/manual/components/FeatureCard';
+import { InfoCallout, TipCallout, FutureCallout } from '@/components/enablement/manual/components/Callout';
 import { WorkflowDiagram } from '@/components/enablement/manual/components/WorkflowDiagram';
 import { ScreenshotPlaceholder } from '@/components/enablement/manual/components/ScreenshotPlaceholder';
-import { SeeAlsoReference } from '@/components/enablement/shared/CrossModuleReference';
 
 const learningFlowDiagram = `
 graph LR
@@ -138,23 +137,26 @@ export function LearningIntegration() {
       </Card>
 
       {/* Key Features */}
-      <FeatureCardGrid columns={3}>
-        <PrimaryFeatureCard
+      <div className="grid md:grid-cols-3 gap-4">
+        <FeatureCard
+          variant="primary"
           icon={Target}
           title="Job-Based Training"
           description="Job profiles define mandatory training that auto-assigns on hire or promotion"
         />
-        <SecondaryFeatureCard
+        <FeatureCard
+          variant="info"
           icon={Lightbulb}
           title="Gap-Driven Recommendations"
           description="Skill gap analysis recommends courses to close competency deficiencies"
         />
-        <InfoFeatureCard
+        <FeatureCard
+          variant="success"
           icon={CheckCircle}
           title="Credential Tracking"
           description="Professional certifications tracked with renewal alerts"
         />
-      </FeatureCardGrid>
+      </div>
 
       {/* Workflow Diagram */}
       <WorkflowDiagram
@@ -232,9 +234,7 @@ export function LearningIntegration() {
 
       {/* Screenshot */}
       <ScreenshotPlaceholder
-        title="ESS Learning Dashboard"
-        description="Employee view showing assigned courses, completion status, and skill gap recommendations"
-        height="h-64"
+        caption="ESS Learning Dashboard - Employee view showing assigned courses, completion status, and skill gap recommendations"
       />
 
       {/* Current Capabilities */}
@@ -287,15 +287,6 @@ export function LearningIntegration() {
         Skill gaps identified in Workforce can be incorporated into Individual Development Plans (IDPs), 
         linking learning activities to career development goals.
       </InfoCallout>
-
-      {/* Cross-References */}
-      <SeeAlsoReference
-        module="Workforce"
-        section="Employee Skills & Competencies"
-        description="Define and assess employee competencies for gap analysis"
-        manualPath="/enablement/manuals/workforce"
-        anchor="wf-sec-4-8"
-      />
     </div>
   );
 }

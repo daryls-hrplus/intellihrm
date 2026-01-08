@@ -4,11 +4,10 @@ import {
   GitBranch, Users, Target, TrendingUp, ArrowRight,
   CheckCircle, AlertCircle, Crown, Shield
 } from 'lucide-react';
-import { FeatureCardGrid, PrimaryFeatureCard, SecondaryFeatureCard, SuccessFeatureCard } from '@/components/enablement/manual/components/FeatureCard';
+import { FeatureCard } from '@/components/enablement/manual/components/FeatureCard';
 import { InfoCallout, TipCallout, WarningCallout } from '@/components/enablement/manual/components/Callout';
 import { WorkflowDiagram } from '@/components/enablement/manual/components/WorkflowDiagram';
 import { ScreenshotPlaceholder } from '@/components/enablement/manual/components/ScreenshotPlaceholder';
-import { SeeAlsoReference } from '@/components/enablement/shared/CrossModuleReference';
 
 const successionFlowDiagram = `
 graph LR
@@ -126,23 +125,26 @@ export function SuccessionIntegration() {
       </Card>
 
       {/* Key Features */}
-      <FeatureCardGrid columns={3}>
-        <PrimaryFeatureCard
+      <div className="grid md:grid-cols-3 gap-4">
+        <FeatureCard
+          variant="primary"
           icon={Shield}
           title="Critical Position Tracking"
           description="Identify and prioritize positions that require succession coverage"
         />
-        <SecondaryFeatureCard
+        <FeatureCard
+          variant="info"
           icon={Users}
           title="Successor Pool Management"
           description="Build pools of potential successors from Nine-Box high performers"
         />
-        <SuccessFeatureCard
+        <FeatureCard
+          variant="success"
           icon={TrendingUp}
           title="Readiness Assessment"
           description="Track successor readiness with competency and experience gaps"
         />
-      </FeatureCardGrid>
+      </div>
 
       {/* Workflow Diagram */}
       <WorkflowDiagram
@@ -256,9 +258,7 @@ export function SuccessionIntegration() {
 
       {/* Screenshot */}
       <ScreenshotPlaceholder
-        title="MSS Succession View"
-        description="Manager view showing succession pipeline for their critical positions"
-        height="h-64"
+        caption="MSS Succession View - Manager view showing succession pipeline for their critical positions"
       />
 
       {/* MSS Integration */}
@@ -311,15 +311,6 @@ export function SuccessionIntegration() {
         Successors identified in succession planning can have linked Individual Development Plans 
         (IDPs) that target the specific competency gaps needed to reach readiness.
       </InfoCallout>
-
-      {/* Cross-References */}
-      <SeeAlsoReference
-        module="Workforce"
-        section="ESS/MSS Succession View"
-        description="Manager self-service succession pipeline visibility"
-        manualPath="/enablement/manuals/workforce"
-        anchor="wf-sec-8-4"
-      />
     </div>
   );
 }

@@ -5,7 +5,7 @@ import {
   CreditCard, Calendar, Award, GraduationCap, TrendingUp,
   UserCheck, Bell, Building2, GitBranch
 } from 'lucide-react';
-import { FeatureCardGrid, PrimaryFeatureCard, SecondaryFeatureCard, InfoFeatureCard } from '@/components/enablement/manual/components/FeatureCard';
+import { FeatureCard } from '@/components/enablement/manual/components/FeatureCard';
 import { InfoCallout, TipCallout } from '@/components/enablement/manual/components/Callout';
 import { WorkflowDiagram } from '@/components/enablement/manual/components/WorkflowDiagram';
 
@@ -163,23 +163,26 @@ export function IntegrationOverview() {
       </Card>
 
       {/* Key Concepts */}
-      <FeatureCardGrid columns={3}>
-        <PrimaryFeatureCard
+      <div className="grid md:grid-cols-3 gap-4">
+        <FeatureCard
+          variant="primary"
           icon={Database}
           title="Master Data Source"
           description="Employee, position, and job data originate in Workforce and are consumed by all other modules"
         />
-        <SecondaryFeatureCard
+        <FeatureCard
+          variant="info"
           icon={ArrowRight}
           title="Event-Driven Sync"
           description="Transactions trigger automatic updates to downstream systems without manual intervention"
         />
-        <InfoFeatureCard
+        <FeatureCard
+          variant="success"
           icon={Network}
           title="Bidirectional Flow"
           description="Some modules feed data back to Workforce (e.g., performance ratings, succession readiness)"
         />
-      </FeatureCardGrid>
+      </div>
 
       {/* Integration Architecture Diagram */}
       <WorkflowDiagram

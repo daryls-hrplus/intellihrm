@@ -4,11 +4,10 @@ import {
   Bell, Mail, Smartphone, Users, ArrowRight,
   CheckCircle, Clock, AlertCircle, Settings
 } from 'lucide-react';
-import { FeatureCardGrid, PrimaryFeatureCard, SecondaryFeatureCard, InfoFeatureCard } from '@/components/enablement/manual/components/FeatureCard';
+import { FeatureCard } from '@/components/enablement/manual/components/FeatureCard';
 import { InfoCallout, TipCallout, WarningCallout } from '@/components/enablement/manual/components/Callout';
 import { WorkflowDiagram } from '@/components/enablement/manual/components/WorkflowDiagram';
 import { ScreenshotPlaceholder } from '@/components/enablement/manual/components/ScreenshotPlaceholder';
-import { SeeAlsoReference } from '@/components/enablement/shared/CrossModuleReference';
 
 const notificationFlowDiagram = `
 graph LR
@@ -156,23 +155,26 @@ export function NotificationOrchestration() {
       </Card>
 
       {/* Key Features */}
-      <FeatureCardGrid columns={3}>
-        <PrimaryFeatureCard
+      <div className="grid md:grid-cols-3 gap-4">
+        <FeatureCard
+          variant="primary"
           icon={ArrowRight}
           title="Event-Triggered"
           description="Workforce transactions automatically fire notification events"
         />
-        <SecondaryFeatureCard
+        <FeatureCard
+          variant="info"
           icon={Users}
           title="Smart Routing"
           description="Recipients determined by org hierarchy and role assignments"
         />
-        <InfoFeatureCard
+        <FeatureCard
+          variant="success"
           icon={Smartphone}
           title="Multi-Channel"
           description="Email, in-app alerts, push notifications, and SMS delivery"
         />
-      </FeatureCardGrid>
+      </div>
 
       {/* Workflow Diagram */}
       <WorkflowDiagram
@@ -252,9 +254,7 @@ export function NotificationOrchestration() {
 
       {/* Screenshot */}
       <ScreenshotPlaceholder
-        title="Notification Settings"
-        description="Admin configuration screen for workforce notification rules and templates"
-        height="h-64"
+        caption="Notification Settings - Admin configuration screen for workforce notification rules and templates"
       />
 
       {/* Approval Notifications */}
@@ -328,15 +328,6 @@ export function NotificationOrchestration() {
         notifications appear in the unified notification inbox and follow the same 
         template and branding standards.
       </InfoCallout>
-
-      {/* Cross-References */}
-      <SeeAlsoReference
-        module="HR Hub"
-        section="Notification Configuration"
-        description="Configure notification templates and delivery settings"
-        manualPath="/enablement/manuals/hr-hub"
-        anchor="hub-sec-5-1"
-      />
     </div>
   );
 }

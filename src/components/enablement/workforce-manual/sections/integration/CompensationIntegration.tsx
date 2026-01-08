@@ -4,11 +4,10 @@ import {
   DollarSign, TrendingUp, BarChart3, Users, ArrowRight,
   CheckCircle, AlertCircle, Target
 } from 'lucide-react';
-import { FeatureCardGrid, PrimaryFeatureCard, SecondaryFeatureCard, WarningFeatureCard } from '@/components/enablement/manual/components/FeatureCard';
+import { FeatureCard } from '@/components/enablement/manual/components/FeatureCard';
 import { InfoCallout, TipCallout, WarningCallout, IntegrationCallout } from '@/components/enablement/manual/components/Callout';
 import { WorkflowDiagram } from '@/components/enablement/manual/components/WorkflowDiagram';
 import { ScreenshotPlaceholder } from '@/components/enablement/manual/components/ScreenshotPlaceholder';
-import { SeeAlsoReference } from '@/components/enablement/shared/CrossModuleReference';
 
 const compensationFlowDiagram = `
 graph LR
@@ -141,23 +140,26 @@ export function CompensationIntegration() {
       </Card>
 
       {/* Key Features */}
-      <FeatureCardGrid columns={3}>
-        <PrimaryFeatureCard
+      <div className="grid md:grid-cols-3 gap-4">
+        <FeatureCard
+          variant="primary"
           icon={BarChart3}
           title="Compa-Ratio Analysis"
           description="Automatic calculation of employee salary position within their grade's band"
         />
-        <SecondaryFeatureCard
+        <FeatureCard
+          variant="info"
           icon={Target}
           title="Merit Matrix Integration"
           description="Performance ratings map to merit increase percentages via configurable matrix"
         />
-        <WarningFeatureCard
+        <FeatureCard
+          variant="warning"
           icon={AlertCircle}
           title="Equity Alerts"
           description="Flags employees significantly below or above their salary band range"
         />
-      </FeatureCardGrid>
+      </div>
 
       {/* Workflow Diagram */}
       <WorkflowDiagram
@@ -249,9 +251,7 @@ export function CompensationIntegration() {
 
       {/* Screenshot */}
       <ScreenshotPlaceholder
-        title="Compensation Dashboard"
-        description="Compa-ratio distribution view showing employees by band position"
-        height="h-64"
+        caption="Compensation Dashboard - Compa-ratio distribution view showing employees by band position"
       />
 
       {/* Merit-Performance Link */}
@@ -299,15 +299,6 @@ export function CompensationIntegration() {
         Compa-ratio analysis can reveal pay equity issues. Use the equity analysis tools to 
         compare pay across demographic groups and identify potential disparities requiring attention.
       </WarningCallout>
-
-      {/* Cross-References */}
-      <SeeAlsoReference
-        module="Workforce"
-        section="Job Grades & Pay Bands"
-        description="Configure the grade structure that drives salary bands"
-        manualPath="/enablement/manuals/workforce"
-        anchor="wf-sec-3-3"
-      />
     </div>
   );
 }

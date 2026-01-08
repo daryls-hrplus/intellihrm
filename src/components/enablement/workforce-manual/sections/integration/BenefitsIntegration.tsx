@@ -4,11 +4,10 @@ import {
   Award, Users, ArrowRight, Heart, Shield,
   CheckCircle, Clock, Baby, UserPlus
 } from 'lucide-react';
-import { FeatureCardGrid, PrimaryFeatureCard, SecondaryFeatureCard, SuccessFeatureCard } from '@/components/enablement/manual/components/FeatureCard';
+import { FeatureCard } from '@/components/enablement/manual/components/FeatureCard';
 import { InfoCallout, TipCallout, WarningCallout } from '@/components/enablement/manual/components/Callout';
 import { WorkflowDiagram } from '@/components/enablement/manual/components/WorkflowDiagram';
 import { ScreenshotPlaceholder } from '@/components/enablement/manual/components/ScreenshotPlaceholder';
-import { SeeAlsoReference } from '@/components/enablement/shared/CrossModuleReference';
 
 const benefitsFlowDiagram = `
 graph LR
@@ -125,23 +124,26 @@ export function BenefitsIntegration() {
       </Card>
 
       {/* Key Features */}
-      <FeatureCardGrid columns={3}>
-        <PrimaryFeatureCard
+      <div className="grid md:grid-cols-3 gap-4">
+        <FeatureCard
+          variant="primary"
           icon={CheckCircle}
           title="Automatic Eligibility"
           description="Benefits eligibility calculated in real-time based on employee attributes"
         />
-        <SecondaryFeatureCard
+        <FeatureCard
+          variant="info"
           icon={Baby}
           title="Life Event Triggers"
           description="Workforce changes automatically open special enrollment periods"
         />
-        <SuccessFeatureCard
+        <FeatureCard
+          variant="success"
           icon={Users}
           title="Dependent Sync"
           description="Dependent data flows to Benefits for coverage enrollment"
         />
-      </FeatureCardGrid>
+      </div>
 
       {/* Workflow Diagram */}
       <WorkflowDiagram
@@ -218,9 +220,7 @@ export function BenefitsIntegration() {
 
       {/* Screenshot */}
       <ScreenshotPlaceholder
-        title="ESS Benefits Enrollment"
-        description="Employee self-service view showing available benefits based on eligibility"
-        height="h-64"
+        caption="ESS Benefits Enrollment - Employee self-service view showing available benefits based on eligibility"
       />
 
       {/* Dependent Data Flow */}
@@ -270,15 +270,6 @@ export function BenefitsIntegration() {
         benefit options based on current workforce data. Ensure employee records are 
         accurate before open enrollment begins.
       </InfoCallout>
-
-      {/* Cross-References */}
-      <SeeAlsoReference
-        module="Workforce"
-        section="Dependents & Beneficiaries"
-        description="Manage dependent data that flows to Benefits enrollment"
-        manualPath="/enablement/manuals/workforce"
-        anchor="wf-sec-4-14"
-      />
     </div>
   );
 }

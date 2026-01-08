@@ -4,8 +4,8 @@ import {
   CreditCard, Database, ArrowRight, FileText, Building2,
   CheckCircle, Clock, AlertCircle, DollarSign
 } from 'lucide-react';
-import { FeatureCardGrid, PrimaryFeatureCard, SecondaryFeatureCard, WarningFeatureCard } from '@/components/enablement/manual/components/FeatureCard';
-import { InfoCallout, TipCallout, WarningCallout, CriticalCallout } from '@/components/enablement/manual/components/Callout';
+import { FeatureCard } from '@/components/enablement/manual/components/FeatureCard';
+import { InfoCallout, TipCallout, CriticalCallout } from '@/components/enablement/manual/components/Callout';
 import { WorkflowDiagram } from '@/components/enablement/manual/components/WorkflowDiagram';
 import { ScreenshotPlaceholder } from '@/components/enablement/manual/components/ScreenshotPlaceholder';
 
@@ -130,23 +130,26 @@ export function PayrollIntegration() {
       </Card>
 
       {/* Key Features */}
-      <FeatureCardGrid columns={3}>
-        <PrimaryFeatureCard
+      <div className="grid md:grid-cols-3 gap-4">
+        <FeatureCard
+          variant="primary"
           icon={ArrowRight}
           title="Real-Time Sync"
           description="Workforce transactions immediately update payroll master records"
         />
-        <SecondaryFeatureCard
+        <FeatureCard
+          variant="info"
           icon={DollarSign}
           title="Pay Element Mapping"
           description="Position grades automatically determine applicable pay elements and amounts"
         />
-        <WarningFeatureCard
+        <FeatureCard
+          variant="warning"
           icon={Clock}
           title="Effective Dating"
           description="Future-dated changes queue for payroll on the effective date"
         />
-      </FeatureCardGrid>
+      </div>
 
       {/* Workflow Diagram */}
       <WorkflowDiagram
@@ -228,9 +231,7 @@ export function PayrollIntegration() {
 
       {/* Screenshot */}
       <ScreenshotPlaceholder
-        title="Payroll Integration Settings"
-        description="Configuration screen showing transaction-to-payroll mapping rules"
-        height="h-64"
+        caption="Payroll Integration Settings - Configuration screen showing transaction-to-payroll mapping rules"
       />
 
       {/* GL Code Integration */}
