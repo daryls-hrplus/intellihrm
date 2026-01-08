@@ -12,7 +12,7 @@ import {
   Book, Search, Clock, ChevronRight, ChevronDown,
   FileText, Layers, Settings, Users, Briefcase, Building2,
   UserPlus, GitBranch, BarChart3, Link2, AlertTriangle,
-  BookOpen, CheckCircle, Circle, ArrowLeft, Sparkles
+  BookOpen, CheckCircle, Circle, ArrowLeft, Sparkles, History as HistoryIcon
 } from 'lucide-react';
 import { WORKFORCE_MANUAL_STRUCTURE } from '@/types/workforceManual';
 import { 
