@@ -42,6 +42,22 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  const getLocalHour = (timeZone: string) => {
+    try {
+      const parts = new Intl.DateTimeFormat("en-US", {
+        hour: "2-digit",
+        hourCycle: "h23",
+        timeZone,
+      }).formatToParts(new Date());
+
+      const hourPart = parts.find((p) => p.type === "hour")?.value;
+      const hour = hourPart ? Number(hourPart) : NaN;
+      return Number.isFinite(hour) ? hour : new Date().getUTCHours();
+    } catch {
+      return new Date().getUTCHours();
+    }
+  };
+
   try {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
@@ -52,7 +68,7 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    const { userId, companyId } = await req.json();
+    const { userId, companyId, timeZone: clientTimeZone } = await req.json();
     console.log(`Generating ESS dashboard for user: ${userId}`);
 
     if (!userId || !companyId) {
