@@ -24,6 +24,41 @@ import {
   TipCallout, 
   WarningCallout 
 } from '@/components/enablement/manual/components';
+import { WorkflowDiagram } from '@/components/enablement/manual/components/WorkflowDiagram';
+
+const taskFlowDiagram = `flowchart TD
+    subgraph Recurring["Recurring Task Generation"]
+        R1[Recurring Rule Active] --> R2{Schedule Triggered?}
+        R2 -->|Yes| R3[Generate New Task]
+        R3 --> A
+        R2 -->|No| R1
+    end
+    
+    A[Task Created] --> B[To Do]
+    B --> C{Work Started?}
+    C -->|Yes| D[In Progress]
+    C -->|No| E{Overdue?}
+    E -->|Yes| F[Overdue Alert]
+    F --> C
+    E -->|No| C
+    D --> G{Completed?}
+    G -->|No| D
+    G -->|Yes| H[Completed]
+    H --> I[Log Completion Time]
+
+    classDef recurring fill:#8b5cf6,stroke:#7c3aed,color:#fff
+    classDef todo fill:#64748b,stroke:#475569,color:#fff
+    classDef inProgress fill:#3b82f6,stroke:#2563eb,color:#fff
+    classDef completed fill:#10b981,stroke:#059669,color:#fff
+    classDef alert fill:#f59e0b,stroke:#d97706,color:#fff
+    classDef decision fill:#f59e0b,stroke:#d97706,color:#fff
+    
+    class R1,R2,R3 recurring
+    class A,B todo
+    class D inProgress
+    class H,I completed
+    class F alert
+    class C,E,G decision`;
 
 export function HRTasksSetup() {
   return (
@@ -270,6 +305,13 @@ export function HRTasksSetup() {
               </p>
             </div>
           </div>
+
+          {/* Task Flow Diagram */}
+          <WorkflowDiagram
+            title="Task Status Flow with Recurring Generation"
+            description="This diagram shows task states, transitions, and how recurring tasks are automatically generated based on schedule rules."
+            diagram={taskFlowDiagram}
+          />
         </CardContent>
       </Card>
 

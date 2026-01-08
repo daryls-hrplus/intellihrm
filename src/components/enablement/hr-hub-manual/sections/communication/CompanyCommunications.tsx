@@ -23,6 +23,36 @@ import {
   TipCallout, 
   WarningCallout 
 } from '@/components/enablement/manual/components';
+import { WorkflowDiagram } from '@/components/enablement/manual/components/WorkflowDiagram';
+
+const announcementWorkflowDiagram = `flowchart TD
+    A[Create Announcement] --> B[Draft Status]
+    B --> C{Ready to Publish?}
+    C -->|No| D[Continue Editing]
+    D --> B
+    C -->|Yes| E[Set Target Audience]
+    E --> F{Targeting}
+    F -->|Company-Wide| G[All Employees]
+    F -->|Targeted| H[Selected Departments]
+    G --> I{Pin?}
+    H --> I
+    I -->|Yes| J[Pin to Top]
+    I -->|No| K[Standard Order]
+    J --> L[Published]
+    K --> L
+    L --> M[Visible to Audience]
+
+    classDef startEnd fill:#10b981,stroke:#059669,color:#fff
+    classDef draft fill:#64748b,stroke:#475569,color:#fff
+    classDef process fill:#3b82f6,stroke:#2563eb,color:#fff
+    classDef decision fill:#f59e0b,stroke:#d97706,color:#fff
+    classDef published fill:#8b5cf6,stroke:#7c3aed,color:#fff
+    
+    class A,M startEnd
+    class B,D draft
+    class E,G,H,J,K process
+    class C,F,I decision
+    class L published`;
 
 export function CompanyCommunications() {
   return (
@@ -216,6 +246,13 @@ export function CompanyCommunications() {
                 the announcement visible to target employees immediately.
               </p>
             </div>
+
+            {/* Announcement Workflow Diagram */}
+            <WorkflowDiagram
+              title="Announcement Publishing Workflow"
+              description="This diagram shows the complete lifecycle of an announcement from draft creation through targeted publishing."
+              diagram={announcementWorkflowDiagram}
+            />
           </CardContent>
         </Card>
       </div>
