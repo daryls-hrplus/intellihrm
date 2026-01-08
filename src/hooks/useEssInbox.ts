@@ -9,7 +9,8 @@ export type InboxItemType =
   | 'change_request' 
   | 'appraisal' 
   | 'document' 
-  | 'idp';
+  | 'idp'
+  | 'reminder';
 
 export type InboxCategory = 
   | 'time_absence' 
@@ -239,6 +240,40 @@ export function useEssInbox() {
             actionPath: '/ess/development',
             createdAt: idp.created_at,
             dueDate: idp.target_completion_date || undefined,
+          });
+        });
+      }
+
+      // Fetch upcoming reminders (next 7 days)
+      const sevenDaysFromNow = new Date();
+      sevenDaysFromNow.setDate(sevenDaysFromNow.getDate() + 7);
+      const sevenDaysStr = sevenDaysFromNow.toISOString().split("T")[0];
+
+      const { data: reminders } = await supabase
+        .from("employee_reminders")
+        .select("id, title, message, reminder_date, event_date, priority, status")
+        .eq("employee_id", user.id)
+        .eq("status", "pending")
+        .lte("reminder_date", sevenDaysStr)
+        .order("reminder_date", { ascending: true });
+
+      if (reminders) {
+        reminders.forEach((rem) => {
+          const reminderDate = new Date(rem.reminder_date);
+          const isOverdue = reminderDate < new Date() && reminderDate.toDateString() !== new Date().toDateString();
+          const isCritical = rem.priority === 'critical' || rem.priority === 'high';
+          
+          items.push({
+            id: rem.id,
+            type: 'reminder',
+            category: 'tasks_approvals',
+            title: isOverdue ? 'Reminder Overdue' : 'Upcoming Reminder',
+            description: rem.title,
+            urgency: isOverdue || isCritical ? 'response_required' : 'pending',
+            actionLabel: 'View',
+            actionPath: '/ess/reminders',
+            createdAt: rem.reminder_date,
+            dueDate: rem.event_date,
           });
         });
       }

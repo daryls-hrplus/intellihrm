@@ -24,6 +24,7 @@ const typeConfig: Record<InboxItemType, { icon: React.ElementType; label: string
   appraisal: { icon: ClipboardCheck, label: 'Appraisal' },
   document: { icon: FileText, label: 'Document' },
   idp: { icon: GraduationCap, label: 'Development' },
+  reminder: { icon: AlertCircle, label: 'Reminder' },
 };
 
 interface InboxItemCardProps {
