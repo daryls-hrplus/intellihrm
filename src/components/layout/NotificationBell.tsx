@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Bell, Check, Trash2, Ticket, UserPlus, MessageSquare, AlertCircle, Info, Settings } from "lucide-react";
+import { Bell, Check, Trash2, Ticket, UserPlus, MessageSquare, AlertCircle, Info, Settings, CheckCircle, XCircle, FileEdit } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
@@ -30,6 +30,11 @@ const typeIcons: Record<string, typeof Bell> = {
   access_request: UserPlus,
   alert: AlertCircle,
   info: Info,
+  // ESS Change Request notifications
+  ess_request_approved: CheckCircle,
+  ess_request_rejected: XCircle,
+  ess_request_info_required: AlertCircle,
+  ess_request_submitted: FileEdit,
 };
 
 const typeColors: Record<string, string> = {
@@ -39,6 +44,11 @@ const typeColors: Record<string, string> = {
   access_request: "bg-orange-500/10 text-orange-600",
   alert: "bg-red-500/10 text-red-600",
   info: "bg-gray-500/10 text-gray-600",
+  // ESS Change Request notifications
+  ess_request_approved: "bg-emerald-500/10 text-emerald-600",
+  ess_request_rejected: "bg-red-500/10 text-red-600",
+  ess_request_info_required: "bg-amber-500/10 text-amber-600",
+  ess_request_submitted: "bg-blue-500/10 text-blue-600",
 };
 
 export function NotificationBell() {
