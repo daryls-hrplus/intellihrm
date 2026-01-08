@@ -77,25 +77,9 @@ export function HRHubConcepts() {
       icon: CheckSquare,
       color: 'text-indigo-500',
       bgColor: 'bg-indigo-500/10',
-      term: 'HR Tasks',
-      definition: 'Centralized task management for HR operations with priority levels, due dates, team assignment, and collaboration features.',
-      example: 'Monthly payroll review task assigned to Payroll Manager with comments for team collaboration.'
-    },
-    {
-      icon: Repeat,
-      color: 'text-teal-500',
-      bgColor: 'bg-teal-500/10',
-      term: 'Recurring Tasks',
-      definition: 'Automated task creation on defined schedules (daily, weekly, biweekly, monthly, quarterly, yearly) for repetitive HR activities.',
-      example: 'Quarterly compliance review tasks auto-generated 30 days before each quarter end.'
-    },
-    {
-      icon: Activity,
-      color: 'text-emerald-500',
-      bgColor: 'bg-emerald-500/10',
-      term: 'Task Activity Log',
-      definition: 'Collaborative discussion threads on tasks enabling team communication, progress updates, and audit trail of task lifecycle.',
-      example: 'HR team discusses completion steps on an onboarding task with timestamps and user attribution.'
+      term: 'HR Task Management',
+      definition: 'Centralized task system with recurring schedules, team assignment, priority levels, collaborative comments, and full activity audit trails.',
+      example: 'Quarterly compliance review auto-creates, assigns to team, tracks discussion, and logs completion history.'
     },
     {
       icon: UserCog,
