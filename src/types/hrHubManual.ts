@@ -839,7 +839,54 @@ export const HR_HUB_MANUAL_STRUCTURE: HRHubManualSection[] = [
           frequency: 'As needed',
           timing: 'Troubleshooting',
           benchmark: 'Self-service support'
-        }
+        },
+        subsections: [
+          {
+            id: 'hh-sec-8-1-1',
+            sectionNumber: '8.1.1',
+            title: 'Diagnostic Checklist',
+            description: 'Step-by-step diagnostic workflow for all issues',
+            contentLevel: 'reference',
+            estimatedReadTime: 2,
+            targetRoles: ['HR Admin', 'Support']
+          },
+          {
+            id: 'hh-sec-8-1-2',
+            sectionNumber: '8.1.2',
+            title: 'Help Desk Issues',
+            description: 'Ticket queue, SLA, canned responses troubleshooting',
+            contentLevel: 'reference',
+            estimatedReadTime: 2,
+            targetRoles: ['HR Admin', 'Support']
+          },
+          {
+            id: 'hh-sec-8-1-3',
+            sectionNumber: '8.1.3',
+            title: 'Knowledge Base Issues',
+            description: 'Search, categories, and article visibility problems',
+            contentLevel: 'reference',
+            estimatedReadTime: 2,
+            targetRoles: ['HR Admin']
+          },
+          {
+            id: 'hh-sec-8-1-4',
+            sectionNumber: '8.1.4',
+            title: 'SOP Management Issues',
+            description: 'Version control, AI generation, acknowledgments',
+            contentLevel: 'reference',
+            estimatedReadTime: 2,
+            targetRoles: ['HR Admin', 'Compliance']
+          },
+          {
+            id: 'hh-sec-8-1-5',
+            sectionNumber: '8.1.5',
+            title: 'Workflow & Approval Issues',
+            description: 'Stuck workflows, notifications, ESS policies',
+            contentLevel: 'reference',
+            estimatedReadTime: 2,
+            targetRoles: ['HR Admin']
+          }
+        ]
       },
       {
         id: 'hh-sec-8-2',
@@ -853,7 +900,45 @@ export const HR_HUB_MANUAL_STRUCTURE: HRHubManualSection[] = [
           frequency: 'Quarterly review',
           timing: 'Maintenance windows',
           benchmark: 'System health management'
-        }
+        },
+        subsections: [
+          {
+            id: 'hh-sec-8-2-1',
+            sectionNumber: '8.2.1',
+            title: 'Performance Issues',
+            description: 'Dashboard, search, upload, and report performance',
+            contentLevel: 'reference',
+            estimatedReadTime: 2,
+            targetRoles: ['HR Admin', 'IT']
+          },
+          {
+            id: 'hh-sec-8-2-2',
+            sectionNumber: '8.2.2',
+            title: 'Health Metrics',
+            description: 'Target, warning, and critical thresholds',
+            contentLevel: 'reference',
+            estimatedReadTime: 2,
+            targetRoles: ['HR Admin', 'IT']
+          },
+          {
+            id: 'hh-sec-8-2-3',
+            sectionNumber: '8.2.3',
+            title: 'Optimization Strategies',
+            description: 'Data, reports, workflows, and storage optimization',
+            contentLevel: 'reference',
+            estimatedReadTime: 2,
+            targetRoles: ['HR Admin', 'IT']
+          },
+          {
+            id: 'hh-sec-8-2-4',
+            sectionNumber: '8.2.4',
+            title: 'Maintenance Schedule',
+            description: 'Recommended periodic maintenance tasks',
+            contentLevel: 'reference',
+            estimatedReadTime: 2,
+            targetRoles: ['HR Admin', 'IT']
+          }
+        ]
       },
       {
         id: 'hh-sec-8-3',
@@ -867,7 +952,54 @@ export const HR_HUB_MANUAL_STRUCTURE: HRHubManualSection[] = [
           frequency: 'Annual review',
           timing: 'Security audits',
           benchmark: 'GDPR, data protection compliance'
-        }
+        },
+        subsections: [
+          {
+            id: 'hh-sec-8-3-1',
+            sectionNumber: '8.3.1',
+            title: 'Access & Authentication',
+            description: 'Login, SSO, MFA, and permission issues',
+            contentLevel: 'reference',
+            estimatedReadTime: 2,
+            targetRoles: ['HR Admin', 'IT']
+          },
+          {
+            id: 'hh-sec-8-3-2',
+            sectionNumber: '8.3.2',
+            title: 'Data Security Issues',
+            description: 'PII exposure, audit gaps, multi-tenant isolation',
+            contentLevel: 'reference',
+            estimatedReadTime: 2,
+            targetRoles: ['HR Admin', 'IT', 'Compliance']
+          },
+          {
+            id: 'hh-sec-8-3-3',
+            sectionNumber: '8.3.3',
+            title: 'Security Checklist',
+            description: 'Access control, data protection, authentication, audit',
+            contentLevel: 'reference',
+            estimatedReadTime: 2,
+            targetRoles: ['HR Admin', 'IT', 'Compliance']
+          },
+          {
+            id: 'hh-sec-8-3-4',
+            sectionNumber: '8.3.4',
+            title: 'Incident Response',
+            description: 'Security incident response procedures',
+            contentLevel: 'reference',
+            estimatedReadTime: 2,
+            targetRoles: ['HR Admin', 'IT', 'Compliance']
+          },
+          {
+            id: 'hh-sec-8-3-5',
+            sectionNumber: '8.3.5',
+            title: 'Data Protection & Compliance',
+            description: 'GDPR, data subject rights, compliance features',
+            contentLevel: 'reference',
+            estimatedReadTime: 2,
+            targetRoles: ['HR Admin', 'Compliance']
+          }
+        ]
       }
     ]
   }

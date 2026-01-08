@@ -145,7 +145,7 @@ export function TroubleshootingCommonIssues() {
         </CardHeader>
         <CardContent className="space-y-8">
           {/* Diagnostic Steps */}
-          <div id="hh-sec-8-1-diagnostic" data-manual-anchor="hh-sec-8-1-diagnostic">
+          <div id="hh-sec-8-1-1" data-manual-anchor="hh-sec-8-1-1">
             <h4 className="font-medium mb-4 flex items-center gap-2">
               <AlertTriangle className="h-4 w-4 text-amber-500" />
               General Diagnostic Checklist
@@ -166,7 +166,7 @@ export function TroubleshootingCommonIssues() {
           </div>
 
           {/* Help Desk Issues */}
-          <div id="hh-sec-8-1-helpdesk" data-manual-anchor="hh-sec-8-1-helpdesk">
+          <div id="hh-sec-8-1-2" data-manual-anchor="hh-sec-8-1-2">
             <TroubleshootingSection 
               items={helpDeskIssues}
               title="Help Desk Issues"
@@ -174,7 +174,7 @@ export function TroubleshootingCommonIssues() {
           </div>
 
           {/* Knowledge Base Issues */}
-          <div id="hh-sec-8-1-kb" data-manual-anchor="hh-sec-8-1-kb">
+          <div id="hh-sec-8-1-3" data-manual-anchor="hh-sec-8-1-3">
             <TroubleshootingSection 
               items={knowledgeBaseIssues}
               title="Knowledge Base Issues"
@@ -182,7 +182,7 @@ export function TroubleshootingCommonIssues() {
           </div>
 
           {/* SOP Issues */}
-          <div id="hh-sec-8-1-sop" data-manual-anchor="hh-sec-8-1-sop">
+          <div id="hh-sec-8-1-4" data-manual-anchor="hh-sec-8-1-4">
             <TroubleshootingSection 
               items={sopIssues}
               title="SOP Management Issues"
@@ -190,7 +190,7 @@ export function TroubleshootingCommonIssues() {
           </div>
 
           {/* Workflow Issues */}
-          <div id="hh-sec-8-1-workflow" data-manual-anchor="hh-sec-8-1-workflow">
+          <div id="hh-sec-8-1-5" data-manual-anchor="hh-sec-8-1-5">
             <TroubleshootingSection 
               items={workflowIssues}
               title="Workflow & Approval Issues"
