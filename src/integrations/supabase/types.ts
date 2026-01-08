@@ -34351,60 +34351,311 @@ export type Database = {
           },
         ]
       }
+      kb_article_feedback: {
+        Row: {
+          article_id: string
+          comment: string | null
+          feedback_type: string
+          id: string
+          resolution_notes: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          section_reference: string | null
+          status: string
+          submitted_at: string
+          submitted_by: string | null
+          suggested_change: string | null
+          version_id: string | null
+        }
+        Insert: {
+          article_id: string
+          comment?: string | null
+          feedback_type: string
+          id?: string
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          section_reference?: string | null
+          status?: string
+          submitted_at?: string
+          submitted_by?: string | null
+          suggested_change?: string | null
+          version_id?: string | null
+        }
+        Update: {
+          article_id?: string
+          comment?: string | null
+          feedback_type?: string
+          id?: string
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          section_reference?: string | null
+          status?: string
+          submitted_at?: string
+          submitted_by?: string | null
+          suggested_change?: string | null
+          version_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kb_article_feedback_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "kb_articles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kb_article_feedback_version_id_fkey"
+            columns: ["version_id"]
+            isOneToOne: false
+            referencedRelation: "kb_article_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      kb_article_reviews: {
+        Row: {
+          assigned_at: string
+          assigned_by: string | null
+          comments: string | null
+          created_at: string
+          decision_at: string | null
+          due_date: string | null
+          escalated_at: string | null
+          escalated_to: string | null
+          escalation_reason: string | null
+          id: string
+          inline_comments: Json | null
+          reviewer_id: string | null
+          status: string
+          version_id: string
+        }
+        Insert: {
+          assigned_at?: string
+          assigned_by?: string | null
+          comments?: string | null
+          created_at?: string
+          decision_at?: string | null
+          due_date?: string | null
+          escalated_at?: string | null
+          escalated_to?: string | null
+          escalation_reason?: string | null
+          id?: string
+          inline_comments?: Json | null
+          reviewer_id?: string | null
+          status?: string
+          version_id: string
+        }
+        Update: {
+          assigned_at?: string
+          assigned_by?: string | null
+          comments?: string | null
+          created_at?: string
+          decision_at?: string | null
+          due_date?: string | null
+          escalated_at?: string | null
+          escalated_to?: string | null
+          escalation_reason?: string | null
+          id?: string
+          inline_comments?: Json | null
+          reviewer_id?: string | null
+          status?: string
+          version_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kb_article_reviews_version_id_fkey"
+            columns: ["version_id"]
+            isOneToOne: false
+            referencedRelation: "kb_article_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      kb_article_versions: {
+        Row: {
+          article_id: string
+          change_summary: string | null
+          change_type: string | null
+          content: string
+          created_at: string
+          created_by: string | null
+          excerpt: string | null
+          expires_at: string | null
+          id: string
+          major_version: number
+          minor_version: number
+          patch_version: number
+          published_at: string | null
+          published_by: string | null
+          review_comments: string | null
+          review_due_date: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          rolled_back_from_version_id: string | null
+          source_manual_id: string | null
+          source_manual_version: string | null
+          source_section_id: string | null
+          status: string
+          title: string
+          version_number: string
+        }
+        Insert: {
+          article_id: string
+          change_summary?: string | null
+          change_type?: string | null
+          content: string
+          created_at?: string
+          created_by?: string | null
+          excerpt?: string | null
+          expires_at?: string | null
+          id?: string
+          major_version?: number
+          minor_version?: number
+          patch_version?: number
+          published_at?: string | null
+          published_by?: string | null
+          review_comments?: string | null
+          review_due_date?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          rolled_back_from_version_id?: string | null
+          source_manual_id?: string | null
+          source_manual_version?: string | null
+          source_section_id?: string | null
+          status?: string
+          title: string
+          version_number: string
+        }
+        Update: {
+          article_id?: string
+          change_summary?: string | null
+          change_type?: string | null
+          content?: string
+          created_at?: string
+          created_by?: string | null
+          excerpt?: string | null
+          expires_at?: string | null
+          id?: string
+          major_version?: number
+          minor_version?: number
+          patch_version?: number
+          published_at?: string | null
+          published_by?: string | null
+          review_comments?: string | null
+          review_due_date?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          rolled_back_from_version_id?: string | null
+          source_manual_id?: string | null
+          source_manual_version?: string | null
+          source_section_id?: string | null
+          status?: string
+          title?: string
+          version_number?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kb_article_versions_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "kb_articles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kb_article_versions_rolled_back_from_version_id_fkey"
+            columns: ["rolled_back_from_version_id"]
+            isOneToOne: false
+            referencedRelation: "kb_article_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       kb_articles: {
         Row: {
+          audience_roles: string[] | null
           author_id: string | null
           category_id: string | null
           content: string
           created_at: string
+          current_version_id: string | null
           excerpt: string | null
           helpful_count: number
           id: string
           is_featured: boolean
           is_published: boolean
+          last_synced_at: string | null
+          next_review_date: string | null
           not_helpful_count: number
+          owner_id: string | null
           published_at: string | null
+          related_articles: string[] | null
+          review_cycle_days: number | null
           slug: string
+          source_manual_id: string | null
+          source_section_id: string | null
           tags: string[] | null
           title: string
           updated_at: string
           view_count: number
+          visibility_level: string | null
         }
         Insert: {
+          audience_roles?: string[] | null
           author_id?: string | null
           category_id?: string | null
           content: string
           created_at?: string
+          current_version_id?: string | null
           excerpt?: string | null
           helpful_count?: number
           id?: string
           is_featured?: boolean
           is_published?: boolean
+          last_synced_at?: string | null
+          next_review_date?: string | null
           not_helpful_count?: number
+          owner_id?: string | null
           published_at?: string | null
+          related_articles?: string[] | null
+          review_cycle_days?: number | null
           slug: string
+          source_manual_id?: string | null
+          source_section_id?: string | null
           tags?: string[] | null
           title: string
           updated_at?: string
           view_count?: number
+          visibility_level?: string | null
         }
         Update: {
+          audience_roles?: string[] | null
           author_id?: string | null
           category_id?: string | null
           content?: string
           created_at?: string
+          current_version_id?: string | null
           excerpt?: string | null
           helpful_count?: number
           id?: string
           is_featured?: boolean
           is_published?: boolean
+          last_synced_at?: string | null
+          next_review_date?: string | null
           not_helpful_count?: number
+          owner_id?: string | null
           published_at?: string | null
+          related_articles?: string[] | null
+          review_cycle_days?: number | null
           slug?: string
+          source_manual_id?: string | null
+          source_section_id?: string | null
           tags?: string[] | null
           title?: string
           updated_at?: string
           view_count?: number
+          visibility_level?: string | null
         }
         Relationships: [
           {
@@ -34419,6 +34670,13 @@ export type Database = {
             columns: ["category_id"]
             isOneToOne: false
             referencedRelation: "kb_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kb_articles_current_version_id_fkey"
+            columns: ["current_version_id"]
+            isOneToOne: false
+            referencedRelation: "kb_article_versions"
             referencedColumns: ["id"]
           },
         ]
@@ -34466,6 +34724,75 @@ export type Database = {
             columns: ["parent_id"]
             isOneToOne: false
             referencedRelation: "kb_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      kb_published_manuals: {
+        Row: {
+          category_id: string | null
+          changelog: string[] | null
+          company_id: string | null
+          id: string
+          manual_id: string
+          manual_name: string
+          published_at: string
+          published_by: string | null
+          published_version: string
+          sections_published: number
+          sections_total: number
+          sections_updated: number
+          source_version: string
+          status: string
+          superseded_at: string | null
+        }
+        Insert: {
+          category_id?: string | null
+          changelog?: string[] | null
+          company_id?: string | null
+          id?: string
+          manual_id: string
+          manual_name: string
+          published_at?: string
+          published_by?: string | null
+          published_version: string
+          sections_published?: number
+          sections_total?: number
+          sections_updated?: number
+          source_version: string
+          status?: string
+          superseded_at?: string | null
+        }
+        Update: {
+          category_id?: string | null
+          changelog?: string[] | null
+          company_id?: string | null
+          id?: string
+          manual_id?: string
+          manual_name?: string
+          published_at?: string
+          published_by?: string | null
+          published_version?: string
+          sections_published?: number
+          sections_total?: number
+          sections_updated?: number
+          source_version?: string
+          status?: string
+          superseded_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kb_published_manuals_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "kb_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kb_published_manuals_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
             referencedColumns: ["id"]
           },
         ]
