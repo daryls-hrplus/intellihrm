@@ -3,7 +3,8 @@ import { Badge } from '@/components/ui/badge';
 import { 
   BookOpen, FileText, MessageSquare, Shield, 
   Workflow, Database, Bell, Search, CheckSquare, Repeat, Activity,
-  UserCog, Users, GitBranch, Settings, IdCard, Upload, BarChart3, Megaphone
+  UserCog, Users, GitBranch, Settings, IdCard, Upload, BarChart3, Megaphone,
+  Calendar, Mail
 } from 'lucide-react';
 import { NoteCallout } from '@/components/enablement/manual/components/Callout';
 
@@ -144,6 +145,22 @@ export function HRHubConcepts() {
       term: 'Company Communications',
       definition: 'Announcements, news, and company-wide messaging with targeting and acknowledgment.',
       example: 'CEO quarterly update targeted to all employees with read tracking.'
+    },
+    {
+      icon: Calendar,
+      color: 'text-teal-500',
+      bgColor: 'bg-teal-500/10',
+      term: 'HR Calendar',
+      definition: 'Company-wide event management with holiday calendars, location-aware scheduling, and multi-timezone support.',
+      example: 'Public holidays configured per country/branch; training events auto-populate employee calendars.'
+    },
+    {
+      icon: Mail,
+      color: 'text-emerald-500',
+      bgColor: 'bg-emerald-500/10',
+      term: 'Notifications & Reminders',
+      definition: 'AI-powered communication system with email templates, automation rules, delivery tracking, and in-app alerts.',
+      example: 'Probation reminder emails auto-send 14 days before review; managers receive in-app alerts for pending approvals.'
     }
   ];
 
