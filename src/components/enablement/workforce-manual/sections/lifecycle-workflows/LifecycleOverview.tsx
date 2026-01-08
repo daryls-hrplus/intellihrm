@@ -11,7 +11,7 @@ export function LifecycleOverview() {
   return (
     <div className="space-y-6">
       <p className="text-muted-foreground">
-        The Employee Lifecycle represents the complete journey from hire to retire. HRplus provides 
+        The Employee Lifecycle represents the complete journey from hire to retire. Intelli HRM provides 
         comprehensive workflow automation for every stage, ensuring consistent processes, compliance, 
         and a positive employee experience throughout their tenure.
       </p>

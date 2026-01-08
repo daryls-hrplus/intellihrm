@@ -361,7 +361,7 @@ export default function ImplementationHandbookPage() {
       // Title
       doc.setFontSize(24);
       doc.setFont("helvetica", "bold");
-      doc.text("HRplus Cerebra", pageWidth / 2, yPos, { align: "center" });
+      doc.text("Intelli HRM Cerebra", pageWidth / 2, yPos, { align: "center" });
       yPos += 10;
       doc.setFontSize(18);
       doc.text("Implementation Handbook", pageWidth / 2, yPos, { align: "center" });
@@ -456,7 +456,7 @@ export default function ImplementationHandbookPage() {
         yPos += 6;
       });
 
-      doc.save("HRplus_Cerebra_Implementation_Handbook.pdf");
+      doc.save("Intelli_HRM_Cerebra_Implementation_Handbook.pdf");
       toast.success("PDF exported successfully");
     } catch (error) {
       console.error("PDF export error:", error);
@@ -472,7 +472,7 @@ export default function ImplementationHandbookPage() {
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Implementation Handbook</h1>
           <p className="text-muted-foreground">
-            Interactive workspace for configuring HRplus Cerebra
+            Interactive workspace for configuring Intelli HRM Cerebra
           </p>
         </div>
         <Button onClick={exportToPDF} variant="outline" className="gap-2">

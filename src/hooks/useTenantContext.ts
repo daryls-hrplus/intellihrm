@@ -2,11 +2,12 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 
-export type TenantType = "hrplus_internal" | "client";
+export type TenantType = "intellihrm_internal" | "client";
 
 interface TenantContext {
   tenantType: TenantType;
-  isHRPlusInternal: boolean;
+  isIntelliHRMInternal: boolean;
+  isHRPlusInternal: boolean; // Backward compatibility alias
   isClient: boolean;
   appVersion: string;
   isLoading: boolean;
@@ -57,7 +58,8 @@ export function useTenantContext(): TenantContext {
 
   return {
     tenantType,
-    isHRPlusInternal: tenantType === "hrplus_internal",
+    isIntelliHRMInternal: tenantType === "intellihrm_internal",
+    isHRPlusInternal: tenantType === "intellihrm_internal", // Backward compatibility alias
     isClient: tenantType === "client",
     appVersion,
     isLoading,

@@ -16,7 +16,7 @@ export function AccessCertification() {
         <UserCheck className="h-4 w-4" />
         <AlertTitle>SOC 2 Control</AlertTitle>
         <AlertDescription>
-          Periodic access reviews are a key control for SOC 2 Type II certification. HRplus automates 
+          Periodic access reviews are a key control for SOC 2 Type II certification. Intelli HRM automates 
           the certification workflow to ensure timely completion and proper documentation.
         </AlertDescription>
       </Alert>

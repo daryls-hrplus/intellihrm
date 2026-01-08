@@ -55,9 +55,9 @@ const MANUAL_CONTENT = {
     title: "Part 1: Module Overview & Conceptual Foundation",
     sections: [
       {
-        title: "1.1 Introduction to Appraisals in HRplus",
+        title: "1.1 Introduction to Appraisals in Intelli HRM",
         content: [
-          "HRplus Appraisals is an enterprise-grade performance management module built with three key differentiators:",
+          "Intelli HRM Appraisals is an enterprise-grade performance management module built with three key differentiators:",
           "AI-First Approach: Embedded intelligence for bias detection, feedback assistance, and predictive insights",
           "Cross-Module Orchestration: Automatic integration with Nine-Box, Succession, Compensation, and Learning modules",
           "Regional Compliance: Built-in support for Caribbean, African, and global labor regulations",

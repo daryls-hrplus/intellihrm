@@ -17,7 +17,7 @@ export function ISO42001Compliance() {
         <AlertTitle>AI Management System (AIMS)</AlertTitle>
         <AlertDescription>
           ISO 42001 requires organizations to establish, implement, maintain, and continually improve an AI 
-          management system. HRplus provides the framework and tools to support these requirements.
+          management system. Intelli HRM provides the framework and tools to support these requirements.
         </AlertDescription>
       </Alert>
 

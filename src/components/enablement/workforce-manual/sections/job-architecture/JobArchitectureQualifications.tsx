@@ -191,7 +191,7 @@ export function JobArchitectureQualifications() {
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-muted-foreground">
-            HRplus automatically monitors qualification expiry dates and generates alerts:
+            Intelli HRM automatically monitors qualification expiry dates and generates alerts:
           </p>
           <ul className="text-sm text-muted-foreground space-y-2">
             <li>• 90 days before expiry: Initial notification to employee and manager</li>

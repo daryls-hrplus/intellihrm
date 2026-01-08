@@ -89,7 +89,7 @@ export function AIPoweredCalibration() {
         />
 
         <InfoCallout title="AI Governance">
-          All AI features in HRPlus comply with ISO 30409:2024 standards for HR AI governance. 
+          All AI features in Intelli HRM comply with ISO 30409:2024 standards for HR AI governance. 
           Human oversight is mandatory—AI augments, never replaces, human decision-making.
         </InfoCallout>
 

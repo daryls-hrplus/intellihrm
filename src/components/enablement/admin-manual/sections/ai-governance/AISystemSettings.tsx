@@ -8,7 +8,7 @@ export function AISystemSettings() {
   return (
     <div className="space-y-6">
       <p className="text-muted-foreground">
-        AI System Settings control how artificial intelligence features are enabled and configured across HRplus.
+        AI System Settings control how artificial intelligence features are enabled and configured across Intelli HRM.
         This includes enabling AI capabilities, selecting allowed models, and setting token consumption limits.
       </p>
 
@@ -16,7 +16,7 @@ export function AISystemSettings() {
         <Brain className="h-4 w-4" />
         <AlertTitle>AI-First Architecture</AlertTitle>
         <AlertDescription>
-          HRplus is designed with AI at its core. Enabling AI unlocks predictive insights, automated recommendations,
+          Intelli HRM is designed with AI at its core. Enabling AI unlocks predictive insights, automated recommendations,
           and intelligent workflows across all modules.
         </AlertDescription>
       </Alert>

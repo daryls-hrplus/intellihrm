@@ -210,7 +210,7 @@ export function SetupIntegrationRules() {
         <div>
           <h4 className="font-medium mb-2">What Are Integration Rules?</h4>
           <p className="text-muted-foreground">
-            Integration rules define how appraisal data flows to other HRplus modules. When 
+            Integration rules define how appraisal data flows to other Intelli HRM modules. When 
             performance cycles complete, scores and ratings can automatically feed into 
             Compensation for merit planning, Succession for talent reviews, and Learning for 
             development recommendations. Well-configured integrations eliminate manual data 

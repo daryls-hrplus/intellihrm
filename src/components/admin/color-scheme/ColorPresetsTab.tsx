@@ -23,9 +23,9 @@ interface Preset {
 const PRESETS: Preset[] = [
   // Default & Professional
   {
-    id: "hrplus-azure",
-    name: "HRplus Azure",
-    description: "Official HRplus brand colors with azure blue and teal accents",
+    id: "intellihrm-azure",
+    name: "Intelli HRM Azure",
+    description: "Official Intelli HRM brand colors with azure blue and teal accents",
     primary: "#2F7AC3",
     secondary: "#0C4277",
     accent: "#17A584",

@@ -156,7 +156,7 @@ export function DAPGuidesManager() {
               <DialogHeader>
                 <DialogTitle>Link UserGuiding Guide</DialogTitle>
                 <DialogDescription>
-                  Connect a UserGuiding guide to an HRplus feature
+                  Connect a UserGuiding guide to an Intelli HRM feature
                 </DialogDescription>
               </DialogHeader>
               <div className="grid gap-4 py-4">

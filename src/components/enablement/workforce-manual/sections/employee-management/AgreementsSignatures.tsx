@@ -53,7 +53,7 @@ export function AgreementsSignatures() {
         <Info className="h-4 w-4" />
         <AlertTitle>E-Signature Support</AlertTitle>
         <AlertDescription>
-          HRplus supports electronic signatures with timestamp and IP logging 
+          Intelli HRM supports electronic signatures with timestamp and IP logging 
           for legally binding document acknowledgments.
         </AlertDescription>
       </Alert>
