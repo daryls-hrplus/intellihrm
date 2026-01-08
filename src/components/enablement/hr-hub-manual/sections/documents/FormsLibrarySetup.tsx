@@ -32,12 +32,12 @@ const plannedFeatures = [
 
 export function FormsLibrarySetup() {
   return (
-    <div className="space-y-6" data-manual-anchor="hh-sec-4-3">
+    <div className="space-y-6" data-manual-anchor="hh-sec-4-4">
       {/* Section Header */}
       <div className="flex items-start justify-between">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <Badge variant="outline">Section 4.3</Badge>
+            <Badge variant="outline">Section 4.4</Badge>
             <Badge variant="secondary">5 min read</Badge>
           </div>
           <h2 className="text-2xl font-bold">Forms Library</h2>
