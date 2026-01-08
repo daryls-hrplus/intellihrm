@@ -35,6 +35,36 @@ import {
   WarningCallout,
   SuccessCallout 
 } from '@/components/enablement/manual/components';
+import { WorkflowDiagram } from '@/components/enablement/manual/components/WorkflowDiagram';
+
+const notificationFlowDiagram = `flowchart TD
+    A[Event Triggered] --> B{Rule Match?}
+    B -->|No| C[No Action]
+    B -->|Yes| D[Load Template]
+    D --> E[Resolve Recipients]
+    E --> F[Populate Variables]
+    F --> G{Delivery Channel}
+    G -->|Email| H[Send Email]
+    G -->|In-App| I[Push Notification]
+    G -->|SMS| J[Send SMS]
+    H --> K{Delivered?}
+    I --> L[Mark Read/Unread]
+    J --> K
+    K -->|Yes| M[Log Success]
+    K -->|No| N{Retry < Max?}
+    N -->|Yes| O[Schedule Retry]
+    N -->|No| P[Log Failure]
+    O --> G
+
+    classDef startEnd fill:#10b981,stroke:#059669,color:#fff
+    classDef process fill:#3b82f6,stroke:#2563eb,color:#fff
+    classDef decision fill:#f59e0b,stroke:#d97706,color:#fff
+    classDef error fill:#ef4444,stroke:#dc2626,color:#fff
+    
+    class A,M,L startEnd
+    class D,E,F,H,I,J,O process
+    class B,G,K,N decision
+    class C,P error`;
 
 export function NotificationsReminders() {
   return (
@@ -314,6 +344,13 @@ export function NotificationsReminders() {
               based on data patterns.
             </SuccessCallout>
           </div>
+
+          {/* Notification Flow Diagram */}
+          <WorkflowDiagram
+            title="Notification Delivery Flow"
+            description="This diagram illustrates how notifications are processed from event trigger through multi-channel delivery with retry logic."
+            diagram={notificationFlowDiagram}
+          />
 
           {/* Rule Fields Reference */}
           <div className="space-y-4">

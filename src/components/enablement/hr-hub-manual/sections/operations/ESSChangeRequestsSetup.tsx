@@ -24,6 +24,39 @@ import {
   WarningCallout,
   SuccessCallout 
 } from '@/components/enablement/manual/components';
+import { WorkflowDiagram } from '@/components/enablement/manual/components/WorkflowDiagram';
+
+const changeRequestWorkflowDiagram = `flowchart TD
+    A[Employee Submits Request] --> B[Request Created]
+    B --> C{Risk Level?}
+    C -->|Low Risk| D{Auto-Approve?}
+    C -->|Medium Risk| E[HR Review Queue]
+    C -->|High Risk| F[Senior HR Review + Docs Required]
+    D -->|Yes| G[Auto-Approved]
+    D -->|No| E
+    E --> H{Review Decision}
+    F --> H
+    H -->|Approve| I[Changes Applied]
+    H -->|Reject| J[Rejection with Reason]
+    H -->|Request Info| K[Info Requested Status]
+    K -->|Employee Responds| E
+    I --> L[Employee Notified - Approved]
+    J --> M[Employee Notified - Rejected]
+    G --> I
+
+    classDef startEnd fill:#10b981,stroke:#059669,color:#fff
+    classDef process fill:#3b82f6,stroke:#2563eb,color:#fff
+    classDef decision fill:#f59e0b,stroke:#d97706,color:#fff
+    classDef highRisk fill:#ef4444,stroke:#dc2626,color:#fff
+    classDef approved fill:#22c55e,stroke:#16a34a,color:#fff
+    classDef rejected fill:#ef4444,stroke:#dc2626,color:#fff
+    
+    class A,L,M startEnd
+    class B,E,K process
+    class C,D,H decision
+    class F highRisk
+    class G,I approved
+    class J rejected`;
 
 export function ESSChangeRequestsSetup() {
   return (
@@ -209,6 +242,13 @@ export function ESSChangeRequestsSetup() {
               </div>
             </div>
           </div>
+
+          {/* Change Request Workflow Diagram */}
+          <WorkflowDiagram
+            title="Change Request Approval Workflow"
+            description="This diagram illustrates the complete approval flow for ESS change requests, including risk-based routing and approval paths."
+            diagram={changeRequestWorkflowDiagram}
+          />
         </CardContent>
       </Card>
 

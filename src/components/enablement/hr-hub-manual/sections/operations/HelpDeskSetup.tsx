@@ -25,6 +25,61 @@ import {
   WarningCallout,
   SuccessCallout 
 } from '@/components/enablement/manual/components';
+import { WorkflowDiagram } from '@/components/enablement/manual/components/WorkflowDiagram';
+
+const ticketLifecycleDiagram = `flowchart TD
+    A[Ticket Created] --> B[Open]
+    B --> C{Assigned?}
+    C -->|No| D[Unassigned Queue]
+    C -->|Yes| E[In Progress]
+    D --> E
+    E --> F{Resolution?}
+    F -->|Needs Info| G[Pending - Awaiting Response]
+    G -->|Info Received| E
+    G -->|Timeout| H{SLA Breach?}
+    F -->|Resolved| I[Resolved]
+    H -->|Yes| J[Escalate to Supervisor]
+    J --> E
+    I --> K{Satisfied?}
+    K -->|Yes| L[Closed]
+    K -->|No| M[Reopened]
+    M --> E
+    E --> H
+    H -->|No| E
+
+    classDef startEnd fill:#10b981,stroke:#059669,color:#fff
+    classDef open fill:#3b82f6,stroke:#2563eb,color:#fff
+    classDef pending fill:#f59e0b,stroke:#d97706,color:#fff
+    classDef decision fill:#8b5cf6,stroke:#7c3aed,color:#fff
+    classDef escalate fill:#ef4444,stroke:#dc2626,color:#fff
+    classDef resolved fill:#22c55e,stroke:#16a34a,color:#fff
+    
+    class A,L startEnd
+    class B,E open
+    class G,D pending
+    class C,F,H,K decision
+    class J,M escalate
+    class I resolved`;
+
+const slaEscalationDiagram = `flowchart LR
+    A[Ticket Open] --> B{Response SLA}
+    B -->|On Track| C[Normal Processing]
+    B -->|Warning 75%| D[Amber Alert]
+    B -->|Breached| E[Red Alert + Escalation]
+    D --> F[Notify Agent]
+    E --> G[Notify Supervisor]
+    G --> H[Priority Boost]
+    H --> I[Reassign if Needed]
+
+    classDef normal fill:#3b82f6,stroke:#2563eb,color:#fff
+    classDef warning fill:#f59e0b,stroke:#d97706,color:#fff
+    classDef breach fill:#ef4444,stroke:#dc2626,color:#fff
+    classDef action fill:#10b981,stroke:#059669,color:#fff
+    
+    class A,C normal
+    class D,F warning
+    class E,G breach
+    class H,I action`;
 
 export function HelpDeskSetup() {
   return (
@@ -246,6 +301,13 @@ export function HelpDeskSetup() {
                 full audit history. Archived tickets remain searchable and can be restored if needed.
               </p>
             </div>
+
+            {/* Ticket Lifecycle Diagram */}
+            <WorkflowDiagram
+              title="Ticket Lifecycle with Escalation Paths"
+              description="This diagram shows the complete ticket lifecycle from creation through resolution, including escalation triggers and reopening flows."
+              diagram={ticketLifecycleDiagram}
+            />
           </CardContent>
         </Card>
 
@@ -368,6 +430,13 @@ export function HelpDeskSetup() {
               red indicators with time-past-breach. Use filters to quickly identify and 
               prioritize at-risk tickets.
             </InfoCallout>
+
+            {/* SLA Escalation Diagram */}
+            <WorkflowDiagram
+              title="SLA Escalation Path"
+              description="This diagram shows how tickets are monitored against SLA thresholds and the escalation actions triggered at each level."
+              diagram={slaEscalationDiagram}
+            />
           </CardContent>
         </Card>
       </div>
