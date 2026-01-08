@@ -23,7 +23,8 @@ import {
   WorkforceManualLifecycleWorkflowsSection,
   WorkforceManualPositionControlSection,
   WorkforceManualAnalyticsSection,
-  WorkforceManualESSMSSSection
+  WorkforceManualESSMSSSection,
+  WorkforceManualIntegrationSection
 } from '@/components/enablement/workforce-manual';
 
 const SECTION_ICONS: Record<string, React.ReactNode> = {
@@ -150,6 +151,8 @@ export default function WorkforceManualPage() {
         return <WorkforceManualAnalyticsSection />;
       case 'wf-part-8':
         return <WorkforceManualESSMSSSection />;
+      case 'wf-part-9':
+        return <WorkforceManualIntegrationSection />;
       case 'wf-part-10':
         return (
           <Card>

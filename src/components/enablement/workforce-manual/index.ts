@@ -6,3 +6,4 @@ export { WorkforceManualLifecycleWorkflowsSection } from './WorkforceManualLifec
 export { WorkforceManualPositionControlSection } from './WorkforceManualPositionControlSection';
 export { WorkforceManualAnalyticsSection } from './WorkforceManualAnalyticsSection';
 export { WorkforceManualESSMSSSection } from './WorkforceManualESSMSSSection';
+export { WorkforceManualIntegrationSection } from './WorkforceManualIntegrationSection';

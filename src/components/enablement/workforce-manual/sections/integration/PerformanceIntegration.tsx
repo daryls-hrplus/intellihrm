@@ -4,11 +4,10 @@ import {
   TrendingUp, Target, Users, ArrowRight, Star,
   CheckCircle, LayoutGrid, Briefcase
 } from 'lucide-react';
-import { FeatureCardGrid, PrimaryFeatureCard, SecondaryFeatureCard, SuccessFeatureCard } from '@/components/enablement/manual/components/FeatureCard';
+import { FeatureCard } from '@/components/enablement/manual/components/FeatureCard';
 import { InfoCallout, TipCallout, IntegrationCallout } from '@/components/enablement/manual/components/Callout';
 import { WorkflowDiagram } from '@/components/enablement/manual/components/WorkflowDiagram';
 import { ScreenshotPlaceholder } from '@/components/enablement/manual/components/ScreenshotPlaceholder';
-import { SeeAlsoReference } from '@/components/enablement/shared/CrossModuleReference';
 
 const performanceFlowDiagram = `
 graph LR
@@ -135,23 +134,26 @@ export function PerformanceIntegration() {
       </Card>
 
       {/* Key Features */}
-      <FeatureCardGrid columns={3}>
-        <PrimaryFeatureCard
+      <div className="grid md:grid-cols-3 gap-4">
+        <FeatureCard
+          variant="primary"
           icon={Briefcase}
           title="Job-Based Appraisals"
           description="Appraisal forms automatically include competencies from the employee's job profile"
         />
-        <SecondaryFeatureCard
+        <FeatureCard
+          variant="info"
           icon={LayoutGrid}
           title="Nine-Box Population"
           description="Performance + potential ratings automatically plot employees on the Nine-Box grid"
         />
-        <SuccessFeatureCard
+        <FeatureCard
+          variant="success"
           icon={Star}
           title="Rating History"
           description="Performance ratings are stored in the employee record for trend analysis"
         />
-      </FeatureCardGrid>
+      </div>
 
       {/* Workflow Diagram */}
       <WorkflowDiagram
@@ -228,9 +230,7 @@ export function PerformanceIntegration() {
 
       {/* Screenshot */}
       <ScreenshotPlaceholder
-        title="MSS Nine-Box View"
-        description="Manager view showing team members plotted on the Nine-Box grid with succession insights"
-        height="h-64"
+        caption="MSS Nine-Box View - Manager view showing team members plotted on the Nine-Box grid with succession insights"
       />
 
       {/* Competency Flow */}
@@ -276,15 +276,6 @@ export function PerformanceIntegration() {
         All performance ratings are retained in the employee's performance history within Workforce. 
         This enables trend analysis and informs long-term talent decisions.
       </InfoCallout>
-
-      {/* Cross-References */}
-      <SeeAlsoReference
-        module="Workforce"
-        section="Job Architecture"
-        description="Define job competencies that drive performance appraisals"
-        manualPath="/enablement/manuals/workforce"
-        anchor="wf-sec-3-1"
-      />
     </div>
   );
 }

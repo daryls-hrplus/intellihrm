@@ -4,10 +4,9 @@ import {
   UserCheck, Briefcase, ArrowRight, FileText, Users,
   CheckCircle, Clock, AlertCircle
 } from 'lucide-react';
-import { FeatureCardGrid, PrimaryFeatureCard, SecondaryFeatureCard, SuccessFeatureCard } from '@/components/enablement/manual/components/FeatureCard';
+import { FeatureCard } from '@/components/enablement/manual/components/FeatureCard';
 import { InfoCallout, TipCallout, WarningCallout } from '@/components/enablement/manual/components/Callout';
 import { WorkflowDiagram } from '@/components/enablement/manual/components/WorkflowDiagram';
-import { SeeAlsoReference } from '@/components/enablement/shared/CrossModuleReference';
 import { ScreenshotPlaceholder } from '@/components/enablement/manual/components/ScreenshotPlaceholder';
 
 const recruitmentFlowDiagram = `
@@ -118,23 +117,26 @@ export function RecruitmentIntegration() {
       </Card>
 
       {/* Key Features */}
-      <FeatureCardGrid columns={3}>
-        <PrimaryFeatureCard
+      <div className="grid md:grid-cols-3 gap-4">
+        <FeatureCard
+          variant="primary"
           icon={FileText}
           title="Auto-Requisition Creation"
           description="Vacancies automatically generate requisitions with position details pre-populated"
         />
-        <SecondaryFeatureCard
+        <FeatureCard
+          variant="info"
           icon={ArrowRight}
           title="Seamless Onboarding"
           description="Accepted candidates convert to employees without duplicate data entry"
         />
-        <SuccessFeatureCard
+        <FeatureCard
+          variant="success"
           icon={CheckCircle}
           title="Position Fill Tracking"
           description="Real-time visibility into vacancy fill status and time-to-hire metrics"
         />
-      </FeatureCardGrid>
+      </div>
 
       {/* Workflow Diagram */}
       <WorkflowDiagram
@@ -178,9 +180,7 @@ export function RecruitmentIntegration() {
 
       {/* Screenshot */}
       <ScreenshotPlaceholder
-        title="MSS Requisition View"
-        description="Manager self-service view showing position vacancy with 'Create Requisition' action"
-        height="h-64"
+        caption="MSS Requisition View - Manager self-service view showing position vacancy with 'Create Requisition' action"
       />
 
       {/* Configuration Points */}
@@ -247,15 +247,6 @@ export function RecruitmentIntegration() {
         Requisitions created from vacancies are validated against headcount budget. If the position 
         exceeds authorized headcount, the requisition requires additional approval from HR or Finance.
       </WarningCallout>
-
-      {/* Cross-References */}
-      <SeeAlsoReference
-        module="Position Control"
-        section="Vacancy Management"
-        description="Configure vacancy triggers and headcount validation"
-        manualPath="/enablement/manuals/workforce"
-        anchor="wf-sec-6-2"
-      />
     </div>
   );
 }

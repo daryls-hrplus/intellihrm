@@ -4,11 +4,10 @@ import {
   Calendar, Clock, MapPin, Users, ArrowRight,
   CheckCircle, AlertCircle, Timer
 } from 'lucide-react';
-import { FeatureCardGrid, PrimaryFeatureCard, SecondaryFeatureCard, InfoFeatureCard } from '@/components/enablement/manual/components/FeatureCard';
+import { FeatureCard } from '@/components/enablement/manual/components/FeatureCard';
 import { InfoCallout, TipCallout, WarningCallout } from '@/components/enablement/manual/components/Callout';
 import { WorkflowDiagram } from '@/components/enablement/manual/components/WorkflowDiagram';
 import { ScreenshotPlaceholder } from '@/components/enablement/manual/components/ScreenshotPlaceholder';
-import { SeeAlsoReference } from '@/components/enablement/shared/CrossModuleReference';
 
 const leaveTimeFlowDiagram = `
 graph LR
@@ -125,23 +124,26 @@ export function LeaveTimeIntegration() {
       </Card>
 
       {/* Key Features */}
-      <FeatureCardGrid columns={3}>
-        <PrimaryFeatureCard
+      <div className="grid md:grid-cols-3 gap-4">
+        <FeatureCard
+          variant="primary"
           icon={ArrowRight}
           title="Auto Policy Assignment"
           description="Leave and time policies auto-assigned based on position and location"
         />
-        <SecondaryFeatureCard
+        <FeatureCard
+          variant="info"
           icon={MapPin}
           title="Location-Based Geofencing"
           description="Work location defines geofence boundaries for attendance validation"
         />
-        <InfoFeatureCard
+        <FeatureCard
+          variant="success"
           icon={Timer}
           title="Shift Inheritance"
           description="Position-based shift patterns determine work schedules"
         />
-      </FeatureCardGrid>
+      </div>
 
       {/* Workflow Diagram */}
       <WorkflowDiagram
@@ -215,9 +217,7 @@ export function LeaveTimeIntegration() {
 
       {/* Screenshot */}
       <ScreenshotPlaceholder
-        title="ESS Leave Dashboard"
-        description="Employee view showing leave balances based on assigned leave policy"
-        height="h-64"
+        caption="ESS Leave Dashboard - Employee view showing leave balances based on assigned leave policy"
       />
 
       {/* Geofencing Details */}
@@ -270,15 +270,6 @@ export function LeaveTimeIntegration() {
         Overtime rules are derived from position type and applicable labor laws for the work location. 
         Time & Attendance uses this to automatically calculate overtime based on hours worked.
       </InfoCallout>
-
-      {/* Cross-References */}
-      <SeeAlsoReference
-        module="Workforce"
-        section="Position Control"
-        description="Configure positions with shift patterns and work schedules"
-        manualPath="/enablement/manuals/workforce"
-        anchor="wf-sec-6-1"
-      />
     </div>
   );
 }
