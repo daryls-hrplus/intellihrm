@@ -22,7 +22,8 @@ import {
   HRHubManualDocumentsSection,
   HRHubManualCommunicationSection,
   HRHubManualOperationsSection,
-  HRHubManualAnalyticsSection
+  HRHubManualAnalyticsSection,
+  HRHubManualTroubleshootingSection
 } from '@/components/enablement/hr-hub-manual';
 
 // Icons mapped to new chapter order:
@@ -152,39 +153,8 @@ export default function HRHubManualPage() {
         return <HRHubManualOperationsSection />;
       case 'hh-part-7':
         return <HRHubManualAnalyticsSection />;
-      // Chapter 8 - Coming Soon placeholder
       case 'hh-part-8':
-        const currentPart = HR_HUB_MANUAL_STRUCTURE.find(s => s.id === activePartId);
-        return (
-          <Card>
-            <CardHeader>
-              <div className="flex items-center gap-3">
-                {SECTION_ICONS[activePartId]}
-                <div>
-                  <CardTitle>Chapter {currentPart?.sectionNumber}: {currentPart?.title}</CardTitle>
-                  <p className="text-sm text-muted-foreground mt-1">{currentPart?.description}</p>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="bg-muted/50 rounded-lg p-6 text-center">
-                <Sparkles className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Coming Soon</h3>
-                <p className="text-muted-foreground max-w-md mx-auto">
-                  This chapter is under development. The content will cover:
-                </p>
-                <ul className="mt-4 space-y-2 text-sm text-left max-w-md mx-auto">
-                  {currentPart?.subsections?.map((sub) => (
-                    <li key={sub.id} className="flex items-start gap-2">
-                      <Circle className="h-4 w-4 mt-0.5 text-muted-foreground" />
-                      <span><strong>{sub.sectionNumber}</strong> {sub.title}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </CardContent>
-          </Card>
-        );
+        return <HRHubManualTroubleshootingSection />;
       default:
         return <HRHubManualOverviewSection />;
     }
