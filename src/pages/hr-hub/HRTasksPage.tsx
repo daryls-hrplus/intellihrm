@@ -17,11 +17,16 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { DatePicker } from "@/components/ui/date-picker";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { formatDateForDisplay } from "@/utils/dateUtils";
-import { Plus, CheckSquare, Clock, AlertCircle, Building2, Search, CalendarDays, X, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import { Plus, CheckSquare, Clock, AlertCircle, Building2, Search, CalendarDays, X, MoreHorizontal, Pencil, Trash2, User } from "lucide-react";
 
 interface Company {
   id: string;
   name: string;
+}
+
+interface TeamMember {
+  id: string;
+  full_name: string | null;
 }
 
 interface HRTask {
@@ -36,6 +41,7 @@ interface HRTask {
   created_at: string;
   completed_at: string | null;
   company?: { name: string } | null;
+  assignee?: { full_name: string } | null;
 }
 
 const priorities = [
@@ -55,6 +61,7 @@ export default function HRTasksPage() {
 
   const [tasks, setTasks] = useState<HRTask[]>([]);
   const [companies, setCompanies] = useState<Company[]>([]);
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -69,10 +76,12 @@ export default function HRTasksPage() {
     priority: "medium",
     due_date: "",
     company_id: "",
+    assigned_to: "",
   });
 
   useEffect(() => {
     loadCompanies();
+    loadTeamMembers();
     loadTasks();
   }, []);
 
@@ -84,11 +93,19 @@ export default function HRTasksPage() {
     setCompanies(res.data || []);
   };
 
+  const loadTeamMembers = async () => {
+    const res: any = await query("profiles")
+      .select("id, full_name")
+      .eq("is_active", true)
+      .order("full_name");
+    setTeamMembers(res.data || []);
+  };
+
   const loadTasks = async () => {
     setIsLoading(true);
     try {
       const res: any = await query("hr_tasks")
-        .select("*, company:companies(name)")
+        .select("*, company:companies(name), assignee:profiles!hr_tasks_assigned_to_fkey(full_name)")
         .order("created_at", { ascending: false });
       setTasks(res.data || []);
     } catch (error) {
@@ -114,6 +131,7 @@ export default function HRTasksPage() {
             priority: formData.priority,
             due_date: formData.due_date,
             company_id: formData.company_id,
+            assigned_to: formData.assigned_to || null,
           })
           .eq("id", editingTask.id);
 
@@ -126,6 +144,7 @@ export default function HRTasksPage() {
           priority: formData.priority,
           due_date: formData.due_date,
           company_id: formData.company_id,
+          assigned_to: formData.assigned_to || null,
           created_by: profile?.id,
         });
 
@@ -150,6 +169,7 @@ export default function HRTasksPage() {
       priority: task.priority,
       due_date: task.due_date || "",
       company_id: task.company_id || "",
+      assigned_to: task.assigned_to || "",
     });
     setDialogOpen(true);
   };
@@ -168,7 +188,7 @@ export default function HRTasksPage() {
   const closeDialog = () => {
     setDialogOpen(false);
     setEditingTask(null);
-    setFormData({ title: "", description: "", priority: "medium", due_date: "", company_id: "" });
+    setFormData({ title: "", description: "", priority: "medium", due_date: "", company_id: "", assigned_to: "" });
   };
 
   const toggleTaskComplete = async (taskId: string, currentStatus: string) => {
@@ -397,6 +417,12 @@ export default function HRTasksPage() {
                             {isOverdue(task.due_date, task.status) && " (Overdue)"}
                           </span>
                         )}
+                        {task.assignee?.full_name && (
+                          <span className="flex items-center gap-1">
+                            <User className="h-3 w-3" />
+                            {task.assignee.full_name}
+                          </span>
+                        )}
                       </div>
                     </div>
                     <DropdownMenu>
@@ -476,6 +502,21 @@ export default function HRTasksPage() {
                     fromDate={new Date()}
                   />
                 </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>{t("common.assignedTo")}</Label>
+                <Select value={formData.assigned_to} onValueChange={(v) => setFormData({ ...formData, assigned_to: v })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select team member" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">Unassigned</SelectItem>
+                    {teamMembers.map((member) => (
+                      <SelectItem key={member.id} value={member.id}>{member.full_name || "Unnamed"}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="space-y-2">
