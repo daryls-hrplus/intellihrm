@@ -2,7 +2,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { 
   BookOpen, FileText, MessageSquare, Shield, 
-  Workflow, Database, Bell, Search, CheckSquare, Repeat, Activity
+  Workflow, Database, Bell, Search, CheckSquare, Repeat, Activity,
+  UserCog, Users, GitBranch, Settings, IdCard, Upload, BarChart3, Megaphone
 } from 'lucide-react';
 import { NoteCallout } from '@/components/enablement/manual/components/Callout';
 
@@ -95,6 +96,70 @@ export function HRHubConcepts() {
       term: 'Task Activity Log',
       definition: 'Collaborative discussion threads on tasks enabling team communication, progress updates, and audit trail of task lifecycle.',
       example: 'HR team discusses completion steps on an onboarding task with timestamps and user attribution.'
+    },
+    {
+      icon: UserCog,
+      color: 'text-rose-500',
+      bgColor: 'bg-rose-500/10',
+      term: 'ESS Change Requests',
+      definition: 'Employee-initiated updates to personal data with configurable approval workflows based on change type.',
+      example: 'Employee updates bank details, routed to HR for verification before system update.'
+    },
+    {
+      icon: Users,
+      color: 'text-yellow-500',
+      bgColor: 'bg-yellow-500/10',
+      term: 'Employee Directory',
+      definition: 'Searchable org-wide employee lookup with contact info, reporting lines, and quick actions.',
+      example: 'Manager searches for IT support contact in another department.'
+    },
+    {
+      icon: GitBranch,
+      color: 'text-violet-500',
+      bgColor: 'bg-violet-500/10',
+      term: 'Integration Hub',
+      definition: 'Centralized management of external system connections and data synchronization.',
+      example: 'Payroll system sync, ATS integration, benefits provider API.'
+    },
+    {
+      icon: Settings,
+      color: 'text-slate-500',
+      bgColor: 'bg-slate-500/10',
+      term: 'ESS Approval Policies',
+      definition: 'Configurable rules determining approval requirements for ESS data changes.',
+      example: 'Address changes auto-approve, bank detail changes require HR approval.'
+    },
+    {
+      icon: IdCard,
+      color: 'text-sky-500',
+      bgColor: 'bg-sky-500/10',
+      term: 'Government ID Types',
+      definition: 'Country-specific configuration of employee and employer identification requirements.',
+      example: 'Trinidad: NIS and BIR; Jamaica: TRN and NIS numbers.'
+    },
+    {
+      icon: Upload,
+      color: 'text-lime-500',
+      bgColor: 'bg-lime-500/10',
+      term: 'Data Import',
+      definition: 'Bulk data loading with validation, mapping, and error handling.',
+      example: 'Import 500 employees from Excel with field mapping and duplicate detection.'
+    },
+    {
+      icon: BarChart3,
+      color: 'text-fuchsia-500',
+      bgColor: 'bg-fuchsia-500/10',
+      term: 'Scheduled Reports',
+      definition: 'Automated report generation and distribution on defined schedules.',
+      example: 'Weekly headcount report emailed to executives every Monday.'
+    },
+    {
+      icon: Megaphone,
+      color: 'text-rose-400',
+      bgColor: 'bg-rose-400/10',
+      term: 'Company Communications',
+      definition: 'Announcements, news, and company-wide messaging with targeting and acknowledgment.',
+      example: 'CEO quarterly update targeted to all employees with read tracking.'
     }
   ];
 
@@ -213,6 +278,42 @@ export function HRHubConcepts() {
             <p className="text-sm text-muted-foreground">
               Recurring task patterns auto-create tasks on schedule. Team members collaborate 
               via comments, track progress, and complete with full audit trail.
+            </p>
+
+            <div className="flex items-center gap-4 p-4 rounded-lg border bg-muted/30">
+              <div className="flex items-center gap-2 text-sm flex-wrap">
+                <Badge variant="outline">ESS Change Request</Badge>
+                <span className="text-muted-foreground">→</span>
+                <Badge variant="outline">Approval Policy Check</Badge>
+                <span className="text-muted-foreground">→</span>
+                <Badge variant="outline">Auto/Manual Approval</Badge>
+                <span className="text-muted-foreground">→</span>
+                <Badge variant="outline">System Update</Badge>
+                <span className="text-muted-foreground">→</span>
+                <Badge variant="outline">Audit Log</Badge>
+              </div>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              ESS data changes route through configurable approval policies. Some changes 
+              auto-approve while sensitive changes require HR verification before system update.
+            </p>
+
+            <div className="flex items-center gap-4 p-4 rounded-lg border bg-muted/30">
+              <div className="flex items-center gap-2 text-sm flex-wrap">
+                <Badge variant="outline">Sentiment Analysis</Badge>
+                <span className="text-muted-foreground">→</span>
+                <Badge variant="outline">Risk Flags</Badge>
+                <span className="text-muted-foreground">→</span>
+                <Badge variant="outline">Manager Alert</Badge>
+                <span className="text-muted-foreground">→</span>
+                <Badge variant="outline">Intervention Task</Badge>
+                <span className="text-muted-foreground">→</span>
+                <Badge variant="outline">Follow-up</Badge>
+              </div>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              AI-powered sentiment monitoring detects employee concerns from help desk tickets 
+              and feedback, triggering proactive HR intervention before issues escalate.
             </p>
           </div>
         </CardContent>

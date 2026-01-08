@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { 
   FileText, MessageSquare, Calendar, Shield, 
-  Sparkles, CheckCircle, Clock, Users
+  Sparkles, CheckCircle, Clock, Users, UserCog, BarChart3
 } from 'lucide-react';
 import { InfoCallout, TipCallout } from '@/components/enablement/manual/components/Callout';
 
@@ -39,7 +39,7 @@ export function HRHubIntroduction() {
             policy access, compliance tracking, and internal communications.
           </p>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
             <div className="flex items-start gap-3 p-4 rounded-lg border bg-card">
               <MessageSquare className="h-5 w-5 text-blue-500 mt-0.5" />
               <div>
@@ -77,6 +77,24 @@ export function HRHubIntroduction() {
                 </p>
               </div>
             </div>
+            <div className="flex items-start gap-3 p-4 rounded-lg border bg-card">
+              <UserCog className="h-5 w-5 text-yellow-500 mt-0.5" />
+              <div>
+                <h4 className="font-medium">Employee Self-Service</h4>
+                <p className="text-sm text-muted-foreground mt-1">
+                  ESS change requests, employee directory, and self-service data management
+                </p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3 p-4 rounded-lg border bg-card">
+              <BarChart3 className="h-5 w-5 text-cyan-500 mt-0.5" />
+              <div>
+                <h4 className="font-medium">Analytics & Insights</h4>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Sentiment monitoring, recognition analytics, and scheduled reporting
+                </p>
+              </div>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -87,7 +105,7 @@ export function HRHubIntroduction() {
           <CardTitle>Business Value</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
             <div className="text-center p-4">
               <div className="text-3xl font-bold text-purple-500">60%</div>
               <div className="text-sm text-muted-foreground mt-1">
@@ -112,9 +130,21 @@ export function HRHubIntroduction() {
                 Reduction in missed HR deadlines
               </div>
             </div>
+            <div className="text-center p-4">
+              <div className="text-3xl font-bold text-yellow-500">75%</div>
+              <div className="text-sm text-muted-foreground mt-1">
+                Faster ESS request processing
+              </div>
+            </div>
+            <div className="text-center p-4">
+              <div className="text-3xl font-bold text-cyan-500">Real-time</div>
+              <div className="text-sm text-muted-foreground mt-1">
+                Employee sentiment visibility
+              </div>
+            </div>
           </div>
 
-          <div className="mt-6 space-y-3">
+          <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-3">
             <div className="flex items-center gap-3">
               <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0" />
               <span className="text-sm">
@@ -137,6 +167,18 @@ export function HRHubIntroduction() {
               <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0" />
               <span className="text-sm">
                 <strong>Workflow Efficiency:</strong> Automated approvals with clear escalation paths
+              </span>
+            </div>
+            <div className="flex items-center gap-3">
+              <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0" />
+              <span className="text-sm">
+                <strong>Employee Self-Service:</strong> Reduce HR workload with automated ESS change request processing
+              </span>
+            </div>
+            <div className="flex items-center gap-3">
+              <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0" />
+              <span className="text-sm">
+                <strong>Predictive Insights:</strong> AI-powered sentiment analysis identifies issues before they escalate
               </span>
             </div>
           </div>

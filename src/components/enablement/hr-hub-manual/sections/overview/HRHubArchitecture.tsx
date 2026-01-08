@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { 
   Building2, FileText, ArrowRight, Database, 
-  Users, BarChart3, Shield, Settings, CheckSquare
+  Users, BarChart3, Shield, Settings, CheckSquare, UserCog, GitBranch, IdCard
 } from 'lucide-react';
 import { ModuleIntegrationMap } from '@/components/enablement/shared';
 import { WarningCallout, InfoCallout } from '@/components/enablement/manual/components/Callout';
@@ -75,7 +75,7 @@ export function HRHubArchitecture() {
                 <Building2 className="h-4 w-4" />
                 Foundation Layer (Workforce Module)
               </h4>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
                 <div className="p-2 bg-background rounded border text-center text-sm">
                   Companies
                 </div>
@@ -87,6 +87,9 @@ export function HRHubArchitecture() {
                 </div>
                 <div className="p-2 bg-background rounded border text-center text-sm">
                   Jobs & Positions
+                </div>
+                <div className="p-2 bg-background rounded border text-center text-sm">
+                  Employee Directory
                 </div>
               </div>
             </div>
@@ -101,7 +104,7 @@ export function HRHubArchitecture() {
                 <FileText className="h-4 w-4" />
                 HR Hub Core Layer
               </h4>
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
                 <div className="p-2 bg-background rounded border text-center text-sm">
                   Help Desk
                 </div>
@@ -117,6 +120,12 @@ export function HRHubArchitecture() {
                 <div className="p-2 bg-background rounded border text-center text-sm">
                   Task Comments
                 </div>
+                <div className="p-2 bg-background rounded border text-center text-sm">
+                  ESS Requests
+                </div>
+                <div className="p-2 bg-background rounded border text-center text-sm">
+                  Company Comms
+                </div>
               </div>
             </div>
 
@@ -130,7 +139,7 @@ export function HRHubArchitecture() {
                 <Settings className="h-4 w-4" />
                 Automation Layer
               </h4>
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
                 <div className="p-2 bg-background rounded border text-center text-sm">
                   Workflows
                 </div>
@@ -146,6 +155,12 @@ export function HRHubArchitecture() {
                 <div className="p-2 bg-background rounded border text-center text-sm">
                   Recurring Tasks
                 </div>
+                <div className="p-2 bg-background rounded border text-center text-sm">
+                  Approval Policies
+                </div>
+                <div className="p-2 bg-background rounded border text-center text-sm">
+                  Integrations
+                </div>
               </div>
             </div>
 
@@ -159,7 +174,7 @@ export function HRHubArchitecture() {
                 <BarChart3 className="h-4 w-4" />
                 Insights Layer
               </h4>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
                 <div className="p-2 bg-background rounded border text-center text-sm">
                   Sentiment
                 </div>
@@ -171,6 +186,12 @@ export function HRHubArchitecture() {
                 </div>
                 <div className="p-2 bg-background rounded border text-center text-sm">
                   Dashboards
+                </div>
+                <div className="p-2 bg-background rounded border text-center text-sm">
+                  Scheduled Reports
+                </div>
+                <div className="p-2 bg-background rounded border text-center text-sm">
+                  Directory Search
                 </div>
               </div>
             </div>
@@ -222,6 +243,36 @@ export function HRHubArchitecture() {
                 <p className="text-sm text-muted-foreground mt-1">
                   Task assignment uses active employee profiles. Recurring tasks respect 
                   company and team structure for automatic routing.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-start gap-4 p-4 rounded-lg border">
+              <UserCog className="h-5 w-5 text-rose-500 mt-0.5 flex-shrink-0" />
+              <div>
+                <h4 className="font-medium">ESS Requests → Approval Policies</h4>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Change request routing determined by configured policy rules per change type.
+                  Sensitive changes require HR verification before system update.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-start gap-4 p-4 rounded-lg border">
+              <GitBranch className="h-5 w-5 text-violet-500 mt-0.5 flex-shrink-0" />
+              <div>
+                <h4 className="font-medium">Integrations → External Systems</h4>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Data flows between HRplus and payroll, ATS, benefits, and other external 
+                  systems through the Integration Hub.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-start gap-4 p-4 rounded-lg border">
+              <IdCard className="h-5 w-5 text-sky-500 mt-0.5 flex-shrink-0" />
+              <div>
+                <h4 className="font-medium">Government IDs → Country Setup</h4>
+                <p className="text-sm text-muted-foreground mt-1">
+                  ID type requirements configured per country for compliance validation.
+                  Each jurisdiction has specific identification number formats.
                 </p>
               </div>
             </div>
