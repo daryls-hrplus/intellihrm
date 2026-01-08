@@ -13,7 +13,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2, FileText, Search, Eye, Sparkles, ChevronDown, AlertTriangle, Loader2, Check, X } from "lucide-react";
+import { Plus, Pencil, Trash2, FileText, Search, Eye, Sparkles, ChevronDown, ChevronUp, AlertTriangle, Loader2, Check, X, Filter, ArrowUpDown, Library } from "lucide-react";
 import { formatDateForDisplay } from "@/utils/dateUtils";
 import { useTemplateAI } from "@/hooks/useTemplateAI";
 import {
@@ -46,9 +46,16 @@ const AVAILABLE_VARIABLES = [
   { key: "{company_name}", desc: "Company name" },
 ];
 
+type SortField = "title" | "updated" | "category";
+type SortOrder = "asc" | "desc";
+
 export function CannedResponseManagementPanel() {
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [sortBy, setSortBy] = useState<SortField>("title");
+  const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
@@ -181,11 +188,85 @@ export function CannedResponseManagementPanel() {
     }));
   };
 
-  const filteredResponses = responses.filter(
-    (r) =>
-      r.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      r.content.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredResponses = useMemo(() => {
+    let result = responses;
+
+    // Text search
+    if (searchTerm) {
+      result = result.filter(
+        (r) =>
+          r.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          r.content.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    // Category filter
+    if (categoryFilter !== "all") {
+      if (categoryFilter === "__none__") {
+        result = result.filter((r) => !r.category_id);
+      } else {
+        result = result.filter((r) => r.category_id === categoryFilter);
+      }
+    }
+
+    // Status filter
+    if (statusFilter !== "all") {
+      result = result.filter((r) =>
+        statusFilter === "active" ? r.is_active : !r.is_active
+      );
+    }
+
+    // Sorting
+    result = [...result].sort((a, b) => {
+      let comparison = 0;
+      switch (sortBy) {
+        case "title":
+          comparison = a.title.localeCompare(b.title);
+          break;
+        case "updated":
+          comparison = new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
+          break;
+        case "category":
+          comparison = (a.category?.name || "zzz").localeCompare(b.category?.name || "zzz");
+          break;
+      }
+      return sortOrder === "asc" ? comparison : -comparison;
+    });
+
+    return result;
+  }, [responses, searchTerm, categoryFilter, statusFilter, sortBy, sortOrder]);
+
+  const getCategoryCount = (catId: string) => {
+    return responses.filter((r) => r.category_id === catId).length;
+  };
+
+  const uncategorizedCount = responses.filter((r) => !r.category_id).length;
+  const activeCount = responses.filter((r) => r.is_active).length;
+  const hasFilters = categoryFilter !== "all" || statusFilter !== "all" || searchTerm;
+
+  const clearFilters = () => {
+    setCategoryFilter("all");
+    setStatusFilter("all");
+    setSearchTerm("");
+  };
+
+  const handleSort = (field: SortField) => {
+    if (sortBy === field) {
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+    } else {
+      setSortBy(field);
+      setSortOrder("asc");
+    }
+  };
+
+  const SortIcon = ({ field }: { field: SortField }) => {
+    if (sortBy !== field) return null;
+    return sortOrder === "asc" ? (
+      <ChevronUp className="h-3 w-3" />
+    ) : (
+      <ChevronDown className="h-3 w-3" />
+    );
+  };
 
   // Templates for the selected category
   const templatesForCategory = useMemo(() => {
@@ -274,25 +355,144 @@ export function CannedResponseManagementPanel() {
         </div>
       </CardHeader>
       <CardContent>
-        <div className="mb-4">
-          <div className="relative max-w-sm">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search templates..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-9"
-            />
+        {/* Enhanced Toolbar */}
+        <div className="flex flex-col gap-4 mb-4">
+          <div className="flex flex-col sm:flex-row gap-3">
+            {/* Search */}
+            <div className="relative flex-1 max-w-sm">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search templates..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+
+            {/* Filters */}
+            <div className="flex flex-wrap gap-2">
+              {/* Category Filter */}
+              <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                <SelectTrigger className="w-[180px]">
+                  <Filter className="h-4 w-4 mr-2 text-muted-foreground" />
+                  <SelectValue placeholder="All Categories" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Categories</SelectItem>
+                  <SelectItem value="__none__">
+                    Uncategorized ({uncategorizedCount})
+                  </SelectItem>
+                  {categories.map((cat) => (
+                    <SelectItem key={cat.id} value={cat.id}>
+                      {cat.name} ({getCategoryCount(cat.id)})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              {/* Status Filter */}
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-[130px]">
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="inactive">Inactive</SelectItem>
+                </SelectContent>
+              </Select>
+
+              {/* Sort Control */}
+              <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortField)}>
+                <SelectTrigger className="w-[150px]">
+                  <ArrowUpDown className="h-4 w-4 mr-2 text-muted-foreground" />
+                  <SelectValue placeholder="Sort by" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="title">Title</SelectItem>
+                  <SelectItem value="updated">Last Updated</SelectItem>
+                  <SelectItem value="category">Category</SelectItem>
+                </SelectContent>
+              </Select>
+
+              {/* Sort Order Toggle */}
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
+                title={sortOrder === "asc" ? "Sort ascending" : "Sort descending"}
+              >
+                {sortOrder === "asc" ? (
+                  <ChevronUp className="h-4 w-4" />
+                ) : (
+                  <ChevronDown className="h-4 w-4" />
+                )}
+              </Button>
+            </div>
+
+            {/* Import from Library Button (placeholder for future) */}
+            <Button variant="outline" className="ml-auto" disabled>
+              <Library className="h-4 w-4 mr-2" />
+              Import from Library
+            </Button>
+          </div>
+
+          {/* Stats Bar */}
+          <div className="flex items-center gap-6 text-sm">
+            <div className="flex items-center gap-2">
+              <span className="text-muted-foreground">Total:</span>
+              <Badge variant="outline">{responses.length}</Badge>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-muted-foreground">Active:</span>
+              <Badge variant="outline" className="text-green-600 border-green-200">
+                {activeCount}
+              </Badge>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-muted-foreground">Showing:</span>
+              <Badge variant="secondary">{filteredResponses.length}</Badge>
+            </div>
+            {hasFilters && (
+              <Button variant="ghost" size="sm" onClick={clearFilters} className="h-7 px-2">
+                <X className="h-3 w-3 mr-1" />
+                Clear filters
+              </Button>
+            )}
           </div>
         </div>
 
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Title</TableHead>
-              <TableHead>Category</TableHead>
+              <TableHead
+                className="cursor-pointer hover:bg-muted/50 select-none"
+                onClick={() => handleSort("title")}
+              >
+                <div className="flex items-center gap-1">
+                  Title
+                  <SortIcon field="title" />
+                </div>
+              </TableHead>
+              <TableHead
+                className="cursor-pointer hover:bg-muted/50 select-none"
+                onClick={() => handleSort("category")}
+              >
+                <div className="flex items-center gap-1">
+                  Category
+                  <SortIcon field="category" />
+                </div>
+              </TableHead>
               <TableHead>Status</TableHead>
-              <TableHead>Updated</TableHead>
+              <TableHead
+                className="cursor-pointer hover:bg-muted/50 select-none"
+                onClick={() => handleSort("updated")}
+              >
+                <div className="flex items-center gap-1">
+                  Updated
+                  <SortIcon field="updated" />
+                </div>
+              </TableHead>
               <TableHead className="w-[100px]">Actions</TableHead>
             </TableRow>
           </TableHeader>
