@@ -315,15 +315,15 @@ export function CannedResponseManagementPanel() {
 
             <div>
               <Label>Category</Label>
-              <Select
-                value={formData.category_id}
-                onValueChange={(v) => setFormData({ ...formData, category_id: v })}
+            <Select
+                value={formData.category_id || "__all__"}
+                onValueChange={(v) => setFormData({ ...formData, category_id: v === "__all__" ? "" : v })}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="All Categories" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Categories</SelectItem>
+                  <SelectItem value="__all__">All Categories</SelectItem>
                   {categories.map((cat) => (
                     <SelectItem key={cat.id} value={cat.id}>
                       {cat.name}
