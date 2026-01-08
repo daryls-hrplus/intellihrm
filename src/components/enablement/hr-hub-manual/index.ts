@@ -8,4 +8,4 @@ export { HRHubManualAnalyticsSection } from './HRHubManualAnalyticsSection';
 export { HRHubManualTroubleshootingSection } from './HRHubManualTroubleshootingSection';
 
 // Supplementary sections
-export { HRHubManualQuickReference, HRHubManualArchitectureDiagrams, HRHubManualGlossary } from './sections/supplementary';
+export { HRHubManualQuickReference, HRHubManualArchitectureDiagrams, HRHubManualGlossary, HRHubManualVersionHistory } from './sections/supplementary';

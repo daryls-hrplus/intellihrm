@@ -12,7 +12,7 @@ import {
   Book, Search, Clock, ChevronRight, ChevronDown,
   FileText, Layers, Settings, Users, MessageSquare, Calendar,
   Shield, Database, BarChart3, AlertTriangle,
-  BookOpen, CheckCircle, Circle, ArrowLeft, Sparkles, Link2, GitBranch
+  BookOpen, CheckCircle, Circle, ArrowLeft, Sparkles, Link2, GitBranch, History
 } from 'lucide-react';
 import { HR_HUB_MANUAL_STRUCTURE } from '@/types/hrHubManual';
 import { 
@@ -26,7 +26,8 @@ import {
   HRHubManualTroubleshootingSection,
   HRHubManualQuickReference,
   HRHubManualArchitectureDiagrams,
-  HRHubManualGlossary
+  HRHubManualGlossary,
+  HRHubManualVersionHistory
 } from '@/components/enablement/hr-hub-manual';
 
 // Icons mapped to new chapter order:
@@ -164,6 +165,8 @@ export default function HRHubManualPage() {
         return <HRHubManualArchitectureDiagrams />;
       case 'glossary':
         return <HRHubManualGlossary />;
+      case 'version-history':
+        return <HRHubManualVersionHistory />;
       default:
         return <HRHubManualOverviewSection />;
     }
@@ -351,6 +354,13 @@ export default function HRHubManualPage() {
                     >
                       <BookOpen className="h-4 w-4 text-green-500" />
                       <span>Glossary</span>
+                    </button>
+                    <button
+                      className={`w-full flex items-center gap-2 p-2 rounded-lg text-left text-sm transition-colors hover:bg-muted ${activePartId === 'version-history' ? 'bg-purple-500/10 text-purple-600 font-medium' : 'text-muted-foreground'}`}
+                      onClick={() => scrollToSection('version-history')}
+                    >
+                      <History className="h-4 w-4 text-orange-500" />
+                      <span>Version History</span>
                     </button>
                   </div>
                 </ScrollArea>
