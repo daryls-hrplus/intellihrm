@@ -241,6 +241,7 @@ import MyBankingPage from "./pages/ess/MyBankingPage";
 import MyPersonalInfoPage from "./pages/ess/MyPersonalInfoPage";
 import MyDependentsPage from "./pages/ess/MyDependentsPage";
 import MyTransactionsPage from "./pages/ess/MyTransactionsPage";
+import MyInboxPage from "./pages/ess/MyInboxPage";
 
 // Training pages
 import TrainingDashboardPage from "./pages/training/TrainingDashboardPage";
@@ -4045,6 +4046,14 @@ const App = () => (
               element={
                 <ProtectedRoute moduleCode="ess">
                   <EssNotificationPreferencesPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/ess/my-inbox"
+              element={
+                <ProtectedRoute moduleCode="ess">
+                  <MyInboxPage />
                 </ProtectedRoute>
               }
             />

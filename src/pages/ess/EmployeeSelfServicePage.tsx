@@ -3,10 +3,8 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { usePageAudit } from "@/hooks/usePageAudit";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { GroupedModuleCards, ModuleSection, GroupedModuleItem } from "@/components/ui/GroupedModuleCards";
-import { EmployeeRODWidget } from "@/components/ess/EmployeeRODWidget";
-import { EssChangeRequestsWidget } from "@/components/ess/EssChangeRequestsWidget";
-import { EssPendingAppraisalActions } from "@/components/ess/EssPendingAppraisalActions";
 import { ESSAIDashboard } from "@/components/ess/ESSAIDashboard";
+import { InboxQuickSummary } from "@/components/ess/InboxQuickSummary";
 import { useGranularPermissions } from "@/hooks/useGranularPermissions";
 import { useEssPendingActions } from "@/hooks/useEssPendingActions";
 import {
@@ -49,6 +47,7 @@ import {
   Route,
   Lightbulb,
   GitPullRequest,
+  Inbox,
 } from "lucide-react";
 
 export default function EmployeeSelfServicePage() {
@@ -155,6 +154,7 @@ export default function EmployeeSelfServicePage() {
     {
       titleKey: "Tasks & Approvals",
       items: filterByAccess([
+        { title: "My Inbox", description: "View all your pending tasks and actions", href: "/ess/my-inbox", icon: Inbox, color: "bg-primary/10 text-primary", tabCode: "ess-inbox" },
         allModules.approvals, 
         allModules.delegates, 
         allModules.reminders,
@@ -186,14 +186,8 @@ export default function EmployeeSelfServicePage() {
         {/* AI-Powered Dashboard */}
         <ESSAIDashboard />
 
-        {/* Pending Resumption of Duty */}
-        <EmployeeRODWidget />
-
-        {/* Pending Change Requests */}
-        <EssChangeRequestsWidget />
-
-        {/* Pending Appraisal Actions */}
-        <EssPendingAppraisalActions />
+        {/* Inbox Quick Summary */}
+        <InboxQuickSummary />
 
         <GroupedModuleCards sections={sections} sectionBadges={sectionBadges} defaultOpen={false} showToggleButton />
       </div>
