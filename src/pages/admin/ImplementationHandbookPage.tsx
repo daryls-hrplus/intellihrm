@@ -23,7 +23,8 @@ import {
   Wrench,
   BookOpen,
   Network,
-  Rocket
+  Rocket,
+  BookMarked
 } from "lucide-react";
 import { toast } from "sonner";
 import jsPDF from "jspdf";
@@ -31,6 +32,7 @@ import { useTranslation } from "react-i18next";
 import { WorkspaceTab } from "@/components/admin/implementation/WorkspaceTab";
 import { ReadinessTab } from "@/components/admin/implementation/ReadinessTab";
 import { DependencyTab } from "@/components/admin/implementation/DependencyTab";
+import { SourceReferenceTab } from "@/components/admin/implementation/SourceReferenceTab";
 
 interface PhaseItem {
   order: number;
@@ -93,17 +95,32 @@ const phases: Phase[] = [
     description: "Core employee data and organizational structure",
     prerequisite: "Phase 1 complete",
     items: [
+      // 2A: Job Architecture
       { order: 1, area: "Job Families", description: "Group jobs by function/category" },
-      { order: 2, area: "Jobs", description: "Define job definitions" },
+      { order: 2, area: "Jobs", description: "Define job definitions with grade levels" },
       { order: 3, area: "Responsibilities", description: "Add responsibilities to jobs (weighted)" },
-      { order: 4, area: "Competencies & Levels", description: "Define skill requirements" },
-      { order: 5, area: "Job Competencies", description: "Link competencies to jobs (weighted)" },
-      { order: 6, area: "Job Goals", description: "Define standard goals per job" },
-      { order: 7, area: "Positions", description: "Create specific positions from jobs" },
-      { order: 8, area: "Employees", description: "Add employee records" },
-      { order: 9, area: "Employee Assignments", description: "Assign employees to positions" },
-      { order: 10, area: "Onboarding Templates", description: "Per-job onboarding workflows" },
-      { order: 11, area: "Offboarding Templates", description: "Exit process workflows" },
+      { order: 4, area: "Skills & Competencies", description: "Define skill library with proficiency levels" },
+      { order: 5, area: "Qualifications", description: "Define education/certification requirements" },
+      { order: 6, area: "Job-Competency Mapping", description: "Link competencies to jobs (weighted)" },
+      { order: 7, area: "Job Goals", description: "Define standard goals per job" },
+      // 2B: Position Management
+      { order: 8, area: "Positions", description: "Create specific positions from jobs" },
+      { order: 9, area: "Position Budgeting", description: "Configure headcount and budget controls" },
+      { order: 10, area: "Position-to-Job Mapping", description: "Link positions to job architecture" },
+      // 2C: Employee Records
+      { order: 11, area: "Employee Record Creation", description: "Add employee master records" },
+      { order: 12, area: "Personal Information", description: "Contact details, emergency contacts" },
+      { order: 13, area: "Employment Assignments", description: "Assign employees to positions" },
+      { order: 14, area: "Government IDs", description: "SSN, passport, work permits" },
+      { order: 15, area: "Banking & Payment", description: "Bank accounts, payment methods" },
+      { order: 16, area: "Dependents & Beneficiaries", description: "Family members, benefit recipients" },
+      // 2D: Lifecycle Workflows
+      { order: 17, area: "Onboarding Workflow Design", description: "Configure onboarding process" },
+      { order: 18, area: "Onboarding Task Templates", description: "Create task checklists per job" },
+      { order: 19, area: "New Hire Portal", description: "Self-service onboarding portal" },
+      { order: 20, area: "Offboarding Workflow", description: "Configure exit process" },
+      { order: 21, area: "Exit Interview Integration", description: "Link exit surveys to offboarding" },
+      { order: 22, area: "Rehire Handling", description: "Configure rehire detection and rules" },
     ],
   },
   {
@@ -202,22 +219,44 @@ const phases: Phase[] = [
     id: "hr-hub",
     title: "Phase 8: HR Hub & Workflows",
     icon: Briefcase,
-    description: "Support systems and automation configuration",
+    description: "Support systems and automation. Flexible: can implement any time after Phase 1.",
+    prerequisite: "Phase 1 required. Sub-sections have varying prerequisites.",
     items: [
-      { order: 1, area: "Dashboard Module Ordering", description: "Admin-only drag-and-drop to set module card order for all users" },
-      { order: 2, area: "Workflow Templates", description: "Approval routing for all processes" },
-      { order: 3, area: "Letter Templates", description: "Hire, promotion, termination letters" },
-      { order: 4, area: "Policy Documents", description: "Upload company policies for RAG integration" },
-      { order: 5, area: "SOPs", description: "Standard operating procedures (separate knowledge base)" },
-      { order: 6, area: "Knowledge Base", description: "Help articles and user guides" },
-      { order: 7, area: "Reminder Rules", description: "Automated notifications for key dates" },
-      { order: 8, area: "Scheduled Reports", description: "Automated report delivery" },
-      { order: 9, area: "AI Budget Tiers", description: "Define tiers: ESS ($1), MSS ($5), Core ($10), Admin (unlimited)" },
-      { order: 10, area: "AI User Settings", description: "Assign tiers to users, custom budget overrides" },
-      { order: 11, area: "AI Guardrails", description: "Configure 8 guardrails: role security, policy, SOP, help center, PII, audit, disclaimer, escalation" },
-      { order: 12, area: "AI Voice Settings", description: "Enable/disable ElevenLabs TTS per user" },
-      { order: 13, area: "AI System Settings", description: "Company-level AI enable/disable, allowed models, token limits" },
-      { order: 14, area: "AI Usage Monitoring", description: "Track monthly usage by user with budget remaining" },
+      // 8A: Organization Setup
+      { order: 1, area: "Lookup Values Setup", description: "Configure statuses, types, reasons" },
+      { order: 2, area: "Government ID Types", description: "Setup ID type configurations" },
+      { order: 3, area: "Data Import Configuration", description: "Configure bulk import settings" },
+      { order: 4, area: "Integration Settings", description: "External system connections" },
+      // 8B: Compliance & Workflows
+      { order: 5, area: "Workflow Templates", description: "Approval routing for all processes" },
+      { order: 6, area: "Transaction Workflow Settings", description: "Process-specific workflow rules" },
+      { order: 7, area: "Approval Delegations", description: "Backup approver configuration" },
+      { order: 8, area: "SOP Management", description: "Standard operating procedures" },
+      { order: 9, area: "ESS Approval Policies", description: "Self-service approval rules" },
+      { order: 10, area: "Compliance Tracker", description: "Regulatory compliance monitoring" },
+      // 8C: Document Center
+      { order: 11, area: "Company Documents", description: "Central document repository" },
+      { order: 12, area: "Policy Documents", description: "Policies with RAG integration" },
+      { order: 13, area: "Letter Templates", description: "Hire, promotion, termination letters" },
+      { order: 14, area: "Forms Library", description: "Digital forms and e-signatures" },
+      // 8D: Communication & Support
+      { order: 15, area: "Employee Directory", description: "Directory configuration" },
+      { order: 16, area: "Notifications & Reminders", description: "Automated notification rules" },
+      { order: 17, area: "Company Communications", description: "Announcements and broadcasts" },
+      { order: 18, area: "Knowledge Base", description: "Self-service help articles" },
+      // 8E: Daily Operations
+      { order: 19, area: "Help Desk Setup", description: "HR ticket system configuration" },
+      { order: 20, area: "ESS Change Requests", description: "Self-service change workflows" },
+      { order: 21, area: "HR Tasks & Recurring Tasks", description: "Task management system" },
+      { order: 22, area: "HR Calendar", description: "Events and scheduling" },
+      { order: 23, area: "Milestones Dashboard", description: "Employee milestone tracking" },
+      // 8F: AI Configuration
+      { order: 24, area: "AI Budget Tiers", description: "Define tiers: ESS ($1), MSS ($5), Core ($10), Admin" },
+      { order: 25, area: "AI User Settings", description: "Assign tiers to users, custom budget overrides" },
+      { order: 26, area: "AI Guardrails", description: "Configure 8 guardrails: role security, policy, SOP, help center, PII, audit, disclaimer, escalation" },
+      { order: 27, area: "AI Voice Settings", description: "Enable/disable ElevenLabs TTS per user" },
+      { order: 28, area: "AI System Settings", description: "Company-level AI enable/disable, allowed models, token limits" },
+      { order: 29, area: "AI Usage Monitoring", description: "Track monthly usage by user with budget remaining" },
     ],
   },
   {
@@ -332,16 +371,16 @@ const dependencies = [
   { module: "Performance", dependsOn: "Workforce + Training (competencies)" },
   { module: "Succession", dependsOn: "Performance (assessments)" },
   { module: "All ESS/MSS", dependsOn: "User accounts + Role assignments" },
-  { module: "AI Assistant", dependsOn: "Admin (roles, users) + Policies + SOPs" },
-  { module: "AI Voice", dependsOn: "AI Assistant (user settings)" },
+  { module: "HR Hub: Organization", dependsOn: "Admin (Phase 1 only)" },
+  { module: "HR Hub: Workflows", dependsOn: "Admin (Phase 1 only)" },
+  { module: "HR Hub: Documents", dependsOn: "HR Hub: Workflows" },
+  { module: "HR Hub: Communication", dependsOn: "Workforce (employees)" },
+  { module: "HR Hub: Operations", dependsOn: "Workforce (employees, positions)" },
+  { module: "HR Hub: AI Config", dependsOn: "HR Hub: Documents (policies, SOPs)" },
   { module: "Billing", dependsOn: "Admin (companies, currencies)" },
-  { module: "Invoices", dependsOn: "Billing (subscriptions, tiers)" },
-  { module: "Leave Buyout", dependsOn: "Leave + Payroll (pay groups)" },
   { module: "International Payroll", dependsOn: "Compensation (pay elements, grades)" },
   { module: "Mexico Core", dependsOn: "International Payroll (country config)" },
   { module: "Mexico Advanced", dependsOn: "Mexico Core (IMSS, SAT setup)" },
-  { module: "CFDI Timbrado", dependsOn: "Mexico Core (e.firma certificates)" },
-  { module: "IDSE/SUA", dependsOn: "Mexico Core (employee IMSS data)" },
 ];
 
 export default function ImplementationHandbookPage() {
@@ -483,7 +522,7 @@ export default function ImplementationHandbookPage() {
 
       {/* Main Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:inline-grid">
+        <TabsList className="grid w-full grid-cols-5 lg:w-auto lg:inline-grid">
           <TabsTrigger value="workspace" className="gap-2">
             <Wrench className="h-4 w-4" />
             <span className="hidden sm:inline">Workspace</span>
@@ -491,6 +530,10 @@ export default function ImplementationHandbookPage() {
           <TabsTrigger value="reference" className="gap-2">
             <BookOpen className="h-4 w-4" />
             <span className="hidden sm:inline">Reference</span>
+          </TabsTrigger>
+          <TabsTrigger value="sources" className="gap-2">
+            <BookMarked className="h-4 w-4" />
+            <span className="hidden sm:inline">Sources</span>
           </TabsTrigger>
           <TabsTrigger value="dependencies" className="gap-2">
             <Network className="h-4 w-4" />
@@ -624,12 +667,15 @@ export default function ImplementationHandbookPage() {
           </Card>
         </TabsContent>
 
+        {/* Sources Tab */}
+        <TabsContent value="sources" className="mt-6">
+          <SourceReferenceTab />
+        </TabsContent>
+
         {/* Dependencies Tab */}
         <TabsContent value="dependencies" className="mt-6">
           <DependencyTab dependencies={dependencies} />
         </TabsContent>
-
-        {/* Readiness Tab */}
         <TabsContent value="readiness" className="mt-6">
           <ReadinessTab />
         </TabsContent>
