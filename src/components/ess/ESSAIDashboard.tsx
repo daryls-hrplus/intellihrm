@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -23,6 +24,7 @@ import {
   ArrowRight,
   Zap,
   RefreshCw,
+  ChevronDown,
 } from "lucide-react";
 
 interface PendingTask {
@@ -83,6 +85,14 @@ export function ESSAIDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [suggestionsExpanded, setSuggestionsExpanded] = useState(() => {
+    const saved = localStorage.getItem("ess-suggestions-expanded");
+    return saved ? JSON.parse(saved) : false;
+  });
+
+  useEffect(() => {
+    localStorage.setItem("ess-suggestions-expanded", JSON.stringify(suggestionsExpanded));
+  }, [suggestionsExpanded]);
 
   const fetchDashboard = async (isRefresh = false) => {
     if (!user?.id || !company?.id) return;
@@ -191,88 +201,56 @@ export function ESSAIDashboard() {
         </CardContent>
       </Card>
 
-      {/* Pending Tasks - Only show if there are tasks */}
-      {pendingTasks.length > 0 && (
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base flex items-center gap-2">
-              <AlertCircle className="h-4 w-4 text-warning" />
-              Action Required
-              <Badge variant="outline" className="border-warning text-warning">
-                {pendingTasks.length}
-              </Badge>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="pt-0">
-            <div className="space-y-2">
-              {pendingTasks.map((task, index) => (
-                <div
-                  key={index}
-                  className={`flex items-center justify-between gap-3 p-3 rounded-lg border ${URGENCY_STYLES[task.urgency]}`}
-                >
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <h4 className="font-medium text-sm">{task.title}</h4>
-                      {task.count && task.count > 1 && (
-                        <Badge variant="secondary" className="h-5 px-1.5 text-xs">
-                          {task.count}
-                        </Badge>
-                      )}
-                    </div>
-                    <p className="text-xs text-muted-foreground truncate">{task.description}</p>
-                  </div>
-                  <Button
-                    size="sm"
-                    variant={task.urgency === "high" ? "default" : "outline"}
-                    onClick={() => navigate(task.href)}
-                    className="shrink-0"
-                  >
-                    {task.actionLabel}
-                    <ArrowRight className="h-3 w-3 ml-1" />
-                  </Button>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Quick Actions */}
+      {/* Collapsible AI Suggestions */}
       {quickActions.length > 0 && (
-        <div>
-          <h3 className="text-sm font-medium text-muted-foreground mb-3 flex items-center gap-2">
-            <Sparkles className="h-3.5 w-3.5" />
-            Suggested for You
-          </h3>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            {quickActions.map((action) => {
-              const IconComponent = ICON_MAP[action.icon] || Target;
-              return (
-                <Card
-                  key={action.id}
-                  className="group cursor-pointer hover:border-primary/50 hover:shadow-md transition-all"
-                  onClick={() => navigate(action.href)}
-                >
-                  <CardContent className="p-4">
-                    <div className="flex items-start gap-3">
-                      <div className="p-2 rounded-lg bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                        <IconComponent className="h-4 w-4" />
+        <Collapsible open={suggestionsExpanded} onOpenChange={setSuggestionsExpanded}>
+          <CollapsibleTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full justify-between text-muted-foreground hover:text-foreground h-9 px-3"
+            >
+              <span className="flex items-center gap-2">
+                <Sparkles className="h-3.5 w-3.5" />
+                Suggested for You
+                <Badge variant="secondary" className="h-5 px-1.5 text-xs">
+                  {quickActions.length}
+                </Badge>
+              </span>
+              <ChevronDown className={`h-4 w-4 transition-transform ${suggestionsExpanded ? "rotate-180" : ""}`} />
+            </Button>
+          </CollapsibleTrigger>
+          <CollapsibleContent className="pt-3">
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              {quickActions.map((action) => {
+                const IconComponent = ICON_MAP[action.icon] || Target;
+                return (
+                  <Card
+                    key={action.id}
+                    className="group cursor-pointer hover:border-primary/50 hover:shadow-md transition-all"
+                    onClick={() => navigate(action.href)}
+                  >
+                    <CardContent className="p-4">
+                      <div className="flex items-start gap-3">
+                        <div className="p-2 rounded-lg bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                          <IconComponent className="h-4 w-4" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-medium text-sm group-hover:text-primary transition-colors">
+                            {action.title}
+                          </h4>
+                          <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
+                            {action.description}
+                          </p>
+                        </div>
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-medium text-sm group-hover:text-primary transition-colors">
-                          {action.title}
-                        </h4>
-                        <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
-                          {action.description}
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-        </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
       )}
     </div>
   );
