@@ -24,11 +24,11 @@ export function MultiCompanyConsolidation() {
   const [isLoading, setIsLoading] = useState(false);
 
   const companies = [
-    { id: "1", name: "HRPlus México", code: "MX-001", country: "Mexico", currency: "MXN", employees: 156 },
-    { id: "2", name: "HRPlus Jamaica", code: "JM-001", country: "Jamaica", currency: "JMD", employees: 89 },
-    { id: "3", name: "HRPlus Ghana", code: "GH-001", country: "Ghana", currency: "GHS", employees: 124 },
-    { id: "4", name: "HRPlus Nigeria", code: "NG-001", country: "Nigeria", currency: "NGN", employees: 210 },
-    { id: "5", name: "HRPlus Trinidad", code: "TT-001", country: "Trinidad", currency: "TTD", employees: 67 },
+    { id: "1", name: "Intelli México", code: "MX-001", country: "Mexico", currency: "MXN", employees: 156 },
+    { id: "2", name: "Intelli Jamaica", code: "JM-001", country: "Jamaica", currency: "JMD", employees: 89 },
+    { id: "3", name: "Intelli Ghana", code: "GH-001", country: "Ghana", currency: "GHS", employees: 124 },
+    { id: "4", name: "Intelli Nigeria", code: "NG-001", country: "Nigeria", currency: "NGN", employees: 210 },
+    { id: "5", name: "Intelli Trinidad", code: "TT-001", country: "Trinidad", currency: "TTD", employees: 67 },
   ];
 
   const consolidatedData = [

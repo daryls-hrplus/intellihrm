@@ -676,7 +676,7 @@ export const generateAppraisalsManualDocx = async (): Promise<void> => {
             alignment: AlignmentType.CENTER,
           }),
           new Paragraph({
-            text: "HRplus Performance Management Module",
+            text: "Intelli HRM Performance Management Module",
             heading: HeadingLevel.HEADING_1,
             alignment: AlignmentType.CENTER,
           }),
@@ -808,7 +808,7 @@ export const generateAppraisalsManualDocx = async (): Promise<void> => {
           new Paragraph({
             children: [
               new TextRun({
-                text: "© HRplus - Confidential",
+                text: "© Intelli HRM - Confidential",
                 italics: true,
                 size: 18,
               }),

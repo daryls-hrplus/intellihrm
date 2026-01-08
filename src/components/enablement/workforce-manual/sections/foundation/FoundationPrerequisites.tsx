@@ -148,7 +148,7 @@ export function FoundationPrerequisites() {
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-muted-foreground">
-            Before configuring the organization hierarchy in HRplus Workforce, gather 
+            Before configuring the organization hierarchy in Intelli HRM Workforce, gather 
             comprehensive information about your company structure, geographic presence, 
             and governance requirements. This preparation follows SAP Activate and 
             Workday Deploy methodology principles.
