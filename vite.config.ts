@@ -17,8 +17,11 @@ export default defineConfig(({ mode, command }) => ({
   },
   build: {
     // Reduce memory usage during build
-    minify: mode === "production" ? "esbuild" : false,
+    // Minify even in "development" build mode to avoid OOM during chunk rendering
+    minify: "esbuild",
+    cssMinify: "esbuild",
     sourcemap: false,
+    reportCompressedSize: false,
     rollupOptions: {
       output: {
         // Manual chunking to reduce bundle size per chunk
