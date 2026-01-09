@@ -1,6 +1,6 @@
 // Panel for regenerating and previewing manual sections
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -37,7 +37,9 @@ import {
   Users,
   BookOpen,
   Layers,
-  Edit
+  Edit,
+  PlayCircle,
+  CheckCircle
 } from "lucide-react";
 import { 
   ManualSection, 
@@ -47,8 +49,10 @@ import {
   useUpdateSectionContent,
   useInitializeSections
 } from "@/hooks/useManualGeneration";
+import { useChapterGeneration, extractChapters, ChapterInfo } from "@/hooks/useChapterGeneration";
 import { ManualStructurePreview } from "./ManualStructurePreview";
 import { SectionContentEditor } from "./SectionContentEditor";
+import { ChapterGenerationProgress } from "./ChapterGenerationProgress";
 
 // Target role options
 const TARGET_ROLES = [
@@ -72,6 +76,7 @@ export function SectionRegenerationPanel({
   onSectionUpdated 
 }: SectionRegenerationPanelProps) {
   const [selectedSections, setSelectedSections] = useState<string[]>([]);
+  const [selectedChapters, setSelectedChapters] = useState<string[]>([]);
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
   const [customInstructions, setCustomInstructions] = useState("");
   const [versionBump, setVersionBump] = useState<'initial' | 'major' | 'minor' | 'patch'>('minor');
@@ -79,11 +84,23 @@ export function SectionRegenerationPanel({
   const [previewSectionId, setPreviewSectionId] = useState<string | null>(null);
   const [selectedTargetRoles, setSelectedTargetRoles] = useState<string[]>(["admin"]);
   const [editingSection, setEditingSection] = useState<ManualSection | null>(null);
+  const [generationMode, setGenerationMode] = useState<'chapters' | 'sections'>('chapters');
   
   const generateSection = useGenerateSection();
   const regenerateManual = useRegenerateManual();
   const updateSectionContent = useUpdateSectionContent();
   const initializeSections = useInitializeSections();
+  
+  // Chapter-based generation
+  const { 
+    progress: chapterProgress, 
+    generateChapters, 
+    cancelGeneration,
+    resetProgress 
+  } = useChapterGeneration(manual?.id || null);
+
+  // Extract chapters from sections
+  const chapters = useMemo(() => extractChapters(sections), [sections]);
 
   const sectionsNeedingRegen = sections.filter(s => s.needs_regeneration);
   const emptySections = sections.filter(s => !s.content || Object.keys(s.content).length === 0);
@@ -103,6 +120,22 @@ export function SectionRegenerationPanel({
       setSelectedSections(prev => [...prev, sectionId]);
     } else {
       setSelectedSections(prev => prev.filter(id => id !== sectionId));
+    }
+  };
+
+  const handleChapterToggle = (chapterNumber: string, checked: boolean) => {
+    if (checked) {
+      setSelectedChapters(prev => [...prev, chapterNumber]);
+    } else {
+      setSelectedChapters(prev => prev.filter(c => c !== chapterNumber));
+    }
+  };
+
+  const handleSelectAllChapters = (checked: boolean) => {
+    if (checked) {
+      setSelectedChapters(chapters.map(c => c.chapterNumber));
+    } else {
+      setSelectedChapters([]);
     }
   };
 
@@ -295,8 +328,27 @@ export function SectionRegenerationPanel({
     );
   }
 
-  // Empty manual state - show initial generation UI
+  // Empty manual state - show initial chapter-by-chapter generation UI
   if (isEmptyManual) {
+    const handleGenerateByChapters = async () => {
+      await generateChapters(chapters, {
+        stopOnError: false,
+        onChapterComplete: () => onSectionUpdated?.()
+      });
+      onSectionUpdated?.();
+    };
+
+    const handleRetryFailed = async () => {
+      const failedChapterInfos = chapters.filter(
+        c => chapterProgress.failedChapters.includes(c.chapterNumber)
+      );
+      await generateChapters(failedChapterInfos, {
+        stopOnError: false,
+        onChapterComplete: () => onSectionUpdated?.()
+      });
+      onSectionUpdated?.();
+    };
+
     return (
       <Card>
         <CardHeader>
@@ -305,92 +357,109 @@ export function SectionRegenerationPanel({
             Generate Initial Content
           </CardTitle>
           <CardDescription>
-            {manual.manual_name} has {sections.length} sections ready for AI generation
+            {manual.manual_name} has {chapters.length} chapters ({sections.length} sections) ready for AI generation
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Structure Preview */}
-          <div className="space-y-2">
-            <Label className="flex items-center gap-2">
-              <BookOpen className="h-4 w-4" />
-              Manual Structure ({sections.length} sections)
-            </Label>
-            <div className="border rounded-lg p-2">
-              <ManualStructurePreview
-                sections={sections}
-                showStatus={false}
-                compact
-              />
-            </div>
-          </div>
-
-          {/* Target Roles */}
-          <div className="space-y-2">
-            <Label className="flex items-center gap-2">
-              <Users className="h-4 w-4" />
-              Target Audience
-            </Label>
-            <div className="flex flex-wrap gap-2">
-              {TARGET_ROLES.map((role) => (
-                <Badge
-                  key={role.id}
-                  variant={selectedTargetRoles.includes(role.id) ? "default" : "outline"}
-                  className="cursor-pointer"
-                  onClick={() => toggleTargetRole(role.id)}
-                >
-                  {role.label}
-                </Badge>
-              ))}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Select the primary audience to tailor content depth and terminology
-            </p>
-          </div>
-
-          {/* Custom Instructions */}
-          <div className="space-y-2">
-            <Label>Custom Instructions (optional)</Label>
-            <Textarea
-              placeholder="Add specific instructions for AI generation, e.g., 'Focus on administrator workflows' or 'Include more examples for new users'"
-              value={customInstructions}
-              onChange={(e) => setCustomInstructions(e.target.value)}
-              rows={3}
+          {/* Show progress if generating */}
+          {(chapterProgress.isGenerating || chapterProgress.completedChapters.length > 0) ? (
+            <ChapterGenerationProgress
+              chapters={chapters}
+              progress={chapterProgress}
+              onCancel={cancelGeneration}
+              onRetryFailed={handleRetryFailed}
             />
-          </div>
+          ) : (
+            <>
+              {/* Chapter Structure Preview */}
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2">
+                  <BookOpen className="h-4 w-4" />
+                  Chapters to Generate ({chapters.length})
+                </Label>
+                <ScrollArea className="h-[200px] border rounded-lg p-2">
+                  <div className="space-y-1">
+                    {chapters.map((chapter) => (
+                      <div 
+                        key={chapter.chapterNumber}
+                        className="flex items-center gap-3 p-2 rounded-md hover:bg-muted/50"
+                      >
+                        <Badge variant="outline" className="text-xs">
+                          Ch. {chapter.chapterNumber}
+                        </Badge>
+                        <span className="text-sm flex-1 truncate">{chapter.title}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {chapter.sectionCount} section{chapter.sectionCount !== 1 ? 's' : ''}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </div>
 
-          {/* Generation Info */}
-          <div className="p-4 bg-muted/30 rounded-lg space-y-2">
-            <div className="flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-primary" />
-              <span className="font-medium">What happens next?</span>
-            </div>
-            <ul className="text-sm text-muted-foreground space-y-1 ml-6">
-              <li>• AI will generate content for all {sections.length} sections</li>
-              <li>• Content follows ADDIE instructional design model</li>
-              <li>• Each section includes objectives, steps, tips, and FAQs</li>
-              <li>• Estimated time: {Math.ceil(sections.length * 0.5)} minutes</li>
-            </ul>
-          </div>
+              {/* Target Roles */}
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2">
+                  <Users className="h-4 w-4" />
+                  Target Audience
+                </Label>
+                <div className="flex flex-wrap gap-2">
+                  {TARGET_ROLES.map((role) => (
+                    <Badge
+                      key={role.id}
+                      variant={selectedTargetRoles.includes(role.id) ? "default" : "outline"}
+                      className="cursor-pointer"
+                      onClick={() => toggleTargetRole(role.id)}
+                    >
+                      {role.label}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+
+              {/* Generation Info */}
+              <div className="p-4 bg-muted/30 rounded-lg space-y-2">
+                <div className="flex items-center gap-2">
+                  <PlayCircle className="h-4 w-4 text-primary" />
+                  <span className="font-medium">Chapter-by-Chapter Generation</span>
+                </div>
+                <ul className="text-sm text-muted-foreground space-y-1 ml-6">
+                  <li>• Generates one chapter at a time to prevent timeouts</li>
+                  <li>• Progress saved after each chapter completes</li>
+                  <li>• Can retry failed chapters individually</li>
+                  <li>• Estimated time: {Math.ceil(chapters.length * 1.5)} minutes</li>
+                </ul>
+              </div>
+            </>
+          )}
 
           {/* Generate Button */}
-          <Button
-            size="lg"
-            className="w-full"
-            onClick={handleGenerateInitial}
-            disabled={regenerateManual.isPending}
-          >
-            {regenerateManual.isPending ? (
-              <>
-                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                Generating Content...
-              </>
-            ) : (
-              <>
-                <Sparkles className="mr-2 h-5 w-5" />
-                Generate All Sections
-              </>
-            )}
-          </Button>
+          {!chapterProgress.isGenerating && chapterProgress.completedChapters.length === 0 && (
+            <Button
+              size="lg"
+              className="w-full"
+              onClick={handleGenerateByChapters}
+            >
+              <Sparkles className="mr-2 h-5 w-5" />
+              Generate All Chapters Sequentially
+            </Button>
+          )}
+
+          {/* Done button */}
+          {!chapterProgress.isGenerating && chapterProgress.completedChapters.length === chapters.length && (
+            <Button
+              size="lg"
+              className="w-full"
+              variant="outline"
+              onClick={() => {
+                resetProgress();
+                onSectionUpdated?.();
+              }}
+            >
+              <CheckCircle className="mr-2 h-5 w-5" />
+              Done - View Generated Content
+            </Button>
+          )}
         </CardContent>
       </Card>
     );

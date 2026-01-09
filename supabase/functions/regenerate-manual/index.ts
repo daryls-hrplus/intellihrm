@@ -211,6 +211,24 @@ serve(async (req) => {
   } catch (error: unknown) {
     console.error('Error regenerating manual:', error);
     const message = error instanceof Error ? error.message : 'Unknown error';
+    
+    // Reset manual status on error
+    try {
+      const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+      const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+      const supabase = createClient(supabaseUrl, supabaseKey);
+      
+      const { manualCode } = await req.clone().json().catch(() => ({}));
+      if (manualCode) {
+        await supabase
+          .from('manual_definitions')
+          .update({ generation_status: 'idle' })
+          .eq('manual_code', manualCode);
+      }
+    } catch (resetError) {
+      console.error('Failed to reset manual status:', resetError);
+    }
+    
     return new Response(
       JSON.stringify({ success: false, error: message }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
