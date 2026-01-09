@@ -1,6 +1,6 @@
-// Multi-step wizard for creating new manuals with template, branding, and structure configuration
+// Simplified 3-step wizard for creating new manuals with template selection
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import {
   Dialog,
   DialogContent,
@@ -19,21 +19,26 @@ import { Separator } from "@/components/ui/separator";
 import {
   BookOpen,
   FileText,
-  Palette,
-  List,
-  Layers,
   ArrowLeft,
   ArrowRight,
   Check,
   Loader2,
   Users,
-  Building2,
+  Layers,
+  Eye,
+  Star,
 } from "lucide-react";
 import { DocumentTemplate, DEFAULT_TEMPLATES } from "./DocumentTemplateConfig";
-import { TemplateStylingEditor } from "./TemplateStylingEditor";
+import { TemplateTypeSelector, DOCUMENT_TYPE_CONFIG } from "./TemplateTypeSelector";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { 
+  DocumentType, 
+  DOCUMENT_TYPE_LABELS,
+  SavedDocumentTemplate,
+  savedToDocumentTemplate 
+} from "@/hooks/useDocumentTemplates";
 
 interface ManualCreationWizardProps {
   open: boolean;
@@ -128,6 +133,26 @@ const STANDARD_STRUCTURE = [
   },
 ];
 
+// Get structure sections based on document type
+function getStructureForType(docType: DocumentType): string[] {
+  switch (docType) {
+    case 'quick_start':
+    case 'job_aid':
+      return ["1", "3"]; // Overview + Workflows only
+    case 'sop':
+      return ["1", "2", "3", "8"]; // Overview, Setup, Workflows, Troubleshooting
+    case 'faq_document':
+      return ["1", "8"]; // Overview + FAQ/Troubleshooting
+    case 'release_notes':
+      return ["1", "4"]; // Overview + Features
+    case 'reference_guide':
+      return ["1", "2", "7"]; // Overview, Setup, Integration
+    default:
+      // Full structure for user_manual, training_guide, technical_doc, implementation_guide, policy_document
+      return STANDARD_STRUCTURE.map(s => s.number);
+  }
+}
+
 const TARGET_ROLES = [
   { id: "admin", label: "Administrator", description: "System administrators and IT staff" },
   { id: "hr_manager", label: "HR Manager", description: "HR department managers and leads" },
@@ -151,13 +176,9 @@ export function ManualCreationWizard({
   const [manualCode, setManualCode] = useState("");
   const [description, setDescription] = useState("");
   const [selectedModules, setSelectedModules] = useState<string[]>([]);
-  const [selectedTemplate, setSelectedTemplate] = useState<DocumentTemplate | null>(
-    DEFAULT_TEMPLATES[0]
-  );
+  const [selectedDocumentType, setSelectedDocumentType] = useState<DocumentType | null>(null);
+  const [selectedTemplate, setSelectedTemplate] = useState<DocumentTemplate | null>(null);
   const [selectedRoles, setSelectedRoles] = useState<string[]>(["admin"]);
-  const [selectedSections, setSelectedSections] = useState<string[]>(
-    STANDARD_STRUCTURE.map((s) => s.number)
-  );
 
   // Fetch available modules
   const { data: modules = [] } = useQuery({
@@ -174,10 +195,59 @@ export function ManualCreationWizard({
     },
   });
 
+  // Fetch saved templates by document type
+  const { data: savedTemplates = [] } = useQuery({
+    queryKey: ["enablement-templates-by-type", selectedDocumentType],
+    queryFn: async () => {
+      if (!selectedDocumentType) return [];
+      const { data, error } = await supabase
+        .from("enablement_document_templates")
+        .select("*")
+        .or(`document_type.eq.${selectedDocumentType},category.eq.${selectedDocumentType}`)
+        .eq("is_active", true)
+        .order("is_default_for_type", { ascending: false });
+
+      if (error) throw error;
+      return data as SavedDocumentTemplate[];
+    },
+    enabled: !!selectedDocumentType,
+  });
+
+  // Get available templates (saved + system defaults for this type)
+  const availableTemplates = useMemo(() => {
+    if (!selectedDocumentType) return [];
+    
+    // Convert saved templates
+    const saved = savedTemplates.map(t => ({
+      ...savedToDocumentTemplate(t),
+      isSaved: true,
+      isDefault: t.is_default_for_type,
+    }));
+    
+    // Get system default for this type
+    const systemDefault = DEFAULT_TEMPLATES.find(t => t.type === selectedDocumentType);
+    const system = systemDefault ? [{ 
+      ...systemDefault, 
+      isSaved: false, 
+      isDefault: saved.length === 0 
+    }] : [];
+    
+    return [...saved, ...system];
+  }, [selectedDocumentType, savedTemplates]);
+
+  // Auto-select first template when document type changes
+  const handleDocumentTypeChange = (type: DocumentType) => {
+    setSelectedDocumentType(type);
+    setSelectedTemplate(null); // Reset template selection
+  };
+
+  // Auto-determine structure based on document type
+  const selectedSections = selectedDocumentType 
+    ? getStructureForType(selectedDocumentType)
+    : STANDARD_STRUCTURE.map(s => s.number);
+
   const createManualMutation = useMutation({
     mutationFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      
       // Create manual definition
       const { data: manual, error: manualError } = await supabase
         .from("manual_definitions")
@@ -188,9 +258,10 @@ export function ManualCreationWizard({
           module_codes: selectedModules,
           current_version: "1.0.0",
           generation_status: "idle",
-          structure_template: selectedTemplate?.type || "training_guide",
+          structure_template: selectedTemplate?.type || selectedDocumentType || "training_guide",
           template_config: {
-            templateType: selectedTemplate?.type,
+            templateId: selectedTemplate?.id,
+            templateType: selectedTemplate?.type || selectedDocumentType,
             branding: selectedTemplate?.branding,
             layout: selectedTemplate?.layout,
             formatting: selectedTemplate?.formatting,
@@ -202,7 +273,7 @@ export function ManualCreationWizard({
 
       if (manualError) throw manualError;
 
-      // Create sections based on selected structure
+      // Create sections based on auto-selected structure
       const sectionsToCreate: Array<{
         manual_id: string;
         section_number: string;
@@ -273,9 +344,9 @@ export function ManualCreationWizard({
     setManualCode("");
     setDescription("");
     setSelectedModules([]);
-    setSelectedTemplate(DEFAULT_TEMPLATES[0]);
+    setSelectedDocumentType(null);
+    setSelectedTemplate(null);
     setSelectedRoles(["admin"]);
-    setSelectedSections(STANDARD_STRUCTURE.map((s) => s.number));
     setIsCreating(false);
     onOpenChange(false);
   };
@@ -290,12 +361,8 @@ export function ManualCreationWizard({
       case 1:
         return manualName.trim() !== "" && manualCode.trim() !== "";
       case 2:
-        return selectedTemplate !== null;
+        return selectedDocumentType !== null && selectedTemplate !== null;
       case 3:
-        return true; // Branding is optional
-      case 4:
-        return selectedSections.length > 0;
-      case 5:
         return selectedRoles.length > 0;
       default:
         return true;
@@ -305,8 +372,6 @@ export function ManualCreationWizard({
   const stepTitles = [
     { icon: BookOpen, label: "Basic Info" },
     { icon: FileText, label: "Template" },
-    { icon: Palette, label: "Branding" },
-    { icon: List, label: "Structure" },
     { icon: Users, label: "Target Roles" },
   ];
 
@@ -319,7 +384,7 @@ export function ManualCreationWizard({
             Create New Manual
           </DialogTitle>
           <DialogDescription>
-            Set up a new documentation manual with templates, branding, and structure
+            Select a template and target roles for your documentation
           </DialogDescription>
         </DialogHeader>
 
@@ -439,123 +504,116 @@ export function ManualCreationWizard({
             </div>
           )}
 
-          {/* Step 2: Template Selection */}
+          {/* Step 2: Document Type + Template Selection */}
           {step === 2 && (
-            <div className="space-y-4 py-4">
-              <p className="text-sm text-muted-foreground">
-                Select a document template that defines the structure and style of your manual
-              </p>
-              <div className="grid gap-3">
-                {DEFAULT_TEMPLATES.map((template) => (
-                  <div
-                    key={template.id}
-                    className={`p-4 border rounded-lg cursor-pointer transition-all ${
-                      selectedTemplate?.id === template.id
-                        ? "border-primary bg-primary/5 ring-2 ring-primary/20"
-                        : "hover:border-muted-foreground/50"
-                    }`}
-                    onClick={() => setSelectedTemplate(template)}
-                  >
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <h4 className="font-medium">{template.name}</h4>
-                        <p className="text-sm text-muted-foreground">{template.description}</p>
-                      </div>
-                      <Badge
-                        variant={selectedTemplate?.id === template.id ? "default" : "outline"}
-                      >
-                        {template.type.replace("_", " ")}
-                      </Badge>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Step 3: Branding */}
-          {step === 3 && (
-            <div className="py-4">
-              <TemplateStylingEditor
-                template={selectedTemplate}
-                onTemplateUpdate={(updated) => setSelectedTemplate(updated)}
-              />
-            </div>
-          )}
-
-          {/* Step 4: Section Structure */}
-          {step === 4 && (
-            <div className="space-y-4 py-4">
-              <div className="flex items-center justify-between">
-                <p className="text-sm text-muted-foreground">
-                  Select which sections to include in your manual (8-part standard structure)
-                </p>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() =>
-                    setSelectedSections(
-                      selectedSections.length === STANDARD_STRUCTURE.length
-                        ? []
-                        : STANDARD_STRUCTURE.map((s) => s.number)
-                    )
-                  }
-                >
-                  {selectedSections.length === STANDARD_STRUCTURE.length
-                    ? "Deselect All"
-                    : "Select All"}
-                </Button>
-              </div>
-
+            <div className="space-y-6 py-4">
+              {/* Document Type Selection */}
               <div className="space-y-3">
-                {STANDARD_STRUCTURE.map((section) => (
-                  <div
-                    key={section.number}
-                    className={`p-3 border rounded-lg ${
-                      selectedSections.includes(section.number)
-                        ? "border-primary bg-primary/5"
-                        : ""
-                    }`}
-                  >
-                    <div
-                      className="flex items-start gap-3 cursor-pointer"
-                      onClick={() => {
-                        setSelectedSections((prev) =>
-                          prev.includes(section.number)
-                            ? prev.filter((s) => s !== section.number)
-                            : [...prev, section.number]
+                <Label className="text-base font-medium">Select Document Type</Label>
+                <p className="text-sm text-muted-foreground">
+                  Choose the type of documentation you want to create
+                </p>
+                <TemplateTypeSelector
+                  value={selectedDocumentType}
+                  onChange={handleDocumentTypeChange}
+                  showDescriptions={false}
+                />
+              </div>
+
+              {/* Template Selection - only show after document type selected */}
+              {selectedDocumentType && (
+                <>
+                  <Separator />
+                  <div className="space-y-3">
+                    <Label className="text-base font-medium">
+                      Select Template for {DOCUMENT_TYPE_LABELS[selectedDocumentType]}
+                    </Label>
+                    <p className="text-sm text-muted-foreground">
+                      {availableTemplates.length === 0 
+                        ? "Loading templates..." 
+                        : `${availableTemplates.length} template${availableTemplates.length !== 1 ? 's' : ''} available`}
+                    </p>
+                    
+                    <div className="grid gap-3">
+                      {availableTemplates.map((template) => {
+                        const config = DOCUMENT_TYPE_CONFIG[template.type];
+                        const brandingColor = template.branding?.primaryColor || config?.color || "#3b82f6";
+                        
+                        return (
+                          <div
+                            key={template.id}
+                            className={`p-4 border rounded-lg cursor-pointer transition-all ${
+                              selectedTemplate?.id === template.id
+                                ? "border-primary bg-primary/5 ring-2 ring-primary/20"
+                                : "hover:border-muted-foreground/50"
+                            }`}
+                            onClick={() => setSelectedTemplate(template)}
+                          >
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="flex items-start gap-3 flex-1">
+                                {/* Branding color indicator */}
+                                <div 
+                                  className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
+                                  style={{ backgroundColor: `${brandingColor}20` }}
+                                >
+                                  <div 
+                                    className="w-5 h-5 rounded"
+                                    style={{ backgroundColor: brandingColor }}
+                                  />
+                                </div>
+                                
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-2 flex-wrap">
+                                    <h4 className="font-medium">{template.name}</h4>
+                                    {(template as any).isDefault && (
+                                      <Badge variant="secondary" className="flex items-center gap-1">
+                                        <Star className="h-3 w-3" />
+                                        Default
+                                      </Badge>
+                                    )}
+                                    {(template as any).isSaved && (
+                                      <Badge variant="outline">Saved</Badge>
+                                    )}
+                                  </div>
+                                  <p className="text-sm text-muted-foreground line-clamp-2">
+                                    {template.description}
+                                  </p>
+                                  
+                                  {/* Template preview info */}
+                                  <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
+                                    {template.branding?.companyName && (
+                                      <span>{template.branding.companyName}</span>
+                                    )}
+                                    {template.layout?.includeTableOfContents && (
+                                      <span>• Table of Contents</span>
+                                    )}
+                                    {template.layout?.includeScreenshots && (
+                                      <span>• Screenshots</span>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                              
+                              <div className="flex items-center gap-2 flex-shrink-0">
+                                {selectedTemplate?.id === template.id && (
+                                  <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center">
+                                    <Check className="h-4 w-4 text-primary-foreground" />
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
                         );
-                      }}
-                    >
-                      <Checkbox
-                        checked={selectedSections.includes(section.number)}
-                        onCheckedChange={() => {}}
-                      />
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <Badge variant="outline">Part {section.number}</Badge>
-                          <span className="font-medium text-sm">{section.title}</span>
-                        </div>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          {section.description}
-                        </p>
-                        <div className="flex flex-wrap gap-1 mt-2">
-                          {section.subsections.map((sub) => (
-                            <Badge key={sub.number} variant="secondary" className="text-xs">
-                              {sub.number}
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
+                      })}
                     </div>
                   </div>
-                ))}
-              </div>
+                </>
+              )}
             </div>
           )}
 
-          {/* Step 5: Target Roles */}
-          {step === 5 && (
+          {/* Step 3: Target Roles */}
+          {step === 3 && (
             <div className="space-y-4 py-4">
               <p className="text-sm text-muted-foreground">
                 Select the target audience for this manual. This influences the content depth and
@@ -596,7 +654,7 @@ export function ManualCreationWizard({
               <Separator className="my-4" />
 
               {/* Summary */}
-              <div className="p-4 bg-muted/30 rounded-lg space-y-2">
+              <div className="p-4 bg-muted/30 rounded-lg space-y-3">
                 <h4 className="font-medium flex items-center gap-2">
                   <Layers className="h-4 w-4" />
                   Manual Summary
@@ -607,16 +665,24 @@ export function ManualCreationWizard({
                     <span className="ml-2 font-medium">{manualName}</span>
                   </div>
                   <div>
-                    <span className="text-muted-foreground">Template:</span>
-                    <span className="ml-2 font-medium">{selectedTemplate?.name}</span>
+                    <span className="text-muted-foreground">Type:</span>
+                    <span className="ml-2 font-medium">
+                      {selectedDocumentType ? DOCUMENT_TYPE_LABELS[selectedDocumentType] : "-"}
+                    </span>
                   </div>
                   <div>
-                    <span className="text-muted-foreground">Sections:</span>
+                    <span className="text-muted-foreground">Template:</span>
+                    <span className="ml-2 font-medium">{selectedTemplate?.name || "-"}</span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Structure:</span>
                     <span className="ml-2 font-medium">{selectedSections.length} parts</span>
                   </div>
-                  <div>
+                  <div className="col-span-2">
                     <span className="text-muted-foreground">Target Roles:</span>
-                    <span className="ml-2 font-medium">{selectedRoles.length} selected</span>
+                    <span className="ml-2 font-medium">
+                      {selectedRoles.map(r => TARGET_ROLES.find(tr => tr.id === r)?.label).join(", ")}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -631,7 +697,7 @@ export function ManualCreationWizard({
             {step === 1 ? "Cancel" : "Back"}
           </Button>
 
-          {step < 5 ? (
+          {step < 3 ? (
             <Button onClick={() => setStep(step + 1)} disabled={!canProceed()}>
               Next
               <ArrowRight className="h-4 w-4 ml-2" />
