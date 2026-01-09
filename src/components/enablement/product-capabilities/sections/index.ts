@@ -1,5 +1,6 @@
 export { ExecutiveOverview } from "./ExecutiveOverview";
 export { PlatformAtGlance } from "./PlatformAtGlance";
+export { ModuleIntegrationDiagram } from "./ModuleIntegrationDiagram";
 
 // Prologue
 export { AdminSecurityCapabilities } from "./prologue/AdminSecurityCapabilities";
