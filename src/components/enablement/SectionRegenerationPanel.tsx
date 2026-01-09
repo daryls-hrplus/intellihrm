@@ -338,6 +338,17 @@ export function SectionRegenerationPanel({
       onSectionUpdated?.();
     };
 
+    const handleGenerateSelectedChapters = async () => {
+      const selected = chapters.filter(c => selectedChapters.includes(c.chapterNumber));
+      if (selected.length === 0) return;
+      await generateChapters(selected, {
+        stopOnError: false,
+        onChapterComplete: () => onSectionUpdated?.()
+      });
+      setSelectedChapters([]);
+      onSectionUpdated?.();
+    };
+
     const handleRetryFailed = async () => {
       const failedChapterInfos = chapters.filter(
         c => chapterProgress.failedChapters.includes(c.chapterNumber)
@@ -364,19 +375,30 @@ export function SectionRegenerationPanel({
           {/* Show progress if generating */}
           {(chapterProgress.isGenerating || chapterProgress.completedChapters.length > 0) ? (
             <ChapterGenerationProgress
-              chapters={chapters}
+              chapters={selectedChapters.length > 0 
+                ? chapters.filter(c => selectedChapters.includes(c.chapterNumber))
+                : chapters}
               progress={chapterProgress}
               onCancel={cancelGeneration}
               onRetryFailed={handleRetryFailed}
             />
           ) : (
             <>
-              {/* Chapter Structure Preview */}
+              {/* Chapter Structure Preview with Checkboxes */}
               <div className="space-y-2">
-                <Label className="flex items-center gap-2">
-                  <BookOpen className="h-4 w-4" />
-                  Chapters to Generate ({chapters.length})
-                </Label>
+                <div className="flex items-center justify-between">
+                  <Label className="flex items-center gap-2">
+                    <BookOpen className="h-4 w-4" />
+                    Chapters to Generate ({chapters.length})
+                  </Label>
+                  <div className="flex items-center gap-2">
+                    <Checkbox
+                      checked={selectedChapters.length === chapters.length && chapters.length > 0}
+                      onCheckedChange={handleSelectAllChapters}
+                    />
+                    <span className="text-sm text-muted-foreground">Select All</span>
+                  </div>
+                </div>
                 <ScrollArea className="h-[200px] border rounded-lg p-2">
                   <div className="space-y-1">
                     {chapters.map((chapter) => (
@@ -384,6 +406,10 @@ export function SectionRegenerationPanel({
                         key={chapter.chapterNumber}
                         className="flex items-center gap-3 p-2 rounded-md hover:bg-muted/50"
                       >
+                        <Checkbox
+                          checked={selectedChapters.includes(chapter.chapterNumber)}
+                          onCheckedChange={(checked) => handleChapterToggle(chapter.chapterNumber, !!checked)}
+                        />
                         <Badge variant="outline" className="text-xs">
                           Ch. {chapter.chapterNumber}
                         </Badge>
@@ -424,35 +450,50 @@ export function SectionRegenerationPanel({
                   <span className="font-medium">Chapter-by-Chapter Generation</span>
                 </div>
                 <ul className="text-sm text-muted-foreground space-y-1 ml-6">
-                  <li>• Generates one chapter at a time to prevent timeouts</li>
+                  <li>• Select specific chapters or generate all at once</li>
                   <li>• Progress saved after each chapter completes</li>
                   <li>• Can retry failed chapters individually</li>
-                  <li>• Estimated time: {Math.ceil(chapters.length * 1.5)} minutes</li>
+                  <li>• Estimated time: ~1.5 min per chapter</li>
                 </ul>
               </div>
             </>
           )}
 
-          {/* Generate Button */}
+          {/* Generate Buttons */}
           {!chapterProgress.isGenerating && chapterProgress.completedChapters.length === 0 && (
-            <Button
-              size="lg"
-              className="w-full"
-              onClick={handleGenerateByChapters}
-            >
-              <Sparkles className="mr-2 h-5 w-5" />
-              Generate All Chapters Sequentially
-            </Button>
+            <div className="flex gap-2">
+              {selectedChapters.length > 0 ? (
+                <Button
+                  size="lg"
+                  className="flex-1"
+                  onClick={handleGenerateSelectedChapters}
+                >
+                  <Sparkles className="mr-2 h-5 w-5" />
+                  Generate Selected ({selectedChapters.length})
+                </Button>
+              ) : (
+                <Button
+                  size="lg"
+                  className="flex-1"
+                  onClick={handleGenerateByChapters}
+                >
+                  <Sparkles className="mr-2 h-5 w-5" />
+                  Generate All Chapters
+                </Button>
+              )}
+            </div>
           )}
 
           {/* Done button */}
-          {!chapterProgress.isGenerating && chapterProgress.completedChapters.length === chapters.length && (
+          {!chapterProgress.isGenerating && chapterProgress.completedChapters.length > 0 && 
+           chapterProgress.completedChapters.length === (selectedChapters.length || chapters.length) && (
             <Button
               size="lg"
               className="w-full"
               variant="outline"
               onClick={() => {
                 resetProgress();
+                setSelectedChapters([]);
                 onSectionUpdated?.();
               }}
             >

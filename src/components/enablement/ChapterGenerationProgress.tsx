@@ -28,8 +28,9 @@ export function ChapterGenerationProgress({
 }: ChapterGenerationProgressProps) {
   const completedCount = progress.completedChapters.length;
   const failedCount = progress.failedChapters.length;
-  const progressPercent = progress.totalChapters > 0 
-    ? Math.round((completedCount / progress.totalChapters) * 100)
+  const totalToGenerate = chapters.length; // Use passed chapters length for partial selection
+  const progressPercent = totalToGenerate > 0 
+    ? Math.round((completedCount / totalToGenerate) * 100)
     : 0;
 
   return (
@@ -76,7 +77,7 @@ export function ChapterGenerationProgress({
       {/* Overall Progress */}
       <div className="space-y-2">
         <div className="flex items-center justify-between text-sm">
-          <span>{completedCount} of {progress.totalChapters} chapters</span>
+          <span>{completedCount} of {totalToGenerate} chapters</span>
           <span>{progressPercent}%</span>
         </div>
         <Progress value={progressPercent} className="h-2" />
