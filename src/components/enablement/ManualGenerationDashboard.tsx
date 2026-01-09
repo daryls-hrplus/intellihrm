@@ -137,36 +137,83 @@ export function ManualGenerationDashboard() {
         </CardContent>
       </Card>
 
-      {/* Manual Cards Overview */}
+      {/* Manual Cards Overview - Enhanced with template/branding info */}
       {!selectedManualId && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {manuals.map((manual) => (
-            <Card 
-              key={manual.id} 
-              className="cursor-pointer hover:border-primary/50 transition-colors"
-              onClick={() => setSelectedManualId(manual.id)}
-            >
-              <CardHeader className="pb-2">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-base">{manual.manual_name}</CardTitle>
-                  {getStatusIcon(manual.generation_status)}
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center justify-between">
-                  <Badge variant="outline">v{manual.current_version}</Badge>
-                  {manual.last_generated_at && (
-                    <span className="text-xs text-muted-foreground">
-                      Updated {formatDistanceToNow(new Date(manual.last_generated_at), { addSuffix: true })}
-                    </span>
+          {manuals.map((manual) => {
+            const templateConfig = (manual as any).template_config || {};
+            const branding = templateConfig.branding || {};
+            const templateType = templateConfig.templateType || 'training_guide';
+            
+            return (
+              <Card 
+                key={manual.id} 
+                className="cursor-pointer hover:border-primary/50 transition-colors"
+                onClick={() => setSelectedManualId(manual.id)}
+              >
+                <CardHeader className="pb-2">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-base">{manual.manual_name}</CardTitle>
+                    {getStatusIcon(manual.generation_status)}
+                  </div>
+                  {/* Template type badge */}
+                  <Badge variant="secondary" className="w-fit text-xs">
+                    {templateType.replace('_', ' ')}
+                  </Badge>
+                </CardHeader>
+                <CardContent>
+                  {/* Branding color preview */}
+                  {branding.primaryColor && (
+                    <div className="flex items-center gap-2 mb-2">
+                      <div
+                        className="w-4 h-4 rounded-full border"
+                        style={{ backgroundColor: branding.primaryColor }}
+                      />
+                      {branding.secondaryColor && (
+                        <div
+                          className="w-4 h-4 rounded-full border"
+                          style={{ backgroundColor: branding.secondaryColor }}
+                        />
+                      )}
+                      {branding.companyName && (
+                        <span className="text-xs text-muted-foreground truncate">
+                          {branding.companyName}
+                        </span>
+                      )}
+                    </div>
                   )}
-                </div>
-                <Button variant="ghost" size="sm" className="w-full mt-2">
-                  Manage <ArrowRight className="ml-2 h-4 w-4" />
+                  <div className="flex items-center justify-between">
+                    <Badge variant="outline">v{manual.current_version}</Badge>
+                    {manual.last_generated_at && (
+                      <span className="text-xs text-muted-foreground">
+                        Updated {formatDistanceToNow(new Date(manual.last_generated_at), { addSuffix: true })}
+                      </span>
+                    )}
+                  </div>
+                  <Button variant="ghost" size="sm" className="w-full mt-2">
+                    Manage <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </CardContent>
+              </Card>
+            );
+          })}
+          
+          {/* Empty state / Create new card */}
+          {manuals.length === 0 && (
+            <Card 
+              className="cursor-pointer hover:border-primary/50 transition-colors border-dashed"
+              onClick={() => setShowCreateWizard(true)}
+            >
+              <CardContent className="py-8 text-center">
+                <BookOpen className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                <p className="text-muted-foreground mb-2">No manuals yet</p>
+                <Button variant="outline" size="sm">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create Your First Manual
                 </Button>
               </CardContent>
             </Card>
-          ))}
+          )}
         </div>
       )}
 

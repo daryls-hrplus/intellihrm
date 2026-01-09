@@ -44,7 +44,9 @@ serve(async (req) => {
       sectionId, 
       regenerationType = 'full',
       customInstructions,
-      userId 
+      userId,
+      templateConfig,
+      targetRoles = ['admin']
     } = await req.json();
 
     if (!sectionId) {
@@ -80,12 +82,18 @@ serve(async (req) => {
     const existingContent = regenerationType === 'incremental' ? section.content : null;
 
     // Build the AI prompt using ADDIE model and industry standards
+    // Get template config from manual if not passed explicitly
+    const effectiveTemplateConfig = templateConfig || section.manual?.template_config || {};
+    const effectiveTargetRoles = targetRoles || effectiveTemplateConfig.targetRoles || ['admin'];
+    
     const prompt = buildSectionPrompt(
       section,
       features || [],
       modules || [],
       existingContent,
-      customInstructions
+      customInstructions,
+      effectiveTemplateConfig,
+      effectiveTargetRoles
     );
 
     // Call AI to generate content (using Lovable AI)
@@ -196,7 +204,9 @@ function buildSectionPrompt(
   features: any[],
   modules: any[],
   existingContent: any,
-  customInstructions?: string
+  customInstructions?: string,
+  templateConfig?: any,
+  targetRoles?: string[]
 ): string {
   const featureContext = features.map(f => `
 - Feature: ${f.feature_name} (${f.feature_code})
@@ -211,12 +221,31 @@ function buildSectionPrompt(
   Route: ${m.route_path}
 `).join('\n');
 
+  // Build target audience context
+  const roleLabels: Record<string, string> = {
+    admin: 'System Administrators',
+    hr_manager: 'HR Managers',
+    hr_user: 'HR Operations Staff',
+    manager: 'Line Managers',
+    employee: 'End-User Employees',
+    consultant: 'Implementation Consultants'
+  };
+  const targetAudience = (targetRoles || ['admin']).map(r => roleLabels[r] || r).join(', ');
+
+  // Build template-specific instructions
+  const templateType = templateConfig?.templateType || 'training_guide';
+  const branding = templateConfig?.branding || {};
+  const formatting = templateConfig?.formatting || {};
+
   let prompt = `Generate comprehensive documentation for the following manual section:
 
 ## Section Details
 - Section Number: ${section.section_number}
 - Title: ${section.title}
 - Manual: ${section.manual?.manual_name}
+- Document Type: ${templateType.replace('_', ' ')}
+- Target Audience: ${targetAudience}
+${branding.companyName ? `- Company: ${branding.companyName}` : ''}
 
 ## Source Features
 ${featureContext || 'No specific features linked'}
@@ -224,14 +253,21 @@ ${featureContext || 'No specific features linked'}
 ## Related Modules
 ${moduleContext || 'No specific modules linked'}
 
-## Requirements
+## Document Style Requirements
+- Header Style: ${formatting.headerStyle || 'numbered'} (use numbered sections like 1.1, 1.2)
+- Callout Style: ${formatting.calloutStyle || 'confluence'} (use info/warning/success panels)
+- Industry Context: Enterprise HR Software (Caribbean, Africa, Global)
+
+## Content Requirements
 1. Follow ADDIE instructional design model
 2. Apply Bloom's Taxonomy for learning objectives (Remember, Understand, Apply, Analyze, Evaluate, Create)
 3. Use active voice and second person ("you")
-4. Include practical examples and step-by-step instructions
-5. Add tips, warnings, and best practices where appropriate
-6. Generate FAQ items for common questions
-7. Include glossary terms for technical vocabulary
+4. Tailor content depth and terminology for: ${targetAudience}
+5. Include practical examples and step-by-step instructions
+6. Add tips, warnings, and best practices where appropriate
+7. Generate FAQ items for common questions
+8. Include glossary terms for technical vocabulary
+9. Match enterprise documentation standards (Workday, SAP SuccessFactors level)
 
 ## Output Format
 Return a JSON object with this structure:
@@ -239,6 +275,8 @@ Return a JSON object with this structure:
   "title": "Section title",
   "overview": "Brief 2-3 sentence overview",
   "learningObjectives": ["Objective 1 (using Bloom's verbs)", "Objective 2"],
+  "estimatedReadTime": 5,
+  "targetRoles": ${JSON.stringify(targetRoles || ['admin'])},
   "content": [
     {
       "heading": "Subsection heading",
@@ -254,13 +292,22 @@ Return a JSON object with this structure:
         }
       ],
       "notes": ["Important note 1"],
-      "bestPractices": ["Best practice 1"]
+      "bestPractices": ["Best practice 1"],
+      "callouts": [
+        {
+          "type": "info|warning|success|tip",
+          "title": "Callout title",
+          "content": "Callout content"
+        }
+      ]
     }
   ],
   "keyTakeaways": ["Key point 1", "Key point 2"],
   "relatedSections": ["Section 2.1", "Section 3.4"],
   "glossaryTerms": [{"term": "Term", "definition": "Definition"}],
-  "faq": [{"question": "Q?", "answer": "A"}]
+  "faq": [{"question": "Q?", "answer": "A"}],
+  "prerequisites": ["Prerequisite 1"],
+  "nextSteps": ["What to do next"]
 }`;
 
   if (existingContent) {

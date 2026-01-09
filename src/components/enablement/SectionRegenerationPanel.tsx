@@ -33,7 +33,10 @@ import {
   Loader2,
   ChevronDown,
   ChevronUp,
-  AlertCircle
+  AlertCircle,
+  Rocket,
+  Users,
+  BookOpen
 } from "lucide-react";
 import { 
   ManualSection, 
@@ -42,6 +45,17 @@ import {
   useRegenerateManual,
   useUpdateSectionContent
 } from "@/hooks/useManualGeneration";
+import { ManualStructurePreview } from "./ManualStructurePreview";
+
+// Target role options
+const TARGET_ROLES = [
+  { id: "admin", label: "Administrator" },
+  { id: "hr_manager", label: "HR Manager" },
+  { id: "hr_user", label: "HR User" },
+  { id: "manager", label: "Line Manager" },
+  { id: "employee", label: "Employee" },
+  { id: "consultant", label: "Consultant" },
+];
 
 interface SectionRegenerationPanelProps {
   manual: ManualDefinition | null;
@@ -60,12 +74,15 @@ export function SectionRegenerationPanel({
   const [versionBump, setVersionBump] = useState<'initial' | 'major' | 'minor' | 'patch'>('minor');
   const [previewContent, setPreviewContent] = useState<Record<string, any> | null>(null);
   const [previewSectionId, setPreviewSectionId] = useState<string | null>(null);
+  const [selectedTargetRoles, setSelectedTargetRoles] = useState<string[]>(["admin"]);
   
   const generateSection = useGenerateSection();
   const regenerateManual = useRegenerateManual();
   const updateSectionContent = useUpdateSectionContent();
 
   const sectionsNeedingRegen = sections.filter(s => s.needs_regeneration);
+  const emptySections = sections.filter(s => !s.content || Object.keys(s.content).length === 0);
+  const isEmptyManual = sections.length > 0 && emptySections.length === sections.length;
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
@@ -115,9 +132,24 @@ export function SectionRegenerationPanel({
     await regenerateManual.mutateAsync({
       manualCode: manual.manual_code,
       runType: type,
-      versionBump
+      versionBump: isEmptyManual ? 'initial' : versionBump
     });
     
+    onSectionUpdated?.();
+  };
+
+  const handleGenerateInitial = async () => {
+    if (!manual) return;
+    
+    setSelectedSections(sections.map(s => s.id));
+    await regenerateManual.mutateAsync({
+      manualCode: manual.manual_code,
+      runType: 'full',
+      versionBump: 'initial',
+      sectionIds: sections.map(s => s.id)
+    });
+    
+    setSelectedSections([]);
     onSectionUpdated?.();
   };
 
@@ -132,12 +164,121 @@ export function SectionRegenerationPanel({
     onSectionUpdated?.();
   };
 
+  const toggleTargetRole = (roleId: string) => {
+    setSelectedTargetRoles(prev => 
+      prev.includes(roleId) 
+        ? prev.filter(r => r !== roleId)
+        : [...prev, roleId]
+    );
+  };
+
   if (!manual) {
     return (
       <Card>
         <CardContent className="py-8 text-center text-muted-foreground">
           <FileText className="h-12 w-12 mx-auto mb-2 opacity-50" />
           <p>Select a manual to view sections</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Empty manual state - show initial generation UI
+  if (isEmptyManual) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Rocket className="h-5 w-5" />
+            Generate Initial Content
+          </CardTitle>
+          <CardDescription>
+            {manual.manual_name} has {sections.length} sections ready for AI generation
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* Structure Preview */}
+          <div className="space-y-2">
+            <Label className="flex items-center gap-2">
+              <BookOpen className="h-4 w-4" />
+              Manual Structure ({sections.length} sections)
+            </Label>
+            <div className="border rounded-lg p-2">
+              <ManualStructurePreview
+                sections={sections}
+                showStatus={false}
+                compact
+              />
+            </div>
+          </div>
+
+          {/* Target Roles */}
+          <div className="space-y-2">
+            <Label className="flex items-center gap-2">
+              <Users className="h-4 w-4" />
+              Target Audience
+            </Label>
+            <div className="flex flex-wrap gap-2">
+              {TARGET_ROLES.map((role) => (
+                <Badge
+                  key={role.id}
+                  variant={selectedTargetRoles.includes(role.id) ? "default" : "outline"}
+                  className="cursor-pointer"
+                  onClick={() => toggleTargetRole(role.id)}
+                >
+                  {role.label}
+                </Badge>
+              ))}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Select the primary audience to tailor content depth and terminology
+            </p>
+          </div>
+
+          {/* Custom Instructions */}
+          <div className="space-y-2">
+            <Label>Custom Instructions (optional)</Label>
+            <Textarea
+              placeholder="Add specific instructions for AI generation, e.g., 'Focus on administrator workflows' or 'Include more examples for new users'"
+              value={customInstructions}
+              onChange={(e) => setCustomInstructions(e.target.value)}
+              rows={3}
+            />
+          </div>
+
+          {/* Generation Info */}
+          <div className="p-4 bg-muted/30 rounded-lg space-y-2">
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-primary" />
+              <span className="font-medium">What happens next?</span>
+            </div>
+            <ul className="text-sm text-muted-foreground space-y-1 ml-6">
+              <li>• AI will generate content for all {sections.length} sections</li>
+              <li>• Content follows ADDIE instructional design model</li>
+              <li>• Each section includes objectives, steps, tips, and FAQs</li>
+              <li>• Estimated time: {Math.ceil(sections.length * 0.5)} minutes</li>
+            </ul>
+          </div>
+
+          {/* Generate Button */}
+          <Button
+            size="lg"
+            className="w-full"
+            onClick={handleGenerateInitial}
+            disabled={regenerateManual.isPending}
+          >
+            {regenerateManual.isPending ? (
+              <>
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                Generating Content...
+              </>
+            ) : (
+              <>
+                <Sparkles className="mr-2 h-5 w-5" />
+                Generate All Sections
+              </>
+            )}
+          </Button>
         </CardContent>
       </Card>
     );
