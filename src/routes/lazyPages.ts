@@ -99,6 +99,7 @@ export const ClientProvisioningGuidePage = lazy(() => import('@/pages/enablement
 export const ClientProvisioningTestingPage = lazy(() => import('@/pages/enablement/ClientProvisioningTestingPage'));
 export const ManualPublishingPage = lazy(() => import('@/pages/enablement/ManualPublishingPage'));
 export const ContentLifecyclePage = lazy(() => import('@/pages/enablement/ContentLifecyclePage'));
+export const ManualsIndexPage = lazy(() => import('@/pages/enablement/ManualsIndexPage'));
 
 // Marketing pages
 export const LandingPage = lazy(() => import('@/pages/marketing/LandingPage'));

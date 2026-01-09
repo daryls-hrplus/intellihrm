@@ -59,7 +59,10 @@ export default function EnablementHubPage() {
   const [activeTab, setActiveTab] = useState(tabParam || "dashboard");
   const [syncDialogOpen, setSyncDialogOpen] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
-  const [showWelcome, setShowWelcome] = useState(true);
+  const [showWelcome, setShowWelcome] = useState(() => {
+    const dismissed = localStorage.getItem('enablement-welcome-dismissed');
+    return dismissed !== 'true';
+  });
   const { contentItems } = useEnablementContentStatus();
   const { releases } = useEnablementReleases();
 
@@ -144,7 +147,7 @@ export default function EnablementHubPage() {
         {
           title: "Administrator Manuals",
           description: "5 comprehensive admin guides (239 sections)",
-          href: "/enablement/manuals/appraisals",
+          href: "/enablement/manuals",
           icon: BookOpen,
           color: "bg-blue-500/10 text-blue-500",
           badge: "5 Guides",
@@ -384,8 +387,13 @@ export default function EnablementHubPage() {
     }
   };
 
-  // Check if user has any content
-  const hasContent = contentItems.length > 0 || publishedArticlesCount > 0;
+  // Check if user has published content (only count published, not in-development)
+  const hasPublishedContent = (publishedArticlesCount ?? 0) > 0;
+  
+  const handleDismissWelcome = () => {
+    setShowWelcome(false);
+    localStorage.setItem('enablement-welcome-dismissed', 'true');
+  };
 
   return (
     <AppLayout>
@@ -422,9 +430,9 @@ export default function EnablementHubPage() {
           </div>
         </div>
 
-        {/* Welcome Banner - Show for new users */}
-        {showWelcome && !hasContent && (
-          <EnablementWelcomeBanner onDismiss={() => setShowWelcome(false)} />
+        {/* Welcome Banner - Show for new users until dismissed or they have published content */}
+        {showWelcome && !hasPublishedContent && (
+          <EnablementWelcomeBanner onDismiss={handleDismissWelcome} />
         )}
 
         {/* Simplified Stats - 3 key metrics */}
