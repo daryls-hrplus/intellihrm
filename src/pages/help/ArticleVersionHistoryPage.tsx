@@ -258,10 +258,11 @@ export default function ArticleVersionHistoryPage() {
         {/* Rollback Dialog */}
         {rollbackVersion && (
           <RollbackDialog
-            isOpen={!!rollbackVersion}
-            onClose={() => setRollbackVersion(null)}
+            open={!!rollbackVersion}
+            onOpenChange={(open) => !open && setRollbackVersion(null)}
             onConfirm={handleConfirmRollback}
             targetVersion={rollbackVersion}
+            currentVersion={versions.find(v => v.id === article?.current_version_id) || null}
             isLoading={rollback.isPending}
           />
         )}

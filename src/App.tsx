@@ -102,6 +102,8 @@ import HRHubManualPage from "./pages/enablement/HRHubManualPage";
 import ClientProvisioningGuidePage from "./pages/enablement/ClientProvisioningGuidePage";
 import ClientProvisioningTestingPage from "./pages/enablement/ClientProvisioningTestingPage";
 import ManualPublishingPage from "./pages/enablement/ManualPublishingPage";
+import ContentLifecyclePage from "./pages/enablement/ContentLifecyclePage";
+import ArticleVersionHistoryPage from "./pages/help/ArticleVersionHistoryPage";
 
 // Marketing pages
 import { MarketingLayout } from "./components/marketing/MarketingLayout";
@@ -4674,6 +4676,24 @@ const App = () => (
                   <EnablementAccessGuard>
                     <ManualPublishingPage />
                   </EnablementAccessGuard>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/enablement/content-lifecycle"
+              element={
+                <ProtectedRoute requiredRoles={["admin"]}>
+                  <EnablementAccessGuard>
+                    <ContentLifecyclePage />
+                  </EnablementAccessGuard>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/help/kb/articles/:articleId/history"
+              element={
+                <ProtectedRoute requiredRoles={["admin"]}>
+                  <ArticleVersionHistoryPage />
                 </ProtectedRoute>
               }
             />

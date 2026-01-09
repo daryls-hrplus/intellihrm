@@ -39,6 +39,7 @@ import {
   Users,
   Target,
   Shield,
+  CalendarClock,
 } from "lucide-react";
 import { ContentWorkflowBoard } from "@/components/enablement/ContentWorkflowBoard";
 import { ReleaseManager } from "@/components/enablement/ReleaseManager";
@@ -248,6 +249,13 @@ export default function EnablementHubPage() {
           href: "/enablement/manual-publishing",
           icon: Upload,
           color: "bg-emerald-500/10 text-emerald-500",
+        },
+        {
+          title: "Content Lifecycle",
+          description: "Track review schedules, expiring content, and pending approvals",
+          href: "/enablement/content-lifecycle",
+          icon: CalendarClock,
+          color: "bg-amber-500/10 text-amber-500",
         },
       ],
     },
