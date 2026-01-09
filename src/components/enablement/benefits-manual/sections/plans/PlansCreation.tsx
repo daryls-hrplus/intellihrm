@@ -308,6 +308,7 @@ export function PlansCreation() {
           </p>
           <ScreenshotPlaceholder 
             alt="Plan creation wizard showing step navigation and form fields"
+            caption="Plan Creation Wizard"
           />
         </CardContent>
       </Card>
