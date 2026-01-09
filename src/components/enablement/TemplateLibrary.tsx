@@ -28,7 +28,13 @@ import {
   Eye,
   Settings,
   Palette,
-  Sparkles
+  Sparkles,
+  ClipboardList,
+  Newspaper,
+  Wrench,
+  BookMarked,
+  Scale,
+  HelpCircle
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { DocumentTemplate, DEFAULT_TEMPLATES } from "./DocumentTemplateConfig";
@@ -246,6 +252,13 @@ export function TemplateLibrary({
       case 'user_manual': return <FileText className="h-4 w-4" />;
       case 'sop': return <FileCheck className="h-4 w-4" />;
       case 'quick_start': return <Zap className="h-4 w-4" />;
+      case 'technical_doc': return <LayoutTemplate className="h-4 w-4" />;
+      case 'job_aid': return <ClipboardList className="h-4 w-4" />;
+      case 'release_notes': return <Newspaper className="h-4 w-4" />;
+      case 'implementation_guide': return <Wrench className="h-4 w-4" />;
+      case 'reference_guide': return <BookMarked className="h-4 w-4" />;
+      case 'policy_document': return <Scale className="h-4 w-4" />;
+      case 'faq_document': return <HelpCircle className="h-4 w-4" />;
       default: return <LayoutTemplate className="h-4 w-4" />;
     }
   };
@@ -595,6 +608,7 @@ export function TemplateLibrary({
                   </p>
                   <TemplateInstructionsManager 
                     templateId={editingTemplate?.id}
+                    templateType={workingTemplate?.type}
                     onInstructionsChange={(instructions) => {
                       console.log("Instructions updated:", instructions);
                     }}
@@ -645,6 +659,13 @@ export function TemplateLibrary({
                   <SelectItem value="user_manual">User Manual</SelectItem>
                   <SelectItem value="sop">SOP</SelectItem>
                   <SelectItem value="quick_start">Quick Start</SelectItem>
+                  <SelectItem value="technical_doc">Technical Documentation</SelectItem>
+                  <SelectItem value="job_aid">Job Aid</SelectItem>
+                  <SelectItem value="release_notes">Release Notes</SelectItem>
+                  <SelectItem value="implementation_guide">Implementation Guide</SelectItem>
+                  <SelectItem value="reference_guide">Reference Guide</SelectItem>
+                  <SelectItem value="policy_document">Policy Document</SelectItem>
+                  <SelectItem value="faq_document">FAQ Document</SelectItem>
                   <SelectItem value="custom">Custom</SelectItem>
                 </SelectContent>
               </Select>

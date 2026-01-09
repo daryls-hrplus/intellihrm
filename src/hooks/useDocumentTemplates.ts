@@ -19,14 +19,31 @@ export interface SavedDocumentTemplate {
   updated_at: string;
 }
 
-export type DocumentType = 'training_guide' | 'user_manual' | 'sop' | 'quick_start' | 'technical_doc';
+export type DocumentType = 
+  | 'training_guide' 
+  | 'user_manual' 
+  | 'sop' 
+  | 'quick_start' 
+  | 'technical_doc'
+  | 'job_aid'
+  | 'release_notes'
+  | 'implementation_guide'
+  | 'reference_guide'
+  | 'policy_document'
+  | 'faq_document';
 
 export const DOCUMENT_TYPE_LABELS: Record<DocumentType, string> = {
   training_guide: 'Training Guide',
   user_manual: 'User Manual',
   sop: 'Standard Operating Procedure',
   quick_start: 'Quick Start Guide',
-  technical_doc: 'Technical Documentation'
+  technical_doc: 'Technical Documentation',
+  job_aid: 'Job Aid',
+  release_notes: 'Release Notes',
+  implementation_guide: 'Implementation Guide',
+  reference_guide: 'Reference Guide',
+  policy_document: 'Policy Document',
+  faq_document: 'FAQ Document'
 };
 
 // Convert saved template to DocumentTemplate format

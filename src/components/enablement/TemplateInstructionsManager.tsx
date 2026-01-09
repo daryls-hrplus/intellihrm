@@ -10,6 +10,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import {
   MessageSquare,
@@ -18,9 +19,11 @@ import {
   Trash2,
   Save,
   RotateCcw,
-  Loader2
+  Loader2,
+  Wand2
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { AI_CONTEXT_PRESETS, DocumentType, DOCUMENT_TYPE_LABELS } from "./TemplatePresetConfigs";
 
 interface Instruction {
   id: string;
@@ -34,6 +37,7 @@ interface Instruction {
 
 interface TemplateInstructionsManagerProps {
   templateId?: string;
+  templateType?: DocumentType;
   onInstructionsChange?: (instructions: Instruction[]) => void;
 }
 
@@ -128,6 +132,7 @@ const INSTRUCTION_OPTIONS = {
 
 export function TemplateInstructionsManager({
   templateId,
+  templateType,
   onInstructionsChange
 }: TemplateInstructionsManagerProps) {
   const [selectedPreset, setSelectedPreset] = useState<string | null>(null);
@@ -325,8 +330,47 @@ export function TemplateInstructionsManager({
     return Object.values(selectedOptions).flat().length + (customInstructions.trim() ? 1 : 0);
   };
 
+  const handleLoadAIContextPreset = (type: DocumentType) => {
+    const preset = AI_CONTEXT_PRESETS[type];
+    if (preset) {
+      setCustomInstructions(preset);
+      toast.success(`Loaded ${DOCUMENT_TYPE_LABELS[type]} AI context preset`);
+    }
+  };
+
   return (
     <div className="space-y-4">
+      {/* AI Context Preset Loader */}
+      <div className="space-y-2">
+        <Label className="text-sm font-medium">Load Industry-Aligned AI Context</Label>
+        <div className="flex gap-2">
+          <Select onValueChange={(value) => handleLoadAIContextPreset(value as DocumentType)}>
+            <SelectTrigger className="flex-1">
+              <SelectValue placeholder="Select document type preset..." />
+            </SelectTrigger>
+            <SelectContent>
+              {Object.entries(DOCUMENT_TYPE_LABELS).map(([key, label]) => (
+                <SelectItem key={key} value={key}>{label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button 
+            variant="outline" 
+            size="icon"
+            onClick={() => templateType && handleLoadAIContextPreset(templateType)}
+            disabled={!templateType}
+            title="Load preset for current template type"
+          >
+            <Wand2 className="h-4 w-4" />
+          </Button>
+        </div>
+        <p className="text-xs text-muted-foreground">
+          Load industry-standard AI instructions based on document type (Workday, SAP, ISO standards)
+        </p>
+      </div>
+
+      <Separator />
+
       {/* Presets */}
       <div className="space-y-2">
         <Label className="text-sm font-medium">Quick Presets</Label>
