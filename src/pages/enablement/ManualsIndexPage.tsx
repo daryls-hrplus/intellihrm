@@ -71,6 +71,17 @@ const manuals = [
     href: "/enablement/manuals/goals",
     version: "2.4",
   },
+  {
+    id: "benefits",
+    title: "Benefits Administrator Guide",
+    description: "Complete benefits management including plans, enrollment, claims, life events, and analytics",
+    icon: Target,
+    color: "bg-pink-500/10 text-pink-600 border-pink-500/20",
+    badgeColor: "bg-pink-500/10 text-pink-700 border-pink-500/30",
+    sections: 45,
+    href: "/enablement/manuals/benefits",
+    version: "2.4",
+  },
 ];
 
 export default function ManualsIndexPage() {
