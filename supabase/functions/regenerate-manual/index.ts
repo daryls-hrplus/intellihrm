@@ -21,7 +21,9 @@ serve(async (req) => {
       runType = 'incremental',
       versionBump = 'minor',
       userId,
-      sectionIds // Optional: specific sections to regenerate
+      sectionIds, // Optional: specific sections to regenerate
+      templateConfig, // Optional: template/branding configuration
+      targetRoles // Optional: target audience roles
     } = await req.json();
 
     if (!manualCode) {
@@ -89,9 +91,13 @@ serve(async (req) => {
       .eq('id', run.id);
 
     // Process sections (with rate limiting)
+    // Get template config from manual if not passed explicitly
+    const effectiveTemplateConfig = templateConfig || manual.template_config || {};
+    const effectiveTargetRoles = targetRoles || effectiveTemplateConfig.targetRoles || ['admin'];
+
     for (const section of sections || []) {
       try {
-        // Call generate-manual-section function
+        // Call generate-manual-section function with template config
         const response = await fetch(`${supabaseUrl}/functions/v1/generate-manual-section`, {
           method: 'POST',
           headers: {
@@ -101,7 +107,9 @@ serve(async (req) => {
           body: JSON.stringify({
             sectionId: section.id,
             regenerationType: runType === 'full' ? 'full' : 'incremental',
-            userId
+            userId,
+            templateConfig: effectiveTemplateConfig,
+            targetRoles: effectiveTargetRoles
           })
         });
 
@@ -209,8 +217,13 @@ serve(async (req) => {
 
 function incrementVersion(
   currentVersion: string,
-  bumpType: 'major' | 'minor' | 'patch'
+  bumpType: 'initial' | 'major' | 'minor' | 'patch'
 ): string {
+  // Handle initial version
+  if (bumpType === 'initial') {
+    return '1.0.0';
+  }
+
   const parts = currentVersion.replace('v', '').split('.').map(Number);
   const [major = 1, minor = 0, patch = 0] = parts;
 
