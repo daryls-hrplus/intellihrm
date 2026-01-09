@@ -54,7 +54,7 @@ export interface ManualGenerationRun {
   manual_id: string;
   triggered_by: string | null;
   run_type: 'full' | 'incremental' | 'section';
-  version_bump: 'major' | 'minor' | 'patch' | null;
+  version_bump: 'initial' | 'major' | 'minor' | 'patch' | null;
   from_version: string | null;
   to_version: string | null;
   sections_total: number;
@@ -255,7 +255,7 @@ export function useRegenerateManual() {
     }: { 
       manualCode: string;
       runType?: 'full' | 'incremental' | 'section';
-      versionBump?: 'major' | 'minor' | 'patch';
+      versionBump?: 'initial' | 'major' | 'minor' | 'patch';
       sectionIds?: string[];
     }) => {
       const { data: { user } } = await supabase.auth.getUser();
