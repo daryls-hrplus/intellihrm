@@ -35,6 +35,8 @@ import { DocumentTemplate, DEFAULT_TEMPLATES } from "@/components/enablement/Doc
 import { ConfluenceStylePreview, GeneratedDocument } from "@/components/enablement/ConfluenceStylePreview";
 import { TemplateLibrary } from "@/components/enablement/TemplateLibrary";
 import { ManualGenerationDashboard } from "@/components/enablement/ManualGenerationDashboard";
+import { TemplatePreviewCard } from "@/components/enablement/TemplatePreviewCard";
+import { useDefaultTemplate, DocumentType } from "@/hooks/useDocumentTemplates";
 
 type ContentType = 'module_overview' | 'feature_tutorial' | 'video_storyboard' | 'quick_reference' | 'kb_article' | 'training_guide' | 'sop';
 
@@ -857,14 +859,21 @@ export default function ApplicationDocsGeneratorPage() {
                 </SelectContent>
               </Select>
               
-              {/* Template Library */}
+              {/* Active Template Preview */}
+              <div className="mt-3">
+                <TemplatePreviewCard
+                  template={selectedTemplate}
+                  documentType={(contentType === 'training_guide' || contentType === 'sop' || contentType === 'quick_reference') 
+                    ? contentType as DocumentType 
+                    : 'training_guide'}
+                  isDefault={true}
+                  compact={true}
+                  onChangeTemplate={() => setShowTemplateLibrary(true)}
+                />
+              </div>
+              
+              {/* Template Library Sheet */}
               <Sheet open={showTemplateLibrary} onOpenChange={setShowTemplateLibrary}>
-                <SheetTrigger asChild>
-                  <Button variant="outline" size="sm" className="mt-2">
-                    <Library className="h-4 w-4 mr-2" />
-                    Template Library
-                  </Button>
-                </SheetTrigger>
                 <SheetContent side="right" className="w-full sm:max-w-3xl overflow-y-auto">
                   <TemplateLibrary
                     selectedTemplate={selectedTemplate}
@@ -877,20 +886,6 @@ export default function ApplicationDocsGeneratorPage() {
                   />
                 </SheetContent>
               </Sheet>
-              {selectedTemplate && (
-                <div className="mt-2 space-y-1">
-                  <span className="text-sm font-medium">{selectedTemplate.name}</span>
-                  <div className="flex items-center gap-2">
-                    <div 
-                      className="w-4 h-4 rounded-full border"
-                      style={{ backgroundColor: selectedTemplate.branding.primaryColor }}
-                    />
-                    <span className="text-xs text-muted-foreground">
-                      {selectedTemplate.branding.companyName || 'No branding set'}
-                    </span>
-                  </div>
-                </div>
-              )}
             </div>
 
             <div className="space-y-2">
