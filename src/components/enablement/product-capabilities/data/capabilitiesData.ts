@@ -38,7 +38,7 @@ export interface ActData {
 export const EXECUTIVE_SUMMARY = {
   title: "Intelli HRM",
   subtitle: "AI-First Human Resource Management System",
-  description: "Purpose-built for the Caribbean, Africa, and global expansion. Deep regional compliance meets embedded intelligence for enterprise-grade workforce management.",
+  description: "Purpose-built for the Caribbean, Latin America, and Africa. Deep regional compliance meets embedded intelligence for enterprise-grade workforce management.",
   stats: [
     { value: "18", label: "Core Modules" },
     { value: "450+", label: "Features" },
@@ -48,7 +48,7 @@ export const EXECUTIVE_SUMMARY = {
   valueProps: [
     {
       title: "Regional Expertise",
-      description: "Deep compliance for Caribbean islands (Jamaica NIS/NHT/PAYE, Trinidad, Barbados) and African markets (Ghana SSNIT, Nigeria). Built-in labor law intelligence."
+      description: "Deep compliance for Caribbean islands (Jamaica NIS/NHT/PAYE, Trinidad, Barbados), Latin America (Dominican Republic, Mexico), and Africa (Ghana SSNIT, Nigeria PFA). Built-in labor law intelligence."
     },
     {
       title: "AI at the Core",
@@ -84,63 +84,116 @@ export const CAPABILITIES_DATA: ActData[] = [
         id: "admin-security",
         title: "Admin & Security",
         tagline: "Enterprise-grade security that scales with you",
-        overview: "Foundation for all platform operations with comprehensive user management, role-based access control, and full audit capabilities.",
-        badge: "45+ Capabilities",
+        overview: "Foundation for all platform operations with comprehensive user lifecycle management, multi-factor authentication, granular role-based access control, PII protection, organizational scoping, approval workflows, and full audit capabilities with AI-powered security monitoring.",
+        badge: "75+ Capabilities",
         categories: [
           {
-            title: "User Management",
+            title: "User Lifecycle Management",
             items: [
-              "User creation and provisioning",
-              "Bulk user import/export",
-              "Delegation matrix configuration",
-              "Access expiry and auto-deactivation",
-              "Password policies and enforcement",
-              "Multi-factor authentication (MFA)"
+              "User creation with configurable provisioning workflows and approval routing",
+              "Bulk user import/export with field mapping validation and error handling",
+              "Employee status transitions (active, inactive, terminated) with cascading access removal",
+              "Access expiry scheduling with automatic deactivation and notification alerts",
+              "Profile management with company-specific configurable fields",
+              "Badge number pattern configuration per company with auto-generation",
+              "User-to-company, department, and section assignments with effective dating"
             ]
           },
           {
-            title: "Role-Based Access",
+            title: "Authentication & Identity",
             items: [
-              "Granular permission management",
-              "Function-level security controls",
-              "PII field protection",
-              "Role inheritance hierarchies",
-              "Custom role creation",
-              "Module-level access control"
+              "Multi-factor authentication (TOTP, SMS, Email) with configurable enrollment periods",
+              "MFA grace periods and mandatory re-authentication for sensitive operations",
+              "Password policy configuration (length, complexity, history, special characters)",
+              "Password expiry with forced rotation and first-login change enforcement",
+              "Single Sign-On integration (SAML 2.0, OIDC) with attribute mapping",
+              "Session management with configurable timeout and concurrent session limits",
+              "Device binding, browser close logout, and remember-me token management"
             ]
           },
           {
-            title: "Audit & Compliance",
+            title: "Role-Based Access Control",
             items: [
-              "Complete activity logging",
-              "Security audit reports",
-              "GDPR compliance controls",
-              "Data retention policies",
-              "Investigation request tracking",
-              "Compliance dashboards"
+              "Granular permission management (View/Create/Edit/Delete) per function",
+              "Module, tab, and card-level permission controls",
+              "Container-based access scoping for multi-tenant environments",
+              "Role inheritance hierarchies with seeded vs. custom role classification",
+              "Role type classification (Super Admin, Admin, Business, Self-Service)",
+              "Role duplication and templating for rapid deployment",
+              "Multi-tenant role visibility controls with activation/deactivation"
             ]
           },
           {
-            title: "System Configuration",
+            title: "Data Access & PII Protection",
             items: [
-              "Business rules engine",
-              "Lookup values management",
-              "Document type configuration",
-              "Workflow template builder",
-              "Custom field definitions",
-              "Company settings management"
+              "PII access levels (None/Limited/Full) configurable per role and domain",
+              "Domain-specific PII controls: Personal, Compensation, Banking, Medical, Disciplinary",
+              "Field-level data masking with just-in-time (JIT) access for sensitive data",
+              "Approval workflows for full PII access with time-limited grants",
+              "PII export restrictions and access logging with real-time alerts",
+              "GDPR data subject request handling with right to erasure support"
+            ]
+          },
+          {
+            title: "Organizational Scope Controls",
+            items: [
+              "Company-level access restrictions for multi-entity deployments",
+              "Division, department, and section-level permission scoping",
+              "Pay group and company tag-based access controls",
+              "Position type exclusions for sensitive role categories",
+              "Hierarchical reporting line visibility controls",
+              "Cross-entity permission management for shared services"
+            ]
+          },
+          {
+            title: "Approval Workflows & Delegation",
+            items: [
+              "Configurable multi-step approval workflows with parallel/sequential routing",
+              "Approval delegation with date ranges and workflow type restrictions",
+              "Auto-escalation with SLA enforcement and reminder notifications",
+              "Auto-approval rules for low-risk actions based on configurable thresholds",
+              "Digital signature integration for critical approvals",
+              "Substitute approver configuration with delegation audit trails",
+              "Workflow analytics with bottleneck detection and optimization recommendations"
+            ]
+          },
+          {
+            title: "Audit, Compliance & Monitoring",
+            items: [
+              "Complete activity logging with before/after value comparison (diff view)",
+              "Risk-level classification for audit events with priority alerting",
+              "Module-based audit filtering with export and long-term archival",
+              "Security audit reports and real-time compliance dashboards",
+              "Data retention policy configuration with automated enforcement",
+              "Investigation request tracking with approval workflows",
+              "Access certification campaigns and compliance framework alignment (ISO 27001, SOC 2)"
+            ]
+          },
+          {
+            title: "AI Security & Governance",
+            items: [
+              "AI security violation detection with unauthorized data access monitoring",
+              "Role escalation attempt detection and PII query blocking",
+              "AI response audit trails with explainability logging",
+              "False positive review workflows with severity-based alert routing",
+              "AI guardrails configuration with budget limit enforcement",
+              "Model registry with approved/prohibited use case management"
             ]
           }
         ],
         aiCapabilities: [
-          { type: "Predictive", description: "Anomaly detection in access patterns" },
-          { type: "Analytics", description: "Security risk scoring and alerts" },
-          { type: "Automated", description: "Suspicious activity flagging" }
+          { type: "Predictive", description: "Anomaly detection in access patterns and attrition-related access behavior" },
+          { type: "Analytics", description: "Security risk scoring, role permission sprawl analysis, unused permission detection" },
+          { type: "Automated", description: "Suspicious activity flagging, auto-deactivation triggers, compliance gap alerts" },
+          { type: "Prescriptive", description: "Role optimization recommendations and access review suggestions" }
         ],
         integrations: [
-          { module: "All Modules", description: "Central authentication and authorization" },
-          { module: "Payroll", description: "Sensitive data access controls" },
-          { module: "HR Hub", description: "Policy enforcement integration" }
+          { module: "All Modules", description: "Central authentication, authorization, and audit backbone" },
+          { module: "Payroll", description: "Sensitive compensation data access controls and visibility rules" },
+          { module: "HR Hub", description: "Policy enforcement and document access permissions" },
+          { module: "Performance", description: "360 feedback and investigation access controls" },
+          { module: "Compensation", description: "Salary data PII protection and approval workflows" },
+          { module: "Employee Relations", description: "Disciplinary record access restrictions" }
         ]
       },
       {
