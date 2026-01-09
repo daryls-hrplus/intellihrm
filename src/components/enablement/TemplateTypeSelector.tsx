@@ -7,7 +7,13 @@ import {
   FileCheck, 
   Zap, 
   LayoutTemplate,
-  Check
+  Check,
+  ClipboardList,
+  Newspaper,
+  Wrench,
+  BookMarked,
+  Scale,
+  HelpCircle
 } from "lucide-react";
 import { DocumentType, DOCUMENT_TYPE_LABELS } from "@/hooks/useDocumentTemplates";
 
@@ -29,7 +35,7 @@ const DOCUMENT_TYPE_CONFIG: Record<DocumentType, {
   },
   user_manual: {
     icon: <FileText className="h-5 w-5" />,
-    description: "Standard user manual with detailed instructions",
+    description: "8-part enterprise manual with detailed admin instructions",
     color: "text-emerald-600"
   },
   sop: {
@@ -46,19 +52,61 @@ const DOCUMENT_TYPE_CONFIG: Record<DocumentType, {
     icon: <LayoutTemplate className="h-5 w-5" />,
     description: "Technical documentation for developers and admins",
     color: "text-slate-600"
+  },
+  job_aid: {
+    icon: <ClipboardList className="h-5 w-5" />,
+    description: "1-2 page quick reference cards for single tasks",
+    color: "text-orange-600"
+  },
+  release_notes: {
+    icon: <Newspaper className="h-5 w-5" />,
+    description: "Version-specific updates, new features, bug fixes",
+    color: "text-cyan-600"
+  },
+  implementation_guide: {
+    icon: <Wrench className="h-5 w-5" />,
+    description: "Step-by-step setup guides for implementation consultants",
+    color: "text-indigo-600"
+  },
+  reference_guide: {
+    icon: <BookMarked className="h-5 w-5" />,
+    description: "Lookup-style documentation with field definitions and codes",
+    color: "text-rose-600"
+  },
+  policy_document: {
+    icon: <Scale className="h-5 w-5" />,
+    description: "HR policies with effective dates, approval, and compliance",
+    color: "text-red-600"
+  },
+  faq_document: {
+    icon: <HelpCircle className="h-5 w-5" />,
+    description: "Structured question-and-answer format",
+    color: "text-teal-600"
   }
 };
+
+const ALL_DOCUMENT_TYPES: DocumentType[] = [
+  'training_guide', 
+  'user_manual', 
+  'sop', 
+  'quick_start', 
+  'technical_doc',
+  'job_aid',
+  'release_notes',
+  'implementation_guide',
+  'reference_guide',
+  'policy_document',
+  'faq_document'
+];
 
 export function TemplateTypeSelector({ 
   value, 
   onChange, 
   showDescriptions = true 
 }: TemplateTypeSelectorProps) {
-  const types: DocumentType[] = ['training_guide', 'user_manual', 'sop', 'quick_start', 'technical_doc'];
-
   return (
     <div className="grid gap-3">
-      {types.map((type) => {
+      {ALL_DOCUMENT_TYPES.map((type) => {
         const config = DOCUMENT_TYPE_CONFIG[type];
         const isSelected = value === type;
         
@@ -113,3 +161,6 @@ export function TemplateTypeBadge({ type }: { type: DocumentType }) {
     </Badge>
   );
 }
+
+// Export the config for use in other components
+export { DOCUMENT_TYPE_CONFIG };

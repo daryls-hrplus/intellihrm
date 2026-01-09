@@ -26,11 +26,13 @@ import {
   RotateCcw
 } from "lucide-react";
 
+import { DocumentType } from "@/hooks/useDocumentTemplates";
+
 export interface DocumentTemplate {
   id: string;
   name: string;
   description: string;
-  type: 'training_guide' | 'user_manual' | 'quick_start' | 'technical_doc' | 'sop';
+  type: DocumentType;
   layout: {
     includeTableOfContents: boolean;
     includeSummary: boolean;
@@ -69,160 +71,9 @@ export interface DocumentTemplate {
   };
 }
 
-const DEFAULT_TEMPLATES: DocumentTemplate[] = [
-  {
-    id: 'training-guide',
-    name: 'Training Guide',
-    description: 'Comprehensive training documentation with learning objectives and assessments',
-    type: 'training_guide',
-    layout: {
-      includeTableOfContents: true,
-      includeSummary: true,
-      includePrerequisites: true,
-      includeLearningObjectives: true,
-      includeScreenshots: true,
-      includeStepNumbers: true,
-      includeTimeEstimates: true,
-      includeRoleIndicators: true,
-      includeVersionInfo: true,
-      includeRelatedDocs: true,
-    },
-    sections: {
-      introduction: true,
-      overview: true,
-      prerequisites: true,
-      stepByStep: true,
-      bestPractices: true,
-      troubleshooting: true,
-      faqs: true,
-      glossary: true,
-      appendix: true,
-    },
-    formatting: {
-      headerStyle: 'numbered',
-      calloutStyle: 'confluence',
-      screenshotPlacement: 'annotated',
-      codeBlockTheme: 'auto',
-    },
-    branding: {
-      primaryColor: '#0052CC',
-    },
-  },
-  {
-    id: 'user-manual',
-    name: 'User Manual',
-    description: 'Standard user manual format with detailed instructions',
-    type: 'user_manual',
-    layout: {
-      includeTableOfContents: true,
-      includeSummary: true,
-      includePrerequisites: true,
-      includeLearningObjectives: false,
-      includeScreenshots: true,
-      includeStepNumbers: true,
-      includeTimeEstimates: false,
-      includeRoleIndicators: true,
-      includeVersionInfo: true,
-      includeRelatedDocs: true,
-    },
-    sections: {
-      introduction: true,
-      overview: true,
-      prerequisites: true,
-      stepByStep: true,
-      bestPractices: true,
-      troubleshooting: true,
-      faqs: true,
-      glossary: false,
-      appendix: false,
-    },
-    formatting: {
-      headerStyle: 'numbered',
-      calloutStyle: 'confluence',
-      screenshotPlacement: 'inline',
-      codeBlockTheme: 'light',
-    },
-    branding: {
-      primaryColor: '#0052CC',
-    },
-  },
-  {
-    id: 'quick-start',
-    name: 'Quick Start Guide',
-    description: 'Concise getting-started guide for rapid onboarding',
-    type: 'quick_start',
-    layout: {
-      includeTableOfContents: false,
-      includeSummary: true,
-      includePrerequisites: true,
-      includeLearningObjectives: false,
-      includeScreenshots: true,
-      includeStepNumbers: true,
-      includeTimeEstimates: true,
-      includeRoleIndicators: false,
-      includeVersionInfo: false,
-      includeRelatedDocs: true,
-    },
-    sections: {
-      introduction: true,
-      overview: false,
-      prerequisites: true,
-      stepByStep: true,
-      bestPractices: false,
-      troubleshooting: false,
-      faqs: false,
-      glossary: false,
-      appendix: false,
-    },
-    formatting: {
-      headerStyle: 'plain',
-      calloutStyle: 'minimal',
-      screenshotPlacement: 'inline',
-      codeBlockTheme: 'auto',
-    },
-    branding: {
-      primaryColor: '#0052CC',
-    },
-  },
-  {
-    id: 'sop',
-    name: 'Standard Operating Procedure',
-    description: 'Formal SOP format with approval sections and compliance elements',
-    type: 'sop',
-    layout: {
-      includeTableOfContents: true,
-      includeSummary: true,
-      includePrerequisites: true,
-      includeLearningObjectives: false,
-      includeScreenshots: true,
-      includeStepNumbers: true,
-      includeTimeEstimates: false,
-      includeRoleIndicators: true,
-      includeVersionInfo: true,
-      includeRelatedDocs: true,
-    },
-    sections: {
-      introduction: true,
-      overview: true,
-      prerequisites: true,
-      stepByStep: true,
-      bestPractices: true,
-      troubleshooting: true,
-      faqs: false,
-      glossary: true,
-      appendix: true,
-    },
-    formatting: {
-      headerStyle: 'numbered',
-      calloutStyle: 'confluence',
-      screenshotPlacement: 'annotated',
-      codeBlockTheme: 'light',
-    },
-    branding: {
-      primaryColor: '#0052CC',
-    },
-  },
-];
+import { INDUSTRY_ALIGNED_TEMPLATES } from "./TemplatePresetConfigs";
+
+const DEFAULT_TEMPLATES: DocumentTemplate[] = INDUSTRY_ALIGNED_TEMPLATES;
 
 interface DocumentTemplateConfigProps {
   selectedTemplate: DocumentTemplate | null;
