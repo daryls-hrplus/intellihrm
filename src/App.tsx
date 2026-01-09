@@ -1,617 +1,45 @@
+import { Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { TranslationsProvider } from "@/components/TranslationsProvider";
 import { ThemeProvider } from "next-themes";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { EnablementAccessGuard } from "@/components/auth/EnablementAccessGuard";
-import Index from "./pages/Index";
-import NotFound from "./pages/NotFound";
-import AuthPage from "./pages/AuthPage";
-import MFAChallengePage from "./pages/auth/MFAChallengePage";
-import UnauthorizedPage from "./pages/UnauthorizedPage";
+import { ProtectedLayout } from "@/components/layout/ProtectedLayout";
+import { MarketingLayout } from "@/components/marketing/MarketingLayout";
+import { Loader2 } from "lucide-react";
 
 // Initialize i18n
 import "@/i18n";
 
-// Admin pages
-import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
-import AdminUsersPage from "./pages/admin/AdminUsersPage";
-import AdminCompaniesPage from "./pages/admin/AdminCompaniesPage";
-import AdminCompanyGroupsPage from "./pages/admin/AdminCompanyGroupsPage";
-import AdminAuditLogsPage from "./pages/admin/AdminAuditLogsPage";
-import AuditCoveragePage from "./pages/admin/AuditCoveragePage";
-import AdminAIUsagePage from "./pages/admin/AdminAIUsagePage";
-import AdminRolesPage from "./pages/admin/AdminRolesPage";
-import RoleManagementPage from "./pages/admin/RoleManagementPage";
-import RoleDetailPage from "./pages/admin/RoleDetailPage";
-import AdminPiiAccessPage from "./pages/admin/AdminPiiAccessPage";
-import AISecurityViolationsPage from "./pages/admin/AISecurityViolationsPage";
-import AdminSettingsPage from "./pages/admin/AdminSettingsPage";
-import AdminPermissionsSummaryPage from "./pages/admin/AdminPermissionsSummaryPage";
-import AdminAccessRequestsPage from "./pages/admin/AdminAccessRequestsPage";
-import AdminAutoApprovalPage from "./pages/admin/AdminAutoApprovalPage";
-import AdminBulkImportPage from "./pages/admin/AdminBulkImportPage";
-import OrgStructureConfigPage from "./pages/workforce/OrgStructureConfigPage";
-import AdminScheduledReportsPage from "./pages/admin/AdminScheduledReportsPage";
-import AdminKnowledgeBasePage from "./pages/admin/AdminKnowledgeBasePage";
-import AdminHelpdeskPage from "./pages/admin/AdminHelpdeskPage";
-import AdminPolicyDocumentsPage from "./pages/admin/AdminPolicyDocumentsPage";
-import AdminLetterTemplatesPage from "./pages/admin/AdminLetterTemplatesPage";
-import AdminLookupValuesPage from "./pages/admin/AdminLookupValuesPage";
-import AdminLmsManagementPage from "./pages/admin/AdminLmsManagementPage";
-import DemoManagementPage from "./pages/admin/DemoManagementPage";
-import DemoAnalyticsDashboard from "./pages/admin/DemoAnalyticsDashboard";
-import ProspectJourneyPage from "./pages/admin/ProspectJourneyPage";
-import AdminOnboardingPage from "./pages/admin/AdminOnboardingPage";
-import AdminOnboardingDetailPage from "./pages/admin/AdminOnboardingDetailPage";
-import AdminColorSchemePage from "./pages/admin/AdminColorSchemePage";
-import TerritoriesPage from "./pages/admin/TerritoriesPage";
-import CompanyTagsPage from "./pages/admin/CompanyTagsPage";
-import GranularPermissionsPage from "./pages/admin/GranularPermissionsPage";
-import ImplementationHandbookPage from "./pages/admin/ImplementationHandbookPage";
-import FeaturesBrochurePage from "./pages/admin/FeaturesBrochurePage";
-import AdminCustomFieldsPage from "./pages/admin/AdminCustomFieldsPage";
-import ModulesBrochurePage from "./pages/admin/ModulesBrochurePage";
-import CurrencyManagementPage from "./pages/admin/CurrencyManagementPage";
-import SubscriptionManagementPage from "./pages/admin/SubscriptionManagementPage";
-import MFASettingsPage from "./pages/admin/MFASettingsPage";
-import SSOSettingsPage from "./pages/admin/SSOSettingsPage";
-import PasswordPoliciesPage from "./pages/admin/PasswordPoliciesPage";
-import SessionManagementPage from "./pages/admin/SessionManagementPage";
-import StaffLoanDesignDocumentPage from "./pages/documents/StaffLoanDesignDocumentPage";
-import AIGovernancePage from "./pages/admin/AIGovernancePage";
-import TranslationsPage from "./pages/admin/TranslationsPage";
-import CompanyValuesPage from "./pages/admin/CompanyValuesPage";
-import ClientRegistryPage from "./pages/admin/ClientRegistryPage";
-import ClientDetailPage from "./pages/admin/ClientDetailPage";
-import ClientProvisioningPage from "./pages/admin/ClientProvisioningPage";
-import InvestigationRequestsPage from "./pages/admin/InvestigationRequestsPage";
+// Import all lazy-loaded pages
+import * as Pages from "@/routes/lazyPages";
 
-// Demo pages
-import DemoLoginPage from "./pages/demo/DemoLoginPage";
-import DemoExpiredPage from "./pages/demo/DemoExpiredPage";
-import DemoConversionPage from "./pages/demo/DemoConversionPage";
-
-// Enablement pages
-import EnablementHubPage from "./pages/enablement/EnablementHubPage";
-import ApplicationDocsGeneratorPage from "./pages/enablement/ApplicationDocsGeneratorPage";
-import FeatureCatalogPage from "./pages/enablement/FeatureCatalogPage";
-import FeatureDatabasePage from "./pages/enablement/FeatureDatabasePage";
-import TemplateLibraryPage from "./pages/enablement/TemplateLibraryPage";
-import EnablementAnalyticsPage from "./pages/enablement/EnablementAnalyticsPage";
-import SCORMGeneratorPage from "./pages/enablement/SCORMGeneratorPage";
-import ReleaseCalendarPage from "./pages/enablement/ReleaseCalendarPage";
-import EnablementSettingsPage from "./pages/enablement/EnablementSettingsPage";
-import EnablementAIToolsPage from "./pages/enablement/EnablementAIToolsPage";
-import EnablementGuidePage from "./pages/enablement/EnablementGuidePage";
-import EnablementArtifactsPage from "./pages/enablement/EnablementArtifactsPage";
-import ArtifactEditorPage from "./pages/enablement/ArtifactEditorPage";
-import ArtifactDetailPage from "./pages/enablement/ArtifactDetailPage";
-import ToursManagementPage from "./pages/enablement/ToursManagementPage";
-import FeatureAuditDashboard from "./pages/enablement/FeatureAuditDashboard";
-import ImplementationDetailPage from "./pages/enablement/ImplementationDetailPage";
-import AppraisalsManualPage from "./pages/enablement/AppraisalsManualPage";
-import AdminSecurityManualPage from "./pages/enablement/AdminSecurityManualPage";
-import GoalsManualPage from "./pages/enablement/GoalsManualPage";
-import WorkforceManualPage from "./pages/enablement/WorkforceManualPage";
-import HRHubManualPage from "./pages/enablement/HRHubManualPage";
-import ManualsIndexPage from "./pages/enablement/ManualsIndexPage";
-import ClientProvisioningGuidePage from "./pages/enablement/ClientProvisioningGuidePage";
-import ClientProvisioningTestingPage from "./pages/enablement/ClientProvisioningTestingPage";
-import ManualPublishingPage from "./pages/enablement/ManualPublishingPage";
-import ContentLifecyclePage from "./pages/enablement/ContentLifecyclePage";
-import ArticleVersionHistoryPage from "./pages/help/ArticleVersionHistoryPage";
-
-// Marketing pages
-import { MarketingLayout } from "./components/marketing/MarketingLayout";
-import LandingPage from "./pages/marketing/LandingPage";
-import RegisterDemoPage from "./pages/marketing/RegisterDemoPage";
-import RegisterDemoSuccessPage from "./pages/marketing/RegisterDemoSuccessPage";
-import FeaturesPage from "./pages/marketing/FeaturesPage";
-import AboutPage from "./pages/marketing/AboutPage";
-
-// Product Tour pages
-import ProductTourLandingPage from "./pages/product-tour/ProductTourLandingPage";
-import ProductTourPlayerPage from "./pages/product-tour/ProductTourPlayerPage";
-
-// Subscription pages
-import SubscriptionPage from "./pages/subscription/SubscriptionPage";
-import UpgradePage from "./pages/subscription/UpgradePage";
-// Workforce pages
-import WorkforceDashboardPage from "./pages/workforce/WorkforceDashboardPage";
-import EmployeesPage from "./pages/workforce/EmployeesPage";
-import EmployeeProfilePage from "./pages/workforce/EmployeeProfilePage";
-import PositionsPage from "./pages/workforce/PositionsPage";
-import OrgStructurePage from "./pages/workforce/OrgStructurePage";
-import DepartmentsPage from "./pages/workforce/DepartmentsPage";
-import OrgChangesPage from "./pages/workforce/OrgChangesPage";
-import EmployeeAssignmentsPage from "./pages/workforce/EmployeeAssignmentsPage";
-import EmployeeTransactionsPage from "./pages/workforce/EmployeeTransactionsPage";
-import WorkforceForecastingPage from "./pages/workforce/WorkforceForecastingPage";
-import IntranetAdminPage from "./pages/hr-hub/IntranetAdminPage";
-import CompanyCommunicationsPage from "./pages/hr-hub/CompanyCommunicationsPage";
-import JobFamiliesPage from "./pages/workforce/JobFamiliesPage";
-import JobsPage from "./pages/workforce/JobsPage";
-import CompetenciesPage from "./pages/workforce/CompetenciesPage";
-import ResponsibilitiesPage from "./pages/workforce/ResponsibilitiesPage";
-import CapabilityRegistryPage from "./pages/workforce/CapabilityRegistryPage";
-import OffboardingPage from "./pages/workforce/OffboardingPage";
-import WorkforceAnalyticsPage from "./pages/workforce/WorkforceAnalyticsPage";
-import QualificationsPage from "./pages/workforce/QualificationsPage";
-import CompanyBoardsPage from "./pages/workforce/CompanyBoardsPage";
-import GovernancePage from "./pages/workforce/GovernancePage";
-import PositionControlVacanciesPage from "./pages/workforce/PositionControlVacanciesPage";
-import HeadcountRequestsPage from "./pages/workforce/HeadcountRequestsPage";
-import HeadcountAnalyticsPage from "./pages/workforce/HeadcountAnalyticsPage";
-import HeadcountForecastPage from "./pages/workforce/HeadcountForecastPage";
-import DivisionsPage from "./pages/workforce/DivisionsPage";
-
-// Intranet pages
-import IntranetDashboardPage from "./pages/intranet/IntranetDashboardPage";
-
-// Privacy pages
-import PrivacySettingsPage from "./pages/profile/PrivacySettingsPage";
-
-// Performance pages
-import PerformanceDashboardPage from "./pages/performance/PerformanceDashboardPage";
-import GoalsPage from "./pages/performance/GoalsPage";
-import Review360Page from "./pages/performance/Review360Page";
-import AppraisalsPage from "./pages/performance/AppraisalsPage";
-import PerformanceImprovementPlansPage from "./pages/performance/PerformanceImprovementPlansPage";
-import ContinuousFeedbackPage from "./pages/performance/ContinuousFeedbackPage";
-import RecognitionAwardsPage from "./pages/performance/RecognitionAwardsPage";
-import PerformanceIntelligenceHub from "./pages/performance/PerformanceIntelligenceHub";
-import CalibrationSessionsPage from "./pages/performance/CalibrationSessionsPage";
-import CalibrationWorkspacePage from "./pages/performance/CalibrationWorkspacePage";
-import PerformanceSetupPage from "./pages/performance/PerformanceSetupPage";
-import TalentUnifiedDashboardPage from "./pages/performance/TalentUnifiedDashboardPage";
-import MyDevelopmentThemesPage from "./pages/performance/feedback/MyDevelopmentThemesPage";
-
-// Leave pages
-import LeaveDashboardPage from "./pages/leave/LeaveDashboardPage";
-import LeaveTypesPage from "./pages/leave/LeaveTypesPage";
-import LeaveAccrualRulesPage from "./pages/leave/LeaveAccrualRulesPage";
-import LeaveRolloverRulesPage from "./pages/leave/LeaveRolloverRulesPage";
-import LeaveScheduleConfigPage from "./pages/leave/LeaveScheduleConfigPage";
-import MyLeavePage from "./pages/leave/MyLeavePage";
-import ApplyLeavePage from "./pages/leave/ApplyLeavePage";
-import LeaveApprovalsPage from "./pages/leave/LeaveApprovalsPage";
-import LeaveHolidaysPage from "./pages/leave/LeaveHolidaysPage";
-import LeaveBalanceRecalculationPage from "./pages/leave/LeaveBalanceRecalculationPage";
-import LeaveAnalyticsPage from "./pages/leave/LeaveAnalyticsPage";
-import CompensatoryTimePage from "./pages/leave/CompensatoryTimePage";
-import CompTimePoliciesPage from "./pages/leave/CompTimePoliciesPage";
-import LeaveCalendarPage from "./pages/leave/LeaveCalendarPage";
-import LeaveBalanceAdjustmentsPage from "./pages/leave/LeaveBalanceAdjustmentsPage";
-import EmployeeLeaveRecordsPage from "./pages/leave/EmployeeLeaveRecordsPage";
-import EmployeeLeaveBalancesPage from "./pages/leave/EmployeeLeaveBalancesPage";
-import LeaveYearsPage from "./pages/leave/LeaveYearsPage";
-import LeaveBlackoutPeriodsPage from "./pages/leave/LeaveBlackoutPeriodsPage";
-import LeaveConflictRulesPage from "./pages/leave/LeaveConflictRulesPage";
-import LeaveEncashmentPage from "./pages/leave/LeaveEncashmentPage";
-import LeaveLiabilityPage from "./pages/leave/LeaveLiabilityPage";
-import LeaveProrataSettingsPage from "./pages/leave/LeaveProrataSettingsPage";
-import MaternityLeavePage from "./pages/leave/MaternityLeavePage";
-import LeaveCompliancePage from "./pages/leave/LeaveCompliancePage";
-
-
-import CompensationDashboardPage from "./pages/compensation/CompensationDashboardPage";
-import PayElementsPage from "./pages/compensation/PayElementsPage";
-import SalaryGradesPage from "./pages/compensation/SalaryGradesPage";
-import PositionCompensationPage from "./pages/compensation/PositionCompensationPage";
-import CompensationHistoryPage from "./pages/compensation/CompensationHistoryPage";
-import MeritCyclesPage from "./pages/compensation/MeritCyclesPage";
-import BonusManagementPage from "./pages/compensation/BonusManagementPage";
-import MarketBenchmarkingPage from "./pages/compensation/MarketBenchmarkingPage";
-import PayEquityPage from "./pages/compensation/PayEquityPage";
-import TotalRewardsPage from "./pages/compensation/TotalRewardsPage";
-import CompensationBudgetsPage from "./pages/compensation/CompensationBudgetsPage";
-import EquityManagementPage from "./pages/compensation/EquityManagementPage";
-import CompaRatioPage from "./pages/compensation/CompaRatioPage";
-import CompensationAnalyticsPage from "./pages/compensation/CompensationAnalyticsPage";
-import SpinalPointsPage from "./pages/compensation/SpinalPointsPage";
-import EmployeeCompensationPage from "./pages/compensation/EmployeeCompensationPage";
-import PositionBudgetDashboardPage from "./pages/compensation/PositionBudgetDashboardPage";
-import PositionBudgetPlanPage from "./pages/compensation/PositionBudgetPlanPage";
-import PositionBudgetWhatIfPage from "./pages/compensation/PositionBudgetWhatIfPage";
-import PositionBudgetApprovalsPage from "./pages/compensation/PositionBudgetApprovalsPage";
-import PositionBudgetCostConfigPage from "./pages/compensation/PositionBudgetCostConfigPage";
-import MinimumWageCompliancePage from "./pages/compensation/MinimumWageCompliancePage";
-import MinimumWageConfigPage from "./pages/compensation/MinimumWageConfigPage";
-
-// Benefits pages
-import BenefitsDashboardPage from "./pages/benefits/BenefitsDashboardPage";
-import BenefitCategoriesPage from "./pages/benefits/BenefitCategoriesPage";
-import BenefitPlansPage from "./pages/benefits/BenefitPlansPage";
-import BenefitEnrollmentsPage from "./pages/benefits/BenefitEnrollmentsPage";
-import BenefitClaimsPage from "./pages/benefits/BenefitClaimsPage";
-import BenefitAnalyticsPage from "./pages/benefits/BenefitAnalyticsPage";
-import BenefitCostProjectionsPage from "./pages/benefits/BenefitCostProjectionsPage";
-import AutoEnrollmentRulesPage from "./pages/benefits/AutoEnrollmentRulesPage";
-import LifeEventManagementPage from "./pages/benefits/LifeEventManagementPage";
-import WaitingPeriodTrackingPage from "./pages/benefits/WaitingPeriodTrackingPage";
-import OpenEnrollmentTrackerPage from "./pages/benefits/OpenEnrollmentTrackerPage";
-import EligibilityAuditPage from "./pages/benefits/EligibilityAuditPage";
-import BenefitComplianceReportsPage from "./pages/benefits/BenefitComplianceReportsPage";
-import PlanComparisonPage from "./pages/benefits/PlanComparisonPage";
-import BenefitCalculatorPage from "./pages/benefits/BenefitCalculatorPage";
-import BenefitProvidersPage from "./pages/benefits/BenefitProvidersPage";
-import MyBenefitsPage from "./pages/ess/MyBenefitsPage";
-import MyBankingPage from "./pages/ess/MyBankingPage";
-import MyPersonalInfoPage from "./pages/ess/MyPersonalInfoPage";
-import MyDependentsPage from "./pages/ess/MyDependentsPage";
-import MyTransactionsPage from "./pages/ess/MyTransactionsPage";
-import MyInboxPage from "./pages/ess/MyInboxPage";
-
-// Training pages
-import TrainingDashboardPage from "./pages/training/TrainingDashboardPage";
-import CourseCatalogPage from "./pages/training/CourseCatalogPage";
-import MyLearningPage from "./pages/training/MyLearningPage";
-import CourseViewerPage from "./pages/training/CourseViewerPage";
-import QuizPage from "./pages/training/QuizPage";
-import CertificationsPage from "./pages/training/CertificationsPage";
-import LiveSessionsPage from "./pages/training/LiveSessionsPage";
-import TrainingCalendarPage from "./pages/training/TrainingCalendarPage";
-import CompetencyGapAnalysisPage from "./pages/training/CompetencyGapAnalysisPage";
-import TrainingRequestsPage from "./pages/training/TrainingRequestsPage";
-import ExternalTrainingPage from "./pages/training/ExternalTrainingPage";
-import TrainingBudgetsPage from "./pages/training/TrainingBudgetsPage";
-import InstructorsPage from "./pages/training/InstructorsPage";
-import TrainingEvaluationsPage from "./pages/training/TrainingEvaluationsPage";
-import LearningPathsPage from "./pages/training/LearningPathsPage";
-import ComplianceTrainingPage from "./pages/training/ComplianceTrainingPage";
-import InteractiveTrainingPage from "./pages/training/InteractiveTrainingPage";
-import InteractiveTrainingAdminPage from "./pages/training/InteractiveTrainingAdminPage";
-import CourseCompetenciesPage from "./pages/training/CourseCompetenciesPage";
-import RecertificationPage from "./pages/training/RecertificationPage";
-import TrainingNeedsPage from "./pages/training/TrainingNeedsPage";
-import TrainingAnalyticsPage from "./pages/training/TrainingAnalyticsPage";
-import VirtualClassroomPage from "./pages/training/VirtualClassroomPage";
-import ContentAuthoringPage from "./pages/training/ContentAuthoringPage";
-import EmployeeLearningPage from "./pages/training/EmployeeLearningPage";
-import EmployeeCertificationsPage from "./pages/training/EmployeeCertificationsPage";
-import TrainingCareerPathsPage from "./pages/training/TrainingCareerPathsPage";
-import TrainingMentorshipPage from "./pages/training/TrainingMentorshipPage";
-
-// Succession pages
-import SuccessionDashboardPage from "./pages/succession/SuccessionDashboardPage";
-import NineBoxPage from "./pages/succession/NineBoxPage";
-import NineBoxConfigPage from "./pages/succession/NineBoxConfigPage";
-import TalentPoolsPage from "./pages/succession/TalentPoolsPage";
-import SuccessionPlansPage from "./pages/succession/SuccessionPlansPage";
-import KeyPositionsPage from "./pages/succession/KeyPositionsPage";
-import CareerDevelopmentPage from "./pages/succession/CareerDevelopmentPage";
-import CareerPathsPage from "./pages/succession/CareerPathsPage";
-import MentorshipPage from "./pages/succession/MentorshipPage";
-import FlightRiskPage from "./pages/succession/FlightRiskPage";
-import BenchStrengthPage from "./pages/succession/BenchStrengthPage";
-import SuccessionAnalyticsPage from "./pages/succession/SuccessionAnalyticsPage";
-
-// Recruitment pages
-import RecruitmentDashboardPage from "./pages/recruitment/RecruitmentDashboardPage";
-import RecruitmentFullPage from "./pages/recruitment/RecruitmentFullPage";
-import RecruitmentAnalyticsPage from "./pages/recruitment/RecruitmentAnalyticsPage";
-import RequisitionsPage from "./pages/recruitment/RequisitionsPage";
-import CandidatesPage from "./pages/recruitment/CandidatesPage";
-import ApplicationsPage from "./pages/recruitment/ApplicationsPage";
-import PipelinePage from "./pages/recruitment/PipelinePage";
-import ScorecardsPage from "./pages/recruitment/ScorecardsPage";
-import OffersPage from "./pages/recruitment/OffersPage";
-import ReferralsPage from "./pages/recruitment/ReferralsPage";
-import AssessmentsPage from "./pages/recruitment/AssessmentsPage";
-import InterviewPanelsPage from "./pages/recruitment/InterviewPanelsPage";
-import EmailTemplatesPage from "./pages/recruitment/EmailTemplatesPage";
-import SourcesPage from "./pages/recruitment/SourcesPage";
-import JobBoardsPage from "./pages/recruitment/JobBoardsPage";
-
-// HSE pages
-import HSEDashboardPage from "./pages/hse/HSEDashboardPage";
-import HSEIncidentsPage from "./pages/hse/HSEIncidentsPage";
-import HSERiskAssessmentPage from "./pages/hse/HSERiskAssessmentPage";
-import HSESafetyTrainingPage from "./pages/hse/HSESafetyTrainingPage";
-import HSECompliancePage from "./pages/hse/HSECompliancePage";
-import HSESafetyPoliciesPage from "./pages/hse/HSESafetyPoliciesPage";
-import HSEWorkersCompPage from "./pages/hse/HSEWorkersCompPage";
-import HSEPPEManagementPage from "./pages/hse/HSEPPEManagementPage";
-import HSEInspectionsPage from "./pages/hse/HSEInspectionsPage";
-import HSEEmergencyResponsePage from "./pages/hse/HSEEmergencyResponsePage";
-import HSEChemicalsPage from "./pages/hse/HSEChemicalsPage";
-import HSEOshaReportingPage from "./pages/hse/HSEOshaReportingPage";
-import HSEPermitToWorkPage from "./pages/hse/HSEPermitToWorkPage";
-import HSELotoPage from "./pages/hse/HSELotoPage";
-import HSENearMissPage from "./pages/hse/HSENearMissPage";
-import HSESafetyObservationsPage from "./pages/hse/HSESafetyObservationsPage";
-import HSEToolboxTalksPage from "./pages/hse/HSEToolboxTalksPage";
-import HSEFirstAidPage from "./pages/hse/HSEFirstAidPage";
-import HSEErgonomicsPage from "./pages/hse/HSEErgonomicsPage";
-import HSEAnalyticsPage from "./pages/hse/HSEAnalyticsPage";
-
-// Employee Relations pages
-import EmployeeRelationsDashboardPage from "./pages/employee-relations/EmployeeRelationsDashboardPage";
-import ERAnalyticsPage from "./pages/employee-relations/ERAnalyticsPage";
-import ERCasesPage from "./pages/employee-relations/ERCasesPage";
-import ERDisciplinaryPage from "./pages/employee-relations/ERDisciplinaryPage";
-import ERRecognitionPage from "./pages/employee-relations/ERRecognitionPage";
-import ERExitInterviewsPage from "./pages/employee-relations/ERExitInterviewsPage";
-import ERSurveysPage from "./pages/employee-relations/ERSurveysPage";
-import ERWellnessPage from "./pages/employee-relations/ERWellnessPage";
-import ERUnionsPage from "./pages/employee-relations/ERUnionsPage";
-import ERGrievancesPage from "./pages/employee-relations/ERGrievancesPage";
-import ERCourtJudgementsPage from "./pages/employee-relations/ERCourtJudgementsPage";
-import CBADetailPage from "./pages/employee-relations/CBADetailPage";
-
-// Property pages
-import PropertyDashboardPage from "./pages/property/PropertyDashboardPage";
-import PropertyAnalyticsPage from "./pages/property/PropertyAnalyticsPage";
-import PropertyAssetsPage from "./pages/property/PropertyAssetsPage";
-import PropertyAssignmentsPage from "./pages/property/PropertyAssignmentsPage";
-import PropertyRequestsPage from "./pages/property/PropertyRequestsPage";
-import PropertyMaintenancePage from "./pages/property/PropertyMaintenancePage";
-import PropertyCategoriesPage from "./pages/property/PropertyCategoriesPage";
-// Payroll pages
-import PayrollDashboardPage from "./pages/payroll/PayrollDashboardPage";
-import TaxAllowancesPage from "./pages/payroll/TaxAllowancesPage";
-import CountryPayrollYearSetupPage from "./pages/payroll/CountryPayrollYearSetupPage";
-import BankFileBuilderPage from "./pages/payroll/BankFileBuilderPage";
-import PayGroupsPage from "./pages/payroll/PayGroupsPage";
-import SemiMonthlyPayrollRulesPage from "./pages/payroll/SemiMonthlyPayrollRulesPage";
-import CountryTaxSettingsPage from "./pages/payroll/CountryTaxSettingsPage";
-import TipPoolManagementPage from "./pages/payroll/TipPoolManagementPage";
-import StatutoryTaxReliefPage from "./pages/payroll/StatutoryTaxReliefPage";
-import TaxReliefSchemesPage from "./pages/payroll/TaxReliefSchemesPage";
-import PayPeriodsPage from "./pages/payroll/PayPeriodsPage";
-import PayrollProcessingPage from "./pages/payroll/PayrollProcessingPage";
-import OffCyclePayrollPage from "./pages/payroll/OffCyclePayrollPage";
-import TaxConfigPage from "./pages/payroll/TaxConfigPage";
-import PayrollReportsPage from "./pages/payroll/PayrollReportsPage";
-import YearEndProcessingPage from "./pages/payroll/YearEndProcessingPage";
-import YearEndPayrollClosingPage from "./pages/payroll/YearEndPayrollClosingPage";
-import StatutoryDeductionTypesPage from "./pages/payroll/StatutoryDeductionTypesPage";
-import PayslipsPage from "./pages/payroll/PayslipsPage";
-import PayPeriodPayrollEntriesPage from "./pages/payroll/PayPeriodPayrollEntriesPage";
-import EmployeeRegularDeductionsPage from "./pages/payroll/EmployeeRegularDeductionsPage";
-import OverpaymentRecoveryPage from "./pages/payroll/OverpaymentRecoveryPage";
-import LeavePaymentConfigPage from "./pages/payroll/LeavePaymentConfigPage";
-import LeaveBalanceBuyoutPage from "./pages/payroll/LeaveBalanceBuyoutPage";
-import PayslipTemplateConfigPage from "./pages/payroll/PayslipTemplateConfigPage";
-import PayrollExpenseClaimsPage from "./pages/payroll/PayrollExpenseClaimsPage";
-import PayrollArchiveSettingsPage from "./pages/payroll/PayrollArchiveSettingsPage";
-import MexicoPayrollPage from "./pages/payroll/MexicoPayrollPage";
-import BenefitPayrollMappingsPage from "./pages/payroll/BenefitPayrollMappingsPage";
-import EmployeeTransactionPayrollMappingsPage from "./pages/payroll/EmployeeTransactionPayrollMappingsPage";
-import StatutoryPayElementMappingsPage from "./pages/payroll/StatutoryPayElementMappingsPage";
-import PayrollHolidaysPage from "./pages/payroll/PayrollHolidaysPage";
-import OpeningBalancesPage from "./pages/payroll/OpeningBalancesPage";
-import HistoricalPayrollImportPage from "./pages/payroll/HistoricalPayrollImportPage";
-import RetroactivePayConfigPage from "./pages/payroll/RetroactivePayConfigPage";
-import RetroactivePayGeneratePage from "./pages/payroll/RetroactivePayGeneratePage";
-import PayrollCountryDocumentationPage from "./pages/payroll/PayrollCountryDocumentationPage";
-import SalaryAdvancesPage from "./pages/payroll/SalaryAdvancesPage";
-import SavingsProgramsPage from "./pages/payroll/SavingsProgramsPage";
-import TimePayrollSyncPage from "./pages/payroll/TimePayrollSyncPage";
-import PaymentRulesConfigPage from "./pages/payroll/PaymentRulesConfigPage";
-import MultiCompanyConsolidationPage from "./pages/payroll/MultiCompanyConsolidationPage";
-import PayrollLoansPage from "./pages/payroll/PayrollLoansPage";
-import VariableCompensationPage from "./pages/payroll/VariableCompensationPage";
-import TimeAttendanceIntegrationPage from "./pages/payroll/TimeAttendanceIntegrationPage";
-import PayrollBudgetingPage from "./pages/payroll/PayrollBudgetingPage";
-import PayrollSimulationsPage from "./pages/payroll/PayrollSimulationsPage";
-import BatchOperationsPage from "./pages/payroll/BatchOperationsPage";
-import VacationManagerPage from "./pages/payroll/VacationManagerPage";
-import SeveranceCalculatorPage from "./pages/payroll/SeveranceCalculatorPage";
-import PayrollTemplatesPage from "./pages/payroll/PayrollTemplatesPage";
-import IntegrationWebhooksPage from "./pages/payroll/IntegrationWebhooksPage";
-import GLDashboardPage from "./pages/payroll/gl/GLDashboardPage";
-import GLAccountsPage from "./pages/payroll/gl/GLAccountsPage";
-import CostCenterSegmentsPage from "./pages/payroll/gl/CostCenterSegmentsPage";
-import CostCentersPage from "./pages/payroll/gl/CostCentersPage";
-import CostReallocationsPage from "./pages/payroll/gl/CostReallocationsPage";
-import GLAccountMappingsPage from "./pages/payroll/gl/GLAccountMappingsPage";
-import GLJournalBatchesPage from "./pages/payroll/gl/GLJournalBatchesPage";
-import EntitySegmentMappingsPage from "./pages/payroll/gl/EntitySegmentMappingsPage";
-import GLOverrideRulesPage from "./pages/payroll/gl/GLOverrideRulesPage";
-
-// Time & Attendance pages
-import TimeAttendanceDashboardPage from "./pages/time-attendance/TimeAttendanceDashboardPage";
-import TimeTrackingPage from "./pages/time-attendance/TimeTrackingPage";
-import AttendanceRecordsPage from "./pages/time-attendance/AttendanceRecordsPage";
-import SchedulesPage from "./pages/time-attendance/SchedulesPage";
-import OvertimeManagementPage from "./pages/time-attendance/OvertimeManagementPage";
-import ShiftManagementPage from "./pages/time-attendance/ShiftManagementPage";
-import ShiftsPage from "./pages/time-attendance/shifts/ShiftsPage";
-import RoundingRulesPage from "./pages/time-attendance/shifts/RoundingRulesPage";
-import PaymentRulesPage from "./pages/time-attendance/shifts/PaymentRulesPage";
-import ShiftAssignmentsPage from "./pages/time-attendance/shifts/ShiftAssignmentsPage";
-import ShiftCalendarPage from "./pages/time-attendance/shifts/ShiftCalendarPage";
-import ShiftSwapRequestsPage from "./pages/time-attendance/shifts/ShiftSwapRequestsPage";
-import OpenShiftBoardPage from "./pages/time-attendance/shifts/OpenShiftBoardPage";
-import ShiftTemplatesPage from "./pages/time-attendance/shifts/ShiftTemplatesPage";
-import RotationPatternsPage from "./pages/time-attendance/shifts/RotationPatternsPage";
-import FatigueManagementPage from "./pages/time-attendance/shifts/FatigueManagementPage";
-import ShiftCoveragePage from "./pages/time-attendance/shifts/ShiftCoveragePage";
-import ShiftBiddingPage from "./pages/time-attendance/shifts/ShiftBiddingPage";
-import AISchedulerPage from "./pages/time-attendance/shifts/AISchedulerPage";
-import MultiLocationSchedulePage from "./pages/time-attendance/shifts/MultiLocationSchedulePage";
-import GeofenceManagementPage from "./pages/time-attendance/GeofenceManagementPage";
-import ProjectTimeTrackingPage from "./pages/time-attendance/ProjectTimeTrackingPage";
-import TimesheetApprovalsPage from "./pages/time-attendance/TimesheetApprovalsPage";
-import TimeclockDevicesPage from "./pages/time-attendance/TimeclockDevicesPage";
-import AttendancePoliciesPage from "./pages/time-attendance/AttendancePoliciesPage";
-import AttendanceExceptionsPage from "./pages/time-attendance/AttendanceExceptionsPage";
-import LiveAttendancePage from "./pages/time-attendance/LiveAttendancePage";
-import PunchImportPage from "./pages/time-attendance/PunchImportPage";
-import AttendanceAnalyticsPage from "./pages/time-attendance/AttendanceAnalyticsPage";
-import AbsenteeismCostPage from "./pages/time-attendance/AbsenteeismCostPage";
-import WellnessMonitoringPage from "./pages/time-attendance/WellnessMonitoringPage";
-import OvertimeAlertsPage from "./pages/time-attendance/OvertimeAlertsPage";
-import LaborCompliancePage from "./pages/time-attendance/LaborCompliancePage";
-import FlexTimePage from "./pages/time-attendance/FlexTimePage";
-import AttendanceRegularizationPage from "./pages/time-attendance/AttendanceRegularizationPage";
-import CBATimeRulesPage from "./pages/time-attendance/CBATimeRulesPage";
-import CBAExtensionsPage from "./pages/time-attendance/CBAExtensionsPage";
-import TimeAuditTrailPage from "./pages/time-attendance/TimeAuditTrailPage";
-import ShiftSwapsPage from "./pages/time-attendance/ShiftSwapsPage";
-import ShiftDifferentialsPage from "./pages/time/ShiftDifferentialsPage";
-import GeofenceLocationsPage from "./pages/time/GeofenceLocationsPage";
-import FaceVerificationPage from "./pages/time/FaceVerificationPage";
-import ProjectCostDashboardPage from "./pages/time/ProjectCostDashboardPage";
-import ProjectCostConfigPage from "./pages/time/ProjectCostConfigPage";
-import CostAllocationPage from "./pages/time/CostAllocationPage";
-
-import EmployeeSelfServicePage from "./pages/ess/EmployeeSelfServicePage";
-import MyLettersPage from "./pages/ess/MyLettersPage";
-import MyGoalsPage from "./pages/ess/MyGoalsPage";
-import MyOnboardingPage from "./pages/ess/MyOnboardingPage";
-import MyOffboardingPage from "./pages/ess/MyOffboardingPage";
-import MyPropertyPage from "./pages/ess/MyPropertyPage";
-import MyEmployeeRelationsPage from "./pages/ess/MyEmployeeRelationsPage";
-import EssLeavePage from "./pages/ess/EssLeavePage";
-import EssJobOpeningsPage from "./pages/ess/EssJobOpeningsPage";
-import MyHSEPage from "./pages/ess/MyHSEPage";
-import MyTrainingPage from "./pages/ess/MyTrainingPage";
-import EssAppraisalInterviewsPage from "./pages/ess/EssAppraisalInterviewsPage";
-import EssGoalInterviewsPage from "./pages/ess/EssGoalInterviewsPage";
-import ManagerSelfServicePage from "./pages/mss/ManagerSelfServicePage";
-import MssAppraisalsPage from "./pages/mss/MssAppraisalsPage";
-import MssAppraisalInterviewsPage from "./pages/mss/MssAppraisalInterviewsPage";
-import MssGoalInterviewsPage from "./pages/mss/MssGoalInterviewsPage";
-import MssReview360Page from "./pages/mss/MssReview360Page";
-import MssGoalsPage from "./pages/mss/MssGoalsPage";
-import MssOnboardingPage from "./pages/mss/MssOnboardingPage";
-import MssOffboardingPage from "./pages/mss/MssOffboardingPage";
-import MssTeamPage from "./pages/mss/MssTeamPage";
-import MssTeamMemberPage from "./pages/mss/MssTeamMemberPage";
-import MssPropertyPage from "./pages/mss/MssPropertyPage";
-import MssEmployeeRelationsPage from "./pages/mss/MssEmployeeRelationsPage";
-import MssLeavePage from "./pages/mss/MssLeavePage";
-import MssBenefitsPage from "./pages/mss/MssBenefitsPage";
-import MssHSEPage from "./pages/mss/MssHSEPage";
-import MssRecruitmentPage from "./pages/mss/MssRecruitmentPage";
-import MssTrainingPage from "./pages/mss/MssTrainingPage";
-import MyDevelopmentPlanPage from "./pages/ess/MyDevelopmentPlanPage";
-import MyAppraisalsPage from "./pages/ess/MyAppraisalsPage";
-import MySkillGapsPage from "./pages/ess/MySkillGapsPage";
-import MssDevelopmentPlansPage from "./pages/mss/MssDevelopmentPlansPage";
-import MyFeedbackPage from "./pages/ess/MyFeedbackPage";
-import MyRecognitionPage from "./pages/ess/MyRecognitionPage";
-import MssFeedbackPage from "./pages/mss/MssFeedbackPage";
-import MssRecognitionPage from "./pages/mss/MssRecognitionPage";
-import MssPipsPage from "./pages/mss/MssPipsPage";
-import MssCalibrationPage from "./pages/mss/MssCalibrationPage";
-import EssCompensationPage from "./pages/ess/EssCompensationPage";
-import EssCompensationHistoryPage from "./pages/ess/EssCompensationHistoryPage";
-import EssTotalRewardsPage from "./pages/ess/EssTotalRewardsPage";
-import EssEquityPage from "./pages/ess/EssEquityPage";
-import EssCompaRatioPage from "./pages/ess/EssCompaRatioPage";
-import EssCurrencyPreferencesPage from "./pages/ess/EssCurrencyPreferencesPage";
-import MssCompensationPage from "./pages/mss/MssCompensationPage";
-import MssCompaRatioPage from "./pages/mss/MssCompaRatioPage";
-import MssEquityPage from "./pages/mss/MssEquityPage";
-import MssAnalyticsPage from "./pages/mss/MssAnalyticsPage";
-import MssSuccessionPage from "./pages/mss/MssSuccessionPage";
-import MyTimeAttendancePage from "./pages/ess/MyTimeAttendancePage";
-import MssTimeAttendancePage from "./pages/mss/MssTimeAttendancePage";
-import MyTimesheetsPage from "./pages/ess/MyTimesheetsPage";
-import MyExpenseClaimsPage from "./pages/ess/MyExpenseClaimsPage";
-import AnnouncementsPage from "./pages/ess/AnnouncementsPage";
-import TeamCalendarPage from "./pages/ess/TeamCalendarPage";
-import MyCalendarPage from "./pages/ess/MyCalendarPage";
-import MilestonesPage from "./pages/ess/MilestonesPage";
-import MyQualificationsPage from "./pages/ess/MyQualificationsPage";
-import MyCompetenciesPage from "./pages/ess/MyCompetenciesPage";
-import MyInterestsPage from "./pages/ess/MyInterestsPage";
-import MyGovernmentIdsPage from "./pages/ess/MyGovernmentIdsPage";
-import MyImmigrationPage from "./pages/ess/MyImmigrationPage";
-import MyMedicalInfoPage from "./pages/ess/MyMedicalInfoPage";
-import MyEvidencePortfolioPage from "./pages/ess/MyEvidencePortfolioPage";
-import MyCareerPathsPage from "./pages/ess/MyCareerPathsPage";
-import MyCareerPlanPage from "./pages/ess/MyCareerPlanPage";
-import MyMentorshipPage from "./pages/ess/MyMentorshipPage";
-import EssNotificationPreferencesPage from "./pages/ess/NotificationPreferencesPage";
-import EmployeeDirectoryPage from "./pages/admin/EmployeeDirectoryPage";
-import CompanyAnnouncementsPage from "./pages/admin/CompanyAnnouncementsPage";
-import ApprovalDelegationsPage from "./pages/admin/ApprovalDelegationsPage";
-import CompanyDocumentsPage from "./pages/admin/CompanyDocumentsPage";
-
-// HR Hub pages
-import HRHubDashboardPage from "./pages/hr-hub/HRHubDashboardPage";
-import HRCalendarPage from "./pages/hr-hub/HRCalendarPage";
-import HRTasksPage from "./pages/hr-hub/HRTasksPage";
-import ESSChangeRequestsPage from "./pages/hr/ESSChangeRequestsPage";
-import ESSApprovalPoliciesPage from "./pages/hr-hub/ESSApprovalPoliciesPage";
-import HRMilestonesPage from "./pages/hr-hub/HRMilestonesPage";
-import ComplianceTrackerPage from "./pages/hr-hub/ComplianceTrackerPage";
-import HRRemindersPage from "./pages/hr-hub/HRRemindersPage";
-import SOPManagementPage from "./pages/hr-hub/SOPManagementPage";
-import GovernmentIdTypesPage from "./pages/hr-hub/GovernmentIdTypesPage";
-import HRDataImportPage from "./pages/hr-hub/HRDataImportPage";
-import SentimentMonitoringPage from "./pages/hr-hub/SentimentMonitoringPage";
-import RecognitionAnalyticsPage from "./pages/hr-hub/RecognitionAnalyticsPage";
-import IntegrationDashboardPage from "./pages/hr-hub/IntegrationDashboardPage";
-import TransactionWorkflowSettingsPage from "./pages/hr-hub/TransactionWorkflowSettingsPage";
-
-// Admin Reminders
-import AdminRemindersPage from "./pages/admin/AdminRemindersPage";
-
-// ESS & MSS Reminders
-import MyRemindersPage from "./pages/ess/MyRemindersPage";
-import MssRemindersPage from "./pages/mss/MssRemindersPage";
-import MyChangeRequestsPage from "./pages/ess/MyChangeRequestsPage";
-
-import AdminWorkflowTemplatesPage from "./pages/admin/AdminWorkflowTemplatesPage";
-import MyApprovalsPage from "./pages/workflow/MyApprovalsPage";
-import MyDelegatesPage from "./pages/workflow/MyDelegatesPage";
-
-// Strategic Planning pages
-import StrategicPlanningHubPage from "./pages/strategic-planning/StrategicPlanningHubPage";
-import OrgDesignPage from "./pages/strategic-planning/OrgDesignPage";
-import ScenarioPlanningPage from "./pages/strategic-planning/ScenarioPlanningPage";
-
-// Reporting & Analytics pages
-import ReportingHubPage from "./pages/reporting/ReportingHubPage";
-import DashboardsPage from "./pages/reporting/DashboardsPage";
-import ReportBuilderPage from "./pages/reporting/ReportBuilderPage";
-import AIInsightsPage from "./pages/reporting/AIInsightsPage";
-import DataExportPage from "./pages/reporting/DataExportPage";
-
-// Insights pages
-import TalentInsightsPage from "./pages/insights/TalentInsightsPage";
-import CompensationInsightsPage from "./pages/insights/CompensationInsightsPage";
-import OperationalInsightsPage from "./pages/insights/OperationalInsightsPage";
-
-
-
-// System & Integration pages
-import SystemHubPage from "./pages/system/SystemHubPage";
-import AgentManagementHubPage from "./pages/system/AgentManagementHubPage";
-import APIManagementPage from "./pages/system/APIManagementPage";
-import SystemAuditLogsPage from "./pages/system/AuditLogsPage";
-import SecuritySettingsPage from "./pages/system/SecuritySettingsPage";
-import SystemConfigPage from "./pages/system/SystemConfigPage";
-
-// Other pages
-import ProfilePage from "./pages/profile/ProfilePage";
-import MyPermissionsPage from "./pages/profile/MyPermissionsPage";
-import NotificationPreferencesPage from "./pages/profile/NotificationPreferencesPage";
-
-// Help Center pages
-import HelpCenterPage from "./pages/help/HelpCenterPage";
-import HelpChatPage from "./pages/help/HelpChatPage";
-import KnowledgeBasePage from "./pages/help/KnowledgeBasePage";
-import TicketsPage from "./pages/help/TicketsPage";
-import NewTicketPage from "./pages/help/NewTicketPage";
-import TicketDetailPage from "./pages/help/TicketDetailPage";
-
-// Messaging pages
-import MessagingPage from "./pages/messaging/MessagingPage";
+// Core pages (synchronous for fast initial load)
+import Index from "./pages/Index";
+import NotFound from "./pages/NotFound";
+import AuthPage from "./pages/AuthPage";
+import UnauthorizedPage from "./pages/UnauthorizedPage";
 
 const queryClient = new QueryClient();
 
-import { ProtectedLayout } from "@/components/layout/ProtectedLayout";
+// Suspense fallback component
+function PageLoader() {
+  return (
+    <div className="flex items-center justify-center min-h-[400px]">
+      <Loader2 className="h-8 w-8 animate-spin text-primary" />
+    </div>
+  );
+}
+
+// Wrapper component for lazy-loaded pages
+function LazyPage({ children }: { children: React.ReactNode }) {
+  return <Suspense fallback={<PageLoader />}>{children}</Suspense>;
+}
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -624,4104 +52,613 @@ const App = () => (
             <AuthProvider>
             <Routes>
             <Route path="/auth" element={<AuthPage />} />
-            <Route path="/auth/mfa" element={<MFAChallengePage />} />
+            <Route path="/auth/mfa" element={<LazyPage><Pages.MFAChallengePage /></LazyPage>} />
             <Route path="/unauthorized" element={<UnauthorizedPage />} />
             
             {/* Demo Routes (public) */}
-            <Route path="/demo/login" element={<DemoLoginPage />} />
-            <Route path="/demo/expired" element={<DemoExpiredPage />} />
-            <Route path="/demo/convert" element={<DemoConversionPage />} />
+            <Route path="/demo/login" element={<LazyPage><Pages.DemoLoginPage /></LazyPage>} />
+            <Route path="/demo/expired" element={<LazyPage><Pages.DemoExpiredPage /></LazyPage>} />
+            <Route path="/demo/convert" element={<LazyPage><Pages.DemoConversionPage /></LazyPage>} />
 
             {/* Subscription Routes */}
-            <Route path="/subscription" element={<SubscriptionPage />} />
-            <Route path="/subscription/upgrade" element={<UpgradePage />} />
+            <Route path="/subscription" element={<LazyPage><Pages.SubscriptionPage /></LazyPage>} />
+            <Route path="/subscription/upgrade" element={<LazyPage><Pages.UpgradePage /></LazyPage>} />
             
             {/* Protected Routes with Layout */}
             <Route element={<ProtectedLayout />}>
               {/* Main Dashboard */}
-              <Route
-                path="/"
-                element={
-                  <ProtectedRoute>
-                    <Index />
-                  </ProtectedRoute>
-                }
-              />
+              <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
 
             {/* Employee Self Service Routes */}
-            <Route
-              path="/ess"
-              element={
-                <ProtectedRoute moduleCode="ess">
-                  <EmployeeSelfServicePage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/ess/letters"
-              element={
-                <ProtectedRoute moduleCode="ess">
-                  <MyLettersPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/ess/goals"
-              element={
-                <ProtectedRoute moduleCode="ess">
-                  <MyGoalsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/ess/onboarding"
-              element={
-                <ProtectedRoute moduleCode="ess">
-                  <MyOnboardingPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/ess/offboarding"
-              element={
-                <ProtectedRoute moduleCode="ess">
-                  <MyOffboardingPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/ess/property"
-              element={
-                <ProtectedRoute moduleCode="ess">
-                  <MyPropertyPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/ess/relations"
-              element={
-                <ProtectedRoute moduleCode="ess">
-                  <MyEmployeeRelationsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/ess/jobs"
-              element={
-                <ProtectedRoute moduleCode="ess">
-                  <EssJobOpeningsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/ess/*"
-              element={
-                <ProtectedRoute moduleCode="ess">
-                  <EmployeeSelfServicePage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/ess/leave"
-              element={
-                <ProtectedRoute moduleCode="ess">
-                  <EssLeavePage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/ess/hse"
-              element={
-                <ProtectedRoute moduleCode="ess">
-                  <MyHSEPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/ess/training"
-              element={
-                <ProtectedRoute moduleCode="ess">
-                  <MyTrainingPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/ess/appraisal-interviews"
-              element={
-                <ProtectedRoute moduleCode="ess">
-                  <EssAppraisalInterviewsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/ess/goal-interviews"
-              element={
-                <ProtectedRoute moduleCode="ess">
-                  <EssGoalInterviewsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/ess/development"
-              element={
-                <ProtectedRoute moduleCode="ess">
-                  <MyDevelopmentPlanPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/ess/my-appraisals"
-              element={
-                <ProtectedRoute moduleCode="ess">
-                  <MyAppraisalsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/ess/my-development-themes"
-              element={
-                <ProtectedRoute moduleCode="ess">
-                  <MyDevelopmentThemesPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/ess/skill-gaps"
-              element={
-                <ProtectedRoute moduleCode="ess">
-                  <MySkillGapsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/ess/feedback"
-              element={
-                <ProtectedRoute moduleCode="ess">
-                  <MyFeedbackPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/ess/recognition"
-              element={
-                <ProtectedRoute moduleCode="ess">
-                  <MyRecognitionPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/ess/compensation"
-              element={
-                <ProtectedRoute moduleCode="ess">
-                  <EssCompensationPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/ess/compensation/history"
-              element={
-                <ProtectedRoute moduleCode="ess">
-                  <EssCompensationHistoryPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/ess/compensation/total-rewards"
-              element={
-                <ProtectedRoute moduleCode="ess">
-                  <EssTotalRewardsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/ess/compensation/equity"
-              element={
-                <ProtectedRoute moduleCode="ess">
-                  <EssEquityPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/ess/compensation/currency-preferences"
-              element={
-                <ProtectedRoute moduleCode="ess">
-                  <EssCurrencyPreferencesPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/ess/compensation/compa-ratio"
-              element={
-                <ProtectedRoute moduleCode="ess">
-                  <EssCompaRatioPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/ess/banking"
-              element={
-                <ProtectedRoute moduleCode="ess">
-                  <MyBankingPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/ess/personal-info"
-              element={
-                <ProtectedRoute moduleCode="ess">
-                  <MyPersonalInfoPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/ess/dependents"
-              element={
-                <ProtectedRoute moduleCode="ess">
-                  <MyDependentsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/ess/transactions"
-              element={
-                <ProtectedRoute moduleCode="ess">
-                  <MyTransactionsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/ess/reminders"
-              element={
-                <ProtectedRoute moduleCode="ess">
-                  <MyRemindersPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/ess/my-change-requests"
-              element={
-                <ProtectedRoute moduleCode="ess">
-                  <MyChangeRequestsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/ess/time-attendance"
-              element={
-                <ProtectedRoute moduleCode="ess">
-                  <MyTimeAttendancePage />
-                </ProtectedRoute>
-              }
-            />
+            <Route path="/ess" element={<ProtectedRoute moduleCode="ess"><LazyPage><Pages.EmployeeSelfServicePage /></LazyPage></ProtectedRoute>} />
+            <Route path="/ess/letters" element={<ProtectedRoute moduleCode="ess"><LazyPage><Pages.MyLettersPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/ess/goals" element={<ProtectedRoute moduleCode="ess"><LazyPage><Pages.MyGoalsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/ess/onboarding" element={<ProtectedRoute moduleCode="ess"><LazyPage><Pages.MyOnboardingPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/ess/offboarding" element={<ProtectedRoute moduleCode="ess"><LazyPage><Pages.MyOffboardingPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/ess/property" element={<ProtectedRoute moduleCode="ess"><LazyPage><Pages.MyPropertyPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/ess/relations" element={<ProtectedRoute moduleCode="ess"><LazyPage><Pages.MyEmployeeRelationsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/ess/jobs" element={<ProtectedRoute moduleCode="ess"><LazyPage><Pages.EssJobOpeningsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/ess/leave" element={<ProtectedRoute moduleCode="ess"><LazyPage><Pages.EssLeavePage /></LazyPage></ProtectedRoute>} />
+            <Route path="/ess/hse" element={<ProtectedRoute moduleCode="ess"><LazyPage><Pages.MyHSEPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/ess/training" element={<ProtectedRoute moduleCode="ess"><LazyPage><Pages.MyTrainingPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/ess/appraisal-interviews" element={<ProtectedRoute moduleCode="ess"><LazyPage><Pages.EssAppraisalInterviewsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/ess/goal-interviews" element={<ProtectedRoute moduleCode="ess"><LazyPage><Pages.EssGoalInterviewsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/ess/development-plan" element={<ProtectedRoute moduleCode="ess"><LazyPage><Pages.MyDevelopmentPlanPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/ess/appraisals" element={<ProtectedRoute moduleCode="ess"><LazyPage><Pages.MyAppraisalsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/ess/skill-gaps" element={<ProtectedRoute moduleCode="ess"><LazyPage><Pages.MySkillGapsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/ess/feedback" element={<ProtectedRoute moduleCode="ess"><LazyPage><Pages.MyFeedbackPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/ess/recognition" element={<ProtectedRoute moduleCode="ess"><LazyPage><Pages.MyRecognitionPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/ess/compensation" element={<ProtectedRoute moduleCode="ess"><LazyPage><Pages.EssCompensationPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/ess/compensation/history" element={<ProtectedRoute moduleCode="ess"><LazyPage><Pages.EssCompensationHistoryPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/ess/compensation/total-rewards" element={<ProtectedRoute moduleCode="ess"><LazyPage><Pages.EssTotalRewardsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/ess/compensation/equity" element={<ProtectedRoute moduleCode="ess"><LazyPage><Pages.EssEquityPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/ess/compensation/currency-preferences" element={<ProtectedRoute moduleCode="ess"><LazyPage><Pages.EssCurrencyPreferencesPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/ess/compensation/compa-ratio" element={<ProtectedRoute moduleCode="ess"><LazyPage><Pages.EssCompaRatioPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/ess/banking" element={<ProtectedRoute moduleCode="ess"><LazyPage><Pages.MyBankingPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/ess/personal-info" element={<ProtectedRoute moduleCode="ess"><LazyPage><Pages.MyPersonalInfoPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/ess/dependents" element={<ProtectedRoute moduleCode="ess"><LazyPage><Pages.MyDependentsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/ess/transactions" element={<ProtectedRoute moduleCode="ess"><LazyPage><Pages.MyTransactionsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/ess/reminders" element={<ProtectedRoute moduleCode="ess"><LazyPage><Pages.MyRemindersPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/ess/my-change-requests" element={<ProtectedRoute moduleCode="ess"><LazyPage><Pages.MyChangeRequestsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/ess/time-attendance" element={<ProtectedRoute moduleCode="ess"><LazyPage><Pages.MyTimeAttendancePage /></LazyPage></ProtectedRoute>} />
+            <Route path="/ess/timesheets" element={<ProtectedRoute moduleCode="ess"><LazyPage><Pages.MyTimesheetsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/ess/expense-claims" element={<ProtectedRoute moduleCode="ess"><LazyPage><Pages.MyExpenseClaimsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/ess/announcements" element={<ProtectedRoute moduleCode="ess"><LazyPage><Pages.AnnouncementsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/ess/team-calendar" element={<ProtectedRoute moduleCode="ess"><LazyPage><Pages.TeamCalendarPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/ess/my-calendar" element={<ProtectedRoute moduleCode="ess"><LazyPage><Pages.MyCalendarPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/ess/milestones" element={<ProtectedRoute moduleCode="ess"><LazyPage><Pages.MilestonesPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/ess/qualifications" element={<ProtectedRoute moduleCode="ess"><LazyPage><Pages.MyQualificationsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/ess/competencies" element={<ProtectedRoute moduleCode="ess"><LazyPage><Pages.MyCompetenciesPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/ess/interests" element={<ProtectedRoute moduleCode="ess"><LazyPage><Pages.MyInterestsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/ess/government-ids" element={<ProtectedRoute moduleCode="ess"><LazyPage><Pages.MyGovernmentIdsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/ess/immigration" element={<ProtectedRoute moduleCode="ess"><LazyPage><Pages.MyImmigrationPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/ess/medical-info" element={<ProtectedRoute moduleCode="ess"><LazyPage><Pages.MyMedicalInfoPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/ess/evidence-portfolio" element={<ProtectedRoute moduleCode="ess"><LazyPage><Pages.MyEvidencePortfolioPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/ess/career-paths" element={<ProtectedRoute moduleCode="ess"><LazyPage><Pages.MyCareerPathsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/ess/career-plan" element={<ProtectedRoute moduleCode="ess"><LazyPage><Pages.MyCareerPlanPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/ess/mentorship" element={<ProtectedRoute moduleCode="ess"><LazyPage><Pages.MyMentorshipPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/ess/notification-preferences" element={<ProtectedRoute moduleCode="ess"><LazyPage><Pages.EssNotificationPreferencesPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/ess/benefits" element={<ProtectedRoute moduleCode="ess"><LazyPage><Pages.MyBenefitsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/ess/inbox" element={<ProtectedRoute moduleCode="ess"><LazyPage><Pages.MyInboxPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/ess/*" element={<ProtectedRoute moduleCode="ess"><LazyPage><Pages.EmployeeSelfServicePage /></LazyPage></ProtectedRoute>} />
+
             {/* Manager Self Service Routes */}
-            <Route
-              path="/mss"
-              element={
-                <ProtectedRoute moduleCode="mss" requiredRoles={["admin", "hr_manager"]}>
-                  <ManagerSelfServicePage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/mss/team"
-              element={
-                <ProtectedRoute moduleCode="mss">
-                  <MssTeamPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/mss/team/:id"
-              element={
-                <ProtectedRoute moduleCode="mss">
-                  <MssTeamMemberPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/mss/appraisals"
-              element={
-                <ProtectedRoute moduleCode="mss">
-                  <MssAppraisalsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/mss/appraisal-interviews"
-              element={
-                <ProtectedRoute moduleCode="mss">
-                  <MssAppraisalInterviewsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/mss/360"
-              element={
-                <ProtectedRoute moduleCode="mss">
-                  <MssReview360Page />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/mss/goals"
-              element={
-                <ProtectedRoute moduleCode="mss">
-                  <MssGoalsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/mss/goal-interviews"
-              element={
-                <ProtectedRoute moduleCode="mss">
-                  <MssGoalInterviewsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/mss/calibration"
-              element={
-                <ProtectedRoute moduleCode="mss">
-                  <MssCalibrationPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/mss/onboarding"
-              element={
-                <ProtectedRoute moduleCode="mss">
-                  <MssOnboardingPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/mss/offboarding"
-              element={
-                <ProtectedRoute moduleCode="mss">
-                  <MssOffboardingPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/mss/property"
-              element={
-                <ProtectedRoute moduleCode="mss">
-                  <MssPropertyPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/mss/leave-approvals"
-              element={
-                <ProtectedRoute moduleCode="mss">
-                  <MssLeavePage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/mss/relations"
-              element={
-                <ProtectedRoute moduleCode="mss">
-                  <MssEmployeeRelationsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/mss/benefits"
-              element={
-                <ProtectedRoute moduleCode="mss">
-                  <MssBenefitsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/mss/hse"
-              element={
-                <ProtectedRoute moduleCode="mss">
-                  <MssHSEPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/mss/recruitment"
-              element={
-                <ProtectedRoute moduleCode="mss">
-                  <MssRecruitmentPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/mss/training"
-              element={
-                <ProtectedRoute moduleCode="mss">
-                  <MssTrainingPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/mss/development"
-              element={
-                <ProtectedRoute moduleCode="mss">
-                  <MssDevelopmentPlansPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/mss/feedback"
-              element={
-                <ProtectedRoute moduleCode="mss">
-                  <MssFeedbackPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/mss/recognition"
-              element={
-                <ProtectedRoute moduleCode="mss">
-                  <MssRecognitionPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/mss/pips"
-              element={
-                <ProtectedRoute moduleCode="mss">
-                  <MssPipsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/mss/compensation"
-              element={
-                <ProtectedRoute moduleCode="mss">
-                  <MssCompensationPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/mss/compensation/compa-ratio"
-              element={
-                <ProtectedRoute moduleCode="mss">
-                  <MssCompaRatioPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/mss/compensation/equity"
-              element={
-                <ProtectedRoute moduleCode="mss">
-                  <MssEquityPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/mss/time-attendance"
-              element={
-                <ProtectedRoute moduleCode="mss" requiredRoles={["admin", "hr_manager"]}>
-                  <MssTimeAttendancePage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/mss/reminders"
-              element={
-                <ProtectedRoute moduleCode="mss" requiredRoles={["admin", "hr_manager"]}>
-                  <MssRemindersPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/mss/analytics"
-              element={
-                <ProtectedRoute moduleCode="mss" requiredRoles={["admin", "hr_manager"]}>
-                  <MssAnalyticsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/mss/succession"
-              element={
-                <ProtectedRoute moduleCode="mss" requiredRoles={["admin", "hr_manager"]}>
-                  <MssSuccessionPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/mss/*"
-              element={
-                <ProtectedRoute moduleCode="mss">
-                  <ManagerSelfServicePage />
-                </ProtectedRoute>
-              }
-            />
+            <Route path="/mss" element={<ProtectedRoute moduleCode="mss" requiredRoles={["admin", "hr_manager"]}><LazyPage><Pages.ManagerSelfServicePage /></LazyPage></ProtectedRoute>} />
+            <Route path="/mss/team" element={<ProtectedRoute moduleCode="mss"><LazyPage><Pages.MssTeamPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/mss/team/:id" element={<ProtectedRoute moduleCode="mss"><LazyPage><Pages.MssTeamMemberPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/mss/appraisals" element={<ProtectedRoute moduleCode="mss"><LazyPage><Pages.MssAppraisalsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/mss/appraisal-interviews" element={<ProtectedRoute moduleCode="mss"><LazyPage><Pages.MssAppraisalInterviewsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/mss/360" element={<ProtectedRoute moduleCode="mss"><LazyPage><Pages.MssReview360Page /></LazyPage></ProtectedRoute>} />
+            <Route path="/mss/goals" element={<ProtectedRoute moduleCode="mss"><LazyPage><Pages.MssGoalsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/mss/goal-interviews" element={<ProtectedRoute moduleCode="mss"><LazyPage><Pages.MssGoalInterviewsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/mss/calibration" element={<ProtectedRoute moduleCode="mss"><LazyPage><Pages.MssCalibrationPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/mss/onboarding" element={<ProtectedRoute moduleCode="mss"><LazyPage><Pages.MssOnboardingPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/mss/offboarding" element={<ProtectedRoute moduleCode="mss"><LazyPage><Pages.MssOffboardingPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/mss/property" element={<ProtectedRoute moduleCode="mss"><LazyPage><Pages.MssPropertyPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/mss/leave-approvals" element={<ProtectedRoute moduleCode="mss"><LazyPage><Pages.MssLeavePage /></LazyPage></ProtectedRoute>} />
+            <Route path="/mss/relations" element={<ProtectedRoute moduleCode="mss"><LazyPage><Pages.MssEmployeeRelationsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/mss/benefits" element={<ProtectedRoute moduleCode="mss"><LazyPage><Pages.MssBenefitsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/mss/hse" element={<ProtectedRoute moduleCode="mss"><LazyPage><Pages.MssHSEPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/mss/recruitment" element={<ProtectedRoute moduleCode="mss"><LazyPage><Pages.MssRecruitmentPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/mss/training" element={<ProtectedRoute moduleCode="mss"><LazyPage><Pages.MssTrainingPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/mss/development" element={<ProtectedRoute moduleCode="mss"><LazyPage><Pages.MssDevelopmentPlansPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/mss/feedback" element={<ProtectedRoute moduleCode="mss"><LazyPage><Pages.MssFeedbackPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/mss/recognition" element={<ProtectedRoute moduleCode="mss"><LazyPage><Pages.MssRecognitionPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/mss/pips" element={<ProtectedRoute moduleCode="mss"><LazyPage><Pages.MssPipsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/mss/compensation" element={<ProtectedRoute moduleCode="mss"><LazyPage><Pages.MssCompensationPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/mss/compensation/compa-ratio" element={<ProtectedRoute moduleCode="mss"><LazyPage><Pages.MssCompaRatioPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/mss/compensation/equity" element={<ProtectedRoute moduleCode="mss"><LazyPage><Pages.MssEquityPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/mss/time-attendance" element={<ProtectedRoute moduleCode="mss" requiredRoles={["admin", "hr_manager"]}><LazyPage><Pages.MssTimeAttendancePage /></LazyPage></ProtectedRoute>} />
+            <Route path="/mss/reminders" element={<ProtectedRoute moduleCode="mss" requiredRoles={["admin", "hr_manager"]}><LazyPage><Pages.MssRemindersPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/mss/analytics" element={<ProtectedRoute moduleCode="mss" requiredRoles={["admin", "hr_manager"]}><LazyPage><Pages.MssAnalyticsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/mss/succession" element={<ProtectedRoute moduleCode="mss" requiredRoles={["admin", "hr_manager"]}><LazyPage><Pages.MssSuccessionPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/mss/*" element={<ProtectedRoute moduleCode="mss"><LazyPage><Pages.ManagerSelfServicePage /></LazyPage></ProtectedRoute>} />
 
             {/* Admin Routes */}
-            <Route
-              path="/admin"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <AdminDashboardPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/custom-fields"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <AdminCustomFieldsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/users"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <AdminUsersPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/companies"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <AdminCompaniesPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/client-registry"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <ClientRegistryPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/client-registry/:id"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <ClientDetailPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/client-registry/:id/provisioning"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <ClientProvisioningPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/company-groups"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <AdminCompanyGroupsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/audit-logs"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <AdminAuditLogsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/audit-coverage"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <AuditCoveragePage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/investigation-requests"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <InvestigationRequestsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/ai-usage"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <AdminAIUsagePage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/roles"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <RoleManagementPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/roles/:id"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <RoleDetailPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/pii-access"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <AdminPiiAccessPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/ai-security-violations"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <AISecurityViolationsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/ai-governance"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <AIGovernancePage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/settings"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <AdminSettingsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/currencies"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <CurrencyManagementPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/color-scheme"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <AdminColorSchemePage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/territories"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <TerritoriesPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/company-tags"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <CompanyTagsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/granular-permissions"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <GranularPermissionsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/company-values"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <CompanyValuesPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/reminders"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <AdminRemindersPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/permissions"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <AdminPermissionsSummaryPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/access-requests"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <AdminAccessRequestsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/auto-approval"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <AdminAutoApprovalPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/bulk-import"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <AdminBulkImportPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/translations"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <TranslationsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/languages"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <TranslationsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/workforce/org-structure"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <OrgStructureConfigPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/workforce/position-control-vacancies"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <PositionControlVacanciesPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/workforce/headcount-requests"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <HeadcountRequestsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/workforce/headcount-analytics"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <HeadcountAnalyticsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/workforce/headcount-forecast"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <HeadcountForecastPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/workforce/divisions"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <DivisionsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/scheduled-reports"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <AdminScheduledReportsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/knowledge-base"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <AdminKnowledgeBasePage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/helpdesk"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <AdminHelpdeskPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/policy-documents"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <AdminPolicyDocumentsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/letter-templates"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <AdminLetterTemplatesPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/workflow-templates"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <AdminWorkflowTemplatesPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/lookup-values"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <AdminLookupValuesPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/implementation-handbook"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <ImplementationHandbookPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/features-brochure"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <FeaturesBrochurePage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/modules-brochure"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <ModulesBrochurePage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/lms"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <AdminLmsManagementPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/demo-management"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <DemoManagementPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/demo-analytics"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <DemoAnalyticsDashboard />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/demo-analytics/prospect/:sessionId"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <ProspectJourneyPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/subscriptions"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <SubscriptionManagementPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/mfa-settings"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <MFASettingsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/sso-settings"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <SSOSettingsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/password-policies"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <PasswordPoliciesPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/session-management"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <SessionManagementPage />
-                </ProtectedRoute>
-              }
-            />
+            <Route path="/admin" element={<ProtectedRoute requiredRoles={["admin"]}><LazyPage><Pages.AdminDashboardPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/admin/custom-fields" element={<ProtectedRoute requiredRoles={["admin"]}><LazyPage><Pages.AdminCustomFieldsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/admin/users" element={<ProtectedRoute requiredRoles={["admin"]}><LazyPage><Pages.AdminUsersPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/admin/companies" element={<ProtectedRoute requiredRoles={["admin"]}><LazyPage><Pages.AdminCompaniesPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/admin/client-registry" element={<ProtectedRoute requiredRoles={["admin"]}><LazyPage><Pages.ClientRegistryPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/admin/client-registry/:id" element={<ProtectedRoute requiredRoles={["admin"]}><LazyPage><Pages.ClientDetailPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/admin/client-registry/:id/provisioning" element={<ProtectedRoute requiredRoles={["admin"]}><LazyPage><Pages.ClientProvisioningPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/admin/company-groups" element={<ProtectedRoute requiredRoles={["admin"]}><LazyPage><Pages.AdminCompanyGroupsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/admin/audit-logs" element={<ProtectedRoute requiredRoles={["admin"]}><LazyPage><Pages.AdminAuditLogsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/admin/audit-coverage" element={<ProtectedRoute requiredRoles={["admin"]}><LazyPage><Pages.AuditCoveragePage /></LazyPage></ProtectedRoute>} />
+            <Route path="/admin/investigation-requests" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><LazyPage><Pages.InvestigationRequestsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/admin/ai-usage" element={<ProtectedRoute requiredRoles={["admin"]}><LazyPage><Pages.AdminAIUsagePage /></LazyPage></ProtectedRoute>} />
+            <Route path="/admin/roles" element={<ProtectedRoute requiredRoles={["admin"]}><LazyPage><Pages.RoleManagementPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/admin/roles/:id" element={<ProtectedRoute requiredRoles={["admin"]}><LazyPage><Pages.RoleDetailPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/admin/pii-access" element={<ProtectedRoute requiredRoles={["admin"]}><LazyPage><Pages.AdminPiiAccessPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/admin/ai-security-violations" element={<ProtectedRoute requiredRoles={["admin"]}><LazyPage><Pages.AISecurityViolationsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/admin/ai-governance" element={<ProtectedRoute requiredRoles={["admin"]}><LazyPage><Pages.AIGovernancePage /></LazyPage></ProtectedRoute>} />
+            <Route path="/admin/settings" element={<ProtectedRoute requiredRoles={["admin"]}><LazyPage><Pages.AdminSettingsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/admin/currencies" element={<ProtectedRoute requiredRoles={["admin"]}><LazyPage><Pages.CurrencyManagementPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/admin/color-scheme" element={<ProtectedRoute requiredRoles={["admin"]}><LazyPage><Pages.AdminColorSchemePage /></LazyPage></ProtectedRoute>} />
+            <Route path="/admin/territories" element={<ProtectedRoute requiredRoles={["admin"]}><LazyPage><Pages.TerritoriesPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/admin/company-tags" element={<ProtectedRoute requiredRoles={["admin"]}><LazyPage><Pages.CompanyTagsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/admin/granular-permissions" element={<ProtectedRoute requiredRoles={["admin"]}><LazyPage><Pages.GranularPermissionsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/admin/company-values" element={<ProtectedRoute requiredRoles={["admin"]}><LazyPage><Pages.CompanyValuesPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/admin/reminders" element={<ProtectedRoute requiredRoles={["admin"]}><LazyPage><Pages.AdminRemindersPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/admin/permissions" element={<ProtectedRoute requiredRoles={["admin"]}><LazyPage><Pages.AdminPermissionsSummaryPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/admin/access-requests" element={<ProtectedRoute requiredRoles={["admin"]}><LazyPage><Pages.AdminAccessRequestsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/admin/auto-approval" element={<ProtectedRoute requiredRoles={["admin"]}><LazyPage><Pages.AdminAutoApprovalPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/admin/bulk-import" element={<ProtectedRoute requiredRoles={["admin"]}><LazyPage><Pages.AdminBulkImportPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/admin/translations" element={<ProtectedRoute requiredRoles={["admin"]}><LazyPage><Pages.TranslationsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/admin/languages" element={<ProtectedRoute requiredRoles={["admin"]}><LazyPage><Pages.TranslationsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/admin/scheduled-reports" element={<ProtectedRoute requiredRoles={["admin"]}><LazyPage><Pages.AdminScheduledReportsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/admin/knowledge-base" element={<ProtectedRoute requiredRoles={["admin"]}><LazyPage><Pages.AdminKnowledgeBasePage /></LazyPage></ProtectedRoute>} />
+            <Route path="/admin/helpdesk" element={<ProtectedRoute requiredRoles={["admin"]}><LazyPage><Pages.AdminHelpdeskPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/admin/policy-documents" element={<ProtectedRoute requiredRoles={["admin"]}><LazyPage><Pages.AdminPolicyDocumentsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/admin/letter-templates" element={<ProtectedRoute requiredRoles={["admin"]}><LazyPage><Pages.AdminLetterTemplatesPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/admin/workflow-templates" element={<ProtectedRoute requiredRoles={["admin"]}><LazyPage><Pages.AdminWorkflowTemplatesPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/admin/lookup-values" element={<ProtectedRoute requiredRoles={["admin"]}><LazyPage><Pages.AdminLookupValuesPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/admin/implementation-handbook" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><LazyPage><Pages.ImplementationHandbookPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/admin/features-brochure" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><LazyPage><Pages.FeaturesBrochurePage /></LazyPage></ProtectedRoute>} />
+            <Route path="/admin/modules-brochure" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><LazyPage><Pages.ModulesBrochurePage /></LazyPage></ProtectedRoute>} />
+            <Route path="/admin/lms" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><LazyPage><Pages.AdminLmsManagementPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/admin/demo-management" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><LazyPage><Pages.DemoManagementPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/admin/demo-analytics" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><LazyPage><Pages.DemoAnalyticsDashboard /></LazyPage></ProtectedRoute>} />
+            <Route path="/admin/demo-analytics/prospect/:sessionId" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><LazyPage><Pages.ProspectJourneyPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/admin/subscriptions" element={<ProtectedRoute requiredRoles={["admin"]}><LazyPage><Pages.SubscriptionManagementPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/admin/mfa-settings" element={<ProtectedRoute requiredRoles={["admin"]}><LazyPage><Pages.MFASettingsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/admin/sso-settings" element={<ProtectedRoute requiredRoles={["admin"]}><LazyPage><Pages.SSOSettingsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/admin/password-policies" element={<ProtectedRoute requiredRoles={["admin"]}><LazyPage><Pages.PasswordPoliciesPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/admin/session-management" element={<ProtectedRoute requiredRoles={["admin"]}><LazyPage><Pages.SessionManagementPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/admin/employee-directory" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><LazyPage><Pages.EmployeeDirectoryPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/admin/company-announcements" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><LazyPage><Pages.CompanyAnnouncementsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/admin/approval-delegations" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><LazyPage><Pages.ApprovalDelegationsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/admin/company-documents" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><LazyPage><Pages.CompanyDocumentsPage /></LazyPage></ProtectedRoute>} />
+
             {/* Workforce Routes */}
-            <Route
-              path="/workforce"
-              element={
-                <ProtectedRoute>
-                  <WorkforceDashboardPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/workforce/company-groups"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <AdminCompanyGroupsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/workforce/companies"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <AdminCompaniesPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/workforce/employees"
-              element={
-                <ProtectedRoute>
-                  <EmployeesPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/workforce/employees/:id"
-              element={
-                <ProtectedRoute>
-                  <EmployeeProfilePage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/workforce/positions"
-              element={
-                <ProtectedRoute>
-                  <PositionsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/workforce/org-chart"
-              element={
-                <ProtectedRoute>
-                  <OrgStructurePage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/workforce/departments"
-              element={
-                <ProtectedRoute>
-                  <DepartmentsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/workforce/org-changes"
-              element={
-                <ProtectedRoute>
-                  <OrgChangesPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/workforce/assignments"
-              element={
-                <ProtectedRoute>
-                  <EmployeeAssignmentsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/workforce/transactions"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <EmployeeTransactionsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/workforce/forecasting"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <WorkforceForecastingPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/workforce/analytics"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <WorkforceAnalyticsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/workforce/qualifications"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <QualificationsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/workforce/company-boards"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <CompanyBoardsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/workforce/governance"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <GovernancePage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/hr-hub/intranet-admin"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <IntranetAdminPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/hr-hub/company-communications"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <CompanyCommunicationsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/workforce/job-families"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <JobFamiliesPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/workforce/jobs"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <JobsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/workforce/competencies"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <CompetenciesPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/workforce/capabilities"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <CapabilityRegistryPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/workforce/capability-registry"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <CapabilityRegistryPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/workforce/responsibilities"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <ResponsibilitiesPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/workforce/onboarding"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <AdminOnboardingPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/workforce/onboarding/:id"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <AdminOnboardingDetailPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/workforce/offboarding"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <OffboardingPage />
-                </ProtectedRoute>
-              }
-            />
+            <Route path="/workforce" element={<ProtectedRoute><LazyPage><Pages.WorkforceDashboardPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/workforce/company-groups" element={<ProtectedRoute requiredRoles={["admin"]}><LazyPage><Pages.AdminCompanyGroupsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/workforce/companies" element={<ProtectedRoute requiredRoles={["admin"]}><LazyPage><Pages.AdminCompaniesPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/workforce/employees" element={<ProtectedRoute><LazyPage><Pages.EmployeesPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/workforce/employees/:id" element={<ProtectedRoute><LazyPage><Pages.EmployeeProfilePage /></LazyPage></ProtectedRoute>} />
+            <Route path="/workforce/positions" element={<ProtectedRoute><LazyPage><Pages.PositionsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/workforce/org-chart" element={<ProtectedRoute><LazyPage><Pages.OrgStructurePage /></LazyPage></ProtectedRoute>} />
+            <Route path="/workforce/org-structure" element={<ProtectedRoute requiredRoles={["admin"]}><LazyPage><Pages.OrgStructureConfigPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/workforce/departments" element={<ProtectedRoute><LazyPage><Pages.DepartmentsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/workforce/org-changes" element={<ProtectedRoute><LazyPage><Pages.OrgChangesPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/workforce/assignments" element={<ProtectedRoute><LazyPage><Pages.EmployeeAssignmentsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/workforce/transactions" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><LazyPage><Pages.EmployeeTransactionsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/workforce/forecasting" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><LazyPage><Pages.WorkforceForecastingPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/workforce/analytics" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><LazyPage><Pages.WorkforceAnalyticsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/workforce/qualifications" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><LazyPage><Pages.QualificationsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/workforce/company-boards" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><LazyPage><Pages.CompanyBoardsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/workforce/governance" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><LazyPage><Pages.GovernancePage /></LazyPage></ProtectedRoute>} />
+            <Route path="/workforce/job-families" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><LazyPage><Pages.JobFamiliesPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/workforce/jobs" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><LazyPage><Pages.JobsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/workforce/competencies" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><LazyPage><Pages.CompetenciesPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/workforce/capabilities" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><LazyPage><Pages.CapabilityRegistryPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/workforce/capability-registry" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><LazyPage><Pages.CapabilityRegistryPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/workforce/responsibilities" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><LazyPage><Pages.ResponsibilitiesPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/workforce/onboarding" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><LazyPage><Pages.AdminOnboardingPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/workforce/onboarding/:id" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><LazyPage><Pages.AdminOnboardingDetailPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/workforce/offboarding" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><LazyPage><Pages.OffboardingPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/workforce/position-control-vacancies" element={<ProtectedRoute requiredRoles={["admin"]}><LazyPage><Pages.PositionControlVacanciesPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/workforce/headcount-requests" element={<ProtectedRoute requiredRoles={["admin"]}><LazyPage><Pages.HeadcountRequestsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/workforce/headcount-analytics" element={<ProtectedRoute requiredRoles={["admin"]}><LazyPage><Pages.HeadcountAnalyticsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/workforce/headcount-forecast" element={<ProtectedRoute requiredRoles={["admin"]}><LazyPage><Pages.HeadcountForecastPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/workforce/divisions" element={<ProtectedRoute requiredRoles={["admin"]}><LazyPage><Pages.DivisionsPage /></LazyPage></ProtectedRoute>} />
 
             {/* Time & Attendance Routes */}
-            <Route
-              path="/time-attendance"
-              element={
-                <ProtectedRoute moduleCode="time_attendance">
-                  <TimeAttendanceDashboardPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/time-attendance/tracking"
-              element={
-                <ProtectedRoute moduleCode="time_attendance">
-                  <TimeTrackingPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/time-attendance/records"
-              element={
-                <ProtectedRoute moduleCode="time_attendance">
-                  <AttendanceRecordsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/time-attendance/schedules"
-              element={
-                <ProtectedRoute moduleCode="time_attendance">
-                  <SchedulesPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/time-attendance/overtime"
-              element={
-                <ProtectedRoute moduleCode="time_attendance">
-                  <OvertimeManagementPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/time-attendance/shifts"
-              element={
-                <ProtectedRoute moduleCode="time_attendance">
-                  <ShiftManagementPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/time-attendance/shifts/list"
-              element={
-                <ProtectedRoute moduleCode="time_attendance">
-                  <ShiftsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/time-attendance/shifts/rounding-rules"
-              element={
-                <ProtectedRoute moduleCode="time_attendance">
-                  <RoundingRulesPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/time-attendance/shifts/payment-rules"
-              element={
-                <ProtectedRoute moduleCode="time_attendance">
-                  <PaymentRulesPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/time-attendance/shifts/assignments"
-              element={
-                <ProtectedRoute moduleCode="time_attendance">
-                  <ShiftAssignmentsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/time-attendance/shifts/calendar"
-              element={
-                <ProtectedRoute moduleCode="time_attendance">
-                  <ShiftCalendarPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/time-attendance/shifts/swap-requests"
-              element={
-                <ProtectedRoute moduleCode="time_attendance">
-                  <ShiftSwapRequestsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/time-attendance/shifts/open-shifts"
-              element={
-                <ProtectedRoute moduleCode="time_attendance">
-                  <OpenShiftBoardPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/time-attendance/shifts/templates"
-              element={
-                <ProtectedRoute moduleCode="time_attendance">
-                  <ShiftTemplatesPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/time-attendance/shifts/rotations"
-              element={
-                <ProtectedRoute moduleCode="time_attendance">
-                  <RotationPatternsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/time-attendance/shifts/fatigue"
-              element={
-                <ProtectedRoute moduleCode="time_attendance">
-                  <FatigueManagementPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/time-attendance/shifts/coverage"
-              element={
-                <ProtectedRoute moduleCode="time_attendance">
-                  <ShiftCoveragePage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/time-attendance/shifts/bidding"
-              element={
-                <ProtectedRoute moduleCode="time_attendance">
-                  <ShiftBiddingPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/time-attendance/shifts/ai-scheduler"
-              element={
-                <ProtectedRoute moduleCode="time_attendance">
-                  <AISchedulerPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/time-attendance/shifts/multi-location"
-              element={
-                <ProtectedRoute moduleCode="time_attendance">
-                  <MultiLocationSchedulePage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/time-attendance/geofencing"
-              element={
-                <ProtectedRoute moduleCode="time_attendance">
-                  <GeofenceManagementPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/time-attendance/projects"
-              element={
-                <ProtectedRoute moduleCode="time_attendance">
-                  <ProjectTimeTrackingPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/time-attendance/timesheet-approvals"
-              element={
-                <ProtectedRoute moduleCode="time_attendance">
-                  <TimesheetApprovalsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/time-attendance/devices"
-              element={
-                <ProtectedRoute moduleCode="time_attendance" requiredRoles={["admin", "hr_manager"]}>
-                  <TimeclockDevicesPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/time-attendance/policies"
-              element={
-                <ProtectedRoute moduleCode="time_attendance" requiredRoles={["admin", "hr_manager"]}>
-                  <AttendancePoliciesPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/time-attendance/exceptions"
-              element={
-                <ProtectedRoute moduleCode="time_attendance" requiredRoles={["admin", "hr_manager"]}>
-                  <AttendanceExceptionsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/time-attendance/live"
-              element={
-                <ProtectedRoute moduleCode="time_attendance" requiredRoles={["admin", "hr_manager"]}>
-                  <LiveAttendancePage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/time-attendance/import"
-              element={
-                <ProtectedRoute moduleCode="time_attendance" requiredRoles={["admin", "hr_manager"]}>
-                  <PunchImportPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/time-attendance/analytics"
-              element={
-                <ProtectedRoute moduleCode="time_attendance" requiredRoles={["admin", "hr_manager"]}>
-                  <AttendanceAnalyticsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/time-attendance/absenteeism-cost"
-              element={
-                <ProtectedRoute moduleCode="time_attendance" requiredRoles={["admin", "hr_manager"]}>
-                  <AbsenteeismCostPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route path="/time-attendance/wellness" element={<ProtectedRoute moduleCode="time_attendance"><WellnessMonitoringPage /></ProtectedRoute>} />
-            <Route path="/time-attendance/overtime-alerts" element={<ProtectedRoute moduleCode="time_attendance"><OvertimeAlertsPage /></ProtectedRoute>} />
-            <Route path="/time-attendance/labor-compliance" element={<ProtectedRoute moduleCode="time_attendance"><LaborCompliancePage /></ProtectedRoute>} />
-            <Route path="/time-attendance/flex-time" element={<ProtectedRoute moduleCode="time_attendance"><FlexTimePage /></ProtectedRoute>} />
-            <Route path="/time-attendance/regularization" element={<ProtectedRoute moduleCode="time_attendance"><AttendanceRegularizationPage /></ProtectedRoute>} />
-            <Route path="/time-attendance/cba-rules" element={<ProtectedRoute moduleCode="time_attendance"><CBATimeRulesPage /></ProtectedRoute>} />
-            <Route path="/time-attendance/cba-extensions" element={<ProtectedRoute moduleCode="time_attendance"><CBAExtensionsPage /></ProtectedRoute>} />
-            <Route path="/time-attendance/audit-trail" element={<ProtectedRoute moduleCode="time_attendance"><TimeAuditTrailPage /></ProtectedRoute>} />
-            <Route path="/time-attendance/shift-swaps" element={<ProtectedRoute moduleCode="time_attendance"><ShiftSwapsPage /></ProtectedRoute>} />
-            <Route
-              path="/time/shift-differentials"
-              element={
-                <ProtectedRoute moduleCode="time_attendance" requiredRoles={["admin", "hr_manager"]}>
-                  <ShiftDifferentialsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/time/geofence-locations"
-              element={
-                <ProtectedRoute moduleCode="time_attendance" requiredRoles={["admin", "hr_manager"]}>
-                  <GeofenceLocationsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/time/face-verification"
-              element={
-                <ProtectedRoute moduleCode="time_attendance" requiredRoles={["admin", "hr_manager"]}>
-                  <FaceVerificationPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/time/project-costs"
-              element={
-                <ProtectedRoute moduleCode="time_attendance" requiredRoles={["admin", "hr_manager"]}>
-                  <ProjectCostDashboardPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/time/project-cost-config"
-              element={
-                <ProtectedRoute moduleCode="time_attendance" requiredRoles={["admin", "hr_manager"]}>
-                  <ProjectCostConfigPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/time/cost-allocation"
-              element={
-                <ProtectedRoute moduleCode="time_attendance" requiredRoles={["admin", "hr_manager"]}>
-                  <CostAllocationPage />
-                </ProtectedRoute>
-              }
-            />
-
-            <Route
-              path="/leave"
-              element={
-                <ProtectedRoute>
-                  <LeaveDashboardPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/leave/employee-records"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <EmployeeLeaveRecordsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/leave/employee-balances"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <EmployeeLeaveBalancesPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/leave/years"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <LeaveYearsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/leave/my-leave"
-              element={
-                <ProtectedRoute>
-                  <MyLeavePage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/leave/apply"
-              element={
-                <ProtectedRoute>
-                  <ApplyLeavePage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/leave/approvals"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <LeaveApprovalsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/leave/types"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <LeaveTypesPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/leave/accrual-rules"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <LeaveAccrualRulesPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/leave/schedule-config"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <LeaveScheduleConfigPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/leave/rollover-rules"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <LeaveRolloverRulesPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/leave/holidays"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <LeaveHolidaysPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/leave/balance-recalculation"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <LeaveBalanceRecalculationPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/leave/analytics"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <LeaveAnalyticsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/leave/compensatory-time"
-              element={
-                <ProtectedRoute moduleCode="leave">
-                  <CompensatoryTimePage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/leave/comp-time-policies"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <CompTimePoliciesPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/leave/calendar"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="leave">
-                  <LeaveCalendarPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/leave/balance-adjustments"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="leave">
-                  <LeaveBalanceAdjustmentsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/leave/blackout-periods"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="leave">
-                  <LeaveBlackoutPeriodsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/leave/conflict-rules"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="leave">
-                  <LeaveConflictRulesPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/leave/encashment"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="leave">
-                  <LeaveEncashmentPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/leave/liability"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="leave">
-                  <LeaveLiabilityPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/leave/prorata-settings"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="leave">
-                  <LeaveProrataSettingsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/leave/maternity"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="leave">
-                  <MaternityLeavePage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/leave/compliance"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="leave">
-                  <LeaveCompliancePage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/payroll"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
-                  <PayrollDashboardPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/payroll/pay-groups"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
-                  <PayGroupsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/payroll/semimonthly-rules"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
-                  <SemiMonthlyPayrollRulesPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/payroll/tip-pools"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
-                  <TipPoolManagementPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/payroll/statutory-tax-relief"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
-                  <StatutoryTaxReliefPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/payroll/tax-relief-schemes"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
-                  <TaxReliefSchemesPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/payroll/pay-periods"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
-                  <PayPeriodsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/payroll/processing"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
-                  <PayrollProcessingPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/payroll/off-cycle"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
-                  <OffCyclePayrollPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/payroll/retroactive-pay"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
-                  <RetroactivePayConfigPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/payroll/retroactive-pay/generate/:configId"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
-                  <RetroactivePayGeneratePage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/payroll/tax-config"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
-                  <TaxConfigPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/payroll/statutory-deduction-types"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
-                  <StatutoryDeductionTypesPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/payroll/country-documentation"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
-                  <PayrollCountryDocumentationPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/payroll/statutory-pay-element-mappings"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
-                  <StatutoryPayElementMappingsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/payroll/reports"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
-                  <PayrollReportsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/payroll/year-end"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
-                  <YearEndProcessingPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/payroll/year-end-closing"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
-                  <YearEndPayrollClosingPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/payroll/salary-overtime"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
-                  <PayPeriodPayrollEntriesPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/payroll/regular-deductions"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
-                  <EmployeeRegularDeductionsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/payroll/overpayment-recovery"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
-                  <OverpaymentRecoveryPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/payroll/salary-advances"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
-                  <SalaryAdvancesPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/payroll/savings-programs"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
-                  <SavingsProgramsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/payroll/holidays"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
-                  <PayrollHolidaysPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/payroll/opening-balances"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
-                  <OpeningBalancesPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/payroll/historical-import"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
-                  <HistoricalPayrollImportPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/payroll/pay-elements"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
-                  <PayElementsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/payroll/leave-payment-config"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
-                  <LeavePaymentConfigPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/payroll/benefit-mappings"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
-                  <BenefitPayrollMappingsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/payroll/transaction-mappings"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
-                  <EmployeeTransactionPayrollMappingsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/payroll/leave-buyout"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
-                  <LeaveBalanceBuyoutPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/payroll/time-sync"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
-                  <TimePayrollSyncPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/payroll/payment-rules"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
-                  <PaymentRulesConfigPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/payroll/templates"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
-                  <PayslipTemplateConfigPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/payroll/expense-claims"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
-                  <PayrollExpenseClaimsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/payroll/archive-settings"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]} moduleCode="payroll">
-                  <PayrollArchiveSettingsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/payroll/tax-allowances"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
-                  <TaxAllowancesPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/payroll/bank-file-builder"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
-                  <BankFileBuilderPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/payroll/country-year-setup"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]} moduleCode="payroll">
-                  <CountryPayrollYearSetupPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/payroll/gl"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
-                  <GLDashboardPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/payroll/gl/accounts"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
-                  <GLAccountsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/payroll/gl/segments"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
-                  <CostCenterSegmentsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/payroll/gl/cost-centers"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
-                  <CostCentersPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/payroll/gl/reallocations"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
-                  <CostReallocationsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/payroll/gl/mappings"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
-                  <GLAccountMappingsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/payroll/gl/batches"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
-                  <GLJournalBatchesPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/payroll/gl/entity-mappings"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
-                  <EntitySegmentMappingsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/payroll/gl/override-rules"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
-                  <GLOverrideRulesPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/payroll/mexico"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
-                  <MexicoPayrollPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/payroll/consolidation"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
-                  <MultiCompanyConsolidationPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/payroll/loans"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
-                  <PayrollLoansPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/payroll/variable-compensation"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
-                  <VariableCompensationPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/payroll/time-integration"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
-                  <TimeAttendanceIntegrationPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/payroll/budgeting"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
-                  <PayrollBudgetingPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/payroll/simulations"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
-                  <PayrollSimulationsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/payroll/batch-operations"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
-                  <BatchOperationsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/payroll/vacation-manager"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
-                  <VacationManagerPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/payroll/severance-calculator"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
-                  <SeveranceCalculatorPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/payroll/templates"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
-                  <PayrollTemplatesPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/payroll/webhooks"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]} moduleCode="payroll">
-                  <IntegrationWebhooksPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/ess/payslips"
-              element={
-                <ProtectedRoute moduleCode="ess">
-                  <PayslipsPage />
-                </ProtectedRoute>
-              }
-            />
-
-            {/* Compensation Routes */}
-            <Route
-              path="/compensation"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <CompensationDashboardPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/compensation/pay-elements"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <PayElementsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/compensation/salary-grades"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <SalaryGradesPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/compensation/position-compensation"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <PositionCompensationPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/compensation/employee-compensation"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <EmployeeCompensationPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/compensation/history"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <CompensationHistoryPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/compensation/merit-cycles"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <MeritCyclesPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/compensation/bonus"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <BonusManagementPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/compensation/market-benchmarking"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <MarketBenchmarkingPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/compensation/pay-equity"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <PayEquityPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/compensation/total-rewards"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <TotalRewardsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/compensation/budgets"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <CompensationBudgetsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/compensation/equity"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <EquityManagementPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/compensation/compa-ratio"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <CompaRatioPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/compensation/analytics"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <CompensationAnalyticsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/compensation/spinal-points"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <SpinalPointsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/compensation/position-budgeting"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <PositionBudgetDashboardPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/compensation/position-budgeting/plans"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <PositionBudgetPlanPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/compensation/position-budgeting/what-if"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <PositionBudgetWhatIfPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/compensation/position-budgeting/approvals"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <PositionBudgetApprovalsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/compensation/position-budgeting/cost-config"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <PositionBudgetCostConfigPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/compensation/minimum-wage-compliance"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <MinimumWageCompliancePage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/compensation/minimum-wage-config"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <MinimumWageConfigPage />
-                </ProtectedRoute>
-              }
-            />
-
-            <Route
-              path="/benefits"
-              element={
-                <ProtectedRoute>
-                  <BenefitsDashboardPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/benefits/categories"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <BenefitCategoriesPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/benefits/plans"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <BenefitPlansPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/benefits/enrollments"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <BenefitEnrollmentsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/benefits/claims"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <BenefitClaimsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/benefits/providers"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <BenefitProvidersPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/benefits/analytics"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <BenefitAnalyticsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/benefits/cost-projections"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <BenefitCostProjectionsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/benefits/auto-enrollment"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <AutoEnrollmentRulesPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/benefits/life-events"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <LifeEventManagementPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/benefits/waiting-periods"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <WaitingPeriodTrackingPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/benefits/open-enrollment"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <OpenEnrollmentTrackerPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/benefits/eligibility-audit"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <EligibilityAuditPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/benefits/compliance"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <BenefitComplianceReportsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/benefits/compare"
-              element={
-                <ProtectedRoute>
-                  <PlanComparisonPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/benefits/calculator"
-              element={
-                <ProtectedRoute>
-                  <BenefitCalculatorPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/ess/benefits"
-              element={
-                <ProtectedRoute moduleCode="ess">
-                  <MyBenefitsPage />
-                </ProtectedRoute>
-              }
-            />
+            <Route path="/time-attendance" element={<ProtectedRoute moduleCode="time_attendance"><LazyPage><Pages.TimeAttendanceDashboardPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/time-attendance/tracking" element={<ProtectedRoute moduleCode="time_attendance"><LazyPage><Pages.TimeTrackingPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/time-attendance/records" element={<ProtectedRoute moduleCode="time_attendance"><LazyPage><Pages.AttendanceRecordsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/time-attendance/schedules" element={<ProtectedRoute moduleCode="time_attendance"><LazyPage><Pages.SchedulesPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/time-attendance/overtime" element={<ProtectedRoute moduleCode="time_attendance"><LazyPage><Pages.OvertimeManagementPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/time-attendance/shifts" element={<ProtectedRoute moduleCode="time_attendance"><LazyPage><Pages.ShiftManagementPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/time-attendance/shifts/list" element={<ProtectedRoute moduleCode="time_attendance"><LazyPage><Pages.ShiftsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/time-attendance/shifts/rounding-rules" element={<ProtectedRoute moduleCode="time_attendance"><LazyPage><Pages.RoundingRulesPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/time-attendance/shifts/payment-rules" element={<ProtectedRoute moduleCode="time_attendance"><LazyPage><Pages.PaymentRulesPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/time-attendance/shifts/assignments" element={<ProtectedRoute moduleCode="time_attendance"><LazyPage><Pages.ShiftAssignmentsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/time-attendance/shifts/calendar" element={<ProtectedRoute moduleCode="time_attendance"><LazyPage><Pages.ShiftCalendarPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/time-attendance/shifts/swap-requests" element={<ProtectedRoute moduleCode="time_attendance"><LazyPage><Pages.ShiftSwapRequestsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/time-attendance/shifts/open-shifts" element={<ProtectedRoute moduleCode="time_attendance"><LazyPage><Pages.OpenShiftBoardPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/time-attendance/shifts/templates" element={<ProtectedRoute moduleCode="time_attendance"><LazyPage><Pages.ShiftTemplatesPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/time-attendance/shifts/rotations" element={<ProtectedRoute moduleCode="time_attendance"><LazyPage><Pages.RotationPatternsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/time-attendance/shifts/fatigue" element={<ProtectedRoute moduleCode="time_attendance"><LazyPage><Pages.FatigueManagementPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/time-attendance/shifts/coverage" element={<ProtectedRoute moduleCode="time_attendance"><LazyPage><Pages.ShiftCoveragePage /></LazyPage></ProtectedRoute>} />
+            <Route path="/time-attendance/shifts/bidding" element={<ProtectedRoute moduleCode="time_attendance"><LazyPage><Pages.ShiftBiddingPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/time-attendance/shifts/ai-scheduler" element={<ProtectedRoute moduleCode="time_attendance"><LazyPage><Pages.AISchedulerPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/time-attendance/shifts/multi-location" element={<ProtectedRoute moduleCode="time_attendance"><LazyPage><Pages.MultiLocationSchedulePage /></LazyPage></ProtectedRoute>} />
+            <Route path="/time-attendance/geofencing" element={<ProtectedRoute moduleCode="time_attendance"><LazyPage><Pages.GeofenceManagementPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/time-attendance/projects" element={<ProtectedRoute moduleCode="time_attendance"><LazyPage><Pages.ProjectTimeTrackingPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/time-attendance/timesheet-approvals" element={<ProtectedRoute moduleCode="time_attendance"><LazyPage><Pages.TimesheetApprovalsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/time-attendance/timeclock-devices" element={<ProtectedRoute moduleCode="time_attendance"><LazyPage><Pages.TimeclockDevicesPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/time-attendance/policies" element={<ProtectedRoute moduleCode="time_attendance"><LazyPage><Pages.AttendancePoliciesPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/time-attendance/exceptions" element={<ProtectedRoute moduleCode="time_attendance"><LazyPage><Pages.AttendanceExceptionsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/time-attendance/live" element={<ProtectedRoute moduleCode="time_attendance"><LazyPage><Pages.LiveAttendancePage /></LazyPage></ProtectedRoute>} />
+            <Route path="/time-attendance/punch-import" element={<ProtectedRoute moduleCode="time_attendance"><LazyPage><Pages.PunchImportPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/time-attendance/analytics" element={<ProtectedRoute moduleCode="time_attendance"><LazyPage><Pages.AttendanceAnalyticsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/time-attendance/absenteeism-cost" element={<ProtectedRoute moduleCode="time_attendance"><LazyPage><Pages.AbsenteeismCostPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/time-attendance/wellness" element={<ProtectedRoute moduleCode="time_attendance"><LazyPage><Pages.WellnessMonitoringPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/time-attendance/overtime-alerts" element={<ProtectedRoute moduleCode="time_attendance"><LazyPage><Pages.OvertimeAlertsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/time-attendance/labor-compliance" element={<ProtectedRoute moduleCode="time_attendance"><LazyPage><Pages.LaborCompliancePage /></LazyPage></ProtectedRoute>} />
+            <Route path="/time-attendance/flex-time" element={<ProtectedRoute moduleCode="time_attendance"><LazyPage><Pages.FlexTimePage /></LazyPage></ProtectedRoute>} />
+            <Route path="/time-attendance/regularization" element={<ProtectedRoute moduleCode="time_attendance"><LazyPage><Pages.AttendanceRegularizationPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/time-attendance/cba-time-rules" element={<ProtectedRoute moduleCode="time_attendance"><LazyPage><Pages.CBATimeRulesPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/time-attendance/cba-extensions" element={<ProtectedRoute moduleCode="time_attendance"><LazyPage><Pages.CBAExtensionsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/time-attendance/audit-trail" element={<ProtectedRoute moduleCode="time_attendance"><LazyPage><Pages.TimeAuditTrailPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/time-attendance/shift-swaps" element={<ProtectedRoute moduleCode="time_attendance"><LazyPage><Pages.ShiftSwapsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/time/shift-differentials" element={<ProtectedRoute moduleCode="time_attendance"><LazyPage><Pages.ShiftDifferentialsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/time/geofence-locations" element={<ProtectedRoute moduleCode="time_attendance"><LazyPage><Pages.GeofenceLocationsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/time/face-verification" element={<ProtectedRoute moduleCode="time_attendance"><LazyPage><Pages.FaceVerificationPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/time/project-costs" element={<ProtectedRoute moduleCode="time_attendance"><LazyPage><Pages.ProjectCostDashboardPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/time/project-costs/config" element={<ProtectedRoute moduleCode="time_attendance"><LazyPage><Pages.ProjectCostConfigPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/time/cost-allocation" element={<ProtectedRoute moduleCode="time_attendance"><LazyPage><Pages.CostAllocationPage /></LazyPage></ProtectedRoute>} />
 
             {/* Performance Routes */}
-            <Route
-              path="/talent"
-              element={
-                <ProtectedRoute>
-                  <TalentUnifiedDashboardPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/performance"
-              element={
-                <ProtectedRoute>
-                  <PerformanceDashboardPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/performance/goals"
-              element={
-                <ProtectedRoute>
-                  <GoalsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/performance/360"
-              element={
-                <ProtectedRoute>
-                  <Review360Page />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/performance/appraisals"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <AppraisalsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/performance/pips"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <PerformanceImprovementPlansPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/performance/feedback"
-              element={
-                <ProtectedRoute>
-                  <ContinuousFeedbackPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/performance/recognition"
-              element={
-                <ProtectedRoute>
-                  <RecognitionAwardsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/performance/setup"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <PerformanceSetupPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/performance/intelligence-hub"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <PerformanceIntelligenceHub />
-                </ProtectedRoute>
-              }
-            />
-            {/* Redirects from old analytics routes */}
-            <Route
-              path="/performance/analytics"
-              element={<Navigate to="/performance/intelligence-hub" replace />}
-            />
-            <Route
-              path="/performance/appraisal-analytics"
-              element={<Navigate to="/performance/intelligence-hub" replace />}
-            />
-            <Route
-              path="/performance/calibration"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <CalibrationSessionsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/performance/calibration/:sessionId"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <CalibrationWorkspacePage />
-                </ProtectedRoute>
-              }
-            />
+            <Route path="/performance" element={<ProtectedRoute moduleCode="performance"><LazyPage><Pages.PerformanceDashboardPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/performance/goals" element={<ProtectedRoute moduleCode="performance"><LazyPage><Pages.GoalsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/performance/360" element={<ProtectedRoute moduleCode="performance"><LazyPage><Pages.Review360Page /></LazyPage></ProtectedRoute>} />
+            <Route path="/performance/appraisals" element={<ProtectedRoute moduleCode="performance"><LazyPage><Pages.AppraisalsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/performance/pips" element={<ProtectedRoute moduleCode="performance"><LazyPage><Pages.PerformanceImprovementPlansPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/performance/feedback" element={<ProtectedRoute moduleCode="performance"><LazyPage><Pages.ContinuousFeedbackPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/performance/recognition" element={<ProtectedRoute moduleCode="performance"><LazyPage><Pages.RecognitionAwardsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/performance/intelligence" element={<ProtectedRoute moduleCode="performance"><LazyPage><Pages.PerformanceIntelligenceHub /></LazyPage></ProtectedRoute>} />
+            <Route path="/performance/calibration" element={<ProtectedRoute moduleCode="performance"><LazyPage><Pages.CalibrationSessionsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/performance/calibration/:id" element={<ProtectedRoute moduleCode="performance"><LazyPage><Pages.CalibrationWorkspacePage /></LazyPage></ProtectedRoute>} />
+            <Route path="/performance/setup" element={<ProtectedRoute moduleCode="performance"><LazyPage><Pages.PerformanceSetupPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/performance/talent-dashboard" element={<ProtectedRoute moduleCode="performance"><LazyPage><Pages.TalentUnifiedDashboardPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/performance/feedback/themes" element={<ProtectedRoute moduleCode="performance"><LazyPage><Pages.MyDevelopmentThemesPage /></LazyPage></ProtectedRoute>} />
+
+            {/* Leave Routes */}
+            <Route path="/leave" element={<ProtectedRoute moduleCode="leave"><LazyPage><Pages.LeaveDashboardPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/leave/types" element={<ProtectedRoute moduleCode="leave"><LazyPage><Pages.LeaveTypesPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/leave/accrual-rules" element={<ProtectedRoute moduleCode="leave"><LazyPage><Pages.LeaveAccrualRulesPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/leave/rollover-rules" element={<ProtectedRoute moduleCode="leave"><LazyPage><Pages.LeaveRolloverRulesPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/leave/schedule-config" element={<ProtectedRoute moduleCode="leave"><LazyPage><Pages.LeaveScheduleConfigPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/leave/my-leave" element={<ProtectedRoute moduleCode="leave"><LazyPage><Pages.MyLeavePage /></LazyPage></ProtectedRoute>} />
+            <Route path="/leave/apply" element={<ProtectedRoute moduleCode="leave"><LazyPage><Pages.ApplyLeavePage /></LazyPage></ProtectedRoute>} />
+            <Route path="/leave/approvals" element={<ProtectedRoute moduleCode="leave"><LazyPage><Pages.LeaveApprovalsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/leave/holidays" element={<ProtectedRoute moduleCode="leave"><LazyPage><Pages.LeaveHolidaysPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/leave/recalculation" element={<ProtectedRoute moduleCode="leave"><LazyPage><Pages.LeaveBalanceRecalculationPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/leave/analytics" element={<ProtectedRoute moduleCode="leave"><LazyPage><Pages.LeaveAnalyticsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/leave/compensatory-time" element={<ProtectedRoute moduleCode="leave"><LazyPage><Pages.CompensatoryTimePage /></LazyPage></ProtectedRoute>} />
+            <Route path="/leave/comp-time-policies" element={<ProtectedRoute moduleCode="leave"><LazyPage><Pages.CompTimePoliciesPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/leave/calendar" element={<ProtectedRoute moduleCode="leave"><LazyPage><Pages.LeaveCalendarPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/leave/balance-adjustments" element={<ProtectedRoute moduleCode="leave"><LazyPage><Pages.LeaveBalanceAdjustmentsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/leave/employee-records" element={<ProtectedRoute moduleCode="leave"><LazyPage><Pages.EmployeeLeaveRecordsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/leave/employee-balances" element={<ProtectedRoute moduleCode="leave"><LazyPage><Pages.EmployeeLeaveBalancesPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/leave/years" element={<ProtectedRoute moduleCode="leave"><LazyPage><Pages.LeaveYearsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/leave/blackout-periods" element={<ProtectedRoute moduleCode="leave"><LazyPage><Pages.LeaveBlackoutPeriodsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/leave/conflict-rules" element={<ProtectedRoute moduleCode="leave"><LazyPage><Pages.LeaveConflictRulesPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/leave/encashment" element={<ProtectedRoute moduleCode="leave"><LazyPage><Pages.LeaveEncashmentPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/leave/liability" element={<ProtectedRoute moduleCode="leave"><LazyPage><Pages.LeaveLiabilityPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/leave/prorata-settings" element={<ProtectedRoute moduleCode="leave"><LazyPage><Pages.LeaveProrataSettingsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/leave/maternity" element={<ProtectedRoute moduleCode="leave"><LazyPage><Pages.MaternityLeavePage /></LazyPage></ProtectedRoute>} />
+            <Route path="/leave/compliance" element={<ProtectedRoute moduleCode="leave"><LazyPage><Pages.LeaveCompliancePage /></LazyPage></ProtectedRoute>} />
+
+            {/* Compensation Routes */}
+            <Route path="/compensation" element={<ProtectedRoute moduleCode="compensation"><LazyPage><Pages.CompensationDashboardPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/compensation/pay-elements" element={<ProtectedRoute moduleCode="compensation"><LazyPage><Pages.PayElementsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/compensation/salary-grades" element={<ProtectedRoute moduleCode="compensation"><LazyPage><Pages.SalaryGradesPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/compensation/position" element={<ProtectedRoute moduleCode="compensation"><LazyPage><Pages.PositionCompensationPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/compensation/history" element={<ProtectedRoute moduleCode="compensation"><LazyPage><Pages.CompensationHistoryPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/compensation/merit-cycles" element={<ProtectedRoute moduleCode="compensation"><LazyPage><Pages.MeritCyclesPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/compensation/bonuses" element={<ProtectedRoute moduleCode="compensation"><LazyPage><Pages.BonusManagementPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/compensation/benchmarking" element={<ProtectedRoute moduleCode="compensation"><LazyPage><Pages.MarketBenchmarkingPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/compensation/pay-equity" element={<ProtectedRoute moduleCode="compensation"><LazyPage><Pages.PayEquityPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/compensation/total-rewards" element={<ProtectedRoute moduleCode="compensation"><LazyPage><Pages.TotalRewardsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/compensation/budgets" element={<ProtectedRoute moduleCode="compensation"><LazyPage><Pages.CompensationBudgetsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/compensation/equity" element={<ProtectedRoute moduleCode="compensation"><LazyPage><Pages.EquityManagementPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/compensation/compa-ratio" element={<ProtectedRoute moduleCode="compensation"><LazyPage><Pages.CompaRatioPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/compensation/analytics" element={<ProtectedRoute moduleCode="compensation"><LazyPage><Pages.CompensationAnalyticsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/compensation/spinal-points" element={<ProtectedRoute moduleCode="compensation"><LazyPage><Pages.SpinalPointsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/compensation/employee" element={<ProtectedRoute moduleCode="compensation"><LazyPage><Pages.EmployeeCompensationPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/compensation/position-budget" element={<ProtectedRoute moduleCode="compensation"><LazyPage><Pages.PositionBudgetDashboardPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/compensation/position-budget/plan" element={<ProtectedRoute moduleCode="compensation"><LazyPage><Pages.PositionBudgetPlanPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/compensation/position-budget/what-if" element={<ProtectedRoute moduleCode="compensation"><LazyPage><Pages.PositionBudgetWhatIfPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/compensation/position-budget/approvals" element={<ProtectedRoute moduleCode="compensation"><LazyPage><Pages.PositionBudgetApprovalsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/compensation/position-budget/cost-config" element={<ProtectedRoute moduleCode="compensation"><LazyPage><Pages.PositionBudgetCostConfigPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/compensation/minimum-wage" element={<ProtectedRoute moduleCode="compensation"><LazyPage><Pages.MinimumWageCompliancePage /></LazyPage></ProtectedRoute>} />
+            <Route path="/compensation/minimum-wage/config" element={<ProtectedRoute moduleCode="compensation"><LazyPage><Pages.MinimumWageConfigPage /></LazyPage></ProtectedRoute>} />
+
+            {/* Benefits Routes */}
+            <Route path="/benefits" element={<ProtectedRoute moduleCode="benefits"><LazyPage><Pages.BenefitsDashboardPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/benefits/categories" element={<ProtectedRoute moduleCode="benefits"><LazyPage><Pages.BenefitCategoriesPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/benefits/plans" element={<ProtectedRoute moduleCode="benefits"><LazyPage><Pages.BenefitPlansPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/benefits/enrollments" element={<ProtectedRoute moduleCode="benefits"><LazyPage><Pages.BenefitEnrollmentsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/benefits/claims" element={<ProtectedRoute moduleCode="benefits"><LazyPage><Pages.BenefitClaimsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/benefits/analytics" element={<ProtectedRoute moduleCode="benefits"><LazyPage><Pages.BenefitAnalyticsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/benefits/cost-projections" element={<ProtectedRoute moduleCode="benefits"><LazyPage><Pages.BenefitCostProjectionsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/benefits/auto-enrollment" element={<ProtectedRoute moduleCode="benefits"><LazyPage><Pages.AutoEnrollmentRulesPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/benefits/life-events" element={<ProtectedRoute moduleCode="benefits"><LazyPage><Pages.LifeEventManagementPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/benefits/waiting-periods" element={<ProtectedRoute moduleCode="benefits"><LazyPage><Pages.WaitingPeriodTrackingPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/benefits/open-enrollment" element={<ProtectedRoute moduleCode="benefits"><LazyPage><Pages.OpenEnrollmentTrackerPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/benefits/eligibility-audit" element={<ProtectedRoute moduleCode="benefits"><LazyPage><Pages.EligibilityAuditPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/benefits/compliance-reports" element={<ProtectedRoute moduleCode="benefits"><LazyPage><Pages.BenefitComplianceReportsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/benefits/plan-comparison" element={<ProtectedRoute moduleCode="benefits"><LazyPage><Pages.PlanComparisonPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/benefits/calculator" element={<ProtectedRoute moduleCode="benefits"><LazyPage><Pages.BenefitCalculatorPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/benefits/providers" element={<ProtectedRoute moduleCode="benefits"><LazyPage><Pages.BenefitProvidersPage /></LazyPage></ProtectedRoute>} />
 
             {/* Training Routes */}
-            <Route
-              path="/training"
-              element={
-                <ProtectedRoute>
-                  <TrainingDashboardPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/training/catalog"
-              element={
-                <ProtectedRoute>
-                  <CourseCatalogPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/training/my-learning"
-              element={
-                <ProtectedRoute>
-                  <MyLearningPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/training/course/:courseId"
-              element={
-                <ProtectedRoute>
-                  <CourseViewerPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/training/quiz/:quizId"
-              element={
-                <ProtectedRoute>
-                  <QuizPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/training/certifications"
-              element={
-                <ProtectedRoute>
-                  <CertificationsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/training/employee-learning"
-              element={
-                <ProtectedRoute>
-                  <EmployeeLearningPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/training/employee-certifications"
-              element={
-                <ProtectedRoute>
-                  <EmployeeCertificationsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/training/sessions"
-              element={
-                <ProtectedRoute>
-                  <LiveSessionsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/training/calendar"
-              element={
-                <ProtectedRoute>
-                  <TrainingCalendarPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/training/gap-analysis"
-              element={
-                <ProtectedRoute>
-                  <CompetencyGapAnalysisPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/training/requests"
-              element={
-                <ProtectedRoute>
-                  <TrainingRequestsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/training/external"
-              element={
-                <ProtectedRoute>
-                  <ExternalTrainingPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/training/budgets"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <TrainingBudgetsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/training/instructors"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <InstructorsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/training/evaluations"
-              element={
-                <ProtectedRoute>
-                  <TrainingEvaluationsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/training/learning-paths"
-              element={
-                <ProtectedRoute>
-                  <LearningPathsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/training/compliance"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <ComplianceTrainingPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/training/interactive"
-              element={
-                <ProtectedRoute>
-                  <InteractiveTrainingPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/training/course-competencies"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <CourseCompetenciesPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/training/interactive/admin"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <InteractiveTrainingAdminPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/training/recertification"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <RecertificationPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/training/needs"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <TrainingNeedsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/training/analytics"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <TrainingAnalyticsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/training/virtual-classroom"
-              element={
-                <ProtectedRoute>
-                  <VirtualClassroomPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/training/content-authoring"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <ContentAuthoringPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/training/career-paths"
-              element={
-                <ProtectedRoute>
-                  <TrainingCareerPathsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/training/mentorship"
-              element={
-                <ProtectedRoute>
-                  <TrainingMentorshipPage />
-                </ProtectedRoute>
-              }
-            />
+            <Route path="/training" element={<ProtectedRoute moduleCode="training"><LazyPage><Pages.TrainingDashboardPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/training/catalog" element={<ProtectedRoute moduleCode="training"><LazyPage><Pages.CourseCatalogPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/training/my-learning" element={<ProtectedRoute moduleCode="training"><LazyPage><Pages.MyLearningPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/training/course/:courseId" element={<ProtectedRoute moduleCode="training"><LazyPage><Pages.CourseViewerPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/training/quiz/:quizId" element={<ProtectedRoute moduleCode="training"><LazyPage><Pages.QuizPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/training/certifications" element={<ProtectedRoute moduleCode="training"><LazyPage><Pages.CertificationsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/training/live-sessions" element={<ProtectedRoute moduleCode="training"><LazyPage><Pages.LiveSessionsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/training/calendar" element={<ProtectedRoute moduleCode="training"><LazyPage><Pages.TrainingCalendarPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/training/competency-gap" element={<ProtectedRoute moduleCode="training"><LazyPage><Pages.CompetencyGapAnalysisPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/training/requests" element={<ProtectedRoute moduleCode="training"><LazyPage><Pages.TrainingRequestsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/training/external" element={<ProtectedRoute moduleCode="training"><LazyPage><Pages.ExternalTrainingPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/training/budgets" element={<ProtectedRoute moduleCode="training"><LazyPage><Pages.TrainingBudgetsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/training/instructors" element={<ProtectedRoute moduleCode="training"><LazyPage><Pages.InstructorsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/training/evaluations" element={<ProtectedRoute moduleCode="training"><LazyPage><Pages.TrainingEvaluationsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/training/learning-paths" element={<ProtectedRoute moduleCode="training"><LazyPage><Pages.LearningPathsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/training/compliance" element={<ProtectedRoute moduleCode="training"><LazyPage><Pages.ComplianceTrainingPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/training/interactive" element={<ProtectedRoute moduleCode="training"><LazyPage><Pages.InteractiveTrainingPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/training/interactive/admin" element={<ProtectedRoute moduleCode="training"><LazyPage><Pages.InteractiveTrainingAdminPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/training/course-competencies" element={<ProtectedRoute moduleCode="training"><LazyPage><Pages.CourseCompetenciesPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/training/recertification" element={<ProtectedRoute moduleCode="training"><LazyPage><Pages.RecertificationPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/training/needs" element={<ProtectedRoute moduleCode="training"><LazyPage><Pages.TrainingNeedsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/training/analytics" element={<ProtectedRoute moduleCode="training"><LazyPage><Pages.TrainingAnalyticsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/training/virtual-classroom" element={<ProtectedRoute moduleCode="training"><LazyPage><Pages.VirtualClassroomPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/training/content-authoring" element={<ProtectedRoute moduleCode="training"><LazyPage><Pages.ContentAuthoringPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/training/employee-learning" element={<ProtectedRoute moduleCode="training"><LazyPage><Pages.EmployeeLearningPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/training/employee-certifications" element={<ProtectedRoute moduleCode="training"><LazyPage><Pages.EmployeeCertificationsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/training/career-paths" element={<ProtectedRoute moduleCode="training"><LazyPage><Pages.TrainingCareerPathsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/training/mentorship" element={<ProtectedRoute moduleCode="training"><LazyPage><Pages.TrainingMentorshipPage /></LazyPage></ProtectedRoute>} />
 
-            <Route
-              path="/succession"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <SuccessionDashboardPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route path="/succession/nine-box" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><NineBoxPage /></ProtectedRoute>} />
-            <Route path="/succession/nine-box/config" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><NineBoxConfigPage /></ProtectedRoute>} />
-            <Route path="/succession/talent-pools" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><TalentPoolsPage /></ProtectedRoute>} />
-            <Route path="/succession/plans" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><SuccessionPlansPage /></ProtectedRoute>} />
-            <Route path="/succession/key-positions" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><KeyPositionsPage /></ProtectedRoute>} />
-            <Route path="/succession/career-development" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><CareerDevelopmentPage /></ProtectedRoute>} />
-            <Route path="/succession/career-paths" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><CareerPathsPage /></ProtectedRoute>} />
-            <Route path="/succession/mentorship" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><MentorshipPage /></ProtectedRoute>} />
-            <Route path="/succession/flight-risk" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><FlightRiskPage /></ProtectedRoute>} />
-            <Route path="/succession/bench-strength" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><BenchStrengthPage /></ProtectedRoute>} />
-            <Route path="/succession/analytics" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><SuccessionAnalyticsPage /></ProtectedRoute>} />
+            {/* Succession Routes */}
+            <Route path="/succession" element={<ProtectedRoute moduleCode="succession"><LazyPage><Pages.SuccessionDashboardPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/succession/nine-box" element={<ProtectedRoute moduleCode="succession"><LazyPage><Pages.NineBoxPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/succession/nine-box/config" element={<ProtectedRoute moduleCode="succession"><LazyPage><Pages.NineBoxConfigPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/succession/talent-pools" element={<ProtectedRoute moduleCode="succession"><LazyPage><Pages.TalentPoolsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/succession/plans" element={<ProtectedRoute moduleCode="succession"><LazyPage><Pages.SuccessionPlansPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/succession/key-positions" element={<ProtectedRoute moduleCode="succession"><LazyPage><Pages.KeyPositionsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/succession/career-development" element={<ProtectedRoute moduleCode="succession"><LazyPage><Pages.CareerDevelopmentPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/succession/career-paths" element={<ProtectedRoute moduleCode="succession"><LazyPage><Pages.CareerPathsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/succession/mentorship" element={<ProtectedRoute moduleCode="succession"><LazyPage><Pages.MentorshipPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/succession/flight-risk" element={<ProtectedRoute moduleCode="succession"><LazyPage><Pages.FlightRiskPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/succession/bench-strength" element={<ProtectedRoute moduleCode="succession"><LazyPage><Pages.BenchStrengthPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/succession/analytics" element={<ProtectedRoute moduleCode="succession"><LazyPage><Pages.SuccessionAnalyticsPage /></LazyPage></ProtectedRoute>} />
 
             {/* Recruitment Routes */}
-            <Route
-              path="/recruitment"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <RecruitmentDashboardPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/recruitment/manage"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <RecruitmentFullPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/recruitment/analytics"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <RecruitmentAnalyticsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route path="/recruitment/requisitions" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><RequisitionsPage /></ProtectedRoute>} />
-            <Route path="/recruitment/candidates" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><CandidatesPage /></ProtectedRoute>} />
-            <Route path="/recruitment/applications" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><ApplicationsPage /></ProtectedRoute>} />
-            <Route path="/recruitment/pipeline" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><PipelinePage /></ProtectedRoute>} />
-            <Route path="/recruitment/scorecards" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><ScorecardsPage /></ProtectedRoute>} />
-            <Route path="/recruitment/offers" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><OffersPage /></ProtectedRoute>} />
-            <Route path="/recruitment/referrals" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><ReferralsPage /></ProtectedRoute>} />
-            <Route path="/recruitment/assessments" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><AssessmentsPage /></ProtectedRoute>} />
-            <Route path="/recruitment/panels" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><InterviewPanelsPage /></ProtectedRoute>} />
-            <Route path="/recruitment/email-templates" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><EmailTemplatesPage /></ProtectedRoute>} />
-            <Route path="/recruitment/sources" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><SourcesPage /></ProtectedRoute>} />
-            <Route path="/recruitment/job-boards" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><JobBoardsPage /></ProtectedRoute>} />
+            <Route path="/recruitment" element={<ProtectedRoute moduleCode="recruitment"><LazyPage><Pages.RecruitmentDashboardPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/recruitment/full" element={<ProtectedRoute moduleCode="recruitment"><LazyPage><Pages.RecruitmentFullPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/recruitment/analytics" element={<ProtectedRoute moduleCode="recruitment"><LazyPage><Pages.RecruitmentAnalyticsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/recruitment/requisitions" element={<ProtectedRoute moduleCode="recruitment"><LazyPage><Pages.RequisitionsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/recruitment/candidates" element={<ProtectedRoute moduleCode="recruitment"><LazyPage><Pages.CandidatesPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/recruitment/applications" element={<ProtectedRoute moduleCode="recruitment"><LazyPage><Pages.ApplicationsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/recruitment/pipeline" element={<ProtectedRoute moduleCode="recruitment"><LazyPage><Pages.PipelinePage /></LazyPage></ProtectedRoute>} />
+            <Route path="/recruitment/scorecards" element={<ProtectedRoute moduleCode="recruitment"><LazyPage><Pages.ScorecardsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/recruitment/offers" element={<ProtectedRoute moduleCode="recruitment"><LazyPage><Pages.OffersPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/recruitment/referrals" element={<ProtectedRoute moduleCode="recruitment"><LazyPage><Pages.ReferralsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/recruitment/assessments" element={<ProtectedRoute moduleCode="recruitment"><LazyPage><Pages.AssessmentsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/recruitment/interview-panels" element={<ProtectedRoute moduleCode="recruitment"><LazyPage><Pages.InterviewPanelsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/recruitment/email-templates" element={<ProtectedRoute moduleCode="recruitment"><LazyPage><Pages.EmailTemplatesPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/recruitment/sources" element={<ProtectedRoute moduleCode="recruitment"><LazyPage><Pages.SourcesPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/recruitment/job-boards" element={<ProtectedRoute moduleCode="recruitment"><LazyPage><Pages.JobBoardsPage /></LazyPage></ProtectedRoute>} />
 
             {/* HSE Routes */}
-            <Route
-              path="/hse"
-              element={
-                <ProtectedRoute>
-                  <HSEDashboardPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/hse/incidents"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <HSEIncidentsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/hse/risk-assessment"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <HSERiskAssessmentPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/hse/safety-training"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <HSESafetyTrainingPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/hse/compliance"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <HSECompliancePage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/hse/safety-policies"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <HSESafetyPoliciesPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/hse/workers-comp"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <HSEWorkersCompPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/hse/ppe"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <HSEPPEManagementPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/hse/inspections"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <HSEInspectionsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/hse/emergency-response"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <HSEEmergencyResponsePage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/hse/chemicals"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <HSEChemicalsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/hse/osha-reporting"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <HSEOshaReportingPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/hse/permit-to-work"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <HSEPermitToWorkPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/hse/loto"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <HSELotoPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/hse/near-miss"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <HSENearMissPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/hse/safety-observations"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <HSESafetyObservationsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/hse/toolbox-talks"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <HSEToolboxTalksPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/hse/first-aid"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <HSEFirstAidPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/hse/ergonomics"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <HSEErgonomicsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/hse/analytics"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <HSEAnalyticsPage />
-                </ProtectedRoute>
-              }
-            />
+            <Route path="/hse" element={<ProtectedRoute moduleCode="hse"><LazyPage><Pages.HSEDashboardPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/hse/incidents" element={<ProtectedRoute moduleCode="hse"><LazyPage><Pages.HSEIncidentsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/hse/risk-assessment" element={<ProtectedRoute moduleCode="hse"><LazyPage><Pages.HSERiskAssessmentPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/hse/safety-training" element={<ProtectedRoute moduleCode="hse"><LazyPage><Pages.HSESafetyTrainingPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/hse/compliance" element={<ProtectedRoute moduleCode="hse"><LazyPage><Pages.HSECompliancePage /></LazyPage></ProtectedRoute>} />
+            <Route path="/hse/safety-policies" element={<ProtectedRoute moduleCode="hse"><LazyPage><Pages.HSESafetyPoliciesPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/hse/workers-comp" element={<ProtectedRoute moduleCode="hse"><LazyPage><Pages.HSEWorkersCompPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/hse/ppe" element={<ProtectedRoute moduleCode="hse"><LazyPage><Pages.HSEPPEManagementPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/hse/inspections" element={<ProtectedRoute moduleCode="hse"><LazyPage><Pages.HSEInspectionsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/hse/emergency-response" element={<ProtectedRoute moduleCode="hse"><LazyPage><Pages.HSEEmergencyResponsePage /></LazyPage></ProtectedRoute>} />
+            <Route path="/hse/chemicals" element={<ProtectedRoute moduleCode="hse"><LazyPage><Pages.HSEChemicalsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/hse/osha-reporting" element={<ProtectedRoute moduleCode="hse"><LazyPage><Pages.HSEOshaReportingPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/hse/permit-to-work" element={<ProtectedRoute moduleCode="hse"><LazyPage><Pages.HSEPermitToWorkPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/hse/loto" element={<ProtectedRoute moduleCode="hse"><LazyPage><Pages.HSELotoPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/hse/near-miss" element={<ProtectedRoute moduleCode="hse"><LazyPage><Pages.HSENearMissPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/hse/safety-observations" element={<ProtectedRoute moduleCode="hse"><LazyPage><Pages.HSESafetyObservationsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/hse/toolbox-talks" element={<ProtectedRoute moduleCode="hse"><LazyPage><Pages.HSEToolboxTalksPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/hse/first-aid" element={<ProtectedRoute moduleCode="hse"><LazyPage><Pages.HSEFirstAidPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/hse/ergonomics" element={<ProtectedRoute moduleCode="hse"><LazyPage><Pages.HSEErgonomicsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/hse/analytics" element={<ProtectedRoute moduleCode="hse"><LazyPage><Pages.HSEAnalyticsPage /></LazyPage></ProtectedRoute>} />
 
-            <Route
-              path="/employee-relations"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <EmployeeRelationsDashboardPage />
-                </ProtectedRoute>
-              }
-            />
-
-            <Route
-              path="/employee-relations/analytics"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <ERAnalyticsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/employee-relations/cases"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <ERCasesPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/employee-relations/disciplinary"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <ERDisciplinaryPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/employee-relations/recognition"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <ERRecognitionPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/employee-relations/exit-interviews"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <ERExitInterviewsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/employee-relations/surveys"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <ERSurveysPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/employee-relations/wellness"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <ERWellnessPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/employee-relations/unions"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <ERUnionsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/employee-relations/grievances"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <ERGrievancesPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/employee-relations/court-judgements"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <ERCourtJudgementsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/employee-relations/cba/:id"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <CBADetailPage />
-                </ProtectedRoute>
-              }
-            />
+            {/* Employee Relations Routes */}
+            <Route path="/employee-relations" element={<ProtectedRoute moduleCode="employee_relations"><LazyPage><Pages.EmployeeRelationsDashboardPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/employee-relations/analytics" element={<ProtectedRoute moduleCode="employee_relations"><LazyPage><Pages.ERAnalyticsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/employee-relations/cases" element={<ProtectedRoute moduleCode="employee_relations"><LazyPage><Pages.ERCasesPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/employee-relations/disciplinary" element={<ProtectedRoute moduleCode="employee_relations"><LazyPage><Pages.ERDisciplinaryPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/employee-relations/recognition" element={<ProtectedRoute moduleCode="employee_relations"><LazyPage><Pages.ERRecognitionPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/employee-relations/exit-interviews" element={<ProtectedRoute moduleCode="employee_relations"><LazyPage><Pages.ERExitInterviewsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/employee-relations/surveys" element={<ProtectedRoute moduleCode="employee_relations"><LazyPage><Pages.ERSurveysPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/employee-relations/wellness" element={<ProtectedRoute moduleCode="employee_relations"><LazyPage><Pages.ERWellnessPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/employee-relations/unions" element={<ProtectedRoute moduleCode="employee_relations"><LazyPage><Pages.ERUnionsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/employee-relations/unions/:id" element={<ProtectedRoute moduleCode="employee_relations"><LazyPage><Pages.CBADetailPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/employee-relations/grievances" element={<ProtectedRoute moduleCode="employee_relations"><LazyPage><Pages.ERGrievancesPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/employee-relations/court-judgements" element={<ProtectedRoute moduleCode="employee_relations"><LazyPage><Pages.ERCourtJudgementsPage /></LazyPage></ProtectedRoute>} />
 
             {/* Property Routes */}
-            <Route
-              path="/property"
-              element={
-                <ProtectedRoute>
-                  <PropertyDashboardPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/property/analytics"
-              element={
-                <ProtectedRoute>
-                  <PropertyAnalyticsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/property/assets"
-              element={
-                <ProtectedRoute>
-                  <PropertyAssetsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/property/assignments"
-              element={
-                <ProtectedRoute>
-                  <PropertyAssignmentsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/property/requests"
-              element={
-                <ProtectedRoute>
-                  <PropertyRequestsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/property/maintenance"
-              element={
-                <ProtectedRoute>
-                  <PropertyMaintenancePage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/property/categories"
-              element={
-                <ProtectedRoute>
-                  <PropertyCategoriesPage />
-                </ProtectedRoute>
-              }
-            />
+            <Route path="/property" element={<ProtectedRoute moduleCode="property"><LazyPage><Pages.PropertyDashboardPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/property/analytics" element={<ProtectedRoute moduleCode="property"><LazyPage><Pages.PropertyAnalyticsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/property/assets" element={<ProtectedRoute moduleCode="property"><LazyPage><Pages.PropertyAssetsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/property/assignments" element={<ProtectedRoute moduleCode="property"><LazyPage><Pages.PropertyAssignmentsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/property/requests" element={<ProtectedRoute moduleCode="property"><LazyPage><Pages.PropertyRequestsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/property/maintenance" element={<ProtectedRoute moduleCode="property"><LazyPage><Pages.PropertyMaintenancePage /></LazyPage></ProtectedRoute>} />
+            <Route path="/property/categories" element={<ProtectedRoute moduleCode="property"><LazyPage><Pages.PropertyCategoriesPage /></LazyPage></ProtectedRoute>} />
 
-            {/* Profile */}
-            <Route
-              path="/profile"
-              element={
-                <ProtectedRoute>
-                  <ProfilePage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/profile/permissions"
-              element={
-                <ProtectedRoute>
-                  <MyPermissionsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/profile/notifications"
-              element={
-                <ProtectedRoute>
-                  <NotificationPreferencesPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/profile/privacy"
-              element={
-                <ProtectedRoute>
-                  <PrivacySettingsPage />
-                </ProtectedRoute>
-              }
-            />
-            
-            {/* Intranet Routes */}
-            <Route
-              path="/intranet"
-              element={
-                <ProtectedRoute>
-                  <IntranetDashboardPage />
-                </ProtectedRoute>
-              }
-            />
-            
-            {/* Help Center Routes */}
-            <Route
-              path="/help"
-              element={
-                <ProtectedRoute>
-                  <HelpCenterPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/help/knowledge-base"
-              element={
-                <ProtectedRoute>
-                  <KnowledgeBasePage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/help/chat"
-              element={
-                <ProtectedRoute>
-                  <HelpChatPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/help/tickets"
-              element={
-                <ProtectedRoute>
-                  <TicketsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/help/tickets/new"
-              element={
-                <ProtectedRoute>
-                  <NewTicketPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/help/tickets/:ticketId"
-              element={
-                <ProtectedRoute>
-                  <TicketDetailPage />
-                </ProtectedRoute>
-              }
-            />
-
-            {/* Workflow Routes */}
-            <Route
-              path="/workflow/approvals"
-              element={
-                <ProtectedRoute>
-                  <MyApprovalsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/workflow/delegates"
-              element={
-                <ProtectedRoute>
-                  <MyDelegatesPage />
-                </ProtectedRoute>
-              }
-            />
-
-            {/* Messaging Routes */}
-            <Route
-              path="/messages"
-              element={
-                <ProtectedRoute>
-                  <MessagingPage />
-                </ProtectedRoute>
-              }
-            />
-
-            {/* ESS New Routes */}
-            <Route
-              path="/ess/timesheets"
-              element={
-                <ProtectedRoute moduleCode="ess">
-                  <MyTimesheetsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/ess/expenses"
-              element={
-                <ProtectedRoute moduleCode="ess">
-                  <MyExpenseClaimsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/ess/announcements"
-              element={
-                <ProtectedRoute moduleCode="ess">
-                  <AnnouncementsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/ess/calendar"
-              element={
-                <ProtectedRoute moduleCode="ess">
-                  <TeamCalendarPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/ess/my-calendar"
-              element={
-                <ProtectedRoute moduleCode="ess">
-                  <MyCalendarPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/ess/milestones"
-              element={
-                <ProtectedRoute moduleCode="ess">
-                  <MilestonesPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/ess/qualifications"
-              element={
-                <ProtectedRoute moduleCode="ess">
-                  <MyQualificationsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/ess/competencies"
-              element={
-                <ProtectedRoute moduleCode="ess">
-                  <MyCompetenciesPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/ess/interests"
-              element={
-                <ProtectedRoute moduleCode="ess">
-                  <MyInterestsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/ess/government-ids"
-              element={
-                <ProtectedRoute moduleCode="ess">
-                  <MyGovernmentIdsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/ess/notification-preferences"
-              element={
-                <ProtectedRoute moduleCode="ess">
-                  <EssNotificationPreferencesPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/ess/my-inbox"
-              element={
-                <ProtectedRoute moduleCode="ess">
-                  <MyInboxPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/ess/immigration"
-              element={
-                <ProtectedRoute moduleCode="ess">
-                  <MyImmigrationPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/ess/medical-info"
-              element={
-                <ProtectedRoute moduleCode="ess">
-                  <MyMedicalInfoPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/ess/evidence-portfolio"
-              element={
-                <ProtectedRoute moduleCode="ess">
-                  <MyEvidencePortfolioPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/ess/directory"
-              element={
-                <ProtectedRoute moduleCode="ess">
-                  <EmployeeDirectoryPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/ess/career-paths"
-              element={
-                <ProtectedRoute moduleCode="ess">
-                  <MyCareerPathsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/ess/career-plan"
-              element={
-                <ProtectedRoute moduleCode="ess">
-                  <MyCareerPlanPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/ess/mentorship"
-              element={
-                <ProtectedRoute moduleCode="ess">
-                  <MyMentorshipPage />
-                </ProtectedRoute>
-              }
-            />
-            
-            {/* Admin New Routes */}
-            <Route
-              path="/admin/announcements"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <CompanyAnnouncementsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/delegations"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <ApprovalDelegationsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/documents"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <CompanyDocumentsPage />
-                </ProtectedRoute>
-              }
-            />
+            {/* Payroll Routes */}
+            <Route path="/payroll" element={<ProtectedRoute moduleCode="payroll"><LazyPage><Pages.PayrollDashboardPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/payroll/tax-allowances" element={<ProtectedRoute moduleCode="payroll"><LazyPage><Pages.TaxAllowancesPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/payroll/country-year-setup" element={<ProtectedRoute moduleCode="payroll"><LazyPage><Pages.CountryPayrollYearSetupPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/payroll/bank-file-builder" element={<ProtectedRoute moduleCode="payroll"><LazyPage><Pages.BankFileBuilderPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/payroll/pay-groups" element={<ProtectedRoute moduleCode="payroll"><LazyPage><Pages.PayGroupsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/payroll/semi-monthly-rules" element={<ProtectedRoute moduleCode="payroll"><LazyPage><Pages.SemiMonthlyPayrollRulesPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/payroll/country-tax-settings" element={<ProtectedRoute moduleCode="payroll"><LazyPage><Pages.CountryTaxSettingsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/payroll/tip-pool" element={<ProtectedRoute moduleCode="payroll"><LazyPage><Pages.TipPoolManagementPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/payroll/statutory-tax-relief" element={<ProtectedRoute moduleCode="payroll"><LazyPage><Pages.StatutoryTaxReliefPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/payroll/tax-relief-schemes" element={<ProtectedRoute moduleCode="payroll"><LazyPage><Pages.TaxReliefSchemesPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/payroll/pay-periods" element={<ProtectedRoute moduleCode="payroll"><LazyPage><Pages.PayPeriodsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/payroll/processing" element={<ProtectedRoute moduleCode="payroll"><LazyPage><Pages.PayrollProcessingPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/payroll/off-cycle" element={<ProtectedRoute moduleCode="payroll"><LazyPage><Pages.OffCyclePayrollPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/payroll/tax-config" element={<ProtectedRoute moduleCode="payroll"><LazyPage><Pages.TaxConfigPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/payroll/reports" element={<ProtectedRoute moduleCode="payroll"><LazyPage><Pages.PayrollReportsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/payroll/year-end" element={<ProtectedRoute moduleCode="payroll"><LazyPage><Pages.YearEndProcessingPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/payroll/year-end-closing" element={<ProtectedRoute moduleCode="payroll"><LazyPage><Pages.YearEndPayrollClosingPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/payroll/statutory-deduction-types" element={<ProtectedRoute moduleCode="payroll"><LazyPage><Pages.StatutoryDeductionTypesPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/payroll/payslips" element={<ProtectedRoute moduleCode="payroll"><LazyPage><Pages.PayslipsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/payroll/entries" element={<ProtectedRoute moduleCode="payroll"><LazyPage><Pages.PayPeriodPayrollEntriesPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/payroll/regular-deductions" element={<ProtectedRoute moduleCode="payroll"><LazyPage><Pages.EmployeeRegularDeductionsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/payroll/overpayment-recovery" element={<ProtectedRoute moduleCode="payroll"><LazyPage><Pages.OverpaymentRecoveryPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/payroll/leave-payment-config" element={<ProtectedRoute moduleCode="payroll"><LazyPage><Pages.LeavePaymentConfigPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/payroll/leave-balance-buyout" element={<ProtectedRoute moduleCode="payroll"><LazyPage><Pages.LeaveBalanceBuyoutPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/payroll/payslip-template" element={<ProtectedRoute moduleCode="payroll"><LazyPage><Pages.PayslipTemplateConfigPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/payroll/expense-claims" element={<ProtectedRoute moduleCode="payroll"><LazyPage><Pages.PayrollExpenseClaimsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/payroll/archive-settings" element={<ProtectedRoute moduleCode="payroll"><LazyPage><Pages.PayrollArchiveSettingsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/payroll/mexico" element={<ProtectedRoute moduleCode="payroll"><LazyPage><Pages.MexicoPayrollPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/payroll/benefit-mappings" element={<ProtectedRoute moduleCode="payroll"><LazyPage><Pages.BenefitPayrollMappingsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/payroll/transaction-mappings" element={<ProtectedRoute moduleCode="payroll"><LazyPage><Pages.EmployeeTransactionPayrollMappingsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/payroll/statutory-pay-element-mappings" element={<ProtectedRoute moduleCode="payroll"><LazyPage><Pages.StatutoryPayElementMappingsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/payroll/holidays" element={<ProtectedRoute moduleCode="payroll"><LazyPage><Pages.PayrollHolidaysPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/payroll/opening-balances" element={<ProtectedRoute moduleCode="payroll"><LazyPage><Pages.OpeningBalancesPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/payroll/historical-import" element={<ProtectedRoute moduleCode="payroll"><LazyPage><Pages.HistoricalPayrollImportPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/payroll/retroactive-pay" element={<ProtectedRoute moduleCode="payroll"><LazyPage><Pages.RetroactivePayConfigPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/payroll/retroactive-pay/generate" element={<ProtectedRoute moduleCode="payroll"><LazyPage><Pages.RetroactivePayGeneratePage /></LazyPage></ProtectedRoute>} />
+            <Route path="/payroll/country-documentation" element={<ProtectedRoute moduleCode="payroll"><LazyPage><Pages.PayrollCountryDocumentationPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/payroll/salary-advances" element={<ProtectedRoute moduleCode="payroll"><LazyPage><Pages.SalaryAdvancesPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/payroll/savings-programs" element={<ProtectedRoute moduleCode="payroll"><LazyPage><Pages.SavingsProgramsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/payroll/time-sync" element={<ProtectedRoute moduleCode="payroll"><LazyPage><Pages.TimePayrollSyncPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/payroll/payment-rules" element={<ProtectedRoute moduleCode="payroll"><LazyPage><Pages.PaymentRulesConfigPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/payroll/multi-company" element={<ProtectedRoute moduleCode="payroll"><LazyPage><Pages.MultiCompanyConsolidationPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/payroll/loans" element={<ProtectedRoute moduleCode="payroll"><LazyPage><Pages.PayrollLoansPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/payroll/variable-compensation" element={<ProtectedRoute moduleCode="payroll"><LazyPage><Pages.VariableCompensationPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/payroll/time-integration" element={<ProtectedRoute moduleCode="payroll"><LazyPage><Pages.TimeAttendanceIntegrationPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/payroll/budgeting" element={<ProtectedRoute moduleCode="payroll"><LazyPage><Pages.PayrollBudgetingPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/payroll/simulations" element={<ProtectedRoute moduleCode="payroll"><LazyPage><Pages.PayrollSimulationsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/payroll/batch-operations" element={<ProtectedRoute moduleCode="payroll"><LazyPage><Pages.BatchOperationsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/payroll/vacation-manager" element={<ProtectedRoute moduleCode="payroll"><LazyPage><Pages.VacationManagerPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/payroll/severance-calculator" element={<ProtectedRoute moduleCode="payroll"><LazyPage><Pages.SeveranceCalculatorPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/payroll/templates" element={<ProtectedRoute moduleCode="payroll"><LazyPage><Pages.PayrollTemplatesPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/payroll/webhooks" element={<ProtectedRoute moduleCode="payroll"><LazyPage><Pages.IntegrationWebhooksPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/payroll/gl" element={<ProtectedRoute moduleCode="payroll"><LazyPage><Pages.GLDashboardPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/payroll/gl/accounts" element={<ProtectedRoute moduleCode="payroll"><LazyPage><Pages.GLAccountsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/payroll/gl/cost-center-segments" element={<ProtectedRoute moduleCode="payroll"><LazyPage><Pages.CostCenterSegmentsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/payroll/gl/cost-centers" element={<ProtectedRoute moduleCode="payroll"><LazyPage><Pages.CostCentersPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/payroll/gl/cost-reallocations" element={<ProtectedRoute moduleCode="payroll"><LazyPage><Pages.CostReallocationsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/payroll/gl/account-mappings" element={<ProtectedRoute moduleCode="payroll"><LazyPage><Pages.GLAccountMappingsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/payroll/gl/journal-batches" element={<ProtectedRoute moduleCode="payroll"><LazyPage><Pages.GLJournalBatchesPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/payroll/gl/entity-segment-mappings" element={<ProtectedRoute moduleCode="payroll"><LazyPage><Pages.EntitySegmentMappingsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/payroll/gl/override-rules" element={<ProtectedRoute moduleCode="payroll"><LazyPage><Pages.GLOverrideRulesPage /></LazyPage></ProtectedRoute>} />
 
             {/* HR Hub Routes */}
-            <Route
-              path="/hr-hub"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <HRHubDashboardPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/hr-hub/ess-change-requests"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <ESSChangeRequestsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/hr-hub/ess-approval-policies"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <ESSApprovalPoliciesPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/hr-hub/calendar"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <HRCalendarPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/hr-hub/tasks"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <HRTasksPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/hr-hub/milestones"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <HRMilestonesPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/hr-hub/compliance"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <ComplianceTrackerPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/hr-hub/reminders"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <HRRemindersPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/hr-hub/sop-management"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <SOPManagementPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/hr-hub/government-id-types"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <GovernmentIdTypesPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/hr-hub/data-import"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <HRDataImportPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/hr-hub/transaction-workflow-settings"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <TransactionWorkflowSettingsPage />
-                </ProtectedRoute>
-              }
-            />
+            <Route path="/hr-hub" element={<ProtectedRoute moduleCode="hr_hub"><LazyPage><Pages.HRHubDashboardPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/hr-hub/calendar" element={<ProtectedRoute moduleCode="hr_hub"><LazyPage><Pages.HRCalendarPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/hr-hub/tasks" element={<ProtectedRoute moduleCode="hr_hub"><LazyPage><Pages.HRTasksPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/hr-hub/ess-change-requests" element={<ProtectedRoute moduleCode="hr_hub"><LazyPage><Pages.ESSChangeRequestsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/hr-hub/ess-approval-policies" element={<ProtectedRoute moduleCode="hr_hub"><LazyPage><Pages.ESSApprovalPoliciesPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/hr-hub/milestones" element={<ProtectedRoute moduleCode="hr_hub"><LazyPage><Pages.HRMilestonesPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/hr-hub/compliance-tracker" element={<ProtectedRoute moduleCode="hr_hub"><LazyPage><Pages.ComplianceTrackerPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/hr-hub/reminders" element={<ProtectedRoute moduleCode="hr_hub"><LazyPage><Pages.HRRemindersPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/hr-hub/sop-management" element={<ProtectedRoute moduleCode="hr_hub"><LazyPage><Pages.SOPManagementPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/hr-hub/government-id-types" element={<ProtectedRoute moduleCode="hr_hub"><LazyPage><Pages.GovernmentIdTypesPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/hr-hub/data-import" element={<ProtectedRoute moduleCode="hr_hub"><LazyPage><Pages.HRDataImportPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/hr-hub/sentiment-monitoring" element={<ProtectedRoute moduleCode="hr_hub"><LazyPage><Pages.SentimentMonitoringPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/hr-hub/recognition-analytics" element={<ProtectedRoute moduleCode="hr_hub"><LazyPage><Pages.RecognitionAnalyticsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/hr-hub/integration-dashboard" element={<ProtectedRoute moduleCode="hr_hub"><LazyPage><Pages.IntegrationDashboardPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/hr-hub/transaction-workflow-settings" element={<ProtectedRoute moduleCode="hr_hub"><LazyPage><Pages.TransactionWorkflowSettingsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/hr-hub/intranet-admin" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><LazyPage><Pages.IntranetAdminPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/hr-hub/company-communications" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><LazyPage><Pages.CompanyCommunicationsPage /></LazyPage></ProtectedRoute>} />
 
-            <Route
-              path="/documents/staff-loan-design"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <StaffLoanDesignDocumentPage />
-                </ProtectedRoute>
-              }
-            />
+            {/* Enablement Routes */}
+            <Route path="/enablement" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.EnablementHubPage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
+            <Route path="/enablement/docs-generator" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.ApplicationDocsGeneratorPage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
+            <Route path="/enablement/feature-catalog" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.FeatureCatalogPage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
+            <Route path="/enablement/feature-database" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.FeatureDatabasePage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
+            <Route path="/enablement/template-library" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.TemplateLibraryPage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
+            <Route path="/enablement/analytics" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.EnablementAnalyticsPage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
+            <Route path="/enablement/scorm-generator" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.SCORMGeneratorPage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
+            <Route path="/enablement/release-calendar" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.ReleaseCalendarPage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
+            <Route path="/enablement/settings" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.EnablementSettingsPage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
+            <Route path="/enablement/ai-tools" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.EnablementAIToolsPage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
+            <Route path="/enablement/guide" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.EnablementGuidePage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
+            <Route path="/enablement/artifacts" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.EnablementArtifactsPage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
+            <Route path="/enablement/artifacts/:id" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.ArtifactDetailPage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
+            <Route path="/enablement/artifacts/:id/edit" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.ArtifactEditorPage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
+            <Route path="/enablement/tours-management" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.ToursManagementPage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
+            <Route path="/enablement/feature-audit" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.FeatureAuditDashboard /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
+            <Route path="/enablement/implementation/:moduleCode" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.ImplementationDetailPage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
+            <Route path="/enablement/manuals" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.ManualsIndexPage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
+            <Route path="/enablement/manuals/appraisals" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.AppraisalsManualPage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
+            <Route path="/enablement/manuals/admin-security" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.AdminSecurityManualPage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
+            <Route path="/enablement/manuals/goals" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.GoalsManualPage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
+            <Route path="/enablement/manuals/workforce" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.WorkforceManualPage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
+            <Route path="/enablement/manuals/hr-hub" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.HRHubManualPage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
+            <Route path="/enablement/manuals/client-provisioning" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.ClientProvisioningGuidePage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
+            <Route path="/enablement/manuals/client-provisioning/testing" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.ClientProvisioningTestingPage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
+            <Route path="/enablement/manuals/publishing" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.ManualPublishingPage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
+            <Route path="/enablement/content-lifecycle" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.ContentLifecyclePage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
 
             {/* Strategic Planning Routes */}
-            <Route
-              path="/strategic-planning"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <StrategicPlanningHubPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/org-design"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <OrgDesignPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/scenario-planning"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <ScenarioPlanningPage />
-                </ProtectedRoute>
-              }
-            />
+            <Route path="/strategic-planning" element={<ProtectedRoute><LazyPage><Pages.StrategicPlanningHubPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/strategic-planning/org-design" element={<ProtectedRoute><LazyPage><Pages.OrgDesignPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/strategic-planning/scenario-planning" element={<ProtectedRoute><LazyPage><Pages.ScenarioPlanningPage /></LazyPage></ProtectedRoute>} />
 
             {/* Reporting & Analytics Routes */}
-            <Route
-              path="/reporting"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <ReportingHubPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/dashboards"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <DashboardsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/report-builder"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <ReportBuilderPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/ai-insights"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <AIInsightsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/data-export"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <DataExportPage />
-                </ProtectedRoute>
-              }
-            />
+            <Route path="/reporting" element={<ProtectedRoute><LazyPage><Pages.ReportingHubPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/reporting/dashboards" element={<ProtectedRoute><LazyPage><Pages.DashboardsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/reporting/report-builder" element={<ProtectedRoute><LazyPage><Pages.ReportBuilderPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/reporting/ai-insights" element={<ProtectedRoute><LazyPage><Pages.AIInsightsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/reporting/data-export" element={<ProtectedRoute><LazyPage><Pages.DataExportPage /></LazyPage></ProtectedRoute>} />
 
             {/* Insights Routes */}
-            <Route
-              path="/insights/talent"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <TalentInsightsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/insights/compensation"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <CompensationInsightsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/insights/operational"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <OperationalInsightsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/enablement/implementation/:id"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <EnablementAccessGuard>
-                    <ImplementationDetailPage />
-                  </EnablementAccessGuard>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/hr-hub/sentiment-monitoring"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <SentimentMonitoringPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/hr-hub/recognition-analytics"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <RecognitionAnalyticsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/hr-hub/integrations"
-              element={
-                <ProtectedRoute requiredRoles={["admin", "hr_manager"]}>
-                  <IntegrationDashboardPage />
-                </ProtectedRoute>
-              }
-            />
-
-
+            <Route path="/insights/talent" element={<ProtectedRoute><LazyPage><Pages.TalentInsightsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/insights/compensation" element={<ProtectedRoute><LazyPage><Pages.CompensationInsightsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/insights/operational" element={<ProtectedRoute><LazyPage><Pages.OperationalInsightsPage /></LazyPage></ProtectedRoute>} />
 
             {/* System & Integration Routes */}
-            <Route
-              path="/system"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <SystemHubPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/system/agents"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <AgentManagementHubPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/system/api-management"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <APIManagementPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/system/audit-logs"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <SystemAuditLogsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/system/security"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <SecuritySettingsPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/system/config"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <SystemConfigPage />
-                </ProtectedRoute>
-              }
-            />
+            <Route path="/system" element={<ProtectedRoute requiredRoles={["admin"]}><LazyPage><Pages.SystemHubPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/system/agents" element={<ProtectedRoute requiredRoles={["admin"]}><LazyPage><Pages.AgentManagementHubPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/system/api" element={<ProtectedRoute requiredRoles={["admin"]}><LazyPage><Pages.APIManagementPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/system/audit-logs" element={<ProtectedRoute requiredRoles={["admin"]}><LazyPage><Pages.SystemAuditLogsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/system/security" element={<ProtectedRoute requiredRoles={["admin"]}><LazyPage><Pages.SecuritySettingsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/system/config" element={<ProtectedRoute requiredRoles={["admin"]}><LazyPage><Pages.SystemConfigPage /></LazyPage></ProtectedRoute>} />
 
-            {/* Enablement Module Routes */}
-            <Route
-              path="/enablement"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <EnablementAccessGuard>
-                    <EnablementHubPage />
-                  </EnablementAccessGuard>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/enablement/feature-catalog"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <EnablementAccessGuard>
-                    <FeatureCatalogPage />
-                  </EnablementAccessGuard>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/enablement/feature-database"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <EnablementAccessGuard>
-                    <FeatureDatabasePage />
-                  </EnablementAccessGuard>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/enablement/audit"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <EnablementAccessGuard>
-                    <FeatureAuditDashboard />
-                  </EnablementAccessGuard>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/enablement/docs-generator"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <EnablementAccessGuard>
-                    <ApplicationDocsGeneratorPage />
-                  </EnablementAccessGuard>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/enablement/template-library"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <EnablementAccessGuard>
-                    <TemplateLibraryPage />
-                  </EnablementAccessGuard>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/enablement/analytics"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <EnablementAccessGuard>
-                    <EnablementAnalyticsPage />
-                  </EnablementAccessGuard>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/enablement/scorm-generator"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <EnablementAccessGuard>
-                    <SCORMGeneratorPage />
-                  </EnablementAccessGuard>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/enablement/release-calendar"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <EnablementAccessGuard>
-                    <ReleaseCalendarPage />
-                  </EnablementAccessGuard>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/enablement/settings"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <EnablementAccessGuard>
-                    <EnablementSettingsPage />
-                  </EnablementAccessGuard>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/enablement/ai-tools"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <EnablementAccessGuard>
-                    <EnablementAIToolsPage />
-                  </EnablementAccessGuard>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/enablement/guide"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <EnablementAccessGuard>
-                    <EnablementGuidePage />
-                  </EnablementAccessGuard>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/enablement/artifacts"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <EnablementAccessGuard>
-                    <EnablementArtifactsPage />
-                  </EnablementAccessGuard>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/enablement/artifacts/new"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <EnablementAccessGuard>
-                    <ArtifactEditorPage />
-                  </EnablementAccessGuard>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/enablement/artifacts/:id"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <EnablementAccessGuard>
-                    <ArtifactDetailPage />
-                  </EnablementAccessGuard>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/enablement/artifacts/:id/edit"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <ArtifactEditorPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/enablement/tours"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <EnablementAccessGuard>
-                    <ToursManagementPage />
-                  </EnablementAccessGuard>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/enablement/manuals"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <EnablementAccessGuard>
-                    <ManualsIndexPage />
-                  </EnablementAccessGuard>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/enablement/manuals/appraisals"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <EnablementAccessGuard>
-                    <AppraisalsManualPage />
-                  </EnablementAccessGuard>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/enablement/manuals/admin-security"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <EnablementAccessGuard>
-                    <AdminSecurityManualPage />
-                  </EnablementAccessGuard>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/enablement/manuals/goals"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <EnablementAccessGuard>
-                    <GoalsManualPage />
-                  </EnablementAccessGuard>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/enablement/manuals/workforce"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <EnablementAccessGuard>
-                    <WorkforceManualPage />
-                  </EnablementAccessGuard>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/enablement/manuals/hr-hub"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <EnablementAccessGuard>
-                    <HRHubManualPage />
-                  </EnablementAccessGuard>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/enablement/client-provisioning"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <EnablementAccessGuard>
-                    <ClientProvisioningGuidePage />
-                  </EnablementAccessGuard>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/enablement/client-provisioning/testing"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <EnablementAccessGuard>
-                    <ClientProvisioningTestingPage />
-                  </EnablementAccessGuard>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/enablement/manual-publishing"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <EnablementAccessGuard>
-                    <ManualPublishingPage />
-                  </EnablementAccessGuard>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/enablement/content-lifecycle"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <EnablementAccessGuard>
-                    <ContentLifecyclePage />
-                  </EnablementAccessGuard>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/help/kb/articles/:articleId/history"
-              element={
-                <ProtectedRoute requiredRoles={["admin"]}>
-                  <ArticleVersionHistoryPage />
-                </ProtectedRoute>
-              }
-            />
+            {/* Profile Routes */}
+            <Route path="/profile" element={<ProtectedRoute><LazyPage><Pages.ProfilePage /></LazyPage></ProtectedRoute>} />
+            <Route path="/profile/permissions" element={<ProtectedRoute><LazyPage><Pages.MyPermissionsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/profile/notifications" element={<ProtectedRoute><LazyPage><Pages.NotificationPreferencesPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/profile/privacy" element={<ProtectedRoute><LazyPage><Pages.PrivacySettingsPage /></LazyPage></ProtectedRoute>} />
+
+            {/* Help Center Routes */}
+            <Route path="/help" element={<ProtectedRoute><LazyPage><Pages.HelpCenterPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/help/chat" element={<ProtectedRoute><LazyPage><Pages.HelpChatPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/help/kb" element={<ProtectedRoute><LazyPage><Pages.KnowledgeBasePage /></LazyPage></ProtectedRoute>} />
+            <Route path="/help/kb/articles/:articleId/history" element={<ProtectedRoute requiredRoles={["admin"]}><LazyPage><Pages.ArticleVersionHistoryPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/help/tickets" element={<ProtectedRoute><LazyPage><Pages.TicketsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/help/tickets/new" element={<ProtectedRoute><LazyPage><Pages.NewTicketPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/help/tickets/:id" element={<ProtectedRoute><LazyPage><Pages.TicketDetailPage /></LazyPage></ProtectedRoute>} />
+
+            {/* Messaging Routes */}
+            <Route path="/messaging" element={<ProtectedRoute><LazyPage><Pages.MessagingPage /></LazyPage></ProtectedRoute>} />
+
+            {/* Workflow Routes */}
+            <Route path="/workflow/approvals" element={<ProtectedRoute><LazyPage><Pages.MyApprovalsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/workflow/delegates" element={<ProtectedRoute><LazyPage><Pages.MyDelegatesPage /></LazyPage></ProtectedRoute>} />
+
+            {/* Intranet Routes */}
+            <Route path="/intranet" element={<ProtectedRoute><LazyPage><Pages.IntranetDashboardPage /></LazyPage></ProtectedRoute>} />
+
+            {/* Document Routes */}
+            <Route path="/documents/staff-loan-design" element={<ProtectedRoute><LazyPage><Pages.StaffLoanDesignDocumentPage /></LazyPage></ProtectedRoute>} />
+
             </Route>
 
             {/* Marketing Routes (Public) */}
             <Route element={<MarketingLayout />}>
-              <Route path="/landing" element={<LandingPage />} />
-              <Route path="/register-demo" element={<RegisterDemoPage />} />
-              <Route path="/register-demo/success" element={<RegisterDemoSuccessPage />} />
-              <Route path="/features" element={<FeaturesPage />} />
-              <Route path="/about" element={<AboutPage />} />
+              <Route path="/landing" element={<LazyPage><Pages.LandingPage /></LazyPage>} />
+              <Route path="/register-demo" element={<LazyPage><Pages.RegisterDemoPage /></LazyPage>} />
+              <Route path="/register-demo/success" element={<LazyPage><Pages.RegisterDemoSuccessPage /></LazyPage>} />
+              <Route path="/features" element={<LazyPage><Pages.FeaturesPage /></LazyPage>} />
+              <Route path="/about" element={<LazyPage><Pages.AboutPage /></LazyPage>} />
             </Route>
 
             {/* Product Tour Routes (Public) */}
-            <Route path="/product-tour" element={<ProductTourLandingPage />} />
-            <Route path="/product-tour/:experienceCode" element={<ProductTourPlayerPage />} />
+            <Route path="/product-tour" element={<LazyPage><Pages.ProductTourLandingPage /></LazyPage>} />
+            <Route path="/product-tour/:experienceCode" element={<LazyPage><Pages.ProductTourPlayerPage /></LazyPage>} />
 
             {/* Catch-all */}
             <Route path="*" element={<NotFound />} />
