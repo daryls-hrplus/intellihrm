@@ -5,9 +5,19 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Separator } from "@/components/ui/separator";
 import { useNavigate } from "react-router-dom";
-import { Heart, BookOpen, ChevronRight, Clock, Users, ArrowLeft } from "lucide-react";
+import { 
+  Heart, 
+  BookOpen, 
+  ChevronRight, 
+  Clock, 
+  ArrowLeft, 
+  Sparkles, 
+  Layers, 
+  History as HistoryIcon,
+  Link2
+} from "lucide-react";
 import { BENEFITS_MANUAL_STRUCTURE, getBenefitsManualStats } from "@/types/benefitsManual";
 import {
   BenefitsManualOverviewSection,
@@ -18,6 +28,10 @@ import {
   BenefitsManualClaimsSection,
   BenefitsManualAnalyticsSection,
   BenefitsManualSelfServiceSection,
+  BenefitsManualQuickReference,
+  BenefitsManualArchitectureDiagrams,
+  BenefitsManualGlossary,
+  BenefitsManualVersionHistory,
 } from "@/components/enablement/benefits-manual";
 
 const SECTION_COMPONENTS: Record<string, React.ComponentType> = {
@@ -29,7 +43,18 @@ const SECTION_COMPONENTS: Record<string, React.ComponentType> = {
   'ben-part-6': BenefitsManualClaimsSection,
   'ben-part-7': BenefitsManualAnalyticsSection,
   'ben-part-8': BenefitsManualSelfServiceSection,
+  'quick-ref': BenefitsManualQuickReference,
+  'diagrams': BenefitsManualArchitectureDiagrams,
+  'glossary': BenefitsManualGlossary,
+  'version-history': BenefitsManualVersionHistory,
 };
+
+const SUPPLEMENTARY_SECTIONS = [
+  { id: 'quick-ref', label: 'Quick Reference Cards', icon: Sparkles, color: 'text-amber-500' },
+  { id: 'diagrams', label: 'Architecture Diagrams', icon: Layers, color: 'text-blue-500' },
+  { id: 'glossary', label: 'Glossary', icon: BookOpen, color: 'text-green-500' },
+  { id: 'version-history', label: 'Version History', icon: HistoryIcon, color: 'text-orange-500' },
+];
 
 export default function BenefitsManualPage() {
   const navigate = useNavigate();
@@ -37,6 +62,23 @@ export default function BenefitsManualPage() {
   const stats = getBenefitsManualStats();
 
   const ActiveComponent = SECTION_COMPONENTS[activeSection] || BenefitsManualOverviewSection;
+
+  const isSupplementarySection = SUPPLEMENTARY_SECTIONS.some(s => s.id === activeSection);
+
+  const getActiveTitle = () => {
+    if (isSupplementarySection) {
+      return SUPPLEMENTARY_SECTIONS.find(s => s.id === activeSection)?.label || '';
+    }
+    const section = BENEFITS_MANUAL_STRUCTURE.find(s => s.id === activeSection);
+    return section ? `Part ${section.sectionNumber}: ${section.title}` : '';
+  };
+
+  const getActiveDescription = () => {
+    if (isSupplementarySection) {
+      return 'Supplementary reference material';
+    }
+    return BENEFITS_MANUAL_STRUCTURE.find(s => s.id === activeSection)?.description || '';
+  };
 
   return (
     <AppLayout>
@@ -95,7 +137,10 @@ export default function BenefitsManualPage() {
                       <Button
                         variant={activeSection === section.id ? "secondary" : "ghost"}
                         className="w-full justify-start text-left h-auto py-2"
-                        onClick={() => setActiveSection(section.id)}
+                        onClick={() => {
+                          setActiveSection(section.id);
+                          window.scrollTo(0, 0);
+                        }}
                       >
                         <div className="flex items-center gap-2 w-full">
                           <span className="text-xs text-muted-foreground w-4">
@@ -120,6 +165,47 @@ export default function BenefitsManualPage() {
                       )}
                     </div>
                   ))}
+
+                  <Separator className="my-3" />
+
+                  {/* Related Manuals */}
+                  <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide px-2 mb-2">
+                    Related Manuals
+                  </div>
+                  <button
+                    className="w-full flex items-center gap-2 p-2 rounded-lg text-left text-sm transition-colors hover:bg-muted text-muted-foreground"
+                    onClick={() => navigate('/enablement/manuals/workforce')}
+                  >
+                    <Link2 className="h-4 w-4 text-blue-500" />
+                    <span>Workforce Admin Manual</span>
+                  </button>
+
+                  <Separator className="my-3" />
+
+                  {/* Appendix / Supplementary Sections */}
+                  <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide px-2 mb-2">
+                    Appendix
+                  </div>
+                  {SUPPLEMENTARY_SECTIONS.map((item) => {
+                    const IconComponent = item.icon;
+                    return (
+                      <button
+                        key={item.id}
+                        className={`w-full flex items-center gap-2 p-2 rounded-lg text-left text-sm transition-colors hover:bg-muted ${
+                          activeSection === item.id 
+                            ? 'bg-primary/10 text-primary font-medium' 
+                            : 'text-muted-foreground'
+                        }`}
+                        onClick={() => {
+                          setActiveSection(item.id);
+                          window.scrollTo(0, 0);
+                        }}
+                      >
+                        <IconComponent className={`h-4 w-4 ${item.color}`} />
+                        <span>{item.label}</span>
+                      </button>
+                    );
+                  })}
                 </div>
               </ScrollArea>
             </CardContent>
@@ -132,12 +218,8 @@ export default function BenefitsManualPage() {
                 <div className="flex items-center gap-3">
                   <Heart className="h-5 w-5 text-pink-500" />
                   <div>
-                    <p className="font-medium">
-                      Part {BENEFITS_MANUAL_STRUCTURE.find(s => s.id === activeSection)?.sectionNumber}: {BENEFITS_MANUAL_STRUCTURE.find(s => s.id === activeSection)?.title}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      {BENEFITS_MANUAL_STRUCTURE.find(s => s.id === activeSection)?.description}
-                    </p>
+                    <p className="font-medium">{getActiveTitle()}</p>
+                    <p className="text-sm text-muted-foreground">{getActiveDescription()}</p>
                   </div>
                 </div>
               </CardContent>
@@ -145,36 +227,38 @@ export default function BenefitsManualPage() {
 
             <ActiveComponent />
 
-            {/* Navigation */}
-            <div className="flex justify-between pt-6">
-              <Button
-                variant="outline"
-                onClick={() => {
-                  const currentIndex = BENEFITS_MANUAL_STRUCTURE.findIndex(s => s.id === activeSection);
-                  if (currentIndex > 0) {
-                    setActiveSection(BENEFITS_MANUAL_STRUCTURE[currentIndex - 1].id);
-                    window.scrollTo(0, 0);
-                  }
-                }}
-                disabled={activeSection === BENEFITS_MANUAL_STRUCTURE[0].id}
-              >
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Previous Part
-              </Button>
-              <Button
-                onClick={() => {
-                  const currentIndex = BENEFITS_MANUAL_STRUCTURE.findIndex(s => s.id === activeSection);
-                  if (currentIndex < BENEFITS_MANUAL_STRUCTURE.length - 1) {
-                    setActiveSection(BENEFITS_MANUAL_STRUCTURE[currentIndex + 1].id);
-                    window.scrollTo(0, 0);
-                  }
-                }}
-                disabled={activeSection === BENEFITS_MANUAL_STRUCTURE[BENEFITS_MANUAL_STRUCTURE.length - 1].id}
-              >
-                Next Part
-                <ChevronRight className="h-4 w-4 ml-2" />
-              </Button>
-            </div>
+            {/* Navigation - only show for main sections */}
+            {!isSupplementarySection && (
+              <div className="flex justify-between pt-6">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    const currentIndex = BENEFITS_MANUAL_STRUCTURE.findIndex(s => s.id === activeSection);
+                    if (currentIndex > 0) {
+                      setActiveSection(BENEFITS_MANUAL_STRUCTURE[currentIndex - 1].id);
+                      window.scrollTo(0, 0);
+                    }
+                  }}
+                  disabled={activeSection === BENEFITS_MANUAL_STRUCTURE[0].id}
+                >
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Previous Part
+                </Button>
+                <Button
+                  onClick={() => {
+                    const currentIndex = BENEFITS_MANUAL_STRUCTURE.findIndex(s => s.id === activeSection);
+                    if (currentIndex < BENEFITS_MANUAL_STRUCTURE.length - 1) {
+                      setActiveSection(BENEFITS_MANUAL_STRUCTURE[currentIndex + 1].id);
+                      window.scrollTo(0, 0);
+                    }
+                  }}
+                  disabled={activeSection === BENEFITS_MANUAL_STRUCTURE[BENEFITS_MANUAL_STRUCTURE.length - 1].id}
+                >
+                  Next Part
+                  <ChevronRight className="h-4 w-4 ml-2" />
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       </div>
