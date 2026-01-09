@@ -161,6 +161,19 @@ export default function EnablementHubPage() {
         },
       ],
     },
+    {
+      titleKey: "Marketing & Sales",
+      items: [
+        {
+          title: "Product Capabilities Document",
+          description: "Comprehensive 18-module capabilities guide with PDF export",
+          href: "/enablement/product-capabilities",
+          icon: FileText,
+          color: "bg-primary/10 text-primary",
+          badge: "New",
+        },
+      ],
+    },
   ], []);
 
   // ADVANCED SECTIONS - Hidden by default
