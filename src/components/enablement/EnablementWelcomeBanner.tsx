@@ -32,7 +32,7 @@ export function EnablementWelcomeBanner({ onDismiss }: EnablementWelcomeBannerPr
       title: "Publish to Help Center",
       description: "Use AI-enhanced publishing with version control and approvals",
       icon: Upload,
-      action: () => navigate("/enablement/manual-publishing"),
+      action: () => navigate("/enablement/manuals/publishing"),
       cta: "Publish Content",
     },
   ];
