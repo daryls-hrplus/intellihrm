@@ -130,103 +130,169 @@ export default function ProductCapabilitiesPage() {
 
       // Module pages
       CAPABILITIES_DATA.forEach((act) => {
-        pdf.addPage();
-        // Act header
-        pdf.setFillColor(act.color[0], act.color[1], act.color[2]);
-        pdf.rect(0, 0, pageWidth, 35, "F");
-        pdf.setTextColor(255, 255, 255);
-        pdf.setFontSize(20);
-        pdf.text(act.title, margin, 22);
-        pdf.setFontSize(11);
-        pdf.text(act.subtitle, margin, 30);
-        yPos = 45;
-
         act.modules.forEach((module) => {
-          checkPageBreak(60);
+          pdf.addPage();
+          yPos = margin;
           
-          // Module header
-          pdf.setFillColor(245, 245, 250);
-          pdf.rect(margin - 2, yPos - 5, contentWidth + 4, 20, "F");
+          // Module header box
+          pdf.setFillColor(249, 250, 251);
+          pdf.rect(margin - 5, yPos - 5, contentWidth + 10, 28, "F");
+          pdf.setDrawColor(act.color[0], act.color[1], act.color[2]);
+          pdf.setLineWidth(0.5);
+          pdf.line(margin - 5, yPos - 5, margin - 5, yPos + 23);
+          
+          // Module title with badge
           pdf.setTextColor(15, 23, 42);
-          pdf.setFontSize(14);
-          pdf.text(module.title, margin, yPos + 3);
+          pdf.setFontSize(16);
+          pdf.setFont("helvetica", "bold");
+          pdf.text(module.title, margin, yPos + 5);
+          
           if (module.badge) {
-            pdf.setFontSize(8);
-            pdf.setTextColor(99, 102, 241);
-            pdf.text(module.badge, margin + pdf.getTextWidth(module.title) + 5, yPos + 3);
+            const titleWidth = pdf.getTextWidth(module.title);
+            pdf.setFillColor(99, 102, 241);
+            pdf.roundedRect(margin + titleWidth + 5, yPos - 1, 28, 8, 2, 2, "F");
+            pdf.setFontSize(7);
+            pdf.setTextColor(255, 255, 255);
+            pdf.text(module.badge, margin + titleWidth + 8, yPos + 5);
           }
+          
+          // Tagline
+          pdf.setFont("helvetica", "italic");
           pdf.setFontSize(10);
-          pdf.setTextColor(79, 70, 229);
-          pdf.text(module.tagline, margin, yPos + 10);
-          yPos += 18;
-
+          pdf.setTextColor(act.color[0], act.color[1], act.color[2]);
+          pdf.text(module.tagline, margin, yPos + 14);
+          
           // Overview
+          pdf.setFont("helvetica", "normal");
           pdf.setFontSize(9);
           pdf.setTextColor(100, 116, 139);
           const overviewLines = pdf.splitTextToSize(module.overview, contentWidth);
-          pdf.text(overviewLines, margin, yPos);
-          yPos += overviewLines.length * 4 + 5;
+          pdf.text(overviewLines, margin, yPos + 22);
+          yPos += 28 + overviewLines.length * 4;
 
-          // Categories
-          module.categories.forEach((cat) => {
-            checkPageBreak(25);
-            pdf.setFontSize(10);
-            pdf.setTextColor(15, 23, 42);
-            pdf.text(`${cat.title}:`, margin, yPos);
-            yPos += 5;
+          // Categories in 2-column layout
+          const colWidth = (contentWidth - 10) / 2;
+          const categories = module.categories;
+          
+          for (let i = 0; i < categories.length; i += 2) {
+            const leftCat = categories[i];
+            const rightCat = categories[i + 1];
             
-            pdf.setFontSize(8);
-            pdf.setTextColor(71, 85, 105);
-            cat.items.forEach((item) => {
-              checkPageBreak(5);
-              pdf.text(`  • ${item}`, margin + 3, yPos);
-              yPos += 4;
-            });
-            yPos += 3;
-          });
-
-          // AI Capabilities
-          if (module.aiCapabilities.length > 0) {
-            checkPageBreak(15);
-            pdf.setFontSize(9);
-            pdf.setTextColor(168, 85, 247);
-            pdf.text("AI Capabilities:", margin, yPos);
-            yPos += 5;
-            pdf.setFontSize(8);
-            module.aiCapabilities.forEach((ai) => {
-              checkPageBreak(5);
-              pdf.text(`  * ${ai.type}: ${ai.description}`, margin + 3, yPos);
-              yPos += 4;
-            });
-            yPos += 3;
+            // Calculate max height needed for this row
+            const leftHeight = 8 + (leftCat?.items.length || 0) * 4;
+            const rightHeight = rightCat ? 8 + rightCat.items.length * 4 : 0;
+            const rowHeight = Math.max(leftHeight, rightHeight) + 5;
+            
+            checkPageBreak(rowHeight);
+            
+            // Left column
+            if (leftCat) {
+              pdf.setFontSize(10);
+              pdf.setFont("helvetica", "bold");
+              pdf.setTextColor(15, 23, 42);
+              pdf.text(leftCat.title, margin, yPos);
+              
+              pdf.setFont("helvetica", "normal");
+              pdf.setFontSize(8);
+              pdf.setTextColor(71, 85, 105);
+              leftCat.items.forEach((item, idx) => {
+                pdf.text(`> ${item}`, margin + 3, yPos + 5 + idx * 4);
+              });
+            }
+            
+            // Right column
+            if (rightCat) {
+              pdf.setFontSize(10);
+              pdf.setFont("helvetica", "bold");
+              pdf.setTextColor(15, 23, 42);
+              pdf.text(rightCat.title, margin + colWidth + 10, yPos);
+              
+              pdf.setFont("helvetica", "normal");
+              pdf.setFontSize(8);
+              pdf.setTextColor(71, 85, 105);
+              rightCat.items.forEach((item, idx) => {
+                pdf.text(`> ${item}`, margin + colWidth + 13, yPos + 5 + idx * 4);
+              });
+            }
+            
+            yPos += rowHeight;
           }
 
-          // Integrations
-          if (module.integrations.length > 0) {
-            checkPageBreak(12);
-            pdf.setFontSize(9);
-            pdf.setTextColor(34, 197, 94);
-            pdf.text("Integrations:", margin, yPos);
-            yPos += 5;
+          yPos += 5;
+
+          // AI Capabilities box
+          if (module.aiCapabilities.length > 0) {
+            const aiHeight = 12 + module.aiCapabilities.length * 5;
+            checkPageBreak(aiHeight);
+            
+            pdf.setFillColor(250, 245, 255);
+            pdf.setDrawColor(168, 85, 247);
+            pdf.setLineWidth(0.3);
+            pdf.roundedRect(margin - 2, yPos - 3, contentWidth + 4, aiHeight, 2, 2, "FD");
+            
+            pdf.setFontSize(10);
+            pdf.setFont("helvetica", "bold");
+            pdf.setTextColor(168, 85, 247);
+            pdf.text("AI-Powered Intelligence", margin + 2, yPos + 4);
+            
+            pdf.setFont("helvetica", "normal");
             pdf.setFontSize(8);
-            pdf.setTextColor(71, 85, 105);
-            module.integrations.forEach((int) => {
-              checkPageBreak(5);
-              pdf.text(`  > ${int.module}: ${int.description}`, margin + 3, yPos);
-              yPos += 4;
+            module.aiCapabilities.forEach((ai, idx) => {
+              pdf.setTextColor(168, 85, 247);
+              pdf.text(`${ai.type}:`, margin + 5, yPos + 11 + idx * 5);
+              pdf.setTextColor(71, 85, 105);
+              pdf.text(ai.description, margin + 5 + pdf.getTextWidth(ai.type + ": "), yPos + 11 + idx * 5);
             });
+            
+            yPos += aiHeight + 5;
+          }
+
+          // Integrations box
+          if (module.integrations.length > 0) {
+            const intHeight = 12 + module.integrations.length * 5;
+            checkPageBreak(intHeight);
+            
+            pdf.setFillColor(240, 253, 244);
+            pdf.setDrawColor(34, 197, 94);
+            pdf.setLineWidth(0.3);
+            pdf.roundedRect(margin - 2, yPos - 3, contentWidth + 4, intHeight, 2, 2, "FD");
+            
+            pdf.setFontSize(10);
+            pdf.setFont("helvetica", "bold");
+            pdf.setTextColor(34, 197, 94);
+            pdf.text("Cross-Module Integration", margin + 2, yPos + 4);
+            
+            pdf.setFont("helvetica", "normal");
+            pdf.setFontSize(8);
+            module.integrations.forEach((int, idx) => {
+              pdf.setTextColor(34, 197, 94);
+              pdf.text(int.module, margin + 5, yPos + 11 + idx * 5);
+              pdf.setTextColor(71, 85, 105);
+              pdf.text(int.description, margin + 5 + pdf.getTextWidth(int.module + "  "), yPos + 11 + idx * 5);
+            });
+            
+            yPos += intHeight + 5;
           }
 
           // Regional note
           if (module.regionalNote) {
-            checkPageBreak(10);
+            checkPageBreak(12);
+            pdf.setFillColor(239, 246, 255);
+            pdf.setDrawColor(59, 130, 246);
+            pdf.setLineWidth(0.3);
+            pdf.roundedRect(margin - 2, yPos - 3, contentWidth + 4, 10, 2, 2, "FD");
+            
             pdf.setFontSize(8);
             pdf.setTextColor(59, 130, 246);
-            pdf.text(`[Regional] ${module.regionalNote}`, margin, yPos);
-            yPos += 5;
+            pdf.text(`Regional Compliance: ${module.regionalNote}`, margin + 2, yPos + 3);
+            yPos += 15;
           }
 
-          yPos += 10;
+          // Footer with act info
+          pdf.setFontSize(7);
+          pdf.setTextColor(150, 150, 150);
+          pdf.text(`${act.title} | ${module.title}`, margin, pageHeight - 10);
+          pdf.text(`Page ${pdf.getNumberOfPages()}`, pageWidth - margin - 15, pageHeight - 10);
         });
       });
 
