@@ -239,6 +239,7 @@ export function PlansVersioning() {
 
       <ScreenshotPlaceholder 
         alt="Plan renewal wizard showing configuration migration and enrollment settings"
+        caption="Plan Renewal Wizard"
       />
 
       <BusinessRules rules={versioningRules} />

@@ -354,6 +354,7 @@ export function PlansEligibility() {
 
       <ScreenshotPlaceholder 
         alt="Eligibility rule builder showing criteria selection and employee preview"
+        caption="Eligibility Rule Builder"
       />
 
       <FieldReferenceTable fields={eligibilityFields} title="Eligibility Configuration Fields" />
