@@ -146,11 +146,11 @@ export default function EnablementHubPage() {
       items: [
         {
           title: "Administrator Manuals",
-          description: "5 comprehensive admin guides (239 sections)",
+          description: "6 comprehensive admin guides (284 sections)",
           href: "/enablement/manuals",
           icon: BookOpen,
           color: "bg-blue-500/10 text-blue-500",
-          badge: "5 Guides",
+          badge: "6 Guides",
         },
         {
           title: "Publish to Help Center",
