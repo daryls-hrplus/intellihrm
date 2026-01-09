@@ -144,7 +144,7 @@ export default function EnablementHubPage() {
         {
           title: "Administrator Manuals",
           description: "5 comprehensive admin guides (239 sections)",
-          href: "/enablement/manuals",
+          href: "/enablement/manuals/appraisals",
           icon: BookOpen,
           color: "bg-blue-500/10 text-blue-500",
           badge: "5 Guides",
