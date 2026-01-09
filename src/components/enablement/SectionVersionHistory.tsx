@@ -52,21 +52,12 @@ export function SectionVersionHistory({
   const { data: versions = [], isLoading } = useSectionVersions(section.id);
   const rollback = useRollbackToVersion();
 
-  const getChangeTypeBadge = (type: SectionVersion['change_type']) => {
-    switch (type) {
-      case 'content':
-        return <Badge variant="secondary">Content</Badge>;
-      case 'structure':
-        return <Badge variant="outline" className="border-blue-500 text-blue-500">Structure</Badge>;
-      case 'branding':
-        return <Badge variant="outline" className="border-purple-500 text-purple-500">Branding</Badge>;
-      case 'import':
-        return <Badge variant="outline" className="border-green-500 text-green-500">Import</Badge>;
-      case 'rollback':
-        return <Badge variant="outline" className="border-orange-500 text-orange-500">Rollback</Badge>;
-      default:
-        return <Badge variant="outline">{type}</Badge>;
+  const getVersionBadge = (version: SectionVersion) => {
+    const aiModel = version.ai_model_used;
+    if (aiModel) {
+      return <Badge variant="outline" className="border-blue-500 text-blue-500">AI Generated</Badge>;
     }
+    return <Badge variant="secondary">Manual</Badge>;
   };
 
   const handleRollback = async () => {
@@ -224,7 +215,7 @@ export function SectionVersionHistory({
                           <Badge variant="secondary" className="font-mono">
                             v{version.version_number}
                           </Badge>
-                          {getChangeTypeBadge(version.change_type)}
+                          {getVersionBadge(version)}
                           {index === 0 && (
                             <Badge variant="default" className="text-xs">Latest</Badge>
                           )}
@@ -252,7 +243,7 @@ export function SectionVersionHistory({
                           <Clock className="h-3 w-3" />
                           {formatDistanceToNow(new Date(version.created_at), { addSuffix: true })}
                         </div>
-                        {version.changed_by && (
+                        {version.generated_by && (
                           <div className="flex items-center gap-1">
                             <User className="h-3 w-3" />
                             User
@@ -260,9 +251,9 @@ export function SectionVersionHistory({
                         )}
                       </div>
 
-                      {version.change_summary && (
+                      {version.changelog_entry && (
                         <p className="text-sm text-muted-foreground mt-2">
-                          {version.change_summary}
+                          {version.changelog_entry}
                         </p>
                       )}
 
@@ -304,7 +295,7 @@ export function SectionVersionHistory({
                   {format(new Date(selectedVersion.created_at), 'PPP')}
                 </span>
               </div>
-              <p className="text-sm">{selectedVersion.change_summary || 'No description'}</p>
+              <p className="text-sm">{selectedVersion.changelog_entry || 'No description'}</p>
             </div>
           )}
 
