@@ -124,7 +124,7 @@ export default function ProductCapabilitiesPage() {
       pdf.setFontSize(9);
       pdf.setTextColor(100, 116, 139);
       EXECUTIVE_SUMMARY.benchmarks.forEach((b) => {
-        pdf.text(`✓ ${b}`, margin + 3, yPos);
+        pdf.text(`- ${b}`, margin + 3, yPos);
         yPos += 5;
       });
 
@@ -195,7 +195,7 @@ export default function ProductCapabilitiesPage() {
             pdf.setFontSize(8);
             module.aiCapabilities.forEach((ai) => {
               checkPageBreak(5);
-              pdf.text(`  ★ ${ai.type}: ${ai.description}`, margin + 3, yPos);
+              pdf.text(`  * ${ai.type}: ${ai.description}`, margin + 3, yPos);
               yPos += 4;
             });
             yPos += 3;
@@ -212,7 +212,7 @@ export default function ProductCapabilitiesPage() {
             pdf.setTextColor(71, 85, 105);
             module.integrations.forEach((int) => {
               checkPageBreak(5);
-              pdf.text(`  → ${int.module}: ${int.description}`, margin + 3, yPos);
+              pdf.text(`  > ${int.module}: ${int.description}`, margin + 3, yPos);
               yPos += 4;
             });
           }
@@ -222,7 +222,7 @@ export default function ProductCapabilitiesPage() {
             checkPageBreak(10);
             pdf.setFontSize(8);
             pdf.setTextColor(59, 130, 246);
-            pdf.text(`🌍 Regional: ${module.regionalNote}`, margin, yPos);
+            pdf.text(`[Regional] ${module.regionalNote}`, margin, yPos);
             yPos += 5;
           }
 
@@ -274,7 +274,7 @@ export default function ProductCapabilitiesPage() {
         yPos += 12;
         pdf.setTextColor(71, 85, 105);
         region.highlights.forEach((h) => {
-          pdf.text(`  ✓ ${h}`, margin + 3, yPos);
+          pdf.text(`  - ${h}`, margin + 3, yPos);
           yPos += 4;
         });
         yPos += 8;
@@ -301,7 +301,7 @@ export default function ProductCapabilitiesPage() {
         pdf.setFontSize(8);
         pdf.setTextColor(71, 85, 105);
         cap.examples.forEach((ex) => {
-          pdf.text(`  → ${ex}`, margin + 3, yPos);
+          pdf.text(`  - ${ex}`, margin + 3, yPos);
           yPos += 4;
         });
         yPos += 6;
