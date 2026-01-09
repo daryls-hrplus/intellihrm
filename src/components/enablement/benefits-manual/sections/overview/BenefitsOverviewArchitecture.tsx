@@ -170,7 +170,7 @@ export function BenefitsOverviewArchitecture() {
   return (
     <div className="space-y-8">
       {/* Section Header */}
-      <div className="border-b border-border pb-4">
+      <div id="ben-sec-1-3" className="border-b border-border pb-4 scroll-mt-24">
         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
           <span className="font-medium">Part 1</span>
           <span>•</span>
