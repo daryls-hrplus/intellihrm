@@ -46,6 +46,7 @@ import {
   RegionalCompliance,
   AIIntelligence,
   GettingStarted,
+  ModuleIntegrationDiagram,
 } from "./sections";
 import { ActDivider } from "./components";
 
@@ -60,6 +61,11 @@ export function ProductCapabilitiesDocument() {
       {/* Platform at a Glance */}
       <section id="platform-overview">
         <PlatformAtGlance />
+      </section>
+
+      {/* Module Integration Diagram */}
+      <section id="integration-diagram" className="scroll-mt-20">
+        <ModuleIntegrationDiagram />
       </section>
 
       {/* PROLOGUE: Setting the Stage */}
