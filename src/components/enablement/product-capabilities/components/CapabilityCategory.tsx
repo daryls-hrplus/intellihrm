@@ -5,6 +5,7 @@ interface CapabilityCategoryProps {
   title: string;
   icon?: LucideIcon;
   accentColor?: string;
+  context?: string;
   children: React.ReactNode;
 }
 
@@ -12,13 +13,21 @@ export function CapabilityCategory({
   title,
   icon: Icon,
   accentColor = "text-primary",
+  context,
   children,
 }: CapabilityCategoryProps) {
   return (
     <div className="space-y-2">
-      <div className="flex items-center gap-2">
-        {Icon && <Icon className={cn("h-4 w-4", accentColor)} />}
-        <h4 className="font-medium text-sm">{title}</h4>
+      <div className="space-y-1">
+        <div className="flex items-center gap-2">
+          {Icon && <Icon className={cn("h-4 w-4", accentColor)} />}
+          <h4 className="font-medium text-sm">{title}</h4>
+        </div>
+        {context && (
+          <p className="text-xs text-muted-foreground italic pl-6 border-l-2 border-primary/20">
+            {context}
+          </p>
+        )}
       </div>
       <div className="pl-6 space-y-1">{children}</div>
     </div>

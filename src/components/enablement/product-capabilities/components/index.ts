@@ -6,3 +6,7 @@ export { ActDivider } from "./ActDivider";
 export { TableOfContents, PRODUCT_CAPABILITIES_TOC } from "./TableOfContents";
 export { IntegrationPoint, ModuleIntegrations } from "./IntegrationPoint";
 export { OutcomeMetric, KeyOutcomes } from "./OutcomeMetric";
+export { ChallengePromise } from "./ChallengePromise";
+export { PersonaValueCard, PersonaGrid } from "./PersonaValueCard";
+export { KeyOutcomeMetrics } from "./KeyOutcomeMetrics";
+export { RegionalAdvantage } from "./RegionalAdvantage";
