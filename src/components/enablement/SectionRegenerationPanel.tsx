@@ -57,7 +57,7 @@ export function SectionRegenerationPanel({
   const [selectedSections, setSelectedSections] = useState<string[]>([]);
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
   const [customInstructions, setCustomInstructions] = useState("");
-  const [versionBump, setVersionBump] = useState<'major' | 'minor' | 'patch'>('minor');
+  const [versionBump, setVersionBump] = useState<'initial' | 'major' | 'minor' | 'patch'>('minor');
   const [previewContent, setPreviewContent] = useState<Record<string, any> | null>(null);
   const [previewSectionId, setPreviewSectionId] = useState<string | null>(null);
   
@@ -176,6 +176,7 @@ export function SectionRegenerationPanel({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="initial">Initial (1.0.0)</SelectItem>
                 <SelectItem value="patch">Patch (x.x.+1)</SelectItem>
                 <SelectItem value="minor">Minor (x.+1.0)</SelectItem>
                 <SelectItem value="major">Major (+1.0.0)</SelectItem>
