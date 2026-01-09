@@ -46,6 +46,7 @@ import { ManualToKBTransformer } from "@/services/kb/ManualToKBTransformer";
 import { ManualPublishService } from "@/services/kb/ManualPublishService";
 import { AIChangelogGenerator } from "./AIChangelogGenerator";
 import { SmartVersionSelector } from "./SmartVersionSelector";
+import { ContentQualityCheck } from "./ContentQualityCheck";
 import { toast } from "sonner";
 
 interface PublishWizardProps {
@@ -406,6 +407,15 @@ export function PublishWizard({
         );
 
       case 3:
+        // Prepare sections data for quality check
+        const sectionsForQualityCheck = sections
+          .filter(s => selectedSections.includes(s.id))
+          .map(s => ({
+            id: s.id,
+            title: s.title,
+            content: s.content || ''
+          }));
+
         return (
           <div className="space-y-6">
             <div>
@@ -416,6 +426,12 @@ export function PublishWizard({
             </div>
 
             <div className="space-y-4">
+              {/* Content Quality Check */}
+              <ContentQualityCheck
+                sections={sectionsForQualityCheck}
+                manualName={manualName}
+              />
+
               {/* Summary */}
               <div className="p-4 border rounded-lg space-y-3">
                 <div className="flex justify-between">
