@@ -24,7 +24,8 @@ import {
   ArrowRight,
   FileText,
   Plus,
-  Palette
+  Palette,
+  Layers
 } from "lucide-react";
 import { 
   useManualDefinitions, 
@@ -37,6 +38,7 @@ import { ManualChangeDetector } from "./ManualChangeDetector";
 import { SectionRegenerationPanel } from "./SectionRegenerationPanel";
 import { ManualCreationWizard } from "./ManualCreationWizard";
 import { ManualBrandingPanel } from "./ManualBrandingPanel";
+import { ManualStructureEditor } from "./ManualStructureEditor";
 import { formatDistanceToNow } from "date-fns";
 
 export function ManualGenerationDashboard() {
@@ -225,6 +227,10 @@ export function ManualGenerationDashboard() {
               <FileText className="h-4 w-4 mr-2" />
               Sections ({sections.length})
             </TabsTrigger>
+            <TabsTrigger value="structure">
+              <Layers className="h-4 w-4 mr-2" />
+              Structure
+            </TabsTrigger>
             <TabsTrigger value="branding">
               <Palette className="h-4 w-4 mr-2" />
               Template & Branding
@@ -235,12 +241,20 @@ export function ManualGenerationDashboard() {
             </TabsTrigger>
             <TabsTrigger value="history">
               <History className="h-4 w-4 mr-2" />
-              Generation History
+              History
             </TabsTrigger>
           </TabsList>
           
           <TabsContent value="sections">
             <SectionRegenerationPanel
+              manual={selectedManual}
+              sections={sections}
+              onSectionUpdated={() => refetchSections()}
+            />
+          </TabsContent>
+
+          <TabsContent value="structure">
+            <ManualStructureEditor
               manual={selectedManual}
               sections={sections}
               onSectionUpdated={() => refetchSections()}
