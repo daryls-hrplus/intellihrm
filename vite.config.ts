@@ -15,4 +15,21 @@ export default defineConfig(({ mode, command }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: {
+    // Reduce memory usage during build
+    minify: mode === "production" ? "esbuild" : false,
+    sourcemap: false,
+    rollupOptions: {
+      output: {
+        // Manual chunking to reduce bundle size per chunk
+        manualChunks: {
+          vendor: ["react", "react-dom", "react-router-dom"],
+          ui: ["@radix-ui/react-dialog", "@radix-ui/react-dropdown-menu", "@radix-ui/react-tabs"],
+          charts: ["recharts"],
+          supabase: ["@supabase/supabase-js"],
+        },
+      },
+    },
+    chunkSizeWarningLimit: 1000,
+  },
 }));
