@@ -8,3 +8,11 @@ export { BenefitsManualLifeEventsSection } from './BenefitsManualLifeEventsSecti
 export { BenefitsManualClaimsSection } from './BenefitsManualClaimsSection';
 export { BenefitsManualAnalyticsSection } from './BenefitsManualAnalyticsSection';
 export { BenefitsManualSelfServiceSection } from './BenefitsManualSelfServiceSection';
+
+// Supplementary sections
+export { 
+  BenefitsManualQuickReference,
+  BenefitsManualArchitectureDiagrams,
+  BenefitsManualGlossary,
+  BenefitsManualVersionHistory
+} from './sections/supplementary';
