@@ -47,11 +47,8 @@ serve(async (req) => {
       .eq('id', manual.id);
 
     // Create generation run record
-    // For initial runs, version_bump should be null and we set requested_version
-    // For other runs, we set version_bump to minor/major/patch
-    const isInitialRun = runType === 'initial' || runType === 'full' && !manual.current_version;
-    const effectiveVersionBump = isInitialRun ? null : (versionBump || 'minor');
-    const requestedVersion = isInitialRun ? '1.0.0' : null;
+    const isInitialRun = runType === 'initial' || (runType === 'full' && !manual.current_version);
+    const effectiveVersionBump = isInitialRun ? 'initial' : (versionBump || 'minor');
     
     const { data: run, error: runError } = await supabase
       .from('manual_generation_runs')
@@ -60,7 +57,6 @@ serve(async (req) => {
         triggered_by: userId,
         run_type: isInitialRun ? 'full' : runType,
         version_bump: effectiveVersionBump,
-        requested_version: requestedVersion,
         from_version: manual.current_version || null,
         status: 'running',
         started_at: new Date().toISOString()
