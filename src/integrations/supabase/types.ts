@@ -39661,10 +39661,13 @@ export type Database = {
           href: string | null
           icon_name: string | null
           id: string
+          industry_context: string | null
           last_generated_at: string | null
           manual_code: string
           manual_name: string
           module_codes: string[]
+          structure_template: string | null
+          template_config: Json | null
           updated_at: string
         }
         Insert: {
@@ -39678,10 +39681,13 @@ export type Database = {
           href?: string | null
           icon_name?: string | null
           id?: string
+          industry_context?: string | null
           last_generated_at?: string | null
           manual_code: string
           manual_name: string
           module_codes?: string[]
+          structure_template?: string | null
+          template_config?: Json | null
           updated_at?: string
         }
         Update: {
@@ -39695,10 +39701,13 @@ export type Database = {
           href?: string | null
           icon_name?: string | null
           id?: string
+          industry_context?: string | null
           last_generated_at?: string | null
           manual_code?: string
           manual_name?: string
           module_codes?: string[]
+          structure_template?: string | null
+          template_config?: Json | null
           updated_at?: string
         }
         Relationships: [
@@ -39868,6 +39877,7 @@ export type Database = {
           section_number: string
           source_feature_codes: string[]
           source_module_codes: string[]
+          target_roles: string[] | null
           title: string
           updated_at: string
         }
@@ -39884,6 +39894,7 @@ export type Database = {
           section_number: string
           source_feature_codes?: string[]
           source_module_codes?: string[]
+          target_roles?: string[] | null
           title: string
           updated_at?: string
         }
@@ -39900,6 +39911,7 @@ export type Database = {
           section_number?: string
           source_feature_codes?: string[]
           source_module_codes?: string[]
+          target_roles?: string[] | null
           title?: string
           updated_at?: string
         }
