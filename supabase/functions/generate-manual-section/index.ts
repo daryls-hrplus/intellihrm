@@ -96,14 +96,21 @@ serve(async (req) => {
       effectiveTargetRoles
     );
 
-    // Call AI to generate content (using Lovable AI)
-    const aiResponse = await fetch(`${supabaseUrl}/functions/v1/ai-chat`, {
+    // Call Lovable AI gateway directly
+    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
+    
+    if (!LOVABLE_API_KEY) {
+      throw new Error('LOVABLE_API_KEY is not configured');
+    }
+
+    const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${supabaseKey}`
+        'Authorization': `Bearer ${LOVABLE_API_KEY}`
       },
       body: JSON.stringify({
+        model: 'google/gemini-2.5-flash',
         messages: [
           {
             role: 'system',
@@ -115,7 +122,6 @@ Always respond with valid JSON matching the requested structure.`
           },
           { role: 'user', content: prompt }
         ],
-        model: 'google/gemini-2.5-flash',
         response_format: { type: 'json_object' }
       })
     });
