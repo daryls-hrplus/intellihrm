@@ -22,7 +22,9 @@ import {
   AlertCircle,
   History,
   ArrowRight,
-  FileText
+  FileText,
+  Plus,
+  Palette
 } from "lucide-react";
 import { 
   useManualDefinitions, 
@@ -33,12 +35,15 @@ import {
 } from "@/hooks/useManualGeneration";
 import { ManualChangeDetector } from "./ManualChangeDetector";
 import { SectionRegenerationPanel } from "./SectionRegenerationPanel";
+import { ManualCreationWizard } from "./ManualCreationWizard";
+import { ManualBrandingPanel } from "./ManualBrandingPanel";
 import { formatDistanceToNow } from "date-fns";
 
 export function ManualGenerationDashboard() {
   const [selectedManualId, setSelectedManualId] = useState<string | null>(null);
+  const [showCreateWizard, setShowCreateWizard] = useState(false);
   
-  const { data: manuals = [], isLoading: loadingManuals } = useManualDefinitions();
+  const { data: manuals = [], isLoading: loadingManuals, refetch: refetchManuals } = useManualDefinitions();
   const { data: sections = [], refetch: refetchSections } = useManualSections(selectedManualId);
   const { data: runs = [] } = useManualGenerationRuns(selectedManualId);
   const { data: sectionsNeedingRegen = 0 } = useSectionsNeedingRegeneration(selectedManualId);
@@ -65,6 +70,16 @@ export function ManualGenerationDashboard() {
 
   return (
     <div className="space-y-6">
+      {/* Manual Creation Wizard */}
+      <ManualCreationWizard
+        open={showCreateWizard}
+        onOpenChange={setShowCreateWizard}
+        onManualCreated={(id) => {
+          setSelectedManualId(id);
+          refetchManuals();
+        }}
+      />
+
       {/* Manual Selection */}
       <Card>
         <CardHeader>
@@ -78,6 +93,10 @@ export function ManualGenerationDashboard() {
                 Automatically generate and maintain manual documentation
               </CardDescription>
             </div>
+            <Button onClick={() => setShowCreateWizard(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              Create New Manual
+            </Button>
           </div>
         </CardHeader>
         <CardContent>
@@ -159,6 +178,10 @@ export function ManualGenerationDashboard() {
               <FileText className="h-4 w-4 mr-2" />
               Sections ({sections.length})
             </TabsTrigger>
+            <TabsTrigger value="branding">
+              <Palette className="h-4 w-4 mr-2" />
+              Template & Branding
+            </TabsTrigger>
             <TabsTrigger value="changes">
               <RefreshCw className="h-4 w-4 mr-2" />
               Change Detection
@@ -174,6 +197,13 @@ export function ManualGenerationDashboard() {
               manual={selectedManual}
               sections={sections}
               onSectionUpdated={() => refetchSections()}
+            />
+          </TabsContent>
+          
+          <TabsContent value="branding">
+            <ManualBrandingPanel
+              manual={selectedManual}
+              onUpdate={() => refetchManuals()}
             />
           </TabsContent>
           
