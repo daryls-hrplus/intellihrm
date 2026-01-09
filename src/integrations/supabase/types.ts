@@ -19498,12 +19498,15 @@ export type Database = {
           created_at: string
           created_by: string | null
           description: string | null
+          document_type: string | null
           formatting_config: Json
           id: string
           is_active: boolean | null
+          is_default_for_type: boolean | null
           is_system_default: boolean | null
           layout_config: Json
           name: string
+          preview_thumbnail: string | null
           sections_config: Json
           updated_at: string
         }
@@ -19514,12 +19517,15 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           description?: string | null
+          document_type?: string | null
           formatting_config?: Json
           id?: string
           is_active?: boolean | null
+          is_default_for_type?: boolean | null
           is_system_default?: boolean | null
           layout_config?: Json
           name: string
+          preview_thumbnail?: string | null
           sections_config?: Json
           updated_at?: string
         }
@@ -19530,12 +19536,15 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           description?: string | null
+          document_type?: string | null
           formatting_config?: Json
           id?: string
           is_active?: boolean | null
+          is_default_for_type?: boolean | null
           is_system_default?: boolean | null
           layout_config?: Json
           name?: string
+          preview_thumbnail?: string | null
           sections_config?: Json
           updated_at?: string
         }
