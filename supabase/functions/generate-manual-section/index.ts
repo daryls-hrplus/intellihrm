@@ -217,6 +217,7 @@ function buildSectionPrompt(
   const featureContext = features.map(f => `
 - Feature: ${f.feature_name} (${f.feature_code})
   Description: ${f.description || 'No description'}
+  Route: ${f.route_path || 'N/A'}
   Workflow Steps: ${JSON.stringify(f.workflow_steps || [])}
   UI Elements: ${JSON.stringify(f.ui_elements || [])}
 `).join('\n');
@@ -243,6 +244,51 @@ function buildSectionPrompt(
   const branding = templateConfig?.branding || {};
   const formatting = templateConfig?.formatting || {};
 
+  // Benefits module specific context for richer content generation
+  const benefitsModuleContext = `
+## Benefits Module Pages (HRplus Application)
+The Benefits module includes these key pages and capabilities:
+
+**Dashboard & Overview:**
+- Benefits Dashboard (/benefits) - Central hub for benefits administration with enrollment metrics, upcoming deadlines, and quick actions
+
+**Plan Management:**
+- Benefit Plans (/benefits/plans) - Create and configure benefit plans including medical, dental, vision, life, disability, retirement
+- Benefit Categories - Organize plans by category (Health, Retirement, Lifestyle, etc.)
+- Provider Management (/benefits/providers) - Manage insurance carriers, TPAs, and benefit providers
+
+**Enrollment Management:**
+- Employee Enrollments (/benefits/enrollments) - View and process employee benefit elections
+- Open Enrollment Tracker (/benefits/open-enrollment) - Manage annual open enrollment periods with real-time tracking
+- Life Events (/benefits/life-events) - Handle qualifying life events (marriage, birth, divorce, etc.)
+- Eligibility Rules (/benefits/eligibility) - Configure eligibility criteria by employment type, tenure, hours
+- Waiting Period Tracking - Monitor waiting periods before benefit eligibility
+- Auto-Enrollment Rules - Configure automatic enrollment for new hires
+
+**Claims & Processing:**
+- Claims Processing (/benefits/claims) - Submit, review, and track benefit claims
+- Dependent Management (/benefits/dependents) - Add and verify dependent information
+
+**Analytics & Compliance:**
+- Benefits Reports (/benefits/reports) - Standard and custom reporting
+- Utilization Reports (/benefits/utilization) - Track plan utilization and trends
+- Cost Analysis (/benefits/costs) - Analyze employer and employee benefit costs
+- Compliance Reports (/benefits/compliance) - COBRA, ACA, HIPAA compliance tracking
+- Benefit Calculator - Help employees compare plan costs
+- Plan Comparison - Side-by-side plan comparison tool
+
+**Key Workflows:**
+1. New Hire Enrollment: Employee onboards → System checks eligibility → Presents eligible plans → Employee makes elections → HR approves → Carrier notification
+2. Open Enrollment: HR configures period → Employees receive notification → Review current elections → Make changes → Confirm → Audit trail
+3. Life Event: Employee reports event → Uploads documentation → HR verifies → New enrollment window opens → Process elections
+4. Claims: Employee/dependent submits claim → TPA/Carrier reviews → Adjudication → Payment/Denial → Appeal if needed
+`;
+
+  // Determine if this is Benefits module and add context
+  const manualName = section.manual?.manual_name?.toLowerCase() || '';
+  const isBenefitsModule = manualName.includes('benefit');
+  const moduleSpecificContext = isBenefitsModule ? benefitsModuleContext : '';
+
   let prompt = `Generate comprehensive documentation for the following manual section:
 
 ## Section Details
@@ -258,6 +304,7 @@ ${featureContext || 'No specific features linked'}
 
 ## Related Modules
 ${moduleContext || 'No specific modules linked'}
+${moduleSpecificContext}
 
 ## Document Style Requirements
 - Header Style: ${formatting.headerStyle || 'numbered'} (use numbered sections like 1.1, 1.2)
