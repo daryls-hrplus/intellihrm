@@ -38,6 +38,8 @@ import {
   X,
   Loader2,
   Users,
+  Sparkles,
+  RefreshCw,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SectionSelector } from "./SectionSelector";
@@ -49,6 +51,8 @@ import { AIChangelogGenerator } from "./AIChangelogGenerator";
 import { SmartVersionSelector } from "./SmartVersionSelector";
 import { ContentQualityCheck } from "./ContentQualityCheck";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { formatDistanceToNow } from "date-fns";
 
 interface PublishWizardProps {
   open: boolean;
@@ -113,6 +117,15 @@ export function PublishWizard({
     patch: '1.0.0',
   });
 
+  // Generation run metadata
+  const [latestGenerationRun, setLatestGenerationRun] = useState<{
+    id: string;
+    run_type: string;
+    sections_regenerated: number;
+    completed_at: string;
+    changelog: string[];
+  } | null>(null);
+
   // Initialize sections
   useEffect(() => {
     if (open) {
@@ -128,8 +141,56 @@ export function PublishWizard({
 
       // Calculate all version options
       calculateAllVersions();
+
+      // Load latest generation run
+      loadLatestGenerationRun();
     }
   }, [open, manualId, sectionsCount]);
+
+  const loadLatestGenerationRun = async () => {
+    try {
+      // Get manual definition first
+      const { data: manualDef } = await supabase
+        .from('manual_definitions')
+        .select('id')
+        .eq('manual_code', manualId)
+        .single();
+
+      if (!manualDef) return;
+
+      // Get latest completed generation run
+      const { data: run } = await supabase
+        .from('manual_generation_runs')
+        .select('id, run_type, sections_regenerated, completed_at, changelog')
+        .eq('manual_id', manualDef.id)
+        .eq('status', 'completed')
+        .order('completed_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      if (run) {
+        const changelogData = Array.isArray(run.changelog) ? run.changelog as unknown as string[] : [];
+        
+        setLatestGenerationRun({
+          id: run.id,
+          run_type: run.run_type || 'unknown',
+          sections_regenerated: run.sections_regenerated || 0,
+          completed_at: run.completed_at || '',
+          changelog: changelogData,
+        });
+
+        // Auto-populate changelog from generation run if available
+        if (changelogData.length > 0) {
+          setChangelog(changelogData.map((text: string, i: number) => ({ 
+            id: String(i + 1), 
+            text 
+          })));
+        }
+      }
+    } catch (error) {
+      console.error('Error loading generation run:', error);
+    }
+  };
 
   // Update version type when first publication status changes
   useEffect(() => {
@@ -241,6 +302,7 @@ export function PublishWizard({
         publishVersion: currentVersion,
         changelog: changelogTexts,
         sections: selectedSections,
+        generationRunId: latestGenerationRun?.id,
       }, 'current-user'); // TODO: Get actual user ID
 
       if (result.success) {
@@ -293,6 +355,37 @@ export function PublishWizard({
                 Configure the version number and changelog for this publication.
               </p>
             </div>
+
+            {/* AI Generation Run Info */}
+            {latestGenerationRun && (
+              <div className="p-4 bg-primary/5 border border-primary/20 rounded-lg">
+                <div className="flex items-start gap-3">
+                  <div className="p-2 bg-primary/10 rounded-lg">
+                    <Sparkles className="h-4 w-4 text-primary" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="font-medium">AI Generation Available</span>
+                      <Badge variant="outline" className="text-xs">
+                        {latestGenerationRun.run_type}
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-muted-foreground mb-2">
+                      {latestGenerationRun.sections_regenerated} sections regenerated{' '}
+                      {latestGenerationRun.completed_at && 
+                        formatDistanceToNow(new Date(latestGenerationRun.completed_at), { addSuffix: true })
+                      }
+                    </p>
+                    {latestGenerationRun.changelog.length > 0 && (
+                      <div className="text-sm">
+                        <span className="text-muted-foreground">Changelog auto-populated from generation run</span>
+                      </div>
+                    )}
+                  </div>
+                  <RefreshCw className="h-4 w-4 text-muted-foreground" />
+                </div>
+              </div>
+            )}
 
             {/* Version Type - Smart Selector */}
             <div className="space-y-3">

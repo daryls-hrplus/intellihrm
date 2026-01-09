@@ -151,6 +151,7 @@ export interface PublishOptions {
   sections: string[];
   reviewerId?: string;
   reviewDueDate?: Date;
+  generationRunId?: string;
 }
 
 export interface SyncResult {
