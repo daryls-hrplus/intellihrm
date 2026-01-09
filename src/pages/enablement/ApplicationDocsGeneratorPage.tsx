@@ -23,8 +23,11 @@ import {
   FileCheck,
   Library,
   RefreshCw,
-  GitBranch
+  GitBranch,
+  Home,
+  ChevronRight
 } from "lucide-react";
+import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useModulesWithFeatures, ApplicationFeature } from "@/hooks/useApplicationFeatures";
 import { FeatureBrowser, FeatureDetailPanel } from "@/components/enablement/FeatureBrowser";
@@ -767,6 +770,16 @@ export default function ApplicationDocsGeneratorPage() {
 
   return (
     <div className="space-y-6">
+      {/* Breadcrumb */}
+      <nav className="flex items-center gap-2 text-sm text-muted-foreground">
+        <Link to="/enablement" className="flex items-center gap-1 hover:text-foreground transition-colors">
+          <Home className="h-4 w-4" />
+          Enablement
+        </Link>
+        <ChevronRight className="h-4 w-4" />
+        <span className="text-foreground font-medium">Docs Generator</span>
+      </nav>
+
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Application Docs Generator</h1>
         <p className="text-muted-foreground">
