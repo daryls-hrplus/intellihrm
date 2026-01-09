@@ -39573,6 +39573,353 @@ export type Database = {
           },
         ]
       }
+      manual_change_detections: {
+        Row: {
+          affected_section_ids: string[]
+          change_summary: string | null
+          change_type: string
+          created_at: string
+          detected_at: string
+          generation_run_id: string | null
+          id: string
+          is_processed: boolean
+          manual_id: string
+          processed_at: string | null
+          processed_by: string | null
+          severity: string
+          source_code: string | null
+          source_id: string
+          source_table: string
+        }
+        Insert: {
+          affected_section_ids?: string[]
+          change_summary?: string | null
+          change_type: string
+          created_at?: string
+          detected_at?: string
+          generation_run_id?: string | null
+          id?: string
+          is_processed?: boolean
+          manual_id: string
+          processed_at?: string | null
+          processed_by?: string | null
+          severity?: string
+          source_code?: string | null
+          source_id: string
+          source_table: string
+        }
+        Update: {
+          affected_section_ids?: string[]
+          change_summary?: string | null
+          change_type?: string
+          created_at?: string
+          detected_at?: string
+          generation_run_id?: string | null
+          id?: string
+          is_processed?: boolean
+          manual_id?: string
+          processed_at?: string | null
+          processed_by?: string | null
+          severity?: string
+          source_code?: string | null
+          source_id?: string
+          source_table?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "manual_change_detections_generation_run_id_fkey"
+            columns: ["generation_run_id"]
+            isOneToOne: false
+            referencedRelation: "manual_generation_runs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "manual_change_detections_manual_id_fkey"
+            columns: ["manual_id"]
+            isOneToOne: false
+            referencedRelation: "manual_definitions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "manual_change_detections_processed_by_fkey"
+            columns: ["processed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      manual_definitions: {
+        Row: {
+          color_class: string | null
+          company_id: string | null
+          created_at: string
+          created_by: string | null
+          current_version: string
+          description: string | null
+          generation_status: string
+          href: string | null
+          icon_name: string | null
+          id: string
+          last_generated_at: string | null
+          manual_code: string
+          manual_name: string
+          module_codes: string[]
+          updated_at: string
+        }
+        Insert: {
+          color_class?: string | null
+          company_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          current_version?: string
+          description?: string | null
+          generation_status?: string
+          href?: string | null
+          icon_name?: string | null
+          id?: string
+          last_generated_at?: string | null
+          manual_code: string
+          manual_name: string
+          module_codes?: string[]
+          updated_at?: string
+        }
+        Update: {
+          color_class?: string | null
+          company_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          current_version?: string
+          description?: string | null
+          generation_status?: string
+          href?: string | null
+          icon_name?: string | null
+          id?: string
+          last_generated_at?: string | null
+          manual_code?: string
+          manual_name?: string
+          module_codes?: string[]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "manual_definitions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "manual_definitions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      manual_generation_runs: {
+        Row: {
+          changelog: string | null
+          company_id: string | null
+          completed_at: string | null
+          created_at: string
+          error_message: string | null
+          from_version: string | null
+          id: string
+          manual_id: string
+          run_type: string
+          sections_failed: number
+          sections_regenerated: number
+          sections_total: number
+          started_at: string
+          status: string
+          to_version: string | null
+          triggered_by: string | null
+          version_bump: string | null
+        }
+        Insert: {
+          changelog?: string | null
+          company_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          from_version?: string | null
+          id?: string
+          manual_id: string
+          run_type: string
+          sections_failed?: number
+          sections_regenerated?: number
+          sections_total?: number
+          started_at?: string
+          status?: string
+          to_version?: string | null
+          triggered_by?: string | null
+          version_bump?: string | null
+        }
+        Update: {
+          changelog?: string | null
+          company_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          from_version?: string | null
+          id?: string
+          manual_id?: string
+          run_type?: string
+          sections_failed?: number
+          sections_regenerated?: number
+          sections_total?: number
+          started_at?: string
+          status?: string
+          to_version?: string | null
+          triggered_by?: string | null
+          version_bump?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "manual_generation_runs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "manual_generation_runs_manual_id_fkey"
+            columns: ["manual_id"]
+            isOneToOne: false
+            referencedRelation: "manual_definitions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "manual_generation_runs_triggered_by_fkey"
+            columns: ["triggered_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      manual_section_versions: {
+        Row: {
+          ai_model_used: string | null
+          changelog_entry: string | null
+          content: Json
+          created_at: string
+          generated_at: string
+          generated_by: string | null
+          id: string
+          section_id: string
+          tokens_used: number | null
+          version_number: string
+        }
+        Insert: {
+          ai_model_used?: string | null
+          changelog_entry?: string | null
+          content: Json
+          created_at?: string
+          generated_at?: string
+          generated_by?: string | null
+          id?: string
+          section_id: string
+          tokens_used?: number | null
+          version_number: string
+        }
+        Update: {
+          ai_model_used?: string | null
+          changelog_entry?: string | null
+          content?: Json
+          created_at?: string
+          generated_at?: string
+          generated_by?: string | null
+          id?: string
+          section_id?: string
+          tokens_used?: number | null
+          version_number?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "manual_section_versions_generated_by_fkey"
+            columns: ["generated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "manual_section_versions_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "manual_sections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      manual_sections: {
+        Row: {
+          content: Json
+          created_at: string
+          display_order: number
+          generation_hash: string | null
+          id: string
+          last_generated_at: string | null
+          manual_id: string
+          needs_regeneration: boolean
+          parent_section_id: string | null
+          section_number: string
+          source_feature_codes: string[]
+          source_module_codes: string[]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          content?: Json
+          created_at?: string
+          display_order?: number
+          generation_hash?: string | null
+          id?: string
+          last_generated_at?: string | null
+          manual_id: string
+          needs_regeneration?: boolean
+          parent_section_id?: string | null
+          section_number: string
+          source_feature_codes?: string[]
+          source_module_codes?: string[]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          content?: Json
+          created_at?: string
+          display_order?: number
+          generation_hash?: string | null
+          id?: string
+          last_generated_at?: string | null
+          manual_id?: string
+          needs_regeneration?: boolean
+          parent_section_id?: string | null
+          section_number?: string
+          source_feature_codes?: string[]
+          source_module_codes?: string[]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "manual_sections_manual_id_fkey"
+            columns: ["manual_id"]
+            isOneToOne: false
+            referencedRelation: "manual_definitions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "manual_sections_parent_section_id_fkey"
+            columns: ["parent_section_id"]
+            isOneToOne: false
+            referencedRelation: "manual_sections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       market_data_rates: {
         Row: {
           average_salary: number | null
