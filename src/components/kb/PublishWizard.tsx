@@ -41,6 +41,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SectionSelector } from "./SectionSelector";
+import { SmartSectionActions } from "./SmartSectionActions";
 import type { ManualSection } from "@/types/kb.types";
 import { ManualToKBTransformer } from "@/services/kb/ManualToKBTransformer";
 import { ManualPublishService } from "@/services/kb/ManualPublishService";
@@ -269,6 +270,11 @@ export function PublishWizard({
                 Choose which sections from {manualName} to include in this publication.
               </p>
             </div>
+            <SmartSectionActions
+              sections={sections}
+              selectedSections={selectedSections}
+              onSelectionChange={setSelectedSections}
+            />
             <SectionSelector
               sections={sections}
               selectedSections={selectedSections}
