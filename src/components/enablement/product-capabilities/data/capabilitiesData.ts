@@ -199,64 +199,127 @@ export const CAPABILITIES_DATA: ActData[] = [
       {
         id: "hr-hub",
         title: "HR Hub",
-        tagline: "The central nervous system of your HR operations",
-        overview: "Unified hub for policies, documents, knowledge management, and company communications. Single source of truth for HR operations.",
-        badge: "40+ Capabilities",
+        tagline: "The central command center for all HR operations",
+        overview: "Unified hub for daily operations, documents, policies, communications, compliance tracking, workflow configuration, and cross-module integration. The single source of truth for HR operations with AI-powered insights and automation.",
+        badge: "70+ Capabilities",
         categories: [
           {
-            title: "Policy Management",
+            title: "Daily Operations",
             items: [
-              "Policy creation and versioning",
-              "Acknowledgment tracking",
-              "Compliance alerts and reminders",
-              "Policy distribution workflows",
-              "Multi-language policy support",
-              "Regulatory update notifications"
+              "Help Desk with full ticketing, SLA management, escalation rules, agent performance tracking, and satisfaction surveys",
+              "ESS Change Request management for address, banking, emergency contacts, qualifications, dependents, and government IDs",
+              "HR Task Management with priorities, due dates, assignees, recurring schedules, comments, and completion tracking",
+              "HR Calendar with event types (meetings, deadlines, training, holidays), company-specific views, and color-coded scheduling",
+              "Milestones Dashboard tracking birthdays, work anniversaries, and probation endings with celebration automation",
+              "Configurable approval modes per change type (auto-approve, HR review, full workflow) with risk-based routing"
             ]
           },
           {
-            title: "Document Library",
+            title: "Communication & Support",
             items: [
-              "Template management and generation",
-              "Employee document vault",
-              "Letter template builder",
-              "Document expiry tracking",
-              "Bulk document generation",
-              "Digital signature integration"
+              "Company announcements with targeted messaging by department, location, or employee group",
+              "Notifications & Reminders with AI-powered automation rules, event triggers, and recipient targeting",
+              "Email template management with versioning, category organization, and merge field support",
+              "Multi-channel delivery tracking (email, SMS, in-app) with retry capability and delivery logs",
+              "Real-time notification center for ESS approvals, workflow updates, and system alerts",
+              "Scheduled communications with read receipt tracking and acknowledgment workflows"
+            ]
+          },
+          {
+            title: "Document Center",
+            items: [
+              "Company document library with categories, types, access controls, and version management",
+              "Policy documents with version control, acknowledgment tracking, and compliance alerts",
+              "Letter template builder with merge fields, bulk generation, and digital signature integration",
+              "Employee document vault with secure storage, expiry tracking, and automated reminders",
+              "Multi-language policy support with regulatory update notifications",
+              "Forms library for configurable HR processes with workflow integration"
             ]
           },
           {
             title: "Knowledge Base",
             items: [
-              "FAQ management and organization",
-              "AI-powered search",
-              "Ticket deflection analytics",
-              "Help article workflows",
-              "Category and tag management",
-              "Content freshness tracking"
+              "FAQ management with category and tag organization for easy navigation",
+              "AI-powered semantic search across all HR content with natural language queries",
+              "Ticket deflection analytics measuring self-service effectiveness",
+              "Help article workflows with approval, publishing, and content freshness tracking",
+              "SOP library with AI assistant integration for step-by-step guidance",
+              "Content recommendations based on user queries and browsing patterns"
             ]
           },
           {
-            title: "Communications",
+            title: "Compliance & Governance",
             items: [
-              "Company announcements",
-              "Targeted messaging by group",
-              "Notification center",
-              "Read receipt tracking",
-              "Scheduled communications",
-              "Multi-channel delivery"
+              "Compliance Tracker with categories: Labor Law, Safety Regulations, Tax, Data Protection, Immigration, Benefits, Training, Licensing",
+              "Deadline management with responsible party assignment and progress tracking",
+              "Overall compliance rate calculation with visual indicators and trend analysis",
+              "Status management (compliant, pending, in progress, overdue) with escalation alerts",
+              "SOP Management with versioning, applicable roles, effective dates, and global vs company-specific scope",
+              "Audit trail for all compliance actions with reporting capabilities"
+            ]
+          },
+          {
+            title: "Workflow Configuration",
+            items: [
+              "Reusable workflow templates for common approval patterns",
+              "Transaction workflow settings with company-specific configuration for approval requirements",
+              "Approval delegations with date ranges and workflow type restrictions",
+              "ESS approval policies with configurable modes (auto-approve, HR review, workflow) per request type",
+              "Risk-based policy routing (low/medium/high) for change requests",
+              "Documentation requirements and notification settings per workflow step"
+            ]
+          },
+          {
+            title: "Organization & Configuration",
+            items: [
+              "Lookup values management for centralized master data (dropdowns, selections)",
+              "Government ID types configuration with country-specific requirements (NIS, BIR, SSN, etc.)",
+              "Data Import Wizard with AI validation, dependency checking, and error correction suggestions",
+              "Import templates for company structure, positions, employees, and new hires",
+              "Import history with full audit trail and status tracking",
+              "Org structure visualization with drill-down capabilities"
+            ]
+          },
+          {
+            title: "Analytics & Insights",
+            items: [
+              "AI Sentiment Monitoring with eNPS scoring, organization trends, and department comparison",
+              "Active alerts management with severity levels (critical, high, medium) and resolution tracking",
+              "Recognition analytics with program effectiveness, leaderboards, and values alignment",
+              "Scheduled reports with automated delivery and company/department filtering",
+              "Radar charts for top sentiment themes and engagement drivers",
+              "Help desk performance metrics with agent productivity and SLA compliance"
+            ]
+          },
+          {
+            title: "Integration Hub",
+            items: [
+              "Cross-module integration dashboard monitoring data flows between Performance, Succession, IDP, PIP, and Compensation",
+              "Pending approvals queue with bulk approve/reject capabilities for integration actions",
+              "Failed integration retry with automatic and manual retry options",
+              "By-module analytics showing success rates, activity volumes, and processing times"
             ]
           }
         ],
         aiCapabilities: [
-          { type: "Conversational", description: "Intelligent policy search and Q&A" },
-          { type: "Automated", description: "Auto-ticket categorization and routing" },
-          { type: "Prescriptive", description: "Content suggestions based on user queries" }
+          { type: "Predictive", description: "Sentiment trend forecasting and compliance deadline risk detection" },
+          { type: "Automated", description: "Auto-categorization for help desk tickets with intelligent routing" },
+          { type: "Automated", description: "SOP guidance integration for AI assistant responses" },
+          { type: "Automated", description: "Import data validation with correction suggestions" },
+          { type: "Prescriptive", description: "Content suggestions based on user queries and patterns" },
+          { type: "Prescriptive", description: "Reminder rule recommendations based on company behavior" },
+          { type: "Conversational", description: "Intelligent policy search and natural language Q&A" },
+          { type: "Analytics", description: "Recognition program effectiveness insights and participation analysis" }
         ],
         integrations: [
-          { module: "Help Center", description: "Published KB articles" },
-          { module: "ESS", description: "Policy acknowledgments and documents" },
-          { module: "Onboarding", description: "Required policy completions" }
+          { module: "Help Center", description: "Published KB articles and FAQ content" },
+          { module: "ESS", description: "Policy acknowledgments, self-service changes, reminders" },
+          { module: "Onboarding", description: "Required policy completions and task checklists" },
+          { module: "Performance", description: "Appraisal data flow to integration hub for IDP/PIP triggers" },
+          { module: "Succession", description: "9-Box placement integration and talent pool feeds" },
+          { module: "Compensation", description: "Salary change workflow integration and approval routing" },
+          { module: "Workforce", description: "Org structure data and compliance tracker feeds" },
+          { module: "Employee Relations", description: "Pulse surveys feeding sentiment analysis" }
         ]
       }
     ]
