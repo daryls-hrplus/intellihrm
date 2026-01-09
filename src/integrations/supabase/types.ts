@@ -39827,6 +39827,7 @@ export type Database = {
           generated_at: string
           generated_by: string | null
           id: string
+          markdown_content: string | null
           section_id: string
           tokens_used: number | null
           version_number: string
@@ -39839,6 +39840,7 @@ export type Database = {
           generated_at?: string
           generated_by?: string | null
           id?: string
+          markdown_content?: string | null
           section_id: string
           tokens_used?: number | null
           version_number: string
@@ -39851,6 +39853,7 @@ export type Database = {
           generated_at?: string
           generated_by?: string | null
           id?: string
+          markdown_content?: string | null
           section_id?: string
           tokens_used?: number | null
           version_number?: string
@@ -39876,16 +39879,21 @@ export type Database = {
         Row: {
           content: Json
           created_at: string
+          current_version: number | null
           display_order: number
           generation_hash: string | null
           id: string
+          is_locked: boolean | null
           last_generated_at: string | null
           manual_id: string
+          markdown_content: string | null
           needs_regeneration: boolean
           parent_section_id: string | null
           section_number: string
           source_feature_codes: string[]
           source_module_codes: string[]
+          source_reference: string | null
+          source_type: string | null
           target_roles: string[] | null
           title: string
           updated_at: string
@@ -39893,16 +39901,21 @@ export type Database = {
         Insert: {
           content?: Json
           created_at?: string
+          current_version?: number | null
           display_order?: number
           generation_hash?: string | null
           id?: string
+          is_locked?: boolean | null
           last_generated_at?: string | null
           manual_id: string
+          markdown_content?: string | null
           needs_regeneration?: boolean
           parent_section_id?: string | null
           section_number: string
           source_feature_codes?: string[]
           source_module_codes?: string[]
+          source_reference?: string | null
+          source_type?: string | null
           target_roles?: string[] | null
           title: string
           updated_at?: string
@@ -39910,16 +39923,21 @@ export type Database = {
         Update: {
           content?: Json
           created_at?: string
+          current_version?: number | null
           display_order?: number
           generation_hash?: string | null
           id?: string
+          is_locked?: boolean | null
           last_generated_at?: string | null
           manual_id?: string
+          markdown_content?: string | null
           needs_regeneration?: boolean
           parent_section_id?: string | null
           section_number?: string
           source_feature_codes?: string[]
           source_module_codes?: string[]
+          source_reference?: string | null
+          source_type?: string | null
           target_roles?: string[] | null
           title?: string
           updated_at?: string
