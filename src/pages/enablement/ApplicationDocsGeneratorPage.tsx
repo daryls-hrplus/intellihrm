@@ -21,7 +21,9 @@ import {
   Download,
   Save,
   FileCheck,
-  Library
+  Library,
+  RefreshCw,
+  GitBranch
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useModulesWithFeatures, ApplicationFeature } from "@/hooks/useApplicationFeatures";
@@ -29,6 +31,7 @@ import { FeatureBrowser, FeatureDetailPanel } from "@/components/enablement/Feat
 import { DocumentTemplate, DEFAULT_TEMPLATES } from "@/components/enablement/DocumentTemplateConfig";
 import { ConfluenceStylePreview, GeneratedDocument } from "@/components/enablement/ConfluenceStylePreview";
 import { TemplateLibrary } from "@/components/enablement/TemplateLibrary";
+import { ManualGenerationDashboard } from "@/components/enablement/ManualGenerationDashboard";
 
 type ContentType = 'module_overview' | 'feature_tutorial' | 'video_storyboard' | 'quick_reference' | 'kb_article' | 'training_guide' | 'sop';
 
@@ -760,6 +763,8 @@ export default function ApplicationDocsGeneratorPage() {
     }
   };
 
+  const [activeTab, setActiveTab] = useState<string>("manual-generation");
+
   return (
     <div className="space-y-6">
       <div>
@@ -768,6 +773,26 @@ export default function ApplicationDocsGeneratorPage() {
           Generate documentation, tutorials, and training content using AI
         </p>
       </div>
+
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        <TabsList className="grid w-full max-w-md grid-cols-2">
+          <TabsTrigger value="manual-generation" className="flex items-center gap-2">
+            <RefreshCw className="h-4 w-4" />
+            Manual Generation
+          </TabsTrigger>
+          <TabsTrigger value="ad-hoc" className="flex items-center gap-2">
+            <Sparkles className="h-4 w-4" />
+            Ad-hoc Content
+          </TabsTrigger>
+        </TabsList>
+
+        {/* AI-Powered Manual Generation Tab */}
+        <TabsContent value="manual-generation" className="space-y-6">
+          <ManualGenerationDashboard />
+        </TabsContent>
+
+        {/* Ad-hoc Content Generation Tab */}
+        <TabsContent value="ad-hoc" className="space-y-6">
 
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Configuration Panel */}
@@ -1027,6 +1052,8 @@ export default function ApplicationDocsGeneratorPage() {
           </CardContent>
         </Card>
       </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
