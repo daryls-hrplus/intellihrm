@@ -111,8 +111,8 @@ export function WorkflowDiagram({ title, description, diagram }: WorkflowDiagram
     };
   }, [isModalOpen, modalRenderNonce, renderToContainer]);
 
-  const handleZoomIn = () => setZoom((prev) => Math.min(prev + 25, 400));
-  const handleZoomOut = () => setZoom((prev) => Math.max(prev - 25, 50));
+  const handleZoomIn = () => setZoom((prev) => Math.min(prev + 25, 800));
+  const handleZoomOut = () => setZoom((prev) => Math.max(prev - 25, 25));
   const handleResetZoom = () => setZoom(100);
 
   const handleOpenChange = (open: boolean) => {
@@ -164,11 +164,11 @@ export function WorkflowDiagram({ title, description, diagram }: WorkflowDiagram
             <DialogTitle className="flex items-center justify-between pr-8">
               <span>{title}</span>
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" onClick={handleZoomOut} disabled={zoom <= 50} type="button">
+                <Button variant="outline" size="sm" onClick={handleZoomOut} disabled={zoom <= 25} type="button">
                   <ZoomOut className="h-4 w-4" />
                 </Button>
                 <span className="text-sm font-medium min-w-[4rem] text-center">{zoom}%</span>
-                <Button variant="outline" size="sm" onClick={handleZoomIn} disabled={zoom >= 400} type="button">
+                <Button variant="outline" size="sm" onClick={handleZoomIn} disabled={zoom >= 800} type="button">
                   <ZoomIn className="h-4 w-4" />
                 </Button>
                 <Button variant="outline" size="sm" onClick={handleResetZoom} type="button">
