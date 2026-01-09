@@ -22,7 +22,6 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { 
   Sparkles, 
@@ -36,16 +35,20 @@ import {
   AlertCircle,
   Rocket,
   Users,
-  BookOpen
+  BookOpen,
+  Layers,
+  Edit
 } from "lucide-react";
 import { 
   ManualSection, 
   ManualDefinition,
   useGenerateSection,
   useRegenerateManual,
-  useUpdateSectionContent
+  useUpdateSectionContent,
+  useInitializeSections
 } from "@/hooks/useManualGeneration";
 import { ManualStructurePreview } from "./ManualStructurePreview";
+import { SectionContentEditor } from "./SectionContentEditor";
 
 // Target role options
 const TARGET_ROLES = [
@@ -75,14 +78,17 @@ export function SectionRegenerationPanel({
   const [previewContent, setPreviewContent] = useState<Record<string, any> | null>(null);
   const [previewSectionId, setPreviewSectionId] = useState<string | null>(null);
   const [selectedTargetRoles, setSelectedTargetRoles] = useState<string[]>(["admin"]);
+  const [editingSection, setEditingSection] = useState<ManualSection | null>(null);
   
   const generateSection = useGenerateSection();
   const regenerateManual = useRegenerateManual();
   const updateSectionContent = useUpdateSectionContent();
+  const initializeSections = useInitializeSections();
 
   const sectionsNeedingRegen = sections.filter(s => s.needs_regeneration);
   const emptySections = sections.filter(s => !s.content || Object.keys(s.content).length === 0);
   const isEmptyManual = sections.length > 0 && emptySections.length === sections.length;
+  const hasNoSections = sections.length === 0;
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
@@ -172,12 +178,118 @@ export function SectionRegenerationPanel({
     );
   };
 
+  const handleInitializeSections = async () => {
+    if (!manual) return;
+    
+    await initializeSections.mutateAsync({
+      manualId: manual.id,
+      moduleName: manual.manual_name.replace(' Manual', '').replace(' Guide', ''),
+      moduleCodes: manual.module_codes || [],
+      targetRoles: selectedTargetRoles
+    });
+    
+    onSectionUpdated?.();
+  };
+
   if (!manual) {
     return (
       <Card>
         <CardContent className="py-8 text-center text-muted-foreground">
           <FileText className="h-12 w-12 mx-auto mb-2 opacity-50" />
           <p>Select a manual to view sections</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Content editor dialog
+  if (editingSection) {
+    return (
+      <SectionContentEditor
+        section={editingSection}
+        onClose={() => setEditingSection(null)}
+        onSaved={() => {
+          setEditingSection(null);
+          onSectionUpdated?.();
+        }}
+      />
+    );
+  }
+
+  // Manual has NO sections at all - show initialize structure UI
+  if (hasNoSections) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Layers className="h-5 w-5" />
+            Initialize Section Structure
+          </CardTitle>
+          <CardDescription>
+            {manual.manual_name} has no sections defined. Initialize with a standard structure.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* Target Roles */}
+          <div className="space-y-2">
+            <Label className="flex items-center gap-2">
+              <Users className="h-4 w-4" />
+              Target Audience
+            </Label>
+            <div className="flex flex-wrap gap-2">
+              {TARGET_ROLES.map((role) => (
+                <Badge
+                  key={role.id}
+                  variant={selectedTargetRoles.includes(role.id) ? "default" : "outline"}
+                  className="cursor-pointer"
+                  onClick={() => toggleTargetRole(role.id)}
+                >
+                  {role.label}
+                </Badge>
+              ))}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Select the primary audience to tailor content depth and terminology
+            </p>
+          </div>
+
+          {/* Standard Structure Info */}
+          <div className="p-4 bg-muted/30 rounded-lg space-y-2">
+            <div className="flex items-center gap-2">
+              <BookOpen className="h-4 w-4 text-primary" />
+              <span className="font-medium">Standard 8-Part Structure</span>
+            </div>
+            <ul className="text-sm text-muted-foreground space-y-1 ml-6">
+              <li>1. Module Overview & Conceptual Foundation</li>
+              <li>2. Setup and Configuration Guide</li>
+              <li>3. Operational Workflows</li>
+              <li>4. Advanced Features</li>
+              <li>5. AI Features and Automation</li>
+              <li>6. Analytics and Reporting</li>
+              <li>7. Integration Points</li>
+              <li>8. Troubleshooting and FAQ</li>
+            </ul>
+          </div>
+
+          {/* Initialize Button */}
+          <Button
+            size="lg"
+            className="w-full"
+            onClick={handleInitializeSections}
+            disabled={initializeSections.isPending}
+          >
+            {initializeSections.isPending ? (
+              <>
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                Creating Sections...
+              </>
+            ) : (
+              <>
+                <Layers className="mr-2 h-5 w-5" />
+                Initialize Standard Structure
+              </>
+            )}
+          </Button>
         </CardContent>
       </Card>
     );

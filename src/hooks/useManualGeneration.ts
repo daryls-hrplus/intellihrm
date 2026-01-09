@@ -372,3 +372,114 @@ export function useSectionsNeedingRegeneration(manualId: string | null) {
     enabled: !!manualId
   });
 }
+
+// Initialize sections for a manual using standard structure
+export function useInitializeSections() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ 
+      manualId, 
+      moduleName,
+      moduleCodes = [],
+      targetRoles = ['admin']
+    }: { 
+      manualId: string;
+      moduleName?: string;
+      moduleCodes?: string[];
+      targetRoles?: string[];
+    }) => {
+      const { data, error } = await supabase.functions.invoke('initialize-manual-sections', {
+        body: { manualId, moduleName, moduleCodes, targetRoles }
+      });
+
+      if (error) throw error;
+      if (!data.success) throw new Error(data.error);
+      
+      return data;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['manual-sections'] });
+      queryClient.invalidateQueries({ queryKey: ['manual-definitions'] });
+      toast.success(`Created ${data.sectionsCreated} sections`);
+    },
+    onError: (error: Error) => {
+      toast.error(`Failed to initialize sections: ${error.message}`);
+    }
+  });
+}
+
+// Delete a section
+export function useDeleteSection() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (sectionId: string) => {
+      const { error } = await supabase
+        .from('manual_sections')
+        .delete()
+        .eq('id', sectionId);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['manual-sections'] });
+      toast.success('Section deleted');
+    },
+    onError: (error: Error) => {
+      toast.error(`Failed to delete section: ${error.message}`);
+    }
+  });
+}
+
+// Update section order
+export function useUpdateSectionOrder() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (sections: { id: string; display_order: number }[]) => {
+      // Update each section's display_order
+      for (const section of sections) {
+        const { error } = await supabase
+          .from('manual_sections')
+          .update({ display_order: section.display_order })
+          .eq('id', section.id);
+        
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['manual-sections'] });
+      toast.success('Section order updated');
+    },
+    onError: (error: Error) => {
+      toast.error(`Failed to update order: ${error.message}`);
+    }
+  });
+}
+
+// Update section title
+export function useUpdateSectionTitle() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ sectionId, title }: { sectionId: string; title: string }) => {
+      const { data, error } = await supabase
+        .from('manual_sections')
+        .update({ title })
+        .eq('id', sectionId)
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['manual-sections'] });
+      toast.success('Section title updated');
+    },
+    onError: (error: Error) => {
+      toast.error(`Failed to update title: ${error.message}`);
+    }
+  });
+}
