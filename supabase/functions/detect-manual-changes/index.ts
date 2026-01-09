@@ -61,10 +61,11 @@ serve(async (req) => {
       const checkFromDate = sinceDate || manual.last_generated_at || '1970-01-01';
 
       // Get features that have changed for this manual's modules
+      const moduleCodes = manual.module_codes || [];
       const { data: changedFeatures, error: featuresError } = await supabase
         .from('application_features')
         .select('feature_code, feature_name, module_code, updated_at, created_at')
-        .overlaps('module_code', manual.module_codes || [])
+        .in('module_code', moduleCodes.length > 0 ? moduleCodes : ['__none__'])
         .or(`updated_at.gt.${checkFromDate},created_at.gt.${checkFromDate}`);
 
       if (featuresError) throw featuresError;
