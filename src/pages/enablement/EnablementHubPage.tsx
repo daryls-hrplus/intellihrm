@@ -166,6 +166,19 @@ export default function EnablementHubPage() {
   // ADVANCED SECTIONS - Hidden by default
   const advancedSections: ModuleSection[] = useMemo(() => [
     {
+      titleKey: "Marketing & Sales",
+      items: [
+        {
+          title: "Product Capabilities Document",
+          description: "Comprehensive 18-module capabilities guide with PDF export",
+          href: "/enablement/product-capabilities",
+          icon: FileText,
+          color: "bg-primary/10 text-primary",
+          badge: "New",
+        },
+      ],
+    },
+    {
       titleKey: "AI Automation",
       items: [
         {
