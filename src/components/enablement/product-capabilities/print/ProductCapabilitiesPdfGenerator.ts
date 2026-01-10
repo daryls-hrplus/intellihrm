@@ -1056,15 +1056,15 @@ export async function generateProductCapabilitiesPdf(
     pdf.setTextColor(255, 255, 255);
     pdf.setFontSize(20);
     pdf.setFont("helvetica", "bold");
-    pdf.text("Platform Features", margins.left, 20);
+    pdf.text("Platform Features", margins.left, 25);
     pdf.setFontSize(10);
     pdf.setFont("helvetica", "normal");
-    pdf.text(PLATFORM_FEATURES.tagline || "Enterprise-grade capabilities that power every module", margins.left, 30);
+    pdf.text(PLATFORM_FEATURES.tagline || "Enterprise-grade capabilities that power every module", margins.left, 35);
     yPos = 50;
     
     // Challenge & Promise
     if (PLATFORM_FEATURES.challenge) {
-      pdf.setFillColor(254, 243, 199); // Warm amber background
+      pdf.setFillColor(254, 243, 199);
       pdf.roundedRect(margins.left, yPos, contentWidth, 20, 2, 2, 'F');
       pdf.setFontSize(9);
       pdf.setFont("helvetica", "bold");
@@ -1078,7 +1078,7 @@ export async function generateProductCapabilitiesPdf(
     }
     
     if (PLATFORM_FEATURES.promise) {
-      pdf.setFillColor(220, 252, 231); // Soft green background
+      pdf.setFillColor(220, 252, 231);
       pdf.roundedRect(margins.left, yPos, contentWidth, 20, 2, 2, 'F');
       pdf.setFontSize(9);
       pdf.setFont("helvetica", "bold");
@@ -1091,24 +1091,51 @@ export async function generateProductCapabilitiesPdf(
       yPos += 26;
     }
     
-    PLATFORM_FEATURES.categories.forEach((cat) => {
-      checkPageBreak(35, "Platform Features");
-      pdf.setFontSize(12);
-      pdf.setTextColor(30, 41, 59);
+    // Two-column layout for Platform Features
+    const pfColWidth = (contentWidth - 8) / 2;
+    const categories = PLATFORM_FEATURES.categories;
+    
+    for (let i = 0; i < categories.length; i += 2) {
+      const leftCat = categories[i];
+      const rightCat = categories[i + 1];
+      
+      const leftFeatureCount = leftCat.features.length;
+      const rightFeatureCount = rightCat ? rightCat.features.length : 0;
+      const maxFeatures = Math.max(leftFeatureCount, rightFeatureCount);
+      const requiredHeight = 12 + maxFeatures * 4;
+      
+      checkPageBreak(requiredHeight, "Platform Features");
+      
+      // Left column
+      pdf.setFontSize(10);
       pdf.setFont("helvetica", "bold");
-      pdf.text(cat.title, margins.left, yPos);
-      yPos += 6;
+      pdf.setTextColor(30, 41, 59);
+      pdf.text(leftCat.title, margins.left, yPos);
       
       pdf.setFontSize(8);
       pdf.setFont("helvetica", "normal");
       pdf.setTextColor(...TEXT_COLORS.secondary);
-      cat.features.forEach((f) => {
-        checkPageBreak(6, "Platform Features");
-        pdf.text(`  • ${f}`, margins.left + 3, yPos);
-        yPos += 4;
+      leftCat.features.forEach((f, idx) => {
+        pdf.text("- " + f, margins.left + 2, yPos + 6 + idx * 4);
       });
-      yPos += 6;
-    });
+      
+      // Right column (if exists)
+      if (rightCat) {
+        pdf.setFontSize(10);
+        pdf.setFont("helvetica", "bold");
+        pdf.setTextColor(30, 41, 59);
+        pdf.text(rightCat.title, margins.left + pfColWidth + 8, yPos);
+        
+        pdf.setFontSize(8);
+        pdf.setFont("helvetica", "normal");
+        pdf.setTextColor(...TEXT_COLORS.secondary);
+        rightCat.features.forEach((f, idx) => {
+          pdf.text("- " + f, margins.left + pfColWidth + 10, yPos + 6 + idx * 4);
+        });
+      }
+      
+      yPos += requiredHeight + 4;
+    }
     
     // Regional Compliance
     addNewPage("Regional Compliance");
@@ -1119,10 +1146,10 @@ export async function generateProductCapabilitiesPdf(
     pdf.setTextColor(255, 255, 255);
     pdf.setFontSize(20);
     pdf.setFont("helvetica", "bold");
-    pdf.text("Regional Compliance", margins.left, 20);
+    pdf.text("Regional Compliance", margins.left, 25);
     pdf.setFontSize(10);
     pdf.setFont("helvetica", "normal");
-    pdf.text(REGIONAL_COMPLIANCE.tagline || "Deep compliance built-in, not bolted on", margins.left, 30);
+    pdf.text(REGIONAL_COMPLIANCE.tagline || "Deep compliance built-in, not bolted on", margins.left, 35);
     yPos = 50;
     
     // Challenge & Promise
@@ -1154,28 +1181,60 @@ export async function generateProductCapabilitiesPdf(
       yPos += 26;
     }
     
-    REGIONAL_COMPLIANCE.regions.forEach((region) => {
-      checkPageBreak(45, "Regional Compliance");
-      pdf.setFontSize(14);
+    // Two-column layout for Regional Compliance
+    const rcColWidth = (contentWidth - 8) / 2;
+    const regions = REGIONAL_COMPLIANCE.regions;
+    
+    for (let i = 0; i < regions.length; i += 2) {
+      const leftRegion = regions[i];
+      const rightRegion = regions[i + 1];
+      
+      const leftHeight = 18 + leftRegion.highlights.length * 4;
+      const rightHeight = rightRegion ? 18 + rightRegion.highlights.length * 4 : 0;
+      const requiredHeight = Math.max(leftHeight, rightHeight);
+      
+      checkPageBreak(requiredHeight + 5, "Regional Compliance");
+      
+      // Left column
+      pdf.setFontSize(11);
       pdf.setTextColor(30, 41, 59);
       pdf.setFont("helvetica", "bold");
-      pdf.text(region.name, margins.left, yPos);
-      
-      pdf.setFontSize(9);
-      pdf.setTextColor(...TEXT_COLORS.muted);
-      pdf.setFont("helvetica", "normal");
-      pdf.text(`Countries: ${region.countries.join(", ")}`, margins.left, yPos + 6);
-      yPos += 14;
+      pdf.text(leftRegion.name, margins.left, yPos);
       
       pdf.setFontSize(8);
+      pdf.setTextColor(...TEXT_COLORS.muted);
+      pdf.setFont("helvetica", "normal");
+      pdf.text(`Countries: ${leftRegion.countries.join(", ")}`, margins.left, yPos + 5);
+      
+      pdf.setFontSize(7);
       pdf.setTextColor(...TEXT_COLORS.secondary);
-      region.highlights.forEach((h) => {
-        checkPageBreak(6, "Regional Compliance");
-        pdf.text(`  • ${h}`, margins.left + 3, yPos);
-        yPos += 4;
+      leftRegion.highlights.forEach((h, idx) => {
+        const truncated = h.length > 50 ? h.substring(0, 47) + "..." : h;
+        pdf.text("- " + truncated, margins.left + 2, yPos + 10 + idx * 4);
       });
-      yPos += 10;
-    });
+      
+      // Right column (if exists)
+      if (rightRegion) {
+        pdf.setFontSize(11);
+        pdf.setTextColor(30, 41, 59);
+        pdf.setFont("helvetica", "bold");
+        pdf.text(rightRegion.name, margins.left + rcColWidth + 8, yPos);
+        
+        pdf.setFontSize(8);
+        pdf.setTextColor(...TEXT_COLORS.muted);
+        pdf.setFont("helvetica", "normal");
+        pdf.text(`Countries: ${rightRegion.countries.join(", ")}`, margins.left + rcColWidth + 8, yPos + 5);
+        
+        pdf.setFontSize(7);
+        pdf.setTextColor(...TEXT_COLORS.secondary);
+        rightRegion.highlights.forEach((h, idx) => {
+          const truncated = h.length > 50 ? h.substring(0, 47) + "..." : h;
+          pdf.text("- " + truncated, margins.left + rcColWidth + 10, yPos + 10 + idx * 4);
+        });
+      }
+      
+      yPos += requiredHeight + 5;
+    }
     
     // AI Intelligence
     addNewPage("AI Intelligence");
@@ -1183,6 +1242,13 @@ export async function generateProductCapabilitiesPdf(
     
     pdf.setFillColor(168, 85, 247);
     pdf.rect(0, 0, pageWidth, 40, 'F');
+    pdf.setTextColor(255, 255, 255);
+    pdf.setFontSize(20);
+    pdf.setFont("helvetica", "bold");
+    pdf.text("AI Intelligence", margins.left, 25);
+    pdf.setFontSize(10);
+    pdf.setFont("helvetica", "normal");
+    pdf.text(AI_INTELLIGENCE.tagline || "Embedded intelligence that transforms HR", margins.left, 35);
     pdf.setTextColor(255, 255, 255);
     pdf.setFontSize(20);
     pdf.setFont("helvetica", "bold");
@@ -1274,10 +1340,10 @@ export async function generateProductCapabilitiesPdf(
     pdf.setTextColor(255, 255, 255);
     pdf.setFontSize(20);
     pdf.setFont("helvetica", "bold");
-    pdf.text("Module Dependency Analysis", margins.left, 20);
+    pdf.text("Module Dependency Analysis", margins.left, 25);
     pdf.setFontSize(10);
     pdf.setFont("helvetica", "normal");
-    pdf.text(MODULE_DEPENDENCY_ANALYSIS.tagline, margins.left, 30);
+    pdf.text(MODULE_DEPENDENCY_ANALYSIS.tagline, margins.left, 35);
     yPos = 50;
     
     // Challenge & Promise
@@ -1372,10 +1438,10 @@ export async function generateProductCapabilitiesPdf(
     pdf.setTextColor(255, 255, 255);
     pdf.setFontSize(20);
     pdf.setFont("helvetica", "bold");
-    pdf.text("Getting Started", margins.left, 20);
+    pdf.text("Getting Started", margins.left, 25);
     pdf.setFontSize(10);
     pdf.setFont("helvetica", "normal");
-    pdf.text(GETTING_STARTED.tagline, margins.left, 30);
+    pdf.text(GETTING_STARTED.tagline, margins.left, 35);
     yPos = 50;
     
     // Implementation Phases
@@ -1425,12 +1491,12 @@ export async function generateProductCapabilitiesPdf(
     pdf.text("Next Steps", margins.left, yPos);
     yPos += 8;
     
-    GETTING_STARTED.nextSteps.forEach((step) => {
+    GETTING_STARTED.nextSteps.forEach((step, idx) => {
       checkPageBreak(12, "Getting Started");
       pdf.setFontSize(9);
       pdf.setFont("helvetica", "bold");
       pdf.setTextColor(16, 185, 129);
-      pdf.text(`→ ${step.action}`, margins.left, yPos);
+      pdf.text(`${idx + 1}. ${step.action}`, margins.left, yPos);
       pdf.setFont("helvetica", "normal");
       pdf.setFontSize(8);
       pdf.setTextColor(...TEXT_COLORS.secondary);

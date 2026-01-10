@@ -512,6 +512,190 @@ export const CAPABILITIES_DATA: ActData[] = [
         }
       },
       {
+        id: "onboarding",
+        title: "Onboarding",
+        tagline: "Welcome new hires with structured, memorable experiences",
+        overview: "Transform new hire orientation into a structured, engaging journey that accelerates time-to-productivity while ensuring compliance and cultural integration from day one.",
+        badge: "55+ Capabilities",
+        challenge: "New hires get lost in the chaos of paperwork, disconnected systems, and unclear expectations. Without structured onboarding, it takes 6-12 months for employees to reach full productivity—and 20% leave within the first 45 days due to poor experiences.",
+        promise: "Intelli HRM Onboarding creates memorable first impressions that accelerate productivity. Pre-boarding starts before day one, automated task flows ensure nothing falls through the cracks, and AI-guided experiences help new hires integrate faster while maintaining full compliance.",
+        keyOutcomes: [
+          { value: "50%", label: "Faster Time-to-Productivity", description: "Structured onboarding paths", trend: "up" },
+          { value: "30%", label: "Higher 90-Day Retention", description: "Engaging first experiences", trend: "up" },
+          { value: "100%", label: "Compliance Completion", description: "Automated task enforcement", trend: "up" },
+          { value: "5 hrs", label: "HR Time Saved Per Hire", description: "Automation vs. manual coordination", trend: "down" }
+        ],
+        personas: [
+          { persona: "New Hire", benefit: "I feel prepared and welcomed from day one", outcomes: ["Pre-boarding access before start date", "Clear task checklist with progress tracking", "Easy access to key contacts and resources"] },
+          { persona: "Hiring Manager", benefit: "My new team member is productive faster", outcomes: ["Role-specific onboarding plans", "Progress visibility and milestone alerts", "First-week meeting coordination"] },
+          { persona: "HR Operations", benefit: "Every new hire gets a consistent, compliant experience", outcomes: ["Automated document collection", "Policy acknowledgment tracking", "Compliance checklist enforcement"] },
+          { persona: "IT/Facilities", benefit: "Provisioning requests come automatically", outcomes: ["Equipment provisioning triggers", "System access requests", "Workspace preparation tasks"] }
+        ],
+        categories: [
+          {
+            title: "Pre-boarding",
+            context: "Engagement starts before day one. Pre-boarding reduces first-day anxiety and accelerates integration.",
+            items: [
+              "Welcome portal with company information and culture content",
+              "Digital document collection (tax forms, IDs, banking)",
+              "Pre-hire task checklists with due dates",
+              "Team introduction and manager welcome messages",
+              "Equipment and workspace selection preferences",
+              "First-day logistics and schedule preview"
+            ]
+          },
+          {
+            title: "Task Management",
+            context: "Onboarding involves dozens of tasks across multiple departments. Automation ensures nothing falls through the cracks.",
+            items: [
+              "Role-based onboarding task templates",
+              "Multi-owner task assignment (HR, IT, Manager, Facilities)",
+              "Automatic task triggering based on hire attributes",
+              "Due date tracking with escalation alerts",
+              "Bulk task management for cohort hires",
+              "Task completion verification and sign-off"
+            ]
+          },
+          {
+            title: "Compliance & Documentation",
+            context: "Compliance requirements vary by role, location, and industry. Automated tracking ensures 100% completion.",
+            items: [
+              "Policy acknowledgment workflows",
+              "Mandatory training enrollment triggers",
+              "Document verification and storage",
+              "Background check status tracking",
+              "Work authorization verification (I-9, visa)",
+              "Certification requirement tracking"
+            ]
+          },
+          {
+            title: "Experience & Engagement",
+            context: "First impressions matter. Structured check-ins and feedback loops ensure new hires feel supported.",
+            items: [
+              "Buddy/mentor assignment and tracking",
+              "30/60/90 day milestone check-ins",
+              "New hire surveys and feedback collection",
+              "Cultural integration activities",
+              "Social connection opportunities",
+              "Progress celebration and recognition"
+            ]
+          }
+        ],
+        aiCapabilities: [
+          { type: "Predictive", description: "Early attrition risk detection from engagement signals" },
+          { type: "Prescriptive", description: "Personalized onboarding path recommendations" },
+          { type: "Automated", description: "Smart task assignment based on role and location" },
+          { type: "Analytics", description: "Time-to-productivity correlation analysis" }
+        ],
+        integrations: [
+          { module: "Recruitment", description: "Automatic onboarding initiation on offer acceptance" },
+          { module: "Workforce", description: "Employee record creation and population" },
+          { module: "Learning", description: "Mandatory training enrollment" },
+          { module: "Company Property", description: "Equipment provisioning requests" }
+        ],
+        regionalAdvantage: {
+          regions: ["Caribbean", "Africa", "Global"],
+          advantages: [
+            "Country-specific compliance requirements pre-configured",
+            "Regional statutory document templates",
+            "Multi-jurisdiction onboarding workflows",
+            "Local benefit enrollment integration"
+          ]
+        }
+      },
+      {
+        id: "offboarding",
+        title: "Offboarding",
+        tagline: "Manage exits with dignity, compliance, and knowledge retention",
+        overview: "Transform employee departures into structured, compliant processes that protect the organization while maintaining positive relationships and capturing valuable knowledge.",
+        badge: "55+ Capabilities",
+        challenge: "Departures are chaotic and risky. Access isn't revoked promptly, assets go missing, knowledge walks out the door, and compliance requirements are missed. Poor exit experiences damage employer brand and create legal exposure.",
+        promise: "Intelli HRM Offboarding ensures every departure—voluntary or involuntary—is handled with structure and dignity. Automated workflows revoke access, recover assets, capture knowledge, and maintain compliance while preserving relationships for potential boomerang hires.",
+        keyOutcomes: [
+          { value: "95%", label: "Asset Recovery Rate", description: "Automated tracking and follow-up", trend: "up" },
+          { value: "100%", label: "Access Revocation", description: "Same-day system deprovisioning", trend: "up" },
+          { value: "Zero", label: "Compliance Gaps", description: "Automated clearance workflows", trend: "down" },
+          { value: "4x", label: "Knowledge Captured", description: "Structured handover processes", trend: "up" }
+        ],
+        personas: [
+          { persona: "Departing Employee", benefit: "My exit is handled professionally and respectfully", outcomes: ["Clear timeline and expectations", "Structured knowledge handover", "Positive final experience"] },
+          { persona: "Manager", benefit: "The transition is smooth with no gaps", outcomes: ["Knowledge transfer checklists", "Work redistribution planning", "Replacement planning integration"] },
+          { persona: "HR Operations", benefit: "Every step is tracked and compliant", outcomes: ["Automated clearance workflows", "Final settlement calculations", "Exit interview scheduling"] },
+          { persona: "IT/Security", benefit: "Access is revoked promptly and completely", outcomes: ["System access revocation triggers", "Equipment return tracking", "Data retention compliance"] }
+        ],
+        categories: [
+          {
+            title: "Exit Processing",
+            context: "Every exit type—resignation, termination, retirement—has different requirements. Configurable workflows handle each appropriately.",
+            items: [
+              "Resignation acceptance and notice period tracking",
+              "Termination workflow with approval routing",
+              "Retirement processing with benefit transitions",
+              "Last working day calculations per policy",
+              "Exit type-specific task templates",
+              "Rehire eligibility determination"
+            ]
+          },
+          {
+            title: "Clearance Management",
+            context: "Clearance involves multiple departments. Automated workflows ensure every stakeholder completes their tasks.",
+            items: [
+              "Multi-department clearance checklists",
+              "Finance clearance (advances, loans, expenses)",
+              "IT clearance (access, email, data)",
+              "Facilities clearance (access cards, parking)",
+              "Manager clearance (handover, projects)",
+              "HR clearance (documents, benefits, settlements)"
+            ]
+          },
+          {
+            title: "Knowledge Transfer",
+            context: "Institutional knowledge is priceless. Structured handover processes capture it before it's lost.",
+            items: [
+              "Knowledge handover templates",
+              "Project documentation checklists",
+              "Contact and relationship transfer",
+              "Process documentation requirements",
+              "Successor training scheduling",
+              "Critical information capture"
+            ]
+          },
+          {
+            title: "Exit Insights",
+            context: "Every departure is a learning opportunity. Exit data reveals retention insights.",
+            items: [
+              "Exit interview scheduling and forms",
+              "Reason for leaving categorization",
+              "Exit survey with sentiment analysis",
+              "Trend analysis and reporting",
+              "Manager feedback collection",
+              "Alumni network enrollment"
+            ]
+          }
+        ],
+        aiCapabilities: [
+          { type: "Predictive", description: "Early warning signals from exit pattern analysis" },
+          { type: "Prescriptive", description: "Retention intervention recommendations" },
+          { type: "Automated", description: "Access revocation and task triggering" },
+          { type: "Analytics", description: "Exit reason trending and root cause analysis" }
+        ],
+        integrations: [
+          { module: "Payroll", description: "Final settlement calculations" },
+          { module: "Company Property", description: "Asset return tracking" },
+          { module: "Admin & Security", description: "Access revocation triggers" },
+          { module: "Succession", description: "Replacement planning activation" }
+        ],
+        regionalAdvantage: {
+          regions: ["Caribbean", "Africa", "Global"],
+          advantages: [
+            "Country-specific termination requirements",
+            "Regional statutory final payment calculations",
+            "Local labor law compliance automation",
+            "Multi-jurisdiction notice period rules"
+          ]
+        }
+      },
+      {
         id: "workforce",
         title: "Workforce Management",
         tagline: "The complete employee record, from hire to retire",
@@ -1353,110 +1537,366 @@ export const CAPABILITIES_DATA: ActData[] = [
         }
       },
       {
-        id: "talent",
-        title: "Talent Management",
-        tagline: "Transform performance from annual event to continuous culture",
-        overview: "Comprehensive talent management spanning goals, appraisals, 360 feedback, and continuous recognition. Drive performance excellence through aligned objectives and meaningful feedback.",
-        badge: "50+ Capabilities",
-        challenge: "Annual reviews that employees and managers dread, goals that disconnect from strategy, and feedback that comes too late to matter. Without continuous performance culture, top performers disengage, poor performance festers, and development happens by accident.",
-        promise: "Intelli HRM Talent Management transforms performance from a dreaded annual event to a continuous culture of growth. Cascading goals, real-time feedback, AI-powered coaching, and fair calibration ensure every employee knows where they stand and how to improve.",
+        id: "goals",
+        title: "Goals Management",
+        tagline: "Align individual objectives with organizational strategy",
+        overview: "Drive strategic execution through cascading goals, OKRs, and continuous progress tracking. Ensure every employee understands how their work contributes to organizational success.",
+        badge: "45+ Capabilities",
+        challenge: "Goals set in January are forgotten by March. Without clear alignment to strategy, employees work hard on the wrong things. Annual goal-setting becomes a checkbox exercise instead of a strategic tool.",
+        promise: "Intelli HRM Goals Management connects every employee's objectives to company strategy. Cascading goals, real-time progress tracking, and AI-powered alignment recommendations ensure everyone rows in the same direction.",
         keyOutcomes: [
-          { value: "85%", label: "Goal Alignment", description: "Cascaded from company strategy", trend: "up" },
-          { value: "4x", label: "More Frequent Feedback", description: "Continuous vs. annual", trend: "up" },
-          { value: "25%", label: "Higher Engagement", description: "From recognition and growth", trend: "up" },
-          { value: "90%", label: "Review Completion", description: "Streamlined workflows", trend: "up" }
+          { value: "95%", label: "Goal Alignment", description: "Cascade from strategy to individual", trend: "up" },
+          { value: "3x", label: "Goal Completion Rate", description: "Regular tracking vs. annual", trend: "up" },
+          { value: "80%", label: "Strategic Visibility", description: "Employee understanding of contribution", trend: "up" },
+          { value: "50%", label: "Faster Goal Updates", description: "Self-service vs. HR-managed", trend: "up" }
         ],
         personas: [
-          { persona: "Employee", benefit: "I know my goals and how I'm doing", outcomes: ["Clear, aligned objectives", "Real-time feedback visibility", "Career development support"] },
-          { persona: "Manager", benefit: "Performance coaching is easy and impactful", outcomes: ["Team goal dashboards", "AI-assisted feedback writing", "Calibration support tools"] },
-          { persona: "HR Business Partner", benefit: "Fair, consistent performance across the org", outcomes: ["Calibration session management", "Rating distribution analytics", "Bias detection alerts"] },
-          { persona: "Executive", benefit: "Strategy execution through aligned goals", outcomes: ["Goal cascade visibility", "Performance distribution trends", "Talent investment ROI"] }
+          { persona: "Employee", benefit: "I know exactly how my work matters", outcomes: ["Clear goal cascade visualization", "Real-time progress tracking", "Milestone celebrations"] },
+          { persona: "Manager", benefit: "My team is aligned and focused", outcomes: ["Team goal dashboards", "Progress alerts and nudges", "Alignment gap detection"] },
+          { persona: "HR Business Partner", benefit: "Goals drive real performance", outcomes: ["Organization-wide alignment metrics", "Goal quality analytics", "Cascade completion tracking"] },
+          { persona: "Executive", benefit: "Strategy translates into action", outcomes: ["Strategic goal cascade visibility", "Progress toward company objectives", "Bottleneck identification"] }
         ],
         categories: [
           {
-            title: "Goals Management",
+            title: "Goal Frameworks",
+            context: "Different teams need different frameworks. Support for SMART, OKRs, and custom formats.",
             items: [
-              "SMART and OKR goal frameworks",
-              "Cascading goals with alignment visualization",
-              "Goal weighting and priority setting",
-              "Progress tracking with milestones",
-              "Team and organizational goal dashboards",
-              "Goal library with templates"
+              "SMART goal creation with AI assistance",
+              "OKR framework with key result tracking",
+              "Custom goal type configuration",
+              "Goal templates by role and department",
+              "Qualitative and quantitative goal types",
+              "Goal library for common objectives"
             ]
           },
           {
-            title: "Performance Appraisals",
+            title: "Cascade & Alignment",
+            context: "Goals without alignment are just wishes. Cascading ensures strategic connection.",
             items: [
-              "Configurable review cycles and templates",
-              "Self-assessment and manager evaluation",
-              "Competency-based rating scales",
-              "Multi-section reviews with weighting",
-              "Comments and evidence attachments",
-              "Digital signature and acknowledgment"
+              "Company to team to individual cascade",
+              "Visual alignment tree view",
+              "Parent goal linkage and tracking",
+              "Cross-functional goal dependencies",
+              "Alignment gap identification",
+              "Strategy mapping visualization"
             ]
           },
           {
-            title: "360 Multi-Rater Feedback",
+            title: "Progress Tracking",
+            context: "What gets measured gets done. Continuous tracking keeps goals front-and-center.",
             items: [
-              "Peer, upward, and external rater selection",
-              "Anonymity controls and thresholds",
-              "Customizable questionnaires",
-              "Aggregated feedback reports",
-              "Rater response tracking",
-              "Development action generation"
+              "Real-time progress updates",
+              "Milestone definition and tracking",
+              "Check-in prompts and reminders",
+              "Evidence and attachment support",
+              "Status reporting (on-track, at-risk, behind)",
+              "Historical progress visualization"
             ]
           },
           {
-            title: "Continuous Feedback",
+            title: "Goal Analytics",
+            context: "Understand goal health across the organization.",
             items: [
-              "Real-time recognition and appreciation",
-              "Pulse surveys and quick check-ins",
-              "Feedback request workflows",
-              "Achievement and milestone logging",
-              "Manager coaching prompts",
-              "Peer-to-peer feedback channels"
-            ]
-          },
-          {
-            title: "Calibration & Development",
-            items: [
-              "Calibration session management",
-              "9-Box talent matrix integration",
-              "Rating distribution curves",
-              "Individual Development Plans (IDP)",
-              "Performance Improvement Plans (PIP)",
-              "Manager coaching tools"
-            ]
-          },
-          {
-            title: "Performance Analytics",
-            items: [
-              "Goal completion and alignment metrics",
-              "Rating distribution analysis",
-              "Performance trend tracking",
-              "Feedback frequency dashboards",
-              "Engagement correlation insights"
+              "Goal completion rate dashboards",
+              "Alignment coverage metrics",
+              "Goal quality scoring",
+              "Time-to-completion analysis",
+              "Department comparison views"
             ]
           }
         ],
         aiCapabilities: [
+          { type: "Prescriptive", description: "AI-suggested goals based on role and strategy" },
           { type: "Predictive", description: "Goal achievement likelihood scoring" },
-          { type: "Prescriptive", description: "AI-suggested objectives based on role and strategy" },
-          { type: "Automated", description: "Bias detection in ratings and feedback" },
-          { type: "Conversational", description: "Comment quality analysis and coaching" }
+          { type: "Automated", description: "Progress nudges and check-in reminders" },
+          { type: "Analytics", description: "Alignment gap detection" }
         ],
         integrations: [
-          { module: "Compensation", description: "Performance-based pay recommendations" },
-          { module: "Succession Planning", description: "High-performer identification" },
-          { module: "Learning", description: "Development gap-based training" }
+          { module: "Performance Appraisals", description: "Goals feed into performance reviews" },
+          { module: "Compensation", description: "Goal achievement impacts pay decisions" },
+          { module: "Learning", description: "Skill development goals trigger training" }
         ],
         regionalAdvantage: {
           regions: ["Caribbean", "Africa", "Global"],
           advantages: [
+            "Multi-language goal templates",
             "Regional performance benchmarks",
-            "Multi-language feedback templates",
-            "Cultural considerations in goal-setting",
-            "Country-specific calibration guidelines"
+            "Cultural goal-setting considerations",
+            "Country-specific goal cycles"
+          ]
+        }
+      },
+      {
+        id: "appraisals",
+        title: "Performance Appraisals",
+        tagline: "Fair, comprehensive performance reviews that drive growth",
+        overview: "Transform performance reviews from dreaded annual events into meaningful developmental conversations. Configurable cycles, multi-section evaluations, and AI-powered calibration ensure fair, growth-oriented assessments.",
+        badge: "50+ Capabilities",
+        challenge: "Annual reviews are dreaded by everyone. Managers struggle to remember a year's worth of performance, ratings are inconsistent across teams, and employees leave reviews without clear development direction.",
+        promise: "Intelli HRM Performance Appraisals makes reviews meaningful. Configurable cycles, comprehensive multi-section evaluations, AI-assisted writing, and fair calibration ensure every employee gets actionable feedback that drives growth.",
+        keyOutcomes: [
+          { value: "95%", label: "Review Completion", description: "Streamlined workflows", trend: "up" },
+          { value: "40%", label: "Less Time on Reviews", description: "AI-assisted writing", trend: "down" },
+          { value: "30%", label: "Higher Employee Satisfaction", description: "With review process", trend: "up" },
+          { value: "25%", label: "Reduced Rating Bias", description: "Calibration and AI detection", trend: "down" }
+        ],
+        personas: [
+          { persona: "Employee", benefit: "I get fair feedback that helps me grow", outcomes: ["Clear performance summary", "Development recommendations", "Transparent rating explanation"] },
+          { persona: "Manager", benefit: "Reviews are fast and meaningful", outcomes: ["AI-assisted comment writing", "Performance data aggregation", "Calibration preparation tools"] },
+          { persona: "HR Business Partner", benefit: "Fair, consistent reviews across the org", outcomes: ["Calibration session management", "Rating distribution monitoring", "Bias detection alerts"] },
+          { persona: "Executive", benefit: "Performance insights drive decisions", outcomes: ["Organization performance overview", "High-performer identification", "Performance-pay correlation"] }
+        ],
+        categories: [
+          {
+            title: "Cycle Configuration",
+            context: "Every organization has unique review rhythms. Full flexibility in cycle design.",
+            items: [
+              "Annual, semi-annual, quarterly cycles",
+              "Probation review cycles",
+              "Custom cycle creation",
+              "Multi-section review templates",
+              "Weighted component configuration",
+              "Review timeline and deadline management"
+            ]
+          },
+          {
+            title: "Evaluation Process",
+            context: "Comprehensive evaluation captures the full picture of performance.",
+            items: [
+              "Self-assessment workflows",
+              "Manager evaluation forms",
+              "Skip-level input collection",
+              "Competency-based ratings",
+              "Goal achievement scoring",
+              "Values alignment assessment"
+            ]
+          },
+          {
+            title: "Calibration",
+            context: "Fair ratings require calibration. Tools ensure consistency across managers.",
+            items: [
+              "Calibration session scheduling",
+              "Rating comparison dashboards",
+              "Distribution curve visualization",
+              "Rating adjustment workflows",
+              "Justification documentation",
+              "9-Box integration for calibration"
+            ]
+          },
+          {
+            title: "Review Completion",
+            context: "Reviews aren't done until acknowledged. Digital workflows ensure closure.",
+            items: [
+              "Digital signature and acknowledgment",
+              "Employee comments and responses",
+              "Appeal process workflows",
+              "Review document generation",
+              "Historical review access",
+              "Development action creation"
+            ]
+          }
+        ],
+        aiCapabilities: [
+          { type: "Automated", description: "AI-assisted comment and narrative writing" },
+          { type: "Predictive", description: "Bias detection in ratings and language" },
+          { type: "Analytics", description: "Rating distribution analysis" },
+          { type: "Prescriptive", description: "Development recommendations from review data" }
+        ],
+        integrations: [
+          { module: "Goals", description: "Goal achievement feeds into reviews" },
+          { module: "360 Feedback", description: "Multi-rater input included" },
+          { module: "Continuous Performance", description: "Recognition and feedback aggregation" },
+          { module: "Compensation", description: "Ratings drive pay decisions" },
+          { module: "Succession", description: "Ratings inform 9-Box placement" }
+        ],
+        regionalAdvantage: {
+          regions: ["Caribbean", "Africa", "Global"],
+          advantages: [
+            "Regional rating scale configurations",
+            "Multi-language review forms",
+            "Country-specific probation review requirements",
+            "Cultural feedback style considerations"
+          ]
+        }
+      },
+      {
+        id: "feedback-360",
+        title: "360 Feedback",
+        tagline: "Multi-perspective insights for well-rounded development",
+        overview: "Gather comprehensive feedback from peers, direct reports, managers, and external stakeholders. Anonymous, aggregated insights reveal blind spots and accelerate leadership development.",
+        badge: "35+ Capabilities",
+        challenge: "Managers only see one perspective of performance. Employees have blind spots they can't see. Without multi-rater feedback, development is based on incomplete information, and toxic behaviors go unaddressed.",
+        promise: "Intelli HRM 360 Feedback reveals the complete picture. Gather perspectives from all directions—peers, direct reports, managers, even external stakeholders. Anonymous aggregation ensures honest feedback that drives real development.",
+        keyOutcomes: [
+          { value: "85%", label: "Rater Participation", description: "Easy, anonymous process", trend: "up" },
+          { value: "3x", label: "Blind Spot Identification", description: "vs. manager-only feedback", trend: "up" },
+          { value: "60%", label: "Leadership Development Acceleration", description: "Targeted feedback", trend: "up" },
+          { value: "90%", label: "Employee Finds Feedback Valuable", description: "Actionable insights", trend: "up" }
+        ],
+        personas: [
+          { persona: "Employee", benefit: "I see myself as others see me", outcomes: ["Aggregated multi-rater feedback", "Strength and gap identification", "Development focus areas"] },
+          { persona: "Manager", benefit: "My team gets well-rounded feedback", outcomes: ["Rater selection tools", "Participation monitoring", "Feedback report access"] },
+          { persona: "HR/L&D", benefit: "Leadership development is data-driven", outcomes: ["Organizational feedback trends", "Competency gap analysis", "Development program targeting"] },
+          { persona: "Executive", benefit: "Culture issues surface before they escalate", outcomes: ["Leadership team feedback trends", "Cultural alignment insights", "Early warning indicators"] }
+        ],
+        categories: [
+          {
+            title: "Rater Management",
+            context: "The right raters provide the right insights. Flexible selection with guardrails.",
+            items: [
+              "Self-select and manager-approve raters",
+              "Minimum/maximum rater limits",
+              "Rater category configuration (peer, report, external)",
+              "Anonymity thresholds per category",
+              "Rater response tracking",
+              "Reminder and nudge workflows"
+            ]
+          },
+          {
+            title: "Survey Design",
+            context: "Questions drive insight quality. Configurable surveys target what matters.",
+            items: [
+              "Competency-based questionnaires",
+              "Behaviorally anchored rating scales",
+              "Open-ended comment prompts",
+              "Question bank and templates",
+              "Role-specific question sets",
+              "Skip logic and conditional questions"
+            ]
+          },
+          {
+            title: "Feedback Reports",
+            context: "Raw data isn't useful. Aggregated, visualized reports drive action.",
+            items: [
+              "Aggregated score visualization",
+              "Self vs. others comparison",
+              "Strength and development area identification",
+              "Verbatim comment aggregation (anonymized)",
+              "Trend analysis over time",
+              "Benchmark comparisons"
+            ]
+          },
+          {
+            title: "Development Integration",
+            context: "Feedback without action is wasted. Connect insights to development.",
+            items: [
+              "Development action creation from feedback",
+              "IDP integration",
+              "Learning recommendation generation",
+              "Coaching conversation preparation",
+              "Progress tracking on development areas"
+            ]
+          }
+        ],
+        aiCapabilities: [
+          { type: "Analytics", description: "Theme extraction from open-ended feedback" },
+          { type: "Predictive", description: "Leadership risk identification from patterns" },
+          { type: "Prescriptive", description: "Development recommendations from gaps" },
+          { type: "Automated", description: "Sentiment analysis of comments" }
+        ],
+        integrations: [
+          { module: "Performance Appraisals", description: "360 input included in reviews" },
+          { module: "Learning", description: "Gap-based course recommendations" },
+          { module: "Succession", description: "Leadership readiness assessment" }
+        ],
+        regionalAdvantage: {
+          regions: ["Caribbean", "Africa", "Global"],
+          advantages: [
+            "Multi-language survey delivery",
+            "Cultural feedback style adaptation",
+            "Regional anonymity considerations",
+            "Cross-border rater management"
+          ]
+        }
+      },
+      {
+        id: "continuous-performance",
+        title: "Continuous Performance",
+        tagline: "Real-time feedback and recognition that drives daily excellence",
+        overview: "Move beyond annual reviews to a culture of continuous feedback, recognition, and coaching. Real-time appreciation, pulse check-ins, and ongoing conversations keep performance top-of-mind every day.",
+        badge: "55+ Capabilities",
+        challenge: "Annual feedback is too late to matter. Good work goes unrecognized, small issues become big problems, and employees wonder how they're doing. Without continuous dialogue, performance management fails everyone.",
+        promise: "Intelli HRM Continuous Performance creates a culture where feedback flows freely. Real-time recognition, pulse surveys, 1-on-1 tracking, and AI coaching prompts ensure performance conversations happen when they matter—every day.",
+        keyOutcomes: [
+          { value: "5x", label: "More Frequent Feedback", description: "Continuous vs. annual", trend: "up" },
+          { value: "35%", label: "Higher Engagement", description: "From regular recognition", trend: "up" },
+          { value: "40%", label: "Faster Issue Resolution", description: "Early intervention", trend: "up" },
+          { value: "70%", label: "Employees Feel Recognized", description: "Regular appreciation", trend: "up" }
+        ],
+        personas: [
+          { persona: "Employee", benefit: "I know how I'm doing all the time", outcomes: ["Real-time recognition and appreciation", "Regular feedback from multiple sources", "Progress visibility and celebration"] },
+          { persona: "Manager", benefit: "Performance coaching is part of daily work", outcomes: ["AI coaching prompts and reminders", "1-on-1 meeting tracking", "Team recognition tools"] },
+          { persona: "HR Business Partner", benefit: "Culture of feedback, not just a process", outcomes: ["Recognition program analytics", "Feedback frequency metrics", "Engagement correlation insights"] },
+          { persona: "Executive", benefit: "Performance culture drives results", outcomes: ["Organization recognition trends", "Manager coaching activity", "Performance conversation velocity"] }
+        ],
+        categories: [
+          {
+            title: "Recognition & Appreciation",
+            context: "Recognition is the most powerful motivator. Make it easy and visible.",
+            items: [
+              "Peer-to-peer recognition",
+              "Manager appreciation workflows",
+              "Values-based recognition badges",
+              "Social recognition feed",
+              "Milestone celebrations (tenure, achievements)",
+              "Recognition leaderboards and gamification"
+            ]
+          },
+          {
+            title: "Feedback Channels",
+            context: "Multiple channels encourage feedback flow. Make giving feedback frictionless.",
+            items: [
+              "In-the-moment feedback tools",
+              "Feedback request workflows",
+              "Anonymous feedback options",
+              "Project-based feedback",
+              "Skill-specific feedback tags",
+              "Feedback history and aggregation"
+            ]
+          },
+          {
+            title: "Pulse & Check-ins",
+            context: "Regular pulse checks surface issues early. Lightweight surveys drive action.",
+            items: [
+              "Pulse survey scheduling",
+              "Quick check-in questions",
+              "Sentiment trend tracking",
+              "Manager alert thresholds",
+              "Anonymous response options",
+              "Action planning from results"
+            ]
+          },
+          {
+            title: "Coaching & 1-on-1s",
+            context: "Regular manager conversations are the heart of performance. Tools make them effective.",
+            items: [
+              "1-on-1 meeting scheduling",
+              "Conversation agenda templates",
+              "Action item tracking",
+              "AI coaching prompts for managers",
+              "Discussion topic suggestions",
+              "Meeting history and continuity"
+            ]
+          }
+        ],
+        aiCapabilities: [
+          { type: "Prescriptive", description: "AI coaching prompts for managers" },
+          { type: "Predictive", description: "Engagement risk from feedback patterns" },
+          { type: "Analytics", description: "Recognition and feedback frequency analysis" },
+          { type: "Automated", description: "Check-in reminders and nudges" }
+        ],
+        integrations: [
+          { module: "Performance Appraisals", description: "Continuous data feeds into reviews" },
+          { module: "Goals", description: "Goal progress recognition" },
+          { module: "Learning", description: "Skill feedback triggers recommendations" }
+        ],
+        regionalAdvantage: {
+          regions: ["Caribbean", "Africa", "Global"],
+          advantages: [
+            "Multi-language recognition messages",
+            "Cultural recognition preferences",
+            "Regional feedback style adaptation",
+            "Cross-border recognition programs"
           ]
         }
       },
