@@ -14,6 +14,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { format } from "date-fns";
@@ -33,8 +34,12 @@ import {
   Target,
   FileCheck,
   Sparkles,
+  Armchair,
+  Link2,
+  Unlink,
 } from "lucide-react";
 import { PositionBudgetAIWizard } from "@/components/compensation/PositionBudgetAIWizard";
+import { SeatBudgetReconciliationPanel } from "@/components/compensation/position-budget";
 
 export default function PositionBudgetPlanPage() {
   const { planId } = useParams();
@@ -368,6 +373,7 @@ export default function PositionBudgetPlanPage() {
           <TabsList>
             <TabsTrigger value="details">Plan Details</TabsTrigger>
             {!isNew && <TabsTrigger value="positions">Position Items</TabsTrigger>}
+            {!isNew && <TabsTrigger value="seat-reconciliation">Seat Reconciliation</TabsTrigger>}
             {!isNew && <TabsTrigger value="scenarios">Scenarios</TabsTrigger>}
           </TabsList>
 
@@ -671,6 +677,7 @@ export default function PositionBudgetPlanPage() {
                       <TableHeader>
                         <TableRow>
                           <TableHead>Position</TableHead>
+                          <TableHead>Seat Link</TableHead>
                           <TableHead>Headcount</TableHead>
                           <TableHead>Base Salary</TableHead>
                           <TableHead>Total Comp</TableHead>
@@ -688,6 +695,37 @@ export default function PositionBudgetPlanPage() {
                                   <p className="text-xs text-muted-foreground">{item.job_family}</p>
                                 )}
                               </div>
+                            </TableCell>
+                            <TableCell>
+                              {item.seat_id ? (
+                                <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger>
+                                      <Badge variant="outline" className="text-xs flex items-center gap-1">
+                                        <Link2 className="h-3 w-3" />
+                                        Linked
+                                      </Badge>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      <p>Linked to seat</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
+                              ) : (
+                                <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger>
+                                      <Badge variant="outline" className="text-xs text-muted-foreground flex items-center gap-1">
+                                        <Unlink className="h-3 w-3" />
+                                        Unlinked
+                                      </Badge>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      <p>Not linked to a specific seat</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
+                              )}
                             </TableCell>
                             <TableCell>{item.headcount} ({item.fte} FTE)</TableCell>
                             <TableCell>{formatCurrency(item.base_salary)}</TableCell>
@@ -740,6 +778,16 @@ export default function PositionBudgetPlanPage() {
                   )}
                 </CardContent>
               </Card>
+            </TabsContent>
+          )}
+
+          {!isNew && (
+            <TabsContent value="seat-reconciliation">
+              <SeatBudgetReconciliationPanel
+                scenarioId={selectedScenarioId || ''}
+                companyId={formData.company_id}
+                onRefresh={() => queryClient.invalidateQueries({ queryKey: ["position-budget-plan"] })}
+              />
             </TabsContent>
           )}
 
