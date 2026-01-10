@@ -159,9 +159,9 @@ export function ExecutiveOverview() {
               <h3 className="font-bold text-lg text-green-600">The Transformation</h3>
             </div>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              HRplus was built from the ground up for regional complexity—not adapted from US templates. 
-              Every statutory deduction, every labor law nuance, every public holiday is native to the platform. 
-              Compliance is a first-class citizen, not an afterthought.
+            Intelli HRM was built from the ground up for regional complexity—not adapted from US templates. 
+            Every statutory deduction, every labor law nuance, every public holiday is native to the platform. 
+            Compliance is a first-class citizen, not an afterthought.
             </p>
             <div className="mt-4 space-y-2">
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -233,7 +233,7 @@ export function ExecutiveOverview() {
           </h2>
           <p className="text-muted-foreground mb-6">
             This document follows the complete employee lifecycle through seven acts, 
-            showing how HRplus supports every stage with integrated, intelligent capabilities.
+            showing how Intelli HRM supports every stage with integrated, intelligent capabilities.
           </p>
           
           <div className="grid md:grid-cols-4 lg:grid-cols-7 gap-3">
@@ -312,7 +312,7 @@ export function ExecutiveOverview() {
             What Each Persona Gains
           </h2>
           <p className="text-muted-foreground mb-6">
-            HRplus delivers distinct value to every role in your organization.
+            Intelli HRM delivers distinct value to every role in your organization.
           </p>
           
           <div className="grid md:grid-cols-2 gap-4">
@@ -389,56 +389,30 @@ export function ExecutiveOverview() {
         </CardContent>
       </Card>
 
-      {/* Competitive Positioning */}
-      <div className="grid md:grid-cols-2 gap-6">
-        <Card>
-          <CardContent className="p-6">
-            <h3 className="font-semibold mb-4">Enterprise Benchmark Alignment</h3>
-            <div className="space-y-3">
-              <div className="flex items-center gap-3">
-                <CheckCircle2 className="h-4 w-4 text-green-500" />
-                <span className="text-sm">SAP SuccessFactors – Enterprise configuration & governance</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <CheckCircle2 className="h-4 w-4 text-green-500" />
-                <span className="text-sm">Workday – Unified data model & intelligence</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <CheckCircle2 className="h-4 w-4 text-green-500" />
-                <span className="text-sm">Oracle HCM – Compliance & scale</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <CheckCircle2 className="h-4 w-4 text-green-500" />
-                <span className="text-sm">ISO 27001 / SOC 2 – Security & controls</span>
-              </div>
+      {/* Key Differentiators */}
+      <Card>
+        <CardContent className="p-6">
+          <h3 className="font-semibold mb-4">Key Differentiators</h3>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="flex items-center gap-3">
+              <Sparkles className="h-4 w-4 text-primary" />
+              <span className="text-sm">AI embedded in every module, not bolted on</span>
             </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="p-6">
-            <h3 className="font-semibold mb-4">Key Differentiators</h3>
-            <div className="space-y-3">
-              <div className="flex items-center gap-3">
-                <Sparkles className="h-4 w-4 text-primary" />
-                <span className="text-sm">AI embedded in every module, not bolted on</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <Globe className="h-4 w-4 text-primary" />
-                <span className="text-sm">Native Caribbean, Latin American & African compliance</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <Shield className="h-4 w-4 text-primary" />
-                <span className="text-sm">Full audit trails with explainable AI</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <Users className="h-4 w-4 text-primary" />
-                <span className="text-sm">Role-based simplicity with progressive depth</span>
-              </div>
+            <div className="flex items-center gap-3">
+              <Globe className="h-4 w-4 text-primary" />
+              <span className="text-sm">Native Caribbean, Latin American & African compliance</span>
             </div>
-          </CardContent>
-        </Card>
-      </div>
+            <div className="flex items-center gap-3">
+              <Shield className="h-4 w-4 text-primary" />
+              <span className="text-sm">Full audit trails with explainable AI</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <Users className="h-4 w-4 text-primary" />
+              <span className="text-sm">Role-based simplicity with progressive depth</span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

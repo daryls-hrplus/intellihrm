@@ -49,7 +49,7 @@ export function PayrollCapabilities() {
       <div className="space-y-6">
         <ValueStoryHeader
           challenge="Payroll errors destroy trust. A single mistake affects employee livelihoods, creates compliance nightmares, and generates weeks of manual corrections. Multi-country operations multiply the complexity—different tax tables, statutory deductions, and filing requirements across Jamaica, Trinidad, Dominican Republic, Ghana, Nigeria, and beyond. Without automation, payroll becomes an endless cycle of stress and risk."
-          promise="HRplus Payroll is your complete pay processing command center. From gross-to-net calculations with country-specific compliance for the Caribbean, Latin America, and Africa to GL integration and bank file generation, every payrun is accurate, auditable, and on time. AI-powered anomaly detection catches errors before they happen, while multi-country support means one system for your entire workforce—wherever they are."
+          promise="Intelli HRM Payroll is your complete pay processing command center. From gross-to-net calculations with country-specific compliance for the Caribbean, Latin America, and Africa to GL integration and bank file generation, every payrun is accurate, auditable, and on time. AI-powered anomaly detection catches errors before they happen, while multi-country support means one system for your entire workforce—wherever they are."
           outcomes={outcomes}
           personas={personas}
         />

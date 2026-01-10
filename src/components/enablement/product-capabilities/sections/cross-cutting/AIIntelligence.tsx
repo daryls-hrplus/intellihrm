@@ -33,7 +33,7 @@ export const AIIntelligence = () => {
 
       <ChallengePromise
         challenge="AI hype outpaces AI reality. Chatbots that can't answer questions. Predictions that aren't actionable. Automation that creates more problems than it solves. When AI is bolted on without purpose, it becomes a feature checkbox, not a capability multiplier."
-        promise="HRplus embeds AI at every decision point—not as a feature, but as the intelligence layer that amplifies human capability. Predictions that prevent problems. Recommendations that save hours. Automation that actually works. And always with explainability, human oversight, and bias detection built in. This is responsible AI that delivers real value."
+        promise="Intelli HRM embeds AI at every decision point—not as a feature, but as the intelligence layer that amplifies human capability. Predictions that prevent problems. Recommendations that save hours. Automation that actually works. And always with explainability, human oversight, and bias detection built in. This is responsible AI that delivers real value."
       />
 
       <KeyOutcomeMetrics

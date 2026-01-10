@@ -103,7 +103,7 @@ export const GettingStarted = () => {
           <h2 className="text-3xl font-bold">Ready to Transform Your HR?</h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
             Join organizations across the Caribbean, Latin America, Africa, and beyond who have transformed 
-            their HR operations with HRplus. Our proven implementation methodology ensures 
+            their HR operations with Intelli HRM. Our proven implementation methodology ensures 
             rapid time-to-value with minimal disruption.
           </p>
           
@@ -161,7 +161,7 @@ export const GettingStarted = () => {
                 phase={2}
                 title="Configuration & Setup"
                 duration="4-6 Weeks"
-                description="Configure HRplus to match your policies, structures, and workflows."
+                description="Configure Intelli HRM to match your policies, structures, and workflows."
                 activities={[
                   "Org structure setup",
                   "Policy configuration",
@@ -208,12 +208,12 @@ export const GettingStarted = () => {
           </CardContent>
         </Card>
 
-        {/* Why HRplus & CTA */}
+        {/* Why Intelli HRM & CTA */}
         <div className="space-y-6">
           {/* Differentiators */}
           <Card>
             <CardContent className="p-6 space-y-4">
-              <h3 className="font-bold text-xl">Why HRplus?</h3>
+              <h3 className="font-bold text-xl">Why Intelli HRM?</h3>
               
               <div className="grid gap-3">
                 <Differentiator
@@ -291,16 +291,16 @@ export const GettingStarted = () => {
             <div>
               <h3 className="font-bold text-lg">Have Questions?</h3>
               <p className="text-sm text-muted-foreground">
-                Our team is ready to help you explore how HRplus can transform your organization.
+                Our team is ready to help you explore how Intelli HRM can transform your organization.
               </p>
             </div>
             <div className="flex flex-wrap gap-4">
               <a 
-                href="mailto:sales@hrplus.com" 
+                href="mailto:sales@intelli-hrm.com" 
                 className="flex items-center gap-2 text-sm text-primary hover:underline"
               >
                 <Mail className="h-4 w-4" />
-                sales@hrplus.com
+                sales@intelli-hrm.com
               </a>
               <a 
                 href="tel:+18001234567" 
@@ -332,7 +332,7 @@ export const GettingStarted = () => {
         </p>
         <div className="flex items-center justify-center gap-2 text-primary">
           <Sparkles className="h-5 w-5" />
-          <span className="font-semibold">This is HRplus.</span>
+          <span className="font-semibold">This is Intelli HRM.</span>
         </div>
       </div>
     </section>

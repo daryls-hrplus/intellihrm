@@ -46,7 +46,7 @@ export function CompensationCapabilities() {
       <div className="space-y-6">
         <ValueStoryHeader
           challenge="Compensation decisions made in spreadsheets lead to pay inequity, budget overruns, and talent attrition. Without market data, organizations overpay for some roles while losing top performers in others. Annual merit cycles become political battles without objective criteria. The cost of getting compensation wrong? Millions in turnover and morale damage."
-          promise="HRplus Compensation Management brings strategic intelligence to every pay decision. From salary structures and market benchmarking to equity grants and merit cycles, every compensation action is data-driven, compliant, and aligned with your talent strategy. AI-powered pay equity analysis ensures fairness, while budget controls keep costs in check."
+          promise="Intelli HRM Compensation Management brings strategic intelligence to every pay decision. From salary structures and market benchmarking to equity grants and merit cycles, every compensation action is data-driven, compliant, and aligned with your talent strategy. AI-powered pay equity analysis ensures fairness, while budget controls keep costs in check."
           outcomes={outcomes}
           personas={personas}
         />

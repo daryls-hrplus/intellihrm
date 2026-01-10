@@ -33,7 +33,7 @@ export const SuccessionCapabilities = () => {
       <div className="space-y-6">
         <ValueStoryHeader
           challenge="Critical positions sit unprotected. When key leaders leave—and they will—organizations scramble to find replacements, losing months of productivity and institutional knowledge. Talent is identified by gut feel, not data. High potentials leave because they see no path forward. The bench is shallow, and succession planning is an annual checkbox exercise."
-          promise="HRplus Succession Planning ensures leadership continuity through data-driven talent intelligence. Identify critical positions, build deep talent pipelines, and develop future leaders with AI-powered readiness assessments. The 9-Box becomes a living tool, flight risks are detected before resignations, and career paths light the way forward."
+          promise="Intelli HRM Succession Planning ensures leadership continuity through data-driven talent intelligence. Identify critical positions, build deep talent pipelines, and develop future leaders with AI-powered readiness assessments. The 9-Box becomes a living tool, flight risks are detected before resignations, and career paths light the way forward."
           outcomes={outcomes}
           personas={personas}
         />

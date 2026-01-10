@@ -34,7 +34,7 @@ export const HelpCenterCapabilities = () => {
       <div className="space-y-6">
         <ChallengePromise
           challenge="HR teams drown in repetitive questions. Employees can't find answers. Tickets pile up. Training materials sit unused. Knowledge lives in people's heads, not systems. Without intelligent self-service, HR becomes a bottleneck—reactive instead of strategic, answering the same questions instead of solving real problems."
-          promise="HRplus Help Center transforms support from bottleneck to enabler. Employees find answers instantly through AI-powered search and conversational assistance. Tickets route automatically to the right people with the right priority. Knowledge is captured, organized, and continuously improved. HR finally has time for strategic work—because routine questions answer themselves."
+          promise="Intelli HRM Help Center transforms support from bottleneck to enabler. Employees find answers instantly through AI-powered search and conversational assistance. Tickets route automatically to the right people with the right priority. Knowledge is captured, organized, and continuously improved. HR finally has time for strategic work—because routine questions answer themselves."
         />
 
         <KeyOutcomeMetrics

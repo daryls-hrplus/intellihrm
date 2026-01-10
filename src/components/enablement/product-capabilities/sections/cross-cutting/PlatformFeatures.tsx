@@ -32,7 +32,7 @@ export const PlatformFeatures = () => {
 
       <ChallengePromise
         challenge="Enterprise software fails when the foundation is weak. Security becomes an afterthought. Workflows break under complexity. Reporting requires IT intervention. Mobile access is an afterthought. Integrations become custom nightmares. Without a robust platform, every new feature becomes technical debt."
-        promise="HRplus Platform is enterprise-grade from day one. Security that meets the strictest audits. Workflows that adapt to any approval chain. Analytics that answer questions before they're asked. Mobile that works like native. Integrations that connect, not complicate. This is the foundation that lets HR focus on people, not technology."
+        promise="Intelli HRM Platform is enterprise-grade from day one. Security that meets the strictest audits. Workflows that adapt to any approval chain. Analytics that answer questions before they're asked. Mobile that works like native. Integrations that connect, not complicate. This is the foundation that lets HR focus on people, not technology."
       />
 
       <KeyOutcomeMetrics

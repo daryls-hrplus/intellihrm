@@ -38,7 +38,7 @@ export function RecruitmentCapabilities() {
         {/* Challenge & Promise */}
         <ChallengePromise
           challenge="Every open position costs $500 per day unfilled. Manual resume screening misses qualified candidates, interview chaos frustrates hiring managers, and disjointed communication damages your employer brand. Without a unified system, great talent slips through the cracks while competitors move faster."
-          promise="HRplus Recruitment is your complete talent acquisition command center. From requisition to offer acceptance, AI-powered sourcing, structured interviews, and seamless candidate experiences ensure you hire the best talent 50% faster—while maintaining full compliance and eliminating bias."
+          promise="Intelli HRM Recruitment is your complete talent acquisition command center. From requisition to offer acceptance, AI-powered sourcing, structured interviews, and seamless candidate experiences ensure you hire the best talent 50% faster—while maintaining full compliance and eliminating bias."
         />
 
         {/* Key Outcomes */}

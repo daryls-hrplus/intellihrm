@@ -63,7 +63,7 @@ export const RegionalCompliance = () => {
 
       <ChallengePromise
         challenge="Global HR software fails locally. Caribbean tax rules don't fit North American templates. African labor laws aren't in the system. Regional statutory requirements become manual spreadsheets. When compliance is an afterthought, organizations face fines, legal exposure, and endless manual workarounds."
-        promise="HRplus was built for the Caribbean, Africa, and Latin America from day one—not adapted from a US template. Every statutory deduction, every labor law nuance, every public holiday is configured and maintained. Compliance rules are versioned, auditable, and configurable. When regulations change, the system updates—not your spreadsheets."
+        promise="Intelli HRM was built for the Caribbean, Africa, and Latin America from day one—not adapted from a US template. Every statutory deduction, every labor law nuance, every public holiday is configured and maintained. Compliance rules are versioned, auditable, and configurable. When regulations change, the system updates—not your spreadsheets."
       />
 
       <KeyOutcomeMetrics
@@ -226,7 +226,7 @@ export const RegionalCompliance = () => {
             <div>
               <h3 className="font-semibold mb-2">Regional-First Architecture</h3>
               <p className="text-sm text-muted-foreground mb-3">
-                Unlike global HCM platforms that adapt US-centric designs, HRplus was architected from day one for regional complexity. Every statutory requirement, labor law variation, and cultural nuance is a first-class citizen in our data model.
+                Unlike global HCM platforms that adapt US-centric designs, Intelli HRM was architected from day one for regional complexity. Every statutory requirement, labor law variation, and cultural nuance is a first-class citizen in our data model.
               </p>
               <div className="flex flex-wrap gap-2">
                 <Badge variant="secondary">Versioned Rules</Badge>

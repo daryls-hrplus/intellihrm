@@ -33,7 +33,7 @@ export const AppraisalsCapabilities = () => {
       <div className="space-y-6">
         <ValueStoryHeader
           challenge="Annual reviews are dreaded rituals that look backward instead of forward. Managers rush through forms, ratings are inconsistent, and feedback arrives too late to change anything. The process consumes weeks of productivity while delivering minimal value—and often damages relationships instead of developing people."
-          promise="HRplus Performance Appraisals transforms evaluation from annual burden to development catalyst. Configurable review cycles, multi-section templates, competency-based ratings, and AI-assisted calibration ensure fair, consistent, and meaningful evaluations. Every appraisal becomes a growth conversation, not a judgment day."
+          promise="Intelli HRM Performance Appraisals transforms evaluation from annual burden to development catalyst. Configurable review cycles, multi-section templates, competency-based ratings, and AI-assisted calibration ensure fair, consistent, and meaningful evaluations. Every appraisal becomes a growth conversation, not a judgment day."
           outcomes={outcomes}
           personas={personas}
         />

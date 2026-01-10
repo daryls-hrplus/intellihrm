@@ -59,12 +59,6 @@ export const EXECUTIVE_SUMMARY = {
       description: "No module exists in isolation. Appraisals feed Succession, Compensation, and Learning. Time data flows to Payroll, Wellness, and Compliance."
     }
   ],
-  benchmarks: [
-    "SAP SuccessFactors – Enterprise configuration & governance",
-    "Workday – Unified data model & intelligence",
-    "Oracle HCM – Compliance & scale",
-    "ISO 27001 / SOC 2 – Security & controls"
-  ],
   differentiators: [
     "AI embedded in every module, not bolted on",
     "Native Caribbean & African compliance",

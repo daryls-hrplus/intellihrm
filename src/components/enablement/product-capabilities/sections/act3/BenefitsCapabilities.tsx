@@ -47,7 +47,7 @@ export function BenefitsCapabilities() {
       <div className="space-y-6">
         <ValueStoryHeader
           challenge="Benefits administration is a compliance minefield. Paper enrollments get lost, life events trigger confusion, and employees don't understand what they're signing up for. Open enrollment becomes an annual crisis, claims processing takes weeks, and HR spends more time on benefits administration than strategic workforce planning. Meanwhile, rising healthcare costs demand smarter decisions."
-          promise="HRplus Benefits Administration delivers complete lifecycle management from enrollment to claims. Configurable plans, automated eligibility, life event processing, and self-service enrollment empower employees while reducing HR burden. AI-powered plan recommendations help employees make optimal choices, while cost analytics enable data-driven decisions on benefit offerings."
+          promise="Intelli HRM Benefits Administration delivers complete lifecycle management from enrollment to claims. Configurable plans, automated eligibility, life event processing, and self-service enrollment empower employees while reducing HR burden. AI-powered plan recommendations help employees make optimal choices, while cost analytics enable data-driven decisions on benefit offerings."
           outcomes={outcomes}
           personas={personas}
         />
