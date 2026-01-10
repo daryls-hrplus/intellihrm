@@ -28,49 +28,49 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-// Act color mapping (matching PrintableIntegrationDiagram)
+// Act color mapping with improved contrast
 const ACT_COLORS = {
   prologue: {
-    bg: "bg-slate-500/15",
-    text: "text-slate-700 dark:text-slate-300",
-    border: "border-slate-400/30",
-    badge: "bg-slate-500/20 text-slate-700 dark:text-slate-300",
+    bg: "bg-slate-100 dark:bg-slate-800/50",
+    text: "text-slate-800 dark:text-slate-100",
+    border: "border-slate-400 dark:border-slate-500",
+    badge: "bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-100 border-slate-400",
   },
   act1: {
-    bg: "bg-blue-500/15",
-    text: "text-blue-700 dark:text-blue-300",
-    border: "border-blue-400/30",
-    badge: "bg-blue-500/20 text-blue-700 dark:text-blue-300",
+    bg: "bg-blue-50 dark:bg-blue-900/40",
+    text: "text-blue-800 dark:text-blue-100",
+    border: "border-blue-400 dark:border-blue-500",
+    badge: "bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-100 border-blue-400",
   },
   act2: {
-    bg: "bg-emerald-500/15",
-    text: "text-emerald-700 dark:text-emerald-300",
-    border: "border-emerald-400/30",
-    badge: "bg-emerald-500/20 text-emerald-700 dark:text-emerald-300",
+    bg: "bg-emerald-50 dark:bg-emerald-900/40",
+    text: "text-emerald-800 dark:text-emerald-100",
+    border: "border-emerald-400 dark:border-emerald-500",
+    badge: "bg-emerald-100 dark:bg-emerald-800 text-emerald-800 dark:text-emerald-100 border-emerald-400",
   },
   act3: {
-    bg: "bg-amber-500/15",
-    text: "text-amber-700 dark:text-amber-300",
-    border: "border-amber-400/30",
-    badge: "bg-amber-500/20 text-amber-700 dark:text-amber-300",
+    bg: "bg-amber-50 dark:bg-amber-900/40",
+    text: "text-amber-800 dark:text-amber-100",
+    border: "border-amber-400 dark:border-amber-500",
+    badge: "bg-amber-100 dark:bg-amber-800 text-amber-800 dark:text-amber-100 border-amber-400",
   },
   act4: {
-    bg: "bg-purple-500/15",
-    text: "text-purple-700 dark:text-purple-300",
-    border: "border-purple-400/30",
-    badge: "bg-purple-500/20 text-purple-700 dark:text-purple-300",
+    bg: "bg-purple-50 dark:bg-purple-900/40",
+    text: "text-purple-800 dark:text-purple-100",
+    border: "border-purple-400 dark:border-purple-500",
+    badge: "bg-purple-100 dark:bg-purple-800 text-purple-800 dark:text-purple-100 border-purple-400",
   },
   act5: {
-    bg: "bg-rose-500/15",
-    text: "text-rose-700 dark:text-rose-300",
-    border: "border-rose-400/30",
-    badge: "bg-rose-500/20 text-rose-700 dark:text-rose-300",
+    bg: "bg-rose-50 dark:bg-rose-900/40",
+    text: "text-rose-800 dark:text-rose-100",
+    border: "border-rose-400 dark:border-rose-500",
+    badge: "bg-rose-100 dark:bg-rose-800 text-rose-800 dark:text-rose-100 border-rose-400",
   },
   epilogue: {
-    bg: "bg-indigo-500/15",
-    text: "text-indigo-700 dark:text-indigo-300",
-    border: "border-indigo-400/30",
-    badge: "bg-indigo-500/20 text-indigo-700 dark:text-indigo-300",
+    bg: "bg-indigo-50 dark:bg-indigo-900/40",
+    text: "text-indigo-800 dark:text-indigo-100",
+    border: "border-indigo-400 dark:border-indigo-500",
+    badge: "bg-indigo-100 dark:bg-indigo-800 text-indigo-800 dark:text-indigo-100 border-indigo-400",
   },
 };
 
@@ -409,10 +409,10 @@ const IMPLEMENTATION_PHASES = [
 
 const getRiskBadge = (riskLevel: RiskLevel) => {
   const config = {
-    critical: { bg: "bg-red-500/20 text-red-700 dark:text-red-300", icon: "🔴" },
-    high: { bg: "bg-orange-500/20 text-orange-700 dark:text-orange-300", icon: "🟠" },
-    medium: { bg: "bg-yellow-500/20 text-yellow-700 dark:text-yellow-300", icon: "🟡" },
-    low: { bg: "bg-green-500/20 text-green-700 dark:text-green-300", icon: "🟢" },
+    critical: { bg: "bg-red-100 dark:bg-red-900/50 text-red-800 dark:text-red-100 border border-red-400", icon: "🔴" },
+    high: { bg: "bg-orange-100 dark:bg-orange-900/50 text-orange-800 dark:text-orange-100 border border-orange-400", icon: "🟠" },
+    medium: { bg: "bg-yellow-100 dark:bg-yellow-900/50 text-yellow-800 dark:text-yellow-100 border border-yellow-500", icon: "🟡" },
+    low: { bg: "bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-100 border border-green-400", icon: "🟢" },
   };
   return config[riskLevel];
 };
