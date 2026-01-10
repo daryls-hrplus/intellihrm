@@ -5,5 +5,8 @@ export * from './FreezeSeatDialog';
 export * from './SeatHistoryDialog';
 export * from './HeadcountChangeRequestDialog';
 export * from './HeadcountRequestsWorkflowPanel';
+export * from './MultiOccupancySeatCard';
+export * from './FTEValidationAlert';
 export * from './hooks/usePositionSeats';
 export * from './hooks/useHeadcountWorkflow';
+export * from './hooks/useMultiOccupancy';
