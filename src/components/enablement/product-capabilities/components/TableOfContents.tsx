@@ -128,6 +128,7 @@ export const PRODUCT_CAPABILITIES_TOC: TOCSection[] = [
     level: 1,
     children: [
       { id: "recruitment", title: "Recruitment", level: 2 },
+      { id: "onboarding", title: "Onboarding & Offboarding", level: 2 },
       { id: "workforce", title: "Workforce Management", level: 2 },
     ],
   },
