@@ -307,6 +307,20 @@ export function ProductCapabilitiesDocument() {
         subtitle="Support that never stops"
         icon={HelpCircle}
         id="epilogue"
+        narrative="The curtain never truly closes on HR. With every act complete—foundation set, talent acquired, people enabled, rewards flowing, growth nurtured, safety ensured—one constant remains: the need for support. The Epilogue isn't an ending. It's the continuous commitment to excellence. When employees have questions, answers appear. When issues arise, resolution follows. When knowledge exists, it's shared. This is where HR becomes truly self-sustaining."
+        themes={[
+          { title: "Self-Service Excellence", description: "Answers before questions" },
+          { title: "Continuous Support", description: "Help that never sleeps" },
+          { title: "Knowledge Sharing", description: "Institutional memory preserved" },
+          { title: "AI Assistance", description: "Intelligent help at every turn" },
+        ]}
+        outcomes={[
+          "70%+ ticket deflection through self-service",
+          "AI assistant available 24/7 for instant answers",
+          "Complete knowledge base with version control",
+          "Satisfaction tracking for continuous improvement",
+        ]}
+        modules={["Help Center (85+)"]}
       />
 
       <section id="help-center" className="scroll-mt-20">
@@ -321,7 +335,10 @@ export function ProductCapabilitiesDocument() {
           </div>
           <div>
             <h2 className="text-2xl font-bold text-teal-600">Cross-Cutting Capabilities</h2>
-            <p className="text-muted-foreground">Features that span the entire platform</p>
+            <p className="text-muted-foreground mt-1">The connective tissue that makes everything work</p>
+            <p className="text-sm text-muted-foreground/80 mt-2 max-w-2xl">
+              These aren't modules—they're the foundation. Security that protects without impeding. Compliance that adapts to any jurisdiction. AI that amplifies human capability. Platform features that scale from startup to enterprise.
+            </p>
           </div>
         </div>
       </div>
