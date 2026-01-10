@@ -86,16 +86,16 @@ const MODULES = {
 
 type ModuleKey = keyof typeof MODULES;
 
-// Act configurations
+// Act configurations - using lighter pastel colors to match Act headings
 const ACTS = {
-  prologue: { name: "Prologue: Foundation", color: "bg-slate-800", textColor: "text-white", borderColor: "border-slate-600" },
-  act1: { name: "Act 1: Attract, Onboard & Transition", color: "bg-blue-800", textColor: "text-white", borderColor: "border-blue-500" },
-  act2: { name: "Act 2: Enable & Engage", color: "bg-emerald-800", textColor: "text-white", borderColor: "border-emerald-500" },
-  act3: { name: "Act 3: Pay & Reward", color: "bg-amber-700", textColor: "text-white", borderColor: "border-amber-500" },
-  act4: { name: "Act 4: Develop & Grow", color: "bg-purple-800", textColor: "text-white", borderColor: "border-purple-500" },
-  act5: { name: "Act 5: Protect & Support", color: "bg-red-800", textColor: "text-white", borderColor: "border-red-500" },
-  epilogue: { name: "Epilogue: Continuous Excellence", color: "bg-indigo-800", textColor: "text-white", borderColor: "border-indigo-500" },
-  cross: { name: "Cross-Cutting Intelligence", color: "bg-gray-700", textColor: "text-white", borderColor: "border-gray-500" },
+  prologue: { name: "Prologue: Foundation", color: "bg-slate-500/15", textColor: "text-slate-700 dark:text-slate-300", borderColor: "border-slate-400/40", moduleColor: "bg-slate-500/20 border-slate-400/50" },
+  act1: { name: "Act 1: Attract, Onboard & Transition", color: "bg-blue-500/15", textColor: "text-blue-700 dark:text-blue-300", borderColor: "border-blue-400/40", moduleColor: "bg-blue-500/20 border-blue-400/50" },
+  act2: { name: "Act 2: Enable & Engage", color: "bg-emerald-500/15", textColor: "text-emerald-700 dark:text-emerald-300", borderColor: "border-emerald-400/40", moduleColor: "bg-emerald-500/20 border-emerald-400/50" },
+  act3: { name: "Act 3: Pay & Reward", color: "bg-amber-500/15", textColor: "text-amber-700 dark:text-amber-300", borderColor: "border-amber-400/40", moduleColor: "bg-amber-500/20 border-amber-400/50" },
+  act4: { name: "Act 4: Develop & Grow", color: "bg-purple-500/15", textColor: "text-purple-700 dark:text-purple-300", borderColor: "border-purple-400/40", moduleColor: "bg-purple-500/20 border-purple-400/50" },
+  act5: { name: "Act 5: Protect & Support", color: "bg-red-500/15", textColor: "text-red-700 dark:text-red-300", borderColor: "border-red-400/40", moduleColor: "bg-red-500/20 border-red-400/50" },
+  epilogue: { name: "Epilogue: Continuous Excellence", color: "bg-indigo-500/15", textColor: "text-indigo-700 dark:text-indigo-300", borderColor: "border-indigo-400/40", moduleColor: "bg-indigo-500/20 border-indigo-400/50" },
+  cross: { name: "Cross-Cutting Intelligence", color: "bg-slate-700", textColor: "text-white", borderColor: "border-slate-500", moduleColor: "bg-slate-600 border-slate-400" },
 };
 
 // Key integration pipelines
@@ -176,20 +176,18 @@ const DATA_FLOW_MATRIX: { source: ModuleKey; target: ModuleKey; dataType: string
 
 function ModuleBox({ moduleKey, className }: { moduleKey: ModuleKey; className?: string }) {
   const module = MODULES[moduleKey];
-  const act = ACTS[module.act];
   const Icon = module.icon;
   
   return (
     <div className={cn(
-      "flex items-center gap-2 px-3 py-2 rounded-lg border-2 print:border",
-      act.color, act.textColor, act.borderColor,
+      "flex items-center gap-2 px-3 py-2 rounded-lg border print:border",
       "min-w-[140px]",
       className
     )}>
       <Icon className="h-4 w-4 flex-shrink-0" />
       <div className="flex-1 min-w-0">
         <div className="text-xs font-semibold truncate">{module.name}</div>
-        <div className="text-[10px] opacity-80">{module.capabilities}+ capabilities</div>
+        <div className="text-[10px] opacity-70">{module.capabilities}+ capabilities</div>
       </div>
     </div>
   );
@@ -197,13 +195,26 @@ function ModuleBox({ moduleKey, className }: { moduleKey: ModuleKey; className?:
 
 function ActSection({ actKey, modules }: { actKey: keyof typeof ACTS; modules: ModuleKey[] }) {
   const act = ACTS[actKey];
+  const isDarkSection = actKey === "cross";
   
   return (
-    <div className={cn("rounded-xl p-4 print:p-3", act.color, act.textColor, "print:break-inside-avoid")}>
-      <h4 className="text-sm font-bold mb-3 opacity-90">{act.name}</h4>
+    <div className={cn(
+      "rounded-xl p-4 print:p-3 border",
+      act.color, 
+      act.borderColor,
+      "print:break-inside-avoid"
+    )}>
+      <h4 className={cn("text-sm font-bold mb-3", act.textColor)}>{act.name}</h4>
       <div className="flex flex-wrap gap-2">
         {modules.map(moduleKey => (
-          <ModuleBox key={moduleKey} moduleKey={moduleKey} className="bg-black/20 border-white/30" />
+          <ModuleBox 
+            key={moduleKey} 
+            moduleKey={moduleKey} 
+            className={cn(
+              act.moduleColor,
+              isDarkSection ? "text-white" : act.textColor
+            )} 
+          />
         ))}
       </div>
     </div>
