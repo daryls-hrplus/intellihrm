@@ -13,6 +13,7 @@ import {
   ArrowRight,
   FileText,
   ChevronRight,
+  Clock,
 } from "lucide-react";
 
 const manuals = [
@@ -80,6 +81,17 @@ const manuals = [
     badgeColor: "bg-pink-500/10 text-pink-700 border-pink-500/30",
     sections: 45,
     href: "/enablement/manuals/benefits",
+    version: "2.4",
+  },
+  {
+    id: "time-attendance",
+    title: "Time & Attendance Guide",
+    description: "Complete guide to time tracking, shifts, schedules, overtime, and attendance management",
+    icon: Clock,
+    color: "bg-indigo-500/10 text-indigo-600 border-indigo-500/20",
+    badgeColor: "bg-indigo-500/10 text-indigo-700 border-indigo-500/30",
+    sections: 65,
+    href: "/enablement/manuals/time-attendance",
     version: "2.4",
   },
 ];
