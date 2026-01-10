@@ -12,6 +12,7 @@ import { useTranslation } from "react-i18next";
 import { useAuth } from "@/contexts/AuthContext";
 import { Loader2 } from "lucide-react";
 import { TransactionType } from "@/hooks/useEmployeeTransactions";
+import { CompensationFTEInfo } from "./CompensationFTEInfo";
 
 interface PayElement {
   id: string;
@@ -252,6 +253,9 @@ export function TransactionEmployeeCompensationDialog({
         </DialogHeader>
 
         <div className="space-y-4 py-4">
+          {/* FTE Context Info Panel */}
+          <CompensationFTEInfo employeeId={employeeId} positionId={positionId} />
+
           {/* Pre-filled Employee & Position Info */}
           <div className="rounded-lg border bg-muted/50 p-4 space-y-2">
             <div className="flex justify-between">
