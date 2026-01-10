@@ -266,6 +266,20 @@ export function ProductCapabilitiesDocument() {
         subtitle="Ensure safety, fairness, and accountability"
         icon={ShieldAlert}
         id="act5"
+        narrative="Act 5 is where organizations fulfill their duty of care. With people hired, performing, and rewarded, the focus shifts to protection and support. Safety isn't a poster—it's a system. Fairness isn't a policy—it's a practice. Accountability isn't an audit—it's a culture. This is where organizations demonstrate that they value their people as much as their profits."
+        themes={[
+          { title: "Proactive Safety Culture", description: "Prevention over reaction" },
+          { title: "Consistent Fairness", description: "Every interaction documented and defensible" },
+          { title: "Asset Accountability", description: "Complete lifecycle visibility" },
+          { title: "AI-Powered Risk Detection", description: "Issues identified before escalation" },
+        ]}
+        outcomes={[
+          "60%+ incident reduction through proactive hazard identification",
+          "70%+ grievance resolution within SLA through streamlined workflows",
+          "98%+ asset recovery through offboarding integration",
+          "Real-time visibility into safety, relations, and property risks",
+        ]}
+        modules={["Health & Safety (120+)", "Employee Relations (95+)", "Company Property (65+)"]}
       />
 
       <section id="health-safety" className="scroll-mt-20">
