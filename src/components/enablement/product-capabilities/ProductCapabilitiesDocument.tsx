@@ -181,6 +181,20 @@ export function ProductCapabilitiesDocument() {
         subtitle="Compensate fairly with regional compliance"
         icon={Wallet}
         id="act3"
+        narrative="Act 3 is where commitment becomes compensation. From the precision of payroll processing to the strategy of total rewards, these modules ensure every employee is paid accurately, fairly, and on time. This is the financial backbone of the employment relationship—where trust is built or broken with every paycheck."
+        themes={[
+          { title: "Financial Accuracy", description: "99.99% payroll precision" },
+          { title: "Multi-Country Compliance", description: "Caribbean & African statutory support" },
+          { title: "Strategic Total Rewards", description: "Beyond salary to complete compensation" },
+          { title: "Data-Driven Decisions", description: "Market benchmarking and equity analysis" },
+        ]}
+        outcomes={[
+          "99.99% payroll accuracy with AI anomaly detection",
+          "Pay equity analysis that identifies and closes gaps",
+          "Complete benefits lifecycle from enrollment to claims",
+          "Real-time GL integration and cost allocation",
+        ]}
+        modules={["Payroll", "Compensation", "Benefits Administration"]}
       />
 
       <section id="payroll" className="scroll-mt-20">
