@@ -12,11 +12,16 @@ import {
   ArrowLeft,
   Loader2,
   Printer,
+  Settings2,
 } from "lucide-react";
 import { ProductCapabilitiesDocument } from "@/components/enablement/product-capabilities/ProductCapabilitiesDocument";
 import { TableOfContents, PRODUCT_CAPABILITIES_TOC } from "@/components/enablement/product-capabilities/components/TableOfContents";
 import { toast } from "sonner";
-import { downloadProductCapabilitiesPdf, printProductCapabilitiesPdf } from "@/components/enablement/product-capabilities/print";
+import { 
+  downloadProductCapabilitiesPdf, 
+  printProductCapabilitiesPdf,
+  ProductCapabilitiesPrintConfig 
+} from "@/components/enablement/product-capabilities/print";
 import { useProductCapabilitiesPrintSettings } from "@/hooks/useProductCapabilitiesPrintSettings";
 
 export default function ProductCapabilitiesPage() {
@@ -24,8 +29,9 @@ export default function ProductCapabilitiesPage() {
   const [activeSection, setActiveSection] = useState("executive-overview");
   const [isExporting, setIsExporting] = useState(false);
   const [isPrinting, setIsPrinting] = useState(false);
+  const [showConfigDialog, setShowConfigDialog] = useState(false);
   const documentRef = useRef<HTMLDivElement>(null);
-  const { printSettings } = useProductCapabilitiesPrintSettings();
+  const { printSettings, savePrintSettings, isLoading } = useProductCapabilitiesPrintSettings();
 
   const handleNavigate = (sectionId: string) => {
     setActiveSection(sectionId);
@@ -115,6 +121,29 @@ export default function ProductCapabilitiesPage() {
                   </SheetContent>
                 </Sheet>
                 
+                <Button 
+                  variant="outline" 
+                  size="icon"
+                  onClick={() => setShowConfigDialog(true)}
+                  title="Print Settings"
+                >
+                  <Settings2 className="h-4 w-4" />
+                </Button>
+
+                <Button 
+                  variant="outline" 
+                  onClick={handlePrint} 
+                  disabled={isPrinting}
+                  title="Print Document"
+                >
+                  {isPrinting ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <Printer className="h-4 w-4 mr-2" />
+                  )}
+                  Print
+                </Button>
+                
                 <Button onClick={handleExportPDF} disabled={isExporting}>
                   {isExporting ? (
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -152,6 +181,18 @@ export default function ProductCapabilitiesPage() {
           </main>
         </div>
       </div>
+
+      {/* Print Configuration Dialog */}
+      <ProductCapabilitiesPrintConfig
+        open={showConfigDialog}
+        onOpenChange={setShowConfigDialog}
+        settings={printSettings}
+        onSave={(settings) => {
+          savePrintSettings.mutate(settings);
+          setShowConfigDialog(false);
+        }}
+        isSaving={savePrintSettings.isPending}
+      />
     </AppLayout>
   );
 }
