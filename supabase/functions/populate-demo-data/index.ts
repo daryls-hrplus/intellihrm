@@ -366,6 +366,7 @@ serve(async (req) => {
     console.log(`Created ${leaveTypesCreated} leave types`);
 
     // ========== STEP 7: EMPLOYEES/PROFILES (Depends on: companies, departments) ==========
+    // Must create auth.users first since profiles.id references auth.users(id)
     console.log('Step 7: Creating employees...');
     let employeesCreated = 0;
     
@@ -377,7 +378,7 @@ serve(async (req) => {
         const firstName = FIRST_NAMES[e % FIRST_NAMES.length];
         const lastName = LAST_NAMES[(e + companyIdx * 10) % LAST_NAMES.length];
         const email = `${firstName.toLowerCase()}.${lastName.toLowerCase()}${e}@demo${companyIdx + 1}.com`;
-        const employeeId = `EMP${String(companyIdx * 1000 + e + 1).padStart(5, '0')}`;
+        const employeeIdCode = `EMP${String(companyIdx * 1000 + e + 1).padStart(5, '0')}`;
         
         const hireDate = new Date();
         hireDate.setMonth(hireDate.getMonth() - Math.floor(Math.random() * 36));
@@ -386,31 +387,66 @@ serve(async (req) => {
         const birthMonth = Math.floor(Math.random() * 12) + 1;
         const birthDay = Math.floor(Math.random() * 28) + 1;
         
-        const { data: employee, error } = await supabase
+        // Check if user already exists
+        const { data: existingProfile } = await supabase
           .from('profiles')
-          .upsert({
-            email,
-            full_name: `${firstName} ${lastName}`,
-            first_name: firstName,
-            first_last_name: lastName,
-            employee_id: employeeId,
-            company_id: companyId,
-            department_id: deptIds.length > 0 ? deptIds[e % deptIds.length] : null,
-            first_hire_date: hireDate.toISOString().split('T')[0],
-            start_date: hireDate.toISOString().split('T')[0],
-            employment_status: 'active',
-            gender: e % 2 === 0 ? 'male' : 'female',
-            date_of_birth: `${birthYear}-${String(birthMonth).padStart(2, '0')}-${String(birthDay).padStart(2, '0')}`,
-            is_active: true
-          }, { onConflict: 'email' })
-          .select()
+          .select('id')
+          .eq('email', email)
           .single();
         
-        if (!error && employee) {
-          createdEmployeeIds.push(employee.id);
-          employeeCompanyMap.set(employee.id, companyId);
-          employeesCreated++;
-          totalRecords++;
+        if (existingProfile) {
+          createdEmployeeIds.push(existingProfile.id);
+          employeeCompanyMap.set(existingProfile.id, companyId);
+          continue;
+        }
+        
+        // Create auth user first (this will trigger profile creation)
+        const { data: authUser, error: authError } = await supabase.auth.admin.createUser({
+          email,
+          password: 'DemoPassword123!',
+          email_confirm: true,
+          user_metadata: {
+            first_name: firstName,
+            last_name: lastName,
+            full_name: `${firstName} ${lastName}`
+          }
+        });
+        
+        if (authError) {
+          console.error(`Auth user ${email} error:`, authError.message);
+          continue;
+        }
+        
+        if (authUser?.user) {
+          // Update the profile with additional employee data
+          const { data: updatedProfile, error: profileError } = await supabase
+            .from('profiles')
+            .update({
+              full_name: `${firstName} ${lastName}`,
+              first_name: firstName,
+              first_last_name: lastName,
+              employee_id: employeeIdCode,
+              company_id: companyId,
+              department_id: deptIds.length > 0 ? deptIds[e % deptIds.length] : null,
+              first_hire_date: hireDate.toISOString().split('T')[0],
+              start_date: hireDate.toISOString().split('T')[0],
+              employment_status: 'active',
+              gender: e % 2 === 0 ? 'male' : 'female',
+              date_of_birth: `${birthYear}-${String(birthMonth).padStart(2, '0')}-${String(birthDay).padStart(2, '0')}`,
+              is_active: true
+            })
+            .eq('id', authUser.user.id)
+            .select()
+            .single();
+          
+          if (!profileError && updatedProfile) {
+            createdEmployeeIds.push(updatedProfile.id);
+            employeeCompanyMap.set(updatedProfile.id, companyId);
+            employeesCreated++;
+            totalRecords++;
+          } else if (profileError) {
+            console.error(`Profile update ${email} error:`, profileError.message);
+          }
         }
       }
     }
