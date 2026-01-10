@@ -33,19 +33,6 @@ serve(async (req) => {
     let tablesPopulated = 0;
     const errors: string[] = [];
 
-    // Get table dependency order
-    const { data: dependencies, error: depError } = await supabase
-      .from('table_dependency_order')
-      .select('*')
-      .order('depth', { ascending: true });
-
-    if (depError) {
-      console.error('Error fetching dependencies:', depError);
-      throw new Error('Failed to fetch table dependencies');
-    }
-
-    console.log(`Found ${dependencies?.length || 0} tables in dependency order`);
-
     // Dataset configurations
     const datasetConfig = {
       minimal: { companies: 1, employeesPerCompany: 5, months: 1 },
