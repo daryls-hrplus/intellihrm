@@ -102,7 +102,7 @@ export const GettingStarted = () => {
           </Badge>
           <h2 className="text-3xl font-bold">Ready to Transform Your HR?</h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            Join organizations across the Caribbean, Africa, and beyond who have transformed 
+            Join organizations across the Caribbean, Latin America, Africa, and beyond who have transformed 
             their HR operations with HRplus. Our proven implementation methodology ensures 
             rapid time-to-value with minimal disruption.
           </p>
@@ -219,7 +219,7 @@ export const GettingStarted = () => {
                 <Differentiator
                   icon={Globe}
                   title="Deep Regional Expertise"
-                  description="Built for Caribbean and Africa with local compliance, tax rules, and labor laws baked in—not adapted from US templates."
+                  description="Built for Caribbean, Latin America, and Africa with local compliance, tax rules, and labor laws baked in—not adapted from US templates."
                 />
                 <Differentiator
                   icon={Brain}
@@ -239,7 +239,7 @@ export const GettingStarted = () => {
                 <Differentiator
                   icon={Rocket}
                   title="Rapid Time-to-Value"
-                  description="Pre-configured templates for Caribbean and African organizations accelerate deployment by 40%."
+                  description="Pre-configured templates for Caribbean, Latin American, and African organizations accelerate deployment by 40%."
                 />
                 <Differentiator
                   icon={HeartHandshake}
@@ -327,7 +327,7 @@ export const GettingStarted = () => {
           1,675+ capabilities. 25 modules. One unified platform.
         </p>
         <p className="text-muted-foreground max-w-xl mx-auto">
-          Built for the Caribbean, Africa, and global operations. 
+          Built for the Caribbean, Latin America, Africa, and global operations. 
           AI-first. Enterprise-ready. Human-centered.
         </p>
         <div className="flex items-center justify-center gap-2 text-primary">

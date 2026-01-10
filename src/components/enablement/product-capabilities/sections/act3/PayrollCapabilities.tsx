@@ -41,15 +41,15 @@ export function PayrollCapabilities() {
       id="payroll"
       icon={DollarSign}
       title="Payroll"
-      tagline="Multi-country payroll with regional compliance built-in"
-      overview="Enterprise payroll processing with gross-to-net calculations, statutory compliance, and comprehensive reporting for Caribbean and African markets."
+      tagline="Multi-country payroll with Caribbean, Latin American, and African compliance built-in"
+      overview="Enterprise payroll processing with gross-to-net calculations, statutory compliance, and comprehensive reporting for Caribbean, Latin American, and African markets."
       accentColor="bg-amber-500/10 text-amber-500"
       badge="150+ Capabilities"
     >
       <div className="space-y-6">
         <ValueStoryHeader
-          challenge="Payroll errors destroy trust. A single mistake affects employee livelihoods, creates compliance nightmares, and generates weeks of manual corrections. Multi-country operations multiply the complexity—different tax tables, statutory deductions, and filing requirements across Jamaica, Trinidad, Ghana, Nigeria, and beyond. Without automation, payroll becomes an endless cycle of stress and risk."
-          promise="HRplus Payroll is your complete pay processing command center. From gross-to-net calculations with country-specific compliance to GL integration and bank file generation, every payrun is accurate, auditable, and on time. AI-powered anomaly detection catches errors before they happen, while multi-country support means one system for your entire workforce—wherever they are."
+          challenge="Payroll errors destroy trust. A single mistake affects employee livelihoods, creates compliance nightmares, and generates weeks of manual corrections. Multi-country operations multiply the complexity—different tax tables, statutory deductions, and filing requirements across Jamaica, Trinidad, Dominican Republic, Ghana, Nigeria, and beyond. Without automation, payroll becomes an endless cycle of stress and risk."
+          promise="HRplus Payroll is your complete pay processing command center. From gross-to-net calculations with country-specific compliance for the Caribbean, Latin America, and Africa to GL integration and bank file generation, every payrun is accurate, auditable, and on time. AI-powered anomaly detection catches errors before they happen, while multi-country support means one system for your entire workforce—wherever they are."
           outcomes={outcomes}
           personas={personas}
         />
@@ -90,6 +90,7 @@ export function PayrollCapabilities() {
 
           <CapabilityCategory title="Statutory Compliance" icon={Shield}>
             <CapabilityItem>Caribbean: NIS, NHT, HEART, PAYE (Jamaica, Trinidad, Barbados)</CapabilityItem>
+            <CapabilityItem>Latin America: AFP, TSS (Dominican Republic), IMSS (Mexico)</CapabilityItem>
             <CapabilityItem>Africa: SSNIT (Ghana), Pension (Nigeria)</CapabilityItem>
             <CapabilityItem>Tax bracket configuration by country</CapabilityItem>
             <CapabilityItem>Tax relief schemes and enrollments</CapabilityItem>
@@ -192,8 +193,8 @@ export function PayrollCapabilities() {
           </CapabilityCategory>
         </div>
 
-        <RegionalBadge regions={["Jamaica", "Trinidad", "Ghana"]}>
-          Full Caribbean statutory support (Jamaica NIS/NHT/PAYE/HEART, Trinidad NIS/PAYE), African payroll (Ghana SSNIT, Nigeria pension), multi-country tax tables, regional bank file formats
+        <RegionalBadge regions={["Jamaica", "Trinidad", "Dominican Republic", "Ghana"]}>
+          Full Caribbean statutory support (Jamaica NIS/NHT/PAYE/HEART, Trinidad NIS/PAYE), Latin American payroll (Dominican Republic AFP/TSS, Mexico IMSS), African payroll (Ghana SSNIT, Nigeria pension), multi-country tax tables, regional bank file formats
         </RegionalBadge>
 
         <AIFeatureHighlight>

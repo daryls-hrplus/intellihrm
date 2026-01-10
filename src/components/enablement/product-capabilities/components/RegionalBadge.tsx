@@ -2,7 +2,7 @@ import { Globe, MapPin } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
-type Region = "Caribbean" | "Africa" | "Global" | "Jamaica" | "Trinidad" | "Ghana" | "Nigeria";
+type Region = "Caribbean" | "Africa" | "Global" | "Jamaica" | "Trinidad" | "Ghana" | "Nigeria" | "LatAm" | "Dominican Republic" | "Mexico" | "Colombia" | "Panama";
 
 interface RegionalBadgeProps {
   regions: Region[];
@@ -18,6 +18,11 @@ const REGION_CONFIG: Record<Region, { color: string; bgColor: string }> = {
   Ghana: { color: "text-amber-600", bgColor: "bg-amber-500/10 border-amber-500/20" },
   Nigeria: { color: "text-amber-600", bgColor: "bg-amber-500/10 border-amber-500/20" },
   Global: { color: "text-emerald-600", bgColor: "bg-emerald-500/10 border-emerald-500/20" },
+  LatAm: { color: "text-purple-600", bgColor: "bg-purple-500/10 border-purple-500/20" },
+  "Dominican Republic": { color: "text-purple-600", bgColor: "bg-purple-500/10 border-purple-500/20" },
+  Mexico: { color: "text-purple-600", bgColor: "bg-purple-500/10 border-purple-500/20" },
+  Colombia: { color: "text-purple-600", bgColor: "bg-purple-500/10 border-purple-500/20" },
+  Panama: { color: "text-purple-600", bgColor: "bg-purple-500/10 border-purple-500/20" },
 };
 
 export function RegionalBadge({ regions, children, compact }: RegionalBadgeProps) {

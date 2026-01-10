@@ -237,7 +237,7 @@ export function PlatformAtGlance() {
                 </Badge>
               </h2>
               <p className="text-muted-foreground mt-1">
-                The complete HR operating system for Caribbean, Africa, and global operations
+                The complete HR operating system for Caribbean, Latin America, Africa, and global operations
               </p>
             </div>
           </div>
@@ -257,7 +257,7 @@ export function PlatformAtGlance() {
               <div className="text-sm text-muted-foreground">Lifecycle Acts</div>
             </div>
             <div className="bg-background/50 rounded-lg p-4 border">
-              <div className="text-3xl font-bold text-primary">15+</div>
+              <div className="text-3xl font-bold text-primary">20+</div>
               <div className="text-sm text-muted-foreground">Countries Supported</div>
             </div>
           </div>
