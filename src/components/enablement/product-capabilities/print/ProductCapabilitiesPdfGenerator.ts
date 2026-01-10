@@ -1032,7 +1032,6 @@ export async function generateProductCapabilitiesPdf(
           pdf.text(`Regional Compliance: ${module.regionalNote}`, margins.left + 2, yPos + 4);
           yPos += 18;
         }
-        }
         
         yPos += 10;
       }
