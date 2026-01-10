@@ -544,11 +544,11 @@ export async function generateProductCapabilitiesPdf(
     pdf.text(descLines, margins.left, yPos);
     yPos += descLines.length * 5 + 10;
     
-    // Stats boxes
-    pdf.setFillColor(249, 250, 251);
+    // Stats boxes - consistent light blue styling
     const statWidth = (contentWidth - 15) / 4;
     EXECUTIVE_SUMMARY.stats.forEach((stat, idx) => {
       const x = margins.left + idx * (statWidth + 5);
+      pdf.setFillColor(239, 246, 255); // Light blue - bg-primary/10 equivalent
       pdf.roundedRect(x, yPos, statWidth, 25, 2, 2, 'F');
       
       pdf.setFontSize(18);
@@ -557,52 +557,283 @@ export async function generateProductCapabilitiesPdf(
       pdf.text(stat.value, x + statWidth / 2, yPos + 12, { align: 'center' });
       
       pdf.setFontSize(8);
-      pdf.setTextColor(...TEXT_COLORS.muted);
+      pdf.setTextColor(...TEXT_COLORS.secondary);
       pdf.setFont("helvetica", "normal");
       pdf.text(stat.label, x + statWidth / 2, yPos + 20, { align: 'center' });
     });
     yPos += 35;
     
-    // Value propositions
+    // Challenge & Transformation - Two column layout (matching web)
+    checkPageBreak(65, "Executive Overview");
+    const halfWidth = (contentWidth - 10) / 2;
+    
+    // Challenge Card (left, red background)
+    pdf.setFillColor(254, 226, 226); // red-100
+    pdf.setDrawColor(239, 68, 68); // red-500
+    pdf.setLineWidth(0.3);
+    pdf.roundedRect(margins.left, yPos, halfWidth, 55, 3, 3, 'FD');
+    
+    pdf.setFontSize(10);
+    pdf.setFont("helvetica", "bold");
+    pdf.setTextColor(220, 38, 38); // red-600
+    pdf.text("The Challenge", margins.left + 4, yPos + 8);
+    
+    pdf.setFont("helvetica", "normal");
+    pdf.setFontSize(8);
+    pdf.setTextColor(127, 29, 29); // red-900
+    const challengeText = "Global HR platforms fail locally. Caribbean tax rules don't fit North American templates. African labor laws are missing. Latin American statutory requirements become manual spreadsheets.";
+    const challengeLines = pdf.splitTextToSize(challengeText, halfWidth - 8);
+    pdf.text(challengeLines.slice(0, 4), margins.left + 4, yPos + 16);
+    
+    // Challenge bullets
+    const challengeBullets = [
+      "Jamaica NIS/NHT/PAYE missing from US-centric platforms",
+      "Ghana SSNIT calculations require manual intervention",
+      "Dominican Republic AFP/TSS compliance as spreadsheets"
+    ];
+    let bulletY = yPos + 36;
+    challengeBullets.forEach((bullet) => {
+      pdf.setFillColor(239, 68, 68);
+      pdf.circle(margins.left + 6, bulletY - 1, 1, 'F');
+      pdf.setFontSize(7);
+      pdf.setTextColor(127, 29, 29);
+      pdf.text(bullet.substring(0, 45), margins.left + 10, bulletY);
+      bulletY += 5;
+    });
+    
+    // Transformation Card (right, green background)
+    pdf.setFillColor(220, 252, 231); // green-100
+    pdf.setDrawColor(34, 197, 94); // green-500
+    pdf.roundedRect(margins.left + halfWidth + 10, yPos, halfWidth, 55, 3, 3, 'FD');
+    
+    pdf.setFontSize(10);
+    pdf.setFont("helvetica", "bold");
+    pdf.setTextColor(22, 101, 52); // green-700
+    pdf.text("The Transformation", margins.left + halfWidth + 14, yPos + 8);
+    
+    pdf.setFont("helvetica", "normal");
+    pdf.setFontSize(8);
+    pdf.setTextColor(20, 83, 45); // green-800
+    const transformText = "Intelli HRM was built from the ground up for regional complexity. Every statutory deduction, every labor law nuance, every public holiday is native to the platform.";
+    const transformLines = pdf.splitTextToSize(transformText, halfWidth - 8);
+    pdf.text(transformLines.slice(0, 4), margins.left + halfWidth + 14, yPos + 16);
+    
+    // Transformation bullets with checkmarks
+    const transformBullets = [
+      "Caribbean payroll with NIS, NHT, PAYE, HEART built-in",
+      "African compliance (Ghana, Nigeria) as first-class features",
+      "Latin America (Dominican Republic, Mexico) fully supported"
+    ];
+    bulletY = yPos + 36;
+    transformBullets.forEach((bullet) => {
+      pdf.setTextColor(34, 197, 94);
+      pdf.text("[check]", margins.left + halfWidth + 14, bulletY);
+      pdf.setFontSize(7);
+      pdf.setTextColor(20, 83, 45);
+      pdf.text(bullet.substring(0, 45), margins.left + halfWidth + 22, bulletY);
+      bulletY += 5;
+    });
+    
+    yPos += 65;
+    
+    // Value propositions - 3 column grid
+    checkPageBreak(50, "Executive Overview");
     pdf.setFontSize(14);
     pdf.setTextColor(...secondaryRgb);
     pdf.setFont("helvetica", "bold");
     pdf.text("Value Proposition", margins.left, yPos);
     yPos += 10;
     
-    EXECUTIVE_SUMMARY.valueProps.forEach((prop) => {
-      checkPageBreak(25);
-      pdf.setFontSize(11);
+    const vpWidth = (contentWidth - 10) / 3;
+    EXECUTIVE_SUMMARY.valueProps.forEach((prop, idx) => {
+      const x = margins.left + idx * (vpWidth + 5);
+      
+      pdf.setFillColor(239, 246, 255); // Light blue
+      pdf.roundedRect(x, yPos, vpWidth, 35, 2, 2, 'F');
+      
+      pdf.setFontSize(9);
       pdf.setFont("helvetica", "bold");
       pdf.setTextColor(...TEXT_COLORS.primary);
-      pdf.text(`* ${prop.title}`, margins.left + 3, yPos);
-      yPos += 6;
+      pdf.text(prop.title, x + 3, yPos + 8);
       
       pdf.setFont("helvetica", "normal");
-      pdf.setFontSize(9);
+      pdf.setFontSize(7);
       pdf.setTextColor(...TEXT_COLORS.secondary);
-      const propLines = pdf.splitTextToSize(prop.description, contentWidth - 10);
-      pdf.text(propLines, margins.left + 8, yPos);
-      yPos += propLines.length * 4 + 5;
+      const propLines = pdf.splitTextToSize(prop.description, vpWidth - 6);
+      pdf.text(propLines.slice(0, 4), x + 3, yPos + 15);
     });
+    yPos += 45;
     
-    yPos += 10;
-    
-    // Key differentiators
+    // Employee Journey Section
+    checkPageBreak(60, "Executive Overview");
     pdf.setFontSize(14);
     pdf.setTextColor(...secondaryRgb);
     pdf.setFont("helvetica", "bold");
-    pdf.text("Key Differentiators", margins.left, yPos);
+    pdf.text("The Employee Journey, HR-Enabled", margins.left, yPos);
+    yPos += 5;
+    
+    pdf.setFontSize(9);
+    pdf.setFont("helvetica", "normal");
+    pdf.setTextColor(...TEXT_COLORS.secondary);
+    pdf.text("This document follows the complete employee lifecycle through seven acts.", margins.left, yPos);
     yPos += 10;
     
-    EXECUTIVE_SUMMARY.differentiators.forEach((diff) => {
-      checkPageBreak(8);
+    // 7 Act Journey Cards
+    const journeyActs = [
+      { act: "Prologue", title: "Setting the Stage", outcome: "Zero-trust security", color: [100, 116, 139] as [number, number, number] },
+      { act: "Act 1", title: "Attract & Onboard", outcome: "50% faster hiring", color: [59, 130, 246] as [number, number, number] },
+      { act: "Act 2", title: "Enable & Engage", outcome: "80% fewer inquiries", color: [16, 185, 129] as [number, number, number] },
+      { act: "Act 3", title: "Pay & Reward", outcome: "99.99% accuracy", color: [245, 158, 11] as [number, number, number] },
+      { act: "Act 4", title: "Develop & Grow", outcome: "90%+ succession", color: [168, 85, 247] as [number, number, number] },
+      { act: "Act 5", title: "Protect & Support", outcome: "60%+ safer", color: [239, 68, 68] as [number, number, number] },
+      { act: "Epilogue", title: "Excellence", outcome: "70%+ self-service", color: [99, 102, 241] as [number, number, number] }
+    ];
+    
+    const actWidth = (contentWidth - 18) / 7;
+    journeyActs.forEach((actItem, idx) => {
+      const x = margins.left + idx * (actWidth + 3);
+      
+      // Card background
+      pdf.setFillColor(actItem.color[0], actItem.color[1], actItem.color[2]);
+      pdf.setGState(new (pdf as any).GState({ opacity: 0.1 }));
+      pdf.roundedRect(x, yPos, actWidth, 32, 2, 2, 'F');
+      pdf.setGState(new (pdf as any).GState({ opacity: 1 }));
+      
+      // Border
+      pdf.setDrawColor(actItem.color[0], actItem.color[1], actItem.color[2]);
+      pdf.setLineWidth(0.3);
+      pdf.roundedRect(x, yPos, actWidth, 32, 2, 2, 'S');
+      
+      // Act badge
+      pdf.setFontSize(6);
+      pdf.setTextColor(actItem.color[0], actItem.color[1], actItem.color[2]);
+      pdf.setFont("helvetica", "bold");
+      pdf.text(actItem.act, x + 2, yPos + 6);
+      
+      // Title
+      pdf.setFontSize(7);
+      pdf.setTextColor(...TEXT_COLORS.primary);
+      const titleLines = pdf.splitTextToSize(actItem.title, actWidth - 4);
+      pdf.text(titleLines[0], x + 2, yPos + 14);
+      
+      // Outcome
+      pdf.setFontSize(6);
+      pdf.setFont("helvetica", "normal");
+      pdf.setTextColor(actItem.color[0], actItem.color[1], actItem.color[2]);
+      pdf.text(actItem.outcome, x + 2, yPos + 28);
+    });
+    yPos += 42;
+    
+    // Persona Value Cards - 2x2 Grid
+    checkPageBreak(55, "Executive Overview");
+    pdf.setFontSize(14);
+    pdf.setTextColor(...secondaryRgb);
+    pdf.setFont("helvetica", "bold");
+    pdf.text("What Each Persona Gains", margins.left, yPos);
+    yPos += 10;
+    
+    const personas = [
+      { persona: "Employee", quote: "One portal for everything - from day one to retirement.", color: [59, 130, 246] as [number, number, number] },
+      { persona: "Manager", quote: "AI tells me what I didn't know to ask about my team.", color: [16, 185, 129] as [number, number, number] },
+      { persona: "HR Partner", quote: "Compliance is built-in, not bolted on.", color: [168, 85, 247] as [number, number, number] },
+      { persona: "Executive", quote: "Strategic workforce insights, not operational noise.", color: [245, 158, 11] as [number, number, number] }
+    ];
+    
+    const personaWidth = (contentWidth - 5) / 2;
+    personas.forEach((p, idx) => {
+      const row = Math.floor(idx / 2);
+      const col = idx % 2;
+      const x = margins.left + col * (personaWidth + 5);
+      const y = yPos + row * 22;
+      
+      pdf.setFillColor(p.color[0], p.color[1], p.color[2]);
+      pdf.setGState(new (pdf as any).GState({ opacity: 0.05 }));
+      pdf.roundedRect(x, y, personaWidth, 18, 2, 2, 'F');
+      pdf.setGState(new (pdf as any).GState({ opacity: 1 }));
+      
+      pdf.setDrawColor(p.color[0], p.color[1], p.color[2]);
+      pdf.setGState(new (pdf as any).GState({ opacity: 0.2 }));
+      pdf.roundedRect(x, y, personaWidth, 18, 2, 2, 'S');
+      pdf.setGState(new (pdf as any).GState({ opacity: 1 }));
+      
       pdf.setFontSize(9);
+      pdf.setFont("helvetica", "bold");
+      pdf.setTextColor(...TEXT_COLORS.primary);
+      pdf.text(p.persona, x + 3, y + 6);
+      
+      pdf.setFontSize(7);
+      pdf.setFont("helvetica", "italic");
+      pdf.setTextColor(...TEXT_COLORS.secondary);
+      const quoteLines = pdf.splitTextToSize(`"${p.quote}"`, personaWidth - 6);
+      pdf.text(quoteLines[0], x + 3, y + 13);
+    });
+    yPos += 50;
+    
+    // AI-First Architecture Section
+    checkPageBreak(45, "Executive Overview");
+    pdf.setFillColor(250, 245, 255); // purple-50
+    pdf.setDrawColor(168, 85, 247); // purple-500
+    pdf.setLineWidth(0.5);
+    pdf.roundedRect(margins.left, yPos, contentWidth, 40, 3, 3, 'FD');
+    
+    pdf.setFontSize(12);
+    pdf.setFont("helvetica", "bold");
+    pdf.setTextColor(168, 85, 247);
+    pdf.text("AI-First Architecture", margins.left + 5, yPos + 10);
+    
+    pdf.setFontSize(8);
+    pdf.setFont("helvetica", "normal");
+    pdf.setTextColor(...TEXT_COLORS.secondary);
+    pdf.text("Not a chatbot bolt-on - intelligence at the core of every decision.", margins.left + 55, yPos + 10);
+    
+    // 4 AI feature boxes
+    const aiFeatures = [
+      { title: "Embedded Intelligence", desc: "AI in every module" },
+      { title: "Predictive Insights", desc: "See problems before they happen" },
+      { title: "Prescriptive Actions", desc: "Know what to do" },
+      { title: "Explainable AI", desc: "Full audit trails" }
+    ];
+    
+    const aiBoxWidth = (contentWidth - 20) / 4;
+    aiFeatures.forEach((f, idx) => {
+      const x = margins.left + 5 + idx * (aiBoxWidth + 3);
+      
+      pdf.setFillColor(255, 255, 255);
+      pdf.roundedRect(x, yPos + 16, aiBoxWidth, 18, 2, 2, 'F');
+      
+      pdf.setFontSize(8);
+      pdf.setFont("helvetica", "bold");
+      pdf.setTextColor(168, 85, 247);
+      pdf.text(f.title, x + 2, yPos + 23);
+      
+      pdf.setFontSize(6);
       pdf.setFont("helvetica", "normal");
       pdf.setTextColor(...TEXT_COLORS.secondary);
-      pdf.text(`- ${diff}`, margins.left + 3, yPos);
-      yPos += 6;
+      pdf.text(f.desc, x + 2, yPos + 30);
     });
+    yPos += 50;
+    
+    // Key differentiators
+    checkPageBreak(30, "Executive Overview");
+    pdf.setFontSize(12);
+    pdf.setTextColor(...secondaryRgb);
+    pdf.setFont("helvetica", "bold");
+    pdf.text("Key Differentiators", margins.left, yPos);
+    yPos += 8;
+    
+    const diffWidth = (contentWidth - 10) / 4;
+    EXECUTIVE_SUMMARY.differentiators.forEach((diff, idx) => {
+      const x = margins.left + idx * (diffWidth + 3);
+      pdf.setFontSize(7);
+      pdf.setFont("helvetica", "normal");
+      pdf.setTextColor(...TEXT_COLORS.secondary);
+      pdf.setTextColor(...primaryRgb);
+      pdf.text("[*]", x, yPos + 3);
+      pdf.setTextColor(...TEXT_COLORS.secondary);
+      const diffLines = pdf.splitTextToSize(diff, diffWidth - 8);
+      pdf.text(diffLines.slice(0, 2), x + 8, yPos + 3);
+    });
+    yPos += 15;
   }
 
   onProgress?.(35, "Creating platform overview...");
@@ -613,62 +844,226 @@ export async function generateProductCapabilitiesPdf(
     trackToc("Platform at a Glance", 1);
     yPos = margins.top;
     
+    // Header with gradient background simulation
+    pdf.setFillColor(239, 246, 255); // Light blue bg
+    pdf.roundedRect(margins.left - 5, yPos - 5, contentWidth + 10, 50, 3, 3, 'F');
+    
     pdf.setFontSize(20);
     pdf.setTextColor(...secondaryRgb);
     pdf.setFont("helvetica", "bold");
-    pdf.text("Platform at a Glance", margins.left, yPos);
-    yPos += 15;
+    pdf.text("Platform at a Glance", margins.left, yPos + 5);
     
     pdf.setFontSize(10);
-    pdf.setTextColor(...TEXT_COLORS.muted);
+    pdf.setTextColor(...TEXT_COLORS.secondary);
     pdf.setFont("helvetica", "normal");
-    pdf.text("25 integrated modules delivering 1,675+ capabilities across the complete employee lifecycle.", margins.left, yPos);
-    yPos += 15;
+    pdf.text("The complete HR operating system for Caribbean, Latin America, Africa, and global operations", margins.left, yPos + 15);
     
-    // Module grid - 4 columns
-    const colWidth = (contentWidth - 15) / 4;
-    let colIdx = 0;
-    let rowY = yPos;
+    // Key Stats - 4 boxes matching web
+    const statsData = [
+      { value: "1,675+", label: "Total Capabilities" },
+      { value: "25", label: "Integrated Modules" },
+      { value: "7", label: "Lifecycle Acts" },
+      { value: "20+", label: "Countries Supported" }
+    ];
     
-    const allModules: { title: string; badge: string; actColor: [number, number, number] }[] = [];
-    CAPABILITIES_DATA.forEach((act) => {
-      const color = ACT_COLORS[act.id] || [100, 116, 139];
-      act.modules.forEach((mod) => {
-        allModules.push({ title: mod.title, badge: mod.badge || '', actColor: color });
+    const pStatWidth = (contentWidth - 15) / 4;
+    const statsY = yPos + 25;
+    statsData.forEach((stat, idx) => {
+      const x = margins.left + idx * (pStatWidth + 5);
+      pdf.setFillColor(255, 255, 255);
+      pdf.roundedRect(x, statsY, pStatWidth, 18, 2, 2, 'F');
+      
+      pdf.setFontSize(14);
+      pdf.setTextColor(...primaryRgb);
+      pdf.setFont("helvetica", "bold");
+      pdf.text(stat.value, x + pStatWidth / 2, statsY + 8, { align: 'center' });
+      
+      pdf.setFontSize(7);
+      pdf.setTextColor(...TEXT_COLORS.secondary);
+      pdf.setFont("helvetica", "normal");
+      pdf.text(stat.label, x + pStatWidth / 2, statsY + 14, { align: 'center' });
+    });
+    yPos += 55;
+    
+    // Employee Lifecycle Acts Section
+    pdf.setFontSize(12);
+    pdf.setFont("helvetica", "bold");
+    pdf.setTextColor(...secondaryRgb);
+    pdf.text("Employee Lifecycle Acts", margins.left, yPos);
+    yPos += 8;
+    
+    // Act data matching PlatformAtGlance.tsx
+    const ACTS_DATA = [
+      { id: "prologue", act: "Prologue", title: "Setting the Stage", subtitle: "Foundation & Governance", capabilities: 150, 
+        modules: ["Admin & Security (80)", "HR Hub (70)"],
+        outcomes: ["Enterprise-grade security", "Complete audit trails", "Zero-trust architecture"],
+        color: [100, 116, 139] as [number, number, number] },
+      { id: "act1", act: "Act 1", title: "Attract, Onboard & Transition", subtitle: "Talent Lifecycle", capabilities: 245,
+        modules: ["Recruitment (75)", "Onboarding (55)", "Offboarding (55)", "Workforce (60)"],
+        outcomes: ["50% faster time-to-hire", "Day-one readiness", "98%+ asset recovery"],
+        color: [59, 130, 246] as [number, number, number] },
+      { id: "act2", act: "Act 2", title: "Enable & Engage", subtitle: "Self-Service & Time", capabilities: 180,
+        modules: ["ESS (45)", "MSS (50)", "Time & Attendance (45)", "Leave (40)"],
+        outcomes: ["80% fewer HR inquiries", "99.9% time accuracy", "Zero compliance violations"],
+        color: [16, 185, 129] as [number, number, number] },
+      { id: "act3", act: "Act 3", title: "Pay & Reward", subtitle: "Compensation & Benefits", capabilities: 150,
+        modules: ["Payroll (60)", "Compensation (50)", "Benefits (40)"],
+        outcomes: ["99.99% payroll accuracy", "Pay equity analysis", "Real-time GL integration"],
+        color: [245, 158, 11] as [number, number, number] },
+      { id: "act4", act: "Act 4", title: "Develop & Grow", subtitle: "Performance & Talent", capabilities: 410,
+        modules: ["Learning & LMS (130)", "Goals (45)", "Appraisals (50)", "360 Feedback (35)", "Continuous Perf (55)", "Succession (95)"],
+        outcomes: ["85%+ training completion", "90%+ successor coverage", "Flight risk detection"],
+        color: [168, 85, 247] as [number, number, number] },
+      { id: "act5", act: "Act 5", title: "Protect & Support", subtitle: "Safety & Relations", capabilities: 280,
+        modules: ["Health & Safety (120)", "Employee Relations (95)", "Company Property (65)"],
+        outcomes: ["60%+ incident reduction", "70%+ grievance resolution", "Complete asset tracking"],
+        color: [239, 68, 68] as [number, number, number] },
+      { id: "epilogue", act: "Epilogue", title: "Continuous Excellence", subtitle: "Support & Knowledge", capabilities: 85,
+        modules: ["Help Center (85)"],
+        outcomes: ["70%+ ticket deflection", "24/7 AI assistance", "Version-controlled KB"],
+        color: [99, 102, 241] as [number, number, number] }
+    ];
+    
+    const totalCaps = ACTS_DATA.reduce((sum, a) => sum + a.capabilities, 0) + 175; // +175 for cross-cutting
+    
+    ACTS_DATA.forEach((act) => {
+      checkPageBreak(30, "Platform at a Glance");
+      
+      // Left border accent
+      pdf.setFillColor(act.color[0], act.color[1], act.color[2]);
+      pdf.rect(margins.left, yPos, 3, 24, 'F');
+      
+      // Card background
+      pdf.setFillColor(249, 250, 251);
+      pdf.roundedRect(margins.left + 4, yPos, contentWidth - 4, 24, 2, 2, 'F');
+      
+      // Act badge + capabilities
+      pdf.setFontSize(7);
+      pdf.setFont("helvetica", "bold");
+      pdf.setTextColor(act.color[0], act.color[1], act.color[2]);
+      pdf.text(act.act, margins.left + 8, yPos + 5);
+      pdf.setTextColor(...TEXT_COLORS.primary);
+      pdf.text(`${act.capabilities}+ capabilities`, margins.left + 28, yPos + 5);
+      
+      // Title
+      pdf.setFontSize(10);
+      pdf.setFont("helvetica", "bold");
+      pdf.setTextColor(...TEXT_COLORS.primary);
+      pdf.text(act.title, margins.left + 8, yPos + 13);
+      
+      // Subtitle
+      pdf.setFontSize(7);
+      pdf.setFont("helvetica", "normal");
+      pdf.setTextColor(...TEXT_COLORS.muted);
+      pdf.text(act.subtitle, margins.left + 8, yPos + 19);
+      
+      // Modules (middle section)
+      const modulesX = margins.left + 80;
+      pdf.setFontSize(6);
+      pdf.setTextColor(...TEXT_COLORS.secondary);
+      const modulesText = act.modules.slice(0, 4).join(" | ");
+      const truncModules = modulesText.length > 60 ? modulesText.substring(0, 57) + "..." : modulesText;
+      pdf.text(truncModules, modulesX, yPos + 10);
+      
+      // Key Outcomes (right section)
+      const outcomesX = margins.left + contentWidth - 50;
+      pdf.setFontSize(6);
+      act.outcomes.slice(0, 2).forEach((outcome, idx) => {
+        pdf.setTextColor(act.color[0], act.color[1], act.color[2]);
+        pdf.text("[check]", outcomesX - 10, yPos + 6 + idx * 6);
+        pdf.setTextColor(...TEXT_COLORS.secondary);
+        const truncOutcome = outcome.length > 25 ? outcome.substring(0, 22) + "..." : outcome;
+        pdf.text(truncOutcome, outcomesX, yPos + 6 + idx * 6);
       });
+      
+      // Progress bar
+      const progressWidth = (act.capabilities / totalCaps) * (contentWidth - 30);
+      pdf.setFillColor(act.color[0], act.color[1], act.color[2]);
+      pdf.setGState(new (pdf as any).GState({ opacity: 0.3 }));
+      pdf.rect(margins.left + 8, yPos + 22, progressWidth, 1.5, 'F');
+      pdf.setGState(new (pdf as any).GState({ opacity: 1 }));
+      
+      yPos += 28;
     });
     
-    allModules.forEach((mod, idx) => {
-      if (colIdx === 0 && idx > 0) {
-        rowY += 22;
-        if (rowY > pageHeight - margins.bottom - 30) {
-          addNewPage("Platform at a Glance");
-          rowY = margins.top;
-        }
+    // Cross-Cutting Capabilities Card
+    checkPageBreak(30, "Platform at a Glance");
+    pdf.setFillColor(20, 184, 166); // Teal
+    pdf.rect(margins.left, yPos, 3, 24, 'F');
+    
+    pdf.setFillColor(249, 250, 251);
+    pdf.roundedRect(margins.left + 4, yPos, contentWidth - 4, 24, 2, 2, 'F');
+    
+    pdf.setFontSize(7);
+    pdf.setFont("helvetica", "bold");
+    pdf.setTextColor(20, 184, 166);
+    pdf.text("Cross-Cutting", margins.left + 8, yPos + 5);
+    pdf.setTextColor(...TEXT_COLORS.primary);
+    pdf.text("175+ capabilities", margins.left + 35, yPos + 5);
+    
+    pdf.setFontSize(10);
+    pdf.setFont("helvetica", "bold");
+    pdf.setTextColor(...TEXT_COLORS.primary);
+    pdf.text("Cross-Cutting Capabilities", margins.left + 8, yPos + 13);
+    
+    pdf.setFontSize(7);
+    pdf.setFont("helvetica", "normal");
+    pdf.setTextColor(...TEXT_COLORS.muted);
+    pdf.text("Platform Features (70) | Regional Compliance (50) | AI Intelligence (55)", margins.left + 8, yPos + 19);
+    
+    yPos += 30;
+    
+    // Capability Distribution Bar
+    checkPageBreak(25, "Platform at a Glance");
+    pdf.setFontSize(10);
+    pdf.setFont("helvetica", "bold");
+    pdf.setTextColor(...secondaryRgb);
+    pdf.text("Capability Distribution", margins.left, yPos);
+    yPos += 8;
+    
+    // Visual bar
+    let barX = margins.left;
+    const barHeight = 8;
+    const barTotalWidth = contentWidth;
+    
+    ACTS_DATA.forEach((act) => {
+      const segmentWidth = (act.capabilities / totalCaps) * barTotalWidth;
+      pdf.setFillColor(act.color[0], act.color[1], act.color[2]);
+      pdf.setGState(new (pdf as any).GState({ opacity: 0.4 }));
+      pdf.rect(barX, yPos, segmentWidth, barHeight, 'F');
+      pdf.setGState(new (pdf as any).GState({ opacity: 1 }));
+      
+      // Label if segment is wide enough
+      if (segmentWidth > 15) {
+        pdf.setFontSize(6);
+        pdf.setTextColor(act.color[0], act.color[1], act.color[2]);
+        const label = act.act.replace("Act ", "A");
+        pdf.text(label, barX + segmentWidth / 2 - 3, yPos + 5);
       }
+      barX += segmentWidth;
+    });
+    
+    // Cross-cutting segment
+    const xCutWidth = (175 / totalCaps) * barTotalWidth;
+    pdf.setFillColor(20, 184, 166);
+    pdf.setGState(new (pdf as any).GState({ opacity: 0.4 }));
+    pdf.rect(barX, yPos, xCutWidth, barHeight, 'F');
+    pdf.setGState(new (pdf as any).GState({ opacity: 1 }));
+    
+    yPos += 15;
+    
+    // Legend
+    pdf.setFontSize(6);
+    let legendX = margins.left;
+    ACTS_DATA.forEach((act) => {
+      pdf.setFillColor(act.color[0], act.color[1], act.color[2]);
+      pdf.setGState(new (pdf as any).GState({ opacity: 0.4 }));
+      pdf.rect(legendX, yPos, 8, 4, 'F');
+      pdf.setGState(new (pdf as any).GState({ opacity: 1 }));
       
-      const x = margins.left + colIdx * (colWidth + 5);
-      
-      // Module card
-      pdf.setFillColor(249, 250, 251);
-      pdf.roundedRect(x, rowY, colWidth, 18, 2, 2, 'F');
-      
-      // Color accent
-      pdf.setFillColor(...mod.actColor);
-      pdf.rect(x, rowY, 3, 18, 'F');
-      
-      pdf.setFontSize(9);
-      pdf.setFont("helvetica", "bold");
-      pdf.setTextColor(30, 41, 59);
-      pdf.text(mod.title, x + 6, rowY + 7);
-      
-      if (mod.badge) {
-        pdf.setFontSize(7);
-        pdf.setTextColor(...mod.actColor);
-        pdf.text(mod.badge, x + 6, rowY + 13);
-      }
-      
-      colIdx = (colIdx + 1) % 4;
+      pdf.setTextColor(...TEXT_COLORS.muted);
+      pdf.text(act.act, legendX + 10, yPos + 3);
+      legendX += 24;
     });
   }
 
@@ -1434,75 +1829,207 @@ export async function generateProductCapabilitiesPdf(
     trackToc("Getting Started", 1);
     
     pdf.setFillColor(16, 185, 129); // Emerald
-    pdf.rect(0, 0, pageWidth, 40, 'F');
+    pdf.rect(0, 0, pageWidth, 45, 'F');
     pdf.setTextColor(255, 255, 255);
     pdf.setFontSize(20);
     pdf.setFont("helvetica", "bold");
-    pdf.text("Getting Started", margins.left, 25);
+    pdf.text("Ready to Transform Your HR?", margins.left, 20);
     pdf.setFontSize(10);
     pdf.setFont("helvetica", "normal");
-    pdf.text(GETTING_STARTED.tagline, margins.left, 35);
-    yPos = 50;
+    pdf.text("Your Journey Starts Here", margins.left, 30);
+    
+    // Quick Stats in header (matching web)
+    const quickStats = [
+      { value: "12-16", label: "Weeks to Go-Live" },
+      { value: "98%", label: "Implementation Success" },
+      { value: "4.8/5", label: "Customer Satisfaction" },
+      { value: "50+", label: "Successful Deployments" }
+    ];
+    
+    const qsWidth = (contentWidth - 15) / 4;
+    quickStats.forEach((qs, idx) => {
+      const x = margins.left + idx * (qsWidth + 5);
+      pdf.setFontSize(12);
+      pdf.setFont("helvetica", "bold");
+      pdf.text(qs.value, x + qsWidth / 2, 38, { align: 'center' });
+      pdf.setFontSize(6);
+      pdf.setFont("helvetica", "normal");
+      pdf.text(qs.label, x + qsWidth / 2, 43, { align: 'center' });
+    });
+    
+    yPos = 55;
     
     // Implementation Phases
-    pdf.setFontSize(12);
+    pdf.setFontSize(14);
     pdf.setFont("helvetica", "bold");
     pdf.setTextColor(...primaryRgb);
-    pdf.text("Implementation Phases", margins.left, yPos);
-    yPos += 8;
+    pdf.text("Implementation Journey", margins.left, yPos);
+    pdf.setFontSize(8);
+    pdf.setFont("helvetica", "normal");
+    pdf.setTextColor(...TEXT_COLORS.secondary);
+    pdf.text("Our phased approach ensures smooth transitions and rapid adoption", margins.left + 55, yPos);
+    yPos += 12;
     
-    GETTING_STARTED.phases.forEach((phase, idx) => {
-      checkPageBreak(40, "Getting Started");
+    // Phase data matching web
+    const phases = [
+      { phase: 1, title: "Discovery & Planning", duration: "2-3 Weeks", color: [59, 130, 246] as [number, number, number],
+        activities: ["Requirements gathering", "Process mapping", "Data audit", "Integration planning", "Success metrics", "Timeline finalization"] },
+      { phase: 2, title: "Configuration & Setup", duration: "4-6 Weeks", color: [16, 185, 129] as [number, number, number],
+        activities: ["Org structure setup", "Policy configuration", "Workflow design", "Data migration", "Integration build", "Security setup"] },
+      { phase: 3, title: "Testing & Training", duration: "3-4 Weeks", color: [245, 158, 11] as [number, number, number],
+        activities: ["UAT execution", "Admin training", "HR user training", "Manager training", "Employee comms", "Go-live prep"] },
+      { phase: 4, title: "Go-Live & Optimization", duration: "2-3 Weeks + Ongoing", color: [168, 85, 247] as [number, number, number],
+        activities: ["Phased rollout", "Hypercare support", "Issue resolution", "Adoption tracking", "Optimization", "Success review"] }
+    ];
+    
+    phases.forEach((p) => {
+      checkPageBreak(28, "Getting Started");
       
-      // Phase header
-      pdf.setFillColor(241, 245, 249);
-      pdf.roundedRect(margins.left, yPos - 3, contentWidth, 10, 2, 2, 'F');
+      // Left color bar
+      pdf.setFillColor(p.color[0], p.color[1], p.color[2]);
+      pdf.rect(margins.left, yPos, 3, 22, 'F');
+      
+      // Phase number circle
+      pdf.setFillColor(p.color[0], p.color[1], p.color[2]);
+      pdf.circle(margins.left + 10, yPos + 5, 4, 'F');
+      pdf.setFontSize(8);
+      pdf.setFont("helvetica", "bold");
+      pdf.setTextColor(255, 255, 255);
+      pdf.text(`${p.phase}`, margins.left + 10, yPos + 7, { align: 'center' });
+      
+      // Title and duration
       pdf.setFontSize(10);
       pdf.setFont("helvetica", "bold");
-      pdf.setTextColor(30, 41, 59);
-      pdf.text(`Phase ${idx + 1}: ${phase.phase}`, margins.left + 3, yPos + 3);
-      pdf.setFontSize(8);
-      pdf.setTextColor(...TEXT_COLORS.muted);
-      pdf.text(`Duration: ${phase.duration}`, margins.left + contentWidth - 35, yPos + 3);
-      yPos += 12;
+      pdf.setTextColor(...TEXT_COLORS.primary);
+      pdf.text(p.title, margins.left + 18, yPos + 6);
       
-      // Activities
-      pdf.setFontSize(8);
+      pdf.setFontSize(7);
       pdf.setFont("helvetica", "normal");
-      pdf.setTextColor(...TEXT_COLORS.secondary);
-      phase.activities.slice(0, 3).forEach((activity) => {
-        pdf.text(`  • ${activity}`, margins.left + 5, yPos);
-        yPos += 4;
+      pdf.setTextColor(...TEXT_COLORS.muted);
+      pdf.text(p.duration, margins.left + 18 + pdf.getTextWidth(p.title) + 5, yPos + 6);
+      
+      // Activities in 2x3 grid
+      const actColWidth = (contentWidth - 20) / 2;
+      p.activities.forEach((activity, idx) => {
+        const col = idx % 2;
+        const row = Math.floor(idx / 2);
+        const x = margins.left + 18 + col * actColWidth;
+        const y = yPos + 12 + row * 4;
+        
+        pdf.setFontSize(7);
+        pdf.setTextColor(p.color[0], p.color[1], p.color[2]);
+        pdf.text("[check]", x, y);
+        pdf.setTextColor(...TEXT_COLORS.secondary);
+        pdf.text(activity, x + 8, y);
       });
       
-      // Deliverables
-      pdf.setFont("helvetica", "italic");
-      pdf.setTextColor(...TEXT_COLORS.muted);
-      pdf.text(`Deliverables: ${phase.deliverables.join(", ")}`, margins.left + 5, yPos);
-      yPos += 8;
+      yPos += 28;
     });
     
-    // Next Steps
-    checkPageBreak(35, "Getting Started");
+    // Why Intelli HRM Section
+    checkPageBreak(70, "Getting Started");
     yPos += 5;
+    pdf.setFontSize(14);
+    pdf.setFont("helvetica", "bold");
+    pdf.setTextColor(...primaryRgb);
+    pdf.text("Why Intelli HRM?", margins.left, yPos);
+    yPos += 10;
+    
+    const differentiators = [
+      { title: "Deep Regional Expertise", desc: "Built for Caribbean, Latin America, and Africa with local compliance, tax rules, and labor laws baked in." },
+      { title: "AI-First Architecture", desc: "Intelligence embedded at every decision point with explainability and human oversight." },
+      { title: "Unified Platform", desc: "All 25 modules share data seamlessly, eliminating silos across the employee lifecycle." },
+      { title: "Enterprise-Grade Security", desc: "SOC 2, GDPR, and ISO 27001 aligned with complete audit trails and role-based access." },
+      { title: "Rapid Time-to-Value", desc: "Pre-configured templates for regional organizations accelerate deployment by 40%." },
+      { title: "Partnership Approach", desc: "Dedicated success managers, 24/7 support, and continuous optimization." }
+    ];
+    
+    const diffColWidth = (contentWidth - 5) / 2;
+    differentiators.forEach((diff, idx) => {
+      const col = idx % 2;
+      const row = Math.floor(idx / 2);
+      const x = margins.left + col * (diffColWidth + 5);
+      const y = yPos + row * 20;
+      
+      if (row > 0 && col === 0) {
+        checkPageBreak(20, "Getting Started");
+      }
+      
+      pdf.setFillColor(239, 246, 255);
+      pdf.roundedRect(x, y, diffColWidth, 16, 2, 2, 'F');
+      
+      pdf.setFontSize(8);
+      pdf.setFont("helvetica", "bold");
+      pdf.setTextColor(...TEXT_COLORS.primary);
+      pdf.text(diff.title, x + 3, y + 5);
+      
+      pdf.setFontSize(6);
+      pdf.setFont("helvetica", "normal");
+      pdf.setTextColor(...TEXT_COLORS.secondary);
+      const descLines = pdf.splitTextToSize(diff.desc, diffColWidth - 6);
+      pdf.text(descLines.slice(0, 2), x + 3, y + 10);
+    });
+    yPos += 65;
+    
+    // CTA and Contact Section
+    checkPageBreak(35, "Getting Started");
+    
+    // CTA box
+    pdf.setFillColor(239, 246, 255);
+    pdf.setDrawColor(...primaryRgb);
+    pdf.setLineWidth(0.5);
+    pdf.roundedRect(margins.left, yPos, contentWidth, 25, 3, 3, 'FD');
+    
     pdf.setFontSize(12);
     pdf.setFont("helvetica", "bold");
     pdf.setTextColor(...primaryRgb);
-    pdf.text("Next Steps", margins.left, yPos);
+    pdf.text("Start Your Transformation", margins.left + 5, yPos + 10);
+    
+    pdf.setFontSize(9);
+    pdf.setFont("helvetica", "normal");
+    pdf.setTextColor(...TEXT_COLORS.secondary);
+    pdf.text("Schedule a Demo  |  Watch Overview  |  View Case Studies", margins.left + 5, yPos + 18);
+    yPos += 32;
+    
+    // Contact info
+    pdf.setFillColor(249, 250, 251);
+    pdf.roundedRect(margins.left, yPos, contentWidth, 18, 2, 2, 'F');
+    
+    pdf.setFontSize(9);
+    pdf.setFont("helvetica", "bold");
+    pdf.setTextColor(...TEXT_COLORS.primary);
+    pdf.text("Have Questions?", margins.left + 5, yPos + 7);
+    
+    pdf.setFontSize(8);
+    pdf.setFont("helvetica", "normal");
+    pdf.setTextColor(...primaryRgb);
+    pdf.text("sales@intelli-hrm.com", margins.left + 55, yPos + 7);
+    pdf.text("+1 (800) 123-4567", margins.left + 105, yPos + 7);
+    pdf.text("Live Chat", margins.left + 145, yPos + 7);
+    
+    pdf.setFontSize(7);
+    pdf.setTextColor(...TEXT_COLORS.secondary);
+    pdf.text("Our team is ready to help you explore how Intelli HRM can transform your organization.", margins.left + 5, yPos + 13);
+    yPos += 25;
+    
+    // Final tagline
+    checkPageBreak(20, "Getting Started");
+    pdf.setFontSize(11);
+    pdf.setFont("helvetica", "bold");
+    pdf.setTextColor(...TEXT_COLORS.primary);
+    pdf.text("1,675+ capabilities. 25 modules. One unified platform.", pageWidth / 2, yPos, { align: 'center' });
     yPos += 8;
     
-    GETTING_STARTED.nextSteps.forEach((step, idx) => {
-      checkPageBreak(12, "Getting Started");
-      pdf.setFontSize(9);
-      pdf.setFont("helvetica", "bold");
-      pdf.setTextColor(16, 185, 129);
-      pdf.text(`${idx + 1}. ${step.action}`, margins.left, yPos);
-      pdf.setFont("helvetica", "normal");
-      pdf.setFontSize(8);
-      pdf.setTextColor(...TEXT_COLORS.secondary);
-      pdf.text(step.description, margins.left + 50, yPos);
-      yPos += 6;
-    });
+    pdf.setFontSize(9);
+    pdf.setFont("helvetica", "normal");
+    pdf.setTextColor(...TEXT_COLORS.secondary);
+    pdf.text("Built for the Caribbean, Latin America, Africa, and global operations. AI-first. Enterprise-ready. Human-centered.", pageWidth / 2, yPos, { align: 'center' });
+    yPos += 8;
+    
+    pdf.setFontSize(10);
+    pdf.setTextColor(...primaryRgb);
+    pdf.setFont("helvetica", "bold");
+    pdf.text("This is Intelli HRM.", pageWidth / 2, yPos, { align: 'center' });
   }
 
   onProgress?.(88, "Creating back matter...");
