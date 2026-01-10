@@ -49,39 +49,24 @@ export function useTransactionSeatOrchestration() {
 
   const findSeatForPosition = useCallback(async (positionId: string): Promise<string | null> => {
     try {
-      const { data: vacantSeat } = await supabase
-        .from('position_seats')
-        .select('id')
-        .eq('position_id', positionId)
-        .eq('status', 'VACANT')
-        .eq('is_active', true)
-        .order('seat_code')
-        .limit(1)
-        .maybeSingle();
+      // Use the summary view to find seats
+      const { data } = await supabase
+        .from('seat_occupancy_summary')
+        .select('seat_id, allocation_status, is_shared_seat, current_occupant_count, max_occupants')
+        .eq('position_id', positionId);
+      
+      if (!data || data.length === 0) return null;
 
-      if (vacantSeat) return vacantSeat.id;
+      // Find vacant seat first
+      const vacant = data.find(s => s.allocation_status === 'VACANT');
+      if (vacant) return vacant.seat_id;
 
-      const { data: sharedSeats } = await supabase
-        .from('position_seats')
-        .select('id, max_occupants')
-        .eq('position_id', positionId)
-        .eq('is_shared_seat', true)
-        .eq('is_active', true);
-
-      if (sharedSeats) {
-        for (const seat of sharedSeats) {
-          const { count } = await supabase
-            .from('seat_occupants')
-            .select('id', { count: 'exact', head: true })
-            .eq('seat_id', seat.id)
-            .is('end_date', null);
-
-          if ((count || 0) < (seat.max_occupants || 1)) {
-            return seat.id;
-          }
-        }
-      }
-      return null;
+      // Find shared seat with capacity
+      const shared = data.find(s => 
+        s.is_shared_seat && 
+        (s.current_occupant_count || 0) < (s.max_occupants || 1)
+      );
+      return shared?.seat_id || null;
     } catch (err) {
       console.error('Error finding seat:', err);
       return null;
@@ -128,9 +113,9 @@ export function useTransactionSeatOrchestration() {
       }
 
       return { success: true, occupantId: occupant.id };
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error assigning seat:', err);
-      return { success: false, error: err.message };
+      return { success: false, error: err instanceof Error ? err.message : 'Unknown error' };
     } finally {
       setIsProcessing(false);
     }
@@ -161,8 +146,8 @@ export function useTransactionSeatOrchestration() {
           .eq('id', seatId);
       }
       return { success: true };
-    } catch (err: any) {
-      return { success: false, error: err.message };
+    } catch (err: unknown) {
+      return { success: false, error: err instanceof Error ? err.message : 'Unknown error' };
     } finally {
       setIsProcessing(false);
     }
@@ -234,7 +219,7 @@ export function useTransactionSeatOrchestration() {
           startDate: effectiveDate,
         });
 
-      case 'SECONDMENT':
+      case 'SECONDMENT': {
         const originSeatId = options?.fromPositionId ? await findSeatForPosition(options.fromPositionId) : null;
         if (originSeatId) {
           return processSecondmentSeat({
@@ -248,9 +233,10 @@ export function useTransactionSeatOrchestration() {
           seatId: targetSeatId!, employeeId, transactionId,
           assignmentType: 'secondment', startDate: effectiveDate, endDate: options?.secondmentReturnDate,
         });
+      }
 
       case 'PROMOTION':
-      case 'TRANSFER':
+      case 'TRANSFER': {
         const fromSeatId = options?.fromPositionId ? await findSeatForPosition(options.fromPositionId) : null;
         if (fromSeatId) {
           return transferEmployeeSeat({
@@ -261,8 +247,9 @@ export function useTransactionSeatOrchestration() {
         return assignEmployeeToSeat({
           seatId: targetSeatId!, employeeId, transactionId, assignmentType: 'primary', startDate: effectiveDate,
         });
+      }
 
-      case 'TERMINATION':
+      case 'TERMINATION': {
         const { data: occupancies } = await supabase
           .from('seat_occupants')
           .select('seat_id')
@@ -273,6 +260,7 @@ export function useTransactionSeatOrchestration() {
           await removeEmployeeFromSeat(occ.seat_id, employeeId, effectiveDate, 'Terminated');
         }
         return { success: true };
+      }
 
       default:
         return { success: false, error: 'Unsupported type' };
