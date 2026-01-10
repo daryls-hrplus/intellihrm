@@ -67,7 +67,7 @@ export default function EmployeeDirectoryPage() {
   const loadData = async () => {
     setIsLoading(true);
     try {
-      // For ESS, filter by user's company; for HR Hub, show all
+      // Build employee query
       let empQuery = query("profiles")
         .select("id, full_name, email, avatar_url, department_id, company_id")
         .eq("is_active", true)
@@ -77,62 +77,53 @@ export default function EmployeeDirectoryPage() {
         empQuery = empQuery.eq("company_id", profile.company_id);
       }
 
-      const empRes: any = await empQuery;
-
-      // For departments, filter by company for ESS
-      let deptQuery = query("departments")
-        .select("id, name")
-        .order("name");
-
-      if (!fromHrHub && profile?.company_id) {
-        deptQuery = deptQuery.eq("company_id", profile.company_id);
-      }
-
-      const deptRes: any = await deptQuery;
-
-      const companyRes: any = await query("companies")
-        .select("id, name")
-        .eq("is_active", true)
-        .order("name");
+      // Fetch all data in parallel for efficiency
+      const [empRes, deptRes, companyRes, positionsRes, empPositionsRes]: any[] = await Promise.all([
+        empQuery,
+        query("departments").select("id, name").order("name"),
+        query("companies").select("id, name").eq("is_active", true).order("name"),
+        query("positions").select("id, title, department_id"),
+        query("employee_positions").select("employee_id, position_id, assignment_type, is_primary").eq("is_active", true),
+      ]);
 
       const empData = empRes.data || [];
       const deptData = deptRes.data || [];
       const companyData = companyRes.data || [];
+      const positionsData = positionsRes.data || [];
+      const empPositionsData = empPositionsRes.data || [];
 
+      // Build lookup maps for O(1) access
       const deptMap = new Map(deptData.map((d: any) => [d.id, d.name]));
       const companyMap = new Map(companyData.map((c: any) => [c.id, c.name]));
+      const positionMap = new Map(positionsData.map((p: any) => [p.id, p]));
 
-      // Get all active positions for employees
-      const employeesWithDetails: Employee[] = [];
-      for (const emp of empData) {
-        // Fetch all active positions for this employee
-        const posRes: any = await query("employee_positions")
-          .select("position_id, assignment_type, is_primary")
-          .eq("employee_id", emp.id)
-          .eq("is_active", true)
-          .order("is_primary", { ascending: false });
-
-        const positions: EmployeePosition[] = [];
-        for (const epRow of posRes.data || []) {
-          const positionRes: any = await query("positions")
-            .select("title, department_id")
-            .eq("id", epRow.position_id)
-            .single();
-          
-          if (positionRes.data) {
-            positions.push({
-              title: positionRes.data.title || "",
-              department_id: positionRes.data.department_id || null,
-              department_name: positionRes.data.department_id 
-                ? String(deptMap.get(positionRes.data.department_id) || "") 
-                : null,
-              assignment_type: epRow.assignment_type || "primary",
-              is_primary: epRow.is_primary,
-            });
-          }
+      // Group employee positions by employee_id
+      const empPositionsByEmployee = new Map<string, any[]>();
+      for (const ep of empPositionsData) {
+        if (!empPositionsByEmployee.has(ep.employee_id)) {
+          empPositionsByEmployee.set(ep.employee_id, []);
         }
+        empPositionsByEmployee.get(ep.employee_id)!.push(ep);
+      }
 
-        employeesWithDetails.push({
+      // Build employee list with positions (no additional queries needed)
+      const employeesWithDetails: Employee[] = empData.map((emp: any) => {
+        const empPositions = empPositionsByEmployee.get(emp.id) || [];
+        // Sort so primary positions come first
+        empPositions.sort((a, b) => (b.is_primary ? 1 : 0) - (a.is_primary ? 1 : 0));
+
+        const positions: EmployeePosition[] = empPositions.map((ep) => {
+          const pos = positionMap.get(ep.position_id) as { id: string; title: string; department_id: string | null } | undefined;
+          return {
+            title: pos?.title || "",
+            department_id: pos?.department_id || null,
+            department_name: pos?.department_id ? String(deptMap.get(pos.department_id) || "") : null,
+            assignment_type: ep.assignment_type || "primary",
+            is_primary: ep.is_primary,
+          };
+        });
+
+        return {
           id: emp.id,
           full_name: emp.full_name || "",
           email: emp.email || "",
@@ -140,8 +131,8 @@ export default function EmployeeDirectoryPage() {
           company_id: emp.company_id || null,
           positions,
           company: emp.company_id ? { name: String(companyMap.get(emp.company_id) || "") } : null,
-        });
-      }
+        };
+      });
 
       setEmployees(employeesWithDetails);
       setDepartments(deptData as Department[]);
