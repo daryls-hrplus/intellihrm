@@ -10,3 +10,4 @@ export { ChallengePromise } from "./ChallengePromise";
 export { PersonaValueCard, PersonaGrid } from "./PersonaValueCard";
 export { KeyOutcomeMetrics } from "./KeyOutcomeMetrics";
 export { RegionalAdvantage } from "./RegionalAdvantage";
+export { PrintableIntegrationDiagram } from "./PrintableIntegrationDiagram";
