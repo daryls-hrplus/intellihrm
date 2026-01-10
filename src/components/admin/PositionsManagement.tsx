@@ -45,8 +45,11 @@ import {
   Users,
   ArrowUpRight,
   DollarSign,
+  TrendingUp,
+  Armchair,
 } from "lucide-react";
 import { EmployeePositionCompensationDrilldown } from "@/components/workforce/EmployeePositionCompensationDrilldown";
+import { PositionSeatsPanel, HeadcountChangeRequestDialog } from "@/components/workforce/position-seats";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { getTodayString } from "@/utils/dateUtils";
@@ -256,6 +259,11 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
   const [assignPayGroupId, setAssignPayGroupId] = useState("");
   const [assignPayGroupStartDate, setAssignPayGroupStartDate] = useState("");
   const [assignPayGroupEndDate, setAssignPayGroupEndDate] = useState("");
+
+  // Position seats state
+  const [expandedPositionSeats, setExpandedPositionSeats] = useState<Set<string>>(new Set());
+  const [headcountDialogOpen, setHeadcountDialogOpen] = useState(false);
+  const [headcountPosition, setHeadcountPosition] = useState<Position | null>(null);
 
   useEffect(() => {
     if (companyId) {
@@ -757,6 +765,7 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
                           {deptPositions.map((position) => {
                             const assignments = getAssignmentsForPosition(position.id);
                             const supervisor = getSupervisorForPosition(position.id);
+                            const isSeatsExpanded = expandedPositionSeats.has(position.id);
 
                             return (
                               <div key={position.id} className="border rounded-lg p-4">
@@ -807,6 +816,32 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
                                     <Button
                                       size="sm"
                                       variant="outline"
+                                      onClick={() => {
+                                        setHeadcountPosition(position);
+                                        setHeadcountDialogOpen(true);
+                                      }}
+                                    >
+                                      <TrendingUp className="h-4 w-4 mr-1" />
+                                      Headcount
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => {
+                                        setExpandedPositionSeats(prev => {
+                                          const next = new Set(prev);
+                                          if (next.has(position.id)) next.delete(position.id);
+                                          else next.add(position.id);
+                                          return next;
+                                        });
+                                      }}
+                                    >
+                                      <Armchair className="h-4 w-4 mr-1" />
+                                      Seats
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
                                       onClick={() => openAssignEmployee(position.id)}
                                     >
                                       <Users className="h-4 w-4 mr-1" />
@@ -830,6 +865,18 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
                                     </Button>
                                   </div>
                                 </div>
+
+                                {/* Position Seats Panel */}
+                                {isSeatsExpanded && (
+                                  <div className="mt-3 border-t pt-3">
+                                    <PositionSeatsPanel
+                                      positionId={position.id}
+                                      positionTitle={position.title}
+                                      authorizedHeadcount={position.authorized_headcount}
+                                      onRequestChange={fetchData}
+                                    />
+                                  </div>
+                                )}
 
                                 {assignments.length > 0 && (
                                   <div className="mt-3 border-t pt-3">
@@ -1424,6 +1471,21 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Headcount Change Request Dialog */}
+      {headcountPosition && (
+        <HeadcountChangeRequestDialog
+          open={headcountDialogOpen}
+          onOpenChange={setHeadcountDialogOpen}
+          positionId={headcountPosition.id}
+          positionTitle={headcountPosition.title}
+          positionCode={headcountPosition.code}
+          currentHeadcount={headcountPosition.authorized_headcount}
+          filledCount={getAssignmentsForPosition(headcountPosition.id).length}
+          companyId={companyId}
+          onSuccess={fetchData}
+        />
+      )}
     </div>
   );
 }
