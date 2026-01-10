@@ -12,7 +12,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, Mail, Phone, Building, Building2, MapPin, Users } from "lucide-react";
+import { Search, Mail, Phone, Building, Building2, MapPin, Users, LayoutGrid, List } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useTranslation } from "react-i18next";
 
 interface EmployeePosition {
@@ -57,6 +59,7 @@ export default function EmployeeDirectoryPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedDepartment, setSelectedDepartment] = useState<string>("all");
   const [selectedCompany, setSelectedCompany] = useState<string>("all");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
   useEffect(() => {
     if (profile?.company_id) {
@@ -194,10 +197,30 @@ export default function EmployeeDirectoryPage() {
             <h1 className="text-3xl font-bold">Employee Directory</h1>
             <p className="text-muted-foreground">Find and connect with colleagues</p>
           </div>
-          <Badge variant="outline" className="gap-1">
-            <Users className="h-4 w-4" />
-            {filteredEmployees.length} employees
-          </Badge>
+          <div className="flex items-center gap-2">
+            <div className="flex border rounded-md">
+              <Button
+                variant={viewMode === "grid" ? "secondary" : "ghost"}
+                size="sm"
+                onClick={() => setViewMode("grid")}
+                className="rounded-r-none"
+              >
+                <LayoutGrid className="h-4 w-4" />
+              </Button>
+              <Button
+                variant={viewMode === "list" ? "secondary" : "ghost"}
+                size="sm"
+                onClick={() => setViewMode("list")}
+                className="rounded-l-none"
+              >
+                <List className="h-4 w-4" />
+              </Button>
+            </div>
+            <Badge variant="outline" className="gap-1">
+              <Users className="h-4 w-4" />
+              {filteredEmployees.length} employees
+            </Badge>
+          </div>
         </div>
 
         <div className="flex flex-col md:flex-row gap-4">
@@ -243,6 +266,73 @@ export default function EmployeeDirectoryPage() {
           <div className="text-center py-12 text-muted-foreground">Loading directory...</div>
         ) : filteredEmployees.length === 0 ? (
           <div className="text-center py-12 text-muted-foreground">No employees found</div>
+        ) : viewMode === "list" ? (
+          <Card>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Employee</TableHead>
+                  <TableHead>Position</TableHead>
+                  <TableHead>Department</TableHead>
+                  <TableHead>Company</TableHead>
+                  <TableHead>Email</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredEmployees.map((emp) => (
+                  <TableRow key={emp.id}>
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-8 w-8">
+                          <AvatarImage src={emp.avatar_url || undefined} alt={emp.full_name} />
+                          <AvatarFallback className="bg-primary/10 text-primary text-xs">
+                            {getInitials(emp.full_name)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span className="font-medium">{emp.full_name}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      {emp.positions.length > 0 ? (
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-1">
+                            <span>{emp.positions[0].title}</span>
+                            {!emp.positions[0].is_primary && (
+                              <Badge variant="outline" className="text-xs capitalize">
+                                {emp.positions[0].assignment_type}
+                              </Badge>
+                            )}
+                          </div>
+                          {emp.positions.length > 1 && (
+                            <span className="text-xs text-muted-foreground">
+                              +{emp.positions.length - 1} more
+                            </span>
+                          )}
+                        </div>
+                      ) : (
+                        <span className="text-muted-foreground">—</span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {emp.positions.length > 0 && emp.positions[0].department_name ? (
+                        emp.positions[0].department_name
+                      ) : (
+                        <span className="text-muted-foreground">—</span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {emp.company ? emp.company.name : <span className="text-muted-foreground">—</span>}
+                    </TableCell>
+                    <TableCell>
+                      <a href={`mailto:${emp.email}`} className="text-primary hover:underline">
+                        {emp.email}
+                      </a>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </Card>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {filteredEmployees.map((emp) => (
@@ -270,7 +360,6 @@ export default function EmployeeDirectoryPage() {
                     </div>
                   </div>
 
-                  {/* Show additional positions if any */}
                   {emp.positions.length > 1 && (
                     <div className="mt-2 space-y-1">
                       {emp.positions.slice(1).map((pos, idx) => (
