@@ -28604,6 +28604,7 @@ export type Database = {
           reviewed_by: string | null
           status: string
           updated_at: string
+          workflow_instance_id: string | null
         }
         Insert: {
           affected_seats?: Json | null
@@ -28633,6 +28634,7 @@ export type Database = {
           reviewed_by?: string | null
           status?: string
           updated_at?: string
+          workflow_instance_id?: string | null
         }
         Update: {
           affected_seats?: Json | null
@@ -28662,6 +28664,7 @@ export type Database = {
           reviewed_by?: string | null
           status?: string
           updated_at?: string
+          workflow_instance_id?: string | null
         }
         Relationships: [
           {
@@ -28711,6 +28714,13 @@ export type Database = {
             columns: ["reviewed_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "headcount_change_requests_workflow_instance_id_fkey"
+            columns: ["workflow_instance_id"]
+            isOneToOne: false
+            referencedRelation: "workflow_instances"
             referencedColumns: ["id"]
           },
         ]
@@ -66663,6 +66673,14 @@ export type Database = {
         }
         Returns: boolean
       }
+      initiate_headcount_workflow: {
+        Args: {
+          p_company_id: string
+          p_headcount_request_id: string
+          p_initiated_by: string
+        }
+        Returns: string
+      }
       is_active_at_date: {
         Args: {
           p_check_date?: string
@@ -66762,6 +66780,15 @@ export type Database = {
       }
       process_goal_approval: {
         Args: { p_approval_id: string; p_comments?: string; p_decision: string }
+        Returns: Json
+      }
+      process_headcount_workflow_action: {
+        Args: {
+          p_action: string
+          p_actor_id: string
+          p_comment?: string
+          p_headcount_request_id: string
+        }
         Returns: Json
       }
       queue_translation: {
