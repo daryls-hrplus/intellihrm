@@ -40,9 +40,9 @@ export const EXECUTIVE_SUMMARY = {
   subtitle: "AI-First Human Resource Management System",
   description: "Purpose-built for the Caribbean, Latin America, and Africa. Deep regional compliance meets embedded intelligence for enterprise-grade workforce management.",
   stats: [
-    { value: "18", label: "Core Modules" },
-    { value: "450+", label: "Features" },
-    { value: "15+", label: "Countries" },
+    { value: "25", label: "Core Modules" },
+    { value: "1,675+", label: "Capabilities" },
+    { value: "20+", label: "Countries" },
     { value: "100%", label: "AI-Enhanced" },
   ],
   valueProps: [
