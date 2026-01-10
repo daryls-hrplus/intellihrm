@@ -14520,6 +14520,7 @@ export type Database = {
           employee_id: string
           end_date: string | null
           frequency: string
+          fte_percentage: number | null
           id: string
           is_active: boolean
           is_override: boolean
@@ -14529,6 +14530,7 @@ export type Database = {
           pending_effective_date: string | null
           position_id: string | null
           rate_type: string | null
+          seat_occupant_id: string | null
           source_transaction_id: string | null
           start_date: string
           updated_at: string
@@ -14545,6 +14547,7 @@ export type Database = {
           employee_id: string
           end_date?: string | null
           frequency?: string
+          fte_percentage?: number | null
           id?: string
           is_active?: boolean
           is_override?: boolean
@@ -14554,6 +14557,7 @@ export type Database = {
           pending_effective_date?: string | null
           position_id?: string | null
           rate_type?: string | null
+          seat_occupant_id?: string | null
           source_transaction_id?: string | null
           start_date?: string
           updated_at?: string
@@ -14570,6 +14574,7 @@ export type Database = {
           employee_id?: string
           end_date?: string | null
           frequency?: string
+          fte_percentage?: number | null
           id?: string
           is_active?: boolean
           is_override?: boolean
@@ -14579,6 +14584,7 @@ export type Database = {
           pending_effective_date?: string | null
           position_id?: string | null
           rate_type?: string | null
+          seat_occupant_id?: string | null
           source_transaction_id?: string | null
           start_date?: string
           updated_at?: string
@@ -14646,6 +14652,13 @@ export type Database = {
             columns: ["position_id"]
             isOneToOne: false
             referencedRelation: "positions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_compensation_seat_occupant_id_fkey"
+            columns: ["seat_occupant_id"]
+            isOneToOne: false
+            referencedRelation: "seat_occupants"
             referencedColumns: ["id"]
           },
           {
