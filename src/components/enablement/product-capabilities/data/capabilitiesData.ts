@@ -1076,6 +1076,20 @@ export const CAPABILITIES_DATA: ActData[] = [
         tagline: "Strategic compensation planning with market intelligence",
         overview: "Comprehensive compensation management including salary structures, planning cycles, market benchmarking, and pay equity analysis.",
         badge: "25+ Capabilities",
+        challenge: "Compensation decisions made in spreadsheets lead to inconsistency, pay inequity, and talent loss. Without market data integration, organizations either overpay and blow budgets or underpay and lose top performers. Annual planning cycles take months of manual work.",
+        promise: "Intelli HRM Compensation brings strategic intelligence to every pay decision. Market benchmarking, pay equity analysis, and budget modeling—all in one platform that ensures competitive, fair, and compliant compensation across your entire workforce.",
+        keyOutcomes: [
+          { value: "25%", label: "Reduced Comp Admin Time", description: "Automated planning cycles", trend: "down" },
+          { value: "15%", label: "Better Budget Accuracy", description: "Data-driven planning", trend: "up" },
+          { value: "100%", label: "Pay Equity Visibility", description: "Proactive gap identification", trend: "up" },
+          { value: "3x", label: "Faster Planning Cycles", description: "Automated worksheets", trend: "up" }
+        ],
+        personas: [
+          { persona: "Compensation Manager", benefit: "Data-driven decisions, not gut feel", outcomes: ["Market benchmarking integration", "Compa-ratio analysis by segment", "Budget modeling scenarios"] },
+          { persona: "HR Business Partner", benefit: "Equip managers with right recommendations", outcomes: ["Manager worksheets with guardrails", "Equity alerts before approvals", "Total rewards visibility"] },
+          { persona: "Finance Partner", benefit: "Budget accuracy and cost control", outcomes: ["Real-time budget tracking", "Variance alerts", "Multi-currency consolidation"] },
+          { persona: "Employee", benefit: "Fair pay with transparent communication", outcomes: ["Total rewards statements", "Career-based pay progression visibility", "Clear compensation philosophy"] }
+        ],
         categories: [
           {
             title: "Salary Structures",
@@ -1132,7 +1146,16 @@ export const CAPABILITIES_DATA: ActData[] = [
           { module: "Performance", description: "Rating-based increase guidelines" },
           { module: "Recruitment", description: "Offer salary benchmarking" },
           { module: "Budgeting", description: "Position cost planning" }
-        ]
+        ],
+        regionalAdvantage: {
+          regions: ["Caribbean", "Africa", "Global"],
+          advantages: [
+            "Multi-currency salary structures and conversions",
+            "Regional minimum wage compliance",
+            "Country-specific pay equity regulations",
+            "Local market data integration"
+          ]
+        }
       },
       {
         id: "benefits",
@@ -1140,6 +1163,20 @@ export const CAPABILITIES_DATA: ActData[] = [
         tagline: "Comprehensive benefits from enrollment to claims",
         overview: "Full lifecycle benefits management including plan configuration, open enrollment, life events, claims processing, and cost analysis.",
         badge: "45+ Capabilities",
+        challenge: "Paper-based enrollment forms, manual eligibility tracking, and disconnected claims processing create compliance risks and employee frustration. HR spends weeks on open enrollment instead of strategic work, while employees struggle to understand their benefit options.",
+        promise: "Intelli HRM Benefits Administration streamlines the entire benefits lifecycle—from plan design to claims resolution. Self-service enrollment, automated eligibility, and AI-powered recommendations ensure employees choose the right benefits while HR maintains full compliance.",
+        keyOutcomes: [
+          { value: "90%", label: "Self-Service Enrollment", description: "Employees enroll without HR help", trend: "up" },
+          { value: "50%", label: "Faster Claims Processing", description: "Automated adjudication", trend: "up" },
+          { value: "100%", label: "Eligibility Compliance", description: "Rules engine enforcement", trend: "up" },
+          { value: "30%", label: "Reduced Admin Burden", description: "Open enrollment automation", trend: "down" }
+        ],
+        personas: [
+          { persona: "Benefits Administrator", benefit: "Configure once, automate forever", outcomes: ["Plan configuration with versioning", "Automated eligibility enforcement", "Carrier file generation"] },
+          { persona: "Employee", benefit: "I understand my options and choose wisely", outcomes: ["Plan comparison tools", "AI-powered recommendations", "Mobile enrollment experience"] },
+          { persona: "HR Leader", benefit: "Cost control with employee satisfaction", outcomes: ["Utilization analytics", "Cost trend forecasting", "Competitive benchmarking"] },
+          { persona: "Finance", benefit: "Predictable benefits costs", outcomes: ["Accrual tracking", "Renewal forecasting", "Budget vs. actual reporting"] }
+        ],
         categories: [
           {
             title: "Plan Configuration",
@@ -1196,6 +1233,15 @@ export const CAPABILITIES_DATA: ActData[] = [
           { module: "Workforce", description: "Dependent and eligibility data" },
           { module: "ESS", description: "Self-service enrollment and claims" }
         ],
+        regionalAdvantage: {
+          regions: ["Caribbean", "Africa", "Global"],
+          advantages: [
+            "Caribbean health scheme integration (NHI, NHT)",
+            "African pension fund requirements (SSNIT, PFA)",
+            "Regional statutory benefit compliance",
+            "Multi-country carrier integrations"
+          ]
+        },
         regionalNote: "Caribbean health scheme integration, African pension requirements, regional statutory benefit compliance"
       }
     ]
@@ -1212,6 +1258,20 @@ export const CAPABILITIES_DATA: ActData[] = [
         tagline: "Build capabilities with an intelligent LMS",
         overview: "Deliver engaging learning experiences across your organization with our comprehensive learning management system. Support multiple content formats, track certifications, and align development with business objectives.",
         badge: "40+ Capabilities",
+        challenge: "Static training libraries, manual enrollment tracking, and one-size-fits-all learning paths fail to develop capabilities where they're needed most. Compliance training deadlines slip, skills gaps widen, and L&D investments lack measurable ROI.",
+        promise: "Intelli HRM Learning Management delivers personalized, AI-powered learning experiences at scale. From SCORM courses to virtual classrooms, competency-based paths to compliance tracking—development is aligned to business needs with clear ROI visibility.",
+        keyOutcomes: [
+          { value: "40%", label: "Higher Course Completion", description: "Personalized learning paths", trend: "up" },
+          { value: "100%", label: "Compliance Training Tracked", description: "Automated deadline enforcement", trend: "up" },
+          { value: "50%", label: "Faster Skill Development", description: "AI-recommended content", trend: "up" },
+          { value: "3x", label: "Learning Engagement", description: "Mobile and social learning", trend: "up" }
+        ],
+        personas: [
+          { persona: "L&D Manager", benefit: "Build and deliver impactful programs at scale", outcomes: ["Multi-format content support (SCORM, video, ILT)", "Learning path configuration", "ROI and effectiveness analytics"] },
+          { persona: "Employee", benefit: "Learning that fits my career and schedule", outcomes: ["Personalized recommendations", "Mobile and offline access", "Progress tracking and certificates"] },
+          { persona: "Manager", benefit: "My team has the skills we need", outcomes: ["Team learning dashboards", "Skill gap visibility", "Training request approvals"] },
+          { persona: "Compliance Officer", benefit: "Mandatory training tracked and enforced", outcomes: ["Deadline tracking with escalations", "Completion certificates", "Audit-ready reports"] }
+        ],
         categories: [
           {
             title: "Course Management",
@@ -1273,7 +1333,16 @@ export const CAPABILITIES_DATA: ActData[] = [
           { module: "Talent Management", description: "Skill development aligned to performance goals" },
           { module: "Succession Planning", description: "Leadership development program tracking" },
           { module: "Recruitment", description: "Onboarding learning assignments" }
-        ]
+        ],
+        regionalAdvantage: {
+          regions: ["Caribbean", "Africa", "Global"],
+          advantages: [
+            "Regional compliance training libraries",
+            "Multi-language content support",
+            "Country-specific certification tracking",
+            "Local regulatory training requirements"
+          ]
+        }
       },
       {
         id: "talent",
@@ -1281,6 +1350,20 @@ export const CAPABILITIES_DATA: ActData[] = [
         tagline: "Transform performance from annual event to continuous culture",
         overview: "Comprehensive talent management spanning goals, appraisals, 360 feedback, and continuous recognition. Drive performance excellence through aligned objectives and meaningful feedback.",
         badge: "50+ Capabilities",
+        challenge: "Annual reviews that employees and managers dread, goals that disconnect from strategy, and feedback that comes too late to matter. Without continuous performance culture, top performers disengage, poor performance festers, and development happens by accident.",
+        promise: "Intelli HRM Talent Management transforms performance from a dreaded annual event to a continuous culture of growth. Cascading goals, real-time feedback, AI-powered coaching, and fair calibration ensure every employee knows where they stand and how to improve.",
+        keyOutcomes: [
+          { value: "85%", label: "Goal Alignment", description: "Cascaded from company strategy", trend: "up" },
+          { value: "4x", label: "More Frequent Feedback", description: "Continuous vs. annual", trend: "up" },
+          { value: "25%", label: "Higher Engagement", description: "From recognition and growth", trend: "up" },
+          { value: "90%", label: "Review Completion", description: "Streamlined workflows", trend: "up" }
+        ],
+        personas: [
+          { persona: "Employee", benefit: "I know my goals and how I'm doing", outcomes: ["Clear, aligned objectives", "Real-time feedback visibility", "Career development support"] },
+          { persona: "Manager", benefit: "Performance coaching is easy and impactful", outcomes: ["Team goal dashboards", "AI-assisted feedback writing", "Calibration support tools"] },
+          { persona: "HR Business Partner", benefit: "Fair, consistent performance across the org", outcomes: ["Calibration session management", "Rating distribution analytics", "Bias detection alerts"] },
+          { persona: "Executive", benefit: "Strategy execution through aligned goals", outcomes: ["Goal cascade visibility", "Performance distribution trends", "Talent investment ROI"] }
+        ],
         categories: [
           {
             title: "Goals Management",
@@ -1358,7 +1441,16 @@ export const CAPABILITIES_DATA: ActData[] = [
           { module: "Compensation", description: "Performance-based pay recommendations" },
           { module: "Succession Planning", description: "High-performer identification" },
           { module: "Learning", description: "Development gap-based training" }
-        ]
+        ],
+        regionalAdvantage: {
+          regions: ["Caribbean", "Africa", "Global"],
+          advantages: [
+            "Regional performance benchmarks",
+            "Multi-language feedback templates",
+            "Cultural considerations in goal-setting",
+            "Country-specific calibration guidelines"
+          ]
+        }
       },
       {
         id: "succession",
@@ -1366,6 +1458,20 @@ export const CAPABILITIES_DATA: ActData[] = [
         tagline: "Identify, develop, and retain future leaders",
         overview: "Ensure business continuity through proactive succession planning. Identify critical positions, build talent pipelines, and develop future leaders with data-driven insights.",
         badge: "35+ Capabilities",
+        challenge: "Key person dependencies put the business at risk. When critical leaders leave unexpectedly, there's no ready successor. Talent reviews happen in spreadsheets that become outdated immediately, and high-potentials leave for opportunities elsewhere because their path forward isn't clear.",
+        promise: "Intelli HRM Succession Planning protects your business continuity with proactive talent pipelines. Identify critical positions, nominate and develop successors, and build leadership depth—with AI that spots readiness gaps before they become risks.",
+        keyOutcomes: [
+          { value: "100%", label: "Critical Roles Covered", description: "Successor identification", trend: "up" },
+          { value: "50%", label: "Reduced Leadership Gaps", description: "Proactive pipeline building", trend: "down" },
+          { value: "30%", label: "Better Retention of HiPos", description: "Clear career visibility", trend: "up" },
+          { value: "2x", label: "Faster Leadership Transitions", description: "Ready-now successors", trend: "up" }
+        ],
+        personas: [
+          { persona: "CHRO", benefit: "Leadership pipeline visibility at a glance", outcomes: ["Bench strength dashboards", "Critical position coverage", "Diversity in pipeline metrics"] },
+          { persona: "HR Business Partner", benefit: "Facilitate meaningful talent reviews", outcomes: ["9-Box talent matrix", "Readiness assessment tools", "Development tracking"] },
+          { persona: "Manager", benefit: "Develop my successor with confidence", outcomes: ["Successor nomination workflows", "Development plan integration", "Mentoring relationship tracking"] },
+          { persona: "High-Potential Employee", benefit: "I see my path to leadership", outcomes: ["Career path visualization", "Development opportunities", "Stretch assignment visibility"] }
+        ],
         categories: [
           {
             title: "Critical Position Management",
@@ -1438,7 +1544,16 @@ export const CAPABILITIES_DATA: ActData[] = [
           { module: "Talent Management", description: "Performance data for readiness assessment" },
           { module: "Learning", description: "Development program enrollment" },
           { module: "Workforce", description: "Position and org structure data" }
-        ]
+        ],
+        regionalAdvantage: {
+          regions: ["Caribbean", "Africa", "Global"],
+          advantages: [
+            "Regional leadership competency frameworks",
+            "Multi-country talent pool visibility",
+            "Cross-border succession planning",
+            "Local regulatory considerations for mobility"
+          ]
+        }
       }
     ]
   },
@@ -1454,6 +1569,20 @@ export const CAPABILITIES_DATA: ActData[] = [
         tagline: "Proactive safety management with compliance built-in",
         overview: "Comprehensive occupational health and safety management from incident reporting to wellness programs. Maintain regulatory compliance while fostering a culture of safety.",
         badge: "50+ Capabilities",
+        challenge: "Paper-based incident logs, expired safety certifications, and reactive compliance create dangerous gaps. When incidents occur, investigation is slow and root causes unclear. Regulatory audits expose missing documentation and inconsistent practices.",
+        promise: "Intelli HRM Health & Safety transforms HSE from reactive paperwork to proactive protection. Digital incident reporting, automated certification tracking, and AI-powered risk prediction ensure a safe workplace with audit-ready compliance.",
+        keyOutcomes: [
+          { value: "40%", label: "Fewer Incidents", description: "Proactive risk management", trend: "down" },
+          { value: "100%", label: "Certification Compliance", description: "Automated expiry tracking", trend: "up" },
+          { value: "75%", label: "Faster Incident Resolution", description: "Digital investigation workflows", trend: "up" },
+          { value: "Zero", label: "Audit Surprises", description: "Continuous compliance monitoring", trend: "down" }
+        ],
+        personas: [
+          { persona: "HSE Manager", benefit: "Complete visibility into safety across all sites", outcomes: ["Incident dashboard with trends", "Certification tracking automation", "Audit management tools"] },
+          { persona: "Site Manager", benefit: "Keep my team safe and compliant", outcomes: ["Real-time hazard reporting", "Safety meeting tracking", "Emergency drill management"] },
+          { persona: "Employee", benefit: "Easy to report hazards and stay safe", outcomes: ["Mobile hazard reporting", "Safety training access", "Emergency procedure visibility"] },
+          { persona: "Compliance Officer", benefit: "Audit-ready documentation always", outcomes: ["OSHA/regulatory reports", "Investigation audit trails", "Policy acknowledgment tracking"] }
+        ],
         categories: [
           {
             title: "Incident Management",
@@ -1529,6 +1658,15 @@ export const CAPABILITIES_DATA: ActData[] = [
           { module: "Time & Attendance", description: "Work hours for exposure tracking" },
           { module: "Learning", description: "Safety training compliance" }
         ],
+        regionalAdvantage: {
+          regions: ["Caribbean", "Africa", "Global"],
+          advantages: [
+            "OSHA and regional HSE compliance frameworks",
+            "Country-specific incident classification",
+            "Multi-jurisdiction regulatory reporting",
+            "Local workplace safety requirements"
+          ]
+        },
         regionalNote: "OSHA compliance reporting, regional health & safety regulations, and multi-country incident classification standards"
       },
       {
@@ -1537,6 +1675,20 @@ export const CAPABILITIES_DATA: ActData[] = [
         tagline: "Fair, consistent, and compliant employee management",
         overview: "Manage the full spectrum of employee relations from grievances to disciplinary actions. Ensure fair treatment, maintain compliance, and support positive workplace relationships.",
         badge: "45+ Capabilities",
+        challenge: "Grievances tracked in emails, inconsistent disciplinary actions, and paper-based investigations create legal exposure and damage trust. Without structured case management, similar situations receive different treatment, and institutional knowledge walks out the door.",
+        promise: "Intelli HRM Employee Relations ensures fair, consistent, and compliant handling of every workplace issue. From grievance intake to resolution, disciplinary actions to exit interviews—structured workflows protect both employees and the organization.",
+        keyOutcomes: [
+          { value: "60%", label: "Faster Case Resolution", description: "Structured investigation workflows", trend: "up" },
+          { value: "100%", label: "Consistent Treatment", description: "Policy-driven decision trees", trend: "up" },
+          { value: "50%", label: "Reduced Legal Exposure", description: "Complete documentation trails", trend: "down" },
+          { value: "85%", label: "Exit Interview Completion", description: "Automated scheduling", trend: "up" }
+        ],
+        personas: [
+          { persona: "Employee Relations Specialist", benefit: "Manage cases consistently with full audit trails", outcomes: ["Centralized case management", "Investigation workflow tools", "Resolution documentation"] },
+          { persona: "HR Manager", benefit: "Visibility into all ER activity with trend analysis", outcomes: ["Case dashboard and analytics", "Escalation alerts", "Union/CBA compliance tracking"] },
+          { persona: "Manager", benefit: "Guidance on handling difficult situations fairly", outcomes: ["Progressive discipline guidance", "Documentation templates", "HR escalation triggers"] },
+          { persona: "Employee", benefit: "My concerns are heard and addressed fairly", outcomes: ["Multiple grievance submission channels", "Status tracking visibility", "Fair appeal processes"] }
+        ],
         categories: [
           {
             title: "Case Management",
@@ -1613,6 +1765,15 @@ export const CAPABILITIES_DATA: ActData[] = [
           { module: "Payroll", description: "Final settlement calculations" },
           { module: "Company Property", description: "Asset return tracking" }
         ],
+        regionalAdvantage: {
+          regions: ["Caribbean", "Africa", "Global"],
+          advantages: [
+            "Regional labor law compliance frameworks",
+            "Country-specific termination requirements",
+            "Union and CBA management by jurisdiction",
+            "Local industrial relations regulations"
+          ]
+        },
         regionalNote: "Regional labor law compliance, statutory termination requirements, and industrial relations frameworks"
       },
       {
@@ -1621,6 +1782,20 @@ export const CAPABILITIES_DATA: ActData[] = [
         tagline: "Track and manage all employee-assigned assets",
         overview: "Comprehensive asset management from assignment to return. Track company property throughout the employee lifecycle and maintain accurate inventory records.",
         badge: "30+ Capabilities",
+        challenge: "Laptops disappear when employees leave, nobody knows who has which equipment, and IT procurement happens without visibility into what's already available. Asset tracking in spreadsheets leads to write-offs, compliance gaps, and operational inefficiency.",
+        promise: "Intelli HRM Company Property provides complete visibility into every asset—from provisioning to return. Integrated with onboarding and offboarding, you always know who has what, when maintenance is due, and what needs replacement.",
+        keyOutcomes: [
+          { value: "95%", label: "Asset Recovery Rate", description: "Offboarding integration", trend: "up" },
+          { value: "100%", label: "Asset Visibility", description: "Complete inventory tracking", trend: "up" },
+          { value: "30%", label: "Reduced Equipment Costs", description: "Utilization optimization", trend: "down" },
+          { value: "Zero", label: "Lost Asset Write-offs", description: "Digital acknowledgments", trend: "down" }
+        ],
+        personas: [
+          { persona: "IT Manager", benefit: "Know where every device is and its status", outcomes: ["Complete asset registry", "Maintenance scheduling", "Depreciation tracking"] },
+          { persona: "HR Operations", benefit: "Seamless asset flows for hire/term", outcomes: ["Onboarding provisioning automation", "Offboarding return checklists", "Department-based kits"] },
+          { persona: "Finance", benefit: "Accurate asset valuation and planning", outcomes: ["Depreciation reports", "Replacement forecasting", "Cost center allocation"] },
+          { persona: "Employee", benefit: "Clear what I have and my responsibilities", outcomes: ["Digital acknowledgment", "Easy return process", "Asset request capability"] }
+        ],
         categories: [
           {
             title: "Asset Registry",
@@ -1674,7 +1849,16 @@ export const CAPABILITIES_DATA: ActData[] = [
           { module: "Workforce", description: "Employee data and department assignment" },
           { module: "Employee Relations", description: "Offboarding clearance checklist" },
           { module: "Payroll", description: "Asset deduction for non-return" }
-        ]
+        ],
+        regionalAdvantage: {
+          regions: ["Caribbean", "Africa", "Global"],
+          advantages: [
+            "Multi-currency asset valuation",
+            "Regional depreciation standards",
+            "Cross-border asset tracking",
+            "Local tax implications for equipment"
+          ]
+        }
       }
     ]
   },
@@ -1690,6 +1874,20 @@ export const CAPABILITIES_DATA: ActData[] = [
         tagline: "Self-service support that reduces HR burden",
         overview: "Empower employees and managers with instant access to knowledge, guided workflows, and intelligent support. Reduce HR ticket volume through comprehensive self-service capabilities.",
         badge: "35+ Capabilities",
+        challenge: "HR inboxes overflow with repetitive questions—leave balances, policy clarifications, form locations. Employees wait for answers they could find themselves, while HR drowns in transactional work instead of focusing on strategic initiatives.",
+        promise: "Intelli HRM Help Center deflects routine inquiries through intelligent self-service. AI-powered search, conversational chatbots, and guided workflows give employees instant answers—while complex issues route to the right HR specialist automatically.",
+        keyOutcomes: [
+          { value: "70%", label: "Ticket Deflection", description: "Self-service resolution", trend: "up" },
+          { value: "24/7", label: "Support Availability", description: "AI-powered assistance", trend: "up" },
+          { value: "85%", label: "First-Contact Resolution", description: "Intelligent routing", trend: "up" },
+          { value: "60%", label: "HR Time Saved", description: "Reduced routine inquiries", trend: "down" }
+        ],
+        personas: [
+          { persona: "Employee", benefit: "Get answers instantly without waiting for HR", outcomes: ["AI chatbot for quick questions", "Searchable knowledge base", "Guided self-service workflows"] },
+          { persona: "Manager", benefit: "Find HR information when I need it", outcomes: ["Policy and procedure access", "Team management guides", "Approval queue visibility"] },
+          { persona: "HR Specialist", benefit: "Focus on complex issues, not routine questions", outcomes: ["Intelligent ticket routing", "Knowledge gap analytics", "CSAT tracking"] },
+          { persona: "HR Leader", benefit: "Scale HR support without scaling headcount", outcomes: ["Deflection rate analytics", "Topic trending insights", "Self-service adoption metrics"] }
+        ],
         categories: [
           {
             title: "Knowledge Base",
@@ -1755,7 +1953,16 @@ export const CAPABILITIES_DATA: ActData[] = [
           { module: "HR Hub", description: "Policy and document library access" },
           { module: "All Modules", description: "Context-aware help from any screen" },
           { module: "Learning", description: "Training recommendations for knowledge gaps" }
-        ]
+        ],
+        regionalAdvantage: {
+          regions: ["Caribbean", "Africa", "Global"],
+          advantages: [
+            "Multi-language knowledge base support",
+            "Region-specific policy content",
+            "Local HR practice guidance",
+            "Cultural context in AI responses"
+          ]
+        }
       }
     ]
   }
