@@ -2,6 +2,7 @@ import { useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAuditLog } from "@/hooks/useAuditLog";
+import { useTransactionSeatOrchestration } from "@/hooks/useTransactionSeatOrchestration";
 import { toast } from "sonner";
 import { Database } from "@/integrations/supabase/types";
 
@@ -132,6 +133,7 @@ export interface LookupValue {
 export function useEmployeeTransactions() {
   const { user } = useAuth();
   const { logAction } = useAuditLog();
+  const { orchestrateTransactionSeat } = useTransactionSeatOrchestration();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -342,6 +344,18 @@ export function useEmployeeTransactions() {
             }
           }
         }
+
+        // Orchestrate seat assignment for ACTING
+        const seatResult = await orchestrateTransactionSeat(
+          'ACTING',
+          newTransaction.id,
+          data.employee_id,
+          data.acting_position_id,
+          data.acting_start_date || data.effective_date || new Date().toISOString().split('T')[0]
+        );
+        if (!seatResult.success) {
+          console.warn("Seat orchestration for ACTING:", seatResult.error);
+        }
       }
 
       // For HIRE transactions, create an employee_positions record and update employee profile dates
@@ -421,6 +435,18 @@ export function useEmployeeTransactions() {
           console.error("Failed to update employee profile dates for hire:", profileError);
           // Don't fail the transaction, just log the error
         }
+
+        // Orchestrate seat assignment for HIRE
+        const seatResult = await orchestrateTransactionSeat(
+          'HIRE',
+          newTransaction.id,
+          data.employee_id,
+          data.position_id,
+          data.effective_date || new Date().toISOString().split('T')[0]
+        );
+        if (!seatResult.success) {
+          console.warn("Seat orchestration for HIRE:", seatResult.error);
+        }
       }
 
       // For REHIRE transactions, create employee_positions record and update profile dates
@@ -498,7 +524,62 @@ export function useEmployeeTransactions() {
         }
       }
 
-      // For PROMOTION transactions, also create an employee_positions record for the new position
+      // For SECONDMENT transactions, create employee_positions for secondment and orchestrate seats
+      if (data.secondment_position_id && data.employee_id) {
+        // Get the suspended position to handle FTE properly
+        const suspendedPositionId = data.suspended_position_id;
+
+        // Create the secondment position assignment
+        const employeePositionData = {
+          employee_id: data.employee_id,
+          position_id: data.secondment_position_id,
+          start_date: data.secondment_start_date || data.effective_date,
+          end_date: data.secondment_end_date || null,
+          is_primary: false, // Secondment is not primary
+          assignment_type: "secondment",
+          compensation_amount: null,
+          compensation_currency: "USD",
+          compensation_frequency: "monthly",
+          benefits_profile: {},
+          is_active: true,
+        };
+
+        const { error: positionError } = await supabase
+          .from("employee_positions")
+          .insert(employeePositionData as any);
+
+        if (positionError) {
+          console.error("Failed to create employee position for secondment:", positionError);
+        }
+
+        // If suspending a position, mark it inactive (but don't end-date it)
+        if (suspendedPositionId) {
+          await supabase
+            .from("employee_positions")
+            .update({ is_active: false })
+            .eq("employee_id", data.employee_id)
+            .eq("position_id", suspendedPositionId)
+            .eq("is_active", true);
+        }
+
+        // Orchestrate seat assignment for SECONDMENT
+        const seatResult = await orchestrateTransactionSeat(
+          'SECONDMENT',
+          newTransaction.id,
+          data.employee_id,
+          data.secondment_position_id,
+          data.secondment_start_date || data.effective_date || new Date().toISOString().split('T')[0],
+          {
+            fromPositionId: suspendedPositionId || undefined,
+            secondmentReturnDate: data.secondment_end_date || undefined,
+            holdOriginSeat: true, // Hold the seat during secondment
+          }
+        );
+        if (!seatResult.success) {
+          console.warn("Seat orchestration for SECONDMENT:", seatResult.error);
+        }
+      }
+
       if (data.to_position_id && data.employee_id) {
         // First, deactivate the current primary position assignment
         if (data.from_position_id) {
@@ -537,6 +618,19 @@ export function useEmployeeTransactions() {
         if (positionError) {
           console.error("Failed to create employee position for promotion:", positionError);
           // Don't fail the transaction, just log the error
+        }
+
+        // Orchestrate seat assignment for PROMOTION
+        const seatResult = await orchestrateTransactionSeat(
+          'PROMOTION',
+          newTransaction.id,
+          data.employee_id,
+          data.to_position_id,
+          data.effective_date || new Date().toISOString().split('T')[0],
+          { fromPositionId: data.from_position_id || undefined }
+        );
+        if (!seatResult.success) {
+          console.warn("Seat orchestration for PROMOTION:", seatResult.error);
         }
       }
 
@@ -585,6 +679,19 @@ export function useEmployeeTransactions() {
 
           if (positionError) {
             console.error("Failed to create employee position for transfer:", positionError);
+          }
+
+          // Orchestrate seat assignment for TRANSFER
+          const seatResult = await orchestrateTransactionSeat(
+            'TRANSFER',
+            newTransaction.id,
+            data.employee_id,
+            data.position_id,
+            data.effective_date || new Date().toISOString().split('T')[0],
+            { fromPositionId: currentPosition.position_id || undefined }
+          );
+          if (!seatResult.success) {
+            console.warn("Seat orchestration for TRANSFER:", seatResult.error);
           }
         }
       }
@@ -639,6 +746,18 @@ export function useEmployeeTransactions() {
             if (profileError) {
               console.error("Failed to update employee profile for termination:", profileError);
             }
+
+            // Orchestrate seat vacating for TERMINATION
+            const seatResult = await orchestrateTransactionSeat(
+              'TERMINATION',
+              newTransaction.id,
+              data.employee_id,
+              terminatedPositionIds[0] || '',
+              data.effective_date || new Date().toISOString().split('T')[0]
+            );
+            if (!seatResult.success) {
+              console.warn("Seat orchestration for TERMINATION:", seatResult.error);
+            }
           }
         }
       }
@@ -661,7 +780,7 @@ export function useEmployeeTransactions() {
     } finally {
       setIsLoading(false);
     }
-  }, [user, logAction]);
+  }, [user, logAction, orchestrateTransactionSeat]);
 
   const updateTransaction = useCallback(async (id: string, data: Partial<EmployeeTransaction>) => {
     setIsLoading(true);
