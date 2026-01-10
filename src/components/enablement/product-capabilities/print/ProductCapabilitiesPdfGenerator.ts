@@ -9,6 +9,9 @@ import {
   PLATFORM_FEATURES, 
   REGIONAL_COMPLIANCE, 
   AI_INTELLIGENCE,
+  PLATFORM_AT_GLANCE,
+  MODULE_DEPENDENCY_ANALYSIS,
+  GETTING_STARTED,
   ActData,
   ModuleData
 } from "../data/capabilitiesData";
@@ -1053,8 +1056,40 @@ export async function generateProductCapabilitiesPdf(
     pdf.setTextColor(255, 255, 255);
     pdf.setFontSize(20);
     pdf.setFont("helvetica", "bold");
-    pdf.text("Platform Features", margins.left, 25);
+    pdf.text("Platform Features", margins.left, 20);
+    pdf.setFontSize(10);
+    pdf.setFont("helvetica", "normal");
+    pdf.text(PLATFORM_FEATURES.tagline || "Enterprise-grade capabilities that power every module", margins.left, 30);
     yPos = 50;
+    
+    // Challenge & Promise
+    if (PLATFORM_FEATURES.challenge) {
+      pdf.setFillColor(254, 243, 199); // Warm amber background
+      pdf.roundedRect(margins.left, yPos, contentWidth, 20, 2, 2, 'F');
+      pdf.setFontSize(9);
+      pdf.setFont("helvetica", "bold");
+      pdf.setTextColor(146, 64, 14);
+      pdf.text("The Challenge", margins.left + 4, yPos + 6);
+      pdf.setFont("helvetica", "normal");
+      pdf.setFontSize(8);
+      const challengeLines = pdf.splitTextToSize(PLATFORM_FEATURES.challenge, contentWidth - 10);
+      pdf.text(challengeLines.slice(0, 2), margins.left + 4, yPos + 12);
+      yPos += 24;
+    }
+    
+    if (PLATFORM_FEATURES.promise) {
+      pdf.setFillColor(220, 252, 231); // Soft green background
+      pdf.roundedRect(margins.left, yPos, contentWidth, 20, 2, 2, 'F');
+      pdf.setFontSize(9);
+      pdf.setFont("helvetica", "bold");
+      pdf.setTextColor(22, 101, 52);
+      pdf.text("Our Promise", margins.left + 4, yPos + 6);
+      pdf.setFont("helvetica", "normal");
+      pdf.setFontSize(8);
+      const promiseLines = pdf.splitTextToSize(PLATFORM_FEATURES.promise, contentWidth - 10);
+      pdf.text(promiseLines.slice(0, 2), margins.left + 4, yPos + 12);
+      yPos += 26;
+    }
     
     PLATFORM_FEATURES.categories.forEach((cat) => {
       checkPageBreak(35, "Platform Features");
@@ -1069,7 +1104,7 @@ export async function generateProductCapabilitiesPdf(
       pdf.setTextColor(...TEXT_COLORS.secondary);
       cat.features.forEach((f) => {
         checkPageBreak(6, "Platform Features");
-        pdf.text(`  * ${f}`, margins.left + 3, yPos);
+        pdf.text(`  • ${f}`, margins.left + 3, yPos);
         yPos += 4;
       });
       yPos += 6;
@@ -1084,8 +1119,40 @@ export async function generateProductCapabilitiesPdf(
     pdf.setTextColor(255, 255, 255);
     pdf.setFontSize(20);
     pdf.setFont("helvetica", "bold");
-    pdf.text("Regional Compliance", margins.left, 25);
+    pdf.text("Regional Compliance", margins.left, 20);
+    pdf.setFontSize(10);
+    pdf.setFont("helvetica", "normal");
+    pdf.text(REGIONAL_COMPLIANCE.tagline || "Deep compliance built-in, not bolted on", margins.left, 30);
     yPos = 50;
+    
+    // Challenge & Promise
+    if (REGIONAL_COMPLIANCE.challenge) {
+      pdf.setFillColor(254, 243, 199);
+      pdf.roundedRect(margins.left, yPos, contentWidth, 20, 2, 2, 'F');
+      pdf.setFontSize(9);
+      pdf.setFont("helvetica", "bold");
+      pdf.setTextColor(146, 64, 14);
+      pdf.text("The Challenge", margins.left + 4, yPos + 6);
+      pdf.setFont("helvetica", "normal");
+      pdf.setFontSize(8);
+      const challengeLines = pdf.splitTextToSize(REGIONAL_COMPLIANCE.challenge, contentWidth - 10);
+      pdf.text(challengeLines.slice(0, 2), margins.left + 4, yPos + 12);
+      yPos += 24;
+    }
+    
+    if (REGIONAL_COMPLIANCE.promise) {
+      pdf.setFillColor(220, 252, 231);
+      pdf.roundedRect(margins.left, yPos, contentWidth, 20, 2, 2, 'F');
+      pdf.setFontSize(9);
+      pdf.setFont("helvetica", "bold");
+      pdf.setTextColor(22, 101, 52);
+      pdf.text("Our Promise", margins.left + 4, yPos + 6);
+      pdf.setFont("helvetica", "normal");
+      pdf.setFontSize(8);
+      const promiseLines = pdf.splitTextToSize(REGIONAL_COMPLIANCE.promise, contentWidth - 10);
+      pdf.text(promiseLines.slice(0, 2), margins.left + 4, yPos + 12);
+      yPos += 26;
+    }
     
     REGIONAL_COMPLIANCE.regions.forEach((region) => {
       checkPageBreak(45, "Regional Compliance");
@@ -1104,7 +1171,7 @@ export async function generateProductCapabilitiesPdf(
       pdf.setTextColor(...TEXT_COLORS.secondary);
       region.highlights.forEach((h) => {
         checkPageBreak(6, "Regional Compliance");
-        pdf.text(`  * ${h}`, margins.left + 3, yPos);
+        pdf.text(`  • ${h}`, margins.left + 3, yPos);
         yPos += 4;
       });
       yPos += 10;
@@ -1119,8 +1186,40 @@ export async function generateProductCapabilitiesPdf(
     pdf.setTextColor(255, 255, 255);
     pdf.setFontSize(20);
     pdf.setFont("helvetica", "bold");
-    pdf.text("AI Intelligence", margins.left, 25);
+    pdf.text("AI Intelligence", margins.left, 20);
+    pdf.setFontSize(10);
+    pdf.setFont("helvetica", "normal");
+    pdf.text(AI_INTELLIGENCE.tagline || "Embedded intelligence that transforms HR", margins.left, 30);
     yPos = 50;
+    
+    // Challenge & Promise
+    if (AI_INTELLIGENCE.challenge) {
+      pdf.setFillColor(254, 243, 199);
+      pdf.roundedRect(margins.left, yPos, contentWidth, 20, 2, 2, 'F');
+      pdf.setFontSize(9);
+      pdf.setFont("helvetica", "bold");
+      pdf.setTextColor(146, 64, 14);
+      pdf.text("The Challenge", margins.left + 4, yPos + 6);
+      pdf.setFont("helvetica", "normal");
+      pdf.setFontSize(8);
+      const challengeLines = pdf.splitTextToSize(AI_INTELLIGENCE.challenge, contentWidth - 10);
+      pdf.text(challengeLines.slice(0, 2), margins.left + 4, yPos + 12);
+      yPos += 24;
+    }
+    
+    if (AI_INTELLIGENCE.promise) {
+      pdf.setFillColor(220, 252, 231);
+      pdf.roundedRect(margins.left, yPos, contentWidth, 20, 2, 2, 'F');
+      pdf.setFontSize(9);
+      pdf.setFont("helvetica", "bold");
+      pdf.setTextColor(22, 101, 52);
+      pdf.text("Our Promise", margins.left + 4, yPos + 6);
+      pdf.setFont("helvetica", "normal");
+      pdf.setFontSize(8);
+      const promiseLines = pdf.splitTextToSize(AI_INTELLIGENCE.promise, contentWidth - 10);
+      pdf.text(promiseLines.slice(0, 2), margins.left + 4, yPos + 12);
+      yPos += 26;
+    }
     
     AI_INTELLIGENCE.capabilities.forEach((cap) => {
       checkPageBreak(40, "AI Intelligence");
@@ -1140,10 +1239,203 @@ export async function generateProductCapabilitiesPdf(
       pdf.setTextColor(...TEXT_COLORS.secondary);
       cap.examples.forEach((ex) => {
         checkPageBreak(6, "AI Intelligence");
-        pdf.text(`  * ${ex}`, margins.left + 3, yPos);
+        pdf.text(`  • ${ex}`, margins.left + 3, yPos);
         yPos += 4;
       });
       yPos += 8;
+    });
+    
+    // AI Principles
+    if (AI_INTELLIGENCE.principles) {
+      checkPageBreak(30, "AI Intelligence");
+      pdf.setFontSize(11);
+      pdf.setFont("helvetica", "bold");
+      pdf.setTextColor(...primaryRgb);
+      pdf.text("AI Governance Principles", margins.left, yPos);
+      yPos += 8;
+      
+      pdf.setFontSize(9);
+      pdf.setFont("helvetica", "normal");
+      pdf.setTextColor(...TEXT_COLORS.secondary);
+      AI_INTELLIGENCE.principles.forEach((principle, idx) => {
+        pdf.text(`${idx + 1}. ${principle}`, margins.left + 5, yPos);
+        yPos += 5;
+      });
+    }
+  }
+
+  // ============ MODULE DEPENDENCY ANALYSIS ============
+  if (settings.sections.includeDependencyAnalysis) {
+    addNewPage("Module Dependency Analysis");
+    trackToc("Module Dependency Analysis", 1);
+    
+    pdf.setFillColor(...secondaryRgb);
+    pdf.rect(0, 0, pageWidth, 40, 'F');
+    pdf.setTextColor(255, 255, 255);
+    pdf.setFontSize(20);
+    pdf.setFont("helvetica", "bold");
+    pdf.text("Module Dependency Analysis", margins.left, 20);
+    pdf.setFontSize(10);
+    pdf.setFont("helvetica", "normal");
+    pdf.text(MODULE_DEPENDENCY_ANALYSIS.tagline, margins.left, 30);
+    yPos = 50;
+    
+    // Challenge & Promise
+    if (MODULE_DEPENDENCY_ANALYSIS.challenge) {
+      pdf.setFillColor(254, 243, 199);
+      pdf.roundedRect(margins.left, yPos, contentWidth, 20, 2, 2, 'F');
+      pdf.setFontSize(9);
+      pdf.setFont("helvetica", "bold");
+      pdf.setTextColor(146, 64, 14);
+      pdf.text("The Challenge", margins.left + 4, yPos + 6);
+      pdf.setFont("helvetica", "normal");
+      pdf.setFontSize(8);
+      const challengeLines = pdf.splitTextToSize(MODULE_DEPENDENCY_ANALYSIS.challenge, contentWidth - 10);
+      pdf.text(challengeLines.slice(0, 2), margins.left + 4, yPos + 12);
+      yPos += 24;
+    }
+    
+    if (MODULE_DEPENDENCY_ANALYSIS.promise) {
+      pdf.setFillColor(220, 252, 231);
+      pdf.roundedRect(margins.left, yPos, contentWidth, 20, 2, 2, 'F');
+      pdf.setFontSize(9);
+      pdf.setFont("helvetica", "bold");
+      pdf.setTextColor(22, 101, 52);
+      pdf.text("Our Promise", margins.left + 4, yPos + 6);
+      pdf.setFont("helvetica", "normal");
+      pdf.setFontSize(8);
+      const promiseLines = pdf.splitTextToSize(MODULE_DEPENDENCY_ANALYSIS.promise, contentWidth - 10);
+      pdf.text(promiseLines.slice(0, 2), margins.left + 4, yPos + 12);
+      yPos += 26;
+    }
+    
+    // Dependency Tiers
+    pdf.setFontSize(12);
+    pdf.setFont("helvetica", "bold");
+    pdf.setTextColor(...primaryRgb);
+    pdf.text("Implementation Tiers", margins.left, yPos);
+    yPos += 8;
+    
+    MODULE_DEPENDENCY_ANALYSIS.dependencyTiers.forEach((tier) => {
+      checkPageBreak(25, "Module Dependency Analysis");
+      pdf.setFontSize(10);
+      pdf.setFont("helvetica", "bold");
+      pdf.setTextColor(30, 41, 59);
+      pdf.text(tier.tier, margins.left, yPos);
+      yPos += 5;
+      
+      pdf.setFontSize(8);
+      pdf.setFont("helvetica", "normal");
+      pdf.setTextColor(...TEXT_COLORS.muted);
+      pdf.text(`Modules: ${tier.modules.join(", ")}`, margins.left + 5, yPos);
+      yPos += 5;
+      
+      pdf.setTextColor(...TEXT_COLORS.secondary);
+      const rationaleLines = pdf.splitTextToSize(tier.rationale, contentWidth - 10);
+      pdf.text(rationaleLines, margins.left + 5, yPos);
+      yPos += rationaleLines.length * 4 + 6;
+    });
+    
+    // Implementation Patterns
+    checkPageBreak(40, "Module Dependency Analysis");
+    yPos += 5;
+    pdf.setFontSize(12);
+    pdf.setFont("helvetica", "bold");
+    pdf.setTextColor(...primaryRgb);
+    pdf.text("Implementation Patterns", margins.left, yPos);
+    yPos += 8;
+    
+    MODULE_DEPENDENCY_ANALYSIS.implementationPatterns.forEach((pattern) => {
+      checkPageBreak(15, "Module Dependency Analysis");
+      pdf.setFontSize(9);
+      pdf.setFont("helvetica", "bold");
+      pdf.setTextColor(30, 41, 59);
+      pdf.text(`${pattern.pattern}: `, margins.left, yPos);
+      pdf.setFont("helvetica", "normal");
+      pdf.setTextColor(...TEXT_COLORS.secondary);
+      pdf.text(pattern.description, margins.left + 30, yPos);
+      yPos += 4;
+      pdf.setFontSize(8);
+      pdf.setTextColor(...TEXT_COLORS.muted);
+      pdf.text(`Best for: ${pattern.suitability}`, margins.left + 5, yPos);
+      yPos += 6;
+    });
+  }
+
+  // ============ GETTING STARTED ============
+  if (settings.sections.includeGettingStarted) {
+    addNewPage("Getting Started");
+    trackToc("Getting Started", 1);
+    
+    pdf.setFillColor(16, 185, 129); // Emerald
+    pdf.rect(0, 0, pageWidth, 40, 'F');
+    pdf.setTextColor(255, 255, 255);
+    pdf.setFontSize(20);
+    pdf.setFont("helvetica", "bold");
+    pdf.text("Getting Started", margins.left, 20);
+    pdf.setFontSize(10);
+    pdf.setFont("helvetica", "normal");
+    pdf.text(GETTING_STARTED.tagline, margins.left, 30);
+    yPos = 50;
+    
+    // Implementation Phases
+    pdf.setFontSize(12);
+    pdf.setFont("helvetica", "bold");
+    pdf.setTextColor(...primaryRgb);
+    pdf.text("Implementation Phases", margins.left, yPos);
+    yPos += 8;
+    
+    GETTING_STARTED.phases.forEach((phase, idx) => {
+      checkPageBreak(40, "Getting Started");
+      
+      // Phase header
+      pdf.setFillColor(241, 245, 249);
+      pdf.roundedRect(margins.left, yPos - 3, contentWidth, 10, 2, 2, 'F');
+      pdf.setFontSize(10);
+      pdf.setFont("helvetica", "bold");
+      pdf.setTextColor(30, 41, 59);
+      pdf.text(`Phase ${idx + 1}: ${phase.phase}`, margins.left + 3, yPos + 3);
+      pdf.setFontSize(8);
+      pdf.setTextColor(...TEXT_COLORS.muted);
+      pdf.text(`Duration: ${phase.duration}`, margins.left + contentWidth - 35, yPos + 3);
+      yPos += 12;
+      
+      // Activities
+      pdf.setFontSize(8);
+      pdf.setFont("helvetica", "normal");
+      pdf.setTextColor(...TEXT_COLORS.secondary);
+      phase.activities.slice(0, 3).forEach((activity) => {
+        pdf.text(`  • ${activity}`, margins.left + 5, yPos);
+        yPos += 4;
+      });
+      
+      // Deliverables
+      pdf.setFont("helvetica", "italic");
+      pdf.setTextColor(...TEXT_COLORS.muted);
+      pdf.text(`Deliverables: ${phase.deliverables.join(", ")}`, margins.left + 5, yPos);
+      yPos += 8;
+    });
+    
+    // Next Steps
+    checkPageBreak(35, "Getting Started");
+    yPos += 5;
+    pdf.setFontSize(12);
+    pdf.setFont("helvetica", "bold");
+    pdf.setTextColor(...primaryRgb);
+    pdf.text("Next Steps", margins.left, yPos);
+    yPos += 8;
+    
+    GETTING_STARTED.nextSteps.forEach((step) => {
+      checkPageBreak(12, "Getting Started");
+      pdf.setFontSize(9);
+      pdf.setFont("helvetica", "bold");
+      pdf.setTextColor(16, 185, 129);
+      pdf.text(`→ ${step.action}`, margins.left, yPos);
+      pdf.setFont("helvetica", "normal");
+      pdf.setFontSize(8);
+      pdf.setTextColor(...TEXT_COLORS.secondary);
+      pdf.text(step.description, margins.left + 50, yPos);
+      yPos += 6;
     });
   }
 

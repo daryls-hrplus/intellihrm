@@ -64,6 +64,8 @@ export const EXECUTIVE_SUMMARY = {
   title: "Intelli HRM",
   subtitle: "AI-First Human Resource Management System",
   description: "Purpose-built for the Caribbean, Latin America, and Africa. Deep regional compliance meets embedded intelligence for enterprise-grade workforce management.",
+  challenge: "Traditional HRMS solutions force organizations to choose between global scale and regional relevance. Enterprise systems ignore Caribbean and African compliance requirements, while local solutions lack the sophistication needed for growing organizations. HR teams are stuck cobbling together disconnected tools, leading to data silos, compliance gaps, and strategic blindness.",
+  promise: "Intelli HRM is the first enterprise-grade HRMS purpose-built for the Caribbean, Africa, and Latin America. Native regional compliance, AI-powered intelligence in every module, and seamless cross-module orchestration—delivering the sophistication of Workday with the regional depth your business demands.",
   stats: [
     { value: "25", label: "Core Modules" },
     { value: "1,675+", label: "Capabilities" },
@@ -89,6 +91,12 @@ export const EXECUTIVE_SUMMARY = {
     "Native Caribbean & African compliance",
     "Full audit trails with explainable AI",
     "Role-based simplicity with progressive depth"
+  ],
+  targetAudience: [
+    { persona: "CHRO / HR Director", benefit: "Strategic workforce intelligence with regional compliance built-in" },
+    { persona: "HR Operations Manager", benefit: "Unified platform eliminates tool sprawl and manual coordination" },
+    { persona: "IT Leader", benefit: "Enterprise security with easy configuration and integration" },
+    { persona: "CFO", benefit: "Accurate payroll, predictable costs, and workforce ROI visibility" }
   ]
 };
 
@@ -1969,6 +1977,12 @@ export const CAPABILITIES_DATA: ActData[] = [
 ];
 
 export const PLATFORM_FEATURES = {
+  title: "Platform Features",
+  tagline: "Enterprise-grade capabilities that power every module",
+  overview: "Cross-cutting platform capabilities that ensure security, enable automation, deliver insights, and support global operations across all modules.",
+  challenge: "Point solutions create capability gaps. Each module needs its own security, workflows, analytics, and mobile access—leading to inconsistent experiences and maintenance nightmares.",
+  promise: "Intelli HRM provides a unified platform layer that delivers enterprise-grade capabilities to every module automatically. Configure once, enforce everywhere—with consistency that delights users and simplifies administration.",
+  badge: "70+ Capabilities",
   categories: [
     {
       title: "Security & Access Control",
@@ -2040,6 +2054,12 @@ export const PLATFORM_FEATURES = {
 };
 
 export const REGIONAL_COMPLIANCE = {
+  title: "Regional Compliance",
+  tagline: "Deep compliance built-in, not bolted on",
+  overview: "Native support for Caribbean, Latin American, and African regulatory requirements including payroll, labor law, tax, and statutory reporting.",
+  challenge: "Global HR systems treat regional compliance as an afterthought—requiring expensive customization, manual workarounds, and constant updates. Organizations risk fines, audits, and employee distrust when compliance fails.",
+  promise: "Intelli HRM embeds regional compliance into the platform DNA. Caribbean NIS/NHT, African SSNIT/PFA, Latin American AFP—all pre-built, regularly updated, and audit-ready without custom development.",
+  badge: "50+ Compliance Areas",
   regions: [
     {
       name: "Caribbean",
@@ -2081,6 +2101,12 @@ export const REGIONAL_COMPLIANCE = {
 };
 
 export const AI_INTELLIGENCE = {
+  title: "AI Intelligence",
+  tagline: "Embedded intelligence that transforms HR from reactive to predictive",
+  overview: "AI capabilities woven into every module—predictive insights, prescriptive recommendations, intelligent automation, and conversational interfaces that reduce cognitive load.",
+  challenge: "Most HR systems add AI as a separate tool or chatbot overlay. Users must switch contexts, and AI lacks the deep integration needed to surface actionable insights where decisions happen.",
+  promise: "Intelli HRM embeds AI directly into every workflow. Attrition predictions appear on the employee profile. Compensation recommendations surface during planning. Bias detection runs automatically on job postings. AI assists, but humans decide.",
+  badge: "55+ AI Capabilities",
   capabilities: [
     {
       title: "Predictive Intelligence",
@@ -2134,4 +2160,133 @@ export const AI_INTELLIGENCE = {
     "Audit Trail",
     "ISO 42001 Aligned"
   ]
+};
+
+export const PLATFORM_AT_GLANCE = {
+  title: "Platform at a Glance",
+  tagline: "25 modules working as one intelligent system",
+  overview: "A visual overview of the complete Intelli HRM platform architecture, showing how modules connect and data flows across the employee lifecycle.",
+  moduleCount: 25,
+  capabilityCount: "1,675+",
+  countryCount: "20+",
+  acts: [
+    { name: "Prologue", description: "Setting the Stage", modules: ["Admin & Security", "HR Hub"] },
+    { name: "Act 1", description: "Attract & Onboard", modules: ["Recruitment", "Onboarding", "Workforce"] },
+    { name: "Act 2", description: "Enable & Engage", modules: ["ESS", "MSS", "Time & Attendance", "Leave"] },
+    { name: "Act 3", description: "Pay & Reward", modules: ["Payroll", "Compensation", "Benefits"] },
+    { name: "Act 4", description: "Develop & Grow", modules: ["Learning", "Talent Management", "Succession"] },
+    { name: "Act 5", description: "Protect & Support", modules: ["Health & Safety", "Employee Relations", "Company Property"] },
+    { name: "Epilogue", description: "Continuous Excellence", modules: ["Help Center"] }
+  ],
+  dataFlows: [
+    { from: "Recruitment", to: "Onboarding", description: "Hired candidate data flows to onboarding" },
+    { from: "Onboarding", to: "Workforce", description: "New hire becomes employee record" },
+    { from: "Time & Attendance", to: "Payroll", description: "Hours worked feed payroll calculations" },
+    { from: "Performance", to: "Compensation", description: "Ratings inform merit increases" },
+    { from: "Performance", to: "Succession", description: "High performers enter talent pools" },
+    { from: "Leave", to: "Payroll", description: "Leave balances affect pay" }
+  ]
+};
+
+export const MODULE_DEPENDENCY_ANALYSIS = {
+  title: "Module Dependency Analysis",
+  tagline: "Understanding how modules connect and depend on each other",
+  overview: "A comprehensive analysis of module relationships, showing prerequisite dependencies, recommended sequences, and data flow patterns across the platform.",
+  challenge: "Implementing an HRMS without understanding module dependencies leads to rework, missing data, and broken workflows. Organizations often enable modules out of sequence, causing configuration headaches.",
+  promise: "Our dependency analysis provides a clear implementation roadmap. Understand which modules are foundational, which can be implemented in parallel, and how to sequence your rollout for maximum efficiency.",
+  dependencyTiers: [
+    {
+      tier: "Foundation (Required First)",
+      modules: ["Admin & Security", "HR Hub", "Workforce"],
+      rationale: "These modules provide core infrastructure, user management, and employee master data that all other modules depend on."
+    },
+    {
+      tier: "Core Operations",
+      modules: ["ESS", "MSS", "Time & Attendance", "Leave", "Payroll"],
+      rationale: "Employee and manager self-service, time tracking, and payroll form the operational backbone of daily HR activities."
+    },
+    {
+      tier: "Talent & Development",
+      modules: ["Performance", "Learning", "Succession", "Compensation"],
+      rationale: "Performance data feeds compensation decisions, learning recommendations, and succession planning."
+    },
+    {
+      tier: "Specialized Functions",
+      modules: ["Recruitment", "Onboarding", "Benefits", "Health & Safety", "Employee Relations"],
+      rationale: "These modules can be implemented based on organizational priority and integrate with the established core."
+    }
+  ],
+  implementationPatterns: [
+    { pattern: "Big Bang", description: "All modules at once", suitability: "Only for new organizations with no legacy data" },
+    { pattern: "Core First", description: "Foundation → Operations → Talent", suitability: "Recommended for most organizations" },
+    { pattern: "Functional", description: "Group by HR function (e.g., all talent modules)", suitability: "Works when replacing specific legacy systems" },
+    { pattern: "Geographic", description: "Roll out by country/region", suitability: "Multi-national organizations with varying compliance needs" }
+  ]
+};
+
+export const GETTING_STARTED = {
+  title: "Getting Started",
+  tagline: "Your path from evaluation to operational excellence",
+  overview: "A structured approach to evaluating, implementing, and maximizing value from Intelli HRM across your organization.",
+  phases: [
+    {
+      phase: "Discovery & Planning",
+      duration: "2-4 weeks",
+      activities: [
+        "Requirements gathering and gap analysis",
+        "Current state documentation",
+        "Success metrics definition",
+        "Implementation roadmap development",
+        "Stakeholder alignment and change management planning"
+      ],
+      deliverables: ["Implementation plan", "Module sequence", "Timeline", "Resource plan"]
+    },
+    {
+      phase: "Foundation Setup",
+      duration: "4-6 weeks",
+      activities: [
+        "Admin & Security configuration",
+        "Organizational structure setup",
+        "Employee data migration",
+        "Role and permission configuration",
+        "Integration setup (SSO, payroll banks, etc.)"
+      ],
+      deliverables: ["Configured platform", "Migrated employee data", "Active authentication"]
+    },
+    {
+      phase: "Core Module Rollout",
+      duration: "6-12 weeks",
+      activities: [
+        "ESS/MSS deployment",
+        "Time & Attendance configuration",
+        "Leave policy setup",
+        "Payroll configuration and parallel runs",
+        "User training and adoption"
+      ],
+      deliverables: ["Live self-service", "Operational payroll", "Trained users"]
+    },
+    {
+      phase: "Advanced Capabilities",
+      duration: "Ongoing",
+      activities: [
+        "Performance management rollout",
+        "Learning & Development activation",
+        "Succession planning setup",
+        "Advanced analytics and AI optimization",
+        "Continuous improvement cycles"
+      ],
+      deliverables: ["Full platform utilization", "AI-driven insights", "Measurable ROI"]
+    }
+  ],
+  nextSteps: [
+    { action: "Request Demo", description: "See Intelli HRM in action with your use cases" },
+    { action: "Compliance Assessment", description: "Validate your regional requirements are covered" },
+    { action: "Data Readiness Review", description: "Assess your current data quality and migration needs" },
+    { action: "Implementation Estimate", description: "Get a tailored timeline and investment estimate" }
+  ],
+  contactInfo: {
+    demo: "Request a personalized demonstration",
+    sales: "Contact our sales team for pricing",
+    support: "Reach our implementation specialists"
+  }
 };
