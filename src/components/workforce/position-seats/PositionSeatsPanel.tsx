@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Tooltip,
   TooltipContent,
@@ -21,19 +22,28 @@ import {
   MoreVertical, 
   Snowflake, 
   Sun, 
-  Trash2,
   User,
+  Users,
+  UserPlus,
   Calendar,
   History,
-  AlertTriangle
+  AlertTriangle,
+  DollarSign,
+  ArrowRightLeft
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { supabase } from '@/integrations/supabase/client';
 import { usePositionSeats } from './hooks/usePositionSeats';
+import { useSeatOccupants, useEmployeeFTESummary } from './hooks/useMultiOccupancy';
 import { SeatStatusBadge } from './SeatStatusBadge';
 import { FreezeSeatDialog } from './FreezeSeatDialog';
 import { SeatHistoryDialog } from './SeatHistoryDialog';
-import type { PositionSeat, SeatStatus } from './types';
+import { AddOccupantDialog } from './AddOccupantDialog';
+import { FTEValidationAlert } from './FTEValidationAlert';
+import { MultiOccupancySeatCard } from './MultiOccupancySeatCard';
+import type { PositionSeat, SeatStatus, SeatOccupant } from './types';
+import { ASSIGNMENT_TYPE_CONFIG } from './types';
 
 interface PositionSeatsPanelProps {
   positionId: string;
@@ -49,10 +59,26 @@ export function PositionSeatsPanel({
   onRequestChange 
 }: PositionSeatsPanelProps) {
   const { seats, isLoading, updateSeatStatus, freezeSeat, unfreezeSeat } = usePositionSeats(positionId);
+  const { overAllocatedEmployees } = useEmployeeFTESummary();
   const [freezeDialogOpen, setFreezeDialogOpen] = useState(false);
   const [selectedSeatForFreeze, setSelectedSeatForFreeze] = useState<PositionSeat | null>(null);
   const [historyDialogOpen, setHistoryDialogOpen] = useState(false);
   const [selectedSeatForHistory, setSelectedSeatForHistory] = useState<PositionSeat | null>(null);
+  const [addOccupantDialogOpen, setAddOccupantDialogOpen] = useState(false);
+  const [selectedSeatForOccupant, setSelectedSeatForOccupant] = useState<PositionSeat | null>(null);
+  const [employees, setEmployees] = useState<Array<{ id: string; full_name: string; email: string }>>([]);
+
+  // Fetch employees for add occupant dialog
+  useEffect(() => {
+    const fetchEmployees = async () => {
+      const { data } = await supabase
+        .from('profiles')
+        .select('id, full_name, email')
+        .order('full_name');
+      if (data) setEmployees(data);
+    };
+    fetchEmployees();
+  }, []);
 
   if (isLoading) {
     return (
@@ -65,6 +91,7 @@ export function PositionSeatsPanel({
   const filledSeats = seats.filter(s => s.status === 'FILLED').length;
   const vacantSeats = seats.filter(s => s.status === 'VACANT').length;
   const frozenSeats = seats.filter(s => s.status === 'FROZEN').length;
+  const sharedSeats = seats.filter(s => s.is_shared_seat).length;
   const activeSeats = seats.filter(s => s.status !== 'ELIMINATED').length;
   const fillRate = activeSeats > 0 ? (filledSeats / activeSeats) * 100 : 0;
 
@@ -80,6 +107,11 @@ export function PositionSeatsPanel({
   const handleViewHistory = (seat: PositionSeat) => {
     setSelectedSeatForHistory(seat);
     setHistoryDialogOpen(true);
+  };
+
+  const handleAddOccupant = (seat: PositionSeat) => {
+    setSelectedSeatForOccupant(seat);
+    setAddOccupantDialogOpen(true);
   };
 
   const getStatusOrder = (status: SeatStatus): number => {
@@ -107,6 +139,7 @@ export function PositionSeatsPanel({
             <CardDescription>
               {filledSeats} of {activeSeats} seats filled
               {frozenSeats > 0 && ` • ${frozenSeats} frozen`}
+              {sharedSeats > 0 && ` • ${sharedSeats} shared`}
             </CardDescription>
           </div>
           <div className="flex items-center gap-2">
@@ -118,6 +151,9 @@ export function PositionSeatsPanel({
         </div>
       </CardHeader>
       <CardContent>
+        {/* FTE Validation Alert */}
+        <FTEValidationAlert overAllocatedEmployees={overAllocatedEmployees} />
+
         {/* Seat Status Summary */}
         <div className="flex flex-wrap gap-2 mb-4">
           <Badge variant="secondary" className="bg-green-200 text-green-900 dark:bg-green-800 dark:text-green-100 font-medium">
@@ -131,6 +167,12 @@ export function PositionSeatsPanel({
               {frozenSeats} Frozen
             </Badge>
           )}
+          {sharedSeats > 0 && (
+            <Badge variant="secondary" className="bg-purple-200 text-purple-900 dark:bg-purple-800 dark:text-purple-100 font-medium">
+              <Users className="h-3 w-3 mr-1" />
+              {sharedSeats} Shared
+            </Badge>
+          )}
         </div>
 
         {/* Seats Grid */}
@@ -142,6 +184,7 @@ export function PositionSeatsPanel({
               onFreeze={handleFreeze}
               onUnfreeze={handleUnfreeze}
               onViewHistory={handleViewHistory}
+              onAddOccupant={handleAddOccupant}
             />
           ))}
         </div>
@@ -172,7 +215,43 @@ export function PositionSeatsPanel({
         onOpenChange={setHistoryDialogOpen}
         seat={selectedSeatForHistory}
       />
+
+      {selectedSeatForOccupant && (
+        <AddOccupantDialogWrapper
+          open={addOccupantDialogOpen}
+          onOpenChange={setAddOccupantDialogOpen}
+          seatId={selectedSeatForOccupant.id}
+          seatCode={selectedSeatForOccupant.seat_code}
+          employees={employees}
+        />
+      )}
     </Card>
+  );
+}
+
+function AddOccupantDialogWrapper({ 
+  open, 
+  onOpenChange, 
+  seatId, 
+  seatCode, 
+  employees 
+}: { 
+  open: boolean; 
+  onOpenChange: (open: boolean) => void; 
+  seatId: string; 
+  seatCode: string;
+  employees: Array<{ id: string; full_name: string; email: string }>;
+}) {
+  const { addOccupant } = useSeatOccupants(seatId);
+
+  return (
+    <AddOccupantDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      seatCode={seatCode}
+      employees={employees}
+      onConfirm={addOccupant}
+    />
   );
 }
 
@@ -181,10 +260,14 @@ interface SeatRowProps {
   onFreeze: (seat: PositionSeat) => void;
   onUnfreeze: (seat: PositionSeat) => void;
   onViewHistory: (seat: PositionSeat) => void;
+  onAddOccupant: (seat: PositionSeat) => void;
 }
 
-function SeatRow({ seat, onFreeze, onUnfreeze, onViewHistory }: SeatRowProps) {
+function SeatRow({ seat, onFreeze, onUnfreeze, onViewHistory, onAddOccupant }: SeatRowProps) {
   const isDisplacement = seat.requires_displacement;
+  const isShared = seat.is_shared_seat;
+  const hasSecondment = seat.secondment_origin_seat_id !== null;
+  const hasBudget = seat.budget_allocation_amount && seat.budget_allocation_amount > 0;
   
   return (
     <div 
@@ -192,7 +275,8 @@ function SeatRow({ seat, onFreeze, onUnfreeze, onViewHistory }: SeatRowProps) {
         "flex items-center justify-between p-3 rounded-lg border transition-colors",
         seat.status === 'ELIMINATED' && "opacity-50",
         seat.status === 'FROZEN' && "border-cyan-500/50 bg-cyan-50/50 dark:bg-cyan-950/20",
-        isDisplacement && "border-red-500/50 bg-red-50/50 dark:bg-red-950/20"
+        isDisplacement && "border-red-500/50 bg-red-50/50 dark:bg-red-950/20",
+        isShared && "border-purple-500/30 bg-purple-50/30 dark:bg-purple-950/10"
       )}
     >
       <div className="flex items-center gap-3">
@@ -201,6 +285,20 @@ function SeatRow({ seat, onFreeze, onUnfreeze, onViewHistory }: SeatRowProps) {
         </div>
         
         <SeatStatusBadge status={seat.status} />
+
+        {isShared && (
+          <Badge variant="outline" className="text-xs text-purple-600 border-purple-300">
+            <Users className="h-3 w-3 mr-1" />
+            Shared
+          </Badge>
+        )}
+
+        {hasSecondment && (
+          <Badge variant="outline" className="text-xs text-cyan-600 border-cyan-300">
+            <ArrowRightLeft className="h-3 w-3 mr-1" />
+            Secondment
+          </Badge>
+        )}
 
         {seat.current_employee && (
           <TooltipProvider>
@@ -261,6 +359,30 @@ function SeatRow({ seat, onFreeze, onUnfreeze, onViewHistory }: SeatRowProps) {
       </div>
 
       <div className="flex items-center gap-2">
+        {hasBudget && (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger>
+                <Badge variant="outline" className="text-xs">
+                  <DollarSign className="h-3 w-3 mr-0.5" />
+                  {new Intl.NumberFormat('en-US', { 
+                    style: 'currency', 
+                    currency: seat.budget_allocation_currency || 'USD',
+                    notation: 'compact'
+                  }).format(seat.budget_allocation_amount || 0)}
+                </Badge>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Budget: {new Intl.NumberFormat('en-US', { 
+                  style: 'currency', 
+                  currency: seat.budget_allocation_currency || 'USD'
+                }).format(seat.budget_allocation_amount || 0)}</p>
+                {seat.budget_funding_source && <p>Source: {seat.budget_funding_source}</p>}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        )}
+
         {seat.filled_date && (
           <TooltipProvider>
             <Tooltip>
@@ -284,6 +406,10 @@ function SeatRow({ seat, onFreeze, onUnfreeze, onViewHistory }: SeatRowProps) {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => onAddOccupant(seat)}>
+              <UserPlus className="h-4 w-4 mr-2" />
+              Add Occupant
+            </DropdownMenuItem>
             <DropdownMenuItem onClick={() => onViewHistory(seat)}>
               <History className="h-4 w-4 mr-2" />
               View History
