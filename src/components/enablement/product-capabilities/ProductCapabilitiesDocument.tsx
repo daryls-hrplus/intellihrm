@@ -142,6 +142,20 @@ export function ProductCapabilitiesDocument() {
         subtitle="Empower employees and managers with self-service tools"
         icon={Users}
         id="act2"
+        narrative="With the foundation set and talent onboard, the real work begins. But here's the paradox: HR can't scale by adding more HR people. The only way to serve thousands is to empower everyone to serve themselves. When employees and managers have the right tools, HR transforms from gatekeeper to enabler."
+        themes={[
+          { title: "Self-Service First", description: "24/7 access to HR services" },
+          { title: "Manager Enablement", description: "Real-time team insights and actions" },
+          { title: "Time Precision", description: "Every hour captured accurately" },
+          { title: "Leave Intelligence", description: "Coverage, compliance, and control" },
+        ]}
+        outcomes={[
+          "80% reduction in HR routine inquiries",
+          "Managers detect team risks 3 months earlier",
+          "99.9% time accuracy with geofencing",
+          "Zero compliance violations on leave",
+        ]}
+        modules={["Employee Self-Service", "Manager Self-Service", "Time & Attendance", "Leave Management"]}
       />
 
       <section id="ess" className="scroll-mt-20">
