@@ -38,12 +38,6 @@ export interface PurgeResult {
   details: { table: string; deleted: number; preserved: number }[];
 }
 
-export interface TableDependency {
-  table_name: string;
-  depth: number;
-  parent_tables: string[];
-}
-
 export const DATA_SET_DESCRIPTIONS: Record<DataSet, { label: string; description: string; employees: string; duration: string }> = {
   minimal: {
     label: 'Minimal',

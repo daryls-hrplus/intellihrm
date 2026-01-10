@@ -6,8 +6,7 @@ import type {
   PurgeConfig, 
   PopulationResult, 
   PurgeResult,
-  TableStatistics,
-  TableDependency
+  TableStatistics
 } from '@/types/dataManagement';
 
 export function useDataManagement() {
@@ -15,19 +14,6 @@ export function useDataManagement() {
   const [isPurging, setIsPurging] = useState(false);
   const [isLoadingStats, setIsLoadingStats] = useState(false);
   const { toast } = useToast();
-
-  const getTableDependencies = async (): Promise<TableDependency[]> => {
-    const { data, error } = await supabase
-      .from('table_dependency_order')
-      .select('*')
-      .order('depth', { ascending: true });
-
-    if (error) {
-      console.error('Error fetching table dependencies:', error);
-      return [];
-    }
-    return data || [];
-  };
 
   const getPurgeStatistics = async (
     companyId?: string,
@@ -44,7 +30,7 @@ export function useDataManagement() {
         console.error('Error fetching purge statistics:', error);
         return [];
       }
-      return data || [];
+      return (data || []) as TableStatistics[];
     } finally {
       setIsLoadingStats(false);
     }
@@ -152,7 +138,6 @@ export function useDataManagement() {
     isPopulating,
     isPurging,
     isLoadingStats,
-    getTableDependencies,
     getPurgeStatistics,
     populateData,
     purgeData

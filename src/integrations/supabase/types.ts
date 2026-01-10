@@ -65591,14 +65591,6 @@ export type Database = {
         }
         Relationships: []
       }
-      table_dependency_order: {
-        Row: {
-          depth: number | null
-          parent_tables: string[] | null
-          table_name: string | null
-        }
-        Relationships: []
-      }
     }
     Functions: {
       accrue_leave_balance: {
@@ -65846,6 +65838,14 @@ export type Database = {
           position_title: string
         }[]
       }
+      get_populated_tables_info: {
+        Args: never
+        Returns: {
+          has_company_id: boolean
+          record_count: number
+          table_name: string
+        }[]
+      }
       get_position_vacancy_summary: {
         Args: { p_company_id: string }
         Returns: {
@@ -65875,14 +65875,6 @@ export type Database = {
           protected_records: number
           table_name: string
           total_records: number
-        }[]
-      }
-      get_table_dependency_order: {
-        Args: never
-        Returns: {
-          depth: number
-          parent_tables: string[]
-          table_name: string
         }[]
       }
       get_timekeeper_employees: {
