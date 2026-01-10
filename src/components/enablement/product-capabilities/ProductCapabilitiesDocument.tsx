@@ -27,6 +27,7 @@ import {
   AdminSecurityCapabilities,
   HRHubCapabilities,
   RecruitmentCapabilities,
+  OnboardingCapabilities,
   WorkforceCapabilities,
   ESSCapabilities,
   MSSCapabilities,
@@ -96,6 +97,10 @@ export function ProductCapabilitiesDocument() {
 
       <section id="recruitment" className="scroll-mt-20">
         <RecruitmentCapabilities />
+      </section>
+
+      <section id="onboarding" className="scroll-mt-20">
+        <OnboardingCapabilities />
       </section>
 
       <section id="workforce" className="scroll-mt-20">
