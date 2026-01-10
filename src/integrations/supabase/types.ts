@@ -3200,6 +3200,13 @@ export type Database = {
             foreignKeyName: "appraisal_participants_primary_position_id_fkey"
             columns: ["primary_position_id"]
             isOneToOne: false
+            referencedRelation: "position_seat_summary"
+            referencedColumns: ["position_id"]
+          },
+          {
+            foreignKeyName: "appraisal_participants_primary_position_id_fkey"
+            columns: ["primary_position_id"]
+            isOneToOne: false
             referencedRelation: "positions"
             referencedColumns: ["id"]
           },
@@ -3267,6 +3274,13 @@ export type Database = {
             foreignKeyName: "appraisal_position_weights_position_id_fkey"
             columns: ["position_id"]
             isOneToOne: false
+            referencedRelation: "position_seat_summary"
+            referencedColumns: ["position_id"]
+          },
+          {
+            foreignKeyName: "appraisal_position_weights_position_id_fkey"
+            columns: ["position_id"]
+            isOneToOne: false
             referencedRelation: "positions"
             referencedColumns: ["id"]
           },
@@ -3329,6 +3343,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "appraisal_participants"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appraisal_role_segments_position_id_fkey"
+            columns: ["position_id"]
+            isOneToOne: false
+            referencedRelation: "position_seat_summary"
+            referencedColumns: ["position_id"]
           },
           {
             foreignKeyName: "appraisal_role_segments_position_id_fkey"
@@ -9707,6 +9728,13 @@ export type Database = {
             foreignKeyName: "compensation_history_position_id_fkey"
             columns: ["position_id"]
             isOneToOne: false
+            referencedRelation: "position_seat_summary"
+            referencedColumns: ["position_id"]
+          },
+          {
+            foreignKeyName: "compensation_history_position_id_fkey"
+            columns: ["position_id"]
+            isOneToOne: false
             referencedRelation: "positions"
             referencedColumns: ["id"]
           },
@@ -13588,6 +13616,13 @@ export type Database = {
             foreignKeyName: "employee_compensation_position_id_fkey"
             columns: ["position_id"]
             isOneToOne: false
+            referencedRelation: "position_seat_summary"
+            referencedColumns: ["position_id"]
+          },
+          {
+            foreignKeyName: "employee_compensation_position_id_fkey"
+            columns: ["position_id"]
+            isOneToOne: false
             referencedRelation: "positions"
             referencedColumns: ["id"]
           },
@@ -15995,6 +16030,13 @@ export type Database = {
             foreignKeyName: "employee_position_history_position_id_fkey"
             columns: ["position_id"]
             isOneToOne: false
+            referencedRelation: "position_seat_summary"
+            referencedColumns: ["position_id"]
+          },
+          {
+            foreignKeyName: "employee_position_history_position_id_fkey"
+            columns: ["position_id"]
+            isOneToOne: false
             referencedRelation: "positions"
             referencedColumns: ["id"]
           },
@@ -16084,6 +16126,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "pay_groups"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_positions_position_id_fkey"
+            columns: ["position_id"]
+            isOneToOne: false
+            referencedRelation: "position_seat_summary"
+            referencedColumns: ["position_id"]
           },
           {
             foreignKeyName: "employee_positions_position_id_fkey"
@@ -18083,6 +18132,13 @@ export type Database = {
             foreignKeyName: "employee_transactions_acting_position_id_fkey"
             columns: ["acting_position_id"]
             isOneToOne: false
+            referencedRelation: "position_seat_summary"
+            referencedColumns: ["position_id"]
+          },
+          {
+            foreignKeyName: "employee_transactions_acting_position_id_fkey"
+            columns: ["acting_position_id"]
+            isOneToOne: false
             referencedRelation: "positions"
             referencedColumns: ["id"]
           },
@@ -18153,6 +18209,13 @@ export type Database = {
             foreignKeyName: "employee_transactions_from_position_id_fkey"
             columns: ["from_position_id"]
             isOneToOne: false
+            referencedRelation: "position_seat_summary"
+            referencedColumns: ["position_id"]
+          },
+          {
+            foreignKeyName: "employee_transactions_from_position_id_fkey"
+            columns: ["from_position_id"]
+            isOneToOne: false
             referencedRelation: "positions"
             referencedColumns: ["id"]
           },
@@ -18174,6 +18237,13 @@ export type Database = {
             foreignKeyName: "employee_transactions_position_id_fkey"
             columns: ["position_id"]
             isOneToOne: false
+            referencedRelation: "position_seat_summary"
+            referencedColumns: ["position_id"]
+          },
+          {
+            foreignKeyName: "employee_transactions_position_id_fkey"
+            columns: ["position_id"]
+            isOneToOne: false
             referencedRelation: "positions"
             referencedColumns: ["id"]
           },
@@ -18188,6 +18258,13 @@ export type Database = {
             foreignKeyName: "employee_transactions_secondment_position_id_fkey"
             columns: ["secondment_position_id"]
             isOneToOne: false
+            referencedRelation: "position_seat_summary"
+            referencedColumns: ["position_id"]
+          },
+          {
+            foreignKeyName: "employee_transactions_secondment_position_id_fkey"
+            columns: ["secondment_position_id"]
+            isOneToOne: false
             referencedRelation: "positions"
             referencedColumns: ["id"]
           },
@@ -18197,6 +18274,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "lookup_values"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_transactions_suspended_position_id_fkey"
+            columns: ["suspended_position_id"]
+            isOneToOne: false
+            referencedRelation: "position_seat_summary"
+            referencedColumns: ["position_id"]
           },
           {
             foreignKeyName: "employee_transactions_suspended_position_id_fkey"
@@ -18225,6 +18309,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "departments"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_transactions_to_position_id_fkey"
+            columns: ["to_position_id"]
+            isOneToOne: false
+            referencedRelation: "position_seat_summary"
+            referencedColumns: ["position_id"]
           },
           {
             foreignKeyName: "employee_transactions_to_position_id_fkey"
@@ -18905,6 +18996,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "payroll_rules"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_work_records_position_id_fkey"
+            columns: ["position_id"]
+            isOneToOne: false
+            referencedRelation: "position_seat_summary"
+            referencedColumns: ["position_id"]
           },
           {
             foreignKeyName: "employee_work_records_position_id_fkey"
@@ -28426,6 +28524,197 @@ export type Database = {
           },
         ]
       }
+      headcount_change_approvals: {
+        Row: {
+          approval_level: number
+          approver_id: string
+          approver_role: string | null
+          comments: string | null
+          created_at: string
+          decision_at: string | null
+          id: string
+          request_id: string
+          status: string
+        }
+        Insert: {
+          approval_level: number
+          approver_id: string
+          approver_role?: string | null
+          comments?: string | null
+          created_at?: string
+          decision_at?: string | null
+          id?: string
+          request_id: string
+          status?: string
+        }
+        Update: {
+          approval_level?: number
+          approver_id?: string
+          approver_role?: string | null
+          comments?: string | null
+          created_at?: string
+          decision_at?: string | null
+          id?: string
+          request_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "headcount_change_approvals_approver_id_fkey"
+            columns: ["approver_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "headcount_change_approvals_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "headcount_change_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      headcount_change_requests: {
+        Row: {
+          affected_seats: Json | null
+          approval_level: number | null
+          budget_impact_amount: number | null
+          budget_impact_currency: string | null
+          business_justification: string
+          change_amount: number
+          company_id: string | null
+          cost_center_id: string | null
+          created_at: string
+          current_approver_id: string | null
+          current_headcount: number
+          displacement_required: boolean | null
+          effective_date: string
+          executed_at: string | null
+          executed_by: string | null
+          id: string
+          impact_analysis: Json | null
+          position_id: string
+          request_type: string
+          requested_at: string
+          requested_by: string
+          requested_headcount: number
+          review_notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          affected_seats?: Json | null
+          approval_level?: number | null
+          budget_impact_amount?: number | null
+          budget_impact_currency?: string | null
+          business_justification: string
+          change_amount: number
+          company_id?: string | null
+          cost_center_id?: string | null
+          created_at?: string
+          current_approver_id?: string | null
+          current_headcount: number
+          displacement_required?: boolean | null
+          effective_date: string
+          executed_at?: string | null
+          executed_by?: string | null
+          id?: string
+          impact_analysis?: Json | null
+          position_id: string
+          request_type: string
+          requested_at?: string
+          requested_by: string
+          requested_headcount: number
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          affected_seats?: Json | null
+          approval_level?: number | null
+          budget_impact_amount?: number | null
+          budget_impact_currency?: string | null
+          business_justification?: string
+          change_amount?: number
+          company_id?: string | null
+          cost_center_id?: string | null
+          created_at?: string
+          current_approver_id?: string | null
+          current_headcount?: number
+          displacement_required?: boolean | null
+          effective_date?: string
+          executed_at?: string | null
+          executed_by?: string | null
+          id?: string
+          impact_analysis?: Json | null
+          position_id?: string
+          request_type?: string
+          requested_at?: string
+          requested_by?: string
+          requested_headcount?: number
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "headcount_change_requests_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "headcount_change_requests_current_approver_id_fkey"
+            columns: ["current_approver_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "headcount_change_requests_executed_by_fkey"
+            columns: ["executed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "headcount_change_requests_position_id_fkey"
+            columns: ["position_id"]
+            isOneToOne: false
+            referencedRelation: "position_seat_summary"
+            referencedColumns: ["position_id"]
+          },
+          {
+            foreignKeyName: "headcount_change_requests_position_id_fkey"
+            columns: ["position_id"]
+            isOneToOne: false
+            referencedRelation: "positions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "headcount_change_requests_requested_by_fkey"
+            columns: ["requested_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "headcount_change_requests_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       headcount_forecasts: {
         Row: {
           company_id: string | null
@@ -28638,6 +28927,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "governance_bodies"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "headcount_requests_position_id_fkey"
+            columns: ["position_id"]
+            isOneToOne: false
+            referencedRelation: "position_seat_summary"
+            referencedColumns: ["position_id"]
           },
           {
             foreignKeyName: "headcount_requests_position_id_fkey"
@@ -34095,6 +34391,13 @@ export type Database = {
             foreignKeyName: "job_requisitions_position_id_fkey"
             columns: ["position_id"]
             isOneToOne: false
+            referencedRelation: "position_seat_summary"
+            referencedColumns: ["position_id"]
+          },
+          {
+            foreignKeyName: "job_requisitions_position_id_fkey"
+            columns: ["position_id"]
+            isOneToOne: false
             referencedRelation: "positions"
             referencedColumns: ["id"]
           },
@@ -34891,6 +35194,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "key_position_risks_position_id_fkey"
+            columns: ["position_id"]
+            isOneToOne: false
+            referencedRelation: "position_seat_summary"
+            referencedColumns: ["position_id"]
           },
           {
             foreignKeyName: "key_position_risks_position_id_fkey"
@@ -42081,6 +42391,13 @@ export type Database = {
             foreignKeyName: "minimum_wage_violations_position_id_fkey"
             columns: ["position_id"]
             isOneToOne: false
+            referencedRelation: "position_seat_summary"
+            referencedColumns: ["position_id"]
+          },
+          {
+            foreignKeyName: "minimum_wage_violations_position_id_fkey"
+            columns: ["position_id"]
+            isOneToOne: false
             referencedRelation: "positions"
             referencedColumns: ["id"]
           },
@@ -48961,6 +49278,13 @@ export type Database = {
             foreignKeyName: "position_budget_items_position_id_fkey"
             columns: ["position_id"]
             isOneToOne: false
+            referencedRelation: "position_seat_summary"
+            referencedColumns: ["position_id"]
+          },
+          {
+            foreignKeyName: "position_budget_items_position_id_fkey"
+            columns: ["position_id"]
+            isOneToOne: false
             referencedRelation: "positions"
             referencedColumns: ["id"]
           },
@@ -49245,6 +49569,13 @@ export type Database = {
             foreignKeyName: "position_compensation_position_id_fkey"
             columns: ["position_id"]
             isOneToOne: false
+            referencedRelation: "position_seat_summary"
+            referencedColumns: ["position_id"]
+          },
+          {
+            foreignKeyName: "position_compensation_position_id_fkey"
+            columns: ["position_id"]
+            isOneToOne: false
             referencedRelation: "positions"
             referencedColumns: ["id"]
           },
@@ -49305,6 +49636,176 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      position_seat_history: {
+        Row: {
+          change_reason: string | null
+          changed_by: string | null
+          created_at: string
+          id: string
+          metadata: Json | null
+          new_status: string
+          previous_status: string | null
+          seat_id: string
+        }
+        Insert: {
+          change_reason?: string | null
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          new_status: string
+          previous_status?: string | null
+          seat_id: string
+        }
+        Update: {
+          change_reason?: string | null
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          new_status?: string
+          previous_status?: string | null
+          seat_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "position_seat_history_changed_by_fkey"
+            columns: ["changed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "position_seat_history_seat_id_fkey"
+            columns: ["seat_id"]
+            isOneToOne: false
+            referencedRelation: "position_seats"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      position_seats: {
+        Row: {
+          approved_date: string | null
+          created_at: string
+          current_employee_id: string | null
+          current_employee_position_id: string | null
+          displacement_action_id: string | null
+          eliminated_date: string | null
+          elimination_approved_by: string | null
+          elimination_reason: string | null
+          filled_date: string | null
+          freeze_approved_by: string | null
+          freeze_reason: string | null
+          frozen_date: string | null
+          id: string
+          notes: string | null
+          planned_date: string | null
+          position_id: string
+          requires_displacement: boolean | null
+          seat_code: string
+          seat_number: number
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          approved_date?: string | null
+          created_at?: string
+          current_employee_id?: string | null
+          current_employee_position_id?: string | null
+          displacement_action_id?: string | null
+          eliminated_date?: string | null
+          elimination_approved_by?: string | null
+          elimination_reason?: string | null
+          filled_date?: string | null
+          freeze_approved_by?: string | null
+          freeze_reason?: string | null
+          frozen_date?: string | null
+          id?: string
+          notes?: string | null
+          planned_date?: string | null
+          position_id: string
+          requires_displacement?: boolean | null
+          seat_code: string
+          seat_number: number
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          approved_date?: string | null
+          created_at?: string
+          current_employee_id?: string | null
+          current_employee_position_id?: string | null
+          displacement_action_id?: string | null
+          eliminated_date?: string | null
+          elimination_approved_by?: string | null
+          elimination_reason?: string | null
+          filled_date?: string | null
+          freeze_approved_by?: string | null
+          freeze_reason?: string | null
+          frozen_date?: string | null
+          id?: string
+          notes?: string | null
+          planned_date?: string | null
+          position_id?: string
+          requires_displacement?: boolean | null
+          seat_code?: string
+          seat_number?: number
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_position_seats_displacement_action"
+            columns: ["displacement_action_id"]
+            isOneToOne: false
+            referencedRelation: "seat_displacement_actions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "position_seats_current_employee_id_fkey"
+            columns: ["current_employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "position_seats_current_employee_position_id_fkey"
+            columns: ["current_employee_position_id"]
+            isOneToOne: false
+            referencedRelation: "employee_positions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "position_seats_elimination_approved_by_fkey"
+            columns: ["elimination_approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "position_seats_freeze_approved_by_fkey"
+            columns: ["freeze_approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "position_seats_position_id_fkey"
+            columns: ["position_id"]
+            isOneToOne: false
+            referencedRelation: "position_seat_summary"
+            referencedColumns: ["position_id"]
+          },
+          {
+            foreignKeyName: "position_seats_position_id_fkey"
+            columns: ["position_id"]
+            isOneToOne: false
+            referencedRelation: "positions"
             referencedColumns: ["id"]
           },
         ]
@@ -49488,6 +49989,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "position_types"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "positions_reports_to_position_id_fkey"
+            columns: ["reports_to_position_id"]
+            isOneToOne: false
+            referencedRelation: "position_seat_summary"
+            referencedColumns: ["position_id"]
           },
           {
             foreignKeyName: "positions_reports_to_position_id_fkey"
@@ -56396,6 +56904,206 @@ export type Database = {
           },
         ]
       }
+      seat_displacement_actions: {
+        Row: {
+          action_type: string
+          created_at: string
+          employee_id: string
+          final_action: string | null
+          grace_period_days: number | null
+          grace_period_end: string | null
+          grace_period_start: string | null
+          hr_reviewed_at: string | null
+          hr_reviewed_by: string | null
+          id: string
+          legal_review_required: boolean | null
+          legal_reviewed_at: string | null
+          legal_reviewed_by: string | null
+          proposed_position_id: string | null
+          proposed_seat_id: string | null
+          request_id: string
+          resolution_notes: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          seat_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          action_type: string
+          created_at?: string
+          employee_id: string
+          final_action?: string | null
+          grace_period_days?: number | null
+          grace_period_end?: string | null
+          grace_period_start?: string | null
+          hr_reviewed_at?: string | null
+          hr_reviewed_by?: string | null
+          id?: string
+          legal_review_required?: boolean | null
+          legal_reviewed_at?: string | null
+          legal_reviewed_by?: string | null
+          proposed_position_id?: string | null
+          proposed_seat_id?: string | null
+          request_id: string
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          seat_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          action_type?: string
+          created_at?: string
+          employee_id?: string
+          final_action?: string | null
+          grace_period_days?: number | null
+          grace_period_end?: string | null
+          grace_period_start?: string | null
+          hr_reviewed_at?: string | null
+          hr_reviewed_by?: string | null
+          id?: string
+          legal_review_required?: boolean | null
+          legal_reviewed_at?: string | null
+          legal_reviewed_by?: string | null
+          proposed_position_id?: string | null
+          proposed_seat_id?: string | null
+          request_id?: string
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          seat_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seat_displacement_actions_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "seat_displacement_actions_hr_reviewed_by_fkey"
+            columns: ["hr_reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "seat_displacement_actions_legal_reviewed_by_fkey"
+            columns: ["legal_reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "seat_displacement_actions_proposed_position_id_fkey"
+            columns: ["proposed_position_id"]
+            isOneToOne: false
+            referencedRelation: "position_seat_summary"
+            referencedColumns: ["position_id"]
+          },
+          {
+            foreignKeyName: "seat_displacement_actions_proposed_position_id_fkey"
+            columns: ["proposed_position_id"]
+            isOneToOne: false
+            referencedRelation: "positions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "seat_displacement_actions_proposed_seat_id_fkey"
+            columns: ["proposed_seat_id"]
+            isOneToOne: false
+            referencedRelation: "position_seats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "seat_displacement_actions_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "headcount_change_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "seat_displacement_actions_resolved_by_fkey"
+            columns: ["resolved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "seat_displacement_actions_seat_id_fkey"
+            columns: ["seat_id"]
+            isOneToOne: false
+            referencedRelation: "position_seats"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      seat_restoration_requests: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          created_at: string
+          id: string
+          original_elimination_date: string
+          requested_at: string | null
+          requested_by: string | null
+          restoration_window_end: string
+          seat_id: string
+          status: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          id?: string
+          original_elimination_date: string
+          requested_at?: string | null
+          requested_by?: string | null
+          restoration_window_end: string
+          seat_id: string
+          status?: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          id?: string
+          original_elimination_date?: string
+          requested_at?: string | null
+          requested_by?: string | null
+          restoration_window_end?: string
+          seat_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seat_restoration_requests_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "seat_restoration_requests_requested_by_fkey"
+            columns: ["requested_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "seat_restoration_requests_seat_id_fkey"
+            columns: ["seat_id"]
+            isOneToOne: false
+            referencedRelation: "position_seats"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sections: {
         Row: {
           code: string
@@ -59159,6 +59867,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "succession_plans_position_id_fkey"
+            columns: ["position_id"]
+            isOneToOne: false
+            referencedRelation: "position_seat_summary"
+            referencedColumns: ["position_id"]
           },
           {
             foreignKeyName: "succession_plans_position_id_fkey"
@@ -64505,6 +65220,13 @@ export type Database = {
             foreignKeyName: "workflow_approval_role_positions_position_id_fkey"
             columns: ["position_id"]
             isOneToOne: false
+            referencedRelation: "position_seat_summary"
+            referencedColumns: ["position_id"]
+          },
+          {
+            foreignKeyName: "workflow_approval_role_positions_position_id_fkey"
+            columns: ["position_id"]
+            isOneToOne: false
             referencedRelation: "positions"
             referencedColumns: ["id"]
           },
@@ -65413,6 +66135,13 @@ export type Database = {
             foreignKeyName: "workflow_steps_approver_position_id_fkey"
             columns: ["approver_position_id"]
             isOneToOne: false
+            referencedRelation: "position_seat_summary"
+            referencedColumns: ["position_id"]
+          },
+          {
+            foreignKeyName: "workflow_steps_approver_position_id_fkey"
+            columns: ["approver_position_id"]
+            isOneToOne: false
             referencedRelation: "positions"
             referencedColumns: ["id"]
           },
@@ -65590,6 +66319,32 @@ export type Database = {
           video_plays: number | null
         }
         Relationships: []
+      }
+      position_seat_summary: {
+        Row: {
+          approved_seats: number | null
+          authorized_headcount: number | null
+          department_id: string | null
+          eliminated_seats: number | null
+          fill_rate_percent: number | null
+          filled_seats: number | null
+          frozen_seats: number | null
+          planned_seats: number | null
+          position_code: string | null
+          position_id: string | null
+          position_title: string | null
+          total_seats: number | null
+          vacant_seats: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "positions_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Functions: {
