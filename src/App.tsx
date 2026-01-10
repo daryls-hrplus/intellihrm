@@ -357,6 +357,7 @@ const App = () => (
             <Route path="/compensation/position-budget/cost-config" element={<ProtectedRoute moduleCode="compensation"><LazyPage><Pages.PositionBudgetCostConfigPage /></LazyPage></ProtectedRoute>} />
             <Route path="/compensation/minimum-wage" element={<ProtectedRoute moduleCode="compensation"><LazyPage><Pages.MinimumWageCompliancePage /></LazyPage></ProtectedRoute>} />
             <Route path="/compensation/minimum-wage/config" element={<ProtectedRoute moduleCode="compensation"><LazyPage><Pages.MinimumWageConfigPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/compensation/fte-reconciliation" element={<ProtectedRoute moduleCode="compensation"><LazyPage><Pages.CompensationFTEReconciliationPage /></LazyPage></ProtectedRoute>} />
 
             {/* Benefits Routes */}
             <Route path="/benefits" element={<ProtectedRoute moduleCode="benefits"><LazyPage><Pages.BenefitsDashboardPage /></LazyPage></ProtectedRoute>} />
