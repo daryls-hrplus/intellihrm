@@ -206,8 +206,9 @@ serve(async (req) => {
           console.log(`Deleted ${deleted} records from ${tableName}`);
         }
       } catch (tableError) {
+        const tableErrorMessage = tableError instanceof Error ? tableError.message : String(tableError);
         console.error(`Error processing ${tableName}:`, tableError);
-        errors.push(`${tableName}: ${tableError.message}`);
+        errors.push(`${tableName}: ${tableErrorMessage}`);
       }
     }
 
@@ -226,13 +227,14 @@ serve(async (req) => {
     });
 
   } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
     console.error('Purge error:', error);
     return new Response(JSON.stringify({
       success: false,
       tablesAffected: 0,
       recordsDeleted: 0,
       preservedRecords: 0,
-      errors: [error.message],
+      errors: [errorMessage],
       details: []
     }), {
       status: 500,

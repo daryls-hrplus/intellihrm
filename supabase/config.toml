@@ -416,3 +416,9 @@ verify_jwt = false
 
 [functions.template-ai-helper]
 verify_jwt = false
+
+[functions.populate-demo-data]
+verify_jwt = false
+
+[functions.purge-transactional-data]
+verify_jwt = false
