@@ -50,6 +50,7 @@ import {
   PlatformFeatures,
   RegionalCompliance,
   AIIntelligence,
+  ModuleDependencyAnalysis,
   GettingStarted,
   ModuleIntegrationDiagram,
 } from "./sections";
@@ -353,6 +354,11 @@ export function ProductCapabilitiesDocument() {
 
       <section id="ai-intelligence" className="scroll-mt-20">
         <AIIntelligence />
+      </section>
+
+      {/* Module Dependency Analysis */}
+      <section id="module-dependency-analysis" className="scroll-mt-20">
+        <ModuleDependencyAnalysis />
       </section>
 
       {/* Getting Started */}

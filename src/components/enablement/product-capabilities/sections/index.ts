@@ -45,4 +45,5 @@ export { RegionalCompliance } from "./cross-cutting/RegionalCompliance";
 export { AIIntelligence } from "./cross-cutting/AIIntelligence";
 
 // Closing
+export { ModuleDependencyAnalysis } from "./closing/ModuleDependencyAnalysis";
 export { GettingStarted } from "./closing/GettingStarted";

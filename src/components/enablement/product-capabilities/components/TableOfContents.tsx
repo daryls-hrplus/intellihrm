@@ -196,6 +196,11 @@ export const PRODUCT_CAPABILITIES_TOC: TOCSection[] = [
     ],
   },
   {
+    id: "module-dependency-analysis",
+    title: "Module Dependency Analysis",
+    level: 1,
+  },
+  {
     id: "getting-started",
     title: "Getting Started",
     level: 1,
