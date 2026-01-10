@@ -28677,6 +28677,7 @@ export type Database = {
           icon_name: string | null
           id: string
           is_active: boolean | null
+          is_seeded: boolean | null
           name: string
           name_key: string | null
           updated_at: string | null
@@ -28688,6 +28689,7 @@ export type Database = {
           icon_name?: string | null
           id?: string
           is_active?: boolean | null
+          is_seeded?: boolean | null
           name: string
           name_key?: string | null
           updated_at?: string | null
@@ -28699,6 +28701,7 @@ export type Database = {
           icon_name?: string | null
           id?: string
           is_active?: boolean | null
+          is_seeded?: boolean | null
           name?: string
           name_key?: string | null
           updated_at?: string | null
@@ -28756,6 +28759,7 @@ export type Database = {
           id: string
           is_active: boolean | null
           is_featured: boolean | null
+          is_seeded: boolean | null
           keywords: string[] | null
           route_patterns: string[] | null
           thumbnail_url: string | null
@@ -28778,6 +28782,7 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           is_featured?: boolean | null
+          is_seeded?: boolean | null
           keywords?: string[] | null
           route_patterns?: string[] | null
           thumbnail_url?: string | null
@@ -28800,6 +28805,7 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           is_featured?: boolean | null
+          is_seeded?: boolean | null
           keywords?: string[] | null
           route_patterns?: string[] | null
           thumbnail_url?: string | null
@@ -65585,6 +65591,14 @@ export type Database = {
         }
         Relationships: []
       }
+      table_dependency_order: {
+        Row: {
+          depth: number | null
+          parent_tables: string[] | null
+          table_name: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       accrue_leave_balance: {
@@ -65854,6 +65868,23 @@ export type Database = {
           cost_rate: number
         }[]
       }
+      get_purge_statistics: {
+        Args: { p_company_id?: string; p_purge_level?: string }
+        Returns: {
+          deletable_records: number
+          protected_records: number
+          table_name: string
+          total_records: number
+        }[]
+      }
+      get_table_dependency_order: {
+        Args: never
+        Returns: {
+          depth: number
+          parent_tables: string[]
+          table_name: string
+        }[]
+      }
       get_timekeeper_employees: {
         Args: { p_timekeeper_id: string }
         Returns: {
@@ -65915,6 +65946,10 @@ export type Database = {
       }
       is_messaging_channel_member: {
         Args: { p_channel_id: string; p_user_id: string }
+        Returns: boolean
+      }
+      is_protected_record: {
+        Args: { p_record_id: string; p_table_name: string }
         Returns: boolean
       }
       lock_goals_on_cycle_freeze: { Args: never; Returns: undefined }
