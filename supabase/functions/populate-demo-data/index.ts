@@ -58,25 +58,29 @@ serve(async (req) => {
 
     // Create demo company if needed
     if (!companyId) {
+      console.log('No existing demo company found, creating new one...');
       const { data: newCompany, error: companyError } = await supabase
         .from('companies')
         .insert({
           name: `Demo Company ${Date.now()}`,
-          code: `DEMO-${Date.now()}`,
-          status: 'active',
+          code: `DEMO${Date.now()}`,
           is_active: true
         })
         .select()
         .single();
 
       if (companyError) {
+        console.error('Failed to create company:', companyError);
         errors.push(`Failed to create company: ${companyError.message}`);
-      } else {
+      } else if (newCompany) {
         companyId = newCompany.id;
         results.push({ table: 'companies', count: 1 });
         totalRecords++;
         tablesPopulated++;
-        console.log(`Created demo company: ${newCompany.name}`);
+        console.log(`Created demo company: ${newCompany.name} (${companyId})`);
+      } else {
+        console.error('Company insert returned no data');
+        errors.push('Company insert returned no data');
       }
     }
 
