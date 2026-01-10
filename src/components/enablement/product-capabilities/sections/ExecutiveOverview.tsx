@@ -96,21 +96,21 @@ export function ExecutiveOverview() {
             meets embedded intelligence for enterprise-grade workforce management.
           </p>
           
-          {/* Key Stats - Updated */}
+          {/* Key Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
-            <div className="text-center p-4 rounded-xl bg-background/50 backdrop-blur border border-primary/10">
+            <div className="text-center p-4 rounded-xl bg-primary/10 border border-primary/20">
               <div className="text-3xl font-bold text-primary">25</div>
               <div className="text-sm text-muted-foreground">Core Modules</div>
             </div>
-            <div className="text-center p-4 rounded-xl bg-background/50 backdrop-blur border border-primary/10">
+            <div className="text-center p-4 rounded-xl bg-primary/10 border border-primary/20">
               <div className="text-3xl font-bold text-primary">1,675+</div>
               <div className="text-sm text-muted-foreground">Capabilities</div>
             </div>
-            <div className="text-center p-4 rounded-xl bg-background/50 backdrop-blur border border-primary/10">
+            <div className="text-center p-4 rounded-xl bg-primary/10 border border-primary/20">
               <div className="text-3xl font-bold text-primary">20+</div>
               <div className="text-sm text-muted-foreground">Countries</div>
             </div>
-            <div className="text-center p-4 rounded-xl bg-background/50 backdrop-blur border border-primary/10">
+            <div className="text-center p-4 rounded-xl bg-primary/10 border border-primary/20">
               <div className="text-3xl font-bold text-primary">100%</div>
               <div className="text-sm text-muted-foreground">AI-Enhanced</div>
             </div>
