@@ -52916,6 +52916,13 @@ export type Database = {
             referencedRelation: "position_budget_items"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "position_budget_actuals_budget_item_id_fkey"
+            columns: ["budget_item_id"]
+            isOneToOne: false
+            referencedRelation: "position_budget_seat_reconciliation"
+            referencedColumns: ["budget_item_id"]
+          },
         ]
       }
       position_budget_approval_levels: {
@@ -53068,6 +53075,13 @@ export type Database = {
             referencedRelation: "position_budget_plans"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "position_budget_approvals_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "position_budget_seat_summary"
+            referencedColumns: ["plan_id"]
+          },
         ]
       }
       position_budget_cost_details: {
@@ -53111,6 +53125,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "position_budget_items"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "position_budget_cost_details_budget_item_id_fkey"
+            columns: ["budget_item_id"]
+            isOneToOne: false
+            referencedRelation: "position_budget_seat_reconciliation"
+            referencedColumns: ["budget_item_id"]
           },
           {
             foreignKeyName: "position_budget_cost_details_cost_component_id_fkey"
@@ -53173,11 +53194,25 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "position_budget_forecasts_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "position_budget_seat_summary"
+            referencedColumns: ["plan_id"]
+          },
+          {
             foreignKeyName: "position_budget_forecasts_scenario_id_fkey"
             columns: ["scenario_id"]
             isOneToOne: false
             referencedRelation: "position_budget_scenarios"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "position_budget_forecasts_scenario_id_fkey"
+            columns: ["scenario_id"]
+            isOneToOne: false
+            referencedRelation: "position_budget_seat_summary"
+            referencedColumns: ["scenario_id"]
           },
         ]
       }
@@ -53209,6 +53244,7 @@ export type Database = {
           position_id: string | null
           position_title: string
           scenario_id: string
+          seat_id: string | null
           total_compensation: number | null
           updated_at: string
         }
@@ -53239,6 +53275,7 @@ export type Database = {
           position_id?: string | null
           position_title: string
           scenario_id: string
+          seat_id?: string | null
           total_compensation?: number | null
           updated_at?: string
         }
@@ -53269,6 +53306,7 @@ export type Database = {
           position_id?: string | null
           position_title?: string
           scenario_id?: string
+          seat_id?: string | null
           total_compensation?: number | null
           updated_at?: string
         }
@@ -53321,6 +53359,34 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "position_budget_scenarios"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "position_budget_items_scenario_id_fkey"
+            columns: ["scenario_id"]
+            isOneToOne: false
+            referencedRelation: "position_budget_seat_summary"
+            referencedColumns: ["scenario_id"]
+          },
+          {
+            foreignKeyName: "position_budget_items_seat_id_fkey"
+            columns: ["seat_id"]
+            isOneToOne: false
+            referencedRelation: "position_seats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "position_budget_items_seat_id_fkey"
+            columns: ["seat_id"]
+            isOneToOne: false
+            referencedRelation: "seat_occupancy_summary"
+            referencedColumns: ["seat_id"]
+          },
+          {
+            foreignKeyName: "position_budget_items_seat_id_fkey"
+            columns: ["seat_id"]
+            isOneToOne: false
+            referencedRelation: "secondment_tracking"
+            referencedColumns: ["current_seat_id"]
           },
         ]
       }
@@ -53403,6 +53469,13 @@ export type Database = {
             referencedRelation: "position_budget_plans"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "position_budget_plans_parent_plan_id_fkey"
+            columns: ["parent_plan_id"]
+            isOneToOne: false
+            referencedRelation: "position_budget_seat_summary"
+            referencedColumns: ["plan_id"]
+          },
         ]
       }
       position_budget_scenarios: {
@@ -53462,6 +53535,13 @@ export type Database = {
             referencedRelation: "position_budget_plans"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "position_budget_scenarios_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "position_budget_seat_summary"
+            referencedColumns: ["plan_id"]
+          },
         ]
       }
       position_budget_whatif_sessions: {
@@ -53519,6 +53599,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "position_budget_whatif_sessions_base_scenario_id_fkey"
+            columns: ["base_scenario_id"]
+            isOneToOne: false
+            referencedRelation: "position_budget_seat_summary"
+            referencedColumns: ["scenario_id"]
+          },
+          {
             foreignKeyName: "position_budget_whatif_sessions_converted_to_scenario_id_fkey"
             columns: ["converted_to_scenario_id"]
             isOneToOne: false
@@ -53526,11 +53613,25 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "position_budget_whatif_sessions_converted_to_scenario_id_fkey"
+            columns: ["converted_to_scenario_id"]
+            isOneToOne: false
+            referencedRelation: "position_budget_seat_summary"
+            referencedColumns: ["scenario_id"]
+          },
+          {
             foreignKeyName: "position_budget_whatif_sessions_plan_id_fkey"
             columns: ["plan_id"]
             isOneToOne: false
             referencedRelation: "position_budget_plans"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "position_budget_whatif_sessions_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "position_budget_seat_summary"
+            referencedColumns: ["plan_id"]
           },
         ]
       }
@@ -71841,6 +71942,149 @@ export type Database = {
         }
         Relationships: []
       }
+      position_budget_seat_reconciliation: {
+        Row: {
+          actual_budget_percentage_allocated: number | null
+          actual_fte_allocated: number | null
+          annual_cost: number | null
+          base_salary: number | null
+          budget_cost_center_code: string | null
+          budget_funding_source: string | null
+          budget_item_id: string | null
+          budget_variance: number | null
+          budgeted_fte: number | null
+          budgeted_headcount: number | null
+          company_id: string | null
+          current_occupant_count: number | null
+          fiscal_year: number | null
+          fte_variance: number | null
+          fully_loaded_cost: number | null
+          is_shared_seat: boolean | null
+          max_occupants: number | null
+          plan_name: string | null
+          position_code: string | null
+          position_id: string | null
+          position_title: string | null
+          position_title_canonical: string | null
+          scenario_id: string | null
+          scenario_name: string | null
+          scenario_type: string | null
+          seat_budget: number | null
+          seat_code: string | null
+          seat_currency: string | null
+          seat_id: string | null
+          seat_status: string | null
+          total_compensation: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "position_budget_items_position_id_fkey"
+            columns: ["position_id"]
+            isOneToOne: false
+            referencedRelation: "position_seat_summary"
+            referencedColumns: ["position_id"]
+          },
+          {
+            foreignKeyName: "position_budget_items_position_id_fkey"
+            columns: ["position_id"]
+            isOneToOne: false
+            referencedRelation: "positions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "position_budget_items_scenario_id_fkey"
+            columns: ["scenario_id"]
+            isOneToOne: false
+            referencedRelation: "position_budget_scenarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "position_budget_items_scenario_id_fkey"
+            columns: ["scenario_id"]
+            isOneToOne: false
+            referencedRelation: "position_budget_seat_summary"
+            referencedColumns: ["scenario_id"]
+          },
+          {
+            foreignKeyName: "position_budget_items_seat_id_fkey"
+            columns: ["seat_id"]
+            isOneToOne: false
+            referencedRelation: "position_seats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "position_budget_items_seat_id_fkey"
+            columns: ["seat_id"]
+            isOneToOne: false
+            referencedRelation: "seat_occupancy_summary"
+            referencedColumns: ["seat_id"]
+          },
+          {
+            foreignKeyName: "position_budget_items_seat_id_fkey"
+            columns: ["seat_id"]
+            isOneToOne: false
+            referencedRelation: "secondment_tracking"
+            referencedColumns: ["current_seat_id"]
+          },
+          {
+            foreignKeyName: "position_budget_plans_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      position_budget_seat_summary: {
+        Row: {
+          actual_filled_seats: number | null
+          actual_seat_budget_allocation: number | null
+          actual_total_seats: number | null
+          actual_vacant_seats: number | null
+          budget_line_items: number | null
+          budget_variance: number | null
+          company_id: string | null
+          department_name: string | null
+          fiscal_year: number | null
+          headcount_variance: number | null
+          plan_id: string | null
+          plan_name: string | null
+          position_code: string | null
+          position_id: string | null
+          position_title: string | null
+          scenario_id: string | null
+          scenario_name: string | null
+          scenario_type: string | null
+          seat_linked_items: number | null
+          total_annual_cost: number | null
+          total_budgeted_fte: number | null
+          total_budgeted_headcount: number | null
+          total_fully_loaded_cost: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "position_budget_items_position_id_fkey"
+            columns: ["position_id"]
+            isOneToOne: false
+            referencedRelation: "position_seat_summary"
+            referencedColumns: ["position_id"]
+          },
+          {
+            foreignKeyName: "position_budget_items_position_id_fkey"
+            columns: ["position_id"]
+            isOneToOne: false
+            referencedRelation: "positions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "position_budget_plans_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       position_seat_summary: {
         Row: {
           approved_seats: number | null
@@ -71934,13 +72178,6 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "position_seats_position_id_fkey"
-            columns: ["origin_position_id"]
-            isOneToOne: false
-            referencedRelation: "position_seat_summary"
-            referencedColumns: ["position_id"]
-          },
-          {
-            foreignKeyName: "position_seats_position_id_fkey"
             columns: ["current_position_id"]
             isOneToOne: false
             referencedRelation: "position_seat_summary"
@@ -71949,13 +72186,20 @@ export type Database = {
           {
             foreignKeyName: "position_seats_position_id_fkey"
             columns: ["origin_position_id"]
+            isOneToOne: false
+            referencedRelation: "position_seat_summary"
+            referencedColumns: ["position_id"]
+          },
+          {
+            foreignKeyName: "position_seats_position_id_fkey"
+            columns: ["current_position_id"]
             isOneToOne: false
             referencedRelation: "positions"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "position_seats_position_id_fkey"
-            columns: ["current_position_id"]
+            columns: ["origin_position_id"]
             isOneToOne: false
             referencedRelation: "positions"
             referencedColumns: ["id"]
@@ -72418,6 +72662,10 @@ export type Database = {
           sop_title: string
           steps: Json
         }[]
+      }
+      populate_budget_from_seats: {
+        Args: { p_position_ids?: string[]; p_scenario_id: string }
+        Returns: number
       }
       process_goal_approval: {
         Args: { p_approval_id: string; p_comments?: string; p_decision: string }
