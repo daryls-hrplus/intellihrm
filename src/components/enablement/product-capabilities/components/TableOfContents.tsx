@@ -171,9 +171,9 @@ export const PRODUCT_CAPABILITIES_TOC: TOCSection[] = [
     title: "Act 5: Protect & Support",
     level: 1,
     children: [
-      { id: "hse", title: "Health & Safety", level: 2 },
-      { id: "employee-relations", title: "Employee Relations", level: 2 },
-      { id: "company-property", title: "Company Property", level: 2 },
+      { id: "health-safety", title: "Health & Safety (120+)", level: 2 },
+      { id: "employee-relations", title: "Employee Relations (95+)", level: 2 },
+      { id: "company-property", title: "Company Property (65+)", level: 2 },
     ],
   },
   {
