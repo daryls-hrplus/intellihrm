@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
 import { 
   Loader2, 
   TrendingUp, 
@@ -23,13 +24,15 @@ import {
   Clock,
   AlertTriangle,
   Users,
-  Building2,
-  Calendar
+  Calendar,
+  RotateCcw,
+  PlayCircle,
+  GitBranch,
+  History
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
-import { useHeadcountRequests } from './hooks/usePositionSeats';
-import type { HeadcountChangeRequest, HeadcountRequestStatus } from './types';
+import { useHeadcountWorkflow, HeadcountRequestWithWorkflow } from './hooks/useHeadcountWorkflow';
 import { REQUEST_STATUS_CONFIG, REQUEST_TYPE_CONFIG } from './types';
 
 interface HeadcountRequestsWorkflowPanelProps {
@@ -37,34 +40,78 @@ interface HeadcountRequestsWorkflowPanelProps {
 }
 
 export function HeadcountRequestsWorkflowPanel({ companyId }: HeadcountRequestsWorkflowPanelProps) {
-  const { requests, isLoading, updateRequestStatus } = useHeadcountRequests(companyId);
-  const [selectedRequest, setSelectedRequest] = useState<HeadcountChangeRequest | null>(null);
-  const [actionType, setActionType] = useState<'approve' | 'reject' | null>(null);
+  const { 
+    requests, 
+    isLoading, 
+    approveRequest, 
+    rejectRequest, 
+    returnRequest,
+    executeRequest,
+    getRequestTimeline
+  } = useHeadcountWorkflow(companyId);
+  
+  const [selectedRequest, setSelectedRequest] = useState<HeadcountRequestWithWorkflow | null>(null);
+  const [actionType, setActionType] = useState<'approve' | 'reject' | 'return' | 'execute' | null>(null);
   const [reviewNotes, setReviewNotes] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
+  const [showTimeline, setShowTimeline] = useState(false);
+  const [timeline, setTimeline] = useState<any[]>([]);
+  const [loadingTimeline, setLoadingTimeline] = useState(false);
 
-  const pendingRequests = requests.filter(r => r.status === 'PENDING' || r.status === 'UNDER_REVIEW');
-  const completedRequests = requests.filter(r => ['APPROVED', 'REJECTED', 'EXECUTED', 'CANCELLED'].includes(r.status));
+  const pendingRequests = requests.filter(r => 
+    ['PENDING', 'UNDER_REVIEW'].includes(r.status)
+  );
+  const completedRequests = requests.filter(r => 
+    ['APPROVED', 'REJECTED', 'EXECUTED', 'CANCELLED'].includes(r.status)
+  );
 
   const handleAction = async () => {
     if (!selectedRequest || !actionType) return;
     
     setIsProcessing(true);
     try {
-      const newStatus: HeadcountRequestStatus = actionType === 'approve' ? 'APPROVED' : 'REJECTED';
-      await updateRequestStatus(selectedRequest.id, newStatus, reviewNotes);
-      setSelectedRequest(null);
-      setActionType(null);
-      setReviewNotes('');
+      let success = false;
+      switch (actionType) {
+        case 'approve':
+          success = await approveRequest(selectedRequest.id, reviewNotes);
+          break;
+        case 'reject':
+          success = await rejectRequest(selectedRequest.id, reviewNotes);
+          break;
+        case 'return':
+          success = await returnRequest(selectedRequest.id, reviewNotes);
+          break;
+        case 'execute':
+          success = await executeRequest(selectedRequest.id);
+          break;
+      }
+      
+      if (success) {
+        setSelectedRequest(null);
+        setActionType(null);
+        setReviewNotes('');
+      }
     } finally {
       setIsProcessing(false);
     }
   };
 
-  const openActionDialog = (request: HeadcountChangeRequest, action: 'approve' | 'reject') => {
+  const openActionDialog = (request: HeadcountRequestWithWorkflow, action: typeof actionType) => {
     setSelectedRequest(request);
     setActionType(action);
     setReviewNotes('');
+  };
+
+  const openTimeline = async (request: HeadcountRequestWithWorkflow) => {
+    setSelectedRequest(request);
+    setShowTimeline(true);
+    setLoadingTimeline(true);
+    try {
+      const data = await getRequestTimeline(request.id);
+      setTimeline(data);
+    } finally {
+      setLoadingTimeline(false);
+    }
   };
 
   if (isLoading) {
@@ -79,11 +126,11 @@ export function HeadcountRequestsWorkflowPanel({ companyId }: HeadcountRequestsW
     <Card>
       <CardHeader>
         <CardTitle className="text-lg flex items-center gap-2">
-          <TrendingUp className="h-5 w-5" />
-          Headcount Change Requests
+          <GitBranch className="h-5 w-5" />
+          Headcount Change Workflow
         </CardTitle>
         <CardDescription>
-          Review and approve headcount increase/decrease requests
+          Multi-level approval workflow for headcount changes (Manager → HR → Finance)
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -118,6 +165,8 @@ export function HeadcountRequestsWorkflowPanel({ companyId }: HeadcountRequestsW
                       request={request}
                       onApprove={() => openActionDialog(request, 'approve')}
                       onReject={() => openActionDialog(request, 'reject')}
+                      onReturn={() => openActionDialog(request, 'return')}
+                      onViewTimeline={() => openTimeline(request)}
                     />
                   ))}
                 </div>
@@ -139,6 +188,8 @@ export function HeadcountRequestsWorkflowPanel({ companyId }: HeadcountRequestsW
                       key={request.id} 
                       request={request}
                       readonly
+                      onViewTimeline={() => openTimeline(request)}
+                      onExecute={request.status === 'APPROVED' ? () => openActionDialog(request, 'execute') : undefined}
                     />
                   ))}
                 </div>
@@ -156,17 +207,20 @@ export function HeadcountRequestsWorkflowPanel({ companyId }: HeadcountRequestsW
         <DialogContent>
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              {actionType === 'approve' ? (
-                <CheckCircle className="h-5 w-5 text-green-600" />
-              ) : (
-                <XCircle className="h-5 w-5 text-red-600" />
-              )}
-              {actionType === 'approve' ? 'Approve' : 'Reject'} Request
+              {actionType === 'approve' && <CheckCircle className="h-5 w-5 text-green-600" />}
+              {actionType === 'reject' && <XCircle className="h-5 w-5 text-red-600" />}
+              {actionType === 'return' && <RotateCcw className="h-5 w-5 text-amber-600" />}
+              {actionType === 'execute' && <PlayCircle className="h-5 w-5 text-purple-600" />}
+              {actionType === 'approve' ? 'Approve' : 
+               actionType === 'reject' ? 'Reject' : 
+               actionType === 'return' ? 'Return for Revision' :
+               'Execute'} Request
             </DialogTitle>
             <DialogDescription>
-              {actionType === 'approve' 
-                ? 'Approving will initiate the headcount change process.'
-                : 'Rejecting will cancel this request.'}
+              {actionType === 'approve' && 'This will advance the request to the next approval level or complete it.'}
+              {actionType === 'reject' && 'This will permanently reject the request.'}
+              {actionType === 'return' && 'This will return the request to the requester for revisions.'}
+              {actionType === 'execute' && 'This will apply the approved headcount changes.'}
             </DialogDescription>
           </DialogHeader>
 
@@ -177,6 +231,12 @@ export function HeadcountRequestsWorkflowPanel({ companyId }: HeadcountRequestsW
                 <p className="text-sm text-muted-foreground">
                   {selectedRequest.request_type}: {selectedRequest.current_headcount} → {selectedRequest.requested_headcount}
                 </p>
+                {selectedRequest.workflow_instance && (
+                  <div className="flex items-center gap-2 mt-2 text-xs">
+                    <GitBranch className="h-3 w-3" />
+                    <span>Step {selectedRequest.workflow_instance.current_step_order}: {selectedRequest.current_step_name}</span>
+                  </div>
+                )}
               </div>
 
               {selectedRequest.displacement_required && actionType === 'approve' && (
@@ -187,23 +247,29 @@ export function HeadcountRequestsWorkflowPanel({ companyId }: HeadcountRequestsW
                       Displacement Required
                     </p>
                     <p className="text-red-700 dark:text-red-500">
-                      Approving will trigger displacement workflows for affected employees.
+                      Execution will trigger displacement workflows for affected employees.
                     </p>
                   </div>
                 </div>
               )}
 
-              <div className="space-y-2">
-                <Label>Review Notes {actionType === 'reject' && '*'}</Label>
-                <Textarea
-                  placeholder={actionType === 'approve' 
-                    ? 'Optional notes...' 
-                    : 'Explain why this request is being rejected...'}
-                  value={reviewNotes}
-                  onChange={(e) => setReviewNotes(e.target.value)}
-                  rows={3}
-                />
-              </div>
+              {actionType !== 'execute' && (
+                <div className="space-y-2">
+                  <Label>
+                    Comments {(actionType === 'reject' || actionType === 'return') && '*'}
+                  </Label>
+                  <Textarea
+                    placeholder={
+                      actionType === 'approve' ? 'Optional approval notes...' : 
+                      actionType === 'reject' ? 'Explain why this request is being rejected...' :
+                      'Explain what needs to be revised...'
+                    }
+                    value={reviewNotes}
+                    onChange={(e) => setReviewNotes(e.target.value)}
+                    rows={3}
+                  />
+                </div>
+              )}
             </div>
           )}
 
@@ -215,9 +281,10 @@ export function HeadcountRequestsWorkflowPanel({ companyId }: HeadcountRequestsW
               Cancel
             </Button>
             <Button
-              variant={actionType === 'approve' ? 'default' : 'destructive'}
+              variant={actionType === 'reject' ? 'destructive' : 
+                       actionType === 'execute' ? 'default' : 'default'}
               onClick={handleAction}
-              disabled={isProcessing || (actionType === 'reject' && !reviewNotes.trim())}
+              disabled={isProcessing || ((actionType === 'reject' || actionType === 'return') && !reviewNotes.trim())}
             >
               {isProcessing ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -226,14 +293,90 @@ export function HeadcountRequestsWorkflowPanel({ companyId }: HeadcountRequestsW
                   <CheckCircle className="h-4 w-4 mr-2" />
                   Approve
                 </>
-              ) : (
+              ) : actionType === 'reject' ? (
                 <>
                   <XCircle className="h-4 w-4 mr-2" />
                   Reject
                 </>
+              ) : actionType === 'return' ? (
+                <>
+                  <RotateCcw className="h-4 w-4 mr-2" />
+                  Return
+                </>
+              ) : (
+                <>
+                  <PlayCircle className="h-4 w-4 mr-2" />
+                  Execute
+                </>
               )}
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Timeline Dialog */}
+      <Dialog open={showTimeline} onOpenChange={setShowTimeline}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <History className="h-5 w-5" />
+              Workflow Timeline
+            </DialogTitle>
+            <DialogDescription>
+              {selectedRequest?.position?.title} - {selectedRequest?.request_type}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <ScrollArea className="max-h-[400px]">
+            {loadingTimeline ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-6 w-6 animate-spin" />
+              </div>
+            ) : timeline.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                <History className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                <p>No workflow history yet</p>
+              </div>
+            ) : (
+              <div className="space-y-4 p-4">
+                {timeline.map((event, index) => (
+                  <div key={event.id} className="flex gap-3">
+                    <div className="flex flex-col items-center">
+                      <div className={cn(
+                        "w-8 h-8 rounded-full flex items-center justify-center",
+                        event.event_type === 'approved' && "bg-green-100 text-green-600",
+                        event.event_type === 'rejected' && "bg-red-100 text-red-600",
+                        event.event_type === 'returned' && "bg-amber-100 text-amber-600",
+                        event.event_type === 'initiated' && "bg-blue-100 text-blue-600",
+                        !['approved', 'rejected', 'returned', 'initiated'].includes(event.event_type) && "bg-muted text-muted-foreground"
+                      )}>
+                        {event.event_type === 'approved' && <CheckCircle className="h-4 w-4" />}
+                        {event.event_type === 'rejected' && <XCircle className="h-4 w-4" />}
+                        {event.event_type === 'returned' && <RotateCcw className="h-4 w-4" />}
+                        {event.event_type === 'initiated' && <PlayCircle className="h-4 w-4" />}
+                      </div>
+                      {index < timeline.length - 1 && (
+                        <div className="w-px h-full bg-border mt-2" />
+                      )}
+                    </div>
+                    <div className="flex-1 pb-4">
+                      <p className="font-medium text-sm capitalize">
+                        {event.event_type.replace('_', ' ')}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {format(new Date(event.created_at), 'MMM d, yyyy h:mm a')}
+                      </p>
+                      {event.comment && (
+                        <p className="text-sm mt-1 p-2 bg-muted rounded">
+                          {event.comment}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </ScrollArea>
         </DialogContent>
       </Dialog>
     </Card>
@@ -241,15 +384,17 @@ export function HeadcountRequestsWorkflowPanel({ companyId }: HeadcountRequestsW
 }
 
 interface RequestCardProps {
-  request: HeadcountChangeRequest;
+  request: HeadcountRequestWithWorkflow;
   onApprove?: () => void;
   onReject?: () => void;
+  onReturn?: () => void;
+  onExecute?: () => void;
+  onViewTimeline?: () => void;
   readonly?: boolean;
 }
 
-function RequestCard({ request, onApprove, onReject, readonly }: RequestCardProps) {
+function RequestCard({ request, onApprove, onReject, onReturn, onExecute, onViewTimeline, readonly }: RequestCardProps) {
   const statusConfig = REQUEST_STATUS_CONFIG[request.status];
-  const typeConfig = REQUEST_TYPE_CONFIG[request.request_type];
   const isIncrease = request.request_type === 'INCREASE';
 
   return (
@@ -290,6 +435,26 @@ function RequestCard({ request, onApprove, onReject, readonly }: RequestCardProp
             </div>
           </div>
 
+          {/* Workflow Progress */}
+          {request.workflow_instance && (
+            <div className="flex items-center gap-2 mt-2">
+              <GitBranch className="h-4 w-4 text-muted-foreground" />
+              <span className="text-xs text-muted-foreground">
+                Step {request.workflow_instance.current_step_order}: {request.current_step_name || 'Pending'}
+              </span>
+              {request.workflow_instance.sla_status === 'warning' && (
+                <Badge variant="outline" className="text-xs text-amber-600 border-amber-300">
+                  SLA Warning
+                </Badge>
+              )}
+              {request.workflow_instance.sla_status === 'critical' && (
+                <Badge variant="destructive" className="text-xs">
+                  SLA Critical
+                </Badge>
+              )}
+            </div>
+          )}
+
           {request.displacement_required && (
             <div className="flex items-center gap-1 mt-2">
               <Badge variant="destructive" className="text-xs">
@@ -317,26 +482,64 @@ function RequestCard({ request, onApprove, onReject, readonly }: RequestCardProp
           )}
         </div>
 
-        {!readonly && (
-          <div className="flex items-center gap-2 shrink-0">
-            <Button 
-              size="sm" 
-              variant="outline"
-              onClick={onReject}
-              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+        <div className="flex flex-col items-end gap-2 shrink-0">
+          {onViewTimeline && (
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={onViewTimeline}
+              className="text-muted-foreground"
             >
-              <XCircle className="h-4 w-4 mr-1" />
-              Reject
+              <History className="h-4 w-4" />
             </Button>
+          )}
+          
+          {!readonly && (
+            <div className="flex items-center gap-2">
+              {onReturn && (
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  onClick={onReturn}
+                  className="text-amber-600 hover:text-amber-700 hover:bg-amber-50"
+                >
+                  <RotateCcw className="h-4 w-4" />
+                </Button>
+              )}
+              {onReject && (
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  onClick={onReject}
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                >
+                  <XCircle className="h-4 w-4 mr-1" />
+                  Reject
+                </Button>
+              )}
+              {onApprove && (
+                <Button 
+                  size="sm"
+                  onClick={onApprove}
+                >
+                  <CheckCircle className="h-4 w-4 mr-1" />
+                  Approve
+                </Button>
+              )}
+            </div>
+          )}
+
+          {readonly && onExecute && (
             <Button 
               size="sm"
-              onClick={onApprove}
+              onClick={onExecute}
+              className="bg-purple-600 hover:bg-purple-700"
             >
-              <CheckCircle className="h-4 w-4 mr-1" />
-              Approve
+              <PlayCircle className="h-4 w-4 mr-1" />
+              Execute
             </Button>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );
