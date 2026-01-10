@@ -58,6 +58,7 @@ import {
   Lightbulb,
   Heart,
   Video,
+  Database,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
@@ -109,6 +110,7 @@ const getAdminModuleSections = (
       { title: "Company Values", description: "Define organizational values for performance appraisals", href: "/admin/company-values", icon: Heart, color: "bg-rose-500/10 text-rose-600", tabCode: "company-values" },
       { title: "API Management", description: "Manage API keys, webhooks, and integrations", href: "/system/api-management", icon: Webhook, color: "bg-indigo-500/10 text-indigo-600", tabCode: "api-management" },
       { title: "Custom Fields", description: "Define custom fields for forms across the application", href: "/admin/custom-fields", icon: Cog, color: "bg-pink-500/10 text-pink-600", tabCode: "custom-fields" },
+      { title: "Data Management", description: "Populate demo data or purge transactional records", href: "/admin/data-management", icon: Database, color: "bg-orange-500/10 text-orange-600", tabCode: "data-management" },
     ],
     // Section 8: Documentation & Enablement
     // Enablement Center is only visible to Intelli HRM internal tenants
