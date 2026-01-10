@@ -14,11 +14,17 @@ interface PurgeConfig {
   confirmationToken?: string;
 }
 
-// Tables by purge level
+// Tables by purge level - aligned with get_purge_statistics function
+// NEVER PURGE: ai_agents, ai_guardrails_config, ai_model_registry, ai_budget_tiers,
+// kb_articles, kb_categories, manual_*, enablement_*, master_skills_library,
+// master_competencies_library, translations, lookup_values, application_*,
+// statutory_*, tax_*, country_*
+
 const TRANSACTION_TABLES = [
   'time_clock_entries',
   'attendance_records',
   'leave_requests',
+  'leave_request_history',
   'payroll_run_details',
   'payroll_runs',
   'goal_updates',
@@ -27,11 +33,13 @@ const TRANSACTION_TABLES = [
   'goals',
   'appraisal_section_responses',
   'appraisal_participants',
-  'audit_logs',
-  'ai_interaction_logs',
-  'ai_usage_logs',
+  'appraisal_cycles',
   'notification_logs',
-  'employee_notifications'
+  'employee_notifications',
+  'shift_assignments',
+  'shift_swaps',
+  'shift_swap_requests',
+  'overtime_requests'
 ];
 
 const NON_SEED_TABLES = [
@@ -44,8 +52,22 @@ const NON_SEED_TABLES = [
   'employee_dependents',
   'employee_emergency_contacts',
   'leave_balances',
-  'shift_swaps',
-  'shift_swap_requests'
+  'employee_documents',
+  'employee_job_history',
+  'employee_addresses',
+  'employee_work_schedules'
+];
+
+const COMPLETE_RESET_TABLES = [
+  ...NON_SEED_TABLES,
+  'profiles',
+  'departments',
+  'positions',
+  'companies',
+  'cost_centers',
+  'locations',
+  'job_grades',
+  'job_families'
 ];
 
 serve(async (req) => {
@@ -92,7 +114,7 @@ serve(async (req) => {
       console.error('Error fetching dependencies:', depError);
     }
 
-    // Determine which tables to purge
+    // Determine which tables to purge - use explicit lists, NOT dependency order
     let tablesToPurge: string[] = [];
     switch (purgeLevel) {
       case 'transactions_only':
@@ -102,8 +124,7 @@ serve(async (req) => {
         tablesToPurge = NON_SEED_TABLES;
         break;
       case 'complete_reset':
-        // Use all tables from dependency order
-        tablesToPurge = dependencies?.map(d => d.table_name) || NON_SEED_TABLES;
+        tablesToPurge = COMPLETE_RESET_TABLES;
         break;
     }
 
