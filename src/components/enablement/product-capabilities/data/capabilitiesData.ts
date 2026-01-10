@@ -416,37 +416,54 @@ export const CAPABILITIES_DATA: ActData[] = [
         id: "recruitment",
         title: "Recruitment",
         tagline: "Find, attract, and hire the best talent faster",
-        overview: "Complete Applicant Tracking System with requisition management, candidate pipeline, and seamless onboarding integration.",
-        badge: "55+ Capabilities",
+        overview: "Complete Applicant Tracking System with AI-powered sourcing, structured assessments, interview coordination, offer management, and seamless onboarding integration. Your end-to-end talent acquisition command center.",
+        badge: "85+ Capabilities",
+        challenge: "Every open position costs $500 per day unfilled. Manual resume screening misses qualified candidates, interview chaos frustrates hiring managers, and disjointed communication damages your employer brand. Without a unified system, great talent slips through the cracks while competitors move faster.",
+        promise: "Intelli HRM Recruitment is your complete talent acquisition command center. From requisition to offer acceptance, AI-powered sourcing, structured interviews, and seamless candidate experiences ensure you hire the best talent 50% faster—while maintaining full compliance and eliminating bias.",
+        keyOutcomes: [
+          { value: "50%", label: "Faster Time-to-Hire", description: "AI screening + automated workflows", trend: "up" },
+          { value: "35%", label: "Higher Candidate Quality", description: "AI matching + structured assessment", trend: "up" },
+          { value: "40%", label: "Lower Cost-per-Hire", description: "Job board optimization + referrals", trend: "down" },
+          { value: "85%+", label: "Offer Acceptance Rate", description: "Streamlined offer management", trend: "up" }
+        ],
+        personas: [
+          { persona: "Recruiter", benefit: "AI handles the noise so I focus on the best candidates", outcomes: ["AI-powered candidate matching and ranking", "Automated screening with skill extraction", "One-click candidate communication tools"] },
+          { persona: "Hiring Manager", benefit: "I see exactly who's in my pipeline and why", outcomes: ["Real-time pipeline visibility with stage tracking", "Structured scorecards for consistent evaluation", "Interview feedback aggregation and insights"] },
+          { persona: "HR Leader", benefit: "Complete visibility into hiring metrics and compliance", outcomes: ["Source effectiveness and diversity analytics", "Time-to-fill tracking by department and role", "Bias detection in screening and job postings"] },
+          { persona: "Candidate", benefit: "Professional experience that reflects the company brand", outcomes: ["Branded career portal with easy application", "Self-service interview scheduling", "Real-time status updates and communication"] }
+        ],
         categories: [
           {
             title: "Requisition Management",
+            context: "Every hire starts with proper authorization and budget alignment. Requisitions ensure headcount control and approval compliance.",
             items: [
-              "Job requisition creation and approval",
-              "Multi-level approval workflows",
-              "Budget tracking and headcount control",
-              "Position linking and vacancy management",
-              "Hiring manager collaboration",
-              "Requisition templates"
+              "Job requisition creation with position linking",
+              "Multi-level approval workflows with configurable routing",
+              "Budget tracking and headcount control validation",
+              "Hiring manager collaboration portal",
+              "Requisition templates by job family",
+              "Headcount request integration with workforce planning"
             ]
           },
           {
             title: "Job Posting & Sourcing",
+            context: "Reach the right candidates across every channel with consistent branding. Multi-channel distribution maximizes qualified applicant flow.",
             items: [
-              "Branded career portal",
-              "Multi-channel job distribution",
-              "Custom application forms",
-              "Job board integrations",
-              "Employee referral program",
-              "Social media sharing"
+              "Branded career portal with SEO optimization",
+              "Multi-channel job distribution (job boards, social)",
+              "Custom application forms by job type",
+              "Job board API integrations (Indeed, LinkedIn, etc.)",
+              "AI-powered job description optimization",
+              "Social media amplification and sharing"
             ]
           },
           {
             title: "Candidate Pipeline",
+            context: "Visual pipeline management ensures no candidate falls through the cracks. Real-time tracking keeps hiring on schedule.",
             items: [
-              "Visual pipeline management",
-              "Stage-based candidate tracking",
-              "Bulk actions and updates",
+              "Kanban-style pipeline visualization",
+              "Stage-based candidate tracking with SLAs",
+              "Bulk actions and stage transitions",
               "Talent pool management",
               "Duplicate candidate detection",
               "Candidate communication history"
@@ -454,8 +471,9 @@ export const CAPABILITIES_DATA: ActData[] = [
           },
           {
             title: "Selection & Assessment",
+            context: "Structured selection reduces bias and improves hire quality. Consistent evaluation criteria lead to better decisions.",
             items: [
-              "Configurable scorecards",
+              "Configurable scorecards by role",
               "Interview scheduling with calendar sync",
               "Panel review workflows",
               "Assessment integrations",
@@ -465,48 +483,74 @@ export const CAPABILITIES_DATA: ActData[] = [
           }
         ],
         aiCapabilities: [
-          { type: "Automated", description: "Resume parsing and data extraction" },
+          { type: "Automated", description: "Resume parsing and skill extraction" },
           { type: "Predictive", description: "Candidate-job matching scores" },
-          { type: "Compliance", description: "Bias detection in screening" },
-          { type: "Analytics", description: "Time-to-hire predictions" }
+          { type: "Compliance", description: "Bias detection in screening and postings" },
+          { type: "Analytics", description: "Time-to-hire and source effectiveness" }
         ],
         integrations: [
           { module: "Workforce", description: "Automatic employee record creation on hire" },
           { module: "Onboarding", description: "Pre-boarding task assignment" },
           { module: "Compensation", description: "Salary benchmarking for offers" }
-        ]
+        ],
+        regionalAdvantage: {
+          regions: ["Caribbean", "Africa", "Global"],
+          advantages: [
+            "Local job board integrations for regional reach",
+            "Multi-currency salary and offer support",
+            "Regional work permit and visa tracking",
+            "Country-specific employment documentation"
+          ]
+        }
       },
       {
         id: "workforce",
         title: "Workforce Management",
         tagline: "The complete employee record, from hire to retire",
-        overview: "Comprehensive employee master data, organization structure, position management, and workforce analytics. The core of your HR operations.",
-        badge: "100+ Capabilities",
+        overview: "Comprehensive employee master data, organization structure, position management, job architecture, headcount planning, and workforce analytics. The single source of truth for your entire organization with 16+ configurable data tabs per employee.",
+        badge: "150+ Capabilities",
+        challenge: "Employee data scattered across spreadsheets, siloed org charts that are always outdated, and manual position tracking create a governance nightmare. Without a single source of truth, strategic workforce decisions are based on gut feel, compliance risks multiply, and HR spends hours chasing data instead of driving strategy.",
+        promise: "Intelli HRM Workforce Management is your organization's living blueprint. Every employee, every position, every reporting relationship—unified in one intelligent system that automatically maintains accuracy, surfaces insights, and enables data-driven workforce planning across countries and entities.",
+        keyOutcomes: [
+          { value: "99.9%", label: "Data Accuracy", description: "Single source of truth", trend: "up" },
+          { value: "80%", label: "Faster Reporting", description: "Real-time dashboards vs. manual", trend: "up" },
+          { value: "Near Zero", label: "Compliance Risk", description: "Automated document tracking", trend: "down" },
+          { value: "360°", label: "Workforce Visibility", description: "All dimensions, all countries", trend: "up" }
+        ],
+        personas: [
+          { persona: "HR Business Partner", benefit: "I see my entire workforce at a glance with real insights", outcomes: ["Complete employee profiles across 16+ data tabs", "Real-time org structure with drill-down", "Attrition risk alerts and workforce trends"] },
+          { persona: "Compensation Analyst", benefit: "Position data flows seamlessly into pay decisions", outcomes: ["Job architecture with salary grade linkage", "Position-based compensation planning", "Market data integration for benchmarking"] },
+          { persona: "Compliance Officer", benefit: "Every document tracked, every expiry alerted", outcomes: ["Document expiry tracking with alerts", "Work permit and certification monitoring", "Complete audit trail for all changes"] },
+          { persona: "Workforce Planner", benefit: "Scenario modeling with real data, not spreadsheets", outcomes: ["Headcount requests and approval workflows", "Monte Carlo workforce forecasting", "Skills gap analysis and planning"] }
+        ],
         categories: [
           {
             title: "Employee Master Data",
+            context: "The employee record is the foundation of all HR operations. Complete, accurate data enables every downstream process.",
             items: [
-              "16+ configurable data tabs",
-              "100+ standard fields with custom field support",
-              "Document attachments and expiry tracking",
-              "Employment history and transactions",
-              "Government ID management (TRN, NIS, etc.)",
-              "Dependent and emergency contact tracking"
+              "100+ standard fields with unlimited custom fields",
+              "16+ configurable data tabs per employee",
+              "Document attachments with expiry tracking",
+              "Employment history and transaction log",
+              "Government ID management (TRN, NIS, NHT, SSN, etc.)",
+              "Dependent and emergency contact management"
             ]
           },
           {
             title: "Organization Structure",
+            context: "Interactive org charts that stay current automatically. Visualize your organization across any dimension.",
             items: [
-              "Interactive org charts with date filtering",
+              "Multi-dimensional org visualization",
+              "Date-effective org snapshots and history",
               "Department and division hierarchies",
               "Cost center management",
               "Location and site configuration",
-              "Reporting relationship management",
-              "Org change tracking and history"
+              "Reporting relationship management"
             ]
           },
           {
             title: "Position Management",
+            context: "Positions are the building blocks of workforce planning. Proper position management enables budgeting, succession, and compliance.",
             items: [
               "Job catalog with job families",
               "Position budgeting and control",
@@ -518,8 +562,9 @@ export const CAPABILITIES_DATA: ActData[] = [
           },
           {
             title: "Lifecycle & Transactions",
+            context: "Every employee lifecycle event—from promotion to termination—must be tracked and auditable.",
             items: [
-              "Promotions and transfers",
+              "Promotions and transfers with approval workflows",
               "Terminations with exit workflows",
               "Rehire processing",
               "Mass update capabilities",
@@ -532,7 +577,7 @@ export const CAPABILITIES_DATA: ActData[] = [
           { type: "Predictive", description: "Attrition risk scoring and alerts" },
           { type: "Analytics", description: "Monte Carlo workforce forecasting" },
           { type: "Prescriptive", description: "Org structure optimization recommendations" },
-          { type: "Automated", description: "Probation tracking and alerts" }
+          { type: "Automated", description: "Probation tracking and document expiry alerts" }
         ],
         integrations: [
           { module: "Payroll", description: "Employee compensation and banking data" },
@@ -540,7 +585,15 @@ export const CAPABILITIES_DATA: ActData[] = [
           { module: "Performance", description: "Manager relationships and goal owners" },
           { module: "Succession", description: "9-Box placement and career paths" }
         ],
-        regionalNote: "Caribbean statutory IDs (TRN, NIS, NHT), African national ID formats, multi-country employment support"
+        regionalAdvantage: {
+          regions: ["Caribbean", "Africa", "Global"],
+          advantages: [
+            "Caribbean statutory IDs (TRN, NIS, NHT) pre-configured",
+            "African national ID formats supported",
+            "Multi-country employment contracts and terms",
+            "Regional labor law compliance tracking"
+          ]
+        }
       }
     ]
   },
@@ -554,231 +607,345 @@ export const CAPABILITIES_DATA: ActData[] = [
         id: "ess",
         title: "Employee Self-Service (ESS)",
         tagline: "Empower employees with 24/7 HR access",
-        overview: "Comprehensive self-service portal enabling employees to manage their personal information, time, pay, and career development independently.",
-        badge: "30+ Capabilities",
+        overview: "Comprehensive self-service portal enabling employees to manage their personal information, time, pay, and career development independently—reducing HR burden while increasing employee satisfaction.",
+        badge: "75+ Capabilities",
+        challenge: "HR is drowning in routine requests. Employees wait days for simple answers about their pay, leave balances, and benefits. Paper forms get lost, phone calls go to voicemail, and email inboxes overflow. Meanwhile, HR spends 70% of their time on transactional tasks instead of strategic initiatives.",
+        promise: "Intelli HRM Employee Self-Service puts the power of HR in every employee's pocket. A single, intuitive portal for everything—viewing payslips, requesting leave, updating personal information, tracking goals, and managing careers. Employees get instant answers; HR gets their time back.",
+        keyOutcomes: [
+          { value: "80%", label: "HR Inquiries Reduced", description: "Self-service replaces routine questions", trend: "down" },
+          { value: "90%", label: "Faster Request Processing", description: "Digital workflows vs. paper forms", trend: "up" },
+          { value: "+25", label: "eNPS Improvement", description: "Employee satisfaction from self-service", trend: "up" },
+          { value: "15 hrs", label: "Admin Time Saved Weekly", description: "Per HR team member", trend: "down" }
+        ],
+        personas: [
+          { persona: "Employee", benefit: "I can manage my work life without waiting for HR", outcomes: ["Instant access to payslips and tax documents", "Self-service leave requests with real-time balance", "Personal information updates with approval tracking"] },
+          { persona: "HR Operations", benefit: "I focus on strategy, not answering the same questions", outcomes: ["Automated change request workflows", "Reduced email and phone inquiries", "Complete audit trail for all changes"] },
+          { persona: "Manager", benefit: "My team is empowered to help themselves", outcomes: ["Employees resolve own queries", "Visible approval queue", "Team coverage visibility"] },
+          { persona: "IT Administrator", benefit: "One portal, fewer support tickets", outcomes: ["Single sign-on integration", "Self-service password management", "Mobile and desktop access"] }
+        ],
         categories: [
           {
             title: "Personal Information",
+            context: "Employees should own their data. Self-service updates with proper approval workflows reduce errors and HR burden.",
             items: [
-              "Profile and contact management",
-              "Emergency contact updates",
-              "Photo upload and management",
-              "Banking details (with approval)",
-              "Dependents and beneficiaries",
-              "Government ID viewing"
+              "Profile and contact management with change request workflows",
+              "Emergency contact updates with approval routing",
+              "Photo upload with verification capability",
+              "Banking details management with dual-approval security",
+              "Dependents and beneficiaries with lifecycle tracking",
+              "Government ID viewing (TRN, NIS, NHT, SSN, BIR)"
             ]
           },
           {
             title: "Time & Leave",
+            context: "Time and leave are the most frequent employee interactions. Self-service here has the highest impact on HR efficiency.",
             items: [
-              "Clock in/out with geofencing",
-              "Leave request submission",
-              "Balance viewing and projections",
-              "Schedule and shift viewing",
-              "Timesheet submission",
-              "Team calendar access"
+              "Clock in/out with geofencing and photo capture",
+              "Leave request submission with balance projection",
+              "Real-time balance viewing across all leave types",
+              "Schedule and shift viewing with swap requests",
+              "Timesheet submission and approval tracking",
+              "Team calendar access for coverage visibility"
             ]
           },
           {
             title: "Pay & Benefits",
+            context: "Pay and benefits questions are sensitive and time-consuming. Self-service reduces anxiety and HR workload.",
             items: [
-              "Payslip viewing and download",
-              "Tax document access",
-              "Benefit election management",
-              "Claims submission",
-              "Total rewards statement",
-              "Expense claim submission"
+              "Payslip viewing with drill-down details",
+              "Tax document access and download (P45, P60, W-2)",
+              "Benefits enrollment and annual elections",
+              "Benefit claims submission with documentation",
+              "Total rewards statement generation",
+              "Expense claim submission with receipt upload"
             ]
           },
           {
             title: "Career & Development",
+            context: "Career development shouldn't wait for annual reviews. Self-service tools enable continuous growth.",
             items: [
-              "Goals viewing and progress",
-              "Training enrollment",
-              "Internal job applications",
-              "Skill profile management",
-              "Development plan access",
-              "Feedback submission"
+              "Goals viewing and progress updates",
+              "Training enrollment with course catalog",
+              "Internal job applications (career portal)",
+              "Skill profile management and gap analysis",
+              "Development plan access and tracking",
+              "Continuous feedback viewing and history"
             ]
           }
         ],
         aiCapabilities: [
           { type: "Prescriptive", description: "Personalized dashboard with smart task prioritization" },
-          { type: "Conversational", description: "AI chatbot for HR questions and policy lookup" }
+          { type: "Conversational", description: "AI chatbot for HR questions and policy lookup" },
+          { type: "Predictive", description: "Leave balance projection with usage recommendations" },
+          { type: "Automated", description: "Career path suggestions based on skills and interests" }
         ],
-        integrations: []
+        integrations: [
+          { module: "HR Hub", description: "Policies, documents, and announcements" },
+          { module: "Time & Attendance", description: "Clock entries and timesheets" },
+          { module: "Leave", description: "Balances and request workflows" },
+          { module: "Payroll", description: "Payslips and tax documents" },
+          { module: "Performance", description: "Goals, feedback, and appraisals" }
+        ],
+        regionalAdvantage: {
+          regions: ["Caribbean", "Africa", "Global"],
+          advantages: [
+            "Regional government ID viewing and updates",
+            "Country-specific tax document access",
+            "Multi-language interface support",
+            "Regional public holiday calendars"
+          ]
+        }
       },
       {
         id: "mss",
         title: "Manager Self-Service (MSS)",
         tagline: "Equip managers with real-time team insights",
-        overview: "Unified manager portal providing team oversight, approval workflows, performance management, and workforce action capabilities.",
-        badge: "35+ Capabilities",
+        overview: "Unified manager portal providing team oversight, unified approvals, performance management, and workforce action capabilities—with AI that surfaces risks before they become crises.",
+        badge: "90+ Capabilities",
+        challenge: "Managers are flying blind. Team data is scattered across spreadsheets, approval requests pile up in email, and critical decisions about hiring, promotions, and performance happen without real-time insights. By the time managers notice problems—attrition, burnout, skill gaps—it's often too late to act.",
+        promise: "Intelli HRM Manager Self-Service transforms managers into informed leaders. A single dashboard for team oversight, unified approvals, performance management, and workforce actions—with AI that surfaces risks before they become crises. Managers spend less time on admin and more time on leadership.",
+        keyOutcomes: [
+          { value: "75%", label: "Faster Approval Cycle", description: "Unified inbox + mobile approvals", trend: "up" },
+          { value: "60%", label: "Manager Admin Time Reduced", description: "Consolidated workflows", trend: "down" },
+          { value: "3 mo", label: "Earlier Risk Detection", description: "AI-powered team alerts", trend: "up" },
+          { value: "+40%", label: "Decision Quality", description: "Data-driven recommendations", trend: "up" }
+        ],
+        personas: [
+          { persona: "First-Line Manager", benefit: "I see my team's pulse at a glance and act before issues escalate", outcomes: ["Real-time team attendance and leave visibility", "Unified approval inbox for all requests", "AI-powered attrition and burnout alerts"] },
+          { persona: "Senior Manager", benefit: "I have visibility across teams with drill-down when needed", outcomes: ["Multi-level team analytics", "Cross-team coverage planning", "Performance distribution insights"] },
+          { persona: "HR Business Partner", benefit: "Managers are self-sufficient, freeing me for strategic work", outcomes: ["Managers handle routine approvals independently", "Exception-based HR escalation", "Coaching prompts for managers"] },
+          { persona: "Executive", benefit: "Confident managers make better workforce decisions", outcomes: ["Reduced management overhead", "Consistent policy application", "Data-driven workforce actions"] }
+        ],
         categories: [
           {
             title: "Team Overview",
+            context: "Managers need a single view of their team's status. Real-time dashboards replace scattered data sources.",
             items: [
-              "Team org chart and headcount",
-              "Attendance summary dashboard",
-              "Leave calendar visualization",
-              "Direct reports management",
-              "Team member profiles",
-              "Vacancy and open position tracking"
+              "Team org chart with headcount and vacancy tracking",
+              "Attendance summary with real-time status",
+              "Leave calendar visualization with coverage gaps",
+              "Direct reports quick access with profile cards",
+              "Team demographics and tenure analysis",
+              "Probation and milestone alerts"
             ]
           },
           {
             title: "Unified Approvals",
+            context: "Approval bottlenecks damage employee experience. A unified inbox with mobile access keeps work moving.",
             items: [
-              "Consolidated approval inbox",
-              "Leave and time-off approvals",
-              "Expense and claims approvals",
-              "Training request approvals",
-              "Requisition approvals",
-              "Bulk approval actions"
+              "Consolidated approval inbox across all modules",
+              "Leave, time-off, and overtime approvals",
+              "Expense and benefit claims approvals",
+              "Training request approvals with budget visibility",
+              "Requisition and headcount approvals",
+              "Bulk approval actions with delegation"
             ]
           },
           {
             title: "Performance Management",
+            context: "Performance management is a continuous process, not an annual event. Managers need tools for ongoing coaching.",
             items: [
-              "Team goal tracking and progress",
-              "Feedback and recognition tools",
-              "Performance review initiation",
-              "Calibration session input",
-              "PIP creation and tracking",
-              "1-on-1 meeting scheduling"
+              "Team goal tracking with cascading alignment",
+              "Feedback and recognition delivery tools",
+              "Performance review initiation and completion",
+              "Calibration session participation",
+              "PIP creation, tracking, and milestone management",
+              "1-on-1 meeting scheduling and notes"
             ]
           },
           {
             title: "Workforce Actions",
+            context: "Managers drive workforce changes. Streamlined workflows with cost visibility enable better decisions.",
             items: [
-              "Promotion and transfer requests",
-              "Compensation change requests",
-              "Disciplinary action initiation",
-              "Termination requests",
-              "Onboarding task management",
-              "Offboarding coordination"
+              "Promotion and transfer requests with cost modeling",
+              "Compensation change requests with impact analysis",
+              "Disciplinary action initiation with documentation",
+              "Termination requests with offboarding trigger",
+              "Onboarding task management visibility",
+              "Offboarding coordination and exit interviews"
             ]
           }
         ],
         aiCapabilities: [
           { type: "Predictive", description: "Team attrition and burnout risk alerts" },
           { type: "Prescriptive", description: "Coaching recommendations based on team dynamics" },
-          { type: "Analytics", description: "Workload distribution insights" }
+          { type: "Analytics", description: "Workload distribution and balance insights" },
+          { type: "Predictive", description: "Succession gap detection and readiness alerts" }
         ],
-        integrations: []
+        integrations: [
+          { module: "ESS", description: "Employee requests and self-service actions" },
+          { module: "Performance", description: "Goals, reviews, and feedback" },
+          { module: "Time & Attendance", description: "Timesheet and overtime approvals" },
+          { module: "Leave", description: "Leave request approvals" },
+          { module: "Recruitment", description: "Requisitions and hiring" }
+        ],
+        regionalAdvantage: {
+          regions: ["Caribbean", "Africa", "Global"],
+          advantages: [
+            "Regional labor law guidance for manager decisions",
+            "Country-specific approval workflows",
+            "Multi-currency cost visibility",
+            "Regional compliance alerts"
+          ]
+        }
       },
       {
         id: "time-attendance",
         title: "Time & Attendance",
-        tagline: "Accurate time tracking with smart scheduling",
-        overview: "Full time management from clock-in to payroll integration, including shift management, overtime control, and compliance tracking.",
-        badge: "40+ Capabilities",
+        tagline: "Accurate time tracking with intelligent compliance",
+        overview: "Comprehensive time management with multiple clock methods, geofencing validation, shift scheduling, overtime control, and seamless payroll integration—with AI-powered anomaly detection and compliance automation.",
+        badge: "120+ Capabilities",
+        challenge: "Time theft, buddy punching, overtime abuse, and union compliance violations cost organizations millions annually. Manual timesheets are error-prone, shift scheduling is a nightmare, and payroll corrections consume weeks of HR time. Without accurate time data, labor costs spiral out of control.",
+        promise: "Intelli HRM Time & Attendance captures every hour with precision and intelligence. Multi-method clocking, geofencing validation, biometric verification, and AI-powered anomaly detection ensure accurate time records. Automated shift scheduling, overtime control, and seamless payroll integration transform time management from a liability into an asset.",
+        keyOutcomes: [
+          { value: "99.9%", label: "Time Accuracy", description: "Geofencing + biometric verification", trend: "up" },
+          { value: "25%", label: "Overtime Costs Reduced", description: "Pre-approval + AI alerts", trend: "down" },
+          { value: "80%", label: "Faster Payroll Processing", description: "Automated time-to-pay flow", trend: "up" },
+          { value: "~0", label: "Compliance Violations", description: "Union rule automation", trend: "down" }
+        ],
+        personas: [
+          { persona: "Employee", benefit: "Clocking is effortless, and my hours are always correct", outcomes: ["Web, mobile, and kiosk clocking options", "Real-time hour tracking and visibility", "Self-service timesheet access"] },
+          { persona: "Supervisor", benefit: "I know exactly who's working and when, in real-time", outcomes: ["Real-time attendance dashboard", "Exception alerts for late arrivals", "Shift coverage visibility"] },
+          { persona: "Payroll Administrator", benefit: "Time data flows to payroll without manual intervention", outcomes: ["Automated overtime calculations", "Validated time records for processing", "Exception-based review only"] },
+          { persona: "HR Compliance Officer", benefit: "Labor law and CBA compliance is built-in, not bolted-on", outcomes: ["Union time rule automation", "Break and rest period enforcement", "Full audit trail for all punches"] }
+        ],
         categories: [
           {
-            title: "Clock Operations",
+            title: "Multi-Method Clocking",
+            context: "Different work environments require different clock methods. Flexibility without sacrificing accuracy.",
             items: [
-              "Web, mobile, and kiosk clock-in",
-              "Biometric device integration",
-              "GPS and geofencing verification",
-              "Facial recognition support",
-              "Offline mode with sync",
-              "Exception handling workflows"
+              "Web, mobile, and kiosk clocking options",
+              "Biometric device integration (fingerprint, facial recognition)",
+              "GPS and geofencing validation with accuracy tracking",
+              "Offline clock support with queue sync",
+              "Photo capture on clock-in/out with face verification",
+              "Break tracking with automatic enforcement"
             ]
           },
           {
             title: "Shift Management",
+            context: "Complex scheduling is a major pain point. AI-assisted scheduling optimizes coverage while respecting preferences.",
             items: [
-              "Shift template configuration",
-              "Rotating schedule support",
-              "Shift swap and bid management",
-              "Coverage gap identification",
-              "Multi-location scheduling",
-              "Employee preference matching"
+              "Shift pattern configuration with templates",
+              "Rotation schedule management",
+              "Shift swap requests with approval workflow",
+              "Coverage planning and gap detection",
+              "Open shift broadcasting and bidding",
+              "Shift differentials by time/day configuration"
             ]
           },
           {
             title: "Overtime Control",
+            context: "Overtime costs can spiral without controls. Pre-approval and real-time alerts keep costs in check.",
             items: [
-              "Overtime rules and thresholds",
-              "Pre-approval workflows",
-              "Real-time overtime tracking",
-              "Cost allocation by project",
-              "Compensatory time management",
-              "Overtime reports and alerts"
+              "Country-specific OT rules (1.5x/2x/3x)",
+              "Pre-approval workflows with budget check",
+              "Budget and threshold alerts",
+              "Weekly/daily hour limit enforcement",
+              "Overtime risk alerts with trending analysis",
+              "Cost projection by overtime category"
             ]
           },
           {
             title: "Compliance & Integration",
+            context: "Labor law compliance varies by country. Built-in rules ensure compliance without manual tracking.",
             items: [
-              "Break and meal tracking",
+              "Break and meal tracking with enforcement",
               "Labor law compliance checks",
-              "Attendance reporting",
+              "CBA agreement management and rule configuration",
               "Payroll data integration",
               "Project time allocation",
-              "Audit trail and history"
+              "Complete audit trail and history"
             ]
           }
         ],
         aiCapabilities: [
-          { type: "Predictive", description: "Schedule optimization recommendations" },
+          { type: "Predictive", description: "AI-powered schedule optimization" },
           { type: "Automated", description: "Anomaly detection in punch patterns" },
-          { type: "Analytics", description: "Attendance trend analysis" }
+          { type: "Analytics", description: "Attendance trend analysis and forecasting" },
+          { type: "Prescriptive", description: "Overtime risk alerts and recommendations" }
         ],
         integrations: [
           { module: "Payroll", description: "Hours worked and overtime calculations" },
-          { module: "Leave", description: "Absence and leave data" },
-          { module: "Wellness", description: "Working hours for fatigue monitoring" }
+          { module: "Leave", description: "Absence and leave data synchronization" },
+          { module: "Workforce", description: "Schedule assignments and employee data" }
         ],
-        regionalNote: "Caribbean overtime rules, regional labor law compliance, multi-jurisdiction shift requirements"
+        regionalAdvantage: {
+          regions: ["Caribbean", "Africa", "Global"],
+          advantages: [
+            "Caribbean overtime rules pre-configured",
+            "Regional labor law compliance built-in",
+            "Multi-jurisdiction shift requirements",
+            "CBA rule automation for unionized workforces"
+          ]
+        }
       },
       {
         id: "leave",
         title: "Leave Management",
-        tagline: "Flexible leave policies with regional compliance",
-        overview: "Comprehensive leave management supporting unlimited leave types, policy configuration, balance tracking, and regional statutory requirements.",
-        badge: "35+ Capabilities",
+        tagline: "Flexible leave policies for every scenario",
+        overview: "Comprehensive leave administration with configurable types, accrual rules, self-service requests, compliance tracking, and liability forecasting—handling every leave scenario across multiple countries.",
+        badge: "80+ Capabilities",
+        challenge: "Leave management is a compliance minefield. Manual balance tracking leads to errors, policy variations by country create confusion, and coverage gaps during peak vacation seasons cripple operations. Employees don't know their entitlements; managers don't know who's available; HR doesn't know their liability exposure.",
+        promise: "Intelli HRM Leave Management handles every leave scenario with precision. From statutory entitlements to custom policies, from accrual calculations to liability forecasting—every leave type, every country, every rule. Employees see real-time balances; managers maintain coverage; compliance is automatic.",
+        keyOutcomes: [
+          { value: "100%", label: "Balance Accuracy", description: "Automated accrual calculations", trend: "up" },
+          { value: "Same Day", label: "Request Processing", description: "Self-service + auto-routing", trend: "up" },
+          { value: "~0", label: "Coverage Gaps", description: "Conflict detection + blackouts", trend: "down" },
+          { value: "Zero", label: "Compliance Risk", description: "Statutory leave automation", trend: "down" }
+        ],
+        personas: [
+          { persona: "Employee", benefit: "I know exactly what leave I have and can request it instantly", outcomes: ["Real-time balance viewing across all leave types", "Self-service leave requests with projections", "Transparent accrual and usage history"] },
+          { persona: "Manager", benefit: "I always have coverage and can plan around absences", outcomes: ["Team leave calendar with conflict detection", "Coverage gap identification and alerts", "Blackout period enforcement"] },
+          { persona: "Payroll Administrator", benefit: "Leave pay calculations are automatic and accurate", outcomes: ["Automated leave pay calculations", "Encashment processing integration", "Year-end balance processing"] },
+          { persona: "HR Compliance Officer", benefit: "Statutory leave requirements are always met", outcomes: ["Country-specific statutory leave tracking", "Audit-ready leave records", "Liability forecasting and reporting"] }
+        ],
         categories: [
           {
-            title: "Leave Types & Rules",
+            title: "Leave Types & Configuration",
+            context: "Every organization has unique leave policies. Unlimited configuration ensures the system adapts to you.",
             items: [
-              "Unlimited leave type configuration",
-              "Accrual rules and formulas",
-              "Carry-forward policies",
-              "Eligibility and tenure rules",
-              "Encashment options",
-              "Negative balance handling"
+              "30+ configurable leave types",
+              "Paid vs. unpaid leave designation",
+              "Gender-specific leave types (maternity, paternity)",
+              "Accrual-based vs. entitlement-based types",
+              "Negative balance allowance with limits",
+              "Documentation requirements per leave type"
+            ]
+          },
+          {
+            title: "Accrual Engine",
+            context: "Accrual rules vary by country, tenure, and policy. A powerful accrual engine handles all scenarios.",
+            items: [
+              "Multiple accrual rule engines",
+              "Service-based entitlement tiers",
+              "Pro-ration for mid-year joins",
+              "Accrual frequency configuration",
+              "Accrual caps and limits",
+              "Balance recalculation tools"
             ]
           },
           {
             title: "Request & Approval",
+            context: "Leave requests should be fast and transparent. Self-service with smart routing keeps work moving.",
             items: [
               "Self-service leave requests",
               "Multi-level approval workflows",
-              "Attachment requirements",
-              "Delegation and proxy",
-              "Cancellation workflows",
-              "Calendar blocking integration"
-            ]
-          },
-          {
-            title: "Balance & Tracking",
-            items: [
-              "Real-time balance display",
-              "Balance projections",
-              "Accrual history",
-              "Used vs remaining analysis",
-              "Expiry notifications",
-              "Year-end processing"
+              "Delegation during absence",
+              "Escalation rules with SLA",
+              "Document attachment support",
+              "Approval history and audit trail"
             ]
           },
           {
             title: "Calendar & Compliance",
+            context: "Coverage and compliance are non-negotiable. Smart calendars and statutory tracking ensure both.",
             items: [
-              "Team leave calendar",
-              "Public holiday configuration",
+              "Team leave calendar with conflict detection",
+              "Public holiday configuration by country",
               "Blackout period management",
               "Minimum staffing rules",
-              "Statutory reporting",
+              "Statutory leave reporting",
               "Absence pattern alerts"
             ]
           }
@@ -786,14 +953,23 @@ export const CAPABILITIES_DATA: ActData[] = [
         aiCapabilities: [
           { type: "Predictive", description: "Leave pattern forecasting for staffing" },
           { type: "Prescriptive", description: "Optimal leave approval recommendations" },
-          { type: "Automated", description: "Balance alerts and expiry notifications" }
+          { type: "Automated", description: "Balance alerts and expiry notifications" },
+          { type: "Analytics", description: "Leave liability forecasting" }
         ],
         integrations: [
           { module: "Time & Attendance", description: "Absence synchronization" },
           { module: "Payroll", description: "Leave pay calculations" },
           { module: "Workforce", description: "Tenure and eligibility data" }
         ],
-        regionalNote: "Caribbean statutory leave (Jamaica, Trinidad), African maternity/paternity requirements, regional public holidays"
+        regionalAdvantage: {
+          regions: ["Caribbean", "Africa", "Global"],
+          advantages: [
+            "Caribbean statutory leave (Jamaica, Trinidad, Barbados)",
+            "African maternity/paternity requirements",
+            "Regional public holiday calendars",
+            "Country-specific accrual rules"
+          ]
+        }
       }
     ]
   },
@@ -806,12 +982,27 @@ export const CAPABILITIES_DATA: ActData[] = [
       {
         id: "payroll",
         title: "Payroll",
-        tagline: "Multi-country payroll with regional compliance built-in",
-        overview: "Enterprise payroll processing with gross-to-net calculations, statutory compliance, and comprehensive reporting for Caribbean and African markets.",
-        badge: "50+ Capabilities",
+        tagline: "Multi-country payroll with Caribbean, Latin American, and African compliance built-in",
+        overview: "Enterprise payroll processing with gross-to-net calculations, statutory compliance, and comprehensive reporting for Caribbean, Latin American, and African markets.",
+        badge: "150+ Capabilities",
+        challenge: "Payroll errors destroy trust. A single mistake affects employee livelihoods, creates compliance nightmares, and generates weeks of manual corrections. Multi-country operations multiply the complexity—different tax tables, statutory deductions, and filing requirements across Jamaica, Trinidad, Dominican Republic, Ghana, Nigeria, and beyond.",
+        promise: "Intelli HRM Payroll is your complete pay processing command center. From gross-to-net calculations with country-specific compliance for the Caribbean, Latin America, and Africa to GL integration and bank file generation, every payrun is accurate, auditable, and on time. AI-powered anomaly detection catches errors before they happen.",
+        keyOutcomes: [
+          { value: "99.99%", label: "Payroll Accuracy", description: "AI anomaly detection + validation", trend: "up" },
+          { value: "70%", label: "Faster Processing Time", description: "Automation vs. manual", trend: "up" },
+          { value: "100%", label: "Compliance Audit Ready", description: "Full audit trail + statutory reports", trend: "up" },
+          { value: "Real-Time", label: "Cost Allocation", description: "Automated GL integration", trend: "up" }
+        ],
+        personas: [
+          { persona: "Payroll Administrator", benefit: "I process payroll with confidence knowing errors are caught before they matter", outcomes: ["AI-powered anomaly detection", "Pre-run validation checks", "Exception-based review"] },
+          { persona: "Finance Controller", benefit: "GL entries and cost allocations are automatic and accurate", outcomes: ["Automated journal entries", "Cost center allocation", "Real-time financial visibility"] },
+          { persona: "Compliance Officer", benefit: "Every statutory filing is on time with full documentation", outcomes: ["Country-specific statutory reports", "Government submission files", "Complete audit trail"] },
+          { persona: "Employee", benefit: "My pay is always correct, and I can see every detail on my payslip", outcomes: ["Accurate, on-time payments", "Detailed payslip access", "Tax document availability"] }
+        ],
         categories: [
           {
             title: "Pay Processing",
+            context: "Payroll processing must be accurate, timely, and auditable. Automation reduces errors while maintaining control.",
             items: [
               "Scheduled and ad-hoc pay runs",
               "Gross-to-net calculations",
@@ -823,6 +1014,7 @@ export const CAPABILITIES_DATA: ActData[] = [
           },
           {
             title: "Earnings & Deductions",
+            context: "Complex earning and deduction rules must be handled with precision. Formula-based calculations ensure accuracy.",
             items: [
               "Unlimited pay code configuration",
               "Formula-based calculations",
@@ -834,17 +1026,19 @@ export const CAPABILITIES_DATA: ActData[] = [
           },
           {
             title: "Statutory Compliance",
+            context: "Regional compliance is non-negotiable. Pre-built rules for Caribbean, Latin American, and African markets reduce risk.",
             items: [
-              "NIS contributions (Jamaica, Trinidad)",
-              "NHT calculations (Jamaica)",
-              "PAYE tax processing",
-              "SSNIT contributions (Ghana)",
-              "Pension fund compliance",
-              "Statutory tax relief schemes"
+              "Caribbean: NIS, NHT, HEART, PAYE (Jamaica, Trinidad, Barbados)",
+              "Latin America: AFP, TSS (Dominican Republic), IMSS (Mexico)",
+              "Africa: SSNIT (Ghana), Pension (Nigeria)",
+              "Tax bracket configuration by country",
+              "Statutory rate band management",
+              "Tax form generation (W-2, P60, IR56)"
             ]
           },
           {
             title: "Reporting & Output",
+            context: "Payroll outputs must integrate seamlessly with finance, banking, and government systems.",
             items: [
               "Payroll journals and GL integration",
               "Bank file generation",
@@ -866,7 +1060,15 @@ export const CAPABILITIES_DATA: ActData[] = [
           { module: "Benefits", description: "Deductions and employer contributions" },
           { module: "Finance/GL", description: "Journal entries and cost allocation" }
         ],
-        regionalNote: "Full Caribbean statutory support (Jamaica NIS/NHT/PAYE/HEART, Trinidad NIS/PAYE), African payroll (Ghana SSNIT, Nigeria pension), multi-country tax tables"
+        regionalAdvantage: {
+          regions: ["Caribbean", "Latin America", "Africa"],
+          advantages: [
+            "Full Caribbean statutory support (Jamaica NIS/NHT/PAYE/HEART, Trinidad, Barbados)",
+            "Latin American compliance (Dominican Republic AFP/TSS, Mexico IMSS)",
+            "African payroll (Ghana SSNIT, Nigeria pension)",
+            "Multi-country tax tables and government filings"
+          ]
+        }
       },
       {
         id: "compensation",
