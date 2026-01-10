@@ -145,7 +145,7 @@ export default function HRHubDashboardPage() {
     {
       titleKey: "hrHub.communicationSupportCenter",
       items: [
-        { titleKey: "hrHub.employeeDirectory", descKey: "hrHub.employeeDirectoryDesc", icon: Users, href: "/admin/employee-directory", badge: null },
+        { titleKey: "hrHub.employeeDirectory", descKey: "hrHub.employeeDirectoryDesc", icon: Users, href: "/admin/employee-directory?from=hr-hub", badge: null },
         { titleKey: "hrHub.communicationsReminders", descKey: "hrHub.communicationsRemindersDesc", icon: Mail, href: "/hr-hub/reminders", badge: null },
         { titleKey: "hrHub.companyComms.title", descKey: "hrHub.companyComms.description", icon: Megaphone, href: "/hr-hub/company-communications", badge: null },
         { titleKey: "hrHub.knowledgeBase", descKey: "hrHub.knowledgeBaseDesc", icon: BookOpen, href: "/admin/knowledge-base", badge: null },
