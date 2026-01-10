@@ -770,6 +770,103 @@ export async function generateProductCapabilitiesPdf(
         pdf.text(overviewLines, margins.left + 5, yPos + 23);
         yPos += 35 + overviewLines.length * 4;
         
+        // Challenge & Promise Section (NEW)
+        if (module.challenge && module.promise) {
+          checkPageBreak(50, module.title);
+          
+          // Challenge box
+          pdf.setFillColor(254, 242, 242); // red-50
+          pdf.setDrawColor(239, 68, 68); // red-500
+          pdf.setLineWidth(0.3);
+          pdf.roundedRect(margins.left - 2, yPos - 3, contentWidth + 4, 22, 2, 2, 'FD');
+          
+          pdf.setFontSize(8);
+          pdf.setFont("helvetica", "bold");
+          pdf.setTextColor(220, 38, 38); // red-600
+          pdf.text("THE CHALLENGE", margins.left + 2, yPos + 3);
+          
+          pdf.setFont("helvetica", "italic");
+          pdf.setFontSize(8);
+          pdf.setTextColor(127, 29, 29); // red-900
+          const challengeLines = pdf.splitTextToSize(`"${module.challenge}"`, contentWidth - 6);
+          pdf.text(challengeLines.slice(0, 2), margins.left + 2, yPos + 9);
+          yPos += 26;
+          
+          // Promise box
+          pdf.setFillColor(239, 246, 255); // blue-50
+          pdf.setDrawColor(59, 130, 246); // blue-500
+          pdf.roundedRect(margins.left - 2, yPos - 3, contentWidth + 4, 22, 2, 2, 'FD');
+          
+          pdf.setFontSize(8);
+          pdf.setFont("helvetica", "bold");
+          pdf.setTextColor(37, 99, 235); // blue-600
+          pdf.text("THE PROMISE", margins.left + 2, yPos + 3);
+          
+          pdf.setFont("helvetica", "normal");
+          pdf.setFontSize(8);
+          pdf.setTextColor(30, 64, 175); // blue-800
+          const promiseLines = pdf.splitTextToSize(module.promise, contentWidth - 6);
+          pdf.text(promiseLines.slice(0, 2), margins.left + 2, yPos + 9);
+          yPos += 28;
+        }
+        
+        // Key Outcomes Section (NEW)
+        if (module.keyOutcomes && module.keyOutcomes.length > 0) {
+          checkPageBreak(25, module.title);
+          
+          pdf.setFontSize(10);
+          pdf.setFont("helvetica", "bold");
+          pdf.setTextColor(...TEXT_COLORS.primary);
+          pdf.text("Key Outcomes", margins.left, yPos);
+          yPos += 6;
+          
+          const outcomeWidth = (contentWidth - 9) / 4;
+          module.keyOutcomes.slice(0, 4).forEach((outcome, idx) => {
+            const x = margins.left + idx * (outcomeWidth + 3);
+            
+            pdf.setFillColor(249, 250, 251);
+            pdf.roundedRect(x, yPos - 2, outcomeWidth, 16, 1, 1, 'F');
+            
+            pdf.setFontSize(12);
+            pdf.setFont("helvetica", "bold");
+            pdf.setTextColor(...actColor);
+            pdf.text(outcome.value, x + 2, yPos + 5);
+            
+            pdf.setFontSize(7);
+            pdf.setTextColor(...TEXT_COLORS.primary);
+            pdf.text(outcome.label, x + 2, yPos + 10);
+          });
+          yPos += 22;
+        }
+        
+        // Personas Section (NEW) - compact version
+        if (module.personas && module.personas.length > 0) {
+          checkPageBreak(20, module.title);
+          
+          pdf.setFontSize(10);
+          pdf.setFont("helvetica", "bold");
+          pdf.setTextColor(...TEXT_COLORS.primary);
+          pdf.text("Who Benefits", margins.left, yPos);
+          yPos += 5;
+          
+          const personaWidth = (contentWidth - 9) / 4;
+          module.personas.slice(0, 4).forEach((persona, idx) => {
+            const x = margins.left + idx * (personaWidth + 3);
+            
+            pdf.setFontSize(8);
+            pdf.setFont("helvetica", "bold");
+            pdf.setTextColor(...TEXT_COLORS.primary);
+            pdf.text(persona.persona, x, yPos + 4);
+            
+            pdf.setFont("helvetica", "italic");
+            pdf.setFontSize(7);
+            pdf.setTextColor(...TEXT_COLORS.secondary);
+            const benefitText = persona.benefit.length > 30 ? persona.benefit.substring(0, 27) + '...' : persona.benefit;
+            pdf.text(`"${benefitText}"`, x, yPos + 9);
+          });
+          yPos += 15;
+        }
+        
         // Categories in 2-column layout
         const colWidth = (contentWidth - 10) / 2;
         const categories = module.categories;
@@ -886,8 +983,44 @@ export async function generateProductCapabilitiesPdf(
           yPos += intHeight + 5;
         }
         
-        // Regional note
-        if (module.regionalNote) {
+        // Regional Advantage box (NEW - replaces regionalNote)
+        if (module.regionalAdvantage && module.regionalAdvantage.advantages.length > 0) {
+          const raHeight = 16 + Math.min(module.regionalAdvantage.advantages.length, 4) * 4;
+          checkPageBreak(raHeight, module.title);
+          
+          pdf.setFillColor(239, 246, 255); // blue-50
+          pdf.setDrawColor(59, 130, 246); // blue-500
+          pdf.setLineWidth(0.3);
+          pdf.roundedRect(margins.left - 2, yPos - 3, contentWidth + 4, raHeight, 2, 2, 'FD');
+          
+          pdf.setFontSize(9);
+          pdf.setFont("helvetica", "bold");
+          pdf.setTextColor(59, 130, 246);
+          pdf.text("Regional Advantage", margins.left + 2, yPos + 4);
+          
+          // Region badges
+          pdf.setFontSize(7);
+          let badgeX = margins.left + 45;
+          module.regionalAdvantage.regions.forEach((region) => {
+            const badgeWidth = pdf.getTextWidth(region) + 6;
+            pdf.setFillColor(219, 234, 254); // blue-100
+            pdf.roundedRect(badgeX, yPos - 1, badgeWidth, 6, 1, 1, 'F');
+            pdf.setTextColor(30, 64, 175);
+            pdf.text(region, badgeX + 3, yPos + 3);
+            badgeX += badgeWidth + 3;
+          });
+          
+          pdf.setFont("helvetica", "normal");
+          pdf.setFontSize(7);
+          pdf.setTextColor(30, 64, 175);
+          module.regionalAdvantage.advantages.slice(0, 4).forEach((adv, idx) => {
+            const advText = adv.length > 80 ? adv.substring(0, 77) + '...' : adv;
+            pdf.text(`- ${advText}`, margins.left + 4, yPos + 10 + idx * 4);
+          });
+          
+          yPos += raHeight + 5;
+        } else if (module.regionalNote) {
+          // Fallback to old regionalNote if no regionalAdvantage
           checkPageBreak(15, module.title);
           pdf.setFillColor(239, 246, 255);
           pdf.setDrawColor(59, 130, 246);
@@ -898,6 +1031,7 @@ export async function generateProductCapabilitiesPdf(
           pdf.setTextColor(59, 130, 246);
           pdf.text(`Regional Compliance: ${module.regionalNote}`, margins.left + 2, yPos + 4);
           yPos += 18;
+        }
         }
         
         yPos += 10;

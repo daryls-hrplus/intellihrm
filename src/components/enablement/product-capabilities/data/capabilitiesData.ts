@@ -2,6 +2,7 @@
 
 export interface CapabilityCategoryData {
   title: string;
+  context?: string;  // Context text explaining why this category matters
   items: string[];
 }
 
@@ -15,15 +16,39 @@ export interface IntegrationData {
   description: string;
 }
 
+export interface KeyOutcomeData {
+  value: string;      // "70%", "5x", "100%"
+  label: string;      // "Self-Service Resolution"
+  description: string; // "AI-powered knowledge base deflection"
+  trend: "up" | "down" | "neutral";
+}
+
+export interface PersonaData {
+  persona: string;    // "HR Manager"
+  benefit: string;    // "Single dashboard, complete control"
+  outcomes: string[];
+}
+
+export interface RegionalAdvantageData {
+  regions: string[];
+  advantages: string[];
+}
+
 export interface ModuleData {
   id: string;
   title: string;
   tagline: string;
   overview: string;
   badge?: string;
+  // Rich content for PDF export (matching web components)
+  challenge?: string;
+  promise?: string;
+  keyOutcomes?: KeyOutcomeData[];
+  personas?: PersonaData[];
   categories: CapabilityCategoryData[];
   aiCapabilities: AICapabilityData[];
   integrations: IntegrationData[];
+  regionalAdvantage?: RegionalAdvantageData;
   regionalNote?: string;
 }
 
@@ -80,9 +105,24 @@ export const CAPABILITIES_DATA: ActData[] = [
         tagline: "Enterprise-grade security that scales with you",
         overview: "Foundation for all platform operations with comprehensive user lifecycle management, multi-factor authentication, granular role-based access control, PII protection, organizational scoping, approval workflows, and full audit capabilities with AI-powered security monitoring.",
         badge: "75+ Capabilities",
+        challenge: "Without robust, unified security controls, organizations face fragmented access management, compliance gaps, data breaches, and audit failures. Manual permission management across multiple systems creates security blind spots and consumes valuable HR and IT resources.",
+        promise: "Intelli HRM delivers an enterprise-grade security foundation that centralizes authentication, authorization, and audit across all HR operations. From day one, you get the same security architecture trusted by global enterprises—configured for your regional compliance needs.",
+        keyOutcomes: [
+          { value: "90%", label: "Faster Access Provisioning", description: "Automated user lifecycle vs. manual", trend: "up" },
+          { value: "75%", label: "Fewer Security Incidents", description: "With AI-powered anomaly detection", trend: "down" },
+          { value: "100%", label: "Audit Ready", description: "Complete trails for every action", trend: "up" },
+          { value: "60%", label: "Less Admin Overhead", description: "Self-service and automation", trend: "down" }
+        ],
+        personas: [
+          { persona: "IT Security / Compliance Officer", benefit: "Complete visibility, zero blind spots", outcomes: ["Complete audit trails with before/after comparisons", "Real-time anomaly detection and alerts", "Framework alignment (ISO 27001, SOC 2, GDPR)"] },
+          { persona: "HR Administrator", benefit: "Configure once, enforce everywhere", outcomes: ["Self-service password resets and MFA enrollment", "Delegated approvals without security gaps", "Automated access provisioning on hire/term"] },
+          { persona: "System Administrator", benefit: "Enterprise power, startup simplicity", outcomes: ["SSO/SAML integration in hours, not weeks", "Granular permissions without complexity", "AI-assisted role optimization suggestions"] },
+          { persona: "Employee", benefit: "Seamless access, transparent security", outcomes: ["Single sign-on across all HR functions", "Secure self-service without friction", "Transparent access to their own data"] }
+        ],
         categories: [
           {
             title: "User Lifecycle Management",
+            context: "Every access decision—from first login to final offboarding—must be tracked, auditable, and aligned with your policies.",
             items: [
               "User creation with configurable provisioning workflows and approval routing",
               "Bulk user import/export with field mapping validation and error handling",
@@ -95,6 +135,7 @@ export const CAPABILITIES_DATA: ActData[] = [
           },
           {
             title: "Authentication & Identity",
+            context: "Identity is the new perimeter. Proper authentication prevents 80% of security incidents before they start.",
             items: [
               "Multi-factor authentication (TOTP, SMS, Email) with configurable enrollment periods",
               "MFA grace periods and mandatory re-authentication for sensitive operations",
@@ -107,6 +148,7 @@ export const CAPABILITIES_DATA: ActData[] = [
           },
           {
             title: "Role-Based Access Control",
+            context: "The right people need the right access—nothing more, nothing less. Role sprawl is a compliance risk waiting to happen.",
             items: [
               "Granular permission management (View/Create/Edit/Delete) per function",
               "Module, tab, and card-level permission controls",
@@ -119,6 +161,7 @@ export const CAPABILITIES_DATA: ActData[] = [
           },
           {
             title: "Data Access & PII Protection",
+            context: "Employee data is among the most sensitive in any organization. Protection isn't optional—it's fundamental.",
             items: [
               "PII access levels (None/Limited/Full) configurable per role and domain",
               "Domain-specific PII controls: Personal, Compensation, Banking, Medical, Disciplinary",
@@ -130,6 +173,7 @@ export const CAPABILITIES_DATA: ActData[] = [
           },
           {
             title: "Organizational Scope Controls",
+            context: "Multi-entity organizations need security boundaries that mirror their business structure—not fight against it.",
             items: [
               "Company-level access restrictions for multi-entity deployments",
               "Division, department, and section-level permission scoping",
@@ -141,6 +185,7 @@ export const CAPABILITIES_DATA: ActData[] = [
           },
           {
             title: "Approval Workflows & Delegation",
+            context: "Security should enable business, not block it. Smart workflows balance control with speed.",
             items: [
               "Configurable multi-step approval workflows with parallel/sequential routing",
               "Approval delegation with date ranges and workflow type restrictions",
@@ -153,6 +198,7 @@ export const CAPABILITIES_DATA: ActData[] = [
           },
           {
             title: "Audit, Compliance & Monitoring",
+            context: "When auditors come calling, you need answers in seconds—not days of manual log searching.",
             items: [
               "Complete activity logging with before/after value comparison (diff view)",
               "Risk-level classification for audit events with priority alerting",
@@ -165,6 +211,7 @@ export const CAPABILITIES_DATA: ActData[] = [
           },
           {
             title: "AI Security & Governance",
+            context: "AI amplifies both capabilities and risks. Governance ensures AI serves your security goals, not undermines them.",
             items: [
               "AI security violation detection with unauthorized data access monitoring",
               "Role escalation attempt detection and PII query blocking",
@@ -188,7 +235,16 @@ export const CAPABILITIES_DATA: ActData[] = [
           { module: "Performance", description: "360 feedback and investigation access controls" },
           { module: "Compensation", description: "Salary data PII protection and approval workflows" },
           { module: "Employee Relations", description: "Disciplinary record access restrictions" }
-        ]
+        ],
+        regionalAdvantage: {
+          regions: ["Caribbean", "Africa", "Global"],
+          advantages: [
+            "Pre-configured for regional data residency requirements",
+            "Local compliance frameworks built-in (NIS, GDPR equivalents)",
+            "Support for regional SSO providers and identity systems",
+            "Multi-jurisdiction audit reporting for cross-border operations"
+          ]
+        }
       },
       {
         id: "hr-hub",
@@ -196,9 +252,24 @@ export const CAPABILITIES_DATA: ActData[] = [
         tagline: "The central command center for all HR operations",
         overview: "Unified hub for daily operations, documents, policies, communications, compliance tracking, workflow configuration, and cross-module integration. The single source of truth for HR operations with AI-powered insights and automation.",
         badge: "70+ Capabilities",
+        challenge: "HR teams juggle dozens of disconnected tools—ticketing systems, document repositories, policy libraries, compliance trackers—wasting hours on context-switching and manual coordination. Employees can't find answers, managers lack visibility, and compliance deadlines slip through the cracks.",
+        promise: "HR Hub is your single command center for all HR operations. Every document, every policy, every ticket, every compliance deadline—unified in one intelligent workspace with AI that anticipates needs and automates routine work.",
+        keyOutcomes: [
+          { value: "70%", label: "Self-Service Resolution", description: "AI-powered knowledge base deflection", trend: "up" },
+          { value: "100%", label: "Compliance Visibility", description: "Never miss a regulatory requirement", trend: "up" },
+          { value: "5x", label: "Faster Document Search", description: "Semantic AI search vs. folder browsing", trend: "up" },
+          { value: "40%", label: "HR Admin Time Saved", description: "Automation of routine operations", trend: "down" }
+        ],
+        personas: [
+          { persona: "HR Manager", benefit: "Single dashboard, complete control", outcomes: ["Single dashboard for all team operations", "Real-time compliance and sentiment visibility", "Workflow automation without IT dependency"] },
+          { persona: "HR Operations Specialist", benefit: "Efficiency without complexity", outcomes: ["Help desk with SLA tracking and intelligent routing", "Document management with version control", "Bulk operations and data import wizards"] },
+          { persona: "Employee", benefit: "Answers when you need them", outcomes: ["Self-service answers without waiting for HR", "Easy policy access and acknowledgment", "Milestone celebrations and recognition"] },
+          { persona: "Compliance Officer", benefit: "Proactive compliance, not reactive panic", outcomes: ["Complete compliance tracker by category", "Automated deadline alerts and escalations", "Full audit trail for all policy distributions"] }
+        ],
         categories: [
           {
             title: "Daily Operations",
+            context: "60% of HR time is spent on routine operational tasks. Automating these frees HR to focus on strategic initiatives.",
             items: [
               "Help Desk with full ticketing, SLA management, escalation rules, agent performance tracking, and satisfaction surveys",
               "ESS Change Request management for address, banking, emergency contacts, qualifications, dependents, and government IDs",
@@ -210,6 +281,7 @@ export const CAPABILITIES_DATA: ActData[] = [
           },
           {
             title: "Communication & Support",
+            context: "Poor communication costs organizations 26% of productive time. Unified communications eliminate the chaos.",
             items: [
               "Company announcements with targeted messaging by department, location, or employee group",
               "Notifications & Reminders with AI-powered automation rules, event triggers, and recipient targeting",
@@ -221,6 +293,7 @@ export const CAPABILITIES_DATA: ActData[] = [
           },
           {
             title: "Document Center",
+            context: "Employees spend 19% of their time searching for information. A smart document center cuts that to near zero.",
             items: [
               "Company document library with categories, types, access controls, and version management",
               "Policy documents with version control, acknowledgment tracking, and compliance alerts",
@@ -232,6 +305,7 @@ export const CAPABILITIES_DATA: ActData[] = [
           },
           {
             title: "Knowledge Base",
+            context: "Employees ask the same questions repeatedly. A smart knowledge base resolves 70% of queries before they become tickets.",
             items: [
               "FAQ management with category and tag organization for easy navigation",
               "AI-powered semantic search across all HR content with natural language queries",
@@ -243,6 +317,7 @@ export const CAPABILITIES_DATA: ActData[] = [
           },
           {
             title: "Compliance & Governance",
+            context: "Non-compliance costs companies $14.82 million annually on average. Proactive tracking prevents costly surprises.",
             items: [
               "Compliance Tracker with categories: Labor Law, Safety Regulations, Tax, Data Protection, Immigration, Benefits, Training, Licensing",
               "Deadline management with responsible party assignment and progress tracking",
@@ -254,6 +329,7 @@ export const CAPABILITIES_DATA: ActData[] = [
           },
           {
             title: "Workflow Configuration",
+            context: "Every organization is unique. Configurable workflows ensure the system adapts to you, not the other way around.",
             items: [
               "Reusable workflow templates for common approval patterns",
               "Transaction workflow settings with company-specific configuration for approval requirements",
@@ -265,6 +341,7 @@ export const CAPABILITIES_DATA: ActData[] = [
           },
           {
             title: "Organization & Configuration",
+            context: "Clean data is the foundation of everything. Smart import tools ensure accuracy from day one.",
             items: [
               "Lookup values management for centralized master data (dropdowns, selections)",
               "Government ID types configuration with country-specific requirements (NIS, BIR, SSN, etc.)",
@@ -276,6 +353,7 @@ export const CAPABILITIES_DATA: ActData[] = [
           },
           {
             title: "Analytics & Insights",
+            context: "What gets measured gets managed. Real-time analytics transform reactive HR into strategic partnership.",
             items: [
               "AI Sentiment Monitoring with eNPS scoring, organization trends, and department comparison",
               "Active alerts management with severity levels (critical, high, medium) and resolution tracking",
@@ -287,6 +365,7 @@ export const CAPABILITIES_DATA: ActData[] = [
           },
           {
             title: "Integration Hub",
+            context: "Disconnected modules create data silos. The Integration Hub ensures every action flows seamlessly across the platform.",
             items: [
               "Cross-module integration dashboard monitoring data flows between Performance, Succession, IDP, PIP, and Compensation",
               "Pending approvals queue with bulk approve/reject capabilities for integration actions",
@@ -314,7 +393,16 @@ export const CAPABILITIES_DATA: ActData[] = [
           { module: "Compensation", description: "Salary change workflow integration and approval routing" },
           { module: "Workforce", description: "Org structure data and compliance tracker feeds" },
           { module: "Employee Relations", description: "Pulse surveys feeding sentiment analysis" }
-        ]
+        ],
+        regionalAdvantage: {
+          regions: ["Caribbean", "Africa", "Global"],
+          advantages: [
+            "Pre-built compliance trackers for regional labor laws",
+            "Multi-language policy support for diverse workforces",
+            "Country-specific government ID configurations",
+            "Local holiday calendars and cultural milestone recognition"
+          ]
+        }
       }
     ]
   },
