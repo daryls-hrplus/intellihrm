@@ -96,6 +96,7 @@ export const GoalsManualPage = lazy(() => import('@/pages/enablement/GoalsManual
 export const WorkforceManualPage = lazy(() => import('@/pages/enablement/WorkforceManualPage'));
 export const HRHubManualPage = lazy(() => import('@/pages/enablement/HRHubManualPage'));
 export const BenefitsManualPage = lazy(() => import('@/pages/enablement/BenefitsManualPage'));
+export const TimeAttendanceManualPage = lazy(() => import('@/pages/enablement/TimeAttendanceManualPage'));
 export const ClientProvisioningGuidePage = lazy(() => import('@/pages/enablement/ClientProvisioningGuidePage'));
 export const ClientProvisioningTestingPage = lazy(() => import('@/pages/enablement/ClientProvisioningTestingPage'));
 export const ManualPublishingPage = lazy(() => import('@/pages/enablement/ManualPublishingPage'));
