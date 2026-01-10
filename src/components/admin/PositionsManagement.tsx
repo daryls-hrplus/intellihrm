@@ -49,7 +49,8 @@ import {
   Armchair,
 } from "lucide-react";
 import { EmployeePositionCompensationDrilldown } from "@/components/workforce/EmployeePositionCompensationDrilldown";
-import { PositionSeatsPanel, HeadcountChangeRequestDialog } from "@/components/workforce/position-seats";
+import { PositionSeatsPanel, HeadcountChangeRequestDialog, HeadcountRequestsWorkflowPanel } from "@/components/workforce/position-seats";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { getTodayString } from "@/utils/dateUtils";
@@ -715,6 +716,18 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
           Add Position
         </Button>
       </div>
+
+      <Tabs defaultValue="positions" className="w-full">
+        <TabsList>
+          <TabsTrigger value="positions">Positions</TabsTrigger>
+          <TabsTrigger value="headcount-requests">Headcount Requests</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="headcount-requests" className="mt-4">
+          <HeadcountRequestsWorkflowPanel companyId={companyId} />
+        </TabsContent>
+        
+        <TabsContent value="positions" className="mt-4">
 
       {departments.length === 0 ? (
         <Card>
@@ -1486,6 +1499,8 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
           onSuccess={fetchData}
         />
       )}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
