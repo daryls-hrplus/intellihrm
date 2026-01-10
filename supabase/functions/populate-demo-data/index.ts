@@ -296,11 +296,12 @@ serve(async (req) => {
               is_active: true,
               authorized_headcount: 5,
               start_date: today.toISOString().split('T')[0],
-              compensation_model: 'salary',
-              pay_type: 'salary',
-              employment_status: 'active',
-              employment_type: 'full_time',
-              flsa_status: 'exempt'
+              compensation_model: 'salary_grade',
+              pay_type: 'SALARIED',
+              employment_status: 'ACTIVE',
+              employment_type: 'FULL_TIME',
+              flsa_status: 'EXEMPT',
+              employment_relation: 'EMPLOYEE'
             })
             .select()
             .single();
