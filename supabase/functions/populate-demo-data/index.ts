@@ -191,12 +191,13 @@ serve(async (req) => {
     });
 
   } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
     console.error('Population error:', error);
     return new Response(JSON.stringify({
       success: false,
       tablesPopulated: 0,
       recordsCreated: 0,
-      errors: [error.message],
+      errors: [errorMessage],
       details: []
     }), {
       status: 500,
