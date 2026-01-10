@@ -189,32 +189,36 @@ serve(async (req) => {
     for (let companyIdx = 0; companyIdx < createdCompanyIds.length; companyIdx++) {
       const companyId = createdCompanyIds[companyIdx];
       const companyDepts = createdDepartmentIds.filter((_, i) => Math.floor(i / departmentNames.length) === companyIdx);
-      const companyPositions = createdPositionIds.filter((_, i) => Math.floor(i / positionData.length) === companyIdx);
       
       for (let e = 0; e < cfg.employeesPerCompany; e++) {
         const firstName = FIRST_NAMES[e % FIRST_NAMES.length];
         const lastName = LAST_NAMES[(e + companyIdx * 10) % LAST_NAMES.length];
         const email = `${firstName.toLowerCase()}.${lastName.toLowerCase()}${e}@demo${companyIdx + 1}.com`;
-        const employeeNumber = `EMP${String(companyIdx * 1000 + e + 1).padStart(5, '0')}`;
+        const employeeId = `EMP${String(companyIdx * 1000 + e + 1).padStart(5, '0')}`;
         
         const hireDate = new Date();
         hireDate.setMonth(hireDate.getMonth() - Math.floor(Math.random() * 36)); // Hired within last 3 years
+        
+        const birthYear = 1970 + Math.floor(Math.random() * 30);
+        const birthMonth = Math.floor(Math.random() * 12) + 1;
+        const birthDay = Math.floor(Math.random() * 28) + 1;
         
         const { data: employee, error } = await supabase
           .from('profiles')
           .upsert({
             email,
+            full_name: `${firstName} ${lastName}`,
             first_name: firstName,
-            last_name: lastName,
-            employee_number: employeeNumber,
+            first_last_name: lastName,
+            employee_id: employeeId,
             company_id: companyId,
             department_id: companyDepts[e % companyDepts.length],
-            position_id: companyPositions[e % companyPositions.length],
-            hire_date: hireDate.toISOString().split('T')[0],
-            status: 'active',
-            employment_type: e % 10 === 0 ? 'contractor' : 'full_time',
-            work_location: e % 5 === 0 ? 'remote' : 'office',
-            phone: `+1-555-${String(Math.floor(Math.random() * 9000) + 1000).padStart(4, '0')}-${String(Math.floor(Math.random() * 9000) + 1000).padStart(4, '0')}`
+            first_hire_date: hireDate.toISOString().split('T')[0],
+            start_date: hireDate.toISOString().split('T')[0],
+            employment_status: 'active',
+            gender: e % 2 === 0 ? 'male' : 'female',
+            date_of_birth: `${birthYear}-${String(birthMonth).padStart(2, '0')}-${String(birthDay).padStart(2, '0')}`,
+            is_active: true
           }, { onConflict: 'email' })
           .select()
           .single();
