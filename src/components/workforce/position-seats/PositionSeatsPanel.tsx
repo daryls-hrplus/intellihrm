@@ -120,14 +120,14 @@ export function PositionSeatsPanel({
       <CardContent>
         {/* Seat Status Summary */}
         <div className="flex flex-wrap gap-2 mb-4">
-          <Badge variant="secondary" className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
+          <Badge variant="secondary" className="bg-green-200 text-green-900 dark:bg-green-800 dark:text-green-100 font-medium">
             {filledSeats} Filled
           </Badge>
-          <Badge variant="secondary" className="bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+          <Badge variant="secondary" className="bg-amber-200 text-amber-900 dark:bg-amber-800 dark:text-amber-100 font-medium">
             {vacantSeats} Vacant
           </Badge>
           {frozenSeats > 0 && (
-            <Badge variant="secondary" className="bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-400">
+            <Badge variant="secondary" className="bg-cyan-200 text-cyan-900 dark:bg-cyan-800 dark:text-cyan-100 font-medium">
               {frozenSeats} Frozen
             </Badge>
           )}
@@ -225,7 +225,7 @@ function SeatRow({ seat, onFreeze, onUnfreeze, onViewHistory }: SeatRowProps) {
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger>
-                <Badge variant="outline" className="text-cyan-600 border-cyan-600 text-xs">
+                <Badge variant="outline" className="text-cyan-800 dark:text-cyan-200 border-cyan-600 dark:border-cyan-400 text-xs font-medium">
                   <Snowflake className="h-3 w-3 mr-1" />
                   Frozen
                 </Badge>

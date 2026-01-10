@@ -166,42 +166,42 @@ export interface PositionSeatSummary {
   fill_rate_percent: number | null;
 }
 
-// Status color mapping
+// Status color mapping - Using high-contrast colors for accessibility
 export const SEAT_STATUS_CONFIG: Record<SeatStatus, { label: string; color: string; bgColor: string; icon: string }> = {
   PLANNED: {
     label: 'Planned',
-    color: 'text-slate-600',
-    bgColor: 'bg-slate-100 dark:bg-slate-800',
+    color: 'text-slate-800 dark:text-slate-100',
+    bgColor: 'bg-slate-200 dark:bg-slate-700',
     icon: 'ClipboardList'
   },
   APPROVED: {
     label: 'Approved',
-    color: 'text-blue-600',
-    bgColor: 'bg-blue-100 dark:bg-blue-900/30',
+    color: 'text-blue-800 dark:text-blue-100',
+    bgColor: 'bg-blue-200 dark:bg-blue-800',
     icon: 'CheckCircle2'
   },
   VACANT: {
     label: 'Vacant',
-    color: 'text-amber-600',
-    bgColor: 'bg-amber-100 dark:bg-amber-900/30',
+    color: 'text-amber-900 dark:text-amber-100',
+    bgColor: 'bg-amber-200 dark:bg-amber-800',
     icon: 'UserX'
   },
   FILLED: {
     label: 'Filled',
-    color: 'text-green-600',
-    bgColor: 'bg-green-100 dark:bg-green-900/30',
+    color: 'text-green-800 dark:text-green-100',
+    bgColor: 'bg-green-200 dark:bg-green-800',
     icon: 'UserCheck'
   },
   FROZEN: {
     label: 'Frozen',
-    color: 'text-cyan-600',
-    bgColor: 'bg-cyan-100 dark:bg-cyan-900/30',
+    color: 'text-cyan-800 dark:text-cyan-100',
+    bgColor: 'bg-cyan-200 dark:bg-cyan-800',
     icon: 'Snowflake'
   },
   ELIMINATED: {
     label: 'Eliminated',
-    color: 'text-red-600',
-    bgColor: 'bg-red-100 dark:bg-red-900/30',
+    color: 'text-red-800 dark:text-red-100',
+    bgColor: 'bg-red-200 dark:bg-red-800',
     icon: 'XCircle'
   }
 };
