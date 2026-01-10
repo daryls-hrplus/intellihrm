@@ -37,7 +37,10 @@ import {
   CompensationCapabilities,
   BenefitsCapabilities,
   LearningCapabilities,
-  TalentCapabilities,
+  GoalsCapabilities,
+  AppraisalsCapabilities,
+  Feedback360Capabilities,
+  ContinuousPerformanceCapabilities,
   SuccessionCapabilities,
   HealthSafetyCapabilities,
   EmployeeRelationsCapabilities,
@@ -216,14 +219,40 @@ export function ProductCapabilitiesDocument() {
         subtitle="Build capabilities and nurture talent"
         icon={GraduationCap}
         id="act4"
+        narrative="Act 4 is where potential becomes performance, and today's contributors become tomorrow's leaders. With the foundation set, people onboarded, and rewards flowing, organizations must now invest in growth. Learning fuels capability. Performance management provides the compass. Succession planning secures the future. This is where organizations build the workforce of tomorrow—today."
+        themes={[
+          { title: "Continuous Development", description: "Learning never stops" },
+          { title: "Performance Culture", description: "Feedback flows constantly" },
+          { title: "Leadership Pipeline", description: "Future leaders identified and developed" },
+          { title: "AI-Powered Talent", description: "Intelligence at every decision point" },
+        ]}
+        outcomes={[
+          "85%+ training completion through gamification and personalization",
+          "Real-time performance visibility replacing annual reviews",
+          "90%+ critical position coverage with identified successors",
+          "Flight risk detection 6 months before resignation",
+        ]}
+        modules={["Learning & LMS (130+)", "Goals (45+)", "Appraisals (50+)", "360 Feedback (35+)", "Continuous Performance (55+)", "Succession (95+)"]}
       />
 
       <section id="learning" className="scroll-mt-20">
         <LearningCapabilities />
       </section>
 
-      <section id="talent" className="scroll-mt-20">
-        <TalentCapabilities />
+      <section id="goals" className="scroll-mt-20">
+        <GoalsCapabilities />
+      </section>
+
+      <section id="appraisals" className="scroll-mt-20">
+        <AppraisalsCapabilities />
+      </section>
+
+      <section id="feedback-360" className="scroll-mt-20">
+        <Feedback360Capabilities />
+      </section>
+
+      <section id="continuous-performance" className="scroll-mt-20">
+        <ContinuousPerformanceCapabilities />
       </section>
 
       <section id="succession" className="scroll-mt-20">
