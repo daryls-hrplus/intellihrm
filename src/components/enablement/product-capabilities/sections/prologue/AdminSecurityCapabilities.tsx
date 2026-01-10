@@ -24,7 +24,7 @@ export function AdminSecurityCapabilities() {
         {/* Challenge & Promise */}
         <ChallengePromise
           challenge="Without robust, unified security controls, organizations face fragmented access management, compliance gaps, data breaches, and audit failures. Manual permission management across multiple systems creates security blind spots and consumes valuable HR and IT resources."
-          promise="HRplus delivers an enterprise-grade security foundation that centralizes authentication, authorization, and audit across all HR operations. From day one, you get the same security architecture trusted by global enterprises—configured for your regional compliance needs."
+          promise="Intelli HRM delivers an enterprise-grade security foundation that centralizes authentication, authorization, and audit across all HR operations. From day one, you get the same security architecture trusted by global enterprises—configured for your regional compliance needs."
         />
 
         {/* Key Outcomes */}

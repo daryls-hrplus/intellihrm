@@ -21,7 +21,7 @@ export function LeaveCapabilities() {
         {/* Value Story Header */}
         <ValueStoryHeader
           challenge="Leave management is a compliance minefield. Manual balance tracking leads to errors, policy variations by country create confusion, and coverage gaps during peak vacation seasons cripple operations. Employees don't know their entitlements; managers don't know who's available; HR doesn't know their liability exposure."
-          promise="HRplus Leave Management handles every leave scenario with precision. From statutory entitlements to custom policies, from accrual calculations to liability forecasting—every leave type, every country, every rule. Employees see real-time balances; managers maintain coverage; compliance is automatic."
+          promise="Intelli HRM Leave Management handles every leave scenario with precision. From statutory entitlements to custom policies, from accrual calculations to liability forecasting—every leave type, every country, every rule. Employees see real-time balances; managers maintain coverage; compliance is automatic."
           outcomes={[
             { metric: "100%", label: "Balance Accuracy", description: "Automated accrual calculations" },
             { metric: "Same Day", label: "Request Processing", description: "Self-service + auto-routing" },

@@ -117,16 +117,6 @@ export default function ProductCapabilitiesPage() {
       });
 
       yPos += 5;
-      pdf.setFontSize(11);
-      pdf.setTextColor(79, 70, 229);
-      pdf.text("Enterprise Benchmarks", margin, yPos);
-      yPos += 6;
-      pdf.setFontSize(9);
-      pdf.setTextColor(100, 116, 139);
-      EXECUTIVE_SUMMARY.benchmarks.forEach((b) => {
-        pdf.text(`- ${b}`, margin + 3, yPos);
-        yPos += 5;
-      });
 
       // Module pages
       CAPABILITIES_DATA.forEach((act) => {

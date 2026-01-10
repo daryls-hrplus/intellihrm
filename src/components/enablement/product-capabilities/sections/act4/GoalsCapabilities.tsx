@@ -33,7 +33,7 @@ export const GoalsCapabilities = () => {
       <div className="space-y-6">
         <ValueStoryHeader
           challenge="Goals set in January are forgotten by March. Strategic objectives never cascade to frontline teams. Individual efforts don't connect to company priorities. Without goal alignment, organizations waste resources on work that doesn't matter—while critical objectives go unmet."
-          promise="HRplus Goals Management connects every individual effort to organizational strategy. From OKRs to SMART goals, from cascading alignment to real-time progress tracking, every goal is visible, measurable, and connected. AI-powered coaching helps employees set better goals and stay on track."
+          promise="Intelli HRM Goals Management connects every individual effort to organizational strategy. From OKRs to SMART goals, from cascading alignment to real-time progress tracking, every goal is visible, measurable, and connected. AI-powered coaching helps employees set better goals and stay on track."
           outcomes={outcomes}
           personas={personas}
         />

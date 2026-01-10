@@ -39,7 +39,7 @@ export function WorkforceCapabilities() {
         {/* Challenge & Promise */}
         <ChallengePromise
           challenge="Employee data scattered across spreadsheets, siloed org charts that are always outdated, and manual position tracking create a governance nightmare. Without a single source of truth, strategic workforce decisions are based on gut feel, compliance risks multiply, and HR spends hours chasing data instead of driving strategy."
-          promise="HRplus Workforce Management is your organization's living blueprint. Every employee, every position, every reporting relationship—unified in one intelligent system that automatically maintains accuracy, surfaces insights, and enables data-driven workforce planning across countries and entities."
+          promise="Intelli HRM Workforce Management is your organization's living blueprint. Every employee, every position, every reporting relationship—unified in one intelligent system that automatically maintains accuracy, surfaces insights, and enables data-driven workforce planning across countries and entities."
         />
 
         {/* Key Outcomes */}

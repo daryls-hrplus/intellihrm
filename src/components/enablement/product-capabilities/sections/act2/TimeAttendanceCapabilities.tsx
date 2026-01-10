@@ -21,7 +21,7 @@ export function TimeAttendanceCapabilities() {
         {/* Value Story Header */}
         <ValueStoryHeader
           challenge="Time theft, buddy punching, overtime abuse, and union compliance violations cost organizations millions annually. Manual timesheets are error-prone, shift scheduling is a nightmare, and payroll corrections consume weeks of HR time. Without accurate time data, labor costs spiral out of control."
-          promise="HRplus Time & Attendance captures every hour with precision and intelligence. Multi-method clocking, geofencing validation, biometric verification, and AI-powered anomaly detection ensure accurate time records. Automated shift scheduling, overtime control, and seamless payroll integration transform time management from a liability into an asset."
+          promise="Intelli HRM Time & Attendance captures every hour with precision and intelligence. Multi-method clocking, geofencing validation, biometric verification, and AI-powered anomaly detection ensure accurate time records. Automated shift scheduling, overtime control, and seamless payroll integration transform time management from a liability into an asset."
           outcomes={[
             { metric: "99.9%", label: "Time Accuracy", description: "Geofencing + biometric verification" },
             { metric: "25%", label: "Overtime Costs Reduced", description: "Pre-approval + AI alerts" },

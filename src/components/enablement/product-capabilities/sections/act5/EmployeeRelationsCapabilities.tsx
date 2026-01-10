@@ -38,7 +38,7 @@ export const EmployeeRelationsCapabilities = () => {
       <div className="space-y-6">
         <ValueStoryHeader
           challenge="Employee issues fester when they're not addressed fairly and promptly. Grievances escalate to lawsuits. Disciplinary actions become discrimination claims. Exit interviews reveal problems too late to fix. Without structured employee relations, organizations face legal exposure, damaged culture, and preventable turnover."
-          promise="HRplus Employee Relations ensures fairness, consistency, and compliance in every employee interaction. From grievance handling to disciplinary processes, from recognition programs to exit insights—every case is documented, every decision is defensible, and every pattern is visible. AI detects emerging issues before they escalate, while regional compliance keeps you protected."
+          promise="Intelli HRM Employee Relations ensures fairness, consistency, and compliance in every employee interaction. From grievance handling to disciplinary processes, from recognition programs to exit insights—every case is documented, every decision is defensible, and every pattern is visible. AI detects emerging issues before they escalate, while regional compliance keeps you protected."
           outcomes={outcomes}
           personas={personas}
         />

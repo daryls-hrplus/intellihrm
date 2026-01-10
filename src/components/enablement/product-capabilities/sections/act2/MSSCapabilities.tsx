@@ -20,7 +20,7 @@ export function MSSCapabilities() {
         {/* Value Story Header */}
         <ValueStoryHeader
           challenge="Managers are flying blind. Team data is scattered across spreadsheets, approval requests pile up in email, and critical decisions about hiring, promotions, and performance happen without real-time insights. By the time managers notice problems—attrition, burnout, skill gaps—it's often too late to act."
-          promise="HRplus Manager Self-Service transforms managers into informed leaders. A single dashboard for team oversight, unified approvals, performance management, and workforce actions—with AI that surfaces risks before they become crises. Managers spend less time on admin and more time on leadership."
+          promise="Intelli HRM Manager Self-Service transforms managers into informed leaders. A single dashboard for team oversight, unified approvals, performance management, and workforce actions—with AI that surfaces risks before they become crises. Managers spend less time on admin and more time on leadership."
           outcomes={[
             { metric: "75%", label: "Faster Approval Cycle", description: "Unified inbox + mobile approvals" },
             { metric: "60%", label: "Manager Admin Time Reduced", description: "Consolidated workflows" },

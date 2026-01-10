@@ -33,7 +33,7 @@ export const Feedback360Capabilities = () => {
       <div className="space-y-6">
         <ValueStoryHeader
           challenge="Managers have blind spots. Self-perception rarely matches reality. Without multi-source feedback, leaders don't know how they're truly perceived—and development efforts miss the mark. Traditional feedback is filtered, infrequent, and incomplete."
-          promise="HRplus 360 Feedback provides the complete picture. Peers, direct reports, and stakeholders contribute anonymous insights that reveal strengths, blind spots, and development priorities. Configurable anonymity, aggregated reporting, and AI-powered action recommendations transform feedback into growth."
+          promise="Intelli HRM 360 Feedback provides the complete picture. Peers, direct reports, and stakeholders contribute anonymous insights that reveal strengths, blind spots, and development priorities. Configurable anonymity, aggregated reporting, and AI-powered action recommendations transform feedback into growth."
           outcomes={outcomes}
           personas={personas}
         />

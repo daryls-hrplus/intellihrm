@@ -33,7 +33,7 @@ export const LearningCapabilities = () => {
       <div className="space-y-6">
         <ValueStoryHeader
           challenge="Training is expensive, inconsistent, and impossible to measure. Classroom sessions pull employees away from work, e-learning courses sit incomplete, and compliance deadlines slip through the cracks. Without a unified learning platform, organizations can't develop their people, maintain certifications, or build the skills needed for tomorrow."
-          promise="HRplus Learning & Development transforms training from a cost center to a competitive advantage. A complete LMS with SCORM/xAPI support, AI-powered personalization, gamification, and competency-aligned learning paths ensures every learning moment is captured, measured, and connected to business outcomes."
+          promise="Intelli HRM Learning & Development transforms training from a cost center to a competitive advantage. A complete LMS with SCORM/xAPI support, AI-powered personalization, gamification, and competency-aligned learning paths ensures every learning moment is captured, measured, and connected to business outcomes."
           outcomes={outcomes}
           personas={personas}
         />

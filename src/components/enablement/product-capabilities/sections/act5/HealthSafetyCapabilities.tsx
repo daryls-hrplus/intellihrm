@@ -38,7 +38,7 @@ export const HealthSafetyCapabilities = () => {
       <div className="space-y-6">
         <ValueStoryHeader
           challenge="Workplace injuries cost organizations millions in direct costs, lost productivity, and damaged morale. Safety incidents happen when hazards go unnoticed, training lapses occur, and compliance deadlines slip. Without a proactive safety culture, organizations react to accidents instead of preventing them—paying the price in human suffering and regulatory penalties."
-          promise="HRplus Health & Safety transforms reactive incident response into proactive risk prevention. From chemical management to LOTO procedures, from behavioral observations to OSHA reporting—every safety touchpoint is captured, analyzed, and acted upon. AI predicts risks before they become incidents, compliance is automated, and a culture of safety becomes the foundation of operations."
+          promise="Intelli HRM Health & Safety transforms reactive incident response into proactive risk prevention. From chemical management to LOTO procedures, from behavioral observations to OSHA reporting—every safety touchpoint is captured, analyzed, and acted upon. AI predicts risks before they become incidents, compliance is automated, and a culture of safety becomes the foundation of operations."
           outcomes={outcomes}
           personas={personas}
         />

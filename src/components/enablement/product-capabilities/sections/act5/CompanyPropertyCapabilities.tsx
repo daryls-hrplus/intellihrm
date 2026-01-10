@@ -36,7 +36,7 @@ export const CompanyPropertyCapabilities = () => {
       <div className="space-y-6">
         <ValueStoryHeader
           challenge="Company assets disappear. Laptops go missing during offboarding. Equipment maintenance is forgotten until failures occur. IT can't track who has what. Finance can't account for depreciation. Without asset visibility, organizations lose money, face compliance issues, and create security vulnerabilities."
-          promise="HRplus Company Property provides complete asset lifecycle visibility. From purchase to disposal, from assignment to return—every asset is tracked, maintained, and accounted for. Onboarding provisions the right equipment automatically. Offboarding ensures complete recovery. AI predicts maintenance needs and optimizes replacement timing."
+          promise="Intelli HRM Company Property provides complete asset lifecycle visibility. From purchase to disposal, from assignment to return—every asset is tracked, maintained, and accounted for. Onboarding provisions the right equipment automatically. Offboarding ensures complete recovery. AI predicts maintenance needs and optimizes replacement timing."
           outcomes={outcomes}
           personas={personas}
         />

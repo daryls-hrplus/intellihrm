@@ -262,7 +262,7 @@ export function PrintableIntegrationDiagram() {
     });
     
     const link = document.createElement("a");
-    link.download = "hrplus-integration-diagram.png";
+    link.download = "intelli-hrm-integration-diagram.png";
     link.href = canvas.toDataURL("image/png");
     link.click();
   };
@@ -295,7 +295,7 @@ export function PrintableIntegrationDiagram() {
         <div className="text-center border-b pb-4 print:pb-2">
           <div className="flex items-center justify-center gap-3 mb-2">
             <Network className="h-8 w-8 text-primary print:text-slate-800" />
-            <h1 className="text-2xl font-bold print:text-xl">HRplus Platform Integration Architecture</h1>
+            <h1 className="text-2xl font-bold print:text-xl">Intelli HRM Platform Integration Architecture</h1>
           </div>
           <p className="text-muted-foreground text-sm">
             Complete Module Connectivity Across the Employee Lifecycle
@@ -519,8 +519,8 @@ export function PrintableIntegrationDiagram() {
 
         {/* Footer */}
         <div className="text-center text-xs text-muted-foreground border-t pt-4 print:pt-2">
-          <p>HRplus Platform Integration Architecture • Generated {new Date().toLocaleDateString()}</p>
-          <p className="mt-1">© HRplus - AI-First Enterprise HRMS for Caribbean, Africa & Global Markets</p>
+          <p>Intelli HRM Platform Integration Architecture • Generated {new Date().toLocaleDateString()}</p>
+          <p className="mt-1">© Intelli HRM - AI-First Enterprise HRMS for Caribbean, Africa & Global Markets</p>
         </div>
       </div>
 

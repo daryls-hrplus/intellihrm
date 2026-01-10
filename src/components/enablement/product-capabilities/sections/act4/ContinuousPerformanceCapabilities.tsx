@@ -33,7 +33,7 @@ export const ContinuousPerformanceCapabilities = () => {
       <div className="space-y-6">
         <ValueStoryHeader
           challenge="Performance happens every day, but it's only measured once a year. High performers feel invisible between reviews. Problems fester for months before anyone notices. Without continuous visibility, organizations react to performance issues instead of preventing them."
-          promise="HRplus Continuous Performance captures every performance signal in real-time. Recognition flows instantly. Feedback is immediate. Pulse surveys track engagement. Performance indices provide always-on visibility. AI detects risks before they become terminations—and celebrates wins as they happen."
+          promise="Intelli HRM Continuous Performance captures every performance signal in real-time. Recognition flows instantly. Feedback is immediate. Pulse surveys track engagement. Performance indices provide always-on visibility. AI detects risks before they become terminations—and celebrates wins as they happen."
           outcomes={outcomes}
           personas={personas}
         />

@@ -37,7 +37,7 @@ export function OnboardingCapabilities() {
         {/* Challenge & Promise */}
         <ChallengePromise
           challenge="The gap between offer acceptance and productive employee is where 20% of new hires decide to quit. Paper-based checklists, forgotten system access, and disconnected onboarding experiences create confusion, delay productivity, and damage employer brand before day one even begins."
-          promise="HRplus Onboarding transforms the new hire journey from chaotic to choreographed. From the moment an offer is signed, automated workflows ensure every stakeholder—HR, IT, managers, buddies—knows exactly what to do and when, creating day-one readiness that accelerates time-to-productivity."
+          promise="Intelli HRM Onboarding transforms the new hire journey from chaotic to choreographed. From the moment an offer is signed, automated workflows ensure every stakeholder—HR, IT, managers, buddies—knows exactly what to do and when, creating day-one readiness that accelerates time-to-productivity."
         />
 
         {/* Key Outcomes */}

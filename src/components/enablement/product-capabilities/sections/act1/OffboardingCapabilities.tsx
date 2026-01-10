@@ -38,7 +38,7 @@ export function OffboardingCapabilities() {
         {/* Value Story Header */}
         <ValueStoryHeader
           challenge="Employee departures are where organizations are most vulnerable. When exits are chaotic, knowledge walks out the door. Assets go missing. Access lingers for months. Exit interviews become perfunctory or forgotten. Legal exposure multiplies. And the door closes on potential boomerang employees forever. A bad exit creates risk, destroys relationships, and erases institutional memory."
-          promise="HRplus Offboarding transforms exits from organizational risk into graceful transitions. Every departure is orchestrated—assets recovered, access revoked, knowledge transferred, and insights captured. Whether resignation, retirement, or termination, each employee leaves with dignity while the organization retains what matters. Former employees become alumni, not adversaries. And AI predicts which departures need extra attention."
+          promise="Intelli HRM Offboarding transforms exits from organizational risk into graceful transitions. Every departure is orchestrated—assets recovered, access revoked, knowledge transferred, and insights captured. Whether resignation, retirement, or termination, each employee leaves with dignity while the organization retains what matters. Former employees become alumni, not adversaries. And AI predicts which departures need extra attention."
           outcomes={[
             { metric: "98%+", label: "Asset Recovery", description: "Automated tracking and clearance" },
             { metric: "100%", label: "Access Revocation", description: "Same-day system deprovisioning" },

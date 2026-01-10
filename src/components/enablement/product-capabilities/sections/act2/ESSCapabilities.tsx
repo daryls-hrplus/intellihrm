@@ -20,7 +20,7 @@ export function ESSCapabilities() {
         {/* Value Story Header */}
         <ValueStoryHeader
           challenge="HR is drowning in routine requests. Employees wait days for simple answers about their pay, leave balances, and benefits. Paper forms get lost, phone calls go to voicemail, and email inboxes overflow. Meanwhile, HR spends 70% of their time on transactional tasks instead of strategic initiatives."
-          promise="HRplus Employee Self-Service puts the power of HR in every employee's pocket. A single, intuitive portal for everything—viewing payslips, requesting leave, updating personal information, tracking goals, and managing careers. Employees get instant answers; HR gets their time back."
+          promise="Intelli HRM Employee Self-Service puts the power of HR in every employee's pocket. A single, intuitive portal for everything—viewing payslips, requesting leave, updating personal information, tracking goals, and managing careers. Employees get instant answers; HR gets their time back."
           outcomes={[
             { metric: "80%", label: "HR Inquiries Reduced", description: "Self-service replaces routine questions" },
             { metric: "90%", label: "Faster Request Processing", description: "Digital workflows vs. paper forms" },
