@@ -6,3 +6,4 @@ export * from './SeatHistoryDialog';
 export * from './HeadcountChangeRequestDialog';
 export * from './HeadcountRequestsWorkflowPanel';
 export * from './hooks/usePositionSeats';
+export * from './hooks/useHeadcountWorkflow';
