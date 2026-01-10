@@ -159,7 +159,10 @@ export const PRODUCT_CAPABILITIES_TOC: TOCSection[] = [
     level: 1,
     children: [
       { id: "learning", title: "Learning & Development", level: 2 },
-      { id: "talent", title: "Talent (Performance)", level: 2 },
+      { id: "goals", title: "Goals Management", level: 2 },
+      { id: "appraisals", title: "Performance Appraisals", level: 2 },
+      { id: "feedback-360", title: "360 Feedback", level: 2 },
+      { id: "continuous-performance", title: "Continuous Performance", level: 2 },
       { id: "succession", title: "Succession Planning", level: 2 },
     ],
   },
