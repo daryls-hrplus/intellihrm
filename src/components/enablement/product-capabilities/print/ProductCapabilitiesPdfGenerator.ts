@@ -18,6 +18,19 @@ import {
 import { PRODUCT_CAPABILITIES_TOC } from "../components/TableOfContents";
 import { format } from "date-fns";
 
+// Import canonical content model for UI-PDF parity
+import {
+  ACTS as CANONICAL_ACTS,
+  CROSS_CUTTING,
+  INTEGRATION_PIPELINES,
+  DATA_FLOW_MATRIX,
+  MODULES_REGISTRY,
+  EXECUTIVE_OVERVIEW_CONTENT,
+  ACT_STYLING,
+  getTotalCapabilities,
+  getModuleName,
+} from "../content/productCapabilitiesContent";
+
 // ACT colors for visual distinction
 const ACT_COLORS: Record<string, [number, number, number]> = {
   prologue: [100, 116, 139],  // Slate
@@ -892,45 +905,17 @@ export async function generateProductCapabilitiesPdf(
     pdf.text("Employee Lifecycle Acts", margins.left, yPos);
     yPos += 8;
     
-    // Act data matching PlatformAtGlance.tsx
-    const ACTS_DATA = [
-      { id: "prologue", act: "Prologue", title: "Setting the Stage", subtitle: "Foundation & Governance", capabilities: 150, 
-        modules: ["Admin & Security (80)", "HR Hub (70)"],
-        outcomes: ["Enterprise-grade security", "Complete audit trails", "Zero-trust architecture"],
-        color: [100, 116, 139] as [number, number, number] },
-      { id: "act1", act: "Act 1", title: "Attract, Onboard & Transition", subtitle: "Talent Lifecycle", capabilities: 245,
-        modules: ["Recruitment (75)", "Onboarding (55)", "Offboarding (55)", "Workforce (60)"],
-        outcomes: ["50% faster time-to-hire", "Day-one readiness", "98%+ asset recovery"],
-        color: [59, 130, 246] as [number, number, number] },
-      { id: "act2", act: "Act 2", title: "Enable & Engage", subtitle: "Self-Service & Time", capabilities: 180,
-        modules: ["ESS (45)", "MSS (50)", "Time & Attendance (45)", "Leave (40)"],
-        outcomes: ["80% fewer HR inquiries", "99.9% time accuracy", "Zero compliance violations"],
-        color: [16, 185, 129] as [number, number, number] },
-      { id: "act3", act: "Act 3", title: "Pay & Reward", subtitle: "Compensation & Benefits", capabilities: 150,
-        modules: ["Payroll (60)", "Compensation (50)", "Benefits (40)"],
-        outcomes: ["99.99% payroll accuracy", "Pay equity analysis", "Real-time GL integration"],
-        color: [245, 158, 11] as [number, number, number] },
-      { id: "act4", act: "Act 4", title: "Develop & Grow", subtitle: "Performance & Talent", capabilities: 410,
-        modules: ["Learning & LMS (130)", "Goals (45)", "Appraisals (50)", "360 Feedback (35)", "Continuous Perf (55)", "Succession (95)"],
-        outcomes: ["85%+ training completion", "90%+ successor coverage", "Flight risk detection"],
-        color: [168, 85, 247] as [number, number, number] },
-      { id: "act5", act: "Act 5", title: "Protect & Support", subtitle: "Safety & Relations", capabilities: 280,
-        modules: ["Health & Safety (120)", "Employee Relations (95)", "Company Property (65)"],
-        outcomes: ["60%+ incident reduction", "70%+ grievance resolution", "Complete asset tracking"],
-        color: [239, 68, 68] as [number, number, number] },
-      { id: "epilogue", act: "Epilogue", title: "Continuous Excellence", subtitle: "Support & Knowledge", capabilities: 85,
-        modules: ["Help Center (85)"],
-        outcomes: ["70%+ ticket deflection", "24/7 AI assistance", "Version-controlled KB"],
-        color: [99, 102, 241] as [number, number, number] }
-    ];
+    // Use canonical ACTS data from productCapabilitiesContent.ts
+    const totalCaps = getTotalCapabilities();
     
-    const totalCaps = ACTS_DATA.reduce((sum, a) => sum + a.capabilities, 0) + 175; // +175 for cross-cutting
-    
-    ACTS_DATA.forEach((act) => {
+    // Render each act from canonical data
+    CANONICAL_ACTS.forEach((act) => {
       checkPageBreak(30, "Platform at a Glance");
       
+      const actColor = act.textColorRgb;
+      
       // Left border accent
-      pdf.setFillColor(act.color[0], act.color[1], act.color[2]);
+      pdf.setFillColor(actColor[0], actColor[1], actColor[2]);
       pdf.rect(margins.left, yPos, 3, 24, 'F');
       
       // Card background
@@ -940,7 +925,7 @@ export async function generateProductCapabilitiesPdf(
       // Act badge + capabilities
       pdf.setFontSize(7);
       pdf.setFont("helvetica", "bold");
-      pdf.setTextColor(act.color[0], act.color[1], act.color[2]);
+      pdf.setTextColor(actColor[0], actColor[1], actColor[2]);
       pdf.text(act.act, margins.left + 8, yPos + 5);
       pdf.setTextColor(...TEXT_COLORS.primary);
       pdf.text(`${act.capabilities}+ capabilities`, margins.left + 28, yPos + 5);
@@ -961,16 +946,16 @@ export async function generateProductCapabilitiesPdf(
       const modulesX = margins.left + 80;
       pdf.setFontSize(6);
       pdf.setTextColor(...TEXT_COLORS.secondary);
-      const modulesText = act.modules.slice(0, 4).join(" | ");
+      const modulesText = act.modules.slice(0, 4).map(m => `${m.name} (${m.count})`).join(" | ");
       const truncModules = modulesText.length > 60 ? modulesText.substring(0, 57) + "..." : modulesText;
       pdf.text(truncModules, modulesX, yPos + 10);
       
       // Key Outcomes (right section)
       const outcomesX = margins.left + contentWidth - 50;
       pdf.setFontSize(6);
-      act.outcomes.slice(0, 2).forEach((outcome, idx) => {
-        pdf.setTextColor(act.color[0], act.color[1], act.color[2]);
-        pdf.text("[check]", outcomesX - 10, yPos + 6 + idx * 6);
+      act.keyOutcomes.slice(0, 2).forEach((outcome, idx) => {
+        pdf.setTextColor(actColor[0], actColor[1], actColor[2]);
+        pdf.text("✓", outcomesX - 10, yPos + 6 + idx * 6);
         pdf.setTextColor(...TEXT_COLORS.secondary);
         const truncOutcome = outcome.length > 25 ? outcome.substring(0, 22) + "..." : outcome;
         pdf.text(truncOutcome, outcomesX, yPos + 6 + idx * 6);
@@ -978,7 +963,7 @@ export async function generateProductCapabilitiesPdf(
       
       // Progress bar
       const progressWidth = (act.capabilities / totalCaps) * (contentWidth - 30);
-      pdf.setFillColor(act.color[0], act.color[1], act.color[2]);
+      pdf.setFillColor(actColor[0], actColor[1], actColor[2]);
       pdf.setGState(new (pdf as any).GState({ opacity: 0.3 }));
       pdf.rect(margins.left + 8, yPos + 22, progressWidth, 1.5, 'F');
       pdf.setGState(new (pdf as any).GState({ opacity: 1 }));
@@ -986,7 +971,7 @@ export async function generateProductCapabilitiesPdf(
       yPos += 28;
     });
     
-    // Cross-Cutting Capabilities Card
+    // Cross-Cutting Capabilities Card (from canonical data)
     checkPageBreak(30, "Platform at a Glance");
     pdf.setFillColor(20, 184, 166); // Teal
     pdf.rect(margins.left, yPos, 3, 24, 'F');
@@ -999,17 +984,18 @@ export async function generateProductCapabilitiesPdf(
     pdf.setTextColor(20, 184, 166);
     pdf.text("Cross-Cutting", margins.left + 8, yPos + 5);
     pdf.setTextColor(...TEXT_COLORS.primary);
-    pdf.text("175+ capabilities", margins.left + 35, yPos + 5);
+    pdf.text(`${CROSS_CUTTING.capabilities}+ capabilities`, margins.left + 35, yPos + 5);
     
     pdf.setFontSize(10);
     pdf.setFont("helvetica", "bold");
     pdf.setTextColor(...TEXT_COLORS.primary);
-    pdf.text("Cross-Cutting Capabilities", margins.left + 8, yPos + 13);
+    pdf.text(CROSS_CUTTING.title, margins.left + 8, yPos + 13);
     
     pdf.setFontSize(7);
     pdf.setFont("helvetica", "normal");
     pdf.setTextColor(...TEXT_COLORS.muted);
-    pdf.text("Platform Features (70) | Regional Compliance (50) | AI Intelligence (55)", margins.left + 8, yPos + 19);
+    const crossModulesText = CROSS_CUTTING.modules.map(m => `${m.name} (${m.count})`).join(" | ");
+    pdf.text(crossModulesText, margins.left + 8, yPos + 19);
     
     yPos += 30;
     
@@ -1021,14 +1007,15 @@ export async function generateProductCapabilitiesPdf(
     pdf.text("Capability Distribution", margins.left, yPos);
     yPos += 8;
     
-    // Visual bar
+    // Visual bar - use canonical ACTS
     let barX = margins.left;
     const barHeight = 8;
     const barTotalWidth = contentWidth;
     
-    ACTS_DATA.forEach((act) => {
+    CANONICAL_ACTS.forEach((act) => {
       const segmentWidth = (act.capabilities / totalCaps) * barTotalWidth;
-      pdf.setFillColor(act.color[0], act.color[1], act.color[2]);
+      const actColor = act.textColorRgb;
+      pdf.setFillColor(actColor[0], actColor[1], actColor[2]);
       pdf.setGState(new (pdf as any).GState({ opacity: 0.4 }));
       pdf.rect(barX, yPos, segmentWidth, barHeight, 'F');
       pdf.setGState(new (pdf as any).GState({ opacity: 1 }));
@@ -1036,7 +1023,7 @@ export async function generateProductCapabilitiesPdf(
       // Label if segment is wide enough
       if (segmentWidth > 15) {
         pdf.setFontSize(6);
-        pdf.setTextColor(act.color[0], act.color[1], act.color[2]);
+        pdf.setTextColor(actColor[0], actColor[1], actColor[2]);
         const label = act.act.replace("Act ", "A");
         pdf.text(label, barX + segmentWidth / 2 - 3, yPos + 5);
       }
@@ -1044,7 +1031,7 @@ export async function generateProductCapabilitiesPdf(
     });
     
     // Cross-cutting segment
-    const xCutWidth = (175 / totalCaps) * barTotalWidth;
+    const xCutWidth = (CROSS_CUTTING.capabilities / totalCaps) * barTotalWidth;
     pdf.setFillColor(20, 184, 166);
     pdf.setGState(new (pdf as any).GState({ opacity: 0.4 }));
     pdf.rect(barX, yPos, xCutWidth, barHeight, 'F');
@@ -1052,11 +1039,12 @@ export async function generateProductCapabilitiesPdf(
     
     yPos += 15;
     
-    // Legend
+    // Legend - use canonical ACTS
     pdf.setFontSize(6);
     let legendX = margins.left;
-    ACTS_DATA.forEach((act) => {
-      pdf.setFillColor(act.color[0], act.color[1], act.color[2]);
+    CANONICAL_ACTS.forEach((act) => {
+      const actColor = act.textColorRgb;
+      pdf.setFillColor(actColor[0], actColor[1], actColor[2]);
       pdf.setGState(new (pdf as any).GState({ opacity: 0.4 }));
       pdf.rect(legendX, yPos, 8, 4, 'F');
       pdf.setGState(new (pdf as any).GState({ opacity: 1 }));
