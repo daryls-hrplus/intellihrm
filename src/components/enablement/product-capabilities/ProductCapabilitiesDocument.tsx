@@ -76,6 +76,20 @@ export function ProductCapabilitiesDocument() {
         subtitle="The foundational modules that power everything else"
         icon={Shield}
         id="prologue"
+        narrative="Before the first employee is hired, before the first paycheck is processed, before any growth can happen—there must be order. Security. Governance. A foundation that never wavers. This is where every successful HR transformation begins: with the invisible infrastructure that makes everything else possible."
+        themes={[
+          { title: "Security First", description: "Zero-trust architecture from day one" },
+          { title: "Governance Foundation", description: "Policies, audits, and compliance built-in" },
+          { title: "Operational Control", description: "Central command for all HR operations" },
+          { title: "AI-Ready Infrastructure", description: "Foundation for intelligent automation" },
+        ]}
+        outcomes={[
+          "Enterprise-grade security without enterprise complexity",
+          "Complete audit trails for every action",
+          "Central command center for HR operations",
+          "Foundation for AI-powered decision support",
+        ]}
+        modules={["Admin & Security", "HR Hub"]}
       />
 
       <section id="admin-security" className="scroll-mt-20">
@@ -93,6 +107,20 @@ export function ProductCapabilitiesDocument() {
         subtitle="Find, hire, and welcome the best talent"
         icon={UserSearch}
         id="act1"
+        narrative="Every great organization starts with great people. But finding them? That's an art backed by science. From the first job posting to the first day on the job, this act transforms talent acquisition from a scramble into a strategic advantage. The war for talent is won here."
+        themes={[
+          { title: "Strategic Sourcing", description: "AI-powered candidate discovery" },
+          { title: "Candidate Experience", description: "Frictionless application journeys" },
+          { title: "Seamless Transitions", description: "From offer letter to productive employee" },
+          { title: "Workforce Architecture", description: "Positions, hierarchies, and org design" },
+        ]}
+        outcomes={[
+          "50% reduction in time-to-hire",
+          "Higher quality candidates through AI matching",
+          "Day-one readiness for every new hire",
+          "Complete visibility into workforce structure",
+        ]}
+        modules={["Recruitment", "Onboarding", "Workforce Management"]}
       />
 
       <section id="recruitment" className="scroll-mt-20">
