@@ -198,6 +198,7 @@ const App = () => (
             <Route path="/admin/modules-brochure" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><LazyPage><Pages.ModulesBrochurePage /></LazyPage></ProtectedRoute>} />
             <Route path="/admin/lms" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><LazyPage><Pages.AdminLmsManagementPage /></LazyPage></ProtectedRoute>} />
             <Route path="/admin/demo-management" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><LazyPage><Pages.DemoManagementPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/admin/data-management" element={<ProtectedRoute requiredRoles={["admin"]}><LazyPage><Pages.DataManagementPage /></LazyPage></ProtectedRoute>} />
             <Route path="/admin/demo-analytics" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><LazyPage><Pages.DemoAnalyticsDashboard /></LazyPage></ProtectedRoute>} />
             <Route path="/admin/demo-analytics/prospect/:sessionId" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><LazyPage><Pages.ProspectJourneyPage /></LazyPage></ProtectedRoute>} />
             <Route path="/admin/subscriptions" element={<ProtectedRoute requiredRoles={["admin"]}><LazyPage><Pages.SubscriptionManagementPage /></LazyPage></ProtectedRoute>} />
