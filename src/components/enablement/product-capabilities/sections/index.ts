@@ -9,6 +9,7 @@ export { HRHubCapabilities } from "./prologue/HRHubCapabilities";
 // Act 1
 export { RecruitmentCapabilities } from "./act1/RecruitmentCapabilities";
 export { OnboardingCapabilities } from "./act1/OnboardingCapabilities";
+export { OffboardingCapabilities } from "./act1/OffboardingCapabilities";
 export { WorkforceCapabilities } from "./act1/WorkforceCapabilities";
 
 // Act 2

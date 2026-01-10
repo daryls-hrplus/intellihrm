@@ -28,6 +28,7 @@ import {
   HRHubCapabilities,
   RecruitmentCapabilities,
   OnboardingCapabilities,
+  OffboardingCapabilities,
   WorkforceCapabilities,
   ESSCapabilities,
   MSSCapabilities,
@@ -103,27 +104,28 @@ export function ProductCapabilitiesDocument() {
         <HRHubCapabilities />
       </section>
 
-      {/* ACT 1: Attract & Onboard */}
+      {/* ACT 1: Attract, Onboard & Transition */}
       <ActDivider
         act="act1"
-        title="Act 1: Attract & Onboard"
-        subtitle="Find, hire, and welcome the best talent"
+        title="Act 1: Attract, Onboard & Transition"
+        subtitle="Find, hire, welcome, and gracefully transition talent"
         icon={UserSearch}
         id="act1"
-        narrative="Every great organization starts with great people. But finding them? That's an art backed by science. From the first job posting to the first day on the job, this act transforms talent acquisition from a scramble into a strategic advantage. The war for talent is won here."
+        narrative="Every great organization starts with great people. But finding them? That's an art backed by science. From the first job posting to the first day on the job—and when paths eventually diverge—this act transforms talent acquisition and lifecycle transitions from chaos into strategic advantage. The war for talent is won at both ends: how you attract people AND how you part ways with them."
         themes={[
           { title: "Strategic Sourcing", description: "AI-powered candidate discovery" },
           { title: "Candidate Experience", description: "Frictionless application journeys" },
-          { title: "Seamless Transitions", description: "From offer letter to productive employee" },
+          { title: "Seamless Onboarding", description: "From offer letter to productive employee" },
+          { title: "Graceful Transitions", description: "Professional, compliant offboarding" },
           { title: "Workforce Architecture", description: "Positions, hierarchies, and org design" },
         ]}
         outcomes={[
           "50% reduction in time-to-hire",
-          "Higher quality candidates through AI matching",
           "Day-one readiness for every new hire",
+          "98%+ asset recovery on departures",
           "Complete visibility into workforce structure",
         ]}
-        modules={["Recruitment", "Onboarding", "Workforce Management"]}
+        modules={["Recruitment (75+)", "Onboarding (55+)", "Offboarding (55+)", "Workforce Management (60+)"]}
       />
 
       <section id="recruitment" className="scroll-mt-20">
@@ -132,6 +134,10 @@ export function ProductCapabilitiesDocument() {
 
       <section id="onboarding" className="scroll-mt-20">
         <OnboardingCapabilities />
+      </section>
+
+      <section id="offboarding" className="scroll-mt-20">
+        <OffboardingCapabilities />
       </section>
 
       <section id="workforce" className="scroll-mt-20">

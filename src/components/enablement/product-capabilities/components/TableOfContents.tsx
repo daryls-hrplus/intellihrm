@@ -124,12 +124,13 @@ export const PRODUCT_CAPABILITIES_TOC: TOCSection[] = [
   },
   {
     id: "act1",
-    title: "Act 1: Attract & Onboard",
+    title: "Act 1: Attract, Onboard & Transition",
     level: 1,
     children: [
-      { id: "recruitment", title: "Recruitment", level: 2 },
-      { id: "onboarding", title: "Onboarding & Offboarding", level: 2 },
-      { id: "workforce", title: "Workforce Management", level: 2 },
+      { id: "recruitment", title: "Recruitment (75+)", level: 2 },
+      { id: "onboarding", title: "Onboarding (55+)", level: 2 },
+      { id: "offboarding", title: "Offboarding (55+)", level: 2 },
+      { id: "workforce", title: "Workforce Management (60+)", level: 2 },
     ],
   },
   {

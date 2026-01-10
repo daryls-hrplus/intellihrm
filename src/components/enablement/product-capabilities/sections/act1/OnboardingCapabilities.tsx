@@ -7,7 +7,6 @@ import {
   GraduationCap, 
   FileText, 
   BarChart3, 
-  LogOut,
   User,
   UserCog,
   Briefcase,
@@ -28,11 +27,11 @@ export function OnboardingCapabilities() {
     <ModuleCapabilityCard
       id="onboarding"
       icon={UserPlus}
-      title="Onboarding & Offboarding"
-      tagline="From offer acceptance to productive employee—and back"
-      overview="Comprehensive employee lifecycle management with automated workflows, multi-actor task coordination, buddy systems, training integration, and seamless transitions that create exceptional first and last impressions."
+      title="Onboarding"
+      tagline="From offer acceptance to productive employee"
+      overview="Comprehensive new hire experience with automated workflows, multi-actor task coordination, buddy systems, and training integration that creates exceptional first impressions and accelerates time-to-productivity."
       accentColor="bg-teal-500/10 text-teal-500"
-      badge="60+ Capabilities"
+      badge="55+ Capabilities"
     >
       <div className="space-y-6">
         {/* Challenge & Promise */}
@@ -107,7 +106,7 @@ export function OnboardingCapabilities() {
             Capability Deep Dive
           </h4>
           <p className="text-xs text-muted-foreground">
-            Explore the complete onboarding and offboarding lifecycle capabilities
+            Complete onboarding lifecycle from offer acceptance to productive employee
           </p>
         </div>
 
@@ -203,18 +202,6 @@ export function OnboardingCapabilities() {
             <CapabilityItem>Onboarding effectiveness analytics</CapabilityItem>
           </CapabilityCategory>
 
-          <CapabilityCategory 
-            title="Offboarding & Separation" 
-            icon={LogOut}
-            context="Last impressions matter as much as first ones. Professional offboarding protects the organization and preserves relationships."
-          >
-            <CapabilityItem>Exit workflow triggers from separation action</CapabilityItem>
-            <CapabilityItem>Asset recovery checklists with tracking</CapabilityItem>
-            <CapabilityItem>Access revocation automation and coordination</CapabilityItem>
-            <CapabilityItem>Knowledge transfer task assignment</CapabilityItem>
-            <CapabilityItem>Exit interview scheduling and tracking</CapabilityItem>
-            <CapabilityItem>Clearance tracking with department sign-offs</CapabilityItem>
-          </CapabilityCategory>
         </div>
 
         {/* Regional Advantage */}
@@ -238,6 +225,7 @@ export function OnboardingCapabilities() {
         <ModuleIntegrations
           integrations={[
             { module: "Recruitment", description: "Offer acceptance triggers onboarding workflow", bidirectional: true },
+            { module: "Offboarding", description: "Rehire triggers re-onboarding with prior context", bidirectional: true },
             { module: "Workforce", description: "Employee record creation and position assignment" },
             { module: "Learning", description: "Training course enrollment and curriculum assignment" },
             { module: "Time & Attendance", description: "Schedule assignment and time policy application" },
