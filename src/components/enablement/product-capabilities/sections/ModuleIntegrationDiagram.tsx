@@ -1,6 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { WorkflowDiagram } from "@/components/enablement/manual/components/WorkflowDiagram";
+import { PrintableIntegrationDiagram } from "../components/PrintableIntegrationDiagram";
 import { 
   Network, 
   ArrowRight, 
@@ -11,55 +13,70 @@ import {
   Clock,
   GraduationCap,
   Shield,
-  HeartHandshake
+  HeartHandshake,
+  Printer,
+  FileText
 } from "lucide-react";
+import { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 const INTEGRATION_DIAGRAM = `flowchart TB
     %% Foundation Layer - Governance to All
     subgraph FOUNDATION["🔒 FOUNDATION LAYER"]
         direction LR
-        ADMIN["Admin & Security"]
-        HRHUB["HR Hub"]
+        ADMIN["Admin & Security<br/>70+ capabilities"]
+        HRHUB["HR Hub<br/>65+ capabilities"]
     end
 
     %% Act 1: Attract & Onboard
-    subgraph ACT1["🎯 ACT 1: ATTRACT & ONBOARD"]
-        RECRUIT["Recruitment"]
-        WORKFORCE["Workforce Admin"]
+    subgraph ACT1["🎯 ACT 1: ATTRACT, ONBOARD & TRANSITION"]
+        RECRUIT["Recruitment<br/>75+ capabilities"]
+        ONBOARD["Onboarding<br/>55+ capabilities"]
+        WORKFORCE["Workforce Admin<br/>60+ capabilities"]
+        OFFBOARD["Offboarding<br/>55+ capabilities"]
     end
 
     %% Act 2: Enable & Engage
     subgraph ACT2["⚡ ACT 2: ENABLE & ENGAGE"]
-        ESS["Employee Self-Service"]
-        MSS["Manager Self-Service"]
-        TIME["Time & Attendance"]
-        LEAVE["Leave Management"]
+        ESS["Employee Self-Service<br/>45+ capabilities"]
+        MSS["Manager Self-Service<br/>60+ capabilities"]
+        TIME["Time & Attendance<br/>55+ capabilities"]
+        LEAVE["Leave Management<br/>50+ capabilities"]
     end
 
     %% Act 3: Pay & Reward
     subgraph ACT3["💰 ACT 3: PAY & REWARD"]
-        PAYROLL["Payroll"]
-        COMP["Compensation"]
-        BENEFITS["Benefits"]
+        PAYROLL["Payroll<br/>85+ capabilities"]
+        COMP["Compensation<br/>55+ capabilities"]
+        BENEFITS["Benefits<br/>60+ capabilities"]
     end
 
     %% Act 4: Develop & Grow
     subgraph ACT4["📈 ACT 4: DEVELOP & GROW"]
-        LEARNING["Learning & LMS"]
-        TALENT["Talent Management"]
-        SUCCESSION["Succession Planning"]
+        LEARNING["Learning & LMS<br/>130+ capabilities"]
+        GOALS["Goals & OKRs<br/>45+ capabilities"]
+        APPRAISALS["Appraisals<br/>50+ capabilities"]
+        FEEDBACK360["360 Feedback<br/>35+ capabilities"]
+        CONTPERF["Continuous Performance<br/>55+ capabilities"]
+        SUCCESSION["Succession Planning<br/>50+ capabilities"]
     end
 
     %% Act 5: Protect & Support
     subgraph ACT5["🛡️ ACT 5: PROTECT & SUPPORT"]
-        HSE["Health & Safety"]
-        ER["Employee Relations"]
-        PROPERTY["Company Property"]
+        HSE["Health & Safety<br/>120+ capabilities"]
+        ER["Employee Relations<br/>95+ capabilities"]
+        PROPERTY["Company Property<br/>65+ capabilities"]
     end
 
     %% Epilogue
     subgraph EPILOGUE["✨ CONTINUOUS EXCELLENCE"]
-        HELP["Help Center"]
+        HELP["Help Center<br/>85+ capabilities"]
     end
 
     %% Foundation Governance (dashed - applies to all)
@@ -69,30 +86,33 @@ const INTEGRATION_DIAGRAM = `flowchart TB
     HRHUB -.->|"Documents"| MSS
 
     %% Act 1 Flows
-    RECRUIT -->|"Hired Candidates"| WORKFORCE
+    RECRUIT -->|"Hired Candidates"| ONBOARD
+    ONBOARD -->|"New Employees"| WORKFORCE
     RECRUIT -->|"Salary Benchmarking"| COMP
     RECRUIT -->|"Onboarding Courses"| LEARNING
     WORKFORCE -->|"Employee Records"| ESS
     WORKFORCE -->|"Team Data"| MSS
     WORKFORCE <-->|"Compensation Data"| PAYROLL
     WORKFORCE -->|"Schedule Assignments"| TIME
-    WORKFORCE -->|"Manager Relationships"| TALENT
+    WORKFORCE -->|"Manager Relationships"| GOALS
     WORKFORCE -->|"Career History"| SUCCESSION
     WORKFORCE -->|"Skills Data"| LEARNING
     WORKFORCE -->|"Eligibility Data"| BENEFITS
     WORKFORCE -->|"Job & Location"| HSE
     WORKFORCE -->|"Employee Data"| ER
     WORKFORCE -->|"Department Data"| PROPERTY
+    OFFBOARD -->|"Exit Processing"| PAYROLL
+    OFFBOARD <-->|"Asset Returns"| PROPERTY
 
     %% Act 2 Flows
     ESS -->|"Clock In/Out"| TIME
     ESS -->|"Leave Requests"| LEAVE
     ESS -->|"Enrollment"| BENEFITS
     ESS -->|"Training Enrollment"| LEARNING
-    ESS -->|"Goals & Feedback"| TALENT
+    ESS -->|"Goals & Feedback"| GOALS
     MSS -->|"Approvals"| TIME
     MSS -->|"Approvals"| LEAVE
-    MSS -->|"Reviews & Calibration"| TALENT
+    MSS -->|"Reviews & Calibration"| APPRAISALS
     MSS -->|"Change Requests"| COMP
     TIME <-->|"Hours & Overtime"| PAYROLL
     TIME -->|"Absence Sync"| LEAVE
@@ -102,7 +122,7 @@ const INTEGRATION_DIAGRAM = `flowchart TB
 
     %% Act 3 Flows
     COMP -->|"Salary Changes"| PAYROLL
-    COMP <-->|"Rating-Based Guidelines"| TALENT
+    COMP <-->|"Rating-Based Guidelines"| APPRAISALS
     COMP -->|"Offer Benchmarks"| RECRUIT
     COMP -->|"Leadership Pay Data"| SUCCESSION
     BENEFITS -->|"Deductions"| PAYROLL
@@ -111,9 +131,12 @@ const INTEGRATION_DIAGRAM = `flowchart TB
     PAYROLL -->|"Final Settlement"| ER
 
     %% Act 4 Flows
-    TALENT -->|"Pay Recommendations"| COMP
-    TALENT -->|"High Potentials"| SUCCESSION
-    TALENT <-->|"Development Gaps"| LEARNING
+    GOALS <-->|"Goal Achievement"| APPRAISALS
+    FEEDBACK360 -->|"Multi-Rater Input"| APPRAISALS
+    CONTPERF -->|"Check-in Data"| APPRAISALS
+    APPRAISALS -->|"Pay Recommendations"| COMP
+    APPRAISALS -->|"High Potentials"| SUCCESSION
+    LEARNING <-->|"Development Gaps"| APPRAISALS
     LEARNING -->|"Leadership Dev"| SUCCESSION
     LEARNING -->|"Onboarding"| RECRUIT
     LEARNING -->|"Safety Training"| HSE
@@ -142,10 +165,10 @@ const INTEGRATION_DIAGRAM = `flowchart TB
     classDef external fill:#6b7280,stroke:#9ca3af,color:#f8fafc
 
     class ADMIN,HRHUB foundation
-    class RECRUIT,WORKFORCE act1
+    class RECRUIT,ONBOARD,WORKFORCE,OFFBOARD act1
     class ESS,MSS,TIME,LEAVE act2
     class PAYROLL,COMP,BENEFITS act3
-    class LEARNING,TALENT,SUCCESSION act4
+    class LEARNING,GOALS,APPRAISALS,FEEDBACK360,CONTPERF,SUCCESSION act4
     class HSE,ER,PROPERTY act5
     class HELP epilogue
     class FINANCE external
@@ -163,14 +186,14 @@ const integrationHighlights: IntegrationHighlight[] = [
   {
     icon: Users,
     title: "Hire-to-Pay Pipeline",
-    flow: "Recruitment → Workforce → Payroll",
+    flow: "Recruitment → Onboarding → Workforce → Payroll",
     description: "New hires flow seamlessly from offer acceptance to first paycheck with zero re-entry",
     color: "text-blue-500",
   },
   {
     icon: DollarSign,
     title: "Performance-to-Pay Link",
-    flow: "Talent ↔ Compensation → Payroll",
+    flow: "Goals ↔ Appraisals ↔ Compensation → Payroll",
     description: "Performance ratings automatically inform merit increases and bonus calculations",
     color: "text-amber-500",
   },
@@ -184,14 +207,14 @@ const integrationHighlights: IntegrationHighlight[] = [
   {
     icon: GraduationCap,
     title: "Development-to-Succession",
-    flow: "Talent ↔ Learning → Succession",
+    flow: "Learning ↔ Goals → Appraisals → Succession",
     description: "High potentials identified, developed, and tracked for leadership pipeline",
     color: "text-purple-500",
   },
   {
     icon: HeartHandshake,
     title: "Self-Service Hub",
-    flow: "ESS ↔ (Time, Leave, Benefits, Learning, Talent)",
+    flow: "ESS ↔ (Time, Leave, Benefits, Learning, Goals)",
     description: "Employees manage their complete work life from one unified portal",
     color: "text-teal-500",
   },
@@ -224,6 +247,8 @@ function IntegrationHighlightCard({ icon: Icon, title, flow, description, color 
 }
 
 export function ModuleIntegrationDiagram() {
+  const [showPrintable, setShowPrintable] = useState(false);
+
   return (
     <div className="space-y-6" id="integration-diagram">
       {/* Header */}
@@ -234,32 +259,48 @@ export function ModuleIntegrationDiagram() {
             Unified Platform Integration
           </h2>
           <p className="text-muted-foreground">
-            See how all 18 modules share data and intelligence seamlessly across the employee lifecycle
+            See how all 25 modules share data and intelligence seamlessly across the employee lifecycle
           </p>
         </div>
-        <Badge className="bg-primary/10 text-primary w-fit">
-          <Sparkles className="h-3 w-3 mr-1" />
-          Cross-Module AI Intelligence
-        </Badge>
+        <div className="flex items-center gap-2">
+          <Dialog open={showPrintable} onOpenChange={setShowPrintable}>
+            <DialogTrigger asChild>
+              <Button variant="outline" size="sm">
+                <FileText className="h-4 w-4 mr-2" />
+                View Print-Friendly
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Print-Friendly Integration Diagram</DialogTitle>
+              </DialogHeader>
+              <PrintableIntegrationDiagram />
+            </DialogContent>
+          </Dialog>
+          <Badge className="bg-primary/10 text-primary">
+            <Sparkles className="h-3 w-3 mr-1" />
+            Cross-Module AI Intelligence
+          </Badge>
+        </div>
       </div>
 
       {/* Statistics Bar */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card className="bg-gradient-to-br from-blue-500/10 to-transparent border-blue-500/20">
           <CardContent className="pt-4 text-center">
-            <div className="text-3xl font-bold text-blue-600">18</div>
+            <div className="text-3xl font-bold text-blue-600">25</div>
             <div className="text-xs text-muted-foreground">Integrated Modules</div>
           </CardContent>
         </Card>
         <Card className="bg-gradient-to-br from-emerald-500/10 to-transparent border-emerald-500/20">
           <CardContent className="pt-4 text-center">
-            <div className="text-3xl font-bold text-emerald-600">60+</div>
+            <div className="text-3xl font-bold text-emerald-600">100+</div>
             <div className="text-xs text-muted-foreground">Direct Integrations</div>
           </CardContent>
         </Card>
         <Card className="bg-gradient-to-br from-purple-500/10 to-transparent border-purple-500/20">
           <CardContent className="pt-4 text-center">
-            <div className="text-3xl font-bold text-purple-600">8</div>
+            <div className="text-3xl font-bold text-purple-600">12</div>
             <div className="text-xs text-muted-foreground">Bidirectional Flows</div>
           </CardContent>
         </Card>
