@@ -36664,6 +36664,7 @@ export type Database = {
           end_date: string | null
           id: string
           is_active: boolean
+          master_job_family_id: string | null
           name: string
           start_date: string
           updated_at: string
@@ -36679,6 +36680,7 @@ export type Database = {
           end_date?: string | null
           id?: string
           is_active?: boolean
+          master_job_family_id?: string | null
           name: string
           start_date?: string
           updated_at?: string
@@ -36694,6 +36696,7 @@ export type Database = {
           end_date?: string | null
           id?: string
           is_active?: boolean
+          master_job_family_id?: string | null
           name?: string
           start_date?: string
           updated_at?: string
@@ -36726,6 +36729,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "seat_occupancy_summary"
             referencedColumns: ["department_id"]
+          },
+          {
+            foreignKeyName: "job_families_master_job_family_id_fkey"
+            columns: ["master_job_family_id"]
+            isOneToOne: false
+            referencedRelation: "master_job_families"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -43881,6 +43891,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      master_job_families: {
+        Row: {
+          code: string
+          created_at: string | null
+          description: string | null
+          id: string
+          industry_category: string | null
+          is_active: boolean | null
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          industry_category?: string | null
+          is_active?: boolean | null
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          industry_category?: string | null
+          is_active?: boolean | null
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       master_occupation_competencies: {
         Row: {
