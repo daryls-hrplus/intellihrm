@@ -13391,7 +13391,7 @@ export type Database = {
           created_at: string
           description: string | null
           description_en: string | null
-          group_id: string
+          group_id: string | null
           id: string
           is_active: boolean
           name: string
@@ -13403,7 +13403,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           description_en?: string | null
-          group_id: string
+          group_id?: string | null
           id?: string
           is_active?: boolean
           name: string
@@ -13415,7 +13415,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           description_en?: string | null
-          group_id?: string
+          group_id?: string | null
           id?: string
           is_active?: boolean
           name?: string
