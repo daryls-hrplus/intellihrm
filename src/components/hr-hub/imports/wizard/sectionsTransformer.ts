@@ -1,10 +1,10 @@
 import { supabase } from "@/integrations/supabase/client";
 
-export interface DepartmentRow {
+export interface SectionRow {
+  company_code: string;
+  department_code: string;
   code: string;
   name: string;
-  company_code: string;
-  division_code?: string;
   description?: string;
   start_date?: string;
   end_date?: string;
@@ -12,11 +12,10 @@ export interface DepartmentRow {
   [key: string]: any;
 }
 
-export interface DepartmentInsertRecord {
+export interface SectionInsertRecord {
+  department_id: string;
   code: string;
   name: string;
-  company_id: string;
-  company_division_id: string | null;
   description: string | null;
   start_date: string;
   end_date: string | null;
@@ -24,13 +23,13 @@ export interface DepartmentInsertRecord {
 }
 
 export interface TransformResult {
-  transformed: DepartmentInsertRecord[];
+  transformed: SectionInsertRecord[];
   errors: { rowIndex: number; row: any; error: string }[];
   warnings: { rowIndex: number; row: any; message: string }[];
 }
 
-export async function transformDepartmentsData(rows: DepartmentRow[]): Promise<TransformResult> {
-  const transformed: DepartmentInsertRecord[] = [];
+export async function transformSectionsData(rows: SectionRow[]): Promise<TransformResult> {
+  const transformed: SectionInsertRecord[] = [];
   const errors: { rowIndex: number; row: any; error: string }[] = [];
   const warnings: { rowIndex: number; row: any; message: string }[] = [];
 
@@ -53,29 +52,50 @@ export async function transformDepartmentsData(rows: DepartmentRow[]): Promise<T
     }
   });
 
-  // Fetch company_divisions for (company_id|code) → id lookup
-  const { data: divisions, error: divisionsError } = await supabase
-    .from("company_divisions")
+  // Fetch departments for (company_id|code) → id lookup
+  const { data: departments, error: departmentsError } = await supabase
+    .from("departments")
     .select("id, code, company_id");
 
-  if (divisionsError) {
-    warnings.push({ rowIndex: -1, row: {}, message: `Could not fetch divisions: ${divisionsError.message}` });
+  if (departmentsError) {
+    errors.push({ rowIndex: -1, row: {}, error: `Failed to fetch departments: ${departmentsError.message}` });
+    return { transformed, errors, warnings };
   }
 
-  // Create a map keyed by "company_id|division_code" for scoped lookup
-  const divisionLookup = new Map<string, string>();
-  (divisions || []).forEach((d) => {
+  // Create a map keyed by "company_id|department_code" for scoped lookup
+  const departmentLookup = new Map<string, string>();
+  const departmentsByCompany = new Map<string, string[]>();
+  (departments || []).forEach((d) => {
     if (d.code && d.company_id) {
-      divisionLookup.set(`${d.company_id}|${d.code.toUpperCase()}`, d.id);
+      departmentLookup.set(`${d.company_id}|${d.code.toUpperCase()}`, d.id);
+      
+      // Track departments per company for error messages
+      if (!departmentsByCompany.has(d.company_id)) {
+        departmentsByCompany.set(d.company_id, []);
+      }
+      departmentsByCompany.get(d.company_id)!.push(d.code);
     }
   });
-
 
   // Process each row
   for (let i = 0; i < rows.length; i++) {
     const row = rows[i];
 
     // Validate required fields
+    if (!row.company_code || !row.company_code.trim()) {
+      errors.push({ 
+        rowIndex: i, 
+        row, 
+        error: `Missing required field: company_code. Valid company codes: ${validCompanyCodes.slice(0, 10).join(", ")}${validCompanyCodes.length > 10 ? "..." : ""}` 
+      });
+      continue;
+    }
+
+    if (!row.department_code || !row.department_code.trim()) {
+      errors.push({ rowIndex: i, row, error: "Missing required field: department_code" });
+      continue;
+    }
+
     if (!row.code || !row.code.trim()) {
       errors.push({ rowIndex: i, row, error: "Missing required field: code" });
       continue;
@@ -83,15 +103,6 @@ export async function transformDepartmentsData(rows: DepartmentRow[]): Promise<T
 
     if (!row.name || !row.name.trim()) {
       errors.push({ rowIndex: i, row, error: "Missing required field: name" });
-      continue;
-    }
-
-    if (!row.company_code || !row.company_code.trim()) {
-      errors.push({ 
-        rowIndex: i, 
-        row, 
-        error: `Missing required field: company_code. Valid company codes: ${validCompanyCodes.slice(0, 10).join(", ")}${validCompanyCodes.length > 10 ? "..." : ""}` 
-      });
       continue;
     }
 
@@ -106,22 +117,19 @@ export async function transformDepartmentsData(rows: DepartmentRow[]): Promise<T
       continue;
     }
 
-    // Resolve optional division_code to company_division_id (scoped to company)
-    let companyDivisionId: string | null = null;
-    if (row.division_code && row.division_code.trim()) {
-      const lookupKey = `${companyId}|${row.division_code.toUpperCase()}`;
-      companyDivisionId = divisionLookup.get(lookupKey) || null;
-      
-      if (!companyDivisionId) {
-        // This is a warning, not an error - department can exist without division
-        warnings.push({ 
-          rowIndex: i, 
-          row, 
-          message: `Division code '${row.division_code}' not found for company '${row.company_code}'. Department will be linked directly to company.` 
-        });
-      }
+    // Resolve department_code to department_id (scoped to company)
+    const deptLookupKey = `${companyId}|${row.department_code.toUpperCase()}`;
+    const departmentId = departmentLookup.get(deptLookupKey);
+    
+    if (!departmentId) {
+      const validDepts = departmentsByCompany.get(companyId) || [];
+      errors.push({ 
+        rowIndex: i, 
+        row, 
+        error: `Department code '${row.department_code}' not found for company '${row.company_code}'. Valid departments for this company: ${validDepts.slice(0, 10).join(", ")}${validDepts.length > 10 ? "..." : ""}` 
+      });
+      continue;
     }
-
 
     // Parse is_active
     let isActive = true;
@@ -143,11 +151,10 @@ export async function transformDepartmentsData(rows: DepartmentRow[]): Promise<T
       : null;
 
     // Build the record
-    const record: DepartmentInsertRecord = {
+    const record: SectionInsertRecord = {
+      department_id: departmentId,
       code: row.code.trim(),
       name: row.name.trim(),
-      company_id: companyId,
-      company_division_id: companyDivisionId,
       description: row.description?.trim() || null,
       start_date: startDate,
       end_date: endDate,
@@ -160,12 +167,12 @@ export async function transformDepartmentsData(rows: DepartmentRow[]): Promise<T
   return { transformed, errors, warnings };
 }
 
-export function generateDepartmentsFailureReport(
+export function generateSectionsFailureReport(
   failures: { rowIndex: number; row: any; error: string }[],
   warnings: { rowIndex: number; message: string }[]
 ): string {
   const lines: string[] = [
-    "=== DEPARTMENTS IMPORT FAILURE REPORT ===",
+    "=== SECTIONS IMPORT FAILURE REPORT ===",
     `Generated: ${new Date().toISOString()}`,
     "",
     "=== SUMMARY ===",
@@ -197,8 +204,8 @@ export function generateDepartmentsFailureReport(
 
   lines.push("=== RESOLUTION TIPS ===");
   lines.push("1. Ensure company codes match existing companies in the system");
-  lines.push("2. Division codes are optional - if provided, must exist for that company");
-  lines.push("3. Import order: Companies → Divisions → Departments");
+  lines.push("2. Department codes must exist within the specified company");
+  lines.push("3. Import order: Companies → Departments → Sections");
   lines.push("4. Use the Reference Data drawer to view valid codes");
   lines.push("5. Check for typos in code values (comparison is case-insensitive)");
 
