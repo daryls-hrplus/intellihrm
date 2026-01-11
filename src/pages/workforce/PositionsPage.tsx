@@ -7,6 +7,7 @@ import { UserCheck, Building2, DollarSign } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { useLanguage } from "@/hooks/useLanguage";
+import { useMenuPermissions } from "@/hooks/useMenuPermissions";
 import {
   Select,
   SelectContent,
@@ -23,9 +24,12 @@ interface Company {
 
 export default function PositionsPage() {
   const { t } = useLanguage();
+  const { hasMenuAccess } = useMenuPermissions();
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
+  
+  const hasCompensationAccess = hasMenuAccess("compensation");
 
   useEffect(() => {
     const fetchCompanies = async () => {
@@ -67,12 +71,14 @@ export default function PositionsPage() {
           </div>
 
           <div className="flex items-center gap-4">
-            <Button variant="outline" size="sm" asChild>
-              <Link to="/compensation/salary-grades">
-                <DollarSign className="h-4 w-4 mr-2" />
-                {t("workforce.viewSalaryGrades")}
-              </Link>
-            </Button>
+            {hasCompensationAccess && (
+              <Button variant="outline" size="sm" asChild>
+                <Link to="/compensation/salary-grades">
+                  <DollarSign className="h-4 w-4 mr-2" />
+                  {t("workforce.viewSalaryGrades")}
+                </Link>
+              </Button>
+            )}
 
             <div className="flex items-center gap-2">
               <Building2 className="h-4 w-4 text-muted-foreground" />
