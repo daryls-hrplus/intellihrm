@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/select";
 import { Search, Download, Copy, Check, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { countries as allCountries } from "@/lib/countries";
 
 interface StatutoryDeductionType {
   id: string;
@@ -37,6 +38,15 @@ export function StatutoryDeductionsTab() {
   const [selectedCountry, setSelectedCountry] = useState<string>("all");
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
 
+  // Create a map for quick country name lookup
+  const countryNameMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    allCountries.forEach(c => {
+      map[c.code] = c.name;
+    });
+    return map;
+  }, []);
+
   const { data: deductions = [], isLoading } = useQuery({
     queryKey: ["statutory-deduction-types-reference"],
     queryFn: async () => {
@@ -51,10 +61,21 @@ export function StatutoryDeductionsTab() {
     },
   });
 
-  const countries = useMemo(() => {
-    const uniqueCountries = [...new Set(deductions.map((d) => d.country).filter(Boolean))];
-    return uniqueCountries.sort() as string[];
-  }, [deductions]);
+  // Get unique country codes from deductions and sort by country name
+  const countryCodes = useMemo(() => {
+    const uniqueCountries = [...new Set(deductions.map((d) => d.country).filter(Boolean))] as string[];
+    return uniqueCountries.sort((a, b) => {
+      const nameA = countryNameMap[a] || a;
+      const nameB = countryNameMap[b] || b;
+      return nameA.localeCompare(nameB);
+    });
+  }, [deductions, countryNameMap]);
+
+  // Helper to get country name from code
+  const getCountryName = (code: string | null) => {
+    if (!code) return "";
+    return countryNameMap[code] || code;
+  };
 
   const filteredDeductions = useMemo(() => {
     let result = deductions;
@@ -69,12 +90,13 @@ export function StatutoryDeductionsTab() {
         (d) =>
           d.statutory_name.toLowerCase().includes(lowerSearch) ||
           d.statutory_code.toLowerCase().includes(lowerSearch) ||
-          (d.statutory_type?.toLowerCase().includes(lowerSearch))
+          (d.statutory_type?.toLowerCase().includes(lowerSearch)) ||
+          (getCountryName(d.country).toLowerCase().includes(lowerSearch))
       );
     }
     
     return result;
-  }, [search, selectedCountry, deductions]);
+  }, [search, selectedCountry, deductions, countryNameMap]);
 
   const handleCopyCode = (code: string) => {
     navigator.clipboard.writeText(code);
@@ -84,11 +106,12 @@ export function StatutoryDeductionsTab() {
   };
 
   const handleDownloadCSV = () => {
-    const headers = ["statutory_code", "statutory_name", "country", "statutory_type", "description"];
+    const headers = ["statutory_code", "statutory_name", "country", "country_name", "statutory_type", "description"];
     const rows = filteredDeductions.map((d) => [
       d.statutory_code, 
       d.statutory_name, 
       d.country || "",
+      getCountryName(d.country),
       d.statutory_type || "",
       d.description || ""
     ]);
@@ -119,14 +142,16 @@ export function StatutoryDeductionsTab() {
       <div className="flex flex-col sm:flex-row gap-4 justify-between">
         <div className="flex flex-col sm:flex-row gap-2 flex-1">
           <Select value={selectedCountry} onValueChange={setSelectedCountry}>
-            <SelectTrigger className="w-full sm:w-[220px]">
-              <SelectValue placeholder="Select country" />
+            <SelectTrigger className="w-full sm:w-[250px]">
+              <SelectValue placeholder="Select country">
+                {selectedCountry === "all" ? "All Countries" : getCountryName(selectedCountry)}
+              </SelectValue>
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Countries</SelectItem>
-              {countries.map((country) => (
-                <SelectItem key={country} value={country}>
-                  {country}
+              {countryCodes.map((code) => (
+                <SelectItem key={code} value={code}>
+                  {getCountryName(code)}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -159,7 +184,7 @@ export function StatutoryDeductionsTab() {
               <TableRow>
                 <TableHead className="w-32">Code</TableHead>
                 <TableHead>Deduction Name</TableHead>
-                <TableHead className="w-28">Country</TableHead>
+                <TableHead className="w-40">Country</TableHead>
                 <TableHead className="w-32">Type</TableHead>
                 <TableHead className="w-16 text-center">Actions</TableHead>
               </TableRow>
@@ -183,7 +208,7 @@ export function StatutoryDeductionsTab() {
                   <TableCell>
                     {deduction.country && (
                       <Badge variant="outline" className="font-normal">
-                        {deduction.country}
+                        {getCountryName(deduction.country)}
                       </Badge>
                     )}
                   </TableCell>
