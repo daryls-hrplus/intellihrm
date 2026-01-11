@@ -29,13 +29,58 @@ const STRUCTURE_TYPES = [
 
 const TEMPLATES = {
   companies: {
-    headers: ["code", "name", "industry", "address", "city", "state", "country", "postal_code", "phone", "email", "website"],
-    example: ["COMP001", "Acme Corporation", "Technology", "123 Main St", "Port of Spain", "Trinidad", "Trinidad and Tobago", "00000", "+1-868-555-1234", "info@acme.com", "https://acme.com"],
+    headers: [
+      "code", 
+      "name", 
+      "legal_name",      // Maps to name_en
+      "industry", 
+      "group_code",      // Resolves to group_id
+      "division_code",   // Resolves to division_id
+      "country",         // 2-letter ISO code
+      "currency",        // 3-letter ISO code, resolves to local_currency_id
+      "address", 
+      "city", 
+      "state", 
+      "postal_code", 
+      "phone", 
+      "email", 
+      "website",
+      "first_language",  // e.g., "en", "es", "fr"
+      "second_language",
+      "is_active"        // "true" or "false"
+    ],
+    example: [
+      "COMP001", 
+      "Acme Corporation", 
+      "Acme Corporation Limited",
+      "Technology", 
+      "AURELIUS-GROUP",
+      "",
+      "TT",
+      "TTD",
+      "123 Main St", 
+      "Port of Spain", 
+      "Trinidad", 
+      "00000", 
+      "+1-868-555-1234", 
+      "info@acme.com", 
+      "https://acme.com",
+      "en",
+      "",
+      "true"
+    ],
     schema: {
       code: { required: true, maxLength: 50 },
       name: { required: true, maxLength: 255 },
+      legal_name: { required: false, maxLength: 255 },
       industry: { required: false, maxLength: 100 },
-      country: { required: true, maxLength: 100 },
+      group_code: { required: false, maxLength: 50 },
+      division_code: { required: false, maxLength: 50 },
+      country: { required: true, maxLength: 2 },
+      currency: { required: false, maxLength: 3 },
+      first_language: { required: false, maxLength: 5 },
+      second_language: { required: false, maxLength: 5 },
+      is_active: { required: false },
       email: { required: false, type: "email" },
     },
   },
@@ -176,6 +221,23 @@ export function CompanyStructureImport() {
         .select("id, code");
       const companyLookup = new Map((companies || []).map(c => [c.code?.toUpperCase(), c.id]));
 
+      // Get additional lookups for company imports
+      const [currenciesRes, groupsRes, divisionsRes] = await Promise.all([
+        supabase.from("currencies").select("id, code"),
+        supabase.from("company_groups").select("id, code"),
+        supabase.from("company_divisions").select("id, code"),
+      ]);
+
+      const currencyLookup = new Map(
+        (currenciesRes.data || []).map((c: { id: string; code: string | null }) => [c.code?.toUpperCase(), c.id])
+      );
+      const groupLookup = new Map(
+        (groupsRes.data || []).map((g: { id: string; code: string | null }) => [g.code?.toUpperCase(), g.id])
+      );
+      const divisionLookup = new Map(
+        (divisionsRes.data || []).map((d: { id: string; code: string | null }) => [d.code?.toUpperCase(), d.id])
+      );
+
       let successCount = 0;
       let failCount = 0;
 
@@ -185,6 +247,7 @@ export function CompanyStructureImport() {
             const { error } = await supabase.from("companies").insert({
               code: row.code,
               name: row.name,
+              name_en: row.legal_name || null,  // Map legal_name → name_en
               industry: row.industry || null,
               address: row.address || null,
               city: row.city || null,
@@ -194,7 +257,19 @@ export function CompanyStructureImport() {
               phone: row.phone || null,
               email: row.email || null,
               website: row.website || null,
-              is_active: true,
+              first_language: row.first_language || "en",
+              second_language: row.second_language || null,
+              is_active: row.is_active?.toLowerCase() === "false" ? false : true,
+              // Resolved foreign keys
+              local_currency_id: row.currency 
+                ? currencyLookup.get(row.currency.toUpperCase()) || null 
+                : null,
+              group_id: row.group_code 
+                ? groupLookup.get(row.group_code.toUpperCase()) || null 
+                : null,
+              division_id: row.division_code 
+                ? divisionLookup.get(row.division_code.toUpperCase()) || null 
+                : null,
             });
             if (error) throw error;
           } else if (selectedType === "departments") {
