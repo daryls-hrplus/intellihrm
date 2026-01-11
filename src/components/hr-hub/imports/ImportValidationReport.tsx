@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -17,6 +18,8 @@ import {
   Download,
   FileText,
   Loader2,
+  BookOpen,
+  ExternalLink,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -121,20 +124,34 @@ export function ImportValidationReport({
           </div>
         </div>
       ) : (
-        <div className="flex items-center justify-between p-4 rounded-lg bg-destructive/10 border border-destructive/20">
-          <div className="flex items-center gap-3">
-            <XCircle className="h-5 w-5 text-destructive" />
-            <div>
-              <p className="font-medium text-destructive">Issues Found</p>
-              <p className="text-sm text-muted-foreground">
-                Please resolve the issues below before importing.
-              </p>
+        <div className="flex flex-col gap-3 p-4 rounded-lg bg-destructive/10 border border-destructive/20">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <XCircle className="h-5 w-5 text-destructive" />
+              <div>
+                <p className="font-medium text-destructive">Issues Found</p>
+                <p className="text-sm text-muted-foreground">
+                  Please resolve the issues below before importing.
+                </p>
+              </div>
             </div>
+            <Button variant="outline" onClick={onDownloadReport}>
+              <Download className="mr-2 h-4 w-4" />
+              Download Report
+            </Button>
           </div>
-          <Button variant="outline" onClick={onDownloadReport}>
-            <Download className="mr-2 h-4 w-4" />
-            Download Report
-          </Button>
+          {/* Reference Data Help Link */}
+          <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 p-2 rounded">
+            <BookOpen className="h-4 w-4" />
+            <span>Need valid codes?</span>
+            <Link 
+              to="/hr-hub/reference-data" 
+              className="inline-flex items-center gap-1 text-primary hover:underline font-medium"
+            >
+              View Reference Data Catalog
+              <ExternalLink className="h-3 w-3" />
+            </Link>
+          </div>
         </div>
       )}
 
