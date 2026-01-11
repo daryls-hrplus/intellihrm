@@ -51,12 +51,63 @@ const CATEGORY_LABELS: Record<string, string> = {
   title: "Titles",
   blood_type: "Blood Types",
   relationship_type: "Relationship Types",
+  pay_element_type: "Pay Element Types",
+  pay_type: "Pay Types",
+  proration_method: "Proration Methods",
+  payment_frequency: "Payment Frequencies",
+  payroll_run_type: "Payroll Run Types",
+  transaction_type: "Transaction Types",
+  overpayment_reason: "Overpayment Reasons",
+  position_employment_status: "Position Employment Status",
+  position_employment_type: "Position Employment Type",
+  overtime_status: "Overtime Status",
+  probation_extension_reason: "Probation Extension Reasons",
+  promotion_reason: "Promotion Reasons",
+  transfer_reason: "Transfer Reasons",
+  acting_reason: "Acting Reasons",
+  hire_type: "Hire Types",
+};
+
+// Module to category mapping for filtering
+const MODULE_CATEGORY_MAP: Record<string, string[]> = {
+  core_hr: [
+    "employee_status", "employee_type", "employment_action", 
+    "hire_type", "termination_reason", "contract_type",
+    "gender", "marital_status", "title", "blood_type", "relationship_type"
+  ],
+  payroll: [
+    "pay_element_type", "pay_type", "proration_method", 
+    "payment_frequency", "payroll_run_type", "transaction_type", 
+    "overpayment_reason"
+  ],
+  workforce: [
+    "position_employment_status", "position_employment_type", 
+    "overtime_status", "probation_extension_reason", 
+    "promotion_reason", "transfer_reason", "acting_reason"
+  ],
+  learning: [
+    "education_level", "qualification_type", "field_of_study", 
+    "certification_type", "certification_name", "institution_name",
+    "accrediting_body"
+  ],
+  leave: [
+    "leave_type"
+  ]
+};
+
+const MODULE_LABELS: Record<string, string> = {
+  core_hr: "Core HR",
+  payroll: "Payroll",
+  workforce: "Workforce Management",
+  learning: "Learning & Qualifications",
+  leave: "Leave Management"
 };
 
 export function LookupValuesTab() {
   const { t } = useLanguage();
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [selectedModule, setSelectedModule] = useState<string>("all");
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
 
   const { data: lookupValues = [], isLoading } = useQuery({
@@ -73,18 +124,32 @@ export function LookupValuesTab() {
     },
   });
 
-  const categories = useMemo(() => {
-    const uniqueCategories = [...new Set(lookupValues.map((v) => v.category))];
-    return uniqueCategories.sort();
-  }, [lookupValues]);
+  // Get categories filtered by module
+  const filteredCategoriesByModule = useMemo(() => {
+    if (selectedModule === "all") {
+      return [...new Set(lookupValues.map((v) => v.category))].sort();
+    }
+    const moduleCategories = MODULE_CATEGORY_MAP[selectedModule] || [];
+    return [...new Set(lookupValues.map((v) => v.category))]
+      .filter(cat => moduleCategories.includes(cat))
+      .sort();
+  }, [lookupValues, selectedModule]);
 
   const filteredValues = useMemo(() => {
     let result = lookupValues;
     
+    // Filter by module first
+    if (selectedModule !== "all") {
+      const moduleCategories = MODULE_CATEGORY_MAP[selectedModule] || [];
+      result = result.filter((v) => moduleCategories.includes(v.category));
+    }
+    
+    // Then filter by category
     if (selectedCategory !== "all") {
       result = result.filter((v) => v.category === selectedCategory);
     }
     
+    // Then filter by search
     if (search.trim()) {
       const lowerSearch = search.toLowerCase();
       result = result.filter(
@@ -96,7 +161,13 @@ export function LookupValuesTab() {
     }
     
     return result;
-  }, [search, selectedCategory, lookupValues]);
+  }, [search, selectedCategory, selectedModule, lookupValues]);
+
+  // Reset category when module changes
+  const handleModuleChange = (module: string) => {
+    setSelectedModule(module);
+    setSelectedCategory("all");
+  };
 
   const handleCopyCode = (code: string) => {
     navigator.clipboard.writeText(code);
@@ -106,7 +177,7 @@ export function LookupValuesTab() {
   };
 
   const handleDownloadCSV = () => {
-    const dataToExport = selectedCategory === "all" ? lookupValues : filteredValues;
+    const dataToExport = selectedCategory === "all" ? filteredValues : filteredValues;
     const headers = ["category", "code", "name", "description"];
     const rows = dataToExport.map((v) => [v.category, v.code, v.name, v.description || ""]);
     const csvContent = [
@@ -117,7 +188,7 @@ export function LookupValuesTab() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `lookup_values${selectedCategory !== "all" ? `_${selectedCategory}` : ""}.csv`;
+    a.download = `lookup_values${selectedModule !== "all" ? `_${selectedModule}` : ""}${selectedCategory !== "all" ? `_${selectedCategory}` : ""}.csv`;
     a.click();
     URL.revokeObjectURL(url);
     toast.success(t("hrHub.refData.downloadSuccess"));
@@ -133,15 +204,28 @@ export function LookupValuesTab() {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row gap-4 justify-between">
+      <div className="flex flex-col gap-4">
         <div className="flex flex-col sm:flex-row gap-2 flex-1">
+          <Select value={selectedModule} onValueChange={handleModuleChange}>
+            <SelectTrigger className="w-full sm:w-[200px]">
+              <SelectValue placeholder="Select module" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Modules</SelectItem>
+              {Object.entries(MODULE_LABELS).map(([key, label]) => (
+                <SelectItem key={key} value={key}>
+                  {label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           <Select value={selectedCategory} onValueChange={setSelectedCategory}>
             <SelectTrigger className="w-full sm:w-[220px]">
               <SelectValue placeholder={t("hrHub.refData.selectCategory")} />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">{t("hrHub.refData.allCategories")}</SelectItem>
-              {categories.map((cat) => (
+              {filteredCategoriesByModule.map((cat) => (
                 <SelectItem key={cat} value={cat}>
                   {CATEGORY_LABELS[cat] || cat.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase())}
                 </SelectItem>
@@ -158,10 +242,17 @@ export function LookupValuesTab() {
             />
           </div>
         </div>
-        <div className="flex gap-2">
-          <Badge variant="secondary" className="text-sm">
-            {filteredValues.length} {t("hrHub.refData.records")}
-          </Badge>
+        <div className="flex gap-2 justify-between items-center">
+          <div className="flex gap-2 flex-wrap">
+            {selectedModule !== "all" && (
+              <Badge variant="default" className="text-xs">
+                {MODULE_LABELS[selectedModule]}
+              </Badge>
+            )}
+            <Badge variant="secondary" className="text-sm">
+              {filteredValues.length} {t("hrHub.refData.records")}
+            </Badge>
+          </div>
           <Button variant="outline" size="sm" onClick={handleDownloadCSV}>
             <Download className="h-4 w-4 mr-2" />
             {t("hrHub.refData.downloadCSV")}
