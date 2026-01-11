@@ -12,6 +12,7 @@ import { useImportValidation } from "./useImportValidation";
 
 const TEMPLATE = {
   headers: [
+    "company_code",
     "email",
     "first_name",
     "last_name",
@@ -25,6 +26,7 @@ const TEMPLATE = {
     "country",
   ],
   example: [
+    "COMP001",
     "john.doe@company.com",
     "John",
     "Doe",
@@ -38,6 +40,7 @@ const TEMPLATE = {
     "Trinidad and Tobago",
   ],
   schema: {
+    company_code: { required: false, maxLength: 50 },
     email: { required: true, type: "email" as const },
     first_name: { required: true, maxLength: 100 },
     last_name: { required: true, maxLength: 100 },
@@ -138,10 +141,28 @@ export function EmployeesImport() {
         return;
       }
 
+      // Resolve company_code to company_id if provided
+      let companyCodeToIdMap: Record<string, string> = {};
+      const uniqueCompanyCodes = [...new Set(parsedData.map(row => row.company_code).filter(Boolean))];
+      
+      if (uniqueCompanyCodes.length > 0) {
+        const { data: companies } = await supabase
+          .from("companies")
+          .select("id, code")
+          .in("code", uniqueCompanyCodes);
+        
+        if (companies) {
+          companyCodeToIdMap = companies.reduce((acc, c) => {
+            acc[c.code] = c.id;
+            return acc;
+          }, {} as Record<string, string>);
+        }
+      }
+
       const users = parsedData.map((row) => ({
         email: row.email,
         full_name: `${row.first_name} ${row.last_name}`.trim(),
-        company_id: profile?.company_id,
+        company_id: row.company_code ? companyCodeToIdMap[row.company_code] : profile?.company_id,
         // Additional profile data will be updated after user creation
         phone: row.phone || null,
         date_of_birth: row.date_of_birth || null,
