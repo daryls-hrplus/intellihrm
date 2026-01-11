@@ -24,6 +24,7 @@ import { transformSalaryGradesData, generateSalaryGradesFailureReport } from "./
 import { transformPaySpinesData, generatePaySpinesFailureReport } from "./paySpinesTransformer";
 import { transformSpinalPointsData, generateSpinalPointsFailureReport } from "./spinalPointsTransformer";
 import { transformEmployeeAssignmentsData, generateEmployeeAssignmentsFailureReport } from "./employeeAssignmentsTransformer";
+import { transformEmployeeCompensationData, generateEmployeeCompensationFailureReport } from "./employeeCompensationTransformer";
 import { transformCompaniesData } from "./companiesTransformer";
 import { transformDivisionsData, generateDivisionsFailureReport } from "./divisionsTransformer";
 import { transformDepartmentsData, generateDepartmentsFailureReport } from "./departmentsTransformer";
@@ -56,6 +57,7 @@ const IMPORT_TYPE_LABELS: Record<string, string> = {
   positions: "Positions",
   employees: "Employees",
   employee_assignments: "Employee Assignments",
+  employee_compensation: "Employee Compensation",
   new_hires: "New Hires",
   salary_grades: "Salary Grades",
   pay_spines: "Pay Spines",
@@ -108,6 +110,8 @@ export function WizardStepCommit({
       report = generateSpinalPointsFailureReport(importFailures, importWarnings);
     } else if (importType === "employee_assignments") {
       report = generateEmployeeAssignmentsFailureReport(importFailures, importWarnings);
+    } else if (importType === "employee_compensation") {
+      report = generateEmployeeCompensationFailureReport(importFailures, importWarnings);
     } else if (importType === "companies") {
       report = generateFailureReport(importFailures, importWarnings);
     } else if (importType === "divisions") {
@@ -527,6 +531,47 @@ export function WizardStepCommit({
             } else {
               successCount += batch.length;
               importedIds.push(...(insertData?.map((d) => d.id) || []));
+            }
+            setProgress(50 + Math.round((i / transformResult.transformed.length) * 40));
+          }
+        }
+        setProgress(90);
+      } else if (importType === "employee_compensation") {
+        setProgress(30);
+        const transformResult = await transformEmployeeCompensationData(validData, companyId);
+        allErrors.push(...transformResult.errors);
+        allWarnings.push(...transformResult.warnings);
+        failedCount = transformResult.errors.length;
+        setProgress(50);
+
+        if (transformResult.transformed.length > 0) {
+          const batchSize = 50;
+          for (let i = 0; i < transformResult.transformed.length; i += batchSize) {
+            const batch = transformResult.transformed.slice(i, i + batchSize);
+            
+            // Update employee_positions with compensation data
+            for (const record of batch) {
+              const { employee_position_id, pay_group_id, spinal_point_id } = record;
+              
+              const { error: updateError } = await supabase
+                .from("employee_positions")
+                .update({
+                  pay_group_id,
+                  spinal_point_id,
+                })
+                .eq("id", employee_position_id);
+
+              if (updateError) {
+                allErrors.push({ 
+                  rowIndex: i, 
+                  row: validData[i], 
+                  error: updateError.message 
+                });
+                failedCount++;
+              } else {
+                successCount++;
+                importedIds.push(employee_position_id);
+              }
             }
             setProgress(50 + Math.round((i / transformResult.transformed.length) * 40));
           }
