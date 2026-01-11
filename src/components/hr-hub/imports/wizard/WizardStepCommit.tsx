@@ -742,10 +742,10 @@ export function WizardStepCommit({
 
       {/* Success */}
       {committedCount > 0 && !isCommitting && (
-        <Alert className="bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800">
-          <CheckCircle2 className="h-4 w-4 text-green-600" />
-          <AlertTitle className="text-green-800 dark:text-green-200">Import Successful!</AlertTitle>
-          <AlertDescription className="text-green-700 dark:text-green-300">
+        <Alert className="bg-green-100 dark:bg-green-900/30 border-green-300 dark:border-green-700">
+          <CheckCircle2 className="h-4 w-4 text-green-700 dark:text-green-400" />
+          <AlertTitle className="text-green-900 dark:text-green-100 font-semibold">Import Successful!</AlertTitle>
+          <AlertDescription className="text-green-900 dark:text-green-100">
             Successfully imported {committedCount} {IMPORT_TYPE_LABELS[importType]?.toLowerCase()} records.
             Click "Complete Import" to finish.
           </AlertDescription>
@@ -797,10 +797,10 @@ export function WizardStepCommit({
 
       {/* Warnings */}
       {importWarnings.length > 0 && !isCommitting && (
-        <Alert className="bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800">
-          <AlertTriangle className="h-4 w-4 text-yellow-600" />
-          <AlertTitle className="text-yellow-800 dark:text-yellow-200">Warnings ({importWarnings.length})</AlertTitle>
-          <AlertDescription className="text-yellow-700 dark:text-yellow-300">
+        <Alert className="bg-amber-100 dark:bg-amber-900/30 border-amber-300 dark:border-amber-700">
+          <AlertTriangle className="h-4 w-4 text-amber-700 dark:text-amber-400" />
+          <AlertTitle className="text-amber-900 dark:text-amber-100 font-semibold">Warnings ({importWarnings.length})</AlertTitle>
+          <AlertDescription className="text-amber-900 dark:text-amber-100">
             <ul className="list-disc list-inside mt-2 space-y-1">
               {importWarnings.slice(0, 5).map((w, idx) => (
                 <li key={idx}>Row {w.rowIndex + 2}: {w.message}</li>
