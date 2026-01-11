@@ -232,14 +232,15 @@ export function WizardStepCompanySelection({
                     </div>
                     <p className="text-sm text-muted-foreground mb-3">{company.code}</p>
 
-                    {/* Structure badges */}
+                    {/* Structure badges - always show all counts */}
                     <div className="flex flex-wrap gap-1.5 mb-3">
-                      {company.structure.divisionCount > 0 && (
-                        <Badge variant="secondary" className="text-xs gap-1">
-                          <FolderTree className="h-3 w-3" />
-                          {company.structure.divisionCount} Divisions
-                        </Badge>
-                      )}
+                      <Badge 
+                        variant={company.structure.divisionCount > 0 ? "secondary" : "outline"} 
+                        className="text-xs gap-1"
+                      >
+                        <FolderTree className="h-3 w-3" />
+                        {company.structure.divisionCount} Divisions
+                      </Badge>
                       <Badge 
                         variant={company.structure.departmentCount > 0 ? "secondary" : "outline"} 
                         className="text-xs gap-1"
@@ -247,12 +248,13 @@ export function WizardStepCompanySelection({
                         <FolderTree className="h-3 w-3" />
                         {company.structure.departmentCount} Depts
                       </Badge>
-                      {company.structure.sectionCount > 0 && (
-                        <Badge variant="secondary" className="text-xs gap-1">
-                          <Layers className="h-3 w-3" />
-                          {company.structure.sectionCount} Sections
-                        </Badge>
-                      )}
+                      <Badge 
+                        variant={company.structure.sectionCount > 0 ? "secondary" : "outline"} 
+                        className="text-xs gap-1"
+                      >
+                        <Layers className="h-3 w-3" />
+                        {company.structure.sectionCount} Sections
+                      </Badge>
                       <Badge 
                         variant={company.structure.jobCount > 0 ? "secondary" : "outline"} 
                         className="text-xs gap-1"
