@@ -12207,6 +12207,7 @@ export type Database = {
           is_active: boolean
           is_group_base: boolean | null
           name: string
+          region: string | null
           symbol: string | null
           updated_at: string
         }
@@ -12218,6 +12219,7 @@ export type Database = {
           is_active?: boolean
           is_group_base?: boolean | null
           name: string
+          region?: string | null
           symbol?: string | null
           updated_at?: string
         }
@@ -12229,6 +12231,7 @@ export type Database = {
           is_active?: boolean
           is_group_base?: boolean | null
           name?: string
+          region?: string | null
           symbol?: string | null
           updated_at?: string
         }
