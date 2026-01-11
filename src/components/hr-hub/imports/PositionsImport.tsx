@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,10 +11,29 @@ import { ImportValidationReport } from "./ImportValidationReport";
 import { useImportValidation } from "./useImportValidation";
 import { ImportDependencyChecker } from "./ImportDependencyChecker";
 
-const TEMPLATE = {
-  headers: [
-    "company_code",
-    "department_code",
+interface CompanyStructure {
+  hasDivisions: boolean;
+  hasSections: boolean;
+}
+
+// Build dynamic template based on company structure
+function buildTemplate(companyStructure: CompanyStructure | null) {
+  // Base headers - order matches manual template standard
+  const headers: string[] = ["company_code"];
+  
+  // Add division_code if company uses divisions
+  if (companyStructure?.hasDivisions) {
+    headers.push("division_code");
+  }
+  
+  headers.push("department_code");
+  
+  // Add section_code if company uses sections
+  if (companyStructure?.hasSections) {
+    headers.push("section_code");
+  }
+  
+  headers.push(
     "job_code",
     "position_code",
     "position_title",
@@ -30,11 +49,23 @@ const TEMPLATE = {
     "flsa_status",
     "default_scheduled_hours",
     "description",
-    "is_active",
-  ],
-  example: [
-    "COMP001",
-    "DEPT001",
+    "is_active"
+  );
+
+  // Build example row matching headers
+  const example: string[] = ["COMP001"];
+  
+  if (companyStructure?.hasDivisions) {
+    example.push("DIV001");
+  }
+  
+  example.push("DEPT001");
+  
+  if (companyStructure?.hasSections) {
+    example.push("SEC001");
+  }
+  
+  example.push(
     "HR001",
     "POS001",
     "HR Manager",
@@ -50,9 +81,11 @@ const TEMPLATE = {
     "exempt",
     "40",
     "HR Manager role",
-    "true",
-  ],
-  schema: {
+    "true"
+  );
+
+  // Build schema dynamically
+  const schema: Record<string, { required?: boolean; maxLength?: number; type?: "number" | "date"; values?: string[] }> = {
     company_code: { required: true },
     department_code: { required: true },
     job_code: { required: true },
@@ -71,14 +104,68 @@ const TEMPLATE = {
     default_scheduled_hours: { required: false, type: "number" as const },
     description: { required: false, maxLength: 2000 },
     is_active: { required: false, values: ["true", "false", "TRUE", "FALSE", "1", "0", "yes", "no", "YES", "NO"] },
-  },
-};
+  };
+
+  // Add dynamic fields to schema
+  if (companyStructure?.hasDivisions) {
+    schema.division_code = { required: false };
+  }
+  if (companyStructure?.hasSections) {
+    schema.section_code = { required: false };
+  }
+
+  return { headers, example, schema };
+}
 
 export function PositionsImport() {
   const { profile } = useAuth();
   const [file, setFile] = useState<File | null>(null);
   const [isImporting, setIsImporting] = useState(false);
   const [prerequisitesMet, setPrerequisitesMet] = useState(false);
+  const [companyStructure, setCompanyStructure] = useState<CompanyStructure | null>(null);
+
+  // Fetch company structure to determine if divisions/sections are used
+  useEffect(() => {
+    async function fetchCompanyStructure() {
+      if (!profile?.company_id) return;
+
+      try {
+        // Check for divisions
+        const { count: divisionCount } = await (supabase
+          .from("divisions") as any)
+          .select("id", { count: "exact", head: true })
+          .eq("company_id", profile.company_id);
+
+        // Check for sections (through departments)
+        const { data: departments } = await supabase
+          .from("departments")
+          .select("id")
+          .eq("company_id", profile.company_id);
+
+        let sectionCount = 0;
+        if (departments && departments.length > 0) {
+          const deptIds = departments.map(d => d.id);
+          const { count } = await (supabase.from("sections" as any) as any)
+            .select("id", { count: "exact", head: true })
+            .in("department_id", deptIds);
+          sectionCount = count || 0;
+        }
+
+        setCompanyStructure({
+          hasDivisions: (divisionCount || 0) > 0,
+          hasSections: sectionCount > 0,
+        });
+      } catch (error) {
+        console.error("Error fetching company structure:", error);
+        setCompanyStructure({ hasDivisions: false, hasSections: false });
+      }
+    }
+
+    fetchCompanyStructure();
+  }, [profile?.company_id]);
+
+  // Build template based on company structure
+  const TEMPLATE = useMemo(() => buildTemplate(companyStructure), [companyStructure]);
 
   const {
     isValidating,
