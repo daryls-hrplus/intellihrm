@@ -4,7 +4,8 @@ import {
   Globe, Coins, Languages, List, Building2, 
   Briefcase, Target, FileText, IdCard, GraduationCap, 
   Award, Calculator, CalendarDays, Users,
-  ChevronRight, ArrowLeft
+  ChevronRight, ArrowLeft, School, FileCheck, Plane,
+  PiggyBank, Wallet, Package
 } from "lucide-react";
 import { CountriesTab } from "./tabs/CountriesTab";
 import { CurrenciesTab } from "./tabs/CurrenciesTab";
@@ -21,6 +22,13 @@ import { AccreditingBodiesTab } from "./tabs/AccreditingBodiesTab";
 import { StatutoryDeductionsTab } from "./tabs/StatutoryDeductionsTab";
 import { LeaveTypesTab } from "./tabs/LeaveTypesTab";
 import { JobFamiliesTab } from "./tabs/JobFamiliesTab";
+import { InstitutionsTab } from "./tabs/InstitutionsTab";
+import { CSMECertificatesTab } from "./tabs/CSMECertificatesTab";
+import { ImmigrationDocTypesTab } from "./tabs/ImmigrationDocTypesTab";
+import { TravelDocumentsTab } from "./tabs/TravelDocumentsTab";
+import { SavingsProgramsTab } from "./tabs/SavingsProgramsTab";
+import { SalaryAdvanceTypesTab } from "./tabs/SalaryAdvanceTypesTab";
+import { PropertyCategoriesTab } from "./tabs/PropertyCategoriesTab";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -80,6 +88,10 @@ const CATEGORY_GROUPS: CategoryGroup[] = [
       { id: "government-ids", label: "Government IDs", icon: IdCard, description: "Country-specific ID types" },
       { id: "qualifications", label: "Qualifications", icon: GraduationCap, description: "Educational qualifications" },
       { id: "accrediting-bodies", label: "Accrediting Bodies", icon: Award, description: "Certification bodies" },
+      { id: "institutions", label: "Educational Institutions", icon: School, description: "Universities and colleges" },
+      { id: "csme-certificates", label: "CSME Certificates", icon: FileCheck, description: "Caribbean free movement" },
+      { id: "immigration-docs", label: "Immigration Documents", icon: Plane, description: "Work permits & visas" },
+      { id: "travel-documents", label: "Travel Documents", icon: Plane, description: "Passport & travel doc types" },
     ]
   },
   {
@@ -88,6 +100,15 @@ const CATEGORY_GROUPS: CategoryGroup[] = [
     items: [
       { id: "statutory-deductions", label: "Statutory Deductions", icon: Calculator, description: "Country-specific deductions" },
       { id: "leave-types", label: "Leave Types", icon: CalendarDays, description: "Leave classifications" },
+      { id: "savings-programs", label: "Savings Programs", icon: PiggyBank, description: "Pension & savings types" },
+      { id: "salary-advances", label: "Salary Advance Types", icon: Wallet, description: "Employee advance types" },
+    ]
+  },
+  {
+    id: "assets-property",
+    label: "Assets & Property",
+    items: [
+      { id: "property-categories", label: "Property Categories", icon: Package, description: "IT & equipment categories" },
     ]
   },
   {
@@ -112,8 +133,15 @@ const COMPONENT_MAP: Record<string, React.ComponentType> = {
   "government-ids": GovernmentIdTypesTab,
   "qualifications": QualificationTypesTab,
   "accrediting-bodies": AccreditingBodiesTab,
+  "institutions": InstitutionsTab,
+  "csme-certificates": CSMECertificatesTab,
+  "immigration-docs": ImmigrationDocTypesTab,
+  "travel-documents": TravelDocumentsTab,
   "statutory-deductions": StatutoryDeductionsTab,
   "leave-types": LeaveTypesTab,
+  "savings-programs": SavingsProgramsTab,
+  "salary-advances": SalaryAdvanceTypesTab,
+  "property-categories": PropertyCategoriesTab,
   "lookups": LookupValuesTab,
 };
 

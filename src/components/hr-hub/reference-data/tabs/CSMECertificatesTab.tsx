@@ -20,7 +20,8 @@ interface CSMECertificate {
   code: string;
   name: string;
   description: string | null;
-  validity_months: number | null;
+  requires_expiry: boolean | null;
+  eligible_countries: string[] | null;
   is_active: boolean;
 }
 
@@ -33,7 +34,7 @@ export function CSMECertificatesTab() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("csme_certificate_types")
-        .select("id, code, name, description, validity_months, is_active")
+        .select("id, code, name, description, requires_expiry, eligible_countries, is_active")
         .eq("is_active", true)
         .order("name", { ascending: true });
       if (error) throw error;
@@ -61,12 +62,13 @@ export function CSMECertificatesTab() {
   };
 
   const handleDownloadCSV = () => {
-    const headers = ["code", "name", "description", "validity_months"];
+    const headers = ["code", "name", "description", "requires_expiry", "eligible_countries"];
     const rows = filteredCertificates.map((c) => [
       c.code,
       c.name,
       c.description || "",
-      c.validity_months?.toString() || ""
+      c.requires_expiry ? "Yes" : "No",
+      c.eligible_countries?.join(", ") || ""
     ]);
     const csvContent = [
       headers.join(","),
@@ -122,7 +124,7 @@ export function CSMECertificatesTab() {
               <TableRow>
                 <TableHead className="w-32">Code</TableHead>
                 <TableHead>Certificate Type</TableHead>
-                <TableHead className="w-32">Validity</TableHead>
+                <TableHead className="w-32">Expiry</TableHead>
                 <TableHead className="w-16 text-center">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -143,12 +145,12 @@ export function CSMECertificatesTab() {
                     </div>
                   </TableCell>
                   <TableCell>
-                    {cert.validity_months ? (
-                      <Badge variant="outline" className="font-normal">
-                        {cert.validity_months} months
+                    {cert.requires_expiry ? (
+                      <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
+                        Required
                       </Badge>
                     ) : (
-                      <span className="text-muted-foreground">-</span>
+                      <span className="text-muted-foreground text-sm">No</span>
                     )}
                   </TableCell>
                   <TableCell className="text-center">
