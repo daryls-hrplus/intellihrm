@@ -19,6 +19,20 @@ import { Link } from "react-router-dom";
 interface WizardStepTemplateProps {
   importType: string;
   compensationModel?: CompensationModel | null;
+  companyStructure?: {
+    hasDivisions: boolean;
+    hasDepartments: boolean;
+    hasSections: boolean;
+    hasJobFamilies: boolean;
+    hasJobs: boolean;
+    hasPositions: boolean;
+    divisionCount: number;
+    departmentCount: number;
+    sectionCount: number;
+    jobFamilyCount: number;
+    jobCount: number;
+    positionCount: number;
+  } | null;
 }
 
 interface TemplateField {
@@ -342,8 +356,11 @@ const COMPENSATION_TEMPLATE_CONFIGS: Record<string, {
   },
 };
 
-// Dynamic positions template based on compensation model
-function getPositionsTemplate(compensationModel: CompensationModel | null | undefined): {
+// Dynamic positions template based on compensation model and company structure
+function getPositionsTemplate(
+  compensationModel: CompensationModel | null | undefined,
+  companyStructure?: { hasDivisions: boolean; hasSections: boolean } | null
+): {
   headers: string[];
   fields: TemplateField[];
   examples: string[][];
@@ -351,11 +368,26 @@ function getPositionsTemplate(compensationModel: CompensationModel | null | unde
 } {
   // Base fields that are always included
   const baseHeaders = [
-    "position_number", "title", "description", "company_code", "department_code", 
+    "position_number", "title", "description", "company_code"
+  ];
+  
+  // Add division_code if company uses divisions
+  if (companyStructure?.hasDivisions) {
+    baseHeaders.push("division_code");
+  }
+  
+  baseHeaders.push("department_code");
+  
+  // Add section_code if company uses sections (for validation, not stored)
+  if (companyStructure?.hasSections) {
+    baseHeaders.push("section_code");
+  }
+  
+  baseHeaders.push(
     "job_code", "reports_to_position", "headcount", "pay_type", "employment_status", 
     "employment_type", "employment_relation", "flsa_status", "default_scheduled_hours",
     "start_date", "end_date", "is_active"
-  ];
+  );
 
   const baseFields: TemplateField[] = [
     { name: "position_number", required: true, description: "Unique position ID", example: "POS-001" },
@@ -500,7 +532,7 @@ const DEFAULT_TEMPLATE = {
   tips: ["Ensure codes are unique", "Use consistent naming conventions"],
 };
 
-export function WizardStepTemplate({ importType, compensationModel }: WizardStepTemplateProps) {
+export function WizardStepTemplate({ importType, compensationModel, companyStructure }: WizardStepTemplateProps) {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [activeRefType, setActiveRefType] = useState<ReferenceDataType>("country");
   const [activeLookupCategory, setActiveLookupCategory] = useState<string | undefined>();
@@ -509,9 +541,12 @@ export function WizardStepTemplate({ importType, compensationModel }: WizardStep
   const baseType = importType.replace("company_structure_", "");
   
   // Get config - use dynamic template for positions
-  const config = baseType === "positions" 
-    ? getPositionsTemplate(compensationModel)
-    : TEMPLATE_CONFIGS[baseType] || COMPENSATION_TEMPLATE_CONFIGS[baseType] || DEFAULT_TEMPLATE;
+  let config;
+  if (baseType === "positions") {
+    config = getPositionsTemplate(compensationModel, companyStructure);
+  } else {
+    config = TEMPLATE_CONFIGS[baseType] || COMPENSATION_TEMPLATE_CONFIGS[baseType] || DEFAULT_TEMPLATE;
+  }
 
   const downloadTemplate = () => {
     const csvContent = [

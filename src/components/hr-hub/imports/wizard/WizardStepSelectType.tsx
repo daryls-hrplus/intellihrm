@@ -143,20 +143,35 @@ interface WizardStepSelectTypeProps {
   selectedType: string | null;
   onSelectType: (type: string) => void;
   companyId?: string | null;
+  companyCode?: string | null;
+  companyStructure?: {
+    hasDivisions: boolean;
+    hasDepartments: boolean;
+    hasSections: boolean;
+    hasJobFamilies: boolean;
+    hasJobs: boolean;
+    hasPositions: boolean;
+    divisionCount: number;
+    departmentCount: number;
+    sectionCount: number;
+    jobFamilyCount: number;
+    jobCount: number;
+    positionCount: number;
+  } | null;
   compensationModel?: CompensationModel | null;
-}
-
-interface PrerequisiteStatus {
-  [key: string]: { count: number; met: boolean };
+  completedImports?: string[];
 }
 
 export function WizardStepSelectType({ 
   selectedType, 
   onSelectType, 
   companyId,
-  compensationModel 
+  companyCode,
+  companyStructure,
+  compensationModel,
+  completedImports = []
 }: WizardStepSelectTypeProps) {
-  const [prerequisiteStatus, setPrerequisiteStatus] = useState<PrerequisiteStatus>({});
+  const [prerequisiteStatus, setPrerequisiteStatus] = useState<Record<string, { count: number; met: boolean }>>({});
   const [loading, setLoading] = useState(true);
 
   // Build import types dynamically based on compensation model
@@ -187,7 +202,7 @@ export function WizardStepSelectType({
 
   const checkPrerequisites = async () => {
     setLoading(true);
-    const status: PrerequisiteStatus = {};
+    const status: Record<string, { count: number; met: boolean }> = {};
 
     const tables = [
       "companies", "divisions", "departments", "sections", 

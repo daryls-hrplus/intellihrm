@@ -1,6 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
 import { useLanguage } from "@/hooks/useLanguage";
-import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Stepper } from "@/components/ui/stepper";
@@ -10,11 +9,13 @@ import {
   ArrowRight, 
   Check, 
   X,
-  Wand2
+  Wand2,
+  RotateCcw
 } from "lucide-react";
 
 // Import wizard step components
 import { WizardStepWelcome } from "./wizard/WizardStepWelcome";
+import { WizardStepCompanySelection, CompanyStructure } from "./wizard/WizardStepCompanySelection";
 import { WizardStepCompensationModel, CompensationModel, getRequiredImportsForModel } from "./wizard/WizardStepCompensationModel";
 import { WizardStepSelectType } from "./wizard/WizardStepSelectType";
 import { WizardStepTemplate } from "./wizard/WizardStepTemplate";
@@ -25,6 +26,8 @@ import { WizardStepCommit } from "./wizard/WizardStepCommit";
 export interface WizardState {
   importType: string | null;
   companyId: string | null;
+  companyCode: string | null;
+  companyStructure: CompanyStructure | null;
   compensationModel: CompensationModel | null;
   file: File | null;
   parsedData: any[] | null;
@@ -33,6 +36,8 @@ export interface WizardState {
   isValidating: boolean;
   isCommitting: boolean;
   committedCount: number;
+  // Track completed imports in this session
+  completedImports: string[];
 }
 
 interface ImportWizardProps {
@@ -41,10 +46,11 @@ interface ImportWizardProps {
   onCancel?: () => void;
 }
 
-// All possible wizard steps
+// All possible wizard steps (now includes Company Selection)
 const ALL_WIZARD_STEPS = [
   { title: "Welcome", description: "Overview" },
-  { title: "Select Type", description: "Choose data" },
+  { title: "Company", description: "Select target" },
+  { title: "Import Type", description: "Choose data" },
   { title: "Compensation", description: "Pay model" },
   { title: "Template", description: "Download" },
   { title: "Upload", description: "Validate" },
@@ -63,6 +69,8 @@ export function ImportWizard({ companyId, onComplete, onCancel }: ImportWizardPr
   const [state, setState] = useState<WizardState>({
     importType: null,
     companyId: companyId || null,
+    companyCode: null,
+    companyStructure: null,
     compensationModel: null,
     file: null,
     parsedData: null,
@@ -71,20 +79,25 @@ export function ImportWizard({ companyId, onComplete, onCancel }: ImportWizardPr
     isValidating: false,
     isCommitting: false,
     committedCount: 0,
+    completedImports: [],
   });
 
   // Dynamic steps based on selected import type
   const activeSteps = useMemo(() => {
-    if (requiresCompensationStep(state.importType)) {
-      return ALL_WIZARD_STEPS; // All 7 steps including compensation
+    // Start with all steps
+    let steps = [...ALL_WIZARD_STEPS];
+    
+    // Remove compensation step (index 3) for non-positions imports
+    if (!requiresCompensationStep(state.importType)) {
+      steps = steps.filter((_, index) => index !== 3);
     }
-    // Remove compensation step (index 2) for non-positions imports
-    return ALL_WIZARD_STEPS.filter((_, index) => index !== 2);
+    
+    return steps;
   }, [state.importType]);
 
   const totalSteps = activeSteps.length;
 
-  // Reset state when import type changes
+  // Reset file/validation state when import type changes (but keep company selection)
   useEffect(() => {
     if (state.importType) {
       setState((prev) => ({
@@ -105,33 +118,39 @@ export function ImportWizard({ companyId, onComplete, onCancel }: ImportWizardPr
 
   const canProceed = () => {
     const needsCompensation = requiresCompensationStep(state.importType);
+    
+    // Step indices shift based on whether compensation step is included
+    // With compensation: 0=Welcome, 1=Company, 2=Type, 3=Comp, 4=Template, 5=Upload, 6=Review, 7=Commit
+    // Without compensation: 0=Welcome, 1=Company, 2=Type, 3=Template, 4=Upload, 5=Review, 6=Commit
 
     switch (currentStep) {
       case 0: // Welcome
         return true;
-      case 1: // Select Type
+      case 1: // Company Selection
+        return !!state.companyId;
+      case 2: // Select Type
         return !!state.importType;
-      case 2: // Compensation (if positions) or Template (if not)
+      case 3: // Compensation (if positions) or Template (if not)
         if (needsCompensation) {
           return !!state.compensationModel;
         }
         return true; // Template step - always can proceed
-      case 3: // Template (if positions) or Upload (if not)
+      case 4: // Template (if positions) or Upload (if not)
         if (needsCompensation) return true;
         return !!state.validationResult && !state.isValidating;
-      case 4: // Upload (if positions) or Review (if not)
+      case 5: // Upload (if positions) or Review (if not)
         if (needsCompensation) {
           return !!state.validationResult && !state.isValidating;
         }
         return !!state.validationResult && 
           (state.validationResult.errorCount === 0 || state.validationResult.validRows > 0);
-      case 5: // Review (if positions) or Commit (if not)
+      case 6: // Review (if positions) or Commit (if not)
         if (needsCompensation) {
           return !!state.validationResult && 
             (state.validationResult.errorCount === 0 || state.validationResult.validRows > 0);
         }
         return state.committedCount > 0;
-      case 6: // Commit (only for positions flow)
+      case 7: // Commit (only for positions flow)
         return state.committedCount > 0;
       default:
         return false;
@@ -151,7 +170,7 @@ export function ImportWizard({ companyId, onComplete, onCancel }: ImportWizardPr
   };
 
   const handleStepClick = (step: number) => {
-    // Only allow going back
+    // Only allow going back to steps that are before current
     if (step < currentStep) {
       setCurrentStep(step);
     }
@@ -168,6 +187,57 @@ export function ImportWizard({ companyId, onComplete, onCancel }: ImportWizardPr
     onComplete?.();
   };
 
+  // Handle continuing with next import type after successful commit
+  const handleContinueImporting = () => {
+    // Add current import type to completed list
+    const newCompleted = state.importType 
+      ? [...state.completedImports, state.importType]
+      : state.completedImports;
+    
+    // Reset for next import while keeping company selection
+    setState((prev) => ({
+      ...prev,
+      importType: null,
+      file: null,
+      parsedData: null,
+      validationResult: null,
+      batchId: null,
+      isCommitting: false,
+      committedCount: 0,
+      completedImports: newCompleted,
+      // Keep company selection
+      companyId: prev.companyId,
+      companyCode: prev.companyCode,
+      companyStructure: prev.companyStructure,
+      compensationModel: null,
+    }));
+    
+    // Go back to import type selection (step 2)
+    setCurrentStep(2);
+    
+    toast.success("Ready for next import type");
+  };
+
+  // Handle switching company
+  const handleSwitchCompany = () => {
+    setState({
+      importType: null,
+      companyId: null,
+      companyCode: null,
+      companyStructure: null,
+      compensationModel: null,
+      file: null,
+      parsedData: null,
+      validationResult: null,
+      batchId: null,
+      isValidating: false,
+      isCommitting: false,
+      committedCount: 0,
+      completedImports: [],
+    });
+    setCurrentStep(1); // Go to company selection
+  };
+
   const renderStep = () => {
     const needsCompensation = requiresCompensationStep(state.importType);
 
@@ -176,14 +246,26 @@ export function ImportWizard({ companyId, onComplete, onCancel }: ImportWizardPr
         return <WizardStepWelcome />;
       case 1:
         return (
+          <WizardStepCompanySelection
+            selectedCompanyId={state.companyId}
+            onSelectCompany={(id, code, structure) => 
+              updateState({ companyId: id, companyCode: code, companyStructure: structure })
+            }
+          />
+        );
+      case 2:
+        return (
           <WizardStepSelectType
             selectedType={state.importType}
             onSelectType={(type) => updateState({ importType: type })}
             companyId={state.companyId}
+            companyCode={state.companyCode}
+            companyStructure={state.companyStructure}
             compensationModel={state.compensationModel}
+            completedImports={state.completedImports}
           />
         );
-      case 2:
+      case 3:
         if (needsCompensation) {
           return (
             <WizardStepCompensationModel
@@ -196,14 +278,16 @@ export function ImportWizard({ companyId, onComplete, onCancel }: ImportWizardPr
           <WizardStepTemplate
             importType={state.importType!}
             compensationModel={state.compensationModel}
+            companyStructure={state.companyStructure}
           />
         );
-      case 3:
+      case 4:
         if (needsCompensation) {
           return (
             <WizardStepTemplate
               importType={state.importType!}
               compensationModel={state.compensationModel}
+              companyStructure={state.companyStructure}
             />
           );
         }
@@ -221,7 +305,7 @@ export function ImportWizard({ companyId, onComplete, onCancel }: ImportWizardPr
             onValidationStart={() => updateState({ isValidating: true })}
           />
         );
-      case 4:
+      case 5:
         if (needsCompensation) {
           return (
             <WizardStepUpload
@@ -246,7 +330,7 @@ export function ImportWizard({ companyId, onComplete, onCancel }: ImportWizardPr
             onDataChange={(data) => updateState({ parsedData: data })}
           />
         );
-      case 5:
+      case 6:
         if (needsCompensation) {
           return (
             <WizardStepReview
@@ -272,7 +356,7 @@ export function ImportWizard({ companyId, onComplete, onCancel }: ImportWizardPr
             onCommitComplete={(count) => updateState({ isCommitting: false, committedCount: count })}
           />
         );
-      case 6:
+      case 7:
         return (
           <WizardStepCommit
             importType={state.importType!}
@@ -293,6 +377,9 @@ export function ImportWizard({ companyId, onComplete, onCancel }: ImportWizardPr
     }
   };
 
+  const isLastStep = currentStep === totalSteps - 1;
+  const showContinueOptions = isLastStep && state.committedCount > 0;
+
   return (
     <Card className="border-2">
       <CardHeader className="pb-4">
@@ -301,6 +388,11 @@ export function ImportWizard({ companyId, onComplete, onCancel }: ImportWizardPr
             <CardTitle className="flex items-center gap-2">
               <Wand2 className="h-5 w-5 text-primary" />
               Import Wizard
+              {state.companyCode && (
+                <span className="text-sm font-normal text-muted-foreground">
+                  — {state.companyCode}
+                </span>
+              )}
             </CardTitle>
             <CardDescription>
               Follow the guided steps to import your data safely
@@ -338,7 +430,24 @@ export function ImportWizard({ companyId, onComplete, onCancel }: ImportWizardPr
         </Button>
 
         <div className="flex items-center gap-2">
-          {currentStep === totalSteps - 1 ? (
+          {showContinueOptions ? (
+            <>
+              <Button
+                variant="outline"
+                onClick={handleContinueImporting}
+              >
+                <RotateCcw className="h-4 w-4 mr-2" />
+                Continue Importing
+              </Button>
+              <Button
+                onClick={handleComplete}
+                className="bg-green-600 hover:bg-green-700"
+              >
+                <Check className="h-4 w-4 mr-2" />
+                Finish Session
+              </Button>
+            </>
+          ) : isLastStep ? (
             <Button
               onClick={handleComplete}
               disabled={state.committedCount === 0}
