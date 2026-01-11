@@ -164,6 +164,14 @@ serve(async (req) => {
     basicIssues.push(...referenceErrors.issues);
     basicErrorCount += referenceErrors.errorCount;
 
+    // ============ COMPANY-SPECIFIC REFERENCE VALIDATION ============
+    if (importType === "companies" || importType === "company_structure_companies") {
+      const companyRefErrors = await validateCompanyReferences(supabase, data);
+      basicIssues.push(...companyRefErrors.issues);
+      basicErrorCount += companyRefErrors.errorCount;
+      basicWarningCount += companyRefErrors.warningCount;
+    }
+
     // If no Lovable API key, return basic validation only
     if (!LOVABLE_API_KEY) {
       console.log("No LOVABLE_API_KEY, returning basic validation only");
@@ -783,4 +791,208 @@ async function validateDatabaseReferences(
   }
 
   return { issues, errorCount };
+}
+
+// Validate company-specific references (currency, group, division, country)
+async function validateCompanyReferences(
+  supabase: any,
+  data: Record<string, string>[]
+): Promise<{ issues: ValidationIssue[]; errorCount: number; warningCount: number }> {
+  const issues: ValidationIssue[] = [];
+  let errorCount = 0;
+  let warningCount = 0;
+
+  console.log("Performing company-specific reference validation");
+
+  try {
+    // Fetch all currencies
+    const { data: currencies } = await supabase
+      .from("currencies")
+      .select("code, name");
+    
+    const currencyLookup = new Map<string, string>();
+    const currencyCodes: string[] = [];
+    (currencies || []).forEach((c: { code: string | null; name: string | null }) => {
+      if (c.code) {
+        currencyLookup.set(c.code.toUpperCase(), c.name || c.code);
+        currencyCodes.push(c.code.toUpperCase());
+      }
+    });
+    console.log(`Found ${currencyLookup.size} currencies for validation`);
+
+    // Fetch company groups
+    const { data: groups } = await supabase
+      .from("company_groups")
+      .select("code, name");
+    
+    const groupLookup = new Map<string, string>();
+    const groupCodes: string[] = [];
+    (groups || []).forEach((g: { code: string | null; name: string | null }) => {
+      if (g.code) {
+        groupLookup.set(g.code.toUpperCase(), g.name || g.code);
+        groupCodes.push(g.code.toUpperCase());
+      }
+    });
+    console.log(`Found ${groupLookup.size} company groups for validation`);
+
+    // Fetch company divisions (global divisions, not company-scoped)
+    const { data: divisions } = await supabase
+      .from("company_divisions")
+      .select("code, name");
+    
+    const divisionLookup = new Map<string, string>();
+    const divisionCodes: string[] = [];
+    (divisions || []).forEach((d: { code: string | null; name: string | null }) => {
+      if (d.code) {
+        divisionLookup.set(d.code.toUpperCase(), d.name || d.code);
+        divisionCodes.push(d.code.toUpperCase());
+      }
+    });
+    console.log(`Found ${divisionLookup.size} company divisions for validation`);
+
+    // Valid 2-letter ISO country codes (common ones)
+    const validCountryCodes = new Set([
+      "AF", "AL", "DZ", "AS", "AD", "AO", "AI", "AG", "AR", "AM", "AW", "AU", "AT", "AZ",
+      "BS", "BH", "BD", "BB", "BY", "BE", "BZ", "BJ", "BM", "BT", "BO", "BA", "BW", "BR",
+      "BN", "BG", "BF", "BI", "KH", "CM", "CA", "CV", "KY", "CF", "TD", "CL", "CN", "CO",
+      "KM", "CG", "CD", "CR", "CI", "HR", "CU", "CY", "CZ", "DK", "DJ", "DM", "DO", "EC",
+      "EG", "SV", "GQ", "ER", "EE", "ET", "FJ", "FI", "FR", "GA", "GM", "GE", "DE", "GH",
+      "GI", "GR", "GD", "GT", "GN", "GW", "GY", "HT", "HN", "HK", "HU", "IS", "IN", "ID",
+      "IR", "IQ", "IE", "IL", "IT", "JM", "JP", "JO", "KZ", "KE", "KI", "KP", "KR", "KW",
+      "KG", "LA", "LV", "LB", "LS", "LR", "LY", "LI", "LT", "LU", "MO", "MK", "MG", "MW",
+      "MY", "MV", "ML", "MT", "MH", "MR", "MU", "MX", "FM", "MD", "MC", "MN", "ME", "MA",
+      "MZ", "MM", "NA", "NR", "NP", "NL", "NZ", "NI", "NE", "NG", "NO", "OM", "PK", "PW",
+      "PA", "PG", "PY", "PE", "PH", "PL", "PT", "PR", "QA", "RO", "RU", "RW", "KN", "LC",
+      "VC", "WS", "SM", "ST", "SA", "SN", "RS", "SC", "SL", "SG", "SK", "SI", "SB", "SO",
+      "ZA", "ES", "LK", "SD", "SR", "SZ", "SE", "CH", "SY", "TW", "TJ", "TZ", "TH", "TL",
+      "TG", "TO", "TT", "TN", "TR", "TM", "TV", "UG", "UA", "AE", "GB", "US", "UY", "UZ",
+      "VU", "VA", "VE", "VN", "YE", "ZM", "ZW"
+    ]);
+
+    // Validate each row
+    data.forEach((row, index) => {
+      const rowNum = index + 2;
+
+      // Validate currency code
+      if (row.currency) {
+        const currencyCode = row.currency.toUpperCase();
+        if (!currencyLookup.has(currencyCode)) {
+          // Find similar currency codes for suggestion
+          const similar = currencyCodes.filter(c => 
+            c.includes(currencyCode.charAt(0)) || currencyCode.includes(c.charAt(0))
+          ).slice(0, 5);
+          
+          issues.push({
+            row: rowNum,
+            field: "currency",
+            value: row.currency,
+            issue: `Currency '${row.currency}' not found in system`,
+            severity: "error",
+            suggestion: similar.length > 0 
+              ? `Did you mean: ${similar.join(", ")}? Check Reference Data Catalog for valid codes.`
+              : "Check Reference Data Catalog for valid currency codes (e.g., TTD, JMD, USD, BBD)",
+          });
+          errorCount++;
+        }
+      }
+
+      // Validate country code (should be 2-letter ISO)
+      if (row.country) {
+        const countryCode = row.country.toUpperCase();
+        if (countryCode.length !== 2) {
+          issues.push({
+            row: rowNum,
+            field: "country",
+            value: row.country,
+            issue: "Country should be a 2-letter ISO code",
+            severity: "warning",
+            suggestion: "Use 2-letter ISO codes like TT (Trinidad), JM (Jamaica), BB (Barbados), US, GB",
+          });
+          warningCount++;
+        } else if (!validCountryCodes.has(countryCode)) {
+          issues.push({
+            row: rowNum,
+            field: "country",
+            value: row.country,
+            issue: `Invalid country code '${row.country}'`,
+            severity: "warning",
+            suggestion: "Use valid 2-letter ISO codes like TT, JM, BB, GH, NG, DO",
+          });
+          warningCount++;
+        }
+      }
+
+      // Validate group code if provided
+      if (row.group_code) {
+        const groupCode = row.group_code.toUpperCase();
+        if (!groupLookup.has(groupCode)) {
+          const similar = groupCodes.slice(0, 5);
+          issues.push({
+            row: rowNum,
+            field: "group_code",
+            value: row.group_code,
+            issue: `Company group '${row.group_code}' not found`,
+            severity: "warning",
+            suggestion: similar.length > 0 
+              ? `Available groups: ${similar.join(", ")}. Create group first or leave empty.`
+              : "Create the company group first or leave this field empty",
+          });
+          warningCount++;
+        }
+      }
+
+      // Validate division code if provided
+      if (row.division_code) {
+        const divisionCode = row.division_code.toUpperCase();
+        if (!divisionLookup.has(divisionCode)) {
+          const similar = divisionCodes.slice(0, 5);
+          issues.push({
+            row: rowNum,
+            field: "division_code",
+            value: row.division_code,
+            issue: `Company division '${row.division_code}' not found`,
+            severity: "warning",
+            suggestion: similar.length > 0 
+              ? `Available divisions: ${similar.join(", ")}. Create division first or leave empty.`
+              : "Create the company division first or leave this field empty",
+          });
+          warningCount++;
+        }
+      }
+
+      // Validate is_active field
+      if (row.is_active) {
+        const value = row.is_active.toLowerCase();
+        if (value !== "true" && value !== "false" && value !== "1" && value !== "0" && value !== "yes" && value !== "no") {
+          issues.push({
+            row: rowNum,
+            field: "is_active",
+            value: row.is_active,
+            issue: "Invalid value for is_active",
+            severity: "warning",
+            suggestion: "Use 'true' or 'false'",
+          });
+          warningCount++;
+        }
+      }
+
+      // Validate first_language and second_language
+      const validLanguages = ["en", "es", "fr", "nl", "pt", "de", "zh", "ar", "hi", "sw"];
+      if (row.first_language && !validLanguages.includes(row.first_language.toLowerCase())) {
+        issues.push({
+          row: rowNum,
+          field: "first_language",
+          value: row.first_language,
+          issue: `Uncommon language code '${row.first_language}'`,
+          severity: "info",
+          suggestion: `Common codes: ${validLanguages.join(", ")}`,
+        });
+      }
+    });
+
+  } catch (err) {
+    console.error("Company reference validation error:", err);
+  }
+
+  return { issues, errorCount, warningCount };
 }
