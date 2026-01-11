@@ -53,6 +53,70 @@ interface LookupRecord {
   category: string;
 }
 
+// Common country name to ISO2 code mapping (Caribbean, Africa, and major countries)
+const COUNTRY_NAME_TO_ISO2: Record<string, string> = {
+  // Caribbean
+  "trinidad and tobago": "TT", "trinidad": "TT", "tobago": "TT",
+  "jamaica": "JM",
+  "barbados": "BB",
+  "bahamas": "BS", "the bahamas": "BS",
+  "guyana": "GY",
+  "suriname": "SR",
+  "haiti": "HT",
+  "dominican republic": "DO",
+  "cuba": "CU",
+  "puerto rico": "PR",
+  "antigua and barbuda": "AG", "antigua": "AG",
+  "saint lucia": "LC", "st lucia": "LC", "st. lucia": "LC",
+  "grenada": "GD",
+  "saint vincent and the grenadines": "VC", "st vincent": "VC",
+  "dominica": "DM",
+  "saint kitts and nevis": "KN", "st kitts": "KN",
+  "belize": "BZ",
+  "cayman islands": "KY",
+  "turks and caicos": "TC",
+  "british virgin islands": "VG",
+  "us virgin islands": "VI",
+  "aruba": "AW",
+  "curacao": "CW",
+  "sint maarten": "SX",
+  // Africa
+  "nigeria": "NG",
+  "ghana": "GH",
+  "south africa": "ZA",
+  "kenya": "KE",
+  "egypt": "EG",
+  "morocco": "MA",
+  "ethiopia": "ET",
+  "tanzania": "TZ",
+  "uganda": "UG",
+  "algeria": "DZ",
+  "sudan": "SD",
+  "zimbabwe": "ZW",
+  "rwanda": "RW",
+  "senegal": "SN",
+  "cameroon": "CM",
+  "ivory coast": "CI", "cote d'ivoire": "CI",
+  // Major countries
+  "united states": "US", "usa": "US", "united states of america": "US",
+  "united kingdom": "GB", "uk": "GB", "great britain": "GB", "england": "GB",
+  "canada": "CA",
+  "india": "IN",
+  "china": "CN",
+  "brazil": "BR",
+  "mexico": "MX",
+  "germany": "DE",
+  "france": "FR",
+  "italy": "IT",
+  "spain": "ES",
+  "australia": "AU",
+  "japan": "JP",
+  "venezuela": "VE",
+  "colombia": "CO",
+  "panama": "PA",
+  "costa rica": "CR",
+};
+
 export async function transformEmployeesData(
   rows: EmployeeRow[],
   defaultCompanyId?: string | null
@@ -195,8 +259,27 @@ export async function transformEmployeesData(
     // Build full name
     const fullName = `${row.first_name.trim()} ${row.last_name.trim()}`;
 
-    // Handle nationality - store as-is since it's a varchar field
-    const nationality = row.nationality?.trim() || null;
+    // Handle nationality - convert to ISO2 code (varchar(2))
+    let nationality: string | null = null;
+    if (row.nationality?.trim()) {
+      const natInput = row.nationality.trim();
+      // Check if it's already a 2-letter code
+      if (natInput.length === 2) {
+        nationality = natInput.toUpperCase();
+      } else {
+        // Try to map from country name
+        const mapped = COUNTRY_NAME_TO_ISO2[natInput.toLowerCase()];
+        if (mapped) {
+          nationality = mapped;
+        } else {
+          warnings.push({
+            rowIndex,
+            field: "nationality",
+            message: `Could not convert nationality '${natInput}' to country code. Use 2-letter ISO code (e.g., TT, JM, GY).`,
+          });
+        }
+      }
+    }
 
     // Add to transformed records
     transformed.push({
