@@ -558,6 +558,7 @@ const App = () => (
             <Route path="/hr-hub/sop-management" element={<ProtectedRoute moduleCode="hr_hub"><LazyPage><Pages.SOPManagementPage /></LazyPage></ProtectedRoute>} />
             <Route path="/hr-hub/government-id-types" element={<ProtectedRoute moduleCode="hr_hub"><LazyPage><Pages.GovernmentIdTypesPage /></LazyPage></ProtectedRoute>} />
             <Route path="/hr-hub/data-import" element={<ProtectedRoute moduleCode="hr_hub"><LazyPage><Pages.HRDataImportPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/hr-hub/reference-data" element={<ProtectedRoute moduleCode="hr_hub"><LazyPage><Pages.ReferenceDataCatalogPage /></LazyPage></ProtectedRoute>} />
             <Route path="/hr-hub/sentiment-monitoring" element={<ProtectedRoute moduleCode="hr_hub"><LazyPage><Pages.SentimentMonitoringPage /></LazyPage></ProtectedRoute>} />
             <Route path="/hr-hub/recognition-analytics" element={<ProtectedRoute moduleCode="hr_hub"><LazyPage><Pages.RecognitionAnalyticsPage /></LazyPage></ProtectedRoute>} />
             <Route path="/hr-hub/integration-dashboard" element={<ProtectedRoute moduleCode="hr_hub"><LazyPage><Pages.IntegrationDashboardPage /></LazyPage></ProtectedRoute>} />
