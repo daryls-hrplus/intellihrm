@@ -22,6 +22,7 @@ import { WizardStepTemplate } from "./wizard/WizardStepTemplate";
 import { WizardStepUpload } from "./wizard/WizardStepUpload";
 import { WizardStepReview } from "./wizard/WizardStepReview";
 import { WizardStepCommit } from "./wizard/WizardStepCommit";
+import { WizardStepPrerequisiteCheck } from "./wizard/WizardStepPrerequisiteCheck";
 
 export interface WizardState {
   importType: string | null;
@@ -38,6 +39,10 @@ export interface WizardState {
   committedCount: number;
   // Track completed imports in this session
   completedImports: string[];
+  // Track if we're in a prerequisite import flow
+  pendingImportType: string | null;
+  // Track if prerequisites have been checked/passed
+  prerequisitesChecked: boolean;
 }
 
 interface ImportWizardProps {
@@ -46,12 +51,13 @@ interface ImportWizardProps {
   onCancel?: () => void;
 }
 
-// All possible wizard steps (now includes Company Selection)
+// All possible wizard steps (now includes Company Selection and Prerequisites)
 const ALL_WIZARD_STEPS = [
   { title: "Welcome", description: "Overview" },
   { title: "Company", description: "Select target" },
   { title: "Import Type", description: "Choose data" },
   { title: "Compensation", description: "Pay model" },
+  { title: "Prerequisites", description: "Check data" },
   { title: "Template", description: "Download" },
   { title: "Upload", description: "Validate" },
   { title: "Review", description: "Preview" },
@@ -61,6 +67,11 @@ const ALL_WIZARD_STEPS = [
 // Only positions require compensation model selection
 const requiresCompensationStep = (importType: string | null): boolean => {
   return importType === "positions";
+};
+
+// Check if compensation model needs prerequisites
+const requiresPrerequisiteStep = (compensationModel: string | null): boolean => {
+  return compensationModel === "salary_grade" || compensationModel === "spinal_point";
 };
 
 export function ImportWizard({ companyId, onComplete, onCancel }: ImportWizardProps) {
@@ -80,20 +91,33 @@ export function ImportWizard({ companyId, onComplete, onCancel }: ImportWizardPr
     isCommitting: false,
     committedCount: 0,
     completedImports: [],
+    pendingImportType: null,
+    prerequisitesChecked: false,
   });
 
-  // Dynamic steps based on selected import type
+  // Dynamic steps based on selected import type and compensation model
   const activeSteps = useMemo(() => {
     // Start with all steps
     let steps = [...ALL_WIZARD_STEPS];
     
-    // Remove compensation step (index 3) for non-positions imports
-    if (!requiresCompensationStep(state.importType)) {
-      steps = steps.filter((_, index) => index !== 3);
+    const needsCompensation = requiresCompensationStep(state.importType);
+    const needsPrerequisites = needsCompensation && requiresPrerequisiteStep(state.compensationModel);
+    
+    // Build list of indices to remove (remove from highest to lowest to avoid index shifting)
+    const indicesToRemove: number[] = [];
+    
+    // Remove compensation step (index 3) and prerequisites step (index 4) for non-positions imports
+    if (!needsCompensation) {
+      indicesToRemove.push(3, 4); // Compensation and Prerequisites
+    } else if (!needsPrerequisites) {
+      indicesToRemove.push(4); // Only Prerequisites
     }
     
+    // Filter out the indices
+    steps = steps.filter((_, index) => !indicesToRemove.includes(index));
+    
     return steps;
-  }, [state.importType]);
+  }, [state.importType, state.compensationModel]);
 
   const totalSteps = activeSteps.length;
 
@@ -234,12 +258,42 @@ export function ImportWizard({ companyId, onComplete, onCancel }: ImportWizardPr
       isCommitting: false,
       committedCount: 0,
       completedImports: [],
+      pendingImportType: null,
+      prerequisitesChecked: false,
     });
     setCurrentStep(1); // Go to company selection
   };
 
+  // Handle importing a prerequisite (e.g., salary grades)
+  const handleImportPrerequisite = (prereqType: string) => {
+    // Store current import type intention and switch to prerequisite import
+    updateState({ 
+      pendingImportType: state.importType,
+      importType: prereqType,
+      prerequisitesChecked: false,
+    });
+    // Go to template step (step 3 in the simplified flow for non-positions)
+    setCurrentStep(2); // Go to Import Type step, but it will auto-proceed to Template
+  };
+
+  // Handle skipping prerequisites by switching to direct pay
+  const handleSkipToDirectPay = () => {
+    updateState({ 
+      compensationModel: "direct_pay",
+      prerequisitesChecked: true,
+    });
+    handleNext(); // Proceed to template step
+  };
+
+  // Handle prerequisites met
+  const handlePrerequisitesMet = () => {
+    updateState({ prerequisitesChecked: true });
+    handleNext(); // Auto-proceed to template step
+  };
+
   const renderStep = () => {
     const needsCompensation = requiresCompensationStep(state.importType);
+    const needsPrerequisites = needsCompensation && requiresPrerequisiteStep(state.compensationModel);
 
     switch (currentStep) {
       case 0:
@@ -270,7 +324,7 @@ export function ImportWizard({ companyId, onComplete, onCancel }: ImportWizardPr
           return (
             <WizardStepCompensationModel
               selectedModel={state.compensationModel}
-              onSelectModel={(model) => updateState({ compensationModel: model })}
+              onSelectModel={(model) => updateState({ compensationModel: model, prerequisitesChecked: false })}
             />
           );
         }
@@ -282,6 +336,18 @@ export function ImportWizard({ companyId, onComplete, onCancel }: ImportWizardPr
           />
         );
       case 4:
+        if (needsCompensation && needsPrerequisites) {
+          return (
+            <WizardStepPrerequisiteCheck
+              compensationModel={state.compensationModel}
+              companyId={state.companyId}
+              companyCode={state.companyCode}
+              onPrerequisitesMet={handlePrerequisitesMet}
+              onImportPrerequisite={handleImportPrerequisite}
+              onSkipToDirectPay={handleSkipToDirectPay}
+            />
+          );
+        }
         if (needsCompensation) {
           return (
             <WizardStepTemplate
