@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -7,9 +8,13 @@ import {
   FileSpreadsheet, 
   Info,
   CheckCircle2,
+  ExternalLink,
+  Database,
 } from "lucide-react";
 import { toast } from "sonner";
 import { CompensationModel } from "./WizardStepCompensationModel";
+import { ReferenceDataDrawer, ReferenceDataType } from "./ReferenceDataDrawer";
+import { Link } from "react-router-dom";
 
 interface WizardStepTemplateProps {
   importType: string;
@@ -23,7 +28,27 @@ interface TemplateField {
   example: string;
   systemDefined?: boolean;
   allowedValues?: string[];
+  referenceDataType?: ReferenceDataType;
+  lookupCategory?: string;
 }
+
+// Map field names to reference data types
+const FIELD_REFERENCE_MAP: Record<string, { type: ReferenceDataType; lookupCategory?: string }> = {
+  country: { type: "country" },
+  nationality: { type: "country" },
+  birth_country: { type: "country" },
+  currency: { type: "currency" },
+  language: { type: "language" },
+  preferred_language: { type: "language" },
+  gender: { type: "lookup", lookupCategory: "gender" },
+  marital_status: { type: "lookup", lookupCategory: "marital_status" },
+  employee_status: { type: "lookup", lookupCategory: "employee_status" },
+  employee_type: { type: "lookup", lookupCategory: "employee_type" },
+  termination_reason: { type: "lookup", lookupCategory: "termination_reason" },
+  contract_type: { type: "lookup", lookupCategory: "contract_type" },
+  education_level: { type: "lookup", lookupCategory: "education_level" },
+  title: { type: "lookup", lookupCategory: "title" },
+};
 
 const TEMPLATE_CONFIGS: Record<string, { 
   headers: string[]; 
@@ -405,6 +430,10 @@ const DEFAULT_TEMPLATE = {
 };
 
 export function WizardStepTemplate({ importType, compensationModel }: WizardStepTemplateProps) {
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [activeRefType, setActiveRefType] = useState<ReferenceDataType>("country");
+  const [activeLookupCategory, setActiveLookupCategory] = useState<string | undefined>();
+
   // Handle prefixed import types
   const baseType = importType.replace("company_structure_", "");
   
@@ -429,9 +458,25 @@ export function WizardStepTemplate({ importType, compensationModel }: WizardStep
     toast.success("Template downloaded successfully");
   };
 
+  const openReferenceDrawer = (fieldName: string) => {
+    const refConfig = FIELD_REFERENCE_MAP[fieldName];
+    if (refConfig) {
+      setActiveRefType(refConfig.type);
+      setActiveLookupCategory(refConfig.lookupCategory);
+      setDrawerOpen(true);
+    }
+  };
+
+  const hasReferenceData = (fieldName: string) => {
+    return fieldName in FIELD_REFERENCE_MAP;
+  };
+
   // Separate system-defined fields
   const systemDefinedFields = config.fields.filter(f => (f as TemplateField).systemDefined);
   const regularFields = config.fields.filter(f => !(f as TemplateField).systemDefined);
+
+  // Check if any fields have reference data
+  const fieldsWithRefData = config.fields.filter(f => hasReferenceData(f.name));
 
   return (
     <div className="space-y-6">
@@ -443,12 +488,50 @@ export function WizardStepTemplate({ importType, compensationModel }: WizardStep
       </div>
 
       {/* Download Button */}
-      <div className="flex justify-center">
+      <div className="flex justify-center gap-3">
         <Button size="lg" onClick={downloadTemplate} className="gap-2">
           <Download className="h-5 w-5" />
           Download {baseType.replace(/_/g, " ")} Template
         </Button>
       </div>
+
+      {/* Reference Data Quick Links */}
+      {fieldsWithRefData.length > 0 && (
+        <Card className="border-primary/30 bg-primary/5">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <Database className="h-5 w-5 text-primary" />
+              <h3 className="font-semibold">Reference Data for This Import</h3>
+            </div>
+            <p className="text-sm text-muted-foreground mb-3">
+              These fields require specific codes. Click to view valid values:
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {fieldsWithRefData.map((field) => (
+                <Button
+                  key={field.name}
+                  variant="outline"
+                  size="sm"
+                  onClick={() => openReferenceDrawer(field.name)}
+                  className="gap-1"
+                >
+                  <ExternalLink className="h-3 w-3" />
+                  {field.name.replace(/_/g, " ")}
+                </Button>
+              ))}
+            </div>
+            <div className="mt-3 pt-3 border-t border-border">
+              <Link 
+                to="/hr-hub/reference-data" 
+                className="text-sm text-primary hover:underline flex items-center gap-1"
+              >
+                <Database className="h-3 w-3" />
+                Open full Reference Data Catalog
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Field Specifications */}
       <Card>
@@ -464,13 +547,24 @@ export function WizardStepTemplate({ importType, compensationModel }: WizardStep
                 className="flex items-start gap-4 p-3 rounded-lg bg-muted/50"
               >
                 <div className="flex-1">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <code className="text-sm font-mono bg-background px-2 py-0.5 rounded">
                       {field.name}
                     </code>
                     <Badge variant={field.required ? "default" : "secondary"} className="text-xs">
                       {field.required ? "Required" : "Optional"}
                     </Badge>
+                    {hasReferenceData(field.name) && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => openReferenceDrawer(field.name)}
+                        className="h-6 px-2 text-xs text-primary hover:text-primary"
+                      >
+                        <ExternalLink className="h-3 w-3 mr-1" />
+                        View valid values
+                      </Button>
+                    )}
                   </div>
                   <p className="text-sm text-muted-foreground mt-1">{field.description}</p>
                 </div>
@@ -483,6 +577,14 @@ export function WizardStepTemplate({ importType, compensationModel }: WizardStep
           </div>
         </CardContent>
       </Card>
+
+      {/* Reference Data Drawer */}
+      <ReferenceDataDrawer
+        open={drawerOpen}
+        onOpenChange={setDrawerOpen}
+        dataType={activeRefType}
+        lookupCategory={activeLookupCategory}
+      />
 
       {/* System-Defined Fields */}
       {systemDefinedFields.length > 0 && (
