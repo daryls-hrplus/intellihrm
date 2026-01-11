@@ -17,6 +17,7 @@ interface EmployeeRow {
 }
 
 interface EmployeeInsertRecord {
+  id: string;
   email: string;
   full_name: string;
   first_name: string | null;
@@ -116,6 +117,19 @@ const COUNTRY_NAME_TO_ISO2: Record<string, string> = {
   "panama": "PA",
   "costa rica": "CR",
 };
+
+function createUuid(): string {
+  if (typeof crypto !== "undefined" && typeof (crypto as any).randomUUID === "function") {
+    return (crypto as any).randomUUID();
+  }
+
+  // RFC4122 v4 fallback (good enough for client-side IDs)
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === "x" ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+}
 
 export async function transformEmployeesData(
   rows: EmployeeRow[],
@@ -281,8 +295,11 @@ export async function transformEmployeesData(
       }
     }
 
+    const id = createUuid();
+
     // Add to transformed records
     transformed.push({
+      id,
       email,
       full_name: fullName,
       first_name: row.first_name.trim(),
