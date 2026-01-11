@@ -26,6 +26,7 @@ import { transformSpinalPointsData, generateSpinalPointsFailureReport } from "./
 import { transformEmployeeAssignmentsData, generateEmployeeAssignmentsFailureReport } from "./employeeAssignmentsTransformer";
 import { transformEmployeeCompensationData, generateEmployeeCompensationFailureReport } from "./employeeCompensationTransformer";
 import { transformCompaniesData } from "./companiesTransformer";
+import { transformEmployeesData, generateEmployeesFailureReport } from "./employeesTransformer";
 import { transformDivisionsData, generateDivisionsFailureReport } from "./divisionsTransformer";
 import { transformDepartmentsData, generateDepartmentsFailureReport } from "./departmentsTransformer";
 import { transformSectionsData, generateSectionsFailureReport } from "./sectionsTransformer";
@@ -124,6 +125,8 @@ export function WizardStepCommit({
       report = generateJobFamiliesFailureReport(importFailures, importWarnings);
     } else if (importType === "jobs") {
       report = generateJobsFailureReport(importFailures, importWarnings);
+    } else if (importType === "employees") {
+      report = generateEmployeesFailureReport(importFailures, importWarnings);
     } else {
       report = generateFailureReport(importFailures, importWarnings); // fallback
     }
@@ -577,6 +580,79 @@ export function WizardStepCommit({
           }
         }
         setProgress(90);
+      } else if (importType === "employees") {
+        // Employees import - transform and insert profiles
+        setProgress(30);
+        const transformResult = await transformEmployeesData(validData, companyId);
+        
+        allErrors.push(...transformResult.errors);
+        allWarnings.push(...transformResult.warnings);
+        failedCount = transformResult.errors.length;
+        
+        setProgress(50);
+
+        if (transformResult.transformed.length > 0) {
+          const batchSize = 50;
+          for (let i = 0; i < transformResult.transformed.length; i += batchSize) {
+            const batch = transformResult.transformed.slice(i, i + batchSize);
+            
+            const { data: insertData, error: insertError } = await (supabase as any)
+              .from("profiles")
+              .insert(batch)
+              .select("id, email");
+
+            if (insertError) {
+              batch.forEach((_, idx) => {
+                allErrors.push({ 
+                  rowIndex: i + idx, 
+                  row: validData[i + idx], 
+                  error: insertError.message 
+                });
+              });
+              failedCount += batch.length;
+            } else {
+              successCount += batch.length;
+              importedIds.push(...(insertData?.map((d) => d.id) || []));
+
+              // Create email-to-id mapping for related records
+              const emailToId = new Map(
+                insertData?.map((d) => [d.email.toLowerCase(), d.id]) || []
+              );
+
+              // Insert address records if any
+              const addressBatch = transformResult.addressRecords.filter(
+                (a) => emailToId.has(a.email.toLowerCase())
+              );
+              if (addressBatch.length > 0) {
+                const addressInserts = addressBatch.map((a) => ({
+                  employee_id: emailToId.get(a.email.toLowerCase())!,
+                  address_type: "home",
+                  address_line_1: a.address,
+                  city: a.city,
+                  country: a.country,
+                  is_primary: true,
+                }));
+                await (supabase as any).from("employee_addresses").insert(addressInserts);
+              }
+
+              // Insert contact records if any
+              const contactBatch = transformResult.contactRecords.filter(
+                (c) => emailToId.has(c.email.toLowerCase())
+              );
+              if (contactBatch.length > 0) {
+                const contactInserts = contactBatch.map((c) => ({
+                  employee_id: emailToId.get(c.email.toLowerCase())!,
+                  contact_type: "phone",
+                  contact_value: c.phone,
+                  is_primary: true,
+                }));
+                await (supabase as any).from("employee_contacts").insert(contactInserts);
+              }
+            }
+            setProgress(50 + Math.round((i / transformResult.transformed.length) * 40));
+          }
+        }
+        setProgress(90);
       } else {
         // Original logic for other import types
         const batchSize = 50;
@@ -659,9 +735,7 @@ export function WizardStepCommit({
     const tableName = tableMap[type];
     
     if (!tableName) {
-      if (type === "employees" || type === "new_hires") {
-        return { success: true, ids: [], count: batch.length };
-      }
+      // employees and new_hires are now handled by specialized transformers above
       return { success: false, error: `Unknown import type: ${type}` };
     }
 
