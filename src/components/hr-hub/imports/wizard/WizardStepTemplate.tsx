@@ -252,6 +252,35 @@ const TEMPLATE_CONFIGS: Record<string, {
       "Compensation is managed separately via Employee Compensation import",
     ],
   },
+  employees: {
+    headers: ["company_code", "email", "first_name", "last_name", "phone", "date_of_birth", "gender", "marital_status", "nationality", "address", "city", "country"],
+    fields: [
+      { name: "company_code", required: false, description: "Company code (optional)", example: "COMP001" },
+      { name: "email", required: true, description: "Employee email (becomes login)", example: "john.doe@company.com" },
+      { name: "first_name", required: true, description: "First name", example: "John" },
+      { name: "last_name", required: true, description: "Last name", example: "Doe" },
+      { name: "phone", required: false, description: "Phone number", example: "+1-868-555-1234" },
+      { name: "date_of_birth", required: false, description: "Date of birth (YYYY-MM-DD)", example: "1990-05-15" },
+      { name: "gender", required: false, description: "Gender", example: "male", referenceDataType: "lookup", lookupCategory: "gender" },
+      { name: "marital_status", required: false, description: "Marital status", example: "single", referenceDataType: "lookup", lookupCategory: "marital_status" },
+      { name: "nationality", required: false, description: "Nationality", example: "Trinidad and Tobago", referenceDataType: "country" },
+      { name: "address", required: false, description: "Street address", example: "123 Main Street" },
+      { name: "city", required: false, description: "City", example: "Port of Spain" },
+      { name: "country", required: false, description: "Country", example: "Trinidad and Tobago", referenceDataType: "country" },
+    ],
+    examples: [
+      ["COMP001", "john.doe@company.com", "John", "Doe", "+1-868-555-1234", "1990-05-15", "male", "single", "Trinidad and Tobago", "123 Main Street", "Port of Spain", "Trinidad and Tobago"],
+      ["COMP001", "jane.smith@company.com", "Jane", "Smith", "+1-868-555-5678", "1985-08-22", "female", "married", "Jamaica", "45 Ocean Drive", "Kingston", "Jamaica"],
+    ],
+    tips: [
+      "Email must be unique - this becomes the employee's login credential",
+      "Company code is optional - if provided, must match an existing company",
+      "Date of birth format: YYYY-MM-DD (e.g., 1990-05-15)",
+      "Gender values: male, female, other",
+      "Marital status values: single, married, divorced, widowed, separated",
+      "User accounts will be created automatically for each employee",
+    ],
+  },
   new_hires: {
     headers: ["email", "first_name", "last_name", "position_number", "department_code", "company_code", "hire_date", "employee_id"],
     fields: [
