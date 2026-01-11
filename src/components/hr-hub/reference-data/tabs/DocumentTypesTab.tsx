@@ -19,7 +19,7 @@ interface DocumentType {
   id: string;
   code: string;
   name: string;
-  record_type: string | null;
+  managed_by_module: string | null;
   description: string | null;
   is_active: boolean;
 }
@@ -33,7 +33,7 @@ export function DocumentTypesTab() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("document_types")
-        .select("id, code, name, record_type, description, is_active")
+        .select("id, code, name, managed_by_module, description, is_active")
         .eq("is_active", true)
         .order("name", { ascending: true });
       if (error) throw error;
@@ -49,7 +49,7 @@ export function DocumentTypesTab() {
       (d) =>
         d.name.toLowerCase().includes(lowerSearch) ||
         d.code.toLowerCase().includes(lowerSearch) ||
-        (d.record_type?.toLowerCase().includes(lowerSearch))
+        (d.managed_by_module?.toLowerCase().includes(lowerSearch))
     );
   }, [search, documentTypes]);
 
@@ -61,11 +61,11 @@ export function DocumentTypesTab() {
   };
 
   const handleDownloadCSV = () => {
-    const headers = ["code", "name", "record_type", "description"];
+    const headers = ["code", "name", "managed_by_module", "description"];
     const rows = filteredDocTypes.map((d) => [
       d.code, 
       d.name, 
-      d.record_type || "",
+      d.managed_by_module || "",
       d.description || ""
     ]);
     const csvContent = [
@@ -120,7 +120,7 @@ export function DocumentTypesTab() {
               <TableRow>
                 <TableHead className="w-32">Code</TableHead>
                 <TableHead>Document Type</TableHead>
-                <TableHead className="w-40">Record Type</TableHead>
+                <TableHead className="w-40">Module</TableHead>
                 <TableHead className="w-20 text-center">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -141,9 +141,9 @@ export function DocumentTypesTab() {
                     </div>
                   </TableCell>
                   <TableCell>
-                    {docType.record_type && (
+                    {docType.managed_by_module && (
                       <Badge variant="outline" className="font-normal">
-                        {docType.record_type}
+                        {docType.managed_by_module}
                       </Badge>
                     )}
                   </TableCell>
