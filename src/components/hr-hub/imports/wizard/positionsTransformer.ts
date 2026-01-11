@@ -195,15 +195,20 @@ export async function transformPositionsData(
         rowErrors.push("job_code is required");
       }
 
+      // Support both wizard and manual template field names for backward compatibility
+      const reportsToCode = row.reports_to_position_code || row.reports_to_position;
+      const positionCode = row.position_code || row.position_number;
+      const positionTitle = row.position_title || row.title;
+
       // Resolve reports_to_position_id (optional)
       let reportsToPositionId: string | null = null;
-      if (row.reports_to_position && resolvedCompanyId) {
-        const key = `${resolvedCompanyId}|${row.reports_to_position.toUpperCase()}`;
+      if (reportsToCode && resolvedCompanyId) {
+        const key = `${resolvedCompanyId}|${reportsToCode.toUpperCase()}`;
         reportsToPositionId = positionLookup.get(key) || null;
         if (!reportsToPositionId) {
           rowWarnings.push({ 
-            field: "reports_to_position", 
-            message: `Position not found: ${row.reports_to_position}. Field will be left empty.` 
+            field: "reports_to_position_code", 
+            message: `Position not found: ${reportsToCode}. Field will be left empty.` 
           });
         }
       }
@@ -234,12 +239,12 @@ export async function transformPositionsData(
         }
       }
 
-      // Validate required fields
-      if (!row.position_number) {
-        rowErrors.push("position_number is required");
+      // Validate required fields (support both field name formats)
+      if (!positionCode) {
+        rowErrors.push("position_code is required");
       }
-      if (!row.title) {
-        rowErrors.push("title is required");
+      if (!positionTitle) {
+        rowErrors.push("position_title is required");
       }
 
       // If there are critical errors, skip this row
@@ -252,13 +257,13 @@ export async function transformPositionsData(
       const rowCompensationModel = normalizeEnum(row.compensation_model, "compensation_model") 
         || defaultCompensationModel;
 
-      // Build transformed record
+      // Build transformed record (using resolved field values for backward compatibility)
       const transformedRow: any = {
         company_id: resolvedCompanyId,
         department_id: departmentId,
         job_id: jobId,
-        code: row.position_number,
-        title: row.title,
+        code: positionCode,
+        title: positionTitle,
         description: row.description || null,
         reports_to_position_id: reportsToPositionId,
         salary_grade_id: salaryGradeId,

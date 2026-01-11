@@ -366,10 +366,16 @@ function getPositionsTemplate(
   examples: string[][];
   tips: string[];
 } {
-  // Base fields that are always included
-  const baseHeaders = [
-    "position_number", "title", "description", "company_code"
-  ];
+  // Determine pay type example based on compensation model
+  const payTypeExample = compensationModel === "hourly_rate" ? "hourly" 
+    : compensationModel === "commission_based" ? "commission" 
+    : "salary";
+
+  // Build headers to match manual template order:
+  // company_code, [division_code], department_code, [section_code], job_code, position_code, position_title, 
+  // reports_to_position_code, salary_grade_code, headcount, start_date, end_date, 
+  // pay_type, employment_status, employment_type, employment_relation, flsa_status, default_scheduled_hours, description, is_active
+  const baseHeaders: string[] = ["company_code"];
   
   // Add division_code if company uses divisions
   if (companyStructure?.hasDivisions) {
@@ -378,36 +384,48 @@ function getPositionsTemplate(
   
   baseHeaders.push("department_code");
   
-  // Add section_code if company uses sections (for validation, not stored)
+  // Add section_code if company uses sections
   if (companyStructure?.hasSections) {
     baseHeaders.push("section_code");
   }
   
   baseHeaders.push(
-    "job_code", "reports_to_position", "headcount", "pay_type", "employment_status", 
-    "employment_type", "employment_relation", "flsa_status", "default_scheduled_hours",
-    "start_date", "end_date", "is_active"
+    "job_code", "position_code", "position_title", "reports_to_position_code"
   );
 
+  // Build base fields with proper ordering and aligned field names
   const baseFields: TemplateField[] = [
-    { name: "position_number", required: true, description: "Unique position ID", example: "POS-001" },
-    { name: "title", required: true, description: "Position title", example: "Senior Developer" },
-    { name: "description", required: false, description: "Position description", example: "Lead development projects" },
     { name: "company_code", required: true, description: "Company code", example: "COMP001" },
-    { name: "department_code", required: true, description: "Department code", example: "IT001" },
-    { name: "job_code", required: true, description: "Job code", example: "DEV002" },
-    { name: "reports_to_position", required: false, description: "Manager position number", example: "POS-000" },
-    { name: "headcount", required: false, description: "Number of positions", example: "1" },
-    { name: "pay_type", required: false, description: "Pay type (SALARIED, HOURLY, etc.)", example: "SALARIED", systemDefined: true, allowedValues: ["SALARIED", "HOURLY", "COMMISSION", "PIECE_RATE"] },
-    { name: "employment_status", required: false, description: "Status (ACTIVE, INACTIVE, ON_HOLD)", example: "ACTIVE", systemDefined: true, allowedValues: ["ACTIVE", "INACTIVE", "ON_HOLD", "TERMINATED"] },
-    { name: "employment_type", required: false, description: "Type (FULL_TIME, PART_TIME, etc.)", example: "FULL_TIME", systemDefined: true, allowedValues: ["FULL_TIME", "PART_TIME", "CONTRACT", "TEMPORARY", "INTERN"] },
-    { name: "employment_relation", required: false, description: "Relation type", example: "EMPLOYEE", systemDefined: true, allowedValues: ["EMPLOYEE", "CONTRACTOR", "CONSULTANT"] },
-    { name: "flsa_status", required: false, description: "Overtime status (EXEMPT, NON_EXEMPT)", example: "EXEMPT", systemDefined: true, allowedValues: ["EXEMPT", "NON_EXEMPT"] },
-    { name: "default_scheduled_hours", required: false, description: "Weekly hours (e.g., 40)", example: "40" },
-    { name: "start_date", required: false, description: "Position start date (YYYY-MM-DD)", example: "2024-01-01" },
-    { name: "end_date", required: false, description: "Position end date (optional)", example: "" },
-    { name: "is_active", required: false, description: "Active status", example: "true" },
   ];
+
+  // Add division_code field spec if applicable
+  if (companyStructure?.hasDivisions) {
+    baseFields.push({ 
+      name: "division_code", 
+      required: false, 
+      description: "Division code (if company uses divisions)", 
+      example: "DIV001" 
+    });
+  }
+
+  baseFields.push({ name: "department_code", required: true, description: "Department code", example: "IT001" });
+
+  // Add section_code field spec if applicable
+  if (companyStructure?.hasSections) {
+    baseFields.push({ 
+      name: "section_code", 
+      required: false, 
+      description: "Section code (if company uses sections)", 
+      example: "SEC001" 
+    });
+  }
+
+  baseFields.push(
+    { name: "job_code", required: true, description: "Job code", example: "DEV002" },
+    { name: "position_code", required: true, description: "Unique position code", example: "POS-001" },
+    { name: "position_title", required: true, description: "Position title", example: "Senior Developer" },
+    { name: "reports_to_position_code", required: false, description: "Manager's position code", example: "POS-000" },
+  );
 
   let compensationHeaders: string[] = [];
   let compensationFields: TemplateField[] = [];
@@ -461,19 +479,52 @@ function getPositionsTemplate(
       break;
   }
 
-  // Insert compensation headers after headcount (index 7)
-  const headers = [...baseHeaders];
-  const insertIndex = headers.indexOf("pay_type");
-  headers.splice(insertIndex, 0, ...compensationHeaders);
+  // Add compensation headers and remaining base headers
+  baseHeaders.push(...compensationHeaders);
+  baseHeaders.push(
+    "headcount", "start_date", "end_date", 
+    "pay_type", "employment_status", "employment_type", "employment_relation", 
+    "flsa_status", "default_scheduled_hours", "description", "is_active"
+  );
 
-  // Build combined fields - insert compensation fields after headcount
-  const fields = [...baseFields];
-  const headcountIndex = fields.findIndex(f => f.name === "headcount");
-  fields.splice(headcountIndex + 1, 0, ...compensationFields);
+  // Add compensation fields to baseFields
+  baseFields.push(...compensationFields);
 
-  // Build example rows
-  const baseExample1 = ["POS-001", "Senior Developer", "Lead development", "COMP001", "IT001", "DEV002", "POS-000", "1"];
-  const baseExample2 = ["POS-002", "Junior Developer", "Support development", "COMP001", "IT001", "DEV001", "POS-001", "2"];
+  // Add remaining fields (suffix fields)
+  baseFields.push(
+    { name: "headcount", required: false, description: "Number of positions", example: "1" },
+    { name: "start_date", required: false, description: "Position start date (YYYY-MM-DD)", example: "2024-01-01" },
+    { name: "end_date", required: false, description: "Position end date (optional)", example: "" },
+    { name: "pay_type", required: false, description: "Pay type (salary, hourly, commission)", example: payTypeExample, systemDefined: true, allowedValues: ["salary", "hourly", "commission", "piece_rate"] },
+    { name: "employment_status", required: false, description: "Status (active, inactive, on_hold)", example: "active", systemDefined: true, allowedValues: ["active", "inactive", "on_hold", "terminated"] },
+    { name: "employment_type", required: false, description: "Type (full_time, part_time, etc.)", example: "full_time", systemDefined: true, allowedValues: ["full_time", "part_time", "contract", "temporary", "intern"] },
+    { name: "employment_relation", required: false, description: "Relation type", example: "employee", systemDefined: true, allowedValues: ["employee", "contractor", "consultant"] },
+    { name: "flsa_status", required: false, description: "Overtime status (exempt, non_exempt)", example: "exempt", systemDefined: true, allowedValues: ["exempt", "non_exempt"] },
+    { name: "default_scheduled_hours", required: false, description: "Weekly hours (e.g., 40)", example: "40" },
+    { name: "description", required: false, description: "Position description", example: "Lead development projects" },
+    { name: "is_active", required: false, description: "Active status", example: "true" },
+  );
+
+  // Build example rows to match the new column order
+  // company_code, [division_code], department_code, [section_code], job_code, position_code, position_title, reports_to_position_code, [compensation], headcount, start_date, end_date, pay_type, employment_status, employment_type, employment_relation, flsa_status, default_scheduled_hours, description, is_active
+  const baseExample1Start: string[] = ["COMP001"];
+  const baseExample2Start: string[] = ["COMP001"];
+  
+  if (companyStructure?.hasDivisions) {
+    baseExample1Start.push("DIV001");
+    baseExample2Start.push("DIV001");
+  }
+  
+  baseExample1Start.push("IT001");
+  baseExample2Start.push("IT001");
+  
+  if (companyStructure?.hasSections) {
+    baseExample1Start.push("SEC001");
+    baseExample2Start.push("SEC001");
+  }
+  
+  baseExample1Start.push("DEV002", "POS-001", "Senior Developer", "POS-000");
+  baseExample2Start.push("DEV001", "POS-002", "Junior Developer", "POS-001");
   
   let compExample1: string[] = [];
   let compExample2: string[] = [];
@@ -495,25 +546,26 @@ function getPositionsTemplate(
       break;
   }
 
-  const suffixExample = ["SALARIED", "ACTIVE", "FULL_TIME", "EMPLOYEE", "EXEMPT", "40", "2024-01-01", "", "true"];
+  const suffixExample = ["1", "2024-01-01", "", payTypeExample, "active", "full_time", "employee", "exempt", "40", "Lead development projects", "true"];
+  const suffixExample2 = ["2", "2024-01-01", "", payTypeExample, "active", "full_time", "employee", "exempt", "40", "Support development", "true"];
 
   const examples = [
-    [...baseExample1, ...compExample1, ...suffixExample],
-    [...baseExample2, ...compExample2, ...suffixExample],
+    [...baseExample1Start, ...compExample1, ...suffixExample],
+    [...baseExample2Start, ...compExample2, ...suffixExample2],
   ];
 
   const baseTips = [
     "Company, department, and job must all exist before importing positions",
-    "Use reports_to_position to build org hierarchy",
+    "Use reports_to_position_code to build org hierarchy",
     "Headcount defaults to 1 if not specified",
-    "Employment fields use predefined system values",
+    "Employment fields use predefined system values (lowercase)",
     "Default scheduled hours is typically 40 for full-time positions",
     "Start date defaults to today if not specified",
   ];
 
   return {
-    headers,
-    fields,
+    headers: baseHeaders,
+    fields: baseFields,
     examples,
     tips: [...baseTips, ...compensationTips],
   };
