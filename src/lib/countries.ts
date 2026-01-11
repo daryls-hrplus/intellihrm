@@ -1,10 +1,89 @@
-// ISO 3166-1 alpha-2 country codes with names
+// ISO 3166-1 alpha-2 country codes with names and regions
 export interface Country {
   code: string;
   name: string;
+  region: string;
 }
 
-export const countries: Country[] = [
+// Region definitions matching currencies
+export const COUNTRY_REGIONS = [
+  { value: "all", label: "All Regions", icon: "🌍" },
+  { value: "caribbean", label: "Caribbean", icon: "🏝️" },
+  { value: "latin_america", label: "Latin America", icon: "🌎" },
+  { value: "africa", label: "Africa", icon: "🌍" },
+  { value: "europe", label: "Europe", icon: "🇪🇺" },
+  { value: "asia_pacific", label: "Asia Pacific", icon: "🌏" },
+  { value: "middle_east", label: "Middle East", icon: "🕌" },
+  { value: "north_america", label: "North America", icon: "🗽" },
+  { value: "oceania", label: "Oceania", icon: "🏝️" },
+] as const;
+
+// Caribbean country codes
+const CARIBBEAN_CODES = [
+  "AG", "AI", "AW", "BB", "BL", "BM", "BS", "CU", "CW", "DM", "DO", "GD", "GP", 
+  "GY", "HT", "JM", "KN", "KY", "LC", "MF", "MQ", "MS", "PR", "SR", "SX", "TC", 
+  "TT", "VC", "VG", "VI", "BZ"
+];
+
+// Latin America country codes
+const LATIN_AMERICA_CODES = [
+  "AR", "BO", "BR", "CL", "CO", "CR", "EC", "GF", "GT", "HN", "MX", "NI", "PA", 
+  "PE", "PY", "SV", "UY", "VE"
+];
+
+// Africa country codes
+const AFRICA_CODES = [
+  "AO", "BF", "BI", "BJ", "BW", "CD", "CF", "CG", "CI", "CM", "CV", "DJ", "DZ", 
+  "EG", "EH", "ER", "ET", "GA", "GH", "GM", "GN", "GQ", "GW", "KE", "KM", "LR", 
+  "LS", "LY", "MA", "MG", "ML", "MR", "MU", "MW", "MZ", "NA", "NE", "NG", "RE", 
+  "RW", "SC", "SD", "SH", "SL", "SN", "SO", "SS", "ST", "SZ", "TD", "TG", "TN", 
+  "TZ", "UG", "YT", "ZA", "ZM", "ZW"
+];
+
+// Europe country codes
+const EUROPE_CODES = [
+  "AD", "AL", "AT", "AX", "BA", "BE", "BG", "BY", "CH", "CY", "CZ", "DE", "DK", 
+  "EE", "ES", "FI", "FO", "FR", "GB", "GE", "GG", "GI", "GR", "HR", "HU", "IE", 
+  "IM", "IS", "IT", "JE", "LI", "LT", "LU", "LV", "MC", "MD", "ME", "MK", "MT", 
+  "NL", "NO", "PL", "PT", "RO", "RS", "RU", "SE", "SI", "SJ", "SK", "SM", "UA", 
+  "VA"
+];
+
+// Asia Pacific country codes
+const ASIA_PACIFIC_CODES = [
+  "AF", "AM", "AZ", "BD", "BN", "BT", "CC", "CN", "CX", "HK", "ID", "IN", "JP", 
+  "KG", "KH", "KP", "KR", "KZ", "LA", "LK", "MM", "MN", "MO", "MV", "MY", "NP", 
+  "PH", "PK", "SG", "TH", "TJ", "TL", "TM", "TW", "UZ", "VN"
+];
+
+// Middle East country codes
+const MIDDLE_EAST_CODES = [
+  "AE", "BH", "IL", "IQ", "IR", "JO", "KW", "LB", "OM", "PS", "QA", "SA", "SY", 
+  "TR", "YE"
+];
+
+// North America country codes
+const NORTH_AMERICA_CODES = ["CA", "PM", "US", "UM"];
+
+// Oceania country codes
+const OCEANIA_CODES = [
+  "AS", "AU", "CK", "FJ", "FM", "GU", "KI", "MH", "MP", "NC", "NF", "NR", "NU", 
+  "NZ", "PF", "PG", "PN", "PW", "SB", "TK", "TO", "TV", "VU", "WF", "WS"
+];
+
+function getRegionForCountry(code: string): string {
+  if (CARIBBEAN_CODES.includes(code)) return "caribbean";
+  if (LATIN_AMERICA_CODES.includes(code)) return "latin_america";
+  if (AFRICA_CODES.includes(code)) return "africa";
+  if (EUROPE_CODES.includes(code)) return "europe";
+  if (ASIA_PACIFIC_CODES.includes(code)) return "asia_pacific";
+  if (MIDDLE_EAST_CODES.includes(code)) return "middle_east";
+  if (NORTH_AMERICA_CODES.includes(code)) return "north_america";
+  if (OCEANIA_CODES.includes(code)) return "oceania";
+  return "other";
+}
+
+const countryData: Array<{ code: string; name: string }> = [
   { code: "AF", name: "Afghanistan" },
   { code: "AL", name: "Albania" },
   { code: "DZ", name: "Algeria" },
@@ -251,6 +330,11 @@ export const countries: Country[] = [
   { code: "AX", name: "Åland Islands" },
 ];
 
+export const countries: Country[] = countryData.map(c => ({
+  ...c,
+  region: getRegionForCountry(c.code),
+}));
+
 // Get country name by code
 export function getCountryName(code: string): string {
   const country = countries.find(c => c.code === code);
@@ -269,4 +353,16 @@ export function searchCountries(query: string): Country[] {
   return countries.filter(
     c => c.name.toLowerCase().includes(lowerQuery) || c.code.toLowerCase().includes(lowerQuery)
   );
+}
+
+// Get region label
+export function getRegionLabel(region: string): string {
+  const found = COUNTRY_REGIONS.find(r => r.value === region);
+  return found?.label || region;
+}
+
+// Get region icon
+export function getRegionIcon(region: string): string {
+  const found = COUNTRY_REGIONS.find(r => r.value === region);
+  return found?.icon || "🌍";
 }
