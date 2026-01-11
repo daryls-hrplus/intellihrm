@@ -42,8 +42,11 @@ const COMPENSATION_PREREQUISITES: Record<string, { key: string; label: string; t
     { key: "pay_spines", label: "Pay Spines", table: "pay_spines" }
     // Spinal points are created alongside pay spines, so we only check pay_spines
   ],
+  hybrid: [
+    { key: "salary_grades", label: "Salary Grades", table: "salary_grades" }
+    // Hybrid uses salary grades as base, commission is added separately
+  ],
   direct_pay: [], // No prerequisites for direct pay
-  hybrid: [],
   commission_based: [],
   hourly_rate: []
 };
