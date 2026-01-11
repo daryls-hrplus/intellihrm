@@ -19495,12 +19495,16 @@ export type Database = {
           acting_start_date: string | null
           adjust_continuous_service: boolean | null
           adjusted_service_date: string | null
+          benefits_change_required: boolean | null
           company_id: string | null
           confirmation_date: string | null
           continuous_service_date: string | null
+          contract_extension_reason_id: string | null
           contract_type_id: string | null
           created_at: string
           created_by: string
+          current_contract_end_date: string | null
+          demotion_reason_id: string | null
           department_id: string | null
           effective_date: string
           employee_id: string | null
@@ -19508,22 +19512,31 @@ export type Database = {
           exit_interview_completed: boolean | null
           extension_days: number | null
           extension_reason_id: string | null
+          final_settlement_date: string | null
           from_company_id: string | null
           from_department_id: string | null
+          from_employment_status_id: string | null
           from_position_id: string | null
           has_adjusted_service: boolean | null
           hire_type_id: string | null
           id: string
+          is_voluntary_demotion: boolean | null
           last_working_date: string | null
+          new_contract_end_date: string | null
+          new_contract_type_id: string | null
           new_probation_end_date: string | null
+          new_weekly_hours: number | null
           notes: string | null
           notes_en: string | null
           original_probation_end_date: string | null
           pay_group_id: string | null
+          pension_eligible: boolean | null
           position_id: string | null
+          probation_applies: boolean | null
           probation_end_date: string | null
           promotion_reason_id: string | null
           requires_workflow: boolean | null
+          retirement_type_id: string | null
           salary_adjustment: number | null
           salary_adjustment_type: string | null
           secondment_end_date: string | null
@@ -19536,6 +19549,7 @@ export type Database = {
           termination_type: string | null
           to_company_id: string | null
           to_department_id: string | null
+          to_employment_status_id: string | null
           to_position_id: string | null
           transaction_number: string
           transaction_type_id: string
@@ -19551,12 +19565,16 @@ export type Database = {
           acting_start_date?: string | null
           adjust_continuous_service?: boolean | null
           adjusted_service_date?: string | null
+          benefits_change_required?: boolean | null
           company_id?: string | null
           confirmation_date?: string | null
           continuous_service_date?: string | null
+          contract_extension_reason_id?: string | null
           contract_type_id?: string | null
           created_at?: string
           created_by: string
+          current_contract_end_date?: string | null
+          demotion_reason_id?: string | null
           department_id?: string | null
           effective_date: string
           employee_id?: string | null
@@ -19564,22 +19582,31 @@ export type Database = {
           exit_interview_completed?: boolean | null
           extension_days?: number | null
           extension_reason_id?: string | null
+          final_settlement_date?: string | null
           from_company_id?: string | null
           from_department_id?: string | null
+          from_employment_status_id?: string | null
           from_position_id?: string | null
           has_adjusted_service?: boolean | null
           hire_type_id?: string | null
           id?: string
+          is_voluntary_demotion?: boolean | null
           last_working_date?: string | null
+          new_contract_end_date?: string | null
+          new_contract_type_id?: string | null
           new_probation_end_date?: string | null
+          new_weekly_hours?: number | null
           notes?: string | null
           notes_en?: string | null
           original_probation_end_date?: string | null
           pay_group_id?: string | null
+          pension_eligible?: boolean | null
           position_id?: string | null
+          probation_applies?: boolean | null
           probation_end_date?: string | null
           promotion_reason_id?: string | null
           requires_workflow?: boolean | null
+          retirement_type_id?: string | null
           salary_adjustment?: number | null
           salary_adjustment_type?: string | null
           secondment_end_date?: string | null
@@ -19592,6 +19619,7 @@ export type Database = {
           termination_type?: string | null
           to_company_id?: string | null
           to_department_id?: string | null
+          to_employment_status_id?: string | null
           to_position_id?: string | null
           transaction_number: string
           transaction_type_id: string
@@ -19607,12 +19635,16 @@ export type Database = {
           acting_start_date?: string | null
           adjust_continuous_service?: boolean | null
           adjusted_service_date?: string | null
+          benefits_change_required?: boolean | null
           company_id?: string | null
           confirmation_date?: string | null
           continuous_service_date?: string | null
+          contract_extension_reason_id?: string | null
           contract_type_id?: string | null
           created_at?: string
           created_by?: string
+          current_contract_end_date?: string | null
+          demotion_reason_id?: string | null
           department_id?: string | null
           effective_date?: string
           employee_id?: string | null
@@ -19620,22 +19652,31 @@ export type Database = {
           exit_interview_completed?: boolean | null
           extension_days?: number | null
           extension_reason_id?: string | null
+          final_settlement_date?: string | null
           from_company_id?: string | null
           from_department_id?: string | null
+          from_employment_status_id?: string | null
           from_position_id?: string | null
           has_adjusted_service?: boolean | null
           hire_type_id?: string | null
           id?: string
+          is_voluntary_demotion?: boolean | null
           last_working_date?: string | null
+          new_contract_end_date?: string | null
+          new_contract_type_id?: string | null
           new_probation_end_date?: string | null
+          new_weekly_hours?: number | null
           notes?: string | null
           notes_en?: string | null
           original_probation_end_date?: string | null
           pay_group_id?: string | null
+          pension_eligible?: boolean | null
           position_id?: string | null
+          probation_applies?: boolean | null
           probation_end_date?: string | null
           promotion_reason_id?: string | null
           requires_workflow?: boolean | null
+          retirement_type_id?: string | null
           salary_adjustment?: number | null
           salary_adjustment_type?: string | null
           secondment_end_date?: string | null
@@ -19648,6 +19689,7 @@ export type Database = {
           termination_type?: string | null
           to_company_id?: string | null
           to_department_id?: string | null
+          to_employment_status_id?: string | null
           to_position_id?: string | null
           transaction_number?: string
           transaction_type_id?: string
@@ -19685,8 +19727,22 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "employee_transactions_contract_extension_reason_id_fkey"
+            columns: ["contract_extension_reason_id"]
+            isOneToOne: false
+            referencedRelation: "lookup_values"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "employee_transactions_contract_type_id_fkey"
             columns: ["contract_type_id"]
+            isOneToOne: false
+            referencedRelation: "lookup_values"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_transactions_demotion_reason_id_fkey"
+            columns: ["demotion_reason_id"]
             isOneToOne: false
             referencedRelation: "lookup_values"
             referencedColumns: ["id"]
@@ -19755,6 +19811,13 @@ export type Database = {
             referencedColumns: ["department_id"]
           },
           {
+            foreignKeyName: "employee_transactions_from_employment_status_id_fkey"
+            columns: ["from_employment_status_id"]
+            isOneToOne: false
+            referencedRelation: "lookup_values"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "employee_transactions_from_position_id_fkey"
             columns: ["from_position_id"]
             isOneToOne: false
@@ -19771,6 +19834,13 @@ export type Database = {
           {
             foreignKeyName: "employee_transactions_hire_type_id_fkey"
             columns: ["hire_type_id"]
+            isOneToOne: false
+            referencedRelation: "lookup_values"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_transactions_new_contract_type_id_fkey"
+            columns: ["new_contract_type_id"]
             isOneToOne: false
             referencedRelation: "lookup_values"
             referencedColumns: ["id"]
@@ -19799,6 +19869,13 @@ export type Database = {
           {
             foreignKeyName: "employee_transactions_promotion_reason_id_fkey"
             columns: ["promotion_reason_id"]
+            isOneToOne: false
+            referencedRelation: "lookup_values"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_transactions_retirement_type_id_fkey"
+            columns: ["retirement_type_id"]
             isOneToOne: false
             referencedRelation: "lookup_values"
             referencedColumns: ["id"]
@@ -19865,6 +19942,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "seat_occupancy_summary"
             referencedColumns: ["department_id"]
+          },
+          {
+            foreignKeyName: "employee_transactions_to_employment_status_id_fkey"
+            columns: ["to_employment_status_id"]
+            isOneToOne: false
+            referencedRelation: "lookup_values"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "employee_transactions_to_position_id_fkey"
@@ -72986,6 +73070,10 @@ export type Database = {
         | "gender"
         | "marital_status"
         | "title"
+        | "demotion_reason"
+        | "retirement_type"
+        | "employment_status"
+        | "contract_extension_reason"
       message_status: "sent" | "delivered" | "read"
       pay_element_type:
         | "regular_time"
@@ -73370,6 +73458,10 @@ export const Constants = {
         "gender",
         "marital_status",
         "title",
+        "demotion_reason",
+        "retirement_type",
+        "employment_status",
+        "contract_extension_reason",
       ],
       message_status: ["sent", "delivered", "read"],
       pay_element_type: [

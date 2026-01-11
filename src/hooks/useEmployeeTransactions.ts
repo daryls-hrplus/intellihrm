@@ -13,11 +13,16 @@ export type TransactionType =
   | "PROBATION_EXT" 
   | "ACTING" 
   | "PROMOTION" 
+  | "DEMOTION"
   | "TRANSFER" 
   | "SECONDMENT"
   | "TERMINATION"
+  | "RETIREMENT"
   | "SALARY_CHANGE"
-  | "RATE_CHANGE";
+  | "RATE_CHANGE"
+  | "STATUS_CHANGE"
+  | "CONTRACT_EXTENSION"
+  | "CONTRACT_CONVERSION";
 
 export type TransactionStatus = 
   | "draft" 
