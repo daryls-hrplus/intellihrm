@@ -5197,7 +5197,11 @@
       "employees": "Employees",
       "employeesDesc": "Import employee basic information and create accounts",
       "newHires": "New Hires",
-      "newHiresDesc": "Import new hire transactions with position assignments"
+      "newHiresDesc": "Import new hire transactions with position assignments",
+      "history": {
+        "title": "Import History",
+        "description": "View and manage all data imports, including rollback capabilities"
+      }
     },
     "referenceDataCatalog": "Reference Data Catalog",
     "referenceDataCatalogDesc": "Browse countries, currencies, languages, and lookup values for data imports",

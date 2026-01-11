@@ -72,6 +72,12 @@
 "hrHub": {
     "title": "HR-Zentrum",
     "documentCenter": "Dokumentenzentrum",
+    "dataImport": {
+      "history": {
+        "title": "Import-Verlauf",
+        "description": "Alle Datenimporte anzeigen und verwalten, einschließlich Rollback-Funktionen"
+      }
+    },
     "transactionWorkflowSettings": {
       "title": "Transaktions-Workflow-Einstellungen",
       "subtitle": "Konfigurieren Sie, welche Mitarbeitertransaktionstypen eine Workflow-Genehmigung pro Unternehmen erfordern",

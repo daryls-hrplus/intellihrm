@@ -174,10 +174,10 @@ export function ImportHistory({ companyId }: ImportHistoryProps) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <History className="h-5 w-5" />
-            {t("hrHub.dataImport.history.title") || "Import History"}
+            {t("hrHub.dataImport.history.title", { defaultValue: "Import History" })}
           </CardTitle>
           <CardDescription>
-            {t("hrHub.dataImport.history.description") || "View and manage all data imports, including rollback capabilities"}
+            {t("hrHub.dataImport.history.description", { defaultValue: "View and manage all data imports, including rollback capabilities" })}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">

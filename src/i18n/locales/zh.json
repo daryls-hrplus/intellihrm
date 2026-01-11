@@ -76,6 +76,12 @@
     "communicationSupportCenter": "沟通与支持中心",
     "communicationsReminders": "通知与提醒",
     "communicationsRemindersDesc": "管理模板、自动化规则、邮件发送和应用内通知",
+    "dataImport": {
+      "history": {
+        "title": "导入历史",
+        "description": "查看和管理所有数据导入，包括回滚功能"
+      }
+    },
     "transactionWorkflowSettings": {
       "title": "交易工作流设置",
       "subtitle": "按公司配置哪些员工交易类型需要工作流审批",
