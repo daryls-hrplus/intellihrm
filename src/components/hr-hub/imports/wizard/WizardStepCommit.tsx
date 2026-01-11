@@ -899,7 +899,14 @@ export function WizardStepCommit({
               {importFailures.slice(0, 10).map((failure, idx) => (
                 <div key={idx} className="p-3 bg-destructive/10 rounded-lg text-sm">
                   <div className="font-medium">
-                    Row {failure.rowIndex + 2}: {failure.row?.position_code || failure.row?.code || "Unknown"}
+                    Row {failure.rowIndex + 2}: {
+                      failure.row?.email || 
+                      failure.row?.position_code || 
+                      failure.row?.code || 
+                      (failure.row?.first_name && failure.row?.last_name 
+                        ? `${failure.row.first_name} ${failure.row.last_name}` 
+                        : failure.row?.name || "Unknown")
+                    }
                   </div>
                   <div className="text-destructive mt-1">{failure.error}</div>
                 </div>
