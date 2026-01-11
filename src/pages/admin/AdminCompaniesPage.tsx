@@ -37,6 +37,7 @@ import { IdCard, DollarSign } from "lucide-react";
 import { supportedLanguages } from "@/i18n";
 import { getLanguagesForCountry } from "@/lib/countryLanguageMapping";
 import { useCurrencies, type Currency } from "@/hooks/useCurrencies";
+import { useIndustries } from "@/hooks/useIndustries";
 
 interface Company {
   id: string;
@@ -117,23 +118,12 @@ const emptyFormData: CompanyFormData = {
   second_language: "",
 };
 
-const industries = [
-  "Technology",
-  "Healthcare",
-  "Finance",
-  "Manufacturing",
-  "Retail",
-  "Education",
-  "Construction",
-  "Transportation",
-  "Energy",
-  "Real Estate",
-  "Other",
-];
+// Industries are now fetched from the database via useIndustries hook
 
 export default function AdminCompaniesPage() {
   const navigate = useNavigate();
   const { currencies } = useCurrencies();
+  const { parentIndustries, childrenByParent } = useIndustries();
   const [companies, setCompanies] = useState<Company[]>([]);
   const [groups, setGroups] = useState<CompanyGroup[]>([]);
   const [divisions, setDivisions] = useState<Division[]>([]);
@@ -932,9 +922,22 @@ export default function AdminCompaniesPage() {
                     className="h-10 w-full rounded-lg border border-input bg-background px-3 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                   >
                     <option value="">Select industry</option>
-                    {industries.map((ind) => (
-                      <option key={ind} value={ind}>{ind}</option>
-                    ))}
+                    {parentIndustries.map((parent) => {
+                      const children = childrenByParent[parent.id] || [];
+                      if (children.length > 0) {
+                        return (
+                          <optgroup key={parent.id} label={parent.name}>
+                            <option value={parent.name}>{parent.name} (General)</option>
+                            {children.map((child) => (
+                              <option key={child.id} value={child.name}>{child.name}</option>
+                            ))}
+                          </optgroup>
+                        );
+                      }
+                      return (
+                        <option key={parent.id} value={parent.name}>{parent.name}</option>
+                      );
+                    })}
                   </select>
                 </div>
 
