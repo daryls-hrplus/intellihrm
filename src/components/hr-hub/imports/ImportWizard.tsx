@@ -70,8 +70,10 @@ const requiresCompensationStep = (importType: string | null): boolean => {
 };
 
 // Check if compensation model needs prerequisites
-const requiresPrerequisiteStep = (compensationModel: string | null): boolean => {
-  return compensationModel === "salary_grade" || compensationModel === "spinal_point";
+const requiresPrerequisiteStep = (compensationModel: CompensationModel | null): boolean => {
+  if (!compensationModel) return false;
+  const requiredImports = getRequiredImportsForModel(compensationModel);
+  return requiredImports.length > 0;
 };
 
 export function ImportWizard({ companyId, onComplete, onCancel }: ImportWizardProps) {
@@ -120,6 +122,13 @@ export function ImportWizard({ companyId, onComplete, onCancel }: ImportWizardPr
   }, [state.importType, state.compensationModel]);
 
   const totalSteps = activeSteps.length;
+
+  // Safety guard: clamp currentStep if activeSteps shrinks
+  useEffect(() => {
+    if (currentStep >= activeSteps.length && activeSteps.length > 0) {
+      setCurrentStep(activeSteps.length - 1);
+    }
+  }, [activeSteps.length, currentStep]);
 
   // Reset file/validation state when import type changes (but keep company selection)
   useEffect(() => {
@@ -282,13 +291,43 @@ export function ImportWizard({ companyId, onComplete, onCancel }: ImportWizardPr
   // Handle importing a prerequisite (e.g., salary grades)
   const handleImportPrerequisite = (prereqType: string) => {
     // Store current import type intention and switch to prerequisite import
-    updateState({ 
-      pendingImportType: state.importType,
+    setState((prev) => ({
+      ...prev,
+      pendingImportType: prev.importType,
       importType: prereqType,
       prerequisitesChecked: false,
-    });
-    // Go to template step (step 3 in the simplified flow for non-positions)
-    setCurrentStep(2); // Go to Import Type step, but it will auto-proceed to Template
+      // Reset file/validation state for the new import
+      file: null,
+      parsedData: null,
+      validationResult: null,
+      batchId: null,
+      isCommitting: false,
+      committedCount: 0,
+    }));
+    // Go directly to Template step (step 3 for non-positions imports like salary_grades)
+    setCurrentStep(3);
+  };
+
+  // Handle resuming the pending import after completing a prerequisite import
+  const handleResumePendingImport = () => {
+    if (!state.pendingImportType) return;
+    
+    setState((prev) => ({
+      ...prev,
+      importType: prev.pendingImportType,
+      pendingImportType: null,
+      prerequisitesChecked: false,
+      // Reset file/validation state for the resumed import
+      file: null,
+      parsedData: null,
+      validationResult: null,
+      batchId: null,
+      isCommitting: false,
+      committedCount: 0,
+    }));
+    // Go to compensation model step (step 3) - the model is already selected
+    // The prerequisite step will auto-pass since we just imported the data
+    setCurrentStep(3);
   };
 
   // Handle skipping prerequisites by switching to direct pay
@@ -568,20 +607,32 @@ export function ImportWizard({ companyId, onComplete, onCancel }: ImportWizardPr
         <div className="flex items-center gap-2">
           {showContinueOptions ? (
             <>
-              <Button
-                variant="outline"
-                onClick={handleContinueImporting}
-              >
-                <RotateCcw className="h-4 w-4 mr-2" />
-                Continue Importing
-              </Button>
-              <Button
-                onClick={handleComplete}
-                className="bg-green-600 hover:bg-green-700"
-              >
-                <Check className="h-4 w-4 mr-2" />
-                Finish Session
-              </Button>
+              {state.pendingImportType ? (
+                <Button
+                  onClick={handleResumePendingImport}
+                  className="bg-primary hover:bg-primary/90"
+                >
+                  <ArrowRight className="h-4 w-4 mr-2" />
+                  Continue to {state.pendingImportType === "positions" ? "Positions" : state.pendingImportType} Import
+                </Button>
+              ) : (
+                <>
+                  <Button
+                    variant="outline"
+                    onClick={handleContinueImporting}
+                  >
+                    <RotateCcw className="h-4 w-4 mr-2" />
+                    Continue Importing
+                  </Button>
+                  <Button
+                    onClick={handleComplete}
+                    className="bg-green-600 hover:bg-green-700"
+                  >
+                    <Check className="h-4 w-4 mr-2" />
+                    Finish Session
+                  </Button>
+                </>
+              )}
             </>
           ) : isLastStep ? (
             <Button

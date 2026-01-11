@@ -186,12 +186,9 @@ export function WizardStepSelectType({
       }
     });
 
-    // Update positions prerequisites based on compensation model
-    const positionsType = types.find((t) => t.id === "positions");
-    if (positionsType && compensationModel) {
-      const additionalPrereqs = requiredCompensation.filter((r) => r !== "spinal_points"); // spinal_points is optional for positions
-      positionsType.prerequisites = ["companies", "departments", "jobs", ...additionalPrereqs];
-    }
+    // NOTE: Do NOT add compensation prerequisites to positions here.
+    // Compensation prerequisites are handled by the dedicated WizardStepPrerequisiteCheck step.
+    // This allows users to select Positions and then be guided to import salary grades if needed.
 
     return types;
   }, [compensationModel]);
