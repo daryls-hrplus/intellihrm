@@ -315,11 +315,20 @@ export function TransactionFormDialog({
     loadTransferAssignment();
   }, [formData.employee_id, transactionType]);
 
-  // Check seat availability for destination position in TRANSFER transactions
+  // Check seat availability for destination position in TRANSFER, PROMOTION, and SECONDMENT transactions
   useEffect(() => {
     const checkDestinationSeat = async () => {
-      // Reset state if not a TRANSFER or no to_position_id
-      if (!formData.to_position_id || transactionType !== "TRANSFER") {
+      // Determine which position field to check based on transaction type
+      let targetPositionId: string | null = null;
+      
+      if (transactionType === "TRANSFER" || transactionType === "PROMOTION") {
+        targetPositionId = formData.to_position_id || null;
+      } else if (transactionType === "SECONDMENT") {
+        targetPositionId = formData.secondment_position_id || null;
+      }
+
+      // Reset state if no target position or not a relevant transaction type
+      if (!targetPositionId || !["TRANSFER", "PROMOTION", "SECONDMENT"].includes(transactionType || "")) {
         setDestinationSeatStatus({ 
           isLoading: false, 
           hasAvailableSeat: true, 
@@ -336,7 +345,7 @@ export function TransactionFormDialog({
         const { data, error } = await supabase
           .from('seat_occupancy_summary')
           .select('seat_id, allocation_status, is_shared_seat, current_occupant_count, max_occupants')
-          .eq('position_id', formData.to_position_id);
+          .eq('position_id', targetPositionId);
 
         if (error) {
           console.error("Error checking seat availability:", error);
@@ -355,12 +364,14 @@ export function TransactionFormDialog({
           (seat.is_shared_seat && (seat.current_occupant_count || 0) < (seat.max_occupants || 1))
         );
 
+        const transactionLabel = transactionType === "SECONDMENT" ? "secondment" : transactionType?.toLowerCase() || "transaction";
+
         setDestinationSeatStatus({
           isLoading: false,
           hasAvailableSeat: available.length > 0,
           availableSeats: available.length,
           errorMessage: available.length === 0 
-            ? "No available seats in the selected position. The transfer cannot proceed."
+            ? `No available seats in the selected position. The ${transactionLabel} cannot proceed.`
             : null,
         });
       } catch (err) {
@@ -375,7 +386,7 @@ export function TransactionFormDialog({
     };
 
     checkDestinationSeat();
-  }, [formData.to_position_id, transactionType]);
+  }, [formData.to_position_id, formData.secondment_position_id, transactionType]);
 
   useEffect(() => {
     if (existingTransaction) {
@@ -471,17 +482,23 @@ export function TransactionFormDialog({
   };
 
   const handleSubmit = async () => {
-    // Pre-validation for TRANSFER transactions - block if no seats available
-    if (transactionType === "TRANSFER") {
+    // Pre-validation for TRANSFER, PROMOTION, and SECONDMENT transactions - block if no seats available
+    if (["TRANSFER", "PROMOTION", "SECONDMENT"].includes(transactionType || "")) {
       // Block if seat check is still loading
       if (destinationSeatStatus.isLoading) {
         toast.warning("Please wait - checking seat availability...");
         return;
       }
       
+      // Determine which position to check based on transaction type
+      const targetPositionId = transactionType === "SECONDMENT" 
+        ? formData.secondment_position_id 
+        : formData.to_position_id;
+      
       // Block if no seats available
-      if (formData.to_position_id && !destinationSeatStatus.hasAvailableSeat) {
-        toast.error("Cannot process transfer: No available seats in the destination position.");
+      if (targetPositionId && !destinationSeatStatus.hasAvailableSeat) {
+        const transactionLabel = transactionType === "SECONDMENT" ? "secondment" : transactionType?.toLowerCase() || "transaction";
+        toast.error(`Cannot process ${transactionLabel}: No available seats in the destination position.`);
         return;
       }
     }
@@ -1378,6 +1395,35 @@ export function TransactionFormDialog({
                     ))}
                   </SelectContent>
                 </Select>
+                
+                {/* Seat Availability Status for Promotion */}
+                {formData.to_position_id && (
+                  <div className={cn(
+                    "rounded-lg border p-3 mt-2",
+                    destinationSeatStatus.isLoading 
+                      ? "border-muted bg-muted/30"
+                      : destinationSeatStatus.hasAvailableSeat 
+                        ? "border-green-500/30 bg-green-50 dark:bg-green-900/20"
+                        : "border-destructive bg-destructive/10"
+                  )}>
+                    {destinationSeatStatus.isLoading ? (
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        {t("workforce.modules.transactions.form.transfer.checkingSeat", "Checking seat availability...")}
+                      </div>
+                    ) : destinationSeatStatus.hasAvailableSeat ? (
+                      <div className="flex items-center gap-2 text-sm text-green-700 dark:text-green-400">
+                        <Armchair className="h-4 w-4" />
+                        {t("workforce.modules.transactions.form.transfer.seatsAvailable", "{{count}} seat(s) available").replace("{{count}}", String(destinationSeatStatus.availableSeats))}
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2 text-sm text-destructive">
+                        <AlertTriangle className="h-4 w-4" />
+                        {destinationSeatStatus.errorMessage}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
             <div className="space-y-2">
@@ -1772,6 +1818,35 @@ export function TransactionFormDialog({
                   ))}
                 </SelectContent>
               </Select>
+              
+              {/* Seat Availability Status for Secondment */}
+              {formData.secondment_position_id && (
+                <div className={cn(
+                  "rounded-lg border p-3 mt-2",
+                  destinationSeatStatus.isLoading 
+                    ? "border-muted bg-muted/30"
+                    : destinationSeatStatus.hasAvailableSeat 
+                      ? "border-green-500/30 bg-green-50 dark:bg-green-900/20"
+                      : "border-destructive bg-destructive/10"
+                )}>
+                  {destinationSeatStatus.isLoading ? (
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      {t("workforce.modules.transactions.form.transfer.checkingSeat", "Checking seat availability...")}
+                    </div>
+                  ) : destinationSeatStatus.hasAvailableSeat ? (
+                    <div className="flex items-center gap-2 text-sm text-green-700 dark:text-green-400">
+                      <Armchair className="h-4 w-4" />
+                      {t("workforce.modules.transactions.form.transfer.seatsAvailable", "{{count}} seat(s) available").replace("{{count}}", String(destinationSeatStatus.availableSeats))}
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2 text-sm text-destructive">
+                      <AlertTriangle className="h-4 w-4" />
+                      {destinationSeatStatus.errorMessage}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Secondment Dates */}
@@ -2304,9 +2379,13 @@ export function TransactionFormDialog({
               onClick={handleSubmit} 
               disabled={
                 isLoading || 
-                (transactionType === "TRANSFER" && (
+                (["TRANSFER", "PROMOTION"].includes(transactionType || "") && (
                   destinationSeatStatus.isLoading || 
                   (formData.to_position_id && !destinationSeatStatus.hasAvailableSeat)
+                )) ||
+                (transactionType === "SECONDMENT" && (
+                  destinationSeatStatus.isLoading || 
+                  (formData.secondment_position_id && !destinationSeatStatus.hasAvailableSeat)
                 ))
               }
             >
