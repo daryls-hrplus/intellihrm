@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { CalendarIcon, Loader2, DollarSign } from "lucide-react";
+import { CalendarIcon, Loader2, DollarSign, ArrowRight, Building2 } from "lucide-react";
 import { useLanguage } from "@/hooks/useLanguage";
 import { formatDateForDisplay, toDateString, getTodayString } from "@/utils/dateUtils";
 import { Button } from "@/components/ui/button";
@@ -76,6 +76,18 @@ interface EmployeePosition {
 interface Department {
   id: string;
   name: string;
+  company_id?: string | null;
+}
+
+interface TransferCurrentAssignment {
+  company_id: string | null;
+  company_name: string | null;
+  department_id: string | null;
+  department_name: string | null;
+  position_id: string | null;
+  position_title: string | null;
+  pay_group_id: string | null;
+  pay_group_name: string | null;
 }
 
 interface Company {
@@ -131,6 +143,10 @@ export function TransactionFormDialog({
   // Compensation dialog state
   const [compensationDialogOpen, setCompensationDialogOpen] = useState(false);
 
+  // Transfer: current employee assignment state
+  const [transferCurrentAssignment, setTransferCurrentAssignment] = useState<TransferCurrentAssignment | null>(null);
+  const [loadingTransferAssignment, setLoadingTransferAssignment] = useState(false);
+
   useEffect(() => {
     if (open) {
       loadMasterData();
@@ -175,6 +191,116 @@ export function TransactionFormDialog({
     loadEmployeePositions();
   }, [formData.employee_id, transactionType]);
 
+  // Load employee's current assignment for TRANSFER transactions
+  useEffect(() => {
+    const loadTransferAssignment = async () => {
+      if (!formData.employee_id || transactionType !== "TRANSFER") {
+        setTransferCurrentAssignment(null);
+        return;
+      }
+
+      setLoadingTransferAssignment(true);
+      try {
+        // Get the employee's primary active position
+        const { data: empPosition } = await supabase
+          .from("employee_positions")
+          .select("position_id")
+          .eq("employee_id", formData.employee_id)
+          .eq("is_active", true)
+          .eq("is_primary", true)
+          .single();
+
+        if (!empPosition) {
+          setTransferCurrentAssignment(null);
+          setLoadingTransferAssignment(false);
+          return;
+        }
+
+        // Get position details with department
+        const { data: positionDetail } = await supabase
+          .from("positions")
+          .select("id, title, department_id")
+          .eq("id", empPosition.position_id)
+          .single();
+
+        if (!positionDetail?.department_id) {
+          setTransferCurrentAssignment(null);
+          setLoadingTransferAssignment(false);
+          return;
+        }
+
+        // Get department details with company
+        const { data: deptDetail } = await supabase
+          .from("departments")
+          .select("id, name, company_id")
+          .eq("id", positionDetail.department_id)
+          .single();
+
+        if (!deptDetail?.company_id) {
+          setTransferCurrentAssignment(null);
+          setLoadingTransferAssignment(false);
+          return;
+        }
+
+        // Get company details
+        const { data: companyDetail } = await supabase
+          .from("companies")
+          .select("id, name")
+          .eq("id", deptDetail.company_id)
+          .single();
+
+        // Get employee's pay group assignment - use any to avoid deep type recursion in generated types
+        const payGroupResult: any = await supabase
+          .from("employee_pay_groups" as any)
+          .select("pay_group_id")
+          .eq("employee_id", formData.employee_id)
+          .eq("is_active", true)
+          .maybeSingle();
+        const payGroupAssignment = payGroupResult?.data as { pay_group_id: string } | null;
+
+        let payGroupName: string | null = null;
+        if (payGroupAssignment?.pay_group_id) {
+          const { data: pgDetail } = await supabase
+            .from("pay_groups")
+            .select("id, name")
+            .eq("id", payGroupAssignment.pay_group_id)
+            .single();
+          payGroupName = pgDetail?.name || null;
+        }
+
+        if (companyDetail) {
+          setTransferCurrentAssignment({
+            company_id: companyDetail.id,
+            company_name: companyDetail.name,
+            department_id: deptDetail.id,
+            department_name: deptDetail.name,
+            position_id: positionDetail.id,
+            position_title: positionDetail.title,
+            pay_group_id: payGroupAssignment?.pay_group_id || null,
+            pay_group_name: payGroupName,
+          });
+
+          // Auto-populate "from" fields
+          setFormData(prev => ({
+            ...prev,
+            from_company_id: companyDetail.id,
+            from_department_id: deptDetail.id,
+            from_position_id: positionDetail.id,
+          }));
+        } else {
+          setTransferCurrentAssignment(null);
+        }
+      } catch (error) {
+        console.error("Error loading transfer assignment:", error);
+        setTransferCurrentAssignment(null);
+      } finally {
+        setLoadingTransferAssignment(false);
+      }
+    };
+
+    loadTransferAssignment();
+  }, [formData.employee_id, transactionType]);
+
   useEffect(() => {
     if (existingTransaction) {
       setFormData(existingTransaction);
@@ -185,6 +311,8 @@ export function TransactionFormDialog({
         requires_workflow: false,
         notes: "",
       });
+      // Reset transfer assignment when form resets
+      setTransferCurrentAssignment(null);
     }
   }, [existingTransaction]);
 
@@ -198,7 +326,7 @@ export function TransactionFormDialog({
     ] = await Promise.all([
       supabase.from("profiles").select("id, full_name, email").order("full_name"),
       supabase.from("positions").select("id, title, code, department_id").eq("is_active", true).order("title"),
-      supabase.from("departments").select("id, name").eq("is_active", true).order("name"),
+      supabase.from("departments").select("id, name, company_id").eq("is_active", true).order("name"),
       supabase.from("companies").select("id, name").eq("is_active", true).order("name"),
       supabase.from("pay_groups").select("id, name, code, company_id").eq("is_active", true).order("name"),
     ]);
@@ -1197,32 +1325,84 @@ export function TransactionFormDialog({
         );
 
       case "TRANSFER":
+        // Filter departments and positions by selected "To Company"
+        const filteredToDepartments = formData.to_company_id 
+          ? departments.filter(d => d.company_id === formData.to_company_id)
+          : departments;
+        const filteredToPayGroups = formData.to_company_id
+          ? payGroups.filter(pg => pg.company_id === formData.to_company_id)
+          : payGroups;
+        // Filter positions by selected "To Department"
+        const filteredToPositions = formData.to_department_id
+          ? positions.filter(p => p.department_id === formData.to_department_id)
+          : [];
+
+        // Get names for comparison panel
+        const toCompanyName = companies.find(c => c.id === formData.to_company_id)?.name;
+        const toDeptName = filteredToDepartments.find(d => d.id === formData.to_department_id)?.name;
+        const toPositionTitle = positions.find(p => p.id === formData.to_position_id)?.title;
+        const toPayGroupName = filteredToPayGroups.find(pg => pg.id === formData.pay_group_id)?.name;
+
         return (
           <>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>{t("workforce.modules.transactions.form.transfer.fromCompany")}</Label>
-                <Select
-                  value={formData.from_company_id || ""}
-                  onValueChange={(v) => setFormData({ ...formData, from_company_id: v })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder={t("workforce.modules.transactions.form.selectCompany")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {companies.map((c) => (
-                      <SelectItem key={c.id} value={c.id}>
-                        {c.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+            {/* Current Assignment Section (Read-Only) */}
+            {loadingTransferAssignment ? (
+              <div className="flex items-center justify-center py-4">
+                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                <span className="ml-2 text-sm text-muted-foreground">
+                  {t("workforce.modules.transactions.form.transfer.loadingAssignment", "Loading current assignment...")}
+                </span>
               </div>
+            ) : transferCurrentAssignment ? (
+              <div className="rounded-lg border border-border bg-muted/30 p-4 space-y-3">
+                <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                  <Building2 className="h-4 w-4" />
+                  {t("workforce.modules.transactions.form.transfer.currentAssignment", "Current Assignment")}
+                </div>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="text-muted-foreground">{t("workforce.modules.transactions.form.transfer.company", "Company")}:</span>
+                    <span className="ml-2 font-medium">{transferCurrentAssignment.company_name || "—"}</span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">{t("workforce.modules.transactions.form.transfer.department", "Department")}:</span>
+                    <span className="ml-2 font-medium">{transferCurrentAssignment.department_name || "—"}</span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">{t("workforce.modules.transactions.form.transfer.position", "Position")}:</span>
+                    <span className="ml-2 font-medium">{transferCurrentAssignment.position_title || "—"}</span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">{t("workforce.modules.transactions.form.transfer.payGroup", "Pay Group")}:</span>
+                    <span className="ml-2 font-medium">{transferCurrentAssignment.pay_group_name || "—"}</span>
+                  </div>
+                </div>
+              </div>
+            ) : formData.employee_id ? (
+              <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-3 text-sm text-yellow-800 dark:border-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-200">
+                {t("workforce.modules.transactions.form.transfer.noAssignmentFound", "No active position found for this employee. Please ensure they have an active position assignment.")}
+              </div>
+            ) : null}
+
+            {/* New Assignment Section */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 text-sm font-medium">
+                <ArrowRight className="h-4 w-4 text-primary" />
+                {t("workforce.modules.transactions.form.transfer.newAssignment", "New Assignment")}
+              </div>
+
+              {/* To Company */}
               <div className="space-y-2">
-                <Label>{t("workforce.modules.transactions.form.transfer.toCompany")}</Label>
+                <Label>{t("workforce.modules.transactions.form.transfer.toCompany")} *</Label>
                 <Select
                   value={formData.to_company_id || ""}
-                  onValueChange={(v) => setFormData({ ...formData, to_company_id: v })}
+                  onValueChange={(v) => setFormData({ 
+                    ...formData, 
+                    to_company_id: v,
+                    to_department_id: undefined, // Reset dependent fields
+                    to_position_id: undefined,
+                    pay_group_id: undefined,
+                  })}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder={t("workforce.modules.transactions.form.selectCompany")} />
@@ -1236,84 +1416,188 @@ export function TransactionFormDialog({
                   </SelectContent>
                 </Select>
               </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
+
+              {/* To Department */}
               <div className="space-y-2">
-                <Label>{t("workforce.modules.transactions.form.transfer.fromDepartment")}</Label>
-                <Select
-                  value={formData.from_department_id || ""}
-                  onValueChange={(v) => setFormData({ ...formData, from_department_id: v })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder={t("workforce.modules.transactions.form.selectDepartment")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {departments.map((d) => (
-                      <SelectItem key={d.id} value={d.id}>
-                        {d.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>{t("workforce.modules.transactions.form.transfer.toDepartment")}</Label>
+                <Label>{t("workforce.modules.transactions.form.transfer.toDepartment")} *</Label>
                 <Select
                   value={formData.to_department_id || ""}
-                  onValueChange={(v) => setFormData({ ...formData, to_department_id: v })}
+                  onValueChange={(v) => setFormData({ 
+                    ...formData, 
+                    to_department_id: v,
+                    to_position_id: undefined, // Reset dependent field
+                  })}
+                  disabled={!formData.to_company_id}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder={t("workforce.modules.transactions.form.selectDepartment")} />
+                    <SelectValue placeholder={
+                      !formData.to_company_id 
+                        ? t("workforce.modules.transactions.form.transfer.selectCompanyFirst", "Select company first")
+                        : t("workforce.modules.transactions.form.selectDepartment")
+                    } />
                   </SelectTrigger>
                   <SelectContent>
-                    {departments.map((d) => (
+                    {filteredToDepartments.map((d) => (
                       <SelectItem key={d.id} value={d.id}>
                         {d.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
+                {formData.to_company_id && filteredToDepartments.length === 0 && (
+                  <p className="text-xs text-yellow-600 dark:text-yellow-400">
+                    {t("workforce.modules.transactions.form.transfer.noDepartments", "No departments found for selected company")}
+                  </p>
+                )}
+              </div>
+
+              {/* To Position */}
+              <div className="space-y-2">
+                <Label>{t("workforce.modules.transactions.form.transfer.toPosition", "New Position")}</Label>
+                <Select
+                  value={formData.to_position_id || ""}
+                  onValueChange={(v) => setFormData({ ...formData, to_position_id: v })}
+                  disabled={!formData.to_department_id}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={
+                      !formData.to_department_id 
+                        ? t("workforce.modules.transactions.form.transfer.selectDepartmentFirst", "Select department first")
+                        : t("workforce.modules.transactions.form.selectPosition")
+                    } />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {filteredToPositions.map((p) => (
+                      <SelectItem key={p.id} value={p.id}>
+                        {p.title} ({p.code})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {formData.to_department_id && filteredToPositions.length === 0 && (
+                  <p className="text-xs text-yellow-600 dark:text-yellow-400">
+                    {t("workforce.modules.transactions.form.transfer.noPositions", "No positions found in selected department")}
+                  </p>
+                )}
+              </div>
+
+              {/* Pay Group */}
+              <div className="space-y-2">
+                <Label>{t("workforce.modules.transactions.form.payGroup", "Pay Group Assignment")}</Label>
+                <Select
+                  value={formData.pay_group_id || ""}
+                  onValueChange={(v) => setFormData({ ...formData, pay_group_id: v || null })}
+                  disabled={!formData.to_company_id}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={
+                      !formData.to_company_id 
+                        ? t("workforce.modules.transactions.form.transfer.selectCompanyFirst", "Select company first")
+                        : t("workforce.modules.transactions.form.selectPayGroup", "Select pay group (optional)")
+                    } />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {filteredToPayGroups.map((pg) => (
+                      <SelectItem key={pg.id} value={pg.id}>
+                        {pg.name} ({pg.code})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  {t("workforce.modules.transactions.form.payGroupHint", "Leave empty to keep current pay group assignment")}
+                </p>
+              </div>
+
+              {/* Transfer Reason */}
+              <div className="space-y-2">
+                <Label>{t("workforce.modules.transactions.form.transfer.transferReason")} *</Label>
+                <Select
+                  value={formData.transfer_reason_id || ""}
+                  onValueChange={(v) => setFormData({ ...formData, transfer_reason_id: v })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={t("workforce.modules.transactions.form.selectReason")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {transferReasons.map((r) => (
+                      <SelectItem key={r.id} value={r.id}>
+                        {r.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
-            <div className="space-y-2">
-              <Label>{t("workforce.modules.transactions.form.transfer.transferReason")}</Label>
-              <Select
-                value={formData.transfer_reason_id || ""}
-                onValueChange={(v) => setFormData({ ...formData, transfer_reason_id: v })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder={t("workforce.modules.transactions.form.selectReason")} />
-                </SelectTrigger>
-                <SelectContent>
-                  {transferReasons.map((r) => (
-                    <SelectItem key={r.id} value={r.id}>
-                      {r.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>{t("workforce.modules.transactions.form.payGroup", "Pay Group Assignment")}</Label>
-              <Select
-                value={formData.pay_group_id || ""}
-                onValueChange={(v) => setFormData({ ...formData, pay_group_id: v || null })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder={t("workforce.modules.transactions.form.selectPayGroup", "Select pay group (optional)")} />
-                </SelectTrigger>
-                <SelectContent>
-                  {payGroups.map((pg) => (
-                    <SelectItem key={pg.id} value={pg.id}>
-                      {pg.name} ({pg.code})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <p className="text-xs text-muted-foreground">
-                {t("workforce.modules.transactions.form.payGroupHint", "Leave empty to keep current pay group assignment")}
-              </p>
-            </div>
+
+            {/* Comparison Panel - Show when we have both current and new assignments */}
+            {transferCurrentAssignment && formData.to_company_id && (
+              <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 space-y-3">
+                <div className="text-sm font-medium text-primary">
+                  {t("workforce.modules.transactions.form.transfer.changesSummary", "Transfer Summary")}
+                </div>
+                <div className="space-y-2 text-sm">
+                  {/* Company Change */}
+                  <div className="flex items-center gap-2">
+                    <span className="w-24 text-muted-foreground">{t("workforce.modules.transactions.form.transfer.company", "Company")}:</span>
+                    <span className={cn(
+                      "font-medium",
+                      transferCurrentAssignment.company_id !== formData.to_company_id && "text-orange-600 dark:text-orange-400"
+                    )}>
+                      {transferCurrentAssignment.company_name}
+                    </span>
+                    <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                    <span className={cn(
+                      "font-medium",
+                      transferCurrentAssignment.company_id !== formData.to_company_id && "text-green-600 dark:text-green-400"
+                    )}>
+                      {toCompanyName || "—"}
+                    </span>
+                    {transferCurrentAssignment.company_id !== formData.to_company_id && (
+                      <span className="text-xs bg-orange-100 text-orange-700 px-1.5 py-0.5 rounded dark:bg-orange-900 dark:text-orange-300">
+                        {t("common.changed", "Changed")}
+                      </span>
+                    )}
+                  </div>
+                  {/* Department Change */}
+                  <div className="flex items-center gap-2">
+                    <span className="w-24 text-muted-foreground">{t("workforce.modules.transactions.form.transfer.department", "Department")}:</span>
+                    <span className="font-medium">{transferCurrentAssignment.department_name}</span>
+                    <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                    <span className={cn(
+                      "font-medium",
+                      formData.to_department_id && transferCurrentAssignment.department_id !== formData.to_department_id && "text-green-600 dark:text-green-400"
+                    )}>
+                      {toDeptName || "—"}
+                    </span>
+                  </div>
+                  {/* Position Change */}
+                  <div className="flex items-center gap-2">
+                    <span className="w-24 text-muted-foreground">{t("workforce.modules.transactions.form.transfer.position", "Position")}:</span>
+                    <span className="font-medium">{transferCurrentAssignment.position_title}</span>
+                    <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                    <span className={cn(
+                      "font-medium",
+                      formData.to_position_id && "text-green-600 dark:text-green-400"
+                    )}>
+                      {toPositionTitle || "—"}
+                    </span>
+                  </div>
+                  {/* Pay Group Change */}
+                  <div className="flex items-center gap-2">
+                    <span className="w-24 text-muted-foreground">{t("workforce.modules.transactions.form.transfer.payGroup", "Pay Group")}:</span>
+                    <span className="font-medium">{transferCurrentAssignment.pay_group_name || "—"}</span>
+                    <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                    <span className={cn(
+                      "font-medium",
+                      formData.pay_group_id && transferCurrentAssignment.pay_group_id !== formData.pay_group_id && "text-green-600 dark:text-green-400"
+                    )}>
+                      {toPayGroupName || t("common.noChange", "(No change)")}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
           </>
         );
 
