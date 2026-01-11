@@ -25,6 +25,7 @@ import { transformPaySpinesData, generatePaySpinesFailureReport } from "./paySpi
 import { transformSpinalPointsData, generateSpinalPointsFailureReport } from "./spinalPointsTransformer";
 import { transformEmployeeAssignmentsData, generateEmployeeAssignmentsFailureReport } from "./employeeAssignmentsTransformer";
 import { transformCompaniesData } from "./companiesTransformer";
+import { transformDivisionsData, generateDivisionsFailureReport } from "./divisionsTransformer";
 import { CompensationModel } from "./WizardStepCompensationModel";
 
 interface WizardStepCommitProps {
@@ -105,6 +106,8 @@ export function WizardStepCommit({
       report = generateEmployeeAssignmentsFailureReport(importFailures, importWarnings);
     } else if (importType === "companies") {
       report = generateFailureReport(importFailures, importWarnings);
+    } else if (importType === "divisions") {
+      report = generateDivisionsFailureReport(importFailures, importWarnings);
     } else {
       report = generateFailureReport(importFailures, importWarnings); // fallback
     }
@@ -188,6 +191,39 @@ export function WizardStepCommit({
             
             const { data: insertData, error: insertError } = await supabase
               .from("companies")
+              .insert(batch)
+              .select("id");
+
+            if (insertError) {
+              batch.forEach((_, idx) => {
+                allErrors.push({ rowIndex: i + idx, row: validData[i + idx], error: insertError.message });
+              });
+              failedCount += batch.length;
+            } else {
+              successCount += batch.length;
+              importedIds.push(...(insertData?.map((d) => d.id) || []));
+            }
+            setProgress(50 + Math.round((i / transformResult.transformed.length) * 40));
+          }
+        }
+        setProgress(90);
+      } else if (importType === "divisions") {
+        setProgress(30);
+        const transformResult = await transformDivisionsData(validData);
+        
+        allErrors.push(...transformResult.errors);
+        allWarnings.push(...transformResult.warnings.map(w => ({ rowIndex: w.rowIndex, field: "foreign_key", message: w.message })));
+        failedCount = transformResult.errors.length;
+        
+        setProgress(50);
+
+        if (transformResult.transformed.length > 0) {
+          const batchSize = 50;
+          for (let i = 0; i < transformResult.transformed.length; i += batchSize) {
+            const batch = transformResult.transformed.slice(i, i + batchSize);
+            
+            const { data: insertData, error: insertError } = await supabase
+              .from("divisions")
               .insert(batch)
               .select("id");
 

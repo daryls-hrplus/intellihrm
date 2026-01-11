@@ -111,6 +111,26 @@ const TEMPLATE_CONFIGS: Record<string, {
       "Division code is optional but helps with org structure",
     ],
   },
+  divisions: {
+    headers: ["code", "name", "group_code", "description", "is_active"],
+    fields: [
+      { name: "code", required: true, description: "Unique division code", example: "OPS" },
+      { name: "name", required: true, description: "Division name", example: "Operations" },
+      { name: "group_code", required: false, description: "Company group code (optional)", example: "AUR-GRP" },
+      { name: "description", required: false, description: "Division description", example: "All operational activities" },
+      { name: "is_active", required: false, description: "Active status (true/false)", example: "true" },
+    ],
+    examples: [
+      ["OPS", "Operations", "AUR-GRP", "Operational execution across all entities", "true"],
+      ["FIN", "Finance", "", "Financial management and reporting", "true"],
+    ],
+    tips: [
+      "Group code is OPTIONAL - divisions can exist independently",
+      "If group_code is provided, it must match an existing company group",
+      "Division codes should be unique within the system",
+      "Import company groups BEFORE divisions if you want to assign groups",
+    ],
+  },
   job_families: {
     headers: ["code", "name", "company_code", "description", "is_active"],
     fields: [
