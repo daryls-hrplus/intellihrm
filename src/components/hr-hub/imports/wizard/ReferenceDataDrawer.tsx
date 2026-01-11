@@ -20,7 +20,7 @@ import { ISO_LANGUAGES } from "@/constants/languageConstants";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
-export type ReferenceDataType = "country" | "currency" | "language" | "lookup";
+export type ReferenceDataType = "country" | "currency" | "language" | "lookup" | "master_job_family";
 
 interface ReferenceDataDrawerProps {
   open: boolean;
@@ -62,6 +62,21 @@ export function ReferenceDataDrawer({
     enabled: open && dataType === "currency",
   });
 
+  // Fetch master job families from database
+  const { data: masterJobFamilies = [] } = useQuery({
+    queryKey: ["master-job-families-reference-drawer"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("master_job_families")
+        .select("code, name, industry_category")
+        .eq("is_active", true)
+        .order("code");
+      if (error) throw error;
+      return data;
+    },
+    enabled: open && dataType === "master_job_family",
+  });
+
   // Fetch lookup values from database
   const { data: lookupValues = [] } = useQuery({
     queryKey: ["lookup-values-reference-drawer", lookupCategory],
@@ -97,10 +112,16 @@ export function ReferenceDataDrawer({
           name: v.name,
           extra: v.description || undefined,
         }));
+      case "master_job_family":
+        return masterJobFamilies.map((m) => ({
+          code: m.code,
+          name: m.name,
+          extra: m.industry_category || undefined,
+        }));
       default:
         return [];
     }
-  }, [dataType, currencies, lookupValues]);
+  }, [dataType, currencies, lookupValues, masterJobFamilies]);
 
   // Filter items
   const filteredItems = useMemo(() => {
@@ -133,6 +154,8 @@ export function ReferenceDataDrawer({
         return lookupCategory
           ? `${lookupCategory.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())} Values`
           : "Lookup Values";
+      case "master_job_family":
+        return "Master Job Family Codes";
       default:
         return "Reference Data";
     }
@@ -148,6 +171,8 @@ export function ReferenceDataDrawer({
         return "Use these language codes for language preference fields.";
       case "lookup":
         return "Use the CODE column values (not the display name) in your import file.";
+      case "master_job_family":
+        return "Use these master codes in the master_code field to link job families to global standards.";
       default:
         return "Copy codes to use in your import file.";
     }

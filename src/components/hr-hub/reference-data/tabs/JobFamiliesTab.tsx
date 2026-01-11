@@ -21,6 +21,11 @@ interface JobFamily {
   name: string;
   description: string | null;
   is_active: boolean;
+  master_job_family_id: string | null;
+  master_job_families?: {
+    code: string;
+    name: string;
+  } | null;
 }
 
 export function JobFamiliesTab() {
@@ -32,7 +37,7 @@ export function JobFamiliesTab() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("job_families")
-        .select("id, code, name, description, is_active")
+        .select("id, code, name, description, is_active, master_job_family_id, master_job_families(code, name)")
         .eq("is_active", true)
         .order("name", { ascending: true });
       if (error) throw error;
@@ -118,6 +123,7 @@ export function JobFamiliesTab() {
               <TableRow>
                 <TableHead className="w-28">Code</TableHead>
                 <TableHead>Job Family</TableHead>
+                <TableHead className="w-28">Source</TableHead>
                 <TableHead className="w-20 text-center">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -136,6 +142,15 @@ export function JobFamiliesTab() {
                         <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{jobFamily.description}</p>
                       )}
                     </div>
+                  </TableCell>
+                  <TableCell>
+                    {jobFamily.master_job_family_id ? (
+                      <Badge variant="outline" className="text-xs">
+                        🔗 {jobFamily.master_job_families?.code || "Master"}
+                      </Badge>
+                    ) : (
+                      <Badge variant="secondary" className="text-xs">Custom</Badge>
+                    )}
                   </TableCell>
                   <TableCell className="text-center">
                     <Button
