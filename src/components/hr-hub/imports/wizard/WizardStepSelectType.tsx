@@ -225,6 +225,37 @@ export function WizardStepSelectType({
     for (const table of tables) {
       try {
         const dbTable = tableDbMap[table] || table;
+
+        // Sections are linked to a company through departments (sections.department_id -> departments.company_id)
+        if (table === "sections" && companyId) {
+          const { data: deptData, error: deptErr } = await supabase
+            .from("departments")
+            .select("id")
+            .eq("company_id", companyId);
+
+          if (deptErr) {
+            status[table] = { count: 0, met: false };
+            continue;
+          }
+
+          const departmentIds = deptData?.map((d) => d.id) ?? [];
+          if (departmentIds.length === 0) {
+            status[table] = { count: 0, met: false };
+            continue;
+          }
+
+          const { count, error } = await (supabase.from("sections" as any) as any)
+            .select("id", { count: "exact", head: true })
+            .in("department_id", departmentIds);
+
+          if (!error) {
+            status[table] = { count: count || 0, met: (count || 0) > 0 };
+          } else {
+            status[table] = { count: 0, met: false };
+          }
+          continue;
+        }
+
         let query = (supabase.from(dbTable as any) as any).select("id", { count: "exact", head: true });
         if (companyId && table !== "companies") {
           query = query.eq("company_id", companyId);
