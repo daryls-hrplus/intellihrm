@@ -223,7 +223,7 @@ export function WizardStepCommit({
             const batch = transformResult.transformed.slice(i, i + batchSize);
             
             const { data: insertData, error: insertError } = await supabase
-              .from("divisions")
+              .from("company_divisions")
               .insert(batch)
               .select("id");
 

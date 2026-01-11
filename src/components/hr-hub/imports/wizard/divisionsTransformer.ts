@@ -3,28 +3,28 @@ import { supabase } from "@/integrations/supabase/client";
 interface DivisionRow {
   code: string;
   name: string;
-  name_en?: string;
-  group_code?: string;
+  company_code: string;
   description?: string;
-  description_en?: string;
+  start_date?: string;
+  end_date?: string;
   is_active?: string | boolean;
   _rowIndex?: number;
   _id?: string;
   [key: string]: any;
 }
 
-interface DivisionInsertRecord {
+interface CompanyDivisionInsertRecord {
   code: string;
   name: string;
-  name_en?: string | null;
+  company_id: string;
   description?: string | null;
-  description_en?: string | null;
-  group_id?: string | null;
+  start_date: string;
+  end_date?: string | null;
   is_active: boolean;
 }
 
 interface TransformResult {
-  transformed: DivisionInsertRecord[];
+  transformed: CompanyDivisionInsertRecord[];
   errors: { rowIndex: number; row: DivisionRow; error: string }[];
   warnings: { rowIndex: number; message: string }[];
 }
@@ -34,20 +34,22 @@ export async function transformDivisionsData(
 ): Promise<TransformResult> {
   const errors: TransformResult["errors"] = [];
   const warnings: TransformResult["warnings"] = [];
-  const transformed: DivisionInsertRecord[] = [];
+  const transformed: CompanyDivisionInsertRecord[] = [];
 
-  // Fetch company groups for lookup
-  const { data: groups } = await supabase
-    .from("company_groups")
+  // Fetch companies for lookup
+  const { data: companies } = await supabase
+    .from("companies")
     .select("id, code");
 
   // Build lookup map
-  const groupMap = new Map<string, string>();
-  if (groups) {
-    groups.forEach((g) => {
-      if (g.code) groupMap.set(g.code.toUpperCase(), g.id);
+  const companyMap = new Map<string, string>();
+  if (companies) {
+    companies.forEach((c) => {
+      if (c.code) companyMap.set(c.code.toUpperCase(), c.id);
     });
   }
+
+  const validCompanyCodes = Array.from(companyMap.keys()).join(", ") || "(none)";
 
   // Transform each row
   for (let i = 0; i < rows.length; i++) {
@@ -63,16 +65,47 @@ export async function transformDivisionsData(
       errors.push({ rowIndex, row, error: "Missing required field: name" });
       continue;
     }
+    if (!row.company_code?.trim()) {
+      errors.push({ rowIndex, row, error: "Missing required field: company_code" });
+      continue;
+    }
 
-    // Resolve group_id (optional)
-    let group_id: string | null = null;
-    if (row.group_code?.trim()) {
-      const groupCode = row.group_code.trim().toUpperCase();
-      group_id = groupMap.get(groupCode) || null;
-      if (!group_id) {
+    // Resolve company_id (required)
+    const companyCode = row.company_code.trim().toUpperCase();
+    const company_id = companyMap.get(companyCode);
+    if (!company_id) {
+      errors.push({
+        rowIndex,
+        row,
+        error: `Company code "${row.company_code}" not found. Valid codes: ${validCompanyCodes}`,
+      });
+      continue;
+    }
+
+    // Parse start_date (default to today if missing)
+    let start_date = new Date().toISOString().slice(0, 10);
+    if (row.start_date?.trim()) {
+      const parsed = new Date(row.start_date.trim());
+      if (!isNaN(parsed.getTime())) {
+        start_date = parsed.toISOString().slice(0, 10);
+      } else {
         warnings.push({
           rowIndex,
-          message: `Group code "${row.group_code}" not found. Division will be imported without group assignment. Valid codes: ${Array.from(groupMap.keys()).join(", ") || "(none)"}`,
+          message: `Invalid start_date "${row.start_date}", using today's date`,
+        });
+      }
+    }
+
+    // Parse end_date (optional)
+    let end_date: string | null = null;
+    if (row.end_date?.trim()) {
+      const parsed = new Date(row.end_date.trim());
+      if (!isNaN(parsed.getTime())) {
+        end_date = parsed.toISOString().slice(0, 10);
+      } else {
+        warnings.push({
+          rowIndex,
+          message: `Invalid end_date "${row.end_date}", ignoring`,
         });
       }
     }
@@ -87,14 +120,14 @@ export async function transformDivisionsData(
       }
     }
 
-    // Build transformed record
-    const record: DivisionInsertRecord = {
+    // Build transformed record for company_divisions table
+    const record: CompanyDivisionInsertRecord = {
       code: row.code.trim(),
       name: row.name.trim(),
-      name_en: row.name_en?.trim() || null,
+      company_id,
       description: row.description?.trim() || null,
-      description_en: row.description_en?.trim() || null,
-      group_id,
+      start_date,
+      end_date,
       is_active,
     };
 

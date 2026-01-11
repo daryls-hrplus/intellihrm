@@ -112,23 +112,25 @@ const TEMPLATE_CONFIGS: Record<string, {
     ],
   },
   divisions: {
-    headers: ["code", "name", "group_code", "description", "is_active"],
+    headers: ["code", "name", "company_code", "description", "start_date", "end_date", "is_active"],
     fields: [
       { name: "code", required: true, description: "Unique division code", example: "OPS" },
       { name: "name", required: true, description: "Division name", example: "Operations" },
-      { name: "group_code", required: false, description: "Company group code (optional)", example: "AUR-GRP" },
+      { name: "company_code", required: true, description: "Parent company code (must exist)", example: "CMG" },
       { name: "description", required: false, description: "Division description", example: "All operational activities" },
+      { name: "start_date", required: false, description: "Start date (YYYY-MM-DD, defaults to today)", example: "2025-01-01" },
+      { name: "end_date", required: false, description: "End date (YYYY-MM-DD, optional)", example: "" },
       { name: "is_active", required: false, description: "Active status (true/false)", example: "true" },
     ],
     examples: [
-      ["OPS", "Operations", "AUR-GRP", "Operational execution across all entities", "true"],
-      ["FIN", "Finance", "", "Financial management and reporting", "true"],
+      ["OPS", "Operations", "CMG", "Operational execution across all plants", "2025-01-01", "", "true"],
+      ["FIN", "Finance", "CMG", "Financial management and reporting", "2025-01-01", "", "true"],
     ],
     tips: [
-      "Group code is OPTIONAL - divisions can exist independently",
-      "If group_code is provided, it must match an existing company group",
-      "Division codes should be unique within the system",
-      "Import company groups BEFORE divisions if you want to assign groups",
+      "Company code is REQUIRED - each division belongs to a specific company",
+      "Import companies BEFORE importing divisions",
+      "Division codes must be unique within each company",
+      "Use Reference Data drawer to see valid company codes",
     ],
   },
   job_families: {
