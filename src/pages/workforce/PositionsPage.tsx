@@ -3,7 +3,9 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { PositionsManagement } from "@/components/admin/PositionsManagement";
 import { supabase } from "@/integrations/supabase/client";
-import { UserCheck, Building2 } from "lucide-react";
+import { UserCheck, Building2, DollarSign } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 import { useLanguage } from "@/hooks/useLanguage";
 import {
   Select,
@@ -64,20 +66,29 @@ export default function PositionsPage() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <Building2 className="h-4 w-4 text-muted-foreground" />
-            <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
-              <SelectTrigger className="w-[250px]">
-                <SelectValue placeholder={t("workforce.selectCompany")} />
-              </SelectTrigger>
-              <SelectContent>
-                {companies.map((company) => (
-                  <SelectItem key={company.id} value={company.id}>
-                    {company.name} ({company.code})
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <div className="flex items-center gap-4">
+            <Button variant="outline" size="sm" asChild>
+              <Link to="/compensation/salary-grades">
+                <DollarSign className="h-4 w-4 mr-2" />
+                {t("workforce.viewSalaryGrades")}
+              </Link>
+            </Button>
+
+            <div className="flex items-center gap-2">
+              <Building2 className="h-4 w-4 text-muted-foreground" />
+              <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
+                <SelectTrigger className="w-[250px]">
+                  <SelectValue placeholder={t("workforce.selectCompany")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {companies.map((company) => (
+                    <SelectItem key={company.id} value={company.id}>
+                      {company.name} ({company.code})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </div>
 
