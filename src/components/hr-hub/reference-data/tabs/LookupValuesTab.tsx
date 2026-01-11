@@ -103,12 +103,23 @@ const MODULE_LABELS: Record<string, string> = {
   leave: "Leave Management"
 };
 
-export function LookupValuesTab() {
+interface LookupValuesTabProps {
+  moduleFilter?: string;
+}
+
+export function LookupValuesTab({ moduleFilter }: LookupValuesTabProps) {
   const { t } = useLanguage();
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
-  const [selectedModule, setSelectedModule] = useState<string>("all");
+  const [selectedModule, setSelectedModule] = useState<string>(moduleFilter || "all");
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
+
+  // Update selectedModule when moduleFilter prop changes
+  useState(() => {
+    if (moduleFilter) {
+      setSelectedModule(moduleFilter);
+    }
+  });
 
   const { data: lookupValues = [], isLoading } = useQuery({
     queryKey: ["lookup-values-reference"],
@@ -206,19 +217,22 @@ export function LookupValuesTab() {
     <div className="space-y-4">
       <div className="flex flex-col gap-4">
         <div className="flex flex-col sm:flex-row gap-2 flex-1">
-          <Select value={selectedModule} onValueChange={handleModuleChange}>
-            <SelectTrigger className="w-full sm:w-[200px]">
-              <SelectValue placeholder="Select module" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Modules</SelectItem>
-              {Object.entries(MODULE_LABELS).map(([key, label]) => (
-                <SelectItem key={key} value={key}>
-                  {label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          {/* Only show module selector if no moduleFilter is pre-set */}
+          {!moduleFilter && (
+            <Select value={selectedModule} onValueChange={handleModuleChange}>
+              <SelectTrigger className="w-full sm:w-[200px]">
+                <SelectValue placeholder="Select module" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Modules</SelectItem>
+                {Object.entries(MODULE_LABELS).map(([key, label]) => (
+                  <SelectItem key={key} value={key}>
+                    {label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
           <Select value={selectedCategory} onValueChange={setSelectedCategory}>
             <SelectTrigger className="w-full sm:w-[220px]">
               <SelectValue placeholder={t("hrHub.refData.selectCategory")} />

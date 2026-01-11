@@ -36,7 +36,7 @@ export default function ReferenceDataCatalogPage() {
         <Alert>
           <Info className="h-4 w-4" />
           <AlertDescription>
-            {t("hrHub.referenceDataCatalogTip")}
+            Browse system reference data (read-only standards) and configurable lookup values that you can customize for your organization.
           </AlertDescription>
         </Alert>
 
