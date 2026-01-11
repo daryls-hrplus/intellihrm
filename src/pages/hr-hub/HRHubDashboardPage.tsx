@@ -187,6 +187,7 @@ export default function HRHubDashboardPage() {
         { titleKey: "hrHub.orgStructure", descKey: "hrHub.orgStructureDesc", icon: FolderTree, href: "/workforce/org-structure", badge: null },
         { titleKey: "hrHub.lookupValues", descKey: "hrHub.lookupValuesDesc", icon: List, href: "/admin/lookup-values", badge: null },
         { titleKey: "hrHub.governmentIdTypes", descKey: "hrHub.governmentIdTypesDesc", icon: IdCard, href: "/hr-hub/government-id-types", badge: null },
+        { titleKey: "hrHub.referenceDataCatalog", descKey: "hrHub.referenceDataCatalogDesc", icon: FolderTree, href: "/hr-hub/reference-data", badge: null },
         { titleKey: "hrHub.dataImport.title", descKey: "hrHub.dataImport.shortDesc", icon: Upload, href: "/hr-hub/data-import", badge: null },
       ],
     },

@@ -549,6 +549,7 @@ export const HRRemindersPage = lazy(() => import('@/pages/hr-hub/HRRemindersPage
 export const SOPManagementPage = lazy(() => import('@/pages/hr-hub/SOPManagementPage'));
 export const GovernmentIdTypesPage = lazy(() => import('@/pages/hr-hub/GovernmentIdTypesPage'));
 export const HRDataImportPage = lazy(() => import('@/pages/hr-hub/HRDataImportPage'));
+export const ReferenceDataCatalogPage = lazy(() => import('@/pages/hr-hub/ReferenceDataCatalogPage'));
 export const SentimentMonitoringPage = lazy(() => import('@/pages/hr-hub/SentimentMonitoringPage'));
 export const RecognitionAnalyticsPage = lazy(() => import('@/pages/hr-hub/RecognitionAnalyticsPage'));
 export const IntegrationDashboardPage = lazy(() => import('@/pages/hr-hub/IntegrationDashboardPage'));
