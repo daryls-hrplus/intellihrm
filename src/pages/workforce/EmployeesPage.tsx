@@ -65,6 +65,7 @@ import {
 import { toast } from "sonner";
 import { EmployeeEditDialog } from "@/components/employee/EmployeeEditDialog";
 import { AddEmployeeDialog } from "@/components/employee/AddEmployeeDialog";
+import { UnassignedEmployeesWidget } from "@/components/workforce/UnassignedEmployeesWidget";
 
 interface EmployeePosition {
   position_title: string;
@@ -265,6 +266,11 @@ export default function EmployeesPage() {
     });
   }, [employees, searchQuery, statusFilter, departmentFilter]);
 
+  // Get unassigned employees for widget
+  const unassignedEmployees = useMemo(() => {
+    return employees.filter(emp => !emp.is_active);
+  }, [employees]);
+
   const activeFiltersCount = (statusFilter !== "all" ? 1 : 0) + (departmentFilter !== "all" ? 1 : 0);
 
   const clearFilters = () => {
@@ -347,6 +353,12 @@ export default function EmployeesPage() {
             {t("workforce.addEmployee")}
           </Button>
         </div>
+
+        {/* Unassigned Employees Widget */}
+        <UnassignedEmployeesWidget
+          unassignedEmployees={unassignedEmployees}
+          onFilterUnassigned={() => setStatusFilter("unassigned")}
+        />
 
         {/* Filters */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center animate-slide-up">
