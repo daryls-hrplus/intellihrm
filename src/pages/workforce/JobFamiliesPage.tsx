@@ -9,7 +9,8 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Building2, FolderTree, Plus, Pencil, Trash2, Search, ClipboardList, Sparkles, Loader2 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Building2, FolderTree, Plus, Pencil, Trash2, Search, ClipboardList, Sparkles, Loader2, Globe, LinkIcon } from "lucide-react";
 import { useLanguage } from "@/hooks/useLanguage";
 import { toast } from "sonner";
 import { useResponsibilityAI } from "@/hooks/useResponsibilityAI";
@@ -54,6 +55,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import { getTodayString, formatDateForDisplay } from "@/utils/dateUtils";
 import { JobFamilyDefaultResponsibilities } from "@/components/workforce/JobFamilyDefaultResponsibilities";
+import { SubscribeFromMasterDrawer } from "@/components/workforce/SubscribeFromMasterDrawer";
+import { MasterJobFamiliesTab } from "@/components/workforce/MasterJobFamiliesTab";
 import { Json } from "@/integrations/supabase/types";
 
 interface Company {
@@ -73,6 +76,11 @@ interface JobFamily {
   end_date: string | null;
   created_at: string;
   default_responsibilities: Json | null;
+  master_job_family_id: string | null;
+  master_job_families?: {
+    code: string;
+    name: string;
+  } | null;
 }
 
 interface DefaultResponsibility {
@@ -100,10 +108,12 @@ export default function JobFamiliesPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [subscribeDrawerOpen, setSubscribeDrawerOpen] = useState(false);
   const [selectedJobFamily, setSelectedJobFamily] = useState<JobFamily | null>(null);
   const [formData, setFormData] = useState(emptyForm);
   const [isSaving, setIsSaving] = useState(false);
   const [activeTab, setActiveTab] = useState("general");
+  const [pageTab, setPageTab] = useState("company");
   const { logAction } = useAuditLog();
   const { generateFamilyDescription, isGenerating: isGeneratingDescription } = useResponsibilityAI();
 
@@ -134,7 +144,7 @@ export default function JobFamiliesPage() {
     setIsLoading(true);
     const { data, error } = await supabase
       .from("job_families")
-      .select("*")
+      .select("*, master_job_families(code, name)")
       .eq("company_id", selectedCompanyId)
       .order("name");
 
@@ -145,6 +155,11 @@ export default function JobFamiliesPage() {
     }
     setIsLoading(false);
   };
+
+  // Get existing master IDs for the subscribe drawer
+  const existingMasterIds = jobFamilies
+    .filter((jf) => jf.master_job_family_id)
+    .map((jf) => jf.master_job_family_id as string);
 
   const handleOpenDialog = (jobFamily?: JobFamily) => {
     if (jobFamily) {
@@ -316,102 +331,151 @@ export default function JobFamiliesPage() {
             <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
           </div>
         ) : selectedCompanyId ? (
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle>{t("workforce.jobFamilies.title")}</CardTitle>
-              <div className="flex items-center gap-2">
-                <div className="relative">
-                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder={t("common.search")}
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-8 w-[200px]"
-                  />
-                </div>
-                <Button onClick={() => handleOpenDialog()}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  {t("workforce.jobFamilies.addJobFamily")}
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>{t("common.code")}</TableHead>
-                    <TableHead>{t("common.name")}</TableHead>
-                    <TableHead>{t("common.description")}</TableHead>
-                    <TableHead>{t("common.startDate")}</TableHead>
-                    <TableHead>{t("common.endDate")}</TableHead>
-                    <TableHead>{t("common.status")}</TableHead>
-                    <TableHead className="w-[100px]">{t("common.actions")}</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredJobFamilies.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
-                        {t("workforce.jobFamilies.noJobFamiliesFound")}
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    filteredJobFamilies.map((jf) => (
-                      <TableRow key={jf.id}>
-                        <TableCell className="font-mono">{jf.code}</TableCell>
-                        <TableCell className="font-medium">{jf.name}</TableCell>
-                        <TableCell className="text-muted-foreground max-w-[200px] truncate">
-                          {jf.description || "-"}
-                        </TableCell>
-                        <TableCell>{formatDateForDisplay(jf.start_date, "MMM d, yyyy")}</TableCell>
-                        <TableCell>
-                          {jf.end_date ? formatDateForDisplay(jf.end_date, "MMM d, yyyy") : "-"}
-                        </TableCell>
-                        <TableCell>
-                          <span
-                            className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
-                              jf.is_active
-                                ? "bg-success/10 text-success"
-                                : "bg-muted text-muted-foreground"
-                            }`}
-                          >
-                            {jf.is_active ? t("common.active") : t("common.inactive")}
-                          </span>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-1">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => handleOpenDialog(jf)}
-                            >
-                              <Pencil className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => {
-                                setSelectedJobFamily(jf);
-                                setDeleteDialogOpen(true);
-                              }}
-                            >
-                              <Trash2 className="h-4 w-4 text-destructive" />
-                            </Button>
-                          </div>
-                        </TableCell>
+          <Tabs value={pageTab} onValueChange={setPageTab}>
+            <TabsList className="mb-4">
+              <TabsTrigger value="company" className="flex items-center gap-2">
+                <Building2 className="h-4 w-4" />
+                Company Job Families
+              </TabsTrigger>
+              <TabsTrigger value="master" className="flex items-center gap-2">
+                <Globe className="h-4 w-4" />
+                Master Library
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="company">
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <CardTitle>{t("workforce.jobFamilies.title")}</CardTitle>
+                  <div className="flex items-center gap-2">
+                    <div className="relative">
+                      <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        placeholder={t("common.search")}
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="pl-8 w-[200px]"
+                      />
+                    </div>
+                    <Button variant="outline" onClick={() => setSubscribeDrawerOpen(true)}>
+                      <Globe className="h-4 w-4 mr-2" />
+                      Subscribe from Master
+                    </Button>
+                    <Button onClick={() => handleOpenDialog()}>
+                      <Plus className="h-4 w-4 mr-2" />
+                      {t("workforce.jobFamilies.addJobFamily")}
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>{t("common.code")}</TableHead>
+                        <TableHead>{t("common.name")}</TableHead>
+                        <TableHead>Source</TableHead>
+                        <TableHead>{t("common.description")}</TableHead>
+                        <TableHead>{t("common.status")}</TableHead>
+                        <TableHead className="w-[100px]">{t("common.actions")}</TableHead>
                       </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredJobFamilies.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
+                            {t("workforce.jobFamilies.noJobFamiliesFound")}
+                          </TableCell>
+                        </TableRow>
+                      ) : (
+                        filteredJobFamilies.map((jf) => (
+                          <TableRow key={jf.id}>
+                            <TableCell className="font-mono">{jf.code}</TableCell>
+                            <TableCell className="font-medium">{jf.name}</TableCell>
+                            <TableCell>
+                              {jf.master_job_family_id ? (
+                                <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger>
+                                      <Badge variant="outline" className="gap-1">
+                                        <LinkIcon className="h-3 w-3" />
+                                        {jf.master_job_families?.code || "Master"}
+                                      </Badge>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      Linked to master: {jf.master_job_families?.name}
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
+                              ) : (
+                                <Badge variant="secondary">Custom</Badge>
+                              )}
+                            </TableCell>
+                            <TableCell className="text-muted-foreground max-w-[200px] truncate">
+                              {jf.description || "-"}
+                            </TableCell>
+                            <TableCell>
+                              <span
+                                className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
+                                  jf.is_active
+                                    ? "bg-success/10 text-success"
+                                    : "bg-muted text-muted-foreground"
+                                }`}
+                              >
+                                {jf.is_active ? t("common.active") : t("common.inactive")}
+                              </span>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-1">
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => handleOpenDialog(jf)}
+                                >
+                                  <Pencil className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => {
+                                    setSelectedJobFamily(jf);
+                                    setDeleteDialogOpen(true);
+                                  }}
+                                >
+                                  <Trash2 className="h-4 w-4 text-destructive" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      )}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="master">
+              <Card>
+                <CardContent className="pt-6">
+                  <MasterJobFamiliesTab />
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
         ) : (
           <div className="rounded-lg border border-border bg-card p-8 text-center">
             <p className="text-muted-foreground">{t("workforce.noCompaniesFound")}</p>
           </div>
         )}
       </div>
+
+      <SubscribeFromMasterDrawer
+        open={subscribeDrawerOpen}
+        onOpenChange={setSubscribeDrawerOpen}
+        companyId={selectedCompanyId}
+        existingMasterIds={existingMasterIds}
+        onSuccess={fetchJobFamilies}
+      />
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-2xl max-h-[85vh] overflow-hidden flex flex-col">

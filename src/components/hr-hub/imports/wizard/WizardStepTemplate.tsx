@@ -48,6 +48,7 @@ const FIELD_REFERENCE_MAP: Record<string, { type: ReferenceDataType; lookupCateg
   contract_type: { type: "lookup", lookupCategory: "contract_type" },
   education_level: { type: "lookup", lookupCategory: "education_level" },
   title: { type: "lookup", lookupCategory: "title" },
+  master_code: { type: "master_job_family" },
 };
 
 const TEMPLATE_CONFIGS: Record<string, { 
