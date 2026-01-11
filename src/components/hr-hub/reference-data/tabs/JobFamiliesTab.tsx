@@ -12,50 +12,48 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Search, Download, Copy, Check, Loader2 } from "lucide-react";
+import { Search, Download, Copy, Check, Loader2, Globe } from "lucide-react";
 import { toast } from "sonner";
 
-interface JobFamily {
+interface MasterJobFamily {
   id: string;
   code: string;
   name: string;
   description: string | null;
+  industry_category: string | null;
   is_active: boolean;
-  master_job_family_id: string | null;
-  master_job_families?: {
-    code: string;
-    name: string;
-  } | null;
 }
 
 export function JobFamiliesTab() {
   const [search, setSearch] = useState("");
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
 
-  const { data: jobFamilies = [], isLoading } = useQuery({
-    queryKey: ["job-families-reference"],
+  // Query master_job_families for reference data - these are the global standards
+  const { data: masterFamilies = [], isLoading } = useQuery({
+    queryKey: ["master-job-families-reference"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("job_families")
-        .select("id, code, name, description, is_active, master_job_family_id, master_job_families(code, name)")
+        .from("master_job_families")
+        .select("id, code, name, description, industry_category, is_active")
         .eq("is_active", true)
         .order("name", { ascending: true });
       if (error) throw error;
-      return data as JobFamily[];
+      return data as MasterJobFamily[];
     },
   });
 
-  const filteredJobFamilies = useMemo(() => {
-    if (!search.trim()) return jobFamilies;
+  const filteredFamilies = useMemo(() => {
+    if (!search.trim()) return masterFamilies;
     
     const lowerSearch = search.toLowerCase();
-    return jobFamilies.filter(
+    return masterFamilies.filter(
       (j) =>
         j.name.toLowerCase().includes(lowerSearch) ||
         j.code.toLowerCase().includes(lowerSearch) ||
-        (j.description?.toLowerCase().includes(lowerSearch))
+        j.description?.toLowerCase().includes(lowerSearch) ||
+        j.industry_category?.toLowerCase().includes(lowerSearch)
     );
-  }, [search, jobFamilies]);
+  }, [search, masterFamilies]);
 
   const handleCopyCode = (code: string) => {
     navigator.clipboard.writeText(code);
@@ -65,10 +63,11 @@ export function JobFamiliesTab() {
   };
 
   const handleDownloadCSV = () => {
-    const headers = ["code", "name", "description"];
-    const rows = filteredJobFamilies.map((j) => [
+    const headers = ["code", "name", "industry_category", "description"];
+    const rows = filteredFamilies.map((j) => [
       j.code, 
-      j.name, 
+      j.name,
+      j.industry_category || "",
       j.description || ""
     ]);
     const csvContent = [
@@ -79,10 +78,10 @@ export function JobFamiliesTab() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "job_families.csv";
+    a.download = "master_job_families.csv";
     a.click();
     URL.revokeObjectURL(url);
-    toast.success("Downloaded job families CSV");
+    toast.success("Downloaded master job families CSV");
   };
 
   if (isLoading) {
@@ -95,11 +94,18 @@ export function JobFamiliesTab() {
 
   return (
     <div className="space-y-4">
+      <div className="flex items-center gap-2 mb-2">
+        <Globe className="h-5 w-5 text-primary" />
+        <span className="text-sm text-muted-foreground">
+          Use these master codes in the <code className="px-1 bg-muted rounded">master_code</code> field when importing job families.
+        </span>
+      </div>
+
       <div className="flex flex-col sm:flex-row gap-4 justify-between">
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search job families..."
+            placeholder="Search master job families..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="pl-10"
@@ -107,7 +113,7 @@ export function JobFamiliesTab() {
         </div>
         <div className="flex gap-2">
           <Badge variant="secondary" className="text-sm">
-            {filteredJobFamilies.length} records
+            {filteredFamilies.length} records
           </Badge>
           <Button variant="outline" size="sm" onClick={handleDownloadCSV}>
             <Download className="h-4 w-4 mr-2" />
@@ -123,58 +129,64 @@ export function JobFamiliesTab() {
               <TableRow>
                 <TableHead className="w-28">Code</TableHead>
                 <TableHead>Job Family</TableHead>
-                <TableHead className="w-28">Source</TableHead>
+                <TableHead className="w-36">Industry</TableHead>
                 <TableHead className="w-20 text-center">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredJobFamilies.map((jobFamily) => (
-                <TableRow key={jobFamily.id}>
-                  <TableCell>
-                    <code className="px-2 py-1 bg-muted rounded text-sm font-mono">
-                      {jobFamily.code}
-                    </code>
-                  </TableCell>
-                  <TableCell>
-                    <div>
-                      <span className="font-medium">{jobFamily.name}</span>
-                      {jobFamily.description && (
-                        <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{jobFamily.description}</p>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    {jobFamily.master_job_family_id ? (
-                      <Badge variant="outline" className="text-xs">
-                        🔗 {jobFamily.master_job_families?.code || "Master"}
-                      </Badge>
-                    ) : (
-                      <Badge variant="secondary" className="text-xs">Custom</Badge>
-                    )}
-                  </TableCell>
-                  <TableCell className="text-center">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleCopyCode(jobFamily.code)}
-                      className="h-8 w-8"
-                    >
-                      {copiedCode === jobFamily.code ? (
-                        <Check className="h-4 w-4 text-green-500" />
-                      ) : (
-                        <Copy className="h-4 w-4" />
-                      )}
-                    </Button>
+              {filteredFamilies.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
+                    No master job families found
                   </TableCell>
                 </TableRow>
-              ))}
+              ) : (
+                filteredFamilies.map((family) => (
+                  <TableRow key={family.id}>
+                    <TableCell>
+                      <code className="px-2 py-1 bg-muted rounded text-sm font-mono">
+                        {family.code}
+                      </code>
+                    </TableCell>
+                    <TableCell>
+                      <div>
+                        <span className="font-medium">{family.name}</span>
+                        {family.description && (
+                          <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{family.description}</p>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      {family.industry_category && (
+                        <Badge variant="outline" className="text-xs">
+                          {family.industry_category}
+                        </Badge>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleCopyCode(family.code)}
+                        className="h-8 w-8"
+                      >
+                        {copiedCode === family.code ? (
+                          <Check className="h-4 w-4 text-green-500" />
+                        ) : (
+                          <Copy className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </div>
       </div>
 
       <p className="text-xs text-muted-foreground">
-        Job families for organizational structure, career pathing, and workforce analytics.
+        Master job families provide global, industry-standard definitions. Use these codes to link company job families to global standards.
       </p>
     </div>
   );
