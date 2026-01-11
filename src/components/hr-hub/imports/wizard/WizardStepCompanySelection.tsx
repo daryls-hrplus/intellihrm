@@ -76,10 +76,23 @@ export function WizardStepCompanySelection({
           // Run all count queries in parallel - cast to any to avoid deep type instantiation
           const divisionsQuery = (supabase.from("company_divisions") as any).select("id", { count: "exact", head: true }).eq("company_id", company.id);
           const departmentsQuery = (supabase.from("departments") as any).select("id", { count: "exact", head: true }).eq("company_id", company.id);
-          const sectionsQuery = (supabase.from("sections") as any).select("id", { count: "exact", head: true }).eq("company_id", company.id);
           const jobFamiliesQuery = (supabase.from("job_families") as any).select("id", { count: "exact", head: true }).eq("company_id", company.id);
           const jobsQuery = (supabase.from("jobs") as any).select("id", { count: "exact", head: true }).eq("company_id", company.id);
           const positionsQuery = (supabase.from("positions") as any).select("id", { count: "exact", head: true }).eq("company_id", company.id);
+          
+          // Sections don't have company_id directly - they link through departments
+          // First get department IDs for this company, then count sections
+          const { data: deptData } = await supabase
+            .from("departments")
+            .select("id")
+            .eq("company_id", company.id);
+          
+          const departmentIds = deptData?.map(d => d.id) || [];
+          
+          // Use a placeholder UUID if no departments to avoid empty IN clause
+          const sectionsQuery = departmentIds.length > 0 
+            ? (supabase.from("sections") as any).select("id", { count: "exact", head: true }).in("department_id", departmentIds)
+            : Promise.resolve({ count: 0 });
 
           const [
             divisionsResult,
