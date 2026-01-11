@@ -72983,6 +72983,9 @@ export type Database = {
         | "flsa_status"
         | "overtime_status"
         | "overpayment_reason"
+        | "gender"
+        | "marital_status"
+        | "title"
       message_status: "sent" | "delivered" | "read"
       pay_element_type:
         | "regular_time"
@@ -73364,6 +73367,9 @@ export const Constants = {
         "flsa_status",
         "overtime_status",
         "overpayment_reason",
+        "gender",
+        "marital_status",
+        "title",
       ],
       message_status: ["sent", "delivered", "read"],
       pay_element_type: [
