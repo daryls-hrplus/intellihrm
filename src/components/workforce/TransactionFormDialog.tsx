@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
-import { CalendarIcon, Loader2, DollarSign, ArrowRight, Building2 } from "lucide-react";
+import { CalendarIcon, Loader2, DollarSign, ArrowRight, Building2, AlertTriangle, Armchair } from "lucide-react";
 import { useLanguage } from "@/hooks/useLanguage";
+import { toast } from "sonner";
 import { formatDateForDisplay, toDateString, getTodayString } from "@/utils/dateUtils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -146,6 +147,19 @@ export function TransactionFormDialog({
   // Transfer: current employee assignment state
   const [transferCurrentAssignment, setTransferCurrentAssignment] = useState<TransferCurrentAssignment | null>(null);
   const [loadingTransferAssignment, setLoadingTransferAssignment] = useState(false);
+
+  // Transfer: destination seat availability state
+  const [destinationSeatStatus, setDestinationSeatStatus] = useState<{
+    isLoading: boolean;
+    hasAvailableSeat: boolean;
+    availableSeats: number;
+    errorMessage: string | null;
+  }>({
+    isLoading: false,
+    hasAvailableSeat: true,
+    availableSeats: 0,
+    errorMessage: null,
+  });
 
   useEffect(() => {
     if (open) {
@@ -301,6 +315,68 @@ export function TransactionFormDialog({
     loadTransferAssignment();
   }, [formData.employee_id, transactionType]);
 
+  // Check seat availability for destination position in TRANSFER transactions
+  useEffect(() => {
+    const checkDestinationSeat = async () => {
+      // Reset state if not a TRANSFER or no to_position_id
+      if (!formData.to_position_id || transactionType !== "TRANSFER") {
+        setDestinationSeatStatus({ 
+          isLoading: false, 
+          hasAvailableSeat: true, 
+          availableSeats: 0, 
+          errorMessage: null 
+        });
+        return;
+      }
+
+      setDestinationSeatStatus(prev => ({ ...prev, isLoading: true }));
+
+      try {
+        // Query seat_occupancy_summary for available seats in destination position
+        const { data, error } = await supabase
+          .from('seat_occupancy_summary')
+          .select('seat_id, allocation_status, is_shared_seat, current_occupant_count, max_occupants')
+          .eq('position_id', formData.to_position_id);
+
+        if (error) {
+          console.error("Error checking seat availability:", error);
+          setDestinationSeatStatus({
+            isLoading: false,
+            hasAvailableSeat: false,
+            availableSeats: 0,
+            errorMessage: "Failed to check seat availability",
+          });
+          return;
+        }
+
+        // Find vacant or under-allocated seats
+        const available = (data || []).filter(seat => 
+          seat.allocation_status === 'VACANT' || 
+          (seat.is_shared_seat && (seat.current_occupant_count || 0) < (seat.max_occupants || 1))
+        );
+
+        setDestinationSeatStatus({
+          isLoading: false,
+          hasAvailableSeat: available.length > 0,
+          availableSeats: available.length,
+          errorMessage: available.length === 0 
+            ? "No available seats in the selected position. The transfer cannot proceed."
+            : null,
+        });
+      } catch (err) {
+        console.error("Error checking seat availability:", err);
+        setDestinationSeatStatus({
+          isLoading: false,
+          hasAvailableSeat: false,
+          availableSeats: 0,
+          errorMessage: "Failed to check seat availability",
+        });
+      }
+    };
+
+    checkDestinationSeat();
+  }, [formData.to_position_id, transactionType]);
+
   useEffect(() => {
     if (existingTransaction) {
       setFormData(existingTransaction);
@@ -313,6 +389,13 @@ export function TransactionFormDialog({
       });
       // Reset transfer assignment when form resets
       setTransferCurrentAssignment(null);
+      // Reset seat status
+      setDestinationSeatStatus({
+        isLoading: false,
+        hasAvailableSeat: true,
+        availableSeats: 0,
+        errorMessage: null,
+      });
     }
   }, [existingTransaction]);
 
@@ -388,6 +471,21 @@ export function TransactionFormDialog({
   };
 
   const handleSubmit = async () => {
+    // Pre-validation for TRANSFER transactions - block if no seats available
+    if (transactionType === "TRANSFER") {
+      // Block if seat check is still loading
+      if (destinationSeatStatus.isLoading) {
+        toast.warning("Please wait - checking seat availability...");
+        return;
+      }
+      
+      // Block if no seats available
+      if (formData.to_position_id && !destinationSeatStatus.hasAvailableSeat) {
+        toast.error("Cannot process transfer: No available seats in the destination position.");
+        return;
+      }
+    }
+
     // Strip out joined/virtual fields that shouldn't be sent to the database
     const { 
       transaction_type, 
@@ -1479,6 +1577,35 @@ export function TransactionFormDialog({
                     {t("workforce.modules.transactions.form.transfer.noPositions", "No positions found in selected department")}
                   </p>
                 )}
+                
+                {/* Seat Availability Status */}
+                {formData.to_position_id && (
+                  <div className={cn(
+                    "rounded-lg border p-3 mt-2",
+                    destinationSeatStatus.isLoading 
+                      ? "border-muted bg-muted/30"
+                      : destinationSeatStatus.hasAvailableSeat 
+                        ? "border-green-500/30 bg-green-50 dark:bg-green-900/20"
+                        : "border-destructive bg-destructive/10"
+                  )}>
+                    {destinationSeatStatus.isLoading ? (
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        {t("workforce.modules.transactions.form.transfer.checkingSeat", "Checking seat availability...")}
+                      </div>
+                    ) : destinationSeatStatus.hasAvailableSeat ? (
+                      <div className="flex items-center gap-2 text-sm text-green-700 dark:text-green-400">
+                        <Armchair className="h-4 w-4" />
+                        {t("workforce.modules.transactions.form.transfer.seatsAvailable", "{{count}} seat(s) available").replace("{{count}}", String(destinationSeatStatus.availableSeats))}
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2 text-sm text-destructive">
+                        <AlertTriangle className="h-4 w-4" />
+                        {destinationSeatStatus.errorMessage}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* Pay Group */}
@@ -2173,7 +2300,16 @@ export function TransactionFormDialog({
             <Button variant="outline" onClick={() => onOpenChange(false)}>
               {t("common.cancel")}
             </Button>
-            <Button onClick={handleSubmit} disabled={isLoading}>
+            <Button 
+              onClick={handleSubmit} 
+              disabled={
+                isLoading || 
+                (transactionType === "TRANSFER" && (
+                  destinationSeatStatus.isLoading || 
+                  (formData.to_position_id && !destinationSeatStatus.hasAvailableSeat)
+                ))
+              }
+            >
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {existingTransaction ? t("workforce.modules.transactions.form.updateTransaction") : t("workforce.modules.transactions.form.createTransaction")}
             </Button>
