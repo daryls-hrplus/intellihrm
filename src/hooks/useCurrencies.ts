@@ -10,6 +10,7 @@ export interface Currency {
   decimal_places: number;
   is_active: boolean;
   is_group_base: boolean;
+  region?: string | null;
 }
 
 export interface ExchangeRate {

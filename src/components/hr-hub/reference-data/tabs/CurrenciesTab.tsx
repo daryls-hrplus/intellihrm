@@ -12,7 +12,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Search, Download, Copy, Check, Loader2 } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Search, Download, Copy, Check, Loader2, Globe } from "lucide-react";
 import { toast } from "sonner";
 import { useLanguage } from "@/hooks/useLanguage";
 
@@ -21,12 +28,37 @@ interface Currency {
   code: string;
   name: string;
   symbol: string | null;
+  region: string | null;
   is_active: boolean;
 }
+
+const REGIONS = [
+  { value: "all", label: "All Regions", icon: "🌍" },
+  { value: "caribbean", label: "Caribbean", icon: "🏝️" },
+  { value: "latin_america", label: "Latin America", icon: "🌎" },
+  { value: "africa", label: "Africa", icon: "🌍" },
+  { value: "europe", label: "Europe", icon: "🇪🇺" },
+  { value: "asia_pacific", label: "Asia Pacific", icon: "🌏" },
+  { value: "middle_east", label: "Middle East", icon: "🕌" },
+  { value: "north_america", label: "North America", icon: "🇺🇸" },
+] as const;
+
+const getRegionLabel = (region: string | null): string => {
+  if (!region) return "—";
+  const found = REGIONS.find((r) => r.value === region);
+  return found ? found.label : region;
+};
+
+const getRegionIcon = (region: string | null): string => {
+  if (!region) return "";
+  const found = REGIONS.find((r) => r.value === region);
+  return found ? found.icon : "";
+};
 
 export function CurrenciesTab() {
   const { t } = useLanguage();
   const [search, setSearch] = useState("");
+  const [regionFilter, setRegionFilter] = useState("all");
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
 
   const { data: currencies = [], isLoading } = useQuery({
@@ -34,7 +66,7 @@ export function CurrenciesTab() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("currencies")
-        .select("id, code, name, symbol, is_active")
+        .select("id, code, name, symbol, region, is_active")
         .eq("is_active", true)
         .order("code", { ascending: true });
       if (error) throw error;
@@ -43,15 +75,26 @@ export function CurrenciesTab() {
   });
 
   const filteredCurrencies = useMemo(() => {
-    if (!search.trim()) return currencies;
-    const lowerSearch = search.toLowerCase();
-    return currencies.filter(
-      (c) =>
-        c.name.toLowerCase().includes(lowerSearch) ||
-        c.code.toLowerCase().includes(lowerSearch) ||
-        (c.symbol && c.symbol.toLowerCase().includes(lowerSearch))
-    );
-  }, [search, currencies]);
+    let result = currencies;
+
+    // Apply region filter
+    if (regionFilter !== "all") {
+      result = result.filter((c) => c.region === regionFilter);
+    }
+
+    // Apply search filter
+    if (search.trim()) {
+      const lowerSearch = search.toLowerCase();
+      result = result.filter(
+        (c) =>
+          c.name.toLowerCase().includes(lowerSearch) ||
+          c.code.toLowerCase().includes(lowerSearch) ||
+          (c.symbol && c.symbol.toLowerCase().includes(lowerSearch))
+      );
+    }
+
+    return result;
+  }, [search, regionFilter, currencies]);
 
   const handleCopyCode = (code: string) => {
     navigator.clipboard.writeText(code);
@@ -61,9 +104,17 @@ export function CurrenciesTab() {
   };
 
   const handleDownloadCSV = () => {
-    const headers = ["code", "name", "symbol"];
-    const rows = currencies.map((c) => [c.code, c.name, c.symbol || ""]);
-    const csvContent = [headers.join(","), ...rows.map((r) => `"${r.join('","')}"`).map(r => r.replace(/""/g, '"'))].join("\n");
+    const headers = ["code", "name", "symbol", "region"];
+    const rows = filteredCurrencies.map((c) => [
+      c.code,
+      c.name,
+      c.symbol || "",
+      getRegionLabel(c.region),
+    ]);
+    const csvContent = [
+      headers.join(","),
+      ...rows.map((r) => `"${r.join('","')}"`).map((r) => r.replace(/""/g, '"')),
+    ].join("\n");
     const blob = new Blob([csvContent], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -85,14 +136,32 @@ export function CurrenciesTab() {
   return (
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row gap-4 justify-between">
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder={t("hrHub.refData.searchCurrencies")}
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-10"
-          />
+        <div className="flex gap-2 flex-1">
+          <div className="relative flex-1 max-w-md">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder={t("hrHub.refData.searchCurrencies")}
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          <Select value={regionFilter} onValueChange={setRegionFilter}>
+            <SelectTrigger className="w-[180px]">
+              <Globe className="h-4 w-4 mr-2 text-muted-foreground" />
+              <SelectValue placeholder="All Regions" />
+            </SelectTrigger>
+            <SelectContent>
+              {REGIONS.map((region) => (
+                <SelectItem key={region.value} value={region.value}>
+                  <span className="flex items-center gap-2">
+                    <span>{region.icon}</span>
+                    <span>{region.label}</span>
+                  </span>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
         <div className="flex gap-2">
           <Badge variant="secondary" className="text-sm">
@@ -113,6 +182,7 @@ export function CurrenciesTab() {
                 <TableHead className="w-24">{t("hrHub.refData.code")}</TableHead>
                 <TableHead>{t("hrHub.refData.name")}</TableHead>
                 <TableHead className="w-24">{t("hrHub.refData.symbol")}</TableHead>
+                <TableHead className="w-36">Region</TableHead>
                 <TableHead className="w-20 text-center">{t("hrHub.refData.actions")}</TableHead>
               </TableRow>
             </TableHeader>
@@ -128,6 +198,13 @@ export function CurrenciesTab() {
                   <TableCell>
                     {currency.symbol && (
                       <span className="text-lg">{currency.symbol}</span>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {currency.region && (
+                      <Badge variant="outline" className="text-xs font-normal">
+                        {getRegionIcon(currency.region)} {getRegionLabel(currency.region)}
+                      </Badge>
                     )}
                   </TableCell>
                   <TableCell className="text-center">
