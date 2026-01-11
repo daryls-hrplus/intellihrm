@@ -142,10 +142,12 @@ export function ImportWizard({ companyId, onComplete, onCancel }: ImportWizardPr
 
   const canProceed = () => {
     const needsCompensation = requiresCompensationStep(state.importType);
+    const needsPrerequisites = needsCompensation && requiresPrerequisiteStep(state.compensationModel);
     
-    // Step indices shift based on whether compensation step is included
-    // With compensation: 0=Welcome, 1=Company, 2=Type, 3=Comp, 4=Template, 5=Upload, 6=Review, 7=Commit
-    // Without compensation: 0=Welcome, 1=Company, 2=Type, 3=Template, 4=Upload, 5=Review, 6=Commit
+    // Step indices vary based on flow:
+    // Full positions flow (with prereqs): 0=Welcome, 1=Company, 2=Type, 3=Comp, 4=Prereq, 5=Template, 6=Upload, 7=Review, 8=Commit
+    // Positions flow (no prereqs): 0=Welcome, 1=Company, 2=Type, 3=Comp, 4=Template, 5=Upload, 6=Review, 7=Commit
+    // Non-positions: 0=Welcome, 1=Company, 2=Type, 3=Template, 4=Upload, 5=Review, 6=Commit
 
     switch (currentStep) {
       case 0: // Welcome
@@ -159,22 +161,35 @@ export function ImportWizard({ companyId, onComplete, onCancel }: ImportWizardPr
           return !!state.compensationModel;
         }
         return true; // Template step - always can proceed
-      case 4: // Template (if positions) or Upload (if not)
-        if (needsCompensation) return true;
-        return !!state.validationResult && !state.isValidating;
-      case 5: // Upload (if positions) or Review (if not)
+      case 4: // Prerequisites (if positions+prereqs) or Template (positions) or Upload (non-positions)
+        if (needsCompensation && needsPrerequisites) {
+          return state.prerequisitesChecked;
+        }
+        if (needsCompensation) return true; // Template
+        return !!state.validationResult && !state.isValidating; // Upload
+      case 5: // Template (if prereqs) or Upload (positions) or Review (non-positions)
+        if (needsCompensation && needsPrerequisites) return true; // Template
         if (needsCompensation) {
           return !!state.validationResult && !state.isValidating;
         }
         return !!state.validationResult && 
           (state.validationResult.errorCount === 0 || state.validationResult.validRows > 0);
-      case 6: // Review (if positions) or Commit (if not)
+      case 6: // Upload (if prereqs) or Review (positions) or Commit (non-positions)
+        if (needsCompensation && needsPrerequisites) {
+          return !!state.validationResult && !state.isValidating;
+        }
         if (needsCompensation) {
           return !!state.validationResult && 
             (state.validationResult.errorCount === 0 || state.validationResult.validRows > 0);
         }
         return state.committedCount > 0;
-      case 7: // Commit (only for positions flow)
+      case 7: // Review (if prereqs) or Commit (positions)
+        if (needsCompensation && needsPrerequisites) {
+          return !!state.validationResult && 
+            (state.validationResult.errorCount === 0 || state.validationResult.validRows > 0);
+        }
+        return state.committedCount > 0;
+      case 8: // Commit (only for prereqs flow)
         return state.committedCount > 0;
       default:
         return false;
@@ -372,6 +387,16 @@ export function ImportWizard({ companyId, onComplete, onCancel }: ImportWizardPr
           />
         );
       case 5:
+        // Template (if prereqs) or Upload (positions no prereqs) or Review (non-positions)
+        if (needsCompensation && needsPrerequisites) {
+          return (
+            <WizardStepTemplate
+              importType={state.importType!}
+              compensationModel={state.compensationModel}
+              companyStructure={state.companyStructure}
+            />
+          );
+        }
         if (needsCompensation) {
           return (
             <WizardStepUpload
@@ -397,6 +422,23 @@ export function ImportWizard({ companyId, onComplete, onCancel }: ImportWizardPr
           />
         );
       case 6:
+        // Upload (if prereqs) or Review (positions no prereqs) or Commit (non-positions)
+        if (needsCompensation && needsPrerequisites) {
+          return (
+            <WizardStepUpload
+              importType={state.importType!}
+              companyId={state.companyId}
+              file={state.file}
+              validationResult={state.validationResult}
+              isValidating={state.isValidating}
+              onFileChange={(file) => updateState({ file })}
+              onValidationComplete={(result, parsedData) => 
+                updateState({ validationResult: result, parsedData, isValidating: false })
+              }
+              onValidationStart={() => updateState({ isValidating: true })}
+            />
+          );
+        }
         if (needsCompensation) {
           return (
             <WizardStepReview
@@ -423,6 +465,34 @@ export function ImportWizard({ companyId, onComplete, onCancel }: ImportWizardPr
           />
         );
       case 7:
+        // Review (if prereqs) or Commit (positions no prereqs)
+        if (needsCompensation && needsPrerequisites) {
+          return (
+            <WizardStepReview
+              importType={state.importType!}
+              parsedData={state.parsedData}
+              validationResult={state.validationResult}
+              onDataChange={(data) => updateState({ parsedData: data })}
+            />
+          );
+        }
+        return (
+          <WizardStepCommit
+            importType={state.importType!}
+            companyId={state.companyId}
+            parsedData={state.parsedData}
+            validationResult={state.validationResult}
+            batchId={state.batchId}
+            isCommitting={state.isCommitting}
+            committedCount={state.committedCount}
+            compensationModel={state.compensationModel}
+            onBatchCreated={(batchId) => updateState({ batchId })}
+            onCommitStart={() => updateState({ isCommitting: true })}
+            onCommitComplete={(count) => updateState({ isCommitting: false, committedCount: count })}
+          />
+        );
+      case 8:
+        // Commit (only for prereqs flow)
         return (
           <WizardStepCommit
             importType={state.importType!}
