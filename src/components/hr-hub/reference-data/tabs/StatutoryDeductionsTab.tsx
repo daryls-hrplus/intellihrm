@@ -19,9 +19,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, Download, Copy, Check, Loader2 } from "lucide-react";
+import { Search, Download, Copy, Check, Loader2, Globe } from "lucide-react";
 import { toast } from "sonner";
-import { countries as allCountries } from "@/lib/countries";
+import { countries as allCountries, COUNTRY_REGIONS, getRegionLabel, getRegionIcon } from "@/lib/countries";
 
 interface StatutoryDeductionType {
   id: string;
@@ -36,6 +36,7 @@ interface StatutoryDeductionType {
 export function StatutoryDeductionsTab() {
   const [search, setSearch] = useState("");
   const [selectedCountry, setSelectedCountry] = useState<string>("all");
+  const [selectedRegion, setSelectedRegion] = useState<string>("all");
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
 
   // Create a map for quick country name lookup
@@ -43,6 +44,15 @@ export function StatutoryDeductionsTab() {
     const map: Record<string, string> = {};
     allCountries.forEach(c => {
       map[c.code] = c.name;
+    });
+    return map;
+  }, []);
+
+  // Create a map for quick country region lookup
+  const countryRegionMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    allCountries.forEach(c => {
+      map[c.code] = c.region;
     });
     return map;
   }, []);
@@ -61,15 +71,22 @@ export function StatutoryDeductionsTab() {
     },
   });
 
-  // Get unique country codes from deductions and sort by country name
+  // Get unique country codes from deductions, filtered by region, and sort by country name
   const countryCodes = useMemo(() => {
     const uniqueCountries = [...new Set(deductions.map((d) => d.country).filter(Boolean))] as string[];
-    return uniqueCountries.sort((a, b) => {
+    
+    // Filter by region first
+    let filtered = uniqueCountries;
+    if (selectedRegion !== "all") {
+      filtered = filtered.filter(code => countryRegionMap[code] === selectedRegion);
+    }
+    
+    return filtered.sort((a, b) => {
       const nameA = countryNameMap[a] || a;
       const nameB = countryNameMap[b] || b;
       return nameA.localeCompare(nameB);
     });
-  }, [deductions, countryNameMap]);
+  }, [deductions, countryNameMap, countryRegionMap, selectedRegion]);
 
   // Helper to get country name from code
   const getCountryName = (code: string | null) => {
@@ -79,7 +96,15 @@ export function StatutoryDeductionsTab() {
 
   const filteredDeductions = useMemo(() => {
     let result = deductions;
-    
+
+    // Filter by region
+    if (selectedRegion !== "all") {
+      result = result.filter((d) => 
+        d.country && countryRegionMap[d.country] === selectedRegion
+      );
+    }
+
+    // Filter by country
     if (selectedCountry !== "all") {
       result = result.filter((d) => d.country === selectedCountry);
     }
@@ -96,7 +121,13 @@ export function StatutoryDeductionsTab() {
     }
     
     return result;
-  }, [search, selectedCountry, deductions, countryNameMap]);
+  }, [search, selectedCountry, selectedRegion, deductions, countryNameMap, countryRegionMap]);
+
+  // Handler to reset country when region changes
+  const handleRegionChange = (region: string) => {
+    setSelectedRegion(region);
+    setSelectedCountry("all");
+  };
 
   const handleCopyCode = (code: string) => {
     navigator.clipboard.writeText(code);
@@ -141,6 +172,25 @@ export function StatutoryDeductionsTab() {
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row gap-4 justify-between">
         <div className="flex flex-col sm:flex-row gap-2 flex-1">
+          {/* Region Filter */}
+          <Select value={selectedRegion} onValueChange={handleRegionChange}>
+            <SelectTrigger className="w-full sm:w-[180px]">
+              <Globe className="h-4 w-4 mr-2 text-muted-foreground" />
+              <SelectValue placeholder="All Regions" />
+            </SelectTrigger>
+            <SelectContent>
+              {COUNTRY_REGIONS.map((region) => (
+                <SelectItem key={region.value} value={region.value}>
+                  <span className="flex items-center gap-2">
+                    <span>{region.icon}</span>
+                    <span>{region.label}</span>
+                  </span>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          {/* Country Filter */}
           <Select value={selectedCountry} onValueChange={setSelectedCountry}>
             <SelectTrigger className="w-full sm:w-[250px]">
               <SelectValue placeholder="Select country">
