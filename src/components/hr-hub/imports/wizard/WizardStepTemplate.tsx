@@ -226,7 +226,7 @@ const TEMPLATE_CONFIGS: Record<string, {
   // Positions template is now dynamically generated based on compensation model
   // See getPositionsTemplate() function below
   employee_assignments: {
-    headers: ["employee_email", "position_code", "assignment_type", "start_date", "end_date", "rate_type", "standard_hours_per_week", "pay_group_code", "spinal_point_number", "is_active"],
+    headers: ["employee_email", "position_code", "assignment_type", "start_date", "end_date", "rate_type", "standard_hours_per_week", "is_active"],
     fields: [
       { name: "employee_email", required: true, description: "Employee's email address", example: "john@company.com" },
       { name: "position_code", required: true, description: "Position code to assign to", example: "DEV001" },
@@ -235,21 +235,44 @@ const TEMPLATE_CONFIGS: Record<string, {
       { name: "end_date", required: false, description: "Assignment end date (optional)", example: "" },
       { name: "rate_type", required: false, description: "Payment rate type", example: "salaried", systemDefined: true, allowedValues: ["salaried", "hourly", "daily"] },
       { name: "standard_hours_per_week", required: false, description: "Standard weekly hours", example: "40" },
-      { name: "pay_group_code", required: false, description: "Pay group code", example: "MONTHLY" },
-      { name: "spinal_point_number", required: false, description: "Spinal point number (if applicable)", example: "5" },
       { name: "is_active", required: false, description: "Active status", example: "true" },
     ],
     examples: [
-      ["john@company.com", "DEV001", "primary", "2024-01-15", "", "salaried", "40", "MONTHLY", "", "true"],
-      ["jane@company.com", "MGR001", "acting", "2024-02-01", "2024-06-30", "salaried", "40", "MONTHLY", "5", "true"],
+      ["john@company.com", "DEV001", "primary", "2024-01-15", "", "salaried", "40", "true"],
+      ["jane@company.com", "MGR001", "acting", "2024-02-01", "2024-06-30", "salaried", "40", "true"],
     ],
     tips: [
       "Employee must already exist in the system",
       "Position must exist and be active",
       "For primary assignments, use assignment_type = 'primary'",
-      "Spinal point number only applies if position uses spinal point compensation",
-      "Pay group code links to payroll cycles",
-      "Compensation is managed separately via Employee Compensation import",
+      "Compensation (pay rates, pay groups, spinal points) is managed separately via Employee Compensation import",
+      "This import assigns employees to positions - for pay details, use Employee Compensation import",
+    ],
+  },
+  employee_compensation: {
+    headers: ["employee_email", "effective_date", "compensation_type", "amount", "currency", "pay_group_code", "spinal_point_number", "position_code", "notes"],
+    fields: [
+      { name: "employee_email", required: true, description: "Employee's email address", example: "john@company.com" },
+      { name: "effective_date", required: true, description: "When compensation starts (YYYY-MM-DD)", example: "2024-01-01" },
+      { name: "compensation_type", required: true, description: "Type of compensation", example: "salary", systemDefined: true, allowedValues: ["salary", "hourly_rate", "daily_rate"] },
+      { name: "amount", required: true, description: "Compensation amount", example: "5000.00" },
+      { name: "currency", required: false, description: "Currency code (defaults to company currency)", example: "USD", referenceDataType: "currency" },
+      { name: "pay_group_code", required: false, description: "Pay group for payroll processing", example: "MONTHLY" },
+      { name: "spinal_point_number", required: false, description: "Spinal point number (if applicable)", example: "5" },
+      { name: "position_code", required: false, description: "Position code (if employee has multiple assignments)", example: "DEV001" },
+      { name: "notes", required: false, description: "Additional notes", example: "Annual salary" },
+    ],
+    examples: [
+      ["john@company.com", "2024-01-01", "salary", "60000", "USD", "MONTHLY", "", "", "Annual salary"],
+      ["jane@company.com", "2024-01-01", "hourly_rate", "25.50", "USD", "WEEKLY", "", "MGR001", "Hourly rate"],
+      ["bob@company.com", "2024-01-01", "salary", "0", "TTD", "MONTHLY", "5", "", "Salary from spinal point"],
+    ],
+    tips: [
+      "Employee must already be assigned to a position before setting compensation",
+      "If amount is 0 and spinal_point_number is provided, salary will be derived from the spinal point",
+      "Pay group links to payroll processing cycles (e.g., MONTHLY, BIWEEKLY, WEEKLY)",
+      "Use position_code only if employee has multiple position assignments",
+      "Import order: Employees → Employee Assignments → Employee Compensation",
     ],
   },
   employees: {

@@ -14,8 +14,6 @@ interface EmployeeAssignmentRow {
   end_date?: string;
   rate_type?: string;
   standard_hours_per_week?: string;
-  pay_group_code?: string;
-  spinal_point_number?: string;
   is_active?: string;
 }
 
@@ -27,8 +25,6 @@ interface EmployeeRecord {
 interface PositionRecord {
   id: string;
   code: string;
-  compensation_model: string | null;
-  pay_spine_id: string | null;
 }
 
 export async function transformEmployeeAssignmentsData(
@@ -50,7 +46,7 @@ export async function transformEmployeeAssignmentsData(
       .map((e) => [e.email!.toLowerCase(), e.id])
   );
 
-  let positionsQuery = (supabase as any).from("positions").select("id, code, compensation_model, pay_spine_id");
+  let positionsQuery = (supabase as any).from("positions").select("id, code");
   if (companyId) {
     positionsQuery = positionsQuery.eq("company_id", companyId);
   }
@@ -59,31 +55,6 @@ export async function transformEmployeeAssignmentsData(
   const positionByCode = new Map<string, PositionRecord>(
     ((positions as PositionRecord[]) || []).map((p) => [p.code?.toLowerCase(), p])
   );
-
-  // Pay groups lookup
-  let payGroupsQuery = (supabase as any).from("pay_groups").select("id, code");
-  if (companyId) {
-    payGroupsQuery = payGroupsQuery.eq("company_id", companyId);
-  }
-  const { data: payGroups } = await payGroupsQuery;
-  const payGroupByCode = new Map<string, string>(
-    ((payGroups as { id: string; code: string }[]) || []).map((pg) => [pg.code?.toLowerCase(), pg.id])
-  );
-
-  // Spinal points lookup (grouped by pay_spine_id)
-  const { data: spinalPoints } = await (supabase as any)
-    .from("spinal_points")
-    .select("id, point_number, pay_spine_id")
-    .eq("is_active", true);
-  
-  // Map: pay_spine_id -> Map(point_number -> spinal_point_id)
-  const spinalPointsBySpine = new Map<string, Map<number, string>>();
-  ((spinalPoints as { id: string; point_number: number; pay_spine_id: string }[]) || []).forEach((sp) => {
-    if (!spinalPointsBySpine.has(sp.pay_spine_id)) {
-      spinalPointsBySpine.set(sp.pay_spine_id, new Map());
-    }
-    spinalPointsBySpine.get(sp.pay_spine_id)!.set(sp.point_number, sp.id);
-  });
 
   for (let i = 0; i < data.length; i++) {
     const row = data[i];
@@ -141,38 +112,6 @@ export async function transformEmployeeAssignmentsData(
         "salaried"
       );
 
-      // Find pay group
-      let payGroupId: string | null = null;
-      if (row.pay_group_code) {
-        payGroupId = payGroupByCode.get(row.pay_group_code.toLowerCase()) || null;
-        if (!payGroupId) {
-          warnings.push({
-            rowIndex: i,
-            field: "pay_group_code",
-            message: `Pay group not found: ${row.pay_group_code}`,
-          });
-        }
-      }
-
-      // Find spinal point if position uses spinal_point model
-      let spinalPointId: string | null = null;
-      if (row.spinal_point_number && position.pay_spine_id) {
-        const pointNumber = parseInt(row.spinal_point_number, 10);
-        if (!isNaN(pointNumber)) {
-          const spinePoints = spinalPointsBySpine.get(position.pay_spine_id);
-          if (spinePoints) {
-            spinalPointId = spinePoints.get(pointNumber) || null;
-          }
-          if (!spinalPointId) {
-            warnings.push({
-              rowIndex: i,
-              field: "spinal_point_number",
-              message: `Spinal point ${pointNumber} not found on position's pay spine`,
-            });
-          }
-        }
-      }
-
       const record: any = {
         employee_id: employeeId,
         position_id: position.id,
@@ -182,8 +121,6 @@ export async function transformEmployeeAssignmentsData(
         end_date: row.end_date || null,
         rate_type: rateType,
         standard_hours_per_week: parseNumber(row.standard_hours_per_week) || 40,
-        pay_group_id: payGroupId,
-        spinal_point_id: spinalPointId,
         is_active: parseBoolean(row.is_active, true),
       };
 

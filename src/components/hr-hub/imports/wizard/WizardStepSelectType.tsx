@@ -14,7 +14,8 @@ import {
   Lock,
   Info,
   Layers,
-  GitBranch
+  GitBranch,
+  DollarSign
 } from "lucide-react";
 import { IMPORT_DEPENDENCIES } from "../importDependencies";
 import { CompensationModel, getRequiredImportsForModel } from "./WizardStepCompensationModel";
@@ -96,9 +97,17 @@ const BASE_IMPORT_TYPES: ImportTypeOption[] = [
   {
     id: "employee_assignments",
     label: "Employee Assignments",
-    description: "Assign employees to positions with compensation",
+    description: "Assign employees to positions",
     icon: UserPlus,
     prerequisites: ["companies", "departments", "positions"],
+    category: "people",
+  },
+  {
+    id: "employee_compensation",
+    label: "Employee Compensation",
+    description: "Set pay rates, pay groups, and spinal points",
+    icon: Layers,
+    prerequisites: ["employee_assignments"],
     category: "people",
   },
   {
@@ -203,7 +212,7 @@ export function WizardStepSelectType({
 
     const tables = [
       "companies", "divisions", "departments", "sections", 
-      "jobs", "job_families", "positions", "salary_grades", "pay_spines", "employee_assignments"
+      "jobs", "job_families", "positions", "salary_grades", "pay_spines", "employee_assignments", "employee_compensation"
     ];
 
     // Map table names to actual DB tables
@@ -218,6 +227,7 @@ export function WizardStepSelectType({
       salary_grades: "salary_grades",
       pay_spines: "pay_spines",
       employee_assignments: "employee_positions",
+      employee_compensation: "employee_positions", // Uses same table, checks if pay_group_id is set
     };
     for (const table of tables) {
       try {
