@@ -52,13 +52,13 @@ export function useTransactionSeatOrchestration() {
       // Use the summary view to find seats
       const { data } = await supabase
         .from('seat_occupancy_summary')
-        .select('seat_id, allocation_status, is_shared_seat, current_occupant_count, max_occupants')
+        .select('seat_id, status, allocation_status, is_shared_seat, current_occupant_count, max_occupants')
         .eq('position_id', positionId);
       
       if (!data || data.length === 0) return null;
 
       // Find vacant seat first
-      const vacant = data.find(s => s.allocation_status === 'VACANT');
+      const vacant = data.find(s => s.status === 'VACANT');
       if (vacant) return vacant.seat_id;
 
       // Find shared seat with capacity

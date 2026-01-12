@@ -202,7 +202,7 @@ export function BulkTransferMappingStep({
         const positionIds = filteredPositions.map(p => p.id);
         const { data: seatData } = await supabase
           .from("seat_occupancy_summary")
-          .select("position_id, seat_id, allocation_status, is_shared_seat, current_occupant_count, max_occupants")
+          .select("position_id, seat_id, status, allocation_status, is_shared_seat, current_occupant_count, max_occupants")
           .in("position_id", positionIds);
 
         // Calculate availability for each position
@@ -224,7 +224,7 @@ export function BulkTransferMappingStep({
         seatsByPosition.forEach((seats, positionId) => {
           const totalSeats = seats.length;
           const availableSeats = seats.filter(seat => 
-            seat.allocation_status === "VACANT" || 
+            seat.status === "VACANT" || 
             (seat.is_shared_seat && (seat.current_occupant_count || 0) < (seat.max_occupants || 1))
           ).length;
 

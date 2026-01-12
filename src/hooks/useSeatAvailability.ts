@@ -54,7 +54,7 @@ export function useSeatAvailability({
       // Query seat_occupancy_summary for available seats in the position
       const { data, error } = await supabase
         .from("seat_occupancy_summary")
-        .select("seat_id, allocation_status, is_shared_seat, current_occupant_count, max_occupants")
+        .select("seat_id, status, allocation_status, is_shared_seat, current_occupant_count, max_occupants")
         .eq("position_id", positionId);
 
       if (error) {
@@ -77,7 +77,7 @@ export function useSeatAvailability({
       
       // Find vacant or under-allocated seats
       const availableSeats = seats.filter(seat => 
-        seat.allocation_status === "VACANT" || 
+        seat.status === "VACANT" || 
         (seat.is_shared_seat && (seat.current_occupant_count || 0) < (seat.max_occupants || 1))
       );
 
@@ -146,7 +146,7 @@ export async function validateSeatAvailability(
   try {
     const { data, error } = await supabase
       .from("seat_occupancy_summary")
-      .select("seat_id, allocation_status, is_shared_seat, current_occupant_count, max_occupants")
+      .select("seat_id, status, allocation_status, is_shared_seat, current_occupant_count, max_occupants")
       .eq("position_id", positionId);
 
     if (error) {
@@ -155,7 +155,7 @@ export async function validateSeatAvailability(
 
     const seats = data || [];
     const availableSeats = seats.filter(seat => 
-      seat.allocation_status === "VACANT" || 
+      seat.status === "VACANT" || 
       (seat.is_shared_seat && (seat.current_occupant_count || 0) < (seat.max_occupants || 1))
     );
 
