@@ -431,3 +431,6 @@ verify_jwt = false
 
 [functions.process-goal-check-ins]
 verify_jwt = false
+
+[functions.process-early-intervention]
+verify_jwt = false
