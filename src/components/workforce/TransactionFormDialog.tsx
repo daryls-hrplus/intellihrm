@@ -132,6 +132,11 @@ export function TransactionFormDialog({
   const [actingReasons, setActingReasons] = useState<LookupValue[]>([]);
   const [secondmentReasons, setSecondmentReasons] = useState<LookupValue[]>([]);
   const [terminationReasons, setTerminationReasons] = useState<LookupValue[]>([]);
+  // New lookup values for additional transaction types
+  const [demotionReasons, setDemotionReasons] = useState<LookupValue[]>([]);
+  const [retirementTypes, setRetirementTypes] = useState<LookupValue[]>([]);
+  const [employmentStatuses, setEmploymentStatuses] = useState<LookupValue[]>([]);
+  const [contractExtensionReasons, setContractExtensionReasons] = useState<LookupValue[]>([]);
 
   // Form state
   const [formData, setFormData] = useState<Partial<EmployeeTransaction>>({
@@ -443,6 +448,10 @@ export function TransactionFormDialog({
         actingReasonsData,
         secondmentReasonsData,
         terminationReasonsData,
+        demotionReasonsData,
+        retirementTypesData,
+        employmentStatusesData,
+        contractExtensionReasonsData,
       ] = await Promise.all([
         fetchLookupValues("hire_type"),
         fetchLookupValues("employee_type"),
@@ -453,6 +462,10 @@ export function TransactionFormDialog({
         fetchLookupValues("acting_reason"),
         fetchLookupValues("secondment_reason"),
         fetchLookupValues("termination_reason"),
+        fetchLookupValues("demotion_reason"),
+        fetchLookupValues("retirement_type"),
+        fetchLookupValues("employment_status"),
+        fetchLookupValues("contract_extension_reason"),
       ]);
 
       setHireTypes(hireTypesData);
@@ -464,6 +477,10 @@ export function TransactionFormDialog({
       setActingReasons(actingReasonsData);
       setSecondmentReasons(secondmentReasonsData);
       setTerminationReasons(terminationReasonsData);
+      setDemotionReasons(demotionReasonsData);
+      setRetirementTypes(retirementTypesData);
+      setEmploymentStatuses(employmentStatusesData);
+      setContractExtensionReasons(contractExtensionReasonsData);
     }
   };
 
@@ -2261,6 +2278,282 @@ export function TransactionFormDialog({
           </>
         );
       }
+
+      case "DEMOTION":
+        return (
+          <>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>{t("workforce.modules.transactions.form.demotion.fromPosition", "From Position")}</Label>
+                <Select
+                  value={formData.from_position_id || ""}
+                  onValueChange={(v) => setFormData({ ...formData, from_position_id: v })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={t("workforce.modules.transactions.form.selectPosition")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {positions.map((p) => (
+                      <SelectItem key={p.id} value={p.id}>{p.title} ({p.code})</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>{t("workforce.modules.transactions.form.demotion.toPosition", "To Position")}</Label>
+                <Select
+                  value={formData.to_position_id || ""}
+                  onValueChange={(v) => setFormData({ ...formData, to_position_id: v })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={t("workforce.modules.transactions.form.selectPosition")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {positions.map((p) => (
+                      <SelectItem key={p.id} value={p.id}>{p.title} ({p.code})</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>{t("workforce.modules.transactions.form.demotion.reason", "Demotion Reason")}</Label>
+              <Select
+                value={formData.demotion_reason_id || ""}
+                onValueChange={(v) => setFormData({ ...formData, demotion_reason_id: v })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={t("workforce.modules.transactions.form.selectReason")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {demotionReasons.map((r) => (
+                    <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Switch
+                checked={formData.is_voluntary_demotion || false}
+                onCheckedChange={(checked) => setFormData({ ...formData, is_voluntary_demotion: checked })}
+              />
+              <Label>{t("workforce.modules.transactions.form.demotion.voluntary", "Voluntary Demotion")}</Label>
+            </div>
+          </>
+        );
+
+      case "RETIREMENT":
+        return (
+          <>
+            <div className="space-y-2">
+              <Label>{t("workforce.modules.transactions.form.retirement.type", "Retirement Type")}</Label>
+              <Select
+                value={formData.retirement_type_id || ""}
+                onValueChange={(v) => setFormData({ ...formData, retirement_type_id: v })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={t("workforce.modules.transactions.form.selectType")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {retirementTypes.map((r) => (
+                    <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex items-center space-x-2 pt-6">
+                <Switch
+                  checked={formData.pension_eligible || false}
+                  onCheckedChange={(checked) => setFormData({ ...formData, pension_eligible: checked })}
+                />
+                <Label>{t("workforce.modules.transactions.form.retirement.pensionEligible", "Pension Eligible")}</Label>
+              </div>
+              <div className="flex items-center space-x-2 pt-6">
+                <Switch
+                  checked={formData.exit_interview_completed || false}
+                  onCheckedChange={(checked) => setFormData({ ...formData, exit_interview_completed: checked })}
+                />
+                <Label>{t("workforce.modules.transactions.form.retirement.exitInterview", "Exit Interview Completed")}</Label>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>{t("workforce.modules.transactions.form.retirement.finalSettlementDate", "Final Settlement Date")}</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="w-full justify-start text-left font-normal">
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {formData.final_settlement_date
+                      ? formatDateForDisplay(formData.final_settlement_date, "PPP")
+                      : t("workforce.modules.transactions.form.selectDate")}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0">
+                  <Calendar
+                    mode="single"
+                    selected={formData.final_settlement_date ? new Date(formData.final_settlement_date) : undefined}
+                    onSelect={(date) => setFormData({ ...formData, final_settlement_date: date ? toDateString(date) : undefined })}
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+          </>
+        );
+
+      case "STATUS_CHANGE":
+        return (
+          <>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>{t("workforce.modules.transactions.form.statusChange.toStatus", "New Employment Status")}</Label>
+                <Select
+                  value={formData.to_employment_status_id || ""}
+                  onValueChange={(v) => setFormData({ ...formData, to_employment_status_id: v })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={t("workforce.modules.transactions.form.selectStatus", "Select status")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {employmentStatuses.map((s) => (
+                      <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>{t("workforce.modules.transactions.form.statusChange.newWeeklyHours", "New Weekly Hours")}</Label>
+                <Input
+                  type="number"
+                  value={formData.new_weekly_hours || ""}
+                  onChange={(e) => setFormData({ ...formData, new_weekly_hours: parseFloat(e.target.value) || null })}
+                  placeholder="40"
+                />
+              </div>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Switch
+                checked={formData.benefits_change_required || false}
+                onCheckedChange={(checked) => setFormData({ ...formData, benefits_change_required: checked })}
+              />
+              <Label>{t("workforce.modules.transactions.form.statusChange.benefitsChange", "Benefits Change Required")}</Label>
+            </div>
+          </>
+        );
+
+      case "CONTRACT_EXTENSION":
+        return (
+          <>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>{t("workforce.modules.transactions.form.contractExtension.currentEnd", "Current Contract End")}</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className="w-full justify-start text-left font-normal">
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {formData.current_contract_end_date
+                        ? formatDateForDisplay(formData.current_contract_end_date, "PPP")
+                        : t("workforce.modules.transactions.form.selectDate")}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0">
+                    <Calendar
+                      mode="single"
+                      selected={formData.current_contract_end_date ? new Date(formData.current_contract_end_date) : undefined}
+                      onSelect={(date) => setFormData({ ...formData, current_contract_end_date: date ? toDateString(date) : undefined })}
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+              <div className="space-y-2">
+                <Label>{t("workforce.modules.transactions.form.contractExtension.newEnd", "New Contract End")}</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className="w-full justify-start text-left font-normal">
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {formData.new_contract_end_date
+                        ? formatDateForDisplay(formData.new_contract_end_date, "PPP")
+                        : t("workforce.modules.transactions.form.selectDate")}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0">
+                    <Calendar
+                      mode="single"
+                      selected={formData.new_contract_end_date ? new Date(formData.new_contract_end_date) : undefined}
+                      onSelect={(date) => setFormData({ ...formData, new_contract_end_date: date ? toDateString(date) : undefined })}
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>{t("workforce.modules.transactions.form.contractExtension.reason", "Extension Reason")}</Label>
+              <Select
+                value={formData.contract_extension_reason_id || ""}
+                onValueChange={(v) => setFormData({ ...formData, contract_extension_reason_id: v })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={t("workforce.modules.transactions.form.selectReason")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {contractExtensionReasons.map((r) => (
+                    <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </>
+        );
+
+      case "CONTRACT_CONVERSION":
+        return (
+          <>
+            <div className="space-y-2">
+              <Label>{t("workforce.modules.transactions.form.contractConversion.newContractType", "New Contract Type")}</Label>
+              <Select
+                value={formData.new_contract_type_id || ""}
+                onValueChange={(v) => setFormData({ ...formData, new_contract_type_id: v })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={t("workforce.modules.transactions.form.selectType")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {contractTypes.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Switch
+                checked={formData.probation_applies || false}
+                onCheckedChange={(checked) => setFormData({ ...formData, probation_applies: checked })}
+              />
+              <Label>{t("workforce.modules.transactions.form.contractConversion.probationApplies", "New Probation Period Applies")}</Label>
+            </div>
+            {formData.probation_applies && (
+              <div className="space-y-2 ml-6 pl-4 border-l-2 border-primary/30">
+                <Label>{t("workforce.modules.transactions.form.hire.probationEndDate")}</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className="w-full justify-start text-left font-normal">
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {formData.probation_end_date
+                        ? formatDateForDisplay(formData.probation_end_date, "PPP")
+                        : t("workforce.modules.transactions.form.selectDate")}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0">
+                    <Calendar
+                      mode="single"
+                      selected={formData.probation_end_date ? new Date(formData.probation_end_date) : undefined}
+                      onSelect={(date) => setFormData({ ...formData, probation_end_date: date ? toDateString(date) : undefined })}
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+            )}
+          </>
+        );
 
       default:
         return null;
