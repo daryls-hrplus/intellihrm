@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { CalendarIcon, Loader2, DollarSign, ArrowRight, Building2, AlertTriangle, Armchair } from "lucide-react";
+import { CalendarIcon, Loader2, DollarSign, ArrowRight, Building2, AlertTriangle, Armchair, Check } from "lucide-react";
 import { EmployeeContextCard } from "@/components/workforce/EmployeeContextCard";
 import { TransactionImpactSummary } from "@/components/workforce/TransactionImpactSummary";
 import { useLanguage } from "@/hooks/useLanguage";
@@ -147,6 +147,10 @@ export function TransactionFormDialog({
     requires_workflow: false,
     notes: "",
   });
+
+  // Workflow setting state
+  const [workflowRequired, setWorkflowRequired] = useState(false);
+  const [isLoadingWorkflowSetting, setIsLoadingWorkflowSetting] = useState(false);
 
   // Compensation dialog state
   const [compensationDialogOpen, setCompensationDialogOpen] = useState(false);
@@ -398,6 +402,11 @@ export function TransactionFormDialog({
   useEffect(() => {
     if (existingTransaction) {
       setFormData(existingTransaction);
+      // Check workflow setting for existing transaction's company
+      const companyId = existingTransaction.to_company_id || existingTransaction.company_id;
+      if (companyId && transactionType) {
+        fetchWorkflowSetting(companyId, transactionType);
+      }
     } else {
       setFormData({
         effective_date: getTodayString(),
@@ -414,8 +423,57 @@ export function TransactionFormDialog({
         availableSeats: 0,
         errorMessage: null,
       });
+      // Reset workflow setting
+      setWorkflowRequired(false);
     }
   }, [existingTransaction]);
+
+  // Fetch workflow setting when company changes
+  useEffect(() => {
+    // Determine the relevant company based on transaction type
+    const targetCompanyId = formData.to_company_id || formData.company_id;
+    if (targetCompanyId && transactionType && !existingTransaction) {
+      fetchWorkflowSetting(targetCompanyId, transactionType);
+    }
+  }, [formData.to_company_id, formData.company_id, transactionType, existingTransaction]);
+
+  // Fetch workflow setting from centralized config
+  const fetchWorkflowSetting = async (companyId: string, txnType: TransactionType) => {
+    setIsLoadingWorkflowSetting(true);
+    try {
+      // Get transaction type ID
+      const { data: txnTypeData } = await supabase
+        .from("lookup_values")
+        .select("id")
+        .eq("category", "transaction_type")
+        .eq("code", txnType)
+        .single();
+
+      if (!txnTypeData) {
+        setWorkflowRequired(false);
+        return;
+      }
+
+      // Check company_transaction_workflow_settings
+      const { data: workflowSetting } = await supabase
+        .from("company_transaction_workflow_settings")
+        .select("workflow_enabled")
+        .eq("company_id", companyId)
+        .eq("transaction_type_id", txnTypeData.id)
+        .eq("is_active", true)
+        .maybeSingle();
+
+      const isRequired = workflowSetting?.workflow_enabled ?? false;
+      setWorkflowRequired(isRequired);
+      // Update formData to reflect the centralized setting
+      setFormData(prev => ({ ...prev, requires_workflow: isRequired }));
+    } catch (error) {
+      console.error("Error fetching workflow setting:", error);
+      setWorkflowRequired(false);
+    } finally {
+      setIsLoadingWorkflowSetting(false);
+    }
+  };
 
   const loadMasterData = async () => {
     const [
@@ -535,6 +593,8 @@ export function TransactionFormDialog({
     const submitData = {
       ...cleanFormData,
       transaction_type_id: transactionTypeId,
+      // Set status based on centralized workflow setting
+      status: workflowRequired ? "pending_approval" : "approved",
     };
 
     let success;
@@ -2670,14 +2730,24 @@ export function TransactionFormDialog({
             />
           </div>
 
-          <div className="flex items-center space-x-2">
-            <Switch
-              checked={formData.requires_workflow || false}
-              onCheckedChange={(checked) =>
-                setFormData({ ...formData, requires_workflow: checked })
-              }
-            />
-            <Label>{t("workforce.modules.transactions.form.requiresWorkflow")}</Label>
+          <div className="flex items-center gap-2 p-3 rounded-lg bg-muted/50 border">
+            {isLoadingWorkflowSetting ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : workflowRequired ? (
+              <>
+                <AlertTriangle className="h-4 w-4 text-warning" />
+                <span className="text-sm">
+                  {t("workforce.modules.transactions.workflowRequired")}
+                </span>
+              </>
+            ) : (
+              <>
+                <Check className="h-4 w-4 text-success" />
+                <span className="text-sm">
+                  {t("workforce.modules.transactions.noWorkflowRequired")}
+                </span>
+              </>
+            )}
           </div>
         </div>
 

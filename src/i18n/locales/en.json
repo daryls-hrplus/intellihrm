@@ -436,6 +436,8 @@
         "noTransactionsFound": "No transactions found",
         "deleteTransaction": "Delete Transaction",
         "deleteConfirmation": "Are you sure you want to delete transaction {{number}}? This action cannot be undone.",
+        "workflowRequired": "This transaction requires workflow approval",
+        "noWorkflowRequired": "This transaction will be approved immediately",
         "statuses": {
           "draft": "Draft",
           "pending_approval": "Pending Approval",
