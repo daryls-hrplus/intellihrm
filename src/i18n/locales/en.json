@@ -469,7 +469,11 @@
             "SECONDMENT": "Secondment",
             "TERMINATION": "Termination",
             "SALARY_CHANGE": "Salary Change",
-            "RATE_CHANGE": "Hourly/Daily Rate Change"
+            "RATE_CHANGE": "Hourly/Daily Rate Change",
+            "DEMOTION": "Demotion",
+            "CONTRACT_EXTENSION": "Contract Extension",
+            "CONTRACT_CONVERSION": "Contract Conversion",
+            "BULK_TRANSFER": "Bulk Transfer"
           },
           "hire": {
             "hireType": "Hire Type",
