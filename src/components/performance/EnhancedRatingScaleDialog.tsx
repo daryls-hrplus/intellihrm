@@ -24,6 +24,28 @@ const sanitizeScaleCode = (value: string) =>
     .replace(/\s+/g, "_")
     .replace(/[^A-Z0-9_]/g, "");
 
+// Moved outside component to prevent re-creation on every render
+const FieldWithTooltip = ({ label, tooltip, children }: { label: string; tooltip: string; children: React.ReactNode }) => (
+  <div className="space-y-2">
+    <div className="flex items-center gap-1.5">
+      <Label>{label}</Label>
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span className="inline-flex">
+              <HelpCircle className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
+            </span>
+          </TooltipTrigger>
+          <TooltipContent side="top" className="max-w-sm">
+            <p className="text-xs leading-relaxed">{tooltip}</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    </div>
+    {children}
+  </div>
+);
+
 interface RatingScale {
   id: string;
   company_id: string;
@@ -327,29 +349,6 @@ export function EnhancedRatingScaleDialog({
       setIsSubmitting(false);
     }
   };
-
-  // Tooltip wrapper component
-  const FieldWithTooltip = ({ label, tooltip, children }: { label: string; tooltip: string; children: React.ReactNode }) => (
-    <div className="space-y-2">
-      <div className="flex items-center gap-1.5">
-        <Label>{label}</Label>
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <span className="inline-flex">
-                <HelpCircle className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
-              </span>
-            </TooltipTrigger>
-            <TooltipContent side="top" className="max-w-sm">
-              <p className="text-xs leading-relaxed">{tooltip}</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      </div>
-      {children}
-    </div>
-  );
-
   // Visual Scale Preview (memoized for smoother typing)
   const scalePreview = useMemo(() => (
     <div className="rounded-lg border bg-muted/30 p-4">
