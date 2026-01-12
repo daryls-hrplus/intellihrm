@@ -562,6 +562,7 @@
           "processingTransfers": "Processing Transfers...",
           "transferComplete": "Bulk transfer completed successfully",
           "transferFailed": "Failed to complete bulk transfer",
+          "successMessage": "{{count}} employee(s) transferred successfully",
           "selectSourceCompanyFirst": "Please select a source company first",
           "selectEmployeesFirst": "Please select at least one employee",
           "selectDestinationCompanyFirst": "Please select a destination company",
