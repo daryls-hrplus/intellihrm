@@ -11,6 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -25,6 +26,10 @@ import {
   FileText,
   MessageSquare,
   Shield,
+  PenLine,
+  Loader2,
+  Clock,
+  Fingerprint,
 } from "lucide-react";
 import { toast } from "sonner";
 import type { MyAppraisal } from "@/hooks/useMyAppraisals";
@@ -36,6 +41,7 @@ import { useAppraisalScoreBreakdown } from "@/hooks/useAppraisalScoreBreakdown";
 import { usePerformanceCategoryByScore } from "@/hooks/usePerformanceCategories";
 import { WhyThisScorePanel } from "@/components/appraisals/WhyThisScorePanel";
 import { PerformanceCategoryBadge } from "@/components/appraisals/PerformanceCategoryBadge";
+import { useAppraisalAcknowledgmentWorkflow } from "@/hooks/useAppraisalAcknowledgmentWorkflow";
 
 interface EssAppraisalAcknowledgmentDialogProps {
   open: boolean;
@@ -55,9 +61,21 @@ export function EssAppraisalAcknowledgmentDialog({
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
-  const [acknowledged, setAcknowledged] = useState(false);
+  const [signatureText, setSignatureText] = useState("");
+  const [signatureConfirmed, setSignatureConfirmed] = useState(false);
   const [comments, setComments] = useState("");
   const [disputeDialogOpen, setDisputeDialogOpen] = useState(false);
+  
+  // Workflow-based acknowledgment
+  const {
+    workflowInstance,
+    currentStep,
+    signature,
+    isLoading: workflowLoading,
+    isSubmitting,
+    hasWorkflow,
+    submitAcknowledgment,
+  } = useAppraisalAcknowledgmentWorkflow(appraisal.id);
   
   // Score Explainability data
   const { data: scoreBreakdown, isLoading: breakdownLoading } = useAppraisalScoreBreakdown(appraisal.id);
@@ -86,15 +104,35 @@ export function EssAppraisalAcknowledgmentDialog({
     );
   };
 
+  const canSubmit = () => {
+    if (!signatureText.trim() || !signatureConfirmed) return false;
+    return true;
+  };
+
   const handleAcknowledge = async () => {
-    if (!acknowledged) {
-      toast.error("Please acknowledge that you have reviewed your evaluation");
+    if (!canSubmit()) {
+      toast.error("Please provide your digital signature to acknowledge");
       return;
     }
 
+    // Use workflow-based acknowledgment if available
+    if (hasWorkflow) {
+      const success = await submitAcknowledgment({
+        signatureText: signatureText.trim(),
+        comments: comments.trim() || undefined,
+      });
+
+      if (success) {
+        queryClient.invalidateQueries({ queryKey: ["my-appraisals"] });
+        onOpenChange(false);
+        onSuccess?.();
+      }
+      return;
+    }
+
+    // Fallback for legacy data without workflow
     setLoading(true);
     try {
-      // Parse existing comments and add acknowledgment
       let existingComments = {};
       try {
         if (appraisal.employee_comments) {
@@ -108,6 +146,7 @@ export function EssAppraisalAcknowledgmentDialog({
         ...existingComments,
         acknowledgmentComments: comments,
         acknowledgedAt: new Date().toISOString(),
+        signatureText: signatureText,
       });
 
       const { error } = await supabase
@@ -115,6 +154,7 @@ export function EssAppraisalAcknowledgmentDialog({
         .update({
           employee_comments: updatedComments,
           status: "acknowledged",
+          acknowledged_at: new Date().toISOString(),
         })
         .eq("id", appraisal.id);
 
@@ -229,35 +269,85 @@ export function EssAppraisalAcknowledgmentDialog({
 
             <Separator />
 
-            {/* Acknowledgment */}
-            <div className="flex items-start space-x-3">
-              <Checkbox
-                id="acknowledge"
-                checked={acknowledged}
-                onCheckedChange={(checked) => setAcknowledged(checked === true)}
-              />
-              <div className="space-y-1">
-                <Label htmlFor="acknowledge" className="cursor-pointer font-medium">
-                  I acknowledge that I have reviewed my performance evaluation
-                </Label>
-                <p className="text-xs text-muted-foreground">
-                  By checking this box, you confirm you have reviewed your scores and feedback.
-                </p>
+            {/* Already Signed Display */}
+            {signature && (
+              <Card className="bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-800">
+                <CardContent className="pt-6">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="h-10 w-10 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center">
+                      <Fingerprint className="h-5 w-5 text-green-600 dark:text-green-400" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-green-800 dark:text-green-200">Digitally Signed</p>
+                      <p className="text-sm text-green-600 dark:text-green-400">
+                        {signature.signer_name || 'Employee'} signed on{' '}
+                        {signature.signed_at && format(new Date(signature.signed_at), "MMM d, yyyy 'at' h:mm a")}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4 text-xs text-muted-foreground">
+                    <div>
+                      <span className="font-medium">IP Address:</span> {signature.ip_address || 'N/A'}
+                    </div>
+                    <div>
+                      <span className="font-medium">Signature Hash:</span>{' '}
+                      <span className="font-mono">{signature.signature_hash?.substring(0, 16)}...</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Digital Signature Form (only if not already signed) */}
+            {!signature && (
+              <div className="space-y-4 rounded-lg border p-4 bg-muted/30">
+                <div className="flex items-center gap-2">
+                  <PenLine className="h-5 w-5 text-primary" />
+                  <Label className="font-medium text-base">Digital Signature Required</Label>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="signature">Type your full name to sign *</Label>
+                  <Input
+                    id="signature"
+                    placeholder="Enter your full legal name"
+                    value={signatureText}
+                    onChange={(e) => setSignatureText(e.target.value)}
+                  />
+                </div>
+
+                <div className="flex items-start gap-2">
+                  <Checkbox
+                    id="confirm-signature"
+                    checked={signatureConfirmed}
+                    onCheckedChange={(checked) => setSignatureConfirmed(checked === true)}
+                  />
+                  <label htmlFor="confirm-signature" className="text-sm text-muted-foreground leading-tight cursor-pointer">
+                    I confirm that this typed signature constitutes my legal electronic signature, that I have reviewed my performance evaluation, and that this signature has the same legal effect as a handwritten signature.
+                  </label>
+                </div>
+
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <Clock className="h-3 w-3" />
+                  <span>Timestamp and IP address will be recorded for audit purposes.</span>
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Employee Comments */}
-            <div className="space-y-2">
-              <Label htmlFor="comments">Your Comments (Optional)</Label>
-              <Textarea
-                id="comments"
-                value={comments}
-                onChange={(e) => setComments(e.target.value)}
-                placeholder="Add any comments or feedback about your evaluation..."
-                rows={4}
-                className="resize-none"
-              />
-            </div>
+            {!signature && (
+              <div className="space-y-2">
+                <Label htmlFor="comments">Your Comments (Optional)</Label>
+                <Textarea
+                  id="comments"
+                  value={comments}
+                  onChange={(e) => setComments(e.target.value)}
+                  placeholder="Add any comments or feedback about your evaluation..."
+                  rows={3}
+                  className="resize-none"
+                />
+              </div>
+            )}
 
             {/* Dispute Notice */}
             <Alert variant="destructive" className="bg-destructive/10 border-destructive/20">
@@ -281,13 +371,16 @@ export function EssAppraisalAcknowledgmentDialog({
             <Button variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button
-              onClick={handleAcknowledge}
-              disabled={loading || !acknowledged}
-            >
-              <CheckCircle2 className="h-4 w-4 mr-2" />
-              {loading ? "Processing..." : "Confirm Acknowledgment"}
-            </Button>
+            {!signature && (
+              <Button
+                onClick={handleAcknowledge}
+                disabled={loading || isSubmitting || !canSubmit()}
+              >
+                {(loading || isSubmitting) && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                <PenLine className="h-4 w-4 mr-2" />
+                {loading || isSubmitting ? "Signing..." : "Sign & Acknowledge"}
+              </Button>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>
