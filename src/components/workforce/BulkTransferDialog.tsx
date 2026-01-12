@@ -408,6 +408,42 @@ export function BulkTransferDialog({
 
         if (error) throw error;
 
+        // If transaction is approved (no workflow required), execute the transfer immediately
+        if (!requiresWorkflow) {
+          // End current position assignment
+          await supabase
+            .from("employee_positions")
+            .update({ 
+              is_active: false, 
+              end_date: effectiveDate 
+            })
+            .eq("employee_id", employee.id)
+            .eq("is_active", true);
+
+          // Create new position assignment at destination
+          if (toPositionId) {
+            await supabase
+              .from("employee_positions")
+              .insert({
+                employee_id: employee.id,
+                position_id: toPositionId,
+                department_id: toDepartmentId,
+                start_date: effectiveDate,
+                is_active: true,
+                is_primary: true,
+              });
+          }
+
+          // Update employee's company and department
+          await supabase
+            .from("profiles")
+            .update({ 
+              company_id: destinationCompanyId,
+              department_id: toDepartmentId,
+            })
+            .eq("id", employee.id);
+        }
+
         successCount++;
       } catch (err: any) {
         failedCount++;

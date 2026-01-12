@@ -111,7 +111,7 @@ export function BulkEmployeeSelector({
         .eq("id", sourceCompanyId)
         .single();
 
-      // Check for employees with pending/draft transfer transactions
+      // Check for employees with pending/draft/approved transfer transactions
       const { data: pendingTransactions } = await supabase
         .from("employee_transactions")
         .select(`
@@ -120,7 +120,7 @@ export function BulkEmployeeSelector({
           status,
           from_company_id
         `)
-        .in("status", ["draft", "pending_approval"])
+        .in("status", ["draft", "pending_approval", "approved"])
         .eq("from_company_id", sourceCompanyId);
 
       // Get employee IDs with pending transfers
