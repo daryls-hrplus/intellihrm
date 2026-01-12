@@ -422,3 +422,12 @@ verify_jwt = false
 
 [functions.purge-transactional-data]
 verify_jwt = false
+
+[functions.process-appraisal-cycle-status]
+verify_jwt = false
+
+[functions.process-appraisal-interview-reminders]
+verify_jwt = false
+
+[functions.process-goal-check-ins]
+verify_jwt = false
