@@ -108,6 +108,28 @@ export interface EmployeeTransaction {
   has_adjusted_service: boolean;
   adjusted_service_date: string | null;
   
+  // Demotion fields
+  demotion_reason_id: string | null;
+  is_voluntary_demotion: boolean;
+  
+  // Retirement fields
+  retirement_type_id: string | null;
+  pension_eligible: boolean;
+  final_settlement_date: string | null;
+  
+  // Status change fields
+  from_employment_status_id: string | null;
+  to_employment_status_id: string | null;
+  new_weekly_hours: number | null;
+  benefits_change_required: boolean;
+  
+  // Contract extension/conversion fields
+  current_contract_end_date: string | null;
+  new_contract_end_date: string | null;
+  new_contract_type_id: string | null;
+  probation_applies: boolean;
+  contract_extension_reason_id: string | null;
+  
   // Workflow
   workflow_instance_id: string | null;
   requires_workflow: boolean;
