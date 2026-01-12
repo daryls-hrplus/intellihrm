@@ -196,6 +196,48 @@ export function BulkTransferMappingStep({
       const deptIds = new Set((deptRes.data || []).map(d => d.id));
       const filteredPositions = (posRes.data || []).filter(p => deptIds.has(p.department_id));
       setPositions(filteredPositions);
+
+      // Fetch seat availability for all positions upfront
+      if (filteredPositions.length > 0) {
+        const positionIds = filteredPositions.map(p => p.id);
+        const { data: seatData } = await supabase
+          .from("seat_occupancy_summary")
+          .select("position_id, seat_id, allocation_status, is_shared_seat, current_occupant_count, max_occupants")
+          .in("position_id", positionIds);
+
+        // Calculate availability for each position
+        const availabilityMap = new Map<string, SeatAvailability>();
+        
+        // Initialize all positions with 0 seats
+        positionIds.forEach(id => {
+          availabilityMap.set(id, { positionId: id, availableSeats: 0, totalSeats: 0, isLoading: false });
+        });
+
+        // Group seats by position and calculate
+        const seatsByPosition = new Map<string, typeof seatData>();
+        (seatData || []).forEach(seat => {
+          const existing = seatsByPosition.get(seat.position_id) || [];
+          existing.push(seat);
+          seatsByPosition.set(seat.position_id, existing);
+        });
+
+        seatsByPosition.forEach((seats, positionId) => {
+          const totalSeats = seats.length;
+          const availableSeats = seats.filter(seat => 
+            seat.allocation_status === "VACANT" || 
+            (seat.is_shared_seat && (seat.current_occupant_count || 0) < (seat.max_occupants || 1))
+          ).length;
+
+          availabilityMap.set(positionId, {
+            positionId,
+            availableSeats,
+            totalSeats,
+            isLoading: false,
+          });
+        });
+
+        setSeatAvailability(availabilityMap);
+      }
     } catch (error) {
       console.error("Error fetching mapping data:", error);
     } finally {
@@ -231,8 +273,25 @@ export function BulkTransferMappingStep({
     return { mapped, partiallyMapped, unmapped, seatIssues, total: employees.length };
   }, [employees, positionAssignmentCounts, seatAvailability]);
 
-  const getPositionsForDepartment = (departmentId: string) => {
-    return positions.filter(p => p.department_id === departmentId);
+  // Get positions for a department, filtered to only those with available seats
+  const getPositionsForDepartment = (departmentId: string, currentEmployeePositionId?: string | null) => {
+    return positions.filter(p => {
+      if (p.department_id !== departmentId) return false;
+      
+      // Always include the currently selected position for this employee
+      if (currentEmployeePositionId && p.id === currentEmployeePositionId) return true;
+      
+      // Check seat availability
+      const availability = seatAvailability.get(p.id);
+      if (!availability) return true; // Include if we don't have data yet
+      
+      // Calculate remaining seats after other employees' assignments
+      const assignedCount = positionAssignmentCounts.get(p.id) || 0;
+      const remainingSeats = availability.availableSeats - assignedCount;
+      
+      // Show position if it has remaining seats
+      return remainingSeats > 0;
+    });
   };
 
   const getSeatStatusForPosition = (positionId: string): { 
@@ -482,7 +541,7 @@ export function BulkTransferMappingStep({
 
           {filteredEmployees.map((employee, index) => {
             const deptPositions = employee.to_department_id 
-              ? getPositionsForDepartment(employee.to_department_id)
+              ? getPositionsForDepartment(employee.to_department_id, employee.to_position_id)
               : [];
             const isMapped = employee.to_department_id && employee.to_position_id;
             const isPartial = employee.to_department_id && !employee.to_position_id;
