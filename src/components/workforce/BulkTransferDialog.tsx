@@ -257,10 +257,10 @@ export function BulkTransferDialog({
             from_company_id: employee.company_id,
             to_company_id: destinationCompanyId,
             from_department_id: employee.department_id,
-            to_department_id: destinationDepartmentId || null,
+            to_department_id: destinationDepartmentId && destinationDepartmentId !== "_keep" ? destinationDepartmentId : null,
             from_position_id: employee.position_id,
             transfer_reason_id: transferReasonId || null,
-            pay_group_id: destinationPayGroupId || null,
+            pay_group_id: destinationPayGroupId && destinationPayGroupId !== "_none" ? destinationPayGroupId : null,
             requires_workflow: requiresWorkflow,
             created_by: user.id,
             is_bulk_transaction: true,
@@ -379,7 +379,7 @@ export function BulkTransferDialog({
                   <SelectValue placeholder={t("common.allDepartments")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">{t("common.allDepartments")}</SelectItem>
+                  <SelectItem value="_all">{t("common.allDepartments")}</SelectItem>
                   {departments
                     .filter((d) => d.company_id === sourceCompanyId)
                     .map((dept) => (
@@ -397,7 +397,7 @@ export function BulkTransferDialog({
         return (
           <BulkEmployeeSelector
             sourceCompanyId={sourceCompanyId}
-            sourceDepartmentId={sourceDepartmentId || null}
+            sourceDepartmentId={sourceDepartmentId && sourceDepartmentId !== "_all" ? sourceDepartmentId : null}
             selectedEmployees={selectedEmployees}
             onSelectionChange={setSelectedEmployees}
           />
@@ -431,7 +431,7 @@ export function BulkTransferDialog({
                   <SelectValue placeholder={t("workforce.modules.transactions.bulkTransfer.keepCurrentMapping")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">{t("workforce.modules.transactions.bulkTransfer.keepCurrentMapping")}</SelectItem>
+                  <SelectItem value="_keep">{t("workforce.modules.transactions.bulkTransfer.keepCurrentMapping")}</SelectItem>
                   {departments.map((dept) => (
                     <SelectItem key={dept.id} value={dept.id}>
                       {dept.name}
@@ -448,7 +448,7 @@ export function BulkTransferDialog({
                   <SelectValue placeholder={t("workforce.modules.transactions.bulkTransfer.noChange")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">{t("workforce.modules.transactions.bulkTransfer.noChange")}</SelectItem>
+                  <SelectItem value="_none">{t("workforce.modules.transactions.bulkTransfer.noChange")}</SelectItem>
                   {payGroups.map((pg) => (
                     <SelectItem key={pg.id} value={pg.id}>
                       {pg.name} ({pg.code})
