@@ -41,6 +41,11 @@ const workflowCodeMap: Record<TransactionType, string> = {
   TERMINATION: "termination",
   SALARY_CHANGE: "salary_change",
   RATE_CHANGE: "rate_change",
+  DEMOTION: "demotion",
+  RETIREMENT: "retirement",
+  STATUS_CHANGE: "status_change",
+  CONTRACT_EXTENSION: "contract_extension",
+  CONTRACT_CONVERSION: "contract_conversion",
 };
 
 export default function EmployeeTransactionsPage() {
