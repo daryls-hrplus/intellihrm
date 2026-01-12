@@ -597,7 +597,9 @@
           "noVacantPositions": "No vacant positions in this department",
           "noVacantPositionsHint": "You may need to select a different department or create new positions first.",
           "insufficientVacancies": "Only {{vacant}} vacant position(s) available for {{employees}} employees",
-          "vacantPositionsAvailable": "{{count}} vacant position(s) available"
+          "vacantPositionsAvailable": "{{count}} vacant position(s) available",
+          "workflowRequired": "This transfer requires workflow approval before completion",
+          "noWorkflowRequired": "This transfer will be approved immediately upon execution"
         }
       },
       "forecasting": {

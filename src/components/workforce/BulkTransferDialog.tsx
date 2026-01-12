@@ -113,6 +113,7 @@ export function BulkTransferDialog({
   const [effectiveDate, setEffectiveDate] = useState<string>(getTodayString());
   const [notes, setNotes] = useState<string>("");
   const [requiresWorkflow, setRequiresWorkflow] = useState(false);
+  const [isLoadingWorkflowSetting, setIsLoadingWorkflowSetting] = useState(false);
   const [mappingMode, setMappingMode] = useState<"same" | "individual">("individual");
   const [vacantPositionCount, setVacantPositionCount] = useState<number | null>(null);
   const [isCheckingVacancies, setIsCheckingVacancies] = useState(false);
@@ -129,14 +130,51 @@ export function BulkTransferDialog({
     if (destinationCompanyId) {
       loadDestinationDepartments();
       loadDestinationPayGroups();
+      fetchWorkflowSetting(destinationCompanyId);
     } else {
       setPayGroups([]);
       setDestinationPayGroupId("");
+      setRequiresWorkflow(false);
     }
     // Reset vacancy check when company changes
     setVacantPositionCount(null);
     setDestinationDepartmentId("");
   }, [destinationCompanyId]);
+
+  // Fetch workflow setting from centralized config
+  const fetchWorkflowSetting = async (companyId: string) => {
+    setIsLoadingWorkflowSetting(true);
+    try {
+      // Get BULK_TRANSFER transaction type ID
+      const { data: bulkTransferType } = await supabase
+        .from("lookup_values")
+        .select("id")
+        .eq("category", "transaction_type")
+        .eq("code", "BULK_TRANSFER")
+        .single();
+
+      if (!bulkTransferType) {
+        setRequiresWorkflow(false);
+        return;
+      }
+
+      // Check company_transaction_workflow_settings
+      const { data: workflowSetting } = await supabase
+        .from("company_transaction_workflow_settings")
+        .select("workflow_enabled")
+        .eq("company_id", companyId)
+        .eq("transaction_type_id", bulkTransferType.id)
+        .eq("is_active", true)
+        .maybeSingle();
+
+      setRequiresWorkflow(workflowSetting?.workflow_enabled ?? false);
+    } catch (error) {
+      console.error("Error fetching workflow setting:", error);
+      setRequiresWorkflow(false);
+    } finally {
+      setIsLoadingWorkflowSetting(false);
+    }
+  };
 
   // Check for vacant positions when destination department changes
   useEffect(() => {
@@ -351,7 +389,7 @@ export function BulkTransferDialog({
             transaction_type_id: bulkTransferType.id,
             employee_id: employee.id,
             effective_date: effectiveDate,
-            status: requiresWorkflow ? "pending_approval" : "draft",
+            status: requiresWorkflow ? "pending_approval" : "approved",
             notes: notes || null,
             from_company_id: employee.company_id,
             to_company_id: destinationCompanyId,
@@ -698,12 +736,24 @@ export function BulkTransferDialog({
               />
             </div>
 
-            <div className="flex items-center space-x-2">
-              <Switch
-                checked={requiresWorkflow}
-                onCheckedChange={setRequiresWorkflow}
-              />
-              <Label>{t("workforce.modules.transactions.form.requiresWorkflow")}</Label>
+            <div className="flex items-center gap-2 p-3 rounded-lg bg-muted/50 border">
+              {isLoadingWorkflowSetting ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : requiresWorkflow ? (
+                <>
+                  <AlertTriangle className="h-4 w-4 text-warning" />
+                  <span className="text-sm">
+                    {t("workforce.modules.transactions.bulkTransfer.workflowRequired")}
+                  </span>
+                </>
+              ) : (
+                <>
+                  <Check className="h-4 w-4 text-success" />
+                  <span className="text-sm">
+                    {t("workforce.modules.transactions.bulkTransfer.noWorkflowRequired")}
+                  </span>
+                </>
+              )}
             </div>
           </div>
         );
