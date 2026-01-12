@@ -147,8 +147,12 @@ export interface EmployeeTransaction {
   
   // Joined data
   transaction_type?: { code: string; name: string };
-  employee?: { full_name: string; email: string };
+  employee?: { full_name: string; email: string; company_id?: string };
   position?: { title: string; code: string };
+  to_position?: { title: string; code: string };
+  from_position?: { title: string; code: string };
+  acting_position?: { title: string; code: string };
+  secondment_position?: { title: string; code: string };
   department?: { name: string };
   company?: { name: string };
 }
@@ -190,6 +194,10 @@ export function useEmployeeTransactions() {
           transaction_type:lookup_values!employee_transactions_transaction_type_id_fkey(code, name),
           employee:profiles!employee_transactions_employee_id_fkey(full_name, email, company_id),
           position:positions!employee_transactions_position_id_fkey(title, code),
+          to_position:positions!employee_transactions_to_position_id_fkey(title, code),
+          from_position:positions!employee_transactions_from_position_id_fkey(title, code),
+          acting_position:positions!employee_transactions_acting_position_id_fkey(title, code),
+          secondment_position:positions!employee_transactions_secondment_position_id_fkey(title, code),
           department:departments!employee_transactions_department_id_fkey(name),
           company:companies!employee_transactions_company_id_fkey(name)
         `)

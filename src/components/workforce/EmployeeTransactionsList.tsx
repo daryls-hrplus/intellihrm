@@ -448,7 +448,47 @@ export function EmployeeTransactionsList({
                         "N/A"}
                     </TableCell>
                     <TableCell>
-                      {transaction.position?.title || "—"}
+                      {(() => {
+                        const typeCode = transaction.transaction_type?.code;
+                        // For movement transactions, show destination position with arrow
+                        if (["TRANSFER", "BULK_TRANSFER", "PROMOTION"].includes(typeCode || "")) {
+                          const toPos = (transaction as any).to_position?.title;
+                          if (toPos) {
+                            return (
+                              <div className="flex items-center gap-1.5">
+                                <span className="text-muted-foreground text-xs">→</span>
+                                <span>{toPos}</span>
+                              </div>
+                            );
+                          }
+                        }
+                        // For ACTING transactions
+                        if (typeCode === "ACTING") {
+                          const actingPos = (transaction as any).acting_position?.title;
+                          if (actingPos) {
+                            return (
+                              <div className="flex items-center gap-1.5">
+                                <span className="text-muted-foreground text-xs">→</span>
+                                <span>{actingPos}</span>
+                              </div>
+                            );
+                          }
+                        }
+                        // For SECONDMENT transactions
+                        if (typeCode === "SECONDMENT") {
+                          const secondmentPos = (transaction as any).secondment_position?.title;
+                          if (secondmentPos) {
+                            return (
+                              <div className="flex items-center gap-1.5">
+                                <span className="text-muted-foreground text-xs">→</span>
+                                <span>{secondmentPos}</span>
+                              </div>
+                            );
+                          }
+                        }
+                        // Default to position
+                        return transaction.position?.title || "—";
+                      })()}
                     </TableCell>
                     <TableCell>
                       {formatDateForDisplay(transaction.effective_date, "MMM d, yyyy")}

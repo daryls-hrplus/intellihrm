@@ -111,6 +111,25 @@ export function BulkEmployeeSelector({
         .eq("id", sourceCompanyId)
         .single();
 
+      // Check for employees with pending/draft transfer transactions
+      const { data: pendingTransactions } = await supabase
+        .from("employee_transactions")
+        .select(`
+          employee_id,
+          transaction_type:lookup_values!employee_transactions_transaction_type_id_fkey(code),
+          status,
+          from_company_id
+        `)
+        .in("status", ["draft", "pending_approval"])
+        .eq("from_company_id", sourceCompanyId);
+
+      // Get employee IDs with pending transfers
+      const pendingEmployeeIds = new Set(
+        (pendingTransactions || [])
+          .filter((t: any) => ["BULK_TRANSFER", "TRANSFER", "PROMOTION"].includes(t.transaction_type?.code))
+          .map((t: any) => t.employee_id)
+      );
+
       const mappedEmployees: BulkEmployee[] = filteredPositions.map((ep: any) => {
         const profile = profileMap.get(ep.employee_id);
         return {
@@ -126,7 +145,10 @@ export function BulkEmployeeSelector({
         };
       });
 
-      setEmployees(mappedEmployees);
+      // Filter out employees with pending transfers
+      const availableEmployees = mappedEmployees.filter(e => !pendingEmployeeIds.has(e.id));
+
+      setEmployees(availableEmployees);
     } catch (error) {
       console.error("Error fetching employees:", error);
     } finally {
