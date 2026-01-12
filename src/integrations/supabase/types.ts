@@ -2498,6 +2498,10 @@ export type Database = {
       }
       appraisal_cycles: {
         Row: {
+          auto_activate_enabled: boolean | null
+          auto_activated_at: string | null
+          auto_complete_enabled: boolean | null
+          auto_completed_at: string | null
           company_id: string
           competency_weight: number
           component_scale_id: string | null
@@ -2510,6 +2514,7 @@ export type Database = {
           evaluation_deadline: string | null
           feedback_360_weight: number | null
           goal_weight: number
+          grace_period_days: number | null
           id: string
           include_360_feedback: boolean | null
           include_360_insights: boolean | null
@@ -2542,6 +2547,10 @@ export type Database = {
           weights_override_reason: string | null
         }
         Insert: {
+          auto_activate_enabled?: boolean | null
+          auto_activated_at?: string | null
+          auto_complete_enabled?: boolean | null
+          auto_completed_at?: string | null
           company_id: string
           competency_weight?: number
           component_scale_id?: string | null
@@ -2554,6 +2563,7 @@ export type Database = {
           evaluation_deadline?: string | null
           feedback_360_weight?: number | null
           goal_weight?: number
+          grace_period_days?: number | null
           id?: string
           include_360_feedback?: boolean | null
           include_360_insights?: boolean | null
@@ -2586,6 +2596,10 @@ export type Database = {
           weights_override_reason?: string | null
         }
         Update: {
+          auto_activate_enabled?: boolean | null
+          auto_activated_at?: string | null
+          auto_complete_enabled?: boolean | null
+          auto_completed_at?: string | null
           company_id?: string
           competency_weight?: number
           component_scale_id?: string | null
@@ -2598,6 +2612,7 @@ export type Database = {
           evaluation_deadline?: string | null
           feedback_360_weight?: number | null
           goal_weight?: number
+          grace_period_days?: number | null
           id?: string
           include_360_feedback?: boolean | null
           include_360_insights?: boolean | null
@@ -3215,6 +3230,7 @@ export type Database = {
           action_priority: number
           action_type: Database["public"]["Enums"]["appraisal_action_type"]
           auto_execute: boolean
+          auto_execute_on_date: boolean | null
           company_id: string
           condition_cycles: number | null
           condition_operator: string
@@ -3225,6 +3241,7 @@ export type Database = {
           created_by: string | null
           description: string | null
           display_order: number
+          execute_after_days: number | null
           id: string
           is_active: boolean
           requires_hr_override: boolean
@@ -3240,6 +3257,7 @@ export type Database = {
           action_priority?: number
           action_type: Database["public"]["Enums"]["appraisal_action_type"]
           auto_execute?: boolean
+          auto_execute_on_date?: boolean | null
           company_id: string
           condition_cycles?: number | null
           condition_operator?: string
@@ -3250,6 +3268,7 @@ export type Database = {
           created_by?: string | null
           description?: string | null
           display_order?: number
+          execute_after_days?: number | null
           id?: string
           is_active?: boolean
           requires_hr_override?: boolean
@@ -3265,6 +3284,7 @@ export type Database = {
           action_priority?: number
           action_type?: Database["public"]["Enums"]["appraisal_action_type"]
           auto_execute?: boolean
+          auto_execute_on_date?: boolean | null
           company_id?: string
           condition_cycles?: number | null
           condition_operator?: string
@@ -3275,6 +3295,7 @@ export type Database = {
           created_by?: string | null
           description?: string | null
           display_order?: number
+          execute_after_days?: number | null
           id?: string
           is_active?: boolean
           requires_hr_override?: boolean
@@ -3319,6 +3340,7 @@ export type Database = {
           competency_score: number | null
           created_at: string
           cycle_id: string
+          due_date: string | null
           employee_comments: string | null
           employee_id: string
           employee_response_due_at: string | null
@@ -3329,7 +3351,9 @@ export type Database = {
           has_employee_response: boolean | null
           has_role_change: boolean | null
           id: string
+          is_overdue: boolean | null
           overall_score: number | null
+          overdue_notified_at: string | null
           primary_position_id: string | null
           responsibility_score: number | null
           reviewed_at: string | null
@@ -3342,6 +3366,7 @@ export type Database = {
           competency_score?: number | null
           created_at?: string
           cycle_id: string
+          due_date?: string | null
           employee_comments?: string | null
           employee_id: string
           employee_response_due_at?: string | null
@@ -3352,7 +3377,9 @@ export type Database = {
           has_employee_response?: boolean | null
           has_role_change?: boolean | null
           id?: string
+          is_overdue?: boolean | null
           overall_score?: number | null
+          overdue_notified_at?: string | null
           primary_position_id?: string | null
           responsibility_score?: number | null
           reviewed_at?: string | null
@@ -3365,6 +3392,7 @@ export type Database = {
           competency_score?: number | null
           created_at?: string
           cycle_id?: string
+          due_date?: string | null
           employee_comments?: string | null
           employee_id?: string
           employee_response_due_at?: string | null
@@ -3375,7 +3403,9 @@ export type Database = {
           has_employee_response?: boolean | null
           has_role_change?: boolean | null
           id?: string
+          is_overdue?: boolean | null
           overall_score?: number | null
+          overdue_notified_at?: string | null
           primary_position_id?: string | null
           responsibility_score?: number | null
           reviewed_at?: string | null
