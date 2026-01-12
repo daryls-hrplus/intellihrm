@@ -122,25 +122,41 @@ export function BulkTransferDialog({
     }
   }, [open]);
 
-  // Load destination departments when destination company changes
+  // Load destination departments and pay groups when destination company changes
   useEffect(() => {
     if (destinationCompanyId) {
       loadDestinationDepartments();
+      loadDestinationPayGroups();
+    } else {
+      setPayGroups([]);
+      setDestinationPayGroupId("");
     }
   }, [destinationCompanyId]);
 
   const loadInitialData = async () => {
-    const [companiesRes, payGroupsRes] = await Promise.all([
-      supabase.from("companies").select("id, name").eq("is_active", true).order("name"),
-      supabase.from("pay_groups").select("id, name, code").eq("is_active", true).order("name"),
-    ]);
+    const companiesRes = await supabase
+      .from("companies")
+      .select("id, name")
+      .eq("is_active", true)
+      .order("name");
 
     setCompanies(companiesRes.data || []);
-    setPayGroups(payGroupsRes.data || []);
 
     // Load transfer reasons
     const reasons = await fetchLookupValues("transfer_reason");
     setTransferReasons(reasons);
+  };
+
+  const loadDestinationPayGroups = async () => {
+    const { data } = await supabase
+      .from("pay_groups")
+      .select("id, name, code")
+      .eq("company_id", destinationCompanyId)
+      .eq("is_active", true)
+      .order("name");
+
+    setPayGroups(data || []);
+    setDestinationPayGroupId(""); // Reset selection when company changes
   };
 
   const loadDestinationDepartments = async () => {
