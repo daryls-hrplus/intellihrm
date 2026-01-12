@@ -301,15 +301,15 @@ export function BulkTransferMappingStep({
       <ScrollArea className="h-[400px] border rounded-lg">
         <div className="divide-y">
           {/* Header */}
-          <div className="flex items-center gap-4 p-3 bg-muted/50 text-sm font-medium sticky top-0 z-10">
-            <div className="w-6"></div>
-            <div className="w-48">{t("workforce.common.employee")}</div>
-            <div className="w-40">{t("workforce.modules.transactions.bulkTransfer.mapping.current")}</div>
-            <div className="w-6 flex justify-center">
+          <div className="flex items-center gap-3 p-3 bg-muted/50 text-sm font-medium sticky top-0 z-10">
+            <div className="w-5"></div>
+            <div className="w-52">{t("workforce.common.employee")}</div>
+            <div className="w-44">{t("workforce.modules.transactions.bulkTransfer.mapping.current")}</div>
+            <div className="w-5 flex justify-center">
               <ArrowRight className="h-4 w-4 text-muted-foreground" />
             </div>
-            <div className="flex-1">{t("workforce.modules.transactions.bulkTransfer.mapping.newAssignment")}</div>
-            <div className="w-20"></div>
+            <div className="flex-1 min-w-[400px]">{t("workforce.modules.transactions.bulkTransfer.mapping.newAssignment")}</div>
+            <div className="w-16"></div>
           </div>
 
           {filteredEmployees.map((employee, index) => {
@@ -323,12 +323,12 @@ export function BulkTransferMappingStep({
               <div
                 key={employee.id}
                 className={cn(
-                  "flex items-center gap-4 p-3 transition-colors",
+                  "flex items-center gap-3 p-3 transition-colors",
                   isMapped ? "bg-primary/5" : isPartial ? "bg-amber-50/50 dark:bg-amber-950/20" : ""
                 )}
               >
                 {/* Status Icon */}
-                <div className="w-6 flex justify-center">
+                <div className="w-5 flex justify-center">
                   {isMapped ? (
                     <Check className="h-4 w-4 text-primary" />
                   ) : isPartial ? (
@@ -339,7 +339,7 @@ export function BulkTransferMappingStep({
                 </div>
 
                 {/* Employee Info */}
-                <div className="w-48 min-w-0">
+                <div className="w-52 min-w-0">
                   <div className="font-medium truncate text-sm">
                     {employee.full_name || employee.email}
                   </div>
@@ -349,7 +349,7 @@ export function BulkTransferMappingStep({
                 </div>
 
                 {/* Current Assignment */}
-                <div className="w-40 min-w-0">
+                <div className="w-44 min-w-0">
                   <div className="text-sm truncate">{employee.position_title || "—"}</div>
                   <div className="text-xs text-muted-foreground truncate">
                     {employee.department_name || "—"}
@@ -357,12 +357,12 @@ export function BulkTransferMappingStep({
                 </div>
 
                 {/* Arrow */}
-                <div className="w-6 flex justify-center">
+                <div className="w-5 flex justify-center">
                   <ArrowRight className="h-4 w-4 text-muted-foreground" />
                 </div>
 
                 {/* New Assignment Selectors */}
-                <div className="flex-1 flex gap-2">
+                <div className="flex-1 flex gap-2 min-w-[400px]">
                   {/* Department Selector */}
                   <Select
                     value={employee.to_department_id || ""}
@@ -406,7 +406,7 @@ export function BulkTransferMappingStep({
                 </div>
 
                 {/* Actions */}
-                <div className="w-20 flex gap-1">
+                <div className="w-16 flex gap-1 shrink-0">
                   <TooltipProvider>
                     {employee.position_title && (
                       <Tooltip>
