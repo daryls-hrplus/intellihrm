@@ -1,5 +1,5 @@
-import { useState, useEffect, useMemo } from "react";
-import { Search, Check, AlertTriangle, X, ArrowRight, Copy, Loader2 } from "lucide-react";
+import { useState, useEffect, useMemo, useCallback } from "react";
+import { Search, Check, AlertTriangle, X, ArrowRight, Copy, Loader2, Users } from "lucide-react";
 import { useLanguage } from "@/hooks/useLanguage";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,6 +34,13 @@ interface Position {
   department_id: string;
 }
 
+interface SeatAvailability {
+  positionId: string;
+  availableSeats: number;
+  totalSeats: number;
+  isLoading: boolean;
+}
+
 interface BulkTransferMappingStepProps {
   employees: BulkEmployee[];
   destinationCompanyId: string;
@@ -52,6 +59,7 @@ export function BulkTransferMappingStep({
   const [positions, setPositions] = useState<Position[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [seatAvailability, setSeatAvailability] = useState<Map<string, SeatAvailability>>(new Map());
 
   // Fetch departments and positions for destination company
   useEffect(() => {
@@ -77,6 +85,94 @@ export function BulkTransferMappingStep({
       }
     }
   }, [defaultDepartmentId, departments.length]);
+
+  // Get unique position IDs from employee mappings
+  const selectedPositionIds = useMemo(() => {
+    const ids = new Set<string>();
+    employees.forEach(emp => {
+      if (emp.to_position_id) {
+        ids.add(emp.to_position_id);
+      }
+    });
+    return Array.from(ids);
+  }, [employees]);
+
+  // Count how many employees are targeting each position
+  const positionAssignmentCounts = useMemo(() => {
+    const counts = new Map<string, number>();
+    employees.forEach(emp => {
+      if (emp.to_position_id) {
+        counts.set(emp.to_position_id, (counts.get(emp.to_position_id) || 0) + 1);
+      }
+    });
+    return counts;
+  }, [employees]);
+
+  // Check seat availability for positions
+  const checkSeatAvailability = useCallback(async (positionIds: string[]) => {
+    if (positionIds.length === 0) return;
+
+    // Mark as loading
+    setSeatAvailability(prev => {
+      const newMap = new Map(prev);
+      positionIds.forEach(id => {
+        newMap.set(id, { positionId: id, availableSeats: 0, totalSeats: 0, isLoading: true });
+      });
+      return newMap;
+    });
+
+    try {
+      const { data, error } = await supabase
+        .from("seat_occupancy_summary")
+        .select("position_id, seat_id, allocation_status, is_shared_seat, current_occupant_count, max_occupants")
+        .in("position_id", positionIds);
+
+      if (error) {
+        console.error("Error checking seat availability:", error);
+        return;
+      }
+
+      // Group seats by position
+      const seatsByPosition = new Map<string, typeof data>();
+      positionIds.forEach(id => seatsByPosition.set(id, []));
+      
+      (data || []).forEach(seat => {
+        const existing = seatsByPosition.get(seat.position_id) || [];
+        existing.push(seat);
+        seatsByPosition.set(seat.position_id, existing);
+      });
+
+      // Calculate availability for each position
+      setSeatAvailability(prev => {
+        const newMap = new Map(prev);
+        seatsByPosition.forEach((seats, positionId) => {
+          const totalSeats = seats.length;
+          const availableSeats = seats.filter(seat => 
+            seat.allocation_status === "VACANT" || 
+            (seat.is_shared_seat && (seat.current_occupant_count || 0) < (seat.max_occupants || 1))
+          ).length;
+
+          newMap.set(positionId, {
+            positionId,
+            availableSeats,
+            totalSeats,
+            isLoading: false,
+          });
+        });
+        return newMap;
+      });
+    } catch (err) {
+      console.error("Error checking seat availability:", err);
+    }
+  }, []);
+
+  // Fetch seat availability when position selections change
+  useEffect(() => {
+    const positionsToCheck = selectedPositionIds.filter(id => !seatAvailability.has(id));
+    if (positionsToCheck.length > 0) {
+      checkSeatAvailability(positionsToCheck);
+    }
+  }, [selectedPositionIds, checkSeatAvailability]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -122,11 +218,68 @@ export function BulkTransferMappingStep({
     const mapped = employees.filter(e => e.to_department_id && e.to_position_id).length;
     const partiallyMapped = employees.filter(e => e.to_department_id && !e.to_position_id).length;
     const unmapped = employees.filter(e => !e.to_department_id).length;
-    return { mapped, partiallyMapped, unmapped, total: employees.length };
-  }, [employees]);
+    
+    // Check for seat issues
+    let seatIssues = 0;
+    positionAssignmentCounts.forEach((count, positionId) => {
+      const availability = seatAvailability.get(positionId);
+      if (availability && !availability.isLoading && count > availability.availableSeats) {
+        seatIssues++;
+      }
+    });
+    
+    return { mapped, partiallyMapped, unmapped, seatIssues, total: employees.length };
+  }, [employees, positionAssignmentCounts, seatAvailability]);
 
   const getPositionsForDepartment = (departmentId: string) => {
     return positions.filter(p => p.department_id === departmentId);
+  };
+
+  const getSeatStatusForPosition = (positionId: string): { 
+    status: 'loading' | 'available' | 'warning' | 'error'; 
+    availableSeats: number;
+    totalSeats: number;
+    assignedCount: number;
+  } | null => {
+    if (!positionId) return null;
+    
+    const availability = seatAvailability.get(positionId);
+    const assignedCount = positionAssignmentCounts.get(positionId) || 0;
+    
+    if (!availability) {
+      return { status: 'loading', availableSeats: 0, totalSeats: 0, assignedCount };
+    }
+    
+    if (availability.isLoading) {
+      return { status: 'loading', availableSeats: 0, totalSeats: 0, assignedCount };
+    }
+    
+    const remainingAfterAssignment = availability.availableSeats - assignedCount;
+    
+    if (remainingAfterAssignment < 0) {
+      return { 
+        status: 'error', 
+        availableSeats: availability.availableSeats, 
+        totalSeats: availability.totalSeats,
+        assignedCount 
+      };
+    }
+    
+    if (remainingAfterAssignment === 0) {
+      return { 
+        status: 'warning', 
+        availableSeats: availability.availableSeats, 
+        totalSeats: availability.totalSeats,
+        assignedCount 
+      };
+    }
+    
+    return { 
+      status: 'available', 
+      availableSeats: availability.availableSeats, 
+      totalSeats: availability.totalSeats,
+      assignedCount 
+    };
   };
 
   const updateEmployeeMapping = (
@@ -256,6 +409,11 @@ export function BulkTransferMappingStep({
               {mappingStats.partiallyMapped} {t("workforce.modules.transactions.bulkTransfer.mapping.partial")}
             </Badge>
           )}
+          {mappingStats.seatIssues > 0 && (
+            <Badge variant="destructive">
+              {mappingStats.seatIssues} {t("workforce.modules.transactions.bulkTransfer.mapping.seatIssues")}
+            </Badge>
+          )}
         </div>
         <Progress 
           value={(mappingStats.mapped / mappingStats.total) * 100} 
@@ -297,6 +455,16 @@ export function BulkTransferMappingStep({
         </div>
       )}
 
+      {/* Seat Issues Warning */}
+      {mappingStats.seatIssues > 0 && (
+        <div className="flex items-center gap-2 p-3 rounded-lg bg-destructive/10 text-destructive">
+          <AlertTriangle className="h-4 w-4 shrink-0" />
+          <span className="text-sm">
+            {t("workforce.modules.transactions.bulkTransfer.mapping.seatIssuesWarning")}
+          </span>
+        </div>
+      )}
+
       {/* Employee Mapping Table */}
       <ScrollArea className="h-[400px] border rounded-lg">
         <div className="divide-y">
@@ -308,7 +476,7 @@ export function BulkTransferMappingStep({
             <div className="w-5 flex justify-center">
               <ArrowRight className="h-4 w-4 text-muted-foreground" />
             </div>
-            <div className="flex-1 min-w-[400px]">{t("workforce.modules.transactions.bulkTransfer.mapping.newAssignment")}</div>
+            <div className="flex-1 min-w-[480px]">{t("workforce.modules.transactions.bulkTransfer.mapping.newAssignment")}</div>
             <div className="w-16"></div>
           </div>
 
@@ -318,18 +486,22 @@ export function BulkTransferMappingStep({
               : [];
             const isMapped = employee.to_department_id && employee.to_position_id;
             const isPartial = employee.to_department_id && !employee.to_position_id;
+            const seatStatus = employee.to_position_id ? getSeatStatusForPosition(employee.to_position_id) : null;
+            const hasSeatIssue = seatStatus?.status === 'error';
 
             return (
               <div
                 key={employee.id}
                 className={cn(
                   "flex items-center gap-3 p-3 transition-colors",
-                  isMapped ? "bg-primary/5" : isPartial ? "bg-amber-50/50 dark:bg-amber-950/20" : ""
+                  hasSeatIssue ? "bg-destructive/5" : isMapped ? "bg-primary/5" : isPartial ? "bg-amber-50/50 dark:bg-amber-950/20" : ""
                 )}
               >
                 {/* Status Icon */}
                 <div className="w-5 flex justify-center">
-                  {isMapped ? (
+                  {hasSeatIssue ? (
+                    <AlertTriangle className="h-4 w-4 text-destructive" />
+                  ) : isMapped ? (
                     <Check className="h-4 w-4 text-primary" />
                   ) : isPartial ? (
                     <AlertTriangle className="h-4 w-4 text-amber-500" />
@@ -362,7 +534,7 @@ export function BulkTransferMappingStep({
                 </div>
 
                 {/* New Assignment Selectors */}
-                <div className="flex-1 flex gap-2 min-w-[400px]">
+                <div className="flex-1 flex items-center gap-2 min-w-[480px]">
                   {/* Department Selector */}
                   <Select
                     value={employee.to_department_id || ""}
@@ -386,7 +558,10 @@ export function BulkTransferMappingStep({
                     onValueChange={(value) => updateEmployeeMapping(employee.id, 'to_position_id', value)}
                     disabled={!employee.to_department_id}
                   >
-                    <SelectTrigger className="w-[180px] h-9">
+                    <SelectTrigger className={cn(
+                      "w-[180px] h-9",
+                      hasSeatIssue && "border-destructive"
+                    )}>
                       <SelectValue placeholder={t("workforce.modules.transactions.bulkTransfer.mapping.selectPos")} />
                     </SelectTrigger>
                     <SelectContent>
@@ -403,6 +578,49 @@ export function BulkTransferMappingStep({
                       )}
                     </SelectContent>
                   </Select>
+
+                  {/* Seat Availability Indicator */}
+                  {seatStatus && (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className={cn(
+                            "flex items-center gap-1 px-2 py-1 rounded text-xs font-medium shrink-0",
+                            seatStatus.status === 'loading' && "bg-muted text-muted-foreground",
+                            seatStatus.status === 'available' && "bg-primary/10 text-primary",
+                            seatStatus.status === 'warning' && "bg-amber-100 text-amber-700 dark:bg-amber-950/50 dark:text-amber-400",
+                            seatStatus.status === 'error' && "bg-destructive/10 text-destructive"
+                          )}>
+                            {seatStatus.status === 'loading' ? (
+                              <Loader2 className="h-3 w-3 animate-spin" />
+                            ) : (
+                              <>
+                                <Users className="h-3 w-3" />
+                                <span>
+                                  {seatStatus.availableSeats - seatStatus.assignedCount}/{seatStatus.totalSeats}
+                                </span>
+                              </>
+                            )}
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          {seatStatus.status === 'loading' ? (
+                            t("workforce.modules.transactions.bulkTransfer.mapping.checkingSeats")
+                          ) : seatStatus.status === 'error' ? (
+                            t("workforce.modules.transactions.bulkTransfer.mapping.notEnoughSeats", {
+                              assigned: seatStatus.assignedCount,
+                              available: seatStatus.availableSeats,
+                            })
+                          ) : (
+                            t("workforce.modules.transactions.bulkTransfer.mapping.seatsAvailable", {
+                              remaining: seatStatus.availableSeats - seatStatus.assignedCount,
+                              total: seatStatus.totalSeats,
+                            })
+                          )}
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
                 </div>
 
                 {/* Actions */}
