@@ -101,6 +101,8 @@
     "upload": "Upload",
     "select": "Select",
     "selectAll": "Select All",
+    "deselectAll": "Deselect All",
+    "selected": "selected",
     "clear": "Clear",
     "reset": "Reset",
     "resetOrder": "Reset Order",
@@ -553,7 +555,8 @@
           "selectEmployeesFirst": "Please select at least one employee",
           "selectDestinationCompanyFirst": "Please select a destination company",
           "selectTransferReasonFirst": "Please select a transfer reason",
-          "selectEffectiveDateFirst": "Please select an effective date"
+          "selectEffectiveDateFirst": "Please select an effective date",
+          "searchEmployees": "Search employees..."
         }
       },
       "forecasting": {
