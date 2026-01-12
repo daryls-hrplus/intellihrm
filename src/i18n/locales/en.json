@@ -592,7 +592,12 @@
             "seatsAvailable": "{{remaining}} seats remaining ({{total}} total)"
           },
           "step5Title": "Map Employee Assignments",
-          "step6Title": "Review & Confirm"
+          "step6Title": "Review & Confirm",
+          "checkingVacancies": "Checking vacant positions...",
+          "noVacantPositions": "No vacant positions in this department",
+          "noVacantPositionsHint": "You may need to select a different department or create new positions first.",
+          "insufficientVacancies": "Only {{vacant}} vacant position(s) available for {{employees}} employees",
+          "vacantPositionsAvailable": "{{count}} vacant position(s) available"
         }
       },
       "forecasting": {
