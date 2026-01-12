@@ -3313,7 +3313,8 @@
       "biweekly": "Bi-weekly (Fortnightly)",
       "semimonthly": "Semi-monthly (Twice a month)",
       "monthly": "Monthly",
-      "codeExists": "A pay group with this code already exists"
+      "codeExists": "A pay group with this code already exists",
+      "creatingFor": "Company"
     },
     "payPeriods": {
       "title": "Pay Periods",

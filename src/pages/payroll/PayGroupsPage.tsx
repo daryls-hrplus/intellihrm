@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { Plus, Pencil, Trash2, Users, ArrowLeft, ShieldCheck, BookOpen, Globe } from "lucide-react";
+import { Plus, Pencil, Trash2, Users, ArrowLeft, ShieldCheck, BookOpen, Globe, Building2 } from "lucide-react";
 import { PayrollCalendarGenerator } from "@/components/payroll/PayrollCalendarGenerator";
 import { toast } from "sonner";
 import { formatDateForDisplay, getTodayString } from "@/utils/dateUtils";
@@ -57,6 +57,21 @@ export default function PayGroupsPage() {
     default_exchange_rate_source: "manual",
     start_date: getTodayString(),
     end_date: "",
+  });
+
+  const { data: selectedCompany } = useQuery({
+    queryKey: ["company", selectedCompanyId],
+    queryFn: async () => {
+      if (!selectedCompanyId) return null;
+      const { data, error } = await supabase
+        .from("companies")
+        .select("id, name, code")
+        .eq("id", selectedCompanyId)
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!selectedCompanyId,
   });
 
   const { data: payGroups, isLoading } = useQuery({
@@ -295,6 +310,15 @@ export default function PayGroupsPage() {
           <DialogHeader>
             <DialogTitle>{editingId ? t("payroll.payGroups.editPayGroup") : t("payroll.payGroups.addPayGroup")}</DialogTitle>
           </DialogHeader>
+          {selectedCompany && (
+            <div className="bg-muted/50 rounded-lg p-3 border">
+              <div className="flex items-center gap-2">
+                <Building2 className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm text-muted-foreground">{t("payroll.payGroups.creatingFor")}:</span>
+                <Badge variant="secondary" className="font-medium">{selectedCompany.name}</Badge>
+              </div>
+            </div>
+          )}
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
               <Label>{t("common.name")} *</Label>
