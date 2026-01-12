@@ -4,6 +4,7 @@ import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmployeeTransactionsList } from "@/components/workforce/EmployeeTransactionsList";
 import { TransactionFormDialog } from "@/components/workforce/TransactionFormDialog";
+import { BulkTransferDialog } from "@/components/workforce/BulkTransferDialog";
 import { EmployeeTransaction, TransactionType } from "@/hooks/useEmployeeTransactions";
 import { useWorkflow } from "@/hooks/useWorkflow";
 import { toast } from "sonner";
@@ -56,6 +57,7 @@ export default function EmployeeTransactionsPage() {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>("all");
   const [formDialogOpen, setFormDialogOpen] = useState(false);
+  const [bulkTransferDialogOpen, setBulkTransferDialogOpen] = useState(false);
   const [selectedTransactionType, setSelectedTransactionType] = useState<TransactionType | null>(null);
   const [selectedTransaction, setSelectedTransaction] = useState<EmployeeTransaction | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
@@ -75,9 +77,14 @@ export default function EmployeeTransactionsPage() {
   }, []);
 
   const handleCreateNew = (typeCode: string) => {
-    setSelectedTransactionType(typeCode as TransactionType);
-    setSelectedTransaction(null);
-    setFormDialogOpen(true);
+    // Open BulkTransferDialog for BULK_TRANSFER, otherwise open regular form
+    if (typeCode === "BULK_TRANSFER") {
+      setBulkTransferDialogOpen(true);
+    } else {
+      setSelectedTransactionType(typeCode as TransactionType);
+      setSelectedTransaction(null);
+      setFormDialogOpen(true);
+    }
   };
 
   const handleView = (transaction: EmployeeTransaction) => {
@@ -254,6 +261,12 @@ export default function EmployeeTransactionsPage() {
           onOpenChange={setFormDialogOpen}
           transactionType={selectedTransactionType}
           existingTransaction={selectedTransaction}
+          onSuccess={handleSuccess}
+        />
+
+        <BulkTransferDialog
+          open={bulkTransferDialogOpen}
+          onOpenChange={setBulkTransferDialogOpen}
           onSuccess={handleSuccess}
         />
       </div>
