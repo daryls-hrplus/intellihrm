@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { formatDateForDisplay } from "@/utils/dateUtils";
-import { Plus, Filter, Eye, Edit, Trash2, PlayCircle, Loader2, DollarSign, ChevronRight, ChevronDown } from "lucide-react";
+import { Plus, Eye, Edit, Trash2, PlayCircle, Loader2, DollarSign, ChevronRight, ChevronDown } from "lucide-react";
 import { useLanguage } from "@/hooks/useLanguage";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -12,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { TransactionTypePicker } from "./TransactionTypePicker";
 import {
   Table,
   TableBody,
@@ -107,6 +108,25 @@ export function EmployeeTransactionsList({
   const [editingCompensation, setEditingCompensation] = useState<{record: EmployeeCompensationRecord; transaction: EmployeeTransaction} | null>(null);
   const [deleteCompensationDialogOpen, setDeleteCompensationDialogOpen] = useState(false);
   const [compensationToDelete, setCompensationToDelete] = useState<{id: string; transactionId: string} | null>(null);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [recentTransactions, setRecentTransactions] = useState<TransactionType[]>(() => {
+    try {
+      const stored = localStorage.getItem("recentTransactionTypes");
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const handleSelectTransactionType = (type: TransactionType) => {
+    // Update recent transactions
+    const updated = [type, ...recentTransactions.filter((t) => t !== type)].slice(0, 5);
+    setRecentTransactions(updated);
+    localStorage.setItem("recentTransactionTypes", JSON.stringify(updated));
+    
+    // Trigger the create flow
+    onCreateNew(type);
+  };
 
   useEffect(() => {
     loadData();
@@ -333,24 +353,22 @@ export function EmployeeTransactionsList({
             </SelectContent>
           </Select>
         </div>
-        <Select onValueChange={onCreateNew}>
-          <SelectTrigger className="w-48 bg-emerald-100 border-emerald-300 text-foreground hover:bg-emerald-200">
-            <Plus className="mr-2 h-4 w-4 text-emerald-700" />
-            <SelectValue placeholder={t("workforce.modules.transactions.newTransaction")} />
-          </SelectTrigger>
-          <SelectContent className="bg-emerald-100 border-emerald-300">
-            {transactionTypes.map((type) => (
-              <SelectItem 
-                key={type.id} 
-                value={type.code}
-                className="text-foreground focus:bg-emerald-200 focus:text-foreground"
-              >
-                {type.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <Button
+          onClick={() => setPickerOpen(true)}
+          className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white"
+        >
+          <Plus className="h-4 w-4" />
+          {t("workforce.modules.transactions.newTransaction")}
+        </Button>
       </div>
+
+      {/* Transaction Type Picker Dialog */}
+      <TransactionTypePicker
+        open={pickerOpen}
+        onOpenChange={setPickerOpen}
+        onSelect={handleSelectTransactionType}
+        recentTransactions={recentTransactions}
+      />
 
       {/* Transactions Table */}
       <div className="rounded-lg border border-border">
