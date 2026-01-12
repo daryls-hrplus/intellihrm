@@ -411,7 +411,7 @@ export function BulkTransferDialog({
         // If transaction is approved (no workflow required), execute the transfer immediately
         if (!requiresWorkflow) {
           // End current position assignment
-          await supabase
+          const { error: endPosError } = await supabase
             .from("employee_positions")
             .update({ 
               is_active: false, 
@@ -420,9 +420,14 @@ export function BulkTransferDialog({
             .eq("employee_id", employee.id)
             .eq("is_active", true);
 
+          if (endPosError) {
+            console.error("Failed to end current position:", endPosError);
+            throw new Error(`Failed to end current position: ${endPosError.message}`);
+          }
+
           // Create new position assignment at destination
           if (toPositionId) {
-            await supabase
+            const { error: insertPosError } = await supabase
               .from("employee_positions")
               .insert({
                 employee_id: employee.id,
@@ -432,16 +437,26 @@ export function BulkTransferDialog({
                 is_active: true,
                 is_primary: true,
               });
+
+            if (insertPosError) {
+              console.error("Failed to create new position:", insertPosError);
+              throw new Error(`Failed to create new position: ${insertPosError.message}`);
+            }
           }
 
           // Update employee's company and department
-          await supabase
+          const { error: profileError } = await supabase
             .from("profiles")
             .update({ 
               company_id: destinationCompanyId,
               department_id: toDepartmentId,
             })
             .eq("id", employee.id);
+
+          if (profileError) {
+            console.error("Failed to update profile:", profileError);
+            throw new Error(`Failed to update employee profile: ${profileError.message}`);
+          }
         }
 
         successCount++;

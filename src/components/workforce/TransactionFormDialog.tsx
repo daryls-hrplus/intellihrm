@@ -607,41 +607,52 @@ export function TransactionFormDialog({
     if (success) {
       // If transaction is approved (no workflow required) and is a TRANSFER type, execute immediately
       if (!workflowRequired && transactionType === "TRANSFER" && formData.employee_id) {
-        try {
-          // End current position assignment
-          await supabase
+        // End current position assignment
+        const { error: endPosError } = await supabase
+          .from("employee_positions")
+          .update({ 
+            is_active: false, 
+            end_date: formData.effective_date 
+          })
+          .eq("employee_id", formData.employee_id)
+          .eq("is_active", true);
+
+        if (endPosError) {
+          console.error("Failed to end current position:", endPosError);
+          toast.error(`Failed to end current position: ${endPosError.message}`);
+        }
+
+        // Create new position assignment at destination
+        if (formData.to_position_id) {
+          const { error: insertPosError } = await supabase
             .from("employee_positions")
-            .update({ 
-              is_active: false, 
-              end_date: formData.effective_date 
-            })
-            .eq("employee_id", formData.employee_id)
-            .eq("is_active", true);
-
-          // Create new position assignment at destination
-          if (formData.to_position_id) {
-            await supabase
-              .from("employee_positions")
-              .insert({
-                employee_id: formData.employee_id,
-                position_id: formData.to_position_id,
-                department_id: formData.to_department_id,
-                start_date: formData.effective_date,
-                is_active: true,
-                is_primary: true,
-              });
-          }
-
-          // Update employee's company and department
-          await supabase
-            .from("profiles")
-            .update({ 
-              company_id: formData.to_company_id,
+            .insert({
+              employee_id: formData.employee_id,
+              position_id: formData.to_position_id,
               department_id: formData.to_department_id,
-            })
-            .eq("id", formData.employee_id);
-        } catch (err) {
-          console.error("Failed to execute approved transfer:", err);
+              start_date: formData.effective_date,
+              is_active: true,
+              is_primary: true,
+            });
+
+          if (insertPosError) {
+            console.error("Failed to create new position:", insertPosError);
+            toast.error(`Failed to create new position: ${insertPosError.message}`);
+          }
+        }
+
+        // Update employee's company and department
+        const { error: profileError } = await supabase
+          .from("profiles")
+          .update({ 
+            company_id: formData.to_company_id,
+            department_id: formData.to_department_id,
+          })
+          .eq("id", formData.employee_id);
+
+        if (profileError) {
+          console.error("Failed to update profile:", profileError);
+          toast.error(`Failed to update employee profile: ${profileError.message}`);
         }
       }
       
