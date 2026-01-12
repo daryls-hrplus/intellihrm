@@ -579,7 +579,12 @@
             "noPositions": "No positions in this department",
             "matchTitle": "Try to match current title",
             "applyBelow": "Apply to all below",
-            "applyUnmapped": "Apply to unmapped"
+            "applyUnmapped": "Apply to unmapped",
+            "seatIssues": "seat issues",
+            "seatIssuesWarning": "Some positions do not have enough available seats for the assigned employees",
+            "checkingSeats": "Checking seat availability...",
+            "notEnoughSeats": "Not enough seats: {{assigned}} assigned but only {{available}} available",
+            "seatsAvailable": "{{remaining}} seats remaining ({{total}} total)"
           },
           "step5Title": "Map Employee Assignments",
           "step6Title": "Review & Confirm"
