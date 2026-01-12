@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { CalendarIcon, Loader2, DollarSign, ArrowRight, Building2, AlertTriangle, Armchair } from "lucide-react";
+import { EmployeeContextCard } from "@/components/workforce/EmployeeContextCard";
+import { TransactionImpactSummary } from "@/components/workforce/TransactionImpactSummary";
 import { useLanguage } from "@/hooks/useLanguage";
 import { toast } from "sonner";
 import { formatDateForDisplay, toDateString, getTodayString } from "@/utils/dateUtils";
@@ -838,24 +840,7 @@ export function TransactionFormDialog({
       case "REHIRE":
         return (
           <>
-            <div className="space-y-2">
-              <Label>{t("common.employee")}</Label>
-              <Select
-                value={formData.employee_id || ""}
-                onValueChange={(v) => setFormData({ ...formData, employee_id: v })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder={t("workforce.modules.transactions.form.selectEmployee")} />
-                </SelectTrigger>
-                <SelectContent>
-                  {employees.map((e) => (
-                    <SelectItem key={e.id} value={e.id}>
-                      {e.full_name || e.email}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            {/* Employee dropdown removed - using common employee dropdown above */}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>{t("workforce.modules.transactions.form.hire.employeeType")}</Label>
@@ -2573,24 +2558,35 @@ export function TransactionFormDialog({
         <div className="space-y-4 py-4">
           {/* Common Fields */}
           {transactionType !== "HIRE" && (
-            <div className="space-y-2">
-              <Label>{t("common.employee")} *</Label>
-              <Select
-                value={formData.employee_id || ""}
-                onValueChange={(v) => setFormData({ ...formData, employee_id: v })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder={t("workforce.modules.transactions.form.selectEmployee")} />
-                </SelectTrigger>
-                <SelectContent>
-                  {employees.map((e) => (
-                    <SelectItem key={e.id} value={e.id}>
-                      {e.full_name || e.email}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            <>
+              <div className="space-y-2">
+                <Label>{t("common.employee")} *</Label>
+                <Select
+                  value={formData.employee_id || ""}
+                  onValueChange={(v) => setFormData({ ...formData, employee_id: v })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={t("workforce.modules.transactions.form.selectEmployee")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {employees.map((e) => (
+                      <SelectItem key={e.id} value={e.id}>
+                        {e.full_name || e.email}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Employee Context Card - shows current employment info */}
+              {formData.employee_id && (
+                <EmployeeContextCard 
+                  employeeId={formData.employee_id} 
+                  className="mt-2"
+                  compact
+                />
+              )}
+            </>
           )}
 
           <div className="space-y-2">
@@ -2627,6 +2623,41 @@ export function TransactionFormDialog({
 
           {/* Type-specific fields */}
           {renderTypeSpecificFields()}
+
+          {/* Transaction Impact Summary - shows what will change */}
+          {formData.employee_id && transactionType && 
+           ["PROMOTION", "DEMOTION", "TRANSFER", "STATUS_CHANGE", "CONTRACT_EXTENSION", "CONTRACT_CONVERSION", "RETIREMENT"].includes(transactionType) && (
+            <TransactionImpactSummary
+              transactionType={transactionType}
+              formData={{
+                from_position_id: employeePositions[0]?.position_id,
+                to_position_id: formData.to_position_id,
+                to_company_id: formData.to_company_id,
+                to_department_id: formData.to_department_id,
+                pay_group_id: formData.pay_group_id,
+                new_weekly_hours: formData.new_weekly_hours,
+                benefits_change_required: formData.benefits_change_required,
+                current_contract_end_date: formData.current_contract_end_date,
+                new_contract_end_date: formData.new_contract_end_date,
+                probation_applies: formData.probation_applies,
+                pension_eligible: formData.pension_eligible,
+              }}
+              positions={positions}
+              departments={departments}
+              companies={companies}
+              payGroups={payGroups}
+              currentAssignment={transferCurrentAssignment}
+              seatStatus={
+                formData.to_position_id
+                  ? {
+                      hasAvailableSeat: destinationSeatStatus.hasAvailableSeat,
+                      availableSeats: destinationSeatStatus.availableSeats,
+                    }
+                  : undefined
+              }
+              className="mt-4"
+            />
+          )}
 
           {/* Common fields continued */}
           <div className="space-y-2">
