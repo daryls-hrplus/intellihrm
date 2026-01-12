@@ -19496,6 +19496,8 @@ export type Database = {
           adjust_continuous_service: boolean | null
           adjusted_service_date: string | null
           benefits_change_required: boolean | null
+          bulk_transaction_count: number | null
+          bulk_transaction_group_id: string | null
           company_id: string | null
           confirmation_date: string | null
           continuous_service_date: string | null
@@ -19520,6 +19522,7 @@ export type Database = {
           has_adjusted_service: boolean | null
           hire_type_id: string | null
           id: string
+          is_bulk_transaction: boolean | null
           is_voluntary_demotion: boolean | null
           last_working_date: string | null
           new_contract_end_date: string | null
@@ -19566,6 +19569,8 @@ export type Database = {
           adjust_continuous_service?: boolean | null
           adjusted_service_date?: string | null
           benefits_change_required?: boolean | null
+          bulk_transaction_count?: number | null
+          bulk_transaction_group_id?: string | null
           company_id?: string | null
           confirmation_date?: string | null
           continuous_service_date?: string | null
@@ -19590,6 +19595,7 @@ export type Database = {
           has_adjusted_service?: boolean | null
           hire_type_id?: string | null
           id?: string
+          is_bulk_transaction?: boolean | null
           is_voluntary_demotion?: boolean | null
           last_working_date?: string | null
           new_contract_end_date?: string | null
@@ -19636,6 +19642,8 @@ export type Database = {
           adjust_continuous_service?: boolean | null
           adjusted_service_date?: string | null
           benefits_change_required?: boolean | null
+          bulk_transaction_count?: number | null
+          bulk_transaction_group_id?: string | null
           company_id?: string | null
           confirmation_date?: string | null
           continuous_service_date?: string | null
@@ -19660,6 +19668,7 @@ export type Database = {
           has_adjusted_service?: boolean | null
           hire_type_id?: string | null
           id?: string
+          is_bulk_transaction?: boolean | null
           is_voluntary_demotion?: boolean | null
           last_working_date?: string | null
           new_contract_end_date?: string | null

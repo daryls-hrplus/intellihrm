@@ -22,7 +22,8 @@ export type TransactionType =
   | "RATE_CHANGE"
   | "STATUS_CHANGE"
   | "CONTRACT_EXTENSION"
-  | "CONTRACT_CONVERSION";
+  | "CONTRACT_CONVERSION"
+  | "BULK_TRANSFER";
 
 export type TransactionStatus = 
   | "draft" 
@@ -133,6 +134,11 @@ export interface EmployeeTransaction {
   // Workflow
   workflow_instance_id: string | null;
   requires_workflow: boolean;
+  
+  // Bulk transfer fields
+  is_bulk_transaction: boolean;
+  bulk_transaction_group_id: string | null;
+  bulk_transaction_count: number | null;
   
   // Audit
   created_by: string;

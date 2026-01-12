@@ -46,6 +46,7 @@ const workflowCodeMap: Record<TransactionType, string> = {
   STATUS_CHANGE: "status_change",
   CONTRACT_EXTENSION: "contract_extension",
   CONTRACT_CONVERSION: "contract_conversion",
+  BULK_TRANSFER: "bulk_transfer",
 };
 
 export default function EmployeeTransactionsPage() {
