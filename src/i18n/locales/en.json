@@ -508,8 +508,10 @@
             "toDepartment": "To Department",
             "fromCompany": "From Company",
             "toCompany": "To Company",
-            "transferReason": "Transfer Reason"
+            "transferReason": "Transfer Reason",
+            "reason": "Transfer Reason"
           },
+          "payGroup": "Pay Group",
           "termination": {
             "terminationType": "Termination Type",
             "terminationReason": "Termination Reason",
@@ -534,6 +536,7 @@
           "employeesInScope": "Employees in selected scope",
           "selectedEmployees": "Selected Employees",
           "transferDetails": "Transfer Details",
+          "defaultDepartment": "Default Department",
           "destinationDepartment": "Destination Department",
           "destinationPayGroup": "Destination Pay Group",
           "transferReason": "Transfer Reason",
