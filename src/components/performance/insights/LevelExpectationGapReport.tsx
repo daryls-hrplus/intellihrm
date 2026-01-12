@@ -80,23 +80,44 @@ export function LevelExpectationGapReport({ companyId }: LevelExpectationGapRepo
 
       // Get employee positions to determine job levels
       const employeeIds = participants.map((p) => p.employee_id);
-      const { data: positions } = await supabase
+      const { data: employeePositions } = await supabase
         .from("employee_positions")
-        .select(`
-          employee_id,
-          positions!inner (
-            job_id,
-            jobs (
-              id,
-              job_level_id,
-              job_grade_id,
-              job_levels (id, name),
-              job_grades (id, name)
-            )
-          )
-        `)
+        .select("employee_id, position_id")
         .in("employee_id", employeeIds)
         .eq("is_active", true);
+
+      // Get position details
+      const positionIds = (employeePositions || []).map((ep) => ep.position_id);
+      const { data: positionsData } = await supabase
+        .from("positions")
+        .select("id, job_id")
+        .in("id", positionIds);
+
+      // Get job details with levels and grades (job_level and job_grade are direct columns)
+      const jobIds = (positionsData || []).map((p) => p.job_id).filter(Boolean);
+      const { data: jobsData } = await supabase
+        .from("jobs")
+        .select("id, job_level, job_grade")
+        .in("id", jobIds);
+
+      // Build lookup maps
+      const positionMap = new Map((positionsData || []).map((p) => [p.id, p]));
+      const jobMap = new Map((jobsData || []).map((j) => [j.id, j]));
+
+      // Build positions with full job info
+      const positions = (employeePositions || []).map((ep) => {
+        const pos = positionMap.get(ep.position_id);
+        const job = pos?.job_id ? jobMap.get(pos.job_id) : null;
+        return {
+          employee_id: ep.employee_id,
+          positions: pos ? {
+            jobs: job ? {
+              job_levels: { name: job.job_level || "" },
+              job_grades: { name: job.job_grade || "" },
+            } : null,
+          } : null,
+        };
+      });
 
       // Get employee names
       const { data: profiles } = await supabase

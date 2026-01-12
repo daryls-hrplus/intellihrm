@@ -48,6 +48,11 @@ const transactionTypeToChangeType: Record<TransactionType, string> = {
   TERMINATION: "adjustment",
   SALARY_CHANGE: "salary_change",
   RATE_CHANGE: "rate_change",
+  DEMOTION: "demotion",
+  RETIREMENT: "adjustment",
+  STATUS_CHANGE: "adjustment",
+  CONTRACT_EXTENSION: "adjustment",
+  CONTRACT_CONVERSION: "adjustment",
 };
 
 export function TransactionCompensationDialog({
