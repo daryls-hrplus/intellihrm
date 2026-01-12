@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -149,6 +149,8 @@ export function EnhancedRatingScaleDialog({
     is_active: true,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const hasInitializedRef = useRef(false);
+  const previousOpenRef = useRef(open);
 
   // Get current preset based on scale type
   const currentPreset = useMemo(() => {
@@ -164,8 +166,19 @@ export function EnhancedRatingScaleDialog({
     return levels;
   }, [formData.min_rating, formData.max_rating]);
 
-  // Initialize form data when dialog opens
+  // Initialize form data ONLY when dialog first opens (not on every render)
   useEffect(() => {
+    // Only initialize when dialog transitions from closed to open
+    const justOpened = open && !previousOpenRef.current;
+    previousOpenRef.current = open;
+
+    if (!justOpened) {
+      return;
+    }
+
+    // Reset initialization flag when opening
+    hasInitializedRef.current = true;
+
     if (editingScale) {
       // Editing existing scale
       const labels = typeof editingScale.rating_labels === 'object' && editingScale.rating_labels !== null
@@ -571,7 +584,7 @@ export function EnhancedRatingScaleDialog({
             >
               <Textarea
                 value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
                 placeholder={t("performance.setup.descriptionPlaceholder", "Describe when and how this scale should be used...")}
                 rows={2}
               />
@@ -608,11 +621,12 @@ export function EnhancedRatingScaleDialog({
                     id="purpose-appraisal"
                     checked={formData.scale_purpose.includes("appraisal")}
                     onCheckedChange={(checked) => {
-                      if (checked) {
-                        setFormData({ ...formData, scale_purpose: [...formData.scale_purpose, "appraisal"] });
-                      } else {
-                        setFormData({ ...formData, scale_purpose: formData.scale_purpose.filter(p => p !== "appraisal") });
-                      }
+                      setFormData((prev) => ({
+                        ...prev,
+                        scale_purpose: checked
+                          ? [...prev.scale_purpose, "appraisal"]
+                          : prev.scale_purpose.filter(p => p !== "appraisal"),
+                      }));
                     }}
                   />
                   <div className="grid gap-1 leading-none">
@@ -629,11 +643,12 @@ export function EnhancedRatingScaleDialog({
                     id="purpose-goals"
                     checked={formData.scale_purpose.includes("goals")}
                     onCheckedChange={(checked) => {
-                      if (checked) {
-                        setFormData({ ...formData, scale_purpose: [...formData.scale_purpose, "goals"] });
-                      } else {
-                        setFormData({ ...formData, scale_purpose: formData.scale_purpose.filter(p => p !== "goals") });
-                      }
+                      setFormData((prev) => ({
+                        ...prev,
+                        scale_purpose: checked
+                          ? [...prev.scale_purpose, "goals"]
+                          : prev.scale_purpose.filter(p => p !== "goals"),
+                      }));
                     }}
                   />
                   <div className="grid gap-1 leading-none">
@@ -650,11 +665,12 @@ export function EnhancedRatingScaleDialog({
                     id="purpose-360"
                     checked={formData.scale_purpose.includes("360_feedback")}
                     onCheckedChange={(checked) => {
-                      if (checked) {
-                        setFormData({ ...formData, scale_purpose: [...formData.scale_purpose, "360_feedback"] });
-                      } else {
-                        setFormData({ ...formData, scale_purpose: formData.scale_purpose.filter(p => p !== "360_feedback") });
-                      }
+                      setFormData((prev) => ({
+                        ...prev,
+                        scale_purpose: checked
+                          ? [...prev.scale_purpose, "360_feedback"]
+                          : prev.scale_purpose.filter(p => p !== "360_feedback"),
+                      }));
                     }}
                   />
                   <div className="grid gap-1 leading-none">
@@ -719,7 +735,7 @@ export function EnhancedRatingScaleDialog({
                       <div className="flex items-center gap-2">
                         <Switch
                           checked={formData.is_default}
-                          onCheckedChange={(checked) => setFormData({ ...formData, is_default: checked })}
+                          onCheckedChange={(checked) => setFormData((prev) => ({ ...prev, is_default: checked }))}
                         />
                         <Label className="cursor-pointer">{t("common.default", "Default")}</Label>
                         <HelpCircle className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
@@ -741,7 +757,7 @@ export function EnhancedRatingScaleDialog({
                       <div className="flex items-center gap-2">
                         <Switch
                           checked={formData.is_active}
-                          onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
+                          onCheckedChange={(checked) => setFormData((prev) => ({ ...prev, is_active: checked }))}
                         />
                         <Label className="cursor-pointer">{t("common.active", "Active")}</Label>
                         <HelpCircle className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
