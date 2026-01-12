@@ -559,7 +559,26 @@
           "selectDestinationCompanyFirst": "Please select a destination company",
           "selectTransferReasonFirst": "Please select a transfer reason",
           "selectEffectiveDateFirst": "Please select an effective date",
-          "searchEmployees": "Search employees..."
+          "searchEmployees": "Search employees...",
+          "mappingMode": "Mapping Mode",
+          "sameForAll": "Apply same department & position to all employees",
+          "mapIndividually": "Map each employee to their specific department & position",
+          "mapEmployees": "Map Employee Assignments",
+          "mapping": {
+            "mapped": "mapped",
+            "partial": "partial",
+            "unmappedWarning": "{{count}} employees still need department and position assignment",
+            "current": "Current",
+            "newAssignment": "New Assignment",
+            "selectDept": "Select department",
+            "selectPos": "Select position",
+            "noPositions": "No positions in this department",
+            "matchTitle": "Try to match current title",
+            "applyBelow": "Apply to all below",
+            "applyUnmapped": "Apply to unmapped"
+          },
+          "step5Title": "Map Employee Assignments",
+          "step6Title": "Review & Confirm"
         }
       },
       "forecasting": {

@@ -26,6 +26,13 @@ export interface BulkEmployee {
   department_name: string | null;
   company_id: string | null;
   company_name: string | null;
+  // Destination mapping fields for individual mapping
+  to_department_id?: string | null;
+  to_department_name?: string | null;
+  to_position_id?: string | null;
+  to_position_title?: string | null;
+  mapping_status?: 'unmapped' | 'mapped' | 'error';
+  mapping_error?: string | null;
 }
 
 interface BulkEmployeeSelectorProps {
