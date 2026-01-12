@@ -282,8 +282,14 @@ export function useEmployeeTransactions() {
         normalizedData.position_id = data.acting_position_id;
       }
       
-      // For PROMOTION transactions, set position_id to to_position_id
+      // For PROMOTION and TRANSFER transactions, set position_id to to_position_id
+      // This ensures seat orchestration uses the correct destination position
       if (data.to_position_id && !data.position_id) {
+        normalizedData.position_id = data.to_position_id;
+      }
+      
+      // For TRANSFER transactions, ensure position_id is set from to_position_id
+      if (data.transfer_reason_id && data.to_position_id) {
         normalizedData.position_id = data.to_position_id;
       }
 
@@ -656,13 +662,54 @@ export function useEmployeeTransactions() {
           data.effective_date || new Date().toISOString().split('T')[0],
           { fromPositionId: data.from_position_id || undefined }
         );
+        
+        // Defense in depth: If seat orchestration fails, rollback the transaction
         if (!seatResult.success) {
-          console.warn("Seat orchestration for PROMOTION:", seatResult.error);
+          console.error("Seat orchestration failed for PROMOTION - rolling back transaction:", seatResult.error);
+          
+          // Rollback: Restore the previous position assignment if it was deactivated
+          if (data.from_position_id) {
+            const { data: prevAssignment } = await supabase
+              .from("employee_positions")
+              .select("id")
+              .eq("employee_id", data.employee_id)
+              .eq("position_id", data.from_position_id)
+              .eq("is_active", false)
+              .order("end_date", { ascending: false })
+              .limit(1)
+              .single();
+            
+            if (prevAssignment) {
+              await supabase
+                .from("employee_positions")
+                .update({ is_active: true, end_date: null })
+                .eq("id", prevAssignment.id);
+            }
+          }
+          
+          // Rollback: Delete the newly created position assignment
+          await supabase
+            .from("employee_positions")
+            .delete()
+            .eq("employee_id", data.employee_id)
+            .eq("position_id", data.to_position_id)
+            .eq("start_date", data.effective_date);
+          
+          // Rollback: Delete the transaction
+          await supabase
+            .from("employee_transactions")
+            .delete()
+            .eq("id", newTransaction.id);
+          
+          toast.error("Promotion failed: " + (seatResult.error || "No available seat in destination position"));
+          setIsLoading(false);
+          return null;
         }
       }
 
       // For TRANSFER transactions, also create an employee_positions record if position changes
-      if (data.transfer_reason_id && data.position_id && data.employee_id) {
+      // Use normalizedData.position_id which is set from to_position_id for transfers
+      if (data.transfer_reason_id && normalizedData.position_id && data.employee_id) {
         // Get current primary position to deactivate it
         const { data: currentPosition } = await supabase
           .from("employee_positions")
@@ -672,7 +719,7 @@ export function useEmployeeTransactions() {
           .eq("is_active", true)
           .single();
 
-        if (currentPosition && currentPosition.position_id !== data.position_id) {
+        if (currentPosition && currentPosition.position_id !== normalizedData.position_id) {
           // Deactivate the current primary position assignment
           await supabase
             .from("employee_positions")
@@ -685,7 +732,7 @@ export function useEmployeeTransactions() {
           // Create new position assignment
           const employeePositionData = {
             employee_id: data.employee_id,
-            position_id: data.position_id,
+            position_id: normalizedData.position_id,
             start_date: data.effective_date,
             end_date: null,
             is_primary: true,
@@ -713,12 +760,38 @@ export function useEmployeeTransactions() {
             'TRANSFER',
             newTransaction.id,
             data.employee_id,
-            data.position_id,
+            normalizedData.position_id, // Use normalized position_id (from to_position_id)
             data.effective_date || new Date().toISOString().split('T')[0],
             { fromPositionId: currentPosition.position_id || undefined }
           );
+          
+          // Defense in depth: If seat orchestration fails, rollback the transaction
           if (!seatResult.success) {
-            console.warn("Seat orchestration for TRANSFER:", seatResult.error);
+            console.error("Seat orchestration failed for TRANSFER - rolling back transaction:", seatResult.error);
+            
+            // Rollback: Restore the previous position assignment
+            await supabase
+              .from("employee_positions")
+              .update({ is_active: true, end_date: null })
+              .eq("id", currentPosition.id);
+            
+            // Rollback: Delete the newly created position assignment
+            await supabase
+              .from("employee_positions")
+              .delete()
+              .eq("employee_id", data.employee_id)
+              .eq("position_id", normalizedData.position_id)
+              .eq("start_date", data.effective_date);
+            
+            // Rollback: Delete the transaction
+            await supabase
+              .from("employee_transactions")
+              .delete()
+              .eq("id", newTransaction.id);
+            
+            toast.error("Transfer failed: " + (seatResult.error || "No available seat in destination position"));
+            setIsLoading(false);
+            return null;
           }
         }
       }
@@ -829,8 +902,14 @@ export function useEmployeeTransactions() {
         normalizedData.position_id = data.acting_position_id;
       }
       
-      // For PROMOTION transactions, set position_id to to_position_id
+      // For PROMOTION and TRANSFER transactions, set position_id to to_position_id
+      // This ensures seat orchestration uses the correct destination position
       if (data.to_position_id && !data.position_id) {
+        normalizedData.position_id = data.to_position_id;
+      }
+      
+      // For TRANSFER transactions, ensure position_id is set from to_position_id
+      if (data.transfer_reason_id && data.to_position_id) {
         normalizedData.position_id = data.to_position_id;
       }
 
