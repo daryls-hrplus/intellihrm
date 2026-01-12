@@ -114,6 +114,8 @@ export function BulkTransferDialog({
   const [notes, setNotes] = useState<string>("");
   const [requiresWorkflow, setRequiresWorkflow] = useState(false);
   const [mappingMode, setMappingMode] = useState<"same" | "individual">("individual");
+  const [vacantPositionCount, setVacantPositionCount] = useState<number | null>(null);
+  const [isCheckingVacancies, setIsCheckingVacancies] = useState(false);
 
   // Load initial data
   useEffect(() => {
@@ -131,7 +133,67 @@ export function BulkTransferDialog({
       setPayGroups([]);
       setDestinationPayGroupId("");
     }
+    // Reset vacancy check when company changes
+    setVacantPositionCount(null);
+    setDestinationDepartmentId("");
   }, [destinationCompanyId]);
+
+  // Check for vacant positions when destination department changes
+  useEffect(() => {
+    if (destinationDepartmentId && destinationDepartmentId !== "_keep") {
+      checkVacantPositions(destinationDepartmentId);
+    } else {
+      setVacantPositionCount(null);
+    }
+  }, [destinationDepartmentId]);
+
+  const checkVacantPositions = async (departmentId: string) => {
+    setIsCheckingVacancies(true);
+    try {
+      // Get all positions in the department
+      const { data: positions } = await supabase
+        .from("positions")
+        .select("id, authorized_headcount")
+        .eq("department_id", departmentId)
+        .eq("is_active", true);
+
+      if (!positions || positions.length === 0) {
+        setVacantPositionCount(0);
+        setIsCheckingVacancies(false);
+        return;
+      }
+
+      // Get filled positions (active employee_positions)
+      const positionIds = positions.map(p => p.id);
+      const { data: filledPositions } = await supabase
+        .from("employee_positions")
+        .select("position_id")
+        .in("position_id", positionIds)
+        .eq("is_active", true);
+
+      // Count filled per position
+      const filledCounts = new Map<string, number>();
+      (filledPositions || []).forEach(fp => {
+        filledCounts.set(fp.position_id, (filledCounts.get(fp.position_id) || 0) + 1);
+      });
+
+      // Calculate total vacant
+      let totalVacant = 0;
+      positions.forEach(pos => {
+        const headcount = pos.authorized_headcount || 1;
+        const filled = filledCounts.get(pos.id) || 0;
+        const vacant = Math.max(0, headcount - filled);
+        totalVacant += vacant;
+      });
+
+      setVacantPositionCount(totalVacant);
+    } catch (error) {
+      console.error("Error checking vacant positions:", error);
+      setVacantPositionCount(null);
+    } finally {
+      setIsCheckingVacancies(false);
+    }
+  };
 
   const loadInitialData = async () => {
     const companiesRes = await supabase
@@ -517,6 +579,51 @@ export function BulkTransferDialog({
                   ))}
                 </SelectContent>
               </Select>
+              
+              {/* Vacancy Alert */}
+              {destinationDepartmentId && destinationDepartmentId !== "_keep" && (
+                <div className="mt-2">
+                  {isCheckingVacancies ? (
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      {t("workforce.modules.transactions.bulkTransfer.checkingVacancies")}
+                    </div>
+                  ) : vacantPositionCount !== null && (
+                    vacantPositionCount === 0 ? (
+                      <div className="flex items-start gap-2 p-3 rounded-lg bg-destructive/10 border border-destructive/20">
+                        <AlertTriangle className="h-4 w-4 text-destructive shrink-0 mt-0.5" />
+                        <div className="text-sm">
+                          <span className="font-medium text-destructive">
+                            {t("workforce.modules.transactions.bulkTransfer.noVacantPositions")}
+                          </span>
+                          <p className="text-muted-foreground mt-0.5">
+                            {t("workforce.modules.transactions.bulkTransfer.noVacantPositionsHint")}
+                          </p>
+                        </div>
+                      </div>
+                    ) : vacantPositionCount < selectedEmployees.length ? (
+                      <div className="flex items-start gap-2 p-3 rounded-lg bg-warning/10 border border-warning/20">
+                        <AlertTriangle className="h-4 w-4 text-warning shrink-0 mt-0.5" />
+                        <div className="text-sm">
+                          <span className="font-medium text-warning">
+                            {t("workforce.modules.transactions.bulkTransfer.insufficientVacancies", {
+                              vacant: vacantPositionCount,
+                              employees: selectedEmployees.length
+                            })}
+                          </span>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2 text-sm text-success">
+                        <Check className="h-4 w-4" />
+                        {t("workforce.modules.transactions.bulkTransfer.vacantPositionsAvailable", {
+                          count: vacantPositionCount
+                        })}
+                      </div>
+                    )
+                  )}
+                </div>
+              )}
             </div>
 
             <div className="space-y-2">
