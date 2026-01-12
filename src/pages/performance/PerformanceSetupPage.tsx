@@ -9,6 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -101,6 +102,10 @@ export default function PerformanceSetupPage() {
   const [editingGoalTemplate, setEditingGoalTemplate] = useState<GoalTemplate | null>(null);
   const [editingRecognitionCategory, setEditingRecognitionCategory] = useState<RecognitionCategory | null>(null);
 
+  // Delete confirmation state
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<{ type: string; id: string; name: string } | null>(null);
+
   const { scales: overallScales, isLoading: overallScalesLoading, refetch: refetchOverallScales } = useOverallRatingScales({ 
     companyId: selectedCompany, 
     activeOnly: false 
@@ -167,45 +172,50 @@ export default function PerformanceSetupPage() {
     if (!error) setAppraisalCycles(data || []);
   };
 
-  const handleDeleteRatingScale = async (id: string) => {
-    if (!confirm("Delete this rating scale?")) return;
-    const { error } = await supabase.from("performance_rating_scales").delete().eq("id", id);
-    if (error) { toast.error("Failed to delete"); return; }
-    toast.success("Rating scale deleted");
-    fetchRatingScales();
+  const confirmDelete = (type: string, id: string, name: string) => {
+    setDeleteTarget({ type, id, name });
+    setDeleteConfirmOpen(true);
   };
 
-  const handleDeleteOverallScale = async (id: string) => {
-    if (!confirm("Delete this overall rating scale?")) return;
-    const { error } = await supabase.from("overall_rating_scales").delete().eq("id", id);
-    if (error) { toast.error("Failed to delete"); return; }
-    toast.success("Overall rating scale deleted");
-    refetchOverallScales();
+  const executeDelete = async () => {
+    if (!deleteTarget) return;
+    
+    try {
+      let error;
+      switch (deleteTarget.type) {
+        case 'rating_scale':
+          ({ error } = await supabase.from("performance_rating_scales").delete().eq("id", deleteTarget.id));
+          if (!error) { toast.success("Rating scale deleted"); fetchRatingScales(); }
+          break;
+        case 'overall_scale':
+          ({ error } = await supabase.from("overall_rating_scales").delete().eq("id", deleteTarget.id));
+          if (!error) { toast.success("Overall rating scale deleted"); refetchOverallScales(); }
+          break;
+        case 'competency':
+          ({ error } = await supabase.from("competencies").delete().eq("id", deleteTarget.id));
+          if (!error) { toast.success("Competency deleted"); fetchCompetencies(); }
+          break;
+        case 'goal_template':
+          ({ error } = await supabase.from("goal_templates").delete().eq("id", deleteTarget.id));
+          if (!error) { toast.success("Goal template deleted"); fetchGoalTemplates(); }
+          break;
+        case 'recognition_category':
+          ({ error } = await supabase.from("recognition_categories").delete().eq("id", deleteTarget.id));
+          if (!error) { toast.success("Recognition category deleted"); fetchRecognitionCategories(); }
+          break;
+      }
+      if (error) toast.error("Failed to delete");
+    } finally {
+      setDeleteConfirmOpen(false);
+      setDeleteTarget(null);
+    }
   };
 
-  const handleDeleteCompetency = async (id: string) => {
-    if (!confirm("Delete this competency?")) return;
-    const { error } = await supabase.from("competencies").delete().eq("id", id);
-    if (error) { toast.error("Failed to delete"); return; }
-    toast.success("Competency deleted");
-    fetchCompetencies();
-  };
-
-  const handleDeleteGoalTemplate = async (id: string) => {
-    if (!confirm("Delete this template?")) return;
-    const { error } = await supabase.from("goal_templates").delete().eq("id", id);
-    if (error) { toast.error("Failed to delete"); return; }
-    toast.success("Goal template deleted");
-    fetchGoalTemplates();
-  };
-
-  const handleDeleteRecognitionCategory = async (id: string) => {
-    if (!confirm("Delete this category?")) return;
-    const { error } = await supabase.from("recognition_categories").delete().eq("id", id);
-    if (error) { toast.error("Failed to delete"); return; }
-    toast.success("Recognition category deleted");
-    fetchRecognitionCategories();
-  };
+  const handleDeleteRatingScale = (id: string, name?: string) => confirmDelete('rating_scale', id, name || 'this rating scale');
+  const handleDeleteOverallScale = (id: string, name?: string) => confirmDelete('overall_scale', id, name || 'this overall rating scale');
+  const handleDeleteCompetency = (id: string, name?: string) => confirmDelete('competency', id, name || 'this competency');
+  const handleDeleteGoalTemplate = (id: string, name?: string) => confirmDelete('goal_template', id, name || 'this template');
+  const handleDeleteRecognitionCategory = (id: string, name?: string) => confirmDelete('recognition_category', id, name || 'this category');
 
   return (
     <AppLayout>
@@ -533,6 +543,24 @@ export default function PerformanceSetupPage() {
         <CompetencyDialog open={competencyDialogOpen} onOpenChange={setCompetencyDialogOpen} companyId={selectedCompany} editingCompetency={editingCompetency} onSuccess={() => { setCompetencyDialogOpen(false); fetchCompetencies(); }} />
         <GoalTemplateDialog open={goalTemplateDialogOpen} onOpenChange={setGoalTemplateDialogOpen} companyId={selectedCompany} editingTemplate={editingGoalTemplate} onSuccess={() => { setGoalTemplateDialogOpen(false); fetchGoalTemplates(); }} />
         <RecognitionCategoryDialog open={recognitionCategoryDialogOpen} onOpenChange={setRecognitionCategoryDialogOpen} companyId={selectedCompany} editingCategory={editingRecognitionCategory} onSuccess={() => { setRecognitionCategoryDialogOpen(false); fetchRecognitionCategories(); }} />
+        
+        {/* Delete Confirmation Dialog */}
+        <AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Confirm Delete</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to delete "{deleteTarget?.name}"? This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={executeDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </AppLayout>
   );
@@ -579,7 +607,7 @@ function RatingScalesContent({ scales, isLoading, onAdd, onEdit, onDelete, t }: 
                   </TableCell>
                   <TableCell className="text-right">
                     <Button variant="ghost" size="icon" onClick={() => onEdit(scale)}><Edit className="h-4 w-4" /></Button>
-                    <Button variant="ghost" size="icon" onClick={() => onDelete(scale.id)}><Trash2 className="h-4 w-4" /></Button>
+                    <Button variant="ghost" size="icon" onClick={() => onDelete(scale.id, scale.name)}><Trash2 className="h-4 w-4" /></Button>
                   </TableCell>
                 </TableRow>
               ))}
@@ -627,7 +655,7 @@ function OverallScalesContent({ scales, isLoading, onAdd, onEdit, onDelete, t }:
                   </TableCell>
                   <TableCell className="text-right">
                     <Button variant="ghost" size="icon" onClick={() => onEdit(scale)}><Edit className="h-4 w-4" /></Button>
-                    <Button variant="ghost" size="icon" onClick={() => onDelete(scale.id)}><Trash2 className="h-4 w-4" /></Button>
+                    <Button variant="ghost" size="icon" onClick={() => onDelete(scale.id, scale.name)}><Trash2 className="h-4 w-4" /></Button>
                   </TableCell>
                 </TableRow>
               ))}
@@ -670,7 +698,7 @@ function CompetenciesContent({ competencies, isLoading, onAdd, onEdit, onDelete,
                   <TableCell><Badge variant={comp.is_active ? "default" : "secondary"}>{comp.is_active ? "Active" : "Inactive"}</Badge></TableCell>
                   <TableCell className="text-right">
                     <Button variant="ghost" size="icon" onClick={() => onEdit(comp)}><Edit className="h-4 w-4" /></Button>
-                    <Button variant="ghost" size="icon" onClick={() => onDelete(comp.id)}><Trash2 className="h-4 w-4" /></Button>
+                    <Button variant="ghost" size="icon" onClick={() => onDelete(comp.id, comp.name)}><Trash2 className="h-4 w-4" /></Button>
                   </TableCell>
                 </TableRow>
               ))}
@@ -715,7 +743,7 @@ function GoalTemplatesContent({ templates, isLoading, onAdd, onEdit, onDelete, t
                   <TableCell><Badge variant={template.is_active ? "default" : "secondary"}>{template.is_active ? "Active" : "Inactive"}</Badge></TableCell>
                   <TableCell className="text-right">
                     <Button variant="ghost" size="icon" onClick={() => onEdit(template)}><Edit className="h-4 w-4" /></Button>
-                    <Button variant="ghost" size="icon" onClick={() => onDelete(template.id)}><Trash2 className="h-4 w-4" /></Button>
+                    <Button variant="ghost" size="icon" onClick={() => onDelete(template.id, template.name)}><Trash2 className="h-4 w-4" /></Button>
                   </TableCell>
                 </TableRow>
               ))}
@@ -797,7 +825,7 @@ function RecognitionCategoriesContent({ categories, isLoading, onAdd, onEdit, on
                   <TableCell><Badge variant={category.is_active ? "default" : "secondary"}>{category.is_active ? "Active" : "Inactive"}</Badge></TableCell>
                   <TableCell className="text-right">
                     <Button variant="ghost" size="icon" onClick={() => onEdit(category)}><Edit className="h-4 w-4" /></Button>
-                    <Button variant="ghost" size="icon" onClick={() => onDelete(category.id)}><Trash2 className="h-4 w-4" /></Button>
+                    <Button variant="ghost" size="icon" onClick={() => onDelete(category.id, category.name)}><Trash2 className="h-4 w-4" /></Button>
                   </TableCell>
                 </TableRow>
               ))}

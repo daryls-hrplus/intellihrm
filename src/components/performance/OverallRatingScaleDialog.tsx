@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,6 +12,28 @@ import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/hooks/useLanguage";
 import { toast } from "sonner";
 import type { OverallRatingScale, OverallRatingLevel } from "@/hooks/useRatingScales";
+
+// Moved outside component to prevent re-creation on every render
+const FieldWithTooltip = ({ label, tooltip, children }: { label: string; tooltip: string; children: React.ReactNode }) => (
+  <div className="space-y-2">
+    <div className="flex items-center gap-1.5">
+      <Label>{label}</Label>
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span className="inline-flex">
+              <HelpCircle className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
+            </span>
+          </TooltipTrigger>
+          <TooltipContent side="top" className="max-w-sm">
+            <p className="text-xs leading-relaxed">{tooltip}</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    </div>
+    {children}
+  </div>
+);
 
 interface OverallRatingScaleDialogProps {
   open: boolean;
@@ -57,8 +79,15 @@ export function OverallRatingScaleDialog({
     is_default: false,
     is_active: true,
   });
+  const previousOpenRef = useRef(open);
 
+  // Initialize form data ONLY when dialog first opens
   useEffect(() => {
+    const justOpened = open && !previousOpenRef.current;
+    previousOpenRef.current = open;
+
+    if (!justOpened) return;
+
     if (editingScale) {
       setFormData({
         name: editingScale.name,
@@ -87,18 +116,22 @@ export function OverallRatingScaleDialog({
   }, [editingScale, open]);
 
   const handleLevelChange = (index: number, field: keyof OverallRatingLevel, value: string | number) => {
-    const newLevels = [...formData.levels];
-    newLevels[index] = { ...newLevels[index], [field]: value };
-    setFormData({ ...formData, levels: newLevels });
+    setFormData((prev) => {
+      const newLevels = [...prev.levels];
+      newLevels[index] = { ...newLevels[index], [field]: value };
+      return { ...prev, levels: newLevels };
+    });
   };
 
   const addLevel = () => {
-    const nextValue = formData.levels.length > 0 
-      ? Math.max(...formData.levels.map(l => l.value)) + 1 
-      : 1;
-    setFormData({
-      ...formData,
-      levels: [...formData.levels, { value: nextValue, label: "", description: "", color: "#6b7280" }],
+    setFormData((prev) => {
+      const nextValue = prev.levels.length > 0 
+        ? Math.max(...prev.levels.map(l => l.value)) + 1 
+        : 1;
+      return {
+        ...prev,
+        levels: [...prev.levels, { value: nextValue, label: "", description: "", color: "#6b7280" }],
+      };
     });
   };
 
@@ -107,18 +140,20 @@ export function OverallRatingScaleDialog({
       toast.error("Minimum 2 levels required");
       return;
     }
-    const newLevels = formData.levels.filter((_, i) => i !== index);
-    setFormData({ ...formData, levels: newLevels });
+    setFormData((prev) => ({
+      ...prev,
+      levels: prev.levels.filter((_, i) => i !== index),
+    }));
   };
 
   const handleDistributionChange = (levelValue: number, percentage: number) => {
-    setFormData({
-      ...formData,
+    setFormData((prev) => ({
+      ...prev,
       distribution_targets: {
-        ...formData.distribution_targets,
+        ...prev.distribution_targets,
         [String(levelValue)]: percentage,
       },
-    });
+    }));
   };
 
   const totalDistribution = Object.values(formData.distribution_targets).reduce((sum, val) => sum + (val || 0), 0);
@@ -183,25 +218,6 @@ export function OverallRatingScaleDialog({
     }
   };
 
-  const FieldWithTooltip = ({ label, tooltip, children }: { label: string; tooltip: string; children: React.ReactNode }) => (
-    <div className="space-y-2">
-      <div className="flex items-center gap-1.5">
-        <Label>{label}</Label>
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <HelpCircle className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
-            </TooltipTrigger>
-            <TooltipContent side="top" className="max-w-sm">
-              <p className="text-xs leading-relaxed">{tooltip}</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      </div>
-      {children}
-    </div>
-  );
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
@@ -234,7 +250,7 @@ export function OverallRatingScaleDialog({
               >
                 <Input
                   value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
                   placeholder="e.g., Annual Performance Rating"
                 />
               </FieldWithTooltip>
@@ -245,7 +261,7 @@ export function OverallRatingScaleDialog({
               >
                 <Input
                   value={formData.code}
-                  onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase().replace(/\s+/g, '_') })}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, code: e.target.value.toUpperCase().replace(/\s+/g, '_') }))}
                   placeholder="e.g., ANNUAL_RATING"
                 />
               </FieldWithTooltip>
@@ -257,7 +273,7 @@ export function OverallRatingScaleDialog({
             >
               <Textarea
                 value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
                 placeholder="Describe the purpose and usage of this overall rating scale..."
                 rows={2}
               />
@@ -346,7 +362,7 @@ export function OverallRatingScaleDialog({
                 </div>
                 <Switch
                   checked={formData.requires_calibration}
-                  onCheckedChange={(checked) => setFormData({ ...formData, requires_calibration: checked })}
+                  onCheckedChange={(checked) => setFormData((prev) => ({ ...prev, requires_calibration: checked }))}
                 />
               </div>
 
@@ -359,7 +375,7 @@ export function OverallRatingScaleDialog({
                 </div>
                 <Switch
                   checked={formData.has_forced_distribution}
-                  onCheckedChange={(checked) => setFormData({ ...formData, has_forced_distribution: checked })}
+                  onCheckedChange={(checked) => setFormData((prev) => ({ ...prev, has_forced_distribution: checked }))}
                 />
               </div>
 
@@ -401,14 +417,14 @@ export function OverallRatingScaleDialog({
               <div className="flex items-center gap-2">
                 <Switch
                   checked={formData.is_default}
-                  onCheckedChange={(checked) => setFormData({ ...formData, is_default: checked })}
+                  onCheckedChange={(checked) => setFormData((prev) => ({ ...prev, is_default: checked }))}
                 />
                 <Label>Set as default</Label>
               </div>
               <div className="flex items-center gap-2">
                 <Switch
                   checked={formData.is_active}
-                  onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
+                  onCheckedChange={(checked) => setFormData((prev) => ({ ...prev, is_active: checked }))}
                 />
                 <Label>Active</Label>
               </div>
