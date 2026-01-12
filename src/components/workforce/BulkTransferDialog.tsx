@@ -239,10 +239,16 @@ export function BulkTransferDialog({
       const employee = selectedEmployees[i];
 
       try {
+        // Generate transaction number: BULK-YYYYMMDD-XXXX-NNN
+        const dateStr = effectiveDate.replace(/-/g, "");
+        const shortGroupId = bulkGroupId.slice(0, 4).toUpperCase();
+        const transactionNumber = `BULK-${dateStr}-${shortGroupId}-${String(i + 1).padStart(3, "0")}`;
+
         // Create the transaction
         const { error } = await supabase
           .from("employee_transactions")
           .insert([{
+            transaction_number: transactionNumber,
             transaction_type_id: bulkTransferType.id,
             employee_id: employee.id,
             effective_date: effectiveDate,
