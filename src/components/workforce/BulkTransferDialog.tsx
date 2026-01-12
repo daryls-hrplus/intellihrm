@@ -8,6 +8,7 @@ import {
   Loader2,
   ChevronLeft,
   ChevronRight,
+  MapPin,
 } from "lucide-react";
 import { useLanguage } from "@/hooks/useLanguage";
 import { toast } from "sonner";
@@ -35,6 +36,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Popover,
   PopoverContent,
@@ -44,6 +46,7 @@ import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { BulkEmployeeSelector, BulkEmployee } from "./BulkEmployeeSelector";
+import { BulkTransferMappingStep } from "./BulkTransferMappingStep";
 import { useEmployeeTransactions, LookupValue } from "@/hooks/useEmployeeTransactions";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -70,9 +73,9 @@ interface PayGroup {
   code: string;
 }
 
-type WizardStep = "source" | "employees" | "destination" | "review" | "executing";
+type WizardStep = "source" | "employees" | "destination" | "mapping" | "review" | "executing";
 
-const STEPS: WizardStep[] = ["source", "employees", "destination", "review"];
+const STEPS: WizardStep[] = ["source", "employees", "destination", "mapping", "review"];
 
 export function BulkTransferDialog({
   open,
@@ -110,6 +113,7 @@ export function BulkTransferDialog({
   const [effectiveDate, setEffectiveDate] = useState<string>(getTodayString());
   const [notes, setNotes] = useState<string>("");
   const [requiresWorkflow, setRequiresWorkflow] = useState(false);
+  const [mappingMode, setMappingMode] = useState<"same" | "individual">("individual");
 
   // Load initial data
   useEffect(() => {
@@ -162,6 +166,7 @@ export function BulkTransferDialog({
     setEffectiveDate(getTodayString());
     setNotes("");
     setRequiresWorkflow(false);
+    setMappingMode("individual");
     setIsExecuting(false);
     setExecutionProgress(0);
     setExecutionResults({ success: 0, failed: 0, errors: [] });
@@ -182,6 +187,13 @@ export function BulkTransferDialog({
         return selectedEmployees.length > 0;
       case "destination":
         return !!destinationCompanyId && !!transferReasonId && !!effectiveDate;
+      case "mapping":
+        // In individual mode, all employees must have department and position
+        if (mappingMode === "individual") {
+          return selectedEmployees.every(e => e.to_department_id && e.to_position_id);
+        }
+        // In same mode, default department must be set
+        return !!destinationDepartmentId && destinationDepartmentId !== "_keep";
       case "review":
         return true;
       default:
@@ -244,6 +256,15 @@ export function BulkTransferDialog({
         const shortGroupId = bulkGroupId.slice(0, 4).toUpperCase();
         const transactionNumber = `BULK-${dateStr}-${shortGroupId}-${String(i + 1).padStart(3, "0")}`;
 
+        // Determine destination department and position based on mapping mode
+        const toDepartmentId = mappingMode === "individual" 
+          ? employee.to_department_id 
+          : (destinationDepartmentId && destinationDepartmentId !== "_keep" ? destinationDepartmentId : null);
+        
+        const toPositionId = mappingMode === "individual" 
+          ? employee.to_position_id 
+          : null;
+
         // Create the transaction
         const { error } = await supabase
           .from("employee_transactions")
@@ -257,8 +278,9 @@ export function BulkTransferDialog({
             from_company_id: employee.company_id,
             to_company_id: destinationCompanyId,
             from_department_id: employee.department_id,
-            to_department_id: destinationDepartmentId && destinationDepartmentId !== "_keep" ? destinationDepartmentId : null,
+            to_department_id: toDepartmentId,
             from_position_id: employee.position_id,
+            to_position_id: toPositionId,
             transfer_reason_id: transferReasonId || null,
             pay_group_id: destinationPayGroupId && destinationPayGroupId !== "_none" ? destinationPayGroupId : null,
             requires_workflow: requiresWorkflow,
@@ -309,8 +331,10 @@ export function BulkTransferDialog({
         return t("workforce.modules.transactions.bulkTransfer.step2Title");
       case "destination":
         return t("workforce.modules.transactions.bulkTransfer.step3Title");
+      case "mapping":
+        return t("workforce.modules.transactions.bulkTransfer.step5Title");
       case "review":
-        return t("workforce.modules.transactions.bulkTransfer.step4Title");
+        return t("workforce.modules.transactions.bulkTransfer.step6Title");
       case "executing":
         return t("workforce.modules.transactions.bulkTransfer.executing");
       default:
@@ -424,14 +448,52 @@ export function BulkTransferDialog({
               </Select>
             </div>
 
+            {/* Mapping Mode Selection */}
+            <div className="space-y-3 rounded-lg border p-4 bg-muted/30">
+              <Label className="flex items-center gap-2">
+                <MapPin className="h-4 w-4" />
+                {t("workforce.modules.transactions.bulkTransfer.mappingMode")}
+              </Label>
+              <RadioGroup
+                value={mappingMode}
+                onValueChange={(value) => setMappingMode(value as "same" | "individual")}
+                className="space-y-2"
+              >
+                <div className="flex items-start space-x-3">
+                  <RadioGroupItem value="individual" id="individual" />
+                  <Label htmlFor="individual" className="font-normal cursor-pointer">
+                    <div className="font-medium">{t("workforce.modules.transactions.bulkTransfer.mapIndividually")}</div>
+                    <div className="text-xs text-muted-foreground">
+                      {t("workforce.modules.transactions.bulkTransfer.step5Title")}
+                    </div>
+                  </Label>
+                </div>
+                <div className="flex items-start space-x-3">
+                  <RadioGroupItem value="same" id="same" />
+                  <Label htmlFor="same" className="font-normal cursor-pointer">
+                    <div className="font-medium">{t("workforce.modules.transactions.bulkTransfer.sameForAll")}</div>
+                  </Label>
+                </div>
+              </RadioGroup>
+            </div>
+
+            {/* Default Department (shown only in same mode or as optional default) */}
             <div className="space-y-2">
-              <Label>{t("workforce.modules.transactions.bulkTransfer.defaultDepartment")}</Label>
+              <Label>
+                {t("workforce.modules.transactions.bulkTransfer.defaultDepartment")}
+                {mappingMode === "same" && " *"}
+              </Label>
               <Select value={destinationDepartmentId} onValueChange={setDestinationDepartmentId}>
                 <SelectTrigger>
-                  <SelectValue placeholder={t("workforce.modules.transactions.bulkTransfer.keepCurrentMapping")} />
+                  <SelectValue placeholder={mappingMode === "same" 
+                    ? t("workforce.modules.transactions.form.selectDepartment")
+                    : t("workforce.modules.transactions.bulkTransfer.keepCurrentMapping")
+                  } />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="_keep">{t("workforce.modules.transactions.bulkTransfer.keepCurrentMapping")}</SelectItem>
+                  {mappingMode === "individual" && (
+                    <SelectItem value="_keep">{t("workforce.modules.transactions.bulkTransfer.keepCurrentMapping")}</SelectItem>
+                  )}
                   {departments.map((dept) => (
                     <SelectItem key={dept.id} value={dept.id}>
                       {dept.name}
@@ -523,6 +585,16 @@ export function BulkTransferDialog({
           </div>
         );
 
+      case "mapping":
+        return (
+          <BulkTransferMappingStep
+            employees={selectedEmployees}
+            destinationCompanyId={destinationCompanyId}
+            defaultDepartmentId={destinationDepartmentId}
+            onMappingChange={setSelectedEmployees}
+          />
+        );
+
       case "review":
         const sourceCompany = companies.find((c) => c.id === sourceCompanyId);
         const destCompany = companies.find((c) => c.id === destinationCompanyId);
@@ -562,26 +634,52 @@ export function BulkTransferDialog({
               </div>
             </div>
 
-            {/* Employee List */}
+            {/* Employee List with Mappings */}
             <div className="space-y-2">
               <Label>{t("workforce.modules.transactions.bulkTransfer.selectedEmployees")}</Label>
               <ScrollArea className="h-[250px] border rounded-lg">
                 <div className="divide-y">
+                  {/* Header */}
+                  <div className="flex items-center gap-4 p-3 bg-muted/50 text-xs font-medium sticky top-0">
+                    <div className="flex-1">{t("workforce.common.employee")}</div>
+                    <div className="w-48 text-center">{t("workforce.modules.transactions.bulkTransfer.mapping.current")}</div>
+                    <div className="w-4"></div>
+                    <div className="w-48 text-center">{t("workforce.modules.transactions.bulkTransfer.mapping.newAssignment")}</div>
+                  </div>
                   {selectedEmployees.map((employee) => (
                     <div
                       key={employee.id}
-                      className="flex items-center justify-between p-3"
+                      className="flex items-center gap-4 p-3"
                     >
-                      <div>
-                        <div className="font-medium">{employee.full_name || employee.email}</div>
-                        <div className="text-sm text-muted-foreground">
-                          {employee.position_title} • {employee.department_name}
-                        </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="font-medium truncate">{employee.full_name || employee.email}</div>
+                        <div className="text-xs text-muted-foreground truncate">{employee.email}</div>
                       </div>
-                      <div className="flex items-center gap-2 text-sm">
-                        <span className="text-muted-foreground">{employee.company_name}</span>
-                        <ArrowRight className="h-4 w-4" />
-                        <span className="font-medium text-primary">{destCompany?.name}</span>
+                      <div className="w-48 text-center">
+                        <div className="text-sm truncate">{employee.position_title || "—"}</div>
+                        <div className="text-xs text-muted-foreground truncate">{employee.department_name || "—"}</div>
+                      </div>
+                      <ArrowRight className="w-4 h-4 text-muted-foreground shrink-0" />
+                      <div className="w-48 text-center">
+                        {mappingMode === "individual" ? (
+                          <>
+                            <div className="text-sm font-medium text-primary truncate">
+                              {employee.to_position_title || "—"}
+                            </div>
+                            <div className="text-xs text-muted-foreground truncate">
+                              {employee.to_department_name || "—"}
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <div className="text-sm font-medium text-primary truncate">
+                              {destCompany?.name}
+                            </div>
+                            <div className="text-xs text-muted-foreground truncate">
+                              {departments.find(d => d.id === destinationDepartmentId)?.name || "—"}
+                            </div>
+                          </>
+                        )}
                       </div>
                     </div>
                   ))}
