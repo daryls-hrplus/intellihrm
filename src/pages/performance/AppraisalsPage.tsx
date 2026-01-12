@@ -50,6 +50,7 @@ import { AIExplainabilityPanel } from "@/components/ai-governance/AIExplainabili
 import { AIHumanOverrideDialog } from "@/components/ai-governance/AIHumanOverrideDialog";
 import { AIBiasAlertBanner } from "@/components/ai-governance/AIBiasAlertBanner";
 import { AIAuditTrailPanel } from "@/components/ai-governance/AIAuditTrailPanel";
+import { CalendarSync } from "@/components/appraisals/CalendarSync";
 
 interface AppraisalCycle {
   id: string;
@@ -795,35 +796,49 @@ export default function AppraisalsPage() {
                   </CardContent>
                 </Card>
               ) : (
-                <div className="grid gap-6 lg:grid-cols-2">
-                  <AppraisalInterviewCalendar
-                    interviews={interviews}
-                    onSelectDate={(date) => console.log("Selected date:", date)}
-                    onSelectInterview={(interview) => console.log("Selected interview:", interview)}
-                  />
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-base">Upcoming Interviews</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-3">
-                        {interviews
-                          .filter((i) => i.status === "scheduled" || i.status === "confirmed")
-                          .slice(0, 5)
-                          .map((interview) => (
-                            <div key={interview.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                              <div>
-                                <p className="font-medium text-sm">{interview.participant?.employee?.full_name || "Unknown"}</p>
-                                <p className="text-xs text-muted-foreground">
-                                  {interview.scheduled_at ? formatDateForDisplay(interview.scheduled_at, "MMM d, yyyy h:mm a") : "Not scheduled"}
-                                </p>
+                <div className="grid gap-6 lg:grid-cols-3">
+                  <div className="lg:col-span-2">
+                    <AppraisalInterviewCalendar
+                      interviews={interviews}
+                      onSelectDate={(date) => console.log("Selected date:", date)}
+                      onSelectInterview={(interview) => console.log("Selected interview:", interview)}
+                    />
+                  </div>
+                  <div className="space-y-6">
+                    {/* Calendar Sync */}
+                    <CalendarSync 
+                      interviews={interviews} 
+                      onSync={() => fetchInterviews({ cycleId: undefined })} 
+                    />
+                    
+                    {/* Upcoming Interviews */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-base">Upcoming Interviews</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-3">
+                          {interviews
+                            .filter((i) => i.status === "scheduled" || i.status === "confirmed")
+                            .slice(0, 5)
+                            .map((interview) => (
+                              <div key={interview.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                                <div>
+                                  <p className="font-medium text-sm">{interview.participant?.employee?.full_name || "Unknown"}</p>
+                                  <p className="text-xs text-muted-foreground">
+                                    {interview.scheduled_at ? formatDateForDisplay(interview.scheduled_at, "MMM d, yyyy h:mm a") : "Not scheduled"}
+                                  </p>
+                                </div>
+                                <Badge className={statusColors[interview.status || "pending"]}>{interview.status}</Badge>
                               </div>
-                              <Badge className={statusColors[interview.status || "pending"]}>{interview.status}</Badge>
-                            </div>
-                          ))}
-                      </div>
-                    </CardContent>
-                  </Card>
+                            ))}
+                          {interviews.filter((i) => i.status === "scheduled" || i.status === "confirmed").length === 0 && (
+                            <p className="text-sm text-muted-foreground text-center py-4">No upcoming interviews</p>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
                 </div>
               )}
             </div>

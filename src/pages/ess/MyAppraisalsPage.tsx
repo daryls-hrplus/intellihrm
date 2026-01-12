@@ -22,7 +22,9 @@ import {
   Eye,
   ClipboardEdit,
   Shield,
-  MessageSquareReply
+  MessageSquareReply,
+  Smartphone,
+  Monitor
 } from "lucide-react";
 import { useMyActiveAppraisals, type MyAppraisal } from "@/hooks/useMyAppraisals";
 import { EssAppraisalDetailDialog } from "@/components/ess/EssAppraisalDetailDialog";
@@ -31,10 +33,13 @@ import { EssAppraisalSelfAssessmentDialog } from "@/components/ess/EssAppraisalS
 import { EssAppraisalAcknowledgmentDialog } from "@/components/ess/EssAppraisalAcknowledgmentDialog";
 import { EmployeeReviewResponseDialog } from "@/components/ess/performance/EmployeeReviewResponseDialog";
 import { PerformanceTrajectoryCard } from "@/components/performance/ai/PerformanceTrajectoryCard";
+import { MobileAppraisalView } from "@/components/appraisals/mobile";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { useAuth } from "@/contexts/AuthContext";
 export default function MyAppraisalsPage() {
   const { t } = useTranslation();
   const { user, company } = useAuth();
+  const isMobile = useIsMobile();
   const { 
     appraisals, 
     active, 
@@ -49,6 +54,26 @@ export default function MyAppraisalsPage() {
   const [acknowledgmentAppraisal, setAcknowledgmentAppraisal] = useState<MyAppraisal | null>(null);
   const [responseAppraisal, setResponseAppraisal] = useState<MyAppraisal | null>(null);
   const [activeTab, setActiveTab] = useState("current");
+  const [viewMode, setViewMode] = useState<"desktop" | "mobile">(isMobile ? "mobile" : "desktop");
+
+  // Convert appraisals to mobile format
+  const mobileAppraisalData = appraisals.map(a => ({
+    id: a.id,
+    employeeName: "My Appraisal",
+    employeeRole: a.position_title || "Employee",
+    cycleId: a.cycle_id,
+    cycleName: a.cycle_name,
+    status: a.status,
+    dueDate: a.evaluation_deadline || a.cycle_end_date,
+    progress: a.submitted_at ? (a.reviewed_at ? (a.status === "acknowledged" ? 100 : 75) : 50) : 25,
+    overallScore: a.overall_score ?? undefined,
+    sections: [
+      { name: "Goals", completed: !!a.submitted_at, score: a.goal_score ?? undefined },
+      { name: "Competencies", completed: !!a.submitted_at, score: a.competency_score ?? undefined },
+      { name: "Manager Review", completed: !!a.reviewed_at },
+      { name: "Acknowledgment", completed: a.status === "acknowledged" },
+    ],
+  }));
 
   const getStatusBadge = (status: string) => {
     const variants: Record<string, { variant: "default" | "secondary" | "destructive" | "outline"; label: string }> = {
@@ -111,17 +136,64 @@ export default function MyAppraisalsPage() {
           ]}
         />
 
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
-            <ClipboardCheck className="h-8 w-8 text-primary" />
-            My Appraisals
-          </h1>
-          <p className="text-muted-foreground">
-            View and manage your performance appraisals
-          </p>
+        <div className="flex items-start justify-between">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
+              <ClipboardCheck className="h-8 w-8 text-primary" />
+              My Appraisals
+            </h1>
+            <p className="text-muted-foreground">
+              View and manage your performance appraisals
+            </p>
+          </div>
+          
+          {/* View Toggle */}
+          <div className="hidden md:flex items-center gap-1 border rounded-lg p-1">
+            <Button
+              variant={viewMode === "desktop" ? "default" : "ghost"}
+              size="sm"
+              onClick={() => setViewMode("desktop")}
+              className="h-8"
+            >
+              <Monitor className="h-4 w-4 mr-1" />
+              Desktop
+            </Button>
+            <Button
+              variant={viewMode === "mobile" ? "default" : "ghost"}
+              size="sm"
+              onClick={() => setViewMode("mobile")}
+              className="h-8"
+            >
+              <Smartphone className="h-4 w-4 mr-1" />
+              Mobile
+            </Button>
+          </div>
         </div>
 
-        {/* Stats Cards */}
+        {/* Mobile-First View */}
+        {(isMobile || viewMode === "mobile") && !isMobile ? (
+          <div className="border rounded-lg overflow-hidden max-w-md mx-auto shadow-lg">
+            <MobileAppraisalView 
+              appraisals={mobileAppraisalData}
+              onSelectAppraisal={(id) => {
+                const appraisal = appraisals.find(a => a.id === id);
+                if (appraisal) setSelectedAppraisal(appraisal);
+              }}
+              role="employee"
+            />
+          </div>
+        ) : isMobile ? (
+          <MobileAppraisalView 
+            appraisals={mobileAppraisalData}
+            onSelectAppraisal={(id) => {
+              const appraisal = appraisals.find(a => a.id === id);
+              if (appraisal) setSelectedAppraisal(appraisal);
+            }}
+            role="employee"
+          />
+        ) : (
+          <>
+            {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Card>
             <CardContent className="pt-6">
@@ -449,6 +521,8 @@ export default function MyAppraisalsPage() {
             </Card>
           </TabsContent>
         </Tabs>
+          </>
+        )}
       </div>
 
       {/* Dialogs */}

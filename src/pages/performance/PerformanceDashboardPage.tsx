@@ -9,6 +9,10 @@ import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/hooks/useLanguage";
 import { useGranularPermissions } from "@/hooks/useGranularPermissions";
 import { GroupedModuleCards, ModuleSection } from "@/components/ui/GroupedModuleCards";
+import { YearOverYearTrends } from "@/components/appraisals/analytics/YearOverYearTrends";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { ChevronDown } from "lucide-react";
+import { useState } from "react";
 import {
   Target,
   ClipboardCheck,
@@ -35,8 +39,9 @@ import { UpcomingRemindersWidget } from "@/components/performance/widgets/Upcomi
 
 export default function PerformanceDashboardPage() {
   const { t } = useLanguage();
-  const { user } = useAuth();
+  const { user, company } = useAuth();
   const { hasTabAccess } = useGranularPermissions();
+  const [analyticsOpen, setAnalyticsOpen] = useState(true);
 
   const allModules = {
     // Performance Reviews
@@ -202,6 +207,24 @@ export default function PerformanceDashboardPage() {
 
         {/* Upcoming Reminders - Compact horizontal bar */}
         <UpcomingRemindersWidget compact />
+
+        {/* Year-Over-Year Performance Analytics */}
+        {company?.id && (
+          <Collapsible open={analyticsOpen} onOpenChange={setAnalyticsOpen}>
+            <CollapsibleTrigger asChild>
+              <Button variant="ghost" className="w-full flex items-center justify-between py-2 px-0 h-auto hover:bg-transparent">
+                <h2 className="text-lg font-semibold flex items-center gap-2">
+                  <BarChart3 className="h-5 w-5 text-primary" />
+                  Performance Analytics
+                </h2>
+                <ChevronDown className={`h-5 w-5 transition-transform ${analyticsOpen ? "rotate-180" : ""}`} />
+              </Button>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="space-y-4 pt-4">
+              <YearOverYearTrends companyId={company.id} />
+            </CollapsibleContent>
+          </Collapsible>
+        )}
 
         <GroupedModuleCards sections={sections} defaultOpen={true} showToggleButton />
       </div>
