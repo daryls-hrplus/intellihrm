@@ -15,6 +15,7 @@ interface BatchGenerateIndicatorsButtonProps {
   companyId?: string;
   onComplete?: () => void;
   includeCompetencies?: boolean;
+  variant?: "default" | "dropdown";
 }
 
 const BATCH_SIZE = 5; // Process 5 items at a time to avoid timeout
@@ -23,6 +24,7 @@ export function BatchGenerateIndicatorsButton({
   companyId,
   onComplete,
   includeCompetencies = true,
+  variant = "default",
 }: BatchGenerateIndicatorsButtonProps) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [skillCount, setSkillCount] = useState<number>(0);
@@ -163,6 +165,38 @@ export function BatchGenerateIndicatorsButton({
       setProcessedCount(0);
     }
   };
+
+  // Dropdown variant - render inline content for DropdownMenuItem
+  if (variant === "dropdown") {
+    return (
+      <div 
+        className="flex flex-col items-start w-full cursor-pointer"
+        onClick={handleBatchGenerate}
+      >
+        <div className="flex items-center">
+          {isGenerating ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          ) : (
+            <Wand2 className="mr-2 h-4 w-4 text-amber-500" />
+          )}
+          <span className="font-medium">
+            {isGenerating ? `Generating (${processedCount}/${missingCount})...` : "Generate AI Indicators"}
+          </span>
+          {!isGenerating && missingCount > 0 && (
+            <span className="ml-2 rounded-full bg-amber-100 dark:bg-amber-900/30 px-2 py-0.5 text-xs text-amber-700 dark:text-amber-400">
+              {missingCount}
+            </span>
+          )}
+        </div>
+        <span className="text-xs text-muted-foreground ml-6 mt-0.5">
+          Add proficiency levels to existing items
+        </span>
+        {isGenerating && (
+          <Progress value={progress} className="h-1 w-full mt-2" />
+        )}
+      </div>
+    );
+  }
 
   if (missingCount === 0) {
     return null;
