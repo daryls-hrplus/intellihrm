@@ -20,7 +20,8 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { X, Plus, Link2, Building2, Globe, Sparkles, Brain, Clock, Info } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { X, Plus, Link2, Building2, Globe, Sparkles, Brain, Clock, Info, ShieldAlert, GitBranch, BarChart3 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CompetencySkillLinker } from "./CompetencySkillLinker";
 import {
@@ -34,6 +35,8 @@ import {
 import { EnhancedJobApplicabilitySelect } from "./EnhancedJobApplicabilitySelect";
 import { useCapabilityJobApplicability, JobRequirementInput } from "@/hooks/useCapabilityJobApplicability";
 import { CompetencyBehavioralLevelsEditor, ProficiencyIndicators } from "./CompetencyBehavioralLevelsEditor";
+import { useCompetencyUsageCheck } from "@/hooks/capabilities/useCompetencyUsageCheck";
+import { VersionImpactReport } from "./VersionImpactReport";
 
 interface CapabilityFormDialogProps {
   open: boolean;
@@ -103,8 +106,10 @@ export function CapabilityFormDialog({
   const [saving, setSaving] = useState(false);
   const [selectedJobRequirements, setSelectedJobRequirements] = useState<JobRequirementInput[]>([]);
   const [proficiencyIndicators, setProficiencyIndicators] = useState<ProficiencyIndicators>({});
+  const [showVersionReport, setShowVersionReport] = useState(false);
 
   const { requirements, fetchApplicability, bulkSetApplicability } = useCapabilityJobApplicability();
+  const { loading: usageLoading, usage, checkUsage, clearUsage } = useCompetencyUsageCheck();
 
   useEffect(() => {
     if (capability) {
@@ -150,8 +155,12 @@ export function CapabilityFormDialog({
           }));
           setSelectedJobRequirements(reqs);
         });
+        
+        // Check if competency is in use in active cycles
+        checkUsage(capability.id);
       }
     } else {
+      clearUsage();
       setProficiencyIndicators({});
       setFormData({
         company_id: defaultCompanyId,
@@ -343,7 +352,39 @@ export function CapabilityFormDialog({
               >
                 {formData.status.replace("_", " ")}
               </Badge>
+              {capability && formData.type === "COMPETENCY" && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 gap-1 text-xs ml-auto"
+                  onClick={() => setShowVersionReport(true)}
+                >
+                  <GitBranch className="h-3 w-3" />
+                  v{(capability as any).version || 1}
+                </Button>
+              )}
             </div>
+          )}
+
+          {/* Active Cycle Warning for edits */}
+          {isEditing && usage?.isBlockedFromMajorEdits && (
+            <Card className="border-amber-300 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-800">
+              <CardContent className="py-3 px-4">
+                <div className="flex items-start gap-3">
+                  <ShieldAlert className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-medium text-amber-800 dark:text-amber-200">
+                      Limited Editing Mode
+                    </p>
+                    <p className="text-xs text-amber-700 dark:text-amber-300 mt-1">
+                      This competency is being used in {usage.activeAppraisalCycles.length} active appraisal cycle(s).
+                      Major changes (name, code, behavioral indicators) are restricted until cycles close.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           )}
         </DialogHeader>
 
@@ -870,6 +911,17 @@ export function CapabilityFormDialog({
           </Button>
         </DialogFooter>
       </DialogContent>
+
+      {/* Version Impact Report Dialog */}
+      {capability && (
+        <VersionImpactReport
+          open={showVersionReport}
+          onOpenChange={setShowVersionReport}
+          competencyId={capability.id}
+          competencyName={capability.name}
+          currentVersion={(capability as any).version || 1}
+        />
+      )}
     </Dialog>
   );
 }

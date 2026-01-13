@@ -821,9 +821,22 @@ export function AppraisalEvaluationDialog({
             comments: score.comments || null,
           };
 
-          // Add metadata for competency assessments with behavioral indicators
-          if (score.evaluation_type === "competency" && score.metadata) {
-            payload.metadata = score.metadata;
+          // Add metadata for competency assessments with behavioral indicators + version snapshot
+          if (score.evaluation_type === "competency") {
+            // Build competency snapshot for historical reference
+            const competencySnapshot = {
+              name: score.item_name,
+              proficiency_indicators: score.proficiency_indicators,
+              version: score.metadata?.competency_version || 1,
+              category: score.competency_category,
+              captured_at: new Date().toISOString(),
+            };
+            
+            payload.metadata = {
+              ...score.metadata,
+              competency_snapshot: competencySnapshot,
+            };
+            payload.competency_version = score.metadata?.competency_version || 1;
           }
 
           if (score.id) {

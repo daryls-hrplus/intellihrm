@@ -6,6 +6,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -14,6 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { JobLevelExpectationsPanel } from "./JobLevelExpectationsPanel";
 import { RoleSegmentTimeline } from "./RoleSegmentTimeline";
 import { PositionScoreSummary } from "./PositionScoreSummary";
+import { HistoricalCompetencyViewer } from "./HistoricalCompetencyViewer";
 import { useEmployeeLevelExpectations } from "@/hooks/useEmployeeLevelExpectations";
 import { useAppraisalRoleSegments, RoleSegment } from "@/hooks/useAppraisalRoleSegments";
 import { useMultiPositionParticipant } from "@/hooks/useMultiPositionParticipant";
@@ -26,7 +28,8 @@ import {
   Calendar,
   CheckCircle2,
   BarChart3,
-  User
+  User,
+  History
 } from "lucide-react";
 import { format, parseISO } from "date-fns";
 
@@ -76,6 +79,12 @@ export function EmployeeAppraisalDetailDialog({
   const [cycleDetails, setCycleDetails] = useState<CycleDetails | null>(null);
   const [roleSegments, setRoleSegments] = useState<RoleSegment[]>([]);
   const [activeSegmentId, setActiveSegmentId] = useState<string | undefined>();
+  const [competencyScores, setCompetencyScores] = useState<any[]>([]);
+  const [selectedHistoricalScore, setSelectedHistoricalScore] = useState<{
+    scoreId: string;
+    competencyId: string;
+    ratedAt?: string;
+  } | null>(null);
   
   const { fetchSegments } = useAppraisalRoleSegments();
   const { 
@@ -96,6 +105,27 @@ export function EmployeeAppraisalDetailDialog({
 
   const { expectation, employeeInfo, gapAnalysis, loading: expectationsLoading } = 
     useEmployeeLevelExpectations(employeeId, companyId, currentScores);
+
+  // Fetch competency scores for this appraisal
+  useEffect(() => {
+    const fetchCompetencyScores = async () => {
+      if (!appraisal?.id) return;
+      
+      const { data } = await supabase
+        .from("appraisal_scores")
+        .select("id, item_id, item_name, rating, metadata, created_at")
+        .eq("participant_id", appraisal.id)
+        .eq("evaluation_type", "competency");
+      
+      if (data) {
+        setCompetencyScores(data);
+      }
+    };
+
+    if (open && appraisal) {
+      fetchCompetencyScores();
+    }
+  }, [open, appraisal?.id]);
 
   // Fetch cycle details
   useEffect(() => {
@@ -310,6 +340,53 @@ export function EmployeeAppraisalDetailDialog({
                   />
                 )}
 
+                {/* Competency Scores with Historical View */}
+                {competencyScores.length > 0 && (
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm font-medium flex items-center gap-2">
+                        <Award className="h-4 w-4 text-primary" />
+                        Competency Ratings
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-2">
+                        {competencyScores.map((score) => {
+                          const hasSnapshot = !!(score.metadata as any)?.competency_snapshot;
+                          return (
+                            <div 
+                              key={score.id}
+                              className="flex items-center justify-between p-2 rounded-lg bg-muted/50"
+                            >
+                              <div className="flex items-center gap-2">
+                                <span className="text-sm font-medium">{score.item_name}</span>
+                                <Badge variant="outline" className="text-xs">
+                                  Rating: {score.rating}
+                                </Badge>
+                              </div>
+                              {hasSnapshot && (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-7 gap-1 text-xs"
+                                  onClick={() => setSelectedHistoricalScore({
+                                    scoreId: score.id,
+                                    competencyId: score.item_id,
+                                    ratedAt: score.created_at,
+                                  })}
+                                >
+                                  <History className="h-3 w-3" />
+                                  View As Rated
+                                </Button>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
                 {/* Progression Status Summary */}
                 {gapAnalysis && (
                   <Card className="border-primary/20">
@@ -449,6 +526,17 @@ export function EmployeeAppraisalDetailDialog({
             )}
           </div>
         </ScrollArea>
+
+        {/* Historical Competency Viewer Dialog */}
+        {selectedHistoricalScore && (
+          <HistoricalCompetencyViewer
+            open={!!selectedHistoricalScore}
+            onOpenChange={(open) => !open && setSelectedHistoricalScore(null)}
+            scoreId={selectedHistoricalScore.scoreId}
+            competencyId={selectedHistoricalScore.competencyId}
+            ratedAt={selectedHistoricalScore.ratedAt}
+          />
+        )}
       </DialogContent>
     </Dialog>
   );
