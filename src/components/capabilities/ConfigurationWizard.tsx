@@ -28,11 +28,16 @@ import {
   AlertCircle,
   Target,
   Wand2,
+  Plus,
+  Pencil,
+  Trash2,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Capability } from "@/hooks/useCapabilities";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { JobLinkDialog, LinkedJobConfig } from "./JobLinkDialog";
+import { ProficiencyLevelBadge } from "./ProficiencyLevelPicker";
 
 interface WizardStep {
   id: string;
@@ -68,8 +73,12 @@ export function ConfigurationWizard({
   const [canBeInferred, setCanBeInferred] = useState(false);
   const [inferenceKeywords, setInferenceKeywords] = useState<string[]>([]);
   const [newKeyword, setNewKeyword] = useState("");
-  const [linkedJobs, setLinkedJobs] = useState<{ id: string; name: string }[]>([]);
-  const [availableJobs, setAvailableJobs] = useState<{ id: string; name: string }[]>([]);
+  
+  // Rich job linking state
+  const [linkedJobs, setLinkedJobs] = useState<LinkedJobConfig[]>([]);
+  const [availableJobs, setAvailableJobs] = useState<{ id: string; name: string; job_level?: string | null }[]>([]);
+  const [jobLinkDialogOpen, setJobLinkDialogOpen] = useState(false);
+  const [editingJobLink, setEditingJobLink] = useState<LinkedJobConfig | null>(null);
   const [linkedSkills, setLinkedSkills] = useState<{ id: string; name: string }[]>([]);
   const [availableSkills, setAvailableSkills] = useState<{ id: string; name: string }[]>([]);
 
@@ -192,14 +201,34 @@ export function ConfigurationWizard({
         }
       }
 
-      // Load linked jobs
+      // Load linked jobs with full configuration
       const { data: jobLinks } = await supabase
         .from("job_capability_requirements")
-        .select("jobs(id, name)")
+        .select(`
+          job_id,
+          required_proficiency_level,
+          weighting,
+          is_required,
+          is_preferred,
+          start_date,
+          end_date,
+          notes,
+          jobs(id, name)
+        `)
         .eq("capability_id", capability.id);
       
       if (jobLinks) {
-        setLinkedJobs(jobLinks.map((j: any) => ({ id: j.jobs.id, name: j.jobs.name })));
+        setLinkedJobs(jobLinks.map((j: any) => ({
+          job_id: j.job_id,
+          job_name: j.jobs?.name || "",
+          required_proficiency_level: j.required_proficiency_level || 3,
+          weighting: j.weighting || 10,
+          is_required: j.is_required ?? true,
+          is_preferred: j.is_preferred ?? false,
+          start_date: j.start_date || new Date().toISOString().split("T")[0],
+          end_date: j.end_date || null,
+          notes: j.notes || null,
+        })));
       }
 
       // Load linked skills (for competencies)
@@ -227,7 +256,7 @@ export function ConfigurationWizard({
       // Load available jobs - filter by company if capability has company_id
       let jobsQuery = supabase
         .from("jobs")
-        .select("id, name")
+        .select("id, name, job_level")
         .eq("is_active", true)
         .order("name")
         .limit(100);
@@ -239,7 +268,7 @@ export function ConfigurationWizard({
       const { data: jobs } = await jobsQuery;
       
       if (jobs) {
-        setAvailableJobs(jobs.map((j: any) => ({ id: j.id, name: j.name })));
+        setAvailableJobs(jobs.map((j: any) => ({ id: j.id, name: j.name, job_level: j.job_level })));
       }
 
       // Load available skills (for competency mapping) - filter by company_id to avoid duplicates
@@ -335,12 +364,30 @@ export function ConfigurationWizard({
     setInferenceKeywords(inferenceKeywords.filter(k => k !== keyword));
   };
 
-  const handleToggleJob = (job: { id: string; name: string }) => {
-    if (linkedJobs.some(j => j.id === job.id)) {
-      setLinkedJobs(linkedJobs.filter(j => j.id !== job.id));
-    } else {
-      setLinkedJobs([...linkedJobs, job]);
-    }
+  const handleAddJobLink = (config: LinkedJobConfig) => {
+    setLinkedJobs([...linkedJobs, config]);
+    setEditingJobLink(null);
+  };
+
+  const handleUpdateJobLink = (config: LinkedJobConfig) => {
+    setLinkedJobs(linkedJobs.map(j => 
+      j.job_id === config.job_id ? config : j
+    ));
+    setEditingJobLink(null);
+  };
+
+  const handleRemoveJobLink = (jobId: string) => {
+    setLinkedJobs(linkedJobs.filter(j => j.job_id !== jobId));
+  };
+
+  const handleEditJobLink = (link: LinkedJobConfig) => {
+    setEditingJobLink(link);
+    setJobLinkDialogOpen(true);
+  };
+
+  const handleOpenJobLinkDialog = () => {
+    setEditingJobLink(null);
+    setJobLinkDialogOpen(true);
   };
 
   const handleToggleSkill = (skill: { id: string; name: string }) => {
@@ -400,7 +447,7 @@ export function ConfigurationWizard({
           break;
 
         case "jobs":
-          // Remove existing links and add new ones
+          // Remove existing links and add new ones with full configuration
           await supabase
             .from("job_capability_requirements")
             .delete()
@@ -410,11 +457,16 @@ export function ConfigurationWizard({
             await supabase
               .from("job_capability_requirements")
               .insert(
-                linkedJobs.map(job => ({
-                  job_id: job.id,
+                linkedJobs.map(link => ({
+                  job_id: link.job_id,
                   capability_id: capability.id,
-                  required_level: 3,
-                  is_required: true,
+                  required_proficiency_level: link.required_proficiency_level,
+                  weighting: link.weighting,
+                  is_required: link.is_required,
+                  is_preferred: link.is_preferred,
+                  start_date: link.start_date,
+                  end_date: link.end_date,
+                  notes: link.notes,
                 }))
               );
           }
@@ -614,47 +666,101 @@ export function ConfigurationWizard({
       case "jobs":
         return (
           <div className="space-y-4">
-            <Label>Select Jobs</Label>
-            <p className="text-sm text-muted-foreground">
-              Link this {isSkill ? "skill" : "competency"} to relevant job profiles
-            </p>
-            
-            <ScrollArea className="h-[250px] border rounded-lg p-2">
-              <div className="space-y-1">
-                {availableJobs.map((job) => {
-                  const isLinked = linkedJobs.some(j => j.id === job.id);
-                  return (
-                    <button
-                      key={job.id}
-                      onClick={() => handleToggleJob(job)}
-                      className={cn(
-                        "w-full text-left p-2 rounded-lg flex items-center gap-2 transition-colors",
-                        isLinked
-                          ? "bg-primary/10 border border-primary/20"
-                          : "hover:bg-muted/50"
-                      )}
-                    >
-                      {isLinked ? (
-                        <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
-                      ) : (
-                        <Circle className="h-4 w-4 text-muted-foreground shrink-0" />
-                      )}
-                      <span className="text-sm">{job.name}</span>
-                    </button>
-                  );
-                })}
-                {availableJobs.length === 0 && (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <Briefcase className="h-8 w-8 mx-auto mb-2" />
-                    <p className="text-sm">No jobs available</p>
-                  </div>
-                )}
+            <div className="flex items-center justify-between">
+              <div>
+                <Label>Linked Jobs</Label>
+                <p className="text-sm text-muted-foreground">
+                  Configure how this {isSkill ? "skill" : "competency"} applies to each job
+                </p>
               </div>
+              <Button
+                size="sm"
+                onClick={handleOpenJobLinkDialog}
+                disabled={availableJobs.length === 0}
+              >
+                <Plus className="h-4 w-4 mr-1" />
+                Link Job
+              </Button>
+            </div>
+            
+            <ScrollArea className="h-[280px] border rounded-lg">
+              {linkedJobs.length > 0 ? (
+                <div className="divide-y">
+                  {linkedJobs.map((link) => (
+                    <div
+                      key={link.job_id}
+                      className="p-3 hover:bg-muted/30 transition-colors"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <Briefcase className="h-4 w-4 text-muted-foreground shrink-0" />
+                            <span className="font-medium text-sm">{link.job_name}</span>
+                            <ProficiencyLevelBadge level={link.required_proficiency_level} size="sm" />
+                          </div>
+                          <div className="flex items-center gap-2 mt-1.5 text-xs text-muted-foreground flex-wrap">
+                            <Badge variant="outline" className="text-xs">
+                              {link.weighting}% weight
+                            </Badge>
+                            <Badge 
+                              variant={link.is_required ? "default" : link.is_preferred ? "secondary" : "outline"}
+                              className="text-xs"
+                            >
+                              {link.is_required ? "Required" : link.is_preferred ? "Preferred" : "Optional"}
+                            </Badge>
+                            <span>From: {link.start_date}</span>
+                            {link.end_date && <span>To: {link.end_date}</span>}
+                          </div>
+                          {link.notes && (
+                            <p className="text-xs text-muted-foreground mt-1 italic">
+                              {link.notes}
+                            </p>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-1 shrink-0">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => handleEditJobLink(link)}
+                            className="h-7 w-7 p-0"
+                          >
+                            <Pencil className="h-3.5 w-3.5" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => handleRemoveJobLink(link.job_id)}
+                            className="h-7 w-7 p-0 text-destructive hover:text-destructive"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center h-full py-12 text-muted-foreground">
+                  <Briefcase className="h-10 w-10 mb-3" />
+                  <p className="text-sm font-medium">No jobs linked</p>
+                  <p className="text-xs mt-1">Click "Link Job" to associate this {isSkill ? "skill" : "competency"} with jobs</p>
+                </div>
+              )}
             </ScrollArea>
 
             <p className="text-xs text-muted-foreground">
-              {linkedJobs.length} job(s) selected
+              {linkedJobs.length} job(s) linked
             </p>
+
+            <JobLinkDialog
+              open={jobLinkDialogOpen}
+              onOpenChange={setJobLinkDialogOpen}
+              availableJobs={availableJobs}
+              existingJobIds={linkedJobs.map(j => j.job_id)}
+              editingLink={editingJobLink}
+              onSave={editingJobLink ? handleUpdateJobLink : handleAddJobLink}
+              isSkill={isSkill}
+            />
           </div>
         );
 
