@@ -18,11 +18,15 @@ import {
   CheckCircle2,
   Calendar,
   Briefcase,
-  Loader2
+  Loader2,
+  ExternalLink,
+  Settings2
 } from "lucide-react";
 import { format } from "date-fns";
 import { useCapabilityJobApplicability } from "@/hooks/useCapabilityJobApplicability";
 import { ProficiencyLevelBadge } from "@/components/capabilities/ProficiencyLevelPicker";
+import { CompetencyJobLinker } from "@/components/capabilities/CompetencyJobLinker";
+import { NavLink } from "react-router-dom";
 
 interface SkillAttribute {
   id: string;
@@ -105,7 +109,8 @@ export function CapabilityDetailPanel({
   onEdit 
 }: CapabilityDetailPanelProps) {
   const [activeTab, setActiveTab] = useState("overview");
-  const { applicability, loading: loadingJobs, fetchApplicability } = useCapabilityJobApplicability();
+  const [isJobLinkerOpen, setIsJobLinkerOpen] = useState(false);
+  const { requirements, applicability, loading: loadingJobs, fetchApplicability } = useCapabilityJobApplicability();
   
   const isSkill = capability.type === "SKILL";
   const isCompetency = capability.type === "COMPETENCY";
@@ -120,6 +125,10 @@ export function CapabilityDetailPanel({
       fetchApplicability(capability.id);
     }
   }, [capability.id, isCompetency, fetchApplicability]);
+
+  const handleJobLinkerComplete = () => {
+    fetchApplicability(capability.id);
+  };
 
   return (
     <Card className="h-full">
@@ -351,27 +360,75 @@ export function CapabilityDetailPanel({
 
               {isCompetency && (
                 <>
-                  {/* Job Applicability - from capability_job_applicability table */}
+                  {/* Job Applicability - Enhanced with linking capabilities */}
                   <div className="p-3 rounded-lg border bg-card">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Briefcase className="h-4 w-4 text-blue-500" />
-                      <h4 className="text-sm font-medium">Applicable Jobs</h4>
-                      {loadingJobs && <Loader2 className="h-3 w-3 animate-spin" />}
-                    </div>
-                    {applicability.length > 0 ? (
-                      <div className="flex flex-wrap gap-1">
-                        {applicability.map((app) => (
-                          <Badge key={app.id} variant="outline" className="text-xs">
-                            <Briefcase className="h-3 w-3 mr-1" />
-                            {app.job?.name || "Unknown Job"}
-                            {app.ai_suggested && (
-                              <Sparkles className="h-3 w-3 ml-1 text-purple-500" />
-                            )}
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <Briefcase className="h-4 w-4 text-blue-500" />
+                        <h4 className="text-sm font-medium">Linked Jobs</h4>
+                        {loadingJobs && <Loader2 className="h-3 w-3 animate-spin" />}
+                        {!loadingJobs && (
+                          <Badge variant="secondary" className="text-xs">
+                            {requirements.length}
                           </Badge>
+                        )}
+                      </div>
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => setIsJobLinkerOpen(true)}
+                        className="text-xs"
+                      >
+                        <Settings2 className="h-3.5 w-3.5 mr-1" />
+                        Manage
+                      </Button>
+                    </div>
+                    {requirements.length > 0 ? (
+                      <div className="space-y-1.5">
+                        {requirements.slice(0, 4).map((req) => (
+                          <div 
+                            key={req.id} 
+                            className="flex items-center justify-between p-1.5 rounded bg-accent/30"
+                          >
+                            <div className="flex items-center gap-1.5">
+                              <Briefcase className="h-3 w-3 text-muted-foreground" />
+                              <span className="text-xs">{req.job?.name || "Unknown Job"}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <ProficiencyLevelBadge level={req.required_proficiency_level} size="sm" />
+                              <NavLink to={`/workforce/jobs?job=${req.job_id}`}>
+                                <Button variant="ghost" size="icon" className="h-6 w-6">
+                                  <ExternalLink className="h-3 w-3" />
+                                </Button>
+                              </NavLink>
+                            </div>
+                          </div>
                         ))}
+                        {requirements.length > 4 && (
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="w-full text-xs"
+                            onClick={() => setIsJobLinkerOpen(true)}
+                          >
+                            +{requirements.length - 4} more jobs
+                            <ChevronRight className="h-3 w-3 ml-1" />
+                          </Button>
+                        )}
                       </div>
                     ) : (
-                      <p className="text-xs text-muted-foreground">No jobs linked to this competency</p>
+                      <div className="text-center py-3">
+                        <AlertTriangle className="h-6 w-6 mx-auto mb-1 text-amber-500" />
+                        <p className="text-xs text-muted-foreground mb-2">No jobs linked yet</p>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => setIsJobLinkerOpen(true)}
+                        >
+                          <Briefcase className="h-3.5 w-3.5 mr-1" />
+                          Link to Jobs
+                        </Button>
+                      </div>
                     )}
                   </div>
 
@@ -458,6 +515,18 @@ export function CapabilityDetailPanel({
           </ScrollArea>
         </Tabs>
       </CardContent>
+
+      {/* Job Linker Dialog */}
+      {isCompetency && (
+        <CompetencyJobLinker
+          capabilityId={capability.id}
+          capabilityName={capability.name}
+          companyId={capability.company_id}
+          open={isJobLinkerOpen}
+          onOpenChange={setIsJobLinkerOpen}
+          onComplete={handleJobLinkerComplete}
+        />
+      )}
     </Card>
   );
 }

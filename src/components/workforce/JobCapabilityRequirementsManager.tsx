@@ -490,6 +490,33 @@ export function JobCapabilityRequirementsManager({
 
   return (
     <div className="space-y-6">
+      {/* Navigation callout to Skills & Competencies registry */}
+      <Alert className="bg-sky-50 border-sky-200 p-4">
+        <Info className="h-5 w-5 text-sky-600" />
+        <AlertDescription className="text-sm ml-1">
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center justify-between">
+              <span className="font-semibold text-slate-900">
+                Competencies Must Be Defined First
+              </span>
+              <a 
+                href="/workforce/capability-registry" 
+                className="inline-flex items-center gap-1.5 text-sm font-medium text-sky-700 hover:text-sky-800 hover:underline"
+              >
+                <Target className="h-4 w-4" />
+                Manage Competencies
+                <ArrowRight className="h-3.5 w-3.5" />
+              </a>
+            </div>
+            <span className="text-slate-700 leading-relaxed">
+              Competencies are defined in the <strong>Skills & Competencies</strong> registry with behavioral indicators and linked skills. 
+              Only <strong>active competencies</strong> with complete setup appear here for selection. 
+              You can also link jobs directly from the competency detail page.
+            </span>
+          </div>
+        </AlertDescription>
+      </Alert>
+
       {/* Info callout explaining competency-first approach */}
       <Alert className="bg-violet-50 border-violet-200 p-4">
         <Target className="h-5 w-5 text-violet-600" />

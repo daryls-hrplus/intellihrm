@@ -51,6 +51,7 @@ interface CapabilityCardProps {
   onStatusChange: (id: string, status: "active" | "deprecated") => void;
   onViewHistory?: (capability: Capability) => void;
   onConfigure?: (capability: Capability) => void;
+  onManageJobs?: (capability: Capability) => void;
 }
 
 const statusConfig = {
@@ -113,6 +114,7 @@ export function CapabilityCard({
   onStatusChange,
   onViewHistory,
   onConfigure,
+  onManageJobs,
 }: CapabilityCardProps) {
   const status = statusConfig[capability.status];
   const StatusIcon = status.icon;
@@ -281,12 +283,20 @@ export function CapabilityCard({
                 complete={canBeInferred ?? false}
                 icon={Brain}
               />
-              <CompletionIndicator
-                label="Jobs"
-                complete={(capability.job_count ?? 0) > 0}
-                count={capability.job_count}
-                icon={Briefcase}
-              />
+              <div 
+                className={cn(
+                  "cursor-pointer",
+                  onManageJobs && "hover:opacity-80 transition-opacity"
+                )}
+                onClick={() => onManageJobs?.(capability)}
+              >
+                <CompletionIndicator
+                  label="Jobs"
+                  complete={(capability.job_count ?? 0) > 0}
+                  count={capability.job_count}
+                  icon={Briefcase}
+                />
+              </div>
             </>
           ) : (
             <>
@@ -295,12 +305,20 @@ export function CapabilityCard({
                 complete={hasBehavioralIndicators}
                 icon={ListChecks}
               />
-              <CompletionIndicator
-                label="Jobs"
-                complete={(capability.job_count ?? 0) > 0}
-                count={capability.job_count}
-                icon={Briefcase}
-              />
+              <div 
+                className={cn(
+                  "cursor-pointer",
+                  onManageJobs && "hover:opacity-80 transition-opacity"
+                )}
+                onClick={() => onManageJobs?.(capability)}
+              >
+                <CompletionIndicator
+                  label="Jobs"
+                  complete={(capability.job_count ?? 0) > 0}
+                  count={capability.job_count}
+                  icon={Briefcase}
+                />
+              </div>
               <CompletionIndicator
                 label="Skills"
                 complete={(capability.skill_count ?? 0) > 0}
