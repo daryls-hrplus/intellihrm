@@ -30,6 +30,10 @@ export interface ReminderRule {
   email_template_id: string | null;
   is_active: boolean;
   priority: 'low' | 'medium' | 'high' | 'critical';
+  effective_from: string | null;
+  effective_to: string | null;
+  version: number | null;
+  supersedes_rule_id: string | null;
   created_by: string | null;
   created_at: string;
   updated_at: string;
@@ -53,6 +57,11 @@ export interface EmployeeReminder {
   status: 'pending' | 'sent' | 'dismissed' | 'cancelled';
   sent_at: string | null;
   dismissed_at: string | null;
+  expires_at: string | null;
+  read_at: string | null;
+  acknowledged_at: string | null;
+  delivery_timezone: string | null;
+  scheduled_send_at: string | null;
   created_by: string | null;
   created_by_role: 'admin' | 'hr' | 'manager' | 'employee' | 'system' | null;
   is_recurring: boolean;
