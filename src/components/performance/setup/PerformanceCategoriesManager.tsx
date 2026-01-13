@@ -11,11 +11,12 @@ import { PerformanceCategoryDialog } from "./PerformanceCategoryDialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
-interface PerformanceCategoriesManagerProps {
+interface RatingLevelsManagerProps {
   companyId: string;
 }
 
-export function PerformanceCategoriesManager({ companyId }: PerformanceCategoriesManagerProps) {
+// Renamed from PerformanceCategoriesManager to better reflect purpose
+export function PerformanceCategoriesManager({ companyId }: RatingLevelsManagerProps) {
   const { data: categories, isLoading } = usePerformanceCategories(companyId);
   const seedCategories = useSeedPerformanceCategories();
   const { deleteCategory } = useManagePerformanceCategories();
@@ -74,10 +75,10 @@ export function PerformanceCategoriesManager({ companyId }: PerformanceCategorie
             <div>
               <CardTitle className="flex items-center gap-2">
                 <Award className="h-5 w-5" />
-                Performance Categories
+                Rating Levels
               </CardTitle>
               <CardDescription>
-                Define performance levels and their score thresholds for the appraisal system
+                Configure performance rating levels with score thresholds and eligibility flags for appraisals
               </CardDescription>
             </div>
             <div className="flex gap-2">
@@ -88,12 +89,12 @@ export function PerformanceCategoriesManager({ companyId }: PerformanceCategorie
                   disabled={seedCategories.isPending}
                 >
                   <Wand2 className="mr-2 h-4 w-4" />
-                  Seed Defaults
+                  Seed Default Levels
                 </Button>
               )}
               <Button onClick={handleAdd}>
                 <Plus className="mr-2 h-4 w-4" />
-                Add Category
+                Add Rating Level
               </Button>
             </div>
           </div>
