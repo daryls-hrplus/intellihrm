@@ -309,7 +309,7 @@ export default function PerformanceSetupPage() {
                 <TabsContent value="competencies" className="mt-4">
                   <UnifiedCompetencyFramework 
                     companyId={selectedCompany} 
-                    onNavigateToLibrary={() => navigate('/workforce/skills-competencies')}
+                    onNavigateToLibrary={() => navigate('/workforce/capability-registry')}
                   />
                 </TabsContent>
                 <TabsContent value="approval-workflows" className="mt-4">
