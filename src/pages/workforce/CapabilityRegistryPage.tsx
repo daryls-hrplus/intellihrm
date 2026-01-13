@@ -23,11 +23,25 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
   Plus,
   Search,
   Zap,
   Target,
   ChevronLeft,
+  ChevronDown,
   Filter,
   Layers,
   Loader2,
@@ -35,6 +49,8 @@ import {
   Sparkles,
   Upload,
   Heart,
+  HelpCircle,
+  FileDown,
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -56,6 +72,7 @@ import { SkillMappingsDialog } from "@/components/capabilities/SkillMappingsDial
 import { SkillsQuickStartWizard } from "@/components/capabilities/SkillsQuickStartWizard";
 import { BatchGenerateIndicatorsButton } from "@/components/capabilities/BatchGenerateIndicatorsButton";
 import { BulkCompetencyImport } from "@/components/capabilities/BulkCompetencyImport";
+import { EmptyStateOnboarding } from "@/components/capabilities/EmptyStateOnboarding";
 import { useAuth } from "@/contexts/AuthContext";
 
 interface Company {
@@ -202,18 +219,47 @@ export default function CapabilityRegistryPage() {
             </div>
           </div>
           <div className="flex gap-2">
-            <BatchGenerateIndicatorsButton
-              companyId={companyFilter !== "all" ? companyFilter : companies[0]?.id}
-              onComplete={() => fetchCapabilities({})}
-            />
-            <Button variant="outline" onClick={() => setIsQuickStartOpen(true)}>
-              <Sparkles className="mr-2 h-4 w-4" />
-              Quick Start
-            </Button>
-            <Button variant="outline" onClick={() => setIsBulkImportOpen(true)}>
-              <Upload className="mr-2 h-4 w-4" />
-              Bulk Import
-            </Button>
+            {/* Import & Generate Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline">
+                  <FileDown className="mr-2 h-4 w-4" />
+                  Import & Generate
+                  <ChevronDown className="ml-2 h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-64">
+                <DropdownMenuItem onClick={() => setIsQuickStartOpen(true)} className="flex flex-col items-start py-3">
+                  <div className="flex items-center">
+                    <Sparkles className="mr-2 h-4 w-4 text-primary" />
+                    <span className="font-medium">Import from Library</span>
+                  </div>
+                  <span className="text-xs text-muted-foreground ml-6 mt-0.5">
+                    Import from ESCO & O*NET standards
+                  </span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setIsBulkImportOpen(true)} className="flex flex-col items-start py-3">
+                  <div className="flex items-center">
+                    <Upload className="mr-2 h-4 w-4" />
+                    <span className="font-medium">Import from CSV</span>
+                  </div>
+                  <span className="text-xs text-muted-foreground ml-6 mt-0.5">
+                    Upload competencies from spreadsheet
+                  </span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild className="flex flex-col items-start py-3">
+                  <div>
+                    <BatchGenerateIndicatorsButton
+                      companyId={companyFilter !== "all" ? companyFilter : companies[0]?.id}
+                      onComplete={() => fetchCapabilities({})}
+                      variant="dropdown"
+                    />
+                  </div>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
             <Button variant="outline" onClick={() => handleAdd("COMPETENCY")}>
               <Target className="mr-2 h-4 w-4" />
               Add Competency
@@ -311,18 +357,35 @@ export default function CapabilityRegistryPage() {
                     <SelectItem value="core">Core</SelectItem>
                   </SelectContent>
                 </Select>
-                <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className="w-[150px]">
-                    <SelectValue placeholder="Status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Statuses</SelectItem>
-                    <SelectItem value="draft">Draft</SelectItem>
-                    <SelectItem value="pending_approval">Pending</SelectItem>
-                    <SelectItem value="active">Active</SelectItem>
-                    <SelectItem value="deprecated">Deprecated</SelectItem>
-                  </SelectContent>
-                </Select>
+                <TooltipProvider>
+                  <div className="flex items-center gap-1">
+                    <Select value={statusFilter} onValueChange={setStatusFilter}>
+                      <SelectTrigger className="w-[170px]">
+                        <SelectValue placeholder="Filter by Status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Statuses</SelectItem>
+                        <SelectItem value="draft">Draft</SelectItem>
+                        <SelectItem value="pending_approval">Pending Approval</SelectItem>
+                        <SelectItem value="active">Active</SelectItem>
+                        <SelectItem value="deprecated">Deprecated</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
+                      </TooltipTrigger>
+                      <TooltipContent side="bottom" className="max-w-xs">
+                        <p className="text-sm">
+                          <strong>Draft:</strong> Work in progress<br />
+                          <strong>Pending Approval:</strong> Awaiting review<br />
+                          <strong>Active:</strong> Ready for use<br />
+                          <strong>Deprecated:</strong> No longer in use
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
+                </TooltipProvider>
                 <Select value={companyFilter} onValueChange={setCompanyFilter}>
                   <SelectTrigger className="w-[180px]">
                     <SelectValue placeholder="Company" />
@@ -369,17 +432,12 @@ export default function CapabilityRegistryPage() {
                     <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
                   </div>
                 ) : capabilities.length === 0 ? (
-                  <div className="text-center py-12 text-muted-foreground">
-                    <Layers className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                    <p className="text-lg font-medium">No skills or competencies found</p>
-                    <p className="text-sm">
-                      Create your first skill or competency to get started.
-                    </p>
-                    <Button className="mt-4" onClick={() => handleAdd("SKILL")}>
-                      <Plus className="h-4 w-4 mr-2" />
-                      Add Skill
-                    </Button>
-                  </div>
+                  <EmptyStateOnboarding
+                    onOpenWizard={() => setIsQuickStartOpen(true)}
+                    onOpenBulkImport={() => setIsBulkImportOpen(true)}
+                    onAddSkill={() => handleAdd("SKILL")}
+                    onAddCompetency={() => handleAdd("COMPETENCY")}
+                  />
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {capabilities.map((capability) => (
@@ -404,11 +462,17 @@ export default function CapabilityRegistryPage() {
                   <div className="text-center py-12 text-muted-foreground">
                     <Zap className="h-12 w-12 mx-auto mb-4 opacity-50" />
                     <p className="text-lg font-medium">No skills found</p>
-                    <p className="text-sm">Create your first skill to get started.</p>
-                    <Button className="mt-4" onClick={() => handleAdd("SKILL")}>
-                      <Plus className="h-4 w-4 mr-2" />
-                      Add Skill
-                    </Button>
+                    <p className="text-sm mb-4">Create skills manually or import from the library.</p>
+                    <div className="flex gap-2 justify-center">
+                      <Button variant="outline" onClick={() => setIsQuickStartOpen(true)}>
+                        <Sparkles className="h-4 w-4 mr-2" />
+                        Import from Library
+                      </Button>
+                      <Button onClick={() => handleAdd("SKILL")}>
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add Skill
+                      </Button>
+                    </div>
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -434,11 +498,17 @@ export default function CapabilityRegistryPage() {
                   <div className="text-center py-12 text-muted-foreground">
                     <Target className="h-12 w-12 mx-auto mb-4 opacity-50" />
                     <p className="text-lg font-medium">No competencies found</p>
-                    <p className="text-sm">Create your first competency to get started.</p>
-                    <Button className="mt-4" onClick={() => handleAdd("COMPETENCY")}>
-                      <Plus className="h-4 w-4 mr-2" />
-                      Add Competency
-                    </Button>
+                    <p className="text-sm mb-4">Create competencies manually or import from the library.</p>
+                    <div className="flex gap-2 justify-center">
+                      <Button variant="outline" onClick={() => setIsQuickStartOpen(true)}>
+                        <Sparkles className="h-4 w-4 mr-2" />
+                        Import from Library
+                      </Button>
+                      <Button onClick={() => handleAdd("COMPETENCY")}>
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add Competency
+                      </Button>
+                    </div>
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
