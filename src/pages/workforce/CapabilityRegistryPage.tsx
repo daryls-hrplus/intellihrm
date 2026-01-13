@@ -391,14 +391,27 @@ export default function CapabilityRegistryPage() {
                   </span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem asChild className="flex flex-col items-start py-3">
-                  <div>
-                    <BatchGenerateIndicatorsButton
-                      companyId={companyFilter !== "all" ? companyFilter : companies[0]?.id}
-                      onComplete={() => fetchCapabilities({})}
-                      variant="dropdown"
-                    />
-                  </div>
+                <DropdownMenuItem 
+                  onSelect={(e) => e.preventDefault()} 
+                  className="flex flex-col items-start py-3 cursor-pointer"
+                >
+                  <BatchGenerateIndicatorsButton
+                    companyId={companyFilter || companies[0]?.id}
+                    onComplete={() => fetchCapabilities({})}
+                    variant="dropdown"
+                    type="competency"
+                  />
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  onSelect={(e) => e.preventDefault()} 
+                  className="flex flex-col items-start py-3 cursor-pointer"
+                >
+                  <BatchGenerateIndicatorsButton
+                    companyId={companyFilter || companies[0]?.id}
+                    onComplete={() => fetchCapabilities({})}
+                    variant="dropdown"
+                    type="skill"
+                  />
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
