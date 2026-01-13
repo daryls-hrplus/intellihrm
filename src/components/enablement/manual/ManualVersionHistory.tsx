@@ -4,6 +4,23 @@ import { History, User, Calendar } from 'lucide-react';
 
 const VERSION_HISTORY = [
   {
+    version: '1.4.0',
+    date: '2026-01-13',
+    author: 'Intelli HRM Team',
+    changes: [
+      'Added Values Assessment Configuration (Section 2.15) and Goals Integration Settings (Section 2.16)',
+      'Added Rating Dispute & Acknowledgment Workflow (Section 3.11) with dispute categories and resolution process',
+      'Added Values Assessment Process (Section 3.12) for employee and manager workflows',
+      'Added AI Coaching Nudges (Section 5.7) with nudge types and configuration',
+      'Added Performance Risk Detection (Section 5.8) with 7 risk types and intervention recommendations',
+      'Added Performance Intelligence Hub (Section 6.5) with 6-tab analytics overview',
+      'Added Talent Unified Dashboard (Section 6.6) for cross-module talent visibility',
+      'Added Compliance Document Generation (Section 7.7) for jurisdiction-specific documents',
+      'Expanded Glossary with 6 new terms (Dispute Window, Performance Risk, Toxic High Performer, etc.)',
+      'Clarified Goals module as separate with integration reference',
+    ],
+  },
+  {
     version: '1.3.0',
     date: '2026-01-02',
     author: 'Intelli HRM Team',

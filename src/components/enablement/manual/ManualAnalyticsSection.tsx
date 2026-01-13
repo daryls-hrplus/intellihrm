@@ -2,7 +2,9 @@ import {
   AppraisalAnalyticsDashboard,
   PerformanceDistributionAnalysis,
   ManagerScoringPatternsSection,
-  TrendAnalysisPredictions
+  TrendAnalysisPredictions,
+  PerformanceIntelligenceHubSection,
+  TalentUnifiedDashboardSection
 } from './sections/analytics';
 
 export function ManualAnalyticsSection() {
@@ -12,6 +14,8 @@ export function ManualAnalyticsSection() {
       <PerformanceDistributionAnalysis />
       <ManagerScoringPatternsSection />
       <TrendAnalysisPredictions />
+      <PerformanceIntelligenceHubSection />
+      <TalentUnifiedDashboardSection />
     </div>
   );
 }
