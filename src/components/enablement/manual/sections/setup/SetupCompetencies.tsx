@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Clock, CheckCircle } from 'lucide-react';
+import { Clock, CheckCircle, AlertCircle, Sparkles, Link2 } from 'lucide-react';
 import { NavigationPath } from '../../NavigationPath';
 import { 
   LearningObjectives, 
@@ -14,92 +14,126 @@ import {
 } from '../../components';
 
 const FIELD_DEFINITIONS = [
-  { name: 'Competency Name', required: true, type: 'Text', description: 'Display name for the competency', defaultValue: '—', validation: 'Max 100 characters' },
-  { name: 'Code', required: true, type: 'Text', description: 'Unique identifier for integrations', defaultValue: 'Auto-generated', validation: 'Max 20 chars' },
-  { name: 'Category', required: true, type: 'Select', description: 'Grouping category (Core, Leadership, Technical, Functional)', defaultValue: 'Core', validation: 'From predefined list' },
-  { name: 'Description', required: true, type: 'Text', description: 'Full description of the competency and its importance', defaultValue: '—', validation: 'Max 1000 characters' },
-  { name: 'Proficiency Levels', required: true, type: 'Array', description: 'Behavioral indicators for each proficiency level (1-5)', defaultValue: '—', validation: 'All 5 levels required' },
-  { name: 'Job Families', required: false, type: 'Multi-select', description: 'Which job families require this competency', defaultValue: 'None', validation: '—' },
-  { name: 'Expected Level by Grade', required: false, type: 'Mapping', description: 'Target proficiency level for each job grade', defaultValue: 'Level 3', validation: 'Level 1-5' },
-  { name: 'Is Core', required: true, type: 'Boolean', description: 'Whether this applies to all employees', defaultValue: 'false', validation: '—' },
-  { name: 'Is Active', required: true, type: 'Boolean', description: 'Whether competency is available for use', defaultValue: 'true', validation: '—' },
+  { name: 'Code', required: true, type: 'Text', description: 'Unique identifier for the competency', defaultValue: 'Auto-generated', validation: 'Max 20 chars, unique' },
+  { name: 'Name', required: true, type: 'Text', description: 'Display name for the competency', defaultValue: '—', validation: 'Max 100 characters' },
+  { name: 'Type', required: true, type: 'Enum', description: 'Must be COMPETENCY for appraisal use', defaultValue: 'COMPETENCY', validation: 'From list' },
+  { name: 'Category', required: true, type: 'Enum', description: 'behavioral, leadership, or core', defaultValue: 'behavioral', validation: 'From predefined list' },
+  { name: 'Description', required: false, type: 'Text', description: 'Full description of the competency and its importance', defaultValue: '—', validation: 'Max 1000 characters' },
+  { name: 'Proficiency Indicators', required: true, type: 'JSONB', description: 'Behavioral descriptors for each proficiency level (1-5)', defaultValue: '—', validation: 'All 5 levels required' },
+  { name: 'External Source', required: false, type: 'Enum', description: 'ESCO, O*NET, or Manual', defaultValue: 'Manual', validation: 'From list' },
+  { name: 'Is Global', required: true, type: 'Boolean', description: 'Available to all companies (platform-wide)', defaultValue: 'false', validation: '—' },
+  { name: 'Effective From', required: true, type: 'Date', description: 'When competency becomes active', defaultValue: 'Today', validation: 'Valid date' },
+  { name: 'Status', required: true, type: 'Enum', description: 'draft, active, or deprecated', defaultValue: 'draft', validation: 'From list' },
+];
+
+const JOB_LINK_FIELDS = [
+  { name: 'Job', required: true, type: 'Reference', description: 'The job this competency applies to', defaultValue: '—', validation: 'Valid job ID' },
+  { name: 'Weight', required: true, type: 'Percentage', description: 'Contribution to overall competency score for this job', defaultValue: '—', validation: 'All job competencies must sum to 100%' },
+  { name: 'Required Level', required: true, type: 'Number (1-5)', description: 'Expected proficiency level for this job', defaultValue: '3', validation: 'Between 1 and 5' },
+  { name: 'Is Required', required: true, type: 'Boolean', description: 'Whether competency is mandatory for the job', defaultValue: 'true', validation: '—' },
 ];
 
 const STEPS = [
   {
-    title: 'Navigate to Competency Library',
-    description: 'Go to Performance → Setup → Foundation → Competencies',
-    expectedResult: 'Competency Library displays with existing competencies grouped by category'
-  },
-  {
-    title: 'Click "Add Competency"',
-    description: 'Click the primary action button to create a new competency',
-    expectedResult: 'Competency creation form opens'
-  },
-  {
-    title: 'Enter Competency Details',
-    description: 'Fill in the basic competency information',
+    title: 'Navigate to Skills & Competencies Registry',
+    description: 'Go to Workforce → Skills & Competencies',
     substeps: [
-      'Name: Enter a clear, descriptive name (e.g., "Strategic Thinking")',
-      'Code: Enter unique identifier or accept auto-generated',
-      'Category: Select the appropriate grouping (Core, Leadership, Technical)',
-      'Description: Write a comprehensive explanation of the competency'
+      'Select company from the company filter (top of page)',
+      'Filter to show only Competencies using the Type filter'
     ],
-    expectedResult: 'Basic information saved'
+    expectedResult: 'Competency Registry displays with existing competencies for the selected company'
   },
   {
-    title: 'Define Proficiency Levels',
-    description: 'Create behavioral indicators for each of the 5 proficiency levels',
+    title: 'Import or Create Competency Library',
+    description: 'Build your competency framework using one of these methods',
     substeps: [
-      'Level 1 (Foundational): Basic understanding, learning stage',
-      'Level 2 (Developing): Applies with guidance, building skills',
-      'Level 3 (Competent): Independent application, consistent performance',
-      'Level 4 (Advanced): Expert application, coaches others',
-      'Level 5 (Mastery): Strategic influence, organizational impact'
+      'Option A: Click "Import & Generate" → "Import from Library" to import from ESCO/O*NET',
+      'Option B: Use Quick Start Wizard to select from curated library',
+      'Option C: Click "Add Capability" to manually create competencies'
     ],
-    expectedResult: 'All 5 proficiency levels have behavioral descriptions'
+    expectedResult: 'Competencies added to the registry for your company'
   },
   {
-    title: 'Assign to Job Families',
-    description: 'Map the competency to relevant job families',
+    title: 'Generate AI Proficiency Indicators',
+    description: 'Use AI to create behavioral descriptors for each proficiency level',
     substeps: [
-      'Select job families that require this competency',
-      'Set expected proficiency level for each job grade within the family',
-      'Mark as "Core" if applicable to all employees'
+      'Select competencies that need indicators (checkbox)',
+      'Click "Import & Generate" → "Generate Competency Indicators"',
+      'AI generates behavioral descriptions for levels 1-5',
+      'Review and edit generated indicators as needed'
     ],
-    expectedResult: 'Competency linked to job hierarchy'
+    expectedResult: 'All competencies have proficiency indicators for levels 1-5'
   },
   {
-    title: 'Save and Verify',
-    description: 'Save the competency and verify it appears correctly',
-    expectedResult: 'Competency saved and visible in the library with correct assignments'
+    title: 'Link Competencies to Jobs',
+    description: 'Associate competencies with relevant jobs in your organization',
+    substeps: [
+      'Click "Manage Jobs" on a competency card',
+      'Or navigate to Workforce → Jobs and expand a job',
+      'Click "Link Competencies" or use the competency linking panel',
+      'Search and select applicable competencies'
+    ],
+    expectedResult: 'Competencies linked to relevant jobs'
+  },
+  {
+    title: 'Configure Weights and Required Levels',
+    description: 'Set the contribution weight and expected proficiency for each job-competency link',
+    substeps: [
+      'For each linked competency, set the Weight percentage (e.g., 25%)',
+      'Set the Required Level (1-5) indicating expected proficiency',
+      'Weights for all competencies linked to a job MUST total 100%',
+      'System validates weight totals and shows warnings if not 100%'
+    ],
+    expectedResult: 'All job-competency links have weights totaling 100% per job'
+  },
+  {
+    title: 'Verify Configuration Status',
+    description: 'Check that competencies are ready for use in appraisals',
+    substeps: [
+      'Navigate to Performance → Setup → Core Framework → Competencies',
+      'Review the Configuration Status column for each competency',
+      'Green "Ready" = Has indicators + linked to 1+ jobs',
+      'Yellow "Partial" = Missing indicators OR job links',
+      'Red "Not Ready" = Missing both indicators AND job links'
+    ],
+    expectedResult: 'All competencies show "Ready" status for appraisal use'
   }
 ];
 
 const BUSINESS_RULES = [
-  { rule: 'All 5 proficiency levels required', enforcement: 'System' as const, description: 'Cannot save competency without behavioral indicators for all levels.' },
-  { rule: 'Core competencies auto-assign to all employees', enforcement: 'System' as const, description: 'Marking competency as Core adds it to all appraisal forms.' },
-  { rule: 'Job family assignment required for non-core', enforcement: 'System' as const, description: 'Non-core competencies must be linked to at least one job family.' },
-  { rule: 'Grade-level expectations recommended', enforcement: 'Policy' as const, description: 'Set expected proficiency by grade for consistent evaluation standards.' },
-  { rule: 'Annual competency framework review', enforcement: 'Policy' as const, description: 'Review and update competencies annually to reflect evolving needs.' },
-  { rule: 'Behavioral indicators should be observable', enforcement: 'Advisory' as const, description: 'Write indicators that describe specific, measurable behaviors.' }
+  { rule: 'Competency weights per job MUST equal 100%', enforcement: 'System' as const, description: 'System validates that all competency weights for a single job sum to exactly 100%.' },
+  { rule: 'All 5 proficiency levels required for appraisals', enforcement: 'System' as const, description: 'Cannot use competency in appraisals without behavioral indicators for all 5 levels.' },
+  { rule: 'Core category competencies auto-assign to all employees', enforcement: 'System' as const, description: 'Marking competency category as "core" adds it to all appraisal forms regardless of job.' },
+  { rule: 'Non-core competencies require job links', enforcement: 'Policy' as const, description: 'Behavioral and leadership competencies should be linked to at least one job.' },
+  { rule: 'AI indicator generation requires company context', enforcement: 'System' as const, description: 'AI uses company-specific context to generate relevant behavioral indicators.' },
+  { rule: 'Deprecated competencies cannot be added to new jobs', enforcement: 'System' as const, description: 'Once deprecated, competency can only be used in existing assignments.' },
 ];
 
 const TROUBLESHOOTING_ITEMS = [
   {
     issue: 'Competency not appearing on appraisal forms',
-    cause: 'Competency not linked to employee\'s job family or marked inactive.',
-    solution: 'Verify the competency is active and assigned to the correct job family. Check employee\'s job assignment in Core HR.'
+    cause: 'Competency not linked to employee\'s job, missing indicators, or status is not "active".',
+    solution: 'Verify: 1) Competency is linked to the employee\'s current job, 2) Has proficiency indicators for all 5 levels, 3) Status is "active", 4) Effective dates are current.'
   },
   {
-    issue: 'Wrong expected level displayed for employee',
-    cause: 'Grade-level mapping not configured or employee grade incorrect.',
-    solution: 'Update the expected level by grade mapping in the competency, or correct the employee\'s grade in Core HR.'
+    issue: 'Weight validation error - "Weights must equal 100%"',
+    cause: 'Competency weights for a job do not sum to exactly 100%.',
+    solution: 'Navigate to the job profile and adjust competency weights. System shows current total. Add or reduce weights until they equal 100%.'
+  },
+  {
+    issue: 'AI indicator generation failed',
+    cause: 'Competency lacks sufficient description context, or system is rate-limited.',
+    solution: 'Add a detailed description to the competency before generating indicators. If rate-limited, wait a few minutes and retry.'
+  },
+  {
+    issue: 'Configuration status shows "Partial"',
+    cause: 'Missing either proficiency indicators OR job links (but not both).',
+    solution: 'Check which is missing: If no indicators, generate using AI. If no job links, link to at least one relevant job.'
   },
   {
     issue: 'Cannot delete competency',
     cause: 'Competency is referenced in active or historical appraisals.',
-    solution: 'Deactivate the competency instead of deleting. Historical data requires reference integrity.'
+    solution: 'Set status to "deprecated" instead of deleting. Historical data requires reference integrity.'
   }
 ];
 
@@ -111,137 +145,204 @@ export function SetupCompetencies() {
           <Badge variant="outline">Section 2.4</Badge>
           <Badge variant="secondary" className="gap-1">
             <Clock className="h-3 w-3" />
-            ~15 min read
+            ~20 min read
           </Badge>
           <Badge className="bg-purple-600 text-white dark:bg-purple-700">
-            Quarterly updates
+            Critical for Appraisals
           </Badge>
         </div>
-        <CardTitle className="text-2xl">Competency Library</CardTitle>
+        <CardTitle className="text-2xl">Competency Framework Configuration</CardTitle>
         <CardDescription>
-          Define organizational competencies with behavioral indicators for performance assessment
+          Import competencies, generate AI indicators, and link to jobs with weights for performance assessment
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        <NavigationPath path={['Performance', 'Setup', 'Foundation', 'Competencies']} />
+        <NavigationPath path={['Workforce', 'Skills & Competencies']} />
+        <div className="text-xs text-muted-foreground">
+          Verification: Performance → Setup → Core Framework → Competencies
+        </div>
 
         <LearningObjectives
           objectives={[
-            'Understand the competency framework structure and categories',
-            'Create competencies with meaningful behavioral indicators',
-            'Link competencies to job families and grade expectations',
-            'Manage core vs. role-specific competency assignments'
+            'Import or create competencies for your organization',
+            'Generate AI-powered proficiency indicators',
+            'Link competencies to jobs with proper weighting',
+            'Validate that weights equal 100% per job',
+            'Verify competency readiness for appraisal forms'
           ]}
         />
 
         <PrerequisiteAlert
           items={[
-            'Job families and grades configured in Core HR',
-            'Organizational competency framework defined',
-            'Rating scales configured (Section 2.2)'
+            'Jobs configured in Workforce → Jobs module',
+            'Company selected for competency management',
+            'Understanding of Skills vs Competencies (Section 2.4a)'
           ]}
         />
 
         {/* Overview */}
         <div>
-          <h4 className="font-medium mb-2">What Is the Competency Library?</h4>
+          <h4 className="font-medium mb-2">What Is Competency Framework Configuration?</h4>
           <p className="text-muted-foreground">
-            The Competency Library serves as the central repository for all organizational competencies 
-            used in performance evaluations. Each competency includes behavioral indicators across 
-            proficiency levels, enabling consistent assessment of employee capabilities. Competencies 
-            are linked to job families to ensure relevant skills appear on each employee's appraisal form.
+            Competencies form the "C" component of the CRGV appraisal model. This section covers how to 
+            import or create competencies in the unified <code className="bg-muted px-1 rounded">skills_competencies</code> registry, 
+            generate AI-powered behavioral indicators, and link them to jobs with weights that must total 100% per job.
           </p>
         </div>
 
+        {/* Workflow Diagram */}
+        <div className="p-4 border rounded-lg bg-muted/30">
+          <h4 className="font-medium mb-3 flex items-center gap-2">
+            <Sparkles className="h-4 w-4 text-purple-500" />
+            Competency Configuration Workflow
+          </h4>
+          <div className="flex flex-wrap items-center gap-2 text-sm">
+            <div className="px-3 py-1.5 bg-primary/10 rounded-full">1. Import/Create</div>
+            <span className="text-muted-foreground">→</span>
+            <div className="px-3 py-1.5 bg-primary/10 rounded-full">2. AI Indicators</div>
+            <span className="text-muted-foreground">→</span>
+            <div className="px-3 py-1.5 bg-primary/10 rounded-full">3. Link to Jobs</div>
+            <span className="text-muted-foreground">→</span>
+            <div className="px-3 py-1.5 bg-primary/10 rounded-full">4. Set Weights (100%)</div>
+            <span className="text-muted-foreground">→</span>
+            <div className="px-3 py-1.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-full">✓ Ready</div>
+          </div>
+        </div>
+
         <ScreenshotPlaceholder
-          caption="Figure 2.4.1: Competency Library showing competencies grouped by category"
-          alt="Competency Library main view"
+          caption="Figure 2.4.1: Skills & Competencies Registry with competency filter applied"
+          alt="Competency Registry main view"
         />
 
         {/* Competency Categories */}
         <div>
           <h4 className="font-medium mb-3">Competency Categories</h4>
-          <div className="grid md:grid-cols-2 gap-4">
+          <div className="grid md:grid-cols-3 gap-4">
             <div className="p-4 border rounded-lg">
-              <h5 className="font-medium mb-2">Core Competencies</h5>
+              <h5 className="font-medium mb-2 text-purple-600 dark:text-purple-400">Core</h5>
               <p className="text-sm text-muted-foreground mb-3">Applied to all employees regardless of role</p>
               <div className="space-y-1 text-sm">
                 <div className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500" /> Communication</div>
-                <div className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500" /> Teamwork & Collaboration</div>
+                <div className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500" /> Teamwork</div>
                 <div className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500" /> Problem Solving</div>
                 <div className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500" /> Accountability</div>
               </div>
             </div>
             <div className="p-4 border rounded-lg">
-              <h5 className="font-medium mb-2">Leadership Competencies</h5>
+              <h5 className="font-medium mb-2 text-blue-600 dark:text-blue-400">Leadership</h5>
               <p className="text-sm text-muted-foreground mb-3">Manager and above positions</p>
               <div className="space-y-1 text-sm">
                 <div className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500" /> Strategic Thinking</div>
                 <div className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500" /> People Development</div>
                 <div className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500" /> Change Management</div>
-                <div className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500" /> Business Acumen</div>
+                <div className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500" /> Decision Making</div>
               </div>
             </div>
             <div className="p-4 border rounded-lg">
-              <h5 className="font-medium mb-2">Technical Competencies</h5>
-              <p className="text-sm text-muted-foreground mb-3">Role-specific technical skills</p>
+              <h5 className="font-medium mb-2 text-amber-600 dark:text-amber-400">Behavioral</h5>
+              <p className="text-sm text-muted-foreground mb-3">Role-specific behavioral traits</p>
               <div className="space-y-1 text-sm">
-                <div className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-blue-500" /> Software Development</div>
-                <div className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-blue-500" /> Data Analysis</div>
-                <div className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-blue-500" /> Project Management</div>
-                <div className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-blue-500" /> Financial Analysis</div>
-              </div>
-            </div>
-            <div className="p-4 border rounded-lg">
-              <h5 className="font-medium mb-2">Functional Competencies</h5>
-              <p className="text-sm text-muted-foreground mb-3">Department-specific capabilities</p>
-              <div className="space-y-1 text-sm">
-                <div className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-amber-500" /> Sales & Negotiation</div>
-                <div className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-amber-500" /> Customer Service</div>
-                <div className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-amber-500" /> Regulatory Compliance</div>
-                <div className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-amber-500" /> Quality Assurance</div>
+                <div className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500" /> Customer Focus</div>
+                <div className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500" /> Innovation</div>
+                <div className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500" /> Adaptability</div>
+                <div className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-500" /> Attention to Detail</div>
               </div>
             </div>
           </div>
         </div>
 
-        <StepByStep steps={STEPS} title="Creating a Competency: Step-by-Step" />
+        <StepByStep steps={STEPS} title="Configuring Competencies: Step-by-Step" />
 
         <ScreenshotPlaceholder
-          caption="Figure 2.4.2: Competency creation form with proficiency level configuration"
-          alt="Add Competency dialog"
+          caption="Figure 2.4.2: AI-generated proficiency indicators for a competency"
+          alt="Competency with AI-generated behavioral indicators"
         />
 
-        <FieldReferenceTable fields={FIELD_DEFINITIONS} title="Field Reference" />
+        {/* Job Linking Section */}
+        <div className="p-4 border-l-4 border-l-blue-500 bg-blue-50 dark:bg-blue-950/30 rounded-r-lg">
+          <div className="flex items-start gap-3">
+            <Link2 className="h-5 w-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+            <div>
+              <h4 className="font-semibold text-foreground">Job Linking & Weight Validation</h4>
+              <p className="text-sm text-foreground mt-1">
+                Each competency linked to a job requires a <strong>weight percentage</strong> and 
+                <strong> required proficiency level</strong>. The system enforces that all competency 
+                weights for a single job must equal exactly 100%.
+              </p>
+              <div className="mt-3 p-3 bg-white/50 dark:bg-black/20 rounded">
+                <h5 className="font-medium text-sm mb-2">Example: Software Developer Job</h5>
+                <table className="w-full text-sm">
+                  <thead className="text-left">
+                    <tr className="border-b">
+                      <th className="py-1">Competency</th>
+                      <th className="py-1">Weight</th>
+                      <th className="py-1">Required Level</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr><td>Problem Solving</td><td>30%</td><td>Level 4</td></tr>
+                    <tr><td>Communication</td><td>25%</td><td>Level 3</td></tr>
+                    <tr><td>Teamwork</td><td>25%</td><td>Level 3</td></tr>
+                    <tr><td>Adaptability</td><td>20%</td><td>Level 3</td></tr>
+                    <tr className="border-t font-medium"><td>Total</td><td>100% ✓</td><td></td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <FieldReferenceTable fields={FIELD_DEFINITIONS} title="Competency Field Reference" />
+        
+        <FieldReferenceTable fields={JOB_LINK_FIELDS} title="Job-Competency Link Fields (job_capability_requirements)" />
 
         <Separator />
 
-        {/* Proficiency Level Example */}
+        {/* Configuration Status */}
         <div>
-          <h4 className="font-medium mb-3">Example: Strategic Thinking Proficiency Levels</h4>
-          <div className="border rounded-lg overflow-hidden">
-            <table className="w-full text-sm">
-              <thead className="bg-muted">
-                <tr>
-                  <th className="text-left p-3 font-medium w-24">Level</th>
-                  <th className="text-left p-3 font-medium">Behavioral Indicator</th>
-                </tr>
-              </thead>
-              <tbody>
-                {[
-                  { level: '1 - Foundational', desc: 'Understands team goals and how individual work contributes to them' },
-                  { level: '2 - Developing', desc: 'Considers implications beyond immediate task; asks clarifying questions about priorities' },
-                  { level: '3 - Competent', desc: 'Anticipates how decisions impact other teams; aligns work with department objectives' },
-                  { level: '4 - Advanced', desc: 'Develops strategies that advance organizational goals; influences cross-functional direction' },
-                  { level: '5 - Mastery', desc: 'Shapes organizational strategy; balances competing priorities for enterprise benefit' }
-                ].map((row) => (
-                  <tr key={row.level} className="border-t">
-                    <td className="p-3 font-medium">{row.level}</td>
-                    <td className="p-3 text-muted-foreground">{row.desc}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <h4 className="font-medium mb-3">Configuration Status Indicators</h4>
+          <p className="text-muted-foreground mb-4">
+            The system tracks readiness status for each competency based on required configuration:
+          </p>
+          <div className="grid md:grid-cols-3 gap-4">
+            <div className="p-4 border rounded-lg border-green-500 bg-green-50 dark:bg-green-950/30">
+              <div className="flex items-center gap-2 mb-2">
+                <Badge className="bg-green-600">Ready</Badge>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Has proficiency indicators for all 5 levels AND linked to at least 1 job with weight.
+              </p>
+            </div>
+            <div className="p-4 border rounded-lg border-yellow-500 bg-yellow-50 dark:bg-yellow-950/30">
+              <div className="flex items-center gap-2 mb-2">
+                <Badge className="bg-yellow-600">Partial</Badge>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Has proficiency indicators OR job links, but not both. Complete missing configuration.
+              </p>
+            </div>
+            <div className="p-4 border rounded-lg border-red-500 bg-red-50 dark:bg-red-950/30">
+              <div className="flex items-center gap-2 mb-2">
+                <Badge className="bg-red-600">Not Ready</Badge>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Missing both proficiency indicators AND job links. Cannot be used in appraisals.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Warning */}
+        <div className="p-4 border-l-4 border-l-amber-500 bg-muted/50 rounded-r-lg">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="h-5 w-5 text-amber-600 dark:text-amber-400 flex-shrink-0" />
+            <div>
+              <h4 className="font-semibold text-foreground">Weight Validation is Enforced</h4>
+              <p className="text-sm text-foreground">
+                If competency weights for a job do not equal 100%, the system will display a warning 
+                and may prevent cycle activation. Always verify weights before launching an appraisal cycle.
+              </p>
+            </div>
           </div>
         </div>
 

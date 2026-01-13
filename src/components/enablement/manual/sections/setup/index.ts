@@ -1,6 +1,7 @@
 export { SetupPrerequisites } from './SetupPrerequisites';
 export { SetupRatingScales } from './SetupRatingScales';
 export { SetupOverallScales } from './SetupOverallScales';
+export { SetupSkillsCompetencies } from './SetupSkillsCompetencies';
 export { SetupCompetencies } from './SetupCompetencies';
 export { SetupApprovalWorkflows } from './SetupApprovalWorkflows';
 export { SetupFormTemplates } from './SetupFormTemplates';

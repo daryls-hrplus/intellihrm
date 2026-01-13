@@ -242,17 +242,31 @@ export const APPRAISALS_MANUAL_STRUCTURE: ManualSection[] = [
         }
       },
       {
+        id: 'sec-2-4a',
+        sectionNumber: '2.4a',
+        title: 'Skills vs Competencies Explained',
+        description: 'Understanding the unified capability framework that powers performance assessment',
+        contentLevel: 'concept',
+        estimatedReadTime: 12,
+        targetRoles: ['Admin', 'Consultant', 'HR User'],
+        industryContext: {
+          frequency: 'Reference material',
+          timing: 'Before competency configuration',
+          benchmark: 'Industry-standard capability frameworks'
+        }
+      },
+      {
         id: 'sec-2-4',
         sectionNumber: '2.4',
-        title: 'Competency Library Integration',
-        description: 'Connecting competencies to appraisal forms',
+        title: 'Competency Framework Configuration',
+        description: 'Import competencies, generate AI indicators, and link to jobs with weights',
         contentLevel: 'procedure',
-        estimatedReadTime: 15,
+        estimatedReadTime: 20,
         targetRoles: ['Admin'],
         industryContext: {
           frequency: 'Initial setup, quarterly updates',
           timing: 'Post competency library population',
-          benchmark: 'Job-based competency assignment'
+          benchmark: 'Job-based competency assignment with 100% weight validation'
         }
       },
       {
@@ -286,15 +300,15 @@ export const APPRAISALS_MANUAL_STRUCTURE: ManualSection[] = [
       {
         id: 'sec-2-7',
         sectionNumber: '2.7',
-        title: 'Performance Categories Setup',
-        description: 'Defining performance levels and score thresholds',
+        title: 'Rating Levels Configuration',
+        description: 'Map overall scores to rating labels, colors, and eligibility flags for automated talent actions',
         contentLevel: 'procedure',
-        estimatedReadTime: 10,
+        estimatedReadTime: 15,
         targetRoles: ['Admin'],
         industryContext: {
           frequency: 'One-time, annual review',
           timing: 'Pre-implementation',
-          benchmark: 'Exceptional (10%), Exceeds (20%), Meets (40%), Needs Improvement (20%), Unsatisfactory (10%)'
+          benchmark: 'Eligibility flags: promotion, succession, bonus, PIP automation'
         }
       },
       {
