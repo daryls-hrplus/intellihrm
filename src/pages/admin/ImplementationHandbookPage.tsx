@@ -24,7 +24,8 @@ import {
   BookOpen,
   Network,
   Rocket,
-  BookMarked
+  BookMarked,
+  Building2
 } from "lucide-react";
 import { toast } from "sonner";
 import jsPDF from "jspdf";
@@ -33,6 +34,7 @@ import { WorkspaceTab } from "@/components/admin/implementation/WorkspaceTab";
 import { ReadinessTab } from "@/components/admin/implementation/ReadinessTab";
 import { DependencyTab } from "@/components/admin/implementation/DependencyTab";
 import { SourceReferenceTab } from "@/components/admin/implementation/SourceReferenceTab";
+import { ClientSelector } from "@/components/enablement/implementation/ClientSelector";
 
 interface PhaseItem {
   order: number;
@@ -186,20 +188,46 @@ const phases: Phase[] = [
     id: "performance",
     title: "Phase 6: Performance & Succession",
     icon: Target,
-    description: "Performance management and talent planning",
-    prerequisite: "Competencies, Jobs, Training configured",
+    description: "Performance management and talent planning. Can run concurrent after Phase 1 + employees exist.",
+    prerequisite: "Phase 1 complete + Employees exist. Can run concurrent with Phases 3-5.",
     items: [
-      { order: 1, area: "Goals (OKR/SMART)", description: "Goal frameworks" },
-      { order: 2, area: "360 Feedback Cycles", description: "Multi-source feedback" },
-      { order: 3, area: "Appraisal Cycles", description: "Formal reviews" },
-      { order: 4, area: "Performance Improvement Plans", description: "For underperformers" },
-      { order: 5, area: "Recognition Programs", description: "Awards and recognition" },
-      { order: 6, area: "Nine Box Grid Config", description: "Talent assessment matrix" },
-      { order: 7, area: "Talent Pools", description: "High-potential groupings" },
-      { order: 8, area: "Key Positions", description: "Critical role identification" },
-      { order: 9, area: "Succession Plans", description: "Successor assignments" },
-      { order: 10, area: "Career Paths", description: "Job progression routes" },
-      { order: 11, area: "Mentorship Programs", description: "Mentor-mentee pairing" },
+      // 6A: Foundation Setup (Global)
+      { order: 1, area: "Rating Scales Configuration", description: "Define competency and behavior rating scales (1-5, 1-7)" },
+      { order: 2, area: "Overall Rating Scales Setup", description: "Configure performance level ratings with labels" },
+      { order: 3, area: "Performance Categories Setup", description: "Define assessment categories (Core, Leadership, Technical)" },
+      { order: 4, area: "Competency Library Integration", description: "Link to Workforce competency definitions" },
+      { order: 5, area: "Index Settings (Multi-Cycle)", description: "Configure appraisal index behavior across cycles" },
+      // 6B: Appraisal Configuration (Company)
+      { order: 6, area: "Appraisal Form Templates", description: "Design review forms with sections and weightings" },
+      { order: 7, area: "Action Rules Configuration", description: "Configure automatic actions based on ratings" },
+      { order: 8, area: "Employee Response Configuration", description: "Set up self-assessment and acknowledgment rules" },
+      { order: 9, area: "HR Escalation Settings", description: "Configure escalation triggers and workflows" },
+      { order: 10, area: "Multi-Position Appraisals Setup", description: "Handle employees with multiple positions" },
+      { order: 11, area: "Benchmarks (Distribution Targets)", description: "Set rating distribution guidelines (bell curve)" },
+      // 6C: Goals & Feedback (Company)
+      { order: 12, area: "Goal Framework (OKR/SMART)", description: "Select and configure goal methodology" },
+      { order: 13, area: "Goal Templates", description: "Create reusable goal structures by job/department" },
+      { order: 14, area: "Goal Locking Rules", description: "Configure when goals can be modified" },
+      { order: 15, area: "Check-in Cadence", description: "Set up regular goal progress check-ins" },
+      { order: 16, area: "360 Feedback Configuration", description: "Configure multi-source feedback dimensions" },
+      { order: 17, area: "Anonymity Settings", description: "Set reviewer anonymity rules by feedback type" },
+      // 6D: Cycles & Operations (Company)
+      { order: 18, area: "Appraisal Cycles Configuration", description: "Create annual/quarterly review cycles" },
+      { order: 19, area: "Participant Enrollment Rules", description: "Auto-enrollment based on tenure, position, etc." },
+      { order: 20, area: "Integration Rules (Downstream)", description: "Link outcomes to compensation, training, succession" },
+      { order: 21, area: "Calibration Session Setup", description: "Configure calibration meetings and participants" },
+      { order: 22, area: "AI Calibration Features", description: "Enable AI-assisted rating suggestions" },
+      // 6E: Talent Management (Company)
+      { order: 23, area: "Nine-Box Grid Configuration", description: "Define performance vs potential axes" },
+      { order: 24, area: "Talent Pools", description: "Create high-potential and succession pools" },
+      { order: 25, area: "Key Positions", description: "Identify and flag critical roles" },
+      { order: 26, area: "Succession Plans", description: "Map successors with readiness levels" },
+      { order: 27, area: "Career Paths", description: "Define progression routes by job family" },
+      { order: 28, area: "Mentorship Programs", description: "Configure mentor matching and programs" },
+      // 6F: Support & PIPs (Company)
+      { order: 29, area: "Performance Improvement Plans", description: "PIP templates with milestones and checkpoints" },
+      { order: 30, area: "Recognition Programs", description: "Awards, badges, and recognition workflows" },
+      { order: 31, area: "Notification Orchestration", description: "Configure performance-related reminders and alerts" },
     ],
   },
   {
@@ -368,8 +396,10 @@ const dependencies = [
   { module: "Leave", dependsOn: "Workforce (employees)" },
   { module: "Benefits", dependsOn: "Workforce (employees, positions)" },
   { module: "Training", dependsOn: "Workforce (employees)" },
-  { module: "Performance", dependsOn: "Workforce + Training (competencies)" },
-  { module: "Succession", dependsOn: "Performance (assessments)" },
+  { module: "Performance (Goals)", dependsOn: "Workforce (employees exist)" },
+  { module: "Performance (Appraisals)", dependsOn: "Workforce (employees, competencies)" },
+  { module: "Performance (Calibration)", dependsOn: "Appraisals (cycles configured)" },
+  { module: "Succession", dependsOn: "Performance (nine-box, talent pools)" },
   { module: "All ESS/MSS", dependsOn: "User accounts + Role assignments" },
   { module: "HR Hub: Organization", dependsOn: "Admin (Phase 1 only)" },
   { module: "HR Hub: Workflows", dependsOn: "Admin (Phase 1 only)" },

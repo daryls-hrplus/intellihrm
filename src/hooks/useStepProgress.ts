@@ -29,14 +29,15 @@ export interface PhaseProgress {
   percentComplete: number;
 }
 
-export function useStepProgress(phaseId?: string) {
+export function useStepProgress(phaseId?: string, overrideCompanyId?: string) {
   const [progress, setProgress] = useState<StepProgress[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { user, profile } = useAuth();
   const { logAction } = useAuditLog();
 
-  const companyId = profile?.company_id;
+  // Use override company ID if provided (for admin multi-company tracking), otherwise use profile's company
+  const companyId = overrideCompanyId || profile?.company_id;
 
   const fetchProgress = useCallback(async () => {
     if (!user || !companyId) {

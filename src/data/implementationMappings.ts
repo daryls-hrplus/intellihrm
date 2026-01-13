@@ -10,6 +10,7 @@ export interface StepMapping {
   subSection?: string;
   sourceManual?: 'workforce' | 'hr-hub' | 'appraisals' | 'admin-security';
   sourceSection?: string;
+  isGlobal?: boolean; // true = global setting, false/undefined = company-specific
 }
 
 // Maps phase ID to step mappings with admin routes and import types
@@ -113,17 +114,43 @@ export const PHASE_STEP_MAPPINGS: Record<string, StepMapping[]> = {
     { order: 10, area: "Quizzes", adminRoute: "/lms/quizzes", isRequired: false, estimatedMinutes: 30 },
   ],
   performance: [
-    { order: 1, area: "Goals (OKR/SMART)", adminRoute: "/admin/goal-templates", isRequired: false, estimatedMinutes: 25 },
-    { order: 2, area: "360 Feedback Cycles", adminRoute: "/admin/feedback-cycles", isRequired: false, estimatedMinutes: 30 },
-    { order: 3, area: "Appraisal Cycles", adminRoute: "/admin/appraisal-cycles", isRequired: false, estimatedMinutes: 35 },
-    { order: 4, area: "Performance Improvement Plans", adminRoute: "/admin/pip-templates", isRequired: false, estimatedMinutes: 20 },
-    { order: 5, area: "Recognition Programs", adminRoute: "/admin/recognition-programs", isRequired: false, estimatedMinutes: 20 },
-    { order: 6, area: "Nine Box Grid Config", adminRoute: "/admin/nine-box-config", isRequired: false, estimatedMinutes: 15 },
-    { order: 7, area: "Talent Pools", adminRoute: "/admin/talent-pools", isRequired: false, estimatedMinutes: 20 },
-    { order: 8, area: "Key Positions", adminRoute: "/admin/key-positions", isRequired: false, estimatedMinutes: 15 },
-    { order: 9, area: "Succession Plans", adminRoute: "/admin/succession-plans", isRequired: false, estimatedMinutes: 30 },
-    { order: 10, area: "Career Paths", adminRoute: "/admin/career-paths", isRequired: false, estimatedMinutes: 25 },
-    { order: 11, area: "Mentorship Programs", adminRoute: "/admin/mentorship", isRequired: false, estimatedMinutes: 20 },
+    // 6A: Foundation Setup (Global settings - apply across all companies)
+    { order: 1, area: "Rating Scales Configuration", adminRoute: "/admin/rating-scales", isRequired: true, estimatedMinutes: 20, subSection: "6A: Foundation Setup", sourceManual: "appraisals", sourceSection: "Part 2.2", isGlobal: true },
+    { order: 2, area: "Overall Rating Scales Setup", adminRoute: "/admin/overall-rating-scales", isRequired: true, estimatedMinutes: 15, subSection: "6A: Foundation Setup", sourceManual: "appraisals", sourceSection: "Part 2.3", isGlobal: true },
+    { order: 3, area: "Performance Categories Setup", adminRoute: "/admin/performance-categories", isRequired: false, estimatedMinutes: 15, subSection: "6A: Foundation Setup", sourceManual: "appraisals", sourceSection: "Part 2.4", isGlobal: true },
+    { order: 4, area: "Competency Library Integration", adminRoute: "/admin/competencies", isRequired: false, estimatedMinutes: 20, subSection: "6A: Foundation Setup", sourceManual: "appraisals", sourceSection: "Part 2.5", isGlobal: true },
+    { order: 5, area: "Index Settings (Multi-Cycle)", adminRoute: "/admin/appraisal-index", isRequired: false, estimatedMinutes: 10, subSection: "6A: Foundation Setup", sourceManual: "appraisals", sourceSection: "Part 2.6", isGlobal: true },
+    // 6B: Appraisal Configuration (Company-specific)
+    { order: 6, area: "Appraisal Form Templates", adminRoute: "/admin/appraisal-templates", isRequired: true, estimatedMinutes: 45, subSection: "6B: Appraisal Configuration", sourceManual: "appraisals", sourceSection: "Part 3.1", isGlobal: false },
+    { order: 7, area: "Action Rules Configuration", adminRoute: "/admin/appraisal-action-rules", isRequired: false, estimatedMinutes: 25, subSection: "6B: Appraisal Configuration", sourceManual: "appraisals", sourceSection: "Part 3.2", isGlobal: false },
+    { order: 8, area: "Employee Response Configuration", adminRoute: "/admin/appraisal-responses", isRequired: false, estimatedMinutes: 15, subSection: "6B: Appraisal Configuration", sourceManual: "appraisals", sourceSection: "Part 3.3", isGlobal: false },
+    { order: 9, area: "HR Escalation Settings", adminRoute: "/admin/appraisal-escalations", isRequired: false, estimatedMinutes: 15, subSection: "6B: Appraisal Configuration", sourceManual: "appraisals", sourceSection: "Part 3.4", isGlobal: false },
+    { order: 10, area: "Multi-Position Appraisals Setup", adminRoute: "/admin/multi-position-appraisals", isRequired: false, estimatedMinutes: 15, subSection: "6B: Appraisal Configuration", sourceManual: "appraisals", sourceSection: "Part 3.5", isGlobal: false },
+    { order: 11, area: "Benchmarks (Distribution Targets)", adminRoute: "/admin/rating-benchmarks", isRequired: false, estimatedMinutes: 20, subSection: "6B: Appraisal Configuration", sourceManual: "appraisals", sourceSection: "Part 3.6", isGlobal: false },
+    // 6C: Goals & Feedback (Company-specific)
+    { order: 12, area: "Goal Framework (OKR/SMART)", adminRoute: "/admin/goal-framework", isRequired: false, estimatedMinutes: 20, subSection: "6C: Goals & Feedback", sourceManual: "appraisals", sourceSection: "Part 4.1", isGlobal: false },
+    { order: 13, area: "Goal Templates", adminRoute: "/admin/goal-templates", isRequired: false, estimatedMinutes: 25, subSection: "6C: Goals & Feedback", sourceManual: "appraisals", sourceSection: "Part 4.2", isGlobal: false },
+    { order: 14, area: "Goal Locking Rules", adminRoute: "/admin/goal-locking", isRequired: false, estimatedMinutes: 10, subSection: "6C: Goals & Feedback", sourceManual: "appraisals", sourceSection: "Part 4.3", isGlobal: false },
+    { order: 15, area: "Check-in Cadence", adminRoute: "/admin/goal-checkins", isRequired: false, estimatedMinutes: 15, subSection: "6C: Goals & Feedback", sourceManual: "appraisals", sourceSection: "Part 4.4", isGlobal: false },
+    { order: 16, area: "360 Feedback Configuration", adminRoute: "/admin/360-feedback", isRequired: false, estimatedMinutes: 30, subSection: "6C: Goals & Feedback", sourceManual: "appraisals", sourceSection: "Part 4.5", isGlobal: false },
+    { order: 17, area: "Anonymity Settings", adminRoute: "/admin/feedback-anonymity", isRequired: false, estimatedMinutes: 10, subSection: "6C: Goals & Feedback", sourceManual: "appraisals", sourceSection: "Part 4.6", isGlobal: false },
+    // 6D: Cycles & Operations (Company-specific)
+    { order: 18, area: "Appraisal Cycles Configuration", adminRoute: "/admin/appraisal-cycles", isRequired: true, estimatedMinutes: 35, subSection: "6D: Cycles & Operations", sourceManual: "appraisals", sourceSection: "Part 5.1", isGlobal: false },
+    { order: 19, area: "Participant Enrollment Rules", adminRoute: "/admin/appraisal-enrollment", isRequired: false, estimatedMinutes: 20, subSection: "6D: Cycles & Operations", sourceManual: "appraisals", sourceSection: "Part 5.2", isGlobal: false },
+    { order: 20, area: "Integration Rules (Downstream)", adminRoute: "/admin/appraisal-integrations", isRequired: false, estimatedMinutes: 25, subSection: "6D: Cycles & Operations", sourceManual: "appraisals", sourceSection: "Part 5.3", isGlobal: false },
+    { order: 21, area: "Calibration Session Setup", adminRoute: "/admin/calibration-sessions", isRequired: false, estimatedMinutes: 30, subSection: "6D: Cycles & Operations", sourceManual: "appraisals", sourceSection: "Part 5.4", isGlobal: false },
+    { order: 22, area: "AI Calibration Features", adminRoute: "/admin/ai-calibration", isRequired: false, estimatedMinutes: 20, subSection: "6D: Cycles & Operations", sourceManual: "appraisals", sourceSection: "Part 5.5", isGlobal: false },
+    // 6E: Talent Management (Company-specific)
+    { order: 23, area: "Nine-Box Grid Configuration", adminRoute: "/admin/nine-box-config", isRequired: false, estimatedMinutes: 20, subSection: "6E: Talent Management", sourceManual: "appraisals", sourceSection: "Part 6.1", isGlobal: false },
+    { order: 24, area: "Talent Pools", adminRoute: "/admin/talent-pools", isRequired: false, estimatedMinutes: 25, subSection: "6E: Talent Management", sourceManual: "appraisals", sourceSection: "Part 6.2", isGlobal: false },
+    { order: 25, area: "Key Positions", adminRoute: "/admin/key-positions", isRequired: false, estimatedMinutes: 20, subSection: "6E: Talent Management", sourceManual: "appraisals", sourceSection: "Part 6.3", isGlobal: false },
+    { order: 26, area: "Succession Plans", adminRoute: "/admin/succession-plans", isRequired: false, estimatedMinutes: 35, subSection: "6E: Talent Management", sourceManual: "appraisals", sourceSection: "Part 6.4", isGlobal: false },
+    { order: 27, area: "Career Paths", adminRoute: "/admin/career-paths", isRequired: false, estimatedMinutes: 30, subSection: "6E: Talent Management", sourceManual: "appraisals", sourceSection: "Part 6.5", isGlobal: false },
+    { order: 28, area: "Mentorship Programs", adminRoute: "/admin/mentorship", isRequired: false, estimatedMinutes: 25, subSection: "6E: Talent Management", sourceManual: "appraisals", sourceSection: "Part 6.6", isGlobal: false },
+    // 6F: Support & PIPs (Company-specific)
+    { order: 29, area: "Performance Improvement Plans", adminRoute: "/admin/pip-templates", isRequired: false, estimatedMinutes: 30, subSection: "6F: Support & PIPs", sourceManual: "appraisals", sourceSection: "Part 7.1", isGlobal: false },
+    { order: 30, area: "Recognition Programs", adminRoute: "/admin/recognition-programs", isRequired: false, estimatedMinutes: 25, subSection: "6F: Support & PIPs", sourceManual: "appraisals", sourceSection: "Part 7.2", isGlobal: false },
+    { order: 31, area: "Notification Orchestration", adminRoute: "/admin/performance-notifications", isRequired: false, estimatedMinutes: 20, subSection: "6F: Support & PIPs", sourceManual: "appraisals", sourceSection: "Part 7.3", isGlobal: false },
   ],
   auxiliary: [
     { order: 1, area: "Recruitment", adminRoute: "/recruitment", isRequired: false, estimatedMinutes: 45 },

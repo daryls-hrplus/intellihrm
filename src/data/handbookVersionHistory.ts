@@ -1,10 +1,10 @@
 // Handbook version tracking and source manual references
 
 export const HANDBOOK_VERSION = {
-  version: '2.0.0',
-  date: '2026-01-08',
+  version: '2.1.0',
+  date: '2026-01-13',
   author: 'Intelli HRM Team',
-  nextReviewDate: '2026-04-08'
+  nextReviewDate: '2026-04-13'
 };
 
 export interface SourceManualReference {
@@ -85,6 +85,18 @@ export interface ChangeLogEntry {
 }
 
 export const HANDBOOK_CHANGE_LOG: ChangeLogEntry[] = [
+  {
+    version: '2.1.0',
+    date: '2026-01-13',
+    changes: [
+      'Restructured Phase 6 with 6 sub-sections (6A-6F) aligned to Appraisals Manual (31 steps)',
+      'Made Phase 6 concurrent - can run after Phase 1 + employees exist',
+      'Added company selector for multi-company implementation tracking',
+      'Added Global vs Per Company badges to step cards',
+      'Updated dependencies to reflect concurrent phase capability',
+      'Added isGlobal flag to implementation mappings'
+    ]
+  },
   {
     version: '2.0.0',
     date: '2026-01-08',

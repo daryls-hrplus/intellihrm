@@ -27,9 +27,10 @@ interface WorkspaceTabProps {
   phases: Phase[];
   activePhase: string;
   onPhaseChange: (phaseId: string) => void;
+  selectedCompanyId?: string;
 }
 
-export function WorkspaceTab({ phases, activePhase, onPhaseChange }: WorkspaceTabProps) {
+export function WorkspaceTab({ phases, activePhase, onPhaseChange, selectedCompanyId }: WorkspaceTabProps) {
   const [importDrawerOpen, setImportDrawerOpen] = useState(false);
   const [selectedImportType, setSelectedImportType] = useState<string | null>(null);
   const [importStepInfo, setImportStepInfo] = useState<{ phaseId: string; stepOrder: number } | null>(null);
@@ -43,7 +44,7 @@ export function WorkspaceTab({ phases, activePhase, onPhaseChange }: WorkspaceTa
     getPhaseProgress,
     getOverallProgress,
     companyId
-  } = useStepProgress();
+  } = useStepProgress(undefined, selectedCompanyId);
 
   const currentPhase = phases.find(p => p.id === activePhase);
   
