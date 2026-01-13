@@ -564,6 +564,8 @@ export function CapabilityFormDialog({
               <CompetencySkillLinker
                 competencyId={capability?.id}
                 competencyName={formData.name}
+                competencyDescription={formData.description}
+                competencyCategory={formData.category}
                 companyId={formData.company_id}
                 isEditing={isEditing}
               />

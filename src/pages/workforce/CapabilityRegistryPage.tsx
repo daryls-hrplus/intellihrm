@@ -389,7 +389,6 @@ export default function CapabilityRegistryPage() {
                         onEdit={handleEdit}
                         onDelete={handleDelete}
                         onStatusChange={handleStatusChange}
-                        onViewMappings={capability.type === "COMPETENCY" ? handleViewMappings : undefined}
                       />
                     ))}
                   </div>
@@ -450,7 +449,6 @@ export default function CapabilityRegistryPage() {
                         onEdit={handleEdit}
                         onDelete={handleDelete}
                         onStatusChange={handleStatusChange}
-                        onViewMappings={handleViewMappings}
                       />
                     ))}
                   </div>

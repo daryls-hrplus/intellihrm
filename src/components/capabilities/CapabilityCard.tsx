@@ -25,7 +25,6 @@ import {
   Archive,
   Zap,
   Target,
-  Link2,
   Brain,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -35,7 +34,6 @@ interface CapabilityCardProps {
   onEdit: (capability: Capability) => void;
   onDelete: (capability: Capability) => void;
   onStatusChange: (id: string, status: "active" | "deprecated") => void;
-  onViewMappings?: (capability: Capability) => void;
 }
 
 const statusConfig = {
@@ -58,7 +56,6 @@ export function CapabilityCard({
   onEdit,
   onDelete,
   onStatusChange,
-  onViewMappings,
 }: CapabilityCardProps) {
   const status = statusConfig[capability.status];
   const StatusIcon = status.icon;
@@ -101,12 +98,6 @@ export function CapabilityCard({
                 <Pencil className="h-4 w-4 mr-2" />
                 Edit
               </DropdownMenuItem>
-              {!isSkill && onViewMappings && (
-                <DropdownMenuItem onClick={() => onViewMappings(capability)}>
-                  <Link2 className="h-4 w-4 mr-2" />
-                  Linked Skills
-                </DropdownMenuItem>
-              )}
               <DropdownMenuSeparator />
               {capability.status !== "active" && (
                 <DropdownMenuItem onClick={() => onStatusChange(capability.id, "active")}>

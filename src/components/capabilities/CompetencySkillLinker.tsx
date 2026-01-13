@@ -2,10 +2,6 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { Slider } from "@/components/ui/slider";
 import {
   Command,
   CommandEmpty,
@@ -25,14 +21,17 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Link2, X, Plus, Search, GraduationCap, AlertCircle, CheckCircle } from "lucide-react";
+import { Link2, X, Plus, GraduationCap, AlertCircle, Sparkles, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useCompetencySkillMappings, CompetencySkillMapping } from "@/hooks/useCapabilities";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 interface CompetencySkillLinkerProps {
   competencyId?: string;
   competencyName: string;
+  competencyDescription?: string;
+  competencyCategory?: string;
   companyId?: string | null;
   isEditing: boolean;
   onMappingsChange?: (mappings: CompetencySkillMapping[]) => void;
@@ -49,6 +48,8 @@ interface AvailableSkill {
 export function CompetencySkillLinker({
   competencyId,
   competencyName,
+  competencyDescription,
+  competencyCategory,
   companyId,
   isEditing,
   onMappingsChange,
@@ -58,6 +59,14 @@ export function CompetencySkillLinker({
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchValue, setSearchValue] = useState("");
   const [loadingSkills, setLoadingSkills] = useState(false);
+  
+  // AI Suggestions state
+  const [suggestingAI, setSuggestingAI] = useState(false);
+  const [aiSuggestions, setAiSuggestions] = useState<Array<{ 
+    skill_id: string; 
+    skill_name: string; 
+    reasoning: string 
+  }>>([]);
 
   // Pending mappings for new competencies (not yet saved)
   const [pendingMappings, setPendingMappings] = useState<{
@@ -136,6 +145,62 @@ export function CompetencySkillLinker({
     }
   };
 
+  const handleAISuggest = async () => {
+    if (!competencyId || !competencyName) return;
+    setSuggestingAI(true);
+    setAiSuggestions([]);
+    try {
+      const { data, error } = await supabase.functions.invoke("suggest-skill-mappings", {
+        body: {
+          competency_id: competencyId,
+          competency_name: competencyName,
+          competency_description: competencyDescription,
+          competency_category: competencyCategory,
+        },
+      });
+
+      if (error) throw error;
+
+      if (data?.suggestions && Array.isArray(data.suggestions)) {
+        // Filter out already mapped skills
+        const unmappedSuggestions = data.suggestions.filter(
+          (s: any) => !mappings.some((m) => m.skill_id === s.skill_id) &&
+                      !pendingMappings.some((m) => m.skill.id === s.skill_id)
+        );
+        
+        // Deduplicate by skill_id
+        const seenIds = new Set<string>();
+        const deduplicatedSuggestions = unmappedSuggestions.filter((s: any) => {
+          if (seenIds.has(s.skill_id)) return false;
+          seenIds.add(s.skill_id);
+          return true;
+        });
+        
+        setAiSuggestions(deduplicatedSuggestions);
+        if (deduplicatedSuggestions.length === 0) {
+          toast.info("No new skill suggestions - all suggested skills are already mapped");
+        } else {
+          toast.success(`Found ${deduplicatedSuggestions.length} skill suggestions`);
+        }
+      }
+    } catch (error: any) {
+      console.error("AI suggest error:", error);
+      toast.error(error.message || "Failed to get AI suggestions");
+    } finally {
+      setSuggestingAI(false);
+    }
+  };
+
+  const handleApplySuggestion = async (suggestion: { skill_id: string; skill_name: string }) => {
+    if (!competencyId) return;
+    const success = await addMapping(competencyId, suggestion.skill_id, 1, false);
+    if (success) {
+      await fetchMappings(competencyId);
+      setAiSuggestions((prev) => prev.filter((s) => s.skill_id !== suggestion.skill_id));
+      toast.success(`Linked "${suggestion.skill_name}"`);
+    }
+  };
+
   const linkedSkillIds = new Set([
     ...mappings.map(m => m.skill_id),
     ...pendingMappings.map(m => m.skill.id),
@@ -199,6 +264,77 @@ export function CompetencySkillLinker({
       </CardHeader>
       
       <CardContent className="space-y-4">
+        {/* AI Suggestions - Only show for existing competencies */}
+        {competencyId && (
+          <div className="border rounded-lg p-3 bg-gradient-to-r from-purple-500/5 to-blue-500/5">
+            <div className="flex items-center justify-between">
+              <h4 className="font-medium flex items-center gap-2 text-sm">
+                <Sparkles className="h-4 w-4 text-purple-500" />
+                AI Suggestions
+                {aiSuggestions.length > 0 && (
+                  <Badge variant="secondary" className="text-xs">
+                    {aiSuggestions.length}
+                  </Badge>
+                )}
+              </h4>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleAISuggest}
+                disabled={suggestingAI}
+                className="gap-2 h-8"
+              >
+                {suggestingAI ? (
+                  <>
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                    Analyzing...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="h-3 w-3" />
+                    Suggest
+                  </>
+                )}
+              </Button>
+            </div>
+            {aiSuggestions.length > 0 && (
+              <div className="mt-3 flex flex-wrap gap-2">
+                {aiSuggestions.slice(0, 8).map((suggestion) => (
+                  <TooltipProvider key={suggestion.skill_id}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="group flex items-center gap-2 px-3 py-1.5 rounded-full bg-background border hover:border-primary/50 transition-colors cursor-pointer">
+                          <GraduationCap className="h-3 w-3 text-blue-500" />
+                          <span className="text-sm font-medium">{suggestion.skill_name}</span>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-5 w-5 opacity-0 group-hover:opacity-100 transition-opacity"
+                            onClick={() => handleApplySuggestion(suggestion)}
+                          >
+                            <Plus className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent side="bottom" className="max-w-xs">
+                        <p className="font-medium">{suggestion.skill_name}</p>
+                        {suggestion.reasoning && (
+                          <p className="text-xs italic mt-1">{suggestion.reasoning}</p>
+                        )}
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                ))}
+                {aiSuggestions.length > 8 && (
+                  <span className="text-xs text-muted-foreground self-center">
+                    +{aiSuggestions.length - 8} more
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Add Skill Button */}
         <Popover open={searchOpen} onOpenChange={setSearchOpen}>
           <PopoverTrigger asChild>
