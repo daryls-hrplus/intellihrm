@@ -146,6 +146,12 @@ export default function CapabilityRegistryPage() {
     setDefaultType(type);
     setIsFormOpen(true);
   };
+  
+  // Get the default company ID based on current filter
+  const getDefaultCompanyId = () => {
+    if (companyFilter !== "all") return companyFilter;
+    return null; // Global by default
+  };
 
   const handleEdit = (capability: Capability) => {
     setSelectedCapability(capability);
@@ -542,6 +548,7 @@ export default function CapabilityRegistryPage() {
         companies={companies}
         onSave={handleSave}
         defaultType={defaultType}
+        defaultCompanyId={selectedCapability ? selectedCapability.company_id : getDefaultCompanyId()}
       />
 
       {/* Skill Mappings Dialog */}

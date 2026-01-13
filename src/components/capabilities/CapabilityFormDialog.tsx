@@ -20,7 +20,8 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { X, Plus, Link2 } from "lucide-react";
+import { X, Plus, Link2, Building2, Globe } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { CompetencySkillLinker } from "./CompetencySkillLinker";
 import {
   Capability,
@@ -42,6 +43,7 @@ interface CapabilityFormDialogProps {
   companies: { id: string; name: string }[];
   onSave: (data: CreateCapabilityInput) => Promise<void>;
   defaultType?: CapabilityType;
+  defaultCompanyId?: string | null;
 }
 
 const categoryOptions: { value: CapabilityCategory; label: string }[] = [
@@ -67,6 +69,7 @@ export function CapabilityFormDialog({
   companies,
   onSave,
   defaultType = "SKILL",
+  defaultCompanyId = null,
 }: CapabilityFormDialogProps) {
   const isEditing = !!capability;
 
@@ -151,7 +154,7 @@ export function CapabilityFormDialog({
     } else {
       setProficiencyIndicators({});
       setFormData({
-        company_id: null,
+        company_id: defaultCompanyId,
         type: defaultType,
         name: "",
         code: "",
@@ -175,7 +178,7 @@ export function CapabilityFormDialog({
       });
       setSelectedJobRequirements([]);
     }
-  }, [capability, defaultType, open, fetchApplicability]);
+  }, [capability, defaultType, defaultCompanyId, open, fetchApplicability]);
 
   const handleSubmit = async () => {
     if (!formData.name || !formData.code || !formData.category) {
@@ -278,10 +281,57 @@ export function CapabilityFormDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader className="space-y-2">
+        <DialogHeader className="space-y-3">
           <DialogTitle>
             {isEditing ? "Edit" : "Create"} {formData.type === "SKILL" ? "Skill" : "Competency"}
           </DialogTitle>
+          
+          {/* Company Context Indicator - Always visible in header */}
+          <div className={cn(
+            "flex items-center gap-2 py-2 px-3 rounded-lg border",
+            formData.company_id 
+              ? "bg-blue-50 border-blue-200 dark:bg-blue-950/20 dark:border-blue-800" 
+              : "bg-amber-50 border-amber-200 dark:bg-amber-950/20 dark:border-amber-800"
+          )}>
+            {formData.company_id ? (
+              <Building2 className="h-4 w-4 text-blue-600 dark:text-blue-400 shrink-0" />
+            ) : (
+              <Globe className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0" />
+            )}
+            <span className="text-sm text-muted-foreground shrink-0">
+              {formData.company_id ? "Company-specific:" : "Global capability:"}
+            </span>
+            <Select
+              value={formData.company_id || "global"}
+              onValueChange={(value) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  company_id: value === "global" ? null : value,
+                }))
+              }
+            >
+              <SelectTrigger className="h-7 w-auto gap-2 border-none bg-transparent p-0 font-medium text-sm hover:bg-transparent focus:ring-0 focus:ring-offset-0">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="global">
+                  <div className="flex items-center gap-2">
+                    <Globe className="h-3.5 w-3.5" />
+                    <span>Global (All Companies)</span>
+                  </div>
+                </SelectItem>
+                {companies.map((company) => (
+                  <SelectItem key={company.id} value={company.id}>
+                    <div className="flex items-center gap-2">
+                      <Building2 className="h-3.5 w-3.5" />
+                      <span>{company.name}</span>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          
           {isEditing && formData.name && (
             <div className="flex items-center gap-2 text-sm">
               <span className="text-lg">{formData.type === "COMPETENCY" ? "🎯" : "🔧"}</span>
@@ -336,30 +386,6 @@ export function CapabilityFormDialog({
               </div>
             )}
 
-            <div className="space-y-2">
-              <Label>Company (optional for global capabilities)</Label>
-              <Select
-                value={formData.company_id || "global"}
-                onValueChange={(value) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    company_id: value === "global" ? null : value,
-                  }))
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select company" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="global">Global (All Companies)</SelectItem>
-                  {companies.map((company) => (
-                    <SelectItem key={company.id} value={company.id}>
-                      {company.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
