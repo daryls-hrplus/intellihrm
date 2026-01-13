@@ -489,22 +489,22 @@ export function JobCapabilityRequirementsManager({
   const selectedCapability = capabilities.find((c) => c.id === formData.capability_id);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {/* Info callout explaining competency-first approach */}
-      <Alert className="bg-violet-50 dark:bg-slate-800 border-violet-200 dark:border-slate-600">
-        <Target className="h-4 w-4 text-violet-600 dark:text-violet-400" />
-        <AlertDescription className="text-sm">
-          <div className="flex flex-col gap-1">
-            <span className="font-medium text-slate-900 dark:text-slate-100">
+      <Alert className="bg-violet-50 dark:bg-slate-800 border-violet-200 dark:border-slate-600 p-4">
+        <Target className="h-5 w-5 text-violet-600 dark:text-violet-400" />
+        <AlertDescription className="text-sm ml-1">
+          <div className="flex flex-col gap-2">
+            <span className="font-semibold text-slate-900 dark:text-slate-100">
               Competencies — For Performance Appraisals
             </span>
-            <span className="text-slate-700 dark:text-slate-300">
+            <span className="text-slate-700 dark:text-slate-300 leading-relaxed">
               Competencies are evaluated in performance appraisals using behavioral indicators at each proficiency level. 
               Each competency has a <strong>weight</strong> that contributes to the overall appraisal score. 
               Skills linked to competencies provide supporting evidence but the <strong>competency level</strong> is what gets rated.
             </span>
-            <div className="flex items-center gap-2 mt-1 text-xs text-slate-600 dark:text-slate-400">
-              <span className="flex items-center gap-1">
+            <div className="flex items-center gap-3 mt-1 text-xs text-slate-600 dark:text-slate-400">
+              <span className="flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-violet-500" />
                 Competency
               </span>

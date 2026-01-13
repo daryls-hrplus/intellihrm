@@ -271,16 +271,16 @@ export function JobSkillsManager({ jobId, companyId }: JobSkillsManagerProps) {
   const selectedSkill = skills.find((s) => s.id === formData.capability_id);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {/* Info callout explaining job skills */}
-      <Alert className="bg-gradient-to-r from-teal-50 to-cyan-50 dark:from-teal-950/20 dark:to-cyan-950/20 border-teal-200 dark:border-teal-800">
-        <Wrench className="h-4 w-4 text-teal-600" />
-        <AlertDescription className="text-sm">
-          <div className="flex flex-col gap-1">
-            <span className="font-medium text-teal-800 dark:text-teal-300">
+      <Alert className="bg-teal-50 dark:bg-slate-800 border-teal-200 dark:border-slate-600 p-4">
+        <Wrench className="h-5 w-5 text-teal-600 dark:text-teal-400" />
+        <AlertDescription className="text-sm ml-1">
+          <div className="flex flex-col gap-2">
+            <span className="font-semibold text-slate-900 dark:text-slate-100">
               Job Skills — Capability Requirements
             </span>
-            <span className="text-teal-700 dark:text-teal-400">
+            <span className="text-slate-700 dark:text-slate-300 leading-relaxed">
               Job Skills define the capabilities required to perform this job. They are used for{" "}
               <strong>recruitment</strong>, <strong>learning paths</strong>, and{" "}
               <strong>succession readiness</strong> — but are{" "}
@@ -301,14 +301,14 @@ export function JobSkillsManager({ jobId, companyId }: JobSkillsManagerProps) {
       </div>
 
       {isLoading ? (
-        <div className="flex justify-center py-8">
+        <div className="flex justify-center py-12">
           <Loader2 className="h-6 w-6 animate-spin" />
         </div>
       ) : requirements.length === 0 ? (
-        <div className="text-center py-8 text-muted-foreground border rounded-lg bg-muted/30">
-          <Wrench className="h-8 w-8 mx-auto mb-2 opacity-50" />
-          <p>No job skills defined yet.</p>
-          <p className="text-xs mt-1">Add skills to define capability requirements for this job.</p>
+        <div className="text-center py-12 text-muted-foreground border rounded-lg bg-white dark:bg-slate-900">
+          <Wrench className="h-10 w-10 mx-auto mb-3 opacity-40" />
+          <p className="font-medium">No job skills defined yet.</p>
+          <p className="text-sm mt-1">Add skills to define capability requirements for this job.</p>
         </div>
       ) : (
         <div className="rounded-lg border">
