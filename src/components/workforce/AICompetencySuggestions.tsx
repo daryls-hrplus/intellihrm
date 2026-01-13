@@ -160,7 +160,7 @@ export function AICompetencySuggestions({
 
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-      <div className="rounded-lg border bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-950/20 dark:to-blue-950/20 p-4">
+      <div className="rounded-lg border border-violet-200 bg-violet-50 p-4">
         <div className="flex items-center justify-between">
           <CollapsibleTrigger asChild>
             <Button variant="ghost" className="p-0 h-auto hover:bg-transparent">
@@ -170,9 +170,9 @@ export function AICompetencySuggestions({
                 ) : (
                   <ChevronRight className="h-4 w-4 text-muted-foreground" />
                 )}
-                <Sparkles className="h-4 w-4 text-purple-500" />
-                <span className="font-medium">AI Suggested Competencies</span>
-                <Badge variant="secondary" className="text-xs">
+                <Sparkles className="h-4 w-4 text-violet-600" />
+                <span className="font-semibold text-slate-900">AI Suggested Competencies</span>
+                <Badge variant="secondary" className="text-xs bg-slate-200 text-slate-800 border-slate-300">
                   Based on "{jobName}"
                   {jobLevel && ` • ${jobLevel}`}
                 </Badge>
@@ -200,12 +200,12 @@ export function AICompetencySuggestions({
         <CollapsibleContent>
           <div className="mt-4">
             {analyzing ? (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground py-4">
+              <div className="flex items-center gap-2 text-sm text-slate-700 py-4">
                 <Loader2 className="h-4 w-4 animate-spin" />
                 Analyzing job profile for competency suggestions...
               </div>
             ) : suggestions.length === 0 ? (
-              <p className="text-sm text-muted-foreground py-2">
+              <p className="text-sm text-slate-700 py-2">
                 No matching competencies found. Try adding a job description for better suggestions.
               </p>
             ) : (
@@ -219,8 +219,8 @@ export function AICompetencySuggestions({
                           size="sm"
                           className={`h-auto py-1.5 gap-2 ${
                             isAlreadyAdded(suggestion)
-                              ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 border-green-200"
-                              : "hover:bg-purple-100 dark:hover:bg-purple-900/30"
+                              ? "bg-green-100 text-green-800 border-green-300"
+                              : "bg-white hover:bg-violet-100 border-violet-200 text-slate-900"
                           }`}
                           onClick={() => !isAlreadyAdded(suggestion) && handleAddSuggestion(suggestion)}
                           disabled={isAlreadyAdded(suggestion)}
@@ -234,7 +234,7 @@ export function AICompetencySuggestions({
                           {suggestion.suggestedLevel && (
                             <Badge 
                               variant="outline" 
-                              className="ml-1 text-xs bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400"
+                              className="ml-1 text-xs bg-sky-100 text-sky-800 border-sky-300 font-semibold"
                             >
                               L{suggestion.suggestedLevel}
                             </Badge>
@@ -242,7 +242,7 @@ export function AICompetencySuggestions({
                           {suggestion.suggestedWeight && (
                             <Badge 
                               variant="outline" 
-                              className="text-xs bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
+                              className="text-xs bg-emerald-100 text-emerald-800 border-emerald-300 font-semibold"
                             >
                               {suggestion.suggestedWeight}%
                             </Badge>
@@ -281,8 +281,8 @@ export function AICompetencySuggestions({
             )}
           </div>
 
-          <p className="text-xs text-muted-foreground mt-3 flex items-center gap-1">
-          <Sparkles className="h-3 w-3" />
+          <p className="text-xs text-slate-600 mt-3 flex items-center gap-1">
+          <Sparkles className="h-3 w-3 text-violet-500" />
           Click a suggestion to add it with AI-recommended level & weight. Competencies are evaluated in performance appraisals.
         </p>
         </CollapsibleContent>

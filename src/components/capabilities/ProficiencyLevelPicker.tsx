@@ -32,8 +32,8 @@ export const DEFAULT_PROFICIENCY_LEVELS = [
     ],
     appraisalGuidance: "Use for employees new to this skill who are still learning the basics. Expect hands-on mentoring.",
     icon: Lightbulb,
-    color: "text-slate-500",
-    bgColor: "bg-slate-100 dark:bg-slate-800",
+    color: "text-slate-700",
+    bgColor: "bg-slate-100",
   },
   {
     level: 2,
@@ -48,8 +48,8 @@ export const DEFAULT_PROFICIENCY_LEVELS = [
     ],
     appraisalGuidance: "Employee is building confidence. May handle straightforward cases independently but needs support for variations.",
     icon: GraduationCap,
-    color: "text-blue-500",
-    bgColor: "bg-blue-100 dark:bg-blue-900/30",
+    color: "text-blue-700",
+    bgColor: "bg-blue-100",
   },
   {
     level: 3,
@@ -64,8 +64,8 @@ export const DEFAULT_PROFICIENCY_LEVELS = [
     ],
     appraisalGuidance: "Solid performer for day-to-day work. This is the expected level for most experienced employees in their core skills.",
     icon: Star,
-    color: "text-emerald-500",
-    bgColor: "bg-emerald-100 dark:bg-emerald-900/30",
+    color: "text-emerald-700",
+    bgColor: "bg-emerald-100",
   },
   {
     level: 4,
@@ -80,8 +80,8 @@ export const DEFAULT_PROFICIENCY_LEVELS = [
     ],
     appraisalGuidance: "Reserve for employees who are clearly above average. They should be mentoring others and handling escalations.",
     icon: Trophy,
-    color: "text-amber-500",
-    bgColor: "bg-amber-100 dark:bg-amber-900/30",
+    color: "text-amber-700",
+    bgColor: "bg-amber-100",
   },
   {
     level: 5,
@@ -96,8 +96,8 @@ export const DEFAULT_PROFICIENCY_LEVELS = [
     ],
     appraisalGuidance: "Very few should reach this level. Reserve for true subject matter experts who innovate and influence beyond their team.",
     icon: Crown,
-    color: "text-purple-500",
-    bgColor: "bg-purple-100 dark:bg-purple-900/30",
+    color: "text-purple-700",
+    bgColor: "bg-purple-100",
   },
 ];
 
