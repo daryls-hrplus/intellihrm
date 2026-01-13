@@ -278,10 +278,23 @@ export function CapabilityFormDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
+        <DialogHeader className="space-y-2">
           <DialogTitle>
             {isEditing ? "Edit" : "Create"} {formData.type === "SKILL" ? "Skill" : "Competency"}
           </DialogTitle>
+          {isEditing && formData.name && (
+            <div className="flex items-center gap-2 text-sm">
+              <span className="text-lg">{formData.type === "COMPETENCY" ? "🎯" : "🔧"}</span>
+              <span className="font-semibold text-foreground">{formData.name}</span>
+              <Badge variant="outline" className="text-xs capitalize">{formData.category}</Badge>
+              <Badge 
+                variant={formData.status === "active" ? "default" : "secondary"} 
+                className="text-xs capitalize"
+              >
+                {formData.status.replace("_", " ")}
+              </Badge>
+            </div>
+          )}
         </DialogHeader>
 
         <Tabs defaultValue="basic" className="w-full">
@@ -524,6 +537,11 @@ export function CapabilityFormDialog({
           {/* Behavioral Levels Tab - Only for Competencies */}
           {formData.type === "COMPETENCY" && (
             <TabsContent value="behaviors" className="space-y-4 mt-4">
+              {/* Context reminder */}
+              <div className="flex items-center gap-2 text-sm text-muted-foreground pb-2 border-b">
+                <span>Defining behaviors for:</span>
+                <span className="font-medium text-foreground">{formData.name || "New Competency"}</span>
+              </div>
               <CompetencyBehavioralLevelsEditor
                 competencyName={formData.name}
                 competencyDescription={formData.description || undefined}
@@ -538,6 +556,11 @@ export function CapabilityFormDialog({
           {/* Skills Linking Tab - only for competencies */}
           {formData.type === "COMPETENCY" && (
             <TabsContent value="skills" className="space-y-4 mt-4">
+              {/* Context reminder */}
+              <div className="flex items-center gap-2 text-sm text-muted-foreground pb-2 border-b">
+                <span>Linking skills to:</span>
+                <span className="font-medium text-foreground">{formData.name || "New Competency"}</span>
+              </div>
               <CompetencySkillLinker
                 competencyId={capability?.id}
                 competencyName={formData.name}
