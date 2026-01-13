@@ -927,7 +927,7 @@ export default function JobsPage() {
 
   return (
     <AppLayout>
-      <div className="space-y-6">
+      <div className="space-y-8">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <NavLink to="/workforce" className="hover:text-foreground">
             Workforce
@@ -966,7 +966,7 @@ export default function JobsPage() {
             <TabsTrigger value="level-expectations">Level Expectations</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="jobs" className="mt-4 space-y-4">
+          <TabsContent value="jobs" className="mt-6 space-y-6">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
               <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
                 <SelectTrigger className="w-full sm:w-[250px]">
@@ -1090,13 +1090,13 @@ export default function JobsPage() {
                     </TableRow>
                     {expandedJobId === job.id && (
                       <TableRow>
-                        <TableCell colSpan={10} className="bg-muted/30 p-4">
+                         <TableCell colSpan={10} className="bg-white dark:bg-slate-900 p-6">
                           {/* Job Architecture Helper Tooltip */}
-                          <div className="mb-4 flex items-start gap-2 text-sm bg-sky-50 dark:bg-slate-800 p-3 rounded-lg border border-sky-200 dark:border-slate-600">
-                            <HelpCircle className="h-4 w-4 mt-0.5 text-sky-600 dark:text-sky-400 shrink-0" />
+                          <div className="mb-6 flex items-start gap-3 text-sm bg-sky-50 dark:bg-slate-800 p-4 rounded-lg border border-sky-200 dark:border-slate-600">
+                            <HelpCircle className="h-5 w-5 mt-0.5 text-sky-600 dark:text-sky-400 shrink-0" />
                             <div>
-                              <p className="font-medium text-slate-900 dark:text-slate-100 mb-1">Understanding Job Architecture</p>
-                              <p className="text-slate-700 dark:text-slate-300">
+                              <p className="font-semibold text-slate-900 dark:text-slate-100 mb-2">Understanding Job Architecture</p>
+                              <p className="text-slate-700 dark:text-slate-300 leading-relaxed">
                                 <strong>Competencies</strong> are evaluated in performance appraisals using behavioral indicators and proficiency levels. 
                                 <strong> Job Skills</strong> define capability requirements and support learning, readiness, and development — they are NOT scored in appraisals. 
                                 <strong> Responsibilities</strong> (KRAs) define key result areas with weighted scoring. 
@@ -1105,32 +1105,32 @@ export default function JobsPage() {
                             </div>
                           </div>
                           <Tabs defaultValue="competencies" className="w-full">
-                            <TabsList>
+                            <TabsList className="bg-slate-100 dark:bg-slate-800">
                               <TabsTrigger value="competencies">Competencies</TabsTrigger>
                               <TabsTrigger value="job-skills">Job Skills</TabsTrigger>
                               <TabsTrigger value="responsibilities">Responsibilities</TabsTrigger>
                               <TabsTrigger value="goals">Goals</TabsTrigger>
                             </TabsList>
-                            <TabsContent value="competencies" className="mt-4">
+                            <TabsContent value="competencies" className="mt-6">
                               <JobCapabilityRequirementsManager 
                                 jobId={job.id} 
                                 companyId={job.company_id} 
                               />
                             </TabsContent>
-                            <TabsContent value="job-skills" className="mt-4">
+                            <TabsContent value="job-skills" className="mt-6">
                               <JobSkillsManager 
                                 jobId={job.id} 
                                 companyId={job.company_id} 
                               />
                             </TabsContent>
-                            <TabsContent value="responsibilities" className="mt-4">
+                            <TabsContent value="responsibilities" className="mt-6">
                               <JobResponsibilitiesManager 
                                 jobId={job.id} 
                                 companyId={job.company_id}
                                 jobFamilyId={job.job_family_id}
                               />
                             </TabsContent>
-                            <TabsContent value="goals" className="mt-4">
+                            <TabsContent value="goals" className="mt-6">
                               <JobGoalsManager 
                                 jobId={job.id} 
                                 companyId={job.company_id} 
@@ -1148,7 +1148,7 @@ export default function JobsPage() {
         </div>
           </TabsContent>
 
-          <TabsContent value="level-expectations" className="mt-4">
+          <TabsContent value="level-expectations" className="mt-6">
             {selectedCompanyId ? (
               <JobLevelExpectationsManager companyId={selectedCompanyId} />
             ) : (
