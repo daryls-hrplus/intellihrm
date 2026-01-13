@@ -20,12 +20,15 @@ import {
   Layers,
   Info,
   Sparkles,
-  Users,
   Link2,
-  ArrowRight
+  ArrowRight,
+  Settings2,
+  Percent
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { getCategoryLabel, getCategoryIcon, normalizeCategory } from "@/components/capabilities/wizard/competencyCategoryConfig";
+import { CompetencyConfigStatusBadge } from "./CompetencyConfigStatusBadge";
+import { CompetencyExpandedDetails, JobRequirement, SkillMapping } from "./CompetencyExpandedDetails";
 
 interface UnifiedCompetency {
   id: string;
@@ -37,7 +40,9 @@ interface UnifiedCompetency {
   proficiency_indicators: any;
   jobCount: number;
   skillCount: number;
-  supportingSkills: { id: string; name: string }[];
+  hasIndicators: boolean;
+  avgLevel: number;
+  totalWeight: number;
 }
 
 interface Props {
@@ -45,20 +50,28 @@ interface Props {
   onNavigateToLibrary?: () => void;
 }
 
+type ConfigStatusFilter = 'all' | 'ready' | 'partial' | 'not_ready';
+
 export function UnifiedCompetencyFramework({ companyId, onNavigateToLibrary }: Props) {
   const navigate = useNavigate();
   const [competencies, setCompetencies] = useState<UnifiedCompetency[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
+  const [configStatusFilter, setConfigStatusFilter] = useState<ConfigStatusFilter>("all");
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
+  
+  // Store detailed job requirements and skill mappings for expanded view
+  const [jobDetailsMap, setJobDetailsMap] = useState<Record<string, JobRequirement[]>>({});
+  const [skillDetailsMap, setSkillDetailsMap] = useState<Record<string, SkillMapping[]>>({});
 
   // Stats
   const [stats, setStats] = useState({
     totalCompetencies: 0,
     linkedJobs: 0,
     mappedSkills: 0,
-    coverage: 0
+    coverage: 0,
+    fullyConfigured: 0
   });
 
   useEffect(() => {
@@ -83,54 +96,113 @@ export function UnifiedCompetencyFramework({ companyId, onNavigateToLibrary }: P
 
       const compIds = competenciesData?.map(c => c.id) || [];
 
-      // Fetch job linkage counts
+      // Fetch job linkage with FULL details
       const { data: jobLinks, error: jobError } = await supabase
         .from("job_capability_requirements")
-        .select("capability_id, job_id")
+        .select(`
+          capability_id,
+          job_id,
+          required_proficiency_level,
+          weighting,
+          is_required,
+          is_preferred,
+          start_date,
+          end_date,
+          jobs(id, name)
+        `)
         .in("capability_id", compIds);
 
       if (jobError) console.error("Job links error:", jobError);
 
-      // Fetch skill mappings
+      // Fetch skill mappings with FULL details
       const { data: skillMappings, error: skillError } = await supabase
         .from("competency_skill_mappings")
         .select(`
           competency_id,
+          min_proficiency_level,
+          weight,
+          is_required,
           skill:skills_competencies!competency_skill_mappings_skill_id_fkey(id, name)
         `)
         .in("competency_id", compIds);
 
       if (skillError) console.error("Skill mappings error:", skillError);
 
-      // Build lookup maps
+      // Build detailed lookup maps
+      const jobDetailsByComp: Record<string, JobRequirement[]> = {};
       const jobCountByComp: Record<string, Set<string>> = {};
+      const jobStatsByComp: Record<string, { totalLevel: number; totalWeight: number; count: number }> = {};
+      
       (jobLinks || []).forEach(link => {
-        if (!jobCountByComp[link.capability_id]) {
-          jobCountByComp[link.capability_id] = new Set();
+        const compId = link.capability_id;
+        if (!jobDetailsByComp[compId]) {
+          jobDetailsByComp[compId] = [];
+          jobCountByComp[compId] = new Set();
+          jobStatsByComp[compId] = { totalLevel: 0, totalWeight: 0, count: 0 };
         }
-        jobCountByComp[link.capability_id].add(link.job_id);
+        
+        jobCountByComp[compId].add(link.job_id);
+        
+        const jobName = (link.jobs as any)?.name || "Unknown Job";
+        jobDetailsByComp[compId].push({
+          job_id: link.job_id,
+          job_name: jobName,
+          required_proficiency_level: link.required_proficiency_level || 3,
+          weighting: link.weighting || 0,
+          is_required: link.is_required || false,
+          is_preferred: link.is_preferred || false,
+          start_date: link.start_date,
+          end_date: link.end_date
+        });
+        
+        jobStatsByComp[compId].totalLevel += (link.required_proficiency_level || 3);
+        jobStatsByComp[compId].totalWeight += (link.weighting || 0);
+        jobStatsByComp[compId].count += 1;
       });
 
-      const skillsByComp: Record<string, { id: string; name: string }[]> = {};
+      const skillDetailsByComp: Record<string, SkillMapping[]> = {};
+      const skillCountByComp: Record<string, number> = {};
+      
       (skillMappings || []).forEach(mapping => {
-        if (!skillsByComp[mapping.competency_id]) {
-          skillsByComp[mapping.competency_id] = [];
+        const compId = mapping.competency_id;
+        if (!skillDetailsByComp[compId]) {
+          skillDetailsByComp[compId] = [];
+          skillCountByComp[compId] = 0;
         }
+        
         if (mapping.skill) {
-          skillsByComp[mapping.competency_id].push({
-            id: mapping.skill.id,
-            name: mapping.skill.name
+          skillCountByComp[compId] += 1;
+          skillDetailsByComp[compId].push({
+            skill_id: mapping.skill.id,
+            skill_name: mapping.skill.name,
+            min_proficiency_level: mapping.min_proficiency_level || 1,
+            weight: mapping.weight || 0,
+            is_required: mapping.is_required || false
           });
         }
       });
 
+      setJobDetailsMap(jobDetailsByComp);
+      setSkillDetailsMap(skillDetailsByComp);
+
       // Combine data
-      const enrichedCompetencies: UnifiedCompetency[] = (competenciesData || []).map(comp => ({
-        ...comp,
-        jobCount: jobCountByComp[comp.id]?.size || 0,
-        skillCount: skillsByComp[comp.id]?.length || 0,
-        supportingSkills: skillsByComp[comp.id] || []
-      }));
+      const enrichedCompetencies: UnifiedCompetency[] = (competenciesData || []).map(comp => {
+        const jobCount = jobCountByComp[comp.id]?.size || 0;
+        const skillCount = skillCountByComp[comp.id] || 0;
+        const jobStats = jobStatsByComp[comp.id];
+        const hasIndicators = comp.proficiency_indicators && 
+          typeof comp.proficiency_indicators === 'object' && 
+          Object.keys(comp.proficiency_indicators).length > 0;
+        
+        return {
+          ...comp,
+          jobCount,
+          skillCount,
+          hasIndicators,
+          avgLevel: jobStats && jobStats.count > 0 ? Math.round((jobStats.totalLevel / jobStats.count) * 10) / 10 : 0,
+          totalWeight: jobStats?.totalWeight || 0
+        };
+      });
 
       setCompetencies(enrichedCompetencies);
 
@@ -138,6 +210,7 @@ export function UnifiedCompetencyFramework({ companyId, onNavigateToLibrary }: P
       const totalJobs = new Set((jobLinks || []).map(l => l.job_id)).size;
       const totalSkillMappings = (skillMappings || []).length;
       const compsWithJobs = enrichedCompetencies.filter(c => c.jobCount > 0).length;
+      const fullyConfigured = enrichedCompetencies.filter(c => c.hasIndicators && c.jobCount > 0).length;
       const coverage = enrichedCompetencies.length > 0 
         ? Math.round((compsWithJobs / enrichedCompetencies.length) * 100) 
         : 0;
@@ -146,7 +219,8 @@ export function UnifiedCompetencyFramework({ companyId, onNavigateToLibrary }: P
         totalCompetencies: enrichedCompetencies.length,
         linkedJobs: totalJobs,
         mappedSkills: totalSkillMappings,
-        coverage
+        coverage,
+        fullyConfigured
       });
 
     } catch (error) {
@@ -182,9 +256,21 @@ export function UnifiedCompetencyFramework({ companyId, onNavigateToLibrary }: P
         comp.code.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesCategory = categoryFilter === "all" || 
         normalizeCategory(comp.category) === categoryFilter;
-      return matchesSearch && matchesCategory;
+      
+      // Config status filter
+      const isFullyConfigured = comp.hasIndicators && comp.jobCount > 0;
+      const isPartial = (comp.hasIndicators || comp.jobCount > 0 || comp.skillCount > 0) && !isFullyConfigured;
+      const isNotReady = !comp.hasIndicators && comp.jobCount === 0 && comp.skillCount === 0;
+      
+      const matchesConfigStatus = 
+        configStatusFilter === "all" ||
+        (configStatusFilter === "ready" && isFullyConfigured) ||
+        (configStatusFilter === "partial" && isPartial) ||
+        (configStatusFilter === "not_ready" && isNotReady);
+      
+      return matchesSearch && matchesCategory && matchesConfigStatus;
     });
-  }, [competencies, searchTerm, categoryFilter]);
+  }, [competencies, searchTerm, categoryFilter, configStatusFilter]);
 
   const handleNavigateToLibrary = () => {
     if (onNavigateToLibrary) {
@@ -192,6 +278,15 @@ export function UnifiedCompetencyFramework({ companyId, onNavigateToLibrary }: P
     } else {
       navigate("/workforce/capability-registry");
     }
+  };
+
+  const getJobSummary = (comp: UnifiedCompetency) => {
+    if (comp.jobCount === 0) return null;
+    return (
+      <div className="text-xs text-muted-foreground">
+        Avg L{comp.avgLevel} • {comp.totalWeight}% weight
+      </div>
+    );
   };
 
   if (isLoading) {
@@ -202,8 +297,8 @@ export function UnifiedCompetencyFramework({ companyId, onNavigateToLibrary }: P
           <Skeleton className="h-4 w-72" />
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-4 gap-4">
-            {[1, 2, 3, 4].map(i => (
+          <div className="grid grid-cols-5 gap-4">
+            {[1, 2, 3, 4, 5].map(i => (
               <Skeleton key={i} className="h-20" />
             ))}
           </div>
@@ -247,7 +342,7 @@ export function UnifiedCompetencyFramework({ companyId, onNavigateToLibrary }: P
         <AlertDescription>
           Competencies are managed centrally in the Workforce module and automatically available for 
           performance reviews. Competencies assigned to an employee's job profile will appear in their 
-          appraisal form.
+          appraisal form with the configured proficiency levels and weightings.
         </AlertDescription>
       </Alert>
 
@@ -269,13 +364,20 @@ export function UnifiedCompetencyFramework({ companyId, onNavigateToLibrary }: P
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Quick Stats */}
-          <div className="grid grid-cols-4 gap-4">
+          <div className="grid grid-cols-5 gap-4">
             <div className="p-4 rounded-lg bg-muted/50 border">
               <div className="flex items-center gap-2 text-muted-foreground text-sm mb-1">
                 <Layers className="h-4 w-4" />
                 Active Competencies
               </div>
               <div className="text-2xl font-bold">{stats.totalCompetencies}</div>
+            </div>
+            <div className="p-4 rounded-lg bg-muted/50 border">
+              <div className="flex items-center gap-2 text-muted-foreground text-sm mb-1">
+                <Settings2 className="h-4 w-4" />
+                Fully Configured
+              </div>
+              <div className="text-2xl font-bold text-green-600">{stats.fullyConfigured}</div>
             </div>
             <div className="p-4 rounded-lg bg-muted/50 border">
               <div className="flex items-center gap-2 text-muted-foreground text-sm mb-1">
@@ -301,7 +403,7 @@ export function UnifiedCompetencyFramework({ companyId, onNavigateToLibrary }: P
           </div>
 
           {/* Filters */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 flex-wrap">
             <div className="relative flex-1 max-w-sm">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
@@ -324,6 +426,17 @@ export function UnifiedCompetencyFramework({ companyId, onNavigateToLibrary }: P
                 ))}
               </SelectContent>
             </Select>
+            <Select value={configStatusFilter} onValueChange={(v) => setConfigStatusFilter(v as ConfigStatusFilter)}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Config status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Statuses</SelectItem>
+                <SelectItem value="ready">Ready for Appraisals</SelectItem>
+                <SelectItem value="partial">Partially Configured</SelectItem>
+                <SelectItem value="not_ready">Not Configured</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Competencies Table */}
@@ -333,9 +446,9 @@ export function UnifiedCompetencyFramework({ companyId, onNavigateToLibrary }: P
                 <TableHead className="w-8"></TableHead>
                 <TableHead>Competency</TableHead>
                 <TableHead>Category</TableHead>
+                <TableHead className="text-center">Config Status</TableHead>
                 <TableHead className="text-center">Jobs</TableHead>
                 <TableHead className="text-center">Skills</TableHead>
-                <TableHead>Status</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -343,13 +456,14 @@ export function UnifiedCompetencyFramework({ companyId, onNavigateToLibrary }: P
               {filteredCompetencies.map((comp) => {
                 const isExpanded = expandedRows.has(comp.id);
                 const CategoryIcon = getCategoryIcon(normalizeCategory(comp.category));
+                const hasExpandableContent = comp.jobCount > 0 || comp.skillCount > 0;
 
                 return (
                   <Collapsible key={comp.id} asChild open={isExpanded}>
                     <>
                       <TableRow className="group">
                         <TableCell>
-                          {comp.skillCount > 0 && (
+                          {hasExpandableContent && (
                             <CollapsibleTrigger asChild>
                               <Button 
                                 variant="ghost" 
@@ -384,52 +498,55 @@ export function UnifiedCompetencyFramework({ companyId, onNavigateToLibrary }: P
                           </div>
                         </TableCell>
                         <TableCell className="text-center">
-                          <Badge variant={comp.jobCount > 0 ? "default" : "secondary"}>
-                            {comp.jobCount}
-                          </Badge>
+                          <CompetencyConfigStatusBadge
+                            hasIndicators={comp.hasIndicators}
+                            jobCount={comp.jobCount}
+                            skillCount={comp.skillCount}
+                          />
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <div className="flex flex-col items-center">
+                            <Badge variant={comp.jobCount > 0 ? "default" : "secondary"}>
+                              {comp.jobCount}
+                            </Badge>
+                            {getJobSummary(comp)}
+                          </div>
                         </TableCell>
                         <TableCell className="text-center">
                           <Badge variant={comp.skillCount > 0 ? "outline" : "secondary"}>
                             {comp.skillCount}
                           </Badge>
                         </TableCell>
-                        <TableCell>
-                          <Badge variant="default" className="capitalize">
-                            {comp.status}
-                          </Badge>
-                        </TableCell>
                         <TableCell className="text-right">
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            onClick={() => navigate(`/workforce/capability-registry?id=${comp.id}`)}
-                          >
-                            View Details
-                            <ArrowRight className="h-3 w-3 ml-1" />
-                          </Button>
+                          <div className="flex items-center justify-end gap-1">
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => navigate(`/workforce/capability-registry?id=${comp.id}&action=configure`)}
+                            >
+                              <Settings2 className="h-3.5 w-3.5 mr-1" />
+                              Configure
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => navigate(`/workforce/capability-registry?id=${comp.id}`)}
+                            >
+                              View
+                              <ArrowRight className="h-3 w-3 ml-1" />
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                       <CollapsibleContent asChild>
                         <TableRow className="bg-muted/30 hover:bg-muted/30">
                           <TableCell></TableCell>
-                          <TableCell colSpan={6} className="py-3">
-                            <div className="pl-2">
-                              <div className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1">
-                                <Sparkles className="h-3 w-3" />
-                                Supporting Skills
-                              </div>
-                              <div className="flex flex-wrap gap-1.5">
-                                {comp.supportingSkills.map(skill => (
-                                  <Badge 
-                                    key={skill.id} 
-                                    variant="secondary" 
-                                    className="text-xs"
-                                  >
-                                    {skill.name}
-                                  </Badge>
-                                ))}
-                              </div>
-                            </div>
+                          <TableCell colSpan={6}>
+                            <CompetencyExpandedDetails
+                              competencyId={comp.id}
+                              jobRequirements={jobDetailsMap[comp.id] || []}
+                              skillMappings={skillDetailsMap[comp.id] || []}
+                            />
                           </TableCell>
                         </TableRow>
                       </CollapsibleContent>
