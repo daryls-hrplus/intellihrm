@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -19,6 +19,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { CompetencyCategoryFilter } from "./CompetencyCategoryFilter";
+import { normalizeCategory } from "./competencyCategoryConfig";
 
 interface WizardStepCompetenciesPreviewProps {
   selectedOccupations: string[];
@@ -134,8 +136,15 @@ export function WizardStepCompetenciesPreview({
     }
   };
 
-  // Get unique categories for filter
-  const categories = [...new Set(competencies.map(c => c.category).filter(Boolean))];
+  // Get unique normalized categories with counts for filter
+  const categoriesWithCounts = useMemo(() => {
+    const normalized = new Map<string, number>();
+    competencies.forEach(c => {
+      const key = normalizeCategory(c.category);
+      normalized.set(key, (normalized.get(key) || 0) + 1);
+    });
+    return Array.from(normalized.entries()).sort((a, b) => b[1] - a[1]);
+  }, [competencies]);
 
   // Filter competencies
   const filteredCompetencies = competencies.filter(competency => {
@@ -143,7 +152,8 @@ export function WizardStepCompetenciesPreview({
       competency.competency_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (competency.description && competency.description.toLowerCase().includes(searchQuery.toLowerCase()));
     
-    const matchesCategory = categoryFilter === "all" || competency.category === categoryFilter;
+    const matchesCategory = categoryFilter === "all" || 
+      normalizeCategory(competency.category) === categoryFilter;
     
     const matchesDuplicates = !showDuplicatesOnly || competency.alreadyExists;
 
@@ -198,17 +208,13 @@ export function WizardStepCompetenciesPreview({
           />
         </div>
         
-        <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-          <SelectTrigger className="w-[150px]">
-            <SelectValue placeholder="Category" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Categories</SelectItem>
-            {categories.map(cat => (
-              <SelectItem key={cat} value={cat!}>{cat}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <CompetencyCategoryFilter
+          categories={categoriesWithCounts}
+          value={categoryFilter}
+          onValueChange={setCategoryFilter}
+          placeholder="All Categories"
+          totalCount={competencies.length}
+        />
       </div>
 
       {/* Selection Actions */}
