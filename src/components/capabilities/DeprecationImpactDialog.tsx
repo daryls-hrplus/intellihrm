@@ -12,6 +12,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   AlertTriangle,
   Briefcase,
@@ -20,13 +21,16 @@ import {
   Loader2,
   Building2,
   ChevronRight,
+  ShieldAlert,
+  Clock,
 } from "lucide-react";
-import { format, addMonths } from "date-fns";
+import { format, addMonths, parseISO } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { Capability } from "@/hooks/useCapabilities";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
+import { useCompetencyUsageCheck, ActiveAppraisalCycle } from "@/hooks/capabilities/useCompetencyUsageCheck";
 
 interface AffectedJob {
   id: string;
@@ -46,7 +50,7 @@ interface DeprecationImpactDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   capability: Capability | null;
-  onConfirm: (effectiveTo: string) => Promise<void>;
+  onConfirm: (effectiveTo: string, setPendingDeprecation?: boolean) => Promise<void>;
 }
 
 export function DeprecationImpactDialog({
@@ -63,11 +67,17 @@ export function DeprecationImpactDialog({
     format(addMonths(new Date(), 6), "yyyy-MM-dd")
   );
 
+  // Active cycle check
+  const { loading: usageLoading, usage, checkUsage, clearUsage } = useCompetencyUsageCheck();
+
   useEffect(() => {
     if (open && capability) {
       fetchImpactData();
+      checkUsage(capability.id);
       // Reset sunset date to 6 months from now
       setSunsetDate(format(addMonths(new Date(), 6), "yyyy-MM-dd"));
+    } else {
+      clearUsage();
     }
   }, [open, capability?.id]);
 
@@ -139,7 +149,9 @@ export function DeprecationImpactDialog({
   const handleConfirm = async () => {
     setConfirming(true);
     try {
-      await onConfirm(sunsetDate);
+      // If blocked from deprecation, set to pending_deprecation instead
+      const setPendingDeprecation = usage?.isBlockedFromDeprecation ?? false;
+      await onConfirm(sunsetDate, setPendingDeprecation);
       onOpenChange(false);
     } finally {
       setConfirming(false);
@@ -148,6 +160,8 @@ export function DeprecationImpactDialog({
 
   const totalImpact = affectedJobs.length + affectedEmployees.length;
   const hasHighImpact = totalImpact > 10;
+  const isBlocked = usage?.isBlockedFromDeprecation ?? false;
+  const activeCycles = usage?.activeAppraisalCycles ?? [];
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
@@ -165,13 +179,61 @@ export function DeprecationImpactDialog({
           </AlertDialogDescription>
         </AlertDialogHeader>
 
-        {loading ? (
+        {loading || usageLoading ? (
           <div className="flex items-center justify-center py-12">
             <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
           </div>
         ) : (
           <ScrollArea className="flex-1 max-h-[400px] pr-4">
             <div className="space-y-6">
+              {/* Active Appraisal Cycles Blocking Deprecation */}
+              {isBlocked && activeCycles.length > 0 && (
+                <Card className="border-destructive/50 bg-destructive/5">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-medium flex items-center gap-2 text-destructive">
+                      <ShieldAlert className="h-4 w-4" />
+                      Deprecation Blocked
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <p className="text-sm text-muted-foreground">
+                      This {capability?.type === "SKILL" ? "skill" : "competency"} is currently being used in 
+                      <strong> {activeCycles.length} active appraisal cycle{activeCycles.length !== 1 ? "s" : ""}</strong>.
+                      It cannot be deprecated until these cycles are closed.
+                    </p>
+                    <div className="space-y-2">
+                      {activeCycles.map((cycle) => (
+                        <div 
+                          key={cycle.cycle_id}
+                          className="flex items-center justify-between p-2 rounded-lg bg-background border text-sm"
+                        >
+                          <div className="flex items-center gap-2">
+                            <Calendar className="h-4 w-4 text-muted-foreground" />
+                            <span className="font-medium">{cycle.cycle_name}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline" className="text-xs">
+                              <Users className="h-3 w-3 mr-1" />
+                              {cycle.participants_count} participants
+                            </Badge>
+                            <Badge variant="secondary" className="text-xs capitalize">
+                              {cycle.status.replace("_", " ")}
+                            </Badge>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="flex items-start gap-2 p-2 rounded-lg bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800">
+                      <Clock className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
+                      <p className="text-xs text-amber-800 dark:text-amber-200">
+                        You can set this to <strong>"Pending Deprecation"</strong> status. It will automatically 
+                        be deprecated once all active cycles are closed.
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
               {/* Impact Summary */}
               <div className="grid grid-cols-2 gap-4">
                 <div className={cn(
@@ -211,7 +273,7 @@ export function DeprecationImpactDialog({
               </div>
 
               {/* Warning message */}
-              {hasHighImpact && (
+              {hasHighImpact && !isBlocked && (
                 <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
                   <p className="text-sm text-destructive font-medium">
                     ⚠️ High Impact Warning: This {capability?.type === "SKILL" ? "skill" : "competency"} is 
@@ -324,15 +386,20 @@ export function DeprecationImpactDialog({
           <AlertDialogCancel>Cancel</AlertDialogCancel>
           <AlertDialogAction
             onClick={handleConfirm}
-            disabled={confirming || loading}
+            disabled={confirming || loading || usageLoading}
             className={cn(
-              hasHighImpact && "bg-destructive hover:bg-destructive/90"
+              isBlocked ? "bg-amber-600 hover:bg-amber-700" : hasHighImpact && "bg-destructive hover:bg-destructive/90"
             )}
           >
             {confirming ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                Deprecating...
+                {isBlocked ? "Setting Pending..." : "Deprecating..."}
+              </>
+            ) : isBlocked ? (
+              <>
+                <Clock className="h-4 w-4 mr-2" />
+                Set Pending Deprecation
               </>
             ) : (
               <>Confirm Deprecation</>

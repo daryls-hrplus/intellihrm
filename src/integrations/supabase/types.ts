@@ -7361,6 +7361,45 @@ export type Database = {
           },
         ]
       }
+      capability_audit_log: {
+        Row: {
+          action: string
+          blocked_by_cycles: Json | null
+          capability_id: string
+          change_reason: string | null
+          changed_at: string
+          changed_by: string | null
+          id: string
+          metadata: Json | null
+          new_values: Json | null
+          old_values: Json | null
+        }
+        Insert: {
+          action: string
+          blocked_by_cycles?: Json | null
+          capability_id: string
+          change_reason?: string | null
+          changed_at?: string
+          changed_by?: string | null
+          id?: string
+          metadata?: Json | null
+          new_values?: Json | null
+          old_values?: Json | null
+        }
+        Update: {
+          action?: string
+          blocked_by_cycles?: Json | null
+          capability_id?: string
+          change_reason?: string | null
+          changed_at?: string
+          changed_by?: string | null
+          id?: string
+          metadata?: Json | null
+          new_values?: Json | null
+          old_values?: Json | null
+        }
+        Relationships: []
+      }
       capability_change_history: {
         Row: {
           approved_at: string | null
