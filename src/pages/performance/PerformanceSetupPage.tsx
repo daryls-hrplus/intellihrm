@@ -64,6 +64,7 @@ import { CompetencyDriftDashboard } from "@/components/performance/ai/Competency
 import { ManagerCapabilityDashboard } from "@/components/performance/ai/ManagerCapabilityDashboard";
 import { IntegrationDashboardWidget } from "@/components/performance/setup/IntegrationDashboardWidget";
 import { NotificationsLinkSection } from "@/components/performance/setup/NotificationsLinkSection";
+import { UnifiedCompetencyFramework } from "@/components/performance/setup/UnifiedCompetencyFramework";
 // Interfaces
 interface Company { id: string; name: string; }
 interface RatingScale { id: string; company_id: string; name: string; code: string; description: string | null; min_rating: number; max_rating: number; rating_labels: any; scale_purpose: string[] | null; is_default: boolean; is_active: boolean; }
@@ -83,7 +84,6 @@ export default function PerformanceSetupPage() {
 
   // Data states
   const [ratingScales, setRatingScales] = useState<RatingScale[]>([]);
-  const [competencies, setCompetencies] = useState<Competency[]>([]);
   const [goalTemplates, setGoalTemplates] = useState<GoalTemplate[]>([]);
   const [recognitionCategories, setRecognitionCategories] = useState<RecognitionCategory[]>([]);
   const [appraisalCycles, setAppraisalCycles] = useState<AppraisalCycle[]>([]);
@@ -91,14 +91,12 @@ export default function PerformanceSetupPage() {
   // Dialog states
   const [ratingScaleDialogOpen, setRatingScaleDialogOpen] = useState(false);
   const [overallScaleDialogOpen, setOverallScaleDialogOpen] = useState(false);
-  const [competencyDialogOpen, setCompetencyDialogOpen] = useState(false);
   const [goalTemplateDialogOpen, setGoalTemplateDialogOpen] = useState(false);
   const [recognitionCategoryDialogOpen, setRecognitionCategoryDialogOpen] = useState(false);
 
   // Edit states
   const [editingRatingScale, setEditingRatingScale] = useState<RatingScale | null>(null);
   const [editingOverallScale, setEditingOverallScale] = useState<OverallRatingScale | null>(null);
-  const [editingCompetency, setEditingCompetency] = useState<Competency | null>(null);
   const [editingGoalTemplate, setEditingGoalTemplate] = useState<GoalTemplate | null>(null);
   const [editingRecognitionCategory, setEditingRecognitionCategory] = useState<RecognitionCategory | null>(null);
 
@@ -141,7 +139,7 @@ export default function PerformanceSetupPage() {
   const fetchAllData = async () => {
     setIsLoading(true);
     try {
-      await Promise.all([fetchRatingScales(), fetchCompetencies(), fetchGoalTemplates(), fetchRecognitionCategories(), fetchAppraisalCycles()]);
+      await Promise.all([fetchRatingScales(), fetchGoalTemplates(), fetchRecognitionCategories(), fetchAppraisalCycles()]);
     } finally {
       setIsLoading(false);
     }
@@ -150,11 +148,6 @@ export default function PerformanceSetupPage() {
   const fetchRatingScales = async () => {
     const { data, error } = await supabase.from("performance_rating_scales").select("*").eq("company_id", selectedCompany).order("name");
     if (!error) setRatingScales(data || []);
-  };
-
-  const fetchCompetencies = async () => {
-    const { data, error } = await supabase.from("competencies").select("*").eq("company_id", selectedCompany).order("category, name");
-    if (!error) setCompetencies(data || []);
   };
 
   const fetchGoalTemplates = async () => {
@@ -191,10 +184,6 @@ export default function PerformanceSetupPage() {
           ({ error } = await supabase.from("overall_rating_scales").delete().eq("id", deleteTarget.id));
           if (!error) { toast.success("Overall rating scale deleted"); refetchOverallScales(); }
           break;
-        case 'competency':
-          ({ error } = await supabase.from("competencies").delete().eq("id", deleteTarget.id));
-          if (!error) { toast.success("Competency deleted"); fetchCompetencies(); }
-          break;
         case 'goal_template':
           ({ error } = await supabase.from("goal_templates").delete().eq("id", deleteTarget.id));
           if (!error) { toast.success("Goal template deleted"); fetchGoalTemplates(); }
@@ -213,7 +202,6 @@ export default function PerformanceSetupPage() {
 
   const handleDeleteRatingScale = (id: string, name?: string) => confirmDelete('rating_scale', id, name || 'this rating scale');
   const handleDeleteOverallScale = (id: string, name?: string) => confirmDelete('overall_scale', id, name || 'this overall rating scale');
-  const handleDeleteCompetency = (id: string, name?: string) => confirmDelete('competency', id, name || 'this competency');
   const handleDeleteGoalTemplate = (id: string, name?: string) => confirmDelete('goal_template', id, name || 'this template');
   const handleDeleteRecognitionCategory = (id: string, name?: string) => confirmDelete('recognition_category', id, name || 'this category');
 
@@ -319,7 +307,10 @@ export default function PerformanceSetupPage() {
                   <OverallScalesContent scales={overallScales} isLoading={overallScalesLoading} onAdd={() => { setEditingOverallScale(null); setOverallScaleDialogOpen(true); }} onEdit={(s: OverallRatingScale) => { setEditingOverallScale(s); setOverallScaleDialogOpen(true); }} onDelete={handleDeleteOverallScale} t={t} />
                 </TabsContent>
                 <TabsContent value="competencies" className="mt-4">
-                  <CompetenciesContent competencies={competencies} isLoading={isLoading} onAdd={() => { setEditingCompetency(null); setCompetencyDialogOpen(true); }} onEdit={(c: Competency) => { setEditingCompetency(c); setCompetencyDialogOpen(true); }} onDelete={handleDeleteCompetency} t={t} />
+                  <UnifiedCompetencyFramework 
+                    companyId={selectedCompany} 
+                    onNavigateToLibrary={() => navigate('/workforce/skills-competencies')}
+                  />
                 </TabsContent>
                 <TabsContent value="approval-workflows" className="mt-4">
                   <TalentApprovalWorkflowManager companyId={selectedCompany} />
@@ -540,7 +531,6 @@ export default function PerformanceSetupPage() {
         {/* Dialogs */}
         <EnhancedRatingScaleDialog open={ratingScaleDialogOpen} onOpenChange={setRatingScaleDialogOpen} companyId={selectedCompany} editingScale={editingRatingScale} onSuccess={() => { setRatingScaleDialogOpen(false); fetchRatingScales(); }} />
         <OverallRatingScaleDialog open={overallScaleDialogOpen} onOpenChange={setOverallScaleDialogOpen} companyId={selectedCompany} editingScale={editingOverallScale} onSuccess={() => { setOverallScaleDialogOpen(false); refetchOverallScales(); }} />
-        <CompetencyDialog open={competencyDialogOpen} onOpenChange={setCompetencyDialogOpen} companyId={selectedCompany} editingCompetency={editingCompetency} onSuccess={() => { setCompetencyDialogOpen(false); fetchCompetencies(); }} />
         <GoalTemplateDialog open={goalTemplateDialogOpen} onOpenChange={setGoalTemplateDialogOpen} companyId={selectedCompany} editingTemplate={editingGoalTemplate} onSuccess={() => { setGoalTemplateDialogOpen(false); fetchGoalTemplates(); }} />
         <RecognitionCategoryDialog open={recognitionCategoryDialogOpen} onOpenChange={setRecognitionCategoryDialogOpen} companyId={selectedCompany} editingCategory={editingRecognitionCategory} onSuccess={() => { setRecognitionCategoryDialogOpen(false); fetchRecognitionCategories(); }} />
         
