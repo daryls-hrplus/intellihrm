@@ -311,7 +311,7 @@ export function CapabilityFormDialog({
               </TabsTrigger>
             )}
             <TabsTrigger value="attributes">
-              {formData.type === "SKILL" ? "Skill" : "Competency"} Attributes
+              {formData.type === "SKILL" ? "Skill Attributes" : "Job Assignment"}
             </TabsTrigger>
           </TabsList>
 
@@ -666,6 +666,12 @@ export function CapabilityFormDialog({
               </>
             ) : (
               <>
+                {/* Context reminder */}
+                <div className="flex items-center gap-2 text-sm text-muted-foreground pb-2 border-b">
+                  <span>Assigning to job profiles:</span>
+                  <span className="font-medium text-foreground">{formData.name || "New Competency"}</span>
+                </div>
+
                 <div className="flex items-center justify-between">
                   <div className="space-y-1">
                     <Label>Requires Human Validation</Label>
