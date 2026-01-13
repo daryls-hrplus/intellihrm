@@ -223,12 +223,31 @@ export function DeprecationImpactDialog({
                         </div>
                       ))}
                     </div>
-                    <div className="flex items-start gap-2 p-2 rounded-lg bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800">
-                      <Clock className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
-                      <p className="text-xs text-amber-800 dark:text-amber-200">
-                        You can set this to <strong>"Pending Deprecation"</strong> status. It will automatically 
-                        be deprecated once all active cycles are closed.
-                      </p>
+                    <div className="p-3 rounded-lg bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 space-y-2">
+                      <div className="flex items-center gap-2">
+                        <Clock className="h-4 w-4 text-amber-600 shrink-0" />
+                        <p className="text-sm font-medium text-amber-800 dark:text-amber-200">
+                          What happens when you click "Set Pending Deprecation"?
+                        </p>
+                      </div>
+                      <ul className="text-xs text-amber-800 dark:text-amber-200 space-y-1.5 ml-6 list-disc">
+                        <li>
+                          The {capability?.type === "SKILL" ? "skill" : "competency"} will be marked as 
+                          <Badge variant="outline" className="mx-1 text-xs bg-amber-100 dark:bg-amber-900 border-amber-300">
+                            Pending Deprecation
+                          </Badge>
+                        </li>
+                        <li>
+                          It will <strong>remain fully functional</strong> in all active appraisal cycles listed above
+                        </li>
+                        <li>
+                          Once <strong>all cycles are closed</strong>, the system will automatically change the status to 
+                          <Badge variant="outline" className="mx-1 text-xs bg-muted">Deprecated</Badge>
+                        </li>
+                        <li>
+                          You will receive a notification when the deprecation is complete
+                        </li>
+                      </ul>
                     </div>
                   </CardContent>
                 </Card>
