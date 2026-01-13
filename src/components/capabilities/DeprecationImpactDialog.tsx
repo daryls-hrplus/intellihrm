@@ -78,30 +78,26 @@ export function DeprecationImpactDialog({
       // Fetch affected jobs
       const { data: jobData, error: jobError } = await supabase
         .from("job_capability_requirements")
-        .select(`
-          id,
-          required_level,
-          job_id
-        `)
+        .select("id, required_proficiency_level, job_id")
         .eq("capability_id", capability.id);
 
       if (jobError) {
         console.error("Error fetching affected jobs:", jobError);
       } else if (jobData && jobData.length > 0) {
         // Fetch job details separately
-        const jobIds = jobData.map((r: any) => r.job_id);
+        const jobIds = (jobData as any[]).map((r) => r.job_id);
         const { data: jobsData } = await supabase
           .from("jobs")
           .select("id, job_title, department_id")
           .in("id", jobIds);
         
-        const jobs: AffectedJob[] = (jobsData || []).map((job: any) => {
-          const req = jobData.find((r: any) => r.job_id === job.id);
+        const jobs: AffectedJob[] = ((jobsData || []) as any[]).map((job) => {
+          const req = (jobData as any[]).find((r) => r.job_id === job.id);
           return {
             id: job.id,
             job_title: job.job_title,
             department_name: null,
-            required_level: req?.required_level || 0,
+            required_level: req?.required_proficiency_level || 0,
           };
         });
         setAffectedJobs(jobs);
@@ -110,27 +106,27 @@ export function DeprecationImpactDialog({
       // Fetch affected employees
       const { data: empData, error: empError } = await supabase
         .from("employee_competencies")
-        .select(`
-          id,
-          proficiency_level,
-          profiles!inner(
-            id,
-            first_name,
-            last_name,
-            departments(name)
-          )
-        `)
-        .eq("capability_id", capability.id);
+        .select("id, employee_id, competency_level_id")
+        .eq("competency_id", capability.id);
 
       if (empError) {
         console.error("Error fetching affected employees:", empError);
-      } else {
-        const employees: AffectedEmployee[] = (empData || []).map((row: any) => ({
-          id: row.profiles.id,
-          employee_name: `${row.profiles.first_name || ""} ${row.profiles.last_name || ""}`.trim() || "Unknown",
-          department_name: row.profiles.departments?.name || null,
-          proficiency_level: row.proficiency_level,
-        }));
+      } else if (empData && empData.length > 0) {
+        // Fetch employee details separately
+        const employeeIds = (empData as any[]).map((r) => r.employee_id);
+        const { data: profilesData } = await supabase
+          .from("profiles")
+          .select("id, first_name, last_name, department_id")
+          .in("id", employeeIds);
+        
+        const employees: AffectedEmployee[] = ((profilesData || []) as any[]).map((profile) => {
+          return {
+            id: profile.id,
+            employee_name: `${profile.first_name || ""} ${profile.last_name || ""}`.trim() || "Unknown",
+            department_name: null,
+            proficiency_level: 0, // Level stored in competency_level_id reference
+          };
+        });
         setAffectedEmployees(employees);
       }
     } catch (err) {
