@@ -54,9 +54,26 @@ const DOCUMENT_NAME_MAP: Record<HRDocumentType, string> = {
 
 export function useHRDocumentSignature() {
   const { user, profile } = useAuth();
-  const { startWorkflow, takeAction, getInstanceById } = useWorkflow();
+  const { startWorkflow, takeAction, getWorkflowInstance } = useWorkflow();
   const { createLetter, getLetter, getLetterWithSignatures, verifyLetter } = useWorkflowLetter();
   const [isLoading, setIsLoading] = useState(false);
+
+  // Helper to get current position title for signer
+  const getCurrentPositionTitle = useCallback(async (employeeId: string): Promise<string | null> => {
+    try {
+      const { data } = await supabase
+        .from("employee_positions")
+        .select("position:positions(title)")
+        .eq("employee_id", employeeId)
+        .eq("is_active", true)
+        .eq("is_primary", true)
+        .single();
+      
+      return data?.position?.title || null;
+    } catch {
+      return null;
+    }
+  }, []);
 
   // Initiate a new HR document signature workflow
   const initiateSignature = useCallback(async (
@@ -144,7 +161,7 @@ export function useHRDocumentSignature() {
     setIsLoading(true);
     try {
       // Get instance details
-      const instance = await getInstanceById(instanceId);
+      const instance = await getWorkflowInstance(instanceId);
       if (!instance) {
         throw new Error("Workflow instance not found");
       }
@@ -167,6 +184,9 @@ export function useHRDocumentSignature() {
         // Ignore IP fetch errors
       }
 
+      // Get signer's current position title
+      const positionTitle = await getCurrentPositionTitle(user.id);
+
       // Record the signature
       const { error: signatureError } = await supabase
         .from("workflow_signatures")
@@ -176,7 +196,7 @@ export function useHRDocumentSignature() {
           signer_id: user.id,
           signer_name: profile.full_name || profile.email,
           signer_email: profile.email,
-          signer_position: profile.position_title,
+          signer_position: positionTitle,
           signature_text: signatureText,
           signature_hash: signatureHash,
           ip_address: ipAddress,
@@ -213,7 +233,7 @@ export function useHRDocumentSignature() {
     } finally {
       setIsLoading(false);
     }
-  }, [user, profile, getInstanceById, takeAction, getLetter]);
+  }, [user, profile, getWorkflowInstance, takeAction, getLetter, getCurrentPositionTitle]);
 
   // Get pending signatures for current user
   const getPendingSignatures = useCallback(async (): Promise<PendingSignature[]> => {
