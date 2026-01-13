@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { X, Plus, Link2, Building2, Globe } from "lucide-react";
+import { X, Plus, Link2, Building2, Globe, Sparkles, Brain, Clock, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CompetencySkillLinker } from "./CompetencySkillLinker";
 import {
@@ -604,94 +604,189 @@ export function CapabilityFormDialog({
           <TabsContent value="attributes" className="space-y-4 mt-4">
             {formData.type === "SKILL" ? (
               <>
-                <div className="flex items-center justify-between">
-                  <div className="space-y-1">
-                    <Label>Can be AI-Inferred</Label>
-                    <p className="text-sm text-muted-foreground">
-                      Allow AI to suggest this skill based on text analysis
-                    </p>
-                  </div>
-                  <Switch
-                    checked={formData.skill_attributes?.can_be_inferred ?? true}
-                    onCheckedChange={(checked) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        skill_attributes: {
-                          ...prev.skill_attributes!,
-                          can_be_inferred: checked,
-                        },
-                      }))
-                    }
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Expiry (months)</Label>
-                  <Input
-                    type="number"
-                    value={formData.skill_attributes?.expiry_months || ""}
-                    onChange={(e) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        skill_attributes: {
-                          ...prev.skill_attributes!,
-                          expiry_months: e.target.value ? parseInt(e.target.value) : null,
-                        },
-                      }))
-                    }
-                    placeholder="Leave empty for no expiry"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Synonyms</Label>
-                  <div className="flex gap-2">
-                    <Input
-                      value={newSynonym}
-                      onChange={(e) => setNewSynonym(e.target.value)}
-                      placeholder="Add synonym"
-                      onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addSynonym())}
-                    />
-                    <Button type="button" size="icon" onClick={addSynonym}>
-                      <Plus className="h-4 w-4" />
-                    </Button>
-                  </div>
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {formData.skill_attributes?.synonyms?.map((syn, idx) => (
-                      <Badge key={idx} variant="secondary" className="gap-1">
-                        {syn}
-                        <X
-                          className="h-3 w-3 cursor-pointer"
-                          onClick={() => removeSynonym(idx)}
-                        />
-                      </Badge>
-                    ))}
+                {/* AI Intelligence Info Card */}
+                <div className="rounded-lg border p-4 bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800">
+                  <div className="flex gap-3">
+                    <Sparkles className="h-5 w-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
+                        AI-Powered Skill Intelligence
+                      </p>
+                      <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">
+                        Configure how AI recognizes and validates this skill. Good synonyms and keywords improve matching accuracy across resumes, projects, and learning completions.
+                      </p>
+                    </div>
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label>Inference Keywords</Label>
-                  <div className="flex gap-2">
-                    <Input
-                      value={newKeyword}
-                      onChange={(e) => setNewKeyword(e.target.value)}
-                      placeholder="Add keyword for AI matching"
-                      onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addKeyword())}
-                    />
-                    <Button type="button" size="icon" onClick={addKeyword}>
-                      <Plus className="h-4 w-4" />
-                    </Button>
+                {/* Section 1: AI Inference Settings */}
+                <div className="rounded-lg border bg-card">
+                  <div className="p-4 border-b bg-muted/30">
+                    <div className="flex items-center gap-2">
+                      <Brain className="h-4 w-4 text-primary" />
+                      <h4 className="font-medium">AI Inference</h4>
+                    </div>
                   </div>
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {formData.skill_attributes?.inference_keywords?.map((kw, idx) => (
-                      <Badge key={idx} variant="outline" className="gap-1">
-                        {kw}
-                        <X
-                          className="h-3 w-3 cursor-pointer"
-                          onClick={() => removeKeyword(idx)}
-                        />
-                      </Badge>
-                    ))}
+                  <div className="p-4 space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-1">
+                        <Label className="text-base">Enable AI Detection</Label>
+                        <p className="text-sm text-muted-foreground">
+                          AI can automatically detect this skill from resumes, project descriptions, and learning completions
+                        </p>
+                      </div>
+                      <Switch
+                        checked={formData.skill_attributes?.can_be_inferred ?? true}
+                        onCheckedChange={(checked) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            skill_attributes: {
+                              ...prev.skill_attributes!,
+                              can_be_inferred: checked,
+                            },
+                          }))
+                        }
+                      />
+                    </div>
+
+                    {/* Conditional AI Matching Configuration */}
+                    {formData.skill_attributes?.can_be_inferred && (
+                      <div className="space-y-4 pt-4 border-t">
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <Label>Synonyms</Label>
+                            <span className="text-xs text-muted-foreground">
+                              {formData.skill_attributes?.synonyms?.length || 0} added
+                            </span>
+                          </div>
+                          <p className="text-xs text-muted-foreground">
+                            Alternative names users might use (e.g., "JavaScript" → "JS", "ECMAScript")
+                          </p>
+                          <div className="flex gap-2">
+                            <Input
+                              value={newSynonym}
+                              onChange={(e) => setNewSynonym(e.target.value)}
+                              placeholder="e.g., JS, ECMAScript, ES6"
+                              onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addSynonym())}
+                            />
+                            <Button type="button" size="icon" onClick={addSynonym}>
+                              <Plus className="h-4 w-4" />
+                            </Button>
+                          </div>
+                          <div className="flex flex-wrap gap-2 mt-2">
+                            {formData.skill_attributes?.synonyms?.map((syn, idx) => (
+                              <Badge key={idx} variant="secondary" className="gap-1">
+                                {syn}
+                                <X
+                                  className="h-3 w-3 cursor-pointer hover:text-destructive"
+                                  onClick={() => removeSynonym(idx)}
+                                />
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <Label>Inference Keywords</Label>
+                            <span className="text-xs text-muted-foreground">
+                              {formData.skill_attributes?.inference_keywords?.length || 0} added
+                            </span>
+                          </div>
+                          <p className="text-xs text-muted-foreground">
+                            Phrases that indicate this skill (e.g., "React" → "frontend development", "component-based UI")
+                          </p>
+                          <div className="flex gap-2">
+                            <Input
+                              value={newKeyword}
+                              onChange={(e) => setNewKeyword(e.target.value)}
+                              placeholder="e.g., data science, machine learning"
+                              onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addKeyword())}
+                            />
+                            <Button type="button" size="icon" onClick={addKeyword}>
+                              <Plus className="h-4 w-4" />
+                            </Button>
+                          </div>
+                          <div className="flex flex-wrap gap-2 mt-2">
+                            {formData.skill_attributes?.inference_keywords?.map((kw, idx) => (
+                              <Badge key={idx} variant="outline" className="gap-1">
+                                {kw}
+                                <X
+                                  className="h-3 w-3 cursor-pointer hover:text-destructive"
+                                  onClick={() => removeKeyword(idx)}
+                                />
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Section 2: Skill Validity & Compliance */}
+                <div className="rounded-lg border bg-card">
+                  <div className="p-4 border-b bg-muted/30">
+                    <div className="flex items-center gap-2">
+                      <Clock className="h-4 w-4 text-primary" />
+                      <h4 className="font-medium">Skill Validity</h4>
+                    </div>
+                  </div>
+                  <div className="p-4 space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-1">
+                        <Label className="text-base">Skill Expires</Label>
+                        <p className="text-sm text-muted-foreground">
+                          Skills like certifications often require periodic re-assessment
+                        </p>
+                      </div>
+                      <Switch
+                        checked={!!formData.skill_attributes?.expiry_months}
+                        onCheckedChange={(checked) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            skill_attributes: {
+                              ...prev.skill_attributes!,
+                              expiry_months: checked ? 12 : null,
+                            },
+                          }))
+                        }
+                      />
+                    </div>
+
+                    {formData.skill_attributes?.expiry_months && (
+                      <div className="space-y-2 pt-2">
+                        <Label>Reassess After</Label>
+                        <Select
+                          value={String(formData.skill_attributes.expiry_months)}
+                          onValueChange={(value) =>
+                            setFormData((prev) => ({
+                              ...prev,
+                              skill_attributes: {
+                                ...prev.skill_attributes!,
+                                expiry_months: parseInt(value),
+                              },
+                            }))
+                          }
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="6">6 months</SelectItem>
+                            <SelectItem value="12">12 months</SelectItem>
+                            <SelectItem value="24">24 months</SelectItem>
+                            <SelectItem value="36">36 months</SelectItem>
+                            <SelectItem value="48">48 months</SelectItem>
+                            <SelectItem value="60">60 months</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <p className="text-xs text-muted-foreground flex items-center gap-1">
+                          <Info className="h-3 w-3" />
+                          Employees will receive reminders to update their proficiency before expiry
+                        </p>
+                      </div>
+                    )}
                   </div>
                 </div>
               </>
