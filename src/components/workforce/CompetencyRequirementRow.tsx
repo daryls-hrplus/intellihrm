@@ -189,7 +189,7 @@ export function CompetencyRequirementRow({
                       {linkedSkills.length} skill{linkedSkills.length !== 1 ? "s" : ""}
                     </span>
                     {overriddenSkillsCount > 0 && (
-                      <Badge variant="outline" className="text-[10px] h-4 px-1 bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 border-amber-200 dark:border-amber-800">
+                      <Badge variant="outline" className="text-[10px] h-4 px-1 bg-amber-100 text-amber-800 border-amber-300 font-semibold">
                         <AlertTriangle className="h-2.5 w-2.5 mr-0.5" />
                         {overriddenSkillsCount}
                       </Badge>
@@ -201,7 +201,7 @@ export function CompetencyRequirementRow({
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <Badge variant="outline" className="text-[10px] h-4 px-1 bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 border-amber-200 dark:border-amber-800 cursor-help">
+                          <Badge variant="outline" className="text-[10px] h-4 px-1 bg-amber-100 text-amber-800 border-amber-300 cursor-help font-semibold">
                             <AlertTriangle className="h-2.5 w-2.5 mr-0.5" />
                             No Skills
                           </Badge>
@@ -327,7 +327,7 @@ export function CompetencyRequirementRow({
                       <div className="flex items-center gap-2">
                         <Wrench className="h-3.5 w-3.5 text-blue-500" />
                         <span className="text-sm">{skill.skill?.name}</span>
-                        <Badge variant="outline" className="text-xs bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 border-blue-200 dark:border-blue-800">
+                        <Badge variant="outline" className="text-xs bg-sky-100 text-sky-800 border-sky-300 font-semibold">
                           Skill
                         </Badge>
                       </div>
@@ -384,7 +384,7 @@ export function CompetencyRequirementRow({
                               <TooltipProvider>
                                 <Tooltip>
                                   <TooltipTrigger asChild>
-                                    <Badge variant="outline" className="text-xs bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 border-amber-200 dark:border-amber-800">
+                                    <Badge variant="outline" className="text-xs bg-amber-100 text-amber-800 border-amber-300 font-semibold">
                                       <AlertTriangle className="h-3 w-3 mr-1" />
                                       Override
                                     </Badge>
