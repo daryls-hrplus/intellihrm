@@ -2802,6 +2802,8 @@ export type Database = {
           rating_scale_id: string | null
           requires_hr_approval_for_override: boolean
           responsibilities_weight: number
+          scope: string | null
+          source_template_id: string | null
           updated_at: string
           values_weight: number
         }
@@ -2832,6 +2834,8 @@ export type Database = {
           rating_scale_id?: string | null
           requires_hr_approval_for_override?: boolean
           responsibilities_weight?: number
+          scope?: string | null
+          source_template_id?: string | null
           updated_at?: string
           values_weight?: number
         }
@@ -2862,6 +2866,8 @@ export type Database = {
           rating_scale_id?: string | null
           requires_hr_approval_for_override?: boolean
           responsibilities_weight?: number
+          scope?: string | null
+          source_template_id?: string | null
           updated_at?: string
           values_weight?: number
         }
@@ -2899,6 +2905,13 @@ export type Database = {
             columns: ["rating_scale_id"]
             isOneToOne: false
             referencedRelation: "performance_rating_scales"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appraisal_form_templates_source_template_id_fkey"
+            columns: ["source_template_id"]
+            isOneToOne: false
+            referencedRelation: "appraisal_form_templates"
             referencedColumns: ["id"]
           },
         ]
@@ -49057,7 +49070,7 @@ export type Database = {
       }
       overall_rating_mappings: {
         Row: {
-          company_id: string
+          company_id: string | null
           component_scale_id: string
           created_at: string | null
           created_by: string | null
@@ -49066,10 +49079,12 @@ export type Database = {
           mapping_rules: Json
           name: string
           overall_scale_id: string
+          scope: string | null
+          source_template_id: string | null
           updated_at: string | null
         }
         Insert: {
-          company_id: string
+          company_id?: string | null
           component_scale_id: string
           created_at?: string | null
           created_by?: string | null
@@ -49078,10 +49093,12 @@ export type Database = {
           mapping_rules?: Json
           name: string
           overall_scale_id: string
+          scope?: string | null
+          source_template_id?: string | null
           updated_at?: string | null
         }
         Update: {
-          company_id?: string
+          company_id?: string | null
           component_scale_id?: string
           created_at?: string | null
           created_by?: string | null
@@ -49090,6 +49107,8 @@ export type Database = {
           mapping_rules?: Json
           name?: string
           overall_scale_id?: string
+          scope?: string | null
+          source_template_id?: string | null
           updated_at?: string | null
         }
         Relationships: [
@@ -49128,12 +49147,19 @@ export type Database = {
             referencedRelation: "overall_rating_scales"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "overall_rating_mappings_source_template_id_fkey"
+            columns: ["source_template_id"]
+            isOneToOne: false
+            referencedRelation: "overall_rating_mappings"
+            referencedColumns: ["id"]
+          },
         ]
       }
       overall_rating_scales: {
         Row: {
           code: string
-          company_id: string
+          company_id: string | null
           created_at: string | null
           created_by: string | null
           description: string | null
@@ -49145,11 +49171,13 @@ export type Database = {
           levels: Json
           name: string
           requires_calibration: boolean | null
+          scope: string | null
+          source_template_id: string | null
           updated_at: string | null
         }
         Insert: {
           code: string
-          company_id: string
+          company_id?: string | null
           created_at?: string | null
           created_by?: string | null
           description?: string | null
@@ -49161,11 +49189,13 @@ export type Database = {
           levels?: Json
           name: string
           requires_calibration?: boolean | null
+          scope?: string | null
+          source_template_id?: string | null
           updated_at?: string | null
         }
         Update: {
           code?: string
-          company_id?: string
+          company_id?: string | null
           created_at?: string | null
           created_by?: string | null
           description?: string | null
@@ -49177,6 +49207,8 @@ export type Database = {
           levels?: Json
           name?: string
           requires_calibration?: boolean | null
+          scope?: string | null
+          source_template_id?: string | null
           updated_at?: string | null
         }
         Relationships: [
@@ -49199,6 +49231,13 @@ export type Database = {
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "overall_rating_scales_source_template_id_fkey"
+            columns: ["source_template_id"]
+            isOneToOne: false
+            referencedRelation: "overall_rating_scales"
             referencedColumns: ["id"]
           },
         ]
@@ -53250,7 +53289,7 @@ export type Database = {
       performance_rating_scales: {
         Row: {
           code: string
-          company_id: string
+          company_id: string | null
           created_at: string
           description: string | null
           id: string
@@ -53261,11 +53300,13 @@ export type Database = {
           name: string
           rating_labels: Json | null
           scale_purpose: string[] | null
+          scope: string | null
+          source_template_id: string | null
           updated_at: string
         }
         Insert: {
           code: string
-          company_id: string
+          company_id?: string | null
           created_at?: string
           description?: string | null
           id?: string
@@ -53276,11 +53317,13 @@ export type Database = {
           name: string
           rating_labels?: Json | null
           scale_purpose?: string[] | null
+          scope?: string | null
+          source_template_id?: string | null
           updated_at?: string
         }
         Update: {
           code?: string
-          company_id?: string
+          company_id?: string | null
           created_at?: string
           description?: string | null
           id?: string
@@ -53291,6 +53334,8 @@ export type Database = {
           name?: string
           rating_labels?: Json | null
           scale_purpose?: string[] | null
+          scope?: string | null
+          source_template_id?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -53299,6 +53344,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "performance_rating_scales_source_template_id_fkey"
+            columns: ["source_template_id"]
+            isOneToOne: false
+            referencedRelation: "performance_rating_scales"
             referencedColumns: ["id"]
           },
         ]
