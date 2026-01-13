@@ -183,14 +183,22 @@ export default function CapabilityRegistryPage() {
 
   // Enrich capabilities with relationship counts
   const enrichedCapabilities = useMemo(() => {
-    return capabilities.map(cap => ({
-      ...cap,
-      job_count: relationshipCounts[cap.id]?.job_count ?? 0,
-      skill_count: relationshipCounts[cap.id]?.skill_count ?? 0,
-      has_behavioral_indicators: cap.type === "SKILL" 
-        ? !!(cap.skill_attributes?.inference_keywords?.length)
-        : !!(cap.competency_attributes?.behavioral_indicators?.length),
-    })) as CapabilityWithMeta[];
+    return capabilities.map(cap => {
+      // Check proficiency_indicators - stored as object with keys "1"-"5" by AI generator
+      const proficiencyIndicators = (cap as any).proficiency_indicators;
+      const hasProficiencyIndicators = proficiencyIndicators && 
+        typeof proficiencyIndicators === 'object' && 
+        Object.keys(proficiencyIndicators).length > 0;
+      
+      return {
+        ...cap,
+        job_count: relationshipCounts[cap.id]?.job_count ?? 0,
+        skill_count: relationshipCounts[cap.id]?.skill_count ?? 0,
+        has_behavioral_indicators: hasProficiencyIndicators || (cap.type === "SKILL" 
+          ? !!(cap.skill_attributes?.inference_keywords?.length)
+          : !!(cap.competency_attributes?.behavioral_indicators?.length)),
+      };
+    }) as CapabilityWithMeta[];
   }, [capabilities, relationshipCounts]);
 
   const fetchCompanies = async () => {
