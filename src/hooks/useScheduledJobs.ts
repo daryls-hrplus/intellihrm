@@ -17,6 +17,86 @@ export interface ScheduledJob {
   created_at: string;
   updated_at: string;
   created_by: string | null;
+  valid_from?: string | null;
+  valid_to?: string | null;
+  timezone?: string | null;
+  run_window_start?: string | null;
+  run_window_end?: string | null;
+  run_days?: number[] | null;
+}
+
+export type JobValidityStatus = 'scheduled' | 'active' | 'expired' | 'inactive';
+
+/**
+ * Get the validity status of a scheduled job based on valid_from/valid_to dates
+ */
+export function getJobValidityStatus(job: ScheduledJob): JobValidityStatus {
+  const today = new Date().toISOString().split('T')[0];
+  
+  // Check if job has future start date
+  if (job.valid_from && job.valid_from > today) {
+    return 'scheduled';
+  }
+  
+  // Check if job has expired
+  if (job.valid_to && job.valid_to < today) {
+    return 'expired';
+  }
+  
+  // Check if job is enabled
+  if (!job.is_enabled) {
+    return 'inactive';
+  }
+  
+  return 'active';
+}
+
+/**
+ * Check if a job is within its run window (business hours)
+ */
+export function isJobWithinRunWindow(job: ScheduledJob, timezone?: string): boolean {
+  if (!job.run_window_start || !job.run_window_end) {
+    return true; // No window restriction
+  }
+  
+  const tz = timezone || job.timezone || 'UTC';
+  const now = new Date();
+  const timeFormatter = new Intl.DateTimeFormat('en-US', {
+    timeZone: tz,
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  });
+  
+  const currentTime = timeFormatter.format(now);
+  
+  return currentTime >= job.run_window_start && currentTime <= job.run_window_end;
+}
+
+/**
+ * Check if today is a valid run day for the job
+ */
+export function isJobRunDay(job: ScheduledJob, timezone?: string): boolean {
+  if (!job.run_days || job.run_days.length === 0) {
+    return true; // No day restriction
+  }
+  
+  const tz = timezone || job.timezone || 'UTC';
+  const now = new Date();
+  const dayFormatter = new Intl.DateTimeFormat('en-US', {
+    timeZone: tz,
+    weekday: 'short',
+  });
+  
+  // Convert day name to number (1=Monday, 7=Sunday)
+  const dayMap: Record<string, number> = {
+    'Mon': 1, 'Tue': 2, 'Wed': 3, 'Thu': 4, 'Fri': 5, 'Sat': 6, 'Sun': 7
+  };
+  
+  const dayName = dayFormatter.format(now);
+  const dayNumber = dayMap[dayName] || 1;
+  
+  return job.run_days.includes(dayNumber);
 }
 
 export function useScheduledJobs() {
@@ -123,5 +203,8 @@ export function useScheduledJobs() {
     runJob: runJobMutation.mutate,
     isUpdating: updateJobMutation.isPending,
     isRunning: runJobMutation.isPending,
+    getJobValidityStatus,
+    isJobWithinRunWindow,
+    isJobRunDay,
   };
 }

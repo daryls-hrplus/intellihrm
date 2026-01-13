@@ -140,6 +140,128 @@ export function NotificationsReminders() {
         </CardContent>
       </Card>
 
+      {/* NEW: Timezone & Lifecycle Configuration */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Clock className="h-5 w-5 text-primary" />
+            Timezone & Notification Lifecycle
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <p className="text-sm text-muted-foreground">
+            Configure timezone settings to ensure reminders are processed and delivered at appropriate 
+            times for your organization. The system supports company-wide timezone settings and 
+            notification lifecycle management.
+          </p>
+
+          {/* Timezone Configuration */}
+          <div className="space-y-4">
+            <h4 className="font-semibold flex items-center gap-2">
+              <Clock className="h-4 w-4 text-primary" />
+              Company Timezone Settings
+            </h4>
+            <div className="p-4 rounded-lg border bg-muted/30">
+              <ol className="text-sm space-y-2 list-decimal list-inside">
+                <li>Navigate to <strong>Settings → Company Settings</strong></li>
+                <li>Locate the <strong>Timezone</strong> dropdown</li>
+                <li>Select your organization's primary timezone</li>
+                <li>Save changes</li>
+              </ol>
+              <div className="mt-4 p-3 rounded bg-primary/5 border border-primary/20">
+                <p className="text-sm">
+                  <strong>Impact:</strong> All reminder processing will use this timezone for date calculations. 
+                  "30 days before expiry" will be calculated at midnight in your company's timezone.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Effective Dating */}
+          <div className="space-y-4">
+            <h4 className="font-semibold flex items-center gap-2">
+              <Calendar className="h-4 w-4 text-primary" />
+              Rule Effective Dating
+            </h4>
+            <p className="text-sm text-muted-foreground">
+              Schedule rule changes in advance or set expiration dates for temporary policies.
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="p-4 rounded-lg border bg-card">
+                <h5 className="font-medium mb-2 flex items-center gap-2">
+                  <Play className="h-4 w-4 text-green-500" />
+                  Effective From
+                </h5>
+                <p className="text-sm text-muted-foreground">
+                  Set a future date when the rule should become active. The rule will show as "Scheduled" 
+                  until this date, then automatically activate.
+                </p>
+              </div>
+              <div className="p-4 rounded-lg border bg-card">
+                <h5 className="font-medium mb-2 flex items-center gap-2">
+                  <Pause className="h-4 w-4 text-amber-500" />
+                  Effective Until
+                </h5>
+                <p className="text-sm text-muted-foreground">
+                  Set an end date for temporary rules. After this date, the rule will show as "Expired" 
+                  and stop generating reminders.
+                </p>
+              </div>
+            </div>
+            <TipCallout title="Use Case: Policy Changes">
+              Schedule a new reminder rule to start on January 1st, replacing an existing rule 
+              that expires on December 31st. Both rules can be configured ahead of time.
+            </TipCallout>
+          </div>
+
+          {/* Notification Lifecycle */}
+          <div className="space-y-4">
+            <h4 className="font-semibold flex items-center gap-2">
+              <RefreshCw className="h-4 w-4 text-primary" />
+              Notification Lifecycle
+            </h4>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b">
+                    <th className="text-left py-2 px-3 font-medium">Field</th>
+                    <th className="text-left py-2 px-3 font-medium">Purpose</th>
+                    <th className="text-left py-2 px-3 font-medium">Behavior</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y">
+                  <tr>
+                    <td className="py-2 px-3 font-medium">Created At</td>
+                    <td className="py-2 px-3 text-muted-foreground">When notification was generated</td>
+                    <td className="py-2 px-3 text-muted-foreground">Set automatically</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 px-3 font-medium">Read At</td>
+                    <td className="py-2 px-3 text-muted-foreground">When user first viewed notification</td>
+                    <td className="py-2 px-3 text-muted-foreground">Tracked for engagement analytics</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 px-3 font-medium">Acknowledged At</td>
+                    <td className="py-2 px-3 text-muted-foreground">Explicit user acknowledgment</td>
+                    <td className="py-2 px-3 text-muted-foreground">Required for compliance reminders</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 px-3 font-medium">Expires At</td>
+                    <td className="py-2 px-3 text-muted-foreground">Auto-archive date</td>
+                    <td className="py-2 px-3 text-muted-foreground">Notifications hidden after this date</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <InfoCallout title="Automatic Cleanup">
+            A scheduled job runs daily to archive expired notifications and update reminder statuses. 
+            This keeps the notification center clean and relevant.
+          </InfoCallout>
+        </CardContent>
+      </Card>
+
       {/* AI Dashboard Overview */}
       <Card>
         <CardHeader>
