@@ -165,7 +165,7 @@ export default function HRHubDashboardPage() {
     {
       titleKey: "hrHub.complianceGovernance",
       items: [
-        { titleKey: "hrHub.compliance", descKey: "hrHub.complianceDesc", icon: ShieldCheck, href: "/hr-hub/compliance", badge: null, pendingCount: expiringComplianceCount },
+        { titleKey: "hrHub.compliance", descKey: "hrHub.complianceDesc", icon: ShieldCheck, href: "/hr-hub/compliance-tracker", badge: null, pendingCount: expiringComplianceCount },
         { titleKey: "hrHub.integrationHub", descKey: "hrHub.integrationHubDesc", icon: GitBranch, href: "/hr-hub/integrations", badge: null },
       ],
     },
