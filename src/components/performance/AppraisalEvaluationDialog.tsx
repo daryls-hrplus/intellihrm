@@ -58,6 +58,13 @@ interface ProficiencyIndicators {
   [level: string]: string[];
 }
 
+interface SupportingSkillData {
+  id: string;
+  name: string;
+  proficiency_level?: number;
+  is_required?: boolean;
+}
+
 interface AppraisalScore {
   id?: string;
   item_id: string;
@@ -82,6 +89,8 @@ interface AppraisalScore {
   competency_category?: string;
   required_level?: number;
   metadata?: CompetencyMetadata;
+  // For supporting skills (informational only)
+  supportingSkills?: SupportingSkillData[];
 }
 
 interface CycleInfo {
@@ -442,7 +451,13 @@ export function AppraisalEvaluationDialog({
       .is("end_date", null);
 
     const compIds = (competencies || []).map((c: any) => c.competency_id);
-    let compDetails: Record<string, { name: string; category?: string; proficiency_indicators?: ProficiencyIndicators }> = {};
+    let compDetails: Record<string, { 
+      name: string; 
+      category?: string; 
+      proficiency_indicators?: ProficiencyIndicators;
+      supportingSkills?: SupportingSkillData[];
+    }> = {};
+    
     if (compIds.length > 0) {
       // First try skills_competencies table (for new unified model)
       const { data: scData } = await supabase
@@ -455,7 +470,8 @@ export function AppraisalEvaluationDialog({
           scData.map((c: any) => [c.id, { 
             name: c.name, 
             category: c.category,
-            proficiency_indicators: c.proficiency_indicators as ProficiencyIndicators | undefined
+            proficiency_indicators: c.proficiency_indicators as ProficiencyIndicators | undefined,
+            supportingSkills: [] as SupportingSkillData[],
           }])
         );
       } else {
@@ -465,6 +481,49 @@ export function AppraisalEvaluationDialog({
           .select("id, name")
           .in("id", compIds);
         compDetails = Object.fromEntries((compData || []).map((c: any) => [c.id, { name: c.name }]));
+      }
+      
+      // Fetch skill mappings for all competencies
+      const { data: skillMappings } = await supabase
+        .from("competency_skill_mappings")
+        .select(`
+          competency_id,
+          is_required,
+          skill:skills_competencies!skill_id(id, name)
+        `)
+        .in("competency_id", compIds);
+      
+      // Also fetch employee's current skill levels if available
+      // Use competency_evidence table for skill proficiency levels
+      const { data: employeeSkills } = await supabase
+        .from("competency_evidence")
+        .select("competency_id, proficiency_level")
+        .eq("employee_id", employeeId)
+        .eq("validation_status", "validated");
+      
+      const skillLevelsMap: Record<string, number> = {};
+      (employeeSkills || []).forEach((es: any) => {
+        if (es.proficiency_level != null) {
+          skillLevelsMap[es.competency_id] = es.proficiency_level;
+        }
+      });
+      
+      // Group skills by competency and add to compDetails
+      if (skillMappings && skillMappings.length > 0) {
+        for (const mapping of skillMappings as any[]) {
+          const compId = mapping.competency_id;
+          if (compDetails[compId] && mapping.skill) {
+            if (!compDetails[compId].supportingSkills) {
+              compDetails[compId].supportingSkills = [];
+            }
+            compDetails[compId].supportingSkills!.push({
+              id: mapping.skill.id,
+              name: mapping.skill.name,
+              proficiency_level: skillLevelsMap[mapping.skill.id],
+              is_required: mapping.is_required,
+            });
+          }
+        }
       }
     }
 
@@ -531,6 +590,7 @@ export function AppraisalEvaluationDialog({
         comments: "",
         competency_category: details.category,
         proficiency_indicators: details.proficiency_indicators,
+        supportingSkills: details.supportingSkills,
       });
     });
 
@@ -1156,6 +1216,7 @@ export function AppraisalEvaluationDialog({
             positionTitle={item.position_title}
             hasRoleChange={hasRoleChange}
             hasMultiplePositions={hasMultiplePositions}
+            supportingSkills={item.supportingSkills}
           />
         ))}
       </div>
