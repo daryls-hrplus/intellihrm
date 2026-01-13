@@ -18,7 +18,8 @@ import { useLanguage } from "@/hooks/useLanguage";
 import { toast } from "sonner";
 import { EnhancedRatingScaleDialog } from "@/components/performance/EnhancedRatingScaleDialog";
 import { OverallRatingScaleDialog } from "@/components/performance/OverallRatingScaleDialog";
-import { useOverallRatingScales, OverallRatingScale } from "@/hooks/useRatingScales";
+import { useOverallRatingScales, useComponentRatingScales, OverallRatingScale, ComponentRatingScale } from "@/hooks/useRatingScales";
+import { ScopeBadge } from "@/components/ui/scope-badge";
 import { TalentApprovalWorkflowManager } from "@/components/performance/setup/TalentApprovalWorkflowManager";
 import { Feedback360ConfigSection } from "@/components/performance/setup/Feedback360ConfigSection";
 import { GoalCyclesManager } from "@/components/performance/setup/GoalCyclesManager";
@@ -65,6 +66,7 @@ import { ManagerCapabilityDashboard } from "@/components/performance/ai/ManagerC
 import { IntegrationDashboardWidget } from "@/components/performance/setup/IntegrationDashboardWidget";
 import { NotificationsLinkSection } from "@/components/performance/setup/NotificationsLinkSection";
 import { UnifiedCompetencyFramework } from "@/components/performance/setup/UnifiedCompetencyFramework";
+import { Globe } from "lucide-react";
 // Interfaces
 interface Company { id: string; name: string; }
 interface RatingScale { id: string; company_id: string; name: string; code: string; description: string | null; min_rating: number; max_rating: number; rating_labels: any; scale_purpose: string[] | null; is_default: boolean; is_active: boolean; }
@@ -83,7 +85,6 @@ export default function PerformanceSetupPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   // Data states
-  const [ratingScales, setRatingScales] = useState<RatingScale[]>([]);
   const [goalTemplates, setGoalTemplates] = useState<GoalTemplate[]>([]);
   const [recognitionCategories, setRecognitionCategories] = useState<RecognitionCategory[]>([]);
   const [appraisalCycles, setAppraisalCycles] = useState<AppraisalCycle[]>([]);
@@ -104,9 +105,16 @@ export default function PerformanceSetupPage() {
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<{ type: string; id: string; name: string } | null>(null);
 
+  const { scales: componentScales, isLoading: componentScalesLoading, refetch: refetchComponentScales } = useComponentRatingScales({ 
+    companyId: selectedCompany, 
+    activeOnly: false,
+    includeGlobal: true 
+  });
+
   const { scales: overallScales, isLoading: overallScalesLoading, refetch: refetchOverallScales } = useOverallRatingScales({ 
     companyId: selectedCompany, 
-    activeOnly: false 
+    activeOnly: false,
+    includeGlobal: true 
   });
 
   useEffect(() => { fetchCompanies(); }, []);
@@ -143,15 +151,12 @@ export default function PerformanceSetupPage() {
   const fetchAllData = async () => {
     setIsLoading(true);
     try {
-      await Promise.all([fetchRatingScales(), fetchGoalTemplates(), fetchRecognitionCategories(), fetchAppraisalCycles()]);
+      await Promise.all([fetchGoalTemplates(), fetchRecognitionCategories(), fetchAppraisalCycles()]);
+      refetchComponentScales();
+      refetchOverallScales();
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const fetchRatingScales = async () => {
-    const { data, error } = await supabase.from("performance_rating_scales").select("*").eq("company_id", selectedCompany).order("name");
-    if (!error) setRatingScales(data || []);
   };
 
   const fetchGoalTemplates = async () => {
@@ -182,7 +187,7 @@ export default function PerformanceSetupPage() {
       switch (deleteTarget.type) {
         case 'rating_scale':
           ({ error } = await supabase.from("performance_rating_scales").delete().eq("id", deleteTarget.id));
-          if (!error) { toast.success("Rating scale deleted"); fetchRatingScales(); }
+          if (!error) { toast.success("Rating scale deleted"); refetchComponentScales(); }
           break;
         case 'overall_scale':
           ({ error } = await supabase.from("overall_rating_scales").delete().eq("id", deleteTarget.id));
@@ -305,7 +310,7 @@ export default function PerformanceSetupPage() {
                   </TabsTrigger>
                 </TabsList>
                 <TabsContent value="rating-scales" className="mt-4">
-                  <RatingScalesContent scales={ratingScales} isLoading={isLoading} onAdd={() => { setEditingRatingScale(null); setRatingScaleDialogOpen(true); }} onEdit={(s: RatingScale) => { setEditingRatingScale(s); setRatingScaleDialogOpen(true); }} onDelete={handleDeleteRatingScale} t={t} />
+                  <RatingScalesContent scales={componentScales} isLoading={componentScalesLoading} onAdd={() => { setEditingRatingScale(null); setRatingScaleDialogOpen(true); }} onEdit={(s: ComponentRatingScale) => { setEditingRatingScale(s as any); setRatingScaleDialogOpen(true); }} onDelete={handleDeleteRatingScale} t={t} />
                 </TabsContent>
                 <TabsContent value="overall-scales" className="mt-4">
                   <OverallScalesContent scales={overallScales} isLoading={overallScalesLoading} onAdd={() => { setEditingOverallScale(null); setOverallScaleDialogOpen(true); }} onEdit={(s: OverallRatingScale) => { setEditingOverallScale(s); setOverallScaleDialogOpen(true); }} onDelete={handleDeleteOverallScale} t={t} />
@@ -533,7 +538,7 @@ export default function PerformanceSetupPage() {
         )}
 
         {/* Dialogs */}
-        <EnhancedRatingScaleDialog open={ratingScaleDialogOpen} onOpenChange={setRatingScaleDialogOpen} companyId={selectedCompany} editingScale={editingRatingScale} onSuccess={() => { setRatingScaleDialogOpen(false); fetchRatingScales(); }} />
+        <EnhancedRatingScaleDialog open={ratingScaleDialogOpen} onOpenChange={setRatingScaleDialogOpen} companyId={selectedCompany} editingScale={editingRatingScale} onSuccess={() => { setRatingScaleDialogOpen(false); refetchComponentScales(); }} />
         <OverallRatingScaleDialog open={overallScaleDialogOpen} onOpenChange={setOverallScaleDialogOpen} companyId={selectedCompany} editingScale={editingOverallScale} onSuccess={() => { setOverallScaleDialogOpen(false); refetchOverallScales(); }} />
         <GoalTemplateDialog open={goalTemplateDialogOpen} onOpenChange={setGoalTemplateDialogOpen} companyId={selectedCompany} editingTemplate={editingGoalTemplate} onSuccess={() => { setGoalTemplateDialogOpen(false); fetchGoalTemplates(); }} />
         <RecognitionCategoryDialog open={recognitionCategoryDialogOpen} onOpenChange={setRecognitionCategoryDialogOpen} companyId={selectedCompany} editingCategory={editingRecognitionCategory} onSuccess={() => { setRecognitionCategoryDialogOpen(false); fetchRecognitionCategories(); }} />
@@ -567,7 +572,7 @@ function RatingScalesContent({ scales, isLoading, onAdd, onEdit, onDelete, t }: 
       <CardHeader className="flex flex-row items-center justify-between">
         <div>
           <CardTitle>Component Rating Scales</CardTitle>
-          <CardDescription>Define rating scales used for goals, competencies, and feedback</CardDescription>
+          <CardDescription>Define rating scales used for goals, competencies, and feedback. Global scales are available across all companies.</CardDescription>
         </div>
         <Button onClick={onAdd}><Plus className="h-4 w-4 mr-2" />Add Scale</Button>
       </CardHeader>
@@ -576,6 +581,7 @@ function RatingScalesContent({ scales, isLoading, onAdd, onEdit, onDelete, t }: 
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead>Scope</TableHead>
                 <TableHead>Name</TableHead>
                 <TableHead>Code</TableHead>
                 <TableHead>Purpose</TableHead>
@@ -585,8 +591,11 @@ function RatingScalesContent({ scales, isLoading, onAdd, onEdit, onDelete, t }: 
               </TableRow>
             </TableHeader>
             <TableBody>
-              {scales.map((scale: RatingScale) => (
-                <TableRow key={scale.id}>
+              {scales.map((scale: ComponentRatingScale) => (
+                <TableRow key={scale.id} className={scale.scope === 'global' ? 'bg-primary/5' : ''}>
+                  <TableCell>
+                    <ScopeBadge scope={scale.scope || 'company'} />
+                  </TableCell>
                   <TableCell className="font-medium">{scale.name}</TableCell>
                   <TableCell>{scale.code}</TableCell>
                   <TableCell>
@@ -601,7 +610,7 @@ function RatingScalesContent({ scales, isLoading, onAdd, onEdit, onDelete, t }: 
                   </TableCell>
                   <TableCell className="text-right">
                     <Button variant="ghost" size="icon" onClick={() => onEdit(scale)}><Edit className="h-4 w-4" /></Button>
-                    <Button variant="ghost" size="icon" onClick={() => onDelete(scale.id, scale.name)}><Trash2 className="h-4 w-4" /></Button>
+                    <Button variant="ghost" size="icon" onClick={() => onDelete(scale.id, scale.name)} disabled={scale.scope === 'global'}><Trash2 className="h-4 w-4" /></Button>
                   </TableCell>
                 </TableRow>
               ))}
@@ -619,7 +628,7 @@ function OverallScalesContent({ scales, isLoading, onAdd, onEdit, onDelete, t }:
       <CardHeader className="flex flex-row items-center justify-between">
         <div>
           <CardTitle>Overall Rating Scales</CardTitle>
-          <CardDescription>Define final talent categorization scales for performance outcomes</CardDescription>
+          <CardDescription>Define final talent categorization scales for performance outcomes. Global scales are available across all companies.</CardDescription>
         </div>
         <Button onClick={onAdd}><Plus className="h-4 w-4 mr-2" />Add Scale</Button>
       </CardHeader>
@@ -628,6 +637,7 @@ function OverallScalesContent({ scales, isLoading, onAdd, onEdit, onDelete, t }:
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead>Scope</TableHead>
                 <TableHead>Name</TableHead>
                 <TableHead>Code</TableHead>
                 <TableHead>Levels</TableHead>
@@ -638,7 +648,10 @@ function OverallScalesContent({ scales, isLoading, onAdd, onEdit, onDelete, t }:
             </TableHeader>
             <TableBody>
               {scales.map((scale: OverallRatingScale) => (
-                <TableRow key={scale.id}>
+                <TableRow key={scale.id} className={scale.scope === 'global' ? 'bg-primary/5' : ''}>
+                  <TableCell>
+                    <ScopeBadge scope={scale.scope || 'company'} />
+                  </TableCell>
                   <TableCell className="font-medium">{scale.name}</TableCell>
                   <TableCell>{scale.code}</TableCell>
                   <TableCell>{scale.levels.length} levels</TableCell>
@@ -649,7 +662,7 @@ function OverallScalesContent({ scales, isLoading, onAdd, onEdit, onDelete, t }:
                   </TableCell>
                   <TableCell className="text-right">
                     <Button variant="ghost" size="icon" onClick={() => onEdit(scale)}><Edit className="h-4 w-4" /></Button>
-                    <Button variant="ghost" size="icon" onClick={() => onDelete(scale.id, scale.name)}><Trash2 className="h-4 w-4" /></Button>
+                    <Button variant="ghost" size="icon" onClick={() => onDelete(scale.id, scale.name)} disabled={scale.scope === 'global'}><Trash2 className="h-4 w-4" /></Button>
                   </TableCell>
                 </TableRow>
               ))}
