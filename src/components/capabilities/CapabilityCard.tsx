@@ -31,6 +31,8 @@ import {
   CalendarClock,
   AlertTriangle,
   Ban,
+  History,
+  Settings2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format, differenceInDays, isFuture, isPast, parseISO, isValid } from "date-fns";
@@ -47,6 +49,8 @@ interface CapabilityCardProps {
   onEdit: (capability: Capability) => void;
   onDelete: (capability: Capability) => void;
   onStatusChange: (id: string, status: "active" | "deprecated") => void;
+  onViewHistory?: (capability: Capability) => void;
+  onConfigure?: (capability: Capability) => void;
 }
 
 const statusConfig = {
@@ -107,6 +111,8 @@ export function CapabilityCard({
   onEdit,
   onDelete,
   onStatusChange,
+  onViewHistory,
+  onConfigure,
 }: CapabilityCardProps) {
   const status = statusConfig[capability.status];
   const StatusIcon = status.icon;
@@ -162,6 +168,18 @@ export function CapabilityCard({
                 <Pencil className="h-4 w-4 mr-2" />
                 Edit
               </DropdownMenuItem>
+              {onConfigure && (
+                <DropdownMenuItem onClick={() => onConfigure(capability)}>
+                  <Settings2 className="h-4 w-4 mr-2" />
+                  Configure Wizard
+                </DropdownMenuItem>
+              )}
+              {onViewHistory && (
+                <DropdownMenuItem onClick={() => onViewHistory(capability)}>
+                  <History className="h-4 w-4 mr-2" />
+                  View History
+                </DropdownMenuItem>
+              )}
               <DropdownMenuSeparator />
               {capability.status !== "active" && (
                 <DropdownMenuItem onClick={() => onStatusChange(capability.id, "active")}>

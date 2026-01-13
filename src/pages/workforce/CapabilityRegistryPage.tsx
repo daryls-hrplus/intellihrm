@@ -85,6 +85,9 @@ import { SkillsQuickStartWizard } from "@/components/capabilities/SkillsQuickSta
 import { BatchGenerateIndicatorsButton } from "@/components/capabilities/BatchGenerateIndicatorsButton";
 import { BulkCompetencyImport } from "@/components/capabilities/BulkCompetencyImport";
 import { EmptyStateOnboarding } from "@/components/capabilities/EmptyStateOnboarding";
+import { VersionHistoryDialog } from "@/components/capabilities/VersionHistoryDialog";
+import { DeprecationImpactDialog } from "@/components/capabilities/DeprecationImpactDialog";
+import { ConfigurationWizard } from "@/components/capabilities/ConfigurationWizard";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 
@@ -126,6 +129,9 @@ export default function CapabilityRegistryPage() {
   const [isMappingsOpen, setIsMappingsOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isBulkImportOpen, setIsBulkImportOpen] = useState(false);
+  const [isVersionHistoryOpen, setIsVersionHistoryOpen] = useState(false);
+  const [isDeprecationOpen, setIsDeprecationOpen] = useState(false);
+  const [isConfigWizardOpen, setIsConfigWizardOpen] = useState(false);
   const [selectedCapability, setSelectedCapability] = useState<Capability | null>(null);
   const [defaultType, setDefaultType] = useState<CapabilityType>("SKILL");
 
@@ -237,12 +243,59 @@ export default function CapabilityRegistryPage() {
   };
 
   const handleStatusChange = async (id: string, status: "active" | "deprecated") => {
+    if (status === "deprecated") {
+      // Find the capability and open deprecation dialog
+      const cap = capabilities.find(c => c.id === id);
+      if (cap) {
+        setSelectedCapability(cap);
+        setIsDeprecationOpen(true);
+        return;
+      }
+    }
     await updateStatus(id, status);
     fetchCapabilities({
       type: activeTab === "skills" ? "SKILL" : activeTab === "competencies" ? "COMPETENCY" : undefined,
       includeExpired,
       includeFuture: true,
     });
+  };
+
+  const handleDeprecationConfirm = async (effectiveTo: string) => {
+    if (!selectedCapability) return;
+    await updateCapability(selectedCapability.id, {
+      status: "deprecated",
+      effective_to: effectiveTo,
+    });
+    fetchCapabilities({
+      type: activeTab === "skills" ? "SKILL" : activeTab === "competencies" ? "COMPETENCY" : undefined,
+      includeExpired,
+      includeFuture: true,
+    });
+  };
+
+  const handleViewHistory = (capability: Capability) => {
+    setSelectedCapability(capability);
+    setIsVersionHistoryOpen(true);
+  };
+
+  const handleConfigureWizard = (capability: Capability) => {
+    setSelectedCapability(capability);
+    setIsConfigWizardOpen(true);
+  };
+
+  const handleRestoreVersion = async (snapshot: Capability) => {
+    if (!selectedCapability) return;
+    await updateCapability(selectedCapability.id, {
+      name: snapshot.name,
+      code: snapshot.code,
+      description: snapshot.description || undefined,
+      category: snapshot.category,
+      status: snapshot.status,
+      effective_from: snapshot.effective_from,
+      effective_to: snapshot.effective_to || undefined,
+    });
+    toast.success("Capability restored to previous version");
+    fetchCapabilities({});
   };
 
   const skillCount = enrichedCapabilities.filter((c) => c.type === "SKILL").length;
@@ -590,6 +643,8 @@ export default function CapabilityRegistryPage() {
                         onEdit={handleEdit}
                         onDelete={handleDelete}
                         onStatusChange={handleStatusChange}
+                        onViewHistory={handleViewHistory}
+                        onConfigure={handleConfigureWizard}
                       />
                     ))}
                   </div>
@@ -626,6 +681,8 @@ export default function CapabilityRegistryPage() {
                         onEdit={handleEdit}
                         onDelete={handleDelete}
                         onStatusChange={handleStatusChange}
+                        onViewHistory={handleViewHistory}
+                        onConfigure={handleConfigureWizard}
                       />
                     ))}
                   </div>
@@ -662,6 +719,8 @@ export default function CapabilityRegistryPage() {
                         onEdit={handleEdit}
                         onDelete={handleDelete}
                         onStatusChange={handleStatusChange}
+                        onViewHistory={handleViewHistory}
+                        onConfigure={handleConfigureWizard}
                       />
                     ))}
                   </div>
@@ -733,6 +792,32 @@ export default function CapabilityRegistryPage() {
         onOpenChange={setIsBulkImportOpen}
         companyId={companyFilter !== "all" ? companyFilter : companies[0]?.id || ""}
         onImportComplete={() => {
+          fetchCapabilities({});
+        }}
+      />
+
+      {/* Version History Dialog */}
+      <VersionHistoryDialog
+        open={isVersionHistoryOpen}
+        onOpenChange={setIsVersionHistoryOpen}
+        capability={selectedCapability}
+        onRestore={handleRestoreVersion}
+      />
+
+      {/* Deprecation Impact Dialog */}
+      <DeprecationImpactDialog
+        open={isDeprecationOpen}
+        onOpenChange={setIsDeprecationOpen}
+        capability={selectedCapability}
+        onConfirm={handleDeprecationConfirm}
+      />
+
+      {/* Configuration Wizard */}
+      <ConfigurationWizard
+        open={isConfigWizardOpen}
+        onOpenChange={setIsConfigWizardOpen}
+        capability={selectedCapability}
+        onComplete={() => {
           fetchCapabilities({});
         }}
       />
