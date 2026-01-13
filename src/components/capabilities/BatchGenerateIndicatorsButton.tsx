@@ -83,18 +83,19 @@ export function BatchGenerateIndicatorsButton({
   }, [companyId, type]);
 
   const fetchMissingCount = async () => {
-    let query = supabase
+    if (!companyId) {
+      setItemCount(0);
+      return;
+    }
+
+    const { count } = await supabase
       .from("skills_competencies")
       .select("id", { count: "exact", head: true })
       .eq("type", dbType)
       .eq("status", "active")
+      .eq("company_id", companyId)
       .is("proficiency_indicators", null);
 
-    if (companyId) {
-      query = query.or(`company_id.eq.${companyId},company_id.is.null`);
-    }
-
-    const { count } = await query;
     setItemCount(count ?? 0);
   };
 
@@ -115,19 +116,20 @@ export function BatchGenerateIndicatorsButton({
     setProcessedCount(0);
 
     try {
-      let query = supabase
+      if (!companyId) {
+        toast.error("Please select a company first");
+        return;
+      }
+
+      const { data: items, error: fetchError } = await supabase
         .from("skills_competencies")
         .select("id, name, description, code, type, category")
         .eq("type", dbType)
         .eq("status", "active")
+        .eq("company_id", companyId)
         .is("proficiency_indicators", null)
         .limit(50);
 
-      if (companyId) {
-        query = query.or(`company_id.eq.${companyId},company_id.is.null`);
-      }
-
-      const { data: items, error: fetchError } = await query;
       if (fetchError) throw fetchError;
 
       if (!items || items.length === 0) {
