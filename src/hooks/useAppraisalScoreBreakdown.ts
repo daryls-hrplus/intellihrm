@@ -97,7 +97,7 @@ export function useCalculateScoreBreakdown() {
 
       // Get performance category
       const { data: category } = await supabase
-        .from("performance_categories")
+        .from("rating_levels")
         .select("id")
         .eq("company_id", companyId)
         .eq("is_active", true)

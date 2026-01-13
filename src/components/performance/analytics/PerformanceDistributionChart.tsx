@@ -55,7 +55,7 @@ export function PerformanceDistributionChart({ companyId, cycleId }: Performance
     try {
       // Get performance categories for this company
       const { data: categories } = await supabase
-        .from('performance_categories')
+        .from('rating_levels')
         .select('*')
         .eq('company_id', companyId)
         .order('min_score', { ascending: false });

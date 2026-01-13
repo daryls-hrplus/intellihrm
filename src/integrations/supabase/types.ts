@@ -3833,7 +3833,7 @@ export type Database = {
             foreignKeyName: "fk_breakdown_perf_category"
             columns: ["performance_category_id"]
             isOneToOne: false
-            referencedRelation: "performance_categories"
+            referencedRelation: "rating_levels"
             referencedColumns: ["id"]
           },
         ]
@@ -52437,80 +52437,6 @@ export type Database = {
           },
         ]
       }
-      performance_categories: {
-        Row: {
-          bonus_eligible: boolean | null
-          code: string
-          color: string
-          company_id: string
-          created_at: string | null
-          description: string | null
-          description_en: string | null
-          display_order: number
-          icon: string | null
-          id: string
-          is_active: boolean | null
-          max_score: number
-          min_score: number
-          name: string
-          name_en: string | null
-          promotion_eligible: boolean | null
-          requires_pip: boolean | null
-          succession_eligible: boolean | null
-          updated_at: string | null
-        }
-        Insert: {
-          bonus_eligible?: boolean | null
-          code: string
-          color?: string
-          company_id: string
-          created_at?: string | null
-          description?: string | null
-          description_en?: string | null
-          display_order?: number
-          icon?: string | null
-          id?: string
-          is_active?: boolean | null
-          max_score: number
-          min_score: number
-          name: string
-          name_en?: string | null
-          promotion_eligible?: boolean | null
-          requires_pip?: boolean | null
-          succession_eligible?: boolean | null
-          updated_at?: string | null
-        }
-        Update: {
-          bonus_eligible?: boolean | null
-          code?: string
-          color?: string
-          company_id?: string
-          created_at?: string | null
-          description?: string | null
-          description_en?: string | null
-          display_order?: number
-          icon?: string | null
-          id?: string
-          is_active?: boolean | null
-          max_score?: number
-          min_score?: number
-          name?: string
-          name_en?: string | null
-          promotion_eligible?: boolean | null
-          requires_pip?: boolean | null
-          succession_eligible?: boolean | null
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "performance_categories_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "companies"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       performance_cycle_snapshots: {
         Row: {
           archived_at: string
@@ -58123,6 +58049,80 @@ export type Database = {
             columns: ["request_id"]
             isOneToOne: false
             referencedRelation: "feedback_360_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rating_levels: {
+        Row: {
+          bonus_eligible: boolean | null
+          code: string
+          color: string
+          company_id: string
+          created_at: string | null
+          description: string | null
+          description_en: string | null
+          display_order: number
+          icon: string | null
+          id: string
+          is_active: boolean | null
+          max_score: number
+          min_score: number
+          name: string
+          name_en: string | null
+          promotion_eligible: boolean | null
+          requires_pip: boolean | null
+          succession_eligible: boolean | null
+          updated_at: string | null
+        }
+        Insert: {
+          bonus_eligible?: boolean | null
+          code: string
+          color?: string
+          company_id: string
+          created_at?: string | null
+          description?: string | null
+          description_en?: string | null
+          display_order?: number
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          max_score: number
+          min_score: number
+          name: string
+          name_en?: string | null
+          promotion_eligible?: boolean | null
+          requires_pip?: boolean | null
+          succession_eligible?: boolean | null
+          updated_at?: string | null
+        }
+        Update: {
+          bonus_eligible?: boolean | null
+          code?: string
+          color?: string
+          company_id?: string
+          created_at?: string | null
+          description?: string | null
+          description_en?: string | null
+          display_order?: number
+          icon?: string | null
+          id?: string
+          is_active?: boolean | null
+          max_score?: number
+          min_score?: number
+          name?: string
+          name_en?: string | null
+          promotion_eligible?: boolean | null
+          requires_pip?: boolean | null
+          succession_eligible?: boolean | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rating_levels_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
             referencedColumns: ["id"]
           },
         ]
@@ -74015,7 +74015,7 @@ export type Database = {
         Args: { p_leave_request_id: string }
         Returns: undefined
       }
-      seed_default_performance_categories: {
+      seed_default_rating_levels: {
         Args: { p_company_id: string }
         Returns: undefined
       }
