@@ -78,7 +78,7 @@ export function PerformanceCategoriesManager({ companyId }: RatingLevelsManagerP
                 Rating Levels
               </CardTitle>
               <CardDescription>
-                Configure performance rating levels with score thresholds and eligibility flags for appraisals
+                Define how overall appraisal scores translate into rating labels (e.g., 90-100% = Exceptional). These levels are applied after the appraisal overall score is calculated.
               </CardDescription>
             </div>
             <div className="flex gap-2">
