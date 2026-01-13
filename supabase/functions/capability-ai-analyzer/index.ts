@@ -759,13 +759,21 @@ async function suggestJobCompetencies(
   const normalizedLevel = jobLevel?.toLowerCase().trim() || "";
   const levelConfig = levelProficiencyMap[normalizedLevel] || { min: 2, typical: 3, max: 4 };
 
+  // Format competencies with IDs to ensure AI returns exact matches
   const competencyList = availableCompetencies
     .slice(0, 50) // Limit to avoid token overflow
-    .map(c => `- ${c.name} (${c.code}) [${c.category}]`)
+    .map(c => `ID: ${c.id} | Name: ${c.name} | Code: ${c.code} | Category: ${c.category}`)
     .join("\n");
 
   const systemPrompt = `You are an expert HR consultant specializing in competency frameworks and job design.
-Your task is to recommend the most relevant competencies for a job role and suggest appropriate proficiency levels and weightings.
+Your task is to recommend the most relevant competencies for a job role from the EXACT list provided below.
+
+CRITICAL CONSTRAINT - READ CAREFULLY:
+- You may ONLY select competencies from the "Available Competencies" list provided by the user
+- You MUST return the EXACT capability_id (the ID field) from the list for each suggestion
+- Do NOT invent, paraphrase, or suggest any competencies not in the provided list
+- Do NOT modify competency names - use them exactly as provided
+- If no competencies in the list are relevant, return an empty suggestions array
 
 Job Level Context:
 - Job Level: ${jobLevel || "Not specified"}
@@ -792,17 +800,17 @@ Weight Distribution Guidelines:
 - Nice-to-have competencies: 5-10% each
 - Distribute weights based on importance to the role
 
-Select 3-6 most relevant competencies from the available list and assign appropriate proficiency levels and weights.`;
+Select 3-6 most relevant competencies from the available list. For EACH suggestion, you MUST include the exact capability_id from the list.`;
 
   const userPrompt = `Job Title: ${jobName}
 ${jobDescription ? `Job Description: ${jobDescription}` : ""}
 ${jobLevel ? `Job Level: ${jobLevel}` : ""}
 ${jobGrade ? `Job Grade: ${jobGrade}` : ""}
 
-Available Competencies:
-${competencyList}
+Available Competencies (you may ONLY select from this list - use the exact ID for capability_id):
+${competencyList || "No competencies available in the library."}
 
-Select the most relevant competencies for this role and suggest appropriate proficiency levels and weights (weights should sum to ~100%).`;
+${!competencyList ? "IMPORTANT: There are no competencies in the library. Return an empty suggestions array." : "Select the most relevant competencies for this role. You MUST use the exact capability_id from the list above for each suggestion. Weights should sum to ~100%."}`;
 
   const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
     method: "POST",
@@ -866,18 +874,40 @@ Select the most relevant competencies for this role and suggest appropriate prof
 
   const result = JSON.parse(toolCall.function.arguments);
   
-  // Match suggestions back to actual competency IDs
-  result.suggestions = result.suggestions.map((s: any) => {
-    const matched = availableCompetencies.find(
-      c => c.id === s.capability_id || 
-           c.name.toLowerCase() === s.name?.toLowerCase() ||
-           c.code.toLowerCase() === s.code?.toLowerCase()
-    );
-    return {
-      ...s,
-      capability_id: matched?.id || s.capability_id,
-    };
-  });
+  // Build a lookup map for available competency IDs
+  const competencyIdSet = new Set(availableCompetencies.map(c => c.id));
+  const competencyByName = new Map(availableCompetencies.map(c => [c.name.toLowerCase(), c]));
+  const competencyByCode = new Map(availableCompetencies.map(c => [c.code.toLowerCase(), c]));
+  
+  // Strictly validate and filter suggestions - only keep those with valid IDs from the library
+  result.suggestions = (result.suggestions || [])
+    .map((s: any) => {
+      // First try to match by ID
+      if (s.capability_id && competencyIdSet.has(s.capability_id)) {
+        return { ...s };
+      }
+      // Fallback: try to match by exact name or code
+      const matchedByName = s.name ? competencyByName.get(s.name.toLowerCase()) : null;
+      const matchedByCode = s.code ? competencyByCode.get(s.code.toLowerCase()) : null;
+      const matched = matchedByName || matchedByCode;
+      
+      if (matched) {
+        console.log(`AI suggested "${s.name}" matched to library competency "${matched.name}" (${matched.id})`);
+        return {
+          ...s,
+          capability_id: matched.id,
+          name: matched.name, // Use exact name from library
+          code: matched.code, // Use exact code from library
+        };
+      }
+      
+      // No match found - this is a hallucinated competency
+      console.warn(`AI hallucinated competency "${s.name}" (${s.code}) - filtering out as not in library`);
+      return null;
+    })
+    .filter((s: any) => s !== null);
+
+  console.log(`Validated ${result.suggestions.length} suggestions from library out of original ${result.suggestions?.length || 0}`);
 
   return result;
 }

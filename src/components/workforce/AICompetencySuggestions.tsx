@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Collapsible,
   CollapsibleContent,
@@ -12,7 +14,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Sparkles, ChevronDown, ChevronRight, Loader2, RefreshCw, Check, Plus } from "lucide-react";
+import { Sparkles, ChevronDown, ChevronRight, Loader2, RefreshCw, Check, Plus, Library, ExternalLink } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -158,6 +160,26 @@ export function AICompetencySuggestions({
 
   if (!jobName) return null;
 
+  // Show empty state if no competencies exist in the library
+  if (availableCompetencies.length === 0) {
+    return (
+      <Alert className="border-amber-200 bg-amber-50">
+        <Library className="h-4 w-4 text-amber-600" />
+        <AlertDescription className="text-amber-800">
+          <span className="font-medium">No competencies available.</span> Define competencies in your{" "}
+          <Link 
+            to="/workforce/capability-registry" 
+            className="text-amber-700 underline hover:text-amber-900 inline-flex items-center gap-1"
+          >
+            Skills & Competencies registry
+            <ExternalLink className="h-3 w-3" />
+          </Link>{" "}
+          before AI can suggest them for this job.
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
       <div className="rounded-lg border border-violet-200 bg-violet-50 p-4">
@@ -172,6 +194,10 @@ export function AICompetencySuggestions({
                 )}
                 <Sparkles className="h-4 w-4 text-violet-600" />
                 <span className="font-semibold text-slate-900">AI Suggested Competencies</span>
+                <Badge variant="secondary" className="text-xs bg-violet-100 text-violet-800 border-violet-300">
+                  <Library className="h-3 w-3 mr-1" />
+                  From your library
+                </Badge>
                 <Badge variant="secondary" className="text-xs bg-slate-200 text-slate-800 border-slate-300">
                   Based on "{jobName}"
                   {jobLevel && ` • ${jobLevel}`}
@@ -202,11 +228,14 @@ export function AICompetencySuggestions({
             {analyzing ? (
               <div className="flex items-center gap-2 text-sm text-slate-700 py-4">
                 <Loader2 className="h-4 w-4 animate-spin" />
-                Analyzing job profile for competency suggestions...
+                Analyzing job profile and matching to your competency library...
               </div>
             ) : suggestions.length === 0 ? (
               <p className="text-sm text-slate-700 py-2">
-                No matching competencies found. Try adding a job description for better suggestions.
+                No matching competencies found in your library. Try adding a job description or define more competencies in your{" "}
+                <Link to="/workforce/capability-registry" className="text-violet-600 underline hover:text-violet-800">
+                  Skills & Competencies registry
+                </Link>.
               </p>
             ) : (
               <div className="flex flex-wrap gap-2">
@@ -282,9 +311,9 @@ export function AICompetencySuggestions({
           </div>
 
           <p className="text-xs text-slate-600 mt-3 flex items-center gap-1">
-          <Sparkles className="h-3 w-3 text-violet-500" />
-          Click a suggestion to add it with AI-recommended level & weight. Competencies are evaluated in performance appraisals.
-        </p>
+            <Sparkles className="h-3 w-3 text-violet-500" />
+            AI recommends competencies from your company's library. Click to add with suggested level & weight.
+          </p>
         </CollapsibleContent>
       </div>
     </Collapsible>
