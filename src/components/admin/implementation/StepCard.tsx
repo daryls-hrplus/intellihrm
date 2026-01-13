@@ -15,7 +15,9 @@ import {
   MessageSquare,
   User,
   ListChecks,
-  AlertCircle
+  AlertCircle,
+  Globe,
+  Building2
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
@@ -142,6 +144,19 @@ export function StepCard({
                   <Badge variant="secondary" className="text-xs px-1.5 py-0 gap-1">
                     <ListChecks className="h-3 w-3" />
                     {subTaskDefinitions.length} sub-tasks
+                  </Badge>
+                )}
+                {/* Global vs Company scope badge */}
+                {mapping?.isGlobal === true && (
+                  <Badge variant="outline" className="text-xs px-1.5 py-0 gap-1 border-blue-500 text-blue-600">
+                    <Globe className="h-3 w-3" />
+                    Global
+                  </Badge>
+                )}
+                {mapping?.isGlobal === false && (
+                  <Badge variant="outline" className="text-xs px-1.5 py-0 gap-1">
+                    <Building2 className="h-3 w-3" />
+                    Per Company
                   </Badge>
                 )}
                 {/* Step status badges based on sub-task rollup */}
