@@ -6,7 +6,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,8 +16,9 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format, differenceInDays, isPast, isFuture } from "date-fns";
-import { Plus, ShieldCheck, AlertTriangle, CheckCircle, Clock, FileText, Building2 } from "lucide-react";
+import { Plus, ShieldCheck, AlertTriangle, CheckCircle, Clock, FileText, Building2, Scale } from "lucide-react";
 import { toast } from "sonner";
+import { ComplianceDocumentLibrary } from "@/components/compliance/ComplianceDocumentLibrary";
 
 interface Company {
   id: string;
@@ -295,60 +296,90 @@ export default function ComplianceTrackerPage() {
           </Card>
         </div>
 
-        <Card>
-          <CardHeader>
-            <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList>
-                <TabsTrigger value="all">{t("common.all")} ({stats.total})</TabsTrigger>
-                <TabsTrigger value="overdue">{t("hrHub.overdue")} ({stats.overdue})</TabsTrigger>
-                <TabsTrigger value="upcoming">{t("hrHub.inProgress")} ({stats.pending})</TabsTrigger>
-                <TabsTrigger value="compliant">{t("hrHub.compliant")} ({stats.compliant})</TabsTrigger>
-              </TabsList>
-            </Tabs>
-          </CardHeader>
-          <CardContent>
-            {filteredItems.length === 0 ? (
-              <div className="text-center py-12 text-muted-foreground">
-                <ShieldCheck className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>{t("hrHub.noComplianceItems")}</p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {filteredItems.map((item) => (
-                  <div key={item.id} className="p-4 rounded-lg border hover:bg-muted/30 transition-colors">
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 flex-wrap mb-2">
-                          <h3 className="font-semibold">{item.title}</h3>
-                          <Badge variant="outline">{item.category}</Badge>
-                          <Badge className={`${getStatusColor(item.status)} text-white`}>
-                            <span className="flex items-center gap-1">
-                              {getStatusIcon(item.status)}
-                              {statusLabels[item.status]}
-                            </span>
-                          </Badge>
-                        </div>
-                        <p className="text-sm text-muted-foreground mb-3">{item.description || "-"}</p>
-                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                          <span>{t("hrHub.responsible")}: {item.responsible || "-"}</span>
-                          <span>•</span>
-                          <span className={item.status === "overdue" ? "text-red-500 font-medium" : ""}>
-                            {getDaysRemaining(item.deadline)}
-                          </span>
-                        </div>
-                      </div>
-                      <div className="text-right min-w-[100px]">
-                        <p className="text-sm text-muted-foreground mb-1">{t("hrHub.progress")}</p>
-                        <p className="text-2xl font-bold">{item.progress}%</p>
-                        <Progress value={item.progress} className="h-2 mt-2" />
-                      </div>
-                    </div>
+        {/* Tabs for Requirements and Documents */}
+        <Tabs defaultValue="requirements" className="space-y-4">
+          <TabsList>
+            <TabsTrigger value="requirements" className="gap-2">
+              <ShieldCheck className="h-4 w-4" />
+              {t("hrHub.requirements")} ({stats.total})
+            </TabsTrigger>
+            <TabsTrigger value="documents" className="gap-2">
+              <Scale className="h-4 w-4" />
+              {t("compliance.documents", "Documents")}
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="requirements">
+            <Card>
+              <CardHeader>
+                <Tabs value={activeTab} onValueChange={setActiveTab}>
+                  <TabsList>
+                    <TabsTrigger value="all">{t("common.all")} ({stats.total})</TabsTrigger>
+                    <TabsTrigger value="overdue">{t("hrHub.overdue")} ({stats.overdue})</TabsTrigger>
+                    <TabsTrigger value="upcoming">{t("hrHub.inProgress")} ({stats.pending})</TabsTrigger>
+                    <TabsTrigger value="compliant">{t("hrHub.compliant")} ({stats.compliant})</TabsTrigger>
+                  </TabsList>
+                </Tabs>
+              </CardHeader>
+              <CardContent>
+                {filteredItems.length === 0 ? (
+                  <div className="text-center py-12 text-muted-foreground">
+                    <ShieldCheck className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>{t("hrHub.noComplianceItems")}</p>
                   </div>
-                ))}
-              </div>
+                ) : (
+                  <div className="space-y-4">
+                    {filteredItems.map((item) => (
+                      <div key={item.id} className="p-4 rounded-lg border hover:bg-muted/30 transition-colors">
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 flex-wrap mb-2">
+                              <h3 className="font-semibold">{item.title}</h3>
+                              <Badge variant="outline">{item.category}</Badge>
+                              <Badge className={`${getStatusColor(item.status)} text-white`}>
+                                <span className="flex items-center gap-1">
+                                  {getStatusIcon(item.status)}
+                                  {statusLabels[item.status]}
+                                </span>
+                              </Badge>
+                            </div>
+                            <p className="text-sm text-muted-foreground mb-3">{item.description || "-"}</p>
+                            <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                              <span>{t("hrHub.responsible")}: {item.responsible || "-"}</span>
+                              <span>•</span>
+                              <span className={item.status === "overdue" ? "text-red-500 font-medium" : ""}>
+                                {getDaysRemaining(item.deadline)}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="text-right min-w-[100px]">
+                            <p className="text-sm text-muted-foreground mb-1">{t("hrHub.progress")}</p>
+                            <p className="text-2xl font-bold">{item.progress}%</p>
+                            <Progress value={item.progress} className="h-2 mt-2" />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="documents">
+            {selectedCompany && (
+              <ComplianceDocumentLibrary companyId={selectedCompany} />
             )}
-          </CardContent>
-        </Card>
+            {!selectedCompany && (
+              <Card>
+                <CardContent className="py-12 text-center text-muted-foreground">
+                  <Scale className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p>{t("compliance.selectCompanyForDocuments", "Select a company to view compliance documents")}</p>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+        </Tabs>
 
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogContent>

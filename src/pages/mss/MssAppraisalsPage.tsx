@@ -29,6 +29,7 @@ import { toast } from "sonner";
 import { AppraisalCycleDialog } from "@/components/performance/AppraisalCycleDialog";
 import { AppraisalParticipantsManager } from "@/components/performance/AppraisalParticipantsManager";
 import { AppraisalEvaluationDialog } from "@/components/performance/AppraisalEvaluationDialog";
+import { AppraisalDocumentActions } from "@/components/performance/AppraisalDocumentActions";
 import { formatDateForDisplay } from "@/utils/dateUtils";
 import { ManagerInterventionInbox } from "@/components/performance/ai/ManagerInterventionInbox";
 import { MyReviewEffectiveness } from "@/components/performance/ai/MyReviewEffectiveness";
@@ -598,10 +599,23 @@ export default function MssAppraisalsPage() {
                             )}
                           </div>
                         </div>
-                        <Button variant="outline" onClick={() => handleStartEvaluation(evaluation)}>
-                          <Eye className="mr-2 h-4 w-4" />
-                          View Details
-                        </Button>
+                        <div className="flex items-center gap-2">
+                          {company?.id && (
+                            <AppraisalDocumentActions
+                              participantId={evaluation.id}
+                              employeeId={evaluation.employee_id}
+                              employeeName={evaluation.employee_name}
+                              companyId={company.id}
+                              cycleName={evaluation.cycle_name}
+                              overallScore={evaluation.overall_score}
+                              status={evaluation.status}
+                            />
+                          )}
+                          <Button variant="outline" onClick={() => handleStartEvaluation(evaluation)}>
+                            <Eye className="mr-2 h-4 w-4" />
+                            View Details
+                          </Button>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>

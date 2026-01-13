@@ -13,9 +13,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus, Scale, FileText, Search, Loader2, ClipboardList } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Plus, Scale, FileText, Search, Loader2, ClipboardList, MoreVertical } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatDateForDisplay } from '@/utils/dateUtils';
+import { ComplianceDocumentGenerator } from '@/components/compliance/ComplianceDocumentGenerator';
 
 interface ERGrievancesTabProps {
   companyId: string;
@@ -34,6 +36,25 @@ export function ERGrievancesTab({ companyId, departmentId }: ERGrievancesTabProp
   const [isProcedureDialogOpen, setIsProcedureDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [documentGeneratorOpen, setDocumentGeneratorOpen] = useState(false);
+  const [selectedGrievanceForDocument, setSelectedGrievanceForDocument] = useState<{
+    id: string;
+    employeeId: string;
+    employeeName: string;
+    title: string;
+    grievanceType: string;
+  } | null>(null);
+
+  const handleGenerateDocument = (grievance: any) => {
+    setSelectedGrievanceForDocument({
+      id: grievance.id,
+      employeeId: grievance.employee_id,
+      employeeName: grievance.profiles?.full_name || 'Employee',
+      title: grievance.title,
+      grievanceType: grievance.grievance_type,
+    });
+    setDocumentGeneratorOpen(true);
+  };
 
   const [grievanceForm, setGrievanceForm] = useState({
     employee_id: '',
@@ -522,6 +543,7 @@ export function ERGrievancesTab({ companyId, departmentId }: ERGrievancesTabProp
                       <TableHead>{t('employeeRelationsModule.grievances.severity')}</TableHead>
                       <TableHead>{t('common.status')}</TableHead>
                       <TableHead>{t('employeeRelationsModule.grievances.filedDate')}</TableHead>
+                      <TableHead className="w-[60px]"></TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -552,6 +574,21 @@ export function ERGrievancesTab({ companyId, departmentId }: ERGrievancesTabProp
                         </TableCell>
                         <TableCell className="text-muted-foreground">
                           {formatDateForDisplay(grievance.filed_date, 'PP')}
+                        </TableCell>
+                        <TableCell>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon">
+                                <MoreVertical className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => handleGenerateDocument(grievance)}>
+                                <FileText className="h-4 w-4 mr-2" />
+                                {t('compliance.generateDocument', 'Generate Response Document')}
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -600,6 +637,25 @@ export function ERGrievancesTab({ companyId, departmentId }: ERGrievancesTabProp
           </TabsContent>
         </Tabs>
       </CardContent>
+
+      {/* Compliance Document Generator for Grievances */}
+      {selectedGrievanceForDocument && companyId && (
+        <ComplianceDocumentGenerator
+          open={documentGeneratorOpen}
+          onOpenChange={setDocumentGeneratorOpen}
+          employeeId={selectedGrievanceForDocument.employeeId}
+          employeeName={selectedGrievanceForDocument.employeeName}
+          companyId={companyId}
+          sourceType="grievance"
+          sourceId={selectedGrievanceForDocument.id}
+          category="grievance"
+          prefilledData={{
+            grievance_ref: selectedGrievanceForDocument.id.slice(0, 8).toUpperCase(),
+            grievance_date: new Date().toISOString().split('T')[0],
+          }}
+          onDocumentCreated={() => setSelectedGrievanceForDocument(null)}
+        />
+      )}
     </Card>
   );
 }

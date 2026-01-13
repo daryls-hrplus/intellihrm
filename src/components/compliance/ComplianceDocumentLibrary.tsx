@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useComplianceDocuments, useUpdateDocumentStatus, ComplianceDocumentInstance } from "@/hooks/useComplianceDocument";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useUpdateDocumentStatus } from "@/hooks/useComplianceDocument";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -41,22 +43,57 @@ export function ComplianceDocumentLibrary({ companyId, employeeId }: ComplianceD
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [sourceFilter, setSourceFilter] = useState<string>("all");
-  const [selectedDocument, setSelectedDocument] = useState<ComplianceDocumentInstance | null>(null);
+  const [selectedDocument, setSelectedDocument] = useState<any | null>(null);
 
-  const { data: documents = [], isLoading } = useComplianceDocuments({
-    companyId,
-    employeeId,
-    status: statusFilter !== "all" ? statusFilter : undefined,
-    sourceType: sourceFilter !== "all" ? sourceFilter : undefined,
+  // Fetch documents with employee info
+  const { data: documents = [], isLoading } = useQuery({
+    queryKey: ["compliance-documents-library", companyId, employeeId, statusFilter, sourceFilter],
+    queryFn: async () => {
+      let query = supabase
+        .from("compliance_document_instances")
+        .select(`
+          *,
+          template:compliance_document_templates(*)
+        `)
+        .eq("company_id", companyId)
+        .order("created_at", { ascending: false });
+
+      if (employeeId) {
+        query = query.eq("employee_id", employeeId);
+      }
+      if (statusFilter !== "all") {
+        query = query.eq("status", statusFilter);
+      }
+      if (sourceFilter !== "all") {
+        query = query.eq("source_type", sourceFilter);
+      }
+
+      const { data, error } = await query;
+      if (error) throw error;
+      
+      // Fetch employee names separately
+      if (data && data.length > 0) {
+        const employeeIds = [...new Set(data.map(d => d.employee_id))];
+        const { data: profiles } = await supabase
+          .from("profiles")
+          .select("id, full_name")
+          .in("id", employeeIds);
+        
+        const profileMap = new Map(profiles?.map(p => [p.id, p.full_name]) || []);
+        return data.map(d => ({
+          ...d,
+          employee_name: profileMap.get(d.employee_id) || "Unknown"
+        }));
+      }
+      return data || [];
+    },
   });
 
   const updateStatus = useUpdateDocumentStatus();
 
-  const filteredDocuments = documents.filter((doc) => {
-    const templateName = (doc.template as any)?.name || "";
-    const employeeName = doc.employee
-      ? `${(doc.employee as any).first_name} ${(doc.employee as any).last_name}`
-      : "";
+  const filteredDocuments = documents.filter((doc: any) => {
+    const templateName = doc.template?.name || "";
+    const employeeName = doc.employee_name || "";
     return (
       templateName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       employeeName.toLowerCase().includes(searchQuery.toLowerCase())
@@ -154,9 +191,8 @@ export function ComplianceDocumentLibrary({ companyId, employeeId }: ComplianceD
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredDocuments.map((doc) => {
-                    const template = doc.template as any;
-                    const employee = doc.employee as any;
+                  {filteredDocuments.map((doc: any) => {
+                    const template = doc.template;
                     return (
                       <TableRow key={doc.id}>
                         <TableCell>
@@ -168,7 +204,7 @@ export function ComplianceDocumentLibrary({ companyId, employeeId }: ComplianceD
                           </div>
                         </TableCell>
                         <TableCell>
-                          {employee ? `${employee.first_name} ${employee.last_name}` : "N/A"}
+                          {doc.employee_name || "N/A"}
                         </TableCell>
                         <TableCell>
                           <Badge variant="secondary" className="text-xs">
