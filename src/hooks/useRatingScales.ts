@@ -99,8 +99,8 @@ export function useComponentRatingScales({ companyId, purpose, activeOnly = true
         query = query.eq("is_active", true);
       }
 
-      // Order by scope (global first) then name
-      query = query.order("scope", { ascending: true }).order("name");
+      // Order by name only - we'll sort by scope in JavaScript
+      query = query.order("name");
 
       const { data, error: fetchError } = await query;
 
@@ -116,7 +116,16 @@ export function useComponentRatingScales({ companyId, purpose, activeOnly = true
         });
       }
 
-      setScales(filteredData.map(scale => {
+      // Sort by scope (global first) then by name
+      const sortedData = [...filteredData].sort((a, b) => {
+        const aIsGlobal = a.company_id === null;
+        const bIsGlobal = b.company_id === null;
+        if (aIsGlobal && !bIsGlobal) return -1;
+        if (!aIsGlobal && bIsGlobal) return 1;
+        return a.name.localeCompare(b.name);
+      });
+
+      setScales(sortedData.map(scale => {
         const scaleAny = scale as any;
         return {
           ...scale,
@@ -175,14 +184,23 @@ export function useOverallRatingScales({ companyId, activeOnly = true, includeGl
         query = query.eq("is_active", true);
       }
 
-      // Order by scope (global first) then name
-      query = query.order("scope", { ascending: true }).order("name");
+      // Order by name only - we'll sort by scope in JavaScript
+      query = query.order("name");
 
       const { data, error: fetchError } = await query;
 
       if (fetchError) throw fetchError;
 
-      setScales((data || []).map(scale => {
+      // Sort by scope (global first) then by name
+      const sortedData = [...(data || [])].sort((a, b) => {
+        const aIsGlobal = a.company_id === null;
+        const bIsGlobal = b.company_id === null;
+        if (aIsGlobal && !bIsGlobal) return -1;
+        if (!aIsGlobal && bIsGlobal) return 1;
+        return a.name.localeCompare(b.name);
+      });
+
+      setScales(sortedData.map(scale => {
         const scaleAny = scale as any;
         return {
           ...scale,
@@ -239,14 +257,23 @@ export function useRatingMappings({ companyId, activeOnly = true, includeGlobal 
         query = query.eq("is_active", true);
       }
 
-      // Order by scope (global first) then name
-      query = query.order("scope", { ascending: true }).order("name");
+      // Order by name only - we'll sort by scope in JavaScript
+      query = query.order("name");
 
       const { data, error: fetchError } = await query;
 
       if (fetchError) throw fetchError;
 
-      setMappings((data || []).map(mapping => {
+      // Sort by scope (global first) then by name
+      const sortedData = [...(data || [])].sort((a, b) => {
+        const aIsGlobal = a.company_id === null;
+        const bIsGlobal = b.company_id === null;
+        if (aIsGlobal && !bIsGlobal) return -1;
+        if (!aIsGlobal && bIsGlobal) return 1;
+        return a.name.localeCompare(b.name);
+      });
+
+      setMappings(sortedData.map(mapping => {
         const mappingAny = mapping as any;
         return {
           ...mapping,
