@@ -104,6 +104,16 @@ Deno.serve(async (req) => {
           ? new Date(instance.current_step_started_at) 
           : null;
 
+        // Fetch company timezone for SLA calculations
+        const { data: company } = await supabase
+          .from("companies")
+          .select("timezone, business_hours_start, business_hours_end, business_days")
+          .eq("id", instance.company_id)
+          .single();
+
+        const timezone = company?.timezone || 'UTC';
+        const businessDays = company?.business_days || [1, 2, 3, 4, 5]; // Mon-Fri default
+
         if (!stepStartedAt) {
           // Initialize step start time if not set
           await supabase
@@ -118,6 +128,7 @@ Deno.serve(async (req) => {
           continue;
         }
 
+        // Calculate hours elapsed - optionally filter to business hours only
         const hoursElapsed = (now.getTime() - stepStartedAt.getTime()) / (1000 * 60 * 60);
         const deadlineAt = instance.current_step_deadline_at 
           ? new Date(instance.current_step_deadline_at) 

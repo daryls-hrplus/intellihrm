@@ -13,7 +13,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Plus, Pencil, Trash2, Bell, Mail, BellRing, Loader2, X, Settings, HelpCircle, Zap, FileText, Users, ExternalLink } from 'lucide-react';
+import { Plus, Pencil, Trash2, Bell, Mail, BellRing, Loader2, X, Settings, HelpCircle, Zap, FileText, Users, ExternalLink, CalendarIcon, CalendarRange } from 'lucide-react';
+import { format, parseISO } from 'date-fns';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { cn } from '@/lib/utils';
 import type { ReminderRule, ReminderEventType } from '@/types/reminders';
 import { PRIORITY_OPTIONS, NOTIFICATION_METHODS } from '@/types/reminders';
 import { NaturalLanguageRuleInput } from './NaturalLanguageRuleInput';
@@ -65,6 +69,8 @@ export const ReminderRulesManager = forwardRef<ReminderRulesManagerRef, Reminder
     priority: 'low' | 'medium' | 'high' | 'critical';
     is_active: boolean;
     cycle_type_filter: string[];
+    effective_from: string | null;
+    effective_to: string | null;
   }>({
     name: '',
     description: '',
@@ -81,6 +87,8 @@ export const ReminderRulesManager = forwardRef<ReminderRulesManagerRef, Reminder
     priority: 'medium',
     is_active: true,
     cycle_type_filter: [],
+    effective_from: null,
+    effective_to: null,
   });
 
   const CYCLE_TYPE_OPTIONS = [
@@ -191,6 +199,8 @@ export const ReminderRulesManager = forwardRef<ReminderRulesManagerRef, Reminder
         priority: rule.priority as 'low' | 'medium' | 'high' | 'critical',
         is_active: rule.is_active,
         cycle_type_filter: (rule as any).cycle_type_filter || [],
+        effective_from: rule.effective_from || null,
+        effective_to: rule.effective_to || null,
       });
     } else {
       setEditingRule(null);
@@ -210,6 +220,8 @@ export const ReminderRulesManager = forwardRef<ReminderRulesManagerRef, Reminder
         priority: 'medium',
         is_active: true,
         cycle_type_filter: [],
+        effective_from: null,
+        effective_to: null,
       });
     }
     setNewInterval('');
@@ -652,6 +664,112 @@ export const ReminderRulesManager = forwardRef<ReminderRulesManagerRef, Reminder
                 />
               </div>
 
+              {/* Effective Dating Section */}
+              <div className="space-y-3 p-4 bg-muted/30 rounded-lg border border-dashed">
+                <div className="flex items-center gap-2 mb-2">
+                  <CalendarRange className="h-4 w-4 text-primary" />
+                  <Label className="font-medium">Rule Effective Period</Label>
+                </div>
+                <p className="text-xs text-muted-foreground mb-3">
+                  Schedule when this rule becomes active or expires. Leave empty for no date restriction.
+                </p>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label className="text-sm">Effective From</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "w-full justify-start text-left font-normal",
+                            !formData.effective_from && "text-muted-foreground"
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {formData.effective_from 
+                            ? format(parseISO(formData.effective_from), "PPP") 
+                            : "No start date"}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={formData.effective_from ? parseISO(formData.effective_from) : undefined}
+                          onSelect={(date) => setFormData({ 
+                            ...formData, 
+                            effective_from: date ? format(date, 'yyyy-MM-dd') : null 
+                          })}
+                          initialFocus
+                          className={cn("p-3 pointer-events-auto")}
+                        />
+                        {formData.effective_from && (
+                          <div className="p-2 border-t">
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="w-full"
+                              onClick={() => setFormData({ ...formData, effective_from: null })}
+                            >
+                              Clear date
+                            </Button>
+                          </div>
+                        )}
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-sm">Effective Until</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "w-full justify-start text-left font-normal",
+                            !formData.effective_to && "text-muted-foreground"
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {formData.effective_to 
+                            ? format(parseISO(formData.effective_to), "PPP") 
+                            : "No end date"}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={formData.effective_to ? parseISO(formData.effective_to) : undefined}
+                          onSelect={(date) => setFormData({ 
+                            ...formData, 
+                            effective_to: date ? format(date, 'yyyy-MM-dd') : null 
+                          })}
+                          disabled={(date) => formData.effective_from ? date < parseISO(formData.effective_from) : false}
+                          initialFocus
+                          className={cn("p-3 pointer-events-auto")}
+                        />
+                        {formData.effective_to && (
+                          <div className="p-2 border-t">
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="w-full"
+                              onClick={() => setFormData({ ...formData, effective_to: null })}
+                            >
+                              Clear date
+                            </Button>
+                          </div>
+                        )}
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                </div>
+                {formData.effective_from && new Date(formData.effective_from) > new Date() && (
+                  <div className="flex items-center gap-2 text-xs text-amber-600 bg-amber-50 dark:bg-amber-950/30 px-3 py-2 rounded-md">
+                    <CalendarIcon className="h-3.5 w-3.5" />
+                    <span>This rule is scheduled to become active on {format(parseISO(formData.effective_from), "PPP")}</span>
+                  </div>
+                )}
+              </div>
+
               <div className="flex items-center gap-2">
                 <Switch
                   checked={formData.is_active}
@@ -706,6 +824,12 @@ export const ReminderRulesManager = forwardRef<ReminderRulesManagerRef, Reminder
                   .replace(/_/g, ' ') || 'records';
                 const isHighlighted = highlightedRuleId === rule.id || highlightRuleId === rule.id;
                 
+                // Determine effective status
+                const today = new Date().toISOString().split('T')[0];
+                const isScheduled = rule.effective_from && rule.effective_from > today;
+                const isExpired = rule.effective_to && rule.effective_to < today;
+                const effectiveStatus = isExpired ? 'expired' : isScheduled ? 'scheduled' : rule.is_active ? 'active' : 'inactive';
+                
                 return (
                 <TableRow 
                   key={rule.id}
@@ -759,9 +883,29 @@ export const ReminderRulesManager = forwardRef<ReminderRulesManagerRef, Reminder
                     <span className={getPriorityColor(rule.priority)}>{rule.priority}</span>
                   </TableCell>
                   <TableCell>
-                    <Badge variant={rule.is_active ? 'default' : 'secondary'}>
-                      {rule.is_active ? 'Active' : 'Inactive'}
-                    </Badge>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Badge 
+                            variant={effectiveStatus === 'active' ? 'default' : effectiveStatus === 'scheduled' ? 'outline' : 'secondary'}
+                            className={cn(
+                              effectiveStatus === 'scheduled' && 'border-amber-500 text-amber-600',
+                              effectiveStatus === 'expired' && 'border-destructive/50 text-destructive'
+                            )}
+                          >
+                            {effectiveStatus === 'active' && 'Active'}
+                            {effectiveStatus === 'scheduled' && 'Scheduled'}
+                            {effectiveStatus === 'expired' && 'Expired'}
+                            {effectiveStatus === 'inactive' && 'Inactive'}
+                          </Badge>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          {rule.effective_from && <p>Starts: {format(parseISO(rule.effective_from), 'PPP')}</p>}
+                          {rule.effective_to && <p>Ends: {format(parseISO(rule.effective_to), 'PPP')}</p>}
+                          {!rule.effective_from && !rule.effective_to && <p>No date restrictions</p>}
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">

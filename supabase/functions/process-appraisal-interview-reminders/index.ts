@@ -23,6 +23,21 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     const now = new Date();
+    
+    // Helper function to format time in company timezone
+    const formatInTimezone = (date: Date, timezone: string): string => {
+      return new Intl.DateTimeFormat('en-US', {
+        timeZone: timezone,
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true,
+      }).format(date);
+    };
+
     const in24Hours = new Date(now.getTime() + 24 * 60 * 60 * 1000);
     const in48Hours = new Date(now.getTime() + 48 * 60 * 60 * 1000);
     
@@ -63,7 +78,16 @@ serve(async (req) => {
       for (const interview of interviews24h) {
         const participant = interview.appraisal_participants as any;
         const cycle = participant.appraisal_cycles;
-        const scheduledTime = new Date(interview.scheduled_at).toLocaleString();
+        
+        // Fetch company timezone
+        const { data: company } = await supabase
+          .from('companies')
+          .select('timezone')
+          .eq('id', cycle.company_id)
+          .single();
+        
+        const timezone = company?.timezone || 'UTC';
+        const scheduledTime = formatInTimezone(new Date(interview.scheduled_at), timezone);
 
         // Create notifications for employee
         const { error: employeeNotifError } = await supabase.from("notifications").insert({
@@ -74,6 +98,7 @@ serve(async (req) => {
           category: "performance",
           company_id: cycle.company_id,
           action_url: `/performance/appraisals`,
+          delivery_timezone: timezone,
         });
 
         if (employeeNotifError) {
@@ -90,6 +115,7 @@ serve(async (req) => {
             category: "performance",
             company_id: cycle.company_id,
             action_url: `/performance/appraisals`,
+            delivery_timezone: timezone,
           });
 
           if (managerNotifError) {
