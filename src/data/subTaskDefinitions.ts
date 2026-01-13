@@ -392,8 +392,13 @@ export const subTaskDefinitions: Record<string, Record<number, SubTaskDefinition
       { order: 3, name: "Set numeric values for calculations", isRequired: true },
     ],
     3: [ // Competency Library Integration
-      { order: 1, name: "Review Workforce competency definitions", isRequired: false },
-      { order: 2, name: "Link competencies to performance assessment", isRequired: false },
+      { order: 1, name: "Import or create competency library for the company", isRequired: true },
+      { order: 2, name: "Generate competency indicators for all competencies", isRequired: true },
+      { order: 3, name: "Add skills evidence to competencies", isRequired: false },
+      { order: 4, name: "Generate skill proficiency levels for competencies", isRequired: false },
+      { order: 5, name: "Link competencies to jobs", isRequired: true },
+      { order: 6, name: "Define weight and required level for each competency-job link", isRequired: true },
+      { order: 7, name: "Validate competency weights equal 100% for each job", isRequired: true },
     ],
     4: [ // Index Settings (Multi-Cycle)
       { order: 1, name: "Configure appraisal index calculation", isRequired: false },
