@@ -119,7 +119,7 @@ export default function CapabilityRegistryPage() {
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [companyFilter, setCompanyFilter] = useState<string>("all");
+  const [companyFilter, setCompanyFilter] = useState<string>("");
   
   // Date-driven filters
   const [effectiveAsOfDate, setEffectiveAsOfDate] = useState<Date | undefined>(undefined);
@@ -142,6 +142,13 @@ export default function CapabilityRegistryPage() {
     fetchScales();
   }, [fetchScales]);
 
+  // Auto-select first company when companies are loaded and no filter is set
+  useEffect(() => {
+    if (companies.length > 0 && !companyFilter) {
+      setCompanyFilter(companies[0].id);
+    }
+  }, [companies, companyFilter]);
+
   // Show quick start prompt if no capabilities exist
   useEffect(() => {
     if (!loading && capabilities.length === 0 && companies.length > 0) {
@@ -150,11 +157,14 @@ export default function CapabilityRegistryPage() {
   }, [loading, capabilities.length, companies.length]);
 
   useEffect(() => {
+    // Only fetch when we have a company filter set (avoids fetching all companies' data)
+    if (!companyFilter) return;
+    
     const filters: CapabilityFilters = {
       type: activeTab === "skills" ? "SKILL" : activeTab === "competencies" ? "COMPETENCY" : undefined,
       category: categoryFilter !== "all" ? (categoryFilter as CapabilityCategory) : undefined,
       status: statusFilter !== "all" ? (statusFilter as CapabilityStatus) : undefined,
-      companyId: companyFilter !== "all" ? companyFilter : undefined,
+      companyId: companyFilter,
       search: search || undefined,
       effectiveAsOf: effectiveAsOfDate ? format(effectiveAsOfDate, "yyyy-MM-dd") : undefined,
       includeExpired: includeExpired,
@@ -598,10 +608,9 @@ export default function CapabilityRegistryPage() {
 
                 <Select value={companyFilter} onValueChange={setCompanyFilter}>
                   <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="Company" />
+                    <SelectValue placeholder="Select Company" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Companies</SelectItem>
                     {companies.map((company) => (
                       <SelectItem key={company.id} value={company.id}>
                         {company.name}
