@@ -8,7 +8,9 @@ import {
   WorkflowEmployeeResponse,
   WorkflowInterviewScheduling,
   WorkflowRoleChangeHandling,
-  WorkflowFinalization
+  WorkflowFinalization,
+  WorkflowRatingDispute,
+  WorkflowValuesAssessment
 } from './sections/workflows';
 
 export function ManualWorkflowsSection() {
@@ -24,6 +26,8 @@ export function ManualWorkflowsSection() {
       <WorkflowInterviewScheduling />
       <WorkflowRoleChangeHandling />
       <WorkflowFinalization />
+      <WorkflowRatingDispute />
+      <WorkflowValuesAssessment />
     </div>
   );
 }

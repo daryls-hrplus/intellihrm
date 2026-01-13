@@ -13,3 +13,5 @@ export { SetupHREscalations } from './SetupHREscalations';
 export { SetupMultiPositionAppraisals } from './SetupMultiPositionAppraisals';
 export { SetupIndexSettings } from './SetupIndexSettings';
 export { SetupBenchmarks } from './SetupBenchmarks';
+export { SetupValuesAssessment } from './SetupValuesAssessment';
+export { SetupGoalsIntegration } from './SetupGoalsIntegration';

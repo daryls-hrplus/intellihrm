@@ -5,7 +5,8 @@ import {
   CompensationIntegrationSection,
   LearningIntegrationSection,
   NotificationOrchestrationSection,
-  IntegrationAnalyticsSection
+  IntegrationAnalyticsSection,
+  ComplianceDocumentSection
 } from './sections/integration';
 
 export function ManualIntegrationSection() {
@@ -18,6 +19,7 @@ export function ManualIntegrationSection() {
       <LearningIntegrationSection />
       <NotificationOrchestrationSection />
       <IntegrationAnalyticsSection />
+      <ComplianceDocumentSection />
     </div>
   );
 }

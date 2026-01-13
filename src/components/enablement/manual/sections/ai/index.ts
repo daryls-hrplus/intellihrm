@@ -4,3 +4,5 @@ export { DevelopmentSuggestionsIDP } from './DevelopmentSuggestionsIDP';
 export { BiasDetectionRemediation } from './BiasDetectionRemediation';
 export { CommentQualityAnalysis } from './CommentQualityAnalysis';
 export { AIAnalyticsPredictions } from './AIAnalyticsPredictions';
+export { AICoachingNudges } from './AICoachingNudges';
+export { AIPerformanceRiskDetection } from './AIPerformanceRiskDetection';

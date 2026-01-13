@@ -4,7 +4,9 @@ import {
   DevelopmentSuggestionsIDP,
   BiasDetectionRemediation,
   CommentQualityAnalysis,
-  AIAnalyticsPredictions
+  AIAnalyticsPredictions,
+  AICoachingNudges,
+  AIPerformanceRiskDetection
 } from './sections/ai';
 
 export function ManualAISection() {
@@ -16,6 +18,8 @@ export function ManualAISection() {
       <BiasDetectionRemediation />
       <CommentQualityAnalysis />
       <AIAnalyticsPredictions />
+      <AICoachingNudges />
+      <AIPerformanceRiskDetection />
     </div>
   );
 }

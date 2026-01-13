@@ -8,3 +8,5 @@ export { WorkflowEmployeeResponse } from './WorkflowEmployeeResponse';
 export { WorkflowInterviewScheduling } from './WorkflowInterviewScheduling';
 export { WorkflowRoleChangeHandling } from './WorkflowRoleChangeHandling';
 export { WorkflowFinalization } from './WorkflowFinalization';
+export { WorkflowRatingDispute } from './WorkflowRatingDispute';
+export { WorkflowValuesAssessment } from './WorkflowValuesAssessment';
