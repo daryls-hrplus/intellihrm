@@ -1,10 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -36,6 +38,12 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import {
   Plus,
   Search,
   Zap,
@@ -51,11 +59,15 @@ import {
   Heart,
   HelpCircle,
   FileDown,
+  CalendarIcon,
+  Clock,
+  AlertTriangle,
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { CompanyValuesTab } from "@/components/capabilities/CompanyValuesTab";
 import { toast } from "sonner";
+import { format } from "date-fns";
 import {
   useCapabilities,
   useProficiencyScales,
@@ -66,7 +78,7 @@ import {
   CapabilityFilters,
   CreateCapabilityInput,
 } from "@/hooks/useCapabilities";
-import { CapabilityCard } from "@/components/capabilities/CapabilityCard";
+import { CapabilityCard, CapabilityWithMeta } from "@/components/capabilities/CapabilityCard";
 import { CapabilityFormDialog } from "@/components/capabilities/CapabilityFormDialog";
 import { SkillMappingsDialog } from "@/components/capabilities/SkillMappingsDialog";
 import { SkillsQuickStartWizard } from "@/components/capabilities/SkillsQuickStartWizard";
@@ -74,6 +86,7 @@ import { BatchGenerateIndicatorsButton } from "@/components/capabilities/BatchGe
 import { BulkCompetencyImport } from "@/components/capabilities/BulkCompetencyImport";
 import { EmptyStateOnboarding } from "@/components/capabilities/EmptyStateOnboarding";
 import { useAuth } from "@/contexts/AuthContext";
+import { cn } from "@/lib/utils";
 
 interface Company {
   id: string;
@@ -85,7 +98,9 @@ export default function CapabilityRegistryPage() {
   const {
     capabilities,
     loading,
+    relationshipCounts,
     fetchCapabilities,
+    fetchRelationshipCounts,
     createCapability,
     updateCapability,
     deleteCapability,
@@ -101,6 +116,11 @@ export default function CapabilityRegistryPage() {
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [companyFilter, setCompanyFilter] = useState<string>("all");
+  
+  // Date-driven filters
+  const [effectiveAsOfDate, setEffectiveAsOfDate] = useState<Date | undefined>(undefined);
+  const [includeExpired, setIncludeExpired] = useState(false);
+  const [showDateFilter, setShowDateFilter] = useState(false);
 
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isMappingsOpen, setIsMappingsOpen] = useState(false);
@@ -128,9 +148,32 @@ export default function CapabilityRegistryPage() {
       status: statusFilter !== "all" ? (statusFilter as CapabilityStatus) : undefined,
       companyId: companyFilter !== "all" ? companyFilter : undefined,
       search: search || undefined,
+      effectiveAsOf: effectiveAsOfDate ? format(effectiveAsOfDate, "yyyy-MM-dd") : undefined,
+      includeExpired: includeExpired,
+      includeFuture: true, // Always show future-dated for admin view
     };
     fetchCapabilities(filters);
-  }, [activeTab, categoryFilter, statusFilter, companyFilter, search, fetchCapabilities]);
+  }, [activeTab, categoryFilter, statusFilter, companyFilter, search, effectiveAsOfDate, includeExpired, fetchCapabilities]);
+
+  // Fetch relationship counts when capabilities change
+  useEffect(() => {
+    if (capabilities.length > 0) {
+      const capabilityIds = capabilities.map(c => c.id);
+      fetchRelationshipCounts(capabilityIds);
+    }
+  }, [capabilities, fetchRelationshipCounts]);
+
+  // Enrich capabilities with relationship counts
+  const enrichedCapabilities = useMemo(() => {
+    return capabilities.map(cap => ({
+      ...cap,
+      job_count: relationshipCounts[cap.id]?.job_count ?? 0,
+      skill_count: relationshipCounts[cap.id]?.skill_count ?? 0,
+      has_behavioral_indicators: cap.type === "SKILL" 
+        ? !!(cap.skill_attributes?.inference_keywords?.length)
+        : !!(cap.competency_attributes?.behavioral_indicators?.length),
+    })) as CapabilityWithMeta[];
+  }, [capabilities, relationshipCounts]);
 
   const fetchCompanies = async () => {
     const { data } = await supabase
@@ -177,6 +220,8 @@ export default function CapabilityRegistryPage() {
     }
     fetchCapabilities({
       type: activeTab === "skills" ? "SKILL" : activeTab === "competencies" ? "COMPETENCY" : undefined,
+      includeExpired,
+      includeFuture: true,
     });
   };
 
@@ -186,6 +231,8 @@ export default function CapabilityRegistryPage() {
     setIsDeleteOpen(false);
     fetchCapabilities({
       type: activeTab === "skills" ? "SKILL" : activeTab === "competencies" ? "COMPETENCY" : undefined,
+      includeExpired,
+      includeFuture: true,
     });
   };
 
@@ -193,11 +240,24 @@ export default function CapabilityRegistryPage() {
     await updateStatus(id, status);
     fetchCapabilities({
       type: activeTab === "skills" ? "SKILL" : activeTab === "competencies" ? "COMPETENCY" : undefined,
+      includeExpired,
+      includeFuture: true,
     });
   };
 
-  const skillCount = capabilities.filter((c) => c.type === "SKILL").length;
-  const competencyCount = capabilities.filter((c) => c.type === "COMPETENCY").length;
+  const skillCount = enrichedCapabilities.filter((c) => c.type === "SKILL").length;
+  const competencyCount = enrichedCapabilities.filter((c) => c.type === "COMPETENCY").length;
+  
+  // Count expiring soon items
+  const expiringSoonCount = useMemo(() => {
+    const now = new Date();
+    const ninetyDaysFromNow = new Date(now.getTime() + 90 * 24 * 60 * 60 * 1000);
+    return enrichedCapabilities.filter(c => {
+      if (!c.effective_to) return false;
+      const expiryDate = new Date(c.effective_to);
+      return expiryDate > now && expiryDate <= ninetyDaysFromNow;
+    }).length;
+  }, [enrichedCapabilities]);
 
   return (
     <AppLayout>
@@ -278,7 +338,7 @@ export default function CapabilityRegistryPage() {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-4 gap-4">
+        <div className="grid grid-cols-5 gap-4">
           <Card>
             <CardContent className="pt-6">
               <div className="flex items-center gap-3">
@@ -313,9 +373,32 @@ export default function CapabilityRegistryPage() {
                 </div>
                 <div>
                   <p className="text-2xl font-bold">
-                    {capabilities.filter((c) => c.status === "active").length}
+                    {enrichedCapabilities.filter((c) => c.status === "active").length}
                   </p>
                   <p className="text-sm text-muted-foreground">Active</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-3">
+                <div className={cn(
+                  "p-2 rounded-lg",
+                  expiringSoonCount > 0 
+                    ? "bg-orange-100 dark:bg-orange-900" 
+                    : "bg-muted"
+                )}>
+                  <AlertTriangle className={cn(
+                    "h-5 w-5",
+                    expiringSoonCount > 0 
+                      ? "text-orange-600 dark:text-orange-400" 
+                      : "text-muted-foreground"
+                  )} />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold">{expiringSoonCount}</p>
+                  <p className="text-sm text-muted-foreground">Expiring Soon</p>
                 </div>
               </div>
             </CardContent>
@@ -366,13 +449,11 @@ export default function CapabilityRegistryPage() {
                 <TooltipProvider>
                   <div className="flex items-center gap-1">
                     <Select value={statusFilter} onValueChange={setStatusFilter}>
-                      <SelectTrigger className="w-[170px]">
-                        <SelectValue placeholder="Filter by Status" />
+                      <SelectTrigger className="w-[150px]">
+                        <SelectValue placeholder="Status" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="all">All Statuses</SelectItem>
-                        <SelectItem value="draft">Draft</SelectItem>
-                        <SelectItem value="pending_approval">Pending Approval</SelectItem>
                         <SelectItem value="active">Active</SelectItem>
                         <SelectItem value="deprecated">Deprecated</SelectItem>
                       </SelectContent>
@@ -383,15 +464,71 @@ export default function CapabilityRegistryPage() {
                       </TooltipTrigger>
                       <TooltipContent side="bottom" className="max-w-xs">
                         <p className="text-sm">
-                          <strong>Draft:</strong> Work in progress<br />
-                          <strong>Pending Approval:</strong> Awaiting review<br />
                           <strong>Active:</strong> Ready for use<br />
-                          <strong>Deprecated:</strong> No longer in use
+                          <strong>Deprecated:</strong> Being phased out
                         </p>
                       </TooltipContent>
                     </Tooltip>
                   </div>
                 </TooltipProvider>
+                
+                {/* Date Filter */}
+                <Popover open={showDateFilter} onOpenChange={setShowDateFilter}>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" size="sm" className={cn(
+                      "gap-2",
+                      (effectiveAsOfDate || includeExpired) && "border-primary"
+                    )}>
+                      <Clock className="h-4 w-4" />
+                      {effectiveAsOfDate ? format(effectiveAsOfDate, "MMM d, yyyy") : "Date Filter"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-4" align="end">
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label className="text-sm font-medium">View "As of" Date</Label>
+                        <p className="text-xs text-muted-foreground">
+                          See which capabilities were/will be effective on a specific date
+                        </p>
+                        <Calendar
+                          mode="single"
+                          selected={effectiveAsOfDate}
+                          onSelect={setEffectiveAsOfDate}
+                          className="rounded-md border"
+                        />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div className="space-y-0.5">
+                          <Label htmlFor="include-expired" className="text-sm">
+                            Show Expired
+                          </Label>
+                          <p className="text-xs text-muted-foreground">
+                            Include expired capabilities
+                          </p>
+                        </div>
+                        <Switch
+                          id="include-expired"
+                          checked={includeExpired}
+                          onCheckedChange={setIncludeExpired}
+                        />
+                      </div>
+                      {(effectiveAsOfDate || includeExpired) && (
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="w-full"
+                          onClick={() => {
+                            setEffectiveAsOfDate(undefined);
+                            setIncludeExpired(false);
+                          }}
+                        >
+                          Clear Filters
+                        </Button>
+                      )}
+                    </div>
+                  </PopoverContent>
+                </Popover>
+
                 <Select value={companyFilter} onValueChange={setCompanyFilter}>
                   <SelectTrigger className="w-[180px]">
                     <SelectValue placeholder="Company" />
@@ -414,7 +551,7 @@ export default function CapabilityRegistryPage() {
                 <TabsTrigger value="all" className="gap-2">
                   <Layers className="h-4 w-4" />
                   All
-                  <Badge variant="secondary">{capabilities.length}</Badge>
+                  <Badge variant="secondary">{enrichedCapabilities.length}</Badge>
                 </TabsTrigger>
                 <TabsTrigger value="skills" className="gap-2">
                   <Zap className="h-4 w-4" />
@@ -437,7 +574,7 @@ export default function CapabilityRegistryPage() {
                   <div className="flex items-center justify-center py-12">
                     <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
                   </div>
-                ) : capabilities.length === 0 ? (
+                ) : enrichedCapabilities.length === 0 ? (
                   <EmptyStateOnboarding
                     onOpenWizard={() => setIsQuickStartOpen(true)}
                     onOpenBulkImport={() => setIsBulkImportOpen(true)}
@@ -446,7 +583,7 @@ export default function CapabilityRegistryPage() {
                   />
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {capabilities.map((capability) => (
+                    {enrichedCapabilities.map((capability) => (
                       <CapabilityCard
                         key={capability.id}
                         capability={capability}
@@ -482,7 +619,7 @@ export default function CapabilityRegistryPage() {
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {capabilities.filter(c => c.type === "SKILL").map((capability) => (
+                    {enrichedCapabilities.filter(c => c.type === "SKILL").map((capability) => (
                       <CapabilityCard
                         key={capability.id}
                         capability={capability}
@@ -518,7 +655,7 @@ export default function CapabilityRegistryPage() {
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {capabilities.filter(c => c.type === "COMPETENCY").map((capability) => (
+                    {enrichedCapabilities.filter(c => c.type === "COMPETENCY").map((capability) => (
                       <CapabilityCard
                         key={capability.id}
                         capability={capability}

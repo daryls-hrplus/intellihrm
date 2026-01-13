@@ -87,6 +87,10 @@ export interface CapabilityFilters {
   status?: CapabilityStatus;
   search?: string;
   companyId?: string;
+  // Date-driven filters
+  effectiveAsOf?: string; // Filter to show capabilities effective as of this date
+  includeExpired?: boolean; // Include expired capabilities (default: false)
+  includeFuture?: boolean; // Include future-dated capabilities (default: true for admins)
 }
 
 export interface CreateCapabilityInput {
@@ -108,9 +112,17 @@ export interface CreateCapabilityInput {
   competency_attributes?: Partial<Omit<CompetencyAttributes, "id" | "capability_id">>;
 }
 
+export interface CapabilityRelationshipCounts {
+  [capabilityId: string]: {
+    job_count: number;
+    skill_count: number;
+  };
+}
+
 export function useCapabilities() {
   const [capabilities, setCapabilities] = useState<Capability[]>([]);
   const [loading, setLoading] = useState(false);
+  const [relationshipCounts, setRelationshipCounts] = useState<CapabilityRelationshipCounts>({});
 
   const fetchCapabilities = useCallback(async (filters?: CapabilityFilters) => {
     setLoading(true);
@@ -141,6 +153,19 @@ export function useCapabilities() {
         query = query.or(`name.ilike.%${filters.search}%,code.ilike.%${filters.search}%,description.ilike.%${filters.search}%`);
       }
 
+      // Date-driven filtering
+      const asOfDate = filters?.effectiveAsOf || new Date().toISOString().split('T')[0];
+      
+      // Filter by effective_from (only show if effective_from <= asOfDate, unless includeFuture is true)
+      if (!filters?.includeFuture) {
+        query = query.lte("effective_from", asOfDate);
+      }
+      
+      // Filter by effective_to (only show if effective_to is null or > asOfDate, unless includeExpired is true)
+      if (!filters?.includeExpired) {
+        query = query.or(`effective_to.is.null,effective_to.gt.${asOfDate}`);
+      }
+
       const { data, error } = await query;
 
       if (error) {
@@ -163,6 +188,62 @@ export function useCapabilities() {
       return [];
     } finally {
       setLoading(false);
+    }
+  }, []);
+
+  // Fetch job and skill relationship counts for all capabilities
+  const fetchRelationshipCounts = useCallback(async (capabilityIds: string[]) => {
+    if (capabilityIds.length === 0) return {};
+    
+    try {
+      // Fetch job counts from job_capability_requirements
+      const { data: jobData, error: jobError } = await supabase
+        .from("job_capability_requirements")
+        .select("capability_id")
+        .in("capability_id", capabilityIds);
+
+      if (jobError) {
+        console.error("Error fetching job counts:", jobError);
+      }
+
+      // Fetch skill counts from competency_skill_mappings (for competencies)
+      const { data: skillData, error: skillError } = await supabase
+        .from("competency_skill_mappings")
+        .select("competency_id")
+        .in("competency_id", capabilityIds);
+
+      if (skillError) {
+        console.error("Error fetching skill counts:", skillError);
+      }
+
+      // Aggregate counts
+      const counts: CapabilityRelationshipCounts = {};
+      
+      capabilityIds.forEach(id => {
+        counts[id] = { job_count: 0, skill_count: 0 };
+      });
+
+      if (jobData) {
+        jobData.forEach((row: any) => {
+          if (counts[row.capability_id]) {
+            counts[row.capability_id].job_count++;
+          }
+        });
+      }
+
+      if (skillData) {
+        skillData.forEach((row: any) => {
+          if (counts[row.competency_id]) {
+            counts[row.competency_id].skill_count++;
+          }
+        });
+      }
+
+      setRelationshipCounts(counts);
+      return counts;
+    } catch (err) {
+      console.error("Error fetching relationship counts:", err);
+      return {};
     }
   }, []);
 
@@ -345,7 +426,9 @@ export function useCapabilities() {
   return {
     capabilities,
     loading,
+    relationshipCounts,
     fetchCapabilities,
+    fetchRelationshipCounts,
     createCapability,
     updateCapability,
     deleteCapability,
