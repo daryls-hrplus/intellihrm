@@ -214,6 +214,40 @@ export function NotificationsReminders() {
             </TipCallout>
           </div>
 
+          {/* Rule Status Badges - NEW in v1.4.0 */}
+          <div className="space-y-4">
+            <h4 className="font-semibold flex items-center gap-2">
+              <Eye className="h-4 w-4 text-primary" />
+              Rule Status Badges
+              <Badge className="bg-green-500/10 text-green-600 border-green-500/20 text-xs">New in v1.4.0</Badge>
+            </h4>
+            <p className="text-sm text-muted-foreground">
+              Rules display visual status badges to indicate their current state based on effective dates and activation status.
+            </p>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <div className="p-3 rounded-lg border border-blue-200 bg-blue-50 dark:bg-blue-950/20 text-center">
+                <Badge className="mb-2">Active</Badge>
+                <p className="text-xs text-muted-foreground">Rule is currently processing reminders</p>
+              </div>
+              <div className="p-3 rounded-lg border border-amber-200 bg-amber-50 dark:bg-amber-950/20 text-center">
+                <Badge variant="outline" className="mb-2 border-amber-500 text-amber-600">Scheduled</Badge>
+                <p className="text-xs text-muted-foreground">effective_from is in the future</p>
+              </div>
+              <div className="p-3 rounded-lg border border-red-200 bg-red-50 dark:bg-red-950/20 text-center">
+                <Badge variant="destructive" className="mb-2">Expired</Badge>
+                <p className="text-xs text-muted-foreground">effective_to has passed</p>
+              </div>
+              <div className="p-3 rounded-lg border bg-muted/50 text-center">
+                <Badge variant="secondary" className="mb-2">Inactive</Badge>
+                <p className="text-xs text-muted-foreground">Manually disabled by admin</p>
+              </div>
+            </div>
+            <InfoCallout title="Tooltip Details">
+              Hover over any status badge to see the effective date range. This helps administrators 
+              quickly understand when a rule is scheduled to activate or when it expired.
+            </InfoCallout>
+          </div>
+
           {/* Notification Lifecycle */}
           <div className="space-y-4">
             <h4 className="font-semibold flex items-center gap-2">
@@ -250,15 +284,89 @@ export function NotificationsReminders() {
                     <td className="py-2 px-3 text-muted-foreground">Auto-archive date</td>
                     <td className="py-2 px-3 text-muted-foreground">Notifications hidden after this date</td>
                   </tr>
+                  <tr>
+                    <td className="py-2 px-3 font-medium">Priority Until</td>
+                    <td className="py-2 px-3 text-muted-foreground">High priority display period</td>
+                    <td className="py-2 px-3 text-muted-foreground">Priority decays after this date</td>
+                  </tr>
                 </tbody>
               </table>
             </div>
           </div>
 
-          <InfoCallout title="Automatic Cleanup">
-            A scheduled job runs daily to archive expired notifications and update reminder statuses. 
-            This keeps the notification center clean and relevant.
-          </InfoCallout>
+          {/* Scheduled Jobs Configuration - NEW in v1.4.0 */}
+          <div className="space-y-4">
+            <h4 className="font-semibold flex items-center gap-2">
+              <Clock className="h-4 w-4 text-primary" />
+              Scheduled Jobs Configuration
+              <Badge className="bg-green-500/10 text-green-600 border-green-500/20 text-xs">New in v1.4.0</Badge>
+            </h4>
+            <p className="text-sm text-muted-foreground">
+              Configure when reminder processing jobs run, including validity periods and run windows.
+            </p>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b">
+                    <th className="text-left py-2 px-3 font-medium">Setting</th>
+                    <th className="text-left py-2 px-3 font-medium">Purpose</th>
+                    <th className="text-left py-2 px-3 font-medium">Example</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y">
+                  <tr>
+                    <td className="py-2 px-3 font-medium">Valid From / Valid To</td>
+                    <td className="py-2 px-3 text-muted-foreground">Date range when job is active</td>
+                    <td className="py-2 px-3 text-muted-foreground">Jan 1 - Dec 31, 2026</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 px-3 font-medium">Run Window</td>
+                    <td className="py-2 px-3 text-muted-foreground">Time of day job can execute</td>
+                    <td className="py-2 px-3 text-muted-foreground">08:00 - 18:00</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 px-3 font-medium">Run Days</td>
+                    <td className="py-2 px-3 text-muted-foreground">Days of week job runs</td>
+                    <td className="py-2 px-3 text-muted-foreground">Mon, Tue, Wed, Thu, Fri</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 px-3 font-medium">Timezone</td>
+                    <td className="py-2 px-3 text-muted-foreground">Timezone for schedule evaluation</td>
+                    <td className="py-2 px-3 text-muted-foreground">America/Jamaica</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <TipCallout title="Business Hours Alignment">
+              Configure run windows to align with your organization's business hours. This ensures 
+              reminders are processed and delivered during working hours in your company's timezone.
+            </TipCallout>
+          </div>
+
+          {/* Automatic Cleanup */}
+          <div className="space-y-4">
+            <h4 className="font-semibold flex items-center gap-2">
+              <RefreshCw className="h-4 w-4 text-primary" />
+              Automatic Cleanup Process
+            </h4>
+            <p className="text-sm text-muted-foreground">
+              A daily scheduled job automatically maintains the notification system by archiving 
+              expired items and updating statuses.
+            </p>
+            <div className="p-4 rounded-lg border bg-muted/30">
+              <h5 className="font-medium mb-2">Cleanup Job Actions:</h5>
+              <ul className="text-sm text-muted-foreground space-y-1">
+                <li>• Archives notifications past their <code className="text-xs bg-muted px-1 rounded">expires_at</code> date</li>
+                <li>• Updates reminder status when events have passed</li>
+                <li>• Clears priority flags after <code className="text-xs bg-muted px-1 rounded">priority_until</code> date</li>
+                <li>• Logs all cleanup actions for audit purposes</li>
+              </ul>
+            </div>
+            <InfoCallout title="Audit Trail">
+              All cleanup actions are logged with timestamps. Administrators can review cleanup 
+              history in the system logs to understand what was archived and when.
+            </InfoCallout>
+          </div>
         </CardContent>
       </Card>
 

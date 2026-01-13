@@ -4,6 +4,22 @@ import { History, User, Calendar, Plus, RefreshCw, FileText } from 'lucide-react
 
 const VERSION_HISTORY = [
   {
+    version: '1.4.0',
+    date: '2026-01-13',
+    author: 'Intelli HRM Team',
+    type: 'minor',
+    changes: [
+      'Added Timezone & Business Hours configuration documentation',
+      'Added Rule Effective Dating with status badges (Active/Scheduled/Expired/Inactive)',
+      'Added Notification Lifecycle Management (read_at, expires_at, priority_until)',
+      'Added Workflow Analytics Dashboard documentation (Section 6.4)',
+      'Added Reference Data Catalog documentation (Section 2.4)',
+      'Added Scheduled Jobs validity period and run window configuration',
+      'Expanded Quick Reference Cards with 4 new workflow cards',
+      'Expanded Glossary with 8 new terms',
+    ],
+  },
+  {
     version: '1.3.0',
     date: '2026-01-08',
     author: 'Intelli HRM Team',
@@ -58,6 +74,42 @@ const VERSION_HISTORY = [
 ];
 
 const FEATURE_LOG = [
+  {
+    feature: 'Timezone Configuration',
+    category: 'Organization',
+    addedIn: '1.4.0',
+    description: 'Company timezone settings affecting reminder processing and SLA calculations',
+  },
+  {
+    feature: 'Rule Effective Dating',
+    category: 'Reminders',
+    addedIn: '1.4.0',
+    description: 'Schedule future rule activation with effective_from/effective_to dates and status badges',
+  },
+  {
+    feature: 'Notification Lifecycle',
+    category: 'Communication',
+    addedIn: '1.4.0',
+    description: 'Read tracking, expiration management, and automatic cleanup processing',
+  },
+  {
+    feature: 'Workflow Analytics Dashboard',
+    category: 'Compliance',
+    addedIn: '1.4.0',
+    description: 'Dashboard with approval rates, trends, and approver performance metrics',
+  },
+  {
+    feature: 'Reference Data Catalog',
+    category: 'Organization',
+    addedIn: '1.4.0',
+    description: 'Browse system reference data and configurable lookup values',
+  },
+  {
+    feature: 'Rule Status Badges',
+    category: 'Reminders',
+    addedIn: '1.4.0',
+    description: 'Visual indicators for Active, Scheduled, Expired, and Inactive rule states',
+  },
   {
     feature: 'Architecture Diagrams',
     category: 'Appendix',
@@ -217,11 +269,11 @@ export function HRHubManualVersionHistory() {
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
               <p className="text-sm font-medium">Current Version</p>
-              <p className="text-2xl font-bold text-primary">v1.3.0</p>
+              <p className="text-2xl font-bold text-primary">v1.4.0</p>
             </div>
             <div className="space-y-2">
               <p className="text-sm font-medium">Last Updated</p>
-              <p className="text-lg text-muted-foreground">January 8, 2026</p>
+              <p className="text-lg text-muted-foreground">January 13, 2026</p>
             </div>
             <div className="space-y-2">
               <p className="text-sm font-medium">Document Owner</p>
