@@ -9,10 +9,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Separator } from "@/components/ui/separator";
-import { HelpCircle, Info, Lightbulb, AlertCircle, CheckSquare } from "lucide-react";
+import { HelpCircle, Info, Lightbulb, AlertCircle, CheckSquare, Globe } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/hooks/useLanguage";
+import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import type { Json } from "@/integrations/supabase/types";
@@ -158,7 +159,10 @@ export function EnhancedRatingScaleDialog({
   onSuccess,
 }: EnhancedRatingScaleDialogProps) {
   const { t } = useLanguage();
+  const { hasRole } = useAuth();
+  const isSystemAdmin = hasRole("system_admin");
   const [scaleType, setScaleType] = useState<ScaleType>("five_point");
+  const [isGlobalTemplate, setIsGlobalTemplate] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     code: "",
@@ -207,6 +211,10 @@ export function EnhancedRatingScaleDialog({
         ? editingScale.rating_labels as Record<string, RatingLabel>
         : {};
       
+      // Determine if this is a global template (company_id is null)
+      const editingScaleAny = editingScale as any;
+      setIsGlobalTemplate(editingScale.company_id === null || editingScaleAny.scope === 'global');
+      
       setFormData({
         name: editingScale.name,
         code: editingScale.code,
@@ -228,6 +236,7 @@ export function EnhancedRatingScaleDialog({
       // New scale - default to 5-point
       const defaultPreset = SCALE_PRESETS.find(p => p.type === "five_point")!;
       setScaleType("five_point");
+      setIsGlobalTemplate(false);
       setFormData({
         name: "",
         code: "",
@@ -314,7 +323,7 @@ export function EnhancedRatingScaleDialog({
 
     setIsSubmitting(true);
     try {
-      const submitData = {
+      const submitData: Record<string, any> = {
         name: trimmedName,
         code: cleanedCode,
         description: formData.description,
@@ -325,6 +334,15 @@ export function EnhancedRatingScaleDialog({
         is_default: formData.is_default,
         is_active: formData.is_active,
       };
+
+      // Handle global vs company-specific scope
+      if (isSystemAdmin && isGlobalTemplate) {
+        submitData.company_id = null;
+        submitData.scope = 'global';
+      } else {
+        submitData.company_id = companyId;
+        submitData.scope = 'company';
+      }
 
       if (editingScale) {
         const { error } = await supabase
@@ -337,10 +355,14 @@ export function EnhancedRatingScaleDialog({
       } else {
         const { error } = await supabase
           .from("performance_rating_scales")
-          .insert([{ ...submitData, company_id: companyId }]);
+          .insert([submitData as any]);
 
         if (error) throw error;
-        toast.success(t("performance.setup.scaleCreated", "Rating scale created"));
+        toast.success(
+          isGlobalTemplate 
+            ? t("performance.setup.globalScaleCreated", "Global rating scale created") 
+            : t("performance.setup.scaleCreated", "Rating scale created")
+        );
       }
       onSuccess();
     } catch (error: any) {
@@ -726,7 +748,35 @@ export function EnhancedRatingScaleDialog({
             <Separator />
 
             {/* Switches */}
-            <div className="flex items-center gap-6">
+            <div className="flex flex-wrap items-center gap-6">
+              {/* Global Template Toggle - Only for System Admins */}
+              {isSystemAdmin && (
+                <div className="flex items-center gap-2">
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="flex items-center gap-2">
+                          <Switch
+                            checked={isGlobalTemplate}
+                            onCheckedChange={setIsGlobalTemplate}
+                          />
+                          <Globe className="h-4 w-4 text-primary" />
+                          <Label className="cursor-pointer font-medium text-primary">
+                            {t("performance.setup.globalTemplate", "Global Template")}
+                          </Label>
+                          <HelpCircle className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="max-w-xs">
+                        <p className="text-xs">
+                          {t("performance.setup.globalTemplateTooltip", "Global templates are available to all companies. Only system administrators can create and manage global templates.")}
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
+              )}
+
               <div className="flex items-center gap-2">
                 <TooltipProvider>
                   <Tooltip>
@@ -771,6 +821,16 @@ export function EnhancedRatingScaleDialog({
                 </TooltipProvider>
               </div>
             </div>
+
+            {/* Global Template Warning */}
+            {isSystemAdmin && isGlobalTemplate && (
+              <Alert className="bg-primary/5 border-primary/20">
+                <Globe className="h-4 w-4" />
+                <AlertDescription className="text-xs">
+                  {t("performance.setup.globalTemplateWarning", "This template will be available to all companies in the system. Changes will affect all companies using this template.")}
+                </AlertDescription>
+              </Alert>
+            )}
           </div>
         </div>
 
