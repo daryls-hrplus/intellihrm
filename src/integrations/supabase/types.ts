@@ -2379,6 +2379,7 @@ export type Database = {
           created_idp_id: string | null
           created_pip_id: string | null
           created_succession_nomination_id: string | null
+          effective_date: string | null
           executed_at: string | null
           executed_by: string | null
           id: string
@@ -2386,6 +2387,7 @@ export type Database = {
           override_approved_by: string | null
           override_reason: string | null
           participant_id: string
+          posted_date: string | null
           rule_id: string
           status: string
           triggered_at: string
@@ -2401,6 +2403,7 @@ export type Database = {
           created_idp_id?: string | null
           created_pip_id?: string | null
           created_succession_nomination_id?: string | null
+          effective_date?: string | null
           executed_at?: string | null
           executed_by?: string | null
           id?: string
@@ -2408,6 +2411,7 @@ export type Database = {
           override_approved_by?: string | null
           override_reason?: string | null
           participant_id: string
+          posted_date?: string | null
           rule_id: string
           status?: string
           triggered_at?: string
@@ -2423,6 +2427,7 @@ export type Database = {
           created_idp_id?: string | null
           created_pip_id?: string | null
           created_succession_nomination_id?: string | null
+          effective_date?: string | null
           executed_at?: string | null
           executed_by?: string | null
           id?: string
@@ -2430,6 +2435,7 @@ export type Database = {
           override_approved_by?: string | null
           override_reason?: string | null
           participant_id?: string
+          posted_date?: string | null
           rule_id?: string
           status?: string
           triggered_at?: string
@@ -3349,6 +3355,7 @@ export type Database = {
           employee_response_status: string | null
           evaluator_id: string | null
           final_comments: string | null
+          finalized_at: string | null
           goal_score: number | null
           has_employee_response: boolean | null
           has_role_change: boolean | null
@@ -3357,6 +3364,9 @@ export type Database = {
           overall_score: number | null
           overdue_notified_at: string | null
           primary_position_id: string | null
+          rating_effective_date: string | null
+          rating_period_end: string | null
+          rating_period_start: string | null
           reflection_completed_at: string | null
           reflection_template_id: string | null
           responsibility_score: number | null
@@ -3380,6 +3390,7 @@ export type Database = {
           employee_response_status?: string | null
           evaluator_id?: string | null
           final_comments?: string | null
+          finalized_at?: string | null
           goal_score?: number | null
           has_employee_response?: boolean | null
           has_role_change?: boolean | null
@@ -3388,6 +3399,9 @@ export type Database = {
           overall_score?: number | null
           overdue_notified_at?: string | null
           primary_position_id?: string | null
+          rating_effective_date?: string | null
+          rating_period_end?: string | null
+          rating_period_start?: string | null
           reflection_completed_at?: string | null
           reflection_template_id?: string | null
           responsibility_score?: number | null
@@ -3411,6 +3425,7 @@ export type Database = {
           employee_response_status?: string | null
           evaluator_id?: string | null
           final_comments?: string | null
+          finalized_at?: string | null
           goal_score?: number | null
           has_employee_response?: boolean | null
           has_role_change?: boolean | null
@@ -3419,6 +3434,9 @@ export type Database = {
           overall_score?: number | null
           overdue_notified_at?: string | null
           primary_position_id?: string | null
+          rating_effective_date?: string | null
+          rating_period_end?: string | null
+          rating_period_start?: string | null
           reflection_completed_at?: string | null
           reflection_template_id?: string | null
           responsibility_score?: number | null
@@ -3813,6 +3831,8 @@ export type Database = {
           comments: string | null
           competency_version: number | null
           created_at: string
+          effective_from: string | null
+          effective_to: string | null
           evaluation_type: string
           id: string
           inflation_warning_acknowledged: boolean | null
@@ -3826,6 +3846,8 @@ export type Database = {
           override_justification: string | null
           participant_id: string
           rating: number | null
+          rating_date: string | null
+          superseded_by: string | null
           updated_at: string
           weight: number
           weighted_score: number | null
@@ -3835,6 +3857,8 @@ export type Database = {
           comments?: string | null
           competency_version?: number | null
           created_at?: string
+          effective_from?: string | null
+          effective_to?: string | null
           evaluation_type: string
           id?: string
           inflation_warning_acknowledged?: boolean | null
@@ -3848,6 +3872,8 @@ export type Database = {
           override_justification?: string | null
           participant_id: string
           rating?: number | null
+          rating_date?: string | null
+          superseded_by?: string | null
           updated_at?: string
           weight?: number
           weighted_score?: number | null
@@ -3857,6 +3883,8 @@ export type Database = {
           comments?: string | null
           competency_version?: number | null
           created_at?: string
+          effective_from?: string | null
+          effective_to?: string | null
           evaluation_type?: string
           id?: string
           inflation_warning_acknowledged?: boolean | null
@@ -3870,6 +3898,8 @@ export type Database = {
           override_justification?: string | null
           participant_id?: string
           rating?: number | null
+          rating_date?: string | null
+          superseded_by?: string | null
           updated_at?: string
           weight?: number
           weighted_score?: number | null
@@ -3901,6 +3931,13 @@ export type Database = {
             columns: ["participant_id"]
             isOneToOne: false
             referencedRelation: "appraisal_participants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appraisal_scores_superseded_by_fkey"
+            columns: ["superseded_by"]
+            isOneToOne: false
+            referencedRelation: "appraisal_scores"
             referencedColumns: ["id"]
           },
         ]
@@ -4006,6 +4043,8 @@ export type Database = {
       appraisal_value_scores: {
         Row: {
           assessed_by: string | null
+          assessment_date: string | null
+          assessment_period: string | null
           comments: string | null
           created_at: string | null
           demonstrated_behaviors: Json | null
@@ -4018,6 +4057,8 @@ export type Database = {
         }
         Insert: {
           assessed_by?: string | null
+          assessment_date?: string | null
+          assessment_period?: string | null
           comments?: string | null
           created_at?: string | null
           demonstrated_behaviors?: Json | null
@@ -4030,6 +4071,8 @@ export type Database = {
         }
         Update: {
           assessed_by?: string | null
+          assessment_date?: string | null
+          assessment_period?: string | null
           comments?: string | null
           created_at?: string | null
           demonstrated_behaviors?: Json | null
@@ -9163,6 +9206,9 @@ export type Database = {
           address: string | null
           address_en: string | null
           app_version: string | null
+          business_days: number[] | null
+          business_hours_end: string | null
+          business_hours_start: string | null
           city: string | null
           code: string
           country: string | null
@@ -9185,6 +9231,7 @@ export type Database = {
           state: string | null
           tenant_type: string | null
           territory_id: string | null
+          timezone: string | null
           updated_at: string
           version_updated_at: string | null
           website: string | null
@@ -9193,6 +9240,9 @@ export type Database = {
           address?: string | null
           address_en?: string | null
           app_version?: string | null
+          business_days?: number[] | null
+          business_hours_end?: string | null
+          business_hours_start?: string | null
           city?: string | null
           code: string
           country?: string | null
@@ -9215,6 +9265,7 @@ export type Database = {
           state?: string | null
           tenant_type?: string | null
           territory_id?: string | null
+          timezone?: string | null
           updated_at?: string
           version_updated_at?: string | null
           website?: string | null
@@ -9223,6 +9274,9 @@ export type Database = {
           address?: string | null
           address_en?: string | null
           app_version?: string | null
+          business_days?: number[] | null
+          business_hours_end?: string | null
+          business_hours_start?: string | null
           city?: string | null
           code?: string
           country?: string | null
@@ -9245,6 +9299,7 @@ export type Database = {
           state?: string | null
           tenant_type?: string | null
           territory_id?: string | null
+          timezone?: string | null
           updated_at?: string
           version_updated_at?: string | null
           website?: string | null
@@ -17251,6 +17306,7 @@ export type Database = {
           affected_competencies: Json | null
           ai_analysis: Json | null
           ai_recommendation: string | null
+          assessment_as_of_date: string | null
           company_id: string
           competency_score: number | null
           consecutive_underperformance_count: number | null
@@ -17271,6 +17327,8 @@ export type Database = {
           resolved_by: string | null
           risk_factors: Json | null
           risk_level: Database["public"]["Enums"]["performance_risk_level"]
+          risk_period_end: string | null
+          risk_period_start: string | null
           risk_score: number | null
           risk_type: Database["public"]["Enums"]["performance_risk_type"]
           succession_impact:
@@ -17285,6 +17343,7 @@ export type Database = {
           affected_competencies?: Json | null
           ai_analysis?: Json | null
           ai_recommendation?: string | null
+          assessment_as_of_date?: string | null
           company_id: string
           competency_score?: number | null
           consecutive_underperformance_count?: number | null
@@ -17305,6 +17364,8 @@ export type Database = {
           resolved_by?: string | null
           risk_factors?: Json | null
           risk_level?: Database["public"]["Enums"]["performance_risk_level"]
+          risk_period_end?: string | null
+          risk_period_start?: string | null
           risk_score?: number | null
           risk_type: Database["public"]["Enums"]["performance_risk_type"]
           succession_impact?:
@@ -17319,6 +17380,7 @@ export type Database = {
           affected_competencies?: Json | null
           ai_analysis?: Json | null
           ai_recommendation?: string | null
+          assessment_as_of_date?: string | null
           company_id?: string
           competency_score?: number | null
           consecutive_underperformance_count?: number | null
@@ -17339,6 +17401,8 @@ export type Database = {
           resolved_by?: string | null
           risk_factors?: Json | null
           risk_level?: Database["public"]["Enums"]["performance_risk_level"]
+          risk_period_end?: string | null
+          risk_period_start?: string | null
           risk_score?: number | null
           risk_type?: Database["public"]["Enums"]["performance_risk_type"]
           succession_impact?:
@@ -18600,24 +18664,29 @@ export type Database = {
       }
       employee_reminders: {
         Row: {
+          acknowledged_at: string | null
           can_employee_dismiss: boolean | null
           company_id: string
           created_at: string
           created_by: string | null
           created_by_role: string | null
+          delivery_timezone: string | null
           dismissed_at: string | null
           employee_id: string
           event_date: string
           event_type_id: string | null
+          expires_at: string | null
           id: string
           is_recurring: boolean | null
           message: string | null
           notes: string | null
           notification_method: string
           priority: string | null
+          read_at: string | null
           recurrence_pattern: string | null
           reminder_date: string
           rule_id: string | null
+          scheduled_send_at: string | null
           sent_at: string | null
           source_record_id: string | null
           source_table: string | null
@@ -18626,24 +18695,29 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          acknowledged_at?: string | null
           can_employee_dismiss?: boolean | null
           company_id: string
           created_at?: string
           created_by?: string | null
           created_by_role?: string | null
+          delivery_timezone?: string | null
           dismissed_at?: string | null
           employee_id: string
           event_date: string
           event_type_id?: string | null
+          expires_at?: string | null
           id?: string
           is_recurring?: boolean | null
           message?: string | null
           notes?: string | null
           notification_method?: string
           priority?: string | null
+          read_at?: string | null
           recurrence_pattern?: string | null
           reminder_date: string
           rule_id?: string | null
+          scheduled_send_at?: string | null
           sent_at?: string | null
           source_record_id?: string | null
           source_table?: string | null
@@ -18652,24 +18726,29 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          acknowledged_at?: string | null
           can_employee_dismiss?: boolean | null
           company_id?: string
           created_at?: string
           created_by?: string | null
           created_by_role?: string | null
+          delivery_timezone?: string | null
           dismissed_at?: string | null
           employee_id?: string
           event_date?: string
           event_type_id?: string | null
+          expires_at?: string | null
           id?: string
           is_recurring?: boolean | null
           message?: string | null
           notes?: string | null
           notification_method?: string
           priority?: string | null
+          read_at?: string | null
           recurrence_pattern?: string | null
           reminder_date?: string
           rule_id?: string | null
+          scheduled_send_at?: string | null
           sent_at?: string | null
           source_record_id?: string | null
           source_table?: string | null
@@ -30147,6 +30226,7 @@ export type Database = {
           dispute_resolved_by: string | null
           dispute_status: string | null
           disputed_at: string | null
+          effective_date: string | null
           employee_id: string
           final_score: number | null
           goal_id: string
@@ -30157,6 +30237,8 @@ export type Database = {
           manager_rating: number | null
           manager_rating_at: string | null
           rating_config_id: string | null
+          rating_period_end: string | null
+          rating_period_start: string | null
           released_at: string | null
           released_by: string | null
           self_comments: string | null
@@ -30181,6 +30263,7 @@ export type Database = {
           dispute_resolved_by?: string | null
           dispute_status?: string | null
           disputed_at?: string | null
+          effective_date?: string | null
           employee_id: string
           final_score?: number | null
           goal_id: string
@@ -30191,6 +30274,8 @@ export type Database = {
           manager_rating?: number | null
           manager_rating_at?: string | null
           rating_config_id?: string | null
+          rating_period_end?: string | null
+          rating_period_start?: string | null
           released_at?: string | null
           released_by?: string | null
           self_comments?: string | null
@@ -30215,6 +30300,7 @@ export type Database = {
           dispute_resolved_by?: string | null
           dispute_status?: string | null
           disputed_at?: string | null
+          effective_date?: string | null
           employee_id?: string
           final_score?: number | null
           goal_id?: string
@@ -30225,6 +30311,8 @@ export type Database = {
           manager_rating?: number | null
           manager_rating_at?: string | null
           rating_config_id?: string | null
+          rating_period_end?: string | null
+          rating_period_start?: string | null
           released_at?: string | null
           released_by?: string | null
           self_comments?: string | null
@@ -38776,9 +38864,11 @@ export type Database = {
       kra_rating_submissions: {
         Row: {
           achievement_notes: string | null
+          assessment_date: string | null
           calculated_score: number | null
           company_id: string | null
           created_at: string | null
+          effective_from: string | null
           evidence_urls: Json | null
           final_score: number | null
           id: string
@@ -38798,9 +38888,11 @@ export type Database = {
         }
         Insert: {
           achievement_notes?: string | null
+          assessment_date?: string | null
           calculated_score?: number | null
           company_id?: string | null
           created_at?: string | null
+          effective_from?: string | null
           evidence_urls?: Json | null
           final_score?: number | null
           id?: string
@@ -38820,9 +38912,11 @@ export type Database = {
         }
         Update: {
           achievement_notes?: string | null
+          assessment_date?: string | null
           calculated_score?: number | null
           company_id?: string | null
           created_at?: string | null
+          effective_from?: string | null
           evidence_urls?: Json | null
           final_score?: number | null
           id?: string
@@ -47658,30 +47752,48 @@ export type Database = {
       notifications: {
         Row: {
           created_at: string
+          delivered_at: string | null
+          delivery_timezone: string | null
+          expires_at: string | null
           id: string
           is_read: boolean
           link: string | null
           message: string
+          priority_until: string | null
+          read_at: string | null
+          scheduled_at: string | null
           title: string
           type: string
           user_id: string
         }
         Insert: {
           created_at?: string
+          delivered_at?: string | null
+          delivery_timezone?: string | null
+          expires_at?: string | null
           id?: string
           is_read?: boolean
           link?: string | null
           message: string
+          priority_until?: string | null
+          read_at?: string | null
+          scheduled_at?: string | null
           title: string
           type?: string
           user_id: string
         }
         Update: {
           created_at?: string
+          delivered_at?: string | null
+          delivery_timezone?: string | null
+          expires_at?: string | null
           id?: string
           is_read?: boolean
           link?: string | null
           message?: string
+          priority_until?: string | null
+          read_at?: string | null
+          scheduled_at?: string | null
           title?: string
           type?: string
           user_id?: string
@@ -59024,6 +59136,8 @@ export type Database = {
           cycle_type_filter: string[] | null
           days_before: number
           description: string | null
+          effective_from: string | null
+          effective_to: string | null
           email_template_id: string | null
           event_type_id: string
           id: string
@@ -59036,7 +59150,9 @@ export type Database = {
           send_to_employee: boolean | null
           send_to_hr: boolean | null
           send_to_manager: boolean | null
+          supersedes_rule_id: string | null
           updated_at: string
+          version: number | null
         }
         Insert: {
           company_id: string
@@ -59045,6 +59161,8 @@ export type Database = {
           cycle_type_filter?: string[] | null
           days_before?: number
           description?: string | null
+          effective_from?: string | null
+          effective_to?: string | null
           email_template_id?: string | null
           event_type_id: string
           id?: string
@@ -59057,7 +59175,9 @@ export type Database = {
           send_to_employee?: boolean | null
           send_to_hr?: boolean | null
           send_to_manager?: boolean | null
+          supersedes_rule_id?: string | null
           updated_at?: string
+          version?: number | null
         }
         Update: {
           company_id?: string
@@ -59066,6 +59186,8 @@ export type Database = {
           cycle_type_filter?: string[] | null
           days_before?: number
           description?: string | null
+          effective_from?: string | null
+          effective_to?: string | null
           email_template_id?: string | null
           event_type_id?: string
           id?: string
@@ -59078,7 +59200,9 @@ export type Database = {
           send_to_employee?: boolean | null
           send_to_hr?: boolean | null
           send_to_manager?: boolean | null
+          supersedes_rule_id?: string | null
           updated_at?: string
+          version?: number | null
         }
         Relationships: [
           {
@@ -59114,6 +59238,13 @@ export type Database = {
             columns: ["event_type_id"]
             isOneToOne: false
             referencedRelation: "reminder_event_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reminder_rules_supersedes_rule_id_fkey"
+            columns: ["supersedes_rule_id"]
+            isOneToOne: false
+            referencedRelation: "reminder_rules"
             referencedColumns: ["id"]
           },
         ]
@@ -62364,7 +62495,13 @@ export type Database = {
           last_run_result: Json | null
           last_run_status: string | null
           next_scheduled_run: string | null
+          run_days: number[] | null
+          run_window_end: string | null
+          run_window_start: string | null
+          timezone: string | null
           updated_at: string | null
+          valid_from: string | null
+          valid_to: string | null
         }
         Insert: {
           company_id?: string | null
@@ -62380,7 +62517,13 @@ export type Database = {
           last_run_result?: Json | null
           last_run_status?: string | null
           next_scheduled_run?: string | null
+          run_days?: number[] | null
+          run_window_end?: string | null
+          run_window_start?: string | null
+          timezone?: string | null
           updated_at?: string | null
+          valid_from?: string | null
+          valid_to?: string | null
         }
         Update: {
           company_id?: string | null
@@ -62396,7 +62539,13 @@ export type Database = {
           last_run_result?: Json | null
           last_run_status?: string | null
           next_scheduled_run?: string | null
+          run_days?: number[] | null
+          run_window_end?: string | null
+          run_window_start?: string | null
+          timezone?: string | null
           updated_at?: string | null
+          valid_from?: string | null
+          valid_to?: string | null
         }
         Relationships: [
           {
@@ -65884,6 +66033,50 @@ export type Database = {
           },
           {
             foreignKeyName: "succession_readiness_indicators_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      system_date_config: {
+        Row: {
+          company_id: string | null
+          config_type: string
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          effective_date: string
+          expires_at: string | null
+          id: string
+          is_active: boolean | null
+        }
+        Insert: {
+          company_id?: string | null
+          config_type: string
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          effective_date: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean | null
+        }
+        Update: {
+          company_id?: string | null
+          config_type?: string
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          effective_date?: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "system_date_config_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"

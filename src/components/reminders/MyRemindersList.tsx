@@ -29,7 +29,7 @@ interface MyRemindersListProps {
 
 export function MyRemindersList({ showCreateButton = false }: MyRemindersListProps) {
   const navigate = useNavigate();
-  const { fetchMyReminders, dismissReminder, isLoading } = useReminders();
+  const { fetchMyReminders, dismissReminder, markReminderAsRead, isLoading } = useReminders();
   const [reminders, setReminders] = useState<EmployeeReminder[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('pending');
@@ -40,6 +40,11 @@ export function MyRemindersList({ showCreateButton = false }: MyRemindersListPro
   };
 
   const handleNavigateToSource = (reminder: EmployeeReminder) => {
+    // Mark as read when clicking through
+    if (!reminder.read_at) {
+      markReminderAsRead(reminder.id);
+    }
+    
     const config = getSourceConfig(reminder.source_table);
     const tab = config?.tab || 'overview';
     // Navigate to ESS section based on source type
@@ -88,6 +93,17 @@ export function MyRemindersList({ showCreateButton = false }: MyRemindersListPro
     }
     await dismissReminder(reminder.id);
     loadData();
+  };
+
+  const getExpiryLabel = (reminder: EmployeeReminder) => {
+    if (!reminder.expires_at) return null;
+    const expiryDate = new Date(reminder.expires_at);
+    const now = new Date();
+    const daysUntil = differenceInDays(expiryDate, now);
+    if (daysUntil <= 0) return 'Expired';
+    if (daysUntil === 1) return 'Expires tomorrow';
+    if (daysUntil <= 7) return `Expires in ${daysUntil} days`;
+    return null;
   };
 
   const getPriorityIcon = (priority: string) => {
@@ -192,6 +208,11 @@ export function MyRemindersList({ showCreateButton = false }: MyRemindersListPro
                           {sourceConfig.label}
                           <ExternalLink className="h-3 w-3 text-muted-foreground" />
                         </button>
+                      )}
+                      {getExpiryLabel(reminder) && (
+                        <span className="text-xs text-orange-500 font-medium">
+                          {getExpiryLabel(reminder)}
+                        </span>
                       )}
                     </div>
                     {reminder.event_type && (

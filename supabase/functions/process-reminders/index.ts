@@ -16,11 +16,50 @@ interface ReminderRule {
   message_template: string | null;
   email_template_id: string | null;
   notification_method: string;
+  effective_from: string | null;
+  effective_to: string | null;
   event_type: {
     code: string;
     name: string;
     category: string;
   };
+}
+
+interface CompanySettings {
+  timezone: string | null;
+  business_hours_start: string | null;
+  business_hours_end: string | null;
+}
+
+// Get current date in a specific timezone
+function getDateInTimezone(timezone: string): { date: Date; dateStr: string } {
+  const now = new Date();
+  const formatter = new Intl.DateTimeFormat('en-CA', {
+    timeZone: timezone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  });
+  const dateStr = formatter.format(now); // YYYY-MM-DD format
+  return { date: now, dateStr };
+}
+
+// Check if a rule is effective for a given date
+function isRuleEffective(rule: ReminderRule, dateStr: string): boolean {
+  if (rule.effective_from && dateStr < rule.effective_from) {
+    return false;
+  }
+  if (rule.effective_to && dateStr > rule.effective_to) {
+    return false;
+  }
+  return true;
+}
+
+// Calculate expiration date (event date + 7 days by default)
+function calculateExpiresAt(eventDate: string, daysAfter: number = 7): string {
+  const expiry = new Date(eventDate);
+  expiry.setDate(expiry.getDate() + daysAfter);
+  return expiry.toISOString();
 }
 
 interface EmailTemplate {
@@ -106,7 +145,7 @@ serve(async (req) => {
 
     console.log('Starting reminder processing...');
 
-    // Get all active reminder rules with email_template_id
+    // Get all active reminder rules with email_template_id, effective_from, effective_to
     const { data: rules, error: rulesError } = await supabase
       .from('reminder_rules')
       .select(`
@@ -122,16 +161,51 @@ serve(async (req) => {
 
     console.log(`Found ${rules?.length || 0} active reminder rules`);
 
-    const today = new Date();
+    // Cache company timezones to avoid repeated lookups
+    const companyTimezones: Record<string, string> = {};
+    const companySettings: Record<string, CompanySettings> = {};
+
     const remindersCreated: string[] = [];
     const emailsSent: string[] = [];
 
     for (const rule of (rules as ReminderRule[]) || []) {
-      const targetDate = new Date(today);
-      targetDate.setDate(targetDate.getDate() + rule.days_before);
-      const targetDateStr = targetDate.toISOString().split('T')[0];
+      // Fetch company timezone if not cached
+      if (!companyTimezones[rule.company_id]) {
+        const { data: company } = await supabase
+          .from('companies')
+          .select('timezone, business_hours_start, business_hours_end')
+          .eq('id', rule.company_id)
+          .single();
+        
+        companyTimezones[rule.company_id] = company?.timezone || 'UTC';
+        companySettings[rule.company_id] = {
+          timezone: company?.timezone || 'UTC',
+          business_hours_start: company?.business_hours_start || null,
+          business_hours_end: company?.business_hours_end || null,
+        };
+      }
 
-      console.log(`Processing rule for ${rule.event_type?.code}, target date: ${targetDateStr}, days_before: ${rule.days_before}`);
+      const timezone = companyTimezones[rule.company_id];
+      const { dateStr: todayStr } = getDateInTimezone(timezone);
+
+      // Check if rule is effective for today's date
+      if (!isRuleEffective(rule, todayStr)) {
+        console.log(`Rule ${rule.id} skipped - not effective (from: ${rule.effective_from}, to: ${rule.effective_to}, today: ${todayStr})`);
+        continue;
+      }
+
+      // Calculate target date in company timezone
+      const targetDate = new Date();
+      targetDate.setDate(targetDate.getDate() + rule.days_before);
+      const targetFormatter = new Intl.DateTimeFormat('en-CA', {
+        timeZone: timezone,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+      });
+      const targetDateStr = targetFormatter.format(targetDate);
+
+      console.log(`Processing rule for ${rule.event_type?.code} (company TZ: ${timezone}), target date: ${targetDateStr}, days_before: ${rule.days_before}`);
 
       let records: RecordWithEmployee[] = [];
 
@@ -422,7 +496,7 @@ serve(async (req) => {
           .select('id')
           .eq('source_record_id', record.id)
           .eq('rule_id', rule.id)
-          .eq('reminder_date', today.toISOString().split('T')[0])
+          .eq('reminder_date', todayStr)
           .maybeSingle();
 
         if (existing) {
@@ -453,6 +527,17 @@ serve(async (req) => {
         const shouldSendInApp = rule.notification_method === 'in_app' || rule.notification_method === 'both';
         const shouldSendEmail = rule.notification_method === 'email' || rule.notification_method === 'both';
 
+        // Calculate expiration date for the reminder
+        const expiresAt = calculateExpiresAt(record.eventDate, 7);
+
+        // Get employee's timezone preference for delivery
+        const { data: empProfile } = await supabase
+          .from('profiles')
+          .select('timezone')
+          .eq('id', record.employee.id)
+          .single();
+        const deliveryTimezone = empProfile?.timezone || timezone;
+
         // Create in-app reminder if enabled
         if (shouldSendInApp) {
           const { error: reminderError } = await supabase
@@ -466,9 +551,11 @@ serve(async (req) => {
               title: reminderTitle,
               message: processedMessage,
               event_date: record.eventDate,
-              reminder_date: today.toISOString().split('T')[0],
+              reminder_date: todayStr,
               status: 'pending',
               created_by_role: 'system',
+              expires_at: expiresAt,
+              delivery_timezone: deliveryTimezone,
             });
 
           if (reminderError) {
@@ -542,12 +629,13 @@ serve(async (req) => {
       }
     }
 
-    // Update sent reminders status
+    // Update sent reminders status - use current UTC date
+    const currentDate = new Date().toISOString().split('T')[0];
     const { error: updateError } = await supabase
       .from('employee_reminders')
       .update({ status: 'sent', sent_at: new Date().toISOString() })
       .eq('status', 'pending')
-      .lte('reminder_date', today.toISOString().split('T')[0]);
+      .lte('reminder_date', currentDate);
 
     if (updateError) {
       console.error('Error updating reminder status:', updateError);

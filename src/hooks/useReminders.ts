@@ -25,8 +25,10 @@ export function useReminders() {
     return data as ReminderEventType[];
   }, []);
 
-  // Fetch reminder rules
-  const fetchRules = useCallback(async (companyId?: string) => {
+  // Fetch reminder rules with optional effective date filtering
+  const fetchRules = useCallback(async (companyId?: string, asOfDate?: string) => {
+    const today = asOfDate || new Date().toISOString().split('T')[0];
+    
     let query = supabase
       .from('reminder_rules')
       .select(`
@@ -38,6 +40,12 @@ export function useReminders() {
     if (companyId && companyId !== 'all') {
       query = query.eq('company_id', companyId);
     }
+
+    // Filter by effective dating - only return rules that are currently effective
+    // Rule is effective if: effective_from is null OR effective_from <= today
+    //                  AND: effective_to is null OR effective_to >= today
+    query = query.or(`effective_from.is.null,effective_from.lte.${today}`);
+    query = query.or(`effective_to.is.null,effective_to.gte.${today}`);
 
     const { data, error } = await query;
     if (error) throw error;
@@ -165,10 +173,12 @@ export function useReminders() {
     return results;
   }, []);
 
-  // Fetch my reminders (for ESS)
-  const fetchMyReminders = useCallback(async (status?: string) => {
+  // Fetch my reminders (for ESS) - filters out expired reminders by default
+  const fetchMyReminders = useCallback(async (status?: string, includeExpired: boolean = false) => {
     if (!user?.id) return [];
 
+    const now = new Date().toISOString();
+    
     let query = supabase
       .from('employee_reminders')
       .select(`
@@ -182,10 +192,46 @@ export function useReminders() {
       query = query.eq('status', status);
     }
 
+    // Filter out expired reminders unless explicitly requested
+    if (!includeExpired) {
+      query = query.or(`expires_at.is.null,expires_at.gt.${now}`);
+    }
+
     const { data, error } = await query;
     if (error) throw error;
     return data as EmployeeReminder[];
   }, [user?.id]);
+
+  // Mark a reminder as read (sets read_at timestamp)
+  const markReminderAsRead = useCallback(async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('employee_reminders')
+        .update({ read_at: new Date().toISOString() })
+        .eq('id', id)
+        .is('read_at', null); // Only update if not already read
+
+      if (error) throw error;
+    } catch (error) {
+      console.error('Error marking reminder as read:', error);
+    }
+  }, []);
+
+  // Acknowledge a reminder (sets acknowledged_at timestamp)
+  const acknowledgeReminder = useCallback(async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('employee_reminders')
+        .update({ acknowledged_at: new Date().toISOString() })
+        .eq('id', id);
+
+      if (error) throw error;
+      toast.success('Reminder acknowledged');
+    } catch (error) {
+      console.error('Error acknowledging reminder:', error);
+      toast.error('Failed to acknowledge reminder');
+    }
+  }, []);
 
   // Create manual reminder
   const createReminder = useCallback(async (
@@ -347,5 +393,7 @@ export function useReminders() {
     cancelReminder,
     fetchPreferences,
     updatePreference,
+    markReminderAsRead,
+    acknowledgeReminder,
   };
 }
