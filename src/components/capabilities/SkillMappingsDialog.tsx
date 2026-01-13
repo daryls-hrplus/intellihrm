@@ -154,14 +154,26 @@ export function SkillMappingsDialog({
       if (error) throw error;
 
       if (data?.suggestions && Array.isArray(data.suggestions)) {
+        // Filter out already mapped skills
         const unmappedSuggestions = data.suggestions.filter(
           (s: any) => !mappings.some((m) => m.skill_id === s.skill_id)
         );
-        setAiSuggestions(unmappedSuggestions);
-        if (unmappedSuggestions.length === 0) {
+        
+        // Deduplicate by skill_id to avoid showing same skill twice
+        const seenIds = new Set<string>();
+        const deduplicatedSuggestions = unmappedSuggestions.filter((s: any) => {
+          if (seenIds.has(s.skill_id)) {
+            return false;
+          }
+          seenIds.add(s.skill_id);
+          return true;
+        });
+        
+        setAiSuggestions(deduplicatedSuggestions);
+        if (deduplicatedSuggestions.length === 0) {
           toast.info("No new skill suggestions - all suggested skills are already mapped");
         } else {
-          toast.success(`Found ${unmappedSuggestions.length} skill suggestions`);
+          toast.success(`Found ${deduplicatedSuggestions.length} skill suggestions`);
         }
       }
     } catch (error: any) {
