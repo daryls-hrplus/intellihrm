@@ -7481,6 +7481,61 @@ export type Database = {
           },
         ]
       }
+      capability_version_history: {
+        Row: {
+          capability_id: string
+          change_summary: string | null
+          change_type: string
+          changed_by: string | null
+          created_at: string
+          id: string
+          snapshot_data: Json
+          version: number
+        }
+        Insert: {
+          capability_id: string
+          change_summary?: string | null
+          change_type: string
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          snapshot_data: Json
+          version: number
+        }
+        Update: {
+          capability_id?: string
+          change_summary?: string | null
+          change_type?: string
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          snapshot_data?: Json
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "capability_version_history_capability_id_fkey"
+            columns: ["capability_id"]
+            isOneToOne: false
+            referencedRelation: "skills_competencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "capability_version_history_changed_by_fkey"
+            columns: ["changed_by"]
+            isOneToOne: false
+            referencedRelation: "employee_fte_summary"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "capability_version_history_changed_by_fkey"
+            columns: ["changed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       career_path_steps: {
         Row: {
           career_path_id: string
