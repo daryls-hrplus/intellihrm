@@ -152,7 +152,7 @@ export function CompetencyBehavioralLevelsEditor({
         onIndicatorsChange(data.proficiency_indicators);
         // Expand all levels to show generated content
         setExpandedLevels(new Set([1, 2, 3, 4, 5]));
-        toast.success("Behavioral indicators generated successfully");
+        toast.success(`Generated behavioral indicators for "${competencyName}"`);
       } else if (data?.levels) {
         // Transform the levels array format to our object format
         const newIndicators: ProficiencyIndicators = {};
@@ -161,7 +161,7 @@ export function CompetencyBehavioralLevelsEditor({
         }
         onIndicatorsChange(newIndicators);
         setExpandedLevels(new Set([1, 2, 3, 4, 5]));
-        toast.success("Behavioral indicators generated successfully");
+        toast.success(`Generated behavioral indicators for "${competencyName}"`);
       }
     } catch (error) {
       console.error("Error generating indicators:", error);
