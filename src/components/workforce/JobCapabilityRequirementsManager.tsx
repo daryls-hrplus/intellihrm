@@ -491,21 +491,21 @@ export function JobCapabilityRequirementsManager({
   return (
     <div className="space-y-4">
       {/* Info callout explaining competency-first approach */}
-      <Alert className="bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-950/20 dark:to-indigo-950/20 border-purple-200 dark:border-purple-800">
-        <Target className="h-4 w-4 text-purple-600" />
+      <Alert className="bg-purple-100 dark:bg-purple-900/40 border-purple-300 dark:border-purple-700">
+        <Target className="h-4 w-4 text-purple-700 dark:text-purple-300" />
         <AlertDescription className="text-sm">
           <div className="flex flex-col gap-1">
-            <span className="font-medium text-purple-800 dark:text-purple-300">
+            <span className="font-medium text-purple-900 dark:text-purple-100">
               Competencies — For Performance Appraisals
             </span>
-            <span className="text-purple-700 dark:text-purple-400">
+            <span className="text-purple-800 dark:text-purple-200">
               Competencies are evaluated in performance appraisals using behavioral indicators at each proficiency level. 
               Each competency has a <strong>weight</strong> that contributes to the overall appraisal score. 
               Skills linked to competencies provide supporting evidence but the <strong>competency level</strong> is what gets rated.
             </span>
-            <div className="flex items-center gap-2 mt-1 text-xs text-purple-600 dark:text-purple-400">
+            <div className="flex items-center gap-2 mt-1 text-xs text-purple-700 dark:text-purple-300">
               <span className="flex items-center gap-1">
-                <span className="w-2 h-2 rounded-full bg-purple-500" />
+                <span className="w-2 h-2 rounded-full bg-purple-600 dark:bg-purple-400" />
                 Competency
               </span>
               <ArrowRight className="h-3 w-3" />
