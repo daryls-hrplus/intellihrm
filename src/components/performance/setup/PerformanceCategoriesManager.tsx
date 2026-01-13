@@ -103,7 +103,6 @@ export function PerformanceCategoriesManager({ companyId }: PerformanceCategorie
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Code</TableHead>
                   <TableHead>Name</TableHead>
                   <TableHead>Score Range</TableHead>
                   <TableHead>Color</TableHead>
@@ -115,8 +114,18 @@ export function PerformanceCategoriesManager({ companyId }: PerformanceCategorie
               <TableBody>
                 {categories.map((category) => (
                   <TableRow key={category.id}>
-                    <TableCell className="font-mono text-sm">{category.code}</TableCell>
-                    <TableCell className="font-medium">{category.name}</TableCell>
+                    <TableCell>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span className="font-medium cursor-help">{category.name}</span>
+                          </TooltipTrigger>
+                          <TooltipContent side="right" className="max-w-xs">
+                            {category.description || "No description available"}
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </TableCell>
                     <TableCell>
                       <Badge variant="outline">
                         {category.min_score}% - {category.max_score}%
