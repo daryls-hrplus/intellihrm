@@ -86,6 +86,19 @@ export interface ChangeLogEntry {
 
 export const HANDBOOK_CHANGE_LOG: ChangeLogEntry[] = [
   {
+    version: '2.2.0',
+    date: '2026-01-13',
+    changes: [
+      'Added Section 2.4a: Skills vs Competencies Explained - foundational concept for capability framework',
+      'Rewrote Section 2.4: Competency Framework Configuration with AI generation and job linking workflow',
+      'Renamed Section 2.7: Performance Categories → Rating Levels Configuration',
+      'Added eligibility flags documentation (promotion_eligible, succession_eligible, bonus_eligible, requires_pip)',
+      'Updated field reference tables with new database columns from rating_levels table',
+      'Added job-competency linking with 100% weight validation requirement',
+      'Updated navigation paths to reflect current UI structure'
+    ]
+  },
+  {
     version: '2.1.0',
     date: '2026-01-13',
     changes: [
