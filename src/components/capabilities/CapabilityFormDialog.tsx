@@ -348,7 +348,7 @@ export function CapabilityFormDialog({
         </DialogHeader>
 
         <Tabs defaultValue="basic" className="w-full">
-          <TabsList className={`grid w-full ${formData.type === "COMPETENCY" ? "grid-cols-5" : "grid-cols-3"}`}>
+          <TabsList className={`grid w-full ${formData.type === "COMPETENCY" ? "grid-cols-5" : "grid-cols-4"}`}>
             <TabsTrigger value="basic">Basic Info</TabsTrigger>
             <TabsTrigger value="governance">Governance</TabsTrigger>
             {formData.type === "COMPETENCY" && (
@@ -361,8 +361,11 @@ export function CapabilityFormDialog({
               </TabsTrigger>
             )}
             <TabsTrigger value="attributes">
-              {formData.type === "SKILL" ? "Skill Attributes" : "Job Assignment"}
+              {formData.type === "SKILL" ? "Attributes" : "Job Assignment"}
             </TabsTrigger>
+            {formData.type === "SKILL" && (
+              <TabsTrigger value="jobs">Job Assignment</TabsTrigger>
+            )}
           </TabsList>
 
           <TabsContent value="basic" className="space-y-4 mt-4">
@@ -731,6 +734,36 @@ export function CapabilityFormDialog({
               </>
             )}
           </TabsContent>
+
+          {/* Job Assignment tab for Skills */}
+          {formData.type === "SKILL" && (
+            <TabsContent value="jobs" className="space-y-4 mt-4">
+              {/* Context reminder */}
+              <div className="flex items-center gap-2 text-sm text-muted-foreground pb-2 border-b">
+                <span>Assigning skill to job profiles:</span>
+                <span className="font-medium text-foreground">{formData.name || "New Skill"}</span>
+              </div>
+
+              {/* Enhanced Job Applicability Multi-Select for Skills */}
+              <EnhancedJobApplicabilitySelect
+                selectedRequirements={selectedJobRequirements}
+                onSelectionChange={setSelectedJobRequirements}
+                companyId={formData.company_id}
+                existingRequirements={requirements.map(r => ({
+                  job_id: r.job_id,
+                  required_proficiency_level: r.required_proficiency_level,
+                  weighting: r.weighting,
+                  is_required: r.is_required,
+                }))}
+              />
+
+              <div className="rounded-lg border p-4 bg-muted/50">
+                <p className="text-sm text-muted-foreground">
+                  💡 Skills assigned to jobs will appear in employee skill gap analysis and learning recommendations.
+                </p>
+              </div>
+            </TabsContent>
+          )}
         </Tabs>
 
         <DialogFooter>
