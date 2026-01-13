@@ -375,7 +375,7 @@ export function JobResponsibilitiesManager({ jobId, companyId, jobFamilyId }: Jo
   }
 
   return (
-    <div className="p-6 space-y-6 bg-white dark:bg-slate-900 rounded-lg">
+    <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div className="space-y-1">
           <h4 className="text-sm font-medium">Job Responsibilities</h4>
