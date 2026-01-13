@@ -177,6 +177,37 @@ const GLOSSARY_TERMS = [
     definition: 'A percentage score (0-100) indicating how certain the AI system is about its analysis, recommendations, or identified patterns. Stored as ai_confidence on strengths_gaps.',
     category: 'Technical',
   },
+  // v1.4.0 Additions
+  {
+    term: 'Dispute Window',
+    definition: 'A configurable period during which employees can formally dispute their appraisal ratings after release. Controlled by dispute_window_days in cycle settings.',
+    category: 'Process',
+  },
+  {
+    term: 'Performance Risk',
+    definition: 'An AI-detected pattern indicating potential performance issues requiring intervention. Categorized by risk type and scored 0-100 with severity levels (Low, Medium, High, Critical).',
+    category: 'Analytics',
+  },
+  {
+    term: 'Toxic High Performer',
+    definition: 'A risk type identifying employees with strong goal/KPI results but poor behavioral or values scores, indicating potential culture impact despite productivity.',
+    category: 'Analytics',
+  },
+  {
+    term: 'Skills Decay',
+    definition: 'A risk type triggered when employee certifications or critical skills are expiring without renewal activity, indicating potential competency gaps.',
+    category: 'Analytics',
+  },
+  {
+    term: 'Coaching Nudge',
+    definition: 'An AI-generated prompt suggesting specific development actions for managers to take with their team members, based on appraisal data and performance patterns.',
+    category: 'AI',
+  },
+  {
+    term: 'Compliance Document',
+    definition: 'Jurisdiction-specific performance documentation generated from appraisal data using configured templates. Ensures legal compliance for performance actions.',
+    category: 'Integration',
+  },
 ];
 
 const CATEGORIES = ['All', ...Array.from(new Set(GLOSSARY_TERMS.map(t => t.category)))];

@@ -18,6 +18,8 @@ import {
   SetupMultiPositionAppraisals,
   SetupIndexSettings,
   SetupBenchmarks,
+  SetupValuesAssessment,
+  SetupGoalsIntegration,
 } from './sections/setup';
 
 type ManualSetupSectionProps = {
@@ -35,6 +37,8 @@ const APPRAISALS_SECTION_IDS = new Set([
   'sec-2-12',
   'sec-2-13',
   'sec-2-14',
+  'sec-2-15',
+  'sec-2-16',
 ]);
 
 const FOUNDATION_SECTION_IDS = new Set(['sec-2-1', 'sec-2-2', 'sec-2-3', 'sec-2-4']);
@@ -127,7 +131,7 @@ export function ManualSetupSection({ selectedSectionId }: ManualSetupSectionProp
                   Forms, cycles, categories, actions, and integrations
                 </p>
               </div>
-              <Badge variant="outline" className="ml-auto">10 sections</Badge>
+              <Badge variant="outline" className="ml-auto">12 sections</Badge>
             </div>
           </AccordionTrigger>
           <AccordionContent className="pt-4 space-y-6">
@@ -160,6 +164,12 @@ export function ManualSetupSection({ selectedSectionId }: ManualSetupSectionProp
             </section>
             <section id="sec-2-14" data-manual-anchor="sec-2-14" className="scroll-mt-32">
               <SetupBenchmarks />
+            </section>
+            <section id="sec-2-15" data-manual-anchor="sec-2-15" className="scroll-mt-32">
+              <SetupValuesAssessment />
+            </section>
+            <section id="sec-2-16" data-manual-anchor="sec-2-16" className="scroll-mt-32">
+              <SetupGoalsIntegration />
             </section>
           </AccordionContent>
         </AccordionItem>
