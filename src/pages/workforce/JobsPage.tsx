@@ -1092,11 +1092,11 @@ export default function JobsPage() {
                       <TableRow>
                         <TableCell colSpan={10} className="bg-muted/30 p-4">
                           {/* Job Architecture Helper Tooltip */}
-                          <div className="mb-4 flex items-start gap-2 text-sm bg-blue-100 dark:bg-blue-900/40 p-3 rounded-lg border border-blue-300 dark:border-blue-700">
-                            <HelpCircle className="h-4 w-4 mt-0.5 text-blue-700 dark:text-blue-300 shrink-0" />
+                          <div className="mb-4 flex items-start gap-2 text-sm bg-sky-50 dark:bg-slate-800 p-3 rounded-lg border border-sky-200 dark:border-slate-600">
+                            <HelpCircle className="h-4 w-4 mt-0.5 text-sky-600 dark:text-sky-400 shrink-0" />
                             <div>
-                              <p className="font-medium text-blue-900 dark:text-blue-100 mb-1">Understanding Job Architecture</p>
-                              <p className="text-blue-800 dark:text-blue-200">
+                              <p className="font-medium text-slate-900 dark:text-slate-100 mb-1">Understanding Job Architecture</p>
+                              <p className="text-slate-700 dark:text-slate-300">
                                 <strong>Competencies</strong> are evaluated in performance appraisals using behavioral indicators and proficiency levels. 
                                 <strong> Job Skills</strong> define capability requirements and support learning, readiness, and development — they are NOT scored in appraisals. 
                                 <strong> Responsibilities</strong> (KRAs) define key result areas with weighted scoring. 
