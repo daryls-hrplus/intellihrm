@@ -196,7 +196,7 @@ const phases: Phase[] = [
       // 6A: Core Framework Setup (Global)
       { order: 1, area: "Rating Scales Configuration", description: "Define competency and behavior rating scales (1-5, 1-7)" },
       { order: 2, area: "Overall Rating Scales Setup", description: "Configure performance level ratings with labels" },
-      { order: 3, area: "Competency Library Integration", description: "Link to Workforce competency definitions" },
+      { order: 3, area: "Competency Library Integration", description: "Import competency library, generate indicators, and link to jobs with weights" },
       { order: 4, area: "Index Settings (Multi-Cycle)", description: "Configure appraisal index behavior across cycles" },
       // 6B: Appraisal Configuration (Company)
       { order: 5, area: "Appraisal Form Templates", description: "Design review forms with sections and weightings" },
