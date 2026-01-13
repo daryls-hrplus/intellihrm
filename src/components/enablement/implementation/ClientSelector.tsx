@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { Building2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface Company {
   id: string;
@@ -11,38 +12,44 @@ interface Company {
 interface ClientSelectorProps {
   value?: string;
   onValueChange: (value: string | undefined) => void;
+  required?: boolean;
 }
 
 const PLACEHOLDER_VALUE = "__none__";
 
-export function ClientSelector({ value, onValueChange }: ClientSelectorProps) {
+export function ClientSelector({ value, onValueChange, required = false }: ClientSelectorProps) {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchCompanies = async () => {
+    const fetchAccessibleCompanies = async () => {
       setIsLoading(true);
       try {
+        // Use RPC function that returns only companies the user has access to
         const { data, error } = await supabase
-          .from("companies")
-          .select("id, name")
-          .order("name");
+          .rpc('get_user_accessible_companies');
 
         if (error) throw error;
         setCompanies(data || []);
+        
+        // Auto-select if user only has access to one company
+        if (data?.length === 1 && !value) {
+          onValueChange(data[0].id);
+        }
       } catch (err) {
-        console.error("Error fetching companies:", err);
+        console.error("Error fetching accessible companies:", err);
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchCompanies();
+    fetchAccessibleCompanies();
   }, []);
 
   // Always use a string value for the Select (never undefined)
   const selectValue = value || PLACEHOLDER_VALUE;
   const selectedCompany = value ? companies.find(c => c.id === value) : null;
+  const showRequired = required && !value;
 
   const handleValueChange = (newValue: string) => {
     if (newValue === PLACEHOLDER_VALUE) {
@@ -54,7 +61,12 @@ export function ClientSelector({ value, onValueChange }: ClientSelectorProps) {
 
   return (
     <Select value={selectValue} onValueChange={handleValueChange}>
-      <SelectTrigger className="w-full">
+      <SelectTrigger 
+        className={cn(
+          "w-full",
+          showRequired && "border-amber-500 ring-2 ring-amber-200 dark:ring-amber-500/30"
+        )}
+      >
         <SelectValue placeholder={isLoading ? "Loading clients..." : "Select a client"}>
           {selectedCompany ? selectedCompany.name : (isLoading ? "Loading clients..." : "Select a client")}
         </SelectValue>
