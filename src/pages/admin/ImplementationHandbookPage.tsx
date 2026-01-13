@@ -417,6 +417,7 @@ export default function ImplementationHandbookPage() {
   const { t } = useTranslation();
   const [activePhase, setActivePhase] = useState("foundation");
   const [activeTab, setActiveTab] = useState("workspace");
+  const [selectedCompanyId, setSelectedCompanyId] = useState<string | undefined>(undefined);
   const contentRef = useRef<HTMLDivElement>(null);
 
   const exportToPDF = () => {
@@ -544,10 +545,19 @@ export default function ImplementationHandbookPage() {
             Interactive workspace for configuring Intelli HRM Cerebra
           </p>
         </div>
-        <Button onClick={exportToPDF} variant="outline" className="gap-2">
-          <Download className="h-4 w-4" />
-          Export PDF
-        </Button>
+        <div className="flex items-center gap-4">
+          {/* Company Selector for multi-company tracking */}
+          <div className="w-64">
+            <ClientSelector 
+              value={selectedCompanyId} 
+              onValueChange={setSelectedCompanyId} 
+            />
+          </div>
+          <Button onClick={exportToPDF} variant="outline" className="gap-2">
+            <Download className="h-4 w-4" />
+            Export PDF
+          </Button>
+        </div>
       </div>
 
       {/* Main Tabs */}
@@ -580,7 +590,8 @@ export default function ImplementationHandbookPage() {
           <WorkspaceTab 
             phases={phases} 
             activePhase={activePhase} 
-            onPhaseChange={setActivePhase} 
+            onPhaseChange={setActivePhase}
+            selectedCompanyId={selectedCompanyId}
           />
         </TabsContent>
 
