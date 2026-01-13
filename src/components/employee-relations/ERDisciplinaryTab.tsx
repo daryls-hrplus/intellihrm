@@ -9,10 +9,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Search, Loader2, Scale, CheckCircle } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Plus, Search, Loader2, Scale, CheckCircle, FileText, MoreVertical } from 'lucide-react';
 import { useEmployeeRelations } from '@/hooks/useEmployeeRelations';
 import { useAuth } from '@/contexts/AuthContext';
 import { getTodayString, formatDateForDisplay } from '@/utils/dateUtils';
+import { ComplianceDocumentGenerator } from '@/components/compliance/ComplianceDocumentGenerator';
 
 const ACTION_TYPES = ['verbal_warning', 'written_warning', 'final_warning', 'suspension', 'demotion', 'termination'];
 const SEVERITIES = ['minor', 'moderate', 'major', 'severe'];
@@ -27,6 +29,25 @@ export function ERDisciplinaryTab({ companyId }: ERDisciplinaryTabProps) {
   const { disciplinaryActions, loadingDisciplinary, createDisciplinaryAction, updateDisciplinaryAction } = useEmployeeRelations(companyId);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [documentGeneratorOpen, setDocumentGeneratorOpen] = useState(false);
+  const [selectedActionForDocument, setSelectedActionForDocument] = useState<{
+    id: string;
+    employeeId: string;
+    employeeName: string;
+    actionType: string;
+    reason: string;
+  } | null>(null);
+
+  const handleGenerateDocument = (action: typeof disciplinaryActions[0]) => {
+    setSelectedActionForDocument({
+      id: action.id,
+      employeeId: action.employee_id,
+      employeeName: action.employee?.full_name || 'Employee',
+      actionType: action.action_type,
+      reason: action.reason,
+    });
+    setDocumentGeneratorOpen(true);
+  };
   
   const [formData, setFormData] = useState({
     employee_id: '',
@@ -233,6 +254,7 @@ export function ERDisciplinaryTab({ companyId }: ERDisciplinaryTabProps) {
                 <TableHead>{t('employeeRelationsModule.disciplinary.effectiveDate')}</TableHead>
                 <TableHead>{t('employeeRelationsModule.disciplinary.acknowledged')}</TableHead>
                 <TableHead>{t('common.status')}</TableHead>
+                <TableHead className="w-[60px]"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -273,12 +295,46 @@ export function ERDisciplinaryTab({ companyId }: ERDisciplinaryTabProps) {
                       {action.status}
                     </Badge>
                   </TableCell>
+                  <TableCell>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon">
+                          <MoreVertical className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => handleGenerateDocument(action)}>
+                          <FileText className="h-4 w-4 mr-2" />
+                          {t('compliance.generateDocument', 'Generate Document')}
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         )}
       </CardContent>
+
+      {/* Compliance Document Generator */}
+      {selectedActionForDocument && companyId && (
+        <ComplianceDocumentGenerator
+          open={documentGeneratorOpen}
+          onOpenChange={setDocumentGeneratorOpen}
+          employeeId={selectedActionForDocument.employeeId}
+          employeeName={selectedActionForDocument.employeeName}
+          companyId={companyId}
+          sourceType="disciplinary"
+          sourceId={selectedActionForDocument.id}
+          category="disciplinary"
+          prefilledData={{
+            reason: selectedActionForDocument.reason,
+            action_type: selectedActionForDocument.actionType,
+          }}
+          onDocumentCreated={() => setSelectedActionForDocument(null)}
+        />
+      )}
     </Card>
   );
 }
