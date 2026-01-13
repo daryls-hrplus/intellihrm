@@ -11561,6 +11561,270 @@ export type Database = {
           },
         ]
       }
+      compliance_document_instances: {
+        Row: {
+          company_id: string
+          completed_at: string | null
+          created_at: string | null
+          created_by: string
+          employee_id: string
+          generated_content: string
+          id: string
+          retention_expires_at: string | null
+          source_id: string | null
+          source_type: string
+          status: string | null
+          template_id: string
+          updated_at: string | null
+          variable_values: Json
+          workflow_instance_id: string | null
+          workflow_letter_id: string | null
+        }
+        Insert: {
+          company_id: string
+          completed_at?: string | null
+          created_at?: string | null
+          created_by: string
+          employee_id: string
+          generated_content: string
+          id?: string
+          retention_expires_at?: string | null
+          source_id?: string | null
+          source_type: string
+          status?: string | null
+          template_id: string
+          updated_at?: string | null
+          variable_values?: Json
+          workflow_instance_id?: string | null
+          workflow_letter_id?: string | null
+        }
+        Update: {
+          company_id?: string
+          completed_at?: string | null
+          created_at?: string | null
+          created_by?: string
+          employee_id?: string
+          generated_content?: string
+          id?: string
+          retention_expires_at?: string | null
+          source_id?: string | null
+          source_type?: string
+          status?: string | null
+          template_id?: string
+          updated_at?: string | null
+          variable_values?: Json
+          workflow_instance_id?: string | null
+          workflow_letter_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "compliance_document_instances_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "compliance_document_instances_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "employee_fte_summary"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "compliance_document_instances_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "compliance_document_instances_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employee_fte_summary"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "compliance_document_instances_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "compliance_document_instances_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "compliance_document_templates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "compliance_document_instances_workflow_instance_id_fkey"
+            columns: ["workflow_instance_id"]
+            isOneToOne: false
+            referencedRelation: "workflow_instances"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "compliance_document_instances_workflow_letter_id_fkey"
+            columns: ["workflow_letter_id"]
+            isOneToOne: false
+            referencedRelation: "workflow_letters"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      compliance_document_templates: {
+        Row: {
+          category: string
+          code: string
+          company_id: string | null
+          country_code: string | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          jurisdiction: string
+          legal_reference: string | null
+          linked_letter_template_id: string | null
+          name: string
+          required_variables: Json
+          retention_period_years: number | null
+          signature_requirements: Json
+          template_content: string
+          updated_at: string | null
+          version: number | null
+          workflow_template_id: string | null
+        }
+        Insert: {
+          category: string
+          code: string
+          company_id?: string | null
+          country_code?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          jurisdiction?: string
+          legal_reference?: string | null
+          linked_letter_template_id?: string | null
+          name: string
+          required_variables?: Json
+          retention_period_years?: number | null
+          signature_requirements?: Json
+          template_content: string
+          updated_at?: string | null
+          version?: number | null
+          workflow_template_id?: string | null
+        }
+        Update: {
+          category?: string
+          code?: string
+          company_id?: string | null
+          country_code?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          jurisdiction?: string
+          legal_reference?: string | null
+          linked_letter_template_id?: string | null
+          name?: string
+          required_variables?: Json
+          retention_period_years?: number | null
+          signature_requirements?: Json
+          template_content?: string
+          updated_at?: string | null
+          version?: number | null
+          workflow_template_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "compliance_document_templates_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "compliance_document_templates_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "employee_fte_summary"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "compliance_document_templates_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "compliance_document_templates_linked_letter_template_id_fkey"
+            columns: ["linked_letter_template_id"]
+            isOneToOne: false
+            referencedRelation: "letter_templates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "compliance_document_templates_workflow_template_id_fkey"
+            columns: ["workflow_template_id"]
+            isOneToOne: false
+            referencedRelation: "workflow_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      compliance_item_documents: {
+        Row: {
+          compliance_item_id: string
+          created_at: string | null
+          document_template_id: string
+          id: string
+          required_by: string | null
+          scope: string | null
+          scope_filter: Json | null
+        }
+        Insert: {
+          compliance_item_id: string
+          created_at?: string | null
+          document_template_id: string
+          id?: string
+          required_by?: string | null
+          scope?: string | null
+          scope_filter?: Json | null
+        }
+        Update: {
+          compliance_item_id?: string
+          created_at?: string | null
+          document_template_id?: string
+          id?: string
+          required_by?: string | null
+          scope?: string | null
+          scope_filter?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "compliance_item_documents_compliance_item_id_fkey"
+            columns: ["compliance_item_id"]
+            isOneToOne: false
+            referencedRelation: "compliance_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "compliance_item_documents_document_template_id_fkey"
+            columns: ["document_template_id"]
+            isOneToOne: false
+            referencedRelation: "compliance_document_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       compliance_items: {
         Row: {
           category: string
@@ -22946,6 +23210,7 @@ export type Database = {
           attachments: Json | null
           case_id: string | null
           company_id: string
+          compliance_document_id: string | null
           created_at: string
           description: string | null
           effective_date: string
@@ -22969,6 +23234,7 @@ export type Database = {
           attachments?: Json | null
           case_id?: string | null
           company_id: string
+          compliance_document_id?: string | null
           created_at?: string
           description?: string | null
           effective_date?: string
@@ -22992,6 +23258,7 @@ export type Database = {
           attachments?: Json | null
           case_id?: string | null
           company_id?: string
+          compliance_document_id?: string | null
           created_at?: string
           description?: string | null
           effective_date?: string
@@ -23019,6 +23286,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "er_disciplinary_actions_compliance_document_id_fkey"
+            columns: ["compliance_document_id"]
+            isOneToOne: false
+            referencedRelation: "compliance_document_instances"
             referencedColumns: ["id"]
           },
           {
@@ -30904,6 +31178,7 @@ export type Database = {
           is_union_represented: boolean | null
           outcome: string | null
           procedure_id: string | null
+          resolution_document_id: string | null
           resolution_notes_en: string | null
           resolution_summary: string | null
           resolved_date: string | null
@@ -30932,6 +31207,7 @@ export type Database = {
           is_union_represented?: boolean | null
           outcome?: string | null
           procedure_id?: string | null
+          resolution_document_id?: string | null
           resolution_notes_en?: string | null
           resolution_summary?: string | null
           resolved_date?: string | null
@@ -30960,6 +31236,7 @@ export type Database = {
           is_union_represented?: boolean | null
           outcome?: string | null
           procedure_id?: string | null
+          resolution_document_id?: string | null
           resolution_notes_en?: string | null
           resolution_summary?: string | null
           resolved_date?: string | null
@@ -31026,6 +31303,13 @@ export type Database = {
             columns: ["procedure_id"]
             isOneToOne: false
             referencedRelation: "grievance_procedures"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "grievances_resolution_document_id_fkey"
+            columns: ["resolution_document_id"]
+            isOneToOne: false
+            referencedRelation: "compliance_document_instances"
             referencedColumns: ["id"]
           },
           {
