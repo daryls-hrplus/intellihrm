@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ChevronDown, ChevronUp, CheckCircle2, AlertCircle, HelpCircle, Info } from "lucide-react";
+import { ChevronDown, ChevronUp, CheckCircle2, AlertCircle, HelpCircle, Info, Lightbulb, Star } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -29,6 +29,13 @@ interface CompetencyScoreData {
   };
 }
 
+export interface SupportingSkill {
+  id: string;
+  name: string;
+  proficiency_level?: number;
+  is_required?: boolean;
+}
+
 interface CompetencyRatingCardProps {
   competencyId: string;
   competencyName: string;
@@ -43,6 +50,8 @@ interface CompetencyRatingCardProps {
   positionTitle?: string;
   hasRoleChange?: boolean;
   hasMultiplePositions?: boolean;
+  /** Skills that support this competency - informational only, NOT rated */
+  supportingSkills?: SupportingSkill[];
 }
 
 export function CompetencyRatingCard({
@@ -59,8 +68,10 @@ export function CompetencyRatingCard({
   positionTitle,
   hasRoleChange = false,
   hasMultiplePositions = false,
+  supportingSkills = [],
 }: CompetencyRatingCardProps) {
   const [expandedIndicators, setExpandedIndicators] = useState(false);
+  const [expandedSkills, setExpandedSkills] = useState(false);
   const [selectedLevel, setSelectedLevel] = useState<number | null>(
     currentScore.metadata?.selected_level ?? currentScore.rating ?? null
   );
@@ -313,6 +324,69 @@ export function CompetencyRatingCard({
                     </span>
                   </div>
                 )}
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
+        )}
+
+        {/* Supporting Skills Section - Informational only, NOT rated */}
+        {supportingSkills.length > 0 && (
+          <Collapsible open={expandedSkills} onOpenChange={setExpandedSkills}>
+            <CollapsibleTrigger asChild>
+              <Button variant="ghost" className="w-full justify-between px-3 py-2 h-auto">
+                <div className="flex items-center gap-2">
+                  <Lightbulb className="h-4 w-4 text-amber-500" />
+                  <span className="text-sm font-medium">
+                    Supported By
+                  </span>
+                  <Badge variant="outline" className="text-xs">
+                    {supportingSkills.length} skill{supportingSkills.length !== 1 ? 's' : ''}
+                  </Badge>
+                </div>
+                {expandedSkills ? (
+                  <ChevronUp className="h-4 w-4" />
+                ) : (
+                  <ChevronDown className="h-4 w-4" />
+                )}
+              </Button>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="pt-3">
+              <div className="space-y-2 p-3 bg-amber-50/50 dark:bg-amber-900/10 rounded-lg border border-amber-200/50 dark:border-amber-800/30">
+                <p className="text-xs text-muted-foreground mb-3 flex items-center gap-1.5">
+                  <Info className="h-3 w-3" />
+                  Skills that support this competency (informational only - skills are not scored in appraisals)
+                </p>
+                <div className="grid gap-2">
+                  {supportingSkills.map((skill) => (
+                    <div
+                      key={skill.id}
+                      className="flex items-center justify-between p-2 bg-background rounded-md border"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium">{skill.name}</span>
+                        {skill.is_required && (
+                          <Badge variant="outline" className="text-[10px] h-5 px-1.5 border-amber-500/50 text-amber-600">
+                            Required
+                          </Badge>
+                        )}
+                      </div>
+                      {skill.proficiency_level !== undefined && skill.proficiency_level !== null && (
+                        <div className="flex items-center gap-1">
+                          {[1, 2, 3, 4, 5].map((level) => (
+                            <Star
+                              key={level}
+                              className={`h-3 w-3 ${
+                                level <= skill.proficiency_level!
+                                  ? 'text-amber-500 fill-amber-500'
+                                  : 'text-muted-foreground/30'
+                              }`}
+                            />
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
             </CollapsibleContent>
           </Collapsible>
