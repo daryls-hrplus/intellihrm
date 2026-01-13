@@ -43,7 +43,7 @@ export function usePerformanceCategories(companyId?: string) {
         if (!profile?.company_id) return [];
         
         const { data, error } = await supabase
-          .from("performance_categories")
+          .from("rating_levels")
           .select("*")
           .eq("company_id", profile.company_id)
           .eq("is_active", true)
@@ -54,7 +54,7 @@ export function usePerformanceCategories(companyId?: string) {
       }
 
       const { data, error } = await supabase
-        .from("performance_categories")
+        .from("rating_levels")
         .select("*")
         .eq("company_id", targetCompanyId)
         .eq("is_active", true)
@@ -87,7 +87,7 @@ export function useSeedPerformanceCategories() {
 
   return useMutation({
     mutationFn: async (companyId: string) => {
-      const { error } = await supabase.rpc("seed_default_performance_categories", {
+      const { error } = await supabase.rpc("seed_default_rating_levels", {
         p_company_id: companyId,
       });
 
@@ -110,7 +110,7 @@ export function useManagePerformanceCategories() {
   const createCategory = useMutation({
     mutationFn: async (category: Omit<PerformanceCategory, "id" | "created_at" | "updated_at">) => {
       const { data, error } = await supabase
-        .from("performance_categories")
+        .from("rating_levels")
         .insert(category)
         .select()
         .single();
@@ -131,7 +131,7 @@ export function useManagePerformanceCategories() {
   const updateCategory = useMutation({
     mutationFn: async ({ id, ...updates }: Partial<PerformanceCategory> & { id: string }) => {
       const { data, error } = await supabase
-        .from("performance_categories")
+        .from("rating_levels")
         .update(updates)
         .eq("id", id)
         .select()
@@ -153,7 +153,7 @@ export function useManagePerformanceCategories() {
   const deleteCategory = useMutation({
     mutationFn: async ({ id, companyId }: { id: string; companyId: string }) => {
       const { error } = await supabase
-        .from("performance_categories")
+        .from("rating_levels")
         .update({ is_active: false })
         .eq("id", id);
 
