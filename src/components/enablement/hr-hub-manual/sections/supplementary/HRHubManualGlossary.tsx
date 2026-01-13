@@ -67,6 +67,7 @@ const GLOSSARY_TERMS: GlossaryTerm[] = [
   { term: 'Recognition Points', definition: 'Reward currency earned through peer recognition that can be accumulated and potentially redeemed.', category: 'analytics', relatedTerms: ['Recognition Award'] },
   { term: 'Recognition Award', definition: 'Formal acknowledgment given to employees for achievements, with associated recognition points.', category: 'analytics' },
   { term: 'Recognition Leaderboard', definition: 'Ranking display showing top recognized employees or departments over a period.', category: 'analytics' },
+  { term: 'Workflow Analytics', definition: 'Dashboard showing approval rates, completion times, trends, and approver performance metrics for workflow processes.', category: 'analytics', relatedTerms: ['Workflow Template'] },
 
   // Integration
   { term: 'Integration Hub', definition: 'Central dashboard for managing connections between HR Hub and external systems or other Intelli HRM modules.', category: 'integration' },
@@ -74,6 +75,16 @@ const GLOSSARY_TERMS: GlossaryTerm[] = [
   { term: 'Import Mapping', definition: 'Configuration defining how columns in source files correspond to HR Hub fields during data import.', category: 'integration' },
   { term: 'API Webhook', definition: 'HTTP callback that sends real-time data to external systems when specific events occur in HR Hub.', category: 'integration' },
   { term: 'Government ID Type', definition: 'Classification of official identification documents (passport, national ID, driver\'s license) for employee records.', category: 'integration' },
+  { term: 'Reference Data Catalog', definition: 'Centralized repository for browsing system reference data (countries, currencies) and configurable lookup values.', category: 'integration', relatedTerms: ['Data Import'] },
+
+  // New v1.4.0 terms
+  { term: 'Company Timezone', definition: 'The primary timezone used for date calculations, reminder processing, SLA tracking, and notification scheduling.', category: 'operations', relatedTerms: ['Reminder Rule'] },
+  { term: 'Effective From', definition: 'Date when a rule or policy becomes active. Rules show "Scheduled" status before this date and activate automatically.', category: 'workflow', relatedTerms: ['Effective To', 'Reminder Rule'] },
+  { term: 'Effective To', definition: 'Date when a rule expires and stops processing. Rules show "Expired" status after this date.', category: 'workflow', relatedTerms: ['Effective From', 'Reminder Rule'] },
+  { term: 'Notification Lifecycle', definition: 'The stages a notification passes through: created, scheduled, delivered, read, acknowledged, and expired.', category: 'communication', relatedTerms: ['Reminder Rule'] },
+  { term: 'Rule Status Badge', definition: 'Visual indicator showing a reminder rule\'s current state: Active, Scheduled, Expired, or Inactive.', category: 'communication', relatedTerms: ['Effective From', 'Effective To'] },
+  { term: 'Run Window', definition: 'Time period during which a scheduled job is allowed to execute, typically aligned with business hours.', category: 'operations', relatedTerms: ['Company Timezone'] },
+  { term: 'Priority Until', definition: 'Date until which a notification maintains high priority display. Priority decays to normal after this date.', category: 'communication', relatedTerms: ['Notification Lifecycle'] },
 ];
 
 const CATEGORY_LABELS: Record<string, string> = {
