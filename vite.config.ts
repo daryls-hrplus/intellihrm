@@ -24,12 +24,23 @@ export default defineConfig(({ mode, command }) => ({
     reportCompressedSize: false,
     rollupOptions: {
       output: {
-        // Manual chunking to reduce bundle size per chunk
+        // Manual chunking to reduce bundle size per chunk and memory usage
         manualChunks: {
           vendor: ["react", "react-dom", "react-router-dom"],
-          ui: ["@radix-ui/react-dialog", "@radix-ui/react-dropdown-menu", "@radix-ui/react-tabs"],
+          "ui-core": ["@radix-ui/react-dialog", "@radix-ui/react-dropdown-menu", "@radix-ui/react-tabs"],
+          "ui-forms": ["@radix-ui/react-checkbox", "@radix-ui/react-select", "@radix-ui/react-radio-group", "@radix-ui/react-switch"],
+          "ui-overlay": ["@radix-ui/react-popover", "@radix-ui/react-tooltip", "@radix-ui/react-hover-card", "@radix-ui/react-alert-dialog"],
+          "ui-layout": ["@radix-ui/react-accordion", "@radix-ui/react-collapsible", "@radix-ui/react-scroll-area", "@radix-ui/react-separator"],
           charts: ["recharts"],
           supabase: ["@supabase/supabase-js"],
+          query: ["@tanstack/react-query"],
+          forms: ["react-hook-form", "@hookform/resolvers", "zod"],
+          dates: ["date-fns", "react-day-picker"],
+          i18n: ["i18next", "react-i18next", "i18next-browser-languagedetector"],
+          dnd: ["@dnd-kit/core", "@dnd-kit/sortable", "@dnd-kit/utilities"],
+          docs: ["jspdf", "docx", "pptxgenjs", "file-saver", "html2canvas"],
+          mermaid: ["mermaid"],
+          mapbox: ["mapbox-gl"],
         },
       },
     },
