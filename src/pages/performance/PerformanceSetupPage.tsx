@@ -126,7 +126,11 @@ export default function PerformanceSetupPage() {
 
   const fetchCompanies = async () => {
     try {
-      const { data, error } = await supabase.from("companies").select("id, name").eq("is_active", true).order("name");
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      // Fetch only companies the user has access to
+      const { data, error } = await supabase.rpc('get_user_accessible_companies', { p_user_id: user.id });
       if (error) throw error;
       setCompanies(data || []);
       if (data && data.length > 0) setSelectedCompany(data[0].id);
@@ -248,7 +252,7 @@ export default function PerformanceSetupPage() {
             <TabsList className="grid w-full grid-cols-6 h-auto p-1">
               <TabsTrigger value="foundation" className="flex items-center gap-2 py-3">
                 <Layers className="h-4 w-4" />
-                <span className="hidden sm:inline">Foundation</span>
+                <span className="hidden sm:inline">Core Framework</span>
               </TabsTrigger>
               <TabsTrigger value="goals" className="flex items-center gap-2 py-3">
                 <Target className="h-4 w-4" />
@@ -275,7 +279,7 @@ export default function PerformanceSetupPage() {
             {/* Foundation Settings */}
             <TabsContent value="foundation" className="space-y-4">
               <div className="text-sm text-muted-foreground mb-4">
-                Cross-module settings that apply to Goals, Appraisals, 360 Feedback, and other talent processes
+                Enterprise-wide standards that apply across all performance processes. These core frameworks ensure consistency in Goals, Appraisals, 360 Feedback, and Recognition.
               </div>
               <Tabs value={secondaryTab} onValueChange={setSecondaryTab}>
                 <TabsList>
