@@ -151,12 +151,14 @@ const QUICK_REF_CATEGORIES: QuickRefCategory[] = [
         notes: 'New instances auto-create based on schedule'
       },
       {
-        action: 'Add Calendar Event',
-        steps: ['HR Hub → Calendar', 'Click on date or "New Event"', 'Enter event details', 'Set time & duration', 'Add attendees', 'Set reminders', 'Save'],
+        action: 'Configure Company Timezone',
+        steps: ['Settings → Company Settings', 'Locate Timezone dropdown', 'Select organization timezone', 'Configure business hours (start/end)', 'Set business days', 'Save changes'],
+        notes: 'Affects all reminder processing and SLA calculations'
       },
       {
-        action: 'View Upcoming Milestones',
-        steps: ['HR Hub → Milestones', 'Select milestone type filter', 'Choose date range', 'Review upcoming dates', 'Configure notifications'],
+        action: 'Schedule Future Rule Activation',
+        steps: ['HR Hub → Reminders → Rules', 'Create or edit rule', 'Set "Effective From" date', 'Rule shows "Scheduled" badge', 'Activates automatically on date'],
+        notes: 'Use "Effective Until" for temporary rules'
       },
       {
         action: 'Process ESS Request',
@@ -170,16 +172,18 @@ const QUICK_REF_CATEGORIES: QuickRefCategory[] = [
     icon: <BarChart3 className="h-4 w-4" />,
     items: [
       {
+        action: 'View Workflow Analytics',
+        steps: ['HR Hub → Workflow Templates', 'Click "Analytics" tab', 'Select date range filter', 'Review KPIs and charts', 'Drill into approver performance'],
+        notes: 'Identify bottlenecks and SLA compliance'
+      },
+      {
+        action: 'Browse Reference Data',
+        steps: ['HR Hub → Reference Data Catalog', 'Select category (Countries, Languages, Lookups)', 'View system or configurable data', 'Use search to filter items'],
+        notes: 'System data is read-only; lookups are configurable'
+      },
+      {
         action: 'View Sentiment Dashboard',
         steps: ['HR Hub → Analytics → Sentiment', 'Review overall score', 'Analyze trends over time', 'Drill into department scores', 'Identify focus areas'],
-      },
-      {
-        action: 'Configure Pulse Survey',
-        steps: ['HR Hub → Surveys', 'Click "New Pulse Survey"', 'Select question template', 'Define audience', 'Set frequency', 'Configure anonymity', 'Launch'],
-      },
-      {
-        action: 'Access Recognition Leaderboard',
-        steps: ['HR Hub → Recognition', 'Click "Leaderboard"', 'Select time period', 'Filter by department', 'View top recognized employees'],
       },
       {
         action: 'Schedule Automated Report',

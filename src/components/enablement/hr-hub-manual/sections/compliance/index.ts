@@ -5,3 +5,4 @@ export { WorkflowTemplatesSetup } from './WorkflowTemplatesSetup';
 export { ApprovalDelegationsSetup } from './ApprovalDelegationsSetup';
 export { ComplianceTrackerSetup } from './ComplianceTrackerSetup';
 export { IntegrationHubSetup } from './IntegrationHubSetup';
+export { WorkflowAnalyticsSetup } from './WorkflowAnalyticsSetup';
