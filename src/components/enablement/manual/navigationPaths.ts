@@ -6,7 +6,7 @@ export const NAVIGATION_PATHS: Record<string, string[]> = {
   'sec-2-3': ['Performance', 'Setup', 'Foundation', 'Overall Rating Scales'],
   'sec-2-4': ['Performance', 'Setup', 'Foundation', 'Competencies'],
   
-  // Part 2: Setup & Configuration - Appraisals (2.5-2.14)
+  // Part 2: Setup & Configuration - Appraisals (2.5-2.16)
   'sec-2-5': ['Performance', 'Setup', 'Appraisals', 'Form Templates'],
   'sec-2-6': ['Performance', 'Setup', 'Appraisals', 'Appraisal Cycles'],
   'sec-2-7': ['Performance', 'Setup', 'Appraisals', 'Performance Categories'],
@@ -17,8 +17,10 @@ export const NAVIGATION_PATHS: Record<string, string[]> = {
   'sec-2-12': ['Performance', 'Setup', 'Appraisals', 'Appraisal Cycles', 'Multi-Position'],
   'sec-2-13': ['Performance', 'Setup', 'Appraisals', 'Index Settings'],
   'sec-2-14': ['Performance', 'Setup', 'Appraisals', 'Benchmarks'],
+  'sec-2-15': ['Performance', 'Setup', 'Appraisals', 'Values Assessment'],
+  'sec-2-16': ['Performance', 'Setup', 'Appraisals', 'Goals Integration'],
 
-  // Part 3: Workflows
+  // Part 3: Workflows (3.1-3.12)
   'sec-3-1': ['Performance', 'Appraisals', 'Cycles'],
   'sec-3-2': ['Performance', 'Appraisals', 'Cycles', 'Enrollment'],
   'sec-3-3': ['Manager Self-Service', 'Team Appraisals'],
@@ -29,6 +31,8 @@ export const NAVIGATION_PATHS: Record<string, string[]> = {
   'sec-3-8': ['Manager Self-Service', 'Team Appraisals', 'Interviews'],
   'sec-3-9': ['Performance', 'Appraisals', 'Role Changes'],
   'sec-3-10': ['Performance', 'Appraisals', 'Finalization'],
+  'sec-3-11': ['Performance', 'Appraisals', 'Rating Dispute'],
+  'sec-3-12': ['Performance', 'Appraisals', 'Values Assessment'],
 
   // Part 4: Calibration Sessions
   'sec-4-1': ['Performance', 'Calibration', 'Overview'],
@@ -38,23 +42,28 @@ export const NAVIGATION_PATHS: Record<string, string[]> = {
   'sec-4-5': ['Performance', 'Talent', 'Nine-Box Grid'],
   'sec-4-6': ['Performance', 'Calibration', 'Audit Trail'],
 
-  // Part 5: AI Features & Intelligence
+  // Part 5: AI Features & Intelligence (5.1-5.8)
   'sec-5-1': ['Performance', 'Appraisals', 'AI Assistant', 'Overview'],
   'sec-5-2': ['Performance', 'Appraisals', 'AI Assistant', 'Strengths Generator'],
   'sec-5-3': ['Performance', 'Appraisals', 'AI Assistant', 'Development Suggestions'],
   'sec-5-4': ['Performance', 'Appraisals', 'AI Assistant', 'Bias Detection'],
   'sec-5-5': ['Performance', 'Appraisals', 'AI Assistant', 'Comment Quality'],
   'sec-5-6': ['Performance', 'Intelligence Hub'],
-  // Part 6: Analytics & Reporting
+  'sec-5-7': ['Performance', 'AI Insights', 'Coaching Nudges'],
+  'sec-5-8': ['Performance', 'AI Insights', 'Risk Detection'],
+
+  // Part 6: Analytics & Reporting (6.1-6.6)
   'sec-6-1': ['Performance', 'Intelligence Hub'],
   'sec-6-2': ['Performance', 'Intelligence Hub', 'Appraisals'],
   'sec-6-3': ['Performance', 'Intelligence Hub', 'Appraisals', 'Distribution'],
   'sec-6-4': ['Performance', 'Intelligence Hub', 'Appraisals', 'Patterns'],
+  'sec-6-5': ['Performance', 'Intelligence Hub', 'Overview'],
+  'sec-6-6': ['Performance', 'Talent', 'Unified Dashboard'],
 
-  // Part 7: Integration
+  // Part 7: Integration (7.1-7.7)
   'sec-7-1': ['Performance', 'Setup', 'Integration', 'Overview'],
   'sec-7-2': ['Performance', 'Setup', 'Integration', 'Triggers'],
-  'sec-7-7': ['Performance', 'Intelligence Hub', 'Integrations'],
+  'sec-7-7': ['Compliance', 'Documents', 'Performance Documents'],
 
   // Part 8: Troubleshooting & Best Practices
   'sec-8-1': ['Support', 'Troubleshooting', 'Common Issues'],
