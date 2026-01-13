@@ -605,14 +605,14 @@ export function CapabilityFormDialog({
             {formData.type === "SKILL" ? (
               <>
                 {/* AI Intelligence Info Card */}
-                <div className="rounded-lg border p-4 bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800">
+                <div className="rounded-lg border p-4 bg-primary/5 border-primary/20">
                   <div className="flex gap-3">
-                    <Sparkles className="h-5 w-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+                    <Sparkles className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
                     <div>
-                      <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
+                      <p className="text-sm font-medium text-foreground">
                         AI-Powered Skill Intelligence
                       </p>
-                      <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">
+                      <p className="text-sm text-muted-foreground mt-1">
                         Configure how AI recognizes and validates this skill. Good synonyms and keywords improve matching accuracy across resumes, projects, and learning completions.
                       </p>
                     </div>
