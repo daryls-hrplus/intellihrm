@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { 
   Download, 
   CheckCircle2, 
@@ -25,7 +26,8 @@ import {
   Network,
   Rocket,
   BookMarked,
-  Building2
+  Building2,
+  AlertCircle
 } from "lucide-react";
 import { toast } from "sonner";
 import jsPDF from "jspdf";
@@ -547,10 +549,11 @@ export default function ImplementationHandbookPage() {
         </div>
         <div className="flex items-center gap-4">
           {/* Company Selector for multi-company tracking */}
-          <div className="w-64">
+          <div className="w-72">
             <ClientSelector 
               value={selectedCompanyId} 
-              onValueChange={setSelectedCompanyId} 
+              onValueChange={setSelectedCompanyId}
+              required={activeTab === "workspace"}
             />
           </div>
           <Button onClick={exportToPDF} variant="outline" className="gap-2">
@@ -587,12 +590,22 @@ export default function ImplementationHandbookPage() {
 
         {/* Workspace Tab - Interactive Implementation */}
         <TabsContent value="workspace" className="mt-6">
-          <WorkspaceTab 
-            phases={phases} 
-            activePhase={activePhase} 
-            onPhaseChange={setActivePhase}
-            selectedCompanyId={selectedCompanyId}
-          />
+          {!selectedCompanyId ? (
+            <Alert variant="destructive" className="mb-6">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Company Required</AlertTitle>
+              <AlertDescription>
+                Please select a company above to track and update implementation progress. The company selector shows only companies you have access to via your role permissions.
+              </AlertDescription>
+            </Alert>
+          ) : (
+            <WorkspaceTab 
+              phases={phases} 
+              activePhase={activePhase} 
+              onPhaseChange={setActivePhase}
+              selectedCompanyId={selectedCompanyId}
+            />
+          )}
         </TabsContent>
 
         {/* Reference Tab - Original Static View */}
