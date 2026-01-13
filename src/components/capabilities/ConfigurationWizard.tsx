@@ -60,6 +60,7 @@ export function ConfigurationWizard({
   const [currentStep, setCurrentStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [generating, setGenerating] = useState(false);
+  const [companyName, setCompanyName] = useState<string | null>(null);
   
   // Step-specific state
   const [behavioralIndicators, setBehavioralIndicators] = useState<string[]>([]);
@@ -67,8 +68,8 @@ export function ConfigurationWizard({
   const [canBeInferred, setCanBeInferred] = useState(false);
   const [inferenceKeywords, setInferenceKeywords] = useState<string[]>([]);
   const [newKeyword, setNewKeyword] = useState("");
-  const [linkedJobs, setLinkedJobs] = useState<{ id: string; title: string }[]>([]);
-  const [availableJobs, setAvailableJobs] = useState<{ id: string; title: string }[]>([]);
+  const [linkedJobs, setLinkedJobs] = useState<{ id: string; name: string }[]>([]);
+  const [availableJobs, setAvailableJobs] = useState<{ id: string; name: string }[]>([]);
   const [linkedSkills, setLinkedSkills] = useState<{ id: string; name: string }[]>([]);
   const [availableSkills, setAvailableSkills] = useState<{ id: string; name: string }[]>([]);
 
@@ -112,10 +113,29 @@ export function ConfigurationWizard({
 
   useEffect(() => {
     if (open && capability) {
+      setCurrentStep(0); // Reset to first step when opening
       loadExistingData();
       loadAvailableData();
+      loadCompanyName();
     }
   }, [open, capability?.id]);
+
+  const loadCompanyName = async () => {
+    if (!capability?.company_id) {
+      setCompanyName(null);
+      return;
+    }
+    try {
+      const { data } = await supabase
+        .from("companies")
+        .select("name")
+        .eq("id", capability.company_id)
+        .single();
+      setCompanyName(data?.name || null);
+    } catch (err) {
+      console.error("Error loading company:", err);
+    }
+  };
 
   const loadExistingData = async () => {
     if (!capability) return;
@@ -175,11 +195,11 @@ export function ConfigurationWizard({
       // Load linked jobs
       const { data: jobLinks } = await supabase
         .from("job_capability_requirements")
-        .select("jobs(id, title)")
+        .select("jobs(id, name)")
         .eq("capability_id", capability.id);
       
       if (jobLinks) {
-        setLinkedJobs(jobLinks.map((j: any) => ({ id: j.jobs.id, title: j.jobs.title })));
+        setLinkedJobs(jobLinks.map((j: any) => ({ id: j.jobs.id, name: j.jobs.name })));
       }
 
       // Load linked skills (for competencies)
@@ -201,31 +221,52 @@ export function ConfigurationWizard({
   };
 
   const loadAvailableData = async () => {
+    if (!capability) return;
+    
     try {
-      // Load available jobs
-      const { data: jobs } = await supabase
+      // Load available jobs - filter by company if capability has company_id
+      let jobsQuery = supabase
         .from("jobs")
-        .select("id, job_title")
+        .select("id, name")
         .eq("is_active", true)
-        .order("job_title")
-        .limit(50);
+        .order("name")
+        .limit(100);
+      
+      if (capability.company_id) {
+        jobsQuery = jobsQuery.eq("company_id", capability.company_id);
+      }
+      
+      const { data: jobs } = await jobsQuery;
       
       if (jobs) {
-        setAvailableJobs(jobs.map((j: any) => ({ id: j.id, title: j.job_title })));
+        setAvailableJobs(jobs.map((j: any) => ({ id: j.id, name: j.name })));
       }
 
-      // Load available skills (for competency mapping)
+      // Load available skills (for competency mapping) - filter by company_id to avoid duplicates
       if (!isSkill) {
-        const { data: skills } = await supabase
+        let skillsQuery = supabase
           .from("skills_competencies")
           .select("id, name")
           .eq("type", "SKILL")
           .eq("status", "active")
           .order("name")
-          .limit(50);
+          .limit(100);
+        
+        // Only load skills from same company to avoid duplicates
+        if (capability.company_id) {
+          skillsQuery = skillsQuery.eq("company_id", capability.company_id);
+        } else {
+          skillsQuery = skillsQuery.is("company_id", null);
+        }
+        
+        const { data: skills } = await skillsQuery;
         
         if (skills) {
-          setAvailableSkills(skills);
+          // Remove duplicates by name
+          const uniqueSkills = skills.filter((skill, index, self) => 
+            index === self.findIndex((s) => s.name === skill.name)
+          );
+          setAvailableSkills(uniqueSkills);
         }
       }
     } catch (err) {
@@ -294,7 +335,7 @@ export function ConfigurationWizard({
     setInferenceKeywords(inferenceKeywords.filter(k => k !== keyword));
   };
 
-  const handleToggleJob = (job: { id: string; title: string }) => {
+  const handleToggleJob = (job: { id: string; name: string }) => {
     if (linkedJobs.some(j => j.id === job.id)) {
       setLinkedJobs(linkedJobs.filter(j => j.id !== job.id));
     } else {
@@ -410,7 +451,30 @@ export function ConfigurationWizard({
     }
   };
 
+  const isCurrentStepValid = (): boolean => {
+    const step = steps[currentStep];
+    switch (step.id) {
+      case "behavioral":
+        return behavioralIndicators.length > 0;
+      case "ai":
+        // AI config is optional - valid if inference is disabled or has keywords
+        return !canBeInferred || inferenceKeywords.length > 0;
+      case "jobs":
+        // Jobs linking is optional
+        return true;
+      case "skills":
+        // Skills mapping is optional
+        return true;
+      default:
+        return true;
+    }
+  };
+
   const handleNext = async () => {
+    if (!isCurrentStepValid()) {
+      toast.error("Please complete this step before continuing");
+      return;
+    }
     await handleSaveStep();
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);
@@ -575,7 +639,7 @@ export function ConfigurationWizard({
                       ) : (
                         <Circle className="h-4 w-4 text-muted-foreground shrink-0" />
                       )}
-                      <span className="text-sm">{job.title}</span>
+                      <span className="text-sm">{job.name}</span>
                     </button>
                   );
                 })}
@@ -672,9 +736,15 @@ export function ConfigurationWizard({
                 <Badge variant="outline" className="capitalize">
                   {capability.category}
                 </Badge>
-                <Badge variant="secondary">
-                  {capability.company_id ? "Company" : "Global"}
-                </Badge>
+                {capability.company_id ? (
+                  <Badge variant="secondary">
+                    {companyName || "Company"}
+                  </Badge>
+                ) : (
+                  <Badge variant="outline" className="text-green-600 border-green-200 bg-green-50">
+                    Global
+                  </Badge>
+                )}
               </div>
               <span className="text-xs text-muted-foreground font-mono">
                 {capability.code}
@@ -745,6 +815,17 @@ export function ConfigurationWizard({
           )}
         </div>
 
+        {/* Validation warning */}
+        {steps[currentStep]?.id === "behavioral" && behavioralIndicators.length === 0 && (
+          <div className="flex items-center gap-2 p-3 rounded-lg bg-amber-50 border border-amber-200 text-amber-800">
+            <AlertCircle className="h-4 w-4 shrink-0" />
+            <p className="text-sm">
+              Please add at least one {isSkill ? "proficiency indicator" : "behavioral indicator"} to continue.
+              Use AI Generate or add manually.
+            </p>
+          </div>
+        )}
+
         {/* Navigation buttons */}
         <div className="flex items-center justify-between pt-4">
           <Button
@@ -765,7 +846,7 @@ export function ConfigurationWizard({
             </Button>
             <Button
               onClick={handleNext}
-              disabled={loading}
+              disabled={loading || (steps[currentStep]?.id === "behavioral" && behavioralIndicators.length === 0)}
             >
               {loading && <Loader2 className="h-4 w-4 animate-spin mr-1" />}
               {currentStep === steps.length - 1 ? "Complete" : "Next"}
