@@ -190,7 +190,7 @@ export function UnifiedCompetencyFramework({ companyId, onNavigateToLibrary }: P
     if (onNavigateToLibrary) {
       onNavigateToLibrary();
     } else {
-      navigate("/workforce/skills-competencies");
+      navigate("/workforce/capability-registry");
     }
   };
 
@@ -402,7 +402,7 @@ export function UnifiedCompetencyFramework({ companyId, onNavigateToLibrary }: P
                           <Button 
                             variant="ghost" 
                             size="sm"
-                            onClick={() => navigate(`/workforce/skills-competencies?id=${comp.id}`)}
+                            onClick={() => navigate(`/workforce/capability-registry?id=${comp.id}`)}
                           >
                             View Details
                             <ArrowRight className="h-3 w-3 ml-1" />
