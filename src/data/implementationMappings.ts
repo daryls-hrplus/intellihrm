@@ -114,11 +114,11 @@ export const PHASE_STEP_MAPPINGS: Record<string, StepMapping[]> = {
     { order: 10, area: "Quizzes", adminRoute: "/lms/quizzes", isRequired: false, estimatedMinutes: 30 },
   ],
   performance: [
-    // 6A: Foundation Setup (Global settings - apply across all companies)
-    { order: 1, area: "Rating Scales Configuration", adminRoute: "/admin/rating-scales", isRequired: true, estimatedMinutes: 20, subSection: "6A: Foundation Setup", sourceManual: "appraisals", sourceSection: "Part 2.2", isGlobal: true },
-    { order: 2, area: "Overall Rating Scales Setup", adminRoute: "/admin/overall-rating-scales", isRequired: true, estimatedMinutes: 15, subSection: "6A: Foundation Setup", sourceManual: "appraisals", sourceSection: "Part 2.3", isGlobal: true },
-    { order: 3, area: "Competency Library Integration", adminRoute: "/admin/competencies", isRequired: false, estimatedMinutes: 20, subSection: "6A: Foundation Setup", sourceManual: "appraisals", sourceSection: "Part 2.4", isGlobal: true },
-    { order: 4, area: "Index Settings (Multi-Cycle)", adminRoute: "/admin/appraisal-index", isRequired: false, estimatedMinutes: 10, subSection: "6A: Foundation Setup", sourceManual: "appraisals", sourceSection: "Part 2.5", isGlobal: true },
+    // 6A: Core Framework Setup (Global settings - apply across all companies)
+    { order: 1, area: "Rating Scales Configuration", adminRoute: "/admin/rating-scales", isRequired: true, estimatedMinutes: 20, subSection: "6A: Core Framework Setup", sourceManual: "appraisals", sourceSection: "Part 2.2", isGlobal: true },
+    { order: 2, area: "Overall Rating Scales Setup", adminRoute: "/admin/overall-rating-scales", isRequired: true, estimatedMinutes: 15, subSection: "6A: Core Framework Setup", sourceManual: "appraisals", sourceSection: "Part 2.3", isGlobal: true },
+    { order: 3, area: "Competency Library Integration", adminRoute: "/admin/competencies", isRequired: false, estimatedMinutes: 20, subSection: "6A: Core Framework Setup", sourceManual: "appraisals", sourceSection: "Part 2.4", isGlobal: true },
+    { order: 4, area: "Index Settings (Multi-Cycle)", adminRoute: "/admin/appraisal-index", isRequired: false, estimatedMinutes: 10, subSection: "6A: Core Framework Setup", sourceManual: "appraisals", sourceSection: "Part 2.5", isGlobal: true },
     // 6B: Appraisal Configuration (Company-specific)
     { order: 5, area: "Appraisal Form Templates", adminRoute: "/admin/appraisal-templates", isRequired: true, estimatedMinutes: 45, subSection: "6B: Appraisal Configuration", sourceManual: "appraisals", sourceSection: "Part 3.1", isGlobal: false },
     { order: 6, area: "Rating Levels Setup", adminRoute: "/performance/setup", isRequired: false, estimatedMinutes: 15, subSection: "6B: Appraisal Configuration", sourceManual: "appraisals", sourceSection: "Part 3.2", isGlobal: false },

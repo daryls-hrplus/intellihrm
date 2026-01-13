@@ -379,7 +379,7 @@ export const subTaskDefinitions: Record<string, Record<number, SubTaskDefinition
 
   // Phase 6: Performance Management (expanded to 31 steps aligned with Appraisals Manual)
   performance: {
-    // 6A: Foundation Setup (Global)
+    // 6A: Core Framework Setup (Global)
     1: [ // Rating Scales Configuration
       { order: 1, name: "Define competency rating scale (1-5 or 1-7)", isRequired: true },
       { order: 2, name: "Define behavior rating scale", isRequired: false },

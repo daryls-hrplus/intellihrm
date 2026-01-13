@@ -193,7 +193,7 @@ const phases: Phase[] = [
     description: "Performance management and talent planning. Can run concurrent after Phase 1 + employees exist.",
     prerequisite: "Phase 1 complete + Employees exist. Can run concurrent with Phases 3-5.",
     items: [
-      // 6A: Foundation Setup (Global)
+      // 6A: Core Framework Setup (Global)
       { order: 1, area: "Rating Scales Configuration", description: "Define competency and behavior rating scales (1-5, 1-7)" },
       { order: 2, area: "Overall Rating Scales Setup", description: "Configure performance level ratings with labels" },
       { order: 3, area: "Competency Library Integration", description: "Link to Workforce competency definitions" },
