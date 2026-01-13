@@ -391,26 +391,27 @@ export const subTaskDefinitions: Record<string, Record<number, SubTaskDefinition
       { order: 2, name: "Define rating level labels (Exceeds, Meets, Below)", isRequired: true },
       { order: 3, name: "Set numeric values for calculations", isRequired: true },
     ],
-    3: [ // Performance Categories Setup
-      { order: 1, name: "Define Core competency category", isRequired: false },
-      { order: 2, name: "Define Leadership competency category", isRequired: false },
-      { order: 3, name: "Define Technical competency category", isRequired: false },
-    ],
-    4: [ // Competency Library Integration
+    3: [ // Competency Library Integration
       { order: 1, name: "Review Workforce competency definitions", isRequired: false },
       { order: 2, name: "Link competencies to performance assessment", isRequired: false },
     ],
-    5: [ // Index Settings (Multi-Cycle)
+    4: [ // Index Settings (Multi-Cycle)
       { order: 1, name: "Configure appraisal index calculation", isRequired: false },
       { order: 2, name: "Set historical cycle weighting", isRequired: false },
     ],
     // 6B: Appraisal Configuration (Company)
-    6: [ // Appraisal Form Templates
+    5: [ // Appraisal Form Templates
       { order: 1, name: "Create appraisal template sections", isRequired: true },
       { order: 2, name: "Configure section weightings", isRequired: true },
       { order: 3, name: "Add competency assessment section", isRequired: false },
       { order: 4, name: "Add goals review section", isRequired: false },
       { order: 5, name: "Configure manager comments section", isRequired: true },
+    ],
+    6: [ // Rating Levels Setup (moved from 6A and renamed)
+      { order: 1, name: "Review default rating levels (Exceptional, Exceeds, Meets, etc.)", isRequired: true },
+      { order: 2, name: "Configure score thresholds for each level", isRequired: true },
+      { order: 3, name: "Set eligibility flags (promotion, bonus, succession, PIP)", isRequired: false },
+      { order: 4, name: "Configure color coding for visual indicators", isRequired: false },
     ],
     7: [ // Action Rules Configuration
       { order: 1, name: "Define rating-triggered actions", isRequired: false },

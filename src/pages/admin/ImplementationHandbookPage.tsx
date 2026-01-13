@@ -196,11 +196,11 @@ const phases: Phase[] = [
       // 6A: Foundation Setup (Global)
       { order: 1, area: "Rating Scales Configuration", description: "Define competency and behavior rating scales (1-5, 1-7)" },
       { order: 2, area: "Overall Rating Scales Setup", description: "Configure performance level ratings with labels" },
-      { order: 3, area: "Performance Categories Setup", description: "Define assessment categories (Core, Leadership, Technical)" },
-      { order: 4, area: "Competency Library Integration", description: "Link to Workforce competency definitions" },
-      { order: 5, area: "Index Settings (Multi-Cycle)", description: "Configure appraisal index behavior across cycles" },
+      { order: 3, area: "Competency Library Integration", description: "Link to Workforce competency definitions" },
+      { order: 4, area: "Index Settings (Multi-Cycle)", description: "Configure appraisal index behavior across cycles" },
       // 6B: Appraisal Configuration (Company)
-      { order: 6, area: "Appraisal Form Templates", description: "Design review forms with sections and weightings" },
+      { order: 5, area: "Appraisal Form Templates", description: "Design review forms with sections and weightings" },
+      { order: 6, area: "Rating Levels Setup", description: "Configure score thresholds, eligibility flags, and color coding for rating levels" },
       { order: 7, area: "Action Rules Configuration", description: "Configure automatic actions based on ratings" },
       { order: 8, area: "Employee Response Configuration", description: "Set up self-assessment and acknowledgment rules" },
       { order: 9, area: "HR Escalation Settings", description: "Configure escalation triggers and workflows" },

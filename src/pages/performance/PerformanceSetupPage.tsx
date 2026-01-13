@@ -407,7 +407,7 @@ export default function PerformanceSetupPage() {
                   </TabsTrigger>
                   <TabsTrigger value="performance-categories" className="flex items-center gap-2">
                     <Tags className="h-4 w-4" />
-                    Performance Categories
+                    Rating Levels
                   </TabsTrigger>
                   <TabsTrigger value="form-templates" className="flex items-center gap-2">
                     <Layers className="h-4 w-4" />
