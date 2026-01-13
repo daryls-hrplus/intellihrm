@@ -273,14 +273,14 @@ export function JobSkillsManager({ jobId, companyId }: JobSkillsManagerProps) {
   return (
     <div className="space-y-6">
       {/* Info callout explaining job skills */}
-      <Alert className="bg-teal-50 dark:bg-slate-800 border-teal-200 dark:border-slate-600 p-4">
-        <Wrench className="h-5 w-5 text-teal-600 dark:text-teal-400" />
+      <Alert className="bg-teal-50 border-teal-200 p-4">
+        <Wrench className="h-5 w-5 text-teal-600" />
         <AlertDescription className="text-sm ml-1">
           <div className="flex flex-col gap-2">
-            <span className="font-semibold text-slate-900 dark:text-slate-100">
+            <span className="font-semibold text-slate-900">
               Job Skills — Capability Requirements
             </span>
-            <span className="text-slate-700 dark:text-slate-300 leading-relaxed">
+            <span className="text-slate-700 leading-relaxed">
               Job Skills define the capabilities required to perform this job. They are used for{" "}
               <strong>recruitment</strong>, <strong>learning paths</strong>, and{" "}
               <strong>succession readiness</strong> — but are{" "}
@@ -305,7 +305,7 @@ export function JobSkillsManager({ jobId, companyId }: JobSkillsManagerProps) {
           <Loader2 className="h-6 w-6 animate-spin" />
         </div>
       ) : requirements.length === 0 ? (
-        <div className="text-center py-12 text-muted-foreground border rounded-lg bg-white dark:bg-slate-900">
+        <div className="text-center py-12 text-muted-foreground border rounded-lg bg-muted/20">
           <Wrench className="h-10 w-10 mx-auto mb-3 opacity-40" />
           <p className="font-medium">No job skills defined yet.</p>
           <p className="text-sm mt-1">Add skills to define capability requirements for this job.</p>
