@@ -73750,6 +73750,13 @@ export type Database = {
           employee_name: string
         }[]
       }
+      get_user_accessible_companies: {
+        Args: { p_user_id: string }
+        Returns: {
+          id: string
+          name: string
+        }[]
+      }
       get_user_app_version: { Args: never; Returns: string }
       get_user_tenant_type: { Args: never; Returns: string }
       get_workflow_approver: {
