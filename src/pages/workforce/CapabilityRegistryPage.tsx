@@ -88,6 +88,7 @@ import { EmptyStateOnboarding } from "@/components/capabilities/EmptyStateOnboar
 import { VersionHistoryDialog } from "@/components/capabilities/VersionHistoryDialog";
 import { DeprecationImpactDialog } from "@/components/capabilities/DeprecationImpactDialog";
 import { ConfigurationWizard } from "@/components/capabilities/ConfigurationWizard";
+import { CompetencyJobLinker } from "@/components/capabilities/CompetencyJobLinker";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 
@@ -132,6 +133,7 @@ export default function CapabilityRegistryPage() {
   const [isVersionHistoryOpen, setIsVersionHistoryOpen] = useState(false);
   const [isDeprecationOpen, setIsDeprecationOpen] = useState(false);
   const [isConfigWizardOpen, setIsConfigWizardOpen] = useState(false);
+  const [isJobLinkerOpen, setIsJobLinkerOpen] = useState(false);
   const [selectedCapability, setSelectedCapability] = useState<Capability | null>(null);
   const [defaultType, setDefaultType] = useState<CapabilityType>("SKILL");
 
@@ -281,6 +283,18 @@ export default function CapabilityRegistryPage() {
   const handleConfigureWizard = (capability: Capability) => {
     setSelectedCapability(capability);
     setIsConfigWizardOpen(true);
+  };
+
+  const handleManageJobs = (capability: Capability) => {
+    setSelectedCapability(capability);
+    setIsJobLinkerOpen(true);
+  };
+
+  const handleJobLinkerComplete = () => {
+    // Refresh relationship counts to show updated job count
+    if (capabilities.length > 0) {
+      fetchRelationshipCounts(capabilities.map(c => c.id));
+    }
   };
 
   const handleRestoreVersion = async (snapshot: Capability) => {
@@ -645,6 +659,7 @@ export default function CapabilityRegistryPage() {
                         onStatusChange={handleStatusChange}
                         onViewHistory={handleViewHistory}
                         onConfigure={handleConfigureWizard}
+                        onManageJobs={handleManageJobs}
                       />
                     ))}
                   </div>
@@ -683,6 +698,7 @@ export default function CapabilityRegistryPage() {
                         onStatusChange={handleStatusChange}
                         onViewHistory={handleViewHistory}
                         onConfigure={handleConfigureWizard}
+                        onManageJobs={handleManageJobs}
                       />
                     ))}
                   </div>
@@ -721,6 +737,7 @@ export default function CapabilityRegistryPage() {
                         onStatusChange={handleStatusChange}
                         onViewHistory={handleViewHistory}
                         onConfigure={handleConfigureWizard}
+                        onManageJobs={handleManageJobs}
                       />
                     ))}
                   </div>
@@ -821,6 +838,18 @@ export default function CapabilityRegistryPage() {
           fetchCapabilities({});
         }}
       />
+
+      {/* Job Linker Dialog */}
+      {selectedCapability && (
+        <CompetencyJobLinker
+          capabilityId={selectedCapability.id}
+          capabilityName={selectedCapability.name}
+          companyId={selectedCapability.company_id}
+          open={isJobLinkerOpen}
+          onOpenChange={setIsJobLinkerOpen}
+          onComplete={handleJobLinkerComplete}
+        />
+      )}
     </AppLayout>
   );
 }
