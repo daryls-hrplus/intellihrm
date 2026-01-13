@@ -121,6 +121,13 @@ export function ConfigurationWizard({
     if (!capability) return;
     setLoading(true);
     try {
+      // Fetch fresh capability data from DB to get latest proficiency_indicators
+      const { data: freshCapability } = await supabase
+        .from("skills_competencies")
+        .select("proficiency_indicators")
+        .eq("id", capability.id)
+        .single();
+
       // Load behavioral indicators
       if (isSkill) {
         const { data: skillAttr } = await supabase
@@ -134,26 +141,34 @@ export function ConfigurationWizard({
           setCanBeInferred(skillAttr.can_be_inferred || false);
         }
         
-        // Use proficiency_indicators from metadata if available
-        const capWithIndicators = capability as any;
-        if (capWithIndicators.proficiency_indicators) {
-          const indicators = Object.values(capWithIndicators.proficiency_indicators as Record<string, any>)
+        // Use proficiency_indicators from fresh DB data
+        if (freshCapability?.proficiency_indicators) {
+          const indicators = Object.values(freshCapability.proficiency_indicators as Record<string, any>)
             .map((ind: any) => ind.description || ind)
             .filter(Boolean);
           setBehavioralIndicators(indicators);
         }
       } else {
-        const { data: compAttr } = await supabase
-          .from("competency_attributes")
-          .select("behavioral_indicators")
-          .eq("capability_id", capability.id)
-          .single();
-        
-        if (compAttr?.behavioral_indicators) {
-          const indicators = (compAttr.behavioral_indicators as any[])
-            .map((ind: any) => ind.description || ind.indicator || JSON.stringify(ind))
+        // For competencies, also check proficiency_indicators first (AI saves here)
+        if (freshCapability?.proficiency_indicators) {
+          const indicators = Object.values(freshCapability.proficiency_indicators as Record<string, any>)
+            .map((ind: any) => ind.description || ind)
             .filter(Boolean);
           setBehavioralIndicators(indicators);
+        } else {
+          // Fallback to competency_attributes
+          const { data: compAttr } = await supabase
+            .from("competency_attributes")
+            .select("behavioral_indicators")
+            .eq("capability_id", capability.id)
+            .single();
+          
+          if (compAttr?.behavioral_indicators) {
+            const indicators = (compAttr.behavioral_indicators as any[])
+              .map((ind: any) => ind.description || ind.indicator || JSON.stringify(ind))
+              .filter(Boolean);
+            setBehavioralIndicators(indicators);
+          }
         }
       }
 
@@ -242,6 +257,12 @@ export function ConfigurationWizard({
           .filter(Boolean);
         setBehavioralIndicators(indicators);
         toast.success("Indicators generated successfully!");
+      } else if (data?.saved) {
+        // Indicators were saved to DB, reload from DB
+        toast.success("Indicators generated and saved!");
+        await loadExistingData();
+      } else {
+        toast.error("No indicators returned from AI");
       }
     } catch (err) {
       console.error("Error generating indicators:", err);
@@ -642,6 +663,30 @@ export function ConfigurationWizard({
             Complete these steps to fully configure your {isSkill ? "skill" : "competency"}
           </DialogDescription>
         </DialogHeader>
+
+        {/* Capability Context Info */}
+        {capability && (
+          <div className="p-3 rounded-lg bg-muted/50 border space-y-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Badge variant="outline" className="capitalize">
+                  {capability.category}
+                </Badge>
+                <Badge variant="secondary">
+                  {capability.company_id ? "Company" : "Global"}
+                </Badge>
+              </div>
+              <span className="text-xs text-muted-foreground font-mono">
+                {capability.code}
+              </span>
+            </div>
+            {capability.description && (
+              <p className="text-sm text-muted-foreground">
+                {capability.description}
+              </p>
+            )}
+          </div>
+        )}
 
         {/* Progress indicator */}
         <div className="space-y-2">
