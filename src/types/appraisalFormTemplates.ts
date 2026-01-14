@@ -12,7 +12,6 @@ export type AppraisalCycleType =
   | 'mid_year' 
   | 'quarterly' 
   | 'probation' 
-  | 'manager_360' 
   | 'project_based' 
   | 'continuous';
 
@@ -273,13 +272,6 @@ export const CYCLE_TYPE_PRESETS: Record<AppraisalCycleType, {
     defaultEvaluationOffset: 7,
     suggestedPhases: ['self_assessment', 'manager_review', 'finalization'],
     weightEnforcement: 'strict',
-  },
-  manager_360: {
-    label: 'Manager 360 Review',
-    defaultDurationDays: 30,
-    defaultEvaluationOffset: 7,
-    suggestedPhases: ['360_collection', 'manager_review', 'finalization'],
-    weightEnforcement: 'relaxed',
   },
   project_based: {
     label: 'Project-Based Review',
