@@ -588,6 +588,7 @@ export function AppraisalFormTemplateManager({ companyId, companyName }: Props) 
                           min={0}
                           max={730}
                         />
+                        <p className="text-xs text-muted-foreground">Length of each review cycle</p>
                       </div>
                       <div className="space-y-1">
                         <Label className="text-xs">Eval Offset (days)</Label>
@@ -598,6 +599,7 @@ export function AppraisalFormTemplateManager({ companyId, companyName }: Props) 
                           min={0}
                           max={60}
                         />
+                        <p className="text-xs text-muted-foreground">Days before end when reviews are due</p>
                       </div>
                       <div className="space-y-1">
                         <Label className="text-xs">Grace Period (days)</Label>
@@ -608,6 +610,7 @@ export function AppraisalFormTemplateManager({ companyId, companyName }: Props) 
                           min={0}
                           max={14}
                         />
+                        <p className="text-xs text-muted-foreground">Extra time allowed for late submissions</p>
                       </div>
                     </div>
                   </div>
