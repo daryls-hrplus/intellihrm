@@ -12,8 +12,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Plus, Building2, Globe, Info, GitBranch } from "lucide-react";
+import { Plus, Building2, Globe, Info, Copy } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { WorkflowModuleSidebar } from "./WorkflowModuleSidebar";
@@ -72,6 +80,9 @@ export function UnifiedWorkflowTemplatesTab({
   const [settings, setSettings] = useState<TransactionWorkflowSetting[]>([]);
   const [loading, setLoading] = useState(true);
   const [allTemplates, setAllTemplates] = useState<WorkflowTemplate[]>([]);
+  const [showCopyDialog, setShowCopyDialog] = useState(false);
+  const [copyTemplateId, setCopyTemplateId] = useState<string | null>(null);
+  const [copyTargetCompanyId, setCopyTargetCompanyId] = useState<string>("");
 
   // Fetch companies on mount
   useEffect(() => {
@@ -116,10 +127,8 @@ export function UnifiedWorkflowTemplatesTab({
     if (selectedCompanyId && selectedCompanyId !== "global") {
       // Get company-specific OR global templates
       query = query.or(`company_id.eq.${selectedCompanyId},is_global.eq.true`);
-    } else {
-      // For global view, only show global templates
-      query = query.eq("is_global", true);
     }
+    // For global view, get all templates
 
     const { data, error } = await query.order("name");
     
@@ -275,78 +284,129 @@ export function UnifiedWorkflowTemplatesTab({
     }
   };
 
-  const selectedCompanyName = selectedCompanyId === "global" 
-    ? "Global (All Companies)" 
-    : companies.find(c => c.id === selectedCompanyId)?.name || "Select Company";
+  const handleCopyToCompany = (templateId: string) => {
+    setCopyTemplateId(templateId);
+    setShowCopyDialog(true);
+  };
+
+  const executeCopyToCompany = async () => {
+    if (!copyTemplateId || !copyTargetCompanyId) return;
+
+    const template = allTemplates.find(t => t.id === copyTemplateId);
+    if (!template) return;
+
+    try {
+      // Create a copy of the template for the selected company
+      const { data: newTemplate, error: templateError } = await supabase
+        .from("workflow_templates")
+        .insert({
+          name: `${template.name} (Copy)`,
+          code: `${template.code}_${copyTargetCompanyId.slice(0, 8).toUpperCase()}`,
+          category: template.category as any,
+          description: template.description,
+          is_global: false,
+          company_id: copyTargetCompanyId,
+          is_active: true,
+          requires_signature: template.requires_signature,
+          requires_letter: template.requires_letter,
+          allow_return_to_previous: template.allow_return_to_previous,
+        } as any)
+        .select()
+        .single();
+
+      if (templateError) throw templateError;
+
+      // Copy the steps if any
+      const { data: steps } = await supabase
+        .from("workflow_steps")
+        .select("*")
+        .eq("template_id", copyTemplateId);
+
+      if (steps && steps.length > 0 && newTemplate) {
+        const newSteps = steps.map(step => ({
+          template_id: newTemplate.id,
+          name: step.name,
+          description: step.description,
+          step_order: step.step_order,
+          approver_type: step.approver_type,
+          approver_position_id: step.approver_position_id,
+          approver_role_id: step.approver_role_id,
+          approver_governance_body_id: step.approver_governance_body_id,
+          approver_user_id: step.approver_user_id,
+          use_reporting_line: step.use_reporting_line,
+          requires_signature: step.requires_signature,
+          requires_comment: step.requires_comment,
+          can_delegate: step.can_delegate,
+          escalation_hours: step.escalation_hours,
+          escalation_action: step.escalation_action,
+        }));
+
+        await supabase.from("workflow_steps").insert(newSteps);
+      }
+
+      toast.success("Template copied to company successfully");
+      setShowCopyDialog(false);
+      setCopyTemplateId(null);
+      setCopyTargetCompanyId("");
+      fetchWorkflowTemplates();
+      fetchAllTemplates();
+    } catch (error: any) {
+      toast.error(error.message || "Failed to copy template");
+    }
+  };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Company Selector Header */}
-      <Card>
-        <CardContent className="py-4">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2">
-                <Label className="text-sm font-medium whitespace-nowrap">
-                  Configuring for:
-                </Label>
-                <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
-                  <SelectTrigger className="w-[280px]">
-                    <Building2 className="h-4 w-4 mr-2 text-muted-foreground" />
-                    <SelectValue placeholder="Select Company" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="global">
-                      <div className="flex items-center gap-2">
-                        <Globe className="h-4 w-4" />
-                        Global (All Companies)
-                      </div>
-                    </SelectItem>
-                    {companies.map((company) => (
-                      <SelectItem key={company.id} value={company.id}>
-                        {company.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between bg-card border rounded-lg px-4 py-3">
+        <div className="flex items-center gap-3">
+          <Label className="text-sm font-medium whitespace-nowrap">
+            Configuring for:
+          </Label>
+          <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
+            <SelectTrigger className="w-[240px]">
+              <Building2 className="h-4 w-4 mr-2 text-muted-foreground" />
+              <SelectValue placeholder="Select Company" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="global">
+                <div className="flex items-center gap-2">
+                  <Globe className="h-4 w-4" />
+                  Global (All Companies)
+                </div>
+              </SelectItem>
+              {companies.map((company) => (
+                <SelectItem key={company.id} value={company.id}>
+                  {company.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
-              <Badge variant={selectedCompanyId === "global" ? "default" : "secondary"}>
-                {selectedCompanyId === "global" ? (
-                  <>
-                    <Globe className="h-3 w-3 mr-1" />
-                    Viewing Global Templates
-                  </>
-                ) : (
-                  <>
-                    <Building2 className="h-3 w-3 mr-1" />
-                    Company-Specific
-                  </>
-                )}
-              </Badge>
-            </div>
+          <Badge variant={selectedCompanyId === "global" ? "default" : "secondary"} className="hidden sm:flex">
+            {selectedCompanyId === "global" ? "Global Templates" : "Company-Specific"}
+          </Badge>
+        </div>
 
-            <Button onClick={() => onCreateTemplate()}>
-              <Plus className="h-4 w-4 mr-2" />
-              New Template
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+        <Button onClick={() => onCreateTemplate()} size="sm">
+          <Plus className="h-4 w-4 mr-2" />
+          New Template
+        </Button>
+      </div>
 
       {/* Info Alert for Global View */}
       {selectedCompanyId === "global" && (
-        <Alert>
-          <Info className="h-4 w-4" />
-          <AlertDescription>
-            You're viewing global templates. To configure which workflows require approval for a specific company, select a company from the dropdown above.
-            Global templates can be used by all companies.
+        <Alert className="bg-blue-50 border-blue-200">
+          <Info className="h-4 w-4 text-blue-600" />
+          <AlertDescription className="text-blue-800">
+            You're viewing global templates available to all companies. Select a specific company to configure which workflows require approval.
+            Use the "Copy to Company" action to create company-specific versions of global templates.
           </AlertDescription>
         </Alert>
       )}
 
       {/* Module-based Navigation + Content */}
-      <div className="flex rounded-lg border bg-card overflow-hidden min-h-[500px]">
+      <div className="flex rounded-lg border bg-card overflow-hidden">
         {/* Module Sidebar */}
         <WorkflowModuleSidebar
           selectedModuleId={selectedModuleId}
@@ -355,28 +415,19 @@ export function UnifiedWorkflowTemplatesTab({
         />
 
         {/* Category & Workflow Content */}
-        <div className="flex-1 p-6">
-          {loading ? (
-            <div className="space-y-4">
+        <div className="flex-1 bg-muted/20">
+          {loading && selectedCompanyId !== "global" ? (
+            <div className="p-6 space-y-4">
               {[1, 2, 3].map((i) => (
                 <Skeleton key={i} className="h-24 w-full" />
               ))}
             </div>
-          ) : selectedCompanyId === "global" ? (
-            <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground">
-              <GitBranch className="h-12 w-12 mb-4 opacity-50" />
-              <h3 className="text-lg font-medium mb-2">Global Template View</h3>
-              <p className="max-w-md">
-                Select a specific company to configure which transaction types require workflow approval.
-                Global templates are available to all companies.
-              </p>
-            </div>
           ) : selectedModule ? (
-            <ScrollArea className="h-[calc(100vh-450px)]">
-              <div className="space-y-6 pr-4">
-                <div className="flex items-center gap-2 mb-4">
+            <ScrollArea className="h-[500px]">
+              <div className="p-4 space-y-4">
+                <div className="flex items-center gap-2 px-2">
                   <selectedModule.icon className="h-5 w-5 text-primary" />
-                  <h2 className="text-xl font-semibold">{selectedModule.name}</h2>
+                  <h2 className="text-lg font-semibold">{selectedModule.name}</h2>
                 </div>
 
                 {selectedModule.categories.map((category) => (
@@ -394,17 +445,56 @@ export function UnifiedWorkflowTemplatesTab({
                     onConfigureSteps={handleConfigureSteps}
                     onCreateTemplate={handleCreateTemplate}
                     onViewProcessMap={handleViewProcessMap}
+                    onCopyToCompany={handleCopyToCompany}
                   />
                 ))}
               </div>
             </ScrollArea>
           ) : (
-            <div className="flex items-center justify-center h-full text-muted-foreground">
+            <div className="flex items-center justify-center h-full text-muted-foreground p-6">
               Select a module from the sidebar
             </div>
           )}
         </div>
       </div>
+
+      {/* Copy to Company Dialog */}
+      <Dialog open={showCopyDialog} onOpenChange={setShowCopyDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Copy Template to Company</DialogTitle>
+            <DialogDescription>
+              Create a company-specific copy of this global template. The new template will include all workflow steps.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Target Company</Label>
+              <Select value={copyTargetCompanyId} onValueChange={setCopyTargetCompanyId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select company" />
+                </SelectTrigger>
+                <SelectContent>
+                  {companies.map((company) => (
+                    <SelectItem key={company.id} value={company.id}>
+                      {company.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCopyDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={executeCopyToCompany} disabled={!copyTargetCompanyId}>
+              <Copy className="h-4 w-4 mr-2" />
+              Copy Template
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

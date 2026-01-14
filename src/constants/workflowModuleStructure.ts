@@ -64,9 +64,7 @@ export const WORKFLOW_MODULES: WorkflowModule[] = [
         icon: ArrowRightLeft,
         workflows: [
           { code: "promotion", name: "Promotion", transactionTypeCode: "PROMOTION" },
-          { code: "demotion", name: "Demotion", transactionTypeCode: "DEMOTION" },
           { code: "transfer", name: "Transfer", transactionTypeCode: "TRANSFER" },
-          { code: "bulk_transfer", name: "Bulk Transfer", transactionTypeCode: "BULK_TRANSFER" },
           { code: "secondment", name: "Secondment", transactionTypeCode: "SECONDMENT" },
           { code: "acting", name: "Acting Assignment", transactionTypeCode: "ACTING" }
         ]

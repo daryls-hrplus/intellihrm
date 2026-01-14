@@ -6,7 +6,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { ChevronDown } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { UnifiedWorkflowCard } from "./UnifiedWorkflowCard";
 import { getCategoryColorClasses, type WorkflowCategory, type WorkflowDefinition } from "@/constants/workflowModuleStructure";
 
@@ -47,6 +47,7 @@ interface WorkflowCategorySectionProps {
   onConfigureSteps: (templateId: string) => void;
   onCreateTemplate: (workflowCode: string) => void;
   onViewProcessMap: (templateId: string) => void;
+  onCopyToCompany?: (templateId: string) => void;
 }
 
 export function WorkflowCategorySection({
@@ -62,9 +63,9 @@ export function WorkflowCategorySection({
   onConfigureSteps,
   onCreateTemplate,
   onViewProcessMap,
+  onCopyToCompany,
 }: WorkflowCategorySectionProps) {
   const [isOpen, setIsOpen] = useState(true);
-  const colorClasses = getCategoryColorClasses(category.color);
   const Icon = category.icon;
 
   // Calculate enabled count for this category
@@ -93,26 +94,21 @@ export function WorkflowCategorySection({
   };
 
   return (
-    <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-      <CollapsibleTrigger className={cn(
-        "w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors",
-        colorClasses.bg,
-        colorClasses.text,
-        "hover:opacity-90"
-      )}>
-        <ChevronDown className={cn(
-          "h-4 w-4 transition-transform",
-          isOpen && "rotate-180"
+    <Collapsible open={isOpen} onOpenChange={setIsOpen} className="border rounded-lg bg-card">
+      <CollapsibleTrigger className="w-full flex items-center gap-2 px-4 py-3 hover:bg-muted/50 transition-colors rounded-t-lg">
+        <ChevronRight className={cn(
+          "h-4 w-4 text-muted-foreground transition-transform",
+          isOpen && "rotate-90"
         )} />
-        <Icon className="h-4 w-4" />
-        <span className="flex-1 text-left">{category.name}</span>
-        <Badge variant="secondary" className="text-xs">
+        <Icon className="h-4 w-4 text-muted-foreground" />
+        <span className="flex-1 text-left font-medium text-sm">{category.name}</span>
+        <Badge variant="secondary" className="text-xs font-normal">
           {enabledCount} / {category.workflows.length} enabled
         </Badge>
       </CollapsibleTrigger>
 
       <CollapsibleContent>
-        <div className="grid gap-3 mt-3 pl-2">
+        <div className="border-t divide-y">
           {category.workflows.map((workflow) => {
             const transactionTypeId = getTransactionTypeId(workflow);
             const setting = getSettingForWorkflow(workflow);
@@ -149,6 +145,7 @@ export function WorkflowCategorySection({
                 onConfigureSteps={onConfigureSteps}
                 onCreateTemplate={onCreateTemplate}
                 onViewProcessMap={onViewProcessMap}
+                onCopyToCompany={onCopyToCompany}
               />
             );
           })}

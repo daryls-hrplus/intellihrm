@@ -19,14 +19,14 @@ export function WorkflowModuleSidebar({
   };
 
   return (
-    <div className="w-64 border-r bg-muted/30">
-      <div className="p-4 border-b">
-        <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">
+    <div className="w-56 border-r bg-background flex-shrink-0">
+      <div className="p-3 border-b bg-muted/30">
+        <h3 className="font-semibold text-xs text-muted-foreground uppercase tracking-wide">
           Modules
         </h3>
       </div>
-      <ScrollArea className="h-[calc(100vh-400px)]">
-        <div className="p-2 space-y-1">
+      <ScrollArea className="h-[500px]">
+        <div className="p-2 space-y-0.5">
           {WORKFLOW_MODULES.map((module) => {
             const Icon = module.icon;
             const totalWorkflows = getModuleTotalWorkflows(module);
@@ -38,9 +38,9 @@ export function WorkflowModuleSidebar({
                 key={module.id}
                 onClick={() => onModuleSelect(module.id)}
                 className={cn(
-                  "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-colors",
+                  "w-full flex items-center gap-2.5 px-3 py-2 rounded-md text-left transition-colors text-sm",
                   isSelected
-                    ? "bg-primary text-primary-foreground"
+                    ? "bg-primary text-primary-foreground font-medium"
                     : "hover:bg-muted text-foreground"
                 )}
               >
@@ -48,18 +48,15 @@ export function WorkflowModuleSidebar({
                   "h-4 w-4 flex-shrink-0",
                   isSelected ? "text-primary-foreground" : "text-muted-foreground"
                 )} />
-                <span className="flex-1 text-sm font-medium truncate">
+                <span className="flex-1 truncate">
                   {module.name}
                 </span>
-                <Badge
-                  variant={isSelected ? "secondary" : "outline"}
-                  className={cn(
-                    "text-xs min-w-[40px] justify-center",
-                    isSelected && "bg-primary-foreground/20 text-primary-foreground border-0"
-                  )}
-                >
+                <span className={cn(
+                  "text-xs tabular-nums",
+                  isSelected ? "text-primary-foreground/80" : "text-muted-foreground"
+                )}>
                   {enabledCount}/{totalWorkflows}
-                </Badge>
+                </span>
               </button>
             );
           })}
