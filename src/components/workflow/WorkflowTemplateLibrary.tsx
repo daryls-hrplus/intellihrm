@@ -92,6 +92,8 @@ const CATEGORY_LABELS: Record<string, string> = {
   contract_conversion: "Contract Conversion",
   status_change: "Status Change",
   retirement: "Retirement",
+  disciplinary_acknowledgement: "Disciplinary Acknowledgement",
+  grievance_submission: "Grievance Submission",
 };
 
 export function WorkflowTemplateLibrary({

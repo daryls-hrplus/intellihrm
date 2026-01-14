@@ -65,6 +65,8 @@ const CATEGORY_LABELS: Record<string, string> = {
   qualification: "Qualification",
   general: "General",
   performance: "Performance",
+  disciplinary_acknowledgement: "Disciplinary Acknowledgement",
+  grievance_submission: "Grievance Submission",
 };
 
 export function WorkflowStepConfiguration({
