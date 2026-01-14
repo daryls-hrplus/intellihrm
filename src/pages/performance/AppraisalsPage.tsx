@@ -436,22 +436,17 @@ export default function AppraisalsPage() {
               <ClipboardCheck className="h-4 w-4" />
               Manager Reviews
             </TabsTrigger>
-            <TabsTrigger value="analytics" className="gap-2">
-              <BarChart3 className="h-4 w-4" />
-              Analytics
+            <TabsTrigger value="approvals" className="gap-2">
+              <FileCheck className="h-4 w-4" />
+              Approvals
             </TabsTrigger>
             <TabsTrigger value="calibration" className="gap-2">
               <Scale className="h-4 w-4" />
               Calibration
             </TabsTrigger>
-            <TabsTrigger value="approvals" className="gap-2">
-              <FileCheck className="h-4 w-4" />
-              Approvals
-              {stats.pendingApprovals > 0 && (
-                <Badge variant="destructive" className="ml-1 h-5 w-5 p-0 flex items-center justify-center text-xs">
-                  {stats.pendingApprovals}
-                </Badge>
-              )}
+            <TabsTrigger value="analytics" className="gap-2">
+              <BarChart3 className="h-4 w-4" />
+              Analytics
             </TabsTrigger>
             <TabsTrigger value="talent" className="gap-2">
               <Brain className="h-4 w-4" />

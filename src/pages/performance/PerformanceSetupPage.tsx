@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,6 +14,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/hooks/useLanguage";
 import { toast } from "sonner";
@@ -49,6 +51,7 @@ import {
   BarChart3,
   Bell,
   ExternalLink,
+  TrendingUp,
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useNavigate } from "react-router-dom";
@@ -67,6 +70,13 @@ import { IntegrationDashboardWidget } from "@/components/performance/setup/Integ
 import { NotificationsLinkSection } from "@/components/performance/setup/NotificationsLinkSection";
 import { UnifiedCompetencyFramework } from "@/components/performance/setup/UnifiedCompetencyFramework";
 import { Globe } from "lucide-react";
+
+// Breadcrumb items
+const breadcrumbItems = [
+  { label: "Performance", href: "/performance" },
+  { label: "Performance Setup" },
+];
+
 // Interfaces
 interface Company { id: string; name: string; }
 interface RatingScale { id: string; company_id: string; name: string; code: string; description: string | null; min_rating: number; max_rating: number; rating_labels: any; scale_purpose: string[] | null; is_default: boolean; is_active: boolean; }
@@ -78,10 +88,16 @@ interface AppraisalCycle { id: string; company_id: string; name: string; descrip
 export default function PerformanceSetupPage() {
   const navigate = useNavigate();
   const { t } = useLanguage();
+  const [searchParams, setSearchParams] = useSearchParams();
+  
+  // Initialize tabs from URL params for deep linking
+  const initialPrimaryTab = searchParams.get('tab') || 'foundation';
+  const initialSecondaryTab = searchParams.get('sub') || 'rating-scales';
+  
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedCompany, setSelectedCompany] = useState<string>("");
-  const [primaryTab, setPrimaryTab] = useState("foundation");
-  const [secondaryTab, setSecondaryTab] = useState("rating-scales");
+  const [primaryTab, setPrimaryTab] = useState(initialPrimaryTab);
+  const [secondaryTab, setSecondaryTab] = useState(initialSecondaryTab);
   const [isLoading, setIsLoading] = useState(true);
 
   // Data states
@@ -214,9 +230,20 @@ export default function PerformanceSetupPage() {
   const handleDeleteGoalTemplate = (id: string, name?: string) => confirmDelete('goal_template', id, name || 'this template');
   const handleDeleteRecognitionCategory = (id: string, name?: string) => confirmDelete('recognition_category', id, name || 'this category');
 
+  // Update URL when tabs change for deep linking support
+  useEffect(() => {
+    const newParams = new URLSearchParams();
+    newParams.set('tab', primaryTab);
+    newParams.set('sub', secondaryTab);
+    setSearchParams(newParams, { replace: true });
+  }, [primaryTab, secondaryTab, setSearchParams]);
+
   return (
     <AppLayout>
       <div className="space-y-6">
+        {/* Breadcrumb */}
+        <Breadcrumbs items={breadcrumbItems} />
+        
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -287,7 +314,7 @@ export default function PerformanceSetupPage() {
                 Enterprise-wide standards that apply across all performance processes. These core frameworks ensure consistency in Goals, Appraisals, 360 Feedback, and Recognition.
               </div>
               <Tabs value={secondaryTab} onValueChange={setSecondaryTab}>
-                <TabsList>
+                <TabsList className="flex-wrap">
                   <TabsTrigger value="rating-scales" className="flex items-center gap-2">
                     <Star className="h-4 w-4" />
                     Rating Scales
@@ -299,6 +326,10 @@ export default function PerformanceSetupPage() {
                   <TabsTrigger value="competencies" className="flex items-center gap-2">
                     <BookOpen className="h-4 w-4" />
                     Competencies
+                  </TabsTrigger>
+                  <TabsTrigger value="index-settings" className="flex items-center gap-2">
+                    <TrendingUp className="h-4 w-4" />
+                    Index Settings
                   </TabsTrigger>
                   <TabsTrigger value="approval-workflows" className="flex items-center gap-2">
                     <GitBranch className="h-4 w-4" />
@@ -320,6 +351,9 @@ export default function PerformanceSetupPage() {
                     companyId={selectedCompany} 
                     onNavigateToLibrary={() => navigate('/workforce/capability-registry')}
                   />
+                </TabsContent>
+                <TabsContent value="index-settings" className="mt-4">
+                  <PerformanceIndexSettingsPanel companyId={selectedCompany} />
                 </TabsContent>
                 <TabsContent value="approval-workflows" className="mt-4">
                   <TalentApprovalWorkflowManager companyId={selectedCompany} />
@@ -401,10 +435,7 @@ export default function PerformanceSetupPage() {
               </Alert>
               <Tabs value={secondaryTab} onValueChange={setSecondaryTab}>
                 <TabsList className="flex-wrap">
-                  <TabsTrigger value="appraisal-cycles" className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4" />
-                    Appraisal Cycles
-                  </TabsTrigger>
+                  {/* Logical order: Rating Levels → Form Templates → Action Rules → ... → Cycles */}
                   <TabsTrigger value="performance-categories" className="flex items-center gap-2">
                     <Tags className="h-4 w-4" />
                     Rating Levels
@@ -425,6 +456,10 @@ export default function PerformanceSetupPage() {
                     <Shield className="h-4 w-4" />
                     HR Escalations
                   </TabsTrigger>
+                  <TabsTrigger value="appraisal-cycles" className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4" />
+                    Cycles
+                  </TabsTrigger>
                   <TabsTrigger value="integration-rules" className="flex items-center gap-2">
                     <GitBranch className="h-4 w-4" />
                     Integration Rules
@@ -433,18 +468,11 @@ export default function PerformanceSetupPage() {
                     <BarChart3 className="h-4 w-4" />
                     Integration Status
                   </TabsTrigger>
-                  <TabsTrigger value="index-settings" className="flex items-center gap-2">
-                    <Layers className="h-4 w-4" />
-                    Index Settings
-                  </TabsTrigger>
                   <TabsTrigger value="benchmarks" className="flex items-center gap-2">
                     <Scale className="h-4 w-4" />
                     Benchmarks
                   </TabsTrigger>
                 </TabsList>
-                <TabsContent value="appraisal-cycles" className="mt-4">
-                  <AppraisalCyclesContent cycles={appraisalCycles} isLoading={isLoading} t={t} />
-                </TabsContent>
                 <TabsContent value="performance-categories" className="mt-4">
                   <PerformanceCategoriesManager companyId={selectedCompany} />
                 </TabsContent>
@@ -460,14 +488,14 @@ export default function PerformanceSetupPage() {
                 <TabsContent value="hr-escalations" className="mt-4">
                   <HRResponseEscalationPanel companyId={selectedCompany} />
                 </TabsContent>
+                <TabsContent value="appraisal-cycles" className="mt-4">
+                  <AppraisalCyclesContent cycles={appraisalCycles} isLoading={isLoading} t={t} />
+                </TabsContent>
                 <TabsContent value="integration-rules" className="mt-4">
                   <IntegrationRulesConfigSection companyId={selectedCompany} />
                 </TabsContent>
                 <TabsContent value="integration-dashboard" className="mt-4">
                   <IntegrationDashboardWidget companyId={selectedCompany} />
-                </TabsContent>
-                <TabsContent value="index-settings" className="mt-4">
-                  <PerformanceIndexSettingsPanel companyId={selectedCompany} />
                 </TabsContent>
                 <TabsContent value="benchmarks" className="mt-4">
                   <ExternalBenchmarkConfigPanel companyId={selectedCompany} />

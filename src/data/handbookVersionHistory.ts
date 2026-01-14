@@ -1,7 +1,7 @@
 // Handbook version tracking and source manual references
 
 export const HANDBOOK_VERSION = {
-  version: '2.4.0',
+  version: '2.5.0',
   date: '2026-01-14',
   author: 'Intelli HRM Team',
   nextReviewDate: '2026-04-14'
@@ -93,6 +93,20 @@ export interface ChangeLogEntry {
 }
 
 export const HANDBOOK_CHANGE_LOG: ChangeLogEntry[] = [
+  {
+    version: '2.5.0',
+    date: '2026-01-14',
+    changes: [
+      'Added breadcrumb navigation to Performance Setup page',
+      'Reorganized Appraisals sub-tabs for logical setup flow: Rating Levels → Form Templates → Action Rules → ... → Cycles',
+      'Moved Index Settings from Appraisals to Core Framework (global setting)',
+      'Updated all Performance phase adminRoute paths to use deep-linking with tab parameters',
+      'Added URL parameter support (?tab=&sub=) for direct navigation from Implementation Handbook',
+      'Reordered Appraisal Administration tabs: moved Approvals earlier for actionable priority',
+      'Reduced Phase 6 to 32 steps with corrected step ordering',
+      'Updated step routes to match actual UI locations'
+    ]
+  },
   {
     version: '2.4.0',
     date: '2026-01-14',
