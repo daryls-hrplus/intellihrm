@@ -37,6 +37,7 @@ export interface ReminderRulesManagerRef {
   reload: () => void;
   scrollToRule: (ruleId: string) => void;
   openEditDialog: (ruleId: string) => void;
+  openCreateDialogWithTemplate: (template: { id: string; name: string; category: string }) => void;
 }
 
 export const ReminderRulesManager = forwardRef<ReminderRulesManagerRef, ReminderRulesManagerProps>(
@@ -52,6 +53,7 @@ export const ReminderRulesManager = forwardRef<ReminderRulesManagerRef, Reminder
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingRule, setEditingRule] = useState<ReminderRule | null>(null);
+  const [linkedTemplate, setLinkedTemplate] = useState<{ id: string; name: string; category: string } | null>(null);
   const [newInterval, setNewInterval] = useState<string>('');
   const [dialogPreviewData, setDialogPreviewData] = useState<SourcePreviewData | null>(null);
   const [formData, setFormData] = useState<{
@@ -153,10 +155,37 @@ export const ReminderRulesManager = forwardRef<ReminderRulesManagerRef, Reminder
     }
   };
 
+  const openCreateDialogWithTemplate = (template: { id: string; name: string; category: string }) => {
+    setLinkedTemplate(template);
+    setEditingRule(null);
+    setFormData({
+      name: `${template.name} Notification Rule`,
+      description: `Auto-generated rule using template: ${template.name}`,
+      event_type_id: '',
+      days_before: 7,
+      reminder_intervals: [7],
+      send_to_employee: true,
+      send_to_manager: true,
+      send_to_hr: false,
+      notification_method: 'both',
+      message_template: '',
+      email_template_id: template.id,
+      use_custom_email: false,
+      priority: 'medium',
+      is_active: true,
+      cycle_type_filter: [],
+      effective_from: null,
+      effective_to: null,
+    });
+    setNewInterval('');
+    setDialogOpen(true);
+  };
+
   useImperativeHandle(ref, () => ({
     reload: loadData,
     scrollToRule,
     openEditDialog,
+    openCreateDialogWithTemplate,
   }));
 
   useEffect(() => {
@@ -180,6 +209,9 @@ export const ReminderRulesManager = forwardRef<ReminderRulesManagerRef, Reminder
   }, [dialogOpen, formData.event_type_id, formData.reminder_intervals, eventTypes, companyId]);
 
   const handleOpenDialog = (rule?: ReminderRule) => {
+    // Clear linked template when opening dialog normally (not from Use in Rule)
+    setLinkedTemplate(null);
+    
     if (rule) {
       setEditingRule(rule);
       const intervals = rule.reminder_intervals || [rule.days_before];
@@ -331,7 +363,10 @@ export const ReminderRulesManager = forwardRef<ReminderRulesManagerRef, Reminder
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
-          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+          <Dialog open={dialogOpen} onOpenChange={(open) => {
+            setDialogOpen(open);
+            if (!open) setLinkedTemplate(null);
+          }}>
             <DialogTrigger asChild>
               <Button onClick={() => handleOpenDialog()} className="bg-primary hover:bg-primary/90">
                 <Zap className="h-4 w-4 mr-2" />
@@ -365,6 +400,19 @@ export const ReminderRulesManager = forwardRef<ReminderRulesManagerRef, Reminder
               </div>
             </div>
 
+            {/* Linked Template Banner - Show when coming from "Use in Rule" */}
+            {linkedTemplate && (
+              <div className="flex items-center gap-2 p-3 bg-accent/50 border border-accent rounded-lg">
+                <FileText className="h-4 w-4 text-primary shrink-0" />
+                <span className="text-sm">
+                  Creating rule with template: <strong>{linkedTemplate.name}</strong>
+                </span>
+                <Badge variant="outline" className="ml-auto text-xs">
+                  {linkedTemplate.category.replace(/_/g, ' ')}
+                </Badge>
+              </div>
+            )}
+
             <div className="grid gap-4 py-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
@@ -379,7 +427,12 @@ export const ReminderRulesManager = forwardRef<ReminderRulesManagerRef, Reminder
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Event Type</Label>
+                  <Label className="flex items-center gap-1">
+                    Event Type
+                    {linkedTemplate && (
+                      <span className="text-xs text-primary ml-1">(Recommended matches shown first)</span>
+                    )}
+                  </Label>
                   <Select
                     value={formData.event_type_id}
                     onValueChange={(v) => setFormData({ ...formData, event_type_id: v })}
@@ -388,8 +441,38 @@ export const ReminderRulesManager = forwardRef<ReminderRulesManagerRef, Reminder
                       <SelectValue placeholder="Select event type" />
                     </SelectTrigger>
                     <SelectContent>
-                      {/* Group event types by category */}
-                      {Object.entries(
+                      {/* When linked template exists, show matching category first */}
+                      {linkedTemplate && (
+                        <>
+                          <div className="px-2 py-1.5 text-xs font-semibold text-primary uppercase tracking-wider bg-primary/10 sticky top-0 flex items-center gap-1">
+                            <Zap className="h-3 w-3" />
+                            Recommended for this template
+                          </div>
+                          {eventTypes
+                            .filter(type => type.category === linkedTemplate.category)
+                            .map((type) => (
+                              <SelectItem key={type.id} value={type.id} className="pl-4">
+                                <div className="flex items-center gap-2">
+                                  <span>{type.name}</span>
+                                  <Badge variant="default" className="text-[10px] px-1.5 py-0">Match</Badge>
+                                </div>
+                              </SelectItem>
+                            ))}
+                          <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider bg-muted/50 sticky top-0 mt-2">
+                            Other event types
+                          </div>
+                          {eventTypes
+                            .filter(type => type.category !== linkedTemplate.category)
+                            .map((type) => (
+                              <SelectItem key={type.id} value={type.id} className="pl-4">
+                                {type.name}
+                              </SelectItem>
+                            ))}
+                        </>
+                      )}
+                      
+                      {/* Default grouping when no linked template */}
+                      {!linkedTemplate && Object.entries(
                         eventTypes.reduce((acc, type) => {
                           const cat = type.category || 'other';
                           if (!acc[cat]) acc[cat] = [];

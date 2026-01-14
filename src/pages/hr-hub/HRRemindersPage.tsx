@@ -97,8 +97,15 @@ export default function HRRemindersPage() {
   }, []);
 
   const handleUseTemplate = (template: any) => {
-    toast.success(`Template "${template.name}" selected. Switch to the Rules tab to create a rule using this template.`);
     setActiveTab('rules');
+    // Trigger the rules manager to open create dialog with this template after tab switch
+    setTimeout(() => {
+      rulesManagerRef.current?.openCreateDialogWithTemplate({
+        id: template.id,
+        name: template.name,
+        category: template.category,
+      });
+    }, 100);
   };
 
   const breadcrumbItems = [
