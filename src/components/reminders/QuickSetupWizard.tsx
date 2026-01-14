@@ -233,7 +233,7 @@ export function QuickSetupWizard({
         notification_method: 'both',
         email_template_id: recommendation.templateId || null,
         priority: recommendation.priority,
-        is_active: true,
+        is_active: false,
       });
 
       if (error) throw error;
