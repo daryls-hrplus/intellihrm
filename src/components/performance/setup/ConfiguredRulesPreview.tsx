@@ -17,7 +17,8 @@ import { cn } from "@/lib/utils";
 
 interface ConfiguredRulesPreviewProps {
   companyId: string;
-  category?: string;
+  categories?: string[];  // Support array of categories
+  category?: string;      // Legacy single category support
   maxRules?: number;
   className?: string;
 }
@@ -49,14 +50,18 @@ const priorityConfig: Record<string, { label: string; variant: "default" | "seco
 
 export function ConfiguredRulesPreview({ 
   companyId, 
+  categories,
   category = 'performance',
   maxRules = 5,
   className 
 }: ConfiguredRulesPreviewProps) {
   const navigate = useNavigate();
+  
+  // Use categories array if provided, otherwise fall back to single category
+  const categoryFilter = categories || [category];
 
   const { data: rules, isLoading } = useQuery({
-    queryKey: ['configured-rules-preview', companyId, category],
+    queryKey: ['configured-rules-preview', companyId, categoryFilter],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('reminder_rules')
@@ -72,8 +77,10 @@ export function ConfiguredRulesPreview({
       
       if (error) throw error;
       
-      // Filter by performance category
-      const filtered = (data as ReminderRule[])?.filter(r => r.event_type?.category === category) || [];
+      // Filter by category/categories
+      const filtered = (data as ReminderRule[])?.filter(r => 
+        categoryFilter.includes(r.event_type?.category || '')
+      ) || [];
       return filtered;
     },
     enabled: !!companyId,

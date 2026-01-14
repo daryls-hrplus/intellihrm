@@ -2,50 +2,67 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { 
   Bell, 
   Target, 
   Calendar, 
   MessageSquare, 
-  Clock, 
+  Heart,
+  Users,
   ExternalLink,
-  ArrowRight
+  ArrowRight,
+  CheckCircle2
 } from "lucide-react";
 import { ConfiguredRulesPreview } from "./ConfiguredRulesPreview";
+import { PerformanceNotificationStats } from "./PerformanceNotificationStats";
+
+// Performance-specific categories matching database
+const PERFORMANCE_CATEGORIES = [
+  'performance_goals',
+  'performance_appraisals',
+  'performance_360',
+  'performance_feedback',
+  'performance_succession'
+];
 
 const NOTIFICATION_CATEGORIES = [
   {
-    id: 'goals',
+    id: 'performance_goals',
     title: 'Goal Reminders',
-    description: 'Check-in deadlines, goal submission due dates, manager review reminders',
+    description: 'Goal check-ins, setting deadlines, milestone tracking, cascade updates',
     icon: Target,
-    category: 'performance',
-    eventTypes: ['goal_check_in', 'goal_deadline', 'goal_approval']
+    category: 'performance_goals',
   },
   {
-    id: 'appraisals',
+    id: 'performance_appraisals',
     title: 'Appraisal Notifications',
-    description: 'Cycle start alerts, submission deadlines, calibration reminders, review completions',
+    description: 'Cycle starts/ends, evaluation deadlines, calibration sessions, sign-offs',
     icon: Calendar,
-    category: 'performance',
-    eventTypes: ['appraisal_start', 'appraisal_due', 'appraisal_calibration']
+    category: 'performance_appraisals',
   },
   {
-    id: 'feedback',
-    title: '360° Feedback Alerts',
-    description: 'Nomination requests, feedback submission reminders, completion notifications',
+    id: 'performance_360',
+    title: '360 Feedback Alerts',
+    description: 'Cycle activation, self-review deadlines, feedback collection, results release',
     icon: MessageSquare,
-    category: 'performance',
-    eventTypes: ['feedback_request', 'feedback_due', 'feedback_complete']
+    category: 'performance_360',
   },
   {
-    id: 'check-ins',
-    title: 'Check-in Reminders',
-    description: 'Regular 1:1 meeting reminders, progress update prompts',
-    icon: Clock,
-    category: 'performance',
-    eventTypes: ['check_in_due', 'check_in_overdue']
-  }
+    id: 'performance_feedback',
+    title: 'Continuous Feedback',
+    description: 'Feedback requests, praise notifications, weekly check-in reminders',
+    icon: Heart,
+    category: 'performance_feedback',
+  },
+  {
+    id: 'performance_succession',
+    title: 'Succession & Talent',
+    description: 'Development plan actions, successor assessments, talent review reminders',
+    icon: Users,
+    category: 'performance_succession',
+  },
 ];
 
 interface NotificationsLinkSectionProps {
@@ -54,6 +71,75 @@ interface NotificationsLinkSectionProps {
 
 export function NotificationsLinkSection({ companyId }: NotificationsLinkSectionProps) {
   const navigate = useNavigate();
+
+  // Fetch rule counts per category
+  const { data: categoryRuleCounts } = useQuery({
+    queryKey: ['performance-category-rule-counts', companyId],
+    queryFn: async () => {
+      if (!companyId) return {};
+      
+      const { data, error } = await supabase
+        .from('reminder_rules')
+        .select(`
+          id,
+          event_type:reminder_event_types!inner(category)
+        `)
+        .eq('company_id', companyId)
+        .eq('is_active', true);
+      
+      if (error) throw error;
+      
+      // Count rules per category
+      const counts: Record<string, number> = {};
+      (data || []).forEach(rule => {
+        const cat = (rule.event_type as any)?.category;
+        if (cat && PERFORMANCE_CATEGORIES.includes(cat)) {
+          counts[cat] = (counts[cat] || 0) + 1;
+        }
+      });
+      return counts;
+    },
+    enabled: !!companyId,
+  });
+
+  // Fetch template counts per category
+  const { data: categoryTemplateCounts } = useQuery({
+    queryKey: ['performance-category-template-counts', companyId],
+    queryFn: async () => {
+      if (!companyId) return {};
+      
+      // Get event types for performance categories
+      const { data: eventTypes } = await supabase
+        .from('reminder_event_types')
+        .select('id, category')
+        .in('category', PERFORMANCE_CATEGORIES);
+      
+      const eventTypeMap = new Map((eventTypes || []).map(et => [et.id, et.category]));
+      const performanceEventTypeIds = Array.from(eventTypeMap.keys());
+      
+      if (performanceEventTypeIds.length === 0) return {};
+      
+      const { data, error } = await (supabase as any)
+        .from('reminder_templates')
+        .select('id, event_type_id')
+        .eq('company_id', companyId)
+        .eq('is_active', true)
+        .in('event_type_id', performanceEventTypeIds);
+      
+      if (error) throw error;
+      
+      // Count templates per category
+      const counts: Record<string, number> = {};
+      (data || []).forEach((template: any) => {
+        const cat = eventTypeMap.get(template.event_type_id);
+        if (cat) {
+          counts[cat] = (counts[cat] || 0) + 1;
+        }
+      });
+      return counts;
+    },
+    enabled: !!companyId,
+  });
 
   const handleNavigateToReminders = (category?: string) => {
     const params = new URLSearchParams();
@@ -80,13 +166,19 @@ export function NotificationsLinkSection({ companyId }: NotificationsLinkSection
                 </CardDescription>
               </div>
             </div>
-            <Button onClick={() => handleNavigateToReminders('performance')}>
+            <Button onClick={() => handleNavigateToReminders()}>
               <ExternalLink className="h-4 w-4 mr-2" />
               Open Reminders Module
             </Button>
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
+          {/* Stats Overview */}
+          {companyId && (
+            <PerformanceNotificationStats companyId={companyId} />
+          )}
+
+          {/* Info Banner */}
           <div className="rounded-lg bg-muted/50 p-4">
             <p className="text-sm text-muted-foreground">
               All notification templates and reminder rules are managed centrally in the <strong>Reminders module</strong>. 
@@ -95,45 +187,53 @@ export function NotificationsLinkSection({ companyId }: NotificationsLinkSection
             </p>
           </div>
 
+          {/* Active Rules Preview */}
           {companyId && (
             <ConfiguredRulesPreview 
               companyId={companyId} 
-              category="performance"
+              categories={PERFORMANCE_CATEGORIES}
               maxRules={5}
             />
           )}
 
-          <div className="grid gap-4 md:grid-cols-2">
+          {/* Category Cards */}
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {NOTIFICATION_CATEGORIES.map((category) => {
               const Icon = category.icon;
+              const ruleCount = categoryRuleCounts?.[category.category] || 0;
+              const templateCount = categoryTemplateCounts?.[category.category] || 0;
+              const hasRules = ruleCount > 0;
+              
               return (
                 <Card 
                   key={category.id} 
                   className="cursor-pointer hover:border-primary/50 transition-colors"
                   onClick={() => handleNavigateToReminders(category.category)}
                 >
-                  <CardContent className="pt-6">
-                    <div className="flex items-start gap-4">
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-                        <Icon className="h-5 w-5 text-primary" />
+                  <CardContent className="pt-5 pb-4">
+                    <div className="flex items-start gap-3">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+                        <Icon className="h-4 w-4 text-primary" />
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between mb-1">
-                          <h3 className="font-semibold">{category.title}</h3>
+                      <div className="flex-1 min-w-0 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <h3 className="font-semibold text-sm">{category.title}</h3>
                           <ArrowRight className="h-4 w-4 text-muted-foreground" />
                         </div>
-                        <p className="text-sm text-muted-foreground line-clamp-2">
+                        <p className="text-xs text-muted-foreground line-clamp-2">
                           {category.description}
                         </p>
-                        <div className="flex flex-wrap gap-1 mt-2">
-                          {category.eventTypes.slice(0, 2).map((type) => (
-                            <Badge key={type} variant="secondary" className="text-xs">
-                              {type.replace(/_/g, ' ')}
-                            </Badge>
-                          ))}
-                          {category.eventTypes.length > 2 && (
-                            <Badge variant="outline" className="text-xs">
-                              +{category.eventTypes.length - 2} more
+                        <div className="flex items-center gap-2 pt-1">
+                          <Badge 
+                            variant={hasRules ? "default" : "outline"} 
+                            className="text-xs"
+                          >
+                            {hasRules && <CheckCircle2 className="h-3 w-3 mr-1" />}
+                            {ruleCount} {ruleCount === 1 ? 'rule' : 'rules'}
+                          </Badge>
+                          {templateCount > 0 && (
+                            <Badge variant="secondary" className="text-xs">
+                              {templateCount} templates
                             </Badge>
                           )}
                         </div>
