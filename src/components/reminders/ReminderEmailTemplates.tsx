@@ -683,10 +683,21 @@ export function ReminderEmailTemplates({ companyId, companyName, onUseTemplate }
                     </Button>
                   </div>
                   <CardDescription className="text-xs">
-                    Based on "{getCategoryLabel(newTemplate.category)}" 
-                    {templates.filter(t => t.category === newTemplate.category).length > 0 && 
-                      ` • ${templates.filter(t => t.category === newTemplate.category).length} templates already exist`
-                    }
+                    Based on "{getCategoryLabel(newTemplate.category)}"
+                    {(() => {
+                      const existingTemplates = templates.filter(t => t.category === newTemplate.category);
+                      if (existingTemplates.length > 0) {
+                        return (
+                          <>
+                            {` • ${existingTemplates.length} templates already exist`}
+                            <span className="block mt-1 text-muted-foreground/80 italic">
+                              Existing: {existingTemplates.map(t => t.name).join(', ')}
+                            </span>
+                          </>
+                        );
+                      }
+                      return null;
+                    })()}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="pt-0">
