@@ -12,7 +12,6 @@ import { Slider } from "@/components/ui/slider";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useAppraisalFormTemplates, AppraisalFormTemplate, CreateTemplateInput, validateWeights } from "@/hooks/useAppraisalFormTemplates";
 import { useAppraisalTemplateSections } from "@/hooks/useAppraisalTemplateSections";
@@ -371,8 +370,8 @@ export function AppraisalFormTemplateManager({ companyId, companyName }: Props) 
       </Card>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col p-0">
-          <DialogHeader className="px-6 pt-6 pb-4 border-b">
+        <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col p-0 overflow-hidden">
+          <DialogHeader className="px-6 pt-6 pb-4 border-b flex-shrink-0">
             <div className="flex items-center justify-between">
               <DialogTitle>{editingTemplate ? "Edit Template" : "Create Template"}</DialogTitle>
               {companyName && (
@@ -387,7 +386,7 @@ export function AppraisalFormTemplateManager({ companyId, companyName }: Props) 
             </DialogDescription>
           </DialogHeader>
 
-          <ScrollArea className="flex-1 px-6">
+          <div className="flex-1 overflow-y-auto px-6">
             <div className="space-y-6 py-4">
               {/* Template Details */}
               <div className="space-y-4">
@@ -521,13 +520,16 @@ export function AppraisalFormTemplateManager({ companyId, companyName }: Props) 
                 </div>
               )}
 
-              {/* Advanced Settings - Collapsible */}
-              <Collapsible open={advancedOpen} onOpenChange={setAdvancedOpen} className="border rounded-lg">
+              {/* Advanced Settings - Collapsible (Optional) */}
+              <Collapsible open={advancedOpen} onOpenChange={setAdvancedOpen} className="border rounded-lg bg-muted/20">
                 <CollapsibleTrigger className="flex items-center gap-3 w-full p-4 hover:bg-muted/50 transition-colors rounded-lg">
                   <ChevronRight className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${advancedOpen ? 'rotate-90' : ''}`} />
                   <Settings2 className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm font-medium">Advanced Settings</span>
-                  <span className="text-xs text-muted-foreground ml-auto">Phases, Timing, Governance</span>
+                  <div className="flex flex-col items-start">
+                    <span className="text-sm font-medium">Advanced Configuration</span>
+                    <span className="text-xs text-muted-foreground">Optional settings for enterprise requirements</span>
+                  </div>
+                  <Badge variant="secondary" className="ml-auto text-xs">Optional</Badge>
                 </CollapsibleTrigger>
                 <CollapsibleContent className="space-y-6 p-4 pt-0 border-t">
                   {/* Phase Configuration - Only for existing templates */}
@@ -693,7 +695,7 @@ export function AppraisalFormTemplateManager({ companyId, companyName }: Props) 
                 </CollapsibleContent>
               </Collapsible>
             </div>
-          </ScrollArea>
+          </div>
 
           <DialogFooter className="px-6 py-4 border-t">
             <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
