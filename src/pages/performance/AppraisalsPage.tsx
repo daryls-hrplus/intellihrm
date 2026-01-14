@@ -28,6 +28,7 @@ import {
   Brain,
   ExternalLink,
   Percent,
+  Shield,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -51,6 +52,7 @@ import { AIHumanOverrideDialog } from "@/components/ai-governance/AIHumanOverrid
 import { AIBiasAlertBanner } from "@/components/ai-governance/AIBiasAlertBanner";
 import { AIAuditTrailPanel } from "@/components/ai-governance/AIAuditTrailPanel";
 import { CalendarSync } from "@/components/appraisals/CalendarSync";
+import { HRResponseEscalationPanel } from "@/components/performance/setup/HRResponseEscalationPanel";
 
 interface AppraisalCycle {
   id: string;
@@ -440,6 +442,10 @@ export default function AppraisalsPage() {
               <FileCheck className="h-4 w-4" />
               Approvals
             </TabsTrigger>
+            <TabsTrigger value="escalations" className="gap-2">
+              <Shield className="h-4 w-4" />
+              Escalations
+            </TabsTrigger>
             <TabsTrigger value="calibration" className="gap-2">
               <Scale className="h-4 w-4" />
               Calibration
@@ -683,6 +689,11 @@ export default function AppraisalsPage() {
               </div>
               <GoalApprovalInbox companyId={selectedCompanyId} />
             </div>
+          </TabsContent>
+
+          {/* Escalations Tab */}
+          <TabsContent value="escalations" className="mt-6">
+            <HRResponseEscalationPanel companyId={selectedCompanyId} />
           </TabsContent>
 
           {/* Talent AI Tab */}

@@ -452,10 +452,6 @@ export default function PerformanceSetupPage() {
                     <MessageSquare className="h-4 w-4" />
                     Employee Response
                   </TabsTrigger>
-                  <TabsTrigger value="hr-escalations" className="flex items-center gap-2">
-                    <Shield className="h-4 w-4" />
-                    HR Escalations
-                  </TabsTrigger>
                   <TabsTrigger value="appraisal-cycles" className="flex items-center gap-2">
                     <Calendar className="h-4 w-4" />
                     Cycles
@@ -487,9 +483,6 @@ export default function PerformanceSetupPage() {
                 </TabsContent>
                 <TabsContent value="employee-response" className="mt-4">
                   <EmployeeResponseConfigurationPanel companyId={selectedCompany} />
-                </TabsContent>
-                <TabsContent value="hr-escalations" className="mt-4">
-                  <HRResponseEscalationPanel companyId={selectedCompany} />
                 </TabsContent>
                 <TabsContent value="appraisal-cycles" className="mt-4">
                   <AppraisalCyclesContent cycles={appraisalCycles} isLoading={isLoading} t={t} />
