@@ -475,11 +475,11 @@ export const subTaskDefinitions: Record<string, Record<number, SubTaskDefinition
       { order: 2, name: "Configure goal hierarchy (company/dept/individual)", isRequired: false },
       { order: 3, name: "Set alignment requirements", isRequired: false },
     ],
-    14: [ // Goal Templates
+    16: [ // Goal Templates
       { order: 1, name: "Create goal templates by job family", isRequired: false },
       { order: 2, name: "Create goal templates by department", isRequired: false },
     ],
-    15: [ // Goal Locking Rules
+    17: [ // Goal Locking Rules
       { order: 1, name: "Configure goal lock dates", isRequired: false },
       { order: 2, name: "Set modification approval workflow", isRequired: false },
     ],
