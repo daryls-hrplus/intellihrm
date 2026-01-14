@@ -98,7 +98,11 @@ export type ReminderCategory =
   | 'onboarding' 
   | 'employment' 
   | 'leave' 
-  | 'performance'
+  | 'performance_appraisals'
+  | 'performance_360'
+  | 'performance_goals'
+  | 'performance_feedback'
+  | 'performance_succession'
   | 'employee_voice'
   | 'training' 
   | 'benefits'
@@ -112,7 +116,11 @@ export const REMINDER_CATEGORIES: { value: ReminderCategory; label: string }[] =
   { value: 'onboarding', label: 'Onboarding & Probation' },
   { value: 'employment', label: 'Employment & Contracts' },
   { value: 'leave', label: 'Leave & Attendance' },
-  { value: 'performance', label: 'Performance & Reviews' },
+  { value: 'performance_appraisals', label: 'Performance: Appraisals' },
+  { value: 'performance_360', label: 'Performance: 360 Feedback' },
+  { value: 'performance_goals', label: 'Performance: Goals' },
+  { value: 'performance_feedback', label: 'Performance: Continuous Feedback' },
+  { value: 'performance_succession', label: 'Performance: Succession' },
   { value: 'employee_voice', label: 'Employee Voice' },
   { value: 'training', label: 'Training & Development' },
   { value: 'benefits', label: 'Benefits & Wellness' },

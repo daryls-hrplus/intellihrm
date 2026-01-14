@@ -50,7 +50,12 @@ import {
   Zap,
   Sparkles,
   RefreshCw,
-  Wand2
+  Wand2,
+  ClipboardCheck,
+  Users,
+  Target,
+  MessageCircle,
+  GitBranch
 } from 'lucide-react';
 
 interface EmailTemplate {
@@ -79,7 +84,11 @@ const CATEGORY_ICONS: Record<string, React.ReactNode> = {
   benefits: <Heart className="h-4 w-4" />,
   leave: <Calendar className="h-4 w-4" />,
   milestone: <Award className="h-4 w-4" />,
-  performance: <Award className="h-4 w-4" />,
+  performance_appraisals: <ClipboardCheck className="h-4 w-4" />,
+  performance_360: <Users className="h-4 w-4" />,
+  performance_goals: <Target className="h-4 w-4" />,
+  performance_feedback: <MessageCircle className="h-4 w-4" />,
+  performance_succession: <GitBranch className="h-4 w-4" />,
   employee_voice: <MessageSquare className="h-4 w-4" />,
   onboarding: <UserPlus className="h-4 w-4" />,
 };

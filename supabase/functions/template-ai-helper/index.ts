@@ -48,13 +48,25 @@ Format your response as JSON array:
   }
 ]`;
     } else if (action === "suggest_email_templates") {
+      // Performance sub-category context for more relevant suggestions
+      const performanceContext: Record<string, string> = {
+        'Performance: Appraisals': 'Focus on formal review cycles, manager evaluations, calibration sessions, employee acknowledgments, and review deadlines. Common events: review cycle launch, evaluation submission deadline, manager sign-off required, employee acknowledgment request.',
+        'Performance: 360 Feedback': 'Focus on multi-rater feedback, peer reviews, self-assessments, feedback collection deadlines, and results sharing. Common events: 360 cycle launch, feedback request to peers, self-assessment reminder, results ready notification.',
+        'Performance: Goals': 'Focus on OKRs, goal setting, goal cascading from company to team to individual, progress check-ins, and goal tracking. Common events: goal setting deadline, quarterly check-in reminder, goal progress update, cascade alignment notification.',
+        'Performance: Continuous Feedback': 'Focus on informal feedback, real-time recognition, praise, coaching moments, and ongoing check-ins. Common events: feedback request nudge, praise notification, weekly check-in reminder, recognition alert.',
+        'Performance: Succession': 'Focus on talent reviews, successor identification, leadership pipeline, readiness assessments, and development plans. Common events: talent review reminder, successor assessment due, development plan action required, pipeline update notification.',
+      };
+      
+      const categoryContext = performanceContext[categoryName] || '';
+
       systemPrompt = `You are an HR notification email template expert. Generate professional reminder and notification email templates for HR systems.
 Templates should be:
 - Professional yet friendly in tone
 - Clear and action-oriented with specific calls to action
 - Include appropriate placeholders using double curly braces: {{employee_first_name}}, {{employee_full_name}}, {{manager_name}}, {{company_name}}, {{event_title}}, {{event_date}}, {{days_until}}, {{cycle_name}}
 - Suitable for automated HR reminder and notification systems
-- Well-structured with proper greeting, body, and sign-off`;
+- Well-structured with proper greeting, body, and sign-off
+${categoryContext ? `\nCategory-specific guidance: ${categoryContext}` : ''}`;
 
       userPrompt = `Generate 3 email template suggestions for the "${categoryName}" reminder/notification category.
 
