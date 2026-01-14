@@ -9,7 +9,8 @@ export type ConditionType =
   | "repeated_low" 
   | "improvement_trend" 
   | "competency_gap" 
-  | "goal_not_met";
+  | "goal_not_met"
+  | "rating_category";
 
 export type ActionType = 
   | "create_idp" 
@@ -36,6 +37,7 @@ export interface AppraisalActionRule {
   condition_operator: ConditionOperator;
   condition_threshold: number;
   condition_cycles: number | null;
+  rating_level_codes: string[] | null;
   action_type: ActionType;
   action_is_mandatory: boolean;
   action_priority: number;
@@ -61,6 +63,7 @@ export interface CreateRuleInput {
   condition_operator?: ConditionOperator;
   condition_threshold: number;
   condition_cycles?: number;
+  rating_level_codes?: string[];
   action_type: ActionType;
   action_is_mandatory?: boolean;
   action_priority?: number;

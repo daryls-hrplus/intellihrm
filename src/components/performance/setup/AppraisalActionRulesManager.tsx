@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -11,7 +11,11 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAppraisalFormTemplates } from "@/hooks/useAppraisalFormTemplates";
+import { usePerformanceCategories } from "@/hooks/usePerformanceCategories";
+import { RatingLevelSelector } from "./RatingLevelSelector";
 import { 
   useAppraisalActionRules, 
   AppraisalActionRule, 
@@ -20,71 +24,147 @@ import {
   ActionType,
   ConditionSection,
   ConditionOperator,
-  getRuleDescription
 } from "@/hooks/useAppraisalActionRules";
-import { Plus, Edit, Trash2, AlertTriangle, Info, ArrowRight, Shield } from "lucide-react";
+import { 
+  Plus, 
+  Edit, 
+  Trash2, 
+  AlertTriangle, 
+  Info, 
+  ArrowRight, 
+  Shield, 
+  Zap,
+  FileText,
+  UserCheck,
+  TrendingUp,
+  Bell,
+  Calendar,
+  Lightbulb,
+  ChevronRight
+} from "lucide-react";
 
 interface Props {
   companyId: string;
 }
 
-const CONDITION_TYPES: { value: ConditionType; label: string }[] = [
-  { value: "score_below", label: "Score Below Threshold" },
-  { value: "score_above", label: "Score Above Threshold" },
-  { value: "repeated_low", label: "Repeated Low Score" },
-  { value: "gap_detected", label: "Performance Gap Detected" },
-  { value: "improvement_trend", label: "Improvement Trend" },
-  { value: "competency_gap", label: "Competency Gap" },
-  { value: "goal_not_met", label: "Goal Not Met" },
+// Simplified condition types with rating category support
+const CONDITION_TYPES: { value: ConditionType | "rating_category"; label: string; description: string }[] = [
+  { value: "rating_category", label: "Falls into Rating Category", description: "Trigger when score maps to specific rating level" },
+  { value: "score_below", label: "Score Below Value", description: "Trigger when score falls below a specific number" },
+  { value: "score_above", label: "Score Above Value", description: "Trigger when score exceeds a specific number" },
+  { value: "repeated_low", label: "Consecutive Low Scores", description: "Trigger after multiple low-scoring cycles" },
 ];
 
-const ACTION_TYPES: { value: ActionType; label: string; description: string }[] = [
-  { value: "create_idp", label: "Create IDP", description: "Auto-create Individual Development Plan" },
-  { value: "create_pip", label: "Create PIP", description: "Initiate Performance Improvement Plan" },
-  { value: "suggest_succession", label: "Succession Suggestion", description: "Suggest for succession pool" },
-  { value: "block_finalization", label: "Block Finalization", description: "Prevent appraisal completion" },
-  { value: "require_comment", label: "Require Comment", description: "Manager must add justification" },
-  { value: "notify_hr", label: "Notify HR", description: "Send alert to HR team" },
-  { value: "schedule_coaching", label: "Schedule Coaching", description: "Prompt coaching session" },
-  { value: "require_development_plan", label: "Require Dev Plan", description: "Mandate development planning" },
+const ACTION_TYPES: { value: ActionType; label: string; description: string; icon: React.ElementType }[] = [
+  { value: "create_pip", label: "Create Performance Improvement Plan", description: "Initiate a formal PIP process", icon: AlertTriangle },
+  { value: "create_idp", label: "Create Individual Development Plan", description: "Generate a development plan", icon: FileText },
+  { value: "suggest_succession", label: "Suggest for Succession Pool", description: "Flag for leadership pipeline", icon: UserCheck },
+  { value: "block_finalization", label: "Block Appraisal Finalization", description: "Prevent completion without action", icon: Shield },
+  { value: "require_comment", label: "Require Manager Comment", description: "Mandate justification note", icon: FileText },
+  { value: "notify_hr", label: "Notify HR Team", description: "Send alert to HR", icon: Bell },
+  { value: "schedule_coaching", label: "Schedule Coaching Session", description: "Prompt coaching meeting", icon: Calendar },
+  { value: "require_development_plan", label: "Require Development Plan", description: "Mandate development planning", icon: TrendingUp },
 ];
 
 const SECTIONS: { value: ConditionSection; label: string }[] = [
   { value: "overall", label: "Overall Score" },
-  { value: "goals", label: "Goals Section" },
-  { value: "competencies", label: "Competencies Section" },
-  { value: "responsibilities", label: "Responsibilities Section" },
-  { value: "feedback_360", label: "360 Feedback Section" },
-  { value: "values", label: "Values Section" },
+  { value: "goals", label: "Goals" },
+  { value: "competencies", label: "Competencies" },
+  { value: "responsibilities", label: "Responsibilities" },
+  { value: "feedback_360", label: "360 Feedback" },
+  { value: "values", label: "Values" },
 ];
 
-const OPERATORS: { value: ConditionOperator; label: string }[] = [
-  { value: "<", label: "Less than" },
-  { value: "<=", label: "Less than or equal" },
-  { value: ">", label: "Greater than" },
-  { value: ">=", label: "Greater than or equal" },
-  { value: "=", label: "Equal to" },
-  { value: "!=", label: "Not equal to" },
+const PRIORITY_OPTIONS = [
+  { value: 1, label: "Low", color: "bg-slate-500" },
+  { value: 2, label: "Medium", color: "bg-amber-500" },
+  { value: 3, label: "High", color: "bg-orange-500" },
+  { value: 4, label: "Critical", color: "bg-destructive" },
 ];
+
+// Quick rule templates
+const RULE_TEMPLATES = [
+  {
+    id: "low_score_pip",
+    name: "Low Score → PIP",
+    description: "Create PIP when employee receives low ratings",
+    icon: AlertTriangle,
+    color: "text-destructive",
+    defaults: {
+      rule_name: "Low Score PIP Trigger",
+      rule_code: "low_score_pip",
+      condition_type: "rating_category" as const,
+      rating_level_codes: ["needs_improvement", "unsatisfactory"],
+      condition_section: "overall" as ConditionSection,
+      action_type: "create_pip" as ActionType,
+      action_is_mandatory: true,
+      action_priority: 4,
+      action_message: "Based on your performance rating, a Performance Improvement Plan has been initiated. Your manager will schedule a meeting to discuss next steps.",
+    },
+  },
+  {
+    id: "high_performer_succession",
+    name: "Top Performer → Succession",
+    description: "Flag high performers for succession planning",
+    icon: TrendingUp,
+    color: "text-emerald-500",
+    defaults: {
+      rule_name: "High Performer Succession Flag",
+      rule_code: "high_performer_succession",
+      condition_type: "rating_category" as const,
+      rating_level_codes: ["exceptional", "exceeds"],
+      condition_section: "overall" as ConditionSection,
+      action_type: "suggest_succession" as ActionType,
+      action_is_mandatory: false,
+      action_priority: 2,
+      action_message: "This employee has been flagged for succession planning consideration based on their outstanding performance.",
+    },
+  },
+  {
+    id: "average_idp",
+    name: "Average Score → IDP",
+    description: "Recommend development plan for average performers",
+    icon: FileText,
+    color: "text-blue-500",
+    defaults: {
+      rule_name: "Average Score Development Plan",
+      rule_code: "average_score_idp",
+      condition_type: "rating_category" as const,
+      rating_level_codes: ["meets"],
+      condition_section: "overall" as ConditionSection,
+      action_type: "create_idp" as ActionType,
+      action_is_mandatory: false,
+      action_priority: 2,
+      action_message: "A development plan is recommended to help you grow into the next level of performance.",
+    },
+  },
+];
+
+interface FormData extends Partial<CreateRuleInput> {
+  rating_level_codes?: string[];
+}
 
 export function AppraisalActionRulesManager({ companyId }: Props) {
   const { templates, isLoading: templatesLoading } = useAppraisalFormTemplates(companyId);
+  const { data: ratingLevels } = usePerformanceCategories(companyId);
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>("");
   
   const { rules, isLoading: rulesLoading, createRule, updateRule, deleteRule, isCreating, isUpdating } = useAppraisalActionRules(selectedTemplateId);
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingRule, setEditingRule] = useState<AppraisalActionRule | null>(null);
+  const [activeTab, setActiveTab] = useState<"custom" | "templates">("custom");
 
-  const [formData, setFormData] = useState<Partial<CreateRuleInput>>({
-    condition_type: "score_below",
+  const [formData, setFormData] = useState<FormData>({
+    condition_type: "rating_category",
     condition_section: "overall",
     condition_operator: "<",
     condition_threshold: 2.5,
     condition_cycles: 1,
+    rating_level_codes: [],
     action_type: "create_idp",
     action_is_mandatory: false,
-    action_priority: 1,
+    action_priority: 2,
     requires_hr_override: false,
     auto_execute: false,
     is_active: true,
@@ -92,21 +172,50 @@ export function AppraisalActionRulesManager({ companyId }: Props) {
 
   const selectedTemplate = templates.find(t => t.id === selectedTemplateId);
 
+  // Generate rule preview text
+  const rulePreview = useMemo(() => {
+    if (!formData.condition_type || !formData.action_type) return null;
+
+    const conditionType = formData.condition_type as ConditionType | "rating_category";
+    let conditionText = "";
+    
+    if (conditionType === "rating_category" && formData.rating_level_codes?.length) {
+      const selectedNames = ratingLevels
+        ?.filter(r => formData.rating_level_codes?.includes(r.code))
+        .map(r => r.name) || [];
+      conditionText = `score falls into ${selectedNames.join(" or ")}`;
+    } else if (conditionType === "score_below") {
+      conditionText = `score is below ${formData.condition_threshold}`;
+    } else if (conditionType === "score_above") {
+      conditionText = `score is above ${formData.condition_threshold}`;
+    } else if (conditionType === "repeated_low") {
+      conditionText = `score is below ${formData.condition_threshold} for ${formData.condition_cycles} consecutive cycles`;
+    }
+
+    const sectionLabel = SECTIONS.find(s => s.value === formData.condition_section)?.label || "Overall";
+    const actionLabel = ACTION_TYPES.find(a => a.value === formData.action_type)?.label || formData.action_type;
+    const mandatory = formData.action_is_mandatory ? " (mandatory)" : " (advisory)";
+
+    return `When ${sectionLabel} ${conditionText}, then ${actionLabel.toLowerCase()}${mandatory}.`;
+  }, [formData, ratingLevels]);
+
   const handleOpenCreate = () => {
     setEditingRule(null);
     setFormData({
-      condition_type: "score_below",
+      condition_type: "rating_category",
       condition_section: "overall",
       condition_operator: "<",
       condition_threshold: 2.5,
       condition_cycles: 1,
+      rating_level_codes: [],
       action_type: "create_idp",
       action_is_mandatory: false,
-      action_priority: 1,
+      action_priority: 2,
       requires_hr_override: false,
       auto_execute: false,
       is_active: true,
     });
+    setActiveTab("custom");
     setDialogOpen(true);
   };
 
@@ -121,6 +230,7 @@ export function AppraisalActionRulesManager({ companyId }: Props) {
       condition_operator: rule.condition_operator,
       condition_threshold: rule.condition_threshold,
       condition_cycles: rule.condition_cycles || 1,
+      rating_level_codes: (rule as any).rating_level_codes || [],
       action_type: rule.action_type,
       action_is_mandatory: rule.action_is_mandatory,
       action_priority: rule.action_priority,
@@ -130,18 +240,43 @@ export function AppraisalActionRulesManager({ companyId }: Props) {
       auto_execute: rule.auto_execute,
       is_active: rule.is_active,
     });
+    setActiveTab("custom");
     setDialogOpen(true);
+  };
+
+  const handleUseTemplate = (template: typeof RULE_TEMPLATES[0]) => {
+    setFormData(prev => ({
+      ...prev,
+      ...template.defaults,
+    }));
+    setActiveTab("custom");
   };
 
   const handleSubmit = async () => {
     if (!formData.rule_name || !formData.rule_code) return;
 
     try {
+      // For rating_category, store the rating codes and calculate threshold from them
+      const submitData: any = { ...formData };
+      
+      if (formData.condition_type === "rating_category" && formData.rating_level_codes?.length) {
+        // Find the minimum score threshold from selected rating levels
+        const selectedLevels = ratingLevels?.filter(r => formData.rating_level_codes?.includes(r.code)) || [];
+        if (selectedLevels.length > 0) {
+          submitData.condition_threshold = Math.min(...selectedLevels.map(l => l.min_score));
+          submitData.condition_operator = "<=";
+          // Also store the max score for accurate matching
+          const maxScore = Math.max(...selectedLevels.map(l => l.max_score));
+          submitData.condition_threshold = maxScore;
+        }
+        submitData.condition_type = "score_below"; // Fall back to score_below for DB compatibility
+      }
+
       if (editingRule) {
-        await updateRule({ id: editingRule.id, ...formData });
+        await updateRule({ id: editingRule.id, ...submitData });
       } else {
         await createRule({
-          ...formData,
+          ...submitData,
           template_id: selectedTemplateId,
           company_id: companyId,
         } as CreateRuleInput);
@@ -157,7 +292,33 @@ export function AppraisalActionRulesManager({ companyId }: Props) {
     await deleteRule(id);
   };
 
-  const isLoading = templatesLoading || rulesLoading;
+  const getRatingLevelDisplay = (rule: AppraisalActionRule) => {
+    const codes = (rule as any).rating_level_codes as string[] | undefined;
+    if (!codes?.length) {
+      return (
+        <div className="flex items-center gap-2 text-sm">
+          <Badge variant="outline">{SECTIONS.find(s => s.value === rule.condition_section)?.label}</Badge>
+          <span>{rule.condition_operator}</span>
+          <span className="font-mono">{rule.condition_threshold}</span>
+        </div>
+      );
+    }
+
+    const matchingLevels = ratingLevels?.filter(l => codes.includes(l.code)) || [];
+    return (
+      <div className="flex flex-wrap gap-1">
+        {matchingLevels.map(level => (
+          <Badge 
+            key={level.id} 
+            variant="outline"
+            style={{ borderColor: level.color, color: level.color }}
+          >
+            {level.name}
+          </Badge>
+        ))}
+      </div>
+    );
+  };
 
   if (templatesLoading) {
     return (
@@ -179,8 +340,13 @@ export function AppraisalActionRulesManager({ companyId }: Props) {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle>Appraisal Action Rules</CardTitle>
-              <CardDescription>Configure automated actions triggered by appraisal outcomes</CardDescription>
+              <CardTitle className="flex items-center gap-2">
+                <Zap className="h-5 w-5 text-primary" />
+                Appraisal Action Rules
+              </CardTitle>
+              <CardDescription>
+                Automate actions based on appraisal outcomes and rating levels
+              </CardDescription>
             </div>
           </div>
         </CardHeader>
@@ -225,17 +391,21 @@ export function AppraisalActionRulesManager({ companyId }: Props) {
               {rulesLoading ? (
                 <Skeleton className="h-48 w-full" />
               ) : rules.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground border-2 border-dashed rounded-lg">
+                <div className="text-center py-12 text-muted-foreground border-2 border-dashed rounded-lg">
                   <Shield className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>No action rules configured for this template.</p>
-                  <p className="text-sm">Create rules to automate responses to appraisal outcomes.</p>
+                  <p className="font-medium">No action rules configured</p>
+                  <p className="text-sm mb-4">Create rules to automate responses to appraisal outcomes.</p>
+                  <Button variant="outline" onClick={handleOpenCreate}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create Your First Rule
+                  </Button>
                 </div>
               ) : (
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Rule Name</TableHead>
-                      <TableHead>Condition</TableHead>
+                      <TableHead>Rule</TableHead>
+                      <TableHead>Trigger Condition</TableHead>
                       <TableHead>Action</TableHead>
                       <TableHead>Type</TableHead>
                       <TableHead>Status</TableHead>
@@ -247,18 +417,14 @@ export function AppraisalActionRulesManager({ companyId }: Props) {
                       <TableRow key={rule.id}>
                         <TableCell>
                           <div className="font-medium">{rule.rule_name}</div>
-                          <div className="text-xs text-muted-foreground">{rule.rule_code}</div>
+                          <div className="text-xs text-muted-foreground font-mono">{rule.rule_code}</div>
                         </TableCell>
                         <TableCell>
-                          <div className="flex items-center gap-2 text-sm">
-                            <Badge variant="outline">{rule.condition_section}</Badge>
-                            <span>{rule.condition_operator}</span>
-                            <span className="font-mono">{rule.condition_threshold}</span>
-                          </div>
+                          {getRatingLevelDisplay(rule)}
                         </TableCell>
                         <TableCell>
                           <Badge variant={rule.action_type === "create_pip" ? "destructive" : "default"}>
-                            {ACTION_TYPES.find(a => a.value === rule.action_type)?.label}
+                            {ACTION_TYPES.find(a => a.value === rule.action_type)?.label?.split(" ").slice(0, 2).join(" ")}
                           </Badge>
                         </TableCell>
                         <TableCell>
@@ -296,253 +462,305 @@ export function AppraisalActionRulesManager({ companyId }: Props) {
 
       {/* Create/Edit Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editingRule ? "Edit Action Rule" : "Create Action Rule"}</DialogTitle>
             <DialogDescription>
-              Define conditions and actions for appraisal outcomes
+              Define automated actions triggered by specific appraisal outcomes
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-6 py-4">
-            {/* Basic Info */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="rule_name">Rule Name *</Label>
-                <Input
-                  id="rule_name"
-                  value={formData.rule_name || ""}
-                  onChange={(e) => setFormData(prev => ({ ...prev, rule_name: e.target.value }))}
-                  placeholder="e.g., Low Score IDP Trigger"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="rule_code">Rule Code *</Label>
-                <Input
-                  id="rule_code"
-                  value={formData.rule_code || ""}
-                  onChange={(e) => setFormData(prev => ({ ...prev, rule_code: e.target.value.toLowerCase().replace(/\s+/g, "_") }))}
-                  placeholder="e.g., low_score_idp"
-                />
-              </div>
-            </div>
+          <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "custom" | "templates")}>
+            <TabsList className="mb-4">
+              <TabsTrigger value="custom">Custom Rule</TabsTrigger>
+              <TabsTrigger value="templates" disabled={!!editingRule}>
+                <Lightbulb className="h-4 w-4 mr-2" />
+                Quick Templates
+              </TabsTrigger>
+            </TabsList>
 
-            <div className="space-y-2">
-              <Label>Description</Label>
-              <Textarea
-                value={formData.description || ""}
-                onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                placeholder="Describe what this rule does..."
-              />
-            </div>
+            <TabsContent value="templates" className="space-y-3">
+              <p className="text-sm text-muted-foreground mb-4">
+                Start with a pre-configured rule template based on industry best practices.
+              </p>
+              {RULE_TEMPLATES.map((template) => {
+                const Icon = template.icon;
+                return (
+                  <div
+                    key={template.id}
+                    onClick={() => handleUseTemplate(template)}
+                    className="flex items-center gap-4 p-4 border rounded-lg cursor-pointer hover:border-primary hover:bg-muted/30 transition-all"
+                  >
+                    <div className={`p-2 rounded-lg bg-muted ${template.color}`}>
+                      <Icon className="h-5 w-5" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="font-medium">{template.name}</div>
+                      <div className="text-sm text-muted-foreground">{template.description}</div>
+                    </div>
+                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                  </div>
+                );
+              })}
+            </TabsContent>
 
-            {/* Condition Configuration */}
-            <div className="space-y-4">
-              <Label className="text-base font-semibold">Condition</Label>
-              
+            <TabsContent value="custom" className="space-y-6">
+              {/* Rule Details */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Condition Type</Label>
-                  <Select 
-                    value={formData.condition_type} 
-                    onValueChange={(v) => setFormData(prev => ({ ...prev, condition_type: v as ConditionType }))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {CONDITION_TYPES.map((type) => (
-                        <SelectItem key={type.value} value={type.value}>{type.label}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Label htmlFor="rule_name">Rule Name *</Label>
+                  <Input
+                    id="rule_name"
+                    value={formData.rule_name || ""}
+                    onChange={(e) => setFormData(prev => ({ ...prev, rule_name: e.target.value }))}
+                    placeholder="e.g., Low Score PIP Trigger"
+                  />
                 </div>
-
                 <div className="space-y-2">
-                  <Label>Section</Label>
-                  <Select 
-                    value={formData.condition_section} 
-                    onValueChange={(v) => setFormData(prev => ({ ...prev, condition_section: v as ConditionSection }))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {SECTIONS.map((section) => (
-                        <SelectItem key={section.value} value={section.value}>{section.label}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Label htmlFor="rule_code">Rule Code *</Label>
+                  <Input
+                    id="rule_code"
+                    value={formData.rule_code || ""}
+                    onChange={(e) => setFormData(prev => ({ 
+                      ...prev, 
+                      rule_code: e.target.value.toLowerCase().replace(/\s+/g, "_").replace(/[^a-z0-9_]/g, "")
+                    }))}
+                    placeholder="e.g., low_score_pip"
+                    className="font-mono"
+                  />
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label>Operator</Label>
-                  <Select 
-                    value={formData.condition_operator} 
-                    onValueChange={(v) => setFormData(prev => ({ ...prev, condition_operator: v as ConditionOperator }))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {OPERATORS.map((op) => (
-                        <SelectItem key={op.value} value={op.value}>{op.label}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+              <Separator />
+
+              {/* WHEN Section */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <div className="bg-primary text-primary-foreground text-xs font-semibold px-2 py-1 rounded">WHEN</div>
+                  <span className="text-sm text-muted-foreground">this happens...</span>
                 </div>
 
-                <div className="space-y-2">
-                  <Label>Threshold</Label>
-                  <Input
-                    type="number"
-                    step="0.5"
-                    value={formData.condition_threshold || 0}
-                    onChange={(e) => setFormData(prev => ({ ...prev, condition_threshold: Number(e.target.value) }))}
-                  />
+                <div className="pl-4 border-l-2 border-primary/30 space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Condition Type</Label>
+                      <Select 
+                        value={formData.condition_type} 
+                        onValueChange={(v) => setFormData(prev => ({ 
+                          ...prev, 
+                          condition_type: v as ConditionType | "rating_category",
+                          rating_level_codes: v === "rating_category" ? prev.rating_level_codes : []
+                        }))}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {CONDITION_TYPES.map((type) => (
+                            <SelectItem key={type.value} value={type.value}>
+                              <div>
+                                <div>{type.label}</div>
+                                <div className="text-xs text-muted-foreground">{type.description}</div>
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Section</Label>
+                      <Select 
+                        value={formData.condition_section} 
+                        onValueChange={(v) => setFormData(prev => ({ ...prev, condition_section: v as ConditionSection }))}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {SECTIONS.map((section) => (
+                            <SelectItem key={section.value} value={section.value}>{section.label}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  {formData.condition_type === "rating_category" ? (
+                    <div className="space-y-2">
+                      <Label>Rating Level(s)</Label>
+                      <RatingLevelSelector
+                        companyId={companyId}
+                        selectedCodes={formData.rating_level_codes || []}
+                        onSelectionChange={(codes) => setFormData(prev => ({ ...prev, rating_level_codes: codes }))}
+                        multiSelect={true}
+                        showEligibility={true}
+                      />
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label>Threshold Value</Label>
+                        <Input
+                          type="number"
+                          step="0.5"
+                          value={formData.condition_threshold || 0}
+                          onChange={(e) => setFormData(prev => ({ ...prev, condition_threshold: Number(e.target.value) }))}
+                        />
+                      </div>
+
+                      {formData.condition_type === "repeated_low" && (
+                        <div className="space-y-2">
+                          <Label>Consecutive Cycles</Label>
+                          <Input
+                            type="number"
+                            min={1}
+                            value={formData.condition_cycles || 1}
+                            onChange={(e) => setFormData(prev => ({ ...prev, condition_cycles: Number(e.target.value) }))}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <Separator />
+
+              {/* THEN Section */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <div className="bg-emerald-500 text-white text-xs font-semibold px-2 py-1 rounded">THEN</div>
+                  <span className="text-sm text-muted-foreground">do this...</span>
                 </div>
 
-                {formData.condition_type === "repeated_low" && (
+                <div className="pl-4 border-l-2 border-emerald-500/30 space-y-4">
                   <div className="space-y-2">
-                    <Label>Consecutive Cycles</Label>
-                    <Input
-                      type="number"
-                      min={1}
-                      value={formData.condition_cycles || 1}
-                      onChange={(e) => setFormData(prev => ({ ...prev, condition_cycles: Number(e.target.value) }))}
+                    <Label>Action</Label>
+                    <div className="grid grid-cols-2 gap-2">
+                      {ACTION_TYPES.map((action) => {
+                        const Icon = action.icon;
+                        const isSelected = formData.action_type === action.value;
+                        return (
+                          <div
+                            key={action.value}
+                            onClick={() => setFormData(prev => ({ ...prev, action_type: action.value }))}
+                            className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
+                              isSelected 
+                                ? "border-primary bg-primary/5 ring-1 ring-primary" 
+                                : "border-border hover:border-primary/50"
+                            }`}
+                          >
+                            <Icon className={`h-4 w-4 ${isSelected ? "text-primary" : "text-muted-foreground"}`} />
+                            <div>
+                              <div className="text-sm font-medium">{action.label}</div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Priority</Label>
+                    <div className="flex gap-2">
+                      {PRIORITY_OPTIONS.map((option) => (
+                        <Button
+                          key={option.value}
+                          type="button"
+                          variant={formData.action_priority === option.value ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => setFormData(prev => ({ ...prev, action_priority: option.value }))}
+                          className="flex-1"
+                        >
+                          <div className={`h-2 w-2 rounded-full mr-2 ${option.color}`} />
+                          {option.label}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Message to Employee (optional)</Label>
+                    <Textarea
+                      value={formData.action_message || ""}
+                      onChange={(e) => setFormData(prev => ({ ...prev, action_message: e.target.value }))}
+                      placeholder="Message shown to employees when this rule triggers..."
+                      rows={2}
                     />
                   </div>
-                )}
-              </div>
-            </div>
-
-            {/* Action Configuration */}
-            <div className="space-y-4">
-              <Label className="text-base font-semibold">Action</Label>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Action Type</Label>
-                  <Select 
-                    value={formData.action_type} 
-                    onValueChange={(v) => setFormData(prev => ({ ...prev, action_type: v as ActionType }))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {ACTION_TYPES.map((action) => (
-                        <SelectItem key={action.value} value={action.value}>
-                          <div>
-                            <div>{action.label}</div>
-                            <div className="text-xs text-muted-foreground">{action.description}</div>
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Priority</Label>
-                  <Select 
-                    value={String(formData.action_priority || 1)} 
-                    onValueChange={(v) => setFormData(prev => ({ ...prev, action_priority: Number(v) }))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="1">Low</SelectItem>
-                      <SelectItem value="2">Medium</SelectItem>
-                      <SelectItem value="3">High</SelectItem>
-                      <SelectItem value="4">Critical</SelectItem>
-                    </SelectContent>
-                  </Select>
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label>User-Facing Message</Label>
-                <Textarea
-                  value={formData.action_message || ""}
-                  onChange={(e) => setFormData(prev => ({ ...prev, action_message: e.target.value }))}
-                  placeholder="Message shown to users when this rule triggers..."
-                />
-              </div>
-            </div>
+              <Separator />
 
-            {/* Settings */}
-            <div className="space-y-4">
-              <Label className="text-base font-semibold">Enforcement Settings</Label>
-
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label>Mandatory Action</Label>
-                  <p className="text-sm text-muted-foreground">Block finalization until action is completed</p>
+              {/* Settings Section */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <div className="bg-muted text-muted-foreground text-xs font-semibold px-2 py-1 rounded">SETTINGS</div>
+                  <span className="text-sm text-muted-foreground">enforcement options</span>
                 </div>
-                <Switch
-                  checked={formData.action_is_mandatory || false}
-                  onCheckedChange={(checked) => setFormData(prev => ({ ...prev, action_is_mandatory: checked }))}
-                />
-              </div>
 
-              {formData.action_is_mandatory && (
-                <div className="flex items-center justify-between pl-6">
-                  <div>
-                    <Label>Allow HR Override</Label>
-                    <p className="text-sm text-muted-foreground">HR can bypass with justification</p>
+                <div className="pl-4 border-l-2 border-muted space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label>Mandatory Action</Label>
+                      <p className="text-sm text-muted-foreground">Block finalization until action is completed</p>
+                    </div>
+                    <Switch
+                      checked={formData.action_is_mandatory || false}
+                      onCheckedChange={(checked) => setFormData(prev => ({ ...prev, action_is_mandatory: checked }))}
+                    />
                   </div>
-                  <Switch
-                    checked={formData.requires_hr_override || false}
-                    onCheckedChange={(checked) => setFormData(prev => ({ ...prev, requires_hr_override: checked }))}
-                  />
+
+                  {formData.action_is_mandatory && (
+                    <div className="flex items-center justify-between pl-4">
+                      <div>
+                        <Label>Allow HR Override</Label>
+                        <p className="text-sm text-muted-foreground">HR can bypass with justification</p>
+                      </div>
+                      <Switch
+                        checked={formData.requires_hr_override || false}
+                        onCheckedChange={(checked) => setFormData(prev => ({ ...prev, requires_hr_override: checked }))}
+                      />
+                    </div>
+                  )}
+
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label>Auto-Execute</Label>
+                      <p className="text-sm text-muted-foreground">Create PIP/IDP automatically without confirmation</p>
+                    </div>
+                    <Switch
+                      checked={formData.auto_execute || false}
+                      onCheckedChange={(checked) => setFormData(prev => ({ ...prev, auto_execute: checked }))}
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label>Active</Label>
+                      <p className="text-sm text-muted-foreground">Rule is currently enforced</p>
+                    </div>
+                    <Switch
+                      checked={formData.is_active !== false}
+                      onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_active: checked }))}
+                    />
+                  </div>
                 </div>
+              </div>
+
+              {/* Rule Preview */}
+              {rulePreview && formData.rule_name && (
+                <Alert className="bg-muted/50">
+                  <Lightbulb className="h-4 w-4" />
+                  <AlertDescription>
+                    <strong>Rule Preview:</strong> {rulePreview}
+                  </AlertDescription>
+                </Alert>
               )}
-
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label>Auto-Execute</Label>
-                  <p className="text-sm text-muted-foreground">Automatically create IDP/PIP without confirmation</p>
-                </div>
-                <Switch
-                  checked={formData.auto_execute || false}
-                  onCheckedChange={(checked) => setFormData(prev => ({ ...prev, auto_execute: checked }))}
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label>Active</Label>
-                  <p className="text-sm text-muted-foreground">Rule is currently enforced</p>
-                </div>
-                <Switch
-                  checked={formData.is_active || false}
-                  onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_active: checked }))}
-                />
-              </div>
-            </div>
-
-            {/* Rule Preview */}
-            {formData.rule_name && formData.condition_type && formData.action_type && (
-              <Alert>
-                <ArrowRight className="h-4 w-4" />
-                <AlertDescription>
-                  <strong>Rule Logic:</strong> {getRuleDescription({
-                    ...formData,
-                    condition_type: formData.condition_type as ConditionType,
-                    condition_section: formData.condition_section as ConditionSection,
-                    condition_operator: (formData.condition_operator || "<") as ConditionOperator,
-                    condition_threshold: formData.condition_threshold || 0,
-                    action_type: formData.action_type as ActionType,
-                    action_is_mandatory: formData.action_is_mandatory || false,
-                  } as AppraisalActionRule)}
-                </AlertDescription>
-              </Alert>
-            )}
-          </div>
+            </TabsContent>
+          </Tabs>
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
