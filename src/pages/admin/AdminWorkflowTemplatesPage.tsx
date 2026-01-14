@@ -25,6 +25,7 @@ import { WorkflowAnalyticsDashboard } from "@/components/workflow/WorkflowAnalyt
 import { WorkflowAuditTrail } from "@/components/workflow/WorkflowAuditTrail";
 import { WorkflowDelegationManager } from "@/components/workflow/WorkflowDelegationManager";
 import { UnifiedWorkflowTemplatesTab } from "@/components/workflow/UnifiedWorkflowTemplatesTab";
+import { WorkflowTemplateLibrary } from "@/components/workflow/WorkflowTemplateLibrary";
 import { BarChart3, History, UserCheck } from "lucide-react";
 import { usePageAudit } from "@/hooks/usePageAudit";
 
@@ -265,7 +266,7 @@ export default function AdminWorkflowTemplatesPage() {
     }
   };
 
-  const [activeMainTab, setActiveMainTab] = useState("templates");
+  const [activeMainTab, setActiveMainTab] = useState("template-library");
 
   return (
     <AppLayout>
@@ -273,7 +274,7 @@ export default function AdminWorkflowTemplatesPage() {
         <Breadcrumbs
           items={[
             { label: "HR Hub", href: "/hr-hub" },
-            { label: "Workflow Templates" },
+            { label: "Workflow Management" },
           ]}
         />
 
@@ -288,13 +289,21 @@ export default function AdminWorkflowTemplatesPage() {
 
         <Tabs value={activeMainTab} onValueChange={setActiveMainTab}>
           <TabsList className="flex-wrap">
-            <TabsTrigger value="templates" className="gap-2">
+            <TabsTrigger value="template-library" className="gap-2">
               <GitBranch className="h-4 w-4" />
-              Templates
+              Template Library
             </TabsTrigger>
             <TabsTrigger value="approval-roles" className="gap-2">
               <Users className="h-4 w-4" />
               Approval Roles
+            </TabsTrigger>
+            <TabsTrigger value="delegation" className="gap-2">
+              <UserCheck className="h-4 w-4" />
+              Delegation
+            </TabsTrigger>
+            <TabsTrigger value="configuration" className="gap-2">
+              <Settings className="h-4 w-4" />
+              Configuration
             </TabsTrigger>
             <TabsTrigger value="scheduler" className="gap-2">
               <Clock className="h-4 w-4" />
@@ -308,13 +317,61 @@ export default function AdminWorkflowTemplatesPage() {
               <History className="h-4 w-4" />
               Audit Trail
             </TabsTrigger>
-            <TabsTrigger value="delegation" className="gap-2">
-              <UserCheck className="h-4 w-4" />
-              Delegation
-            </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="templates" className="mt-6">
+          <TabsContent value="template-library" className="mt-6">
+            <WorkflowTemplateLibrary
+              selectedCompanyId="global"
+              isStandaloneTab={true}
+              onEditTemplate={(template) => {
+                setSelectedTemplate(template);
+                setEditingTemplate(template);
+                setShowTemplateDialog(true);
+              }}
+              onViewProcessMap={(template) => {
+                setProcessMapTemplate(template);
+                setShowProcessMapDialog(true);
+              }}
+              onAddStep={(templateId) => {
+                const template = templates.find(t => t.id === templateId);
+                if (template) {
+                  setSelectedTemplate(template);
+                  fetchSteps(templateId);
+                }
+                setEditingStep({});
+                setShowStepDialog(true);
+              }}
+              onEditStep={(step) => {
+                setEditingStep(step);
+                setShowStepDialog(true);
+              }}
+              onDeleteStep={handleDeleteStep}
+              onCreateTemplate={() => {
+                setEditingTemplate({ 
+                  is_global: true, 
+                  requires_signature: false, 
+                  requires_letter: false, 
+                  allow_return_to_previous: true,
+                });
+                setShowTemplateDialog(true);
+              }}
+              positions={positions}
+              roles={roles}
+              governanceBodies={governanceBodies}
+              users={users}
+              workflowApprovalRoles={workflowApprovalRoles}
+            />
+          </TabsContent>
+
+          <TabsContent value="approval-roles" className="mt-6">
+            <WorkflowApprovalRolesManagement />
+          </TabsContent>
+
+          <TabsContent value="delegation" className="mt-6">
+            <WorkflowDelegationManager />
+          </TabsContent>
+
+          <TabsContent value="configuration" className="mt-6">
             <UnifiedWorkflowTemplatesTab
               onCreateTemplate={(category) => {
                 setEditingTemplate({ 
@@ -336,7 +393,6 @@ export default function AdminWorkflowTemplatesPage() {
                 setShowProcessMapDialog(true);
               }}
               onAddStep={(templateId) => {
-                // Find the template and set it as selected
                 const template = templates.find(t => t.id === templateId);
                 if (template) {
                   setSelectedTemplate(template);
@@ -355,11 +411,8 @@ export default function AdminWorkflowTemplatesPage() {
               governanceBodies={governanceBodies}
               users={users}
               workflowApprovalRoles={workflowApprovalRoles}
+              hideTemplateLibrary={true}
             />
-          </TabsContent>
-
-          <TabsContent value="approval-roles" className="mt-6">
-            <WorkflowApprovalRolesManagement />
           </TabsContent>
 
           <TabsContent value="scheduler" className="mt-6">
@@ -372,10 +425,6 @@ export default function AdminWorkflowTemplatesPage() {
 
           <TabsContent value="audit" className="mt-6">
             <WorkflowAuditTrail />
-          </TabsContent>
-
-          <TabsContent value="delegation" className="mt-6">
-            <WorkflowDelegationManager />
           </TabsContent>
         </Tabs>
 

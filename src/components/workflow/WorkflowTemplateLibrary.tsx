@@ -48,11 +48,13 @@ interface WorkflowTemplateLibraryProps {
   onAddStep: (templateId: string) => void;
   onEditStep: (step: WorkflowStep) => void;
   onDeleteStep: (stepId: string) => void;
+  onCreateTemplate?: () => void;
   positions?: { id: string; title: string }[];
   roles?: { id: string; name: string }[];
   governanceBodies?: { id: string; name: string }[];
   users?: { id: string; full_name: string; email: string }[];
   workflowApprovalRoles?: { id: string; name: string; code: string }[];
+  isStandaloneTab?: boolean;
 }
 
 interface ExtendedTemplate extends WorkflowTemplate {
@@ -91,11 +93,13 @@ export function WorkflowTemplateLibrary({
   onAddStep,
   onEditStep,
   onDeleteStep,
+  onCreateTemplate,
   positions = [],
   roles = [],
   governanceBodies = [],
   users = [],
   workflowApprovalRoles = [],
+  isStandaloneTab = false,
 }: WorkflowTemplateLibraryProps) {
   const [templates, setTemplates] = useState<ExtendedTemplate[]>([]);
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
@@ -244,6 +248,317 @@ export function WorkflowTemplateLibrary({
     return <Badge variant="default" className="bg-green-600"><CheckCircle2 className="h-3 w-3 mr-1" />Active</Badge>;
   }
 
+  // Render the two-column template grid
+  const renderTemplateGrid = () => (
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 min-h-[400px]">
+      {/* Left Column - Template List */}
+      <div className="lg:col-span-4 border rounded-lg overflow-hidden bg-muted/20">
+        <ScrollArea className="h-[450px]">
+          {loading ? (
+            <div className="p-3 space-y-2">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <Skeleton key={i} className="h-16 w-full" />
+              ))}
+            </div>
+          ) : filteredTemplates.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-full text-muted-foreground p-6">
+              <GitBranch className="h-12 w-12 mb-3 opacity-40" />
+              <p className="text-sm">No templates found</p>
+            </div>
+          ) : (
+            <div className="p-2 space-y-1">
+              {filteredTemplates.map((template) => (
+                <button
+                  key={template.id}
+                  onClick={() => setSelectedTemplateId(template.id)}
+                  className={cn(
+                    "w-full text-left p-3 rounded-md transition-colors",
+                    selectedTemplateId === template.id
+                      ? "bg-primary text-primary-foreground"
+                      : "hover:bg-muted"
+                  )}
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        {template.is_global && (
+                          <Globe className={cn(
+                            "h-3.5 w-3.5 flex-shrink-0",
+                            selectedTemplateId === template.id 
+                              ? "text-primary-foreground/80" 
+                              : "text-blue-500"
+                          )} />
+                        )}
+                        <span className="font-medium truncate text-sm">
+                          {template.name}
+                        </span>
+                      </div>
+                      <p className={cn(
+                        "text-xs mt-0.5 truncate",
+                        selectedTemplateId === template.id
+                          ? "text-primary-foreground/70"
+                          : "text-muted-foreground"
+                      )}>
+                        {CATEGORY_LABELS[template.category] || template.category}
+                      </p>
+                    </div>
+                    <div className="flex-shrink-0">
+                      {selectedTemplateId === template.id ? (
+                        <CheckCircle2 className="h-4 w-4" />
+                      ) : (
+                        <span className={cn(
+                          "w-2 h-2 rounded-full inline-block",
+                          getTemplateEffectiveStatus(template) 
+                            ? "bg-green-500" 
+                            : isTemplateScheduled(template)
+                              ? "bg-blue-500"
+                              : "bg-muted-foreground"
+                        )} />
+                      )}
+                    </div>
+                  </div>
+                  
+                  {/* Date indicators */}
+                  {(template.start_date || template.end_date) && selectedTemplateId !== template.id && (
+                    <div className="flex items-center gap-2 mt-1">
+                      {template.start_date && (
+                        <span className="text-xs text-muted-foreground flex items-center gap-1">
+                          <Calendar className="h-3 w-3" />
+                          {formatDateForDisplay(template.start_date)}
+                        </span>
+                      )}
+                      {template.end_date && (
+                        <span className={cn(
+                          "text-xs flex items-center gap-1",
+                          template.end_date < today ? "text-destructive" : "text-muted-foreground"
+                        )}>
+                          → {formatDateForDisplay(template.end_date)}
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </button>
+              ))}
+            </div>
+          )}
+        </ScrollArea>
+      </div>
+
+      {/* Right Column - Template Details & Steps */}
+      <div className="lg:col-span-8 border rounded-lg overflow-hidden">
+        {!selectedTemplateId ? (
+          <div className="flex flex-col items-center justify-center h-full text-muted-foreground p-6">
+            <GitBranch className="h-12 w-12 mb-3 opacity-40" />
+            <p className="text-sm">Select a template to view details</p>
+          </div>
+        ) : selectedTemplate ? (
+          <div className="h-full flex flex-col">
+            {/* Template Header */}
+            <div className="p-4 bg-muted/30 border-b">
+              <div className="flex items-start justify-between gap-4">
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h3 className="text-lg font-semibold">{selectedTemplate.name}</h3>
+                    {selectedTemplate.is_global && (
+                      <Badge variant="outline" className="gap-1 text-blue-600">
+                        <Globe className="h-3 w-3" />
+                        Global
+                      </Badge>
+                    )}
+                    {getTemplateBadge(selectedTemplate)}
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    <span className="font-mono text-xs bg-muted px-1.5 py-0.5 rounded mr-2">
+                      {selectedTemplate.code}
+                    </span>
+                    {CATEGORY_LABELS[selectedTemplate.category] || selectedTemplate.category}
+                  </p>
+                  {selectedTemplate.description && (
+                    <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
+                      {selectedTemplate.description}
+                    </p>
+                  )}
+                  
+                  {/* Effective Dates */}
+                  {(selectedTemplate.start_date || selectedTemplate.end_date) && (
+                    <div className="flex items-center gap-4 mt-3 text-sm">
+                      <div className="flex items-center gap-2">
+                        <Calendar className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-muted-foreground">Effective:</span>
+                      </div>
+                      {selectedTemplate.start_date && (
+                        <span className={cn(
+                          selectedTemplate.start_date > today && "text-blue-600 font-medium"
+                        )}>
+                          {formatDateForDisplay(selectedTemplate.start_date)}
+                        </span>
+                      )}
+                      {selectedTemplate.start_date && selectedTemplate.end_date && (
+                        <span className="text-muted-foreground">→</span>
+                      )}
+                      {selectedTemplate.end_date && (
+                        <span className={cn(
+                          selectedTemplate.end_date < today && "text-destructive font-medium"
+                        )}>
+                          {formatDateForDisplay(selectedTemplate.end_date)}
+                        </span>
+                      )}
+                      {!selectedTemplate.start_date && !selectedTemplate.end_date && (
+                        <span className="text-muted-foreground">Always active</span>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => onViewProcessMap(selectedTemplate)}
+                  >
+                    <Eye className="h-4 w-4 mr-1" />
+                    Process Map
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => onEditTemplate(selectedTemplate)}
+                  >
+                    <Pencil className="h-4 w-4 mr-1" />
+                    Edit
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            {/* Steps Section */}
+            <div className="flex-1 overflow-hidden">
+              <div className="p-4 border-b bg-background flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <h4 className="font-medium">Workflow Steps</h4>
+                  <Badge variant="secondary">{steps.length} steps</Badge>
+                </div>
+                <Button size="sm" onClick={() => onAddStep(selectedTemplate.id)}>
+                  <Plus className="h-4 w-4 mr-1" />
+                  Add Step
+                </Button>
+              </div>
+
+              <ScrollArea className="h-[280px]">
+                <div className="p-4 space-y-3">
+                  {stepsLoading ? (
+                    <>
+                      <Skeleton className="h-24 w-full" />
+                      <Skeleton className="h-24 w-full" />
+                    </>
+                  ) : steps.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
+                      <AlertTriangle className="h-8 w-8 mb-2 opacity-40" />
+                      <p className="text-sm">No steps configured</p>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="mt-3"
+                        onClick={() => onAddStep(selectedTemplate.id)}
+                      >
+                        <Plus className="h-4 w-4 mr-1" />
+                        Add First Step
+                      </Button>
+                    </div>
+                  ) : (
+                    steps.map((step) => (
+                      <WorkflowStepCard
+                        key={step.id}
+                        step={step}
+                        positions={positions}
+                        roles={roles}
+                        governanceBodies={governanceBodies}
+                        users={users}
+                        workflowApprovalRoles={workflowApprovalRoles}
+                        onEdit={onEditStep}
+                        onDelete={onDeleteStep}
+                      />
+                    ))
+                  )}
+                </div>
+              </ScrollArea>
+            </div>
+          </div>
+        ) : null}
+      </div>
+    </div>
+  );
+
+  // Render filters row
+  const renderFilters = () => (
+    <div className="flex flex-col sm:flex-row gap-3 mb-4">
+      <div className="relative flex-1">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder="Search templates..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="pl-9"
+        />
+      </div>
+      <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+        <SelectTrigger className="w-[180px]">
+          <SelectValue placeholder="All Categories" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">All Categories</SelectItem>
+          {uniqueCategories.map((cat) => (
+            <SelectItem key={cat} value={cat}>
+              {CATEGORY_LABELS[cat] || cat}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      <Select value={statusFilter} onValueChange={setStatusFilter}>
+        <SelectTrigger className="w-[140px]">
+          <SelectValue placeholder="All Status" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">All Status</SelectItem>
+          <SelectItem value="active">Active</SelectItem>
+          <SelectItem value="inactive">Inactive</SelectItem>
+          <SelectItem value="scheduled">Scheduled</SelectItem>
+          <SelectItem value="expired">Expired</SelectItem>
+        </SelectContent>
+      </Select>
+    </div>
+  );
+
+  // Standalone tab layout (no collapsible wrapper)
+  if (isStandaloneTab) {
+    return (
+      <div className="space-y-4">
+        {/* Header with Create Button */}
+        <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
+          <div className="flex items-center gap-2">
+            <GitBranch className="h-5 w-5 text-primary" />
+            <h2 className="text-lg font-semibold">Template Library</h2>
+            <Badge variant="secondary">{filteredTemplates.length} templates</Badge>
+          </div>
+          {onCreateTemplate && (
+            <Button onClick={onCreateTemplate} size="sm">
+              <Plus className="h-4 w-4 mr-2" />
+              New Template
+            </Button>
+          )}
+        </div>
+
+        {/* Filters */}
+        {renderFilters()}
+
+        {/* Two-Column Layout */}
+        {renderTemplateGrid()}
+      </div>
+    );
+  }
+
+  // Collapsible layout (embedded in another component)
   return (
     <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
       <Card className="border-t-4 border-t-primary">
@@ -266,283 +581,11 @@ export function WorkflowTemplateLibrary({
 
         <CollapsibleContent>
           <CardContent className="pt-0">
-            {/* Filters Row */}
-            <div className="flex flex-col sm:flex-row gap-3 mb-4">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search templates..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-9"
-                />
-              </div>
-              <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="All Categories" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Categories</SelectItem>
-                  {uniqueCategories.map((cat) => (
-                    <SelectItem key={cat} value={cat}>
-                      {CATEGORY_LABELS[cat] || cat}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-[140px]">
-                  <SelectValue placeholder="All Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="inactive">Inactive</SelectItem>
-                  <SelectItem value="scheduled">Scheduled</SelectItem>
-                  <SelectItem value="expired">Expired</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            {/* Filters */}
+            {renderFilters()}
 
             {/* Two-Column Layout */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 min-h-[400px]">
-              {/* Left Column - Template List */}
-              <div className="lg:col-span-4 border rounded-lg overflow-hidden bg-muted/20">
-                <ScrollArea className="h-[450px]">
-                  {loading ? (
-                    <div className="p-3 space-y-2">
-                      {[1, 2, 3, 4, 5].map((i) => (
-                        <Skeleton key={i} className="h-16 w-full" />
-                      ))}
-                    </div>
-                  ) : filteredTemplates.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center h-full text-muted-foreground p-6">
-                      <GitBranch className="h-12 w-12 mb-3 opacity-40" />
-                      <p className="text-sm">No templates found</p>
-                    </div>
-                  ) : (
-                    <div className="p-2 space-y-1">
-                      {filteredTemplates.map((template) => (
-                        <button
-                          key={template.id}
-                          onClick={() => setSelectedTemplateId(template.id)}
-                          className={cn(
-                            "w-full text-left p-3 rounded-md transition-colors",
-                            selectedTemplateId === template.id
-                              ? "bg-primary text-primary-foreground"
-                              : "hover:bg-muted"
-                          )}
-                        >
-                          <div className="flex items-start justify-between gap-2">
-                            <div className="min-w-0 flex-1">
-                              <div className="flex items-center gap-2">
-                                {template.is_global && (
-                                  <Globe className={cn(
-                                    "h-3.5 w-3.5 flex-shrink-0",
-                                    selectedTemplateId === template.id 
-                                      ? "text-primary-foreground/80" 
-                                      : "text-blue-500"
-                                  )} />
-                                )}
-                                <span className="font-medium truncate text-sm">
-                                  {template.name}
-                                </span>
-                              </div>
-                              <p className={cn(
-                                "text-xs mt-0.5 truncate",
-                                selectedTemplateId === template.id
-                                  ? "text-primary-foreground/70"
-                                  : "text-muted-foreground"
-                              )}>
-                                {CATEGORY_LABELS[template.category] || template.category}
-                              </p>
-                            </div>
-                            <div className="flex-shrink-0">
-                              {selectedTemplateId === template.id ? (
-                                <CheckCircle2 className="h-4 w-4" />
-                              ) : (
-                                <span className={cn(
-                                  "w-2 h-2 rounded-full inline-block",
-                                  getTemplateEffectiveStatus(template) 
-                                    ? "bg-green-500" 
-                                    : isTemplateScheduled(template)
-                                      ? "bg-blue-500"
-                                      : "bg-muted-foreground"
-                                )} />
-                              )}
-                            </div>
-                          </div>
-                          
-                          {/* Date indicators */}
-                          {(template.start_date || template.end_date) && selectedTemplateId !== template.id && (
-                            <div className="flex items-center gap-2 mt-1">
-                              {template.start_date && (
-                                <span className="text-xs text-muted-foreground flex items-center gap-1">
-                                  <Calendar className="h-3 w-3" />
-                                  {formatDateForDisplay(template.start_date)}
-                                </span>
-                              )}
-                              {template.end_date && (
-                                <span className={cn(
-                                  "text-xs flex items-center gap-1",
-                                  template.end_date < today ? "text-destructive" : "text-muted-foreground"
-                                )}>
-                                  → {formatDateForDisplay(template.end_date)}
-                                </span>
-                              )}
-                            </div>
-                          )}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </ScrollArea>
-              </div>
-
-              {/* Right Column - Template Details & Steps */}
-              <div className="lg:col-span-8 border rounded-lg overflow-hidden">
-                {!selectedTemplateId ? (
-                  <div className="flex flex-col items-center justify-center h-full text-muted-foreground p-6">
-                    <GitBranch className="h-12 w-12 mb-3 opacity-40" />
-                    <p className="text-sm">Select a template to view details</p>
-                  </div>
-                ) : selectedTemplate ? (
-                  <div className="h-full flex flex-col">
-                    {/* Template Header */}
-                    <div className="p-4 bg-muted/30 border-b">
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <h3 className="text-lg font-semibold">{selectedTemplate.name}</h3>
-                            {selectedTemplate.is_global && (
-                              <Badge variant="outline" className="gap-1 text-blue-600">
-                                <Globe className="h-3 w-3" />
-                                Global
-                              </Badge>
-                            )}
-                            {getTemplateBadge(selectedTemplate)}
-                          </div>
-                          <p className="text-sm text-muted-foreground mt-1">
-                            <span className="font-mono text-xs bg-muted px-1.5 py-0.5 rounded mr-2">
-                              {selectedTemplate.code}
-                            </span>
-                            {CATEGORY_LABELS[selectedTemplate.category] || selectedTemplate.category}
-                          </p>
-                          {selectedTemplate.description && (
-                            <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
-                              {selectedTemplate.description}
-                            </p>
-                          )}
-                          
-                          {/* Effective Dates */}
-                          {(selectedTemplate.start_date || selectedTemplate.end_date) && (
-                            <div className="flex items-center gap-4 mt-3 text-sm">
-                              <div className="flex items-center gap-2">
-                                <Calendar className="h-4 w-4 text-muted-foreground" />
-                                <span className="text-muted-foreground">Effective:</span>
-                              </div>
-                              {selectedTemplate.start_date && (
-                                <span className={cn(
-                                  selectedTemplate.start_date > today && "text-blue-600 font-medium"
-                                )}>
-                                  {formatDateForDisplay(selectedTemplate.start_date)}
-                                </span>
-                              )}
-                              {selectedTemplate.start_date && selectedTemplate.end_date && (
-                                <span className="text-muted-foreground">→</span>
-                              )}
-                              {selectedTemplate.end_date && (
-                                <span className={cn(
-                                  selectedTemplate.end_date < today && "text-destructive font-medium"
-                                )}>
-                                  {formatDateForDisplay(selectedTemplate.end_date)}
-                                </span>
-                              )}
-                              {!selectedTemplate.start_date && !selectedTemplate.end_date && (
-                                <span className="text-muted-foreground">Always active</span>
-                              )}
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Action Buttons */}
-                        <div className="flex items-center gap-2 flex-shrink-0">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => onViewProcessMap(selectedTemplate)}
-                          >
-                            <Eye className="h-4 w-4 mr-1" />
-                            Process Map
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => onEditTemplate(selectedTemplate)}
-                          >
-                            <Pencil className="h-4 w-4 mr-1" />
-                            Edit
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Steps Section */}
-                    <div className="flex-1 overflow-hidden">
-                      <div className="p-4 border-b bg-background flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <h4 className="font-medium">Workflow Steps</h4>
-                          <Badge variant="secondary">{steps.length} steps</Badge>
-                        </div>
-                        <Button size="sm" onClick={() => onAddStep(selectedTemplate.id)}>
-                          <Plus className="h-4 w-4 mr-1" />
-                          Add Step
-                        </Button>
-                      </div>
-
-                      <ScrollArea className="h-[280px]">
-                        <div className="p-4 space-y-3">
-                          {stepsLoading ? (
-                            <>
-                              <Skeleton className="h-24 w-full" />
-                              <Skeleton className="h-24 w-full" />
-                            </>
-                          ) : steps.length === 0 ? (
-                            <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
-                              <AlertTriangle className="h-8 w-8 mb-2 opacity-40" />
-                              <p className="text-sm">No steps configured</p>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="mt-3"
-                                onClick={() => onAddStep(selectedTemplate.id)}
-                              >
-                                <Plus className="h-4 w-4 mr-1" />
-                                Add First Step
-                              </Button>
-                            </div>
-                          ) : (
-                            steps.map((step) => (
-                              <WorkflowStepCard
-                                key={step.id}
-                                step={step}
-                                positions={positions}
-                                roles={roles}
-                                governanceBodies={governanceBodies}
-                                users={users}
-                                workflowApprovalRoles={workflowApprovalRoles}
-                                onEdit={onEditStep}
-                                onDelete={onDeleteStep}
-                              />
-                            ))
-                          )}
-                        </div>
-                      </ScrollArea>
-                    </div>
-                  </div>
-                ) : null}
-              </div>
-            </div>
+            {renderTemplateGrid()}
           </CardContent>
         </CollapsibleContent>
       </Card>

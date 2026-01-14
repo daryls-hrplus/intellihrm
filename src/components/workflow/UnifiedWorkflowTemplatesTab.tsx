@@ -74,6 +74,7 @@ interface UnifiedWorkflowTemplatesTabProps {
   governanceBodies?: { id: string; name: string }[];
   users?: { id: string; full_name: string; email: string }[];
   workflowApprovalRoles?: { id: string; name: string; code: string }[];
+  hideTemplateLibrary?: boolean;
 }
 
 export function UnifiedWorkflowTemplatesTab({
@@ -88,6 +89,7 @@ export function UnifiedWorkflowTemplatesTab({
   governanceBodies = [],
   users = [],
   workflowApprovalRoles = [],
+  hideTemplateLibrary = false,
 }: UnifiedWorkflowTemplatesTabProps) {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>("global");
@@ -475,25 +477,27 @@ export function UnifiedWorkflowTemplatesTab({
         </div>
       </div>
 
-      {/* Template Library Section */}
-      <WorkflowTemplateLibrary
-        selectedCompanyId={selectedCompanyId}
-        onEditTemplate={onEditTemplate}
-        onViewProcessMap={(template) => {
-          const fullTemplate = allTemplates.find(t => t.id === template.id);
-          if (fullTemplate) {
-            onViewProcessMap(fullTemplate);
-          }
-        }}
-        onAddStep={onAddStep || (() => {})}
-        onEditStep={onEditStep || (() => {})}
-        onDeleteStep={onDeleteStep || (() => {})}
-        positions={positions}
-        roles={roles}
-        governanceBodies={governanceBodies}
-        users={users}
-        workflowApprovalRoles={workflowApprovalRoles}
-      />
+      {/* Template Library Section - conditionally shown */}
+      {!hideTemplateLibrary && (
+        <WorkflowTemplateLibrary
+          selectedCompanyId={selectedCompanyId}
+          onEditTemplate={onEditTemplate}
+          onViewProcessMap={(template) => {
+            const fullTemplate = allTemplates.find(t => t.id === template.id);
+            if (fullTemplate) {
+              onViewProcessMap(fullTemplate);
+            }
+          }}
+          onAddStep={onAddStep || (() => {})}
+          onEditStep={onEditStep || (() => {})}
+          onDeleteStep={onDeleteStep || (() => {})}
+          positions={positions}
+          roles={roles}
+          governanceBodies={governanceBodies}
+          users={users}
+          workflowApprovalRoles={workflowApprovalRoles}
+        />
+      )}
 
       {/* Copy to Company Dialog */}
       <Dialog open={showCopyDialog} onOpenChange={setShowCopyDialog}>
