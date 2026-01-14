@@ -483,25 +483,25 @@ export function QuickSetupWizard({
         </p>
       </div>
       
-      {/* Coverage Summary - White backdrop with colored accent */}
-      <div className="p-4 bg-white dark:bg-zinc-900 border border-border rounded-md shadow-sm">
+      {/* Coverage Summary - Always white backdrop with amber accent */}
+      <div className="p-4 bg-white border border-gray-200 rounded-md shadow-sm">
         <div className="flex items-start gap-3">
           <div className="p-2 rounded-full bg-amber-500 text-white flex-shrink-0">
             <AlertCircle className="h-4 w-4" />
           </div>
           <div className="space-y-1">
-            <p className="text-sm font-semibold text-foreground">
+            <p className="text-sm font-semibold text-gray-900">
               Quick Setup Opportunities
             </p>
-            <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
+            <div className="flex flex-wrap gap-3 text-sm text-gray-600">
               <span className="flex items-center gap-1.5">
                 <FolderOpen className="h-3.5 w-3.5 text-amber-600" />
-                <strong className="text-foreground">{uncoveredCategories.length}</strong> categories without rules
+                <strong className="text-gray-900">{uncoveredCategories.length}</strong> categories without rules
               </span>
-              <span className="text-border">•</span>
+              <span className="text-gray-400">•</span>
               <span className="flex items-center gap-1.5">
                 <Mail className="h-3.5 w-3.5 text-amber-600" />
-                <strong className="text-foreground">{loadingTemplates ? '...' : orphanedTemplates.length}</strong> templates without linked rules
+                <strong className="text-gray-900">{loadingTemplates ? '...' : orphanedTemplates.length}</strong> templates without linked rules
               </span>
             </div>
           </div>
