@@ -538,14 +538,6 @@ export function ReminderEmailTemplates({ companyId, companyName, onUseTemplate }
                             <Files className="h-3.5 w-3.5 mr-1" />
                             Duplicate
                           </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            onClick={() => handleCopyTemplate(template)}
-                            title="Copy content to clipboard"
-                          >
-                            <Copy className="h-3.5 w-3.5" />
-                          </Button>
                           {!template.is_default && (
                             <Button 
                               variant="ghost" 
