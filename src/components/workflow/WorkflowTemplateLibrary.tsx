@@ -3,9 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Select,
@@ -25,7 +23,6 @@ import {
   Pencil,
   GitBranch,
   Globe,
-  Building2,
   Calendar,
   ChevronDown,
   ChevronUp,
@@ -34,21 +31,20 @@ import {
   Eye,
   AlertTriangle,
   Clock,
+  Settings2,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import type { WorkflowTemplate, WorkflowStep } from "@/hooks/useWorkflow";
 import { WorkflowStepCard } from "./WorkflowStepCard";
 import { formatDateForDisplay } from "@/utils/dateUtils";
 import { cn } from "@/lib/utils";
+import { WORKFLOW_MODULES, getWorkflowCodesForModule } from "@/constants/workflowModuleStructure";
 
 interface WorkflowTemplateLibraryProps {
-  selectedCompanyId: string;
   onEditTemplate: (template: WorkflowTemplate) => void;
   onViewProcessMap: (template: WorkflowTemplate) => void;
-  onAddStep: (templateId: string) => void;
-  onEditStep: (step: WorkflowStep) => void;
-  onDeleteStep: (stepId: string) => void;
   onCreateTemplate?: () => void;
+  onNavigateToStepConfiguration?: (templateId: string) => void;
   positions?: { id: string; title: string }[];
   roles?: { id: string; name: string }[];
   governanceBodies?: { id: string; name: string }[];
@@ -84,16 +80,25 @@ const CATEGORY_LABELS: Record<string, string> = {
   qualification: "Qualification",
   general: "General",
   performance: "Performance",
+  leave_cancellation: "Leave Cancellation",
+  certification_request: "Certification Request",
+  requisition_approval: "Requisition Approval",
+  offer_approval: "Offer Approval",
+  offer_extension: "Offer Extension",
+  pip_acknowledgment: "PIP Acknowledgment",
+  goal_approval: "Goal Approval",
+  immigration: "Immigration Documents",
+  contract_extension: "Contract Extension",
+  contract_conversion: "Contract Conversion",
+  status_change: "Status Change",
+  retirement: "Retirement",
 };
 
 export function WorkflowTemplateLibrary({
-  selectedCompanyId,
   onEditTemplate,
   onViewProcessMap,
-  onAddStep,
-  onEditStep,
-  onDeleteStep,
   onCreateTemplate,
+  onNavigateToStepConfiguration,
   positions = [],
   roles = [],
   governanceBodies = [],
@@ -106,7 +111,7 @@ export function WorkflowTemplateLibrary({
   const [steps, setSteps] = useState<WorkflowStep[]>([]);
   const [stepsLoading, setStepsLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState<string>("all");
+  const [selectedModuleId, setSelectedModuleId] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [loading, setLoading] = useState(true);
   const [isExpanded, setIsExpanded] = useState(true);
@@ -114,20 +119,15 @@ export function WorkflowTemplateLibrary({
   // Get current date for effective date checks
   const today = new Date().toISOString().split('T')[0];
 
-  // Fetch templates
+  // Fetch only global templates
   useEffect(() => {
     const fetchTemplates = async () => {
       setLoading(true);
-      let query = supabase
+      const { data, error } = await supabase
         .from("workflow_templates")
         .select("*")
+        .eq("is_global", true)
         .order("name");
-
-      if (selectedCompanyId && selectedCompanyId !== "global") {
-        query = query.or(`company_id.eq.${selectedCompanyId},is_global.eq.true`);
-      }
-
-      const { data, error } = await query;
 
       if (error) {
         console.error("Error fetching templates:", error);
@@ -140,7 +140,7 @@ export function WorkflowTemplateLibrary({
     };
 
     fetchTemplates();
-  }, [selectedCompanyId]);
+  }, []);
 
   // Fetch steps when template is selected
   useEffect(() => {
@@ -170,6 +170,12 @@ export function WorkflowTemplateLibrary({
     fetchSteps();
   }, [selectedTemplateId]);
 
+  // Get workflow codes for selected module
+  const moduleWorkflowCodes = useMemo(() => {
+    if (selectedModuleId === "all") return null;
+    return getWorkflowCodesForModule(selectedModuleId);
+  }, [selectedModuleId]);
+
   // Filter templates
   const filteredTemplates = useMemo(() => {
     return templates.filter((template) => {
@@ -185,8 +191,8 @@ export function WorkflowTemplateLibrary({
         }
       }
 
-      // Category filter
-      if (categoryFilter !== "all" && template.category !== categoryFilter) {
+      // Module filter
+      if (moduleWorkflowCodes && !moduleWorkflowCodes.includes(template.category)) {
         return false;
       }
 
@@ -201,12 +207,16 @@ export function WorkflowTemplateLibrary({
 
       return true;
     });
-  }, [templates, searchQuery, categoryFilter, statusFilter]);
+  }, [templates, searchQuery, moduleWorkflowCodes, statusFilter]);
 
-  // Get unique categories from templates
-  const uniqueCategories = useMemo(() => {
-    const categories = new Set(templates.map(t => t.category).filter(Boolean));
-    return Array.from(categories).sort();
+  // Count templates per module
+  const moduleTemplateCounts = useMemo(() => {
+    const counts: Record<string, number> = { all: templates.length };
+    WORKFLOW_MODULES.forEach(module => {
+      const codes = getWorkflowCodesForModule(module.id);
+      counts[module.id] = templates.filter(t => codes.includes(t.category)).length;
+    });
+    return counts;
   }, [templates]);
 
   // Selected template
@@ -215,11 +225,8 @@ export function WorkflowTemplateLibrary({
   // Check template effective status
   function getTemplateEffectiveStatus(template: WorkflowTemplate): boolean {
     if (!template.is_active) return false;
-    
-    // Check date-based activation
     if (template.start_date && template.start_date > today) return false;
     if (template.end_date && template.end_date < today) return false;
-    
     return true;
   }
 
@@ -248,10 +255,83 @@ export function WorkflowTemplateLibrary({
     return <Badge variant="default" className="bg-green-600"><CheckCircle2 className="h-3 w-3 mr-1" />Active</Badge>;
   }
 
-  // Render the two-column template grid
+  // Render Module Sidebar
+  const renderModuleSidebar = () => (
+    <div className="w-48 border-r bg-muted/20 flex-shrink-0">
+      <div className="p-3 border-b bg-muted/30">
+        <h3 className="font-semibold text-xs text-muted-foreground uppercase tracking-wide">
+          Modules
+        </h3>
+      </div>
+      <ScrollArea className="h-[450px]">
+        <div className="p-2 space-y-0.5">
+          {/* All Modules Option */}
+          <button
+            onClick={() => setSelectedModuleId("all")}
+            className={cn(
+              "w-full flex items-center gap-2.5 px-3 py-2 rounded-md text-left transition-colors text-sm",
+              selectedModuleId === "all"
+                ? "bg-primary text-primary-foreground font-medium"
+                : "hover:bg-muted text-foreground"
+            )}
+          >
+            <GitBranch className={cn(
+              "h-4 w-4 flex-shrink-0",
+              selectedModuleId === "all" ? "text-primary-foreground" : "text-muted-foreground"
+            )} />
+            <span className="flex-1 truncate">All Modules</span>
+            <span className={cn(
+              "text-xs tabular-nums px-1.5 py-0.5 rounded",
+              selectedModuleId === "all"
+                ? "bg-primary-foreground/20 text-primary-foreground"
+                : "bg-muted text-muted-foreground"
+            )}>
+              {moduleTemplateCounts.all}
+            </span>
+          </button>
+
+          {/* Module List */}
+          {WORKFLOW_MODULES.map((module) => {
+            const Icon = module.icon;
+            const count = moduleTemplateCounts[module.id] || 0;
+            const isSelected = selectedModuleId === module.id;
+
+            return (
+              <button
+                key={module.id}
+                onClick={() => setSelectedModuleId(module.id)}
+                className={cn(
+                  "w-full flex items-center gap-2.5 px-3 py-2 rounded-md text-left transition-colors text-sm",
+                  isSelected
+                    ? "bg-primary text-primary-foreground font-medium"
+                    : "hover:bg-muted text-foreground"
+                )}
+              >
+                <Icon className={cn(
+                  "h-4 w-4 flex-shrink-0",
+                  isSelected ? "text-primary-foreground" : "text-muted-foreground"
+                )} />
+                <span className="flex-1 truncate">{module.name}</span>
+                <span className={cn(
+                  "text-xs tabular-nums px-1.5 py-0.5 rounded",
+                  isSelected
+                    ? "bg-primary-foreground/20 text-primary-foreground"
+                    : "bg-muted text-muted-foreground"
+                )}>
+                  {count}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </ScrollArea>
+    </div>
+  );
+
+  // Render the template list and details grid
   const renderTemplateGrid = () => (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 min-h-[400px]">
-      {/* Left Column - Template List */}
+    <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-4 min-h-[450px]">
+      {/* Template List */}
       <div className="lg:col-span-4 border rounded-lg overflow-hidden bg-muted/20">
         <ScrollArea className="h-[450px]">
           {loading ? (
@@ -281,14 +361,12 @@ export function WorkflowTemplateLibrary({
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
-                        {template.is_global && (
-                          <Globe className={cn(
-                            "h-3.5 w-3.5 flex-shrink-0",
-                            selectedTemplateId === template.id 
-                              ? "text-primary-foreground/80" 
-                              : "text-blue-500"
-                          )} />
-                        )}
+                        <Globe className={cn(
+                          "h-3.5 w-3.5 flex-shrink-0",
+                          selectedTemplateId === template.id 
+                            ? "text-primary-foreground/80" 
+                            : "text-blue-500"
+                        )} />
                         <span className="font-medium truncate text-sm">
                           {template.name}
                         </span>
@@ -344,7 +422,7 @@ export function WorkflowTemplateLibrary({
         </ScrollArea>
       </div>
 
-      {/* Right Column - Template Details & Steps */}
+      {/* Template Details & Steps (Read-Only) */}
       <div className="lg:col-span-8 border rounded-lg overflow-hidden">
         {!selectedTemplateId ? (
           <div className="flex flex-col items-center justify-center h-full text-muted-foreground p-6">
@@ -359,12 +437,10 @@ export function WorkflowTemplateLibrary({
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2 flex-wrap">
                     <h3 className="text-lg font-semibold">{selectedTemplate.name}</h3>
-                    {selectedTemplate.is_global && (
-                      <Badge variant="outline" className="gap-1 text-blue-600">
-                        <Globe className="h-3 w-3" />
-                        Global
-                      </Badge>
-                    )}
+                    <Badge variant="outline" className="gap-1 text-blue-600">
+                      <Globe className="h-3 w-3" />
+                      Global
+                    </Badge>
                     {getTemplateBadge(selectedTemplate)}
                   </div>
                   <p className="text-sm text-muted-foreground mt-1">
@@ -432,17 +508,23 @@ export function WorkflowTemplateLibrary({
               </div>
             </div>
 
-            {/* Steps Section */}
+            {/* Steps Section - READ ONLY */}
             <div className="flex-1 overflow-hidden">
               <div className="p-4 border-b bg-background flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <h4 className="font-medium">Workflow Steps</h4>
                   <Badge variant="secondary">{steps.length} steps</Badge>
                 </div>
-                <Button size="sm" onClick={() => onAddStep(selectedTemplate.id)}>
-                  <Plus className="h-4 w-4 mr-1" />
-                  Add Step
-                </Button>
+                {onNavigateToStepConfiguration && (
+                  <Button 
+                    size="sm" 
+                    variant="default"
+                    onClick={() => onNavigateToStepConfiguration(selectedTemplate.id)}
+                  >
+                    <Settings2 className="h-4 w-4 mr-1" />
+                    Configure Steps
+                  </Button>
+                )}
               </div>
 
               <ScrollArea className="h-[280px]">
@@ -456,15 +538,17 @@ export function WorkflowTemplateLibrary({
                     <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
                       <AlertTriangle className="h-8 w-8 mb-2 opacity-40" />
                       <p className="text-sm">No steps configured</p>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="mt-3"
-                        onClick={() => onAddStep(selectedTemplate.id)}
-                      >
-                        <Plus className="h-4 w-4 mr-1" />
-                        Add First Step
-                      </Button>
+                      {onNavigateToStepConfiguration && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="mt-3"
+                          onClick={() => onNavigateToStepConfiguration(selectedTemplate.id)}
+                        >
+                          <Settings2 className="h-4 w-4 mr-1" />
+                          Configure Steps
+                        </Button>
+                      )}
                     </div>
                   ) : (
                     steps.map((step) => (
@@ -476,8 +560,7 @@ export function WorkflowTemplateLibrary({
                         governanceBodies={governanceBodies}
                         users={users}
                         workflowApprovalRoles={workflowApprovalRoles}
-                        onEdit={onEditStep}
-                        onDelete={onDeleteStep}
+                        readonly={true}
                       />
                     ))
                   )}
@@ -502,19 +585,6 @@ export function WorkflowTemplateLibrary({
           className="pl-9"
         />
       </div>
-      <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-        <SelectTrigger className="w-[180px]">
-          <SelectValue placeholder="All Categories" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">All Categories</SelectItem>
-          {uniqueCategories.map((cat) => (
-            <SelectItem key={cat} value={cat}>
-              {CATEGORY_LABELS[cat] || cat}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
       <Select value={statusFilter} onValueChange={setStatusFilter}>
         <SelectTrigger className="w-[140px]">
           <SelectValue placeholder="All Status" />
@@ -530,7 +600,7 @@ export function WorkflowTemplateLibrary({
     </div>
   );
 
-  // Standalone tab layout (no collapsible wrapper)
+  // Standalone tab layout with module sidebar
   if (isStandaloneTab) {
     return (
       <div className="space-y-4">
@@ -540,6 +610,10 @@ export function WorkflowTemplateLibrary({
             <GitBranch className="h-5 w-5 text-primary" />
             <h2 className="text-lg font-semibold">Template Library</h2>
             <Badge variant="secondary">{filteredTemplates.length} templates</Badge>
+            <Badge variant="outline" className="gap-1 text-blue-600">
+              <Globe className="h-3 w-3" />
+              Global Only
+            </Badge>
           </div>
           {onCreateTemplate && (
             <Button onClick={onCreateTemplate} size="sm">
@@ -552,8 +626,13 @@ export function WorkflowTemplateLibrary({
         {/* Filters */}
         {renderFilters()}
 
-        {/* Two-Column Layout */}
-        {renderTemplateGrid()}
+        {/* Main Content: Module Sidebar + Template Grid */}
+        <div className="flex gap-4 border rounded-lg overflow-hidden bg-background">
+          {renderModuleSidebar()}
+          <div className="flex-1 p-4">
+            {renderTemplateGrid()}
+          </div>
+        </div>
       </div>
     );
   }
@@ -584,8 +663,13 @@ export function WorkflowTemplateLibrary({
             {/* Filters */}
             {renderFilters()}
 
-            {/* Two-Column Layout */}
-            {renderTemplateGrid()}
+            {/* Main Content: Module Sidebar + Template Grid */}
+            <div className="flex gap-4 border rounded-lg overflow-hidden">
+              {renderModuleSidebar()}
+              <div className="flex-1 p-4">
+                {renderTemplateGrid()}
+              </div>
+            </div>
           </CardContent>
         </CollapsibleContent>
       </Card>

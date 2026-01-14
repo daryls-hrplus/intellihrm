@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
-import { Plus, Pencil, Trash2, Loader2, GitBranch, ArrowRight, Clock, Settings, Users, FileImage } from "lucide-react";
+import { Plus, Pencil, Trash2, Loader2, GitBranch, ArrowRight, Clock, Settings, Users, FileImage, Settings2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -26,6 +26,7 @@ import { WorkflowAuditTrail } from "@/components/workflow/WorkflowAuditTrail";
 import { WorkflowDelegationManager } from "@/components/workflow/WorkflowDelegationManager";
 import { UnifiedWorkflowTemplatesTab } from "@/components/workflow/UnifiedWorkflowTemplatesTab";
 import { WorkflowTemplateLibrary } from "@/components/workflow/WorkflowTemplateLibrary";
+import { WorkflowStepConfiguration } from "@/components/workflow/WorkflowStepConfiguration";
 import { BarChart3, History, UserCheck } from "lucide-react";
 import { usePageAudit } from "@/hooks/usePageAudit";
 
@@ -267,6 +268,13 @@ export default function AdminWorkflowTemplatesPage() {
   };
 
   const [activeMainTab, setActiveMainTab] = useState("template-library");
+  const [stepConfigTemplateId, setStepConfigTemplateId] = useState<string | null>(null);
+
+  // Navigate to Step Configuration with a specific template
+  const handleNavigateToStepConfiguration = (templateId: string) => {
+    setStepConfigTemplateId(templateId);
+    setActiveMainTab("step-configuration");
+  };
 
   return (
     <AppLayout>
@@ -292,6 +300,10 @@ export default function AdminWorkflowTemplatesPage() {
             <TabsTrigger value="template-library" className="gap-2">
               <GitBranch className="h-4 w-4" />
               Template Library
+            </TabsTrigger>
+            <TabsTrigger value="step-configuration" className="gap-2">
+              <Settings2 className="h-4 w-4" />
+              Step Configuration
             </TabsTrigger>
             <TabsTrigger value="approval-roles" className="gap-2">
               <Users className="h-4 w-4" />
@@ -321,7 +333,6 @@ export default function AdminWorkflowTemplatesPage() {
 
           <TabsContent value="template-library" className="mt-6">
             <WorkflowTemplateLibrary
-              selectedCompanyId="global"
               isStandaloneTab={true}
               onEditTemplate={(template) => {
                 setSelectedTemplate(template);
@@ -332,6 +343,29 @@ export default function AdminWorkflowTemplatesPage() {
                 setProcessMapTemplate(template);
                 setShowProcessMapDialog(true);
               }}
+              onNavigateToStepConfiguration={handleNavigateToStepConfiguration}
+              onCreateTemplate={() => {
+                setEditingTemplate({ 
+                  is_global: true, 
+                  requires_signature: false, 
+                  requires_letter: false, 
+                  allow_return_to_previous: true,
+                });
+                setShowTemplateDialog(true);
+              }}
+              positions={positions}
+              roles={roles}
+              governanceBodies={governanceBodies}
+              users={users}
+              workflowApprovalRoles={workflowApprovalRoles}
+            />
+          </TabsContent>
+
+          <TabsContent value="step-configuration" className="mt-6">
+            <WorkflowStepConfiguration
+              templates={templates}
+              selectedTemplateId={stepConfigTemplateId}
+              onSelectTemplate={setStepConfigTemplateId}
               onAddStep={(templateId) => {
                 const template = templates.find(t => t.id === templateId);
                 if (template) {
@@ -346,15 +380,6 @@ export default function AdminWorkflowTemplatesPage() {
                 setShowStepDialog(true);
               }}
               onDeleteStep={handleDeleteStep}
-              onCreateTemplate={() => {
-                setEditingTemplate({ 
-                  is_global: true, 
-                  requires_signature: false, 
-                  requires_letter: false, 
-                  allow_return_to_previous: true,
-                });
-                setShowTemplateDialog(true);
-              }}
               positions={positions}
               roles={roles}
               governanceBodies={governanceBodies}
