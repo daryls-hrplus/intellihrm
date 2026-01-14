@@ -3098,6 +3098,9 @@ export type Database = {
       appraisal_integration_rules: {
         Row: {
           action_config: Json
+          action_is_mandatory: boolean | null
+          action_message: string | null
+          action_priority: number | null
           action_type: string
           approval_role: string | null
           auto_execute: boolean
@@ -3105,6 +3108,7 @@ export type Database = {
           condition_category_codes: Json | null
           condition_operator: string
           condition_section: string | null
+          condition_threshold: number | null
           condition_type: string
           condition_value: number | null
           condition_value_max: number | null
@@ -3115,13 +3119,18 @@ export type Database = {
           id: string
           is_active: boolean
           name: string
+          rating_level_codes: string[] | null
           requires_approval: boolean
+          requires_hr_override: boolean | null
           target_module: string
           trigger_event: string
           updated_at: string
         }
         Insert: {
           action_config?: Json
+          action_is_mandatory?: boolean | null
+          action_message?: string | null
+          action_priority?: number | null
           action_type: string
           approval_role?: string | null
           auto_execute?: boolean
@@ -3129,6 +3138,7 @@ export type Database = {
           condition_category_codes?: Json | null
           condition_operator?: string
           condition_section?: string | null
+          condition_threshold?: number | null
           condition_type: string
           condition_value?: number | null
           condition_value_max?: number | null
@@ -3139,13 +3149,18 @@ export type Database = {
           id?: string
           is_active?: boolean
           name: string
+          rating_level_codes?: string[] | null
           requires_approval?: boolean
+          requires_hr_override?: boolean | null
           target_module: string
           trigger_event: string
           updated_at?: string
         }
         Update: {
           action_config?: Json
+          action_is_mandatory?: boolean | null
+          action_message?: string | null
+          action_priority?: number | null
           action_type?: string
           approval_role?: string | null
           auto_execute?: boolean
@@ -3153,6 +3168,7 @@ export type Database = {
           condition_category_codes?: Json | null
           condition_operator?: string
           condition_section?: string | null
+          condition_threshold?: number | null
           condition_type?: string
           condition_value?: number | null
           condition_value_max?: number | null
@@ -3163,7 +3179,9 @@ export type Database = {
           id?: string
           is_active?: boolean
           name?: string
+          rating_level_codes?: string[] | null
           requires_approval?: boolean
+          requires_hr_override?: boolean | null
           target_module?: string
           trigger_event?: string
           updated_at?: string
