@@ -26,8 +26,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { WorkflowModuleSidebar } from "./WorkflowModuleSidebar";
 import { WorkflowCategorySection } from "./WorkflowCategorySection";
+import { WorkflowTemplateLibrary } from "./WorkflowTemplateLibrary";
 import { WORKFLOW_MODULES } from "@/constants/workflowModuleStructure";
-import type { WorkflowTemplate } from "@/hooks/useWorkflow";
+import type { WorkflowTemplate, WorkflowStep } from "@/hooks/useWorkflow";
 
 interface Company {
   id: string;
@@ -65,12 +66,28 @@ interface UnifiedWorkflowTemplatesTabProps {
   onCreateTemplate: (category?: string) => void;
   onEditTemplate: (template: WorkflowTemplate) => void;
   onViewProcessMap: (template: WorkflowTemplate) => void;
+  onAddStep?: (templateId: string) => void;
+  onEditStep?: (step: WorkflowStep) => void;
+  onDeleteStep?: (stepId: string) => void;
+  positions?: { id: string; title: string }[];
+  roles?: { id: string; name: string }[];
+  governanceBodies?: { id: string; name: string }[];
+  users?: { id: string; full_name: string; email: string }[];
+  workflowApprovalRoles?: { id: string; name: string; code: string }[];
 }
 
 export function UnifiedWorkflowTemplatesTab({
   onCreateTemplate,
   onEditTemplate,
   onViewProcessMap,
+  onAddStep,
+  onEditStep,
+  onDeleteStep,
+  positions = [],
+  roles = [],
+  governanceBodies = [],
+  users = [],
+  workflowApprovalRoles = [],
 }: UnifiedWorkflowTemplatesTabProps) {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>("global");
@@ -457,6 +474,26 @@ export function UnifiedWorkflowTemplatesTab({
           )}
         </div>
       </div>
+
+      {/* Template Library Section */}
+      <WorkflowTemplateLibrary
+        selectedCompanyId={selectedCompanyId}
+        onEditTemplate={onEditTemplate}
+        onViewProcessMap={(template) => {
+          const fullTemplate = allTemplates.find(t => t.id === template.id);
+          if (fullTemplate) {
+            onViewProcessMap(fullTemplate);
+          }
+        }}
+        onAddStep={onAddStep || (() => {})}
+        onEditStep={onEditStep || (() => {})}
+        onDeleteStep={onDeleteStep || (() => {})}
+        positions={positions}
+        roles={roles}
+        governanceBodies={governanceBodies}
+        users={users}
+        workflowApprovalRoles={workflowApprovalRoles}
+      />
 
       {/* Copy to Company Dialog */}
       <Dialog open={showCopyDialog} onOpenChange={setShowCopyDialog}>
