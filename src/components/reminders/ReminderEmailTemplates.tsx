@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -26,6 +26,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { REMINDER_CATEGORIES } from '@/types/reminders';
 import { TEMPLATE_PLACEHOLDERS } from './templatePlaceholders';
+import { useTemplateAI, EmailTemplateSuggestion } from '@/hooks/useTemplateAI';
 import { 
   Mail, 
   Copy, 
@@ -46,7 +47,10 @@ import {
   UserPlus,
   Loader2,
   RotateCcw,
-  Zap
+  Zap,
+  Sparkles,
+  RefreshCw,
+  Wand2
 } from 'lucide-react';
 
 interface EmailTemplate {
@@ -89,6 +93,15 @@ export function ReminderEmailTemplates({ companyId, onUseTemplate }: ReminderEma
   const [saving, setSaving] = useState(false);
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
   const [previewTemplate, setPreviewTemplate] = useState<EmailTemplate | null>(null);
+
+  const { 
+    isGenerating, 
+    isImproving, 
+    emailSuggestions, 
+    suggestEmailTemplates, 
+    improveEmailContent, 
+    clearSuggestions 
+  } = useTemplateAI();
 
   const [newTemplate, setNewTemplate] = useState({
     category: '',
@@ -270,9 +283,67 @@ export function ReminderEmailTemplates({ companyId, onUseTemplate }: ReminderEma
     return acc;
   }, {} as Record<string, EmailTemplate[]>);
 
-  const getCategoryLabel = (category: string) => {
+  const getCategoryLabel = useCallback((category: string) => {
     return REMINDER_CATEGORIES.find(c => c.value === category)?.label || category;
-  };
+  }, []);
+
+  // Trigger AI suggestions when category changes in create dialog
+  const handleCategoryChange = useCallback((category: string) => {
+    setNewTemplate(prev => ({ ...prev, category }));
+    
+    // Get existing templates in this category
+    const existingInCategory = templates
+      .filter(t => t.category === category)
+      .map(t => t.name);
+    
+    // Trigger AI suggestions
+    const categoryLabel = getCategoryLabel(category);
+    suggestEmailTemplates(categoryLabel, existingInCategory);
+  }, [templates, getCategoryLabel, suggestEmailTemplates]);
+
+  // Apply AI suggestion to form
+  const applySuggestion = useCallback((suggestion: EmailTemplateSuggestion) => {
+    setNewTemplate(prev => ({
+      ...prev,
+      name: suggestion.title,
+      subject: suggestion.subject,
+      body: suggestion.content.replace(/\\n/g, '\n'),
+    }));
+    toast.success('Template applied! You can customize it further.');
+  }, []);
+
+  // Improve body content with AI
+  const handleImproveBody = useCallback(async () => {
+    if (!newTemplate.body.trim()) {
+      toast.error('Please add some content first');
+      return;
+    }
+    
+    const improved = await improveEmailContent(newTemplate.body);
+    if (improved) {
+      setNewTemplate(prev => ({ ...prev, body: improved }));
+      toast.success('Content improved!');
+    }
+  }, [newTemplate.body, improveEmailContent]);
+
+  // Refresh AI suggestions
+  const handleRefreshSuggestions = useCallback(() => {
+    if (!newTemplate.category) return;
+    
+    const existingInCategory = templates
+      .filter(t => t.category === newTemplate.category)
+      .map(t => t.name);
+    
+    const categoryLabel = getCategoryLabel(newTemplate.category);
+    suggestEmailTemplates(categoryLabel, existingInCategory);
+  }, [newTemplate.category, templates, getCategoryLabel, suggestEmailTemplates]);
+
+  // Clear suggestions when dialog closes
+  useEffect(() => {
+    if (!isCreating) {
+      clearSuggestions();
+    }
+  }, [isCreating, clearSuggestions]);
 
   if (loading) {
     return (
@@ -546,7 +617,7 @@ export function ReminderEmailTemplates({ companyId, onUseTemplate }: ReminderEma
 
       {/* Create Dialog */}
       <Dialog open={isCreating} onOpenChange={setIsCreating}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Create New Template</DialogTitle>
             <DialogDescription>
@@ -556,10 +627,10 @@ export function ReminderEmailTemplates({ companyId, onUseTemplate }: ReminderEma
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label>Category</Label>
+                <Label>Category *</Label>
                 <Select 
                   value={newTemplate.category}
-                  onValueChange={(v) => setNewTemplate({ ...newTemplate, category: v })}
+                  onValueChange={handleCategoryChange}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select category" />
@@ -582,6 +653,78 @@ export function ReminderEmailTemplates({ companyId, onUseTemplate }: ReminderEma
                 />
               </div>
             </div>
+
+            {/* AI Suggestions Section */}
+            {newTemplate.category && (
+              <Card className="border-dashed border-primary/30 bg-primary/5">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="h-4 w-4 text-primary" />
+                      <CardTitle className="text-sm">AI Suggestions</CardTitle>
+                    </div>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={handleRefreshSuggestions}
+                      disabled={isGenerating}
+                    >
+                      <RefreshCw className={`h-3.5 w-3.5 ${isGenerating ? 'animate-spin' : ''}`} />
+                    </Button>
+                  </div>
+                  <CardDescription className="text-xs">
+                    Based on "{getCategoryLabel(newTemplate.category)}" 
+                    {templates.filter(t => t.category === newTemplate.category).length > 0 && 
+                      ` • ${templates.filter(t => t.category === newTemplate.category).length} templates already exist`
+                    }
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  {isGenerating ? (
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                      {[1, 2, 3].map(i => (
+                        <div key={i} className="p-3 border rounded-lg bg-background">
+                          <Skeleton className="h-4 w-3/4 mb-2" />
+                          <Skeleton className="h-3 w-full mb-1" />
+                          <Skeleton className="h-3 w-2/3" />
+                        </div>
+                      ))}
+                    </div>
+                  ) : emailSuggestions.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                      {emailSuggestions.map((suggestion, index) => (
+                        <div 
+                          key={index}
+                          className="p-3 border rounded-lg bg-background hover:border-primary/50 hover:bg-muted/50 transition-colors cursor-pointer group"
+                          onClick={() => applySuggestion(suggestion)}
+                        >
+                          <div className="flex items-start justify-between gap-2 mb-2">
+                            <p className="font-medium text-sm line-clamp-1">{suggestion.title}</p>
+                            <Badge variant="outline" className="text-xs shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                              Use
+                            </Badge>
+                          </div>
+                          <p className="text-xs text-muted-foreground line-clamp-2 mb-2">
+                            {suggestion.useCase}
+                          </p>
+                          <p className="text-xs text-muted-foreground/70 line-clamp-1 italic">
+                            Subject: {suggestion.subject}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-xs text-muted-foreground text-center py-4">
+                      No suggestions available. Click refresh to generate.
+                    </p>
+                  )}
+                  <p className="text-xs text-muted-foreground mt-3 text-center">
+                    Click a suggestion to use it, or write your own below ↓
+                  </p>
+                </CardContent>
+              </Card>
+            )}
+
             <div>
               <Label>Subject Line</Label>
               <Input
@@ -591,7 +734,23 @@ export function ReminderEmailTemplates({ companyId, onUseTemplate }: ReminderEma
               />
             </div>
             <div>
-              <Label>Email Body</Label>
+              <div className="flex items-center justify-between mb-1">
+                <Label>Email Body</Label>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={handleImproveBody}
+                  disabled={isImproving || !newTemplate.body.trim()}
+                  className="h-7 text-xs gap-1.5"
+                >
+                  {isImproving ? (
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                  ) : (
+                    <Wand2 className="h-3 w-3" />
+                  )}
+                  Improve with AI
+                </Button>
+              </div>
               <Textarea
                 value={newTemplate.body}
                 onChange={(e) => setNewTemplate({ ...newTemplate, body: e.target.value })}

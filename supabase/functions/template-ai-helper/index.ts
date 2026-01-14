@@ -47,6 +47,35 @@ Format your response as JSON array:
     "useCase": "When to use this template"
   }
 ]`;
+    } else if (action === "suggest_email_templates") {
+      systemPrompt = `You are an HR notification email template expert. Generate professional reminder and notification email templates for HR systems.
+Templates should be:
+- Professional yet friendly in tone
+- Clear and action-oriented with specific calls to action
+- Include appropriate placeholders using double curly braces: {{employee_first_name}}, {{employee_full_name}}, {{manager_name}}, {{company_name}}, {{event_title}}, {{event_date}}, {{days_until}}, {{cycle_name}}
+- Suitable for automated HR reminder and notification systems
+- Well-structured with proper greeting, body, and sign-off`;
+
+      userPrompt = `Generate 3 email template suggestions for the "${categoryName}" reminder/notification category.
+
+${existingTemplates?.length ? `Existing templates in this category (AVOID creating similar ones):
+${existingTemplates.map((t: string) => `- ${t}`).join('\n')}` : 'No existing templates in this category yet.'}
+
+For each template, provide:
+1. title: A concise, descriptive name for the template
+2. subject: Email subject line with placeholders where appropriate
+3. content: Full email body with placeholders, proper formatting with line breaks
+4. useCase: Brief description of when this template should be used
+
+Format your response as JSON array:
+[
+  {
+    "title": "Template Name",
+    "subject": "Subject line with {{placeholders}}",
+    "content": "Dear {{employee_first_name}},\\n\\nEmail body content...\\n\\nBest regards,\\n{{company_name}} HR Team",
+    "useCase": "Use when..."
+  }
+]`;
     } else if (action === "improve_content") {
       systemPrompt = `You are an expert HR communications editor. Improve template content to be more professional, clear, and empathetic while maintaining the original meaning and any placeholder variables.`;
 
@@ -63,6 +92,23 @@ Requirements:
 - Keep the response concise but complete
 
 Return only the improved content, no explanations.`;
+    } else if (action === "improve_email_content") {
+      systemPrompt = `You are an expert HR communications editor. Improve email template content to be more professional, clear, and engaging while maintaining the original meaning and all placeholder variables.`;
+
+      userPrompt = `Improve this HR notification email template:
+
+"""
+${content}
+"""
+
+Requirements:
+- Keep ALL existing placeholder variables exactly as they are (e.g., {{employee_first_name}}, {{event_date}})
+- Improve clarity, professionalism, and engagement
+- Ensure friendly yet professional tone appropriate for employee communications
+- Maintain proper email structure (greeting, body, call-to-action, sign-off)
+- Keep the response concise but complete
+
+Return only the improved content, no explanations or markdown formatting.`;
     } else {
       throw new Error("Invalid action");
     }
@@ -104,7 +150,7 @@ Return only the improved content, no explanations.`;
     const aiResponse = data.choices?.[0]?.message?.content || "";
 
     let result;
-    if (action === "suggest_templates") {
+    if (action === "suggest_templates" || action === "suggest_email_templates") {
       // Parse JSON from response
       const jsonMatch = aiResponse.match(/\[[\s\S]*\]/);
       if (jsonMatch) {
