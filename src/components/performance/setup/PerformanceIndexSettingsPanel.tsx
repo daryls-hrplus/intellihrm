@@ -203,7 +203,7 @@ export function PerformanceIndexSettingsPanel({ companyId }: PerformanceIndexSet
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger><Info className="h-4 w-4 text-muted-foreground" /></TooltipTrigger>
-                  <TooltipContent>Minimum number of appraisal cycles needed to calculate a performance index</TooltipContent>
+                  <TooltipContent className="max-w-xs">Minimum number of completed appraisal cycles required before a performance index can be calculated. Each cycle type (Annual, Mid-Year, Quarterly) counts as one cycle.</TooltipContent>
                 </Tooltip>
               </TooltipProvider>
             </div>
