@@ -480,7 +480,6 @@ export function UnifiedWorkflowTemplatesTab({
       {/* Template Library Section - conditionally shown */}
       {!hideTemplateLibrary && (
         <WorkflowTemplateLibrary
-          selectedCompanyId={selectedCompanyId}
           onEditTemplate={onEditTemplate}
           onViewProcessMap={(template) => {
             const fullTemplate = allTemplates.find(t => t.id === template.id);
@@ -488,9 +487,6 @@ export function UnifiedWorkflowTemplatesTab({
               onViewProcessMap(fullTemplate);
             }
           }}
-          onAddStep={onAddStep || (() => {})}
-          onEditStep={onEditStep || (() => {})}
-          onDeleteStep={onDeleteStep || (() => {})}
           positions={positions}
           roles={roles}
           governanceBodies={governanceBodies}
