@@ -10,14 +10,12 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
-import { Plus, Pencil, Trash2, Loader2, GitBranch, ArrowRight, GripVertical, Clock, Settings, Users, FileImage } from "lucide-react";
+import { Plus, Pencil, Trash2, Loader2, GitBranch, ArrowRight, Clock, Settings, Users, FileImage } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import { format } from "date-fns";
 import { formatDateForDisplay } from "@/utils/dateUtils";
 import type { WorkflowTemplate, WorkflowStep, WorkflowCategory } from "@/hooks/useWorkflow";
 import { SchedulerManagement } from "@/components/admin/SchedulerManagement";
@@ -26,6 +24,7 @@ import { WorkflowProcessMapDialog } from "@/components/workflow/WorkflowProcessM
 import { WorkflowAnalyticsDashboard } from "@/components/workflow/WorkflowAnalyticsDashboard";
 import { WorkflowAuditTrail } from "@/components/workflow/WorkflowAuditTrail";
 import { WorkflowDelegationManager } from "@/components/workflow/WorkflowDelegationManager";
+import { UnifiedWorkflowTemplatesTab } from "@/components/workflow/UnifiedWorkflowTemplatesTab";
 import { BarChart3, History, UserCheck } from "lucide-react";
 import { usePageAudit } from "@/hooks/usePageAudit";
 
@@ -92,6 +91,7 @@ export default function AdminWorkflowTemplatesPage() {
   const [sections, setSections] = useState<{ id: string; name: string; department_id: string }[]>([]);
   const [workflowApprovalRoles, setWorkflowApprovalRoles] = useState<{ id: string; name: string; code: string }[]>([]);
   const [showProcessMapDialog, setShowProcessMapDialog] = useState(false);
+  const [processMapTemplate, setProcessMapTemplate] = useState<WorkflowTemplate | null>(null);
 
   useEffect(() => {
     fetchData();
@@ -315,215 +315,27 @@ export default function AdminWorkflowTemplatesPage() {
           </TabsList>
 
           <TabsContent value="templates" className="mt-6">
-            <div className="flex items-center justify-end mb-4">
-              <Button onClick={() => {
-                setEditingTemplate({ is_global: false, requires_signature: false, requires_letter: false, allow_return_to_previous: true });
+            <UnifiedWorkflowTemplatesTab
+              onCreateTemplate={(category) => {
+                setEditingTemplate({ 
+                  is_global: false, 
+                  requires_signature: false, 
+                  requires_letter: false, 
+                  allow_return_to_previous: true,
+                  category: category as WorkflowCategory,
+                });
                 setShowTemplateDialog(true);
-              }}>
-                <Plus className="h-4 w-4 mr-2" />
-                New Template
-              </Button>
-            </div>
-
-            <div className="grid gap-6 lg:grid-cols-3">
-          {/* Templates List */}
-          <Card className="lg:col-span-1">
-            <CardHeader>
-              <CardTitle className="text-lg">Templates</CardTitle>
-              <CardDescription>Select a template to configure steps</CardDescription>
-            </CardHeader>
-            <CardContent className="p-0">
-              {isLoading ? (
-                <div className="flex items-center justify-center py-8">
-                  <Loader2 className="h-6 w-6 animate-spin" />
-                </div>
-              ) : templates.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  <GitBranch className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                  <p>No templates created yet</p>
-                </div>
-              ) : (
-                <div className="divide-y">
-                  {templates.map((template) => (
-                    <button
-                      key={template.id}
-                      onClick={() => setSelectedTemplate(template)}
-                      className={`w-full px-4 py-3 text-left hover:bg-muted/50 transition-colors ${
-                        selectedTemplate?.id === template.id ? "bg-muted" : ""
-                      }`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="font-medium">{template.name}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {WORKFLOW_CATEGORIES.find((c) => c.value === template.category)?.label}
-                          </p>
-                        </div>
-                        <Badge variant={template.is_active ? "default" : "secondary"}>
-                          {template.is_active ? "Active" : "Inactive"}
-                        </Badge>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Template Details & Steps */}
-          <Card className="lg:col-span-2">
-            {selectedTemplate ? (
-              <>
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <CardTitle>{selectedTemplate.name}</CardTitle>
-                      <CardDescription>{selectedTemplate.description}</CardDescription>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => {
-                          setEditingTemplate(selectedTemplate);
-                          setShowTemplateDialog(true);
-                        }}
-                      >
-                        <Pencil className="h-4 w-4 mr-1" />
-                        Edit
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => setShowProcessMapDialog(true)}
-                      >
-                        <FileImage className="h-4 w-4 mr-1" />
-                        Process Map
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="destructive"
-                        onClick={() => handleDeleteTemplate(selectedTemplate.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                  
-                  <div className="flex flex-wrap gap-2 mt-4">
-                    <Badge variant="outline">Code: {selectedTemplate.code}</Badge>
-                    {selectedTemplate.start_date && (
-                      <Badge variant="outline">
-                        From: {formatDateForDisplay(selectedTemplate.start_date)}
-                      </Badge>
-                    )}
-                    {selectedTemplate.end_date && (
-                      <Badge variant="outline">
-                        Until: {formatDateForDisplay(selectedTemplate.end_date)}
-                      </Badge>
-                    )}
-                    {selectedTemplate.requires_signature && (
-                      <Badge variant="secondary">Requires Signature</Badge>
-                    )}
-                    {selectedTemplate.auto_terminate_hours && (
-                      <Badge variant="secondary">
-                        Auto-terminate: {selectedTemplate.auto_terminate_hours}h
-                      </Badge>
-                    )}
-                    {selectedTemplate.is_global && (
-                      <Badge>Global</Badge>
-                    )}
-                  </div>
-                </CardHeader>
-
-                <Separator />
-
-                <CardContent className="pt-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-semibold">Workflow Steps</h3>
-                    <Button
-                      size="sm"
-                      onClick={() => {
-                        setEditingStep({
-                          use_reporting_line: false,
-                          requires_signature: false,
-                          requires_comment: false,
-                          can_delegate: true,
-                        });
-                        setShowStepDialog(true);
-                      }}
-                    >
-                      <Plus className="h-4 w-4 mr-1" />
-                      Add Step
-                    </Button>
-                  </div>
-
-                  {steps.length === 0 ? (
-                    <div className="text-center py-8 text-muted-foreground border-2 border-dashed rounded-lg">
-                      <p>No steps configured</p>
-                      <p className="text-xs">Add steps to define the approval flow</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-3">
-                      {steps.map((step, index) => (
-                        <div
-                          key={step.id}
-                          className="flex items-center gap-3 p-3 border rounded-lg bg-muted/30"
-                        >
-                          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-medium">
-                            {step.step_order}
-                          </div>
-                          <div className="flex-1">
-                            <p className="font-medium">{step.name}</p>
-                            <p className="text-xs text-muted-foreground">
-                              {APPROVER_TYPES.find((t) => t.value === step.approver_type)?.label}
-                              {step.escalation_hours && ` • Escalate after ${step.escalation_hours}h`}
-                            </p>
-                          </div>
-                          <div className="flex gap-1">
-                            {step.requires_signature && (
-                              <Badge variant="outline" className="text-xs">Signature</Badge>
-                            )}
-                          </div>
-                          <div className="flex gap-1">
-                            <Button
-                              size="icon"
-                              variant="ghost"
-                              onClick={() => {
-                                setEditingStep(step);
-                                setShowStepDialog(true);
-                              }}
-                            >
-                              <Pencil className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              size="icon"
-                              variant="ghost"
-                              onClick={() => handleDeleteStep(step.id)}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                          {index < steps.length - 1 && (
-                            <ArrowRight className="h-4 w-4 text-muted-foreground" />
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </CardContent>
-              </>
-            ) : (
-              <CardContent className="flex items-center justify-center py-16">
-                <div className="text-center text-muted-foreground">
-                  <GitBranch className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p className="font-medium">Select a template</p>
-                  <p className="text-sm">Choose a template from the list to view and configure its steps</p>
-                </div>
-              </CardContent>
-            )}
-          </Card>
-        </div>
+              }}
+              onEditTemplate={(template) => {
+                setSelectedTemplate(template);
+                setEditingTemplate(template);
+                setShowTemplateDialog(true);
+              }}
+              onViewProcessMap={(template) => {
+                setProcessMapTemplate(template);
+                setShowProcessMapDialog(true);
+              }}
+            />
           </TabsContent>
 
           <TabsContent value="approval-roles" className="mt-6">
@@ -1197,8 +1009,11 @@ export default function AdminWorkflowTemplatesPage() {
         {/* Process Map Dialog */}
         <WorkflowProcessMapDialog
           open={showProcessMapDialog}
-          onOpenChange={setShowProcessMapDialog}
-          template={selectedTemplate}
+          onOpenChange={(open) => {
+            setShowProcessMapDialog(open);
+            if (!open) setProcessMapTemplate(null);
+          }}
+          template={processMapTemplate || selectedTemplate}
           steps={steps}
         />
       </div>

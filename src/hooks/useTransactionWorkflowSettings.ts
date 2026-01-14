@@ -38,6 +38,8 @@ export interface WorkflowTemplate {
   name: string;
   code: string;
   category: string | null;
+  is_global?: boolean;
+  company_id?: string | null;
 }
 
 type LookupValueRow = {
@@ -51,6 +53,8 @@ type WorkflowTemplateRow = {
   name: string;
   code: string;
   category: string | null;
+  is_global: boolean;
+  company_id: string | null;
 };
 
 export function useTransactionWorkflowSettings(companyId?: string) {
@@ -83,11 +87,14 @@ export function useTransactionWorkflowSettings(companyId?: string) {
   const fetchWorkflowTemplates = useCallback(async () => {
     let query = supabase
       .from("workflow_templates")
-      .select("id, name, code, category")
+      .select("id, name, code, category, is_global, company_id")
       .eq("is_active", true);
 
+    // Include company-specific templates OR global templates
     if (companyId) {
-      query = query.eq("company_id", companyId);
+      query = query.or(`company_id.eq.${companyId},is_global.eq.true`);
+    } else {
+      query = query.eq("is_global", true);
     }
 
     const { data, error } = await query.order("name");
@@ -102,6 +109,8 @@ export function useTransactionWorkflowSettings(companyId?: string) {
       name: item.name,
       code: item.code,
       category: item.category,
+      is_global: item.is_global,
+      company_id: item.company_id,
     }));
     setWorkflowTemplates(typedData);
   }, [companyId]);
