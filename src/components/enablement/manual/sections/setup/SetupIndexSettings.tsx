@@ -12,6 +12,7 @@ import {
   ScreenshotPlaceholder,
   PrerequisiteAlert
 } from '../../components';
+import { InfoCallout } from '../../components/Callout';
 
 const FIELD_DEFINITIONS = [
   { name: 'Index Name', required: true, type: 'Text', description: 'Display name for the performance index', defaultValue: '—', validation: 'Max 50 characters' },
@@ -21,7 +22,7 @@ const FIELD_DEFINITIONS = [
   { name: 'Historical Cycles', required: true, type: 'Number', description: 'Number of past cycles to include', defaultValue: '2', validation: 'Max 5 cycles' },
   { name: 'Current Cycle Weight', required: true, type: 'Number', description: 'Weight for most recent cycle', defaultValue: '50%', validation: 'Sum to 100% with historical' },
   { name: 'Historical Weight Distribution', required: true, type: 'Select', description: 'How historical weight is spread', defaultValue: 'Equal', validation: '—' },
-  { name: 'Minimum Cycles Required', required: true, type: 'Number', description: 'Minimum data points for valid index', defaultValue: '1', validation: 'Min 1' },
+  { name: 'Minimum Cycles Required', required: true, type: 'Number', description: 'Minimum completed cycles (Annual, Mid-Year, Quarterly each count as one) before index is calculated', defaultValue: '1', validation: 'Min 1' },
   { name: 'Handle Missing Data', required: true, type: 'Select', description: 'How to treat employees with fewer cycles', defaultValue: 'Use Available Data', validation: '—' },
   { name: 'Refresh Frequency', required: true, type: 'Select', description: 'When index is recalculated', defaultValue: 'On Cycle Close', validation: '—' },
   { name: 'Is Active', required: true, type: 'Boolean', description: 'Whether index is calculated', defaultValue: 'true', validation: '—' },
@@ -228,6 +229,14 @@ export function SetupIndexSettings() {
         <StepByStep steps={STEPS} title="Configuring the Performance Index: Step-by-Step" />
 
         <FieldReferenceTable fields={FIELD_DEFINITIONS} title="Field Reference" />
+
+        <InfoCallout title="How Cycles Are Counted">
+          Each completed appraisal cycle instance counts separately toward the minimum requirement. 
+          For example, if an employee completes 1 Annual Review, 1 Mid-Year Review, and 2 Quarterly Reviews, 
+          that equals <strong>4 cycles</strong> total. While different cycle types may have different weights 
+          in the index calculation (e.g., Annual: 1.0, Mid-Year: 0.5, Quarterly: 0.25), each counts as one 
+          cycle toward meeting the minimum requirement.
+        </InfoCallout>
 
         <ConfigurationExample examples={CONFIGURATION_EXAMPLES} />
 
