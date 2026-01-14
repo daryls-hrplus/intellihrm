@@ -434,3 +434,6 @@ verify_jwt = false
 
 [functions.process-early-intervention]
 verify_jwt = false
+
+[functions.action-rule-ai-suggester]
+verify_jwt = false
