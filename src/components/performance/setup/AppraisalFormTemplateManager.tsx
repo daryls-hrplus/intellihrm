@@ -467,7 +467,7 @@ export function AppraisalFormTemplateManager({ companyId }: Props) {
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            {Object.entries(CYCLE_TYPE_PRESETS).map(([type, preset]) => (
+                          {(Object.entries(CYCLE_TYPE_PRESETS) as [AppraisalCycleType, typeof CYCLE_TYPE_PRESETS[AppraisalCycleType]][]).map(([type, preset]) => (
                               <SelectItem key={type} value={type}>
                                 <div className="flex flex-col">
                                   <span>{preset.label}</span>
