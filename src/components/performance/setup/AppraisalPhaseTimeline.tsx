@@ -407,7 +407,7 @@ export function AppraisalPhaseTimeline({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {Object.entries(PHASE_TYPE_PRESETS).map(([type, preset]) => (
+                {(Object.entries(PHASE_TYPE_PRESETS) as [AppraisalPhaseType, typeof PHASE_TYPE_PRESETS[AppraisalPhaseType]][]).map(([type, preset]) => (
                     <SelectItem key={type} value={type}>
                       <div className="flex flex-col">
                         <span>{preset.label}</span>
