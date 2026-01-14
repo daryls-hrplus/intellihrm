@@ -483,20 +483,20 @@ export function QuickSetupWizard({
         </p>
       </div>
       
-      {/* Coverage Summary */}
-      <div className="p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg space-y-1">
+      {/* Coverage Summary - GitHub-style warning */}
+      <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-400 dark:border-yellow-600 rounded-md space-y-1">
         <div className="flex items-center gap-2">
-          <AlertCircle className="h-4 w-4 text-amber-600" />
-          <p className="text-sm font-medium text-amber-800 dark:text-amber-200">
+          <AlertCircle className="h-4 w-4 text-yellow-700 dark:text-yellow-400" />
+          <p className="text-sm font-semibold text-yellow-900 dark:text-yellow-100">
             Quick Setup Opportunities
           </p>
         </div>
-        <div className="flex flex-wrap gap-4 text-xs text-amber-700 dark:text-amber-300">
+        <div className="flex flex-wrap gap-4 text-xs text-yellow-800 dark:text-yellow-200 font-medium">
           <span className="flex items-center gap-1">
             <FolderOpen className="h-3 w-3" />
             {uncoveredCategories.length} categories without rules
           </span>
-          <span>•</span>
+          <span className="text-yellow-600 dark:text-yellow-400">•</span>
           <span className="flex items-center gap-1">
             <Mail className="h-3 w-3" />
             {loadingTemplates ? '...' : orphanedTemplates.length} templates without linked rules
