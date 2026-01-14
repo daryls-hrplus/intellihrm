@@ -2777,11 +2777,18 @@ export type Database = {
       appraisal_form_templates: {
         Row: {
           allow_weight_override: boolean
+          applicable_cycle_types: string[] | null
+          auto_calculate_dates: boolean | null
+          cloned_from_id: string | null
+          cloned_from_version: number | null
           code: string
           company_id: string
           competencies_weight: number
           created_at: string
           created_by: string | null
+          default_duration_days: number | null
+          default_evaluation_offset_days: number | null
+          default_grace_period_days: number | null
           description: string | null
           description_en: string | null
           feedback_360_weight: number
@@ -2794,11 +2801,13 @@ export type Database = {
           include_values: boolean
           is_active: boolean
           is_default: boolean
+          is_draft: boolean
           is_locked: boolean
           max_rating: number
           min_rating: number
           name: string
           overall_scale_id: string | null
+          published_at: string | null
           rating_scale_id: string | null
           requires_hr_approval_for_override: boolean
           responsibilities_weight: number
@@ -2806,14 +2815,24 @@ export type Database = {
           source_template_id: string | null
           updated_at: string
           values_weight: number
+          version_notes: string | null
+          version_number: number
+          weight_enforcement: string
         }
         Insert: {
           allow_weight_override?: boolean
+          applicable_cycle_types?: string[] | null
+          auto_calculate_dates?: boolean | null
+          cloned_from_id?: string | null
+          cloned_from_version?: number | null
           code: string
           company_id: string
           competencies_weight?: number
           created_at?: string
           created_by?: string | null
+          default_duration_days?: number | null
+          default_evaluation_offset_days?: number | null
+          default_grace_period_days?: number | null
           description?: string | null
           description_en?: string | null
           feedback_360_weight?: number
@@ -2826,11 +2845,13 @@ export type Database = {
           include_values?: boolean
           is_active?: boolean
           is_default?: boolean
+          is_draft?: boolean
           is_locked?: boolean
           max_rating?: number
           min_rating?: number
           name: string
           overall_scale_id?: string | null
+          published_at?: string | null
           rating_scale_id?: string | null
           requires_hr_approval_for_override?: boolean
           responsibilities_weight?: number
@@ -2838,14 +2859,24 @@ export type Database = {
           source_template_id?: string | null
           updated_at?: string
           values_weight?: number
+          version_notes?: string | null
+          version_number?: number
+          weight_enforcement?: string
         }
         Update: {
           allow_weight_override?: boolean
+          applicable_cycle_types?: string[] | null
+          auto_calculate_dates?: boolean | null
+          cloned_from_id?: string | null
+          cloned_from_version?: number | null
           code?: string
           company_id?: string
           competencies_weight?: number
           created_at?: string
           created_by?: string | null
+          default_duration_days?: number | null
+          default_evaluation_offset_days?: number | null
+          default_grace_period_days?: number | null
           description?: string | null
           description_en?: string | null
           feedback_360_weight?: number
@@ -2858,11 +2889,13 @@ export type Database = {
           include_values?: boolean
           is_active?: boolean
           is_default?: boolean
+          is_draft?: boolean
           is_locked?: boolean
           max_rating?: number
           min_rating?: number
           name?: string
           overall_scale_id?: string | null
+          published_at?: string | null
           rating_scale_id?: string | null
           requires_hr_approval_for_override?: boolean
           responsibilities_weight?: number
@@ -2870,8 +2903,18 @@ export type Database = {
           source_template_id?: string | null
           updated_at?: string
           values_weight?: number
+          version_notes?: string | null
+          version_number?: number
+          weight_enforcement?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "appraisal_form_templates_cloned_from_id_fkey"
+            columns: ["cloned_from_id"]
+            isOneToOne: false
+            referencedRelation: "appraisal_form_templates"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "appraisal_form_templates_company_id_fkey"
             columns: ["company_id"]
@@ -4049,6 +4092,167 @@ export type Database = {
             columns: ["participant_id"]
             isOneToOne: false
             referencedRelation: "appraisal_participants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      appraisal_template_phases: {
+        Row: {
+          advance_condition: string | null
+          allow_parallel: boolean
+          auto_advance: boolean
+          created_at: string
+          depends_on_phase_id: string | null
+          display_order: number
+          duration_days: number
+          id: string
+          is_active: boolean
+          is_mandatory: boolean
+          notify_on_deadline: boolean
+          notify_on_start: boolean
+          phase_name: string
+          phase_type: string
+          reminder_intervals: number[] | null
+          start_offset_days: number
+          template_id: string
+          updated_at: string
+        }
+        Insert: {
+          advance_condition?: string | null
+          allow_parallel?: boolean
+          auto_advance?: boolean
+          created_at?: string
+          depends_on_phase_id?: string | null
+          display_order?: number
+          duration_days?: number
+          id?: string
+          is_active?: boolean
+          is_mandatory?: boolean
+          notify_on_deadline?: boolean
+          notify_on_start?: boolean
+          phase_name: string
+          phase_type: string
+          reminder_intervals?: number[] | null
+          start_offset_days?: number
+          template_id: string
+          updated_at?: string
+        }
+        Update: {
+          advance_condition?: string | null
+          allow_parallel?: boolean
+          auto_advance?: boolean
+          created_at?: string
+          depends_on_phase_id?: string | null
+          display_order?: number
+          duration_days?: number
+          id?: string
+          is_active?: boolean
+          is_mandatory?: boolean
+          notify_on_deadline?: boolean
+          notify_on_start?: boolean
+          phase_name?: string
+          phase_type?: string
+          reminder_intervals?: number[] | null
+          start_offset_days?: number
+          template_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appraisal_template_phases_depends_on_phase_id_fkey"
+            columns: ["depends_on_phase_id"]
+            isOneToOne: false
+            referencedRelation: "appraisal_template_phases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appraisal_template_phases_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "appraisal_form_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      appraisal_template_sections: {
+        Row: {
+          advisory_label: string | null
+          ai_interpretation_hint: string | null
+          created_at: string
+          data_source: string | null
+          deadline_offset_days: number | null
+          display_name: string
+          display_order: number
+          id: string
+          include_in_final_score: boolean
+          is_active: boolean
+          is_advisory_only: boolean
+          is_required: boolean
+          max_weight_cap: number | null
+          reminder_days_before: number[] | null
+          scoring_method: string
+          section_type: string
+          template_id: string
+          updated_at: string
+          visible_to_employee: boolean
+          visible_to_hr: boolean
+          visible_to_manager: boolean
+          weight: number
+        }
+        Insert: {
+          advisory_label?: string | null
+          ai_interpretation_hint?: string | null
+          created_at?: string
+          data_source?: string | null
+          deadline_offset_days?: number | null
+          display_name: string
+          display_order?: number
+          id?: string
+          include_in_final_score?: boolean
+          is_active?: boolean
+          is_advisory_only?: boolean
+          is_required?: boolean
+          max_weight_cap?: number | null
+          reminder_days_before?: number[] | null
+          scoring_method?: string
+          section_type: string
+          template_id: string
+          updated_at?: string
+          visible_to_employee?: boolean
+          visible_to_hr?: boolean
+          visible_to_manager?: boolean
+          weight?: number
+        }
+        Update: {
+          advisory_label?: string | null
+          ai_interpretation_hint?: string | null
+          created_at?: string
+          data_source?: string | null
+          deadline_offset_days?: number | null
+          display_name?: string
+          display_order?: number
+          id?: string
+          include_in_final_score?: boolean
+          is_active?: boolean
+          is_advisory_only?: boolean
+          is_required?: boolean
+          max_weight_cap?: number | null
+          reminder_days_before?: number[] | null
+          scoring_method?: string
+          section_type?: string
+          template_id?: string
+          updated_at?: string
+          visible_to_employee?: boolean
+          visible_to_hr?: boolean
+          visible_to_manager?: boolean
+          weight?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appraisal_template_sections_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "appraisal_form_templates"
             referencedColumns: ["id"]
           },
         ]
