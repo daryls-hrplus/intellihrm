@@ -13,8 +13,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { useAppraisalFormTemplates } from "@/hooks/useAppraisalFormTemplates";
 import { usePerformanceCategories } from "@/hooks/usePerformanceCategories";
+import { useActionRuleAI, AISuggestedRule } from "@/hooks/useActionRuleAI";
 import { RatingLevelSelector } from "./RatingLevelSelector";
 import { 
   useAppraisalActionRules, 
@@ -40,7 +42,15 @@ import {
   Bell,
   Calendar,
   Lightbulb,
-  ChevronRight
+  ChevronRight,
+  Sparkles,
+  Lock,
+  MessageSquare,
+  Award,
+  Target,
+  Loader2,
+  CheckCircle2,
+  Building2
 } from "lucide-react";
 
 interface Props {
@@ -82,12 +92,25 @@ const PRIORITY_OPTIONS = [
   { value: 4, label: "Critical", color: "bg-destructive" },
 ];
 
-// Quick rule templates
+// Template categories for filtering
+const TEMPLATE_CATEGORIES = [
+  { id: "all", label: "All" },
+  { id: "pip", label: "PIP" },
+  { id: "development", label: "Development" },
+  { id: "succession", label: "Succession" },
+  { id: "coaching", label: "Coaching" },
+  { id: "hr_alerts", label: "HR Alerts" },
+  { id: "blocking", label: "Blocking" },
+];
+
+// Expanded quick rule templates - industry best practices
 const RULE_TEMPLATES = [
+  // PIP Rules
   {
     id: "low_score_pip",
     name: "Low Score → PIP",
     description: "Create PIP when employee receives low ratings",
+    category: "pip",
     icon: AlertTriangle,
     color: "text-destructive",
     defaults: {
@@ -103,9 +126,109 @@ const RULE_TEMPLATES = [
     },
   },
   {
+    id: "critical_score_pip",
+    name: "Critical Score → Immediate PIP",
+    description: "Mandatory PIP for unsatisfactory ratings",
+    category: "pip",
+    icon: AlertTriangle,
+    color: "text-destructive",
+    defaults: {
+      rule_name: "Critical Score Immediate PIP",
+      rule_code: "critical_score_pip",
+      condition_type: "rating_category" as const,
+      rating_level_codes: ["unsatisfactory"],
+      condition_section: "overall" as ConditionSection,
+      action_type: "create_pip" as ActionType,
+      action_is_mandatory: true,
+      action_priority: 4,
+      action_message: "Due to your performance rating, an immediate Performance Improvement Plan is required. HR has been notified.",
+    },
+  },
+  // Blocking Rules
+  {
+    id: "critical_block",
+    name: "Critical Score → Block Finalization",
+    description: "Block appraisal until action is taken",
+    category: "blocking",
+    icon: Lock,
+    color: "text-destructive",
+    defaults: {
+      rule_name: "Critical Score Blocking",
+      rule_code: "critical_score_block",
+      condition_type: "rating_category" as const,
+      rating_level_codes: ["unsatisfactory"],
+      condition_section: "overall" as ConditionSection,
+      action_type: "block_finalization" as ActionType,
+      action_is_mandatory: true,
+      action_priority: 4,
+      action_message: "This appraisal cannot be finalized until a Performance Improvement Plan has been initiated.",
+    },
+  },
+  {
+    id: "low_goals_block",
+    name: "Low Goals Score → Block",
+    description: "Block until goals are discussed",
+    category: "blocking",
+    icon: Lock,
+    color: "text-amber-500",
+    defaults: {
+      rule_name: "Low Goals Score Block",
+      rule_code: "low_goals_block",
+      condition_type: "score_below" as const,
+      rating_level_codes: [],
+      condition_section: "goals" as ConditionSection,
+      condition_threshold: 2.5,
+      action_type: "block_finalization" as ActionType,
+      action_is_mandatory: true,
+      action_priority: 3,
+      action_message: "Appraisal blocked: Goals section requires review and manager comment before finalization.",
+    },
+  },
+  // HR Alerts
+  {
+    id: "low_score_hr_alert",
+    name: "Low Score → Notify HR",
+    description: "Alert HR when employee scores low",
+    category: "hr_alerts",
+    icon: Bell,
+    color: "text-amber-500",
+    defaults: {
+      rule_name: "Low Score HR Alert",
+      rule_code: "low_score_hr_alert",
+      condition_type: "rating_category" as const,
+      rating_level_codes: ["needs_improvement", "unsatisfactory"],
+      condition_section: "overall" as ConditionSection,
+      action_type: "notify_hr" as ActionType,
+      action_is_mandatory: true,
+      action_priority: 3,
+      action_message: "HR has been notified of this performance rating for review and support.",
+    },
+  },
+  {
+    id: "star_performer_hr_alert",
+    name: "Star Performer → Notify HR",
+    description: "Alert HR for recognition and rewards",
+    category: "hr_alerts",
+    icon: Award,
+    color: "text-emerald-500",
+    defaults: {
+      rule_name: "Star Performer Recognition Alert",
+      rule_code: "star_performer_alert",
+      condition_type: "rating_category" as const,
+      rating_level_codes: ["exceptional"],
+      condition_section: "overall" as ConditionSection,
+      action_type: "notify_hr" as ActionType,
+      action_is_mandatory: false,
+      action_priority: 2,
+      action_message: "This exceptional performer has been flagged for recognition and potential reward consideration.",
+    },
+  },
+  // Succession
+  {
     id: "high_performer_succession",
     name: "Top Performer → Succession",
     description: "Flag high performers for succession planning",
+    category: "succession",
     icon: TrendingUp,
     color: "text-emerald-500",
     defaults: {
@@ -120,10 +243,12 @@ const RULE_TEMPLATES = [
       action_message: "This employee has been flagged for succession planning consideration based on their outstanding performance.",
     },
   },
+  // Development
   {
     id: "average_idp",
     name: "Average Score → IDP",
     description: "Recommend development plan for average performers",
+    category: "development",
     icon: FileText,
     color: "text-blue-500",
     defaults: {
@@ -138,6 +263,86 @@ const RULE_TEMPLATES = [
       action_message: "A development plan is recommended to help you grow into the next level of performance.",
     },
   },
+  {
+    id: "competency_gap_dev",
+    name: "Competency Gap → Development Plan",
+    description: "Require development when competencies are low",
+    category: "development",
+    icon: Target,
+    color: "text-blue-500",
+    defaults: {
+      rule_name: "Competency Gap Development",
+      rule_code: "competency_gap_dev",
+      condition_type: "score_below" as const,
+      rating_level_codes: [],
+      condition_section: "competencies" as ConditionSection,
+      condition_threshold: 3.0,
+      action_type: "require_development_plan" as ActionType,
+      action_is_mandatory: true,
+      action_priority: 3,
+      action_message: "A competency development plan is required to address identified skill gaps.",
+    },
+  },
+  // Coaching
+  {
+    id: "needs_improvement_coaching",
+    name: "Low Score → Schedule Coaching",
+    description: "Prompt coaching session for struggling employees",
+    category: "coaching",
+    icon: Calendar,
+    color: "text-violet-500",
+    defaults: {
+      rule_name: "Performance Coaching Session",
+      rule_code: "needs_improvement_coaching",
+      condition_type: "rating_category" as const,
+      rating_level_codes: ["needs_improvement"],
+      condition_section: "overall" as ConditionSection,
+      action_type: "schedule_coaching" as ActionType,
+      action_is_mandatory: false,
+      action_priority: 2,
+      action_message: "A coaching session has been recommended to support your performance improvement.",
+    },
+  },
+  {
+    id: "goals_gap_coaching",
+    name: "Goals Gap → Schedule Coaching",
+    description: "Coaching when goals performance is weak",
+    category: "coaching",
+    icon: Calendar,
+    color: "text-violet-500",
+    defaults: {
+      rule_name: "Goals Coaching Session",
+      rule_code: "goals_gap_coaching",
+      condition_type: "score_below" as const,
+      rating_level_codes: [],
+      condition_section: "goals" as ConditionSection,
+      condition_threshold: 3.0,
+      action_type: "schedule_coaching" as ActionType,
+      action_is_mandatory: false,
+      action_priority: 2,
+      action_message: "A coaching session is recommended to help improve your goal achievement.",
+    },
+  },
+  // Comment Required
+  {
+    id: "low_score_comment",
+    name: "Low Score → Require Comment",
+    description: "Mandate manager justification for low ratings",
+    category: "pip",
+    icon: MessageSquare,
+    color: "text-amber-500",
+    defaults: {
+      rule_name: "Low Score Comment Required",
+      rule_code: "low_score_comment",
+      condition_type: "rating_category" as const,
+      rating_level_codes: ["needs_improvement", "unsatisfactory"],
+      condition_section: "overall" as ConditionSection,
+      action_type: "require_comment" as ActionType,
+      action_is_mandatory: true,
+      action_priority: 3,
+      action_message: "Manager comment is required to justify this performance rating.",
+    },
+  },
 ];
 
 interface FormData extends Partial<CreateRuleInput> {
@@ -147,13 +352,16 @@ interface FormData extends Partial<CreateRuleInput> {
 export function AppraisalActionRulesManager({ companyId }: Props) {
   const { templates, isLoading: templatesLoading } = useAppraisalFormTemplates(companyId);
   const { data: ratingLevels } = usePerformanceCategories(companyId);
+  const { isLoading: aiLoading, suggestions: aiSuggestions, getSuggestions, clearSuggestions } = useActionRuleAI();
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>("");
   
   const { rules, isLoading: rulesLoading, createRule, updateRule, deleteRule, isCreating, isUpdating } = useAppraisalActionRules(selectedTemplateId);
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingRule, setEditingRule] = useState<AppraisalActionRule | null>(null);
-  const [activeTab, setActiveTab] = useState<"custom" | "templates">("custom");
+  const [activeTab, setActiveTab] = useState<"custom" | "templates" | "ai">("custom");
+  const [templateCategory, setTemplateCategory] = useState<string>("all");
+  const [showAiSuggestions, setShowAiSuggestions] = useState(false);
 
   const [formData, setFormData] = useState<FormData>({
     condition_type: "rating_category",
@@ -169,6 +377,12 @@ export function AppraisalActionRulesManager({ companyId }: Props) {
     auto_execute: false,
     is_active: true,
   });
+
+  // Filter templates by category
+  const filteredTemplates = useMemo(() => {
+    if (templateCategory === "all") return RULE_TEMPLATES;
+    return RULE_TEMPLATES.filter(t => t.category === templateCategory);
+  }, [templateCategory]);
 
   const selectedTemplate = templates.find(t => t.id === selectedTemplateId);
 
@@ -250,6 +464,51 @@ export function AppraisalActionRulesManager({ companyId }: Props) {
       ...template.defaults,
     }));
     setActiveTab("custom");
+  };
+
+  const handleUseAISuggestion = (suggestion: AISuggestedRule) => {
+    setFormData({
+      rule_name: suggestion.rule_name,
+      rule_code: suggestion.rule_code,
+      description: suggestion.description,
+      condition_type: suggestion.condition_type,
+      condition_section: suggestion.condition_section as ConditionSection,
+      rating_level_codes: suggestion.rating_level_codes,
+      action_type: suggestion.action_type as ActionType,
+      action_is_mandatory: suggestion.action_is_mandatory,
+      action_priority: suggestion.action_priority,
+      action_message: suggestion.action_message,
+      condition_threshold: 2.5,
+      condition_cycles: 1,
+      requires_hr_override: false,
+      auto_execute: false,
+      is_active: true,
+    });
+    setActiveTab("custom");
+    setShowAiSuggestions(false);
+  };
+
+  const handleGetAISuggestions = async () => {
+    if (!ratingLevels?.length) return;
+    setShowAiSuggestions(true);
+    await getSuggestions(
+      ratingLevels.map(r => ({
+        id: r.id,
+        code: r.code,
+        name: r.name,
+        min_score: r.min_score,
+        max_score: r.max_score,
+        requires_pip: r.requires_pip || false,
+        succession_eligible: r.succession_eligible || false,
+        promotion_eligible: r.promotion_eligible || false,
+        bonus_eligible: r.bonus_eligible || false,
+      })),
+      rules.map(r => ({
+        rule_code: r.rule_code,
+        action_type: r.action_type,
+        rating_level_codes: (r as any).rating_level_codes,
+      }))
+    );
   };
 
   const handleSubmit = async () => {
@@ -470,38 +729,152 @@ export function AppraisalActionRulesManager({ companyId }: Props) {
             </DialogDescription>
           </DialogHeader>
 
-          <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "custom" | "templates")}>
+          <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "custom" | "templates" | "ai")}>
             <TabsList className="mb-4">
               <TabsTrigger value="custom">Custom Rule</TabsTrigger>
               <TabsTrigger value="templates" disabled={!!editingRule}>
                 <Lightbulb className="h-4 w-4 mr-2" />
                 Quick Templates
               </TabsTrigger>
+              <TabsTrigger value="ai" disabled={!!editingRule}>
+                <Sparkles className="h-4 w-4 mr-2" />
+                AI Suggestions
+              </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="templates" className="space-y-3">
-              <p className="text-sm text-muted-foreground mb-4">
+            {/* AI Suggestions Tab */}
+            <TabsContent value="ai" className="space-y-4">
+              <div className="text-center p-6 border-2 border-dashed rounded-lg bg-gradient-to-br from-violet-50/50 to-primary/5">
+                <Sparkles className="h-10 w-10 mx-auto mb-3 text-primary" />
+                <h3 className="font-semibold mb-2">AI-Powered Rule Suggestions</h3>
+                <p className="text-sm text-muted-foreground mb-4 max-w-md mx-auto">
+                  Let AI analyze your rating levels and existing rules to suggest intelligent action rules based on industry best practices.
+                </p>
+                <Button 
+                  onClick={handleGetAISuggestions} 
+                  disabled={aiLoading || !ratingLevels?.length}
+                  className="gap-2"
+                >
+                  {aiLoading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Analyzing...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="h-4 w-4" />
+                      Get AI Suggestions
+                    </>
+                  )}
+                </Button>
+              </div>
+
+              {showAiSuggestions && (
+                <ScrollArea className="h-[350px]">
+                  <div className="space-y-3 pr-4">
+                    {aiLoading ? (
+                      <div className="space-y-3">
+                        {[1, 2, 3].map(i => (
+                          <Skeleton key={i} className="h-24 w-full" />
+                        ))}
+                      </div>
+                    ) : aiSuggestions.length === 0 ? (
+                      <Alert>
+                        <Info className="h-4 w-4" />
+                        <AlertDescription>
+                          No additional rules suggested. Your current configuration covers the main scenarios.
+                        </AlertDescription>
+                      </Alert>
+                    ) : (
+                      aiSuggestions.map((suggestion, idx) => (
+                        <div
+                          key={idx}
+                          className="p-4 border rounded-lg hover:border-primary hover:bg-muted/30 transition-all cursor-pointer"
+                          onClick={() => handleUseAISuggestion(suggestion)}
+                        >
+                          <div className="flex items-start gap-3">
+                            <div className="p-2 rounded-lg bg-primary/10">
+                              <Sparkles className="h-4 w-4 text-primary" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="font-medium">{suggestion.rule_name}</span>
+                                <Badge variant="outline" className="text-xs">
+                                  {ACTION_TYPES.find(a => a.value === suggestion.action_type)?.label?.split(" ").slice(0, 2).join(" ")}
+                                </Badge>
+                              </div>
+                              <p className="text-sm text-muted-foreground mb-2">{suggestion.description}</p>
+                              <div className="flex flex-wrap gap-1 mb-2">
+                                {suggestion.rating_level_codes.map(code => (
+                                  <Badge key={code} variant="secondary" className="text-xs">
+                                    {code}
+                                  </Badge>
+                                ))}
+                              </div>
+                              <p className="text-xs text-muted-foreground italic">
+                                <Building2 className="h-3 w-3 inline mr-1" />
+                                {suggestion.industry_context}
+                              </p>
+                            </div>
+                            <ChevronRight className="h-4 w-4 text-muted-foreground flex-shrink-0 mt-2" />
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </ScrollArea>
+              )}
+            </TabsContent>
+
+            {/* Quick Templates Tab */}
+            <TabsContent value="templates" className="space-y-4">
+              <p className="text-sm text-muted-foreground">
                 Start with a pre-configured rule template based on industry best practices.
               </p>
-              {RULE_TEMPLATES.map((template) => {
-                const Icon = template.icon;
-                return (
-                  <div
-                    key={template.id}
-                    onClick={() => handleUseTemplate(template)}
-                    className="flex items-center gap-4 p-4 border rounded-lg cursor-pointer hover:border-primary hover:bg-muted/30 transition-all"
+              
+              {/* Category Filter */}
+              <div className="flex flex-wrap gap-2">
+                {TEMPLATE_CATEGORIES.map((cat) => (
+                  <Button
+                    key={cat.id}
+                    variant={templateCategory === cat.id ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setTemplateCategory(cat.id)}
+                    className="text-xs"
                   >
-                    <div className={`p-2 rounded-lg bg-muted ${template.color}`}>
-                      <Icon className="h-5 w-5" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="font-medium">{template.name}</div>
-                      <div className="text-sm text-muted-foreground">{template.description}</div>
-                    </div>
-                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                  </div>
-                );
-              })}
+                    {cat.label}
+                  </Button>
+                ))}
+              </div>
+
+              <ScrollArea className="h-[350px]">
+                <div className="space-y-3 pr-4">
+                  {filteredTemplates.map((template) => {
+                    const Icon = template.icon;
+                    return (
+                      <div
+                        key={template.id}
+                        onClick={() => handleUseTemplate(template)}
+                        className="flex items-center gap-4 p-4 border rounded-lg cursor-pointer hover:border-primary hover:bg-muted/30 transition-all"
+                      >
+                        <div className={`p-2 rounded-lg bg-muted ${template.color}`}>
+                          <Icon className="h-5 w-5" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium">{template.name}</span>
+                            <Badge variant="secondary" className="text-xs capitalize">
+                              {template.category.replace("_", " ")}
+                            </Badge>
+                          </div>
+                          <div className="text-sm text-muted-foreground">{template.description}</div>
+                        </div>
+                        <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                      </div>
+                    );
+                  })}
+                </div>
+              </ScrollArea>
             </TabsContent>
 
             <TabsContent value="custom" className="space-y-6">
