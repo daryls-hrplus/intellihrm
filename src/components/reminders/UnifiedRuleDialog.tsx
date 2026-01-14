@@ -116,7 +116,7 @@ export const UnifiedRuleDialog = forwardRef<UnifiedRuleDialogRef, UnifiedRuleDia
       email_template_id: null,
       use_custom_email: false,
       priority: 'medium',
-      is_active: true,
+      is_active: false,
       cycle_type_filter: [],
       effective_from: null,
       effective_to: null,
@@ -197,7 +197,7 @@ export const UnifiedRuleDialog = forwardRef<UnifiedRuleDialogRef, UnifiedRuleDia
         email_template_id: null,
         use_custom_email: false,
         priority: 'medium',
-        is_active: true,
+        is_active: false,
         cycle_type_filter: [],
         effective_from: null,
         effective_to: null,
@@ -655,23 +655,24 @@ export const UnifiedRuleDialog = forwardRef<UnifiedRuleDialogRef, UnifiedRuleDia
             <div className="flex items-center gap-2 mb-2">
               <CalendarRange className="h-4 w-4 text-primary" />
               <Label className="font-medium">Rule Effective Period</Label>
+              <Badge variant="destructive" className="text-[10px] px-1.5">Required</Badge>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label className="text-sm">Effective From</Label>
+                <Label className="text-sm">Effective From <span className="text-destructive">*</span></Label>
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
                       className={cn(
                         "w-full justify-start text-left font-normal",
-                        !formData.effective_from && "text-muted-foreground"
+                        !formData.effective_from && "text-muted-foreground border-destructive"
                       )}
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
                       {formData.effective_from 
                         ? format(parseISO(formData.effective_from), "PPP") 
-                        : "No start date"}
+                        : "Select start date"}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
@@ -691,7 +692,7 @@ export const UnifiedRuleDialog = forwardRef<UnifiedRuleDialogRef, UnifiedRuleDia
                           variant="ghost" 
                           size="sm" 
                           className="w-full"
-                          onClick={() => setFormData({ ...formData, effective_from: null })}
+                          onClick={() => setFormData({ ...formData, effective_from: null, is_active: false })}
                         >
                           Clear date
                         </Button>
@@ -699,6 +700,9 @@ export const UnifiedRuleDialog = forwardRef<UnifiedRuleDialogRef, UnifiedRuleDia
                     )}
                   </PopoverContent>
                 </Popover>
+                {!formData.effective_from && (
+                  <p className="text-xs text-destructive">Required to activate rule</p>
+                )}
               </div>
               <div className="space-y-2">
                 <Label className="text-sm">Effective Until</Label>
@@ -748,12 +752,26 @@ export const UnifiedRuleDialog = forwardRef<UnifiedRuleDialogRef, UnifiedRuleDia
           </div>
 
           {/* Active switch */}
-          <div className="flex items-center gap-2">
-            <Switch
-              checked={formData.is_active}
-              onCheckedChange={(v) => setFormData({ ...formData, is_active: v })}
-            />
-            <Label>Active</Label>
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <Switch
+                checked={formData.is_active}
+                onCheckedChange={(v) => {
+                  if (v && !formData.effective_from) {
+                    toast.error('Set an effective date before activating the rule');
+                    return;
+                  }
+                  setFormData({ ...formData, is_active: v });
+                }}
+                disabled={!formData.effective_from && !formData.is_active}
+              />
+              <Label className={!formData.effective_from ? 'text-muted-foreground' : ''}>Active</Label>
+            </div>
+            {!formData.effective_from && (
+              <p className="text-xs text-muted-foreground ml-10">
+                Set an effective date to enable activation
+              </p>
+            )}
           </div>
 
           {/* Footer */}
