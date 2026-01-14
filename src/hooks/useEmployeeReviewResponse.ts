@@ -232,8 +232,52 @@ export function useEmployeeReviewResponse({ companyId }: UseEmployeeReviewRespon
     enabled: !!user?.id && !!companyId,
   });
 
+  // Helper function to send HR notifications
+  const sendHRNotification = async (
+    title: string, 
+    message: string, 
+    link: string,
+    employeeName: string
+  ) => {
+    try {
+      // Get HR users for company by checking user_roles
+      const { data: hrRoles } = await supabase
+        .from('user_roles')
+        .select('user_id')
+        .in('role', ['hr_manager', 'admin']);
+
+      if (!hrRoles?.length) return;
+
+      const hrUserIds = hrRoles.map(r => r.user_id);
+
+      // Get profiles matching these users and company
+      const { data: hrUsers } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('company_id', companyId)
+        .in('id', hrUserIds);
+
+      if (!hrUsers?.length) return;
+
+      // Create notifications for all HR users
+      await supabase.from('notifications').insert(
+        hrUsers.map(hr => ({
+          user_id: hr.id,
+          title,
+          message: `${employeeName}: ${message}`,
+          link,
+          type: 'performance',
+          priority: 'high',
+          is_read: false,
+        }))
+      );
+    } catch (err) {
+      console.error('Error sending HR notification:', err);
+    }
+  };
+
   // Submit employee response
-  const submitResponse = async (params: SubmitResponseParams) => {
+  const submitResponse = async (params: SubmitResponseParams & { cycleId?: string }) => {
     if (!user?.id) {
       throw new Error('User not authenticated');
     }
@@ -242,6 +286,39 @@ export function useEmployeeReviewResponse({ companyId }: UseEmployeeReviewRespon
     setError(null);
 
     try {
+      // Fetch configuration for validation
+      const config = await fetchConfiguration(params.cycleId);
+      
+      // Validate against configuration
+      if (params.responseType === 'disagree' && config && !config.allow_disagree) {
+        throw new Error('Disagreement is not allowed for this cycle');
+      }
+      if (params.responseType === 'partial_disagree' && config && !config.allow_partial_disagree) {
+        throw new Error('Partial disagreement is not allowed for this cycle');
+      }
+      if ((params.responseType === 'disagree' || params.responseType === 'partial_disagree') 
+          && config?.require_comments_for_disagree && !params.employeeComments) {
+        throw new Error('Comments are required when disagreeing');
+      }
+      if (params.isEscalatedToHr && config && !config.allow_hr_escalation) {
+        throw new Error('HR escalation is not allowed for this cycle');
+      }
+
+      // Calculate deadline from configuration
+      let responseDeadline = params.responseDeadline;
+      if (!responseDeadline && config?.response_window_days) {
+        const deadline = new Date();
+        deadline.setDate(deadline.getDate() + config.response_window_days);
+        responseDeadline = deadline.toISOString();
+      }
+
+      // Apply auto-escalation if configured
+      let shouldEscalate = params.isEscalatedToHr || false;
+      if (config?.auto_escalate_on_disagree && 
+          (params.responseType === 'disagree' || params.responseType === 'partial_disagree')) {
+        shouldEscalate = true;
+      }
+
       const responseData: Record<string, unknown> = {
         company_id: companyId,
         employee_id: user.id,
@@ -251,16 +328,17 @@ export function useEmployeeReviewResponse({ companyId }: UseEmployeeReviewRespon
         response_type: params.responseType,
         employee_comments: params.employeeComments || null,
         specific_disagreements: JSON.stringify(params.specificDisagreements || []),
-        is_escalated_to_hr: params.isEscalatedToHr || false,
-        escalation_reason: params.escalationReason || null,
-        escalation_category: params.escalationCategory || null,
-        escalated_at: params.isEscalatedToHr ? new Date().toISOString() : null,
-        status: 'submitted' as ResponseStatus,
+        is_escalated_to_hr: shouldEscalate,
+        escalation_reason: shouldEscalate ? (params.escalationReason || 'Auto-escalated due to disagreement') : null,
+        escalation_category: shouldEscalate ? (params.escalationCategory || 'rating_discussion') : null,
+        escalated_at: shouldEscalate ? new Date().toISOString() : null,
+        status: shouldEscalate ? 'hr_review' : 'submitted' as ResponseStatus,
         submitted_at: new Date().toISOString(),
-        response_deadline: params.responseDeadline || null,
-        visible_to_manager: true,
+        response_deadline: responseDeadline || null,
+        // Apply visibility settings from configuration
+        visible_to_manager: config?.show_response_to_manager ?? true,
         visible_to_hr: true,
-        visible_in_record: true,
+        visible_in_record: config?.include_in_permanent_record ?? true,
       };
 
       const { data, error: insertError } = await supabase
@@ -275,13 +353,42 @@ export function useEmployeeReviewResponse({ companyId }: UseEmployeeReviewRespon
       if (params.appraisalParticipantId) {
         const updateData: Record<string, unknown> = {
           has_employee_response: true,
-          employee_response_status: params.isEscalatedToHr ? 'escalated' : 'responded',
+          employee_response_status: shouldEscalate ? 'escalated' : 'responded',
         };
 
         await supabase
           .from('appraisal_participants')
           .update(updateData)
           .eq('id', params.appraisalParticipantId);
+      }
+
+      // Get employee name for notifications
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('full_name')
+        .eq('id', user.id)
+        .single();
+      
+      const employeeName = profileData?.full_name || 'An employee';
+
+      // Send HR notifications based on configuration
+      if (config?.notify_hr_on_disagreement && 
+          (params.responseType === 'disagree' || params.responseType === 'partial_disagree')) {
+        await sendHRNotification(
+          'Employee Disagreement',
+          'has disagreed with their performance review',
+          '/performance/escalations',
+          employeeName
+        );
+      }
+
+      if (config?.notify_hr_on_escalation && shouldEscalate) {
+        await sendHRNotification(
+          'Review Escalation',
+          'has escalated their review to HR',
+          '/performance/escalations',
+          employeeName
+        );
       }
 
       // Invalidate queries
