@@ -57,9 +57,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useNavigate } from "react-router-dom";
 import { CheckInCadenceConfig } from "@/components/performance/setup/CheckInCadenceConfig";
 import { AppraisalFormTemplateManager } from "@/components/performance/setup/AppraisalFormTemplateManager";
-import { AppraisalActionRulesManager } from "@/components/performance/setup/AppraisalActionRulesManager";
 import { EmployeeResponseConfigurationPanel } from "@/components/performance/setup/EmployeeResponseConfigurationPanel";
-import { HRResponseEscalationPanel } from "@/components/performance/setup/HRResponseEscalationPanel";
 import { PerformanceCategoriesManager } from "@/components/performance/setup/PerformanceCategoriesManager";
 import { IntegrationRulesConfigSection } from "@/components/performance/setup/IntegrationRulesConfigSection";
 import { PerformanceIndexSettingsPanel } from "@/components/performance/setup/PerformanceIndexSettingsPanel";
@@ -444,9 +442,9 @@ export default function PerformanceSetupPage() {
                     <Layers className="h-4 w-4" />
                     Form Templates
                   </TabsTrigger>
-                  <TabsTrigger value="action-rules" className="flex items-center gap-2">
+                  <TabsTrigger value="outcome-rules" className="flex items-center gap-2">
                     <GitBranch className="h-4 w-4" />
-                    Action Rules
+                    Outcome Rules
                   </TabsTrigger>
                   <TabsTrigger value="employee-response" className="flex items-center gap-2">
                     <MessageSquare className="h-4 w-4" />
@@ -455,10 +453,6 @@ export default function PerformanceSetupPage() {
                   <TabsTrigger value="appraisal-cycles" className="flex items-center gap-2">
                     <Calendar className="h-4 w-4" />
                     Cycles
-                  </TabsTrigger>
-                  <TabsTrigger value="integration-rules" className="flex items-center gap-2">
-                    <GitBranch className="h-4 w-4" />
-                    Integration Rules
                   </TabsTrigger>
                   <TabsTrigger value="integration-dashboard" className="flex items-center gap-2">
                     <BarChart3 className="h-4 w-4" />
@@ -478,17 +472,14 @@ export default function PerformanceSetupPage() {
                     companyName={companies.find(c => c.id === selectedCompany)?.name}
                   />
                 </TabsContent>
-                <TabsContent value="action-rules" className="mt-4">
-                  <AppraisalActionRulesManager companyId={selectedCompany} />
+                <TabsContent value="outcome-rules" className="mt-4">
+                  <IntegrationRulesConfigSection companyId={selectedCompany} />
                 </TabsContent>
                 <TabsContent value="employee-response" className="mt-4">
                   <EmployeeResponseConfigurationPanel companyId={selectedCompany} />
                 </TabsContent>
                 <TabsContent value="appraisal-cycles" className="mt-4">
                   <AppraisalCyclesContent cycles={appraisalCycles} isLoading={isLoading} t={t} />
-                </TabsContent>
-                <TabsContent value="integration-rules" className="mt-4">
-                  <IntegrationRulesConfigSection companyId={selectedCompany} />
                 </TabsContent>
                 <TabsContent value="integration-dashboard" className="mt-4">
                   <IntegrationDashboardWidget companyId={selectedCompany} />
