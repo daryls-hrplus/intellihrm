@@ -9,6 +9,7 @@ import {
   SetupSkillsCompetencies,
   SetupCompetencies,
   SetupApprovalWorkflows,
+  SetupNotifications,
   SetupFormTemplates,
   SetupAppraisalCycles,
   SetupPerformanceCategories,
@@ -42,7 +43,7 @@ const APPRAISALS_SECTION_IDS = new Set([
   'sec-2-16',
 ]);
 
-const FOUNDATION_SECTION_IDS = new Set(['sec-2-1', 'sec-2-2', 'sec-2-3', 'sec-2-4a', 'sec-2-4']);
+const FOUNDATION_SECTION_IDS = new Set(['sec-2-1', 'sec-2-2', 'sec-2-3', 'sec-2-4a', 'sec-2-4', 'sec-2-1-workflows', 'sec-2-4b']);
 
 export function ManualSetupSection({ selectedSectionId }: ManualSetupSectionProps) {
   const [openGroups, setOpenGroups] = useState<string[]>(['foundation']);
@@ -94,10 +95,10 @@ export function ManualSetupSection({ selectedSectionId }: ManualSetupSectionProp
               <div className="text-left">
                 <h3 className="font-semibold">Foundation Settings</h3>
                 <p className="text-sm text-muted-foreground font-normal">
-                  Rating scales, competencies, and approval workflows
+                  Rating scales, competencies, workflows, and notifications
                 </p>
               </div>
-              <Badge variant="outline" className="ml-auto">6 sections</Badge>
+              <Badge variant="outline" className="ml-auto">7 sections</Badge>
             </div>
           </AccordionTrigger>
           <AccordionContent className="pt-4 space-y-6">
@@ -118,6 +119,9 @@ export function ManualSetupSection({ selectedSectionId }: ManualSetupSectionProp
             </section>
             <section id="sec-2-1-workflows" data-manual-anchor="sec-2-1-workflows" className="scroll-mt-32">
               <SetupApprovalWorkflows />
+            </section>
+            <section id="sec-2-4b" data-manual-anchor="sec-2-4b" className="scroll-mt-32">
+              <SetupNotifications />
             </section>
           </AccordionContent>
         </AccordionItem>

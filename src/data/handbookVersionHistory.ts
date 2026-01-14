@@ -1,7 +1,7 @@
 // Handbook version tracking and source manual references
 
 export const HANDBOOK_VERSION = {
-  version: '2.3.0',
+  version: '2.4.0',
   date: '2026-01-14',
   author: 'Intelli HRM Team',
   nextReviewDate: '2026-04-14'
@@ -93,6 +93,17 @@ export interface ChangeLogEntry {
 }
 
 export const HANDBOOK_CHANGE_LOG: ChangeLogEntry[] = [
+  {
+    version: '2.4.0',
+    date: '2026-01-14',
+    changes: [
+      'Added Approval Workflows (Step 5) and Notification Templates (Step 6) to Phase 6A Core Framework Setup',
+      'Updated Phase 6 to 33 steps (was 32) with notifications moved from 6F to 6A',
+      'Fixed page layout so TOC and content extend to full viewport height',
+      'Added SetupNotifications component to Appraisal Manual Foundation Settings',
+      'Renumbered all Phase 6 steps to accommodate new workflow and notification steps in Core Framework'
+    ]
+  },
   {
     version: '2.3.0',
     date: '2026-01-14',
