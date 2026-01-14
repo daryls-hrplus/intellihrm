@@ -335,6 +335,26 @@ export default function AdminWorkflowTemplatesPage() {
                 setProcessMapTemplate(template);
                 setShowProcessMapDialog(true);
               }}
+              onAddStep={(templateId) => {
+                // Find the template and set it as selected
+                const template = templates.find(t => t.id === templateId);
+                if (template) {
+                  setSelectedTemplate(template);
+                  fetchSteps(templateId);
+                }
+                setEditingStep({});
+                setShowStepDialog(true);
+              }}
+              onEditStep={(step) => {
+                setEditingStep(step);
+                setShowStepDialog(true);
+              }}
+              onDeleteStep={handleDeleteStep}
+              positions={positions}
+              roles={roles}
+              governanceBodies={governanceBodies}
+              users={users}
+              workflowApprovalRoles={workflowApprovalRoles}
             />
           </TabsContent>
 
