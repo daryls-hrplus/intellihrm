@@ -377,7 +377,7 @@ export const subTaskDefinitions: Record<string, Record<number, SubTaskDefinition
     ],
   },
 
-  // Phase 6: Performance Management (expanded to 31 steps aligned with Appraisals Manual)
+  // Phase 6: Performance Management (expanded to 33 steps aligned with Appraisals Manual)
   performance: {
     // 6A: Core Framework Setup (Global)
     1: [ // Rating Scales Configuration
@@ -407,12 +407,26 @@ export const subTaskDefinitions: Record<string, Record<number, SubTaskDefinition
       { order: 8, name: "Validate competency weights equal 100% for each job", isRequired: true },
       { order: 9, name: "Verify configuration status shows 'Ready' for all competencies", isRequired: true },
     ],
-    5: [ // Index Settings (Multi-Cycle)
+    5: [ // Approval Workflows Configuration
+      { order: 1, name: "Create workflow for goal submissions (manager approval)", isRequired: true },
+      { order: 2, name: "Create workflow for appraisal reviews (multi-tier if needed)", isRequired: true },
+      { order: 3, name: "Create workflow for 360 feedback nominations", isRequired: false },
+      { order: 4, name: "Configure approval delegation rules", isRequired: false },
+      { order: 5, name: "Test workflow routing with sample data", isRequired: true },
+    ],
+    6: [ // Performance Notification Templates
+      { order: 1, name: "Configure cycle launch notifications", isRequired: true },
+      { order: 2, name: "Set up evaluation deadline reminders", isRequired: true },
+      { order: 3, name: "Configure escalation alerts for overdue items", isRequired: false },
+      { order: 4, name: "Set up completion confirmation notifications", isRequired: false },
+      { order: 5, name: "Test notification delivery channels (email, in-app)", isRequired: true },
+    ],
+    7: [ // Index Settings (Multi-Cycle)
       { order: 1, name: "Configure appraisal index calculation", isRequired: false },
       { order: 2, name: "Set historical cycle weighting", isRequired: false },
     ],
     // 6B: Appraisal Configuration (Company)
-    6: [ // Appraisal Form Templates
+    8: [ // Appraisal Form Templates
       { order: 1, name: "Create appraisal template sections", isRequired: true },
       { order: 2, name: "Configure section weightings (CRGV model)", isRequired: true },
       { order: 3, name: "Add competency assessment section with job-linked competencies", isRequired: true },
@@ -420,7 +434,7 @@ export const subTaskDefinitions: Record<string, Record<number, SubTaskDefinition
       { order: 5, name: "Configure manager comments section", isRequired: true },
       { order: 6, name: "Link rating levels to form template for scoring", isRequired: true },
     ],
-    7: [ // Rating Levels Setup (Section 2.7)
+    9: [ // Rating Levels Setup (Section 2.7)
       { order: 1, name: "Review default rating levels (Exceptional, Exceeds, Meets, Needs Improvement, Unsatisfactory)", isRequired: true },
       { order: 2, name: "Configure score thresholds (min/max) for each level", isRequired: true },
       { order: 3, name: "Verify no gaps or overlaps in score ranges (1.0-5.0 coverage)", isRequired: true },
@@ -431,32 +445,32 @@ export const subTaskDefinitions: Record<string, Record<number, SubTaskDefinition
       { order: 8, name: "Configure color coding for visual dashboards", isRequired: false },
       { order: 9, name: "Validate all rating levels are active and configured", isRequired: true },
     ],
-    8: [ // Action Rules Configuration
+    10: [ // Action Rules Configuration
       { order: 1, name: "Define rating-triggered actions", isRequired: false },
       { order: 2, name: "Configure automatic actions by eligibility flags (promotion, succession, bonus)", isRequired: false },
       { order: 3, name: "Configure PIP auto-trigger based on requires_pip flag", isRequired: false },
       { order: 4, name: "Set up recognition triggers for top performers", isRequired: false },
       { order: 5, name: "Link action rules to downstream modules (Succession, Compensation, PIP)", isRequired: false },
     ],
-    9: [ // Employee Response Configuration
+    11: [ // Employee Response Configuration
       { order: 1, name: "Enable self-assessment", isRequired: false },
       { order: 2, name: "Configure acknowledgment requirements", isRequired: false },
       { order: 3, name: "Set response deadlines", isRequired: false },
     ],
-    10: [ // HR Escalation Settings
+    12: [ // HR Escalation Settings
       { order: 1, name: "Define escalation triggers", isRequired: false },
       { order: 2, name: "Configure escalation workflow", isRequired: false },
     ],
-    11: [ // Multi-Position Appraisals Setup
+    13: [ // Multi-Position Appraisals Setup
       { order: 1, name: "Configure handling for multi-position employees", isRequired: false },
       { order: 2, name: "Set weighted aggregation rules", isRequired: false },
     ],
-    12: [ // Benchmarks (Distribution Targets)
+    14: [ // Benchmarks (Distribution Targets)
       { order: 1, name: "Set target distribution percentages", isRequired: false },
       { order: 2, name: "Configure bell curve guidelines", isRequired: false },
     ],
     // 6C: Goals & Feedback (Company)
-    13: [ // Goal Framework (OKR/SMART)
+    15: [ // Goal Framework (OKR/SMART)
       { order: 1, name: "Select goal methodology (OKR or SMART)", isRequired: false },
       { order: 2, name: "Configure goal hierarchy (company/dept/individual)", isRequired: false },
       { order: 3, name: "Set alignment requirements", isRequired: false },
@@ -469,91 +483,86 @@ export const subTaskDefinitions: Record<string, Record<number, SubTaskDefinition
       { order: 1, name: "Configure goal lock dates", isRequired: false },
       { order: 2, name: "Set modification approval workflow", isRequired: false },
     ],
-    16: [ // Check-in Cadence
+    18: [ // Check-in Cadence
       { order: 1, name: "Set check-in frequency (weekly/biweekly/monthly)", isRequired: false },
       { order: 2, name: "Configure check-in reminders", isRequired: false },
     ],
-    17: [ // 360 Feedback Configuration
+    19: [ // 360 Feedback Configuration
       { order: 1, name: "Define feedback dimensions", isRequired: false },
       { order: 2, name: "Set rater selection rules", isRequired: false },
       { order: 3, name: "Configure minimum rater counts", isRequired: false },
     ],
-    18: [ // Anonymity Settings
+    20: [ // Anonymity Settings
       { order: 1, name: "Configure peer feedback anonymity", isRequired: false },
       { order: 2, name: "Set skip-level feedback visibility", isRequired: false },
     ],
     // 6D: Cycles & Operations (Company)
-    19: [ // Appraisal Cycles Configuration
+    21: [ // Appraisal Cycles Configuration
       { order: 1, name: "Create annual review cycle", isRequired: true },
       { order: 2, name: "Set cycle start and end dates", isRequired: true },
       { order: 3, name: "Configure cycle stages and deadlines", isRequired: true },
       { order: 4, name: "Set up cycle notifications", isRequired: false },
     ],
-    20: [ // Participant Enrollment Rules
+    22: [ // Participant Enrollment Rules
       { order: 1, name: "Configure tenure-based enrollment", isRequired: false },
       { order: 2, name: "Set position-based enrollment", isRequired: false },
       { order: 3, name: "Configure probation exclusions", isRequired: false },
     ],
-    21: [ // Integration Rules (Downstream)
+    23: [ // Integration Rules (Downstream)
       { order: 1, name: "Link to compensation planning", isRequired: false },
       { order: 2, name: "Link to training recommendations", isRequired: false },
       { order: 3, name: "Link to succession planning", isRequired: false },
     ],
-    22: [ // Calibration Session Setup
+    24: [ // Calibration Session Setup
       { order: 1, name: "Create calibration session templates", isRequired: false },
       { order: 2, name: "Define participant groups", isRequired: false },
       { order: 3, name: "Configure calibration workflow", isRequired: false },
     ],
-    23: [ // AI Calibration Features
+    25: [ // AI Calibration Features
       { order: 1, name: "Enable AI rating suggestions", isRequired: false },
       { order: 2, name: "Configure AI bias detection", isRequired: false },
     ],
     // 6E: Talent Management (Company)
-    24: [ // Nine-Box Grid Configuration
+    26: [ // Nine-Box Grid Configuration
       { order: 1, name: "Configure performance axis", isRequired: false },
       { order: 2, name: "Configure potential axis", isRequired: false },
       { order: 3, name: "Set box definitions and actions", isRequired: false },
     ],
-    25: [ // Talent Pools
+    27: [ // Talent Pools
       { order: 1, name: "Define talent pool categories", isRequired: false },
       { order: 2, name: "Set nomination criteria", isRequired: false },
       { order: 3, name: "Configure pool review cadence", isRequired: false },
     ],
-    26: [ // Key Positions
+    28: [ // Key Positions
       { order: 1, name: "Identify critical positions", isRequired: false },
       { order: 2, name: "Set risk assessment criteria", isRequired: false },
     ],
-    27: [ // Succession Plans
+    29: [ // Succession Plans
       { order: 1, name: "Configure readiness levels", isRequired: false },
       { order: 2, name: "Set development requirements", isRequired: false },
       { order: 3, name: "Create succession templates", isRequired: false },
     ],
-    28: [ // Career Paths
+    30: [ // Career Paths
       { order: 1, name: "Define career tracks by job family", isRequired: false },
       { order: 2, name: "Map progression requirements", isRequired: false },
       { order: 3, name: "Link to learning paths", isRequired: false },
     ],
-    29: [ // Mentorship Programs
+    31: [ // Mentorship Programs
       { order: 1, name: "Create mentorship program types", isRequired: false },
       { order: 2, name: "Configure matching criteria", isRequired: false },
       { order: 3, name: "Set program duration and milestones", isRequired: false },
     ],
     // 6F: Support & PIPs (Company)
-    30: [ // Performance Improvement Plans
+    32: [ // Performance Improvement Plans
       { order: 1, name: "Create PIP templates", isRequired: false },
       { order: 2, name: "Set improvement milestones", isRequired: false },
       { order: 3, name: "Configure review checkpoints", isRequired: false },
       { order: 4, name: "Define escalation outcomes", isRequired: false },
     ],
-    31: [ // Recognition Programs
+    33: [ // Recognition Programs
       { order: 1, name: "Create recognition categories", isRequired: false },
       { order: 2, name: "Set reward types and values", isRequired: false },
       { order: 3, name: "Configure approval workflow", isRequired: false },
-    ],
-    32: [ // Notification Orchestration
-      { order: 1, name: "Configure cycle reminders", isRequired: false },
-      { order: 2, name: "Set up deadline notifications", isRequired: false },
-      { order: 3, name: "Configure completion alerts", isRequired: false },
     ],
   },
 

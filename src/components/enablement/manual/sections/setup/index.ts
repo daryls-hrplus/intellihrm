@@ -4,6 +4,7 @@ export { SetupOverallScales } from './SetupOverallScales';
 export { SetupSkillsCompetencies } from './SetupSkillsCompetencies';
 export { SetupCompetencies } from './SetupCompetencies';
 export { SetupApprovalWorkflows } from './SetupApprovalWorkflows';
+export { SetupNotifications } from './SetupNotifications';
 export { SetupFormTemplates } from './SetupFormTemplates';
 export { SetupAppraisalCycles } from './SetupAppraisalCycles';
 export { SetupPerformanceCategories } from './SetupPerformanceCategories';

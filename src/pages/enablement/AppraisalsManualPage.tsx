@@ -201,9 +201,9 @@ export default function AppraisalsManualPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="h-screen flex flex-col bg-background">
       {/* Header */}
-      <div className="border-b bg-card sticky top-0 z-10">
+      <div className="border-b bg-card sticky top-0 z-10 flex-shrink-0">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -254,12 +254,12 @@ export default function AppraisalsManualPage() {
         </div>
       </div>
 
-      <div className="container mx-auto px-6 py-6">
-        <div className="flex gap-6">
+      <div className="container mx-auto px-6 py-6 flex-1 overflow-hidden">
+        <div className="flex gap-6 h-full">
           {/* Left Sidebar - Table of Contents */}
-          <div className="w-80 flex-shrink-0">
-            <Card className="sticky top-28">
-              <CardHeader className="pb-3">
+          <div className="w-80 flex-shrink-0 h-full">
+            <Card className="h-full flex flex-col">
+              <CardHeader className="pb-3 flex-shrink-0">
                 <CardTitle className="text-base flex items-center gap-2">
                   <Layers className="h-4 w-4" />
                   Table of Contents
@@ -274,8 +274,8 @@ export default function AppraisalsManualPage() {
                   />
                 </div>
               </CardHeader>
-              <CardContent className="pt-0">
-                <ScrollArea className="h-[calc(100vh-320px)]">
+              <CardContent className="pt-0 flex-1 overflow-hidden">
+                <ScrollArea className="h-full">
                   <div className="space-y-1">
                     {filteredSections.map((section) => (
                       <Collapsible
@@ -388,7 +388,7 @@ export default function AppraisalsManualPage() {
           </div>
 
           {/* Main Content Area */}
-          <div className="flex-1 min-w-0" ref={contentRef}>
+          <div className="flex-1 min-w-0 overflow-auto" ref={contentRef}>
             {renderSectionContent()}
           </div>
 
