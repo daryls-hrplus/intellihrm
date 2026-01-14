@@ -74298,6 +74298,8 @@ export type Database = {
         | "salary_change"
         | "rate_change"
         | "performance"
+        | "disciplinary_acknowledgement"
+        | "grievance_submission"
       workflow_status:
         | "draft"
         | "pending"
@@ -74693,6 +74695,8 @@ export const Constants = {
         "salary_change",
         "rate_change",
         "performance",
+        "disciplinary_acknowledgement",
+        "grievance_submission",
       ],
       workflow_status: [
         "draft",
