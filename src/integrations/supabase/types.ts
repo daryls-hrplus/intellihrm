@@ -3306,6 +3306,7 @@ export type Database = {
           execute_after_days: number | null
           id: string
           is_active: boolean
+          rating_level_codes: string[] | null
           requires_hr_override: boolean
           rule_code: string
           rule_name: string
@@ -3333,6 +3334,7 @@ export type Database = {
           execute_after_days?: number | null
           id?: string
           is_active?: boolean
+          rating_level_codes?: string[] | null
           requires_hr_override?: boolean
           rule_code: string
           rule_name: string
@@ -3360,6 +3362,7 @@ export type Database = {
           execute_after_days?: number | null
           id?: string
           is_active?: boolean
+          rating_level_codes?: string[] | null
           requires_hr_override?: boolean
           rule_code?: string
           rule_name?: string
@@ -74288,6 +74291,7 @@ export type Database = {
         | "improvement_trend"
         | "competency_gap"
         | "goal_not_met"
+        | "rating_category"
       approval_workflow_status:
         | "pending_level_1"
         | "pending_level_2"
@@ -74668,6 +74672,7 @@ export const Constants = {
         "improvement_trend",
         "competency_gap",
         "goal_not_met",
+        "rating_category",
       ],
       approval_workflow_status: [
         "pending_level_1",
