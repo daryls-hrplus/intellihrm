@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -18,10 +19,11 @@ import { useAppraisalTemplateSections } from "@/hooks/useAppraisalTemplateSectio
 import { useAppraisalTemplatePhases } from "@/hooks/useAppraisalTemplatePhases";
 import { TemplateSectionConfigPanel } from "./TemplateSectionConfigPanel";
 import { AppraisalPhaseTimeline } from "./AppraisalPhaseTimeline";
+import { AppraisalFormTemplatePreview } from "./AppraisalFormTemplatePreview";
 import { 
   Plus, Edit, Trash2, Copy, Star, Lock, AlertTriangle, CheckCircle, 
   Target, BookOpen, Users, MessageSquare, Heart, ChevronRight,
-  Settings2, Calendar, Shield, Building
+  Settings2, Calendar, Shield, Building, Eye, EyeOff
 } from "lucide-react";
 import { CYCLE_TYPE_PRESETS, type AppraisalCycleType, type WeightEnforcement } from "@/types/appraisalFormTemplates";
 
@@ -50,6 +52,7 @@ export function AppraisalFormTemplateManager({ companyId, companyName }: Props) 
   const [duplicateName, setDuplicateName] = useState("");
   const [duplicateCode, setDuplicateCode] = useState("");
   const [advancedOpen, setAdvancedOpen] = useState(false);
+  const [previewOpen, setPreviewOpen] = useState(false);
 
   // Section and phase hooks - only active when editing
   const { 
@@ -374,12 +377,23 @@ export function AppraisalFormTemplateManager({ companyId, companyName }: Props) 
           <DialogHeader className="px-6 pt-6 pb-4 border-b flex-shrink-0">
             <div className="flex items-center justify-between">
               <DialogTitle>{editingTemplate ? "Edit Template" : "Create Template"}</DialogTitle>
-              {companyName && (
-                <Badge variant="outline" className="text-xs font-normal">
-                  <Building className="h-3 w-3 mr-1" />
-                  {companyName}
-                </Badge>
-              )}
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPreviewOpen(!previewOpen)}
+                  className="gap-2"
+                >
+                  {previewOpen ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {previewOpen ? "Hide Preview" : "Preview"}
+                </Button>
+                {companyName && (
+                  <Badge variant="outline" className="text-xs font-normal">
+                    <Building className="h-3 w-3 mr-1" />
+                    {companyName}
+                  </Badge>
+                )}
+              </div>
             </div>
             <DialogDescription>
               Configure your appraisal form template{companyName ? ` for ${companyName}` : ''}
@@ -711,6 +725,28 @@ export function AppraisalFormTemplateManager({ companyId, companyName }: Props) 
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Preview Sheet */}
+      <Sheet open={previewOpen} onOpenChange={setPreviewOpen}>
+        <SheetContent side="right" className="w-[500px] sm:w-[600px] overflow-y-auto p-0">
+          <SheetHeader className="px-6 pt-6 pb-4 border-b">
+            <SheetTitle className="flex items-center gap-2">
+              <Eye className="h-5 w-5 text-muted-foreground" />
+              Template Preview
+            </SheetTitle>
+          </SheetHeader>
+          <div className="p-6">
+            <AppraisalFormTemplatePreview
+              template={{
+                ...formData,
+                name: formData.name || 'Untitled Template',
+              }}
+              sections={sections || []}
+              phases={phases || []}
+            />
+          </div>
+        </SheetContent>
+      </Sheet>
 
       {/* Duplicate Dialog */}
       <Dialog open={duplicateDialogOpen} onOpenChange={setDuplicateDialogOpen}>
