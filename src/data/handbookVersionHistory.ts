@@ -1,10 +1,10 @@
 // Handbook version tracking and source manual references
 
 export const HANDBOOK_VERSION = {
-  version: '2.1.0',
-  date: '2026-01-13',
+  version: '2.3.0',
+  date: '2026-01-14',
   author: 'Intelli HRM Team',
-  nextReviewDate: '2026-04-13'
+  nextReviewDate: '2026-04-14'
 };
 
 export interface SourceManualReference {
@@ -52,16 +52,24 @@ export const SOURCE_REFERENCES: SourceManualReference[] = [
   {
     id: 'appraisals',
     manualName: 'Appraisals Administrator Manual',
-    version: 'v1.3.0',
-    lastUpdated: '2026-01-02',
+    version: 'v2.2.0',
+    lastUpdated: '2026-01-14',
     phasesUsed: ['Phase 6 (Performance)'],
     chaptersReferenced: [
-      'Part 2: Cycle Setup',
-      'Part 3: Template Configuration',
-      'Part 4: Rating Scales',
-      'Part 5: Workflow Management'
+      'Part 2.2: Rating Scales',
+      'Part 2.3: Overall Rating Scales',
+      'Part 2.4a: Skills vs Competencies Explained',
+      'Part 2.4: Competency Framework Configuration',
+      'Part 2.5: Appraisal Index',
+      'Part 2.7: Rating Levels Configuration',
+      'Part 2.8: Action Rules Configuration',
+      'Part 3: Appraisal Configuration',
+      'Part 4: Goals & Feedback',
+      'Part 5: Cycles & Operations',
+      'Part 6: Talent Management',
+      'Part 7: Support & PIPs'
     ],
-    routePath: '/admin/appraisals-admin-manual'
+    routePath: '/enablement/manuals/appraisals'
   },
   {
     id: 'admin-security',
@@ -85,6 +93,21 @@ export interface ChangeLogEntry {
 }
 
 export const HANDBOOK_CHANGE_LOG: ChangeLogEntry[] = [
+  {
+    version: '2.3.0',
+    date: '2026-01-14',
+    changes: [
+      'Updated Phase 6 to 32 steps (was 31) with new Skills vs Competencies Foundation step',
+      'Added Step 3: Skills vs Competencies Foundation referencing Section 2.4a',
+      'Updated Step 4 (Competency Library) with 9 subtasks aligned to Section 2.4 workflow',
+      'Expanded Step 7 (Rating Levels) to 9 subtasks including all 4 eligibility flags',
+      'Updated Step 6 (Form Templates) to include rating level linking and CRGV model',
+      'Updated Step 8 (Action Rules) to include eligibility flag triggers and downstream linking',
+      'Corrected source section references to match updated manual structure (2.4a, 2.4, 2.7, 2.8)',
+      'Updated admin routes for competencies to /workforce/skills-competencies',
+      'Updated Appraisals Manual reference to v2.2.0 with expanded chapter list'
+    ]
+  },
   {
     version: '2.2.0',
     date: '2026-01-13',
