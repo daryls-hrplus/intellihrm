@@ -477,7 +477,10 @@ export default function PerformanceSetupPage() {
                   <PerformanceCategoriesManager companyId={selectedCompany} />
                 </TabsContent>
                 <TabsContent value="form-templates" className="mt-4">
-                  <AppraisalFormTemplateManager companyId={selectedCompany} />
+                  <AppraisalFormTemplateManager 
+                    companyId={selectedCompany} 
+                    companyName={companies.find(c => c.id === selectedCompany)?.name}
+                  />
                 </TabsContent>
                 <TabsContent value="action-rules" className="mt-4">
                   <AppraisalActionRulesManager companyId={selectedCompany} />
