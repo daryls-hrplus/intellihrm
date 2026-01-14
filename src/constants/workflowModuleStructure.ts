@@ -208,6 +208,31 @@ export const WORKFLOW_MODULES: WorkflowModule[] = [
     ]
   },
   {
+    id: "employee_relations",
+    name: "Employee Relations",
+    icon: Users,
+    categories: [
+      {
+        id: "disciplinary",
+        name: "Disciplinary",
+        color: "red",
+        icon: FileText,
+        workflows: [
+          { code: "disciplinary_acknowledgement", name: "Disciplinary Acknowledgement", transactionTypeCode: null }
+        ]
+      },
+      {
+        id: "grievances",
+        name: "Grievances",
+        color: "orange",
+        icon: FileText,
+        workflows: [
+          { code: "grievance_submission", name: "Grievance Submission", transactionTypeCode: null }
+        ]
+      }
+    ]
+  },
+  {
     id: "documents",
     name: "Documents & Compliance",
     icon: FileText,
