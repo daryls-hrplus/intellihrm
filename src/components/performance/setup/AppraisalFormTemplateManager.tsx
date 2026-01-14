@@ -11,27 +11,24 @@ import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useAppraisalFormTemplates, AppraisalFormTemplate, CreateTemplateInput, validateWeights } from "@/hooks/useAppraisalFormTemplates";
 import { useAppraisalTemplateSections } from "@/hooks/useAppraisalTemplateSections";
 import { useAppraisalTemplatePhases } from "@/hooks/useAppraisalTemplatePhases";
-import { AppraisalFormTemplatePreview } from "./AppraisalFormTemplatePreview";
 import { TemplateSectionConfigPanel } from "./TemplateSectionConfigPanel";
 import { AppraisalPhaseTimeline } from "./AppraisalPhaseTimeline";
 import { 
   Plus, Edit, Trash2, Copy, Star, Lock, AlertTriangle, CheckCircle, 
-  Target, BookOpen, Users, MessageSquare, Heart, Eye, Calendar, 
-  Settings2, History, GitBranch
+  Target, BookOpen, Users, MessageSquare, Heart, ChevronRight,
+  Settings2, Calendar, Shield
 } from "lucide-react";
 import { CYCLE_TYPE_PRESETS, type AppraisalCycleType, type WeightEnforcement } from "@/types/appraisalFormTemplates";
 
 interface Props {
   companyId: string;
 }
-
-type DialogTab = "basic" | "sections" | "phases" | "settings";
 
 export function AppraisalFormTemplateManager({ companyId }: Props) {
   const { 
@@ -52,8 +49,7 @@ export function AppraisalFormTemplateManager({ companyId }: Props) {
   const [duplicatingTemplate, setDuplicatingTemplate] = useState<AppraisalFormTemplate | null>(null);
   const [duplicateName, setDuplicateName] = useState("");
   const [duplicateCode, setDuplicateCode] = useState("");
-  const [activeTab, setActiveTab] = useState<DialogTab>("basic");
-  const [showPreview, setShowPreview] = useState(true);
+  const [advancedOpen, setAdvancedOpen] = useState(false);
 
   // Section and phase hooks - only active when editing
   const { 
@@ -140,7 +136,7 @@ export function AppraisalFormTemplateManager({ companyId }: Props) {
       version_number: 1,
       is_draft: false,
     });
-    setActiveTab("basic");
+    setAdvancedOpen(false);
     setDialogOpen(true);
   };
 
@@ -174,7 +170,7 @@ export function AppraisalFormTemplateManager({ companyId }: Props) {
       version_number: (template as any).version_number || 1,
       is_draft: (template as any).is_draft || false,
     });
-    setActiveTab("basic");
+    setAdvancedOpen(false);
     setDialogOpen(true);
   };
 
@@ -280,7 +276,7 @@ export function AppraisalFormTemplateManager({ companyId }: Props) {
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
             <CardTitle>Appraisal Form Templates</CardTitle>
-            <CardDescription>Configure reusable templates with section weights, phases, and settings</CardDescription>
+            <CardDescription>Configure reusable templates with section weights and settings</CardDescription>
           </div>
           <Button onClick={handleOpenCreate}>
             <Plus className="h-4 w-4 mr-2" />
@@ -298,7 +294,7 @@ export function AppraisalFormTemplateManager({ companyId }: Props) {
                 <TableRow>
                   <TableHead>Name</TableHead>
                   <TableHead>Code</TableHead>
-                  <TableHead>Cycle Types</TableHead>
+                  <TableHead>Cycle Type</TableHead>
                   <TableHead>Sections</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
@@ -330,13 +326,9 @@ export function AppraisalFormTemplateManager({ companyId }: Props) {
                       </TableCell>
                       <TableCell className="text-muted-foreground">{template.code}</TableCell>
                       <TableCell>
-                        <div className="flex gap-1 flex-wrap">
-                          {cycleTypes.map((ct: string) => (
-                            <Badge key={ct} variant="outline" className="text-xs capitalize">
-                              {ct.replace('_', ' ')}
-                            </Badge>
-                          ))}
-                        </div>
+                        <Badge variant="outline" className="text-xs capitalize">
+                          {cycleTypes[0]?.replace('_', ' ')}
+                        </Badge>
                       </TableCell>
                       <TableCell>
                         <div className="flex gap-1">
@@ -377,267 +369,247 @@ export function AppraisalFormTemplateManager({ companyId }: Props) {
         </CardContent>
       </Card>
 
-      {/* Create/Edit Dialog - Enhanced with Tabs and Preview */}
+      {/* Simplified Single-Page Create/Edit Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden flex flex-col">
-          <DialogHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <DialogTitle>{editingTemplate ? "Edit Template" : "Create Template"}</DialogTitle>
-                <DialogDescription>
-                  Configure appraisal form sections, phases, and settings
-                </DialogDescription>
-              </div>
-              {editingTemplate && (
-                <div className="flex items-center gap-2">
-                  <Badge variant="outline">
-                    <GitBranch className="h-3 w-3 mr-1" />
-                    v{formData.version_number}
-                  </Badge>
-                  <Button 
-                    variant="ghost" 
-                    size="sm"
-                    onClick={() => setShowPreview(!showPreview)}
-                  >
-                    <Eye className="h-4 w-4 mr-1" />
-                    {showPreview ? "Hide" : "Show"} Preview
-                  </Button>
-                </div>
-              )}
-            </div>
+        <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col p-0">
+          <DialogHeader className="px-6 pt-6 pb-4 border-b">
+            <DialogTitle>{editingTemplate ? "Edit Template" : "Create Template"}</DialogTitle>
+            <DialogDescription>
+              Configure your appraisal form template
+            </DialogDescription>
           </DialogHeader>
 
-          <div className="flex-1 overflow-hidden">
-            <ResizablePanelGroup direction="horizontal" className="h-full">
-              <ResizablePanel defaultSize={showPreview && editingTemplate ? 60 : 100} minSize={40}>
-                <div className="h-full overflow-y-auto pr-4">
-                  <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as DialogTab)}>
-                    <TabsList className="mb-4">
-                      <TabsTrigger value="basic">Basic Info</TabsTrigger>
-                      <TabsTrigger value="sections" disabled={!editingTemplate}>
-                        Sections
-                      </TabsTrigger>
-                      <TabsTrigger value="phases" disabled={!editingTemplate}>
-                        Phases
-                      </TabsTrigger>
-                      <TabsTrigger value="settings">Settings</TabsTrigger>
-                    </TabsList>
+          <ScrollArea className="flex-1 px-6">
+            <div className="space-y-6 py-4">
+              {/* Template Details */}
+              <div className="space-y-4">
+                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Template Details</h3>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="name">Template Name *</Label>
+                    <Input
+                      id="name"
+                      value={formData.name || ""}
+                      onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                      placeholder="e.g., Annual Performance Review"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="code">Code *</Label>
+                    <Input
+                      id="code"
+                      value={formData.code || ""}
+                      onChange={(e) => setFormData(prev => ({ ...prev, code: e.target.value.toLowerCase().replace(/\s+/g, "_") }))}
+                      placeholder="e.g., annual_review"
+                    />
+                  </div>
+                </div>
 
-                    <TabsContent value="basic" className="space-y-6">
-                      {/* Basic Info */}
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="name">Template Name *</Label>
-                          <Input
-                            id="name"
-                            value={formData.name || ""}
-                            onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                            placeholder="e.g., Annual Performance Review"
+                <div className="space-y-2">
+                  <Label htmlFor="description">Description</Label>
+                  <Textarea
+                    id="description"
+                    value={formData.description || ""}
+                    onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                    placeholder="Describe when this template should be used..."
+                    rows={2}
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Cycle Type</Label>
+                    <Select 
+                      value={formData.applicable_cycle_types?.[0] || 'annual'} 
+                      onValueChange={(v) => handleCycleTypeChange(v as AppraisalCycleType)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {(Object.entries(CYCLE_TYPE_PRESETS) as [AppraisalCycleType, typeof CYCLE_TYPE_PRESETS[AppraisalCycleType]][]).map(([type, preset]) => (
+                          <SelectItem key={type} value={type}>
+                            {preset.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Rating Scale</Label>
+                    <div className="flex items-center gap-2">
+                      <Input
+                        type="number"
+                        value={formData.min_rating || 1}
+                        onChange={(e) => setFormData(prev => ({ ...prev, min_rating: Number(e.target.value) }))}
+                        min={0}
+                        max={10}
+                        className="w-20"
+                      />
+                      <span className="text-muted-foreground">to</span>
+                      <Input
+                        type="number"
+                        value={formData.max_rating || 5}
+                        onChange={(e) => setFormData(prev => ({ ...prev, max_rating: Number(e.target.value) }))}
+                        min={1}
+                        max={10}
+                        className="w-20"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Sections & Weights */}
+              {useLegacySections && (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Sections & Weights</h3>
+                    {weightValidation.valid ? (
+                      <Badge variant="outline" className="text-green-600 border-green-200 bg-green-50">
+                        <CheckCircle className="h-3 w-3 mr-1" />
+                        {weightValidation.total}%
+                      </Badge>
+                    ) : (
+                      <Badge variant="destructive">
+                        <AlertTriangle className="h-3 w-3 mr-1" />
+                        {weightValidation.total}%
+                      </Badge>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    {legacySections.map((section) => {
+                      const isEnabled = formData[section.includeKey as keyof typeof formData] as boolean;
+                      const weight = (formData[section.weightKey as keyof typeof formData] as number) || 0;
+
+                      return (
+                        <div key={section.key} className="flex items-center gap-3 p-3 border rounded-lg bg-muted/30">
+                          <div className="flex items-center gap-2 w-36">
+                            {getSectionIcon(section.key)}
+                            <span className="text-sm font-medium">{section.label}</span>
+                          </div>
+                          <Switch
+                            checked={isEnabled}
+                            onCheckedChange={(checked) => toggleSection(section.key, checked)}
                           />
+                          {isEnabled && (
+                            <div className="flex-1 flex items-center gap-3">
+                              <Slider
+                                value={[weight]}
+                                onValueChange={([value]) => updateWeight(section.weightKey, value)}
+                                max={100}
+                                step={5}
+                                className="flex-1"
+                              />
+                              <span className="w-10 text-right font-mono text-sm">{weight}%</span>
+                            </div>
+                          )}
                         </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="code">Code *</Label>
-                          <Input
-                            id="code"
-                            value={formData.code || ""}
-                            onChange={(e) => setFormData(prev => ({ ...prev, code: e.target.value.toLowerCase().replace(/\s+/g, "_") }))}
-                            placeholder="e.g., annual_review"
-                          />
-                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Advanced Settings - Collapsible */}
+              <Collapsible open={advancedOpen} onOpenChange={setAdvancedOpen}>
+                <CollapsibleTrigger className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors w-full py-2">
+                  <ChevronRight className={`h-4 w-4 transition-transform ${advancedOpen ? 'rotate-90' : ''}`} />
+                  <Settings2 className="h-4 w-4" />
+                  Advanced Settings
+                </CollapsibleTrigger>
+                <CollapsibleContent className="space-y-6 pt-4">
+                  {/* Phase Configuration - Only for existing templates */}
+                  {editingTemplate && (
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <Calendar className="h-4 w-4 text-muted-foreground" />
+                        <h4 className="text-sm font-medium">Phase Timeline</h4>
                       </div>
+                      <AppraisalPhaseTimeline
+                        phases={phases}
+                        templateId={editingTemplate.id}
+                        defaultDurationDays={formData.default_duration_days || 365}
+                        onAddPhase={createPhase}
+                        onUpdatePhase={updatePhase}
+                        onDeletePhase={deletePhase}
+                        onReorderPhases={reorderPhases}
+                        isUpdating={isPhaseUpdating}
+                      />
+                    </div>
+                  )}
 
-                      <div className="space-y-2">
-                        <Label htmlFor="description">Description</Label>
-                        <Textarea
-                          id="description"
-                          value={formData.description || ""}
-                          onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                          placeholder="Describe when this template should be used..."
+                  {/* Advanced Sections - Only for existing templates */}
+                  {editingTemplate && (
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <Target className="h-4 w-4 text-muted-foreground" />
+                        <h4 className="text-sm font-medium">Advanced Section Configuration</h4>
+                      </div>
+                      <TemplateSectionConfigPanel
+                        sections={sections}
+                        templateId={editingTemplate.id}
+                        weightEnforcement={formData.weight_enforcement || 'strict'}
+                        onAddSection={createSection}
+                        onUpdateSection={updateSection}
+                        onDeleteSection={deleteSection}
+                        onReorderSections={reorderSections}
+                        isUpdating={isSectionUpdating}
+                      />
+                    </div>
+                  )}
+
+                  {/* Date Offsets */}
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <Calendar className="h-4 w-4 text-muted-foreground" />
+                      <h4 className="text-sm font-medium">Default Timing</h4>
+                    </div>
+                    <div className="grid grid-cols-3 gap-3">
+                      <div className="space-y-1">
+                        <Label className="text-xs">Duration (days)</Label>
+                        <Input
+                          type="number"
+                          value={formData.default_duration_days || 365}
+                          onChange={(e) => setFormData(prev => ({ ...prev, default_duration_days: parseInt(e.target.value) || 365 }))}
+                          min={0}
+                          max={730}
                         />
                       </div>
-
-                      {/* Cycle Type Selection */}
-                      <div className="space-y-2">
-                        <Label>Primary Cycle Type</Label>
-                        <Select 
-                          value={formData.applicable_cycle_types?.[0] || 'annual'} 
-                          onValueChange={(v) => handleCycleTypeChange(v as AppraisalCycleType)}
-                        >
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                          {(Object.entries(CYCLE_TYPE_PRESETS) as [AppraisalCycleType, typeof CYCLE_TYPE_PRESETS[AppraisalCycleType]][]).map(([type, preset]) => (
-                              <SelectItem key={type} value={type}>
-                                <div className="flex flex-col">
-                                  <span>{preset.label}</span>
-                                  <span className="text-xs text-muted-foreground">
-                                    {preset.defaultDurationDays > 0 ? `${preset.defaultDurationDays} days` : 'Ongoing'}
-                                  </span>
-                                </div>
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      {/* Date Configuration */}
-                      <div className="grid grid-cols-3 gap-4">
-                        <div className="space-y-2">
-                          <Label>Default Duration (days)</Label>
-                          <Input
-                            type="number"
-                            value={formData.default_duration_days || 365}
-                            onChange={(e) => setFormData(prev => ({ ...prev, default_duration_days: parseInt(e.target.value) || 365 }))}
-                            min={0}
-                            max={730}
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label>Evaluation Offset (days)</Label>
-                          <Input
-                            type="number"
-                            value={formData.default_evaluation_offset_days || 14}
-                            onChange={(e) => setFormData(prev => ({ ...prev, default_evaluation_offset_days: parseInt(e.target.value) || 14 }))}
-                            min={0}
-                            max={60}
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label>Grace Period (days)</Label>
-                          <Input
-                            type="number"
-                            value={formData.default_grace_period_days || 3}
-                            onChange={(e) => setFormData(prev => ({ ...prev, default_grace_period_days: parseInt(e.target.value) || 3 }))}
-                            min={0}
-                            max={14}
-                          />
-                        </div>
-                      </div>
-
-                      {/* Legacy Section Configuration (for new templates without sections) */}
-                      {useLegacySections && (
-                        <div className="space-y-4">
-                          <Label className="text-base font-semibold">Sections & Weights</Label>
-                          
-                          <Alert variant={weightValidation.valid ? "default" : "destructive"}>
-                            {weightValidation.valid ? (
-                              <CheckCircle className="h-4 w-4" />
-                            ) : (
-                              <AlertTriangle className="h-4 w-4" />
-                            )}
-                            <AlertDescription>
-                              {weightValidation.valid 
-                                ? `Total weight: ${weightValidation.total}% ✓`
-                                : weightValidation.message}
-                            </AlertDescription>
-                          </Alert>
-
-                          {legacySections.map((section) => {
-                            const isEnabled = formData[section.includeKey as keyof typeof formData] as boolean;
-                            const weight = (formData[section.weightKey as keyof typeof formData] as number) || 0;
-
-                            return (
-                              <div key={section.key} className="flex items-center gap-4 p-4 border rounded-lg">
-                                <div className="flex items-center gap-3 w-40">
-                                  {getSectionIcon(section.key)}
-                                  <span className="font-medium">{section.label}</span>
-                                </div>
-                                <Switch
-                                  checked={isEnabled}
-                                  onCheckedChange={(checked) => toggleSection(section.key, checked)}
-                                />
-                                {isEnabled && (
-                                  <div className="flex-1 flex items-center gap-4">
-                                    <Slider
-                                      value={[weight]}
-                                      onValueChange={([value]) => updateWeight(section.weightKey, value)}
-                                      max={100}
-                                      step={5}
-                                      className="flex-1"
-                                    />
-                                    <span className="w-12 text-right font-mono">{weight}%</span>
-                                  </div>
-                                )}
-                              </div>
-                            );
-                          })}
-                        </div>
-                      )}
-                    </TabsContent>
-
-                    <TabsContent value="sections" className="space-y-4">
-                      {editingTemplate ? (
-                        <TemplateSectionConfigPanel
-                          sections={sections}
-                          templateId={editingTemplate.id}
-                          weightEnforcement={formData.weight_enforcement || 'strict'}
-                          onAddSection={createSection}
-                          onUpdateSection={updateSection}
-                          onDeleteSection={deleteSection}
-                          onReorderSections={reorderSections}
-                          isUpdating={isSectionUpdating}
+                      <div className="space-y-1">
+                        <Label className="text-xs">Eval Offset (days)</Label>
+                        <Input
+                          type="number"
+                          value={formData.default_evaluation_offset_days || 14}
+                          onChange={(e) => setFormData(prev => ({ ...prev, default_evaluation_offset_days: parseInt(e.target.value) || 14 }))}
+                          min={0}
+                          max={60}
                         />
-                      ) : (
-                        <Alert>
-                          <AlertTriangle className="h-4 w-4" />
-                          <AlertDescription>
-                            Save the template first to configure advanced sections.
-                          </AlertDescription>
-                        </Alert>
-                      )}
-                    </TabsContent>
-
-                    <TabsContent value="phases" className="space-y-4">
-                      {editingTemplate ? (
-                        <AppraisalPhaseTimeline
-                          phases={phases}
-                          templateId={editingTemplate.id}
-                          defaultDurationDays={formData.default_duration_days || 365}
-                          onAddPhase={createPhase}
-                          onUpdatePhase={updatePhase}
-                          onDeletePhase={deletePhase}
-                          onReorderPhases={reorderPhases}
-                          isUpdating={isPhaseUpdating}
-                        />
-                      ) : (
-                        <Alert>
-                          <AlertTriangle className="h-4 w-4" />
-                          <AlertDescription>
-                            Save the template first to configure phase timeline.
-                          </AlertDescription>
-                        </Alert>
-                      )}
-                    </TabsContent>
-
-                    <TabsContent value="settings" className="space-y-6">
-                      {/* Rating Scale */}
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label>Min Rating</Label>
-                          <Input
-                            type="number"
-                            value={formData.min_rating || 1}
-                            onChange={(e) => setFormData(prev => ({ ...prev, min_rating: Number(e.target.value) }))}
-                            min={0}
-                            max={10}
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label>Max Rating</Label>
-                          <Input
-                            type="number"
-                            value={formData.max_rating || 5}
-                            onChange={(e) => setFormData(prev => ({ ...prev, max_rating: Number(e.target.value) }))}
-                            min={1}
-                            max={10}
-                          />
-                        </div>
                       </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs">Grace Period (days)</Label>
+                        <Input
+                          type="number"
+                          value={formData.default_grace_period_days || 3}
+                          onChange={(e) => setFormData(prev => ({ ...prev, default_grace_period_days: parseInt(e.target.value) || 3 }))}
+                          min={0}
+                          max={14}
+                        />
+                      </div>
+                    </div>
+                  </div>
 
-                      {/* Weight Enforcement */}
+                  {/* Governance Settings */}
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <Shield className="h-4 w-4 text-muted-foreground" />
+                      <h4 className="text-sm font-medium">Governance</h4>
+                    </div>
+                    <div className="space-y-3">
                       <div className="space-y-2">
-                        <Label>Weight Enforcement</Label>
+                        <Label className="text-xs">Weight Enforcement</Label>
                         <Select 
                           value={formData.weight_enforcement || 'strict'} 
                           onValueChange={(v) => setFormData(prev => ({ ...prev, weight_enforcement: v as WeightEnforcement }))}
@@ -652,78 +624,69 @@ export function AppraisalFormTemplateManager({ companyId }: Props) {
                           </SelectContent>
                         </Select>
                       </div>
-
-                      {/* Template Settings */}
-                      <div className="space-y-4">
-                        <Label className="text-base font-semibold">Governance</Label>
-                        
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Lock Template</Label>
-                            <p className="text-sm text-muted-foreground">Prevent weight changes when used in cycles</p>
-                          </div>
-                          <Switch
-                            checked={formData.is_locked || false}
-                            onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_locked: checked }))}
-                          />
+                      
+                      <div className="flex items-center justify-between py-2">
+                        <div>
+                          <Label className="text-sm">Lock Template</Label>
+                          <p className="text-xs text-muted-foreground">Prevent changes when used in cycles</p>
                         </div>
-
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Allow Weight Override</Label>
-                            <p className="text-sm text-muted-foreground">Allow cycles to customize weights</p>
-                          </div>
-                          <Switch
-                            checked={formData.allow_weight_override || false}
-                            onCheckedChange={(checked) => setFormData(prev => ({ ...prev, allow_weight_override: checked }))}
-                          />
-                        </div>
-
-                        {formData.allow_weight_override && (
-                          <div className="flex items-center justify-between pl-6">
-                            <div>
-                              <Label>Require HR Approval</Label>
-                              <p className="text-sm text-muted-foreground">Weight changes need HR approval</p>
-                            </div>
-                            <Switch
-                              checked={formData.requires_hr_approval_for_override || false}
-                              onCheckedChange={(checked) => setFormData(prev => ({ ...prev, requires_hr_approval_for_override: checked }))}
-                            />
-                          </div>
-                        )}
-
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <Label>Active</Label>
-                            <p className="text-sm text-muted-foreground">Template available for new cycles</p>
-                          </div>
-                          <Switch
-                            checked={formData.is_active || false}
-                            onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_active: checked }))}
-                          />
-                        </div>
+                        <Switch
+                          checked={formData.is_locked || false}
+                          onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_locked: checked }))}
+                        />
                       </div>
-                    </TabsContent>
-                  </Tabs>
-                </div>
-              </ResizablePanel>
 
-              {showPreview && editingTemplate && (
-                <>
-                  <ResizableHandle withHandle />
-                  <ResizablePanel defaultSize={40} minSize={30}>
-                    <AppraisalFormTemplatePreview
-                      template={formData as any}
-                      sections={sections}
-                      phases={phases}
-                    />
-                  </ResizablePanel>
-                </>
-              )}
-            </ResizablePanelGroup>
-          </div>
+                      <div className="flex items-center justify-between py-2">
+                        <div>
+                          <Label className="text-sm">Allow Weight Override</Label>
+                          <p className="text-xs text-muted-foreground">Allow cycles to customize weights</p>
+                        </div>
+                        <Switch
+                          checked={formData.allow_weight_override || false}
+                          onCheckedChange={(checked) => setFormData(prev => ({ ...prev, allow_weight_override: checked }))}
+                        />
+                      </div>
 
-          <DialogFooter className="pt-4 border-t">
+                      {formData.allow_weight_override && (
+                        <div className="flex items-center justify-between py-2 pl-4 border-l-2 border-muted">
+                          <div>
+                            <Label className="text-sm">Require HR Approval</Label>
+                            <p className="text-xs text-muted-foreground">Weight changes need HR approval</p>
+                          </div>
+                          <Switch
+                            checked={formData.requires_hr_approval_for_override || false}
+                            onCheckedChange={(checked) => setFormData(prev => ({ ...prev, requires_hr_approval_for_override: checked }))}
+                          />
+                        </div>
+                      )}
+
+                      <div className="flex items-center justify-between py-2">
+                        <div>
+                          <Label className="text-sm">Active</Label>
+                          <p className="text-xs text-muted-foreground">Template available for new cycles</p>
+                        </div>
+                        <Switch
+                          checked={formData.is_active || false}
+                          onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_active: checked }))}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {!editingTemplate && (
+                    <Alert>
+                      <AlertTriangle className="h-4 w-4" />
+                      <AlertDescription>
+                        Save the template first to configure phases and advanced sections.
+                      </AlertDescription>
+                    </Alert>
+                  )}
+                </CollapsibleContent>
+              </Collapsible>
+            </div>
+          </ScrollArea>
+
+          <DialogFooter className="px-6 py-4 border-t">
             <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
             <Button 
               onClick={handleSubmit} 
