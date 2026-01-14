@@ -55,7 +55,8 @@ import {
   Users,
   Target,
   MessageCircle,
-  GitBranch
+  GitBranch,
+  Files
 } from 'lucide-react';
 
 interface EmailTemplate {
@@ -259,6 +260,42 @@ export function ReminderEmailTemplates({ companyId, companyName, onUseTemplate }
     } catch (error) {
       console.error('Error resetting template:', error);
       toast.error('Failed to reset template');
+    }
+  };
+
+  const handleDuplicateTemplate = async (template: EmailTemplate) => {
+    setSaving(true);
+    try {
+      // Generate a unique name for the duplicate
+      const baseName = template.name.replace(/\s*\(Copy\s*\d*\)$/, '');
+      const existingCopies = templates.filter(t => 
+        t.name.startsWith(baseName) && t.name !== template.name
+      ).length;
+      const newName = existingCopies > 0 
+        ? `${baseName} (Copy ${existingCopies + 1})`
+        : `${baseName} (Copy)`;
+
+      const { error } = await supabase
+        .from('reminder_email_templates')
+        .insert({
+          company_id: companyId,
+          category: template.category,
+          name: newName,
+          subject: template.subject,
+          body: template.body,
+          is_default: false,
+          is_active: true,
+        });
+
+      if (error) throw error;
+      
+      toast.success(`Template duplicated as "${newName}"`);
+      fetchTemplates();
+    } catch (error) {
+      console.error('Error duplicating template:', error);
+      toast.error('Failed to duplicate template');
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -492,9 +529,20 @@ export function ReminderEmailTemplates({ companyId, companyName, onUseTemplate }
                             </Button>
                           )}
                           <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleDuplicateTemplate(template)}
+                            disabled={saving}
+                            title="Duplicate template"
+                          >
+                            <Files className="h-3.5 w-3.5 mr-1" />
+                            Duplicate
+                          </Button>
+                          <Button 
                             variant="ghost" 
                             size="sm"
                             onClick={() => handleCopyTemplate(template)}
+                            title="Copy content to clipboard"
                           >
                             <Copy className="h-3.5 w-3.5" />
                           </Button>
@@ -504,6 +552,7 @@ export function ReminderEmailTemplates({ companyId, companyName, onUseTemplate }
                               size="sm"
                               onClick={() => handleResetToDefault(template)}
                               className="text-muted-foreground"
+                              title="Delete custom template"
                             >
                               <RotateCcw className="h-3.5 w-3.5" />
                             </Button>
