@@ -73,6 +73,7 @@ interface EmailTemplate {
 
 interface ReminderEmailTemplatesProps {
   companyId: string;
+  companyName?: string;
   onUseTemplate?: (template: EmailTemplate) => void;
 }
 
@@ -93,7 +94,7 @@ const CATEGORY_ICONS: Record<string, React.ReactNode> = {
   onboarding: <UserPlus className="h-4 w-4" />,
 };
 
-export function ReminderEmailTemplates({ companyId, onUseTemplate }: ReminderEmailTemplatesProps) {
+export function ReminderEmailTemplates({ companyId, companyName, onUseTemplate }: ReminderEmailTemplatesProps) {
   const [templates, setTemplates] = useState<EmailTemplate[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingTemplate, setEditingTemplate] = useState<EmailTemplate | null>(null);
@@ -266,7 +267,7 @@ export function ReminderEmailTemplates({ companyId, onUseTemplate }: ReminderEma
       .replace(/\{\{employee_first_name\}\}/gi, 'John')
       .replace(/\{\{employee_full_name\}\}/gi, 'John Doe')
       .replace(/\{\{manager_name\}\}/gi, 'Jane Smith')
-      .replace(/\{\{company_name\}\}/gi, 'Acme Corp')
+      .replace(/\{\{company_name\}\}/gi, companyName || 'Your Company')
       .replace(/\{\{event_date\}\}/gi, 'January 15, 2025')
       .replace(/\{\{event_title\}\}/gi, 'Work Permit Renewal')
       .replace(/\{\{days_until\}\}/gi, '14')

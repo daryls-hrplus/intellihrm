@@ -91,12 +91,15 @@ export default function AdminRemindersPage() {
                 </p>
               </CardHeader>
               <CardContent>
-                {selectedCompanyId === 'all' ? (
+              {selectedCompanyId === 'all' ? (
                   <div className="text-center py-8 text-muted-foreground">
                     Please select a company to manage reminder rules
                   </div>
                 ) : (
-                  <ReminderRulesManager companyId={selectedCompanyId} />
+                  <ReminderRulesManager 
+                    companyId={selectedCompanyId}
+                    companyName={companies.find(c => c.id === selectedCompanyId)?.name}
+                  />
                 )}
               </CardContent>
             </Card>
