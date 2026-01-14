@@ -1,9 +1,9 @@
-import { useState, useEffect, forwardRef, useImperativeHandle, useRef } from 'react';
+import { useState, useEffect, forwardRef, useImperativeHandle, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useReminders } from '@/hooks/useReminders';
 import { useReminderSourcePreview } from '@/hooks/useReminderSourcePreview';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Input } from '@/components/ui/input';
@@ -13,13 +13,19 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Plus, Pencil, Trash2, Bell, Mail, BellRing, Loader2, X, Settings, HelpCircle, Zap, FileText, Users, ExternalLink, CalendarIcon, CalendarRange } from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { 
+  Plus, Pencil, Trash2, Bell, Mail, BellRing, Loader2, X, Settings, HelpCircle, Zap, 
+  FileText, Users, ExternalLink, CalendarIcon, CalendarRange, Search, ChevronDown, 
+  ChevronRight, AlertCircle, Shield, Briefcase, GraduationCap, Heart, Calendar,
+  Trophy, MessageSquare, UserCheck, Clock, FolderOpen, CheckCircle2
+} from 'lucide-react';
 import { format, parseISO } from 'date-fns';
-import { Calendar } from '@/components/ui/calendar';
+import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
-import type { ReminderRule, ReminderEventType } from '@/types/reminders';
-import { PRIORITY_OPTIONS, NOTIFICATION_METHODS } from '@/types/reminders';
+import type { ReminderRule, ReminderEventType, ReminderCategory } from '@/types/reminders';
+import { PRIORITY_OPTIONS, NOTIFICATION_METHODS, REMINDER_CATEGORIES } from '@/types/reminders';
 import { NaturalLanguageRuleInput } from './NaturalLanguageRuleInput';
 import { RuleSourcePreview } from './RuleSourcePreview';
 import { TemplateMessagePreview } from './TemplateMessagePreview';
@@ -40,6 +46,25 @@ export interface ReminderRulesManagerRef {
   openCreateDialogWithTemplate: (template: { id: string; name: string; category: string }) => void;
 }
 
+// Category icons mapping
+const CATEGORY_ICONS: Record<string, React.ReactNode> = {
+  custom: <Settings className="h-4 w-4" />,
+  onboarding: <UserCheck className="h-4 w-4" />,
+  employment: <Briefcase className="h-4 w-4" />,
+  leave: <Calendar className="h-4 w-4" />,
+  performance_appraisals: <Trophy className="h-4 w-4" />,
+  performance_360: <Users className="h-4 w-4" />,
+  performance_goals: <CheckCircle2 className="h-4 w-4" />,
+  performance_feedback: <MessageSquare className="h-4 w-4" />,
+  performance_succession: <UserCheck className="h-4 w-4" />,
+  employee_voice: <MessageSquare className="h-4 w-4" />,
+  training: <GraduationCap className="h-4 w-4" />,
+  benefits: <Heart className="h-4 w-4" />,
+  document: <FileText className="h-4 w-4" />,
+  compliance: <Shield className="h-4 w-4" />,
+  milestone: <Trophy className="h-4 w-4" />,
+};
+
 export const ReminderRulesManager = forwardRef<ReminderRulesManagerRef, ReminderRulesManagerProps>(
   function ReminderRulesManager({ companyId, companyName, highlightRuleId, onEditRule }, ref) {
   const navigate = useNavigate();
@@ -56,6 +81,12 @@ export const ReminderRulesManager = forwardRef<ReminderRulesManagerRef, Reminder
   const [linkedTemplate, setLinkedTemplate] = useState<{ id: string; name: string; category: string } | null>(null);
   const [newInterval, setNewInterval] = useState<string>('');
   const [dialogPreviewData, setDialogPreviewData] = useState<SourcePreviewData | null>(null);
+  
+  // Category-based filtering states
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
+  
   const [formData, setFormData] = useState<{
     name: string;
     description: string;
@@ -102,6 +133,71 @@ export const ReminderRulesManager = forwardRef<ReminderRulesManagerRef, Reminder
     { value: 'mid_year', label: 'Mid-Year Review' },
   ];
 
+  // Get rule category from event_type
+  const getRuleCategory = (rule: ReminderRule): string => {
+    return rule.event_type?.category || 'custom';
+  };
+
+  // Group rules by category with filtering
+  const groupedRules = useMemo(() => {
+    const filtered = rules.filter(rule => {
+      const matchesSearch = !searchQuery || 
+        rule.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        rule.event_type?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        rule.description?.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesCategory = !selectedCategory || getRuleCategory(rule) === selectedCategory;
+      return matchesSearch && matchesCategory;
+    });
+    
+    return filtered.reduce((acc, rule) => {
+      const category = getRuleCategory(rule);
+      if (!acc[category]) acc[category] = [];
+      acc[category].push(rule);
+      return acc;
+    }, {} as Record<string, ReminderRule[]>);
+  }, [rules, searchQuery, selectedCategory]);
+
+  // Calculate category coverage
+  const categoryCoverage = useMemo(() => {
+    const coverage: Record<string, { count: number; hasRules: boolean }> = {};
+    
+    REMINDER_CATEGORIES.forEach(cat => {
+      const rulesInCategory = rules.filter(r => getRuleCategory(r) === cat.value);
+      coverage[cat.value] = {
+        count: rulesInCategory.length,
+        hasRules: rulesInCategory.length > 0
+      };
+    });
+    
+    return coverage;
+  }, [rules]);
+
+  const categoriesWithRules = Object.values(categoryCoverage).filter(c => c.hasRules).length;
+
+  const toggleCategory = (category: string) => {
+    setExpandedCategories(prev => {
+      const next = new Set(prev);
+      if (next.has(category)) {
+        next.delete(category);
+      } else {
+        next.add(category);
+      }
+      return next;
+    });
+  };
+
+  // Auto-expand categories with rules on initial load
+  useEffect(() => {
+    if (rules.length > 0 && expandedCategories.size === 0) {
+      const categoriesWithRulesSet = new Set<string>();
+      rules.forEach(rule => {
+        const cat = getRuleCategory(rule);
+        categoriesWithRulesSet.add(cat);
+      });
+      setExpandedCategories(categoriesWithRulesSet);
+    }
+  }, [rules]);
+
   const loadData = async () => {
     setLoading(true);
     try {
@@ -138,6 +234,12 @@ export const ReminderRulesManager = forwardRef<ReminderRulesManagerRef, Reminder
 
   const scrollToRule = (ruleId: string) => {
     setHighlightedRuleId(ruleId);
+    // Find the category of the rule and expand it
+    const rule = rules.find(r => r.id === ruleId);
+    if (rule) {
+      const category = getRuleCategory(rule);
+      setExpandedCategories(prev => new Set([...prev, category]));
+    }
     setTimeout(() => {
       const row = ruleRowRefs.current[ruleId];
       if (row) {
@@ -177,6 +279,37 @@ export const ReminderRulesManager = forwardRef<ReminderRulesManagerRef, Reminder
       effective_from: null,
       effective_to: null,
     });
+    setNewInterval('');
+    setDialogOpen(true);
+  };
+
+  const handleOpenDialogWithCategory = (categoryValue: string) => {
+    setLinkedTemplate(null);
+    setEditingRule(null);
+    setFormData({
+      name: '',
+      description: '',
+      event_type_id: '',
+      days_before: 7,
+      reminder_intervals: [7],
+      send_to_employee: true,
+      send_to_manager: true,
+      send_to_hr: false,
+      notification_method: 'both',
+      message_template: '',
+      email_template_id: null,
+      use_custom_email: false,
+      priority: 'medium',
+      is_active: true,
+      cycle_type_filter: [],
+      effective_from: null,
+      effective_to: null,
+    });
+    // Pre-select first event type from this category if available
+    const eventTypeInCategory = eventTypes.find(t => t.category === categoryValue);
+    if (eventTypeInCategory) {
+      setFormData(prev => ({ ...prev, event_type_id: eventTypeInCategory.id }));
+    }
     setNewInterval('');
     setDialogOpen(true);
   };
@@ -320,6 +453,112 @@ export const ReminderRulesManager = forwardRef<ReminderRulesManagerRef, Reminder
   const getPriorityColor = (priority: string) => {
     const option = PRIORITY_OPTIONS.find(p => p.value === priority);
     return option?.color || 'text-muted-foreground';
+  };
+
+  // Render rule row for table
+  const renderRuleRow = (rule: ReminderRule) => {
+    const intervals = rule.reminder_intervals || [rule.days_before];
+    const affectedData = ruleAffectedCounts[rule.id];
+    const sourceTableLabel = rule.event_type?.source_table
+      ?.replace('employee_', '')
+      .replace(/_/g, ' ') || 'records';
+    const isHighlighted = highlightedRuleId === rule.id || highlightRuleId === rule.id;
+    
+    // Determine effective status
+    const today = new Date().toISOString().split('T')[0];
+    const isScheduled = rule.effective_from && rule.effective_from > today;
+    const isExpired = rule.effective_to && rule.effective_to < today;
+    const effectiveStatus = isExpired ? 'expired' : isScheduled ? 'scheduled' : rule.is_active ? 'active' : 'inactive';
+    
+    return (
+      <TableRow 
+        key={rule.id}
+        ref={(el) => { ruleRowRefs.current[rule.id] = el; }}
+        className={isHighlighted ? 'animate-pulse bg-primary/10 transition-colors duration-1000' : ''}
+      >
+        <TableCell className="font-medium">{rule.name}</TableCell>
+        <TableCell>
+          <span className="text-sm">{rule.event_type?.name || '-'}</span>
+        </TableCell>
+        <TableCell>
+          {affectedData ? (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Badge 
+                    variant="secondary" 
+                    className="cursor-pointer hover:bg-primary/20 transition-colors gap-1"
+                  >
+                    <FileText className="h-3 w-3" />
+                    {affectedData.count} {sourceTableLabel}
+                  </Badge>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{affectedData.count} records across {affectedData.employeeCount} employees</p>
+                  <p className="text-xs text-muted-foreground">Click edit to see details</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          ) : (
+            <span className="text-muted-foreground text-sm">-</span>
+          )}
+        </TableCell>
+        <TableCell>
+          <div className="flex flex-wrap gap-1">
+            {intervals.sort((a, b) => b - a).map((interval) => (
+              <Badge key={interval} variant="outline" className="text-xs">
+                {interval}d
+              </Badge>
+            ))}
+          </div>
+        </TableCell>
+        <TableCell>
+          <div className="flex gap-1">
+            {rule.send_to_employee && <Badge variant="outline" className="text-xs">Emp</Badge>}
+            {rule.send_to_manager && <Badge variant="outline" className="text-xs">Mgr</Badge>}
+            {rule.send_to_hr && <Badge variant="outline" className="text-xs">HR</Badge>}
+          </div>
+        </TableCell>
+        <TableCell>
+          <span className={getPriorityColor(rule.priority)}>{rule.priority}</span>
+        </TableCell>
+        <TableCell>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Badge 
+                  variant={effectiveStatus === 'active' ? 'default' : effectiveStatus === 'scheduled' ? 'outline' : 'secondary'}
+                  className={cn(
+                    effectiveStatus === 'scheduled' && 'border-amber-500 text-amber-600',
+                    effectiveStatus === 'expired' && 'border-destructive/50 text-destructive'
+                  )}
+                >
+                  {effectiveStatus === 'active' && 'Active'}
+                  {effectiveStatus === 'scheduled' && 'Scheduled'}
+                  {effectiveStatus === 'expired' && 'Expired'}
+                  {effectiveStatus === 'inactive' && 'Inactive'}
+                </Badge>
+              </TooltipTrigger>
+              <TooltipContent>
+                {rule.effective_from && <p>Starts: {format(parseISO(rule.effective_from), 'PPP')}</p>}
+                {rule.effective_to && <p>Ends: {format(parseISO(rule.effective_to), 'PPP')}</p>}
+                {!rule.effective_from && !rule.effective_to && <p>No date restrictions</p>}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </TableCell>
+        <TableCell className="text-right">
+          <div className="flex justify-end gap-2">
+            <Button variant="ghost" size="icon" onClick={() => handleOpenDialog(rule)}>
+              <Pencil className="h-4 w-4" />
+            </Button>
+            <Button variant="ghost" size="icon" onClick={() => handleDelete(rule.id)}>
+              <Trash2 className="h-4 w-4 text-destructive" />
+            </Button>
+          </div>
+        </TableCell>
+      </TableRow>
+    );
   };
 
   if (loading) {
@@ -777,7 +1016,7 @@ export const ReminderRulesManager = forwardRef<ReminderRulesManagerRef, Reminder
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
+                        <CalendarComponent
                           mode="single"
                           selected={formData.effective_from ? parseISO(formData.effective_from) : undefined}
                           onSelect={(date) => setFormData({ 
@@ -820,7 +1059,7 @@ export const ReminderRulesManager = forwardRef<ReminderRulesManagerRef, Reminder
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
+                        <CalendarComponent
                           mode="single"
                           selected={formData.effective_to ? parseISO(formData.effective_to) : undefined}
                           onSelect={(date) => setFormData({ 
@@ -877,7 +1116,95 @@ export const ReminderRulesManager = forwardRef<ReminderRulesManagerRef, Reminder
         </div>
       </div>
 
-      {rules.length === 0 ? (
+      {/* Coverage Summary */}
+      <div className="flex flex-col sm:flex-row sm:items-center gap-4 p-4 bg-muted/50 rounded-lg border">
+        <div className="flex-1">
+          <div className="flex items-center gap-2">
+            <Zap className="h-4 w-4 text-primary" />
+            <p className="text-sm font-medium">Automation Coverage</p>
+          </div>
+          <p className="text-xs text-muted-foreground mt-1">
+            {categoriesWithRules} of {REMINDER_CATEGORIES.length} categories have automation rules configured
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-1.5">
+          {REMINDER_CATEGORIES.slice(0, 10).map(cat => (
+            <TooltipProvider key={cat.value}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className={cn(
+                    "w-7 h-7 rounded-md flex items-center justify-center transition-colors cursor-pointer",
+                    categoryCoverage[cat.value]?.hasRules 
+                      ? "bg-primary/20 text-primary" 
+                      : "bg-muted text-muted-foreground"
+                  )}>
+                    {CATEGORY_ICONS[cat.value] || <Bell className="h-4 w-4" />}
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p className="font-medium">{cat.label}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {categoryCoverage[cat.value]?.count || 0} rule{(categoryCoverage[cat.value]?.count || 0) !== 1 ? 's' : ''} configured
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          ))}
+          {REMINDER_CATEGORIES.length > 10 && (
+            <div className="w-7 h-7 rounded-md flex items-center justify-center bg-muted text-muted-foreground text-xs">
+              +{REMINDER_CATEGORIES.length - 10}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Search and Filter Bar */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+        <div className="relative flex-1 max-w-sm">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input 
+            placeholder="Search rules..." 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-9"
+          />
+        </div>
+        <Select 
+          value={selectedCategory || 'all'} 
+          onValueChange={(v) => setSelectedCategory(v === 'all' ? null : v)}
+        >
+          <SelectTrigger className="w-[220px]">
+            <SelectValue placeholder="All Categories" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Categories</SelectItem>
+            {REMINDER_CATEGORIES.map(cat => (
+              <SelectItem key={cat.value} value={cat.value}>
+                <div className="flex items-center gap-2">
+                  {CATEGORY_ICONS[cat.value]}
+                  <span>{cat.label}</span>
+                  <Badge variant="secondary" className="ml-auto text-xs">
+                    {categoryCoverage[cat.value]?.count || 0}
+                  </Badge>
+                </div>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        {(searchQuery || selectedCategory) && (
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={() => { setSearchQuery(''); setSelectedCategory(null); }}
+          >
+            <X className="h-4 w-4 mr-1" />
+            Clear filters
+          </Button>
+        )}
+      </div>
+
+      {/* Category-Based Rules Display */}
+      {rules.length === 0 && !searchQuery && !selectedCategory ? (
         <Card>
           <CardContent className="py-12 text-center">
             <Bell className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
@@ -886,128 +1213,134 @@ export const ReminderRulesManager = forwardRef<ReminderRulesManagerRef, Reminder
           </CardContent>
         </Card>
       ) : (
-        <Card>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Rule Name</TableHead>
-                <TableHead>Event Type</TableHead>
-                <TableHead>Affected Items</TableHead>
-                <TableHead>Intervals</TableHead>
-                <TableHead>Recipients</TableHead>
-                <TableHead>Priority</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {rules.map((rule) => {
-                const intervals = rule.reminder_intervals || [rule.days_before];
-                const affectedData = ruleAffectedCounts[rule.id];
-                const sourceTableLabel = rule.event_type?.source_table
-                  ?.replace('employee_', '')
-                  .replace(/_/g, ' ') || 'records';
-                const isHighlighted = highlightedRuleId === rule.id || highlightRuleId === rule.id;
-                
-                // Determine effective status
-                const today = new Date().toISOString().split('T')[0];
-                const isScheduled = rule.effective_from && rule.effective_from > today;
-                const isExpired = rule.effective_to && rule.effective_to < today;
-                const effectiveStatus = isExpired ? 'expired' : isScheduled ? 'scheduled' : rule.is_active ? 'active' : 'inactive';
-                
-                return (
-                <TableRow 
-                  key={rule.id}
-                  ref={(el) => { ruleRowRefs.current[rule.id] = el; }}
-                  className={isHighlighted ? 'animate-pulse bg-primary/10 transition-colors duration-1000' : ''}
-                >
-                  <TableCell className="font-medium">{rule.name}</TableCell>
-                  <TableCell>
-                    <span className="text-sm">{rule.event_type?.name || '-'}</span>
-                  </TableCell>
-                  <TableCell>
-                    {affectedData ? (
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Badge 
-                              variant="secondary" 
-                              className="cursor-pointer hover:bg-primary/20 transition-colors gap-1"
-                            >
-                              <FileText className="h-3 w-3" />
-                              {affectedData.count} {sourceTableLabel}
+        <div className="space-y-3">
+          {REMINDER_CATEGORIES.map(category => {
+            const categoryRules = groupedRules[category.value] || [];
+            const hasRules = categoryRules.length > 0;
+            const isExpanded = expandedCategories.has(category.value);
+            const totalInCategory = categoryCoverage[category.value]?.count || 0;
+            
+            // Skip if filtering and no matching rules
+            if ((searchQuery || selectedCategory) && !hasRules) return null;
+            
+            return (
+              <Collapsible
+                key={category.value}
+                open={isExpanded}
+                onOpenChange={() => toggleCategory(category.value)}
+              >
+                <Card className={cn(
+                  "transition-all",
+                  !hasRules && "opacity-70 border-dashed"
+                )}>
+                  <CollapsibleTrigger className="w-full">
+                    <CardHeader className="py-3 cursor-pointer hover:bg-muted/50 transition-colors">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className={cn(
+                            "p-2 rounded-lg",
+                            hasRules ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
+                          )}>
+                            {CATEGORY_ICONS[category.value] || <Bell className="h-4 w-4" />}
+                          </div>
+                          <div className="text-left">
+                            <CardTitle className="text-sm font-medium">{category.label}</CardTitle>
+                            <CardDescription className="text-xs mt-0.5">
+                              {hasRules 
+                                ? `${totalInCategory} rule${totalInCategory !== 1 ? 's' : ''} configured`
+                                : 'No automation rules'}
+                            </CardDescription>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {!hasRules && (
+                            <Badge variant="outline" className="text-amber-600 border-amber-300 bg-amber-50 dark:bg-amber-950/30">
+                              <AlertCircle className="h-3 w-3 mr-1" />
+                              No Rules
                             </Badge>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>{affectedData.count} records across {affectedData.employeeCount} employees</p>
-                            <p className="text-xs text-muted-foreground">Click edit to see details</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    ) : (
-                      <span className="text-muted-foreground text-sm">-</span>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex flex-wrap gap-1">
-                      {intervals.sort((a, b) => b - a).map((interval) => (
-                        <Badge key={interval} variant="outline" className="text-xs">
-                          {interval}d
-                        </Badge>
-                      ))}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex gap-1">
-                      {rule.send_to_employee && <Badge variant="outline" className="text-xs">Emp</Badge>}
-                      {rule.send_to_manager && <Badge variant="outline" className="text-xs">Mgr</Badge>}
-                      {rule.send_to_hr && <Badge variant="outline" className="text-xs">HR</Badge>}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <span className={getPriorityColor(rule.priority)}>{rule.priority}</span>
-                  </TableCell>
-                  <TableCell>
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Badge 
-                            variant={effectiveStatus === 'active' ? 'default' : effectiveStatus === 'scheduled' ? 'outline' : 'secondary'}
-                            className={cn(
-                              effectiveStatus === 'scheduled' && 'border-amber-500 text-amber-600',
-                              effectiveStatus === 'expired' && 'border-destructive/50 text-destructive'
-                            )}
+                          )}
+                          {hasRules && (
+                            <Badge variant="secondary" className="font-normal">
+                              {categoryRules.length}
+                              {searchQuery && categoryRules.length !== totalInCategory && ` / ${totalInCategory}`}
+                            </Badge>
+                          )}
+                          {isExpanded ? (
+                            <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                          ) : (
+                            <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                          )}
+                        </div>
+                      </div>
+                    </CardHeader>
+                  </CollapsibleTrigger>
+                  
+                  <CollapsibleContent>
+                    <CardContent className="pt-0 pb-4">
+                      {hasRules ? (
+                        <div className="rounded-md border overflow-hidden">
+                          <Table>
+                            <TableHeader>
+                              <TableRow>
+                                <TableHead>Rule Name</TableHead>
+                                <TableHead>Event Type</TableHead>
+                                <TableHead>Affected Items</TableHead>
+                                <TableHead>Intervals</TableHead>
+                                <TableHead>Recipients</TableHead>
+                                <TableHead>Priority</TableHead>
+                                <TableHead>Status</TableHead>
+                                <TableHead className="text-right">Actions</TableHead>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              {categoryRules.map(renderRuleRow)}
+                            </TableBody>
+                          </Table>
+                        </div>
+                      ) : (
+                        <div className="text-center py-8 text-muted-foreground border rounded-lg border-dashed bg-muted/20">
+                          <FolderOpen className="h-10 w-10 mx-auto mb-3 opacity-50" />
+                          <p className="text-sm font-medium mb-1">No rules configured for {category.label}</p>
+                          <p className="text-xs text-muted-foreground mb-4">
+                            Set up automation to send reminders for this category
+                          </p>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleOpenDialogWithCategory(category.value);
+                            }}
                           >
-                            {effectiveStatus === 'active' && 'Active'}
-                            {effectiveStatus === 'scheduled' && 'Scheduled'}
-                            {effectiveStatus === 'expired' && 'Expired'}
-                            {effectiveStatus === 'inactive' && 'Inactive'}
-                          </Badge>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          {rule.effective_from && <p>Starts: {format(parseISO(rule.effective_from), 'PPP')}</p>}
-                          {rule.effective_to && <p>Ends: {format(parseISO(rule.effective_to), 'PPP')}</p>}
-                          {!rule.effective_from && !rule.effective_to && <p>No date restrictions</p>}
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button variant="ghost" size="icon" onClick={() => handleOpenDialog(rule)}>
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon" onClick={() => handleDelete(rule.id)}>
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              );
-              })}
-            </TableBody>
-          </Table>
-        </Card>
+                            <Plus className="h-4 w-4 mr-1" />
+                            Add Rule
+                          </Button>
+                        </div>
+                      )}
+                    </CardContent>
+                  </CollapsibleContent>
+                </Card>
+              </Collapsible>
+            );
+          })}
+          
+          {/* No results message when filtering */}
+          {(searchQuery || selectedCategory) && Object.keys(groupedRules).length === 0 && (
+            <Card>
+              <CardContent className="py-12 text-center">
+                <Search className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                <p className="text-muted-foreground">No rules match your search criteria</p>
+                <Button 
+                  variant="ghost" 
+                  className="mt-2"
+                  onClick={() => { setSearchQuery(''); setSelectedCategory(null); }}
+                >
+                  Clear filters
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+        </div>
       )}
     </div>
   );
