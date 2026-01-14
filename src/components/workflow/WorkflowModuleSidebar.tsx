@@ -52,10 +52,12 @@ export function WorkflowModuleSidebar({
                   {module.name}
                 </span>
                 <span className={cn(
-                  "text-xs tabular-nums",
-                  isSelected ? "text-primary-foreground/80" : "text-muted-foreground"
+                  "text-xs tabular-nums px-1.5 py-0.5 rounded",
+                  isSelected 
+                    ? "bg-primary-foreground/20 text-primary-foreground" 
+                    : "bg-muted text-muted-foreground"
                 )}>
-                  {enabledCount}/{totalWorkflows}
+                  {totalWorkflows}
                 </span>
               </button>
             );
