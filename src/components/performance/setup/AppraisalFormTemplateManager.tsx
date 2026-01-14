@@ -112,6 +112,126 @@ export function AppraisalFormTemplateManager({ companyId, companyName }: Props) 
   // Determine if we're using legacy weights or new section-based weights
   const useLegacySections = sections.length === 0;
 
+  // Generate preview sections from legacy form data when no custom sections exist
+  const previewSections = useMemo(() => {
+    if (!useLegacySections) return sections;
+    
+    // Create mock sections from legacy form data for preview
+    const legacyPreviewSections: Array<{
+      id: string;
+      template_id: string;
+      section_type: string;
+      display_name: string;
+      weight: number;
+      display_order: number;
+      is_active: boolean;
+      visible_to_employee: boolean;
+      visible_to_manager: boolean;
+      is_advisory_only: boolean;
+      include_in_final_score: boolean;
+      scoring_method: string;
+      deadline_offset_days: number;
+      advisory_label: string | null;
+    }> = [];
+
+    if (formData.include_goals) {
+      legacyPreviewSections.push({
+        id: 'legacy-goals',
+        template_id: editingTemplate?.id || 'new',
+        section_type: 'goals',
+        display_name: 'Goals',
+        weight: formData.goals_weight || 0,
+        display_order: 1,
+        is_active: true,
+        visible_to_employee: true,
+        visible_to_manager: true,
+        is_advisory_only: false,
+        include_in_final_score: true,
+        scoring_method: 'numeric',
+        deadline_offset_days: 0,
+        advisory_label: null,
+      });
+    }
+
+    if (formData.include_competencies) {
+      legacyPreviewSections.push({
+        id: 'legacy-competencies',
+        template_id: editingTemplate?.id || 'new',
+        section_type: 'competencies',
+        display_name: 'Competencies',
+        weight: formData.competencies_weight || 0,
+        display_order: 2,
+        is_active: true,
+        visible_to_employee: true,
+        visible_to_manager: true,
+        is_advisory_only: false,
+        include_in_final_score: true,
+        scoring_method: 'numeric',
+        deadline_offset_days: 0,
+        advisory_label: null,
+      });
+    }
+
+    if (formData.include_responsibilities) {
+      legacyPreviewSections.push({
+        id: 'legacy-responsibilities',
+        template_id: editingTemplate?.id || 'new',
+        section_type: 'responsibilities',
+        display_name: 'Responsibilities',
+        weight: formData.responsibilities_weight || 0,
+        display_order: 3,
+        is_active: true,
+        visible_to_employee: true,
+        visible_to_manager: true,
+        is_advisory_only: false,
+        include_in_final_score: true,
+        scoring_method: 'numeric',
+        deadline_offset_days: 0,
+        advisory_label: null,
+      });
+    }
+
+    if (formData.include_360_feedback) {
+      legacyPreviewSections.push({
+        id: 'legacy-feedback_360',
+        template_id: editingTemplate?.id || 'new',
+        section_type: 'feedback_360',
+        display_name: '360 Feedback',
+        weight: formData.feedback_360_weight || 0,
+        display_order: 4,
+        is_active: true,
+        visible_to_employee: true,
+        visible_to_manager: true,
+        is_advisory_only: true,
+        include_in_final_score: false,
+        scoring_method: 'aggregate',
+        deadline_offset_days: 7,
+        advisory_label: 'Peer feedback informs the overall assessment but does not directly affect the final score.',
+      });
+    }
+
+    if (formData.include_values) {
+      legacyPreviewSections.push({
+        id: 'legacy-values',
+        template_id: editingTemplate?.id || 'new',
+        section_type: 'values',
+        display_name: 'Values',
+        weight: formData.values_weight || 0,
+        display_order: 5,
+        is_active: true,
+        visible_to_employee: true,
+        visible_to_manager: true,
+        is_advisory_only: false,
+        include_in_final_score: true,
+        scoring_method: 'numeric',
+        deadline_offset_days: 0,
+        advisory_label: null,
+      });
+    }
+
+    return legacyPreviewSections;
+  }, [useLegacySections, sections, formData, editingTemplate?.id]);
+
   const handleOpenCreate = () => {
     setEditingTemplate(null);
     setFormData({
@@ -741,7 +861,7 @@ export function AppraisalFormTemplateManager({ companyId, companyName }: Props) 
                 ...formData,
                 name: formData.name || 'Untitled Template',
               }}
-              sections={sections || []}
+              sections={previewSections as any}
               phases={phases || []}
             />
           </div>
