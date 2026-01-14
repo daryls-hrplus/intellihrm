@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { format } from "date-fns";
+import { format, addDays, isPast } from "date-fns";
 import {
   Dialog,
   DialogContent,
@@ -40,6 +40,7 @@ import {
   Clock,
   Plus,
   Trash2,
+  CalendarClock,
 } from "lucide-react";
 import { toast } from "sonner";
 import type { MyAppraisal } from "@/hooks/useMyAppraisals";
@@ -47,7 +48,8 @@ import {
   useEmployeeReviewResponse, 
   ResponseType, 
   EscalationCategory,
-  SpecificDisagreement 
+  SpecificDisagreement,
+  EmployeeResponseConfiguration 
 } from "@/hooks/useEmployeeReviewResponse";
 import { useTranslation } from "react-i18next";
 
@@ -59,7 +61,7 @@ interface EmployeeReviewResponseDialogProps {
   onSuccess?: () => void;
 }
 
-const RESPONSE_OPTIONS: { value: ResponseType; label: string; icon: React.ReactNode; description: string }[] = [
+const ALL_RESPONSE_OPTIONS: { value: ResponseType; label: string; icon: React.ReactNode; description: string }[] = [
   {
     value: 'agree',
     label: 'I Agree',
@@ -110,7 +112,7 @@ export function EmployeeReviewResponseDialog({
   onSuccess,
 }: EmployeeReviewResponseDialogProps) {
   const { t } = useTranslation();
-  const { submitResponse, isLoading } = useEmployeeReviewResponse({ companyId });
+  const { submitResponse, fetchConfiguration, isLoading } = useEmployeeReviewResponse({ companyId });
   
   const [responseType, setResponseType] = useState<ResponseType | null>(null);
   const [comments, setComments] = useState("");
@@ -119,6 +121,36 @@ export function EmployeeReviewResponseDialog({
   const [escalationReason, setEscalationReason] = useState("");
   const [escalationCategory, setEscalationCategory] = useState<EscalationCategory | null>(null);
   const [acknowledged, setAcknowledged] = useState(false);
+  
+  // Configuration state
+  const [config, setConfig] = useState<EmployeeResponseConfiguration | null>(null);
+  const [configLoading, setConfigLoading] = useState(false);
+
+  // Fetch configuration when dialog opens
+  useEffect(() => {
+    if (open && companyId) {
+      setConfigLoading(true);
+      fetchConfiguration(appraisal.cycle_id)
+        .then(setConfig)
+        .finally(() => setConfigLoading(false));
+    }
+  }, [open, companyId, appraisal.cycle_id, fetchConfiguration]);
+
+  // Filter response options based on configuration
+  const availableResponseOptions = ALL_RESPONSE_OPTIONS.filter(option => {
+    if (option.value === 'disagree' && config && !config.allow_disagree) return false;
+    if (option.value === 'partial_disagree' && config && !config.allow_partial_disagree) return false;
+    return true;
+  });
+
+  // Calculate response deadline
+  const responseDeadline = config?.response_window_days 
+    ? addDays(new Date(), config.response_window_days)
+    : addDays(new Date(), 7);
+  
+  const isOverdue = (appraisal as any).employee_response_due_at 
+    ? isPast(new Date((appraisal as any).employee_response_due_at))
+    : false;
 
   // Reset form when dialog opens
   useEffect(() => {
@@ -134,7 +166,8 @@ export function EmployeeReviewResponseDialog({
   }, [open]);
 
   const showDisagreementDetails = responseType === 'partial_disagree' || responseType === 'disagree';
-  const requiresComments = responseType === 'agree_with_comments' || showDisagreementDetails;
+  const requiresComments = responseType === 'agree_with_comments' || 
+    (showDisagreementDetails && config?.require_comments_for_disagree);
 
   const getScoreColor = (score: number | null) => {
     if (score === null) return "text-muted-foreground";
@@ -189,6 +222,7 @@ export function EmployeeReviewResponseDialog({
 
     const result = await submitResponse({
       appraisalParticipantId: appraisal.id,
+      cycleId: appraisal.cycle_id,
       responseType,
       employeeComments: comments || undefined,
       specificDisagreements: showDisagreementDetails ? specificDisagreements : undefined,
@@ -224,6 +258,26 @@ export function EmployeeReviewResponseDialog({
         </DialogHeader>
 
         <div className="space-y-6 py-4">
+          {/* Response Deadline Alert */}
+          {config && (
+            <Alert variant={isOverdue && !config.allow_late_responses ? "destructive" : "default"}>
+              <CalendarClock className="h-4 w-4" />
+              <AlertDescription className="flex items-center justify-between">
+                <span>
+                  Response due by: <strong>{format(responseDeadline, 'MMM d, yyyy')}</strong>
+                  {isOverdue && !config.allow_late_responses && (
+                    <Badge variant="destructive" className="ml-2">Overdue</Badge>
+                  )}
+                </span>
+                {config.auto_escalate_on_disagree && (
+                  <Badge variant="secondary" className="text-xs">
+                    Auto-escalate on disagreement
+                  </Badge>
+                )}
+              </AlertDescription>
+            </Alert>
+          )}
+
           {/* Review Summary */}
           <Card className="bg-muted/50">
             <CardHeader className="pb-3">
@@ -282,7 +336,7 @@ export function EmployeeReviewResponseDialog({
               onValueChange={(value) => setResponseType(value as ResponseType)}
               className="grid grid-cols-1 md:grid-cols-2 gap-3"
             >
-              {RESPONSE_OPTIONS.map((option) => (
+              {availableResponseOptions.map((option) => (
                 <div key={option.value}>
                   <RadioGroupItem
                     value={option.value}
@@ -426,8 +480,8 @@ export function EmployeeReviewResponseDialog({
             </div>
           )}
 
-          {/* HR Escalation Option */}
-          {responseType && (responseType === 'disagree' || responseType === 'partial_disagree') && (
+          {/* HR Escalation Option - only show if allowed by config */}
+          {config?.allow_hr_escalation && responseType && (responseType === 'disagree' || responseType === 'partial_disagree') && (
             <>
               <Separator />
               <div className="space-y-4">
