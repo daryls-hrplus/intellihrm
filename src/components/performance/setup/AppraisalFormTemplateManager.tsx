@@ -22,15 +22,16 @@ import { AppraisalPhaseTimeline } from "./AppraisalPhaseTimeline";
 import { 
   Plus, Edit, Trash2, Copy, Star, Lock, AlertTriangle, CheckCircle, 
   Target, BookOpen, Users, MessageSquare, Heart, ChevronRight,
-  Settings2, Calendar, Shield
+  Settings2, Calendar, Shield, Building
 } from "lucide-react";
 import { CYCLE_TYPE_PRESETS, type AppraisalCycleType, type WeightEnforcement } from "@/types/appraisalFormTemplates";
 
 interface Props {
   companyId: string;
+  companyName?: string;
 }
 
-export function AppraisalFormTemplateManager({ companyId }: Props) {
+export function AppraisalFormTemplateManager({ companyId, companyName }: Props) {
   const { 
     templates, 
     isLoading, 
@@ -369,13 +370,20 @@ export function AppraisalFormTemplateManager({ companyId }: Props) {
         </CardContent>
       </Card>
 
-      {/* Simplified Single-Page Create/Edit Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col p-0">
           <DialogHeader className="px-6 pt-6 pb-4 border-b">
-            <DialogTitle>{editingTemplate ? "Edit Template" : "Create Template"}</DialogTitle>
+            <div className="flex items-center justify-between">
+              <DialogTitle>{editingTemplate ? "Edit Template" : "Create Template"}</DialogTitle>
+              {companyName && (
+                <Badge variant="outline" className="text-xs font-normal">
+                  <Building className="h-3 w-3 mr-1" />
+                  {companyName}
+                </Badge>
+              )}
+            </div>
             <DialogDescription>
-              Configure your appraisal form template
+              Configure your appraisal form template{companyName ? ` for ${companyName}` : ''}
             </DialogDescription>
           </DialogHeader>
 
