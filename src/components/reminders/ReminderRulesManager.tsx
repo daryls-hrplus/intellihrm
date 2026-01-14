@@ -26,10 +26,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { cn } from '@/lib/utils';
 import type { ReminderRule, ReminderEventType, ReminderCategory } from '@/types/reminders';
 import { PRIORITY_OPTIONS, NOTIFICATION_METHODS, REMINDER_CATEGORIES } from '@/types/reminders';
-import { NaturalLanguageRuleInput } from './NaturalLanguageRuleInput';
-import { RuleSourcePreview } from './RuleSourcePreview';
-import { TemplateMessagePreview } from './TemplateMessagePreview';
-import { TemplateSelector } from './TemplateSelector';
+import { UnifiedRuleDialog, type DialogMode } from './UnifiedRuleDialog';
 import type { SourcePreviewData } from '@/hooks/useReminderSourcePreview';
 
 interface ReminderRulesManagerProps {
@@ -77,10 +74,9 @@ export const ReminderRulesManager = forwardRef<ReminderRulesManagerRef, Reminder
   const [ruleAffectedCounts, setRuleAffectedCounts] = useState<Record<string, { count: number; employeeCount: number }>>({});
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogMode, setDialogMode] = useState<DialogMode>('ai-assist');
   const [editingRule, setEditingRule] = useState<ReminderRule | null>(null);
   const [linkedTemplate, setLinkedTemplate] = useState<{ id: string; name: string; category: string } | null>(null);
-  const [newInterval, setNewInterval] = useState<string>('');
-  const [dialogPreviewData, setDialogPreviewData] = useState<SourcePreviewData | null>(null);
   
   // Category-based filtering states
   const [searchQuery, setSearchQuery] = useState('');
@@ -571,9 +567,6 @@ export const ReminderRulesManager = forwardRef<ReminderRulesManagerRef, Reminder
 
   return (
     <div className="space-y-6">
-      {/* Natural Language Rule Input */}
-      <NaturalLanguageRuleInput companyId={companyId} onRuleCreated={loadData} />
-
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-medium">Automatic Reminder Rules</h3>
         <div className="flex items-center gap-2">
@@ -602,21 +595,56 @@ export const ReminderRulesManager = forwardRef<ReminderRulesManagerRef, Reminder
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
-          <Dialog open={dialogOpen} onOpenChange={(open) => {
-            setDialogOpen(open);
-            if (!open) setLinkedTemplate(null);
-          }}>
-            <DialogTrigger asChild>
-              <Button onClick={() => handleOpenDialog()} className="bg-primary hover:bg-primary/90">
-                <Zap className="h-4 w-4 mr-2" />
-                Add Rule
-              </Button>
-            </DialogTrigger>
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto border-t-4 border-t-primary">
-            <DialogHeader className="pb-4 border-b">
-              <div className="flex items-center gap-2">
-                <div className="p-2 rounded-lg bg-primary/10">
-                  <Settings className="h-5 w-5 text-primary" />
+          <Button 
+            onClick={() => {
+              setEditingRule(null);
+              setLinkedTemplate(null);
+              setDialogMode('ai-assist');
+              setDialogOpen(true);
+            }} 
+            className="bg-primary hover:bg-primary/90"
+          >
+            <Sparkles className="h-4 w-4 mr-2" />
+            Create Rule
+          </Button>
+
+          {/* Quick Setup Shortcut when coverage is low */}
+          {categoriesWithRules < REMINDER_CATEGORIES.length - 3 && (
+            <Button 
+              variant="outline"
+              onClick={() => {
+                setEditingRule(null);
+                setLinkedTemplate(null);
+                setDialogMode('quick-setup');
+                setDialogOpen(true);
+              }}
+              className="border-amber-300 text-amber-700 hover:bg-amber-50"
+            >
+              <Zap className="h-4 w-4 mr-2" />
+              Quick Setup
+            </Button>
+          )}
+
+          {/* Unified Rule Dialog */}
+          <UnifiedRuleDialog
+            companyId={companyId}
+            companyName={companyName}
+            open={dialogOpen}
+            onOpenChange={(open) => {
+              setDialogOpen(open);
+              if (!open) {
+                setLinkedTemplate(null);
+                setEditingRule(null);
+              }
+            }}
+            defaultMode={dialogMode}
+            editingRule={editingRule}
+            linkedTemplate={linkedTemplate}
+            eventTypes={eventTypes}
+            categoryCoverage={categoryCoverage}
+            onRuleCreated={loadData}
+            onRuleUpdated={loadData}
+          />
                 </div>
                 <div>
                   <DialogTitle className="text-lg">{editingRule ? 'Edit Reminder Rule' : 'Create Automated Reminder Rule'}</DialogTitle>
