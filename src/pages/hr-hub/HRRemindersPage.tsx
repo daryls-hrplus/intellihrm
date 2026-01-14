@@ -241,7 +241,8 @@ export default function HRRemindersPage() {
                   </div>
                 ) : (
                   <ReminderEmailTemplates 
-                    companyId={selectedCompanyId} 
+                    companyId={selectedCompanyId}
+                    companyName={companies.find(c => c.id === selectedCompanyId)?.name}
                     onUseTemplate={handleUseTemplate}
                   />
                 )}
@@ -279,6 +280,7 @@ export default function HRRemindersPage() {
                 ) : (
                   <ReminderRulesManager 
                     companyId={selectedCompanyId}
+                    companyName={companies.find(c => c.id === selectedCompanyId)?.name}
                     ref={rulesManagerRef}
                     highlightRuleId={highlightRuleId}
                   />

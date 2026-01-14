@@ -28,6 +28,7 @@ import type { SourcePreviewData } from '@/hooks/useReminderSourcePreview';
 
 interface ReminderRulesManagerProps {
   companyId: string;
+  companyName?: string;
   highlightRuleId?: string | null;
   onEditRule?: (ruleId: string) => void;
 }
@@ -39,7 +40,7 @@ export interface ReminderRulesManagerRef {
 }
 
 export const ReminderRulesManager = forwardRef<ReminderRulesManagerRef, ReminderRulesManagerProps>(
-  function ReminderRulesManager({ companyId, highlightRuleId, onEditRule }, ref) {
+  function ReminderRulesManager({ companyId, companyName, highlightRuleId, onEditRule }, ref) {
   const navigate = useNavigate();
   const { fetchRules, fetchEventTypes, createRule, updateRule, deleteRule, isLoading } = useReminders();
   const { fetchRuleAffectedCount, fetchPreview, previewData, loading: previewLoading } = useReminderSourcePreview();
@@ -579,6 +580,7 @@ export const ReminderRulesManager = forwardRef<ReminderRulesManagerRef, Reminder
               {(formData.notification_method === 'email' || formData.notification_method === 'both') && (
                 <TemplateSelector
                   companyId={companyId}
+                  companyName={companyName}
                   category={eventTypes.find(t => t.id === formData.event_type_id)?.category || null}
                   eventTypeId={formData.event_type_id}
                   selectedTemplateId={formData.email_template_id}
