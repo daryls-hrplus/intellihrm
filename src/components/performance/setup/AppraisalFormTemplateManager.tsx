@@ -514,13 +514,14 @@ export function AppraisalFormTemplateManager({ companyId }: Props) {
               )}
 
               {/* Advanced Settings - Collapsible */}
-              <Collapsible open={advancedOpen} onOpenChange={setAdvancedOpen}>
-                <CollapsibleTrigger className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors w-full py-2">
-                  <ChevronRight className={`h-4 w-4 transition-transform ${advancedOpen ? 'rotate-90' : ''}`} />
-                  <Settings2 className="h-4 w-4" />
-                  Advanced Settings
+              <Collapsible open={advancedOpen} onOpenChange={setAdvancedOpen} className="border rounded-lg">
+                <CollapsibleTrigger className="flex items-center gap-3 w-full p-4 hover:bg-muted/50 transition-colors rounded-lg">
+                  <ChevronRight className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${advancedOpen ? 'rotate-90' : ''}`} />
+                  <Settings2 className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm font-medium">Advanced Settings</span>
+                  <span className="text-xs text-muted-foreground ml-auto">Phases, Timing, Governance</span>
                 </CollapsibleTrigger>
-                <CollapsibleContent className="space-y-6 pt-4">
+                <CollapsibleContent className="space-y-6 p-4 pt-0 border-t">
                   {/* Phase Configuration - Only for existing templates */}
                   {editingTemplate && (
                     <div className="space-y-3">
