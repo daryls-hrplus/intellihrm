@@ -2968,6 +2968,67 @@ export type Database = {
           },
         ]
       }
+      appraisal_hr_comments: {
+        Row: {
+          created_at: string | null
+          developmental_issues: string | null
+          hr_comments: string | null
+          hr_user_id: string | null
+          id: string
+          participant_id: string
+          recommendations: string | null
+          review_status: string | null
+          reviewed_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          developmental_issues?: string | null
+          hr_comments?: string | null
+          hr_user_id?: string | null
+          id?: string
+          participant_id: string
+          recommendations?: string | null
+          review_status?: string | null
+          reviewed_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          developmental_issues?: string | null
+          hr_comments?: string | null
+          hr_user_id?: string | null
+          id?: string
+          participant_id?: string
+          recommendations?: string | null
+          review_status?: string | null
+          reviewed_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appraisal_hr_comments_hr_user_id_fkey"
+            columns: ["hr_user_id"]
+            isOneToOne: false
+            referencedRelation: "employee_fte_summary"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "appraisal_hr_comments_hr_user_id_fkey"
+            columns: ["hr_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appraisal_hr_comments_participant_id_fkey"
+            columns: ["participant_id"]
+            isOneToOne: false
+            referencedRelation: "appraisal_participants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       appraisal_integration_log: {
         Row: {
           action_config: Json | null
