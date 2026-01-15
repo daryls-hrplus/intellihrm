@@ -17,6 +17,10 @@ import { Badge } from "@/components/ui/badge";
 
 export default function AppraisalFormPreviewPage() {
   const { templateId } = useParams<{ templateId: string }>();
+  const [searchParams] = useSearchParams();
+  const initialView = (searchParams.get("view") as ViewMode) || "hr";
+  const [viewMode, setViewMode] = useState<ViewMode>(initialView);
+  
   const { data, isLoading, error } = useAppraisalTemplatePrintData(templateId);
 
   if (isLoading) {
@@ -54,10 +58,6 @@ export default function AppraisalFormPreviewPage() {
     comments,
     signatures,
   } = data;
-
-  const [searchParams] = useSearchParams();
-  const initialView = (searchParams.get("view") as ViewMode) || "hr";
-  const [viewMode, setViewMode] = useState<ViewMode>(initialView);
 
   return (
     <AppraisalPrintLayout
