@@ -414,11 +414,9 @@ export const subTaskDefinitions: Record<string, Record<number, SubTaskDefinition
       { order: 7, name: "Enable/disable performance index calculation across platform", isRequired: false },
     ],
     5: [ // Approval Workflows Configuration
-      { order: 1, name: "Create workflow for goal submissions (manager approval)", isRequired: true },
-      { order: 2, name: "Create workflow for appraisal reviews (multi-tier if needed)", isRequired: true },
-      { order: 3, name: "Create workflow for 360 feedback nominations", isRequired: false },
-      { order: 4, name: "Configure approval delegation rules", isRequired: false },
-      { order: 5, name: "Test workflow routing with sample data", isRequired: true },
+      { order: 1, name: "Create workflow for appraisal reviews (multi-tier if needed)", isRequired: true },
+      { order: 2, name: "Configure approval delegation rules", isRequired: false },
+      { order: 3, name: "Test workflow routing with sample data", isRequired: true },
     ],
     6: [ // Performance Notification Templates
       { order: 1, name: "Configure cycle launch notifications", isRequired: true },
