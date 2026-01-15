@@ -28,7 +28,8 @@ import {
   GripVertical,
   Play,
   ArrowRight,
-  HelpCircle
+  HelpCircle,
+  ShieldCheck
 } from "lucide-react";
 import type { 
   AppraisalTemplatePhase, 
@@ -58,6 +59,7 @@ const getPhaseIcon = (phaseType: string) => {
     case "manager_review": return UserCheck;
     case "360_collection": return MessageSquare;
     case "calibration": return BarChart;
+    case "hr_review": return ShieldCheck;
     case "finalization": return CheckCircle;
     case "employee_acknowledgment": return FileCheck;
     default: return Calendar;

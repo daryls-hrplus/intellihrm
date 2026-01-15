@@ -441,7 +441,7 @@ export const subTaskDefinitions: Record<string, Record<number, SubTaskDefinition
       { order: 1, name: "Configure template basics (name, code, cycle type, rating scale)", isRequired: true },
       { order: 2, name: "Enable and weight appraisal sections (Goals, Competencies, Responsibilities, 360, Values)", isRequired: true },
       { order: 3, name: "Verify section weights total 100%", isRequired: true },
-      { order: 4, name: "Add workflow phases (Self Assessment, Manager Evaluation, Calibration, HR Review, Sign-off)", isRequired: true },
+      { order: 4, name: "Add workflow phases (Self Assessment, Manager Evaluation, Calibration, Finalization, Employee Acknowledgment)", isRequired: true },
       { order: 5, name: "Configure phase settings (mandatory, parallel, auto-advance, notifications)", isRequired: false },
       { order: 6, name: "Set default timing (cycle duration, evaluation offset, grace period)", isRequired: true },
       { order: 7, name: "Configure governance controls (weight enforcement, template locking, HR approval)", isRequired: false },
