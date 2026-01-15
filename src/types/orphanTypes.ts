@@ -109,3 +109,22 @@ export interface OrphanActionResult {
   errors: string[];
   undoToken?: string;
 }
+
+export type DuplicateType = 'true_duplicate' | 'same_name_different_context';
+export type DuplicateRecommendation = 'merge' | 'keep_both' | 'rename_one' | 'review';
+
+export interface DuplicateAnalysis {
+  featureName: string;
+  entries: OrphanEntry[];
+  type: DuplicateType;
+  recommendation: DuplicateRecommendation;
+  reason: string;
+  suggestedAction: string;
+  differences: {
+    hasDifferentModules: boolean;
+    hasDifferentRoutePatterns: boolean;
+    hasDifferentDescriptions: boolean;
+    moduleList: string[];
+    routePatternList: string[];
+  };
+}

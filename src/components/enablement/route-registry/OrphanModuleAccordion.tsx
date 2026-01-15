@@ -15,9 +15,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Archive, Trash2, ExternalLink, FolderOpen } from "lucide-react";
-import { OrphanEntry, OrphanSource, OrphanRecommendation } from "@/types/orphanTypes";
-import { useNavigate } from "react-router-dom";
+import { Archive, Trash2, ExternalLink, FolderOpen, Copy } from "lucide-react";
+import { OrphanEntry, OrphanSource, OrphanRecommendation, OrphanDuplicate } from "@/types/orphanTypes";
 import { cn } from "@/lib/utils";
 
 interface ModuleGroup {
@@ -40,6 +39,8 @@ interface OrphanModuleAccordionProps {
   onToggleSelection: (id: string) => void;
   onArchive: (orphan: OrphanEntry) => void;
   onDelete: (orphan: OrphanEntry) => void;
+  onViewDuplicate: (duplicate: OrphanDuplicate) => void;
+  duplicates: OrphanDuplicate[];
   getRecommendationBadge: (recommendation: OrphanRecommendation) => React.ReactNode;
   getSourceBadge: (source: OrphanSource) => React.ReactNode;
 }
@@ -50,14 +51,30 @@ export function OrphanModuleAccordion({
   onToggleSelection,
   onArchive,
   onDelete,
+  onViewDuplicate,
+  duplicates,
   getRecommendationBadge,
   getSourceBadge
 }: OrphanModuleAccordionProps) {
-  const navigate = useNavigate();
-
   const handlePreviewRoute = (routePath: string | null) => {
     if (routePath) {
       window.open(routePath, '_blank');
+    }
+  };
+  
+  // Find duplicate info for an orphan
+  const findDuplicateForOrphan = (orphan: OrphanEntry): OrphanDuplicate | null => {
+    if (!orphan.hasDuplicate) return null;
+    return duplicates.find(d => 
+      d.entries.some(e => e.id === orphan.id) ||
+      d.featureName.toLowerCase() === orphan.featureName.toLowerCase()
+    ) || null;
+  };
+  
+  const handleDuplicateClick = (orphan: OrphanEntry) => {
+    const duplicate = findDuplicateForOrphan(orphan);
+    if (duplicate) {
+      onViewDuplicate(duplicate);
     }
   };
 
@@ -131,9 +148,19 @@ export function OrphanModuleAccordion({
                           <p className="font-medium truncate max-w-[200px]">
                             {orphan.featureName}
                           </p>
-                          <p className="text-xs text-muted-foreground italic truncate max-w-[200px]">
-                            {orphan.recommendationReason}
-                          </p>
+                          {orphan.hasDuplicate && orphan.duplicateOf && orphan.duplicateOf.length > 0 ? (
+                            <button
+                              onClick={() => handleDuplicateClick(orphan)}
+                              className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 hover:underline cursor-pointer mt-1"
+                            >
+                              <Copy className="h-3 w-3" />
+                              <span>Duplicate found: {orphan.duplicateOf[0]} - Click for details</span>
+                            </button>
+                          ) : (
+                            <p className="text-xs text-muted-foreground italic truncate max-w-[200px]">
+                              {orphan.recommendationReason}
+                            </p>
+                          )}
                         </div>
                       </TableCell>
                       <TableCell>
