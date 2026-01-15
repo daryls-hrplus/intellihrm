@@ -111,8 +111,18 @@ export default function AppraisalFormPreviewPage() {
 
       {/* Executive Summary - NEW */}
       <ExecutiveSummary
-        employee={employee}
-        appraisal={appraisal}
+        employee={{
+          name: employee.fullName,
+          position: employee.jobTitle,
+          department: employee.department,
+          employeeId: employee.employeeNumber,
+        }}
+        appraisal={{
+          period: appraisal.cycleName,
+          status: appraisal.status,
+          startDate: appraisal.performancePeriodStart,
+          endDate: appraisal.performancePeriodEnd,
+        }}
         overallRating={totalScore}
         maxRating={template.max_rating}
         minRating={template.min_rating}
