@@ -25,7 +25,6 @@ import {
   RefreshCw,
   Loader2,
   FileCode,
-  Link2,
   Unlink2,
   Activity,
   TrendingUp,
@@ -40,13 +39,18 @@ import { useRouteValidation, ValidationIssue } from "@/hooks/useRouteValidation"
 import { useHandbookTasks } from "@/hooks/useHandbookTasks";
 import { useFeatureRegistrySync } from "@/hooks/useFeatureRegistrySync";
 import { useValidationFixer } from "@/hooks/useValidationFixer";
+import { useProductCapabilitiesValidation } from "@/hooks/useProductCapabilitiesValidation";
 import { FixPreviewDialog } from "@/components/enablement/route-registry/FixPreviewDialog";
+import { DocumentSelector } from "@/components/enablement/route-registry/DocumentSelector";
+import { ProductCapabilitiesValidation } from "@/components/enablement/route-registry/ProductCapabilitiesValidation";
+import { DocumentType } from "@/types/documentValidation";
 import { cn } from "@/lib/utils";
 
 export default function RouteRegistryPage() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("overview");
   const [showFixPreview, setShowFixPreview] = useState(false);
+  const [selectedDocument, setSelectedDocument] = useState<DocumentType>("implementation_handbook");
   const { 
     dbRouteCount, 
     registryRouteCount, 
@@ -491,151 +495,188 @@ export default function RouteRegistryPage() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="validation" className="mt-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                <span>Validation Report</span>
-                {lastReport && (
-                  <Badge 
-                    variant="outline" 
-                    className={cn(
-                      "text-lg px-3 py-1",
-                      lastReport.healthScore >= 80 && "bg-green-50 text-green-700 border-green-200",
-                      lastReport.healthScore >= 60 && lastReport.healthScore < 80 && "bg-yellow-50 text-yellow-700 border-yellow-200",
-                      lastReport.healthScore < 60 && "bg-red-50 text-red-700 border-red-200"
-                    )}
-                  >
-                    Health Score: {lastReport.healthScore}%
-                  </Badge>
+        <TabsContent value="validation" className="mt-6 space-y-4">
+          {/* Document Selector */}
+          <div className="flex items-center justify-between">
+            <DocumentSelector 
+              selected={selectedDocument} 
+              onSelect={setSelectedDocument} 
+            />
+            {selectedDocument === "implementation_handbook" && (
+              <Button 
+                onClick={handleRunValidation}
+                disabled={isValidating}
+                size="sm"
+              >
+                {isValidating ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <Play className="h-4 w-4 mr-2" />
                 )}
-              </CardTitle>
-              <CardDescription>
-                {lastReport 
-                  ? `Last run: ${lastReport.timestamp.toLocaleString()}`
-                  : "Run validation to check route health"
-                }
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {!lastReport ? (
-                <div className="flex flex-col items-center justify-center py-12 text-center">
-                  <Activity className="h-12 w-12 text-muted-foreground mb-4" />
-                  <p className="font-medium">No validation report yet</p>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Click "Run Validation" to check route health
-                  </p>
-                  <Button onClick={handleRunValidation} disabled={isValidating}>
-                    {isValidating && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                    Run Validation
-                  </Button>
-                </div>
-              ) : (
-                <div className="space-y-6">
-                  {/* Summary */}
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="rounded-lg border p-3 text-center">
-                      <p className="text-2xl font-bold text-green-600">
-                        {lastReport.summary.tasksWithFeatureCode}
-                      </p>
-                      <p className="text-xs text-muted-foreground">With Feature Code</p>
-                    </div>
-                    <div className="rounded-lg border p-3 text-center">
-                      <p className="text-2xl font-bold text-yellow-600">
-                        {lastReport.summary.tasksWithLegacyRoute}
-                      </p>
-                      <p className="text-xs text-muted-foreground">Legacy Routes</p>
-                    </div>
-                    <div className="rounded-lg border p-3 text-center">
-                      <p className="text-2xl font-bold text-green-600">
-                        {lastReport.summary.validRoutes}
-                      </p>
-                      <p className="text-xs text-muted-foreground">Valid Routes</p>
-                    </div>
-                    <div className="rounded-lg border p-3 text-center">
-                      <p className="text-2xl font-bold text-destructive">
-                        {lastReport.summary.invalidRoutes}
-                      </p>
-                      <p className="text-xs text-muted-foreground">Invalid Routes</p>
-                    </div>
+                Run Validation
+              </Button>
+            )}
+          </div>
+
+          {/* Conditional Validation Content */}
+          {selectedDocument === "implementation_handbook" ? (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                  <span>Implementation Handbook Validation</span>
+                  {lastReport && (
+                    <Badge 
+                      variant="outline" 
+                      className={cn(
+                        "text-lg px-3 py-1",
+                        lastReport.healthScore >= 80 && "bg-green-50 text-green-700 border-green-200",
+                        lastReport.healthScore >= 60 && lastReport.healthScore < 80 && "bg-yellow-50 text-yellow-700 border-yellow-200",
+                        lastReport.healthScore < 60 && "bg-red-50 text-red-700 border-red-200"
+                      )}
+                    >
+                      Health Score: {lastReport.healthScore}%
+                    </Badge>
+                  )}
+                </CardTitle>
+                <CardDescription>
+                  {lastReport 
+                    ? `Last run: ${lastReport.timestamp.toLocaleString()}`
+                    : "Run validation to check implementation tasks against application features registry"
+                  }
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {!lastReport ? (
+                  <div className="flex flex-col items-center justify-center py-12 text-center">
+                    <Activity className="h-12 w-12 text-muted-foreground mb-4" />
+                    <p className="font-medium">No validation report yet</p>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Click "Run Validation" to check route health
+                    </p>
+                    <Button onClick={handleRunValidation} disabled={isValidating}>
+                      {isValidating && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                      Run Validation
+                    </Button>
                   </div>
-
-                  {/* Fix Actions */}
-                  {lastReport.summary.tasksWithLegacyRoute > 0 && (
-                    <div className="flex items-center justify-between rounded-lg border p-4 bg-muted/30">
-                      <div>
-                        <p className="font-medium">Legacy Routes Detected</p>
-                        <p className="text-sm text-muted-foreground">
-                          {lastReport.summary.tasksWithLegacyRoute} tasks can be auto-migrated to feature codes
+                ) : (
+                  <div className="space-y-6">
+                    {/* Summary */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <div className="rounded-lg border p-3 text-center">
+                        <p className="text-2xl font-bold text-green-600">
+                          {lastReport.summary.tasksWithFeatureCode}
                         </p>
+                        <p className="text-xs text-muted-foreground">With Feature Code</p>
                       </div>
-                      <div className="flex gap-2">
-                        <Button
-                          variant="outline"
-                          onClick={handlePreviewFix}
-                          disabled={isPreviewing || isFixing}
-                        >
-                          {isPreviewing ? (
-                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                          ) : (
-                            <Info className="h-4 w-4 mr-2" />
-                          )}
-                          Preview Fix
-                        </Button>
-                        <Button
-                          onClick={handlePreviewFix}
-                          disabled={isPreviewing || isFixing}
-                        >
-                          {isFixing ? (
-                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                          ) : (
-                            <Wrench className="h-4 w-4 mr-2" />
-                          )}
-                          Fix All
-                        </Button>
+                      <div className="rounded-lg border p-3 text-center">
+                        <p className="text-2xl font-bold text-yellow-600">
+                          {lastReport.summary.tasksWithLegacyRoute}
+                        </p>
+                        <p className="text-xs text-muted-foreground">Legacy Routes</p>
+                      </div>
+                      <div className="rounded-lg border p-3 text-center">
+                        <p className="text-2xl font-bold text-green-600">
+                          {lastReport.summary.validRoutes}
+                        </p>
+                        <p className="text-xs text-muted-foreground">Valid Routes</p>
+                      </div>
+                      <div className="rounded-lg border p-3 text-center">
+                        <p className="text-2xl font-bold text-destructive">
+                          {lastReport.summary.invalidRoutes}
+                        </p>
+                        <p className="text-xs text-muted-foreground">Invalid Routes</p>
                       </div>
                     </div>
-                  )}
 
-                  {/* Issues */}
-                  {lastReport.issues.length > 0 && (
-                    <div>
-                      <h4 className="font-medium mb-3">
-                        Issues ({lastReport.issues.length})
-                      </h4>
-                      <ScrollArea className="h-[300px]">
-                        <div className="space-y-2">
-                          {lastReport.issues.map((issue, index) => (
-                            <div 
-                              key={index}
-                              className={cn(
-                                "flex items-start gap-3 rounded-lg border p-3",
-                                issue.severity === 'error' && "border-destructive/50 bg-destructive/5",
-                                issue.severity === 'warning' && "border-warning/50 bg-warning/5"
-                              )}
-                            >
-                              {getSeverityIcon(issue.severity)}
-                              <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium">{issue.message}</p>
-                                {issue.details.area && (
-                                  <p className="text-xs text-muted-foreground">
-                                    {issue.details.phaseId} → Step {issue.details.stepOrder}: {issue.details.area}
-                                  </p>
-                                )}
-                              </div>
-                              <Badge variant="outline" className="text-xs">
-                                {issue.type.replace(/_/g, ' ')}
-                              </Badge>
-                            </div>
-                          ))}
+                    {/* Fix Actions */}
+                    {lastReport.summary.tasksWithLegacyRoute > 0 && (
+                      <div className="flex items-center justify-between rounded-lg border p-4 bg-muted/30">
+                        <div>
+                          <p className="font-medium">Legacy Routes Detected</p>
+                          <p className="text-sm text-muted-foreground">
+                            {lastReport.summary.tasksWithLegacyRoute} tasks can be auto-migrated to feature codes
+                          </p>
                         </div>
-                      </ScrollArea>
-                    </div>
-                  )}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            onClick={handlePreviewFix}
+                            disabled={isPreviewing || isFixing}
+                          >
+                            {isPreviewing ? (
+                              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            ) : (
+                              <Info className="h-4 w-4 mr-2" />
+                            )}
+                            Preview Fix
+                          </Button>
+                          <Button
+                            onClick={handlePreviewFix}
+                            disabled={isPreviewing || isFixing}
+                          >
+                            {isFixing ? (
+                              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            ) : (
+                              <Wrench className="h-4 w-4 mr-2" />
+                            )}
+                            Fix All
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Issues */}
+                    {lastReport.issues.length > 0 && (
+                      <div>
+                        <h4 className="font-medium mb-3">
+                          Issues ({lastReport.issues.length})
+                        </h4>
+                        <ScrollArea className="h-[300px]">
+                          <div className="space-y-2">
+                            {lastReport.issues.map((issue, index) => (
+                              <div 
+                                key={index}
+                                className={cn(
+                                  "flex items-start gap-3 rounded-lg border p-3",
+                                  issue.severity === 'error' && "border-destructive/50 bg-destructive/5",
+                                  issue.severity === 'warning' && "border-yellow-500/50 bg-yellow-50/50"
+                                )}
+                              >
+                                {getSeverityIcon(issue.severity)}
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-sm font-medium">{issue.message}</p>
+                                  {issue.details.area && (
+                                    <p className="text-xs text-muted-foreground">
+                                      {issue.details.phaseId} → Step {issue.details.stepOrder}: {issue.details.area}
+                                    </p>
+                                  )}
+                                </div>
+                                <Badge variant="outline" className="text-xs">
+                                  {issue.type.replace(/_/g, ' ')}
+                                </Badge>
+                              </div>
+                            ))}
+                          </div>
+                        </ScrollArea>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          ) : (
+            <Card>
+              <CardHeader>
+                <CardTitle>Product Capabilities Validation</CardTitle>
+                <CardDescription>
+                  Validates capabilities document modules against route registry and completeness checks
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ProductCapabilitiesValidation />
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
       </Tabs>
 
