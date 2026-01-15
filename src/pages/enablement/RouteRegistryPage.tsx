@@ -31,19 +31,22 @@ import {
   TrendingUp,
   Info,
   Play,
-  ExternalLink
+  ExternalLink,
+  Wrench
 } from "lucide-react";
 import { toast } from "sonner";
 import { useRouteResolver } from "@/hooks/useRouteResolver";
 import { useRouteValidation, ValidationIssue } from "@/hooks/useRouteValidation";
 import { useHandbookTasks } from "@/hooks/useHandbookTasks";
 import { useFeatureRegistrySync } from "@/hooks/useFeatureRegistrySync";
+import { useValidationFixer } from "@/hooks/useValidationFixer";
+import { FixPreviewDialog } from "@/components/enablement/route-registry/FixPreviewDialog";
 import { cn } from "@/lib/utils";
 
 export default function RouteRegistryPage() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("overview");
-  
+  const [showFixPreview, setShowFixPreview] = useState(false);
   const { 
     dbRouteCount, 
     registryRouteCount, 
@@ -75,6 +78,14 @@ export default function RouteRegistryPage() {
     lastSyncResult
   } = useFeatureRegistrySync();
 
+  const {
+    previewFix,
+    fixAllIssues,
+    isFixing,
+    isPreviewing,
+    lastPreview
+  } = useValidationFixer();
+
   const unsyncedRoutes = getUnsyncedRoutes();
   const dbRoutes = getAllDbRoutes();
   const quickHealth = getQuickHealth();
@@ -85,6 +96,24 @@ export default function RouteRegistryPage() {
       toast.success("Validation complete");
     } catch (error) {
       toast.error("Validation failed");
+    }
+  };
+
+  const handlePreviewFix = async () => {
+    try {
+      await previewFix();
+      setShowFixPreview(true);
+    } catch (error) {
+      toast.error("Failed to generate fix preview");
+    }
+  };
+
+  const handleFixAll = async () => {
+    const result = await fixAllIssues();
+    if (result.success) {
+      setShowFixPreview(false);
+      // Re-run validation to refresh the report
+      await runValidation();
     }
   };
 
@@ -531,6 +560,43 @@ export default function RouteRegistryPage() {
                     </div>
                   </div>
 
+                  {/* Fix Actions */}
+                  {lastReport.summary.tasksWithLegacyRoute > 0 && (
+                    <div className="flex items-center justify-between rounded-lg border p-4 bg-muted/30">
+                      <div>
+                        <p className="font-medium">Legacy Routes Detected</p>
+                        <p className="text-sm text-muted-foreground">
+                          {lastReport.summary.tasksWithLegacyRoute} tasks can be auto-migrated to feature codes
+                        </p>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          onClick={handlePreviewFix}
+                          disabled={isPreviewing || isFixing}
+                        >
+                          {isPreviewing ? (
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          ) : (
+                            <Info className="h-4 w-4 mr-2" />
+                          )}
+                          Preview Fix
+                        </Button>
+                        <Button
+                          onClick={handlePreviewFix}
+                          disabled={isPreviewing || isFixing}
+                        >
+                          {isFixing ? (
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          ) : (
+                            <Wrench className="h-4 w-4 mr-2" />
+                          )}
+                          Fix All
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Issues */}
                   {lastReport.issues.length > 0 && (
                     <div>
@@ -572,6 +638,15 @@ export default function RouteRegistryPage() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Fix Preview Dialog */}
+      <FixPreviewDialog
+        open={showFixPreview}
+        onOpenChange={setShowFixPreview}
+        preview={lastPreview}
+        isFixing={isFixing}
+        onConfirm={handleFixAll}
+      />
     </div>
   );
 }
