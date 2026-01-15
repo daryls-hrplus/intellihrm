@@ -18,17 +18,33 @@ export function SubTaskList({ companyId, phaseId, stepOrder, subTaskDefinitions,
   const { 
     subTasks, 
     isLoading, 
-    initializeSubTasks, 
+    initializeSubTasks,
+    syncSubTasks,
     updateSubTaskStatus, 
     getCompletionStats,
     calculateStepStatus,
   } = useSubTaskProgress(companyId, phaseId, stepOrder);
 
+  // Initialize if no subtasks exist, or sync if definitions have changed
   useEffect(() => {
-    if (subTaskDefinitions && subTaskDefinitions.length > 0 && subTasks.length === 0 && !isLoading) {
+    if (!subTaskDefinitions || subTaskDefinitions.length === 0 || isLoading) return;
+    
+    if (subTasks.length === 0) {
+      // No subtasks exist yet - initialize
       initializeSubTasks(subTaskDefinitions);
+    } else {
+      // Check if definitions have changed (different count or different names)
+      const needsSync = subTasks.length !== subTaskDefinitions.length ||
+        subTasks.some((st) => {
+          const def = subTaskDefinitions.find(d => d.order === st.sub_task_order);
+          return !def || def.name !== st.sub_task_name;
+        });
+      
+      if (needsSync) {
+        syncSubTasks(subTaskDefinitions);
+      }
     }
-  }, [subTaskDefinitions, subTasks.length, isLoading]);
+  }, [subTaskDefinitions, subTasks, isLoading]);
 
   // Notify parent of status changes
   useEffect(() => {
