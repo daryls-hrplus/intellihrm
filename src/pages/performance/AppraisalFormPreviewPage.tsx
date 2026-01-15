@@ -75,6 +75,10 @@ export default function AppraisalFormPreviewPage() {
       isPreview={true}
       minRating={template.min_rating}
       maxRating={template.max_rating}
+      employeeName={employee.fullName}
+      employeePosition={employee.jobTitle}
+      employeeDepartment={employee.department}
+      cycleName={appraisal.cycleName}
     >
       {/* Preview Notice */}
       <div className="mb-6 no-print">
