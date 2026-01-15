@@ -405,10 +405,13 @@ export const subTaskDefinitions: Record<string, Record<number, SubTaskDefinition
       { order: 11, name: "Verify configuration status shows 'Ready' for all competencies", isRequired: true },
     ],
     4: [ // Index Settings (Multi-Cycle)
-      { order: 1, name: "Configure appraisal index calculation method", isRequired: false },
-      { order: 2, name: "Set historical cycle weighting for performance index", isRequired: false },
-      { order: 3, name: "Define index refresh frequency", isRequired: false },
-      { order: 4, name: "Configure index visibility settings", isRequired: false },
+      { order: 1, name: "Set rolling window period (12-60 months of historical data)", isRequired: false },
+      { order: 2, name: "Configure minimum cycles required before index calculation", isRequired: false },
+      { order: 3, name: "Adjust recency weight factor for recent vs older appraisals", isRequired: false },
+      { order: 4, name: "Set trend sensitivity to amplify improving/declining patterns", isRequired: false },
+      { order: 5, name: "Configure cycle type weights (Annual, Mid-Year, Quarterly)", isRequired: false },
+      { order: 6, name: "Decide whether to include probation reviews in index", isRequired: false },
+      { order: 7, name: "Enable/disable performance index calculation across platform", isRequired: false },
     ],
     5: [ // Approval Workflows Configuration
       { order: 1, name: "Create workflow for goal submissions (manager approval)", isRequired: true },
