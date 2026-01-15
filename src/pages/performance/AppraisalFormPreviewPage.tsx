@@ -67,6 +67,8 @@ export default function AppraisalFormPreviewPage() {
       templateVersion={template.version_number}
       companyName={company.name}
       isPreview={true}
+      minRating={template.min_rating}
+      maxRating={template.max_rating}
     >
       {/* Preview Notice */}
       <div className="mb-6 no-print">
