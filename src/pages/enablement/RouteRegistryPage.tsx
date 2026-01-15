@@ -32,7 +32,8 @@ import {
   Play,
   ExternalLink,
   Wrench,
-  Code2
+  Code2,
+  FileSearch
 } from "lucide-react";
 import { toast } from "sonner";
 import { useRouteResolver } from "@/hooks/useRouteResolver";
@@ -42,11 +43,13 @@ import { useFeatureRegistrySync } from "@/hooks/useFeatureRegistrySync";
 import { useValidationFixer } from "@/hooks/useValidationFixer";
 import { useProductCapabilitiesValidation } from "@/hooks/useProductCapabilitiesValidation";
 import { useCodeRegistryScanner } from "@/hooks/useCodeRegistryScanner";
+import { useContentCurrencyValidation } from "@/hooks/useContentCurrencyValidation";
 import { FixPreviewDialog } from "@/components/enablement/route-registry/FixPreviewDialog";
 import { DocumentSelector } from "@/components/enablement/route-registry/DocumentSelector";
 import { ProductCapabilitiesValidation } from "@/components/enablement/route-registry/ProductCapabilitiesValidation";
 import { CodeRegistryPanel } from "@/components/enablement/route-registry/CodeRegistryPanel";
 import { OrphanManagementPanel } from "@/components/enablement/route-registry/OrphanManagementPanel";
+import { ContentCurrencyPanel } from "@/components/enablement/route-registry/ContentCurrencyPanel";
 import { DocumentType } from "@/types/documentValidation";
 import { cn } from "@/lib/utils";
 
@@ -99,6 +102,10 @@ export default function RouteRegistryPage() {
     syncStatus,
     checkSyncStatus
   } = useCodeRegistryScanner();
+
+  const {
+    lastReport: contentCurrencyReport
+  } = useContentCurrencyValidation();
 
   const unsyncedRoutes = getUnsyncedRoutes();
   const dbRoutes = getAllDbRoutes();
@@ -297,6 +304,15 @@ export default function RouteRegistryPage() {
             <Code2 className="h-4 w-4" />
             Code Registry
           </TabsTrigger>
+          <TabsTrigger value="content-currency" className="gap-2">
+            <FileSearch className="h-4 w-4" />
+            Content Currency
+            {contentCurrencyReport && contentCurrencyReport.summary.undocumentedCount > 0 && (
+              <Badge variant="outline" className="ml-1 h-5 px-1.5 text-xs bg-yellow-50 text-yellow-700">
+                {contentCurrencyReport.summary.undocumentedCount}
+              </Badge>
+            )}
+          </TabsTrigger>
           <TabsTrigger value="orphans" className="gap-2">
             <FileCode className="h-4 w-4" />
             Orphans
@@ -416,6 +432,10 @@ export default function RouteRegistryPage() {
 
         <TabsContent value="code-registry" className="mt-6">
           <CodeRegistryPanel />
+        </TabsContent>
+
+        <TabsContent value="content-currency" className="mt-6">
+          <ContentCurrencyPanel />
         </TabsContent>
 
         <TabsContent value="orphans" className="mt-6">
