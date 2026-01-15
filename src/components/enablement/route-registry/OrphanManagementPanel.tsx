@@ -35,10 +35,11 @@ import {
 } from "lucide-react";
 import { useOrphanDetection } from "@/hooks/useOrphanDetection";
 import { useOrphanActions } from "@/hooks/useOrphanActions";
-import { OrphanEntry, OrphanSource, OrphanRecommendation } from "@/types/orphanTypes";
+import { OrphanEntry, OrphanSource, OrphanRecommendation, OrphanDuplicate } from "@/types/orphanTypes";
 import { OrphanModuleAccordion } from "./OrphanModuleAccordion";
 import { OrphanDuplicatesPanel } from "./OrphanDuplicatesPanel";
 import { OrphanActionDialog } from "./OrphanActionDialog";
+import { DuplicateDetailDialog } from "./DuplicateDetailDialog";
 import { cn } from "@/lib/utils";
 
 export function OrphanManagementPanel() {
@@ -54,6 +55,10 @@ export function OrphanManagementPanel() {
     orphan?: OrphanEntry;
     count?: number;
   }>({ open: false, type: 'archive' });
+  const [duplicateDialog, setDuplicateDialog] = useState<{
+    open: boolean;
+    duplicate: OrphanDuplicate | null;
+  }>({ open: false, duplicate: null });
 
   const {
     isLoading,
@@ -426,7 +431,7 @@ export function OrphanManagementPanel() {
                   {stats && Object.entries(stats.bySource).map(([source, count]) => (
                     <div key={source} className="flex items-center justify-between">
                       {getSourceBadge(source as OrphanSource)}
-                      <span className="font-medium">{count}</span>
+                      <span className="font-medium">{count as number}</span>
                     </div>
                   ))}
                 </div>
@@ -460,6 +465,8 @@ export function OrphanManagementPanel() {
             onToggleSelection={toggleSelection}
             onArchive={(orphan) => setActionDialog({ open: true, type: 'archive', orphan })}
             onDelete={(orphan) => setActionDialog({ open: true, type: 'delete', orphan })}
+            onViewDuplicate={(duplicate) => setDuplicateDialog({ open: true, duplicate })}
+            duplicates={duplicates}
             getRecommendationBadge={getRecommendationBadge}
             getSourceBadge={getSourceBadge}
           />
@@ -471,6 +478,7 @@ export function OrphanManagementPanel() {
             routeConflicts={routeConflicts}
             onArchive={(orphan) => setActionDialog({ open: true, type: 'archive', orphan })}
             onDelete={(orphan) => setActionDialog({ open: true, type: 'delete', orphan })}
+            onViewDuplicate={(duplicate) => setDuplicateDialog({ open: true, duplicate })}
           />
         </TabsContent>
 
@@ -571,6 +579,21 @@ export function OrphanManagementPanel() {
           setActionDialog({ open: false, type: 'archive' });
         }}
         onCancel={() => setActionDialog({ open: false, type: 'archive' })}
+      />
+
+      {/* Duplicate Detail Dialog */}
+      <DuplicateDetailDialog
+        open={duplicateDialog.open}
+        onOpenChange={(open) => setDuplicateDialog({ open, duplicate: duplicateDialog.duplicate })}
+        duplicate={duplicateDialog.duplicate}
+        onArchive={(orphan) => {
+          setDuplicateDialog({ open: false, duplicate: null });
+          setActionDialog({ open: true, type: 'archive', orphan });
+        }}
+        onDelete={(orphan) => {
+          setDuplicateDialog({ open: false, duplicate: null });
+          setActionDialog({ open: true, type: 'delete', orphan });
+        }}
       />
     </div>
   );

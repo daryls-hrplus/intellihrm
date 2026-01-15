@@ -25,13 +25,15 @@ interface OrphanDuplicatesPanelProps {
   routeConflicts: OrphanRouteConflict[];
   onArchive: (orphan: OrphanEntry) => void;
   onDelete: (orphan: OrphanEntry) => void;
+  onViewDuplicate: (duplicate: OrphanDuplicate) => void;
 }
 
 export function OrphanDuplicatesPanel({
   duplicates,
   routeConflicts,
   onArchive,
-  onDelete
+  onDelete,
+  onViewDuplicate
 }: OrphanDuplicatesPanelProps) {
   if (duplicates.length === 0 && routeConflicts.length === 0) {
     return (
@@ -66,16 +68,27 @@ export function OrphanDuplicatesPanel({
                   <Card key={index} className="border-dashed">
                     <CardHeader className="pb-2">
                       <div className="flex items-center justify-between">
-                        <CardTitle className="text-base flex items-center gap-2">
+                        <button
+                          onClick={() => onViewDuplicate(duplicate)}
+                          className="text-base flex items-center gap-2 font-semibold hover:text-primary hover:underline cursor-pointer text-left"
+                        >
                           <GitMerge className="h-4 w-4 text-blue-500" />
                           "{duplicate.featureName}"
-                        </CardTitle>
+                        </button>
                         <Badge variant="outline">
                           {duplicate.entries.length} entries
                         </Badge>
                       </div>
                       <CardDescription className="text-xs">
                         {duplicate.mergeRecommendation}
+                        <Button
+                          variant="link"
+                          size="sm"
+                          className="p-0 h-auto ml-2 text-xs"
+                          onClick={() => onViewDuplicate(duplicate)}
+                        >
+                          View Details →
+                        </Button>
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
