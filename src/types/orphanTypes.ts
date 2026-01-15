@@ -1,6 +1,6 @@
 /**
  * Orphan Management Types
- * 
+ *
  * Types for detecting, analyzing, and managing orphaned database entries
  * that have no corresponding code implementation.
  */
