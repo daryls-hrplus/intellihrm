@@ -163,6 +163,7 @@ export const CalibrationWorkspacePage = lazy(() => import('@/pages/performance/C
 export const PerformanceSetupPage = lazy(() => import('@/pages/performance/PerformanceSetupPage'));
 export const TalentUnifiedDashboardPage = lazy(() => import('@/pages/performance/TalentUnifiedDashboardPage'));
 export const MyDevelopmentThemesPage = lazy(() => import('@/pages/performance/feedback/MyDevelopmentThemesPage'));
+export const AppraisalFormPreviewPage = lazy(() => import('@/pages/performance/AppraisalFormPreviewPage'));
 
 // Leave pages
 export const LeaveDashboardPage = lazy(() => import('@/pages/leave/LeaveDashboardPage'));
