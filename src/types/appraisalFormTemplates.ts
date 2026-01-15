@@ -32,6 +32,7 @@ export type AppraisalPhaseType =
   | 'manager_review' 
   | '360_collection' 
   | 'calibration' 
+  | 'hr_review'
   | 'finalization' 
   | 'employee_acknowledgment';
 
@@ -249,7 +250,7 @@ export const CYCLE_TYPE_PRESETS: Record<AppraisalCycleType, {
     label: 'Annual Review',
     defaultDurationDays: 365,
     defaultEvaluationOffset: 14,
-    suggestedPhases: ['goal_setting', 'self_assessment', '360_collection', 'manager_review', 'calibration', 'finalization', 'employee_acknowledgment'],
+    suggestedPhases: ['goal_setting', 'self_assessment', '360_collection', 'manager_review', 'calibration', 'hr_review', 'finalization', 'employee_acknowledgment'],
     weightEnforcement: 'strict',
   },
   mid_year: {
@@ -392,6 +393,12 @@ export const PHASE_TYPE_PRESETS: Record<AppraisalPhaseType, {
     icon: 'BarChart',
     defaultDurationDays: 7,
     description: 'Leadership reviews and calibrates ratings across teams',
+  },
+  hr_review: {
+    label: 'HR Review',
+    icon: 'ShieldCheck',
+    defaultDurationDays: 5,
+    description: 'HR reviews and approves evaluations before finalization (optional checkpoint)',
   },
   finalization: {
     label: 'Finalization',
