@@ -1,6 +1,5 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Building, User, Calendar, FileText } from "lucide-react";
+import { Building, Calendar, User } from "lucide-react";
 
 interface EmployeeInfo {
   id: string;
@@ -39,6 +38,7 @@ interface PrintHeaderProps {
   companyLogo?: string;
   templateCode?: string;
   templateVersion?: number;
+  compact?: boolean;
 }
 
 export function PrintHeader({
@@ -49,16 +49,8 @@ export function PrintHeader({
   companyLogo,
   templateCode,
   templateVersion,
+  compact = false,
 }: PrintHeaderProps) {
-  const getInitials = (name: string) => {
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
-  };
-
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
       year: "numeric",
@@ -68,149 +60,118 @@ export function PrintHeader({
   };
 
   const formatDateRange = (start: string, end: string) => {
-    return `${formatDate(start)} — ${formatDate(end)}`;
+    return `${formatDate(start)} – ${formatDate(end)}`;
   };
 
+  const orgPath = [employee.division, employee.department, employee.section]
+    .filter(Boolean)
+    .join(" › ");
+
   return (
-    <div className="print-header-section border-b pb-6 mb-6">
-      {/* Company Header with Document Info */}
-      <div className="flex items-start justify-between mb-6">
-        <div className="flex items-center gap-3">
+    <div className="print-header-section border rounded-lg mb-4 bg-white overflow-hidden print:mb-2">
+      {/* Row 1: Company + Form Info */}
+      <div className="flex items-center justify-between px-4 py-2.5 border-b bg-muted/30">
+        <div className="flex items-center gap-2.5">
           {companyLogo ? (
-            <img src={companyLogo} alt={companyName} className="h-12 w-auto" />
+            <img src={companyLogo} alt={companyName} className="h-8 w-auto" />
           ) : (
-            <div className="h-12 w-12 bg-primary/10 rounded-lg flex items-center justify-center">
-              <Building className="h-6 w-6 text-primary" />
+            <div className="h-8 w-8 bg-primary/10 rounded flex items-center justify-center">
+              <Building className="h-4 w-4 text-primary" />
             </div>
           )}
           <div>
-            <h1 className="text-xl font-bold">{companyName || "Company Name"}</h1>
-            <p className="text-sm text-muted-foreground">Performance Appraisal Form</p>
+            <h1 className="text-sm font-bold leading-tight">{companyName || "Company Name"}</h1>
+            <p className="text-xs text-muted-foreground">Performance Appraisal</p>
           </div>
         </div>
-        <div className="text-right space-y-1">
-          <Badge variant="outline" className="text-xs">
+        <div className="flex items-center gap-2 text-right">
+          <Badge variant="outline" className="text-[10px] h-5">
             {appraisal.status || "Draft"}
           </Badge>
           {templateCode && (
-            <p className="text-xs text-muted-foreground">
-              Form: {templateCode}
-              {templateVersion && ` v${templateVersion}`}
-            </p>
+            <span className="text-[10px] text-muted-foreground">
+              {templateCode}{templateVersion && ` v${templateVersion}`}
+            </span>
           )}
         </div>
       </div>
 
-      {/* Period Information - Industry Standard Layout */}
-      <div className="bg-muted/30 rounded-lg p-4 mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Performance Period - The work period being evaluated */}
-          <div className="border-l-4 border-primary pl-3">
-            <div className="flex items-center gap-2 mb-1">
-              <Calendar className="h-4 w-4 text-primary" />
-              <span className="text-sm font-semibold text-primary">Performance Period</span>
-              {appraisal.isPreview && (
-                <Badge variant="outline" className="text-[10px] text-amber-600 border-amber-400">
-                  SAMPLE
-                </Badge>
-              )}
-            </div>
-            <p className="text-sm text-muted-foreground mb-0.5">
-              Work period being evaluated
-            </p>
-            <p className="font-medium">
-              {appraisal.performancePeriodStart && appraisal.performancePeriodEnd
-                ? formatDateRange(appraisal.performancePeriodStart, appraisal.performancePeriodEnd)
-                : "Not specified"}
-            </p>
+      {/* Row 2: Period Info - Condensed */}
+      <div className="grid grid-cols-2 divide-x text-xs border-b">
+        <div className="px-3 py-2">
+          <div className="flex items-center gap-1.5 text-muted-foreground mb-0.5">
+            <Calendar className="h-3 w-3" />
+            <span className="font-medium">Performance Period</span>
             {appraisal.isPreview && (
-              <p className="text-xs text-amber-600 italic mt-1">Set in Cycle Setup</p>
+              <Badge variant="outline" className="text-[8px] h-4 text-amber-600 border-amber-300 ml-1">
+                SAMPLE
+              </Badge>
             )}
           </div>
-
-          {/* Appraisal Period - The formal review window */}
-          <div className="border-l-4 border-muted-foreground/50 pl-3">
-            <div className="flex items-center gap-2 mb-1">
-              <FileText className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm font-semibold">Appraisal Period</span>
-              {appraisal.isPreview && (
-                <Badge variant="outline" className="text-[10px] text-amber-600 border-amber-400">
-                  SAMPLE
-                </Badge>
-              )}
-            </div>
-            <p className="text-sm text-muted-foreground mb-0.5">
-              Formal review window
-            </p>
-            <p className="font-medium">
-              {formatDateRange(appraisal.startDate, appraisal.endDate)}
-            </p>
-            {appraisal.isPreview && (
-              <p className="text-xs text-amber-600 italic mt-1">Set in Cycle Setup</p>
-            )}
-          </div>
+          <p className="font-medium text-foreground">
+            {appraisal.performancePeriodStart && appraisal.performancePeriodEnd
+              ? formatDateRange(appraisal.performancePeriodStart, appraisal.performancePeriodEnd)
+              : "Not specified"}
+          </p>
         </div>
-
-        {/* Event Info Row */}
-        <div className="grid grid-cols-2 gap-4 mt-4 pt-4 border-t border-muted">
-          <div>
-            <span className="text-xs text-muted-foreground block">Appraisal Event</span>
-            <span className="font-medium text-sm">{appraisal.eventName}</span>
+        <div className="px-3 py-2">
+          <div className="flex items-center gap-1.5 text-muted-foreground mb-0.5">
+            <Calendar className="h-3 w-3" />
+            <span className="font-medium">Review Period</span>
+            {appraisal.isPreview && (
+              <Badge variant="outline" className="text-[8px] h-4 text-amber-600 border-amber-300 ml-1">
+                SAMPLE
+              </Badge>
+            )}
           </div>
-          <div>
-            <span className="text-xs text-muted-foreground block">Review Cycle</span>
-            <span className="font-medium text-sm">{appraisal.cycleName || "Annual"}</span>
-          </div>
+          <p className="font-medium text-foreground">
+            {formatDateRange(appraisal.startDate, appraisal.endDate)}
+          </p>
         </div>
       </div>
 
-      {/* Employee and Supervisor Info */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Employee Section */}
-        <div className="border rounded-lg p-4">
-          <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3 flex items-center gap-2">
-            <User className="h-3.5 w-3.5" />
-            Employee Being Appraised
-          </h3>
-          <div className="flex items-start gap-3">
-            <Avatar className="h-12 w-12 print:h-10 print:w-10">
-              <AvatarImage src={employee.avatarUrl} alt={employee.fullName} />
-              <AvatarFallback className="text-sm">{getInitials(employee.fullName)}</AvatarFallback>
-            </Avatar>
-            <div className="flex-1 space-y-0.5 min-w-0">
-              <p className="font-semibold text-base leading-tight">{employee.fullName}</p>
-              <p className="text-sm text-primary leading-tight">{employee.jobTitle || "N/A"}</p>
-              {employee.employeeNumber && (
-                <p className="text-xs text-muted-foreground">ID: {employee.employeeNumber}</p>
-              )}
-              <p className="text-xs text-muted-foreground truncate">
-                {[employee.division, employee.department, employee.section]
-                  .filter(Boolean)
-                  .join(" › ")}
-              </p>
-            </div>
-          </div>
+      {/* Row 3: Event + Cycle */}
+      <div className="grid grid-cols-2 divide-x text-xs border-b bg-muted/10">
+        <div className="px-3 py-1.5">
+          <span className="text-muted-foreground">Event: </span>
+          <span className="font-medium">{appraisal.eventName}</span>
         </div>
+        <div className="px-3 py-1.5">
+          <span className="text-muted-foreground">Cycle: </span>
+          <span className="font-medium">{appraisal.cycleName || "Annual"}</span>
+        </div>
+      </div>
 
-        {/* Supervisor Section */}
-        <div className="border rounded-lg p-4">
-          <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3 flex items-center gap-2">
-            <User className="h-3.5 w-3.5" />
-            Direct Supervisor / Appraiser
-          </h3>
+      {/* Row 4: Employee + Supervisor - Table Layout */}
+      <div className="grid grid-cols-2 divide-x text-xs">
+        <div className="px-3 py-2.5">
+          <div className="flex items-center gap-1 text-muted-foreground mb-1">
+            <User className="h-3 w-3" />
+            <span className="font-medium uppercase text-[10px] tracking-wide">Employee</span>
+          </div>
+          <p className="font-semibold text-sm text-foreground leading-tight">{employee.fullName}</p>
+          <p className="text-primary text-xs">{employee.jobTitle || "N/A"}</p>
+          <div className="flex items-center gap-2 mt-0.5 text-muted-foreground">
+            {employee.employeeNumber && <span>ID: {employee.employeeNumber}</span>}
+          </div>
+          {orgPath && (
+            <p className="text-muted-foreground truncate mt-0.5" title={orgPath}>
+              {orgPath}
+            </p>
+          )}
+        </div>
+        <div className="px-3 py-2.5">
+          <div className="flex items-center gap-1 text-muted-foreground mb-1">
+            <User className="h-3 w-3" />
+            <span className="font-medium uppercase text-[10px] tracking-wide">Supervisor</span>
+          </div>
           {supervisor ? (
-            <div className="flex items-start gap-3">
-              <Avatar className="h-12 w-12 print:h-10 print:w-10">
-                <AvatarImage src={supervisor.avatarUrl} alt={supervisor.fullName} />
-                <AvatarFallback className="text-sm">{getInitials(supervisor.fullName)}</AvatarFallback>
-              </Avatar>
-              <div className="flex-1 space-y-0.5">
-                <p className="font-semibold text-base leading-tight">{supervisor.fullName}</p>
-                <p className="text-sm text-primary leading-tight">{supervisor.jobTitle || "N/A"}</p>
-              </div>
-            </div>
+            <>
+              <p className="font-semibold text-sm text-foreground leading-tight">{supervisor.fullName}</p>
+              <p className="text-primary text-xs">{supervisor.jobTitle || "N/A"}</p>
+            </>
           ) : (
-            <p className="text-sm text-muted-foreground">No supervisor assigned</p>
+            <p className="text-muted-foreground italic">Not assigned</p>
           )}
         </div>
       </div>
