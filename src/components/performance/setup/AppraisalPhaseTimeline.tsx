@@ -9,6 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { 
   Calendar,
   Clock,
@@ -26,7 +27,8 @@ import {
   FileCheck,
   GripVertical,
   Play,
-  ArrowRight
+  ArrowRight,
+  HelpCircle
 } from "lucide-react";
 import type { 
   AppraisalTemplatePhase, 
@@ -266,7 +268,19 @@ export function AppraisalPhaseTimeline({
                     {/* Phase Settings */}
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label>Mandatory</Label>
+                        <Label className="flex items-center gap-1.5">
+                          Mandatory
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <HelpCircle className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
+                              </TooltipTrigger>
+                              <TooltipContent side="top" className="max-w-xs">
+                                <p>When enabled, participants must complete this phase before the appraisal can be finalized. Optional phases can be skipped.</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </Label>
                         <div className="flex items-center gap-2 h-10">
                           <Switch
                             checked={phase.is_mandatory}
@@ -282,7 +296,19 @@ export function AppraisalPhaseTimeline({
                       </div>
 
                       <div className="space-y-2">
-                        <Label>Allow Parallel</Label>
+                        <Label className="flex items-center gap-1.5">
+                          Allow Parallel
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <HelpCircle className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
+                              </TooltipTrigger>
+                              <TooltipContent side="top" className="max-w-xs">
+                                <p>When enabled, this phase can run at the same time as other phases. Otherwise, it must complete before the next phase can start.</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </Label>
                         <div className="flex items-center gap-2 h-10">
                           <Switch
                             checked={phase.allow_parallel}
@@ -301,7 +327,19 @@ export function AppraisalPhaseTimeline({
                     {/* Automation */}
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label>Auto-Advance</Label>
+                        <Label className="flex items-center gap-1.5">
+                          Auto-Advance
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <HelpCircle className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
+                              </TooltipTrigger>
+                              <TooltipContent side="top" className="max-w-xs">
+                                <p>When enabled, the appraisal automatically moves to the next phase when the advance condition is met. Otherwise, HR must manually advance each participant.</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </Label>
                         <div className="flex items-center gap-2 h-10">
                           <Switch
                             checked={phase.auto_advance}
@@ -338,7 +376,19 @@ export function AppraisalPhaseTimeline({
 
                     {/* Notifications */}
                     <div className="space-y-2">
-                      <Label>Notifications</Label>
+                      <Label className="flex items-center gap-1.5">
+                        Notifications
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <HelpCircle className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
+                            </TooltipTrigger>
+                            <TooltipContent side="top" className="max-w-xs">
+                              <p>Choose when to send email reminders to participants. "On Start" notifies when the phase begins. "On Deadline" sends a reminder as the deadline approaches.</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </Label>
                       <div className="flex gap-4">
                         <label className="flex items-center gap-2 text-sm">
                           <Switch
