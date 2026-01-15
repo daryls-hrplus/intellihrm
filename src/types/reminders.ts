@@ -98,6 +98,7 @@ export type ReminderCategory =
   | 'onboarding' 
   | 'employment' 
   | 'leave' 
+  | 'workforce'
   | 'performance_appraisals'
   | 'performance_360'
   | 'performance_goals'
@@ -116,6 +117,9 @@ export const REMINDER_CATEGORIES: { value: ReminderCategory; label: string }[] =
   { value: 'custom', label: 'Custom' },
   { value: 'onboarding', label: 'Onboarding & Probation' },
   { value: 'employment', label: 'Employment & Contracts' },
+  { value: 'leave', label: 'Leave & Attendance' },
+  { value: 'workforce', label: 'Workforce' },
+  { value: 'performance_appraisals', label: 'Performance: Appraisals' },
   { value: 'leave', label: 'Leave & Attendance' },
   { value: 'performance_appraisals', label: 'Performance: Appraisals' },
   { value: 'performance_360', label: 'Performance: 360 Feedback' },
