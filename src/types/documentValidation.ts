@@ -3,7 +3,8 @@
 
 export type DocumentType = 
   | 'implementation_handbook' 
-  | 'product_capabilities';
+  | 'product_capabilities'
+  | 'admin_manual';
 
 export interface DocumentInfo {
   type: DocumentType;
@@ -24,6 +25,12 @@ export const DOCUMENT_REGISTRY: Record<DocumentType, DocumentInfo> = {
     name: 'Product Capabilities',
     description: 'Validates capabilities document modules against route registry',
     icon: 'FileText'
+  },
+  admin_manual: {
+    type: 'admin_manual',
+    name: 'Admin & Security Manual',
+    description: 'Validates admin documentation against security and governance routes',
+    icon: 'Shield'
   }
 };
 
