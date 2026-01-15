@@ -596,6 +596,7 @@ const App = () => (
             <Route path="/enablement/manuals/client-provisioning/testing" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.ClientProvisioningTestingPage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
             <Route path="/enablement/manuals/publishing" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.ManualPublishingPage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
             <Route path="/enablement/content-lifecycle" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.ContentLifecyclePage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
+            <Route path="/enablement/route-registry" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.RouteRegistryPage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
             <Route path="/enablement/product-capabilities" element={<ProtectedRoute><EnablementAccessGuard><LazyPage><Pages.ProductCapabilitiesPage /></LazyPage></EnablementAccessGuard></ProtectedRoute>} />
 
             {/* Strategic Planning Routes */}
