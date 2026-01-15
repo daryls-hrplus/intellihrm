@@ -12,14 +12,15 @@ import { Badge } from "@/components/ui/badge";
 import { HelpCircle, TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-// Rating scale definitions with behavioral anchors
+// Rating scale definitions with behavioral anchors - classic white backgrounds with color accents
 export const RATING_SCALE_DEFINITIONS = [
   {
     level: 1,
     label: "Needs Development",
     shortLabel: "ND",
     icon: "🔴",
-    color: "bg-red-100 text-red-800 border-red-300 dark:bg-red-900/30 dark:text-red-300",
+    color: "bg-white border-l-4 border-l-red-500 border-red-200",
+    textColor: "text-red-700 dark:text-red-400",
     description: "Performance is significantly below expectations for the required level.",
     behavioralAnchors: [
       "Rarely demonstrates the expected behaviors",
@@ -34,7 +35,8 @@ export const RATING_SCALE_DEFINITIONS = [
     label: "Below Expectations",
     shortLabel: "BE",
     icon: "🟠",
-    color: "bg-orange-100 text-orange-800 border-orange-300 dark:bg-orange-900/30 dark:text-orange-300",
+    color: "bg-white border-l-4 border-l-orange-500 border-orange-200",
+    textColor: "text-orange-700 dark:text-orange-400",
     description: "Performance is below the level required for the role.",
     behavioralAnchors: [
       "Occasionally demonstrates expected behaviors but inconsistently",
@@ -49,7 +51,8 @@ export const RATING_SCALE_DEFINITIONS = [
     label: "Meets Expectations",
     shortLabel: "ME",
     icon: "🟢",
-    color: "bg-green-100 text-green-800 border-green-300 dark:bg-green-900/30 dark:text-green-300",
+    color: "bg-white border-l-4 border-l-green-500 border-green-200",
+    textColor: "text-green-700 dark:text-green-400",
     description: "Performance fully meets the expectations for the required level.",
     behavioralAnchors: [
       "Consistently demonstrates expected behaviors",
@@ -64,7 +67,8 @@ export const RATING_SCALE_DEFINITIONS = [
     label: "Exceeds Expectations",
     shortLabel: "EE",
     icon: "🔵",
-    color: "bg-blue-100 text-blue-800 border-blue-300 dark:bg-blue-900/30 dark:text-blue-300",
+    color: "bg-white border-l-4 border-l-blue-500 border-blue-200",
+    textColor: "text-blue-700 dark:text-blue-400",
     description: "Performance frequently exceeds the level required for the role.",
     behavioralAnchors: [
       "Frequently exceeds expected behaviors",
@@ -79,7 +83,8 @@ export const RATING_SCALE_DEFINITIONS = [
     label: "Exceptional",
     shortLabel: "EX",
     icon: "🏆",
-    color: "bg-purple-100 text-purple-800 border-purple-300 dark:bg-purple-900/30 dark:text-purple-300",
+    color: "bg-white border-l-4 border-l-purple-500 border-purple-200",
+    textColor: "text-purple-700 dark:text-purple-400",
     description: "Performance is outstanding and sets the standard for others.",
     behavioralAnchors: [
       "Consistently exemplifies excellence in all aspects",
@@ -129,7 +134,7 @@ export function RatingScaleLegend({
           <div
             key={level.level}
             className={cn(
-              "rounded-lg border p-4 transition-all",
+              "rounded-lg border p-4 shadow-sm",
               level.color
             )}
           >
@@ -138,14 +143,14 @@ export function RatingScaleLegend({
               <div className="flex-1 space-y-2">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <span className="font-semibold">
+                    <span className={cn("font-semibold", level.textColor)}>
                       Level {level.level}: {level.label}
                     </span>
                     <Badge variant="outline" className="text-xs">
                       {level.shortLabel}
                     </Badge>
                   </div>
-                  <div className="flex items-center gap-1 text-xs">
+                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
                     {level.level === 3 ? (
                       <Minus className="h-3 w-3" />
                     ) : level.level > 3 ? (
@@ -153,16 +158,16 @@ export function RatingScaleLegend({
                     ) : (
                       <TrendingDown className="h-3 w-3 text-red-600" />
                     )}
-                    <span className="opacity-80">vs. Required</span>
+                    <span>vs. Required</span>
                   </div>
                 </div>
-                <p className="text-sm font-medium">{level.description}</p>
-                <ul className="list-disc list-inside space-y-1 text-sm opacity-90">
+                <p className="text-sm text-foreground">{level.description}</p>
+                <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
                   {level.behavioralAnchors.map((anchor, i) => (
                     <li key={i}>{anchor}</li>
                   ))}
                 </ul>
-                <p className="text-xs italic pt-1 border-t border-current/20 mt-2">
+                <p className={cn("text-xs pt-2 border-t", level.textColor)}>
                   <strong>Gap Interpretation:</strong> {level.gapMeaning}
                 </p>
               </div>
