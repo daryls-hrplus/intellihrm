@@ -48139,6 +48139,10 @@ export type Database = {
           created_at: string
           created_by: string | null
           employee_id: string
+          exit_interview_date: string | null
+          exit_interview_location: string | null
+          exit_interview_time: string | null
+          exit_interviewer_id: string | null
           id: string
           last_working_date: string
           manager_id: string | null
@@ -48154,6 +48158,10 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           employee_id: string
+          exit_interview_date?: string | null
+          exit_interview_location?: string | null
+          exit_interview_time?: string | null
+          exit_interviewer_id?: string | null
           id?: string
           last_working_date: string
           manager_id?: string | null
@@ -48169,6 +48177,10 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           employee_id?: string
+          exit_interview_date?: string | null
+          exit_interview_location?: string | null
+          exit_interview_time?: string | null
+          exit_interviewer_id?: string | null
           id?: string
           last_working_date?: string
           manager_id?: string | null
@@ -48196,6 +48208,20 @@ export type Database = {
           {
             foreignKeyName: "offboarding_instances_employee_id_fkey"
             columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "offboarding_instances_exit_interviewer_id_fkey"
+            columns: ["exit_interviewer_id"]
+            isOneToOne: false
+            referencedRelation: "employee_fte_summary"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "offboarding_instances_exit_interviewer_id_fkey"
+            columns: ["exit_interviewer_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -55809,6 +55835,7 @@ export type Database = {
           company_id: string | null
           continuous_service_date: string | null
           created_at: string
+          current_contract_end_date: string | null
           date_format: string | null
           date_of_birth: string | null
           department_id: string | null
@@ -55836,6 +55863,7 @@ export type Database = {
           middle_name: string | null
           nationality: string | null
           preferred_language: string | null
+          retirement_date: string | null
           second_last_name: string | null
           section_id: string | null
           seniority_date: string | null
@@ -55855,6 +55883,7 @@ export type Database = {
           company_id?: string | null
           continuous_service_date?: string | null
           created_at?: string
+          current_contract_end_date?: string | null
           date_format?: string | null
           date_of_birth?: string | null
           department_id?: string | null
@@ -55882,6 +55911,7 @@ export type Database = {
           middle_name?: string | null
           nationality?: string | null
           preferred_language?: string | null
+          retirement_date?: string | null
           second_last_name?: string | null
           section_id?: string | null
           seniority_date?: string | null
@@ -55901,6 +55931,7 @@ export type Database = {
           company_id?: string | null
           continuous_service_date?: string | null
           created_at?: string
+          current_contract_end_date?: string | null
           date_format?: string | null
           date_of_birth?: string | null
           department_id?: string | null
@@ -55928,6 +55959,7 @@ export type Database = {
           middle_name?: string | null
           nationality?: string | null
           preferred_language?: string | null
+          retirement_date?: string | null
           second_last_name?: string | null
           section_id?: string | null
           seniority_date?: string | null

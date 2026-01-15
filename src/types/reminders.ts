@@ -120,8 +120,6 @@ export const REMINDER_CATEGORIES: { value: ReminderCategory; label: string }[] =
   { value: 'leave', label: 'Leave & Attendance' },
   { value: 'workforce', label: 'Workforce' },
   { value: 'performance_appraisals', label: 'Performance: Appraisals' },
-  { value: 'leave', label: 'Leave & Attendance' },
-  { value: 'performance_appraisals', label: 'Performance: Appraisals' },
   { value: 'performance_360', label: 'Performance: 360 Feedback' },
   { value: 'performance_goals', label: 'Performance: Goals' },
   { value: 'performance_feedback', label: 'Performance: Continuous Feedback' },
