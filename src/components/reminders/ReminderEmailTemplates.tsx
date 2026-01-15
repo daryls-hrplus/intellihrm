@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -24,7 +24,7 @@ import {
 } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { REMINDER_CATEGORIES } from '@/types/reminders';
+import { REMINDER_CATEGORIES, WORKFORCE_SUBCATEGORIES } from '@/types/reminders';
 import { TEMPLATE_PLACEHOLDERS } from './templatePlaceholders';
 import { useTemplateAI, EmailTemplateSuggestion } from '@/hooks/useTemplateAI';
 import { 
@@ -56,7 +56,8 @@ import {
   Target,
   MessageCircle,
   GitBranch,
-  Files
+  Files,
+  Search
 } from 'lucide-react';
 
 interface EmailTemplate {
@@ -64,6 +65,7 @@ interface EmailTemplate {
   company_id: string | null;
   event_type_id: string | null;
   category: string;
+  subcategory: string | null;
   name: string;
   subject: string;
   body: string;
@@ -93,6 +95,7 @@ const CATEGORY_ICONS: Record<string, React.ReactNode> = {
   performance_succession: <GitBranch className="h-4 w-4" />,
   employee_voice: <MessageSquare className="h-4 w-4" />,
   onboarding: <UserPlus className="h-4 w-4" />,
+  workforce: <Users className="h-4 w-4" />,
 };
 
 export function ReminderEmailTemplates({ companyId, companyName, onUseTemplate }: ReminderEmailTemplatesProps) {
@@ -103,7 +106,10 @@ export function ReminderEmailTemplates({ companyId, companyName, onUseTemplate }
   const [isCreating, setIsCreating] = useState(false);
   const [saving, setSaving] = useState(false);
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
+  const [expandedSubcategories, setExpandedSubcategories] = useState<Set<string>>(new Set());
   const [previewTemplate, setPreviewTemplate] = useState<EmailTemplate | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
   const { 
     isGenerating, 
@@ -116,6 +122,7 @@ export function ReminderEmailTemplates({ companyId, companyName, onUseTemplate }
 
   const [newTemplate, setNewTemplate] = useState({
     category: '',
+    subcategory: '',
     name: '',
     subject: '',
     body: '',
@@ -130,6 +137,7 @@ export function ReminderEmailTemplates({ companyId, companyName, onUseTemplate }
         .or(`is_default.eq.true,company_id.eq.${companyId}`)
         .eq('is_active', true)
         .order('category')
+        .order('subcategory')
         .order('name');
 
       if (error) throw error;
@@ -151,6 +159,55 @@ export function ReminderEmailTemplates({ companyId, companyName, onUseTemplate }
   useEffect(() => {
     fetchTemplates();
   }, [companyId]);
+
+  // Filter templates based on search and category
+  const filteredTemplates = useMemo(() => {
+    return templates.filter(t => {
+      const matchesSearch = !searchQuery || 
+        t.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        t.subject.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesCategory = selectedCategory === 'all' || t.category === selectedCategory;
+      return matchesSearch && matchesCategory;
+    });
+  }, [templates, searchQuery, selectedCategory]);
+
+  // Group filtered templates by category
+  const groupedTemplates = useMemo(() => {
+    return filteredTemplates.reduce((acc, template) => {
+      if (!acc[template.category]) {
+        acc[template.category] = [];
+      }
+      acc[template.category].push(template);
+      return acc;
+    }, {} as Record<string, EmailTemplate[]>);
+  }, [filteredTemplates]);
+
+  // For workforce category, group by subcategory
+  const getWorkforceSubcategoryGroups = useCallback((categoryTemplates: EmailTemplate[]) => {
+    const groups: Record<string, EmailTemplate[]> = {};
+    
+    categoryTemplates.forEach(template => {
+      const subcat = template.subcategory || 'other_workforce';
+      if (!groups[subcat]) {
+        groups[subcat] = [];
+      }
+      groups[subcat].push(template);
+    });
+    
+    // Sort by WORKFORCE_SUBCATEGORIES order
+    const sortedGroups: Record<string, EmailTemplate[]> = {};
+    WORKFORCE_SUBCATEGORIES.forEach(sub => {
+      if (groups[sub.value]) {
+        sortedGroups[sub.value] = groups[sub.value];
+      }
+    });
+    
+    return sortedGroups;
+  }, []);
+
+  const getSubcategoryLabel = useCallback((subcategory: string) => {
+    return WORKFORCE_SUBCATEGORIES.find(s => s.value === subcategory)?.label || subcategory;
+  }, []);
 
   const handleCopyTemplate = (template: EmailTemplate) => {
     navigator.clipboard.writeText(template.body);
@@ -175,6 +232,7 @@ export function ReminderEmailTemplates({ companyId, companyName, onUseTemplate }
             company_id: companyId,
             event_type_id: editingTemplate.event_type_id,
             category: editingTemplate.category,
+            subcategory: editingTemplate.subcategory,
             name: editingTemplate.name,
             subject: editingTemplate.subject,
             body: editingTemplate.body,
@@ -223,6 +281,7 @@ export function ReminderEmailTemplates({ companyId, companyName, onUseTemplate }
         .insert({
           company_id: companyId,
           category: newTemplate.category,
+          subcategory: newTemplate.category === 'workforce' ? newTemplate.subcategory : null,
           name: newTemplate.name,
           subject: newTemplate.subject,
           body: newTemplate.body,
@@ -234,7 +293,7 @@ export function ReminderEmailTemplates({ companyId, companyName, onUseTemplate }
       
       toast.success('Template created');
       setIsCreating(false);
-      setNewTemplate({ category: '', name: '', subject: '', body: '' });
+      setNewTemplate({ category: '', subcategory: '', name: '', subject: '', body: '' });
       fetchTemplates();
     } catch (error) {
       console.error('Error creating template:', error);
@@ -280,6 +339,7 @@ export function ReminderEmailTemplates({ companyId, companyName, onUseTemplate }
         .insert({
           company_id: companyId,
           category: template.category,
+          subcategory: template.subcategory,
           name: newName,
           subject: template.subject,
           body: template.body,
@@ -321,14 +381,15 @@ export function ReminderEmailTemplates({ companyId, companyName, onUseTemplate }
     setExpandedCategories(newExpanded);
   };
 
-  // Group templates by category
-  const groupedTemplates = templates.reduce((acc, template) => {
-    if (!acc[template.category]) {
-      acc[template.category] = [];
+  const toggleSubcategory = (subcategory: string) => {
+    const newExpanded = new Set(expandedSubcategories);
+    if (newExpanded.has(subcategory)) {
+      newExpanded.delete(subcategory);
+    } else {
+      newExpanded.add(subcategory);
     }
-    acc[template.category].push(template);
-    return acc;
-  }, {} as Record<string, EmailTemplate[]>);
+    setExpandedSubcategories(newExpanded);
+  };
 
   const getCategoryLabel = useCallback((category: string) => {
     return REMINDER_CATEGORIES.find(c => c.value === category)?.label || category;
@@ -336,7 +397,7 @@ export function ReminderEmailTemplates({ companyId, companyName, onUseTemplate }
 
   // Trigger AI suggestions when category changes in create dialog
   const handleCategoryChange = useCallback((category: string) => {
-    setNewTemplate(prev => ({ ...prev, category }));
+    setNewTemplate(prev => ({ ...prev, category, subcategory: '' }));
     
     // Get existing templates in this category
     const existingInCategory = templates
@@ -392,6 +453,82 @@ export function ReminderEmailTemplates({ companyId, companyName, onUseTemplate }
     }
   }, [isCreating, clearSuggestions]);
 
+  // Render template card
+  const renderTemplateCard = (template: EmailTemplate) => (
+    <div 
+      key={template.id}
+      className="p-4 border rounded-lg bg-background hover:bg-muted/30 transition-colors"
+    >
+      <div className="flex items-start justify-between gap-2 mb-2">
+        <div>
+          <p className="font-medium text-sm">{template.name}</p>
+          {template.is_default && (
+            <Badge variant="secondary" className="text-xs mt-1">
+              Default
+            </Badge>
+          )}
+        </div>
+      </div>
+      <div className="mb-3">
+        <p className="text-xs text-muted-foreground">Subject</p>
+        <p className="text-sm truncate">{template.subject}</p>
+      </div>
+      <p className="text-xs text-muted-foreground line-clamp-2 mb-3">
+        {template.body.substring(0, 100)}...
+      </p>
+      <div className="flex gap-2 flex-wrap">
+        <Button 
+          variant="outline" 
+          size="sm"
+          onClick={() => setPreviewTemplate(template)}
+        >
+          <Eye className="h-3.5 w-3.5 mr-1" />
+          Preview
+        </Button>
+        <Button 
+          variant="outline" 
+          size="sm"
+          onClick={() => handleEditTemplate(template)}
+        >
+          <Edit className="h-3.5 w-3.5 mr-1" />
+          {template.is_default ? 'Customize' : 'Edit'}
+        </Button>
+        {onUseTemplate && (
+          <Button 
+            variant="default" 
+            size="sm"
+            onClick={() => onUseTemplate(template)}
+            className="bg-primary hover:bg-primary/90"
+          >
+            <Zap className="h-3.5 w-3.5 mr-1" />
+            Use in Rule
+          </Button>
+        )}
+        <Button 
+          variant="outline" 
+          size="sm"
+          onClick={() => handleDuplicateTemplate(template)}
+          disabled={saving}
+          title="Duplicate template"
+        >
+          <Files className="h-3.5 w-3.5 mr-1" />
+          Duplicate
+        </Button>
+        {!template.is_default && (
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={() => handleResetToDefault(template)}
+            className="text-muted-foreground"
+            title="Delete custom template"
+          >
+            <RotateCcw className="h-3.5 w-3.5" />
+          </Button>
+        )}
+      </div>
+    </div>
+  );
+
   if (loading) {
     return (
       <div className="space-y-4">
@@ -404,7 +541,7 @@ export function ReminderEmailTemplates({ companyId, companyName, onUseTemplate }
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h3 className="text-lg font-semibold">Email Templates</h3>
           <p className="text-sm text-muted-foreground">
@@ -415,6 +552,32 @@ export function ReminderEmailTemplates({ companyId, companyName, onUseTemplate }
           <Plus className="h-4 w-4" />
           Create Template
         </Button>
+      </div>
+
+      {/* Search and Filter Bar */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+        <div className="relative flex-1 max-w-sm">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input 
+            placeholder="Search templates..." 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-9"
+          />
+        </div>
+        <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+          <SelectTrigger className="w-[220px]">
+            <SelectValue placeholder="All Categories" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Categories</SelectItem>
+            {REMINDER_CATEGORIES.map(cat => (
+              <SelectItem key={cat.value} value={cat.value}>
+                {cat.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Placeholder Reference */}
@@ -477,88 +640,56 @@ export function ReminderEmailTemplates({ companyId, companyName, onUseTemplate }
               
               <CollapsibleContent>
                 <CardContent className="pt-0 pb-4">
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-                    {categoryTemplates.map(template => (
-                      <div 
-                        key={template.id}
-                        className="p-4 border rounded-lg bg-background hover:bg-muted/30 transition-colors"
-                      >
-                        <div className="flex items-start justify-between gap-2 mb-2">
-                          <div>
-                            <p className="font-medium text-sm">{template.name}</p>
-                            {template.is_default && (
-                              <Badge variant="secondary" className="text-xs mt-1">
-                                Default
-                              </Badge>
-                            )}
+                  {category === 'workforce' ? (
+                    // Workforce category with subcategories
+                    <div className="space-y-4">
+                      {Object.entries(getWorkforceSubcategoryGroups(categoryTemplates)).map(([subcategory, subTemplates]) => (
+                        <Collapsible
+                          key={subcategory}
+                          open={expandedSubcategories.has(subcategory)}
+                          onOpenChange={() => toggleSubcategory(subcategory)}
+                        >
+                          <div className="border rounded-lg">
+                            <CollapsibleTrigger className="w-full px-4 py-3 flex items-center justify-between hover:bg-muted/30 transition-colors">
+                              <div className="flex items-center gap-2">
+                                <span className="font-medium text-sm">{getSubcategoryLabel(subcategory)}</span>
+                                <Badge variant="outline" className="text-xs">
+                                  {subTemplates.length}
+                                </Badge>
+                              </div>
+                              {expandedSubcategories.has(subcategory) 
+                                ? <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                                : <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                              }
+                            </CollapsibleTrigger>
+                            <CollapsibleContent>
+                              <div className="px-4 pb-4 grid grid-cols-1 lg:grid-cols-2 gap-3">
+                                {subTemplates.map(template => renderTemplateCard(template))}
+                              </div>
+                            </CollapsibleContent>
                           </div>
-                        </div>
-                        <div className="mb-3">
-                          <p className="text-xs text-muted-foreground">Subject</p>
-                          <p className="text-sm truncate">{template.subject}</p>
-                        </div>
-                        <p className="text-xs text-muted-foreground line-clamp-2 mb-3">
-                          {template.body.substring(0, 100)}...
-                        </p>
-                        <div className="flex gap-2 flex-wrap">
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => setPreviewTemplate(template)}
-                          >
-                            <Eye className="h-3.5 w-3.5 mr-1" />
-                            Preview
-                          </Button>
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => handleEditTemplate(template)}
-                          >
-                            <Edit className="h-3.5 w-3.5 mr-1" />
-                            {template.is_default ? 'Customize' : 'Edit'}
-                          </Button>
-                          {onUseTemplate && (
-                            <Button 
-                              variant="default" 
-                              size="sm"
-                              onClick={() => onUseTemplate(template)}
-                              className="bg-primary hover:bg-primary/90"
-                            >
-                              <Zap className="h-3.5 w-3.5 mr-1" />
-                              Use in Rule
-                            </Button>
-                          )}
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => handleDuplicateTemplate(template)}
-                            disabled={saving}
-                            title="Duplicate template"
-                          >
-                            <Files className="h-3.5 w-3.5 mr-1" />
-                            Duplicate
-                          </Button>
-                          {!template.is_default && (
-                            <Button 
-                              variant="ghost" 
-                              size="sm"
-                              onClick={() => handleResetToDefault(template)}
-                              className="text-muted-foreground"
-                              title="Delete custom template"
-                            >
-                              <RotateCcw className="h-3.5 w-3.5" />
-                            </Button>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                        </Collapsible>
+                      ))}
+                    </div>
+                  ) : (
+                    // Other categories - flat list
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+                      {categoryTemplates.map(template => renderTemplateCard(template))}
+                    </div>
+                  )}
                 </CardContent>
               </CollapsibleContent>
             </Card>
           </Collapsible>
         ))}
       </div>
+
+      {filteredTemplates.length === 0 && (
+        <div className="text-center py-12 text-muted-foreground">
+          <Mail className="h-12 w-12 mx-auto mb-4 opacity-50" />
+          <p>No templates found matching your search.</p>
+        </div>
+      )}
 
       {/* Preview Dialog */}
       <Dialog open={!!previewTemplate} onOpenChange={() => setPreviewTemplate(null)}>
@@ -714,6 +845,28 @@ export function ReminderEmailTemplates({ companyId, companyName, onUseTemplate }
                 />
               </div>
             </div>
+
+            {/* Subcategory selector for workforce */}
+            {newTemplate.category === 'workforce' && (
+              <div>
+                <Label>Subcategory</Label>
+                <Select 
+                  value={newTemplate.subcategory}
+                  onValueChange={(value) => setNewTemplate({ ...newTemplate, subcategory: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select subcategory" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {WORKFORCE_SUBCATEGORIES.map(sub => (
+                      <SelectItem key={sub.value} value={sub.value}>
+                        {sub.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
 
             {/* AI Suggestions Section */}
             {newTemplate.category && (

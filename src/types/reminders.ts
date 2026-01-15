@@ -113,6 +113,23 @@ export type ReminderCategory =
   | 'milestone' 
   | 'custom';
 
+export type WorkforceSubcategory = 
+  | 'new_hire_onboarding'
+  | 'probation'
+  | 'acting_temporary'
+  | 'position_salary'
+  | 'separation_offboarding'
+  | 'other_workforce';
+
+export const WORKFORCE_SUBCATEGORIES: { value: WorkforceSubcategory; label: string }[] = [
+  { value: 'new_hire_onboarding', label: 'New Hire & Onboarding' },
+  { value: 'probation', label: 'Probation' },
+  { value: 'acting_temporary', label: 'Acting & Temporary Assignments' },
+  { value: 'position_salary', label: 'Position & Salary Changes' },
+  { value: 'separation_offboarding', label: 'Separation & Offboarding' },
+  { value: 'other_workforce', label: 'Other Workforce Events' },
+];
+
 export const REMINDER_CATEGORIES: { value: ReminderCategory; label: string }[] = [
   { value: 'custom', label: 'Custom' },
   { value: 'onboarding', label: 'Onboarding & Probation' },
