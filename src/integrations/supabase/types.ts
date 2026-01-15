@@ -73945,6 +73945,10 @@ export type Database = {
         Args: { p_request_id: string; p_user_id: string }
         Returns: boolean
       }
+      can_manage_template_phases: {
+        Args: { p_template_id: string; p_user_id: string }
+        Returns: boolean
+      }
       check_ai_budget: {
         Args: { p_user_id: string }
         Returns: {
