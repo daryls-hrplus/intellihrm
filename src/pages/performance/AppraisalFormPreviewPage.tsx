@@ -1,4 +1,5 @@
-import { useParams } from "react-router-dom";
+import { useState } from "react";
+import { useParams, useSearchParams } from "react-router-dom";
 import { useAppraisalTemplatePrintData } from "@/hooks/useAppraisalPrintData";
 import {
   AppraisalPrintLayout,
@@ -7,6 +8,8 @@ import {
   ScoreSummarySection,
   CommentsSection,
   SignatureSection,
+  ViewModeToggle,
+  type ViewMode,
 } from "@/components/performance/appraisal/print";
 import { Loader2, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -52,6 +55,10 @@ export default function AppraisalFormPreviewPage() {
     signatures,
   } = data;
 
+  const [searchParams] = useSearchParams();
+  const initialView = (searchParams.get("view") as ViewMode) || "hr";
+  const [viewMode, setViewMode] = useState<ViewMode>(initialView);
+
   return (
     <AppraisalPrintLayout
       title={`Preview: ${template.name}`}
@@ -71,6 +78,11 @@ export default function AppraisalFormPreviewPage() {
             appear.
           </AlertDescription>
         </Alert>
+      </div>
+
+      {/* View Mode Toggle */}
+      <div className="mb-6 no-print">
+        <ViewModeToggle value={viewMode} onChange={setViewMode} />
       </div>
 
       {/* Template Info Badges */}
@@ -94,14 +106,14 @@ export default function AppraisalFormPreviewPage() {
         templateVersion={template.version_number}
       />
 
-      {/* Appraisal Items Table */}
+      {/* Appraisal Items Table - New Card Layout */}
       {items.length > 0 ? (
         <AppraisalItemsTable
           items={items}
           minRating={template.min_rating}
           maxRating={template.max_rating}
-          showEmployeeRating={true}
-          showRequiredLevel={true}
+          viewMode={viewMode}
+          isPreview={true}
         />
       ) : (
         <div className="border rounded-lg p-8 text-center text-muted-foreground mb-6">

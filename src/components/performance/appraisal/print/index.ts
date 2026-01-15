@@ -4,3 +4,8 @@ export { AppraisalItemsTable, type AppraisalItem } from "./AppraisalItemsTable";
 export { ScoreSummarySection, type SectionScore } from "./ScoreSummarySection";
 export { CommentsSection } from "./CommentsSection";
 export { SignatureSection } from "./SignatureSection";
+export { RatingScaleLegend, getRatingDefinition, RatingLabel, RATING_SCALE_DEFINITIONS } from "./RatingScaleLegend";
+export { ViewModeToggle, getViewModeVisibility, type ViewMode } from "./ViewModeToggle";
+export { ItemLevelContext } from "./ItemLevelContext";
+export { ItemEvidence, SAMPLE_EVIDENCE, type EvidenceItem } from "./ItemEvidence";
+export { RatingDisplay, GapIndicator } from "./RatingDisplay";

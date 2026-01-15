@@ -1,6 +1,24 @@
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Target, BookOpen, Users, MessageSquare, Heart, Briefcase, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
+import { 
+  Target, 
+  BookOpen, 
+  Users, 
+  MessageSquare, 
+  Heart, 
+  Briefcase,
+  ChevronDown,
+  ChevronUp,
+} from "lucide-react";
+import { useState } from "react";
+import { cn } from "@/lib/utils";
+import { ItemLevelContext } from "./ItemLevelContext";
+import { ItemEvidence, EvidenceItem, SAMPLE_EVIDENCE } from "./ItemEvidence";
+import { RatingDisplay, GapIndicator } from "./RatingDisplay";
+import { RatingScaleLegend } from "./RatingScaleLegend";
+import { ViewMode, getViewModeVisibility } from "./ViewModeToggle";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 export interface AppraisalItem {
   id: string;
@@ -10,11 +28,18 @@ export interface AppraisalItem {
   description?: string;
   weight: number;
   requiredLevel?: number;
+  requiredLevelLabel?: string;
+  requiredLevelIndicators?: string[];
   employeeRating?: number;
+  employeeRatingLabel?: string;
   managerRating?: number;
+  managerRatingLabel?: string;
   gap?: number;
+  gapExplanation?: string;
   comments?: string;
   employeeComments?: string;
+  managerComments?: string;
+  evidence?: EvidenceItem[];
 }
 
 interface AppraisalItemsTableProps {
@@ -23,25 +48,233 @@ interface AppraisalItemsTableProps {
   maxRating?: number;
   showEmployeeRating?: boolean;
   showRequiredLevel?: boolean;
+  viewMode?: ViewMode;
+  isPreview?: boolean;
 }
 
 const typeIcons: Record<string, React.ReactNode> = {
-  goal: <Target className="h-3 w-3" />,
-  competency: <BookOpen className="h-3 w-3" />,
-  responsibility: <Briefcase className="h-3 w-3" />,
-  feedback_360: <MessageSquare className="h-3 w-3" />,
-  value: <Heart className="h-3 w-3" />,
-  custom: <Users className="h-3 w-3" />,
+  goal: <Target className="h-4 w-4" />,
+  competency: <BookOpen className="h-4 w-4" />,
+  responsibility: <Briefcase className="h-4 w-4" />,
+  feedback_360: <MessageSquare className="h-4 w-4" />,
+  value: <Heart className="h-4 w-4" />,
+  custom: <Users className="h-4 w-4" />,
 };
 
 const typeColors: Record<string, string> = {
-  goal: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300",
-  competency: "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300",
-  responsibility: "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-300",
-  feedback_360: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
-  value: "bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-300",
-  custom: "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300",
+  goal: "bg-blue-100 text-blue-800 border-blue-300 dark:bg-blue-900/30 dark:text-blue-300",
+  competency: "bg-purple-100 text-purple-800 border-purple-300 dark:bg-purple-900/30 dark:text-purple-300",
+  responsibility: "bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-900/30 dark:text-amber-300",
+  feedback_360: "bg-green-100 text-green-800 border-green-300 dark:bg-green-900/30 dark:text-green-300",
+  value: "bg-pink-100 text-pink-800 border-pink-300 dark:bg-pink-900/30 dark:text-pink-300",
+  custom: "bg-slate-100 text-slate-800 border-slate-300 dark:bg-slate-900/30 dark:text-slate-300",
 };
+
+function AppraisalItemCard({
+  item,
+  index,
+  minRating,
+  maxRating,
+  viewMode,
+  isPreview,
+}: {
+  item: AppraisalItem;
+  index: number;
+  minRating: number;
+  maxRating: number;
+  viewMode: ViewMode;
+  isPreview: boolean;
+}) {
+  const [isExpanded, setIsExpanded] = useState(true);
+  const visibility = getViewModeVisibility(viewMode);
+  
+  // Use sample evidence for preview, or actual evidence
+  const evidence = isPreview 
+    ? (index % 2 === 0 ? SAMPLE_EVIDENCE : []) 
+    : (item.evidence || []);
+
+  return (
+    <Card className="overflow-hidden print:break-inside-avoid">
+      <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
+        {/* Card Header */}
+        <CardHeader className="py-3 px-4 bg-muted/30">
+          <CollapsibleTrigger className="w-full">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-start gap-3">
+                <span className="text-lg font-semibold text-muted-foreground shrink-0">
+                  #{index + 1}
+                </span>
+                <Badge 
+                  variant="outline" 
+                  className={cn("gap-1.5 px-2 py-1 shrink-0", typeColors[item.type] || typeColors.custom)}
+                >
+                  {typeIcons[item.type] || typeIcons.custom}
+                  <span>{item.typeLabel}</span>
+                </Badge>
+                <div className="text-left">
+                  <h4 className="font-semibold text-base">{item.name}</h4>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 shrink-0">
+                <Badge variant="secondary" className="font-mono text-xs">
+                  Weight: {item.weight}%
+                </Badge>
+                {isExpanded ? (
+                  <ChevronUp className="h-4 w-4 text-muted-foreground" />
+                ) : (
+                  <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                )}
+              </div>
+            </div>
+          </CollapsibleTrigger>
+        </CardHeader>
+
+        <CollapsibleContent>
+          <CardContent className="p-4 space-y-4">
+            {/* Full Description */}
+            {item.description && (
+              <div className="space-y-1">
+                <h5 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                  Description
+                </h5>
+                <p className="text-sm leading-relaxed">{item.description}</p>
+              </div>
+            )}
+
+            <Separator />
+
+            {/* Required Level Context - Shows what the level means */}
+            <ItemLevelContext
+              requiredLevel={item.requiredLevel}
+              requiredLevelLabel={item.requiredLevelLabel}
+              requiredLevelIndicators={item.requiredLevelIndicators}
+              currentRating={
+                viewMode === "employee" 
+                  ? item.employeeRating 
+                  : item.managerRating
+              }
+              currentRatingLabel={
+                viewMode === "employee"
+                  ? item.employeeRatingLabel
+                  : item.managerRatingLabel
+              }
+              isEmployeeView={viewMode === "employee"}
+              showDevelopmentSuggestion={viewMode !== "employee"}
+            />
+
+            <Separator />
+
+            {/* Ratings Section */}
+            <div className="space-y-3">
+              <h5 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                Ratings
+              </h5>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {/* Required Level */}
+                <div className="p-3 rounded-lg bg-muted/30 border">
+                  <RatingDisplay
+                    rating={item.requiredLevel}
+                    maxRating={maxRating}
+                    minRating={minRating}
+                    label="Required Level"
+                    showDots={true}
+                    size="sm"
+                  />
+                </div>
+
+                {/* Self Assessment - visible to employee and HR */}
+                {visibility.showEmployeeRating && (
+                  <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+                    <RatingDisplay
+                      rating={item.employeeRating}
+                      maxRating={maxRating}
+                      minRating={minRating}
+                      label="Self Assessment"
+                      sublabel={item.employeeComments}
+                      showDots={true}
+                      size="sm"
+                    />
+                  </div>
+                )}
+
+                {/* Manager Assessment - visible to manager and HR */}
+                {visibility.showManagerRating && (
+                  <div className="p-3 rounded-lg bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800">
+                    <RatingDisplay
+                      rating={item.managerRating}
+                      maxRating={maxRating}
+                      minRating={minRating}
+                      label="Manager Assessment"
+                      sublabel={item.managerComments}
+                      showDots={true}
+                      size="sm"
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* Gap Analysis - shown to manager and HR */}
+              {visibility.showGapAnalysis && item.gap !== undefined && (
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/20 border">
+                  <span className="text-sm font-medium">Gap Analysis:</span>
+                  <GapIndicator gap={item.gap} size="md" showLabel={true} />
+                  {item.gapExplanation && (
+                    <span className="text-sm text-muted-foreground">
+                      — {item.gapExplanation}
+                    </span>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Comments Section */}
+            {(item.comments || item.employeeComments || item.managerComments) && (
+              <>
+                <Separator />
+                <div className="space-y-3">
+                  <h5 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                    Comments
+                  </h5>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {visibility.showEmployeeRating && item.employeeComments && (
+                      <div className="p-3 rounded-lg bg-blue-50/50 dark:bg-blue-900/10 border">
+                        <p className="text-xs font-medium text-blue-700 dark:text-blue-400 mb-1">
+                          Employee Comments
+                        </p>
+                        <p className="text-sm">{item.employeeComments}</p>
+                      </div>
+                    )}
+                    {visibility.showManagerComments && (item.managerComments || item.comments) && (
+                      <div className="p-3 rounded-lg bg-purple-50/50 dark:bg-purple-900/10 border">
+                        <p className="text-xs font-medium text-purple-700 dark:text-purple-400 mb-1">
+                          Manager Comments
+                        </p>
+                        <p className="text-sm">{item.managerComments || item.comments}</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* Evidence Section */}
+            {(evidence.length > 0 || viewMode === "employee") && (
+              <>
+                <Separator />
+                <ItemEvidence
+                  evidence={evidence}
+                  isEmployeeView={viewMode === "employee"}
+                  isPreview={isPreview}
+                />
+              </>
+            )}
+          </CardContent>
+        </CollapsibleContent>
+      </Collapsible>
+    </Card>
+  );
+}
 
 export function AppraisalItemsTable({
   items,
@@ -49,43 +282,10 @@ export function AppraisalItemsTable({
   maxRating = 5,
   showEmployeeRating = true,
   showRequiredLevel = true,
+  viewMode = "hr",
+  isPreview = false,
 }: AppraisalItemsTableProps) {
-  const getRatingColor = (rating: number | undefined) => {
-    if (!rating) return "text-muted-foreground";
-    const percentage = (rating - minRating) / (maxRating - minRating);
-    if (percentage >= 0.8) return "text-green-600 dark:text-green-400";
-    if (percentage >= 0.6) return "text-blue-600 dark:text-blue-400";
-    if (percentage >= 0.4) return "text-amber-600 dark:text-amber-400";
-    return "text-red-600 dark:text-red-400";
-  };
-
-  const getGapIndicator = (gap: number | undefined) => {
-    if (gap === undefined || gap === null) return null;
-    if (gap > 0) {
-      return (
-        <span className="inline-flex items-center gap-0.5 text-green-600 dark:text-green-400">
-          <TrendingUp className="h-3 w-3" />
-          <span className="text-xs">+{gap}</span>
-        </span>
-      );
-    }
-    if (gap < 0) {
-      return (
-        <span className="inline-flex items-center gap-0.5 text-red-600 dark:text-red-400">
-          <TrendingDown className="h-3 w-3" />
-          <span className="text-xs">{gap}</span>
-        </span>
-      );
-    }
-    return (
-      <span className="inline-flex items-center gap-0.5 text-muted-foreground">
-        <Minus className="h-3 w-3" />
-        <span className="text-xs">0</span>
-      </span>
-    );
-  };
-
-  // Group items by type for print sections
+  // Group items by type for organized display
   const groupedItems = items.reduce((acc, item) => {
     if (!acc[item.type]) acc[item.type] = [];
     acc[item.type].push(item);
@@ -99,120 +299,74 @@ export function AppraisalItemsTable({
 
   let itemNumber = 0;
 
+  if (items.length === 0) {
+    return (
+      <Card className="mb-6">
+        <CardContent className="py-12 text-center text-muted-foreground">
+          <BookOpen className="h-12 w-12 mx-auto mb-4 opacity-50" />
+          <p className="font-medium">No appraisal items configured</p>
+          <p className="text-sm mt-1">
+            Add sections to the template to see items appear here.
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
-    <div className="appraisal-items-table mb-6">
-      <div className="bg-muted/30 px-4 py-3 border border-b-0 rounded-t-lg">
-        <h3 className="font-semibold">Appraisal Items</h3>
-        <p className="text-xs text-muted-foreground mt-1">
-          Rating Scale: {minRating} (Lowest) - {maxRating} (Highest)
-        </p>
+    <div className="appraisal-items-section space-y-6 mb-6">
+      {/* Section Header with Rating Legend */}
+      <div className="flex items-center justify-between flex-wrap gap-4">
+        <div>
+          <h3 className="text-lg font-semibold">Appraisal Items</h3>
+          <p className="text-sm text-muted-foreground">
+            {items.length} items across {sortedTypes.length} categories
+          </p>
+        </div>
+        <RatingScaleLegend minRating={minRating} maxRating={maxRating} />
       </div>
 
-      <div className="border rounded-b-lg overflow-hidden">
-        <Table className="print-table">
-          <TableHeader>
-            <TableRow className="bg-muted/20">
-              <TableHead className="w-8 text-xs">#</TableHead>
-              <TableHead className="w-20 text-xs">Type</TableHead>
-              <TableHead className="text-xs">Item</TableHead>
-              <TableHead className="w-14 text-center text-xs">Wt%</TableHead>
-              {showRequiredLevel && (
-                <TableHead className="w-14 text-center text-xs">Req'd</TableHead>
-              )}
-              {showEmployeeRating && (
-                <TableHead className="w-14 text-center text-xs">Self</TableHead>
-              )}
-              <TableHead className="w-14 text-center text-xs">Mgr</TableHead>
-              {showRequiredLevel && (
-                <TableHead className="w-14 text-center text-xs">Gap</TableHead>
-              )}
-              <TableHead className="w-32 text-xs">Comments</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {items.length === 0 ? (
-              <TableRow>
-                <TableCell
-                  colSpan={showEmployeeRating && showRequiredLevel ? 9 : 7}
-                  className="text-center text-muted-foreground py-8"
-                >
-                  No appraisal items configured for this template
-                </TableCell>
-              </TableRow>
-            ) : (
-              sortedTypes.map((type) =>
-                groupedItems[type].map((item, index) => {
-                  itemNumber++;
-                  const isFirstOfType = index === 0;
-                  return (
-                    <TableRow
-                      key={item.id}
-                      className={isFirstOfType ? "border-t-2 border-muted" : ""}
-                    >
-                      <TableCell className="text-muted-foreground text-xs py-2">
-                        {itemNumber}
-                      </TableCell>
-                      <TableCell className="py-2">
-                        <Badge
-                          variant="secondary"
-                          className={`text-[10px] gap-0.5 px-1.5 py-0.5 ${typeColors[item.type] || typeColors.custom}`}
-                        >
-                          {typeIcons[item.type] || typeIcons.custom}
-                          <span className="hidden sm:inline">{item.typeLabel}</span>
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="py-2">
-                        <div className="space-y-0.5">
-                          <p className="font-medium text-sm leading-tight">{item.name}</p>
-                          {item.description && (
-                            <p className="text-xs text-muted-foreground leading-tight line-clamp-2 print:line-clamp-none">
-                              {item.description}
-                            </p>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-center font-medium text-xs py-2">
-                        {item.weight}%
-                      </TableCell>
-                      {showRequiredLevel && (
-                        <TableCell className="text-center text-xs py-2 font-medium text-muted-foreground">
-                          {item.requiredLevel ?? "—"}
-                        </TableCell>
-                      )}
-                      {showEmployeeRating && (
-                        <TableCell
-                          className={`text-center font-semibold text-xs py-2 ${getRatingColor(item.employeeRating)}`}
-                        >
-                          {item.employeeRating ?? "—"}
-                        </TableCell>
-                      )}
-                      <TableCell
-                        className={`text-center font-semibold text-xs py-2 ${getRatingColor(item.managerRating)}`}
-                      >
-                        {item.managerRating ?? "—"}
-                      </TableCell>
-                      {showRequiredLevel && (
-                        <TableCell className="text-center py-2">
-                          {getGapIndicator(item.gap)}
-                        </TableCell>
-                      )}
-                      <TableCell className="py-2">
-                        {item.comments ? (
-                          <p className="text-xs text-muted-foreground line-clamp-2 print:line-clamp-none">
-                            {item.comments}
-                          </p>
-                        ) : (
-                          <span className="text-muted-foreground text-xs">—</span>
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  );
-                })
-              )
-            )}
-          </TableBody>
-        </Table>
-      </div>
+      {/* Items grouped by type */}
+      {sortedTypes.map((type) => {
+        const typeItems = groupedItems[type];
+        const firstItem = typeItems[0];
+        
+        return (
+          <div key={type} className="space-y-4">
+            {/* Type Section Header */}
+            <div className="flex items-center gap-3 pt-4 border-t">
+              <Badge 
+                variant="outline" 
+                className={cn("gap-1.5 px-3 py-1.5 text-sm", typeColors[type] || typeColors.custom)}
+              >
+                {typeIcons[type] || typeIcons.custom}
+                <span>{firstItem.typeLabel}</span>
+              </Badge>
+              <span className="text-sm text-muted-foreground">
+                {typeItems.length} {typeItems.length === 1 ? "item" : "items"}
+              </span>
+            </div>
+
+            {/* Items in this type */}
+            <div className="space-y-4 pl-0 md:pl-4">
+              {typeItems.map((item) => {
+                itemNumber++;
+                return (
+                  <AppraisalItemCard
+                    key={item.id}
+                    item={item}
+                    index={itemNumber - 1}
+                    minRating={minRating}
+                    maxRating={maxRating}
+                    viewMode={viewMode}
+                    isPreview={isPreview}
+                  />
+                );
+              })}
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }

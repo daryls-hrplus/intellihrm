@@ -375,6 +375,7 @@ export function useAppraisalTemplatePrintData(templateId: string | undefined) {
         performancePeriodStart: performanceYearStart.toISOString(),
         performancePeriodEnd: performanceYearEnd.toISOString(),
         status: "Draft (Preview)",
+        isPreview: true,
       };
 
       return {
