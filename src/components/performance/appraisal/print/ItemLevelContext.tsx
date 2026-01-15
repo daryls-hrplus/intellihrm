@@ -79,9 +79,9 @@ export function ItemLevelContext({
     if (gap > 0) {
       return {
         icon: TrendingUp,
-        color: "text-green-600 dark:text-green-400",
-        bgColor: "bg-green-50 dark:bg-green-900/20",
-        borderColor: "border-green-200 dark:border-green-800",
+        color: "text-green-700 dark:text-green-400",
+        bgColor: "bg-white",
+        borderColor: "border-l-4 border-l-green-500 border-green-200",
         message: gap === 1 
           ? "Performing above the required level. Ready for additional challenges."
           : `Performing ${gap} levels above requirement. Strong candidate for advancement.`,
@@ -91,9 +91,9 @@ export function ItemLevelContext({
       const absGap = Math.abs(gap);
       return {
         icon: TrendingDown,
-        color: "text-amber-600 dark:text-amber-400",
-        bgColor: "bg-amber-50 dark:bg-amber-900/20",
-        borderColor: "border-amber-200 dark:border-amber-800",
+        color: "text-amber-700 dark:text-amber-400",
+        bgColor: "bg-white",
+        borderColor: "border-l-4 border-l-amber-500 border-amber-200",
         message: absGap === 1
           ? "Currently performing below the required level."
           : `Performing ${absGap} levels below requirement. Development is a priority.`,
@@ -104,9 +104,9 @@ export function ItemLevelContext({
     } else {
       return {
         icon: CheckCircle,
-        color: "text-blue-600 dark:text-blue-400",
-        bgColor: "bg-blue-50 dark:bg-blue-900/20",
-        borderColor: "border-blue-200 dark:border-blue-800",
+        color: "text-blue-700 dark:text-blue-400",
+        bgColor: "bg-white",
+        borderColor: "border-l-4 border-l-blue-500 border-blue-200",
         message: "Performing at the level required for this role.",
         suggestion: "Continue reinforcing current capabilities.",
       };
@@ -118,15 +118,15 @@ export function ItemLevelContext({
   return (
     <div className={cn("space-y-3", className)}>
       {/* Required Level Section */}
-      <Card className="p-4 bg-muted/30 border-muted">
+      <Card className="p-4 bg-white border-l-4 border-l-primary border shadow-sm">
         <div className="flex items-start gap-3">
           <div className="rounded-full bg-primary/10 p-2 shrink-0">
             <Target className="h-4 w-4 text-primary" />
           </div>
           <div className="flex-1 space-y-2">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-sm font-semibold">Required Level:</span>
-              <Badge variant="outline" className="font-medium">
+              <span className="text-sm font-semibold text-foreground">Required Level:</span>
+              <Badge variant="outline" className="font-medium border-primary text-primary">
                 Level {requiredLevel} - {levelName}
               </Badge>
             </div>
@@ -138,7 +138,7 @@ export function ItemLevelContext({
             {indicators.length > 0 && (
               <ul className="space-y-1 mt-2">
                 {indicators.map((indicator, i) => (
-                  <li key={i} className="flex items-start gap-2 text-sm">
+                  <li key={i} className="flex items-start gap-2 text-sm text-foreground">
                     <span className="text-primary shrink-0 mt-0.5">•</span>
                     <span>{indicator}</span>
                   </li>
@@ -152,20 +152,20 @@ export function ItemLevelContext({
       {/* Rating Context Section */}
       {currentRating !== undefined && gapInfo && (
         <Card className={cn(
-          "p-4 border",
+          "p-4 shadow-sm",
           gapInfo.bgColor,
           gapInfo.borderColor
         )}>
           <div className="flex items-start gap-3">
-            <div className={cn("rounded-full p-2 shrink-0", gapInfo.bgColor)}>
+            <div className="rounded-full bg-muted p-2 shrink-0">
               <gapInfo.icon className={cn("h-4 w-4", gapInfo.color)} />
             </div>
             <div className="flex-1 space-y-2">
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-sm font-semibold">
+                <span className="text-sm font-semibold text-foreground">
                   {isEmployeeView ? "Your Rating:" : "Rating Given:"}
                 </span>
-                <Badge className={cn("font-medium", ratingDef?.color)}>
+                <Badge variant="outline" className="font-medium">
                   {ratingDef?.icon} Level {currentRating} - {currentRatingLabel || ratingDef?.label}
                 </Badge>
                 {gap !== undefined && (
@@ -173,9 +173,9 @@ export function ItemLevelContext({
                     variant="outline" 
                     className={cn(
                       "font-mono text-xs",
-                      gap > 0 ? "text-green-600 border-green-600" :
-                      gap < 0 ? "text-amber-600 border-amber-600" :
-                      "text-blue-600 border-blue-600"
+                      gap > 0 ? "text-green-700 border-green-500" :
+                      gap < 0 ? "text-amber-700 border-amber-500" :
+                      "text-blue-700 border-blue-500"
                     )}
                   >
                     {gap > 0 ? `+${gap}` : gap === 0 ? "0" : gap} vs Required
@@ -188,7 +188,7 @@ export function ItemLevelContext({
               </p>
 
               {showDevelopmentSuggestion && gapInfo.suggestion && (
-                <div className="flex items-start gap-2 mt-2 pt-2 border-t border-current/10">
+                <div className="flex items-start gap-2 mt-2 pt-2 border-t">
                   <Lightbulb className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
                   <p className="text-sm text-muted-foreground">
                     {gapInfo.suggestion}
