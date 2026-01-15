@@ -34,6 +34,7 @@ const ClientProvisioningGuidePage = lazy(() => import('@/pages/enablement/Client
 const ClientProvisioningTestingPage = lazy(() => import('@/pages/enablement/ClientProvisioningTestingPage'));
 const ManualPublishingPage = lazy(() => import('@/pages/enablement/ManualPublishingPage'));
 const ContentLifecyclePage = lazy(() => import('@/pages/enablement/ContentLifecyclePage'));
+const RouteRegistryPage = lazy(() => import('@/pages/enablement/RouteRegistryPage'));
 
 // Wrapper for enablement routes with guards
 function EnablementRoute({ children }: { children: React.ReactNode }) {
@@ -80,6 +81,7 @@ export function EnablementRoutes() {
       <Route path="/enablement/client-provisioning/testing" element={<EnablementRoute><ClientProvisioningTestingPage /></EnablementRoute>} />
       <Route path="/enablement/manual-publishing" element={<EnablementRoute><ManualPublishingPage /></EnablementRoute>} />
       <Route path="/enablement/content-lifecycle" element={<EnablementRoute><ContentLifecyclePage /></EnablementRoute>} />
+      <Route path="/enablement/route-registry" element={<EnablementRoute><RouteRegistryPage /></EnablementRoute>} />
     </>
   );
 }
