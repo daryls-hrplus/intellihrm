@@ -2,7 +2,8 @@ import { useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useRouteResolver } from "./useRouteResolver";
 import { useHandbookTasks } from "./useHandbookTasks";
-import { PHASE_STEP_MAPPINGS } from "@/data/implementationMappings";
+// Note: We now use dbTasks from useHandbookTasks as the primary source
+// PHASE_STEP_MAPPINGS is only used as fallback when database is empty
 
 export interface ValidationIssue {
   type: 'missing_feature_code' | 'invalid_route' | 'orphan_route' | 'unsynced_feature' | 'route_mismatch';
@@ -49,7 +50,7 @@ export function useRouteValidation() {
     isLoaded: routerLoaded 
   } = useRouteResolver();
   
-  const { tasks: dbTasks, isUsingDatabase } = useHandbookTasks();
+  const { tasks: dbTasks, isUsingDatabase, dataSource } = useHandbookTasks();
 
   /**
    * Run full validation of routes
@@ -61,18 +62,24 @@ export function useRouteValidation() {
     const runId = crypto.randomUUID();
     
     try {
-      // Get all implementation tasks (from hardcoded source for comparison)
-      const allTasks: Array<{ phaseId: string; stepOrder: number; area: string; adminRoute?: string }> = [];
-      Object.entries(PHASE_STEP_MAPPINGS).forEach(([phaseId, mappings]) => {
-        mappings.forEach(mapping => {
-          allTasks.push({
-            phaseId,
-            stepOrder: mapping.order,
-            area: mapping.area,
-            adminRoute: mapping.adminRoute
-          });
+      // Use database tasks as source of truth (falls back to hardcoded if empty)
+      const allTasks = dbTasks.map(task => ({
+        phaseId: task.phase_id,
+        stepOrder: task.step_order,
+        area: task.area,
+        adminRoute: task.admin_route || undefined,
+        featureCode: task.feature_code || undefined
+      }));
+
+      // Add info issue if using legacy fallback
+      if (!isUsingDatabase) {
+        issues.push({
+          type: 'missing_feature_code',
+          severity: 'warning',
+          message: 'Validation running on legacy hardcoded data. Database may be empty.',
+          details: {}
         });
-      });
+      }
 
       let tasksWithFeatureCode = 0;
       let tasksWithLegacyRoute = 0;
@@ -81,15 +88,11 @@ export function useRouteValidation() {
 
       // Check each task
       for (const task of allTasks) {
-        // Check if task has been migrated to use feature_code
-        const dbTask = dbTasks.find(t => 
-          t.phase_id === task.phaseId && t.step_order === task.stepOrder
-        );
-
-        if (dbTask?.feature_code) {
+        // Check if task has feature_code (preferred) or legacy adminRoute
+        if (task.featureCode) {
           tasksWithFeatureCode++;
           // Validate the feature code resolves to a valid route
-          const resolution = resolveByFeatureCode(dbTask.feature_code);
+          const resolution = resolveByFeatureCode(task.featureCode);
           if (resolution.isValid) {
             validRoutes++;
           } else {
@@ -97,12 +100,12 @@ export function useRouteValidation() {
             issues.push({
               type: 'invalid_route',
               severity: 'error',
-              message: `Feature code "${dbTask.feature_code}" does not resolve to a valid route`,
+              message: `Feature code "${task.featureCode}" does not resolve to a valid route`,
               details: {
                 phaseId: task.phaseId,
                 stepOrder: task.stepOrder,
                 area: task.area,
-                featureCode: dbTask.feature_code
+                featureCode: task.featureCode
               }
             });
           }
@@ -215,38 +218,34 @@ export function useRouteValidation() {
     } finally {
       setIsValidating(false);
     }
-  }, [dbTasks, resolveByFeatureCode, resolveByLegacyRoute, getUnsyncedRoutes]);
+  }, [dbTasks, isUsingDatabase, resolveByFeatureCode, resolveByLegacyRoute, getUnsyncedRoutes]);
 
   /**
    * Get quick health check without full validation
+   * Now uses dbTasks as the source of truth
    */
   const getQuickHealth = useCallback(() => {
     const dbRoutes = getAllDbRoutes();
     const unsyncedRoutes = getUnsyncedRoutes();
     
-    // Count tasks with feature codes
-    let tasksWithFeatureCode = 0;
-    let totalTasks = 0;
-    
-    Object.values(PHASE_STEP_MAPPINGS).forEach(mappings => {
-      totalTasks += mappings.length;
-    });
-    
-    dbTasks.forEach(task => {
-      if (task.feature_code) tasksWithFeatureCode++;
-    });
+    // Count from database tasks (SSOT)
+    const totalTasks = dbTasks.length;
+    const tasksWithFeatureCode = dbTasks.filter(t => t.feature_code).length;
+    const tasksWithLegacyRoute = dbTasks.filter(t => !t.feature_code && t.admin_route).length;
 
     return {
       totalDbRoutes: dbRoutes.length,
       unsyncedCount: unsyncedRoutes.length,
       totalTasks,
       tasksWithFeatureCode,
+      tasksWithLegacyRoute,
+      dataSource,
       migrationProgress: totalTasks > 0 
         ? Math.round((tasksWithFeatureCode / totalTasks) * 100)
         : 0,
-      isHealthy: unsyncedRoutes.length === 0 && tasksWithFeatureCode === totalTasks
+      isHealthy: unsyncedRoutes.length === 0 && tasksWithFeatureCode === totalTasks && isUsingDatabase
     };
-  }, [getAllDbRoutes, getUnsyncedRoutes, dbTasks]);
+  }, [getAllDbRoutes, getUnsyncedRoutes, dbTasks, dataSource, isUsingDatabase]);
 
   return {
     runValidation,
