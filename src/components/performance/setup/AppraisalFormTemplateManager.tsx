@@ -16,7 +16,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAppraisalFormTemplates, AppraisalFormTemplate, CreateTemplateInput, validateWeights } from "@/hooks/useAppraisalFormTemplates";
 import { useAppraisalTemplateSections } from "@/hooks/useAppraisalTemplateSections";
-import { useAppraisalTemplatePhases } from "@/hooks/useAppraisalTemplatePhases";
+import { useAppraisalTemplatePhases, validatePhaseTimeline } from "@/hooks/useAppraisalTemplatePhases";
+import { toast } from "sonner";
 import { TemplateSectionConfigPanel } from "./TemplateSectionConfigPanel";
 import { AppraisalPhaseTimeline } from "./AppraisalPhaseTimeline";
 import { AppraisalFormTemplatePreview } from "./AppraisalFormTemplatePreview";
@@ -310,6 +311,16 @@ export function AppraisalFormTemplateManager({ companyId, companyName }: Props) 
 
   const handleSubmit = async () => {
     if (useLegacySections && !weightValidation.valid) return;
+
+    // Phase ordering validation (for existing templates with phases)
+    if (editingTemplate && phases.length > 0) {
+      const phaseValidation = validatePhaseTimeline(phases);
+      if (!phaseValidation.valid) {
+        toast.error(phaseValidation.issues[0]);
+        setWizardStep(2); // Navigate to Phases tab
+        return;
+      }
+    }
 
     try {
       if (editingTemplate) {
