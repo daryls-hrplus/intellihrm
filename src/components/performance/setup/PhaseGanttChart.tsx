@@ -77,47 +77,22 @@ export function PhaseGanttChart({
   sampleStartDate,
   onPhaseClick,
 }: PhaseGanttChartProps) {
-  // Sort phases by start offset for proper rendering
+  // Sort phases by display_order to respect user's saved sequence
   const sortedPhases = useMemo(() => {
-    return [...phases].sort((a, b) => a.start_offset_days - b.start_offset_days);
+    return [...phases].sort((a, b) => a.display_order - b.display_order);
   }, [phases]);
 
-  // Detect overlapping phases and assign rows
+  // Assign rows based on display order - each phase gets its own row
   const phaseRows = useMemo(() => {
-    const rows: { phase: PhaseWithDates; row: number }[] = [];
-    const occupiedRanges: { start: number; end: number }[][] = [];
-
-    for (const phase of sortedPhases) {
-      const phaseStart = phase.start_offset_days;
-      const phaseEnd = phaseStart + phase.duration_days;
-      
-      // Find the first row where this phase doesn't overlap
-      let assignedRow = 0;
-      for (let row = 0; row < occupiedRanges.length + 1; row++) {
-        if (!occupiedRanges[row]) {
-          occupiedRanges[row] = [];
-        }
-        
-        const overlaps = occupiedRanges[row].some(
-          range => !(phaseEnd <= range.start || phaseStart >= range.end)
-        );
-        
-        if (!overlaps) {
-          assignedRow = row;
-          occupiedRanges[row].push({ start: phaseStart, end: phaseEnd });
-          break;
-        }
-      }
-      
-      rows.push({ phase, row: assignedRow });
-    }
-    
-    return rows;
+    return sortedPhases.map((phase, index) => ({
+      phase,
+      row: index,
+    }));
   }, [sortedPhases]);
 
   const maxRow = useMemo(() => {
-    return Math.max(0, ...phaseRows.map(r => r.row));
-  }, [phaseRows]);
+    return Math.max(0, sortedPhases.length - 1);
+  }, [sortedPhases]);
 
   // Generate time scale markers
   const timeMarkers = useMemo(() => {
