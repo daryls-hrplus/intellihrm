@@ -358,7 +358,9 @@ export function formatPhaseDuration(days: number): string {
   if (days === 1) return "1 day";
   if (days < 7) return `${days} days`;
   if (days === 7) return "1 week";
-  if (days < 30) return `${Math.round(days / 7)} weeks`;
+  const weeks = Math.round(days / 7);
+  if (days < 30) return weeks === 1 ? "1 week" : `${weeks} weeks`;
   if (days === 30) return "1 month";
-  return `${Math.round(days / 30)} months`;
+  const months = Math.round(days / 30);
+  return months === 1 ? "1 month" : `${months} months`;
 }
