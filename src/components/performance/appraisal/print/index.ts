@@ -10,3 +10,8 @@ export { ViewModeToggle, getViewModeVisibility, type ViewMode } from "./ViewMode
 export { ItemLevelContext } from "./ItemLevelContext";
 export { ItemEvidence, SAMPLE_EVIDENCE, type EvidenceItem } from "./ItemEvidence";
 export { RatingDisplay, GapIndicator } from "./RatingDisplay";
+export { RatingIcon, RatingDot, PrintRatingBadge, getRatingIcon, RATING_ICONS } from "./PrintSafeRatingIcons";
+export { ExecutiveSummary } from "./ExecutiveSummary";
+export { DevelopmentPlanSection, type DevelopmentAction } from "./DevelopmentPlanSection";
+export { NextStepsSection, type ActionItem } from "./NextStepsSection";
+export { CompactAppraisalTable } from "./CompactAppraisalTable";
