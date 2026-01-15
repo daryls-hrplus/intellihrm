@@ -339,6 +339,17 @@ export function AppraisalPrintLayout({
             page-break-after: auto;
           }
           
+          /* Each appraisal item on its own page */
+          .appraisal-item-card-wrapper {
+            page-break-inside: avoid;
+            page-break-after: always;
+          }
+          
+          /* Last item should not force a page break after */
+          .appraisal-item-card-wrapper:last-child {
+            page-break-after: auto;
+          }
+          
           .page-break {
             page-break-before: always;
           }

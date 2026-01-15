@@ -103,7 +103,8 @@ function AppraisalItemCard({
     : (item.evidence || []);
 
   return (
-    <Card className={cn("overflow-hidden print:break-inside-avoid bg-white shadow-sm", typeColors[item.type] || typeColors.custom)}>
+    <div className="appraisal-item-card-wrapper print:break-inside-avoid print:break-after-page print:mb-0 mb-4">
+      <Card className={cn("overflow-hidden bg-white shadow-sm", typeColors[item.type] || typeColors.custom)}>
       <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
         {/* Card Header */}
         <CardHeader className="py-3 px-4 bg-muted/20">
@@ -282,6 +283,7 @@ function AppraisalItemCard({
         </CollapsibleContent>
       </Collapsible>
     </Card>
+    </div>
   );
 }
 
