@@ -445,7 +445,7 @@ export const subTaskDefinitions: Record<string, Record<number, SubTaskDefinition
       { order: 5, name: "Configure manager comments section", isRequired: true },
       { order: 6, name: "Link rating levels to form template for scoring", isRequired: true },
     ],
-    9: [ // Action Rules Configuration
+    9: [ // Appraisal Outcome Rules
       { order: 1, name: "Define rating-triggered actions", isRequired: false },
       { order: 2, name: "Configure automatic actions by eligibility flags (promotion, succession, bonus)", isRequired: false },
       { order: 3, name: "Configure PIP auto-trigger based on requires_pip flag", isRequired: false },
@@ -457,7 +457,7 @@ export const subTaskDefinitions: Record<string, Record<number, SubTaskDefinition
       { order: 2, name: "Configure acknowledgment requirements", isRequired: false },
       { order: 3, name: "Set response deadlines", isRequired: false },
     ],
-    11: [ // HR Escalation Settings
+    11: [ // HR Escalation Management
       { order: 1, name: "Define escalation triggers", isRequired: false },
       { order: 2, name: "Configure escalation workflow", isRequired: false },
     ],

@@ -203,9 +203,9 @@ const phases: Phase[] = [
       // 6B: Appraisal Configuration (Company)
       { order: 7, area: "Rating Levels Setup", description: "Configure score thresholds, eligibility flags, and color coding for rating levels" },
       { order: 8, area: "Appraisal Form Templates", description: "Design review forms with sections and weightings" },
-      { order: 9, area: "Action Rules Configuration", description: "Configure automatic actions based on ratings" },
+      { order: 9, area: "Appraisal Outcome Rules", description: "Configure rating-triggered actions for PIP, succession, and compensation" },
       { order: 10, area: "Employee Response Configuration", description: "Set up self-assessment and acknowledgment rules" },
-      { order: 11, area: "HR Escalation Settings", description: "Configure escalation triggers and workflows" },
+      { order: 11, area: "HR Escalation Management", description: "Configure escalation triggers and workflows" },
       { order: 12, area: "Benchmarks (Distribution Targets)", description: "Set rating distribution guidelines (bell curve)" },
       // 6C: Goals & Feedback (Company)
       { order: 13, area: "Goal Cycles Configuration", description: "Create goal cycles with dates and deadlines" },
