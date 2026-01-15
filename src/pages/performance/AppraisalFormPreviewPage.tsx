@@ -9,6 +9,7 @@ import {
   CommentsSection,
   SignatureSection,
   ViewModeToggle,
+  RatingScaleLegendCompact,
   type ViewMode,
 } from "@/components/performance/appraisal/print";
 import { Loader2, AlertCircle } from "lucide-react";
@@ -104,6 +105,15 @@ export default function AppraisalFormPreviewPage() {
         companyLogo={company.logo_url || undefined}
         templateCode={template.code}
         templateVersion={template.version_number}
+        compact
+      />
+
+      {/* Sticky Rating Scale Legend - Always visible for context */}
+      <RatingScaleLegendCompact
+        minRating={template.min_rating}
+        maxRating={template.max_rating}
+        sticky
+        className="mb-4 rounded-lg border shadow-sm"
       />
 
       {/* Appraisal Items Table - New Card Layout */}
