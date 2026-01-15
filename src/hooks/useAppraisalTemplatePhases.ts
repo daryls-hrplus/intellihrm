@@ -223,6 +223,21 @@ export function validatePhaseTimeline(phases: AppraisalTemplatePhase[]): {
       }
     }
   }
+
+  // Check HR Review phase ordering (must be after Calibration, before Finalization)
+  const hrReviewPhase = phases.find(p => p.phase_type === 'hr_review');
+  if (hrReviewPhase) {
+    const calibrationPhase = phases.find(p => p.phase_type === 'calibration');
+    const finalizationPhase = phases.find(p => p.phase_type === 'finalization');
+    
+    if (calibrationPhase && hrReviewPhase.display_order <= calibrationPhase.display_order) {
+      issues.push('HR Review must come after Calibration in the workflow');
+    }
+    
+    if (finalizationPhase && hrReviewPhase.display_order >= finalizationPhase.display_order) {
+      issues.push('HR Review must come before Finalization in the workflow');
+    }
+  }
   
   return {
     valid: issues.length === 0,
