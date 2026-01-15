@@ -23,7 +23,7 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
-import type { StepMapping } from "@/data/implementationMappings";
+import type { StepMapping } from "@/types/implementation";
 import type { StepProgress } from "@/hooks/useStepProgress";
 import { SubTaskList } from "./SubTaskList";
 import { getSubTasksForStep } from "@/data/subTaskDefinitions";

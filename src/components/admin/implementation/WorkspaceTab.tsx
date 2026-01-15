@@ -2,11 +2,12 @@ import { useState } from "react";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { CheckCircle2, Clock } from "lucide-react";
+import { CheckCircle2, Clock, Database, FileCode } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { StepCard } from "./StepCard";
 import { ImportDrawer } from "./ImportDrawer";
 import { useStepProgress } from "@/hooks/useStepProgress";
-import { getStepMapping, getPhaseEstimatedTime, getRequiredStepsCount } from "@/data/implementationMappings";
+import { useImplementationTaskStats } from "@/hooks/useHandbookTasks";
 
 interface PhaseItem {
   order: number;
@@ -46,6 +47,15 @@ export function WorkspaceTab({ phases, activePhase, onPhaseChange, selectedCompa
     companyId
   } = useStepProgress(undefined, selectedCompanyId);
 
+  // Use database-backed task stats (SSOT)
+  const { 
+    dataSource, 
+    isUsingDatabase, 
+    getPhaseEstimatedTime, 
+    getRequiredStepsCount,
+    getStepMapping 
+  } = useImplementationTaskStats();
+
   const currentPhase = phases.find(p => p.id === activePhase);
   
   const phasesWithItemCount = phases.map(p => ({ id: p.id, itemCount: p.items.length }));
@@ -75,6 +85,37 @@ export function WorkspaceTab({ phases, activePhase, onPhaseChange, selectedCompa
     <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
       {/* Phase Navigation with Progress */}
       <div className="lg:col-span-1 space-y-4">
+        {/* Data Source Indicator */}
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className={`flex items-center gap-2 p-2 rounded-md text-xs ${
+              isUsingDatabase 
+                ? 'bg-green-500/10 text-green-600 border border-green-500/20' 
+                : 'bg-amber-500/10 text-amber-600 border border-amber-500/20'
+            }`}>
+              {isUsingDatabase ? (
+                <>
+                  <Database className="h-3 w-3" />
+                  <span>Database (SSOT)</span>
+                </>
+              ) : (
+                <>
+                  <FileCode className="h-3 w-3" />
+                  <span>Legacy Fallback</span>
+                </>
+              )}
+            </div>
+          </TooltipTrigger>
+          <TooltipContent side="right" className="max-w-xs">
+            <p className="text-xs">
+              {isUsingDatabase 
+                ? "Tasks loaded from implementation_tasks database table (Single Source of Truth)"
+                : "Using hardcoded mappings as fallback. Database may be empty or unavailable."
+              }
+            </p>
+          </TooltipContent>
+        </Tooltip>
+
         {/* Overall Progress */}
         <div className="p-4 rounded-lg border bg-card">
           <div className="flex items-center justify-between mb-2">
@@ -188,7 +229,7 @@ export function WorkspaceTab({ phases, activePhase, onPhaseChange, selectedCompa
               <div className="space-y-3">
                 {currentPhase.items.map((item, index) => {
                   const mapping = getStepMapping(currentPhase.id, item.order);
-                  const stepProgress = getStepProgress(currentPhase.id, item.order);
+                  const stepProgressData = getStepProgress(currentPhase.id, item.order);
                   
                   // Check if this is the first item of a new sub-section
                   const previousMapping = index > 0 ? getStepMapping(currentPhase.id, currentPhase.items[index - 1].order) : null;
@@ -206,10 +247,11 @@ export function WorkspaceTab({ phases, activePhase, onPhaseChange, selectedCompa
                         </div>
                       )}
                       <StepCard
+                        key={`${currentPhase.id}-${item.order}`}
                         phaseId={currentPhase.id}
                         step={item}
                         mapping={mapping}
-                        stepProgress={stepProgress}
+                        stepProgress={stepProgressData}
                         isComplete={isStepComplete(currentPhase.id, item.order)}
                         isLoading={isLoading}
                         onToggleComplete={(complete) => toggleStepComplete(currentPhase.id, item.order, complete)}

@@ -1,17 +1,33 @@
-// Mappings for implementation steps to admin routes and import types
+/**
+ * ============================================================================
+ * @deprecated DEPRECATION NOTICE - DO NOT ADD NEW ENTRIES HERE
+ * ============================================================================
+ * 
+ * This file is DEPRECATED. The database table `implementation_tasks` is now
+ * the Single Source of Truth (SSOT) for implementation step mappings.
+ * 
+ * Migration Status:
+ * - 198 tasks migrated to database on 2026-01-15
+ * - 24 tasks (12%) have feature_code references
+ * - 174 tasks (88%) still use legacy admin_route
+ * 
+ * What to do instead:
+ * 1. Use `useHandbookTasks()` hook to fetch tasks from database
+ * 2. Add new entries via Route Registry UI at /enablement/route-registry
+ * 3. Use shared types from `@/types/implementation`
+ * 
+ * This file is kept for:
+ * - Backward compatibility during migration
+ * - Fallback if database is unavailable
+ * - Type definitions (re-exported from @/types/implementation)
+ * 
+ * Timeline for removal: After all tasks have feature_code and validation passes
+ * ============================================================================
+ */
 
-export interface StepMapping {
-  order: number;
-  area: string;
-  adminRoute?: string;
-  importType?: string;
-  isRequired?: boolean;
-  estimatedMinutes?: number;
-  subSection?: string;
-  sourceManual?: 'workforce' | 'hr-hub' | 'appraisals' | 'admin-security';
-  sourceSection?: string;
-  isGlobal?: boolean; // true = global setting, false/undefined = company-specific
-}
+// Re-export shared types from central location
+export type { StepMapping } from '@/types/implementation';
+import type { StepMapping } from '@/types/implementation';
 
 // Maps phase ID to step mappings with admin routes and import types
 export const PHASE_STEP_MAPPINGS: Record<string, StepMapping[]> = {
