@@ -16,7 +16,9 @@ import {
   CheckCircle,
   FileCheck,
   ArrowRight,
-  ShieldCheck
+  ShieldCheck,
+  Sparkles,
+  Zap
 } from "lucide-react";
 import {
   DndContext,
@@ -36,11 +38,12 @@ import {
 import type { 
   AppraisalTemplatePhase, 
   CreateTemplatePhaseInput,
-  AppraisalPhaseType 
+  AppraisalPhaseType,
+  AppraisalCycleType
 } from "@/types/appraisalFormTemplates";
-import { PHASE_TYPE_PRESETS } from "@/types/appraisalFormTemplates";
+import { PHASE_TYPE_PRESETS, CYCLE_TYPE_PRESETS } from "@/types/appraisalFormTemplates";
 import { calculateAllPhaseDates } from "@/utils/appraisalDateCalculations";
-import { formatPhaseDuration, validatePhaseTimeline } from "@/hooks/useAppraisalTemplatePhases";
+import { formatPhaseDuration, validatePhaseTimeline, getSuggestedPhaseOrder, generatePhasePresets } from "@/hooks/useAppraisalTemplatePhases";
 import { SortablePhaseItem } from "./SortablePhaseItem";
 
 interface Props {
@@ -52,6 +55,7 @@ interface Props {
   onUpdatePhase: (data: Partial<AppraisalTemplatePhase> & { id: string }) => Promise<any>;
   onDeletePhase: (id: string) => Promise<void>;
   onReorderPhases: (orderedIds: string[]) => Promise<void>;
+  onBulkCreatePhases?: (inputs: CreateTemplatePhaseInput[]) => Promise<any>;
   isUpdating?: boolean;
 }
 
@@ -78,6 +82,7 @@ export function AppraisalPhaseTimeline({
   onUpdatePhase,
   onDeletePhase,
   onReorderPhases,
+  onBulkCreatePhases,
   isUpdating,
 }: Props) {
   const [expandedPhase, setExpandedPhase] = useState<string | null>(null);
@@ -156,6 +161,23 @@ export function AppraisalPhaseTimeline({
     setShowAddPhase(false);
   };
 
+  // Apply suggested order based on industry standards
+  const handleApplySuggestedOrder = useCallback(async () => {
+    if (phases.length === 0) return;
+    
+    const sortedPhases = getSuggestedPhaseOrder(phases);
+    const orderedIds = sortedPhases.map(p => p.id);
+    await onReorderPhases(orderedIds);
+  }, [phases, onReorderPhases]);
+
+  // Apply preset phases for a cycle type
+  const handleApplyPreset = useCallback(async (cycleType: AppraisalCycleType) => {
+    if (!onBulkCreatePhases) return;
+    
+    const presetPhases = generatePhasePresets(cycleType, templateId);
+    await onBulkCreatePhases(presetPhases);
+  }, [onBulkCreatePhases, templateId]);
+
   // Phase IDs for sortable context
   const phaseIds = useMemo(() => phases.map(p => p.id), [phases]);
 
@@ -167,8 +189,22 @@ export function AppraisalPhaseTimeline({
           <Calendar className="h-5 w-5 text-primary" />
           <h3 className="font-semibold">Phase Timeline</h3>
         </div>
-        <div className="text-sm text-muted-foreground">
-          Total Duration: <span className="font-medium">{formatPhaseDuration(totalDuration)}</span>
+        <div className="flex items-center gap-4">
+          {phases.length > 1 && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleApplySuggestedOrder}
+              disabled={isUpdating}
+              className="gap-2"
+            >
+              <Sparkles className="h-4 w-4" />
+              Apply Suggested Order
+            </Button>
+          )}
+          <div className="text-sm text-muted-foreground">
+            Total Duration: <span className="font-medium">{formatPhaseDuration(totalDuration)}</span>
+          </div>
         </div>
       </div>
 
@@ -287,8 +323,48 @@ export function AppraisalPhaseTimeline({
         </Button>
       )}
 
-      {/* Preset Suggestions */}
-      {phases.length === 0 && (
+      {/* Quick Setup Presets - Show when no phases exist */}
+      {phases.length === 0 && onBulkCreatePhases && (
+        <Card className="bg-muted/30 border-dashed">
+          <CardContent className="pt-6 pb-6">
+            <div className="text-center space-y-4">
+              <div className="flex items-center justify-center gap-2 text-muted-foreground">
+                <Zap className="h-5 w-5" />
+                <span className="font-medium">Quick Setup</span>
+              </div>
+              <p className="text-sm text-muted-foreground max-w-md mx-auto">
+                Start with an industry-standard phase configuration for your review cycle:
+              </p>
+              <div className="flex flex-wrap justify-center gap-3">
+                {(['annual', 'mid_year', 'quarterly'] as AppraisalCycleType[]).map((cycleType) => {
+                  const preset = CYCLE_TYPE_PRESETS[cycleType];
+                  return (
+                    <Button
+                      key={cycleType}
+                      variant="outline"
+                      onClick={() => handleApplyPreset(cycleType)}
+                      disabled={isUpdating}
+                      className="gap-2"
+                    >
+                      <Calendar className="h-4 w-4" />
+                      {preset.label}
+                      <span className="text-xs text-muted-foreground">
+                        ({preset.suggestedPhases.length} phases)
+                      </span>
+                    </Button>
+                  );
+                })}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Or add individual phases manually using the button above
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Fallback message when no bulk create available */}
+      {phases.length === 0 && !onBulkCreatePhases && (
         <Alert>
           <Calendar className="h-4 w-4" />
           <AlertDescription>

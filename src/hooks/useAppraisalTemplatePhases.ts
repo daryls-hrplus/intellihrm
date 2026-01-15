@@ -4,8 +4,60 @@ import { toast } from "sonner";
 import type { 
   AppraisalTemplatePhase, 
   CreateTemplatePhaseInput,
-  PhaseWithDates 
+  PhaseWithDates,
+  AppraisalCycleType
 } from "@/types/appraisalFormTemplates";
+import { CYCLE_TYPE_PRESETS, PHASE_TYPE_PRESETS } from "@/types/appraisalFormTemplates";
+
+// Industry-standard phase ordering (position in workflow)
+export const PHASE_ORDER_PRIORITY: Record<string, number> = {
+  goal_setting: 1,
+  self_assessment: 2,
+  '360_collection': 3,
+  manager_review: 4,
+  calibration: 5,
+  hr_review: 6,
+  finalization: 7,
+  employee_acknowledgment: 8,
+};
+
+// Get suggested phase order based on industry standards
+export function getSuggestedPhaseOrder(phases: AppraisalTemplatePhase[]): AppraisalTemplatePhase[] {
+  return [...phases].sort((a, b) => {
+    const aPriority = PHASE_ORDER_PRIORITY[a.phase_type] ?? 99;
+    const bPriority = PHASE_ORDER_PRIORITY[b.phase_type] ?? 99;
+    return aPriority - bPriority;
+  });
+}
+
+// Generate phase presets for a given cycle type
+export function generatePhasePresets(
+  cycleType: AppraisalCycleType,
+  templateId: string
+): CreateTemplatePhaseInput[] {
+  const cyclePreset = CYCLE_TYPE_PRESETS[cycleType];
+  let currentOffset = 0;
+  
+  return cyclePreset.suggestedPhases.map((phaseType, index) => {
+    const phasePreset = PHASE_TYPE_PRESETS[phaseType];
+    const phase: CreateTemplatePhaseInput = {
+      template_id: templateId,
+      phase_type: phaseType,
+      phase_name: phasePreset.label,
+      display_order: index,
+      start_offset_days: currentOffset,
+      duration_days: phasePreset.defaultDurationDays,
+      is_mandatory: true,
+      notify_on_start: true,
+      notify_on_deadline: true,
+    };
+    
+    // Advance offset for next phase
+    currentOffset += phasePreset.defaultDurationDays;
+    
+    return phase;
+  });
+}
 
 export function useAppraisalTemplatePhases(templateId: string | undefined) {
   const queryClient = useQueryClient();
@@ -224,18 +276,74 @@ export function validatePhaseTimeline(phases: AppraisalTemplatePhase[]): {
     }
   }
 
-  // Check HR Review phase ordering (must be after Calibration, before Finalization)
+  // === COMPREHENSIVE PHASE ORDERING VALIDATION ===
+  
+  // 1. Goal Setting should be first (if present)
+  const goalSettingPhase = phases.find(p => p.phase_type === 'goal_setting');
+  if (goalSettingPhase) {
+    const earlierPhase = phases.find(p => 
+      p.id !== goalSettingPhase.id && 
+      p.display_order < goalSettingPhase.display_order
+    );
+    if (earlierPhase) {
+      issues.push('Goal Setting should be the first phase in the workflow');
+    }
+  }
+
+  // 2. Self Assessment must come before Manager Review
+  const selfAssessmentPhase = phases.find(p => p.phase_type === 'self_assessment');
+  const managerReviewPhase = phases.find(p => p.phase_type === 'manager_review');
+  if (selfAssessmentPhase && managerReviewPhase) {
+    if (selfAssessmentPhase.display_order >= managerReviewPhase.display_order) {
+      issues.push('Self Assessment must come before Manager Review');
+    }
+  }
+
+  // 3. 360 Collection should complete before Calibration
+  const collection360Phase = phases.find(p => p.phase_type === '360_collection');
+  const calibrationPhase = phases.find(p => p.phase_type === 'calibration');
+  if (collection360Phase && calibrationPhase) {
+    if (collection360Phase.display_order >= calibrationPhase.display_order) {
+      issues.push('360 Feedback Collection should complete before Calibration');
+    }
+  }
+
+  // 4. Calibration must come after Manager Review
+  if (calibrationPhase && managerReviewPhase) {
+    if (calibrationPhase.display_order <= managerReviewPhase.display_order) {
+      issues.push('Calibration must come after Manager Review');
+    }
+  }
+
+  // 5. HR Review phase ordering (must be after Calibration, before Finalization)
   const hrReviewPhase = phases.find(p => p.phase_type === 'hr_review');
+  const finalizationPhase = phases.find(p => p.phase_type === 'finalization');
   if (hrReviewPhase) {
-    const calibrationPhase = phases.find(p => p.phase_type === 'calibration');
-    const finalizationPhase = phases.find(p => p.phase_type === 'finalization');
-    
     if (calibrationPhase && hrReviewPhase.display_order <= calibrationPhase.display_order) {
       issues.push('HR Review must come after Calibration in the workflow');
     }
     
     if (finalizationPhase && hrReviewPhase.display_order >= finalizationPhase.display_order) {
       issues.push('HR Review must come before Finalization in the workflow');
+    }
+  }
+
+  // 6. Finalization must come after Calibration (if both exist)
+  if (finalizationPhase && calibrationPhase) {
+    if (finalizationPhase.display_order <= calibrationPhase.display_order) {
+      issues.push('Finalization must come after Calibration');
+    }
+  }
+
+  // 7. Employee Acknowledgment must be last (if present)
+  const acknowledgmentPhase = phases.find(p => p.phase_type === 'employee_acknowledgment');
+  if (acknowledgmentPhase) {
+    const laterPhase = phases.find(p => 
+      p.id !== acknowledgmentPhase.id && 
+      p.display_order > acknowledgmentPhase.display_order
+    );
+    if (laterPhase) {
+      issues.push('Employee Acknowledgment must be the last phase in the workflow');
     }
   }
   
