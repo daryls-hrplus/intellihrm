@@ -64,7 +64,6 @@ import { PerformanceIndexSettingsPanel } from "@/components/performance/setup/Pe
 import { ExternalBenchmarkConfigPanel } from "@/components/performance/setup/ExternalBenchmarkConfigPanel";
 import { CompetencyDriftDashboard } from "@/components/performance/ai/CompetencyDriftDashboard";
 import { ManagerCapabilityDashboard } from "@/components/performance/ai/ManagerCapabilityDashboard";
-import { IntegrationDashboardWidget } from "@/components/performance/setup/IntegrationDashboardWidget";
 import { NotificationsLinkSection } from "@/components/performance/setup/NotificationsLinkSection";
 import { UnifiedCompetencyFramework } from "@/components/performance/setup/UnifiedCompetencyFramework";
 import { Globe } from "lucide-react";
@@ -101,7 +100,6 @@ export default function PerformanceSetupPage() {
   // Data states
   const [goalTemplates, setGoalTemplates] = useState<GoalTemplate[]>([]);
   const [recognitionCategories, setRecognitionCategories] = useState<RecognitionCategory[]>([]);
-  const [appraisalCycles, setAppraisalCycles] = useState<AppraisalCycle[]>([]);
 
   // Dialog states
   const [ratingScaleDialogOpen, setRatingScaleDialogOpen] = useState(false);
@@ -165,7 +163,7 @@ export default function PerformanceSetupPage() {
   const fetchAllData = async () => {
     setIsLoading(true);
     try {
-      await Promise.all([fetchGoalTemplates(), fetchRecognitionCategories(), fetchAppraisalCycles()]);
+      await Promise.all([fetchGoalTemplates(), fetchRecognitionCategories()]);
       refetchComponentScales();
       refetchOverallScales();
     } finally {
@@ -181,11 +179,6 @@ export default function PerformanceSetupPage() {
   const fetchRecognitionCategories = async () => {
     const { data, error } = await supabase.from("recognition_categories").select("*").eq("company_id", selectedCompany).order("name");
     if (!error) setRecognitionCategories(data || []);
-  };
-
-  const fetchAppraisalCycles = async () => {
-    const { data, error } = await supabase.from("appraisal_cycles").select("*").eq("company_id", selectedCompany).order("start_date", { ascending: false });
-    if (!error) setAppraisalCycles(data || []);
   };
 
   const confirmDelete = (type: string, id: string, name: string) => {
@@ -450,14 +443,6 @@ export default function PerformanceSetupPage() {
                     <MessageSquare className="h-4 w-4" />
                     Employee Response
                   </TabsTrigger>
-                  <TabsTrigger value="appraisal-cycles" className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4" />
-                    Cycles
-                  </TabsTrigger>
-                  <TabsTrigger value="integration-dashboard" className="flex items-center gap-2">
-                    <BarChart3 className="h-4 w-4" />
-                    Integration Status
-                  </TabsTrigger>
                   <TabsTrigger value="benchmarks" className="flex items-center gap-2">
                     <Scale className="h-4 w-4" />
                     Benchmarks
@@ -477,12 +462,6 @@ export default function PerformanceSetupPage() {
                 </TabsContent>
                 <TabsContent value="employee-response" className="mt-4">
                   <EmployeeResponseConfigurationPanel companyId={selectedCompany} />
-                </TabsContent>
-                <TabsContent value="appraisal-cycles" className="mt-4">
-                  <AppraisalCyclesContent cycles={appraisalCycles} isLoading={isLoading} t={t} />
-                </TabsContent>
-                <TabsContent value="integration-dashboard" className="mt-4">
-                  <IntegrationDashboardWidget companyId={selectedCompany} />
                 </TabsContent>
                 <TabsContent value="benchmarks" className="mt-4">
                   <ExternalBenchmarkConfigPanel companyId={selectedCompany} />

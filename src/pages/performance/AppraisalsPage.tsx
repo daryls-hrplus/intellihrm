@@ -53,6 +53,7 @@ import { AIBiasAlertBanner } from "@/components/ai-governance/AIBiasAlertBanner"
 import { AIAuditTrailPanel } from "@/components/ai-governance/AIAuditTrailPanel";
 import { CalendarSync } from "@/components/appraisals/CalendarSync";
 import { HRResponseEscalationPanel } from "@/components/performance/setup/HRResponseEscalationPanel";
+import { IntegrationDashboardWidget } from "@/components/performance/setup/IntegrationDashboardWidget";
 
 interface AppraisalCycle {
   id: string;
@@ -462,6 +463,10 @@ export default function AppraisalsPage() {
               <CalendarClock className="h-4 w-4" />
               Interviews
             </TabsTrigger>
+            <TabsTrigger value="integrations" className="gap-2">
+              <Target className="h-4 w-4" />
+              Integrations
+            </TabsTrigger>
           </TabsList>
 
           {/* Cycles Tab */}
@@ -848,6 +853,17 @@ export default function AppraisalsPage() {
                 </div>
               )}
             </div>
+          </TabsContent>
+
+          {/* Integrations Tab - Integration Status */}
+          <TabsContent value="integrations" className="mt-6">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h2 className="text-lg font-semibold">Integration Status</h2>
+                <p className="text-sm text-muted-foreground">Monitor downstream integrations triggered by appraisal outcomes</p>
+              </div>
+            </div>
+            <IntegrationDashboardWidget companyId={selectedCompanyId} />
           </TabsContent>
         </Tabs>
 
