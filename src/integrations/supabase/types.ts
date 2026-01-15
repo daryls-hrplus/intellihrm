@@ -2148,6 +2148,9 @@ export type Database = {
           module_id: string
           role_requirements: string[] | null
           route_path: string | null
+          route_validated: boolean | null
+          route_validated_at: string | null
+          route_validation_source: string | null
           source: string | null
           ui_elements: Json | null
           updated_at: string
@@ -2171,6 +2174,9 @@ export type Database = {
           module_id: string
           role_requirements?: string[] | null
           route_path?: string | null
+          route_validated?: boolean | null
+          route_validated_at?: string | null
+          route_validation_source?: string | null
           source?: string | null
           ui_elements?: Json | null
           updated_at?: string
@@ -2194,6 +2200,9 @@ export type Database = {
           module_id?: string
           role_requirements?: string[] | null
           route_path?: string | null
+          route_validated?: boolean | null
+          route_validated_at?: string | null
+          route_validation_source?: string | null
           source?: string | null
           ui_elements?: Json | null
           updated_at?: string
@@ -36011,6 +36020,69 @@ export type Database = {
           },
         ]
       }
+      implementation_tasks: {
+        Row: {
+          admin_route: string | null
+          area: string
+          created_at: string | null
+          description: string | null
+          display_order: number | null
+          estimated_minutes: number | null
+          feature_code: string | null
+          id: string
+          import_type: string | null
+          is_active: boolean | null
+          is_global: boolean | null
+          is_required: boolean | null
+          phase_id: string
+          source_manual: string | null
+          source_section: string | null
+          step_order: number
+          sub_section: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          admin_route?: string | null
+          area: string
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          estimated_minutes?: number | null
+          feature_code?: string | null
+          id?: string
+          import_type?: string | null
+          is_active?: boolean | null
+          is_global?: boolean | null
+          is_required?: boolean | null
+          phase_id: string
+          source_manual?: string | null
+          source_section?: string | null
+          step_order: number
+          sub_section?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          admin_route?: string | null
+          area?: string
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          estimated_minutes?: number | null
+          feature_code?: string | null
+          id?: string
+          import_type?: string | null
+          is_active?: boolean | null
+          is_global?: boolean | null
+          is_required?: boolean | null
+          phase_id?: string
+          source_manual?: string | null
+          source_section?: string | null
+          step_order?: number
+          sub_section?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       import_batches: {
         Row: {
           committed_at: string | null
@@ -61294,6 +61366,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      route_validation_log: {
+        Row: {
+          feature_code: string
+          id: string
+          route_path: string | null
+          validated_at: string | null
+          validated_by: string | null
+          validation_message: string | null
+          validation_run_id: string
+          validation_status: string
+        }
+        Insert: {
+          feature_code: string
+          id?: string
+          route_path?: string | null
+          validated_at?: string | null
+          validated_by?: string | null
+          validation_message?: string | null
+          validation_run_id: string
+          validation_status: string
+        }
+        Update: {
+          feature_code?: string
+          id?: string
+          route_path?: string | null
+          validated_at?: string | null
+          validated_by?: string | null
+          validation_message?: string | null
+          validation_run_id?: string
+          validation_status?: string
+        }
+        Relationships: []
       }
       salary_advance_payroll_queue: {
         Row: {
