@@ -75,6 +75,7 @@ export function AppraisalFormTemplateManager({ companyId, companyName }: Props) 
     updatePhase, 
     deletePhase, 
     reorderPhases,
+    bulkCreatePhases,
     isUpdating: isPhaseUpdating 
   } = useAppraisalTemplatePhases(editingTemplate?.id);
 
@@ -763,6 +764,7 @@ export function AppraisalFormTemplateManager({ companyId, companyName }: Props) 
                       onUpdatePhase={updatePhase}
                       onDeletePhase={deletePhase}
                       onReorderPhases={reorderPhases}
+                      onBulkCreatePhases={bulkCreatePhases}
                       isUpdating={isPhaseUpdating}
                     />
                   </div>
