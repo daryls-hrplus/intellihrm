@@ -104,6 +104,7 @@ export type ReminderCategory =
   | 'performance_feedback'
   | 'performance_succession'
   | 'employee_voice'
+  | 'compensation'
   | 'training' 
   | 'benefits'
   | 'document' 
@@ -122,6 +123,7 @@ export const REMINDER_CATEGORIES: { value: ReminderCategory; label: string }[] =
   { value: 'performance_feedback', label: 'Performance: Continuous Feedback' },
   { value: 'performance_succession', label: 'Performance: Succession' },
   { value: 'employee_voice', label: 'Employee Voice' },
+  { value: 'compensation', label: 'Compensation' },
   { value: 'training', label: 'Training & Development' },
   { value: 'benefits', label: 'Benefits & Wellness' },
   { value: 'document', label: 'Documents & Certifications' },
