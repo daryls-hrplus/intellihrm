@@ -46,6 +46,7 @@ import { FixPreviewDialog } from "@/components/enablement/route-registry/FixPrev
 import { DocumentSelector } from "@/components/enablement/route-registry/DocumentSelector";
 import { ProductCapabilitiesValidation } from "@/components/enablement/route-registry/ProductCapabilitiesValidation";
 import { CodeRegistryPanel } from "@/components/enablement/route-registry/CodeRegistryPanel";
+import { OrphanManagementPanel } from "@/components/enablement/route-registry/OrphanManagementPanel";
 import { DocumentType } from "@/types/documentValidation";
 import { cn } from "@/lib/utils";
 
@@ -296,6 +297,15 @@ export default function RouteRegistryPage() {
             <Code2 className="h-4 w-4" />
             Code Registry
           </TabsTrigger>
+          <TabsTrigger value="orphans" className="gap-2">
+            <FileCode className="h-4 w-4" />
+            Orphans
+            {syncStatus && syncStatus.orphaned.length > 0 && (
+              <Badge variant="destructive" className="ml-1 h-5 px-1.5 text-xs">
+                {syncStatus.orphaned.length}
+              </Badge>
+            )}
+          </TabsTrigger>
           <TabsTrigger value="unsynced" className="gap-2">
             <Unlink2 className="h-4 w-4" />
             Unsynced ({unsyncedCount})
@@ -406,6 +416,10 @@ export default function RouteRegistryPage() {
 
         <TabsContent value="code-registry" className="mt-6">
           <CodeRegistryPanel />
+        </TabsContent>
+
+        <TabsContent value="orphans" className="mt-6">
+          <OrphanManagementPanel />
         </TabsContent>
 
         <TabsContent value="unsynced" className="mt-6">
