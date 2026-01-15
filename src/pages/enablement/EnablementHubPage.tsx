@@ -40,6 +40,7 @@ import {
   ChevronDown,
   Eye,
   EyeOff,
+  Route,
 } from "lucide-react";
 import { ContentWorkflowBoard } from "@/components/enablement/ContentWorkflowBoard";
 import { ReleaseManager } from "@/components/enablement/ReleaseManager";
@@ -363,6 +364,14 @@ export default function EnablementHubPage() {
           href: "/admin/client-registry",
           icon: Users,
           color: "bg-purple-500/10 text-purple-500",
+        },
+        {
+          title: "Route Registry",
+          description: "Database-First route management",
+          href: "/enablement/route-registry",
+          icon: Route,
+          color: "bg-orange-500/10 text-orange-500",
+          badge: "SSOT",
         },
       ],
     },

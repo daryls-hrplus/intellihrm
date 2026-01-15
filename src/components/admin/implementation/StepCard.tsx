@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { 
   CheckCircle2, 
   ExternalLink, 
@@ -17,7 +18,8 @@ import {
   ListChecks,
   AlertCircle,
   Globe,
-  Building2
+  Building2,
+  AlertTriangle
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
@@ -27,6 +29,7 @@ import { SubTaskList } from "./SubTaskList";
 import { getSubTasksForStep } from "@/data/subTaskDefinitions";
 import type { StepRollupStatus } from "@/hooks/useSubTaskProgress";
 import { useToast } from "@/hooks/use-toast";
+import { useRouteResolver, RouteResolution } from "@/hooks/useRouteResolver";
 
 interface PhaseItem {
   order: number;
@@ -64,9 +67,19 @@ export function StepCard({
   const [isSavingNotes, setIsSavingNotes] = useState(false);
   const [subTaskRollupStatus, setSubTaskRollupStatus] = useState<StepRollupStatus>('not_started');
   const { toast } = useToast();
+  const { resolve } = useRouteResolver();
   
   const subTaskDefinitions = getSubTasksForStep(phaseId, step.order);
   const hasSubTasks = subTaskDefinitions.length > 0;
+
+  // Resolve route using Database-First approach
+  const routeResolution: RouteResolution = useMemo(() => {
+    // TODO: When featureCode is added to StepMapping, use it here
+    // For now, use legacy adminRoute
+    return resolve({ adminRoute: mapping?.adminRoute });
+  }, [resolve, mapping?.adminRoute]);
+
+  const hasValidRoute = routeResolution.isValid && routeResolution.path !== '#';
 
   const handleNotesBlur = async () => {
     if (notes !== (stepProgress?.notes || "")) {
@@ -198,13 +211,30 @@ export function StepCard({
 
             {/* Actions */}
             <div className="flex items-center gap-2">
-              {mapping?.adminRoute && (
-                <Button variant="outline" size="sm" asChild>
-                  <Link to={mapping.adminRoute}>
-                    Configure
-                    <ExternalLink className="h-3 w-3 ml-1" />
-                  </Link>
-                </Button>
+              {hasValidRoute && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button variant="outline" size="sm" asChild>
+                      <Link to={routeResolution.path}>
+                        Configure
+                        {routeResolution.source === 'legacy' && (
+                          <AlertTriangle className="h-3 w-3 ml-1 text-warning" />
+                        )}
+                        {routeResolution.source !== 'legacy' && (
+                          <ExternalLink className="h-3 w-3 ml-1" />
+                        )}
+                      </Link>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="top" className="max-w-xs">
+                    <p className="text-xs">
+                      {routeResolution.source === 'database' && "Route from database (SSOT)"}
+                      {routeResolution.source === 'registry' && "Route from code registry (not synced)"}
+                      {routeResolution.source === 'legacy' && "Legacy hardcoded route - needs migration"}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">{routeResolution.path}</p>
+                  </TooltipContent>
+                </Tooltip>
               )}
               
               {mapping?.importType && onImportClick && (
