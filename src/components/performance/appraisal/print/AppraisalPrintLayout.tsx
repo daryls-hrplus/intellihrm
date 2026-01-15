@@ -14,6 +14,11 @@ interface AppraisalPrintLayoutProps {
   isPreview?: boolean;
   minRating?: number;
   maxRating?: number;
+  // Employee context for headers
+  employeeName?: string;
+  employeePosition?: string;
+  employeeDepartment?: string;
+  cycleName?: string;
 }
 
 export function AppraisalPrintLayout({
@@ -26,6 +31,10 @@ export function AppraisalPrintLayout({
   isPreview = false,
   minRating = 1,
   maxRating = 5,
+  employeeName,
+  employeePosition,
+  employeeDepartment,
+  cycleName,
 }: AppraisalPrintLayoutProps) {
   const navigate = useNavigate();
 
@@ -49,23 +58,47 @@ export function AppraisalPrintLayout({
 
   return (
     <div className="min-h-screen bg-background appraisal-print-container">
-      {/* Print Controls - Hidden when printing */}
-      <div className="no-print sticky top-0 z-50 bg-background border-b px-6 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
-            <X className="h-4 w-4" />
-          </Button>
-          <h1 className="text-lg font-semibold">{title}</h1>
+      {/* Screen Header - Always visible on screen with employee context */}
+      <div className="no-print sticky top-0 z-50 bg-background border-b">
+        {/* Controls row */}
+        <div className="px-6 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
+              <X className="h-4 w-4" />
+            </Button>
+            <div>
+              <h1 className="text-lg font-semibold">{employeeName || title}</h1>
+              <p className="text-sm text-muted-foreground">
+                {cycleName && <span>{cycleName}</span>}
+                {employeePosition && <span> • {employeePosition}</span>}
+                {employeeDepartment && <span> • {employeeDepartment}</span>}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" onClick={handlePrint}>
+              <Printer className="h-4 w-4 mr-2" />
+              Print
+            </Button>
+            <Button variant="outline" onClick={handlePrint}>
+              <Download className="h-4 w-4 mr-2" />
+              Export PDF
+            </Button>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={handlePrint}>
-            <Printer className="h-4 w-4 mr-2" />
-            Print
-          </Button>
-          <Button variant="outline" onClick={handlePrint}>
-            <Download className="h-4 w-4 mr-2" />
-            Export PDF
-          </Button>
+
+        {/* Rating scale bar */}
+        <div className="px-6 py-2 border-t bg-muted/30">
+          <div className="flex items-center gap-1 text-xs">
+            <span className="font-medium text-muted-foreground mr-2">Rating Scale:</span>
+            {filteredLevels.map((level) => (
+              <span key={level.level} className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-background border">
+                <span className={`w-2 h-2 rounded-full rating-dot-screen-${level.level}`} />
+                <span className="font-medium">{level.level}</span>
+                <span className="text-muted-foreground">= {level.shortLabel}</span>
+              </span>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -85,24 +118,40 @@ export function AppraisalPrintLayout({
           <thead className="print-page-header">
             <tr>
               <td>
-                {/* Running Header */}
+                {/* Running Header - Enhanced with employee context */}
                 <div className="print-running-header">
+                  {/* Row 1: Company + Document Title + Code */}
                   <div className="header-row-1">
                     <span className="company-name">{companyName || "Company"}</span>
-                    <span className="doc-title">Performance Appraisal Form</span>
+                    <span className="doc-title">PERFORMANCE APPRAISAL</span>
                     <span className="doc-code">
                       {templateCode && `${templateCode}`}
                       {templateVersion && ` v${templateVersion}`}
                     </span>
                   </div>
-                  <div className="header-row-2">
-                    <span className="rating-label">Rating Scale:</span>
-                    {filteredLevels.map((level) => (
-                      <span key={level.level} className="rating-item">
-                        <span className={`rating-dot rating-dot-${level.level}`} />
-                        {level.level} ({level.shortLabel})
-                      </span>
-                    ))}
+
+                  {/* Row 2: Employee Context */}
+                  <div className="header-row-2 employee-context">
+                    <span><strong>Employee:</strong> {employeeName || "N/A"}</span>
+                    <span className="separator">|</span>
+                    <span><strong>Position:</strong> {employeePosition || "N/A"}</span>
+                    <span className="separator">|</span>
+                    <span><strong>Dept:</strong> {employeeDepartment || "N/A"}</span>
+                  </div>
+
+                  {/* Row 3: Cycle + Rating Scale */}
+                  <div className="header-row-3">
+                    <span className="cycle-name">
+                      <strong>Cycle:</strong> {cycleName || "Annual Review"}
+                    </span>
+                    <div className="rating-legend-inline">
+                      {filteredLevels.map((level) => (
+                        <span key={level.level} className="rating-item">
+                          <span className={`rating-dot rating-dot-${level.level}`} />
+                          {level.level}={level.shortLabel}
+                        </span>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </td>
@@ -113,11 +162,11 @@ export function AppraisalPrintLayout({
               <td>
                 <div className="print-running-footer">
                   <span className="footer-left">
-                    {templateCode && `Doc: ${templateCode}`}
-                    {templateVersion && ` v${templateVersion}`}
-                    {" | "}Generated: {currentDate}
+                    Form: {templateCode || "N/A"} v{templateVersion || "1.0"}
                   </span>
-                  <span className="footer-center">Confidential - Internal Use Only</span>
+                  <span className="footer-center">
+                    CONFIDENTIAL – Do Not Distribute
+                  </span>
                   <span className="footer-right">
                     Page <span className="page-number" /> of <span className="page-total" />
                   </span>
@@ -134,7 +183,7 @@ export function AppraisalPrintLayout({
           </tbody>
         </table>
 
-        {/* Document Control Footer (visible on screen and last page) */}
+        {/* Document Control Footer (visible on screen only) */}
         <div className="print-document-control no-print mt-8 pt-4 border-t">
           <div className="flex justify-between items-center text-xs text-muted-foreground">
             <span>
@@ -159,7 +208,7 @@ export function AppraisalPrintLayout({
             margin: 0 auto;
             padding: 2rem;
             background: white;
-            min-height: calc(100vh - 60px);
+            min-height: calc(100vh - 120px);
             position: relative;
           }
           
@@ -175,6 +224,13 @@ export function AppraisalPrintLayout({
           .print-body-cell {
             display: block;
           }
+          
+          /* Screen rating dots */
+          .rating-dot-screen-1 { background-color: hsl(0, 84%, 60%); }
+          .rating-dot-screen-2 { background-color: hsl(25, 95%, 53%); }
+          .rating-dot-screen-3 { background-color: hsl(142, 71%, 45%); }
+          .rating-dot-screen-4 { background-color: hsl(217, 91%, 60%); }
+          .rating-dot-screen-5 { background-color: hsl(271, 81%, 56%); }
         }
         
         /* Print Styles */
@@ -200,7 +256,7 @@ export function AppraisalPrintLayout({
           
           @page {
             size: A4 portrait;
-            margin: 15mm 10mm 20mm 10mm;
+            margin: 18mm 12mm 22mm 12mm;
           }
           
           body {
@@ -236,54 +292,99 @@ export function AppraisalPrintLayout({
             display: block;
           }
           
-          /* Running Header Styles */
+          /* Running Header Styles - Enhanced */
           .print-running-header {
-            padding-bottom: 6px;
-            margin-bottom: 8px;
-            border-bottom: 1px solid #e5e7eb;
+            padding-bottom: 8px;
+            margin-bottom: 10px;
+            border-bottom: 2px solid #1f2937;
           }
           
           .print-running-header .header-row-1 {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 8pt;
-            color: #6b7280;
-            margin-bottom: 4px;
+            font-size: 9pt;
+            color: #1f2937;
+            margin-bottom: 6px;
+          }
+          
+          .print-running-header .company-name {
+            font-weight: 700;
+            font-size: 10pt;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
           }
           
           .print-running-header .doc-title {
-            font-weight: 600;
-            color: #374151;
+            font-weight: 700;
+            font-size: 11pt;
+            color: #111827;
+            letter-spacing: 1px;
           }
           
-          .print-running-header .header-row-2 {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 7pt;
+          .print-running-header .doc-code {
+            font-size: 8pt;
             color: #6b7280;
-            background: #f9fafb;
-            padding: 3px 8px;
+            font-family: monospace;
+          }
+          
+          .print-running-header .header-row-2.employee-context {
+            display: flex;
+            justify-content: flex-start;
+            gap: 16px;
+            font-size: 8pt;
+            color: #374151;
+            padding: 4px 0;
+            border-bottom: 1px solid #e5e7eb;
+            margin-bottom: 4px;
+          }
+          
+          .print-running-header .header-row-2 .separator {
+            color: #d1d5db;
+          }
+          
+          .print-running-header .header-row-2 strong {
+            color: #6b7280;
+            font-weight: 600;
+          }
+          
+          .print-running-header .header-row-3 {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 7pt;
+            background: #f3f4f6;
+            padding: 4px 10px;
             border-radius: 4px;
           }
           
-          .print-running-header .rating-label {
-            font-weight: 600;
-            margin-right: 4px;
+          .print-running-header .cycle-name {
+            color: #374151;
+          }
+          
+          .print-running-header .cycle-name strong {
+            color: #6b7280;
+          }
+          
+          .print-running-header .rating-legend-inline {
+            display: flex;
+            align-items: center;
+            gap: 10px;
           }
           
           .print-running-header .rating-item {
             display: inline-flex;
             align-items: center;
             gap: 3px;
+            color: #374151;
           }
           
           .print-running-header .rating-dot {
             display: inline-block;
-            width: 6px;
-            height: 6px;
+            width: 8px;
+            height: 8px;
             border-radius: 50%;
+            border: 1px solid rgba(0,0,0,0.1);
           }
           
           .print-running-header .rating-dot-1 { background-color: #ef4444; }
@@ -292,20 +393,32 @@ export function AppraisalPrintLayout({
           .print-running-header .rating-dot-4 { background-color: #3b82f6; }
           .print-running-header .rating-dot-5 { background-color: #a855f7; }
           
-          /* Running Footer Styles */
+          /* Running Footer Styles - Enhanced */
           .print-running-footer {
             display: flex;
             justify-content: space-between;
             align-items: center;
             font-size: 7pt;
             color: #6b7280;
-            padding-top: 8px;
-            margin-top: 8px;
-            border-top: 1px solid #e5e7eb;
+            padding-top: 10px;
+            margin-top: 10px;
+            border-top: 1px solid #d1d5db;
+          }
+          
+          .print-running-footer .footer-left {
+            font-family: monospace;
+            font-size: 7pt;
           }
           
           .print-running-footer .footer-center {
-            font-style: italic;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #374151;
+          }
+          
+          .print-running-footer .footer-right {
+            font-size: 8pt;
           }
           
           /* Page Numbers - Using CSS counters */
