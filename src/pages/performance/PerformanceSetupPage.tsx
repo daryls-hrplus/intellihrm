@@ -435,13 +435,13 @@ export default function PerformanceSetupPage() {
                     <Layers className="h-4 w-4" />
                     Form Templates
                   </TabsTrigger>
-                  <TabsTrigger value="outcome-rules" className="flex items-center gap-2">
-                    <GitBranch className="h-4 w-4" />
-                    Outcome Rules
-                  </TabsTrigger>
                   <TabsTrigger value="employee-response" className="flex items-center gap-2">
                     <MessageSquare className="h-4 w-4" />
                     Employee Response
+                  </TabsTrigger>
+                  <TabsTrigger value="outcome-rules" className="flex items-center gap-2">
+                    <GitBranch className="h-4 w-4" />
+                    Outcome Rules
                   </TabsTrigger>
                   <TabsTrigger value="benchmarks" className="flex items-center gap-2">
                     <Scale className="h-4 w-4" />
@@ -457,11 +457,11 @@ export default function PerformanceSetupPage() {
                     companyName={companies.find(c => c.id === selectedCompany)?.name}
                   />
                 </TabsContent>
-                <TabsContent value="outcome-rules" className="mt-4">
-                  <IntegrationRulesConfigSection companyId={selectedCompany} />
-                </TabsContent>
                 <TabsContent value="employee-response" className="mt-4">
                   <EmployeeResponseConfigurationPanel companyId={selectedCompany} />
+                </TabsContent>
+                <TabsContent value="outcome-rules" className="mt-4">
+                  <IntegrationRulesConfigSection companyId={selectedCompany} />
                 </TabsContent>
                 <TabsContent value="benchmarks" className="mt-4">
                   <ExternalBenchmarkConfigPanel companyId={selectedCompany} />
