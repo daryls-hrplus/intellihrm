@@ -13,7 +13,7 @@ import { Slider } from "@/components/ui/slider";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAppraisalFormTemplates, AppraisalFormTemplate, CreateTemplateInput, validateWeights } from "@/hooks/useAppraisalFormTemplates";
 import { useAppraisalTemplateSections } from "@/hooks/useAppraisalTemplateSections";
 import { useAppraisalTemplatePhases } from "@/hooks/useAppraisalTemplatePhases";
@@ -22,10 +22,11 @@ import { AppraisalPhaseTimeline } from "./AppraisalPhaseTimeline";
 import { AppraisalFormTemplatePreview } from "./AppraisalFormTemplatePreview";
 import { 
   Plus, Edit, Trash2, Copy, Star, Lock, AlertTriangle, CheckCircle, 
-  Target, BookOpen, Users, MessageSquare, Heart, ChevronRight,
-  Settings2, Calendar, Shield, Building, Eye, EyeOff
+  Target, BookOpen, Users, MessageSquare, Heart, ChevronLeft, ChevronRight,
+  Calendar, Shield, Building, Eye, EyeOff, Check
 } from "lucide-react";
 import { CYCLE_TYPE_PRESETS, type AppraisalCycleType, type WeightEnforcement } from "@/types/appraisalFormTemplates";
+import { cn } from "@/lib/utils";
 
 interface Props {
   companyId: string;
@@ -51,8 +52,11 @@ export function AppraisalFormTemplateManager({ companyId, companyName }: Props) 
   const [duplicatingTemplate, setDuplicatingTemplate] = useState<AppraisalFormTemplate | null>(null);
   const [duplicateName, setDuplicateName] = useState("");
   const [duplicateCode, setDuplicateCode] = useState("");
-  const [advancedOpen, setAdvancedOpen] = useState(false);
+  const [wizardStep, setWizardStep] = useState(0);
   const [previewOpen, setPreviewOpen] = useState(false);
+
+  const WIZARD_STEPS = ['basics', 'sections', 'phases', 'timing', 'governance'] as const;
+  type WizardStep = typeof WIZARD_STEPS[number];
 
   // Section and phase hooks - only active when editing
   const { 
@@ -234,6 +238,7 @@ export function AppraisalFormTemplateManager({ companyId, companyName }: Props) 
 
   const handleOpenCreate = () => {
     setEditingTemplate(null);
+    setWizardStep(0);
     setFormData({
       include_goals: true,
       include_competencies: true,
@@ -259,12 +264,12 @@ export function AppraisalFormTemplateManager({ companyId, companyName }: Props) 
       version_number: 1,
       is_draft: false,
     });
-    setAdvancedOpen(false);
     setDialogOpen(true);
   };
 
   const handleOpenEdit = (template: AppraisalFormTemplate) => {
     setEditingTemplate(template);
+    setWizardStep(0);
     setFormData({
       name: template.name,
       code: template.code,
@@ -293,7 +298,6 @@ export function AppraisalFormTemplateManager({ companyId, companyName }: Props) 
       version_number: (template as any).version_number || 1,
       is_draft: (template as any).is_draft || false,
     });
-    setAdvancedOpen(false);
     setDialogOpen(true);
   };
 
@@ -493,7 +497,7 @@ export function AppraisalFormTemplateManager({ companyId, companyName }: Props) 
       </Card>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col p-0 overflow-hidden">
+        <DialogContent className="max-w-3xl max-h-[90vh] flex flex-col p-0 overflow-hidden">
           <DialogHeader className="px-6 pt-6 pb-4 border-b flex-shrink-0">
             <div className="flex items-center justify-between">
               <DialogTitle>{editingTemplate ? "Edit Template" : "Create Template"}</DialogTitle>
@@ -520,12 +524,54 @@ export function AppraisalFormTemplateManager({ companyId, companyName }: Props) 
             </DialogDescription>
           </DialogHeader>
 
-          <div className="flex-1 overflow-y-auto px-6">
-            <div className="space-y-6 py-4">
-              {/* Template Details */}
-              <div className="space-y-4">
-                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Template Details</h3>
-                
+          {/* Progress Indicator */}
+          <div className="flex items-center justify-center gap-2 px-6 py-3 bg-muted/30 border-b">
+            {WIZARD_STEPS.map((step, index) => (
+              <div key={step} className="flex items-center gap-2">
+                <button
+                  onClick={() => {
+                    // Allow clicking on completed steps or current step
+                    if (index <= wizardStep || (index === 2 && !editingTemplate)) return;
+                    setWizardStep(index);
+                  }}
+                  disabled={index === 2 && !editingTemplate}
+                  className={cn(
+                    "w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-all",
+                    index < wizardStep && "bg-primary text-primary-foreground cursor-pointer hover:bg-primary/90",
+                    index === wizardStep && "bg-primary text-primary-foreground ring-2 ring-offset-2 ring-primary",
+                    index > wizardStep && "bg-muted text-muted-foreground",
+                    index === 2 && !editingTemplate && "opacity-50 cursor-not-allowed"
+                  )}
+                >
+                  {index < wizardStep ? <Check className="h-4 w-4" /> : index + 1}
+                </button>
+                {index < WIZARD_STEPS.length - 1 && (
+                  <div className={cn(
+                    "w-8 h-0.5 transition-colors",
+                    index < wizardStep ? "bg-primary" : "bg-muted"
+                  )} />
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* Tabs */}
+          <Tabs 
+            value={WIZARD_STEPS[wizardStep]} 
+            onValueChange={(v) => setWizardStep(WIZARD_STEPS.indexOf(v as WizardStep))}
+            className="flex-1 flex flex-col overflow-hidden"
+          >
+            <TabsList className="grid w-full grid-cols-5 px-6 pt-2 bg-transparent">
+              <TabsTrigger value="basics" className="text-xs">1. Basics</TabsTrigger>
+              <TabsTrigger value="sections" className="text-xs">2. Sections</TabsTrigger>
+              <TabsTrigger value="phases" disabled={!editingTemplate} className="text-xs">3. Phases</TabsTrigger>
+              <TabsTrigger value="timing" className="text-xs">4. Timing</TabsTrigger>
+              <TabsTrigger value="governance" className="text-xs">5. Governance</TabsTrigger>
+            </TabsList>
+
+            <div className="flex-1 overflow-y-auto px-6">
+              {/* Step 1: Basics */}
+              <TabsContent value="basics" className="mt-0 py-4 space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="name">Template Name *</Label>
@@ -554,7 +600,7 @@ export function AppraisalFormTemplateManager({ companyId, companyName }: Props) 
                     value={formData.description || ""}
                     onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
                     placeholder="Describe when this template should be used..."
-                    rows={2}
+                    rows={3}
                   />
                 </div>
 
@@ -600,99 +646,78 @@ export function AppraisalFormTemplateManager({ companyId, companyName }: Props) 
                     </div>
                   </div>
                 </div>
-              </div>
+              </TabsContent>
 
-              {/* Sections & Weights */}
-              {useLegacySections && (
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Sections & Weights</h3>
-                    {weightValidation.valid ? (
-                      <Badge variant="outline" className="text-green-600 border-green-200 bg-green-50">
-                        <CheckCircle className="h-3 w-3 mr-1" />
-                        {weightValidation.total}%
-                      </Badge>
-                    ) : (
-                      <Badge variant="destructive">
-                        <AlertTriangle className="h-3 w-3 mr-1" />
-                        {weightValidation.total}%
-                      </Badge>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    {legacySections.map((section) => {
-                      const isEnabled = formData[section.includeKey as keyof typeof formData] as boolean;
-                      const weight = (formData[section.weightKey as keyof typeof formData] as number) || 0;
-
-                      return (
-                        <div key={section.key} className="flex items-center gap-3 p-3 border rounded-lg bg-muted/30">
-                          <div className="flex items-center gap-2 w-36">
-                            {getSectionIcon(section.key)}
-                            <span className="text-sm font-medium">{section.label}</span>
-                          </div>
-                          <Switch
-                            checked={isEnabled}
-                            onCheckedChange={(checked) => toggleSection(section.key, checked)}
-                          />
-                          {isEnabled && (
-                            <div className="flex-1 flex items-center gap-3">
-                              <Slider
-                                value={[weight]}
-                                onValueChange={([value]) => updateWeight(section.weightKey, value)}
-                                max={100}
-                                step={5}
-                                className="flex-1"
-                              />
-                              <span className="w-10 text-right font-mono text-sm">{weight}%</span>
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-
-              {/* Advanced Settings - Collapsible (Optional) */}
-              <Collapsible open={advancedOpen} onOpenChange={setAdvancedOpen} className="border rounded-lg bg-muted/20">
-                <CollapsibleTrigger className="flex items-center gap-3 w-full p-4 hover:bg-muted/50 transition-colors rounded-lg">
-                  <ChevronRight className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${advancedOpen ? 'rotate-90' : ''}`} />
-                  <Settings2 className="h-4 w-4 text-muted-foreground" />
-                  <div className="flex flex-col items-start">
-                    <span className="text-sm font-medium">Advanced Configuration</span>
-                    <span className="text-xs text-muted-foreground">Optional settings for enterprise requirements</span>
-                  </div>
-                  <Badge variant="secondary" className="ml-auto text-xs">Optional</Badge>
-                </CollapsibleTrigger>
-                <CollapsibleContent className="space-y-6 p-4 pt-0 border-t">
-                  {/* Phase Configuration - Only for existing templates */}
-                  {editingTemplate && (
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4 text-muted-foreground" />
-                        <h4 className="text-sm font-medium">Phase Timeline</h4>
+              {/* Step 2: Sections */}
+              <TabsContent value="sections" className="mt-0 py-4 space-y-4">
+                {useLegacySections ? (
+                  <>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="text-sm font-medium">Configure Sections & Weights</h3>
+                        <p className="text-xs text-muted-foreground">Enable sections and assign weight percentages (must total 100%)</p>
                       </div>
-                      <AppraisalPhaseTimeline
-                        phases={phases}
-                        templateId={editingTemplate.id}
-                        defaultDurationDays={formData.default_duration_days || 365}
-                        onAddPhase={createPhase}
-                        onUpdatePhase={updatePhase}
-                        onDeletePhase={deletePhase}
-                        onReorderPhases={reorderPhases}
-                        isUpdating={isPhaseUpdating}
-                      />
+                      {weightValidation.valid ? (
+                        <Badge variant="outline" className="text-green-600 border-green-200 bg-green-50">
+                          <CheckCircle className="h-3 w-3 mr-1" />
+                          {weightValidation.total}%
+                        </Badge>
+                      ) : (
+                        <Badge variant="destructive">
+                          <AlertTriangle className="h-3 w-3 mr-1" />
+                          {weightValidation.total}%
+                        </Badge>
+                      )}
                     </div>
-                  )}
 
-                  {/* Advanced Sections - Only for existing templates */}
-                  {editingTemplate && (
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-2">
-                        <Target className="h-4 w-4 text-muted-foreground" />
-                        <h4 className="text-sm font-medium">Advanced Section Configuration</h4>
-                      </div>
+                    <div className="space-y-2">
+                      {legacySections.map((section) => {
+                        const isEnabled = formData[section.includeKey as keyof typeof formData] as boolean;
+                        const weight = (formData[section.weightKey as keyof typeof formData] as number) || 0;
+
+                        return (
+                          <div key={section.key} className="flex items-center gap-3 p-3 border rounded-lg bg-muted/30">
+                            <div className="flex items-center gap-2 w-36">
+                              {getSectionIcon(section.key)}
+                              <span className="text-sm font-medium">{section.label}</span>
+                            </div>
+                            <Switch
+                              checked={isEnabled}
+                              onCheckedChange={(checked) => toggleSection(section.key, checked)}
+                            />
+                            {isEnabled && (
+                              <div className="flex-1 flex items-center gap-3">
+                                <Slider
+                                  value={[weight]}
+                                  onValueChange={([value]) => updateWeight(section.weightKey, value)}
+                                  max={100}
+                                  step={5}
+                                  className="flex-1"
+                                />
+                                <span className="w-10 text-right font-mono text-sm">{weight}%</span>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {!weightValidation.valid && (
+                      <Alert variant="destructive">
+                        <AlertTriangle className="h-4 w-4" />
+                        <AlertDescription>
+                          Weights must total 100%. Current total: {weightValidation.total}%
+                        </AlertDescription>
+                      </Alert>
+                    )}
+                  </>
+                ) : (
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-2">
+                      <Target className="h-4 w-4 text-muted-foreground" />
+                      <h4 className="text-sm font-medium">Advanced Section Configuration</h4>
+                    </div>
+                    {editingTemplate && (
                       <TemplateSectionConfigPanel
                         sections={sections}
                         templateId={editingTemplate.id}
@@ -703,146 +728,214 @@ export function AppraisalFormTemplateManager({ companyId, companyName }: Props) 
                         onReorderSections={reorderSections}
                         isUpdating={isSectionUpdating}
                       />
-                    </div>
-                  )}
+                    )}
+                  </div>
+                )}
+              </TabsContent>
 
-                  {/* Date Offsets */}
-                  <div className="space-y-3">
+              {/* Step 3: Phases */}
+              <TabsContent value="phases" className="mt-0 py-4 space-y-4">
+                {editingTemplate ? (
+                  <div className="space-y-4">
                     <div className="flex items-center gap-2">
                       <Calendar className="h-4 w-4 text-muted-foreground" />
-                      <h4 className="text-sm font-medium">Default Timing</h4>
-                    </div>
-                    <div className="grid grid-cols-3 gap-3">
-                      <div className="space-y-1">
-                        <Label className="text-xs">Duration (days)</Label>
-                        <Input
-                          type="number"
-                          value={formData.default_duration_days || 365}
-                          onChange={(e) => setFormData(prev => ({ ...prev, default_duration_days: parseInt(e.target.value) || 365 }))}
-                          min={0}
-                          max={730}
-                        />
-                        <p className="text-xs text-muted-foreground">Length of each review cycle</p>
-                      </div>
-                      <div className="space-y-1">
-                        <Label className="text-xs">Eval Offset (days)</Label>
-                        <Input
-                          type="number"
-                          value={formData.default_evaluation_offset_days || 14}
-                          onChange={(e) => setFormData(prev => ({ ...prev, default_evaluation_offset_days: parseInt(e.target.value) || 14 }))}
-                          min={0}
-                          max={60}
-                        />
-                        <p className="text-xs text-muted-foreground">Days before end when reviews are due</p>
-                      </div>
-                      <div className="space-y-1">
-                        <Label className="text-xs">Grace Period (days)</Label>
-                        <Input
-                          type="number"
-                          value={formData.default_grace_period_days || 3}
-                          onChange={(e) => setFormData(prev => ({ ...prev, default_grace_period_days: parseInt(e.target.value) || 3 }))}
-                          min={0}
-                          max={14}
-                        />
-                        <p className="text-xs text-muted-foreground">Extra time allowed for late submissions</p>
+                      <div>
+                        <h4 className="text-sm font-medium">Phase Timeline</h4>
+                        <p className="text-xs text-muted-foreground">Define the phases employees go through during the appraisal cycle</p>
                       </div>
                     </div>
+                    <AppraisalPhaseTimeline
+                      phases={phases}
+                      templateId={editingTemplate.id}
+                      defaultDurationDays={formData.default_duration_days || 365}
+                      onAddPhase={createPhase}
+                      onUpdatePhase={updatePhase}
+                      onDeletePhase={deletePhase}
+                      onReorderPhases={reorderPhases}
+                      isUpdating={isPhaseUpdating}
+                    />
+                  </div>
+                ) : (
+                  <Alert>
+                    <AlertTriangle className="h-4 w-4" />
+                    <AlertDescription>
+                      Save the template first to configure phases. Phases define the workflow stages employees go through during each appraisal cycle.
+                    </AlertDescription>
+                  </Alert>
+                )}
+              </TabsContent>
+
+              {/* Step 4: Timing */}
+              <TabsContent value="timing" className="mt-0 py-4 space-y-4">
+                <div className="flex items-center gap-2 mb-4">
+                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                  <div>
+                    <h4 className="text-sm font-medium">Default Timing Configuration</h4>
+                    <p className="text-xs text-muted-foreground">Set default durations for appraisal cycles using this template</p>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="space-y-2 p-4 border rounded-lg">
+                    <Label>Cycle Duration</Label>
+                    <Input
+                      type="number"
+                      value={formData.default_duration_days || 365}
+                      onChange={(e) => setFormData(prev => ({ ...prev, default_duration_days: parseInt(e.target.value) || 365 }))}
+                      min={0}
+                      max={730}
+                    />
+                    <p className="text-xs text-muted-foreground">Length of each review cycle in days</p>
+                  </div>
+                  <div className="space-y-2 p-4 border rounded-lg">
+                    <Label>Evaluation Offset</Label>
+                    <Input
+                      type="number"
+                      value={formData.default_evaluation_offset_days || 14}
+                      onChange={(e) => setFormData(prev => ({ ...prev, default_evaluation_offset_days: parseInt(e.target.value) || 14 }))}
+                      min={0}
+                      max={60}
+                    />
+                    <p className="text-xs text-muted-foreground">Days before end when evaluations are due</p>
+                  </div>
+                  <div className="space-y-2 p-4 border rounded-lg">
+                    <Label>Grace Period</Label>
+                    <Input
+                      type="number"
+                      value={formData.default_grace_period_days || 3}
+                      onChange={(e) => setFormData(prev => ({ ...prev, default_grace_period_days: parseInt(e.target.value) || 3 }))}
+                      min={0}
+                      max={14}
+                    />
+                    <p className="text-xs text-muted-foreground">Extra time for late submissions</p>
+                  </div>
+                </div>
+              </TabsContent>
+
+              {/* Step 5: Governance */}
+              <TabsContent value="governance" className="mt-0 py-4 space-y-4">
+                <div className="flex items-center gap-2 mb-4">
+                  <Shield className="h-4 w-4 text-muted-foreground" />
+                  <div>
+                    <h4 className="text-sm font-medium">Governance & Controls</h4>
+                    <p className="text-xs text-muted-foreground">Configure template locking, weight enforcement, and approval requirements</p>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label>Weight Enforcement</Label>
+                    <Select 
+                      value={formData.weight_enforcement || 'strict'} 
+                      onValueChange={(v) => setFormData(prev => ({ ...prev, weight_enforcement: v as WeightEnforcement }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="strict">Strict (must equal 100%)</SelectItem>
+                        <SelectItem value="relaxed">Relaxed (max 100%)</SelectItem>
+                        <SelectItem value="none">None (qualitative only)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-muted-foreground">How strictly section weights are enforced</p>
+                  </div>
+                  
+                  <div className="flex items-center justify-between p-4 border rounded-lg">
+                    <div>
+                      <Label className="text-sm">Lock Template</Label>
+                      <p className="text-xs text-muted-foreground">Prevent changes when used in active cycles</p>
+                    </div>
+                    <Switch
+                      checked={formData.is_locked || false}
+                      onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_locked: checked }))}
+                    />
                   </div>
 
-                  {/* Governance Settings */}
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-2">
-                      <Shield className="h-4 w-4 text-muted-foreground" />
-                      <h4 className="text-sm font-medium">Governance</h4>
+                  <div className="flex items-center justify-between p-4 border rounded-lg">
+                    <div>
+                      <Label className="text-sm">Allow Weight Override</Label>
+                      <p className="text-xs text-muted-foreground">Allow individual cycles to customize weights</p>
                     </div>
-                    <div className="space-y-3">
-                      <div className="space-y-2">
-                        <Label className="text-xs">Weight Enforcement</Label>
-                        <Select 
-                          value={formData.weight_enforcement || 'strict'} 
-                          onValueChange={(v) => setFormData(prev => ({ ...prev, weight_enforcement: v as WeightEnforcement }))}
-                        >
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="strict">Strict (must equal 100%)</SelectItem>
-                            <SelectItem value="relaxed">Relaxed (max 100%)</SelectItem>
-                            <SelectItem value="none">None (qualitative only)</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      
-                      <div className="flex items-center justify-between py-2">
-                        <div>
-                          <Label className="text-sm">Lock Template</Label>
-                          <p className="text-xs text-muted-foreground">Prevent changes when used in cycles</p>
-                        </div>
-                        <Switch
-                          checked={formData.is_locked || false}
-                          onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_locked: checked }))}
-                        />
-                      </div>
-
-                      <div className="flex items-center justify-between py-2">
-                        <div>
-                          <Label className="text-sm">Allow Weight Override</Label>
-                          <p className="text-xs text-muted-foreground">Allow cycles to customize weights</p>
-                        </div>
-                        <Switch
-                          checked={formData.allow_weight_override || false}
-                          onCheckedChange={(checked) => setFormData(prev => ({ ...prev, allow_weight_override: checked }))}
-                        />
-                      </div>
-
-                      {formData.allow_weight_override && (
-                        <div className="flex items-center justify-between py-2 pl-4 border-l-2 border-muted">
-                          <div>
-                            <Label className="text-sm">Require HR Approval</Label>
-                            <p className="text-xs text-muted-foreground">Weight changes need HR approval</p>
-                          </div>
-                          <Switch
-                            checked={formData.requires_hr_approval_for_override || false}
-                            onCheckedChange={(checked) => setFormData(prev => ({ ...prev, requires_hr_approval_for_override: checked }))}
-                          />
-                        </div>
-                      )}
-
-                      <div className="flex items-center justify-between py-2">
-                        <div>
-                          <Label className="text-sm">Active</Label>
-                          <p className="text-xs text-muted-foreground">Template available for new cycles</p>
-                        </div>
-                        <Switch
-                          checked={formData.is_active || false}
-                          onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_active: checked }))}
-                        />
-                      </div>
-                    </div>
+                    <Switch
+                      checked={formData.allow_weight_override || false}
+                      onCheckedChange={(checked) => setFormData(prev => ({ ...prev, allow_weight_override: checked }))}
+                    />
                   </div>
 
-                  {!editingTemplate && (
-                    <Alert>
-                      <AlertTriangle className="h-4 w-4" />
-                      <AlertDescription>
-                        Save the template first to configure phases and advanced sections.
-                      </AlertDescription>
-                    </Alert>
+                  {formData.allow_weight_override && (
+                    <div className="flex items-center justify-between p-4 border rounded-lg ml-4 border-l-2 border-primary/30">
+                      <div>
+                        <Label className="text-sm">Require HR Approval</Label>
+                        <p className="text-xs text-muted-foreground">Weight changes require HR approval</p>
+                      </div>
+                      <Switch
+                        checked={formData.requires_hr_approval_for_override || false}
+                        onCheckedChange={(checked) => setFormData(prev => ({ ...prev, requires_hr_approval_for_override: checked }))}
+                      />
+                    </div>
                   )}
-                </CollapsibleContent>
-              </Collapsible>
+
+                  <div className="flex items-center justify-between p-4 border rounded-lg">
+                    <div>
+                      <Label className="text-sm">Active</Label>
+                      <p className="text-xs text-muted-foreground">Template available for new cycles</p>
+                    </div>
+                    <Switch
+                      checked={formData.is_active || false}
+                      onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_active: checked }))}
+                    />
+                  </div>
+                </div>
+              </TabsContent>
+            </div>
+          </Tabs>
+
+          {/* Footer with Navigation */}
+          <div className="px-6 py-4 border-t flex justify-between items-center bg-background">
+            <div>
+              {wizardStep > 0 && (
+                <Button 
+                  variant="outline" 
+                  onClick={() => setWizardStep(prev => prev - 1)}
+                >
+                  <ChevronLeft className="h-4 w-4 mr-2" />
+                  Previous
+                </Button>
+              )}
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => setDialogOpen(false)}>
+                Cancel
+              </Button>
+              {wizardStep < WIZARD_STEPS.length - 1 ? (
+                <Button 
+                  onClick={() => {
+                    // Skip phases step for new templates
+                    if (wizardStep === 1 && !editingTemplate) {
+                      setWizardStep(3); // Skip to timing
+                    } else {
+                      setWizardStep(prev => prev + 1);
+                    }
+                  }}
+                  disabled={
+                    (wizardStep === 0 && (!formData.name || !formData.code)) ||
+                    (wizardStep === 1 && useLegacySections && !weightValidation.valid)
+                  }
+                >
+                  Next
+                  <ChevronRight className="h-4 w-4 ml-2" />
+                </Button>
+              ) : (
+                <Button 
+                  onClick={handleSubmit} 
+                  disabled={(useLegacySections && !weightValidation.valid) || !formData.name || !formData.code || isCreating || isUpdating}
+                >
+                  {editingTemplate ? "Save Changes" : "Create Template"}
+                </Button>
+              )}
             </div>
           </div>
-
-          <DialogFooter className="px-6 py-4 border-t">
-            <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
-            <Button 
-              onClick={handleSubmit} 
-              disabled={(useLegacySections && !weightValidation.valid) || !formData.name || !formData.code || isCreating || isUpdating}
-            >
-              {editingTemplate ? "Save Changes" : "Create Template"}
-            </Button>
-          </DialogFooter>
         </DialogContent>
       </Dialog>
 
