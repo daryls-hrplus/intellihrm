@@ -92,6 +92,44 @@ export function useSubTaskProgress(companyId: string | undefined, phaseId: strin
     }
   };
 
+  // Sync subtasks with updated definitions (preserves status, updates names)
+  const syncSubTasks = async (definitions: SubTaskDefinition[]) => {
+    if (!companyId) return;
+
+    try {
+      // Delete existing subtasks for this step that are beyond the new definition count
+      const maxOrder = definitions.length;
+      await supabase
+        .from('implementation_sub_tasks')
+        .delete()
+        .eq('company_id', companyId)
+        .eq('phase_id', phaseId)
+        .eq('step_order', stepOrder)
+        .gt('sub_task_order', maxOrder);
+
+      // Upsert new definitions - this will update names but preserve other fields if they exist
+      const tasksToUpsert = definitions.map(def => ({
+        company_id: companyId,
+        phase_id: phaseId,
+        step_order: stepOrder,
+        sub_task_order: def.order,
+        sub_task_name: def.name,
+        is_required: def.isRequired ?? true,
+      }));
+
+      const { error } = await supabase
+        .from('implementation_sub_tasks')
+        .upsert(tasksToUpsert, { 
+          onConflict: 'company_id,phase_id,step_order,sub_task_order',
+        });
+
+      if (error) throw error;
+      await fetchSubTasks();
+    } catch (error) {
+      console.error('Error syncing sub-tasks:', error);
+    }
+  };
+
   const updateSubTaskStatus = async (
     subTaskOrder: number, 
     status: SubTaskStatus, 
@@ -216,6 +254,7 @@ export function useSubTaskProgress(companyId: string | undefined, phaseId: strin
     subTasks,
     isLoading,
     initializeSubTasks,
+    syncSubTasks,
     updateSubTaskStatus,
     getCompletionStats,
     calculateStepStatus,
