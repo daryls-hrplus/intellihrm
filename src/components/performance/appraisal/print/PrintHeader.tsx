@@ -24,6 +24,7 @@ interface AppraisalInfo {
   eventName: string;
   cycleName?: string;
   startDate: string;
+  isPreview?: boolean;
   endDate: string;
   performancePeriodStart?: string;
   performancePeriodEnd?: string;
@@ -108,6 +109,11 @@ export function PrintHeader({
             <div className="flex items-center gap-2 mb-1">
               <Calendar className="h-4 w-4 text-primary" />
               <span className="text-sm font-semibold text-primary">Performance Period</span>
+              {appraisal.isPreview && (
+                <Badge variant="outline" className="text-[10px] text-amber-600 border-amber-400">
+                  SAMPLE
+                </Badge>
+              )}
             </div>
             <p className="text-sm text-muted-foreground mb-0.5">
               Work period being evaluated
@@ -117,6 +123,9 @@ export function PrintHeader({
                 ? formatDateRange(appraisal.performancePeriodStart, appraisal.performancePeriodEnd)
                 : "Not specified"}
             </p>
+            {appraisal.isPreview && (
+              <p className="text-xs text-amber-600 italic mt-1">Set in Cycle Setup</p>
+            )}
           </div>
 
           {/* Appraisal Period - The formal review window */}
@@ -124,6 +133,11 @@ export function PrintHeader({
             <div className="flex items-center gap-2 mb-1">
               <FileText className="h-4 w-4 text-muted-foreground" />
               <span className="text-sm font-semibold">Appraisal Period</span>
+              {appraisal.isPreview && (
+                <Badge variant="outline" className="text-[10px] text-amber-600 border-amber-400">
+                  SAMPLE
+                </Badge>
+              )}
             </div>
             <p className="text-sm text-muted-foreground mb-0.5">
               Formal review window
@@ -131,6 +145,9 @@ export function PrintHeader({
             <p className="font-medium">
               {formatDateRange(appraisal.startDate, appraisal.endDate)}
             </p>
+            {appraisal.isPreview && (
+              <p className="text-xs text-amber-600 italic mt-1">Set in Cycle Setup</p>
+            )}
           </div>
         </div>
 
