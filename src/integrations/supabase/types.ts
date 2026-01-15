@@ -2550,6 +2550,8 @@ export type Database = {
           name: string
           name_en: string | null
           overall_scale_id: string | null
+          performance_period_end: string | null
+          performance_period_start: string | null
           responsibility_weight: number
           start_date: string
           status: string
@@ -2599,6 +2601,8 @@ export type Database = {
           name: string
           name_en?: string | null
           overall_scale_id?: string | null
+          performance_period_end?: string | null
+          performance_period_start?: string | null
           responsibility_weight?: number
           start_date: string
           status?: string
@@ -2648,6 +2652,8 @@ export type Database = {
           name?: string
           name_en?: string | null
           overall_scale_id?: string | null
+          performance_period_end?: string | null
+          performance_period_start?: string | null
           responsibility_weight?: number
           start_date?: string
           status?: string
