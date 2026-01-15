@@ -489,9 +489,38 @@ export function UnifiedAppraisalRulesManager({ companyId }: UnifiedAppraisalRule
   };
 
   const handleUseTemplate = (template: typeof RULE_TEMPLATES[0]) => {
+    // Check if template's codes match any configured rating levels
+    const templateCodes = template.defaults.rating_level_codes || [];
+    const matchingCodes = templateCodes.filter(
+      code => ratingLevels.some(r => r.code.toLowerCase() === code.toLowerCase())
+    );
+
+    if (templateCodes.length > 0 && matchingCodes.length === 0) {
+      toast.warning(
+        `This template uses rating levels (${templateCodes.join(', ')}) that don't match your setup. Please select the appropriate rating levels manually.`,
+        { duration: 6000 }
+      );
+    } else if (matchingCodes.length < templateCodes.length && templateCodes.length > 0) {
+      const missing = templateCodes.filter(
+        code => !ratingLevels.some(r => r.code.toLowerCase() === code.toLowerCase())
+      );
+      toast.info(
+        `Some template rating levels (${missing.join(', ')}) were not found. Please verify your selection.`,
+        { duration: 5000 }
+      );
+    }
+
+    // Map matching codes to actual codes (preserve case from DB)
+    const actualMatchingCodes = matchingCodes.map(code => {
+      const match = ratingLevels.find(r => r.code.toLowerCase() === code.toLowerCase());
+      return match?.code || code;
+    });
+
     setFormData(prev => ({
       ...prev,
       ...template.defaults,
+      // Only include codes that actually exist
+      rating_level_codes: actualMatchingCodes,
     }));
     setActiveDialogTab("custom");
   };
@@ -555,6 +584,38 @@ export function UnifiedAppraisalRulesManager({ companyId }: UnifiedAppraisalRule
     if (!formData.name) {
       toast.error("Rule name is required");
       return;
+    }
+
+    // Validate rating levels are selected when using category_match condition
+    if (formData.condition_type === "category_match") {
+      // Check if any rating level codes are specified
+      if (!formData.rating_level_codes?.length) {
+        toast.error("At least one rating level must be selected for this rule to trigger");
+        return;
+      }
+
+      // Check if selected codes actually exist in configured rating levels
+      const validCodes = formData.rating_level_codes.filter(
+        code => ratingLevels.some(r => r.code === code)
+      );
+
+      if (validCodes.length === 0) {
+        toast.error(
+          "None of the selected rating levels exist in your configuration. Please select valid rating levels or set up rating levels first."
+        );
+        return;
+      }
+
+      // Warn if some codes are invalid but allow save with valid ones
+      if (validCodes.length < formData.rating_level_codes.length) {
+        const invalidCodes = formData.rating_level_codes.filter(
+          code => !ratingLevels.some(r => r.code === code)
+        );
+        toast.warning(
+          `Some rating levels were not found: ${invalidCodes.join(', ')}. Rule will only trigger for valid levels.`
+        );
+        formData.rating_level_codes = validCodes;
+      }
     }
 
     try {
@@ -825,6 +886,30 @@ export function UnifiedAppraisalRulesManager({ companyId }: UnifiedAppraisalRule
                         {rulePreview}
                       </AlertDescription>
                     </Alert>
+                  )}
+
+                  {/* Rating Level Validation Warning */}
+                  {formData.condition_type === "category_match" && (
+                    <>
+                      {!ratingLevels.length ? (
+                        <Alert variant="destructive">
+                          <AlertTriangle className="h-4 w-4" />
+                          <AlertDescription>
+                            No rating levels are configured. Rules require rating levels to trigger.{" "}
+                            <a href="/performance/setup?tab=appraisals&sub=performance-categories" className="underline font-medium">
+                              Set up rating levels first
+                            </a>
+                          </AlertDescription>
+                        </Alert>
+                      ) : formData.rating_level_codes?.length === 0 ? (
+                        <Alert variant="destructive">
+                          <AlertTriangle className="h-4 w-4" />
+                          <AlertDescription>
+                            At least one rating level must be selected for this rule to trigger.
+                          </AlertDescription>
+                        </Alert>
+                      ) : null}
+                    </>
                   )}
 
                   {/* Basic Info */}
