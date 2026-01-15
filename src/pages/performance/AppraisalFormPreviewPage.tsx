@@ -10,17 +10,23 @@ import {
   SignatureSection,
   ViewModeToggle,
   RatingScaleLegendCompact,
+  ExecutiveSummary,
+  DevelopmentPlanSection,
+  NextStepsSection,
+  CompactAppraisalTable,
   type ViewMode,
 } from "@/components/performance/appraisal/print";
 import { Loader2, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function AppraisalFormPreviewPage() {
   const { templateId } = useParams<{ templateId: string }>();
   const [searchParams] = useSearchParams();
   const initialView = (searchParams.get("view") as ViewMode) || "hr";
   const [viewMode, setViewMode] = useState<ViewMode>(initialView);
+  const [layoutMode, setLayoutMode] = useState<"compact" | "full">("compact");
   
   const { data, isLoading, error } = useAppraisalTemplatePrintData(templateId);
 
@@ -77,15 +83,20 @@ export default function AppraisalFormPreviewPage() {
           <AlertTitle>Template Preview Mode</AlertTitle>
           <AlertDescription>
             This is a preview of how the appraisal form will appear when used. All data shown is
-            sample data for demonstration purposes. Only sections configured in the template will
-            appear.
+            sample data for demonstration purposes.
           </AlertDescription>
         </Alert>
       </div>
 
-      {/* View Mode Toggle */}
-      <div className="mb-6 no-print">
+      {/* View Mode & Layout Toggle */}
+      <div className="mb-6 no-print flex items-center justify-between flex-wrap gap-4">
         <ViewModeToggle value={viewMode} onChange={setViewMode} />
+        <Tabs value={layoutMode} onValueChange={(v) => setLayoutMode(v as "compact" | "full")}>
+          <TabsList>
+            <TabsTrigger value="compact">Compact View</TabsTrigger>
+            <TabsTrigger value="full">Full View</TabsTrigger>
+          </TabsList>
+        </Tabs>
       </div>
 
       {/* Template Info Badges */}
@@ -94,9 +105,21 @@ export default function AppraisalFormPreviewPage() {
         <Badge variant="secondary">
           Rating Scale: {template.min_rating} - {template.max_rating}
         </Badge>
-        <Badge variant="secondary">{sections.length} Sections Configured</Badge>
+        <Badge variant="secondary">{sections.length} Sections</Badge>
         <Badge variant="secondary">{items.length} Items</Badge>
       </div>
+
+      {/* Executive Summary - NEW */}
+      <ExecutiveSummary
+        employee={employee}
+        appraisal={appraisal}
+        overallRating={totalScore}
+        maxRating={template.max_rating}
+        minRating={template.min_rating}
+        items={items}
+        managerStatement={comments.manager}
+        companyName={company.name}
+      />
 
       {/* Header Section */}
       <PrintHeader
@@ -110,7 +133,7 @@ export default function AppraisalFormPreviewPage() {
         compact
       />
 
-      {/* Sticky Rating Scale Legend - Always visible for context */}
+      {/* Rating Scale Legend */}
       <RatingScaleLegendCompact
         minRating={template.min_rating}
         maxRating={template.max_rating}
@@ -118,21 +141,27 @@ export default function AppraisalFormPreviewPage() {
         className="mb-4 rounded-lg border shadow-sm"
       />
 
-      {/* Appraisal Items Table - New Card Layout */}
+      {/* Appraisal Items - Compact or Full Layout */}
       {items.length > 0 ? (
-        <AppraisalItemsTable
-          items={items}
-          minRating={template.min_rating}
-          maxRating={template.max_rating}
-          viewMode={viewMode}
-          isPreview={true}
-        />
+        layoutMode === "compact" ? (
+          <CompactAppraisalTable
+            items={items}
+            minRating={template.min_rating}
+            maxRating={template.max_rating}
+            viewMode={viewMode}
+          />
+        ) : (
+          <AppraisalItemsTable
+            items={items}
+            minRating={template.min_rating}
+            maxRating={template.max_rating}
+            viewMode={viewMode}
+            isPreview={true}
+          />
+        )
       ) : (
         <div className="border rounded-lg p-8 text-center text-muted-foreground mb-6">
           <p className="font-medium">No appraisal items configured</p>
-          <p className="text-sm mt-1">
-            Add sections to the template to see items appear here.
-          </p>
         </div>
       )}
 
@@ -146,8 +175,9 @@ export default function AppraisalFormPreviewPage() {
         />
       )}
 
-      {/* Page Break before Comments for print */}
+      {/* Development Plan - NEW */}
       <div className="page-break" />
+      <DevelopmentPlanSection items={items} />
 
       {/* Comments Section */}
       <CommentsSection
@@ -162,6 +192,9 @@ export default function AppraisalFormPreviewPage() {
           { type: "gap", description: "Time management during peak periods" },
         ]}
       />
+
+      {/* Next Steps - NEW */}
+      <NextStepsSection />
 
       {/* Signature Section */}
       <SignatureSection signatures={signatures} finalStatus={appraisal.status} />
