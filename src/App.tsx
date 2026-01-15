@@ -305,6 +305,7 @@ const App = () => (
             <Route path="/performance/setup" element={<ProtectedRoute moduleCode="performance"><LazyPage><Pages.PerformanceSetupPage /></LazyPage></ProtectedRoute>} />
             <Route path="/performance/talent-dashboard" element={<ProtectedRoute moduleCode="performance"><LazyPage><Pages.TalentUnifiedDashboardPage /></LazyPage></ProtectedRoute>} />
             <Route path="/performance/feedback/themes" element={<ProtectedRoute moduleCode="performance"><LazyPage><Pages.MyDevelopmentThemesPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/performance/appraisal-preview/:templateId" element={<ProtectedRoute moduleCode="performance"><LazyPage><Pages.AppraisalFormPreviewPage /></LazyPage></ProtectedRoute>} />
 
             {/* Leave Routes */}
             <Route path="/leave" element={<ProtectedRoute moduleCode="leave"><LazyPage><Pages.LeaveDashboardPage /></LazyPage></ProtectedRoute>} />

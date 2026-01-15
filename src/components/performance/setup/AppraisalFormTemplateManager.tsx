@@ -484,6 +484,14 @@ export function AppraisalFormTemplateManager({ companyId, companyName }: Props) 
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right">
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          onClick={() => window.open(`/performance/appraisal-preview/${template.id}`, '_blank')} 
+                          title="Preview Form"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
                         <Button variant="ghost" size="icon" onClick={() => handleOpenEdit(template)} title="Edit">
                           <Edit className="h-4 w-4" />
                         </Button>
