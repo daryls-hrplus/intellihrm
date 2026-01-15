@@ -31,7 +31,8 @@ import {
   Info,
   Play,
   ExternalLink,
-  Wrench
+  Wrench,
+  Code2
 } from "lucide-react";
 import { toast } from "sonner";
 import { useRouteResolver } from "@/hooks/useRouteResolver";
@@ -40,9 +41,11 @@ import { useHandbookTasks } from "@/hooks/useHandbookTasks";
 import { useFeatureRegistrySync } from "@/hooks/useFeatureRegistrySync";
 import { useValidationFixer } from "@/hooks/useValidationFixer";
 import { useProductCapabilitiesValidation } from "@/hooks/useProductCapabilitiesValidation";
+import { useCodeRegistryScanner } from "@/hooks/useCodeRegistryScanner";
 import { FixPreviewDialog } from "@/components/enablement/route-registry/FixPreviewDialog";
 import { DocumentSelector } from "@/components/enablement/route-registry/DocumentSelector";
 import { ProductCapabilitiesValidation } from "@/components/enablement/route-registry/ProductCapabilitiesValidation";
+import { CodeRegistryPanel } from "@/components/enablement/route-registry/CodeRegistryPanel";
 import { DocumentType } from "@/types/documentValidation";
 import { cn } from "@/lib/utils";
 
@@ -89,6 +92,12 @@ export default function RouteRegistryPage() {
     isPreviewing,
     lastPreview
   } = useValidationFixer();
+
+  const {
+    totalCodeRoutes,
+    syncStatus,
+    checkSyncStatus
+  } = useCodeRegistryScanner();
 
   const unsyncedRoutes = getUnsyncedRoutes();
   const dbRoutes = getAllDbRoutes();
@@ -283,6 +292,10 @@ export default function RouteRegistryPage() {
             <Activity className="h-4 w-4" />
             Overview
           </TabsTrigger>
+          <TabsTrigger value="code-registry" className="gap-2">
+            <Code2 className="h-4 w-4" />
+            Code Registry
+          </TabsTrigger>
           <TabsTrigger value="unsynced" className="gap-2">
             <Unlink2 className="h-4 w-4" />
             Unsynced ({unsyncedCount})
@@ -389,6 +402,10 @@ export default function RouteRegistryPage() {
               </CardContent>
             </Card>
           </div>
+        </TabsContent>
+
+        <TabsContent value="code-registry" className="mt-6">
+          <CodeRegistryPanel />
         </TabsContent>
 
         <TabsContent value="unsynced" className="mt-6">
