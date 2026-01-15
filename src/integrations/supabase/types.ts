@@ -59349,6 +59349,7 @@ export type Database = {
           is_default: boolean | null
           name: string
           previous_version_id: string | null
+          subcategory: string | null
           subject: string
           updated_at: string | null
           version: number
@@ -59366,6 +59367,7 @@ export type Database = {
           is_default?: boolean | null
           name: string
           previous_version_id?: string | null
+          subcategory?: string | null
           subject: string
           updated_at?: string | null
           version?: number
@@ -59383,6 +59385,7 @@ export type Database = {
           is_default?: boolean | null
           name?: string
           previous_version_id?: string | null
+          subcategory?: string | null
           subject?: string
           updated_at?: string | null
           version?: number
