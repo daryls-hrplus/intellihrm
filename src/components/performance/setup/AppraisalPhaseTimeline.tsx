@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { 
   Calendar,
   Plus,
@@ -18,8 +19,19 @@ import {
   ArrowRight,
   ShieldCheck,
   Sparkles,
-  Zap
+  Zap,
+  List,
+  GanttChart,
+  Lightbulb,
+  Building2,
 } from "lucide-react";
+import { PhaseGanttChart } from "./PhaseGanttChart";
+import { 
+  getCompanySizeTier, 
+  getCompanySizeLabel, 
+  getRecommendedDuration,
+  type CompanySizeTier 
+} from "@/utils/phaseDurationRecommendations";
 import {
   DndContext,
   closestCenter,
@@ -51,6 +63,8 @@ interface Props {
   templateId: string;
   defaultDurationDays: number;
   sampleStartDate?: Date;
+  cycleType?: AppraisalCycleType;
+  companyEmployeeCount?: number;
   onAddPhase: (input: CreateTemplatePhaseInput) => Promise<any>;
   onUpdatePhase: (data: Partial<AppraisalTemplatePhase> & { id: string }) => Promise<any>;
   onDeletePhase: (id: string) => Promise<void>;
@@ -78,6 +92,8 @@ export function AppraisalPhaseTimeline({
   templateId,
   defaultDurationDays,
   sampleStartDate = new Date(new Date().getFullYear() + 1, 0, 1),
+  cycleType = 'annual',
+  companyEmployeeCount,
   onAddPhase,
   onUpdatePhase,
   onDeletePhase,
@@ -88,6 +104,13 @@ export function AppraisalPhaseTimeline({
   const [expandedPhase, setExpandedPhase] = useState<string | null>(null);
   const [showAddPhase, setShowAddPhase] = useState(false);
   const [newPhaseType, setNewPhaseType] = useState<AppraisalPhaseType>("self_assessment");
+  const [viewMode, setViewMode] = useState<'list' | 'gantt'>('list');
+
+  // Calculate company size tier for recommendations
+  const companySizeTier: CompanySizeTier | null = useMemo(() => {
+    if (!companyEmployeeCount) return null;
+    return getCompanySizeTier(companyEmployeeCount);
+  }, [companyEmployeeCount]);
 
   // DnD sensors
   const sensors = useSensors(
@@ -171,12 +194,27 @@ export function AppraisalPhaseTimeline({
   }, [phases, onReorderPhases]);
 
   // Apply preset phases for a cycle type
-  const handleApplyPreset = useCallback(async (cycleType: AppraisalCycleType) => {
+  const handleApplyPreset = useCallback(async (presetCycleType: AppraisalCycleType) => {
     if (!onBulkCreatePhases) return;
     
-    const presetPhases = generatePhasePresets(cycleType, templateId);
+    const presetPhases = generatePhasePresets(presetCycleType, templateId);
     await onBulkCreatePhases(presetPhases);
   }, [onBulkCreatePhases, templateId]);
+
+  // Apply recommended durations based on company size
+  const handleApplyRecommendedDurations = useCallback(async () => {
+    if (!companySizeTier) return;
+    
+    for (const phase of phases) {
+      const recommendation = getRecommendedDuration(phase.phase_type, companySizeTier, cycleType);
+      if (recommendation.recommendedDays !== phase.duration_days) {
+        await onUpdatePhase({
+          id: phase.id,
+          duration_days: recommendation.recommendedDays,
+        });
+      }
+    }
+  }, [phases, companySizeTier, cycleType, onUpdatePhase]);
 
   // Phase IDs for sortable context
   const phaseIds = useMemo(() => phases.map(p => p.id), [phases]);
@@ -184,12 +222,73 @@ export function AppraisalPhaseTimeline({
   return (
     <div className="space-y-4">
       {/* Timeline Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-2">
         <div className="flex items-center gap-2">
           <Calendar className="h-5 w-5 text-primary" />
           <h3 className="font-semibold">Phase Timeline</h3>
+          {companySizeTier && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="flex items-center gap-1 text-xs text-muted-foreground bg-muted px-2 py-1 rounded">
+                    <Building2 className="h-3 w-3" />
+                    {getCompanySizeLabel(companySizeTier)}
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  Duration recommendations are tailored for your company size
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2">
+          {/* View Toggle */}
+          {phases.length > 0 && (
+            <div className="flex items-center border rounded-md">
+              <Button
+                variant={viewMode === 'list' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('list')}
+                className="rounded-r-none h-8"
+              >
+                <List className="h-4 w-4" />
+              </Button>
+              <Button
+                variant={viewMode === 'gantt' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('gantt')}
+                className="rounded-l-none h-8"
+              >
+                <GanttChart className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
+          
+          {/* Apply Recommended Durations */}
+          {phases.length > 0 && companySizeTier && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleApplyRecommendedDurations}
+                    disabled={isUpdating}
+                    className="gap-2"
+                  >
+                    <Lightbulb className="h-4 w-4 text-amber-500" />
+                    Apply Recommendations
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  Apply duration recommendations based on company size and cycle type
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
+          
+          {/* Apply Suggested Order */}
           {phases.length > 1 && (
             <Button
               variant="outline"
@@ -202,8 +301,9 @@ export function AppraisalPhaseTimeline({
               Apply Suggested Order
             </Button>
           )}
+          
           <div className="text-sm text-muted-foreground">
-            Total Duration: <span className="font-medium">{formatPhaseDuration(totalDuration)}</span>
+            Total: <span className="font-medium">{formatPhaseDuration(totalDuration)}</span>
           </div>
         </div>
       </div>
@@ -222,8 +322,18 @@ export function AppraisalPhaseTimeline({
         </Alert>
       )}
 
-      {/* Visual Timeline */}
-      {phasesWithDates.length > 0 && (
+      {/* Gantt Chart View */}
+      {viewMode === 'gantt' && phasesWithDates.length > 0 && (
+        <PhaseGanttChart
+          phases={phasesWithDates}
+          totalDuration={totalDuration}
+          sampleStartDate={sampleStartDate}
+          onPhaseClick={(phaseId) => setExpandedPhase(phaseId)}
+        />
+      )}
+
+      {/* List View - Visual Timeline */}
+      {viewMode === 'list' && phasesWithDates.length > 0 && (
         <Card className="bg-muted/30">
           <CardContent className="pt-4">
             <div className="text-xs text-muted-foreground mb-2">
@@ -255,33 +365,39 @@ export function AppraisalPhaseTimeline({
       )}
 
       {/* Phase List */}
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCenter}
-        onDragEnd={handleDragEnd}
-      >
-        <SortableContext items={phaseIds} strategy={verticalListSortingStrategy}>
-          <div className="space-y-2">
-            {phases.map((phase, index) => {
-              const isExpanded = expandedPhase === phase.id;
-              const phaseWithDates = phasesWithDates.find(p => p.id === phase.id);
+      {viewMode === 'list' && (
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext items={phaseIds} strategy={verticalListSortingStrategy}>
+            <div className="space-y-2">
+              {phases.map((phase, index) => {
+                const isExpanded = expandedPhase === phase.id;
+                const phaseWithDates = phasesWithDates.find(p => p.id === phase.id);
+                const recommendation = companySizeTier 
+                  ? getRecommendedDuration(phase.phase_type, companySizeTier, cycleType)
+                  : null;
 
-              return (
-                <SortablePhaseItem
-                  key={phase.id}
-                  phase={phase}
-                  index={index}
-                  isExpanded={isExpanded}
-                  phaseWithDates={phaseWithDates}
-                  onToggleExpand={(open) => setExpandedPhase(open ? phase.id : null)}
-                  onUpdatePhase={onUpdatePhase}
-                  onDeletePhase={onDeletePhase}
-                />
-              );
-            })}
-          </div>
-        </SortableContext>
-      </DndContext>
+                return (
+                  <SortablePhaseItem
+                    key={phase.id}
+                    phase={phase}
+                    index={index}
+                    isExpanded={isExpanded}
+                    phaseWithDates={phaseWithDates}
+                    recommendation={recommendation}
+                    onToggleExpand={(open) => setExpandedPhase(open ? phase.id : null)}
+                    onUpdatePhase={onUpdatePhase}
+                    onDeletePhase={onDeletePhase}
+                  />
+                );
+              })}
+            </div>
+          </SortableContext>
+        </DndContext>
+      )}
 
       {/* Add Phase */}
       {showAddPhase ? (

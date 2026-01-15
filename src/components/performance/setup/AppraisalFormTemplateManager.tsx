@@ -760,6 +760,8 @@ export function AppraisalFormTemplateManager({ companyId, companyName }: Props) 
                       phases={phases}
                       templateId={editingTemplate.id}
                       defaultDurationDays={formData.default_duration_days || 365}
+                      cycleType={formData.applicable_cycle_types?.[0] || 'annual'}
+                      companyEmployeeCount={150}
                       onAddPhase={createPhase}
                       onUpdatePhase={updatePhase}
                       onDeletePhase={deletePhase}

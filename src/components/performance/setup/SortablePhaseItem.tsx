@@ -26,10 +26,12 @@ import {
   HelpCircle,
   ShieldCheck,
   Calendar,
+  Lightbulb,
 } from "lucide-react";
 import type { AppraisalTemplatePhase } from "@/types/appraisalFormTemplates";
 import { formatDateRange } from "@/utils/appraisalDateCalculations";
 import { formatPhaseDuration } from "@/hooks/useAppraisalTemplatePhases";
+import type { DurationRecommendation } from "@/utils/phaseDurationRecommendations";
 
 interface SortablePhaseItemProps {
   phase: AppraisalTemplatePhase;
@@ -39,6 +41,7 @@ interface SortablePhaseItemProps {
     calculated_start_date?: Date;
     calculated_end_date?: Date;
   };
+  recommendation?: DurationRecommendation | null;
   onToggleExpand: (open: boolean) => void;
   onUpdatePhase: (data: Partial<AppraisalTemplatePhase> & { id: string }) => Promise<any>;
   onDeletePhase: (id: string) => Promise<void>;
@@ -63,6 +66,7 @@ export function SortablePhaseItem({
   index,
   isExpanded,
   phaseWithDates,
+  recommendation,
   onToggleExpand,
   onUpdatePhase,
   onDeletePhase,
@@ -158,7 +162,35 @@ export function SortablePhaseItem({
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Duration (days)</Label>
+                  <div className="flex items-center justify-between">
+                    <Label>Duration (days)</Label>
+                    {recommendation && recommendation.recommendedDays !== phase.duration_days && (
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => onUpdatePhase({ 
+                                id: phase.id, 
+                                duration_days: recommendation.recommendedDays 
+                              })}
+                              className="h-6 px-2 text-xs gap-1"
+                            >
+                              <Lightbulb className="h-3 w-3 text-amber-500" />
+                              Suggested: {recommendation.recommendedDays}d
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent side="top" className="max-w-xs">
+                            <p className="font-medium mb-1">{recommendation.rationale}</p>
+                            <p className="text-xs text-muted-foreground">
+                              Recommended range: {recommendation.minDays}-{recommendation.maxDays} days
+                            </p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    )}
+                  </div>
                   <Input
                     type="number"
                     value={phase.duration_days}
