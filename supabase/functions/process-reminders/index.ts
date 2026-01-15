@@ -77,8 +77,11 @@ interface Employee {
   company_id: string;
   hire_date: string | null;
   probation_end_date: string | null;
-  contract_end_date: string | null;
+  current_contract_end_date: string | null;
   date_of_birth: string | null;
+  retirement_date?: string | null;
+  separation_date?: string | null;
+  last_working_date?: string | null;
 }
 
 interface RecordWithEmployee {
@@ -211,16 +214,53 @@ serve(async (req) => {
 
       // Fetch records based on event type - now fetching individual records with their details
       switch (rule.event_type?.code) {
+        // ========================
+        // WORKFORCE EVENTS - NEW HIRE & REHIRE
+        // ========================
+        case 'NEW_HIRE_STARTING':
+        case 'REHIRE_STARTING': {
+          const isRehire = rule.event_type?.code === 'REHIRE_STARTING';
+          // Query employee_transactions for HIRE or REHIRE types
+          const { data: transactions } = await supabase
+            .from('employee_transactions')
+            .select(`
+              id, effective_date, transaction_type_id,
+              transaction_type:transaction_type_id(code, name),
+              profiles:employee_id(id, full_name, email, company_id, hire_date, probation_end_date, date_of_birth)
+            `)
+            .eq('company_id', rule.company_id)
+            .eq('effective_date', targetDateStr)
+            .eq('status', 'approved');
+          
+          records = (transactions || [])
+            .filter((t: any) => {
+              const typeCode = t.transaction_type?.code?.toUpperCase();
+              return isRehire ? typeCode === 'REHIRE' : typeCode === 'HIRE';
+            })
+            .map((t: any) => ({
+              id: t.id,
+              employee: t.profiles,
+              eventDate: t.effective_date,
+              itemName: isRehire ? 'Rehire Start' : 'New Hire Start',
+              sourceTable: 'employee_transactions'
+            }));
+          break;
+        }
+
+        // ========================
+        // WORKFORCE EVENTS - PROBATION
+        // ========================
+        case 'PROBATION_END':
         case 'probation_end': {
           const { data: probationEmps } = await supabase
             .from('profiles')
-            .select('id, full_name, email, company_id, hire_date, probation_end_date, contract_end_date, date_of_birth')
+            .select('id, full_name, email, company_id, hire_date, probation_end_date, current_contract_end_date, date_of_birth')
             .eq('company_id', rule.company_id)
             .eq('is_active', true)
             .eq('probation_end_date', targetDateStr);
           
           records = (probationEmps || []).map((emp: Employee) => ({
-            id: emp.id, // Use employee id as source_record_id for profile-based events
+            id: emp.id,
             employee: emp,
             eventDate: emp.probation_end_date!,
             itemName: 'Probation Period',
@@ -229,24 +269,502 @@ serve(async (req) => {
           break;
         }
 
+        case 'PROBATION_REVIEW_DUE': {
+          // Same as probation_end but with different messaging for manager to review
+          const { data: probationEmps } = await supabase
+            .from('profiles')
+            .select('id, full_name, email, company_id, hire_date, probation_end_date, current_contract_end_date, date_of_birth')
+            .eq('company_id', rule.company_id)
+            .eq('is_active', true)
+            .eq('probation_end_date', targetDateStr);
+          
+          records = (probationEmps || []).map((emp: Employee) => ({
+            id: emp.id,
+            employee: emp,
+            eventDate: emp.probation_end_date!,
+            itemName: 'Probation Review',
+            sourceTable: 'profiles'
+          }));
+          break;
+        }
+
+        // ========================
+        // WORKFORCE EVENTS - ACTING & SECONDMENT
+        // ========================
+        case 'ACTING_ASSIGNMENT_ENDING': {
+          const { data: positions } = await supabase
+            .from('employee_positions')
+            .select(`
+              id, end_date, assignment_type, position_title,
+              profiles:employee_id(id, full_name, email, company_id, hire_date, probation_end_date, date_of_birth)
+            `)
+            .eq('assignment_type', 'acting')
+            .eq('end_date', targetDateStr)
+            .eq('is_active', true);
+          
+          records = (positions || [])
+            .filter((p: any) => p.profiles?.company_id === rule.company_id)
+            .map((p: any) => ({
+              id: p.id,
+              employee: p.profiles,
+              eventDate: p.end_date,
+              itemName: `Acting Assignment - ${p.position_title || 'Position'}`,
+              sourceTable: 'employee_positions'
+            }));
+          break;
+        }
+
+        case 'SECONDMENT_ENDING': {
+          const { data: positions } = await supabase
+            .from('employee_positions')
+            .select(`
+              id, end_date, assignment_type, position_title,
+              profiles:employee_id(id, full_name, email, company_id, hire_date, probation_end_date, date_of_birth)
+            `)
+            .eq('assignment_type', 'secondment')
+            .eq('end_date', targetDateStr)
+            .eq('is_active', true);
+          
+          records = (positions || [])
+            .filter((p: any) => p.profiles?.company_id === rule.company_id)
+            .map((p: any) => ({
+              id: p.id,
+              employee: p.profiles,
+              eventDate: p.end_date,
+              itemName: `Secondment - ${p.position_title || 'Position'}`,
+              sourceTable: 'employee_positions'
+            }));
+          break;
+        }
+
+        // ========================
+        // WORKFORCE EVENTS - POSITION/SALARY/STATUS CHANGES
+        // ========================
+        case 'POSITION_CHANGE_EFFECTIVE': {
+          const { data: transactions } = await supabase
+            .from('employee_transactions')
+            .select(`
+              id, effective_date, transaction_type_id,
+              transaction_type:transaction_type_id(code, name),
+              profiles:employee_id(id, full_name, email, company_id, hire_date, probation_end_date, date_of_birth)
+            `)
+            .eq('company_id', rule.company_id)
+            .eq('effective_date', targetDateStr)
+            .eq('status', 'approved');
+          
+          records = (transactions || [])
+            .filter((t: any) => {
+              const typeCode = t.transaction_type?.code?.toUpperCase();
+              return ['PROMOTION', 'DEMOTION', 'POSITION_CHANGE'].includes(typeCode);
+            })
+            .map((t: any) => ({
+              id: t.id,
+              employee: t.profiles,
+              eventDate: t.effective_date,
+              itemName: t.transaction_type?.name || 'Position Change',
+              sourceTable: 'employee_transactions'
+            }));
+          break;
+        }
+
+        case 'TRANSFER_EFFECTIVE': {
+          const { data: transactions } = await supabase
+            .from('employee_transactions')
+            .select(`
+              id, effective_date, transaction_type_id,
+              transaction_type:transaction_type_id(code, name),
+              profiles:employee_id(id, full_name, email, company_id, hire_date, probation_end_date, date_of_birth)
+            `)
+            .eq('company_id', rule.company_id)
+            .eq('effective_date', targetDateStr)
+            .eq('status', 'approved');
+          
+          records = (transactions || [])
+            .filter((t: any) => {
+              const typeCode = t.transaction_type?.code?.toUpperCase();
+              return ['TRANSFER', 'BULK_TRANSFER', 'INTER_COMPANY_TRANSFER'].includes(typeCode);
+            })
+            .map((t: any) => ({
+              id: t.id,
+              employee: t.profiles,
+              eventDate: t.effective_date,
+              itemName: t.transaction_type?.name || 'Transfer',
+              sourceTable: 'employee_transactions'
+            }));
+          break;
+        }
+
+        case 'SALARY_CHANGE_EFFECTIVE': {
+          const { data: transactions } = await supabase
+            .from('employee_transactions')
+            .select(`
+              id, effective_date, transaction_type_id,
+              transaction_type:transaction_type_id(code, name),
+              profiles:employee_id(id, full_name, email, company_id, hire_date, probation_end_date, date_of_birth)
+            `)
+            .eq('company_id', rule.company_id)
+            .eq('effective_date', targetDateStr)
+            .eq('status', 'approved');
+          
+          records = (transactions || [])
+            .filter((t: any) => {
+              const typeCode = t.transaction_type?.code?.toUpperCase();
+              return ['SALARY_CHANGE', 'RATE_CHANGE', 'SALARY_ADJUSTMENT'].includes(typeCode);
+            })
+            .map((t: any) => ({
+              id: t.id,
+              employee: t.profiles,
+              eventDate: t.effective_date,
+              itemName: t.transaction_type?.name || 'Salary Change',
+              sourceTable: 'employee_transactions'
+            }));
+          break;
+        }
+
+        case 'STATUS_CHANGE_EFFECTIVE': {
+          const { data: transactions } = await supabase
+            .from('employee_transactions')
+            .select(`
+              id, effective_date, transaction_type_id,
+              transaction_type:transaction_type_id(code, name),
+              profiles:employee_id(id, full_name, email, company_id, hire_date, probation_end_date, date_of_birth)
+            `)
+            .eq('company_id', rule.company_id)
+            .eq('effective_date', targetDateStr)
+            .eq('status', 'approved');
+          
+          records = (transactions || [])
+            .filter((t: any) => {
+              const typeCode = t.transaction_type?.code?.toUpperCase();
+              return ['STATUS_CHANGE', 'EMPLOYMENT_STATUS_CHANGE'].includes(typeCode);
+            })
+            .map((t: any) => ({
+              id: t.id,
+              employee: t.profiles,
+              eventDate: t.effective_date,
+              itemName: t.transaction_type?.name || 'Status Change',
+              sourceTable: 'employee_transactions'
+            }));
+          break;
+        }
+
+        // ========================
+        // WORKFORCE EVENTS - CONTRACT & RETIREMENT
+        // ========================
+        case 'CONTRACT_END':
         case 'contract_end': {
           const { data: contractEmps } = await supabase
             .from('profiles')
-            .select('id, full_name, email, company_id, hire_date, probation_end_date, contract_end_date, date_of_birth')
+            .select('id, full_name, email, company_id, hire_date, probation_end_date, current_contract_end_date, date_of_birth')
             .eq('company_id', rule.company_id)
             .eq('is_active', true)
-            .eq('contract_end_date', targetDateStr);
+            .eq('current_contract_end_date', targetDateStr);
           
-          records = (contractEmps || []).map((emp: Employee) => ({
+          records = (contractEmps || []).map((emp: any) => ({
             id: emp.id,
             employee: emp,
-            eventDate: emp.contract_end_date!,
+            eventDate: emp.current_contract_end_date!,
             itemName: 'Employment Contract',
             sourceTable: 'profiles'
           }));
           break;
         }
 
+        case 'CONTRACT_EXTENSION_DUE': {
+          // Same query as contract_end but different messaging for extension review
+          const { data: contractEmps } = await supabase
+            .from('profiles')
+            .select('id, full_name, email, company_id, hire_date, probation_end_date, current_contract_end_date, date_of_birth')
+            .eq('company_id', rule.company_id)
+            .eq('is_active', true)
+            .eq('current_contract_end_date', targetDateStr);
+          
+          records = (contractEmps || []).map((emp: any) => ({
+            id: emp.id,
+            employee: emp,
+            eventDate: emp.current_contract_end_date!,
+            itemName: 'Contract Extension Review',
+            sourceTable: 'profiles'
+          }));
+          break;
+        }
+
+        case 'RETIREMENT': {
+          const { data: retirementEmps } = await supabase
+            .from('profiles')
+            .select('id, full_name, email, company_id, hire_date, probation_end_date, retirement_date, date_of_birth')
+            .eq('company_id', rule.company_id)
+            .eq('is_active', true)
+            .eq('retirement_date', targetDateStr);
+          
+          records = (retirementEmps || []).map((emp: any) => ({
+            id: emp.id,
+            employee: emp,
+            eventDate: emp.retirement_date!,
+            itemName: 'Retirement',
+            sourceTable: 'profiles'
+          }));
+          break;
+        }
+
+        // ========================
+        // WORKFORCE EVENTS - SEPARATION & OFFBOARDING
+        // ========================
+        case 'SEPARATION_EFFECTIVE': {
+          const { data: separationEmps } = await supabase
+            .from('profiles')
+            .select('id, full_name, email, company_id, hire_date, probation_end_date, separation_date, date_of_birth')
+            .eq('company_id', rule.company_id)
+            .eq('separation_date', targetDateStr);
+          
+          records = (separationEmps || []).map((emp: any) => ({
+            id: emp.id,
+            employee: emp,
+            eventDate: emp.separation_date!,
+            itemName: 'Employee Separation',
+            sourceTable: 'profiles'
+          }));
+          break;
+        }
+
+        case 'LAST_WORKING_DAY': {
+          const { data: lwdEmps } = await supabase
+            .from('profiles')
+            .select('id, full_name, email, company_id, hire_date, probation_end_date, last_working_date, date_of_birth')
+            .eq('company_id', rule.company_id)
+            .eq('last_working_date', targetDateStr);
+          
+          records = (lwdEmps || []).map((emp: any) => ({
+            id: emp.id,
+            employee: emp,
+            eventDate: emp.last_working_date!,
+            itemName: 'Last Working Day',
+            sourceTable: 'profiles'
+          }));
+          break;
+        }
+
+        case 'OFFBOARDING_TASK_DUE': {
+          const { data: tasks } = await supabase
+            .from('offboarding_instance_tasks')
+            .select(`
+              id, due_date, title, task_type, status,
+              offboarding_instance:instance_id(
+                id,
+                profiles:employee_id(id, full_name, email, company_id, hire_date, probation_end_date, date_of_birth)
+              )
+            `)
+            .eq('due_date', targetDateStr)
+            .neq('status', 'completed');
+          
+          records = (tasks || [])
+            .filter((t: any) => t.offboarding_instance?.profiles?.company_id === rule.company_id)
+            .map((t: any) => ({
+              id: t.id,
+              employee: t.offboarding_instance?.profiles,
+              eventDate: t.due_date,
+              itemName: t.title || 'Offboarding Task',
+              sourceTable: 'offboarding_instance_tasks'
+            }));
+          break;
+        }
+
+        case 'EQUIPMENT_RETURN_DUE': {
+          const { data: tasks } = await supabase
+            .from('offboarding_instance_tasks')
+            .select(`
+              id, due_date, title, task_type, status,
+              offboarding_instance:instance_id(
+                id,
+                profiles:employee_id(id, full_name, email, company_id, hire_date, probation_end_date, date_of_birth)
+              )
+            `)
+            .eq('due_date', targetDateStr)
+            .eq('task_type', 'equipment')
+            .neq('status', 'completed');
+          
+          records = (tasks || [])
+            .filter((t: any) => t.offboarding_instance?.profiles?.company_id === rule.company_id)
+            .map((t: any) => ({
+              id: t.id,
+              employee: t.offboarding_instance?.profiles,
+              eventDate: t.due_date,
+              itemName: t.title || 'Equipment Return',
+              sourceTable: 'offboarding_instance_tasks'
+            }));
+          break;
+        }
+
+        case 'KNOWLEDGE_TRANSFER_DUE': {
+          const { data: tasks } = await supabase
+            .from('offboarding_instance_tasks')
+            .select(`
+              id, due_date, title, task_type, status,
+              offboarding_instance:instance_id(
+                id,
+                profiles:employee_id(id, full_name, email, company_id, hire_date, probation_end_date, date_of_birth)
+              )
+            `)
+            .eq('due_date', targetDateStr)
+            .eq('task_type', 'knowledge_transfer')
+            .neq('status', 'completed');
+          
+          records = (tasks || [])
+            .filter((t: any) => t.offboarding_instance?.profiles?.company_id === rule.company_id)
+            .map((t: any) => ({
+              id: t.id,
+              employee: t.offboarding_instance?.profiles,
+              eventDate: t.due_date,
+              itemName: t.title || 'Knowledge Transfer',
+              sourceTable: 'offboarding_instance_tasks'
+            }));
+          break;
+        }
+
+        case 'EXIT_INTERVIEW_SCHEDULED': {
+          const { data: instances } = await supabase
+            .from('offboarding_instances')
+            .select(`
+              id, exit_interview_date, status,
+              profiles:employee_id(id, full_name, email, company_id, hire_date, probation_end_date, date_of_birth)
+            `)
+            .eq('exit_interview_date', targetDateStr)
+            .eq('status', 'in_progress');
+          
+          records = (instances || [])
+            .filter((i: any) => i.profiles?.company_id === rule.company_id)
+            .map((i: any) => ({
+              id: i.id,
+              employee: i.profiles,
+              eventDate: i.exit_interview_date,
+              itemName: 'Exit Interview',
+              sourceTable: 'offboarding_instances'
+            }));
+          break;
+        }
+
+        // ========================
+        // WORKFORCE EVENTS - VACANCY & HEADCOUNT
+        // ========================
+        case 'VACANCY_CREATED': {
+          // Query positions that recently became vacant (incumbent left)
+          const { data: vacancies } = await supabase
+            .from('positions')
+            .select(`
+              id, title, status, updated_at,
+              department:department_id(id, name, company_id)
+            `)
+            .is('incumbent_id', null)
+            .eq('status', 'active');
+          
+          // Filter to company and recently updated (within days_before window)
+          const targetDateObj = new Date(targetDateStr);
+          records = (vacancies || [])
+            .filter((v: any) => {
+              if (v.department?.company_id !== rule.company_id) return false;
+              const updatedAt = new Date(v.updated_at);
+              const diffDays = Math.floor((targetDateObj.getTime() - updatedAt.getTime()) / (1000 * 60 * 60 * 24));
+              return diffDays >= 0 && diffDays <= 1;
+            })
+            .map((v: any) => ({
+              id: v.id,
+              employee: {
+                id: v.id,
+                full_name: `${v.title} Vacancy`,
+                email: '',
+                company_id: v.department?.company_id,
+                hire_date: null,
+                probation_end_date: null,
+                current_contract_end_date: null,
+                date_of_birth: null
+              },
+              eventDate: targetDateStr,
+              itemName: `Position Vacancy: ${v.title}`,
+              sourceTable: 'positions'
+            }));
+          break;
+        }
+
+        case 'HEADCOUNT_REQUEST_PENDING': {
+          const { data: requests } = await supabase
+            .from('headcount_requests')
+            .select(`
+              id, created_at, position_title, status, requested_by,
+              company_id
+            `)
+            .eq('company_id', rule.company_id)
+            .eq('status', 'pending');
+          
+          // Create reminders for pending requests that have been waiting
+          records = (requests || []).map((r: any) => ({
+            id: r.id,
+            employee: {
+              id: r.requested_by || r.id,
+              full_name: `Headcount Request: ${r.position_title}`,
+              email: '',
+              company_id: r.company_id,
+              hire_date: null,
+              probation_end_date: null,
+              current_contract_end_date: null,
+              date_of_birth: null
+            },
+            eventDate: r.created_at.split('T')[0],
+            itemName: `Pending Headcount: ${r.position_title}`,
+            sourceTable: 'headcount_requests'
+          }));
+          break;
+        }
+
+        // ========================
+        // WORKFORCE EVENTS - MILESTONES (moved from milestone category)
+        // ========================
+        case 'BIRTHDAY':
+        case 'birthday': {
+          const monthDay = targetDateStr.substring(5); // MM-DD
+          const { data: birthdayEmps } = await supabase
+            .from('profiles')
+            .select('id, full_name, email, company_id, hire_date, probation_end_date, current_contract_end_date, date_of_birth')
+            .eq('company_id', rule.company_id)
+            .eq('is_active', true)
+            .not('date_of_birth', 'is', null);
+          
+          records = (birthdayEmps || [])
+            .filter((e: Employee) => e.date_of_birth && e.date_of_birth.substring(5) === monthDay)
+            .map((emp: Employee) => ({
+              id: emp.id,
+              employee: emp,
+              eventDate: targetDateStr,
+              itemName: 'Birthday',
+              sourceTable: 'profiles'
+            }));
+          break;
+        }
+
+        case 'WORK_ANNIVERSARY':
+        case 'work_anniversary': {
+          const anniversaryMonthDay = targetDateStr.substring(5);
+          const { data: anniversaryEmps } = await supabase
+            .from('profiles')
+            .select('id, full_name, email, company_id, hire_date, probation_end_date, current_contract_end_date, date_of_birth')
+            .eq('company_id', rule.company_id)
+            .eq('is_active', true)
+            .not('hire_date', 'is', null);
+          
+          records = (anniversaryEmps || [])
+            .filter((e: Employee) => e.hire_date && e.hire_date.substring(5) === anniversaryMonthDay)
+            .map((emp: Employee) => ({
+              id: emp.id,
+              employee: emp,
+              eventDate: targetDateStr,
+              itemName: 'Work Anniversary',
+              sourceTable: 'profiles'
+            }));
+          break;
+        }
+
+        // ========================
+        // LEAVE EVENTS
+        // ========================
         case 'leave_start': {
           const { data: leaveRecords } = await supabase
             .from('leave_requests')
@@ -254,7 +772,7 @@ serve(async (req) => {
               id,
               start_date,
               leave_type:leave_types(name),
-              profiles:employee_id(id, full_name, email, company_id, hire_date, probation_end_date, contract_end_date, date_of_birth)
+              profiles:employee_id(id, full_name, email, company_id, hire_date, probation_end_date, current_contract_end_date, date_of_birth)
             `)
             .eq('status', 'approved')
             .eq('start_date', targetDateStr);
@@ -278,7 +796,7 @@ serve(async (req) => {
               id,
               end_date,
               leave_type:leave_types(name),
-              profiles:employee_id(id, full_name, email, company_id, hire_date, probation_end_date, contract_end_date, date_of_birth)
+              profiles:employee_id(id, full_name, email, company_id, hire_date, probation_end_date, current_contract_end_date, date_of_birth)
             `)
             .eq('status', 'approved')
             .eq('end_date', targetDateStr);
@@ -295,6 +813,9 @@ serve(async (req) => {
           break;
         }
 
+        // ========================
+        // DOCUMENT & COMPLIANCE EVENTS
+        // ========================
         case 'license_expiry': {
           const { data: licenseRecords } = await supabase
             .from('employee_licenses')
@@ -303,7 +824,7 @@ serve(async (req) => {
               license_name,
               license_type,
               expiry_date,
-              profiles:employee_id(id, full_name, email, company_id, hire_date, probation_end_date, contract_end_date, date_of_birth)
+              profiles:employee_id(id, full_name, email, company_id, hire_date, probation_end_date, current_contract_end_date, date_of_birth)
             `)
             .eq('expiry_date', targetDateStr);
           
@@ -326,7 +847,7 @@ serve(async (req) => {
               id,
               certificate_name,
               expiry_date,
-              profiles:employee_id(id, full_name, email, company_id, hire_date, probation_end_date, contract_end_date, date_of_birth)
+              profiles:employee_id(id, full_name, email, company_id, hire_date, probation_end_date, current_contract_end_date, date_of_birth)
             `)
             .eq('expiry_date', targetDateStr);
           
@@ -349,7 +870,7 @@ serve(async (req) => {
               id,
               permit_type,
               expiry_date,
-              profiles:employee_id(id, full_name, email, company_id, hire_date, probation_end_date, contract_end_date, date_of_birth)
+              profiles:employee_id(id, full_name, email, company_id, hire_date, probation_end_date, current_contract_end_date, date_of_birth)
             `)
             .eq('expiry_date', targetDateStr);
           
@@ -372,7 +893,7 @@ serve(async (req) => {
               id,
               target_completion_date,
               training_course:training_courses(name),
-              profiles:employee_id(id, full_name, email, company_id, hire_date, probation_end_date, contract_end_date, date_of_birth)
+              profiles:employee_id(id, full_name, email, company_id, hire_date, probation_end_date, current_contract_end_date, date_of_birth)
             `)
             .eq('target_completion_date', targetDateStr)
             .neq('status', 'completed');
@@ -397,7 +918,7 @@ serve(async (req) => {
               membership_name,
               organization_name,
               expiry_date,
-              profiles:employee_id(id, full_name, email, company_id, hire_date, probation_end_date, contract_end_date, date_of_birth)
+              profiles:employee_id(id, full_name, email, company_id, hire_date, probation_end_date, current_contract_end_date, date_of_birth)
             `)
             .eq('expiry_date', targetDateStr);
           
@@ -421,7 +942,7 @@ serve(async (req) => {
               document_name,
               document_type,
               expiry_date,
-              profiles:employee_id(id, full_name, email, company_id, hire_date, probation_end_date, contract_end_date, date_of_birth)
+              profiles:employee_id(id, full_name, email, company_id, hire_date, probation_end_date, current_contract_end_date, date_of_birth)
             `)
             .not('expiry_date', 'is', null)
             .eq('expiry_date', targetDateStr);
@@ -434,48 +955,6 @@ serve(async (req) => {
               eventDate: d.expiry_date,
               itemName: d.document_name || d.document_type || 'Document',
               sourceTable: 'employee_documents'
-            }));
-          break;
-        }
-
-        case 'birthday': {
-          const monthDay = targetDateStr.substring(5); // MM-DD
-          const { data: birthdayEmps } = await supabase
-            .from('profiles')
-            .select('id, full_name, email, company_id, hire_date, probation_end_date, contract_end_date, date_of_birth')
-            .eq('company_id', rule.company_id)
-            .eq('is_active', true)
-            .not('date_of_birth', 'is', null);
-          
-          records = (birthdayEmps || [])
-            .filter((e: Employee) => e.date_of_birth && e.date_of_birth.substring(5) === monthDay)
-            .map((emp: Employee) => ({
-              id: emp.id,
-              employee: emp,
-              eventDate: targetDateStr,
-              itemName: 'Birthday',
-              sourceTable: 'profiles'
-            }));
-          break;
-        }
-
-        case 'work_anniversary': {
-          const anniversaryMonthDay = targetDateStr.substring(5);
-          const { data: anniversaryEmps } = await supabase
-            .from('profiles')
-            .select('id, full_name, email, company_id, hire_date, probation_end_date, contract_end_date, date_of_birth')
-            .eq('company_id', rule.company_id)
-            .eq('is_active', true)
-            .not('hire_date', 'is', null);
-          
-          records = (anniversaryEmps || [])
-            .filter((e: Employee) => e.hire_date && e.hire_date.substring(5) === anniversaryMonthDay)
-            .map((emp: Employee) => ({
-              id: emp.id,
-              employee: emp,
-              eventDate: targetDateStr,
-              itemName: 'Work Anniversary',
-              sourceTable: 'profiles'
             }));
           break;
         }
