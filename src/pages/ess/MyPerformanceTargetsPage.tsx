@@ -1,13 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Briefcase, Target, ChevronRight, AlertTriangle, CheckCircle2, Loader2, Plus, FileText } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { Briefcase, Target, ChevronRight, AlertTriangle, Loader2, Plus, FileText } from 'lucide-react';
 import { AssessmentModeIndicator } from '@/components/workforce/AssessmentModeIndicator';
 import { AssessmentMode } from '@/types/appraisalKRASnapshot';
 

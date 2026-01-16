@@ -86,6 +86,7 @@ const App = () => (
             <Route path="/ess/development-plan" element={<ProtectedRoute moduleCode="ess"><LazyPage><Pages.MyDevelopmentPlanPage /></LazyPage></ProtectedRoute>} />
             <Route path="/ess/appraisals" element={<ProtectedRoute moduleCode="ess"><LazyPage><Pages.MyAppraisalsPage /></LazyPage></ProtectedRoute>} />
             <Route path="/ess/skill-gaps" element={<ProtectedRoute moduleCode="ess"><LazyPage><Pages.MySkillGapsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/ess/performance-targets" element={<ProtectedRoute moduleCode="ess"><LazyPage><Pages.MyPerformanceTargetsPage /></LazyPage></ProtectedRoute>} />
             <Route path="/ess/feedback" element={<ProtectedRoute moduleCode="ess"><LazyPage><Pages.MyFeedbackPage /></LazyPage></ProtectedRoute>} />
             <Route path="/ess/recognition" element={<ProtectedRoute moduleCode="ess"><LazyPage><Pages.MyRecognitionPage /></LazyPage></ProtectedRoute>} />
             <Route path="/ess/compensation" element={<ProtectedRoute moduleCode="ess"><LazyPage><Pages.EssCompensationPage /></LazyPage></ProtectedRoute>} />
