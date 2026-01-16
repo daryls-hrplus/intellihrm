@@ -487,7 +487,10 @@ export function AppraisalFormTemplateManager({ companyId, companyName }: Props) 
                         <Button 
                           variant="ghost" 
                           size="icon" 
-                          onClick={() => window.open(`/performance/appraisal-preview/${template.id}`, '_blank')} 
+                          onClick={() => {
+                            const url = `${window.location.origin}/performance/appraisal-preview/${template.id}${window.location.search || ""}`;
+                            window.open(url, "_blank", "noopener,noreferrer");
+                          }} 
                           title="Preview Form"
                         >
                           <Eye className="h-4 w-4" />
