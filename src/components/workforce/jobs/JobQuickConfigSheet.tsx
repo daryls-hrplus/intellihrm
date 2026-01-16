@@ -54,6 +54,7 @@ interface JobQuickConfigSheetProps {
   onOpenChange: (open: boolean) => void;
   incompleteJobs: JobConfigStats[];
   companyId: string;
+  companyName: string;
   onConfigurationChanged: () => void;
 }
 
@@ -64,6 +65,7 @@ export function JobQuickConfigSheet({
   onOpenChange,
   incompleteJobs,
   companyId,
+  companyName,
   onConfigurationChanged,
 }: JobQuickConfigSheetProps) {
   const [selectedJobId, setSelectedJobId] = useState<string>("");
@@ -144,6 +146,8 @@ export function JobQuickConfigSheet({
                 Configure Job
               </DialogTitle>
               <DialogDescription className="text-sm text-muted-foreground">
+                {companyName && <span className="font-medium text-foreground">{companyName}</span>}
+                {companyName && " • "}
                 {incompleteJobs.length} job{incompleteJobs.length !== 1 ? "s" : ""} need configuration
               </DialogDescription>
             </div>

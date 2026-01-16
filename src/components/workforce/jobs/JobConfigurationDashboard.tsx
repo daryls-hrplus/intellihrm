@@ -49,6 +49,7 @@ interface JobConfigurationDashboardProps {
   onFilterChange: (filter: ConfigFilter) => void;
   getPercentage: (count: number, total: number) => string;
   companyId: string;
+  companyName: string;
   onRefresh: () => void;
 }
 
@@ -75,6 +76,7 @@ export function JobConfigurationDashboard({
   onFilterChange,
   getPercentage,
   companyId,
+  companyName,
   onRefresh,
 }: JobConfigurationDashboardProps) {
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -253,6 +255,7 @@ export function JobConfigurationDashboard({
         onOpenChange={setSheetOpen}
         incompleteJobs={incompleteJobs}
         companyId={companyId}
+        companyName={companyName}
         onConfigurationChanged={onRefresh}
       />
     </>

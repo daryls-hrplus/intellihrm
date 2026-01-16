@@ -999,6 +999,7 @@ export default function JobsPage() {
                 onFilterChange={setActiveFilter}
                 getPercentage={getPercentage}
                 companyId={selectedCompanyId}
+                companyName={companies.find(c => c.id === selectedCompanyId)?.name || ""}
                 onRefresh={refetchStats}
               />
             )}
