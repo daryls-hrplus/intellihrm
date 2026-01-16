@@ -872,6 +872,7 @@ export default function AppraisalsPage() {
           onOpenChange={setCycleDialogOpen}
           cycle={selectedCycle}
           companyId={selectedCompanyId}
+          companyName={companies.find(c => c.id === selectedCompanyId)?.name || ""}
           onSuccess={fetchData}
           isProbationReview={isProbationReview}
           isManagerCycle={isManagerCycle}

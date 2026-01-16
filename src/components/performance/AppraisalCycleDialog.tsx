@@ -57,6 +57,7 @@ interface AppraisalCycleDialogProps {
   onOpenChange: (open: boolean) => void;
   cycle: AppraisalCycle | null;
   companyId: string | undefined;
+  companyName?: string;
   onSuccess: () => void;
   isProbationReview?: boolean;
   isManagerCycle?: boolean;
@@ -67,6 +68,7 @@ export function AppraisalCycleDialog({
   onOpenChange,
   cycle,
   companyId,
+  companyName,
   onSuccess,
   isProbationReview = false,
   isManagerCycle = false,
@@ -287,6 +289,9 @@ export function AppraisalCycleDialog({
             {cycle ? "Edit " : "Create "}
             {isProbationReview ? "Probation Review Cycle" : "Appraisal Cycle"}
           </DialogTitle>
+          {companyName && (
+            <p className="text-sm text-muted-foreground">{companyName}</p>
+          )}
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6">
