@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Table,
   TableBody,
@@ -37,6 +38,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
@@ -50,10 +57,16 @@ import {
   Loader2,
   ClipboardList,
   ChevronLeft,
+  ChevronDown,
+  ChevronUp,
   Sparkles,
   Target,
   X,
   Settings,
+  Link2,
+  Briefcase,
+  Upload,
+  MoreHorizontal,
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { getTodayString } from "@/utils/dateUtils";
@@ -62,6 +75,11 @@ import { ResponsibilityCategoryBadge, getCategoryOptions, ResponsibilityCategory
 import { ComplexityLevelIndicator, getComplexityLevelOptions } from "@/components/workforce/ComplexityLevelIndicator";
 import { useResponsibilityAI } from "@/hooks/useResponsibilityAI";
 import { ResponsibilityKRAManager } from "@/components/responsibilities/ResponsibilityKRAManager";
+import { useResponsibilityJobLinks } from "@/hooks/useResponsibilityJobLinks";
+import { ResponsibilityJobsDialog } from "@/components/workforce/responsibilities/ResponsibilityJobsDialog";
+import { BulkAssignToJobsDialog } from "@/components/workforce/responsibilities/BulkAssignToJobsDialog";
+import { ResponsibilityExpandedRow } from "@/components/workforce/responsibilities/ResponsibilityExpandedRow";
+import { BulkJobDataImport } from "@/components/workforce/BulkJobDataImport";
 
 interface Responsibility {
   id: string;
@@ -131,18 +149,69 @@ export default function ResponsibilitiesPage() {
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [jobFamilyFilter, setJobFamilyFilter] = useState<string>("all");
   const [jobFilter, setJobFilter] = useState<string>("all");
+  const [assignmentFilter, setAssignmentFilter] = useState<string>("all");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedResponsibility, setSelectedResponsibility] = useState<Responsibility | null>(null);
   const [formData, setFormData] = useState(emptyForm);
   const [newKRA, setNewKRA] = useState("");
+  
+  // New states for enhanced functionality
+  const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
+  const [selectedForBulk, setSelectedForBulk] = useState<Set<string>>(new Set());
+  const [jobsDialogOpen, setJobsDialogOpen] = useState(false);
+  const [jobsDialogResponsibility, setJobsDialogResponsibility] = useState<Responsibility | null>(null);
+  const [bulkAssignDialogOpen, setBulkAssignDialogOpen] = useState(false);
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
 
   const { logAction } = useAuditLog();
   const { t } = useLanguage();
   const { isGenerating, generateDescription, suggestKRAs, enrichAll } = useResponsibilityAI();
+  const { getJobCount, getJobLinks, refetch: refetchJobLinks } = useResponsibilityJobLinks(selectedCompanyId);
 
   const categoryOptions = getCategoryOptions();
   const complexityOptions = getComplexityLevelOptions();
+  
+  const toggleRowExpanded = (id: string) => {
+    setExpandedRows(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
+  
+  const toggleBulkSelection = (id: string) => {
+    setSelectedForBulk(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
+  
+  const toggleSelectAll = () => {
+    if (selectedForBulk.size === filteredResponsibilities.length) {
+      setSelectedForBulk(new Set());
+    } else {
+      setSelectedForBulk(new Set(filteredResponsibilities.map(r => r.id)));
+    }
+  };
+  
+  const openJobsDialog = (responsibility: Responsibility) => {
+    setJobsDialogResponsibility(responsibility);
+    setJobsDialogOpen(true);
+  };
+  
+  const getSelectedResponsibilities = () => {
+    return responsibilities.filter(r => selectedForBulk.has(r.id));
+  };
 
   useEffect(() => {
     fetchCompanies();
@@ -470,7 +539,15 @@ export default function ResponsibilitiesPage() {
       }
     }
     
-    return matchesSearch && matchesCategory && matchesJobFamily && matchesJob;
+    // Filter by assignment status
+    let matchesAssignment = true;
+    if (assignmentFilter === "assigned") {
+      matchesAssignment = getJobCount(r.id) > 0;
+    } else if (assignmentFilter === "unassigned") {
+      matchesAssignment = getJobCount(r.id) === 0;
+    }
+    
+    return matchesSearch && matchesCategory && matchesJobFamily && matchesJob && matchesAssignment;
   });
 
   return (
@@ -496,10 +573,16 @@ export default function ResponsibilitiesPage() {
               </p>
             </div>
           </div>
-          <Button onClick={() => handleOpenDialog()}>
-            <Plus className="mr-2 h-4 w-4" />
-            {t("workforce.responsibilities.addResponsibility")}
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" onClick={() => setImportDialogOpen(true)}>
+              <Upload className="mr-2 h-4 w-4" />
+              Import
+            </Button>
+            <Button onClick={() => handleOpenDialog()}>
+              <Plus className="mr-2 h-4 w-4" />
+              {t("workforce.responsibilities.addResponsibility")}
+            </Button>
+          </div>
         </div>
 
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
@@ -564,6 +647,17 @@ export default function ResponsibilitiesPage() {
             </SelectContent>
           </Select>
 
+          <Select value={assignmentFilter} onValueChange={setAssignmentFilter}>
+            <SelectTrigger className="w-full sm:w-[150px]">
+              <SelectValue placeholder="All" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All</SelectItem>
+              <SelectItem value="assigned">Assigned to Jobs</SelectItem>
+              <SelectItem value="unassigned">Unassigned</SelectItem>
+            </SelectContent>
+          </Select>
+
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
@@ -575,13 +669,33 @@ export default function ResponsibilitiesPage() {
           </div>
         </div>
 
+        {/* Bulk Actions Bar */}
+        {selectedForBulk.size > 0 && (
+          <div className="flex items-center gap-3 p-3 bg-primary/5 rounded-lg border border-primary/20">
+            <Badge variant="secondary">{selectedForBulk.size} selected</Badge>
+            <Button size="sm" onClick={() => setBulkAssignDialogOpen(true)}>
+              <Link2 className="h-4 w-4 mr-1" />
+              Assign to Jobs
+            </Button>
+            <Button size="sm" variant="ghost" onClick={() => setSelectedForBulk(new Set())}>
+              Clear Selection
+            </Button>
+          </div>
+        )}
+
         <div className="rounded-lg border bg-card">
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-[40px]">
+                  <Checkbox
+                    checked={selectedForBulk.size === filteredResponsibilities.length && filteredResponsibilities.length > 0}
+                    onCheckedChange={toggleSelectAll}
+                  />
+                </TableHead>
                 <TableHead>{t("common.name")}</TableHead>
                 <TableHead>Category</TableHead>
-                <TableHead>Complexity</TableHead>
+                <TableHead>Linked Jobs</TableHead>
                 <TableHead>KRAs</TableHead>
                 <TableHead>{t("common.status")}</TableHead>
                 <TableHead className="w-[100px]">{t("common.actions")}</TableHead>
@@ -590,73 +704,123 @@ export default function ResponsibilitiesPage() {
             <TableBody>
               {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-8">
+                  <TableCell colSpan={7} className="text-center py-8">
                     <Loader2 className="h-6 w-6 animate-spin mx-auto" />
                   </TableCell>
                 </TableRow>
               ) : filteredResponsibilities.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
                     {searchTerm ? t("workforce.responsibilities.noMatchingSearch") : t("workforce.responsibilities.createToStart")}
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredResponsibilities.map((responsibility) => (
-                  <TableRow key={responsibility.id}>
-                    <TableCell>
-                      <div>
-                        <span className="font-medium">{responsibility.name}</span>
-                        {responsibility.description && (
-                          <p className="text-xs text-muted-foreground truncate max-w-xs">
-                            {responsibility.description}
-                          </p>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <ResponsibilityCategoryBadge category={responsibility.category} size="sm" />
-                    </TableCell>
-                    <TableCell>
-                      <ComplexityLevelIndicator level={responsibility.complexity_level} size="sm" />
-                    </TableCell>
-                    <TableCell>
-                      {responsibility.key_result_areas.length > 0 ? (
-                        <Badge variant="secondary" className="text-xs">
-                          <Target className="h-3 w-3 mr-1" />
-                          {responsibility.key_result_areas.length} KRAs
-                        </Badge>
-                      ) : (
-                        <span className="text-muted-foreground text-xs">—</span>
+                filteredResponsibilities.map((responsibility) => {
+                  const jobCount = getJobCount(responsibility.id);
+                  const linkedJobs = getJobLinks(responsibility.id);
+                  const isExpanded = expandedRows.has(responsibility.id);
+                  
+                  return (
+                    <>
+                      <TableRow key={responsibility.id} className={isExpanded ? "border-b-0" : ""}>
+                        <TableCell>
+                          <Checkbox
+                            checked={selectedForBulk.has(responsibility.id)}
+                            onCheckedChange={() => toggleBulkSelection(responsibility.id)}
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-6 w-6 shrink-0"
+                              onClick={() => toggleRowExpanded(responsibility.id)}
+                            >
+                              {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                            </Button>
+                            <div>
+                              <span className="font-medium">{responsibility.name}</span>
+                              {responsibility.description && (
+                                <p className="text-xs text-muted-foreground truncate max-w-xs">
+                                  {responsibility.description}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <ResponsibilityCategoryBadge category={responsibility.category} size="sm" />
+                        </TableCell>
+                        <TableCell>
+                          <Badge
+                            variant={jobCount > 0 ? "default" : "outline"}
+                            className={`cursor-pointer ${jobCount === 0 ? "text-amber-600 border-amber-300" : ""}`}
+                            onClick={() => openJobsDialog(responsibility)}
+                          >
+                            <Briefcase className="h-3 w-3 mr-1" />
+                            {jobCount} {jobCount === 1 ? "Job" : "Jobs"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          {responsibility.key_result_areas.length > 0 ? (
+                            <Badge variant="secondary" className="text-xs">
+                              <Target className="h-3 w-3 mr-1" />
+                              {responsibility.key_result_areas.length} KRAs
+                            </Badge>
+                          ) : (
+                            <span className="text-muted-foreground text-xs">—</span>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={responsibility.is_active ? "default" : "secondary"}>
+                            {responsibility.is_active ? t("common.active") : t("common.inactive")}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => handleOpenDialog(responsibility)}>
+                                <Pencil className="h-4 w-4 mr-2" />
+                                Edit
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => openJobsDialog(responsibility)}>
+                                <Link2 className="h-4 w-4 mr-2" />
+                                Manage Jobs
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => {
+                                  setSelectedResponsibility(responsibility);
+                                  setDeleteDialogOpen(true);
+                                }}
+                                className="text-destructive"
+                              >
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                Delete
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                      {isExpanded && (
+                        <TableRow key={`${responsibility.id}-expanded`}>
+                          <TableCell colSpan={7} className="p-0">
+                            <ResponsibilityExpandedRow
+                              linkedJobs={linkedJobs}
+                              kras={responsibility.key_result_areas}
+                              onManageJobs={() => openJobsDialog(responsibility)}
+                            />
+                          </TableCell>
+                        </TableRow>
                       )}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={responsibility.is_active ? "default" : "secondary"}>
-                        {responsibility.is_active ? t("common.active") : t("common.inactive")}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleOpenDialog(responsibility)}
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => {
-                            setSelectedResponsibility(responsibility);
-                            setDeleteDialogOpen(true);
-                          }}
-                        >
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
+                    </>
+                  );
+                })
               )}
             </TableBody>
           </Table>
