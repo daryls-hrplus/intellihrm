@@ -228,7 +228,7 @@ export function JobConfigurationDashboard({
                   {stats.totalActiveJobs - stats.fullyConfiguredJobs !== 1 ? "s" : ""} need
                   {stats.totalActiveJobs - stats.fullyConfiguredJobs === 1 ? "s" : ""} configuration
                 </p>
-                <p className="text-neutral-700 dark:text-neutral-300 mt-1">
+                <p className="text-neutral-800 dark:text-neutral-200 mt-1">
                   Jobs without competencies, responsibilities, goals, or skills may impact performance
                   appraisals and succession planning.
                 </p>
