@@ -1097,6 +1097,45 @@ export default function ResponsibilitiesPage() {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+
+        {/* Responsibility Jobs Dialog */}
+        {jobsDialogResponsibility && (
+          <ResponsibilityJobsDialog
+            open={jobsDialogOpen}
+            onOpenChange={setJobsDialogOpen}
+            responsibilityId={jobsDialogResponsibility.id}
+            responsibilityName={jobsDialogResponsibility.name}
+            companyId={selectedCompanyId}
+            linkedJobs={getJobLinks(jobsDialogResponsibility.id)}
+            onUpdate={() => {
+              refetchJobLinks();
+              fetchResponsibilities();
+            }}
+          />
+        )}
+
+        {/* Bulk Assign to Jobs Dialog */}
+        <BulkAssignToJobsDialog
+          open={bulkAssignDialogOpen}
+          onOpenChange={setBulkAssignDialogOpen}
+          companyId={selectedCompanyId}
+          selectedResponsibilities={getSelectedResponsibilities()}
+          onComplete={() => {
+            refetchJobLinks();
+            setSelectedForBulk(new Set());
+          }}
+        />
+
+        {/* Import Dialog */}
+        <BulkJobDataImport
+          open={importDialogOpen}
+          onOpenChange={setImportDialogOpen}
+          companyId={selectedCompanyId}
+          onImportComplete={() => {
+            fetchResponsibilities();
+            refetchJobLinks();
+          }}
+        />
       </div>
     </AppLayout>
   );

@@ -2,7 +2,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Briefcase, ExternalLink, Target, AlertCircle } from "lucide-react";
 import { formatDateForDisplay } from "@/utils/dateUtils";
-import { NavLink } from "react-router-dom";
 
 interface JobLink {
   id: string;
@@ -25,6 +24,18 @@ export function ResponsibilityExpandedRow({
   kras,
   onManageJobs,
 }: ResponsibilityExpandedRowProps) {
+  const handleManageJobsClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onManageJobs();
+  };
+
+  const handleAssignClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onManageJobs();
+  };
+
   return (
     <div className="px-4 py-3 bg-muted/30 border-t space-y-4">
       {/* Jobs Section */}
@@ -34,9 +45,14 @@ export function ResponsibilityExpandedRow({
             <Briefcase className="h-4 w-4 text-muted-foreground" />
             Jobs Using This Responsibility
           </h4>
-          <Button variant="ghost" size="sm" onClick={onManageJobs}>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={handleManageJobsClick}
+            className="gap-1"
+          >
             Manage Jobs
-            <ExternalLink className="h-3 w-3 ml-1" />
+            <ExternalLink className="h-3 w-3" />
           </Button>
         </div>
 
@@ -44,30 +60,34 @@ export function ResponsibilityExpandedRow({
           <div className="flex items-center gap-2 text-sm text-muted-foreground py-2">
             <AlertCircle className="h-4 w-4" />
             <span>Not assigned to any job yet</span>
-            <Button variant="link" size="sm" className="h-auto p-0" onClick={onManageJobs}>
+            <Button 
+              variant="link" 
+              size="sm" 
+              className="h-auto p-0 text-primary"
+              onClick={handleAssignClick}
+            >
               Click to assign
             </Button>
           </div>
         ) : (
           <div className="flex flex-wrap gap-2">
             {linkedJobs.slice(0, 8).map((job) => (
-              <NavLink
+              <Badge
                 key={job.id}
-                to={`/workforce/jobs?highlight=${job.job_id}`}
-                className="group"
+                variant="outline"
+                className="cursor-pointer hover:bg-primary/10 transition-colors"
               >
-                <Badge
-                  variant="outline"
-                  className="cursor-pointer hover:bg-primary/10 transition-colors"
-                >
-                  <span className="font-medium">{job.job_name}</span>
-                  <span className="mx-1 text-muted-foreground">•</span>
-                  <span className="text-primary">{job.weighting}%</span>
-                </Badge>
-              </NavLink>
+                <span className="font-medium">{job.job_name}</span>
+                <span className="mx-1 text-muted-foreground">•</span>
+                <span className="text-primary">{job.weighting}%</span>
+              </Badge>
             ))}
             {linkedJobs.length > 8 && (
-              <Badge variant="secondary" className="cursor-pointer" onClick={onManageJobs}>
+              <Badge 
+                variant="secondary" 
+                className="cursor-pointer" 
+                onClick={handleManageJobsClick}
+              >
                 +{linkedJobs.length - 8} more
               </Badge>
             )}
