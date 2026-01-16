@@ -1,11 +1,11 @@
 import { useState, useMemo, useCallback } from "react";
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
-} from "@/components/ui/sheet";
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
@@ -69,7 +69,7 @@ export function JobQuickConfigSheet({
   const [selectedJobId, setSelectedJobId] = useState<string>("");
   const [activeTab, setActiveTab] = useState<ConfigTab>("competencies");
 
-  // Auto-select first job when sheet opens or jobs change
+  // Auto-select first job when dialog opens or jobs change
   useMemo(() => {
     if (incompleteJobs.length > 0 && (!selectedJobId || !incompleteJobs.find(j => j.jobId === selectedJobId))) {
       setSelectedJobId(incompleteJobs[0].jobId);
@@ -125,7 +125,7 @@ export function JobQuickConfigSheet({
     return count;
   }, []);
 
-  const handleSheetClose = useCallback(() => {
+  const handleDialogClose = useCallback(() => {
     onConfigurationChanged();
     onOpenChange(false);
   }, [onConfigurationChanged, onOpenChange]);
@@ -135,20 +135,17 @@ export function JobQuickConfigSheet({
   }
 
   return (
-    <Sheet open={open} onOpenChange={handleSheetClose}>
-      <SheetContent 
-        side="right" 
-        className="w-full sm:w-[600px] md:w-[700px] lg:w-[800px] xl:w-[900px] p-0 flex flex-col"
-      >
-        <SheetHeader className="px-6 pt-6 pb-4 border-b bg-muted/30">
+    <Dialog open={open} onOpenChange={handleDialogClose}>
+      <DialogContent className="max-w-5xl w-[95vw] h-[90vh] p-0 flex flex-col">
+        <DialogHeader className="px-6 pt-6 pb-4 border-b bg-muted/30 shrink-0">
           <div className="flex items-center justify-between">
             <div>
-              <SheetTitle className="text-lg font-semibold">
+              <DialogTitle className="text-xl font-semibold">
                 Configure Job
-              </SheetTitle>
-              <SheetDescription className="text-sm text-muted-foreground">
+              </DialogTitle>
+              <DialogDescription className="text-sm text-muted-foreground">
                 {incompleteJobs.length} job{incompleteJobs.length !== 1 ? "s" : ""} need configuration
-              </SheetDescription>
+              </DialogDescription>
             </div>
           </div>
 
@@ -209,7 +206,7 @@ export function JobQuickConfigSheet({
               />
             </div>
           )}
-        </SheetHeader>
+        </DialogHeader>
 
         {/* Tabs Content */}
         {selectedJob && (
@@ -218,34 +215,34 @@ export function JobQuickConfigSheet({
             onValueChange={(v) => setActiveTab(v as ConfigTab)}
             className="flex-1 flex flex-col overflow-hidden"
           >
-            <div className="border-b px-6 py-2 bg-background">
+            <div className="border-b px-6 py-2 bg-background shrink-0">
               <TabsList className="grid grid-cols-4 w-full">
-                <TabsTrigger value="competencies" className="text-xs sm:text-sm">
-                  <Award className="h-3.5 w-3.5 mr-1.5 hidden sm:inline" />
+                <TabsTrigger value="competencies" className="text-sm">
+                  <Award className="h-4 w-4 mr-2" />
                   Competencies
                   {!selectedJob.hasCompetencies && (
-                    <AlertCircle className="h-3 w-3 ml-1 text-amber-500" />
+                    <AlertCircle className="h-3.5 w-3.5 ml-1.5 text-amber-500" />
                   )}
                 </TabsTrigger>
-                <TabsTrigger value="skills" className="text-xs sm:text-sm">
-                  <Lightbulb className="h-3.5 w-3.5 mr-1.5 hidden sm:inline" />
+                <TabsTrigger value="skills" className="text-sm">
+                  <Lightbulb className="h-4 w-4 mr-2" />
                   Skills
                   {!selectedJob.hasSkills && (
-                    <AlertCircle className="h-3 w-3 ml-1 text-amber-500" />
+                    <AlertCircle className="h-3.5 w-3.5 ml-1.5 text-amber-500" />
                   )}
                 </TabsTrigger>
-                <TabsTrigger value="responsibilities" className="text-xs sm:text-sm">
-                  <ListChecks className="h-3.5 w-3.5 mr-1.5 hidden sm:inline" />
+                <TabsTrigger value="responsibilities" className="text-sm">
+                  <ListChecks className="h-4 w-4 mr-2" />
                   Responsibilities
                   {!selectedJob.hasResponsibilities && (
-                    <AlertCircle className="h-3 w-3 ml-1 text-amber-500" />
+                    <AlertCircle className="h-3.5 w-3.5 ml-1.5 text-amber-500" />
                   )}
                 </TabsTrigger>
-                <TabsTrigger value="goals" className="text-xs sm:text-sm">
-                  <Target className="h-3.5 w-3.5 mr-1.5 hidden sm:inline" />
+                <TabsTrigger value="goals" className="text-sm">
+                  <Target className="h-4 w-4 mr-2" />
                   Goals
                   {!selectedJob.hasGoals && (
-                    <AlertCircle className="h-3 w-3 ml-1 text-amber-500" />
+                    <AlertCircle className="h-3.5 w-3.5 ml-1.5 text-amber-500" />
                   )}
                 </TabsTrigger>
               </TabsList>
@@ -283,7 +280,7 @@ export function JobQuickConfigSheet({
         )}
 
         {/* Navigation Footer */}
-        <div className="border-t px-6 py-4 bg-muted/30 flex items-center justify-between">
+        <div className="border-t px-6 py-4 bg-muted/30 flex items-center justify-between shrink-0">
           <Button
             variant="outline"
             size="sm"
@@ -306,8 +303,8 @@ export function JobQuickConfigSheet({
             <ChevronRight className="h-4 w-4 ml-1" />
           </Button>
         </div>
-      </SheetContent>
-    </Sheet>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -322,16 +319,16 @@ function StatusBadge({ label, hasConfig, count }: StatusBadgeProps) {
     <Badge
       variant="outline"
       className={cn(
-        "flex items-center gap-1 text-xs",
+        "flex items-center gap-1.5 text-xs py-1",
         hasConfig
-          ? "border-emerald-500/50 text-emerald-600 bg-emerald-500/5"
-          : "border-amber-500/50 text-amber-600 bg-amber-500/5"
+          ? "border-emerald-500/50 text-emerald-700 bg-emerald-500/10 dark:text-emerald-400"
+          : "border-amber-500/50 text-amber-700 bg-amber-500/10 dark:text-amber-400"
       )}
     >
       {hasConfig ? (
-        <CheckCircle2 className="h-3 w-3" />
+        <CheckCircle2 className="h-3.5 w-3.5" />
       ) : (
-        <AlertCircle className="h-3 w-3" />
+        <AlertCircle className="h-3.5 w-3.5" />
       )}
       {label}
       {hasConfig && <span className="text-muted-foreground">({count})</span>}
