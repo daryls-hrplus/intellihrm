@@ -66,7 +66,8 @@ import { CompetencyDriftDashboard } from "@/components/performance/ai/Competency
 import { ManagerCapabilityDashboard } from "@/components/performance/ai/ManagerCapabilityDashboard";
 import { NotificationsLinkSection } from "@/components/performance/setup/NotificationsLinkSection";
 import { UnifiedCompetencyFramework } from "@/components/performance/setup/UnifiedCompetencyFramework";
-import { Globe } from "lucide-react";
+import { JobAssessmentConfigPanel } from "@/components/performance/setup/JobAssessmentConfigPanel";
+import { Globe, Briefcase } from "lucide-react";
 
 // Breadcrumb items
 const breadcrumbItems = [
@@ -447,6 +448,10 @@ export default function PerformanceSetupPage() {
                     <Scale className="h-4 w-4" />
                     Benchmarks
                   </TabsTrigger>
+                  <TabsTrigger value="job-assessment-config" className="flex items-center gap-2">
+                    <Briefcase className="h-4 w-4" />
+                    Job Assessment Config
+                  </TabsTrigger>
                 </TabsList>
                 <TabsContent value="performance-categories" className="mt-4">
                   <PerformanceCategoriesManager companyId={selectedCompany} />
@@ -465,6 +470,9 @@ export default function PerformanceSetupPage() {
                 </TabsContent>
                 <TabsContent value="benchmarks" className="mt-4">
                   <ExternalBenchmarkConfigPanel companyId={selectedCompany} />
+                </TabsContent>
+                <TabsContent value="job-assessment-config" className="mt-4">
+                  <JobAssessmentConfigPanel companyId={selectedCompany} />
                 </TabsContent>
               </Tabs>
             </TabsContent>
