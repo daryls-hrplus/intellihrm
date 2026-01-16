@@ -217,18 +217,18 @@ export function JobConfigurationDashboard({
           )}
         </div>
 
-        {/* Warning for incomplete jobs */}
+        {/* Warning for incomplete jobs - Confluence style */}
         {stats && stats.fullyConfiguredJobs < stats.totalActiveJobs && stats.totalActiveJobs > 0 && (
-          <div className="flex items-start justify-between gap-3 text-sm bg-white dark:bg-zinc-900 p-4 rounded-md border-l-4 border-l-amber-500 border border-gray-200 dark:border-zinc-700 shadow-sm">
+          <div className="flex items-start justify-between gap-4 text-sm bg-white dark:bg-card p-4 rounded-md border-l-4 border-l-amber-500 shadow-sm">
             <div className="flex items-start gap-3">
-              <AlertCircle className="h-5 w-5 mt-0.5 text-amber-600 dark:text-amber-500 shrink-0" />
+              <AlertCircle className="h-5 w-5 mt-0.5 text-amber-600 shrink-0" />
               <div>
-                <p className="font-semibold text-gray-900 dark:text-gray-100">
+                <p className="font-semibold text-black dark:text-white">
                   {stats.totalActiveJobs - stats.fullyConfiguredJobs} job
                   {stats.totalActiveJobs - stats.fullyConfiguredJobs !== 1 ? "s" : ""} need
                   {stats.totalActiveJobs - stats.fullyConfiguredJobs === 1 ? "s" : ""} configuration
                 </p>
-                <p className="text-gray-600 dark:text-gray-400 mt-0.5">
+                <p className="text-neutral-700 dark:text-neutral-300 mt-1">
                   Jobs without competencies, responsibilities, goals, or skills may impact performance
                   appraisals and succession planning.
                 </p>
@@ -238,7 +238,7 @@ export function JobConfigurationDashboard({
               variant="outline"
               size="sm"
               onClick={() => setSheetOpen(true)}
-              className="shrink-0"
+              className="shrink-0 border-neutral-300 text-neutral-800 hover:bg-neutral-100 dark:border-neutral-600 dark:text-neutral-200 dark:hover:bg-neutral-800"
             >
               <Settings2 className="h-4 w-4 mr-1.5" />
               Configure Now
