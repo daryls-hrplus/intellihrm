@@ -998,6 +998,8 @@ export default function JobsPage() {
                 activeFilter={activeFilter}
                 onFilterChange={setActiveFilter}
                 getPercentage={getPercentage}
+                companyId={selectedCompanyId}
+                onRefresh={refetchStats}
               />
             )}
 
