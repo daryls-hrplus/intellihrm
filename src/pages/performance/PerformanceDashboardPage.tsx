@@ -41,7 +41,7 @@ export default function PerformanceDashboardPage() {
   const { t } = useLanguage();
   const { user, company } = useAuth();
   const { hasTabAccess } = useGranularPermissions();
-  const [analyticsOpen, setAnalyticsOpen] = useState(true);
+  const [analyticsOpen, setAnalyticsOpen] = useState(false);
 
   const allModules = {
     // Performance Reviews
