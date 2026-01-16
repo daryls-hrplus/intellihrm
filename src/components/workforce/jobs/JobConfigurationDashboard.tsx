@@ -1,6 +1,4 @@
 import { UnifiedStatCard } from "@/components/dashboard/UnifiedStatCard";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import {
   Briefcase,
   Award,
@@ -165,28 +163,27 @@ export function JobConfigurationDashboard({
       <div className="flex flex-wrap items-center gap-2">
         <span className="text-sm font-medium text-muted-foreground mr-2">Filter:</span>
         {filterChips.map((chip) => (
-          <Badge
+          <button
             key={chip.filter}
-            variant={activeFilter === chip.filter ? "default" : "outline"}
-            className={cn(
-              "cursor-pointer transition-all hover:bg-primary/10",
-              activeFilter === chip.filter && "ring-1 ring-primary"
-            )}
             onClick={() => onFilterChange(chip.filter)}
+            className={cn(
+              "px-3 py-1.5 text-sm font-medium rounded-md transition-all border",
+              activeFilter === chip.filter
+                ? "bg-primary text-primary-foreground border-primary"
+                : "bg-transparent text-foreground border-border hover:bg-muted"
+            )}
           >
             {chip.label}
-          </Badge>
+          </button>
         ))}
         {activeFilter !== "all" && (
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-6 px-2 text-xs"
+          <button
             onClick={() => onFilterChange("all")}
+            className="px-2 py-1.5 text-sm text-muted-foreground hover:text-foreground flex items-center gap-1"
           >
-            <X className="h-3 w-3 mr-1" />
+            <X className="h-3 w-3" />
             Clear
-          </Button>
+          </button>
         )}
       </div>
 
