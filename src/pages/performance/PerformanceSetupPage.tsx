@@ -427,7 +427,11 @@ export default function PerformanceSetupPage() {
               </Alert>
               <Tabs value={secondaryTab} onValueChange={setSecondaryTab}>
                 <TabsList className="flex-wrap">
-                  {/* Logical order: Rating Levels → Form Templates → Action Rules → ... → Cycles */}
+                  {/* Logical order: Job Config (prerequisite) → Rating Levels → Form Templates → ... */}
+                  <TabsTrigger value="job-assessment-config" className="flex items-center gap-2">
+                    <Briefcase className="h-4 w-4" />
+                    Job Assessment Config
+                  </TabsTrigger>
                   <TabsTrigger value="performance-categories" className="flex items-center gap-2">
                     <Tags className="h-4 w-4" />
                     Rating Levels
@@ -448,11 +452,10 @@ export default function PerformanceSetupPage() {
                     <Scale className="h-4 w-4" />
                     Benchmarks
                   </TabsTrigger>
-                  <TabsTrigger value="job-assessment-config" className="flex items-center gap-2">
-                    <Briefcase className="h-4 w-4" />
-                    Job Assessment Config
-                  </TabsTrigger>
                 </TabsList>
+                <TabsContent value="job-assessment-config" className="mt-4">
+                  <JobAssessmentConfigPanel companyId={selectedCompany} />
+                </TabsContent>
                 <TabsContent value="performance-categories" className="mt-4">
                   <PerformanceCategoriesManager companyId={selectedCompany} />
                 </TabsContent>
@@ -470,9 +473,6 @@ export default function PerformanceSetupPage() {
                 </TabsContent>
                 <TabsContent value="benchmarks" className="mt-4">
                   <ExternalBenchmarkConfigPanel companyId={selectedCompany} />
-                </TabsContent>
-                <TabsContent value="job-assessment-config" className="mt-4">
-                  <JobAssessmentConfigPanel companyId={selectedCompany} />
                 </TabsContent>
               </Tabs>
             </TabsContent>
