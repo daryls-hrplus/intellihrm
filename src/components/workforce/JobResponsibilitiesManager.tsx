@@ -21,7 +21,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, Trash2, AlertCircle, ChevronDown, ChevronUp, Target, Star, Sparkles } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Plus, Trash2, AlertCircle, ChevronDown, ChevronUp, Target, Star, Sparkles, HelpCircle } from "lucide-react";
 import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ResponsibilityCategoryBadge, ResponsibilityCategory } from "./ResponsibilityCategoryBadge";
@@ -33,6 +39,7 @@ import { useJobResponsibilityKRAs, GenericKRA } from "@/hooks/useJobResponsibili
 import { AssessmentModeIndicator } from "./AssessmentModeIndicator";
 import { ResponsibilityWeightValidator } from "./ResponsibilityWeightValidator";
 import { AssessmentMode, ASSESSMENT_MODE_LABELS } from "@/types/appraisalKRASnapshot";
+import { useAuditLog } from "@/hooks/useAuditLog";
 
 interface JobResponsibility {
   id: string;
@@ -110,6 +117,7 @@ export function JobResponsibilitiesManager({ jobId, companyId, jobFamilyId }: Jo
   });
 
   const { generateWithAI, saveAIGeneratedKRAs, generating } = useJobResponsibilityKRAs(selectedJobResponsibility?.id || "");
+  const { logAction } = useAuditLog();
 
   const toggleRowExpanded = (id: string) => {
     setExpandedRows(prev => {
@@ -340,8 +348,10 @@ export function JobResponsibilitiesManager({ jobId, companyId, jobFamilyId }: Jo
       return;
     }
 
+    const selectedResp = responsibilities.find(r => r.id === formData.responsibility_id);
+
     setSaving(true);
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from("job_responsibilities")
       .insert({
         job_id: jobId,
@@ -350,7 +360,9 @@ export function JobResponsibilitiesManager({ jobId, companyId, jobFamilyId }: Jo
         notes: formData.notes || null,
         start_date: formData.start_date,
         end_date: formData.end_date || null,
-      });
+      })
+      .select('id')
+      .single();
 
     if (error) {
       if (error.message?.includes("Overlapping date ranges")) {
@@ -362,6 +374,22 @@ export function JobResponsibilitiesManager({ jobId, companyId, jobFamilyId }: Jo
         toast.error("Failed to add responsibility");
       }
     } else {
+      // Log audit event
+      await logAction({
+        action: 'CREATE',
+        entityType: 'job_responsibilities',
+        entityId: data?.id,
+        entityName: `${selectedResp?.name || 'Responsibility'} assigned to ${jobDetails?.name || 'Job'}`,
+        newValues: {
+          job_id: jobId,
+          responsibility_id: formData.responsibility_id,
+          responsibility_name: selectedResp?.name,
+          weighting: formData.weighting,
+          start_date: formData.start_date,
+          end_date: formData.end_date || null,
+        },
+        metadata: { module: 'Workforce', job_name: jobDetails?.name }
+      });
       toast.success("Responsibility added to job");
       setDialogOpen(false);
       fetchJobResponsibilities();
@@ -370,6 +398,8 @@ export function JobResponsibilitiesManager({ jobId, companyId, jobFamilyId }: Jo
   };
 
   const handleDelete = async (id: string) => {
+    const jr = jobResponsibilities.find(j => j.id === id);
+    
     const { error } = await supabase
       .from("job_responsibilities")
       .delete()
@@ -379,6 +409,21 @@ export function JobResponsibilitiesManager({ jobId, companyId, jobFamilyId }: Jo
       console.error("Error deleting job responsibility:", error);
       toast.error("Failed to remove responsibility");
     } else {
+      // Log audit event
+      await logAction({
+        action: 'DELETE',
+        entityType: 'job_responsibilities',
+        entityId: id,
+        entityName: `${jr?.responsibility_name || 'Responsibility'} removed from ${jobDetails?.name || 'Job'}`,
+        oldValues: {
+          responsibility_name: jr?.responsibility_name,
+          weighting: jr?.weighting,
+          start_date: jr?.start_date,
+          end_date: jr?.end_date,
+          assessment_mode: jr?.assessment_mode,
+        },
+        metadata: { module: 'Workforce', job_id: jobId, job_name: jobDetails?.name }
+      });
       toast.success("Responsibility removed from job");
       fetchJobResponsibilities();
     }
@@ -389,6 +434,9 @@ export function JobResponsibilitiesManager({ jobId, companyId, jobFamilyId }: Jo
   }
 
   const handleAssessmentModeChange = async (jobRespId: string, mode: AssessmentMode) => {
+    const jr = jobResponsibilities.find(j => j.id === jobRespId);
+    const oldMode = jr?.assessment_mode;
+    
     const { error } = await supabase
       .from("job_responsibilities")
       .update({ assessment_mode: mode })
@@ -397,6 +445,21 @@ export function JobResponsibilitiesManager({ jobId, companyId, jobFamilyId }: Jo
     if (error) {
       toast.error("Failed to update assessment mode");
     } else {
+      // Log audit event for assessment mode change
+      await logAction({
+        action: 'UPDATE',
+        entityType: 'job_assessment_mode',
+        entityId: jobRespId,
+        entityName: `Assessment mode changed for ${jr?.responsibility_name || 'Responsibility'}`,
+        oldValues: { assessment_mode: oldMode },
+        newValues: { assessment_mode: mode },
+        metadata: { 
+          module: 'Workforce', 
+          job_id: jobId, 
+          job_name: jobDetails?.name,
+          responsibility_name: jr?.responsibility_name 
+        }
+      });
       toast.success("Assessment mode updated");
       fetchJobResponsibilities();
     }
@@ -483,21 +546,38 @@ export function JobResponsibilitiesManager({ jobId, companyId, jobFamilyId }: Jo
                   </div>
                   
                   {/* Assessment Mode Selector */}
-                  <Select
-                    value={jr.assessment_mode}
-                    onValueChange={(v) => handleAssessmentModeChange(jr.id, v as AssessmentMode)}
-                  >
-                    <SelectTrigger className="w-32 h-8 text-xs">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {Object.entries(ASSESSMENT_MODE_LABELS).map(([value, label]) => (
-                        <SelectItem key={value} value={value} className="text-xs">
-                          {label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <div className="flex items-center gap-1">
+                    <Select
+                      value={jr.assessment_mode}
+                      onValueChange={(v) => handleAssessmentModeChange(jr.id, v as AssessmentMode)}
+                    >
+                      <SelectTrigger className="w-32 h-8 text-xs">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Object.entries(ASSESSMENT_MODE_LABELS).map(([value, label]) => (
+                          <SelectItem key={value} value={value} className="text-xs">
+                            {label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
+                        </TooltipTrigger>
+                        <TooltipContent className="max-w-xs" side="left">
+                          <div className="space-y-2 text-sm">
+                            <p><strong>Auto-detect:</strong> System determines based on whether KRAs exist</p>
+                            <p><strong>Overall Rating:</strong> Rate the responsibility as a whole (1-5)</p>
+                            <p><strong>KRA-Based:</strong> Rate each KRA individually, scores roll up</p>
+                            <p><strong>Hybrid:</strong> Rate both individual KRAs and overall responsibility</p>
+                          </div>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
                   
                   {/* Weight */}
                   <div className="text-right shrink-0">
