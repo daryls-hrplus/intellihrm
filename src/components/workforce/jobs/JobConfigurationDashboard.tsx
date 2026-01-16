@@ -219,17 +219,19 @@ export function JobConfigurationDashboard({
 
         {/* Warning for incomplete jobs */}
         {stats && stats.fullyConfiguredJobs < stats.totalActiveJobs && stats.totalActiveJobs > 0 && (
-          <div className="flex items-start justify-between gap-3 text-sm bg-white dark:bg-card p-3 rounded-lg border border-amber-500 dark:border-amber-600">
+          <div className="flex items-start justify-between gap-3 text-sm bg-amber-50 dark:bg-amber-950/30 p-3 rounded-lg border border-amber-500 dark:border-amber-600">
             <div className="flex items-start gap-3">
-              <AlertCircle className="h-4 w-4 mt-0.5 text-amber-600 shrink-0" />
-              <div className="text-slate-700 dark:text-slate-200">
-                <span className="font-semibold text-amber-700 dark:text-amber-400">
+              <AlertCircle className="h-4 w-4 mt-0.5 text-amber-600 dark:text-amber-500 shrink-0" />
+              <div className="text-gray-800 dark:text-gray-100">
+                <span className="font-semibold text-amber-800 dark:text-amber-300">
                   {stats.totalActiveJobs - stats.fullyConfiguredJobs} job
                   {stats.totalActiveJobs - stats.fullyConfiguredJobs !== 1 ? "s" : ""} need
                   {stats.totalActiveJobs - stats.fullyConfiguredJobs === 1 ? "s" : ""} configuration.
                 </span>{" "}
-                Jobs without competencies, responsibilities, goals, or skills may impact performance
-                appraisals and succession planning.
+                <span className="text-gray-700 dark:text-gray-200">
+                  Jobs without competencies, responsibilities, goals, or skills may impact performance
+                  appraisals and succession planning.
+                </span>
               </div>
             </div>
             <Button
