@@ -3378,6 +3378,149 @@ export type Database = {
           },
         ]
       }
+      appraisal_kra_snapshots: {
+        Row: {
+          achievement_notes: string | null
+          calculated_score: number | null
+          company_id: string | null
+          created_at: string | null
+          description: string | null
+          evidence_urls: string[] | null
+          final_score: number | null
+          id: string
+          job_kra_id: string | null
+          job_specific_target: string | null
+          manager_comments: string | null
+          manager_id: string | null
+          manager_rated_at: string | null
+          manager_rating: number | null
+          measurement_method: string | null
+          name: string
+          participant_id: string
+          responsibility_id: string
+          self_comments: string | null
+          self_rated_at: string | null
+          self_rating: number | null
+          sequence_order: number | null
+          source_kra_id: string | null
+          status: string | null
+          target_metric: string | null
+          updated_at: string | null
+          weight: number
+          weight_adjusted_score: number | null
+        }
+        Insert: {
+          achievement_notes?: string | null
+          calculated_score?: number | null
+          company_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          evidence_urls?: string[] | null
+          final_score?: number | null
+          id?: string
+          job_kra_id?: string | null
+          job_specific_target?: string | null
+          manager_comments?: string | null
+          manager_id?: string | null
+          manager_rated_at?: string | null
+          manager_rating?: number | null
+          measurement_method?: string | null
+          name: string
+          participant_id: string
+          responsibility_id: string
+          self_comments?: string | null
+          self_rated_at?: string | null
+          self_rating?: number | null
+          sequence_order?: number | null
+          source_kra_id?: string | null
+          status?: string | null
+          target_metric?: string | null
+          updated_at?: string | null
+          weight?: number
+          weight_adjusted_score?: number | null
+        }
+        Update: {
+          achievement_notes?: string | null
+          calculated_score?: number | null
+          company_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          evidence_urls?: string[] | null
+          final_score?: number | null
+          id?: string
+          job_kra_id?: string | null
+          job_specific_target?: string | null
+          manager_comments?: string | null
+          manager_id?: string | null
+          manager_rated_at?: string | null
+          manager_rating?: number | null
+          measurement_method?: string | null
+          name?: string
+          participant_id?: string
+          responsibility_id?: string
+          self_comments?: string | null
+          self_rated_at?: string | null
+          self_rating?: number | null
+          sequence_order?: number | null
+          source_kra_id?: string | null
+          status?: string | null
+          target_metric?: string | null
+          updated_at?: string | null
+          weight?: number
+          weight_adjusted_score?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appraisal_kra_snapshots_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appraisal_kra_snapshots_job_kra_id_fkey"
+            columns: ["job_kra_id"]
+            isOneToOne: false
+            referencedRelation: "job_responsibility_kras"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appraisal_kra_snapshots_manager_id_fkey"
+            columns: ["manager_id"]
+            isOneToOne: false
+            referencedRelation: "employee_fte_summary"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "appraisal_kra_snapshots_manager_id_fkey"
+            columns: ["manager_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appraisal_kra_snapshots_participant_id_fkey"
+            columns: ["participant_id"]
+            isOneToOne: false
+            referencedRelation: "appraisal_participants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appraisal_kra_snapshots_responsibility_id_fkey"
+            columns: ["responsibility_id"]
+            isOneToOne: false
+            referencedRelation: "responsibilities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appraisal_kra_snapshots_source_kra_id_fkey"
+            columns: ["source_kra_id"]
+            isOneToOne: false
+            referencedRelation: "responsibility_kras"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       appraisal_outcome_action_rules: {
         Row: {
           action_description: string | null
@@ -38512,10 +38655,13 @@ export type Database = {
       }
       job_responsibilities: {
         Row: {
+          assessment_mode: string | null
           created_at: string
           end_date: string | null
           id: string
           job_id: string
+          kra_weights_validated: boolean | null
+          kra_weights_validated_at: string | null
           notes: string | null
           responsibility_id: string
           start_date: string
@@ -38523,10 +38669,13 @@ export type Database = {
           weighting: number
         }
         Insert: {
+          assessment_mode?: string | null
           created_at?: string
           end_date?: string | null
           id?: string
           job_id: string
+          kra_weights_validated?: boolean | null
+          kra_weights_validated_at?: string | null
           notes?: string | null
           responsibility_id: string
           start_date?: string
@@ -38534,10 +38683,13 @@ export type Database = {
           weighting?: number
         }
         Update: {
+          assessment_mode?: string | null
           created_at?: string
           end_date?: string | null
           id?: string
           job_id?: string
+          kra_weights_validated?: boolean | null
+          kra_weights_validated_at?: string | null
           notes?: string | null
           responsibility_id?: string
           start_date?: string
