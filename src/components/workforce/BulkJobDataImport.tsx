@@ -528,20 +528,86 @@ export function BulkJobDataImport({
           .select("id, code")
           .eq("company_id", companyId);
 
-        const respLookup = new Map((responsibilities || []).map(r => [r.code.toUpperCase(), r.id]));
+        const respLookup = new Map(
+          (responsibilities || []).map((r) => [r.code.toUpperCase(), r.id])
+        );
+
+        const toNameFromCode = (code: string) => {
+          const cleaned = code
+            .trim()
+            .toUpperCase()
+            .replace(/^RESP[-_\s]*/i, "")
+            .replace(/[^A-Z0-9]+/g, " ")
+            .trim()
+            .toLowerCase();
+          if (!cleaned) return code;
+          return cleaned.replace(/\b\w/g, (m) => m.toUpperCase());
+        };
+
+        let createdResponsibilities = 0;
+
+        const ensureResponsibility = async (code: string) => {
+          const normalized = code.trim().toUpperCase();
+          const existing = respLookup.get(normalized);
+          if (existing) return existing;
+
+          // Create a placeholder responsibility so the assignment import can proceed.
+          // This mirrors enterprise systems: missing master data becomes a draft item to review.
+          const { data: inserted, error: insertError } = await supabase
+            .from("responsibilities")
+            .insert({
+              company_id: companyId,
+              code: normalized,
+              name: toNameFromCode(normalized),
+              description:
+                "Imported automatically from job responsibility assignments. Please review and update details.",
+              category: null,
+              complexity_level: null,
+              key_result_areas: [],
+              start_date: getTodayString(),
+              end_date: null,
+              is_active: true,
+            })
+            .select("id, code")
+            .single();
+
+          if (!insertError && inserted?.id) {
+            createdResponsibilities++;
+            respLookup.set(normalized, inserted.id);
+            return inserted.id;
+          }
+
+          // If it already exists (race/duplicate), fetch it.
+          if ((insertError as any)?.code === "23505") {
+            const { data: existingRow } = await supabase
+              .from("responsibilities")
+              .select("id")
+              .eq("company_id", companyId)
+              .eq("code", normalized)
+              .maybeSingle();
+            if (existingRow?.id) {
+              respLookup.set(normalized, existingRow.id);
+              return existingRow.id;
+            }
+          }
+
+          console.error(`Responsibility not found and could not be created: ${normalized}`);
+          return null;
+        };
 
         for (const row of validRows) {
           const jobId = jobLookup.get(row.data.job_code.toUpperCase());
-          const responsibilityId = respLookup.get(row.data.responsibility_code.toUpperCase());
+          const responsibilityId = await ensureResponsibility(
+            row.data.responsibility_code
+          );
 
           if (!jobId) {
             console.error(`Job not found: ${row.data.job_code}`);
             failed++;
             continue;
           }
-          
+
           if (!responsibilityId) {
-            console.error(`Responsibility not found: ${row.data.responsibility_code}`);
             failed++;
             continue;
           }
@@ -561,6 +627,12 @@ export function BulkJobDataImport({
           } else {
             success++;
           }
+        }
+
+        if (createdResponsibilities > 0) {
+          toast.message(
+            `${createdResponsibilities} responsibility record(s) were auto-created from your import codes.`
+          );
         }
       }
 
