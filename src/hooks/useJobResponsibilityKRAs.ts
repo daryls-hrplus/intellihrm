@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useAuditLog } from "@/hooks/useAuditLog";
 
 export interface JobResponsibilityKRA {
   id: string;
@@ -37,6 +38,7 @@ export function useJobResponsibilityKRAs(jobResponsibilityId: string) {
   const [kras, setKRAs] = useState<JobResponsibilityKRA[]>([]);
   const [loading, setLoading] = useState(false);
   const [generating, setGenerating] = useState(false);
+  const { logAction } = useAuditLog();
 
   const fetchKRAs = useCallback(async () => {
     if (!jobResponsibilityId) return;
@@ -80,6 +82,19 @@ export function useJobResponsibilityKRAs(jobResponsibilityId: string) {
 
       if (error) throw error;
       
+      // Log audit event
+      await logAction({
+        action: 'CREATE',
+        entityType: 'job_responsibility_kras',
+        entityId: jobResponsibilityId,
+        entityName: `${genericKRAs.length} KRAs inherited`,
+        newValues: {
+          kra_count: genericKRAs.length,
+          kra_names: genericKRAs.map(k => k.name),
+        },
+        metadata: { module: 'Workforce', source: 'inherit_from_library' }
+      });
+      
       await fetchKRAs();
       toast.success("KRAs inherited from library");
     } catch (error) {
@@ -88,7 +103,7 @@ export function useJobResponsibilityKRAs(jobResponsibilityId: string) {
     } finally {
       setLoading(false);
     }
-  }, [jobResponsibilityId, fetchKRAs]);
+  }, [jobResponsibilityId, fetchKRAs, logAction]);
 
   const customizeKRA = useCallback(async (
     kraId: string,
@@ -96,6 +111,8 @@ export function useJobResponsibilityKRAs(jobResponsibilityId: string) {
   ) => {
     setLoading(true);
     try {
+      const existingKRA = kras.find(k => k.id === kraId);
+      
       const { error } = await supabase
         .from("job_responsibility_kras")
         .update({
@@ -107,6 +124,21 @@ export function useJobResponsibilityKRAs(jobResponsibilityId: string) {
 
       if (error) throw error;
       
+      // Log audit event
+      await logAction({
+        action: 'UPDATE',
+        entityType: 'job_responsibility_kras',
+        entityId: kraId,
+        entityName: `KRA customized: ${existingKRA?.name || 'Unknown'}`,
+        oldValues: {
+          job_specific_target: existingKRA?.job_specific_target,
+          measurement_method: existingKRA?.measurement_method,
+          weight: existingKRA?.weight,
+        },
+        newValues: updates,
+        metadata: { module: 'Workforce', kra_name: existingKRA?.name }
+      });
+      
       await fetchKRAs();
       toast.success("KRA customized");
     } catch (error) {
@@ -115,11 +147,13 @@ export function useJobResponsibilityKRAs(jobResponsibilityId: string) {
     } finally {
       setLoading(false);
     }
-  }, [fetchKRAs]);
+  }, [fetchKRAs, kras, logAction]);
 
   const resetToInherited = useCallback(async (kraId: string, originalTarget?: string) => {
     setLoading(true);
     try {
+      const existingKRA = kras.find(k => k.id === kraId);
+      
       const { error } = await supabase
         .from("job_responsibility_kras")
         .update({
@@ -134,6 +168,24 @@ export function useJobResponsibilityKRAs(jobResponsibilityId: string) {
 
       if (error) throw error;
       
+      // Log audit event
+      await logAction({
+        action: 'UPDATE',
+        entityType: 'job_responsibility_kras',
+        entityId: kraId,
+        entityName: `KRA reset to inherited: ${existingKRA?.name || 'Unknown'}`,
+        oldValues: {
+          job_specific_target: existingKRA?.job_specific_target,
+          measurement_method: existingKRA?.measurement_method,
+        },
+        newValues: {
+          job_specific_target: originalTarget || null,
+          measurement_method: null,
+          is_inherited: true,
+        },
+        metadata: { module: 'Workforce', kra_name: existingKRA?.name }
+      });
+      
       await fetchKRAs();
       toast.success("KRA reset to inherited");
     } catch (error) {
@@ -142,7 +194,7 @@ export function useJobResponsibilityKRAs(jobResponsibilityId: string) {
     } finally {
       setLoading(false);
     }
-  }, [fetchKRAs]);
+  }, [fetchKRAs, kras, logAction]);
 
   const generateWithAI = useCallback(async (
     genericKRAs: GenericKRA[],
@@ -227,6 +279,20 @@ export function useJobResponsibilityKRAs(jobResponsibilityId: string) {
 
       if (error) throw error;
       
+      // Log audit event
+      await logAction({
+        action: 'CREATE',
+        entityType: 'job_responsibility_kras',
+        entityId: jobResponsibilityId,
+        entityName: `${contextualizedKRAs.length} AI-generated KRAs saved`,
+        newValues: {
+          kra_count: contextualizedKRAs.length,
+          kra_names: contextualizedKRAs.map(k => k.name),
+          ai_generated: true,
+        },
+        metadata: { module: 'Workforce', source: 'ai_contextualization' }
+      });
+      
       await fetchKRAs();
       toast.success("AI-generated KRAs saved");
     } catch (error) {
@@ -235,17 +301,33 @@ export function useJobResponsibilityKRAs(jobResponsibilityId: string) {
     } finally {
       setLoading(false);
     }
-  }, [jobResponsibilityId, fetchKRAs]);
+  }, [jobResponsibilityId, fetchKRAs, logAction]);
 
   const deleteKRA = useCallback(async (kraId: string) => {
     setLoading(true);
     try {
+      const existingKRA = kras.find(k => k.id === kraId);
+      
       const { error } = await supabase
         .from("job_responsibility_kras")
         .delete()
         .eq("id", kraId);
 
       if (error) throw error;
+      
+      // Log audit event
+      await logAction({
+        action: 'DELETE',
+        entityType: 'job_responsibility_kras',
+        entityId: kraId,
+        entityName: `KRA removed: ${existingKRA?.name || 'Unknown'}`,
+        oldValues: {
+          name: existingKRA?.name,
+          job_specific_target: existingKRA?.job_specific_target,
+          weight: existingKRA?.weight,
+        },
+        metadata: { module: 'Workforce', kra_name: existingKRA?.name }
+      });
       
       await fetchKRAs();
       toast.success("KRA removed");
@@ -255,7 +337,7 @@ export function useJobResponsibilityKRAs(jobResponsibilityId: string) {
     } finally {
       setLoading(false);
     }
-  }, [fetchKRAs]);
+  }, [fetchKRAs, kras, logAction]);
 
   return {
     kras,

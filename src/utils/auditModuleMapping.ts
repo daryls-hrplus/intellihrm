@@ -85,6 +85,14 @@ export const moduleMapping: Record<string, string> = {
   'company_boards': 'Workforce',
   'governance': 'Workforce',
   'position_control': 'Workforce',
+  'job_responsibilities': 'Workforce',
+  'job_competencies': 'Workforce',
+  'job_goals': 'Workforce',
+  'job_skills': 'Workforce',
+  'job_kras': 'Workforce',
+  'job_responsibility_kras': 'Workforce',
+  'job_assessment_mode': 'Workforce',
+  'job_level_expectations': 'Workforce',
 
   // Payroll Module
   'payroll': 'Payroll',

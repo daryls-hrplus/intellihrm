@@ -32,6 +32,7 @@ import { Plus, Trash2, Loader2, Award, Info } from "lucide-react";
 import { SkillProficiencyGuide } from "@/components/capabilities/SkillProficiencyGuide";
 import { format } from "date-fns";
 import { getTodayString, formatDateForDisplay } from "@/utils/dateUtils";
+import { useAuditLog } from "@/hooks/useAuditLog";
 
 interface JobCompetency {
   id: string;
@@ -83,6 +84,7 @@ export function JobCompetenciesManager({ jobId, companyId }: JobCompetenciesMana
   const [jobCompetencies, setJobCompetencies] = useState<JobCompetency[]>([]);
   const [competencies, setCompetencies] = useState<Competency[]>([]);
   const [competencyLevels, setCompetencyLevels] = useState<CompetencyLevel[]>([]);
+  const [jobDetails, setJobDetails] = useState<{ name: string } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -95,11 +97,22 @@ export function JobCompetenciesManager({ jobId, companyId }: JobCompetenciesMana
     start_date: getTodayString(),
     end_date: "",
   });
+  const { logAction } = useAuditLog();
 
   useEffect(() => {
     fetchJobCompetencies();
     fetchCompetencies();
+    fetchJobDetails();
   }, [jobId, companyId]);
+
+  const fetchJobDetails = async () => {
+    const { data } = await supabase
+      .from("jobs")
+      .select("name")
+      .eq("id", jobId)
+      .single();
+    if (data) setJobDetails(data);
+  };
 
   useEffect(() => {
     if (formData.competency_id) {
@@ -262,7 +275,10 @@ export function JobCompetenciesManager({ jobId, companyId }: JobCompetenciesMana
       end_date: formData.end_date || null,
     };
 
-    const { error } = await supabase.from("job_competencies").insert([payload]);
+    const selectedComp = competencies.find(c => c.id === formData.competency_id);
+    const selectedLevel = competencyLevels.find(l => l.id === formData.competency_level_id);
+
+    const { data, error } = await supabase.from("job_competencies").insert([payload]).select('id').single();
 
     if (error) {
       console.error("Error adding job competency:", error);
@@ -272,6 +288,22 @@ export function JobCompetenciesManager({ jobId, companyId }: JobCompetenciesMana
         toast.error("Failed to add competency");
       }
     } else {
+      // Log audit event
+      await logAction({
+        action: 'CREATE',
+        entityType: 'job_competencies',
+        entityId: data?.id,
+        entityName: `${selectedComp?.name || 'Competency'} assigned to ${jobDetails?.name || 'Job'}`,
+        newValues: {
+          competency_name: selectedComp?.name,
+          required_level: selectedLevel?.name,
+          weighting: weighting,
+          is_required: formData.is_required,
+          start_date: formData.start_date,
+          end_date: formData.end_date || null,
+        },
+        metadata: { module: 'Workforce', job_id: jobId, job_name: jobDetails?.name }
+      });
       toast.success("Competency added successfully");
       fetchJobCompetencies();
       setDialogOpen(false);
@@ -280,12 +312,28 @@ export function JobCompetenciesManager({ jobId, companyId }: JobCompetenciesMana
   };
 
   const handleDelete = async (id: string) => {
+    const jc = jobCompetencies.find(c => c.id === id);
+    
     const { error } = await supabase.from("job_competencies").delete().eq("id", id);
 
     if (error) {
       console.error("Error deleting job competency:", error);
       toast.error("Failed to remove competency");
     } else {
+      // Log audit event
+      await logAction({
+        action: 'DELETE',
+        entityType: 'job_competencies',
+        entityId: id,
+        entityName: `${jc?.competencies?.name || 'Competency'} removed from ${jobDetails?.name || 'Job'}`,
+        oldValues: {
+          competency_name: jc?.competencies?.name,
+          required_level: jc?.competency_levels?.name,
+          weighting: jc?.weighting,
+          is_required: jc?.is_required,
+        },
+        metadata: { module: 'Workforce', job_id: jobId, job_name: jobDetails?.name }
+      });
       toast.success("Competency removed");
       fetchJobCompetencies();
     }

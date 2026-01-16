@@ -45,6 +45,7 @@ import { Plus, Loader2, Wrench, Info, ChevronsUpDown, Check, Trash2 } from "luci
 import { getTodayString, formatDateForDisplay } from "@/utils/dateUtils";
 import { ProficiencyLevelPicker } from "@/components/capabilities/ProficiencyLevelPicker";
 import { cn } from "@/lib/utils";
+import { useAuditLog } from "@/hooks/useAuditLog";
 
 interface JobSkillRequirement {
   id: string;
@@ -91,11 +92,13 @@ const CATEGORY_LABELS: Record<string, string> = {
 export function JobSkillsManager({ jobId, companyId }: JobSkillsManagerProps) {
   const [requirements, setRequirements] = useState<JobSkillRequirement[]>([]);
   const [skills, setSkills] = useState<Skill[]>([]);
+  const [jobDetails, setJobDetails] = useState<{ name: string } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingRequirement, setEditingRequirement] = useState<JobSkillRequirement | null>(null);
   const [comboboxOpen, setComboboxOpen] = useState(false);
+  const { logAction } = useAuditLog();
 
   const [formData, setFormData] = useState({
     capability_id: "",
@@ -110,7 +113,17 @@ export function JobSkillsManager({ jobId, companyId }: JobSkillsManagerProps) {
   useEffect(() => {
     fetchRequirements();
     fetchSkills();
+    fetchJobDetails();
   }, [jobId, companyId]);
+
+  const fetchJobDetails = async () => {
+    const { data } = await supabase
+      .from("jobs")
+      .select("name")
+      .eq("id", jobId)
+      .single();
+    if (data) setJobDetails(data);
+  };
 
   const fetchRequirements = async () => {
     setIsLoading(true);
@@ -222,6 +235,8 @@ export function JobSkillsManager({ jobId, companyId }: JobSkillsManagerProps) {
       end_date: formData.end_date || null,
     };
 
+    const selectedSkill = skills.find(s => s.id === formData.capability_id);
+
     if (editingRequirement) {
       const { error } = await supabase
         .from("job_capability_requirements")
@@ -232,13 +247,31 @@ export function JobSkillsManager({ jobId, companyId }: JobSkillsManagerProps) {
         console.error("Error updating skill requirement:", error);
         toast.error("Failed to update skill requirement");
       } else {
+        // Log audit event for update
+        await logAction({
+          action: 'UPDATE',
+          entityType: 'job_skills',
+          entityId: editingRequirement.id,
+          entityName: `${selectedSkill?.name || 'Skill'} updated for ${jobDetails?.name || 'Job'}`,
+          oldValues: {
+            skill_name: editingRequirement.skills_competencies?.name,
+            required_level: editingRequirement.required_proficiency_level,
+            is_required: editingRequirement.is_required,
+          },
+          newValues: {
+            skill_name: selectedSkill?.name,
+            required_level: parseInt(formData.required_proficiency_level),
+            is_required: formData.is_required,
+          },
+          metadata: { module: 'Workforce', job_id: jobId, job_name: jobDetails?.name }
+        });
         toast.success("Skill requirement updated");
         fetchRequirements();
         setDialogOpen(false);
         setEditingRequirement(null);
       }
     } else {
-      const { error } = await supabase.from("job_capability_requirements").insert([payload]);
+      const { data, error } = await supabase.from("job_capability_requirements").insert([payload]).select('id').single();
 
       if (error) {
         console.error("Error adding skill requirement:", error);
@@ -248,6 +281,21 @@ export function JobSkillsManager({ jobId, companyId }: JobSkillsManagerProps) {
           toast.error("Failed to add skill requirement");
         }
       } else {
+        // Log audit event for create
+        await logAction({
+          action: 'CREATE',
+          entityType: 'job_skills',
+          entityId: data?.id,
+          entityName: `${selectedSkill?.name || 'Skill'} assigned to ${jobDetails?.name || 'Job'}`,
+          newValues: {
+            skill_name: selectedSkill?.name,
+            required_level: parseInt(formData.required_proficiency_level),
+            is_required: formData.is_required,
+            is_preferred: formData.is_preferred,
+            start_date: formData.start_date,
+          },
+          metadata: { module: 'Workforce', job_id: jobId, job_name: jobDetails?.name }
+        });
         toast.success("Skill requirement added successfully");
         fetchRequirements();
         setDialogOpen(false);
@@ -257,12 +305,27 @@ export function JobSkillsManager({ jobId, companyId }: JobSkillsManagerProps) {
   };
 
   const handleDelete = async (id: string) => {
+    const req = requirements.find(r => r.id === id);
+    
     const { error } = await supabase.from("job_capability_requirements").delete().eq("id", id);
 
     if (error) {
       console.error("Error deleting skill requirement:", error);
       toast.error("Failed to remove skill requirement");
     } else {
+      // Log audit event
+      await logAction({
+        action: 'DELETE',
+        entityType: 'job_skills',
+        entityId: id,
+        entityName: `${req?.skills_competencies?.name || 'Skill'} removed from ${jobDetails?.name || 'Job'}`,
+        oldValues: {
+          skill_name: req?.skills_competencies?.name,
+          required_level: req?.required_proficiency_level,
+          is_required: req?.is_required,
+        },
+        metadata: { module: 'Workforce', job_id: jobId, job_name: jobDetails?.name }
+      });
       toast.success("Skill requirement removed");
       fetchRequirements();
     }
