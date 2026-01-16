@@ -770,6 +770,7 @@ export default function MssAppraisalsPage() {
           onOpenChange={setCycleDialogOpen}
           cycle={selectedCycle}
           companyId={company?.id}
+          companyName={company?.name}
           onSuccess={fetchData}
           isProbationReview={false}
           isManagerCycle={true}
