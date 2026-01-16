@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -75,6 +75,8 @@ import { JobCapabilityRequirementsManager } from "@/components/workforce/JobCapa
 import { JobSkillsManager } from "@/components/workforce/JobSkillsManager";
 import { JobLevelExpectationsManager } from "@/components/workforce/JobLevelExpectationsManager";
 import { BulkJobDataImport } from "@/components/workforce/BulkJobDataImport";
+import { JobConfigurationDashboard } from "@/components/workforce/jobs/JobConfigurationDashboard";
+import { useJobConfigurationStats } from "@/hooks/useJobConfigurationStats";
 
 interface Job {
   id: string;
@@ -215,6 +217,17 @@ export default function JobsPage() {
   const [activePageTab, setActivePageTab] = useState<"jobs" | "level-expectations">("jobs");
 
   const { logAction } = useAuditLog();
+  
+  // Job configuration stats hook
+  const {
+    stats: configStats,
+    isLoading: statsLoading,
+    activeFilter,
+    setActiveFilter,
+    filteredJobIds,
+    getPercentage,
+    refetch: refetchStats,
+  } = useJobConfigurationStats(selectedCompanyId);
 
   useEffect(() => {
     fetchCompanies();
@@ -647,12 +660,22 @@ export default function JobsPage() {
   // Filter job families based on selected company in form
   const formJobFamilies = formData.company_id === selectedCompanyId ? jobFamilies : [];
 
-  const filteredJobs = jobs.filter(
-    (job) =>
-      job.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      job.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      job.job_families?.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Filter jobs based on search term AND dashboard filter
+  const filteredJobs = useMemo(() => {
+    return jobs.filter((job) => {
+      // Search filter
+      const matchesSearch =
+        job.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        job.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        job.job_families?.name.toLowerCase().includes(searchTerm.toLowerCase());
+
+      // Dashboard configuration filter
+      const matchesConfigFilter =
+        activeFilter === "all" || filteredJobIds.has(job.id);
+
+      return matchesSearch && matchesConfigFilter;
+    });
+  }, [jobs, searchTerm, activeFilter, filteredJobIds]);
 
   const renderJobForm = () => (
     <>
@@ -967,6 +990,17 @@ export default function JobsPage() {
           </TabsList>
 
           <TabsContent value="jobs" className="mt-6 space-y-6">
+            {/* Job Configuration Dashboard */}
+            {selectedCompanyId && (
+              <JobConfigurationDashboard
+                stats={configStats}
+                isLoading={statsLoading}
+                activeFilter={activeFilter}
+                onFilterChange={setActiveFilter}
+                getPercentage={getPercentage}
+              />
+            )}
+
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
               <Select value={selectedCompanyId} onValueChange={setSelectedCompanyId}>
                 <SelectTrigger className="w-full sm:w-[250px]">
