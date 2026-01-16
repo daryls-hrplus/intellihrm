@@ -366,7 +366,7 @@ export function JobAssessmentConfigPanel({ companyId }: JobAssessmentConfigPanel
                             size="sm"
                             onClick={(e) => {
                               e.stopPropagation();
-                              navigate(`/workforce/jobs/${job.jobId}`);
+                              navigate(`/workforce/jobs?job=${job.jobId}`);
                             }}
                           >
                             <ExternalLink className="h-4 w-4" />
