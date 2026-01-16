@@ -30,6 +30,9 @@ import { getTodayString, formatDateForDisplay } from "@/utils/dateUtils";
 import { JobKRAContextualizationDialog } from "./JobKRAContextualizationDialog";
 import { JobSpecificKRAsList } from "./JobSpecificKRAsList";
 import { useJobResponsibilityKRAs, GenericKRA } from "@/hooks/useJobResponsibilityKRAs";
+import { AssessmentModeIndicator } from "./AssessmentModeIndicator";
+import { ResponsibilityWeightValidator } from "./ResponsibilityWeightValidator";
+import { AssessmentMode, ASSESSMENT_MODE_LABELS } from "@/types/appraisalKRASnapshot";
 
 interface JobResponsibility {
   id: string;
@@ -39,10 +42,13 @@ interface JobResponsibility {
   notes: string | null;
   start_date: string;
   end_date: string | null;
+  assessment_mode: AssessmentMode;
   responsibility_name?: string;
   responsibility_category?: ResponsibilityCategory | null;
   responsibility_complexity?: number | null;
   responsibility_kras?: string[];
+  kra_count?: number;
+  kra_weight_total?: number;
 }
 
 interface Responsibility {
@@ -184,7 +190,9 @@ export function JobResponsibilitiesManager({ jobId, companyId, jobFamilyId }: Jo
         notes,
         start_date,
         end_date,
-        responsibilities (name, category, complexity_level, key_result_areas)
+        assessment_mode,
+        responsibilities (name, category, complexity_level, key_result_areas),
+        job_responsibility_kras (id, weight)
       `)
       .eq("job_id", jobId)
       .order("start_date", { ascending: false });
@@ -193,15 +201,21 @@ export function JobResponsibilitiesManager({ jobId, companyId, jobFamilyId }: Jo
       console.error("Error fetching job responsibilities:", error);
       toast.error("Failed to load job responsibilities");
     } else {
-      const mapped = (data || []).map((jr: any) => ({
-        ...jr,
-        responsibility_name: jr.responsibilities?.name,
-        responsibility_category: jr.responsibilities?.category,
-        responsibility_complexity: jr.responsibilities?.complexity_level,
-        responsibility_kras: Array.isArray(jr.responsibilities?.key_result_areas) 
-          ? jr.responsibilities.key_result_areas 
-          : [],
-      }));
+      const mapped = (data || []).map((jr: any) => {
+        const kras = jr.job_responsibility_kras || [];
+        return {
+          ...jr,
+          assessment_mode: jr.assessment_mode || 'auto',
+          responsibility_name: jr.responsibilities?.name,
+          responsibility_category: jr.responsibilities?.category,
+          responsibility_complexity: jr.responsibilities?.complexity_level,
+          responsibility_kras: Array.isArray(jr.responsibilities?.key_result_areas) 
+            ? jr.responsibilities.key_result_areas 
+            : [],
+          kra_count: kras.length,
+          kra_weight_total: kras.reduce((sum: number, k: any) => sum + (k.weight || 0), 0),
+        };
+      });
       setJobResponsibilities(mapped);
     }
     setLoading(false);
@@ -374,6 +388,20 @@ export function JobResponsibilitiesManager({ jobId, companyId, jobFamilyId }: Jo
     return <div className="p-4 text-muted-foreground">Loading responsibilities...</div>;
   }
 
+  const handleAssessmentModeChange = async (jobRespId: string, mode: AssessmentMode) => {
+    const { error } = await supabase
+      .from("job_responsibilities")
+      .update({ assessment_mode: mode })
+      .eq("id", jobRespId);
+
+    if (error) {
+      toast.error("Failed to update assessment mode");
+    } else {
+      toast.success("Assessment mode updated");
+      fetchJobResponsibilities();
+    }
+  };
+
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
@@ -388,6 +416,11 @@ export function JobResponsibilitiesManager({ jobId, companyId, jobFamilyId }: Jo
           Add Responsibility
         </Button>
       </div>
+
+      {/* Weight Validator */}
+      {jobResponsibilities.length > 0 && (
+        <ResponsibilityWeightValidator jobId={jobId} compact />
+      )}
 
       {totalWeight > 100 && (
         <Alert variant="destructive">
@@ -435,12 +468,36 @@ export function JobResponsibilitiesManager({ jobId, companyId, jobFamilyId }: Jo
                       <span className="font-medium">{jr.responsibility_name}</span>
                       <ResponsibilityCategoryBadge category={jr.responsibility_category} size="sm" showIcon={false} />
                       <ComplexityLevelIndicator level={jr.responsibility_complexity} size="sm" />
+                      <AssessmentModeIndicator
+                        mode={jr.assessment_mode}
+                        kraCount={jr.kra_count || 0}
+                        weightsValid={jr.kra_weight_total === 100 || (jr.kra_count || 0) === 0}
+                        totalWeight={jr.kra_weight_total}
+                        size="sm"
+                      />
                     </div>
                     <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1">
                       <span>{formatDateForDisplay(jr.start_date)} → {jr.end_date ? formatDateForDisplay(jr.end_date) : "Ongoing"}</span>
                       {jr.notes && <span className="truncate max-w-[200px]">{jr.notes}</span>}
                     </div>
                   </div>
+                  
+                  {/* Assessment Mode Selector */}
+                  <Select
+                    value={jr.assessment_mode}
+                    onValueChange={(v) => handleAssessmentModeChange(jr.id, v as AssessmentMode)}
+                  >
+                    <SelectTrigger className="w-32 h-8 text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.entries(ASSESSMENT_MODE_LABELS).map(([value, label]) => (
+                        <SelectItem key={value} value={value} className="text-xs">
+                          {label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   
                   {/* Weight */}
                   <div className="text-right shrink-0">

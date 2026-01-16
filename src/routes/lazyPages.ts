@@ -473,6 +473,7 @@ export const EssGoalInterviewsPage = lazy(() => import('@/pages/ess/EssGoalInter
 export const MyDevelopmentPlanPage = lazy(() => import('@/pages/ess/MyDevelopmentPlanPage'));
 export const MyAppraisalsPage = lazy(() => import('@/pages/ess/MyAppraisalsPage'));
 export const MySkillGapsPage = lazy(() => import('@/pages/ess/MySkillGapsPage'));
+export const MyPerformanceTargetsPage = lazy(() => import('@/pages/ess/MyPerformanceTargetsPage'));
 export const MyFeedbackPage = lazy(() => import('@/pages/ess/MyFeedbackPage'));
 export const MyRecognitionPage = lazy(() => import('@/pages/ess/MyRecognitionPage'));
 export const MyBenefitsPage = lazy(() => import('@/pages/ess/MyBenefitsPage'));

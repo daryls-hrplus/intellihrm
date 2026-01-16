@@ -191,8 +191,9 @@ export function useAppraisalKRAPopulation() {
           evidence_urls: s.evidence_urls || [],
         }));
         
-        const { error: insertError } = await supabase
-          .from('appraisal_kra_snapshots')
+        // Cast to any to handle types not yet regenerated after migration
+        const { error: insertError } = await (supabase
+          .from('appraisal_kra_snapshots') as any)
           .insert(insertData);
         if (insertError) throw insertError;
       }
