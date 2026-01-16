@@ -99,6 +99,17 @@ export function getEntityLink(entityType: string, entityId: string | null): stri
     'appraisals': `/performance/appraisals/${entityId}`,
     'goal': `/performance/goals/${entityId}`,
     'goals': `/performance/goals/${entityId}`,
+    // Jobs and job sub-components
+    'job': `/workforce/jobs/${entityId}`,
+    'jobs': `/workforce/jobs/${entityId}`,
+    'job_responsibilities': `/workforce/jobs`,
+    'job_competencies': `/workforce/jobs`,
+    'job_skills': `/workforce/jobs`,
+    'job_goals': `/workforce/jobs`,
+    'job_kras': `/workforce/jobs`,
+    'job_responsibility_kras': `/workforce/jobs`,
+    'job_assessment_mode': `/workforce/jobs`,
+    'job_level_expectations': `/workforce/jobs`,
   };
 
   // Check for exact match first
