@@ -189,9 +189,9 @@ export function JobConfigurationDashboard({
 
       {/* Warning for incomplete jobs */}
       {stats && stats.fullyConfiguredJobs < stats.totalActiveJobs && stats.totalActiveJobs > 0 && (
-        <div className="flex items-start gap-3 text-sm bg-amber-50 dark:bg-amber-950/30 p-3 rounded-lg border border-amber-200 dark:border-amber-800">
+        <div className="flex items-start gap-3 text-sm bg-white dark:bg-card p-3 rounded-lg border border-amber-400 dark:border-amber-600">
           <AlertCircle className="h-4 w-4 mt-0.5 text-amber-600 dark:text-amber-500 shrink-0" />
-          <div className="text-amber-800 dark:text-amber-200">
+          <div className="text-amber-700 dark:text-amber-300">
             <span className="font-medium">
               {stats.totalActiveJobs - stats.fullyConfiguredJobs} job
               {stats.totalActiveJobs - stats.fullyConfiguredJobs !== 1 ? "s" : ""} need
