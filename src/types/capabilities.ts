@@ -4,7 +4,7 @@
 import { Json } from "@/integrations/supabase/types";
 
 // Use database enum values directly
-export type CapabilityType = 'SKILL' | 'COMPETENCY';
+export type CapabilityType = 'SKILL' | 'COMPETENCY' | 'VALUE';
 export type CapabilityCategory = 'technical' | 'leadership' | 'functional' | 'behavioral' | 'core';
 export type CapabilityStatus = 'draft' | 'active' | 'deprecated' | 'pending_approval';
 export type EvidenceSource = 'self_assessment' | 'manager_assessment' | 'peer_review' | 'certification' | 'lms_completion' | 'project_outcome' | 'external_validation' | '360_feedback' | 'ai_inference' | 'training_completion';
