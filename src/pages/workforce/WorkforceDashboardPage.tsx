@@ -19,6 +19,7 @@ import {
   LineChart,
   BarChart3,
   Layers,
+  Heart,
   Briefcase,
   Target,
   ClipboardList,
@@ -143,11 +144,11 @@ export default function WorkforceDashboardPage() {
       color: "bg-emerald-500/10 text-emerald-500",
       tabCode: "jobs",
     },
-    skillsCompetencies: {
-      title: "Skills & Competencies",
-      description: "Manage organizational skills and competency framework",
+    capabilityFramework: {
+      title: "Capability Framework",
+      description: "Manage skills, competencies, and values",
       href: "/workforce/capability-registry",
-      icon: Target,
+      icon: Layers,
       color: "bg-rose-500/10 text-rose-500",
       tabCode: "competencies",
     },
@@ -292,7 +293,7 @@ export default function WorkforceDashboardPage() {
       items: filterByAccess([
         allModules.jobFamilies,
         allModules.jobs,
-        allModules.skillsCompetencies,
+        allModules.capabilityFramework,
         allModules.responsibilities,
         allModules.qualifications,
         allModules.positions,
