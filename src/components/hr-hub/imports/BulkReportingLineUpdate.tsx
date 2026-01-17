@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,11 +7,13 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCompanyRelationships } from "@/hooks/useCompanyRelationships";
 import { parsePositionCode } from "@/utils/validateReportingRelationship";
+import { detectCircularReferencesInBatch, Position } from "@/utils/detectCircularReporting";
 import {
   Download, 
   Upload, 
@@ -22,7 +24,14 @@ import {
   Info,
   Loader2,
   Building2,
-  GitBranch
+  GitBranch,
+  Search,
+  Filter,
+  FileDown,
+  Edit2,
+  Save,
+  X,
+  Copy
 } from "lucide-react";
 
 interface ParsedRow {
@@ -36,6 +45,7 @@ interface ValidationResult extends ParsedRow {
   positionTitle: string | null;
   positionCompanyCode: string | null;
   positionCompanyName: string | null;
+  currentSupervisorId: string | null;
   currentSupervisorTitle: string | null;
   currentSupervisorCompanyCode: string | null;
   newSupervisorId: string | null;
@@ -45,9 +55,11 @@ interface ValidationResult extends ParsedRow {
   isCrossCompany: boolean;
   status: "valid" | "error" | "warning";
   message: string;
+  errorType?: string;
 }
 
 type ReportingMode = "primary" | "matrix";
+type FilterMode = "all" | "errors" | "warnings" | "valid";
 
 export function BulkReportingLineUpdate() {
   const { toast } = useToast();
@@ -59,6 +71,12 @@ export function BulkReportingLineUpdate() {
   const [isUpdating, setIsUpdating] = useState(false);
   const [updateComplete, setUpdateComplete] = useState(false);
   const [reportingMode, setReportingMode] = useState<ReportingMode>("primary");
+  
+  // New state for enhanced features
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterMode, setFilterMode] = useState<FilterMode>("all");
+  const [editingRowIndex, setEditingRowIndex] = useState<number | null>(null);
+  const [editedValues, setEditedValues] = useState<{ position_code: string; reports_to_position_code: string }>({ position_code: "", reports_to_position_code: "" });
 
   const { 
     groupCompanies, 
@@ -121,6 +139,8 @@ FIN-ANALYST-001,OLD-MGR-001,functional,remove`;
     setFile(selectedFile);
     setValidationResults([]);
     setUpdateComplete(false);
+    setSearchTerm("");
+    setFilterMode("all");
     
     try {
       const text = await selectedFile.text();
@@ -179,38 +199,47 @@ FIN-ANALYST-001,OLD-MGR-001,functional,remove`;
       if (error) throw error;
       
       // Build lookup maps
-      // Key by company_id|code for explicit lookups
       const positionsByCompanyAndCode = new Map<string, any>();
-      // Key by just code for same-company lookups
       const positionsByCode = new Map<string, any>();
-      const positionsById = new Map<string, any>();
+      const positionsById = new Map<string, Position & { companyCode: string; companyName: string }>();
       
       positions?.forEach(p => {
         const company = p.company as any;
         const key = `${company?.code?.toUpperCase()}:${p.code?.toUpperCase()}`;
-        positionsByCompanyAndCode.set(key, { ...p, companyCode: company?.code, companyName: company?.name });
+        const posData = { ...p, companyCode: company?.code, companyName: company?.name };
+        positionsByCompanyAndCode.set(key, posData);
         
-        // For same-company positions, also index by just code
         if (p.company_id === profile.company_id) {
-          positionsByCode.set(p.code?.toUpperCase() || "", { ...p, companyCode: company?.code, companyName: company?.name });
+          positionsByCode.set(p.code?.toUpperCase() || "", posData);
         }
         
-        positionsById.set(p.id, { ...p, companyCode: company?.code, companyName: company?.name });
+        positionsById.set(p.id, posData);
       });
+
+      // Phase 1: Detect in-file duplicates
+      const seenPositionCodes = new Map<string, number>();
+      const duplicateRows = new Set<number>();
       
-      const results: ValidationResult[] = data.map(row => {
-        // Parse the position code (may have COMPANY:CODE format)
+      data.forEach((row, index) => {
+        const posCode = row.position_code.toUpperCase();
+        if (seenPositionCodes.has(posCode)) {
+          duplicateRows.add(index);
+          duplicateRows.add(seenPositionCodes.get(posCode)!);
+        } else {
+          seenPositionCodes.set(posCode, index);
+        }
+      });
+
+      // First pass: Resolve all positions and supervisors
+      const resolvedData = data.map((row, index) => {
         const { companyCode: posCompanyCode, positionCode: posCode } = parsePositionCode(row.position_code);
         
-        // Find the position
         let position: any = null;
         if (posCompanyCode) {
           position = positionsByCompanyAndCode.get(`${posCompanyCode}:${posCode.toUpperCase()}`);
         } else {
-          // First try same company, then search all
           position = positionsByCode.get(posCode.toUpperCase());
           if (!position) {
-            // Search across all positions
             for (const [key, pos] of positionsByCompanyAndCode) {
               if (key.endsWith(`:${posCode.toUpperCase()}`)) {
                 position = pos;
@@ -220,40 +249,77 @@ FIN-ANALYST-001,OLD-MGR-001,functional,remove`;
           }
         }
         
-        // Parse the supervisor code
         const { companyCode: supCompanyCode, positionCode: supCode } = parsePositionCode(row.reports_to_position_code);
         
-        // Find the new supervisor
         let newSupervisor: any = null;
         if (row.reports_to_position_code) {
           if (supCompanyCode) {
             newSupervisor = positionsByCompanyAndCode.get(`${supCompanyCode}:${supCode.toUpperCase()}`);
           } else {
-            // First try same company as the position being updated
             if (position) {
               const positionCompanyCode = position.companyCode;
               newSupervisor = positionsByCompanyAndCode.get(`${positionCompanyCode?.toUpperCase()}:${supCode.toUpperCase()}`);
             }
-            // Fallback to current user's company
             if (!newSupervisor) {
               newSupervisor = positionsByCode.get(supCode.toUpperCase());
             }
           }
         }
         
+        return { ...row, index, position, newSupervisor };
+      });
+
+      // Phase 2: Detect circular references using batch detection
+      const proposedChanges = resolvedData
+        .filter(r => r.position && r.newSupervisor)
+        .map(r => ({
+          positionId: r.position.id,
+          newSupervisorId: r.newSupervisor?.id || null,
+          positionCode: r.position_code
+        }));
+      
+      const circularResults = detectCircularReferencesInBatch(proposedChanges, positionsById);
+
+      // Final validation pass
+      const results: ValidationResult[] = resolvedData.map((row, index) => {
+        const { position, newSupervisor } = row;
+        
         // Get current supervisor
+        let currentSupervisorId: string | null = null;
         let currentSupervisorTitle: string | null = null;
         let currentSupervisorCompanyCode: string | null = null;
         if (position?.reports_to_position_id) {
+          currentSupervisorId = position.reports_to_position_id;
           const currentSup = positionsById.get(position.reports_to_position_id);
           currentSupervisorTitle = currentSup?.title || null;
           currentSupervisorCompanyCode = currentSup?.companyCode || null;
         }
         
-        // Determine if this is a cross-company relationship
         const isCrossCompany = position && newSupervisor && position.company_id !== newSupervisor.company_id;
+
+        // Check for in-file duplicate
+        if (duplicateRows.has(index)) {
+          const firstRow = seenPositionCodes.get(row.position_code.toUpperCase());
+          return {
+            ...row,
+            positionId: position?.id || null,
+            positionTitle: position?.title || null,
+            positionCompanyCode: position?.companyCode || null,
+            positionCompanyName: position?.companyName || null,
+            currentSupervisorId,
+            currentSupervisorTitle,
+            currentSupervisorCompanyCode,
+            newSupervisorId: null,
+            newSupervisorTitle: null,
+            newSupervisorCompanyCode: null,
+            newSupervisorCompanyName: null,
+            isCrossCompany: false,
+            status: "error" as const,
+            message: `Duplicate: Position also appears in row ${(firstRow || 0) + 2}`,
+            errorType: "duplicate"
+          };
+        }
         
-        // Validation checks
         if (!position) {
           return {
             ...row,
@@ -261,6 +327,7 @@ FIN-ANALYST-001,OLD-MGR-001,functional,remove`;
             positionTitle: null,
             positionCompanyCode: null,
             positionCompanyName: null,
+            currentSupervisorId: null,
             currentSupervisorTitle: null,
             currentSupervisorCompanyCode: null,
             newSupervisorId: null,
@@ -269,7 +336,8 @@ FIN-ANALYST-001,OLD-MGR-001,functional,remove`;
             newSupervisorCompanyName: null,
             isCrossCompany: false,
             status: "error" as const,
-            message: "Position code not found"
+            message: "Position code not found",
+            errorType: "not_found"
           };
         }
         
@@ -280,6 +348,7 @@ FIN-ANALYST-001,OLD-MGR-001,functional,remove`;
             positionTitle: position.title,
             positionCompanyCode: position.companyCode,
             positionCompanyName: position.companyName,
+            currentSupervisorId,
             currentSupervisorTitle,
             currentSupervisorCompanyCode,
             newSupervisorId: null,
@@ -288,7 +357,8 @@ FIN-ANALYST-001,OLD-MGR-001,functional,remove`;
             newSupervisorCompanyName: null,
             isCrossCompany: false,
             status: "error" as const,
-            message: "Reports-to position code not found"
+            message: "Reports-to position code not found",
+            errorType: "supervisor_not_found"
           };
         }
         
@@ -300,6 +370,7 @@ FIN-ANALYST-001,OLD-MGR-001,functional,remove`;
             positionTitle: position.title,
             positionCompanyCode: position.companyCode,
             positionCompanyName: position.companyName,
+            currentSupervisorId,
             currentSupervisorTitle,
             currentSupervisorCompanyCode,
             newSupervisorId: null,
@@ -308,8 +379,35 @@ FIN-ANALYST-001,OLD-MGR-001,functional,remove`;
             newSupervisorCompanyName: null,
             isCrossCompany: false,
             status: "error" as const,
-            message: "Position cannot report to itself"
+            message: "Position cannot report to itself",
+            errorType: "self_reference"
           };
+        }
+
+        // Check for circular reference
+        if (newSupervisor) {
+          const circularCheck = circularResults.get(position.id);
+          if (circularCheck?.isCircular) {
+            const chainDisplay = circularCheck.chainCodes?.slice(0, 4).join(" → ") || "";
+            return {
+              ...row,
+              positionId: position.id,
+              positionTitle: position.title,
+              positionCompanyCode: position.companyCode,
+              positionCompanyName: position.companyName,
+              currentSupervisorId,
+              currentSupervisorTitle,
+              currentSupervisorCompanyCode,
+              newSupervisorId: null,
+              newSupervisorTitle: newSupervisor.title,
+              newSupervisorCompanyCode: newSupervisor.companyCode,
+              newSupervisorCompanyName: newSupervisor.companyName,
+              isCrossCompany,
+              status: "error" as const,
+              message: `Circular reference: ${chainDisplay}...`,
+              errorType: "circular"
+            };
+          }
         }
         
         // Validate cross-company relationship
@@ -327,6 +425,7 @@ FIN-ANALYST-001,OLD-MGR-001,functional,remove`;
               positionTitle: position.title,
               positionCompanyCode: position.companyCode,
               positionCompanyName: position.companyName,
+              currentSupervisorId,
               currentSupervisorTitle,
               currentSupervisorCompanyCode,
               newSupervisorId: null,
@@ -335,9 +434,31 @@ FIN-ANALYST-001,OLD-MGR-001,functional,remove`;
               newSupervisorCompanyName: newSupervisor.companyName,
               isCrossCompany: true,
               status: "error" as const,
-              message: `Cross-company not allowed: ${validation.reason}`
+              message: `Cross-company not allowed: ${validation.reason}`,
+              errorType: "cross_company"
             };
           }
+        }
+
+        // Check for no change (already reports to this supervisor)
+        if (newSupervisor && position.reports_to_position_id === newSupervisor.id) {
+          return {
+            ...row,
+            positionId: position.id,
+            positionTitle: position.title,
+            positionCompanyCode: position.companyCode,
+            positionCompanyName: position.companyName,
+            currentSupervisorId,
+            currentSupervisorTitle,
+            currentSupervisorCompanyCode,
+            newSupervisorId: newSupervisor.id,
+            newSupervisorTitle: newSupervisor.title,
+            newSupervisorCompanyCode: newSupervisor.companyCode,
+            newSupervisorCompanyName: newSupervisor.companyName,
+            isCrossCompany,
+            status: "warning" as const,
+            message: "No change: Already reports to this supervisor"
+          };
         }
         
         // Warning if clearing supervisor
@@ -348,6 +469,7 @@ FIN-ANALYST-001,OLD-MGR-001,functional,remove`;
             positionTitle: position.title,
             positionCompanyCode: position.companyCode,
             positionCompanyName: position.companyName,
+            currentSupervisorId,
             currentSupervisorTitle,
             currentSupervisorCompanyCode,
             newSupervisorId: null,
@@ -366,6 +488,7 @@ FIN-ANALYST-001,OLD-MGR-001,functional,remove`;
           positionTitle: position.title,
           positionCompanyCode: position.companyCode,
           positionCompanyName: position.companyName,
+          currentSupervisorId,
           currentSupervisorTitle,
           currentSupervisorCompanyCode,
           newSupervisorId: newSupervisor?.id || null,
@@ -408,7 +531,6 @@ FIN-ANALYST-001,OLD-MGR-001,functional,remove`;
     
     try {
       if (reportingMode === "primary") {
-        // Update primary reporting relationships
         for (const row of validRows) {
           const { error } = await supabase
             .from("positions")
@@ -423,9 +545,7 @@ FIN-ANALYST-001,OLD-MGR-001,functional,remove`;
           }
         }
       } else {
-        // Update matrix supervisors (would need additional logic for add/remove actions)
         for (const row of validRows) {
-          // For matrix mode, we insert into position_matrix_supervisors
           const { error } = await supabase
             .from("position_matrix_supervisors")
             .upsert({
@@ -469,13 +589,114 @@ FIN-ANALYST-001,OLD-MGR-001,functional,remove`;
     setParsedData([]);
     setValidationResults([]);
     setUpdateComplete(false);
+    setSearchTerm("");
+    setFilterMode("all");
+    setEditingRowIndex(null);
   };
 
+  // Export errors to CSV
+  const exportErrorsToCSV = () => {
+    const errorRows = validationResults.filter(r => r.status === "error");
+    if (errorRows.length === 0) return;
+
+    const csvHeaders = ["row", "position_code", "reports_to_position_code", "status", "error_type", "message"];
+    const csvRows = errorRows.map(row => [
+      row.rowIndex,
+      row.position_code,
+      row.reports_to_position_code,
+      row.status,
+      row.errorType || "",
+      `"${row.message.replace(/"/g, '""')}"`
+    ].join(","));
+
+    const csvContent = [csvHeaders.join(","), ...csvRows].join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "reporting_line_errors.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+
+    toast({
+      title: "Exported",
+      description: `${errorRows.length} error(s) exported to CSV`
+    });
+  };
+
+  // Handle inline edit
+  const startEditing = (idx: number) => {
+    const row = validationResults[idx];
+    setEditingRowIndex(idx);
+    setEditedValues({
+      position_code: row.position_code,
+      reports_to_position_code: row.reports_to_position_code
+    });
+  };
+
+  const cancelEditing = () => {
+    setEditingRowIndex(null);
+    setEditedValues({ position_code: "", reports_to_position_code: "" });
+  };
+
+  const saveEdit = async () => {
+    if (editingRowIndex === null) return;
+
+    // Update the parsed data
+    const newParsedData = [...parsedData];
+    newParsedData[editingRowIndex] = {
+      ...newParsedData[editingRowIndex],
+      position_code: editedValues.position_code,
+      reports_to_position_code: editedValues.reports_to_position_code
+    };
+    setParsedData(newParsedData);
+    setEditingRowIndex(null);
+
+    // Re-validate
+    await validateData(newParsedData);
+
+    toast({
+      title: "Row Updated",
+      description: "The row has been updated and re-validated."
+    });
+  };
+
+  // Computed values
   const validCount = validationResults.filter(r => r.status === "valid").length;
   const warningCount = validationResults.filter(r => r.status === "warning").length;
   const errorCount = validationResults.filter(r => r.status === "error").length;
+  const duplicateCount = validationResults.filter(r => r.errorType === "duplicate").length;
   const crossCompanyCount = validationResults.filter(r => r.isCrossCompany && r.status !== "error").length;
   const updateableCount = validCount + warningCount;
+
+  // Filtered results
+  const filteredResults = useMemo(() => {
+    let results = validationResults;
+
+    // Apply status filter
+    if (filterMode !== "all") {
+      results = results.filter(r => {
+        if (filterMode === "errors") return r.status === "error";
+        if (filterMode === "warnings") return r.status === "warning";
+        if (filterMode === "valid") return r.status === "valid";
+        return true;
+      });
+    }
+
+    // Apply search filter
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase();
+      results = results.filter(r => 
+        r.position_code.toLowerCase().includes(term) ||
+        r.reports_to_position_code.toLowerCase().includes(term) ||
+        r.positionTitle?.toLowerCase().includes(term) ||
+        r.newSupervisorTitle?.toLowerCase().includes(term) ||
+        r.message.toLowerCase().includes(term)
+      );
+    }
+
+    return results;
+  }, [validationResults, filterMode, searchTerm]);
 
   const getStatusIcon = (status: ValidationResult["status"]) => {
     switch (status) {
@@ -611,22 +832,29 @@ FIN-ANALYST-001,OLD-MGR-001,functional,remove`;
           {/* Validation Results */}
           {validationResults.length > 0 && (
             <div className="space-y-4">
+              {/* Summary Cards */}
               <div className="flex items-center gap-4 flex-wrap">
                 <h4 className="font-medium text-sm">Step 3: Review & Confirm</h4>
                 <div className="flex gap-2 flex-wrap">
                   {validCount > 0 && (
-                    <Badge variant="default" className="bg-green-600">
+                    <Badge variant="default" className="bg-green-600 cursor-pointer" onClick={() => setFilterMode(filterMode === "valid" ? "all" : "valid")}>
                       {validCount} Valid
                     </Badge>
                   )}
                   {warningCount > 0 && (
-                    <Badge variant="secondary" className="bg-yellow-500 text-white">
+                    <Badge variant="secondary" className="bg-yellow-500 text-white cursor-pointer" onClick={() => setFilterMode(filterMode === "warnings" ? "all" : "warnings")}>
                       {warningCount} Warnings
                     </Badge>
                   )}
                   {errorCount > 0 && (
-                    <Badge variant="destructive">
+                    <Badge variant="destructive" className="cursor-pointer" onClick={() => setFilterMode(filterMode === "errors" ? "all" : "errors")}>
                       {errorCount} Errors
+                    </Badge>
+                  )}
+                  {duplicateCount > 0 && (
+                    <Badge variant="outline" className="border-orange-500 text-orange-600">
+                      <Copy className="h-3 w-3 mr-1" />
+                      {duplicateCount} Duplicates
                     </Badge>
                   )}
                   {crossCompanyCount > 0 && (
@@ -638,77 +866,184 @@ FIN-ANALYST-001,OLD-MGR-001,functional,remove`;
                 </div>
               </div>
 
-              <div className="border rounded-lg overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-12">Status</TableHead>
-                      <TableHead>Position</TableHead>
-                      <TableHead>Company</TableHead>
-                      <TableHead>Current Supervisor</TableHead>
-                      <TableHead>New Supervisor</TableHead>
-                      <TableHead>Supervisor Company</TableHead>
-                      <TableHead>Message</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {validationResults.map((result, idx) => (
-                      <TableRow key={idx} className={getRowClass(result.status)}>
-                        <TableCell>{getStatusIcon(result.status)}</TableCell>
-                        <TableCell>
-                          <div>
-                            <p className="font-mono text-sm">{result.position_code}</p>
-                            <p className="text-xs text-muted-foreground">{result.positionTitle || "-"}</p>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className="text-xs">
-                            {result.positionCompanyCode || "-"}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <div className="text-sm">
-                            {result.currentSupervisorTitle || "(None)"}
-                            {result.currentSupervisorCompanyCode && result.currentSupervisorCompanyCode !== result.positionCompanyCode && (
-                              <Badge variant="secondary" className="text-xs ml-1">
-                                {result.currentSupervisorCompanyCode}
-                              </Badge>
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="text-sm">
-                            {result.newSupervisorTitle || "-"}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          {result.newSupervisorCompanyCode ? (
-                            <Tooltip>
-                              <TooltipTrigger>
-                                <Badge 
-                                  variant={result.isCrossCompany ? "default" : "outline"} 
-                                  className={result.isCrossCompany ? "bg-blue-500" : "text-xs"}
-                                >
-                                  {result.newSupervisorCompanyCode}
-                                  {result.isCrossCompany && <GitBranch className="h-3 w-3 ml-1" />}
-                                </Badge>
-                              </TooltipTrigger>
-                              {result.isCrossCompany && (
-                                <TooltipContent>
-                                  Cross-company reporting to {result.newSupervisorCompanyName}
-                                </TooltipContent>
-                              )}
-                            </Tooltip>
-                          ) : "-"}
-                        </TableCell>
-                        <TableCell className="text-sm text-muted-foreground max-w-xs truncate">
-                          {result.message}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+              {/* Search and Filter Controls */}
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="relative flex-1 min-w-[200px] max-w-sm">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search by position code, title..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-9"
+                  />
+                </div>
+                <div className="flex gap-1">
+                  <Button 
+                    variant={filterMode === "all" ? "default" : "outline"} 
+                    size="sm"
+                    onClick={() => setFilterMode("all")}
+                  >
+                    All
+                  </Button>
+                  <Button 
+                    variant={filterMode === "errors" ? "destructive" : "outline"} 
+                    size="sm"
+                    onClick={() => setFilterMode("errors")}
+                  >
+                    <Filter className="h-3 w-3 mr-1" />
+                    Errors
+                  </Button>
+                  <Button 
+                    variant={filterMode === "warnings" ? "secondary" : "outline"} 
+                    size="sm"
+                    onClick={() => setFilterMode("warnings")}
+                  >
+                    Warnings
+                  </Button>
+                </div>
+                {errorCount > 0 && (
+                  <Button variant="outline" size="sm" onClick={exportErrorsToCSV}>
+                    <FileDown className="h-4 w-4 mr-1" />
+                    Export Errors
+                  </Button>
+                )}
               </div>
+
+              {/* Results Table */}
+              <div className="border rounded-lg">
+                <ScrollArea className="h-[400px]">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-12 sticky top-0 bg-background">Status</TableHead>
+                        <TableHead className="sticky top-0 bg-background">Position</TableHead>
+                        <TableHead className="sticky top-0 bg-background">Company</TableHead>
+                        <TableHead className="sticky top-0 bg-background">Current Supervisor</TableHead>
+                        <TableHead className="sticky top-0 bg-background">New Supervisor</TableHead>
+                        <TableHead className="sticky top-0 bg-background">Supervisor Company</TableHead>
+                        <TableHead className="sticky top-0 bg-background">Message</TableHead>
+                        <TableHead className="w-16 sticky top-0 bg-background">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredResults.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                            No results match your filter
+                          </TableCell>
+                        </TableRow>
+                      ) : (
+                        filteredResults.map((result, displayIdx) => {
+                          const originalIdx = validationResults.indexOf(result);
+                          const isEditing = editingRowIndex === originalIdx;
+                          
+                          return (
+                            <TableRow key={originalIdx} className={getRowClass(result.status)}>
+                              <TableCell>{getStatusIcon(result.status)}</TableCell>
+                              <TableCell>
+                                {isEditing ? (
+                                  <Input
+                                    value={editedValues.position_code}
+                                    onChange={(e) => setEditedValues(prev => ({ ...prev, position_code: e.target.value }))}
+                                    className="h-8 font-mono text-sm"
+                                  />
+                                ) : (
+                                  <div>
+                                    <p className="font-mono text-sm">{result.position_code}</p>
+                                    <p className="text-xs text-muted-foreground">{result.positionTitle || "-"}</p>
+                                  </div>
+                                )}
+                              </TableCell>
+                              <TableCell>
+                                <Badge variant="outline" className="text-xs">
+                                  {result.positionCompanyCode || "-"}
+                                </Badge>
+                              </TableCell>
+                              <TableCell>
+                                <div className="text-sm">
+                                  {result.currentSupervisorTitle || "(None)"}
+                                  {result.currentSupervisorCompanyCode && result.currentSupervisorCompanyCode !== result.positionCompanyCode && (
+                                    <Badge variant="secondary" className="text-xs ml-1">
+                                      {result.currentSupervisorCompanyCode}
+                                    </Badge>
+                                  )}
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                {isEditing ? (
+                                  <Input
+                                    value={editedValues.reports_to_position_code}
+                                    onChange={(e) => setEditedValues(prev => ({ ...prev, reports_to_position_code: e.target.value }))}
+                                    className="h-8 font-mono text-sm"
+                                  />
+                                ) : (
+                                  <div className="text-sm">
+                                    {result.newSupervisorTitle || "-"}
+                                  </div>
+                                )}
+                              </TableCell>
+                              <TableCell>
+                                {result.newSupervisorCompanyCode ? (
+                                  <Tooltip>
+                                    <TooltipTrigger>
+                                      <Badge 
+                                        variant={result.isCrossCompany ? "default" : "outline"} 
+                                        className={result.isCrossCompany ? "bg-blue-500" : "text-xs"}
+                                      >
+                                        {result.newSupervisorCompanyCode}
+                                        {result.isCrossCompany && <GitBranch className="h-3 w-3 ml-1" />}
+                                      </Badge>
+                                    </TooltipTrigger>
+                                    {result.isCrossCompany && (
+                                      <TooltipContent>
+                                        Cross-company reporting to {result.newSupervisorCompanyName}
+                                      </TooltipContent>
+                                    )}
+                                  </Tooltip>
+                                ) : "-"}
+                              </TableCell>
+                              <TableCell className="text-sm text-muted-foreground max-w-xs">
+                                <span className="truncate block" title={result.message}>
+                                  {result.message}
+                                </span>
+                              </TableCell>
+                              <TableCell>
+                                {isEditing ? (
+                                  <div className="flex gap-1">
+                                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={saveEdit}>
+                                      <Save className="h-3 w-3" />
+                                    </Button>
+                                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={cancelEditing}>
+                                      <X className="h-3 w-3" />
+                                    </Button>
+                                  </div>
+                                ) : (
+                                  <Button 
+                                    variant="ghost" 
+                                    size="icon" 
+                                    className="h-7 w-7"
+                                    onClick={() => startEditing(originalIdx)}
+                                    disabled={updateComplete}
+                                  >
+                                    <Edit2 className="h-3 w-3" />
+                                  </Button>
+                                )}
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })
+                      )}
+                    </TableBody>
+                  </Table>
+                </ScrollArea>
+              </div>
+
+              {/* Showing count */}
+              {searchTerm || filterMode !== "all" ? (
+                <p className="text-xs text-muted-foreground">
+                  Showing {filteredResults.length} of {validationResults.length} rows
+                </p>
+              ) : null}
 
               {/* Action Buttons */}
               <div className="flex items-center gap-4">
