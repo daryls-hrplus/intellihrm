@@ -73,6 +73,7 @@ import { JobResponsibilitiesManager } from "@/components/workforce/JobResponsibi
 import { JobGoalsManager } from "@/components/workforce/JobGoalsManager";
 import { JobCapabilityRequirementsManager } from "@/components/workforce/JobCapabilityRequirementsManager";
 import { JobSkillsManager } from "@/components/workforce/JobSkillsManager";
+import { JobQualificationsManager } from "@/components/workforce/JobQualificationsManager";
 import { JobLevelExpectationsManager } from "@/components/workforce/JobLevelExpectationsManager";
 import { BulkJobDataImport } from "@/components/workforce/BulkJobDataImport";
 import { JobConfigurationDashboard } from "@/components/workforce/jobs/JobConfigurationDashboard";
@@ -1134,28 +1135,36 @@ export default function JobsPage() {
                             <div>
                               <p className="font-semibold text-slate-900 mb-2">Understanding Job Architecture</p>
                               <p className="text-slate-700 leading-relaxed">
-                                <strong>Competencies</strong> are evaluated in performance appraisals using behavioral indicators and proficiency levels. 
-                                <strong> Job Skills</strong> define capability requirements and support learning, readiness, and development — they are NOT scored in appraisals. 
+                                <strong>Qualifications</strong> define education and certification requirements to be eligible for the job.
+                                <strong> Skills</strong> define capability requirements and support learning, readiness, and development.
+                                <strong> Competencies</strong> are evaluated in performance appraisals using behavioral indicators.
                                 <strong> Responsibilities</strong> (KRAs) define key result areas with weighted scoring. 
                                 <strong> Goals</strong> are specific, measurable objectives tied to the job.
                               </p>
                             </div>
                           </div>
-                          <Tabs defaultValue="competencies" className="w-full">
+                          <Tabs defaultValue="qualifications" className="w-full">
                             <TabsList className="bg-muted">
+                              <TabsTrigger value="qualifications">Qualifications</TabsTrigger>
+                              <TabsTrigger value="job-skills">Skills</TabsTrigger>
                               <TabsTrigger value="competencies">Competencies</TabsTrigger>
-                              <TabsTrigger value="job-skills">Job Skills</TabsTrigger>
                               <TabsTrigger value="responsibilities">Responsibilities</TabsTrigger>
                               <TabsTrigger value="goals">Goals</TabsTrigger>
                             </TabsList>
-                            <TabsContent value="competencies" className="mt-6">
-                              <JobCapabilityRequirementsManager 
+                            <TabsContent value="qualifications" className="mt-6">
+                              <JobQualificationsManager 
                                 jobId={job.id} 
                                 companyId={job.company_id} 
                               />
                             </TabsContent>
                             <TabsContent value="job-skills" className="mt-6">
                               <JobSkillsManager 
+                                jobId={job.id} 
+                                companyId={job.company_id} 
+                              />
+                            </TabsContent>
+                            <TabsContent value="competencies" className="mt-6">
+                              <JobCapabilityRequirementsManager 
                                 jobId={job.id} 
                                 companyId={job.company_id} 
                               />
