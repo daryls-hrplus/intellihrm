@@ -1,12 +1,13 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Sparkles, Plus, Upload, Target, Zap, Layers, ArrowRight } from "lucide-react";
+import { Sparkles, Plus, Upload, Target, Zap, Layers, ArrowRight, Heart } from "lucide-react";
 
 interface EmptyStateOnboardingProps {
   onOpenWizard: () => void;
   onOpenBulkImport: () => void;
   onAddSkill: () => void;
   onAddCompetency: () => void;
+  onAddValue?: () => void;
 }
 
 export function EmptyStateOnboarding({
@@ -14,6 +15,7 @@ export function EmptyStateOnboarding({
   onOpenBulkImport,
   onAddSkill,
   onAddCompetency,
+  onAddValue,
 }: EmptyStateOnboardingProps) {
   return (
     <div className="py-12 px-4">
@@ -23,9 +25,9 @@ export function EmptyStateOnboarding({
             <Layers className="h-12 w-12 text-primary" />
           </div>
         </div>
-        <h2 className="text-2xl font-bold mb-2">Get Started with Capabilities</h2>
-        <p className="text-muted-foreground max-w-md mx-auto">
-          Build your organization's skills and competencies framework to enable performance management, career pathing, and workforce planning.
+        <h2 className="text-2xl font-bold mb-2">Build Your Capability Framework</h2>
+        <p className="text-muted-foreground max-w-lg mx-auto">
+          Define your organization's values, competencies, and skills to enable performance management, career pathing, and workforce planning.
         </p>
       </div>
 
@@ -62,18 +64,26 @@ export function EmptyStateOnboarding({
               <div>
                 <h3 className="font-semibold text-lg mb-1">Create Manually</h3>
                 <p className="text-sm text-muted-foreground mb-4">
-                  Build custom skills and competencies from scratch tailored to your organization
+                  Build custom values, skills, and competencies tailored to your organization
                 </p>
               </div>
-              <div className="flex gap-2 w-full">
-                <Button variant="outline" className="flex-1" onClick={onAddSkill}>
-                  <Zap className="mr-2 h-4 w-4" />
-                  Add Skill
-                </Button>
-                <Button variant="outline" className="flex-1" onClick={onAddCompetency}>
-                  <Target className="mr-2 h-4 w-4" />
-                  Add Competency
-                </Button>
+              <div className="flex flex-col gap-2 w-full">
+                {onAddValue && (
+                  <Button variant="outline" className="w-full border-rose-200 dark:border-rose-800 hover:bg-rose-50 dark:hover:bg-rose-950" onClick={onAddValue}>
+                    <Heart className="mr-2 h-4 w-4 text-rose-500" />
+                    Add Company Value
+                  </Button>
+                )}
+                <div className="flex gap-2 w-full">
+                  <Button variant="outline" className="flex-1" onClick={onAddCompetency}>
+                    <Target className="mr-2 h-4 w-4" />
+                    Add Competency
+                  </Button>
+                  <Button variant="outline" className="flex-1" onClick={onAddSkill}>
+                    <Zap className="mr-2 h-4 w-4" />
+                    Add Skill
+                  </Button>
+                </div>
               </div>
             </div>
           </CardContent>
