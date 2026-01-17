@@ -15,7 +15,10 @@ interface AnalysisRequest {
     | "analyze_gap"
     | "generate_proficiency_indicators"
     | "suggest_job_competencies"
-    | "batch_generate_indicators";
+    | "batch_generate_indicators"
+    | "generate_value_description"
+    | "generate_value_behavioral_levels"
+    | "analyze_value";
   text?: string;
   capability?: { id: string; name: string; description?: string; type: string; code: string };
   capabilities?: { id: string; name: string; code: string }[];
@@ -27,6 +30,8 @@ interface AnalysisRequest {
   jobLevel?: string;
   jobGrade?: string;
   availableCompetencies?: { id: string; name: string; code: string; category: string }[];
+  valueName?: string;
+  valueDescription?: string;
 }
 
 serve(async (req) => {
@@ -45,7 +50,7 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     const body = await req.json() as AnalysisRequest;
-    const { action, text, capability, capabilities, companyId, employeeId, jobProfileId, jobName, jobDescription, jobLevel, jobGrade, availableCompetencies } = body;
+    const { action, text, capability, capabilities, companyId, employeeId, jobProfileId, jobName, jobDescription, jobLevel, jobGrade, availableCompetencies, valueName, valueDescription } = body;
     console.log(`Processing capability AI action: ${action}`);
 
     let result: unknown;
@@ -81,6 +86,15 @@ serve(async (req) => {
           availableCompetencies || [],
           LOVABLE_API_KEY
         );
+        break;
+      case "generate_value_description":
+        result = await generateValueDescription(valueName || "", LOVABLE_API_KEY);
+        break;
+      case "generate_value_behavioral_levels":
+        result = await generateValueBehavioralLevels(valueName || "", valueDescription || "", LOVABLE_API_KEY);
+        break;
+      case "analyze_value":
+        result = await analyzeValue(valueName || "", valueDescription || "", LOVABLE_API_KEY);
         break;
       default:
         throw new Error(`Unknown action: ${action}`);
@@ -910,4 +924,211 @@ ${!competencyList ? "IMPORTANT: There are no competencies in the library. Return
   console.log(`Validated ${result.suggestions.length} suggestions from library out of original ${result.suggestions?.length || 0}`);
 
   return result;
+}
+
+// Value-specific AI functions
+
+async function generateValueDescription(valueName: string, apiKey: string) {
+  console.log("Generating value description for:", valueName);
+
+  const systemPrompt = `You are an expert in organizational culture and HR best practices.
+Generate a compelling, professional description for a company value.
+The description should:
+- Be 1-2 sentences
+- Explain what the value means in an organizational context
+- Be inspiring but practical
+- Be suitable for use in performance reviews and company culture documents`;
+
+  const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: "google/gemini-2.5-flash",
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: `Generate a description for the company value: "${valueName}"` },
+      ],
+      tools: [
+        {
+          type: "function",
+          function: {
+            name: "generate_description",
+            description: "Returns a generated value description",
+            parameters: {
+              type: "object",
+              properties: {
+                description: { type: "string" },
+              },
+              required: ["description"],
+            },
+          },
+        },
+      ],
+      tool_choice: { type: "function", function: { name: "generate_description" } },
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to generate value description");
+  }
+
+  const data = await response.json();
+  const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
+
+  if (!toolCall?.function?.arguments) {
+    return { description: null };
+  }
+
+  return JSON.parse(toolCall.function.arguments);
+}
+
+async function generateValueBehavioralLevels(valueName: string, valueDescription: string, apiKey: string) {
+  console.log("Generating value behavioral levels for:", valueName);
+
+  const systemPrompt = `You are an expert in organizational culture and competency frameworks.
+Generate behavioral indicators for each proficiency level of a company value.
+Use value-appropriate terminology:
+- Level 1: Learning - Developing awareness
+- Level 2: Applying - Consistently demonstrating
+- Level 3: Modeling - Actively exemplifying
+- Level 4: Championing - Advocating and driving adoption
+- Level 5: Embodying - Living the value as core identity
+
+Each level should have 2-3 observable behavioral indicators.
+Indicators should be specific, measurable, and show clear progression.`;
+
+  const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: "google/gemini-2.5-flash",
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: `Value: ${valueName}\nDescription: ${valueDescription || "Not provided"}\n\nGenerate behavioral indicators for each level.` },
+      ],
+      tools: [
+        {
+          type: "function",
+          function: {
+            name: "generate_behavioral_levels",
+            description: "Returns behavioral indicators by level",
+            parameters: {
+              type: "object",
+              properties: {
+                behavioral_levels: {
+                  type: "object",
+                  properties: {
+                    "1": { type: "array", items: { type: "string" } },
+                    "2": { type: "array", items: { type: "string" } },
+                    "3": { type: "array", items: { type: "string" } },
+                    "4": { type: "array", items: { type: "string" } },
+                    "5": { type: "array", items: { type: "string" } },
+                  },
+                  required: ["1", "2", "3", "4", "5"],
+                },
+              },
+              required: ["behavioral_levels"],
+            },
+          },
+        },
+      ],
+      tool_choice: { type: "function", function: { name: "generate_behavioral_levels" } },
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to generate behavioral levels");
+  }
+
+  const data = await response.json();
+  const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
+
+  if (!toolCall?.function?.arguments) {
+    return { behavioral_levels: {} };
+  }
+
+  return JSON.parse(toolCall.function.arguments);
+}
+
+async function analyzeValue(valueName: string, valueDescription: string, apiKey: string) {
+  console.log("Analyzing value:", valueName);
+
+  const systemPrompt = `You are an expert in organizational culture and HR.
+Analyze the given company value and provide:
+1. A confidence score (0-1) on how well-defined it is
+2. Suggested improvements to the description
+3. Related values that often complement this one
+4. Classification: core (fundamental), aspirational (growth-oriented), or leadership (role-model)`;
+
+  const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: "google/gemini-2.5-flash",
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: `Value: ${valueName}\nDescription: ${valueDescription || "Not provided"}` },
+      ],
+      tools: [
+        {
+          type: "function",
+          function: {
+            name: "analyze_value",
+            description: "Returns value analysis",
+            parameters: {
+              type: "object",
+              properties: {
+                confidence_score: { type: "number", minimum: 0, maximum: 1 },
+                improvements: {
+                  type: "array",
+                  items: { type: "string" },
+                },
+                related_values: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      name: { type: "string" },
+                      reason: { type: "string" },
+                    },
+                    required: ["name", "reason"],
+                  },
+                },
+                classification: { type: "string", enum: ["core", "aspirational", "leadership"] },
+              },
+              required: ["confidence_score", "improvements", "related_values", "classification"],
+            },
+          },
+        },
+      ],
+      tool_choice: { type: "function", function: { name: "analyze_value" } },
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to analyze value");
+  }
+
+  const data = await response.json();
+  const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
+
+  if (!toolCall?.function?.arguments) {
+    return { 
+      confidence_score: 0.5, 
+      improvements: [], 
+      related_values: [],
+      classification: "core" 
+    };
+  }
+
+  return JSON.parse(toolCall.function.arguments);
 }

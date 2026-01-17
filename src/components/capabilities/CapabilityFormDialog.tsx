@@ -21,7 +21,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { X, Plus, Link2, Building2, Globe, Sparkles, Brain, Clock, Info, ShieldAlert, GitBranch, BarChart3, Heart, Award } from "lucide-react";
+import { X, Plus, Link2, Building2, Globe, Sparkles, Brain, Clock, Info, ShieldAlert, GitBranch, BarChart3, Heart, Award, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CompetencySkillLinker } from "./CompetencySkillLinker";
 import {
@@ -37,6 +37,9 @@ import { useCapabilityJobApplicability, JobRequirementInput } from "@/hooks/useC
 import { CompetencyBehavioralLevelsEditor, ProficiencyIndicators } from "./CompetencyBehavioralLevelsEditor";
 import { useCompetencyUsageCheck } from "@/hooks/capabilities/useCompetencyUsageCheck";
 import { VersionImpactReport } from "./VersionImpactReport";
+import { ValueQuickStartDialog } from "./ValueQuickStartDialog";
+import { ValueAISuggestionsPanel } from "./ValueAISuggestionsPanel";
+import { useValueAI, VALUE_TEMPLATES } from "@/hooks/capabilities/useValueAI";
 
 interface CapabilityFormDialogProps {
   open: boolean;
@@ -107,9 +110,12 @@ export function CapabilityFormDialog({
   const [selectedJobRequirements, setSelectedJobRequirements] = useState<JobRequirementInput[]>([]);
   const [proficiencyIndicators, setProficiencyIndicators] = useState<ProficiencyIndicators>({});
   const [showVersionReport, setShowVersionReport] = useState(false);
+  const [showValueQuickStart, setShowValueQuickStart] = useState(false);
+  const [generatingDescription, setGeneratingDescription] = useState(false);
 
   const { requirements, fetchApplicability, bulkSetApplicability } = useCapabilityJobApplicability();
   const { loading: usageLoading, usage, checkUsage, clearUsage } = useCompetencyUsageCheck();
+  const { generateValueDescription, generateBehavioralLevels, isGenerating: valueAIGenerating } = useValueAI();
 
   useEffect(() => {
     if (capability) {
@@ -472,16 +478,60 @@ export function CapabilityFormDialog({
             </div>
 
             <div className="space-y-2">
-              <Label>Description</Label>
+              <div className="flex items-center justify-between">
+                <Label>Description</Label>
+                {formData.type === "VALUE" && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 gap-1.5 text-xs text-primary hover:text-primary"
+                    onClick={async () => {
+                      if (!formData.name) return;
+                      setGeneratingDescription(true);
+                      const desc = await generateValueDescription(formData.name);
+                      if (desc) {
+                        setFormData((prev) => ({ ...prev, description: desc }));
+                      }
+                      setGeneratingDescription(false);
+                    }}
+                    disabled={generatingDescription || !formData.name}
+                  >
+                    {generatingDescription ? (
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                    ) : (
+                      <Sparkles className="h-3 w-3" />
+                    )}
+                    AI Generate
+                  </Button>
+                )}
+              </div>
               <Textarea
                 value={formData.description || ""}
                 onChange={(e) =>
                   setFormData((prev) => ({ ...prev, description: e.target.value }))
                 }
-                placeholder="Enter description"
+                placeholder={formData.type === "VALUE" ? "Describe what this value means for your organization..." : "Enter description"}
                 rows={3}
               />
             </div>
+
+            {/* AI Suggestions Panel for Values */}
+            {formData.type === "VALUE" && formData.name && (
+              <ValueAISuggestionsPanel
+                valueName={formData.name}
+                valueDescription={formData.description}
+                onApplyImprovement={(improvement) => {
+                  // Append improvement as a hint
+                  setFormData((prev) => ({
+                    ...prev,
+                    description: prev.description 
+                      ? `${prev.description}\n\n${improvement}`
+                      : improvement,
+                  }));
+                }}
+              />
+            )}
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
