@@ -2511,6 +2511,80 @@ export type Database = {
           },
         ]
       }
+      appraisal_capability_scores: {
+        Row: {
+          assessed_by: string | null
+          assessment_source: string | null
+          capability_id: string
+          capability_type: Database["public"]["Enums"]["capability_type"]
+          comments: string | null
+          created_at: string | null
+          demonstrated_behaviors: string[] | null
+          evidence: string | null
+          id: string
+          participant_id: string
+          rating: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          assessed_by?: string | null
+          assessment_source?: string | null
+          capability_id: string
+          capability_type: Database["public"]["Enums"]["capability_type"]
+          comments?: string | null
+          created_at?: string | null
+          demonstrated_behaviors?: string[] | null
+          evidence?: string | null
+          id?: string
+          participant_id: string
+          rating?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          assessed_by?: string | null
+          assessment_source?: string | null
+          capability_id?: string
+          capability_type?: Database["public"]["Enums"]["capability_type"]
+          comments?: string | null
+          created_at?: string | null
+          demonstrated_behaviors?: string[] | null
+          evidence?: string | null
+          id?: string
+          participant_id?: string
+          rating?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appraisal_capability_scores_assessed_by_fkey"
+            columns: ["assessed_by"]
+            isOneToOne: false
+            referencedRelation: "employee_fte_summary"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "appraisal_capability_scores_assessed_by_fkey"
+            columns: ["assessed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appraisal_capability_scores_capability_id_fkey"
+            columns: ["capability_id"]
+            isOneToOne: false
+            referencedRelation: "skills_competencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appraisal_capability_scores_participant_id_fkey"
+            columns: ["participant_id"]
+            isOneToOne: false
+            referencedRelation: "appraisal_participants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       appraisal_cycles: {
         Row: {
           auto_activate_enabled: boolean | null
@@ -65143,12 +65217,14 @@ export type Database = {
       }
       skills_competencies: {
         Row: {
+          assessment_mode: string | null
           category: Database["public"]["Enums"]["capability_category"]
           code: string
           company_id: string | null
           created_at: string | null
           created_by: string | null
           description: string | null
+          display_order: number | null
           effective_from: string
           effective_to: string | null
           esco_concept_type: string | null
@@ -65159,6 +65235,7 @@ export type Database = {
           external_sync_status: string | null
           id: string
           is_global: boolean | null
+          is_promotion_factor: boolean | null
           last_external_sync_at: string | null
           metadata: Json | null
           name: string
@@ -65170,14 +65247,17 @@ export type Database = {
           type: Database["public"]["Enums"]["capability_type"]
           updated_at: string | null
           version: number
+          weight: number | null
         }
         Insert: {
+          assessment_mode?: string | null
           category: Database["public"]["Enums"]["capability_category"]
           code: string
           company_id?: string | null
           created_at?: string | null
           created_by?: string | null
           description?: string | null
+          display_order?: number | null
           effective_from?: string
           effective_to?: string | null
           esco_concept_type?: string | null
@@ -65188,6 +65268,7 @@ export type Database = {
           external_sync_status?: string | null
           id?: string
           is_global?: boolean | null
+          is_promotion_factor?: boolean | null
           last_external_sync_at?: string | null
           metadata?: Json | null
           name: string
@@ -65199,14 +65280,17 @@ export type Database = {
           type: Database["public"]["Enums"]["capability_type"]
           updated_at?: string | null
           version?: number
+          weight?: number | null
         }
         Update: {
+          assessment_mode?: string | null
           category?: Database["public"]["Enums"]["capability_category"]
           code?: string
           company_id?: string | null
           created_at?: string | null
           created_by?: string | null
           description?: string | null
+          display_order?: number | null
           effective_from?: string
           effective_to?: string | null
           esco_concept_type?: string | null
@@ -65217,6 +65301,7 @@ export type Database = {
           external_sync_status?: string | null
           id?: string
           is_global?: boolean | null
+          is_promotion_factor?: boolean | null
           last_external_sync_at?: string | null
           metadata?: Json | null
           name?: string
@@ -65228,6 +65313,7 @@ export type Database = {
           type?: Database["public"]["Enums"]["capability_type"]
           updated_at?: string | null
           version?: number
+          weight?: number | null
         }
         Relationships: [
           {
@@ -72266,6 +72352,32 @@ export type Database = {
           },
         ]
       }
+      value_capability_mapping: {
+        Row: {
+          migrated_at: string | null
+          new_capability_id: string | null
+          old_value_id: string
+        }
+        Insert: {
+          migrated_at?: string | null
+          new_capability_id?: string | null
+          old_value_id: string
+        }
+        Update: {
+          migrated_at?: string | null
+          new_capability_id?: string | null
+          old_value_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "value_capability_mapping_new_capability_id_fkey"
+            columns: ["new_capability_id"]
+            isOneToOne: false
+            referencedRelation: "skills_competencies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       video_call_participants: {
         Row: {
           call_id: string
@@ -74695,7 +74807,7 @@ export type Database = {
         | "leadership"
         | "core"
       capability_status: "draft" | "pending_approval" | "active" | "deprecated"
-      capability_type: "SKILL" | "COMPETENCY"
+      capability_type: "SKILL" | "COMPETENCY" | "VALUE"
       channel_type: "direct" | "group" | "channel"
       competency_change_type: "added" | "modified" | "removed"
       custom_field_form_context:
@@ -75080,7 +75192,7 @@ export const Constants = {
         "core",
       ],
       capability_status: ["draft", "pending_approval", "active", "deprecated"],
-      capability_type: ["SKILL", "COMPETENCY"],
+      capability_type: ["SKILL", "COMPETENCY", "VALUE"],
       channel_type: ["direct", "group", "channel"],
       competency_change_type: ["added", "modified", "removed"],
       custom_field_form_context: [

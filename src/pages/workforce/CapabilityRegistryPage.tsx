@@ -161,7 +161,7 @@ export default function CapabilityRegistryPage() {
     if (!companyFilter) return;
     
     const filters: CapabilityFilters = {
-      type: activeTab === "skills" ? "SKILL" : activeTab === "competencies" ? "COMPETENCY" : undefined,
+      type: activeTab === "skills" ? "SKILL" : activeTab === "competencies" ? "COMPETENCY" : activeTab === "values" ? "VALUE" : undefined,
       category: categoryFilter !== "all" ? (categoryFilter as CapabilityCategory) : undefined,
       status: statusFilter !== "all" ? (statusFilter as CapabilityStatus) : undefined,
       companyId: companyFilter,
@@ -332,6 +332,7 @@ export default function CapabilityRegistryPage() {
 
   const skillCount = enrichedCapabilities.filter((c) => c.type === "SKILL").length;
   const competencyCount = enrichedCapabilities.filter((c) => c.type === "COMPETENCY").length;
+  const valueCount = enrichedCapabilities.filter((c) => c.type === "VALUE").length;
   
   // Count expiring soon items
   const expiringSoonCount = useMemo(() => {
@@ -663,6 +664,7 @@ export default function CapabilityRegistryPage() {
                 <TabsTrigger value="values" className="gap-2">
                   <Heart className="h-4 w-4" />
                   Values
+                  <Badge variant="secondary">{valueCount}</Badge>
                 </TabsTrigger>
               </TabsList>
 
@@ -775,7 +777,38 @@ export default function CapabilityRegistryPage() {
               </TabsContent>
 
               <TabsContent value="values" className="mt-6">
-                <CompanyValuesTab companyId={companyFilter !== "all" ? companyFilter : companies[0]?.id || ""} />
+                {loading ? (
+                  <div className="flex items-center justify-center py-12">
+                    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                  </div>
+                ) : enrichedCapabilities.filter(c => c.type === "VALUE").length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-16 text-center">
+                    <Heart className="h-12 w-12 text-muted-foreground mb-4" />
+                    <h3 className="text-lg font-medium">No Values Defined</h3>
+                    <p className="text-muted-foreground mb-4">
+                      Company values represent core organizational principles used in performance assessments.
+                    </p>
+                    <Button onClick={() => handleAdd("VALUE")}>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Value
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {enrichedCapabilities.filter(c => c.type === "VALUE").map((capability) => (
+                      <CapabilityCard
+                        key={capability.id}
+                        capability={capability}
+                        onEdit={handleEdit}
+                        onDelete={handleDelete}
+                        onStatusChange={handleStatusChange}
+                        onViewHistory={handleViewHistory}
+                        onConfigure={handleConfigureWizard}
+                        onManageJobs={handleManageJobs}
+                      />
+                    ))}
+                  </div>
+                )}
               </TabsContent>
             </Tabs>
           </CardContent>
