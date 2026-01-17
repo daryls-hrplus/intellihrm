@@ -149,9 +149,10 @@ export default function CapabilityRegistryPage() {
     }
   }, [companies, companyFilter]);
 
-  // Show quick start prompt if no capabilities exist
+  // Show quick start prompt if no capabilities exist and user hasn't dismissed it
   useEffect(() => {
-    if (!loading && capabilities.length === 0 && companies.length > 0) {
+    const dismissed = localStorage.getItem('capability-wizard-dismissed');
+    if (!loading && capabilities.length === 0 && companies.length > 0 && !dismissed) {
       setShowQuickStartPrompt(true);
     }
   }, [loading, capabilities.length, companies.length]);
@@ -858,6 +859,10 @@ export default function CapabilityRegistryPage() {
         open={isQuickStartOpen || showQuickStartPrompt}
         onOpenChange={(open) => {
           setIsQuickStartOpen(open);
+          if (!open && showQuickStartPrompt) {
+            // User dismissed the wizard - remember this choice
+            localStorage.setItem('capability-wizard-dismissed', 'true');
+          }
           setShowQuickStartPrompt(false);
         }}
         companyId={companies[0]?.id || ""}
