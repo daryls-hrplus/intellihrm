@@ -9,27 +9,49 @@ import {
   BehavioralIndicator 
 } from '@/types/valuesAssessment';
 
+/**
+ * Unified Values Assessment Hook
+ * 
+ * This hook now queries from skills_competencies table where type = 'VALUE',
+ * following the Unified Capability Framework pattern.
+ */
 export function useValuesAssessment() {
   const [values, setValues] = useState<CompanyValue[]>([]);
   const [scores, setScores] = useState<AppraisalValueScore[]>([]);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
+  /**
+   * Fetch company values from the unified skills_competencies table
+   */
   const fetchCompanyValues = useCallback(async (companyId: string): Promise<CompanyValue[]> => {
     setLoading(true);
     try {
+      // Query from skills_competencies where type = 'VALUE'
       const { data, error } = await supabase
-        .from('company_values')
+        .from('skills_competencies')
         .select('*')
         .eq('company_id', companyId)
-        .eq('is_active', true)
+        .eq('type', 'VALUE')
+        .eq('status', 'active')
         .order('display_order');
 
       if (error) throw error;
 
+      // Map skills_competencies fields to CompanyValue interface
       const typedValues = (data || []).map(v => ({
-        ...v,
-        behavioral_indicators: (v.behavioral_indicators as unknown as BehavioralIndicator[]) || []
+        id: v.id,
+        company_id: v.company_id,
+        name: v.name,
+        code: v.code,
+        description: v.description,
+        behavioral_indicators: (v.proficiency_indicators as unknown as BehavioralIndicator[]) || [],
+        display_order: v.display_order ?? 0,
+        is_active: v.status === 'active',
+        weight: v.weight ?? 0,
+        is_promotion_factor: v.is_promotion_factor ?? false,
+        created_at: v.created_at,
+        updated_at: v.updated_at
       })) as CompanyValue[];
 
       setValues(typedValues);
@@ -47,9 +69,57 @@ export function useValuesAssessment() {
     }
   }, [toast]);
 
+  /**
+   * Fetch value scores - now uses appraisal_capability_scores unified table
+   */
   const fetchValueScores = useCallback(async (participantId: string): Promise<AppraisalValueScore[]> => {
     setLoading(true);
     try {
+      // First try unified table
+      const { data: unifiedData, error: unifiedError } = await supabase
+        .from('appraisal_capability_scores')
+        .select(`
+          *,
+          capability:skills_competencies(*)
+        `)
+        .eq('participant_id', participantId);
+
+      if (!unifiedError && unifiedData && unifiedData.length > 0) {
+        // Filter to only VALUE type capabilities
+        const valueScores = unifiedData.filter((score: any) => score.capability?.type === 'VALUE');
+        
+        const typedScores = valueScores.map((score: any) => ({
+          id: score.id,
+          participant_id: score.participant_id,
+          value_id: score.capability_id,
+          rating: score.rating,
+          demonstrated_behaviors: score.demonstrated_behaviors || null,
+          evidence: score.evidence,
+          comments: score.comments,
+          assessed_by: score.assessed_by,
+          created_at: score.created_at,
+          updated_at: score.updated_at,
+          value: score.capability ? {
+            id: score.capability.id,
+            company_id: score.capability.company_id,
+            name: score.capability.name,
+            code: score.capability.code,
+            description: score.capability.description,
+            behavioral_indicators: (score.capability.proficiency_indicators as unknown as BehavioralIndicator[]) || [],
+            display_order: score.capability.display_order ?? 0,
+            is_active: score.capability.status === 'active',
+            weight: score.capability.weight ?? 0,
+            is_promotion_factor: score.capability.is_promotion_factor ?? false,
+            created_at: score.capability.created_at,
+            updated_at: score.capability.updated_at
+          } : undefined
+        })) as AppraisalValueScore[];
+
+        setScores(typedScores);
+        return typedScores;
+      }
+
+      // Fallback to legacy table for backward compatibility
       const { data, error } = await supabase
         .from('appraisal_value_scores')
         .select(`
@@ -78,17 +148,22 @@ export function useValuesAssessment() {
     }
   }, []);
 
+  /**
+   * Save value score - now uses appraisal_capability_scores unified table
+   */
   const saveValueScore = useCallback(async (
     participantId: string,
     input: ValueScoreInput,
     assessedBy: string
   ): Promise<boolean> => {
     try {
+      // Use unified table
       const { error } = await supabase
-        .from('appraisal_value_scores')
+        .from('appraisal_capability_scores')
         .upsert({
           participant_id: participantId,
-          value_id: input.value_id,
+          capability_id: input.value_id,
+          capability_type: 'VALUE' as const,
           rating: input.rating,
           demonstrated_behaviors: input.demonstrated_behaviors,
           evidence: input.evidence,
@@ -96,7 +171,7 @@ export function useValuesAssessment() {
           assessed_by: assessedBy,
           updated_at: new Date().toISOString()
         }, {
-          onConflict: 'participant_id,value_id'
+          onConflict: 'participant_id,capability_id'
         });
 
       if (error) throw error;
@@ -112,6 +187,9 @@ export function useValuesAssessment() {
     }
   }, [toast]);
 
+  /**
+   * Save all value scores at once
+   */
   const saveAllValueScores = useCallback(async (
     participantId: string,
     inputs: ValueScoreInput[],
@@ -121,7 +199,8 @@ export function useValuesAssessment() {
     try {
       const records = inputs.map(input => ({
         participant_id: participantId,
-        value_id: input.value_id,
+        capability_id: input.value_id,
+        capability_type: 'VALUE' as const,
         rating: input.rating,
         demonstrated_behaviors: input.demonstrated_behaviors,
         evidence: input.evidence,
@@ -131,9 +210,9 @@ export function useValuesAssessment() {
       }));
 
       const { error } = await supabase
-        .from('appraisal_value_scores')
+        .from('appraisal_capability_scores')
         .upsert(records, {
-          onConflict: 'participant_id,value_id'
+          onConflict: 'participant_id,capability_id'
         });
 
       if (error) throw error;
@@ -157,15 +236,19 @@ export function useValuesAssessment() {
     }
   }, [toast]);
 
+  /**
+   * Get values analysis summary for a participant
+   */
   const getValuesAnalysis = useCallback(async (
     participantId: string
   ): Promise<ValuesAssessmentSummary | null> => {
     try {
+      // Query unified table
       const { data: scores, error: scoresError } = await supabase
-        .from('appraisal_value_scores')
+        .from('appraisal_capability_scores')
         .select(`
           rating,
-          value:company_values(is_promotion_factor)
+          capability:skills_competencies(is_promotion_factor, type)
         `)
         .eq('participant_id', participantId);
 
@@ -175,16 +258,21 @@ export function useValuesAssessment() {
         return null;
       }
 
-      const ratingsWithValues = scores.filter(s => s.rating !== null);
+      // Filter to only VALUE type
+      const valueScores = scores.filter((s: any) => s.capability?.type === 'VALUE');
+      
+      if (valueScores.length === 0) return null;
+
+      const ratingsWithValues = valueScores.filter((s: any) => s.rating !== null);
       const avgRating = ratingsWithValues.length > 0
-        ? ratingsWithValues.reduce((sum, s) => sum + (s.rating || 0), 0) / ratingsWithValues.length
+        ? ratingsWithValues.reduce((sum: number, s: any) => sum + (s.rating || 0), 0) / ratingsWithValues.length
         : null;
 
-      const promotionFactors = scores.filter(s => s.value?.is_promotion_factor);
-      const promotionFactorsMet = promotionFactors.filter(s => (s.rating || 0) >= 3).length;
+      const promotionFactors = valueScores.filter((s: any) => s.capability?.is_promotion_factor);
+      const promotionFactorsMet = promotionFactors.filter((s: any) => (s.rating || 0) >= 3).length;
 
       return {
-        total_values: scores.length,
+        total_values: valueScores.length,
         assessed_values: ratingsWithValues.length,
         average_rating: avgRating ? Math.round(avgRating * 10) / 10 : null,
         promotion_factors_met: promotionFactorsMet,
@@ -196,23 +284,31 @@ export function useValuesAssessment() {
     }
   }, []);
 
+  /**
+   * Create a company value - now creates in skills_competencies with type = 'VALUE'
+   */
   const createCompanyValue = useCallback(async (
     companyId: string,
     value: Partial<CompanyValue>
   ): Promise<CompanyValue | null> => {
     try {
+      const code = value.code || `VAL_${value.name?.toUpperCase().replace(/[^A-Z0-9]/g, '_').substring(0, 20)}`;
+      
       const { data, error } = await supabase
-        .from('company_values')
+        .from('skills_competencies')
         .insert({
           company_id: companyId,
+          type: 'VALUE',
           name: value.name!,
-          code: value.code || null,
+          code: code,
           description: value.description || null,
-          behavioral_indicators: (value.behavioral_indicators || []) as unknown as any,
+          proficiency_indicators: (value.behavioral_indicators || []) as unknown as any,
           display_order: value.display_order || 0,
           weight: value.weight || 0,
           is_promotion_factor: value.is_promotion_factor || false,
-          is_active: true
+          status: 'active',
+          category: 'core',
+          effective_from: new Date().toISOString().split('T')[0]
         })
         .select()
         .single();
@@ -225,8 +321,18 @@ export function useValuesAssessment() {
       });
 
       return {
-        ...data,
-        behavioral_indicators: (data.behavioral_indicators as unknown as BehavioralIndicator[]) || []
+        id: data.id,
+        company_id: data.company_id,
+        name: data.name,
+        code: data.code,
+        description: data.description,
+        behavioral_indicators: (data.proficiency_indicators as unknown as BehavioralIndicator[]) || [],
+        display_order: data.display_order ?? 0,
+        is_active: data.status === 'active',
+        weight: data.weight ?? 0,
+        is_promotion_factor: data.is_promotion_factor ?? false,
+        created_at: data.created_at,
+        updated_at: data.updated_at
       } as CompanyValue;
     } catch (error) {
       console.error('Error creating company value:', error);
@@ -239,6 +345,9 @@ export function useValuesAssessment() {
     }
   }, [toast]);
 
+  /**
+   * Update a company value
+   */
   const updateCompanyValue = useCallback(async (
     valueId: string,
     updates: Partial<CompanyValue>
@@ -248,14 +357,14 @@ export function useValuesAssessment() {
       if (updates.name !== undefined) updatePayload.name = updates.name;
       if (updates.code !== undefined) updatePayload.code = updates.code;
       if (updates.description !== undefined) updatePayload.description = updates.description;
-      if (updates.behavioral_indicators !== undefined) updatePayload.behavioral_indicators = updates.behavioral_indicators;
+      if (updates.behavioral_indicators !== undefined) updatePayload.proficiency_indicators = updates.behavioral_indicators;
       if (updates.display_order !== undefined) updatePayload.display_order = updates.display_order;
       if (updates.weight !== undefined) updatePayload.weight = updates.weight;
       if (updates.is_promotion_factor !== undefined) updatePayload.is_promotion_factor = updates.is_promotion_factor;
-      if (updates.is_active !== undefined) updatePayload.is_active = updates.is_active;
+      if (updates.is_active !== undefined) updatePayload.status = updates.is_active ? 'active' : 'deprecated';
 
       const { error } = await supabase
-        .from('company_values')
+        .from('skills_competencies')
         .update(updatePayload)
         .eq('id', valueId);
 
@@ -278,11 +387,14 @@ export function useValuesAssessment() {
     }
   }, [toast]);
 
+  /**
+   * Delete (soft-delete) a company value
+   */
   const deleteCompanyValue = useCallback(async (valueId: string): Promise<boolean> => {
     try {
       const { error } = await supabase
-        .from('company_values')
-        .update({ is_active: false })
+        .from('skills_competencies')
+        .update({ status: 'deprecated' })
         .eq('id', valueId);
 
       if (error) throw error;

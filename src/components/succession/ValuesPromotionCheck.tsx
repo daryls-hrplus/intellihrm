@@ -34,6 +34,12 @@ interface PromotionReadiness {
   valueScores: ValueScore[];
 }
 
+/**
+ * ValuesPromotionCheck - Unified Capability Framework Version
+ * 
+ * This component now queries from skills_competencies where type = 'VALUE'
+ * and uses appraisal_capability_scores for score data.
+ */
 export function ValuesPromotionCheck({ 
   employeeId, 
   companyId,
@@ -49,12 +55,13 @@ export function ValuesPromotionCheck({
   const fetchValuesAssessment = async () => {
     setLoading(true);
     try {
-      // Get company values
+      // Get company values from unified skills_competencies table
       const { data: values } = await supabase
-        .from('company_values')
+        .from('skills_competencies')
         .select('id, name, is_promotion_factor')
         .eq('company_id', companyId)
-        .eq('is_active', true);
+        .eq('type', 'VALUE')
+        .eq('status', 'active');
 
       if (!values || values.length === 0) {
         setReadiness(null);
@@ -79,7 +86,7 @@ export function ValuesPromotionCheck({
           valueScores: values.map(v => ({
             valueId: v.id,
             valueName: v.name,
-            isPromotionFactor: v.is_promotion_factor,
+            isPromotionFactor: v.is_promotion_factor ?? false,
             rating: null,
             meetsCriteria: false
           }))
@@ -87,20 +94,20 @@ export function ValuesPromotionCheck({
         return;
       }
 
-      // Get value scores for this participant
+      // Get value scores from unified appraisal_capability_scores table
       const { data: scores } = await supabase
-        .from('appraisal_value_scores')
-        .select('value_id, rating')
+        .from('appraisal_capability_scores')
+        .select('capability_id, rating')
         .eq('participant_id', participant.id);
 
-      const scoreMap = new Map(scores?.map(s => [s.value_id, s.rating]) || []);
+      const scoreMap = new Map(scores?.map(s => [s.capability_id, s.rating]) || []);
 
       const valueScores: ValueScore[] = values.map(v => {
         const rating = scoreMap.get(v.id) || null;
         return {
           valueId: v.id,
           valueName: v.name,
-          isPromotionFactor: v.is_promotion_factor,
+          isPromotionFactor: v.is_promotion_factor ?? false,
           rating,
           meetsCriteria: rating !== null && rating >= 3
         };

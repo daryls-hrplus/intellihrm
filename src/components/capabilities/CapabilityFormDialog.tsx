@@ -21,7 +21,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { X, Plus, Link2, Building2, Globe, Sparkles, Brain, Clock, Info, ShieldAlert, GitBranch, BarChart3 } from "lucide-react";
+import { X, Plus, Link2, Building2, Globe, Sparkles, Brain, Clock, Info, ShieldAlert, GitBranch, BarChart3, Heart, Award } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CompetencySkillLinker } from "./CompetencySkillLinker";
 import {
@@ -210,7 +210,7 @@ export function CapabilityFormDialog({
   };
 
   const generateCode = () => {
-    const prefix = formData.type === "SKILL" ? "SKL" : "CMP";
+    const prefix = formData.type === "SKILL" ? "SKL" : formData.type === "VALUE" ? "VAL" : "CMP";
     const nameCode = formData.name
       .toUpperCase()
       .replace(/[^A-Z0-9]/g, "_")
@@ -292,7 +292,7 @@ export function CapabilityFormDialog({
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader className="space-y-3">
           <DialogTitle>
-            {isEditing ? "Edit" : "Create"} {formData.type === "SKILL" ? "Skill" : "Competency"}
+            {isEditing ? "Edit" : "Create"} {formData.type === "SKILL" ? "Skill" : formData.type === "VALUE" ? "Value" : "Competency"}
           </DialogTitle>
           
           {/* Company Context Indicator - Always visible in header */}
@@ -343,7 +343,7 @@ export function CapabilityFormDialog({
           
           {isEditing && formData.name && (
             <div className="flex items-center gap-2 text-sm">
-              <span className="text-lg">{formData.type === "COMPETENCY" ? "🎯" : "🔧"}</span>
+              <span className="text-lg">{formData.type === "COMPETENCY" ? "🎯" : formData.type === "VALUE" ? "💜" : "🔧"}</span>
               <span className="font-semibold text-foreground">{formData.name}</span>
               <Badge variant="outline" className="text-xs capitalize">{formData.category}</Badge>
               <Badge 
@@ -389,10 +389,10 @@ export function CapabilityFormDialog({
         </DialogHeader>
 
         <Tabs defaultValue="basic" className="w-full">
-          <TabsList className={`grid w-full ${formData.type === "COMPETENCY" ? "grid-cols-5" : "grid-cols-4"}`}>
+          <TabsList className={`grid w-full ${formData.type === "COMPETENCY" ? "grid-cols-5" : formData.type === "VALUE" ? "grid-cols-4" : "grid-cols-4"}`}>
             <TabsTrigger value="basic">Basic Info</TabsTrigger>
             <TabsTrigger value="governance">Governance</TabsTrigger>
-            {formData.type === "COMPETENCY" && (
+            {(formData.type === "COMPETENCY" || formData.type === "VALUE") && (
               <TabsTrigger value="behaviors">Behavioral Levels</TabsTrigger>
             )}
             {formData.type === "COMPETENCY" && (
@@ -401,8 +401,14 @@ export function CapabilityFormDialog({
                 Skills
               </TabsTrigger>
             )}
+            {formData.type === "VALUE" && (
+              <TabsTrigger value="value-settings" className="gap-1">
+                <Award className="h-3.5 w-3.5" />
+                Value Settings
+              </TabsTrigger>
+            )}
             <TabsTrigger value="attributes">
-              {formData.type === "SKILL" ? "Attributes" : "Job Assignment"}
+              {formData.type === "SKILL" ? "Attributes" : formData.type === "VALUE" ? "Usage" : "Job Assignment"}
             </TabsTrigger>
             {formData.type === "SKILL" && (
               <TabsTrigger value="jobs">Job Assignment</TabsTrigger>
@@ -425,6 +431,7 @@ export function CapabilityFormDialog({
                   <SelectContent>
                     <SelectItem value="SKILL">Skill</SelectItem>
                     <SelectItem value="COMPETENCY">Competency</SelectItem>
+                    <SelectItem value="VALUE">Value</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -604,13 +611,13 @@ export function CapabilityFormDialog({
             </div>
           </TabsContent>
 
-          {/* Behavioral Levels Tab - Only for Competencies */}
-          {formData.type === "COMPETENCY" && (
+          {/* Behavioral Levels Tab - For Competencies and Values */}
+          {(formData.type === "COMPETENCY" || formData.type === "VALUE") && (
             <TabsContent value="behaviors" className="space-y-4 mt-4">
               {/* Context reminder */}
               <div className="flex items-center gap-2 text-sm text-muted-foreground pb-2 border-b">
                 <span>Defining behaviors for:</span>
-                <span className="font-medium text-foreground">{formData.name || "New Competency"}</span>
+                <span className="font-medium text-foreground">{formData.name || (formData.type === "VALUE" ? "New Value" : "New Competency")}</span>
               </div>
               <CompetencyBehavioralLevelsEditor
                 competencyName={formData.name}
@@ -620,6 +627,113 @@ export function CapabilityFormDialog({
                 indicators={proficiencyIndicators}
                 onIndicatorsChange={setProficiencyIndicators}
               />
+            </TabsContent>
+          )}
+
+          {/* Value Settings Tab - Only for Values */}
+          {formData.type === "VALUE" && (
+            <TabsContent value="value-settings" className="space-y-4 mt-4">
+              {/* Context reminder */}
+              <div className="flex items-center gap-2 text-sm text-muted-foreground pb-2 border-b">
+                <Heart className="h-4 w-4 text-rose-500" />
+                <span>Settings for:</span>
+                <span className="font-medium text-foreground">{formData.name || "New Value"}</span>
+              </div>
+
+              {/* Promotion Factor */}
+              <div className="rounded-lg border bg-card">
+                <div className="p-4 border-b bg-muted/30">
+                  <div className="flex items-center gap-2">
+                    <Award className="h-4 w-4 text-amber-600" />
+                    <h4 className="font-medium">Promotion Factor</h4>
+                  </div>
+                </div>
+                <div className="p-4 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-1">
+                      <Label className="text-base">Required for Promotion</Label>
+                      <p className="text-sm text-muted-foreground">
+                        Employees must meet the threshold rating on this value to be considered for promotion
+                      </p>
+                    </div>
+                    <Switch
+                      checked={(formData as any).is_promotion_factor ?? false}
+                      onCheckedChange={(checked) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          is_promotion_factor: checked,
+                        } as any))
+                      }
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Weight in Appraisals */}
+              <div className="rounded-lg border bg-card">
+                <div className="p-4 border-b bg-muted/30">
+                  <div className="flex items-center gap-2">
+                    <BarChart3 className="h-4 w-4 text-primary" />
+                    <h4 className="font-medium">Weighting</h4>
+                  </div>
+                </div>
+                <div className="p-4 space-y-4">
+                  <div className="space-y-2">
+                    <Label>Weight in Assessments (%)</Label>
+                    <Input
+                      type="number"
+                      min={0}
+                      max={100}
+                      value={(formData as any).weight ?? 0}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          weight: parseFloat(e.target.value) || 0,
+                        } as any))
+                      }
+                      placeholder="0"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Relative weight when calculating overall values assessment score
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Assessment Mode */}
+              <div className="rounded-lg border bg-card">
+                <div className="p-4 border-b bg-muted/30">
+                  <div className="flex items-center gap-2">
+                    <Info className="h-4 w-4 text-info" />
+                    <h4 className="font-medium">Assessment Mode</h4>
+                  </div>
+                </div>
+                <div className="p-4 space-y-4">
+                  <div className="space-y-2">
+                    <Label>How should this value be assessed?</Label>
+                    <Select
+                      value={(formData as any).assessment_mode ?? "rated"}
+                      onValueChange={(value) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          assessment_mode: value,
+                        } as any))
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="rated">Rated (1-5 Scale)</SelectItem>
+                        <SelectItem value="qualitative">Qualitative (Evidence-based)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-muted-foreground">
+                      Rated: Numeric rating with behavioral indicators. Qualitative: Free-text evidence collection.
+                    </p>
+                  </div>
+                </div>
+              </div>
             </TabsContent>
           )}
 
