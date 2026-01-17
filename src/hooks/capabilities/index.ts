@@ -5,6 +5,7 @@ export { useCapabilities, useEmployeeCapabilities } from './useCapabilities';
 export { useCapabilityAIAnalyzer } from './useCapabilityAIAnalyzer';
 export { useMasterLibrary } from './useMasterLibrary';
 export { useCompetencyUsageCheck } from './useCompetencyUsageCheck';
+export { useValueAI, VALUE_TEMPLATES, VALUE_LEVEL_DEFINITIONS } from './useValueAI';
 
 // Integration hooks
 export { useGoalCapabilityIntegration } from './useGoalCapabilityIntegration';
