@@ -95,6 +95,8 @@ interface AccreditingBody {
   short_name: string | null;
 }
 
+const NONE_VALUE = "__none__";
+
 export function JobQualificationsManager({ jobId, companyId }: JobQualificationsManagerProps) {
   const [requirements, setRequirements] = useState<JobQualificationRequirement[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -152,7 +154,6 @@ export function JobQualificationsManager({ jobId, companyId }: JobQualifications
   };
 
   const fetchReferenceData = async () => {
-    // Fetch all reference data in parallel
     const [
       { data: eduData },
       { data: fieldData },
@@ -199,7 +200,6 @@ export function JobQualificationsManager({ jobId, companyId }: JobQualifications
   };
 
   const handleSave = async () => {
-    // Validate based on requirement type
     if (formData.requirement_type === "academic" && !formData.education_level_id) {
       toast.error("Please select an education level");
       return;
@@ -445,8 +445,8 @@ export function JobQualificationsManager({ jobId, companyId }: JobQualifications
                 <div className="space-y-2">
                   <Label>Education Level *</Label>
                   <Select
-                    value={formData.education_level_id}
-                    onValueChange={(value) => setFormData({ ...formData, education_level_id: value })}
+                    value={formData.education_level_id || NONE_VALUE}
+                    onValueChange={(value) => setFormData({ ...formData, education_level_id: value === NONE_VALUE ? "" : value })}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select education level" />
@@ -464,14 +464,14 @@ export function JobQualificationsManager({ jobId, companyId }: JobQualifications
                 <div className="space-y-2">
                   <Label>Field of Study</Label>
                   <Select
-                    value={formData.field_of_study_id}
-                    onValueChange={(value) => setFormData({ ...formData, field_of_study_id: value })}
+                    value={formData.field_of_study_id || NONE_VALUE}
+                    onValueChange={(value) => setFormData({ ...formData, field_of_study_id: value === NONE_VALUE ? "" : value })}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Any field (optional)" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Any field</SelectItem>
+                      <SelectItem value={NONE_VALUE}>Any field</SelectItem>
                       {fieldsOfStudy.map((field) => (
                         <SelectItem key={field.id} value={field.id}>
                           {field.name}
@@ -486,8 +486,8 @@ export function JobQualificationsManager({ jobId, companyId }: JobQualifications
                 <div className="space-y-2">
                   <Label>Qualification / Certification Type *</Label>
                   <Select
-                    value={formData.qualification_type_id}
-                    onValueChange={(value) => setFormData({ ...formData, qualification_type_id: value })}
+                    value={formData.qualification_type_id || NONE_VALUE}
+                    onValueChange={(value) => setFormData({ ...formData, qualification_type_id: value === NONE_VALUE ? "" : value })}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select qualification type" />
@@ -505,14 +505,14 @@ export function JobQualificationsManager({ jobId, companyId }: JobQualifications
                 <div className="space-y-2">
                   <Label>Accrediting Body</Label>
                   <Select
-                    value={formData.accrediting_body_id}
-                    onValueChange={(value) => setFormData({ ...formData, accrediting_body_id: value })}
+                    value={formData.accrediting_body_id || NONE_VALUE}
+                    onValueChange={(value) => setFormData({ ...formData, accrediting_body_id: value === NONE_VALUE ? "" : value })}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Any body (optional)" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Any accrediting body</SelectItem>
+                      <SelectItem value={NONE_VALUE}>Any accrediting body</SelectItem>
                       {accreditingBodies.map((body) => (
                         <SelectItem key={body.id} value={body.id}>
                           {body.short_name || body.name}
