@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,13 +14,54 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
-import { Users, GitMerge, FileText, AlertTriangle } from "lucide-react";
+import { Users, GitMerge, FileText, AlertTriangle, Target, ClipboardList, Goal, Heart } from "lucide-react";
 import { useAppraisalFormTemplates } from "@/hooks/useAppraisalFormTemplates";
 import { format } from "date-fns";
 import { checkCycleOverlap } from "@/utils/cycleOverlapCheck";
 import { useDebouncedCallback } from "@/hooks/use-debounced-callback";
 import { formatDateForDisplay } from "@/utils/dateUtils";
+import { cn } from "@/lib/utils";
 
+// Weight input component with template-aware visual state
+interface WeightInputProps {
+  id: string;
+  label: string;
+  value: number;
+  onChange: (value: number) => void;
+  enabled: boolean;
+  icon: React.ReactNode;
+}
+
+const WeightInput = ({ id, label, value, onChange, enabled, icon }: WeightInputProps) => (
+  <div className={cn("relative transition-opacity", !enabled && "opacity-50")}>
+    <div className="flex items-center justify-between mb-1.5">
+      <Label htmlFor={id} className={cn("flex items-center gap-1.5", !enabled && "text-muted-foreground")}>
+        {icon}
+        {label}
+      </Label>
+      {!enabled && (
+        <Badge variant="outline" className="text-xs h-5 bg-muted">
+          Off
+        </Badge>
+      )}
+    </div>
+    <Input
+      id={id}
+      type="number"
+      min="0"
+      max="100"
+      value={enabled ? value : 0}
+      onChange={(e) => enabled && onChange(parseInt(e.target.value) || 0)}
+      disabled={!enabled}
+      className={cn(!enabled && "bg-muted cursor-not-allowed border-muted")}
+    />
+    {!enabled && (
+      <p className="text-xs text-muted-foreground mt-1">
+        Not in template
+      </p>
+    )}
+  </div>
+);
 // Industry-standard appraisal cycle types
 const APPRAISAL_CYCLE_TYPES = [
   { value: "annual", label: "Annual Review", description: "Standard yearly performance evaluation" },
@@ -151,23 +192,24 @@ export function AppraisalCycleDialog({
     }
   }, [cycle, templates, isProbationReview, isManagerCycle]);
 
-  // Handle template selection - auto-populate weights
+  // Handle template selection - auto-populate weights (only for enabled categories)
   const handleTemplateChange = (templateId: string) => {
     if (templateId === "none") {
       setFormData(prev => ({ ...prev, template_id: "" }));
       return;
     }
-    const selectedTemplate = templates?.find(t => t.id === templateId);
-    if (selectedTemplate) {
+    const template = templates?.find(t => t.id === templateId);
+    if (template) {
       setFormData(prev => ({
         ...prev,
         template_id: templateId,
-        competency_weight: selectedTemplate.competencies_weight,
-        responsibility_weight: selectedTemplate.responsibilities_weight,
-        goal_weight: selectedTemplate.goals_weight,
-        values_weight: selectedTemplate.values_weight || 0,
-        min_rating: selectedTemplate.min_rating,
-        max_rating: selectedTemplate.max_rating,
+        // Only apply weights for enabled categories, zero out disabled ones
+        competency_weight: template.include_competencies ? template.competencies_weight : 0,
+        responsibility_weight: template.include_responsibilities ? template.responsibilities_weight : 0,
+        goal_weight: template.include_goals ? template.goals_weight : 0,
+        values_weight: template.include_values ? (template.values_weight || 0) : 0,
+        min_rating: template.min_rating,
+        max_rating: template.max_rating,
       }));
       setShowWeightWarning(false);
     } else {
@@ -183,6 +225,25 @@ export function AppraisalCycleDialog({
     formData.goal_weight !== selectedTemplate.goals_weight ||
     formData.values_weight !== (selectedTemplate.values_weight || 0)
   );
+
+  // Determine which categories are enabled by the selected template
+  const categoryState = useMemo(() => {
+    if (!selectedTemplate) {
+      // No template selected - all categories enabled
+      return {
+        competencies: true,
+        responsibilities: true,
+        goals: true,
+        values: true,
+      };
+    }
+    return {
+      competencies: selectedTemplate.include_competencies ?? true,
+      responsibilities: selectedTemplate.include_responsibilities ?? true,
+      goals: selectedTemplate.include_goals ?? true,
+      values: selectedTemplate.include_values ?? false,
+    };
+  }, [selectedTemplate]);
 
   useEffect(() => {
     if (weightsDeviate && selectedTemplate?.is_locked) {
@@ -218,7 +279,12 @@ export function AppraisalCycleDialog({
     debouncedOverlapCheck();
   }, [formData.start_date, formData.end_date, formData.cycle_type, debouncedOverlapCheck]);
 
-  const totalWeight = formData.competency_weight + formData.responsibility_weight + formData.goal_weight + formData.values_weight;
+  // Only count enabled categories in total weight calculation
+  const totalWeight = 
+    (categoryState.competencies ? formData.competency_weight : 0) +
+    (categoryState.responsibilities ? formData.responsibility_weight : 0) +
+    (categoryState.goals ? formData.goal_weight : 0) +
+    (categoryState.values ? formData.values_weight : 0);
   const hasUnacknowledgedOverlap = overlappingCycles.length > 0 && !overlapAcknowledged;
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -498,59 +564,45 @@ export function AppraisalCycleDialog({
             </div>
 
             <div className="grid gap-4 md:grid-cols-4">
-              <div>
-                <Label htmlFor="competency_weight">Competency (%)</Label>
-                <Input
-                  id="competency_weight"
-                  type="number"
-                  min="0"
-                  max="100"
-                  value={formData.competency_weight}
-                  onChange={(e) =>
-                    setFormData({ ...formData, competency_weight: parseInt(e.target.value) || 0 })
-                  }
-                />
-              </div>
-              <div>
-                <Label htmlFor="responsibility_weight">Responsibility (%)</Label>
-                <Input
-                  id="responsibility_weight"
-                  type="number"
-                  min="0"
-                  max="100"
-                  value={formData.responsibility_weight}
-                  onChange={(e) =>
-                    setFormData({ ...formData, responsibility_weight: parseInt(e.target.value) || 0 })
-                  }
-                />
-              </div>
-              <div>
-                <Label htmlFor="goal_weight">Goals (%)</Label>
-                <Input
-                  id="goal_weight"
-                  type="number"
-                  min="0"
-                  max="100"
-                  value={formData.goal_weight}
-                  onChange={(e) =>
-                    setFormData({ ...formData, goal_weight: parseInt(e.target.value) || 0 })
-                  }
-                />
-              </div>
-              <div>
-                <Label htmlFor="values_weight">Values (%)</Label>
-                <Input
-                  id="values_weight"
-                  type="number"
-                  min="0"
-                  max="100"
-                  value={formData.values_weight}
-                  onChange={(e) =>
-                    setFormData({ ...formData, values_weight: parseInt(e.target.value) || 0 })
-                  }
-                />
-              </div>
+              <WeightInput
+                id="competency_weight"
+                label="Competency (%)"
+                value={formData.competency_weight}
+                onChange={(v) => setFormData({ ...formData, competency_weight: v })}
+                enabled={categoryState.competencies}
+                icon={<Target className="h-3.5 w-3.5" />}
+              />
+              <WeightInput
+                id="responsibility_weight"
+                label="Responsibility (%)"
+                value={formData.responsibility_weight}
+                onChange={(v) => setFormData({ ...formData, responsibility_weight: v })}
+                enabled={categoryState.responsibilities}
+                icon={<ClipboardList className="h-3.5 w-3.5" />}
+              />
+              <WeightInput
+                id="goal_weight"
+                label="Goals (%)"
+                value={formData.goal_weight}
+                onChange={(v) => setFormData({ ...formData, goal_weight: v })}
+                enabled={categoryState.goals}
+                icon={<Goal className="h-3.5 w-3.5" />}
+              />
+              <WeightInput
+                id="values_weight"
+                label="Values (%)"
+                value={formData.values_weight}
+                onChange={(v) => setFormData({ ...formData, values_weight: v })}
+                enabled={categoryState.values}
+                icon={<Heart className="h-3.5 w-3.5" />}
+              />
             </div>
+
+            {!selectedTemplate && (
+              <p className="text-xs text-muted-foreground mt-2">
+                All categories enabled. Select a template to apply predefined configurations.
+              </p>
+            )}
           </div>
 
           <div className="space-y-4">
