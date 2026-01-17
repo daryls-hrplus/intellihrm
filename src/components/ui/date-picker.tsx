@@ -5,6 +5,7 @@ import { DayPicker } from "react-day-picker";
 
 import { cn } from "@/lib/utils";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { parseLocalDate } from "@/utils/dateUtils";
 import {
   Popover,
   PopoverContent,
@@ -48,12 +49,13 @@ export function DatePicker({
 }: DatePickerProps) {
   const [open, setOpen] = React.useState(false);
   
-  // Parse the value to a Date object
+  // Parse the value to a Date object using local timezone
   const dateValue = React.useMemo(() => {
     if (!value) return undefined;
     if (value instanceof Date) return value;
-    const parsed = new Date(value);
-    return isNaN(parsed.getTime()) ? undefined : parsed;
+    // Use parseLocalDate to prevent timezone shifts (e.g., Jan 1 becoming Dec 31)
+    const parsed = parseLocalDate(value);
+    return parsed && !isNaN(parsed.getTime()) ? parsed : undefined;
   }, [value]);
 
   const [month, setMonth] = React.useState<Date>(dateValue || new Date());
