@@ -12,7 +12,8 @@ import {
   FolderTree,
   Wand2,
   History,
-  List
+  List,
+  RefreshCw
 } from "lucide-react";
 import { useState } from "react";
 import { CompanyStructureImport } from "@/components/hr-hub/imports/CompanyStructureImport";
@@ -21,6 +22,7 @@ import { EmployeesImport } from "@/components/hr-hub/imports/EmployeesImport";
 import { NewHiresImport } from "@/components/hr-hub/imports/NewHiresImport";
 import { ImportWizard } from "@/components/hr-hub/imports/ImportWizard";
 import { ImportHistory } from "@/components/hr-hub/imports/ImportHistory";
+import { BulkReportingLineUpdate } from "@/components/hr-hub/imports/BulkReportingLineUpdate";
 
 export default function HRDataImportPage() {
   const { t } = useLanguage();
@@ -56,6 +58,12 @@ export default function HRDataImportPage() {
       label: t("hrHub.dataImport.newHires"), 
       icon: UserPlus,
       description: t("hrHub.dataImport.newHiresDesc")
+    },
+    { 
+      id: "bulk-actions", 
+      label: "Bulk Actions", 
+      icon: RefreshCw,
+      description: "Bulk update reporting lines and other position data"
     },
   ];
 
@@ -131,7 +139,7 @@ export default function HRDataImportPage() {
             </CardHeader>
             <CardContent>
               <Tabs value={activeTab} onValueChange={setActiveTab}>
-                <TabsList className="grid w-full grid-cols-4 mb-6">
+                <TabsList className="grid w-full grid-cols-5 mb-6">
                   {importTypes.map((type) => (
                     <TabsTrigger 
                       key={type.id} 
@@ -158,6 +166,10 @@ export default function HRDataImportPage() {
 
                 <TabsContent value="new-hires">
                   <NewHiresImport />
+                </TabsContent>
+
+                <TabsContent value="bulk-actions">
+                  <BulkReportingLineUpdate />
                 </TabsContent>
               </Tabs>
             </CardContent>
