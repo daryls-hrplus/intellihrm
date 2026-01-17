@@ -992,6 +992,9 @@ export function AppraisalFormTemplateManager({ companyId, companyName }: Props) 
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Duplicate Template</DialogTitle>
+            {companyName && (
+              <p className="text-sm text-muted-foreground">{companyName}</p>
+            )}
             <DialogDescription>
               Create a copy of "{duplicatingTemplate?.name}"
             </DialogDescription>

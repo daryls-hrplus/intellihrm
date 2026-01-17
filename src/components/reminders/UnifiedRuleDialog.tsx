@@ -290,6 +290,9 @@ export const UnifiedRuleDialog = forwardRef<UnifiedRuleDialogRef, UnifiedRuleDia
                 <DialogTitle className="text-lg">
                   {editingRule ? 'Edit Reminder Rule' : 'Create Automation Rule'}
                 </DialogTitle>
+                {companyName && (
+                  <p className="text-sm text-muted-foreground">{companyName}</p>
+                )}
                 <DialogDescription className="mt-1">
                   {editingRule 
                     ? 'Modify the rule configuration below'

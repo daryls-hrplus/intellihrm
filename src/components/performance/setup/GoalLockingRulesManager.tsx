@@ -32,6 +32,7 @@ interface GoalLockingRule {
 
 interface GoalLockingRulesManagerProps {
   companyId: string;
+  companyName?: string;
 }
 
 const ruleTypes = [
@@ -56,7 +57,7 @@ const lockableFields = [
   { value: "end_date", label: "End Date" },
 ];
 
-export function GoalLockingRulesManager({ companyId }: GoalLockingRulesManagerProps) {
+export function GoalLockingRulesManager({ companyId, companyName }: GoalLockingRulesManagerProps) {
   const [rules, setRules] = useState<GoalLockingRule[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -317,6 +318,9 @@ export function GoalLockingRulesManager({ companyId }: GoalLockingRulesManagerPr
         <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editingRule ? "Edit Locking Rule" : "Create Locking Rule"}</DialogTitle>
+            {companyName && (
+              <p className="text-sm text-muted-foreground">{companyName}</p>
+            )}
             <DialogDescription>
               Configure when and how goals should be locked
             </DialogDescription>
