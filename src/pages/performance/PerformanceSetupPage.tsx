@@ -81,7 +81,7 @@ interface RatingScale { id: string; company_id: string; name: string; code: stri
 interface Competency { id: string; company_id: string; name: string; code: string; category: string; description: string | null; proficiency_levels: any; is_active: boolean; }
 interface GoalTemplate { id: string; company_id: string | null; name: string; description: string | null; goal_type: string; category: string | null; default_weighting: number | null; is_active: boolean; }
 interface RecognitionCategory { id: string; company_id: string; name: string; code: string; description: string | null; icon: string | null; color: string | null; points_value: number; requires_approval: boolean; is_active: boolean; }
-interface AppraisalCycle { id: string; company_id: string; name: string; description: string | null; start_date: string; end_date: string; status: string; goal_weight: number; competency_weight: number; responsibility_weight: number; min_rating: number; max_rating: number; }
+interface AppraisalCycle { id: string; company_id: string; name: string; description: string | null; start_date: string; end_date: string; status: string; goal_weight: number; competency_weight: number; responsibility_weight: number; values_weight?: number; min_rating: number; max_rating: number; }
 
 export default function PerformanceSetupPage() {
   const navigate = useNavigate();
@@ -788,7 +788,7 @@ function AppraisalCyclesContent({ cycles, isLoading, t }: any) {
                 <TableRow key={cycle.id}>
                   <TableCell className="font-medium">{cycle.name}</TableCell>
                   <TableCell>{new Date(cycle.start_date).toLocaleDateString()} - {new Date(cycle.end_date).toLocaleDateString()}</TableCell>
-                  <TableCell>{cycle.goal_weight}% / {cycle.competency_weight}% / {cycle.responsibility_weight}%</TableCell>
+                  <TableCell>{cycle.goal_weight}% / {cycle.competency_weight}% / {cycle.responsibility_weight}%{cycle.values_weight ? ` / ${cycle.values_weight}%` : ''}</TableCell>
                   <TableCell>{cycle.min_rating} - {cycle.max_rating}</TableCell>
                   <TableCell><Badge variant={cycle.status === "active" ? "default" : cycle.status === "completed" ? "secondary" : "outline"}>{cycle.status}</Badge></TableCell>
                 </TableRow>
