@@ -3,13 +3,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Download, Upload, FileSpreadsheet } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Download, Upload, FileSpreadsheet, GitBranch, Building2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { ImportValidationReport } from "./ImportValidationReport";
 import { useImportValidation } from "./useImportValidation";
 import { ImportDependencyChecker } from "./ImportDependencyChecker";
+import { useCompanyRelationships } from "@/hooks/useCompanyRelationships";
+import { parsePositionCode } from "@/utils/validateReportingRelationship";
 
 interface CompanyStructure {
   hasDivisions: boolean;
@@ -123,6 +126,9 @@ export function PositionsImport() {
   const [isImporting, setIsImporting] = useState(false);
   const [prerequisitesMet, setPrerequisitesMet] = useState(false);
   const [companyStructure, setCompanyStructure] = useState<CompanyStructure | null>(null);
+  const [crossCompanyCount, setCrossCompanyCount] = useState(0);
+
+  const { groupCompanies, isValidReportingRelationship } = useCompanyRelationships(profile?.company_id);
 
   // Fetch company structure to determine if divisions/sections are used
   useEffect(() => {
@@ -187,7 +193,14 @@ export function PositionsImport() {
       return fieldSchema?.required ? "REQUIRED" : "optional";
     });
     
+    // Add a note about cross-company reporting
+    const notes = [
+      "# Cross-company reporting: Use COMPANY_CODE:POSITION_CODE format",
+      "# Example: AUR-CORP:CEO-001 reports to CEO in AUR-CORP company",
+    ];
+    
     const csv = [
+      ...notes,
       TEMPLATE.headers.join(","),
       requiredRow.join(","),
       TEMPLATE.example.join(","),
@@ -209,6 +222,7 @@ export function PositionsImport() {
 
     setFile(selectedFile);
     reset();
+    setCrossCompanyCount(0);
 
     try {
       const text = await selectedFile.text();
@@ -218,6 +232,15 @@ export function PositionsImport() {
         toast.error("No data found in file");
         return;
       }
+
+      // Count cross-company references
+      let crossCount = 0;
+      data.forEach(row => {
+        if (row.reports_to_position_code?.includes(":")) {
+          crossCount++;
+        }
+      });
+      setCrossCompanyCount(crossCount);
 
       console.log(`Parsed ${data.length} rows from ${selectedFile.name}`);
       toast.info(`Parsing ${data.length} rows from file...`);
@@ -240,16 +263,44 @@ export function PositionsImport() {
 
     try {
       // Get lookups
-      const { data: companies } = await supabase.from("companies").select("id, code");
-      const companyLookup = new Map((companies || []).map((c) => [c.code?.toUpperCase(), c.id]));
+      const { data: companies } = await supabase.from("companies").select("id, code, group_id");
+      const companyLookup = new Map((companies || []).map((c) => [c.code?.toUpperCase(), c]));
+
+      // Get group companies for cross-company position lookup
+      const validCompanyIds = groupCompanies.map(c => c.id);
+      
+      // Build position lookup across all group companies
+      const { data: allPositions } = await supabase
+        .from("positions")
+        .select(`
+          id, 
+          code, 
+          company_id,
+          company:companies(code)
+        `)
+        .in("company_id", validCompanyIds.length > 0 ? validCompanyIds : [profile?.company_id || ""]);
+
+      // Build position lookup map: COMPANY_CODE:POSITION_CODE -> position
+      const positionLookup = new Map<string, { id: string; companyId: string }>();
+      allPositions?.forEach(p => {
+        const companyCode = (p.company as any)?.code?.toUpperCase() || "";
+        const positionCode = p.code?.toUpperCase() || "";
+        positionLookup.set(`${companyCode}:${positionCode}`, { id: p.id, companyId: p.company_id });
+        // Also index by just position code for backward compatibility
+        if (!positionLookup.has(positionCode)) {
+          positionLookup.set(positionCode, { id: p.id, companyId: p.company_id });
+        }
+      });
 
       let successCount = 0;
       let failCount = 0;
+      let crossCompanySuccessCount = 0;
 
       for (const row of parsedData) {
         try {
-          const companyId = companyLookup.get(row.company_code?.toUpperCase());
-          if (!companyId) throw new Error(`Company not found: ${row.company_code}`);
+          const company = companyLookup.get(row.company_code?.toUpperCase());
+          if (!company) throw new Error(`Company not found: ${row.company_code}`);
+          const companyId = company.id;
 
           // Get department
           const { data: dept } = await supabase
@@ -271,16 +322,40 @@ export function PositionsImport() {
 
           if (!job) throw new Error(`Job not found: ${row.job_code}`);
 
-          // Get reports_to position if specified
+          // Get reports_to position if specified (with cross-company support)
           let reportsToId = null;
+          let isCrossCompany = false;
+          
           if (row.reports_to_position_code) {
-            const { data: reportsTo } = await supabase
-              .from("positions")
-              .select("id")
-              .eq("company_id", companyId)
-              .eq("code", row.reports_to_position_code)
-              .maybeSingle();
-            reportsToId = reportsTo?.id;
+            const { companyCode: supCompanyCode, positionCode: supPosCode } = parsePositionCode(row.reports_to_position_code);
+            
+            let supervisorPosition: { id: string; companyId: string } | undefined;
+            
+            if (supCompanyCode) {
+              // Explicit cross-company reference
+              supervisorPosition = positionLookup.get(`${supCompanyCode}:${supPosCode.toUpperCase()}`);
+            } else {
+              // Try same company first
+              const currentCompanyCode = row.company_code?.toUpperCase();
+              supervisorPosition = positionLookup.get(`${currentCompanyCode}:${supPosCode.toUpperCase()}`);
+              
+              // Fallback to any matching position in the group
+              if (!supervisorPosition) {
+                supervisorPosition = positionLookup.get(supPosCode.toUpperCase());
+              }
+            }
+            
+            if (supervisorPosition) {
+              // Validate cross-company relationship
+              if (supervisorPosition.companyId !== companyId) {
+                isCrossCompany = true;
+                const validation = isValidReportingRelationship(companyId, supervisorPosition.companyId, "primary");
+                if (!validation.isValid) {
+                  throw new Error(`Cross-company reporting not allowed: ${validation.reason}`);
+                }
+              }
+              reportsToId = supervisorPosition.id;
+            }
           }
 
           // Get salary grade if specified
@@ -316,6 +391,7 @@ export function PositionsImport() {
 
           if (error) throw error;
           successCount++;
+          if (isCrossCompany) crossCompanySuccessCount++;
         } catch (err) {
           console.error("Import error for row:", row, err);
           failCount++;
@@ -323,7 +399,10 @@ export function PositionsImport() {
       }
 
       if (successCount > 0) {
-        toast.success(`Imported ${successCount} positions successfully`);
+        const crossCompanyMsg = crossCompanySuccessCount > 0 
+          ? ` (${crossCompanySuccessCount} with cross-company reporting)` 
+          : "";
+        toast.success(`Imported ${successCount} positions successfully${crossCompanyMsg}`);
       }
       if (failCount > 0) {
         toast.error(`Failed to import ${failCount} records`);
@@ -331,6 +410,7 @@ export function PositionsImport() {
 
       reset();
       setFile(null);
+      setCrossCompanyCount(0);
     } catch (error) {
       console.error("Import failed:", error);
       toast.error("Import failed");
@@ -345,7 +425,8 @@ export function PositionsImport() {
         <FileSpreadsheet className="h-4 w-4" />
         <AlertDescription>
           Import positions for your organization. Positions link jobs to departments and define the 
-          reporting hierarchy. Make sure companies, departments, and jobs are imported first.
+          reporting hierarchy. Supports cross-company reporting within corporate groups using 
+          <code className="text-xs bg-muted px-1 mx-1 rounded">COMPANY_CODE:POSITION_CODE</code> format.
         </AlertDescription>
       </Alert>
 
@@ -355,6 +436,32 @@ export function PositionsImport() {
         companyId={profile?.company_id}
         onPrerequisitesChecked={setPrerequisitesMet}
       />
+
+      {/* Group Companies Info */}
+      {groupCompanies.length > 1 && (
+        <div className="p-4 rounded-lg border bg-muted/30">
+          <div className="flex items-center gap-2 mb-2">
+            <Building2 className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm font-medium">Corporate Group - Cross-Company Reporting Enabled</span>
+          </div>
+          <div className="flex flex-wrap gap-1">
+            {groupCompanies.map(c => (
+              <Badge 
+                key={c.id} 
+                variant={c.isCurrentCompany ? "default" : "secondary"}
+                className="text-xs"
+              >
+                {c.code}
+              </Badge>
+            ))}
+          </div>
+          <p className="text-xs text-muted-foreground mt-2">
+            Positions can report to supervisors in any of these companies. Use 
+            <code className="bg-background px-1 mx-1 rounded">COMPANY_CODE:POSITION_CODE</code> 
+            in the reports_to_position_code column.
+          </p>
+        </div>
+      )}
 
       {/* Template Download */}
       <div className="flex items-center justify-between p-4 rounded-lg border bg-muted/30">
@@ -385,6 +492,16 @@ export function PositionsImport() {
           </p>
         )}
       </div>
+
+      {/* Cross-company indicator */}
+      {crossCompanyCount > 0 && (
+        <div className="flex items-center gap-2 p-3 rounded-lg border border-blue-500/20 bg-blue-500/5">
+          <GitBranch className="h-4 w-4 text-blue-600" />
+          <span className="text-sm">
+            <strong>{crossCompanyCount}</strong> position(s) have cross-company reporting relationships
+          </span>
+        </div>
+      )}
 
       {/* Validation Report */}
       <ImportValidationReport
