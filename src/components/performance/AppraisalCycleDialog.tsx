@@ -45,6 +45,8 @@ interface AppraisalCycle {
   competency_weight: number;
   responsibility_weight: number;
   goal_weight: number;
+  values_weight?: number;
+  include_values_assessment?: boolean;
   min_rating: number;
   max_rating: number;
   multi_position_mode?: string;
@@ -98,7 +100,8 @@ export function AppraisalCycleDialog({
     status: "draft",
     competency_weight: 40,
     responsibility_weight: 30,
-    goal_weight: 30,
+    goal_weight: 20,
+    values_weight: 10,
     min_rating: 1,
     max_rating: 5,
     multi_position_mode: "aggregate" as "aggregate" | "separate",
@@ -118,6 +121,7 @@ export function AppraisalCycleDialog({
         competency_weight: cycle.competency_weight,
         responsibility_weight: cycle.responsibility_weight,
         goal_weight: cycle.goal_weight,
+        values_weight: cycle.values_weight || 0,
         min_rating: cycle.min_rating,
         max_rating: cycle.max_rating,
         multi_position_mode: (cycle.multi_position_mode as "aggregate" | "separate") || "aggregate",
@@ -136,7 +140,8 @@ export function AppraisalCycleDialog({
         status: "draft",
         competency_weight: defaultTemplate?.competencies_weight ?? 40,
         responsibility_weight: defaultTemplate?.responsibilities_weight ?? 30,
-        goal_weight: defaultTemplate?.goals_weight ?? 30,
+        goal_weight: defaultTemplate?.goals_weight ?? 20,
+        values_weight: defaultTemplate?.values_weight ?? 10,
         min_rating: defaultTemplate?.min_rating ?? 1,
         max_rating: defaultTemplate?.max_rating ?? 5,
         multi_position_mode: "aggregate",
@@ -160,6 +165,7 @@ export function AppraisalCycleDialog({
         competency_weight: selectedTemplate.competencies_weight,
         responsibility_weight: selectedTemplate.responsibilities_weight,
         goal_weight: selectedTemplate.goals_weight,
+        values_weight: selectedTemplate.values_weight || 0,
         min_rating: selectedTemplate.min_rating,
         max_rating: selectedTemplate.max_rating,
       }));
@@ -174,7 +180,8 @@ export function AppraisalCycleDialog({
   const weightsDeviate = selectedTemplate && (
     formData.competency_weight !== selectedTemplate.competencies_weight ||
     formData.responsibility_weight !== selectedTemplate.responsibilities_weight ||
-    formData.goal_weight !== selectedTemplate.goals_weight
+    formData.goal_weight !== selectedTemplate.goals_weight ||
+    formData.values_weight !== (selectedTemplate.values_weight || 0)
   );
 
   useEffect(() => {
@@ -211,7 +218,7 @@ export function AppraisalCycleDialog({
     debouncedOverlapCheck();
   }, [formData.start_date, formData.end_date, formData.cycle_type, debouncedOverlapCheck]);
 
-  const totalWeight = formData.competency_weight + formData.responsibility_weight + formData.goal_weight;
+  const totalWeight = formData.competency_weight + formData.responsibility_weight + formData.goal_weight + formData.values_weight;
   const hasUnacknowledgedOverlap = overlappingCycles.length > 0 && !overlapAcknowledged;
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -241,6 +248,8 @@ export function AppraisalCycleDialog({
         competency_weight: formData.competency_weight,
         responsibility_weight: formData.responsibility_weight,
         goal_weight: formData.goal_weight,
+        values_weight: formData.values_weight,
+        include_values_assessment: formData.values_weight > 0,
         min_rating: formData.min_rating,
         max_rating: formData.max_rating,
         multi_position_mode: formData.multi_position_mode,
@@ -488,9 +497,9 @@ export function AppraisalCycleDialog({
               </span>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-3">
+            <div className="grid gap-4 md:grid-cols-4">
               <div>
-                <Label htmlFor="competency_weight">Competency Weight (%)</Label>
+                <Label htmlFor="competency_weight">Competency (%)</Label>
                 <Input
                   id="competency_weight"
                   type="number"
@@ -503,7 +512,7 @@ export function AppraisalCycleDialog({
                 />
               </div>
               <div>
-                <Label htmlFor="responsibility_weight">Responsibility Weight (%)</Label>
+                <Label htmlFor="responsibility_weight">Responsibility (%)</Label>
                 <Input
                   id="responsibility_weight"
                   type="number"
@@ -516,7 +525,7 @@ export function AppraisalCycleDialog({
                 />
               </div>
               <div>
-                <Label htmlFor="goal_weight">Goal Weight (%)</Label>
+                <Label htmlFor="goal_weight">Goals (%)</Label>
                 <Input
                   id="goal_weight"
                   type="number"
@@ -525,6 +534,19 @@ export function AppraisalCycleDialog({
                   value={formData.goal_weight}
                   onChange={(e) =>
                     setFormData({ ...formData, goal_weight: parseInt(e.target.value) || 0 })
+                  }
+                />
+              </div>
+              <div>
+                <Label htmlFor="values_weight">Values (%)</Label>
+                <Input
+                  id="values_weight"
+                  type="number"
+                  min="0"
+                  max="100"
+                  value={formData.values_weight}
+                  onChange={(e) =>
+                    setFormData({ ...formData, values_weight: parseInt(e.target.value) || 0 })
                   }
                 />
               </div>
