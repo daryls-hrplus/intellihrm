@@ -29,39 +29,54 @@ interface WeightInputProps {
   value: number;
   onChange: (value: number) => void;
   enabled: boolean;
+  locked?: boolean;
   icon: React.ReactNode;
 }
 
-const WeightInput = ({ id, label, value, onChange, enabled, icon }: WeightInputProps) => (
-  <div className={cn("relative transition-opacity", !enabled && "opacity-50")}>
-    <div className="flex items-center justify-between mb-1.5">
-      <Label htmlFor={id} className={cn("flex items-center gap-1.5", !enabled && "text-muted-foreground")}>
-        {icon}
-        {label}
-      </Label>
+const WeightInput = ({ id, label, value, onChange, enabled, locked, icon }: WeightInputProps) => {
+  const isDisabled = !enabled || locked;
+  
+  return (
+    <div className={cn("relative transition-opacity", !enabled && "opacity-50")}>
+      <div className="flex items-center justify-between mb-1.5">
+        <Label htmlFor={id} className={cn("flex items-center gap-1.5", isDisabled && "text-muted-foreground")}>
+          {icon}
+          {label}
+        </Label>
+        {!enabled && (
+          <Badge variant="outline" className="text-xs h-5 bg-muted">
+            Off
+          </Badge>
+        )}
+        {enabled && locked && (
+          <Badge variant="outline" className="text-xs h-5 bg-amber-100 text-amber-700 border-amber-300">
+            Locked
+          </Badge>
+        )}
+      </div>
+      <Input
+        id={id}
+        type="number"
+        min="0"
+        max="100"
+        value={enabled ? value : 0}
+        onChange={(e) => !isDisabled && onChange(parseInt(e.target.value) || 0)}
+        disabled={isDisabled}
+        className={cn(isDisabled && "bg-muted cursor-not-allowed border-muted")}
+      />
       {!enabled && (
-        <Badge variant="outline" className="text-xs h-5 bg-muted">
-          Off
-        </Badge>
+        <p className="text-xs text-muted-foreground mt-1">
+          Not in template
+        </p>
+      )}
+      {enabled && locked && (
+        <p className="text-xs text-amber-600 mt-1">
+          HR approval required
+        </p>
       )}
     </div>
-    <Input
-      id={id}
-      type="number"
-      min="0"
-      max="100"
-      value={enabled ? value : 0}
-      onChange={(e) => enabled && onChange(parseInt(e.target.value) || 0)}
-      disabled={!enabled}
-      className={cn(!enabled && "bg-muted cursor-not-allowed border-muted")}
-    />
-    {!enabled && (
-      <p className="text-xs text-muted-foreground mt-1">
-        Not in template
-      </p>
-    )}
-  </div>
-);
+  );
+};
 // Industry-standard appraisal cycle types
 const APPRAISAL_CYCLE_TYPES = [
   { value: "annual", label: "Annual Review", description: "Standard yearly performance evaluation" },
@@ -570,6 +585,7 @@ export function AppraisalCycleDialog({
                 value={formData.competency_weight}
                 onChange={(v) => setFormData({ ...formData, competency_weight: v })}
                 enabled={categoryState.competencies}
+                locked={selectedTemplate?.is_locked}
                 icon={<Target className="h-3.5 w-3.5" />}
               />
               <WeightInput
@@ -578,6 +594,7 @@ export function AppraisalCycleDialog({
                 value={formData.responsibility_weight}
                 onChange={(v) => setFormData({ ...formData, responsibility_weight: v })}
                 enabled={categoryState.responsibilities}
+                locked={selectedTemplate?.is_locked}
                 icon={<ClipboardList className="h-3.5 w-3.5" />}
               />
               <WeightInput
@@ -586,6 +603,7 @@ export function AppraisalCycleDialog({
                 value={formData.goal_weight}
                 onChange={(v) => setFormData({ ...formData, goal_weight: v })}
                 enabled={categoryState.goals}
+                locked={selectedTemplate?.is_locked}
                 icon={<Goal className="h-3.5 w-3.5" />}
               />
               <WeightInput
@@ -594,6 +612,7 @@ export function AppraisalCycleDialog({
                 value={formData.values_weight}
                 onChange={(v) => setFormData({ ...formData, values_weight: v })}
                 enabled={categoryState.values}
+                locked={selectedTemplate?.is_locked}
                 icon={<Heart className="h-3.5 w-3.5" />}
               />
             </div>

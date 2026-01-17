@@ -66,6 +66,8 @@ interface AppraisalCycle {
   competency_weight: number;
   responsibility_weight: number;
   goal_weight: number;
+  values_weight?: number;
+  include_values_assessment?: boolean;
   min_rating: number;
   max_rating: number;
   participants_count?: number;
@@ -517,7 +519,7 @@ export default function AppraisalsPage() {
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-4">
-                        <div className="grid gap-4 md:grid-cols-3">
+                        <div className="grid gap-4 md:grid-cols-4">
                           <div className="text-center p-3 bg-muted/50 rounded-lg">
                             <p className="text-sm text-muted-foreground">Competency</p>
                             <p className="text-xl font-semibold">{cycle.competency_weight}%</p>
@@ -530,6 +532,12 @@ export default function AppraisalsPage() {
                             <p className="text-sm text-muted-foreground">Goals</p>
                             <p className="text-xl font-semibold">{cycle.goal_weight}%</p>
                           </div>
+                          {(cycle.values_weight !== undefined && cycle.values_weight > 0) && (
+                            <div className="text-center p-3 bg-muted/50 rounded-lg">
+                              <p className="text-sm text-muted-foreground">Values</p>
+                              <p className="text-xl font-semibold">{cycle.values_weight}%</p>
+                            </div>
+                          )}
                         </div>
                         <div className="flex items-center gap-4">
                           <div className="flex-1">
