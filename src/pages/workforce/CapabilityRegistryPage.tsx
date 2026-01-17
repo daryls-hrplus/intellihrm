@@ -355,7 +355,7 @@ export default function CapabilityRegistryPage() {
             Workforce
           </NavLink>
           <ChevronLeft className="h-4 w-4 rotate-180" />
-          <span className="text-foreground">Skills & Competencies</span>
+          <span className="text-foreground">Capability Framework</span>
         </div>
 
         {/* Header */}
@@ -365,9 +365,25 @@ export default function CapabilityRegistryPage() {
               <Layers className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight">Skills & Competencies</h1>
+              <div className="flex items-center gap-2">
+                <h1 className="text-2xl font-bold tracking-tight">Capability Framework</h1>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="max-w-xs p-3">
+                      <div className="space-y-2 text-sm">
+                        <p><strong className="text-rose-500">Values:</strong> WHY we do it — guiding principles & culture</p>
+                        <p><strong className="text-purple-500">Competencies:</strong> HOW we do it — behaviors & soft skills</p>
+                        <p><strong className="text-blue-500">Skills:</strong> WHAT we can do — technical abilities</p>
+                      </div>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
               <p className="text-muted-foreground">
-                Manage your organization's skills and competencies framework
+                Manage your organization's skills, competencies, and values
               </p>
             </div>
           </div>
@@ -423,9 +439,24 @@ export default function CapabilityRegistryPage() {
                     type="skill"
                   />
                 </DropdownMenuItem>
+                <DropdownMenuItem 
+                  onSelect={(e) => e.preventDefault()} 
+                  className="flex flex-col items-start py-3 cursor-pointer"
+                >
+                  <BatchGenerateIndicatorsButton
+                    companyId={companyFilter || companies[0]?.id}
+                    onComplete={() => fetchCapabilities({})}
+                    variant="dropdown"
+                    type="value"
+                  />
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
 
+            <Button variant="outline" onClick={() => handleAdd("VALUE")} className="border-rose-200 dark:border-rose-800 hover:bg-rose-50 dark:hover:bg-rose-950">
+              <Heart className="mr-2 h-4 w-4 text-rose-500" />
+              Add Value
+            </Button>
             <Button variant="outline" onClick={() => handleAdd("COMPETENCY")}>
               <Target className="mr-2 h-4 w-4" />
               Add Competency
@@ -439,15 +470,15 @@ export default function CapabilityRegistryPage() {
 
         {/* Stats */}
         <div className="grid grid-cols-5 gap-4">
-          <Card>
+          <Card className="border-rose-200/50 dark:border-rose-800/50">
             <CardContent className="pt-6">
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900">
-                  <Zap className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                <div className="p-2 rounded-lg bg-rose-100 dark:bg-rose-900">
+                  <Heart className="h-5 w-5 text-rose-600 dark:text-rose-400" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold">{skillCount}</p>
-                  <p className="text-sm text-muted-foreground">Skills</p>
+                  <p className="text-2xl font-bold">{valueCount}</p>
+                  <p className="text-sm text-muted-foreground">Values</p>
                 </div>
               </div>
             </CardContent>
@@ -461,6 +492,19 @@ export default function CapabilityRegistryPage() {
                 <div>
                   <p className="text-2xl font-bold">{competencyCount}</p>
                   <p className="text-sm text-muted-foreground">Competencies</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900">
+                  <Zap className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold">{skillCount}</p>
+                  <p className="text-sm text-muted-foreground">Skills</p>
                 </div>
               </div>
             </CardContent>
@@ -503,33 +547,20 @@ export default function CapabilityRegistryPage() {
               </div>
             </CardContent>
           </Card>
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-amber-100 dark:bg-amber-900">
-                  <Filter className="h-5 w-5 text-amber-600 dark:text-amber-400" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">{scales.length}</p>
-                  <p className="text-sm text-muted-foreground">Scales</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
         </div>
 
         {/* Main Content */}
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle>Skills & Competencies</CardTitle>
+              <CardTitle>Capability Framework</CardTitle>
               <div className="flex items-center gap-4">
                 <div className="relative w-64">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    placeholder="Search skills & competencies..."
+                    placeholder="Search capabilities..."
                     className="pl-9"
                   />
                 </div>
@@ -680,6 +711,7 @@ export default function CapabilityRegistryPage() {
                     onOpenBulkImport={() => setIsBulkImportOpen(true)}
                     onAddSkill={() => handleAdd("SKILL")}
                     onAddCompetency={() => handleAdd("COMPETENCY")}
+                    onAddValue={() => handleAdd("VALUE")}
                   />
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

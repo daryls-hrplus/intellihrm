@@ -25,7 +25,7 @@ interface BatchGenerateIndicatorsButtonProps {
   companyId?: string;
   onComplete?: () => void;
   variant?: "default" | "dropdown";
-  type?: "skill" | "competency";
+  type?: "skill" | "competency" | "value";
 }
 
 const BATCH_SIZE = 5;
@@ -42,7 +42,7 @@ export function BatchGenerateIndicatorsButton({
   const [progress, setProgress] = useState(0);
   const [processedCount, setProcessedCount] = useState(0);
 
-  const dbType = type === "skill" ? "SKILL" : "COMPETENCY";
+  const dbType = type === "skill" ? "SKILL" : type === "value" ? "VALUE" : "COMPETENCY";
   
   const labels = {
     skill: {
@@ -72,6 +72,20 @@ export function BatchGenerateIndicatorsButton({
       ],
       confirmText: "Generate Indicators",
       successMessage: (count: number) => `Generated behavioral indicators for ${count} competencies`,
+    },
+    value: {
+      title: "Generate AI Value Behavioral Levels",
+      buttonText: "Generate Value Levels",
+      description: "Add behavioral levels to company values",
+      dialogTitle: "Generate AI Value Behavioral Levels",
+      dialogDescription: `You are about to generate AI-powered behavioral levels for ${itemCount} values that don't have levels defined yet.`,
+      dialogDetails: [
+        "Create 5 behavioral levels for each value",
+        "Generate observable behaviors demonstrating each level",
+        "Save the levels directly to each value",
+      ],
+      confirmText: "Generate Levels",
+      successMessage: (count: number) => `Generated behavioral levels for ${count} values`,
     },
   };
 
