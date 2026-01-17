@@ -33,6 +33,8 @@ import {
   Ban,
   History,
   Settings2,
+  Heart,
+  Award,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format, differenceInDays, isFuture, isPast, parseISO, isValid } from "date-fns";
@@ -119,9 +121,12 @@ export function CapabilityCard({
   const status = statusConfig[capability.status];
   const StatusIcon = status.icon;
   const isSkill = capability.type === "SKILL";
+  const isValue = capability.type === "VALUE";
+  const isCompetency = capability.type === "COMPETENCY";
   const canBeInferred = isSkill
     ? capability.skill_attributes?.can_be_inferred
     : false;
+  const isPromotionFactor = (capability as any).is_promotion_factor;
 
   // Date-driven status
   const dateStatus = getDateStatus(capability.effective_from, capability.effective_to);
@@ -145,15 +150,32 @@ export function CapabilityCard({
     >
       <CardHeader className="pb-2">
         <div className="flex items-start justify-between">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              {isSkill ? (
-                <Zap className="h-4 w-4 text-blue-500" />
-              ) : (
-                <Target className="h-4 w-4 text-purple-500" />
-              )}
-              <h3 className="font-semibold leading-none">{capability.name}</h3>
-            </div>
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                {isSkill ? (
+                  <Zap className="h-4 w-4 text-blue-500" />
+                ) : isValue ? (
+                  <Heart className="h-4 w-4 text-rose-500" />
+                ) : (
+                  <Target className="h-4 w-4 text-purple-500" />
+                )}
+                <h3 className="font-semibold leading-none">{capability.name}</h3>
+                {isValue && isPromotionFactor && (
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Badge className="gap-1 bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200 text-xs">
+                          <Award className="h-3 w-3" />
+                          Promotion Factor
+                        </Badge>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        This value is required for promotion eligibility
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                )}
+              </div>
             <p className="text-sm text-muted-foreground font-mono">
               {capability.code}
             </p>
@@ -297,6 +319,19 @@ export function CapabilityCard({
                   icon={Briefcase}
                 />
               </div>
+            </>
+          ) : isValue ? (
+            <>
+              <CompletionIndicator
+                label="Behavioral Indicators"
+                complete={hasBehavioralIndicators}
+                icon={ListChecks}
+              />
+              <CompletionIndicator
+                label="Promotion Factor"
+                complete={isPromotionFactor}
+                icon={Award}
+              />
             </>
           ) : (
             <>

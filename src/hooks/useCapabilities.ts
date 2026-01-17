@@ -290,8 +290,8 @@ export function useCapabilities() {
         }
       }
 
-      // Auto-generate proficiency indicators for skills (fire and forget)
-      if (input.type === "SKILL" && capability) {
+      // Auto-generate proficiency indicators for skills and values (fire and forget)
+      if ((input.type === "SKILL" || input.type === "VALUE") && capability) {
         supabase.functions.invoke("capability-ai-analyzer", {
           body: {
             action: "generate_proficiency_indicators",
@@ -304,14 +304,14 @@ export function useCapabilities() {
           },
         }).then((result) => {
           if (result.data?.saved) {
-            console.log(`Proficiency indicators generated for skill: ${capability.name}`);
+            console.log(`Proficiency indicators generated for ${input.type.toLowerCase()}: ${capability.name}`);
           }
         }).catch((err) => {
           console.warn("Background indicator generation failed:", err);
         });
       }
 
-      toast.success(`${input.type === "SKILL" ? "Skill" : "Competency"} created successfully`);
+      toast.success(`${input.type === "SKILL" ? "Skill" : input.type === "VALUE" ? "Value" : "Competency"} created successfully`);
       return capability as Capability;
     } catch (err) {
       console.error("Error in createCapability:", err);

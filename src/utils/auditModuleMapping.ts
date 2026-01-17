@@ -28,7 +28,7 @@ export const moduleMapping: Record<string, string> = {
   'announcements': 'Admin',
   'company_documents': 'Admin',
   'company_tags': 'Admin',
-  'company_values': 'Admin',
+  'company_values': 'Workforce',
   'currencies': 'Admin',
   'translations': 'Admin',
   'permissions': 'Admin',
