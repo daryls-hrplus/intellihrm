@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import type { Database } from "@/integrations/supabase/types";
 
-export type CapabilityType = "SKILL" | "COMPETENCY";
+export type CapabilityType = "SKILL" | "COMPETENCY" | "VALUE";
 export type CapabilityCategory = "technical" | "functional" | "behavioral" | "leadership" | "core";
 export type CapabilityStatus = "draft" | "pending_approval" | "active" | "deprecated";
 
