@@ -55,6 +55,7 @@ import {
 
 interface Props {
   companyId: string;
+  companyName?: string;
 }
 
 // Simplified condition types with rating category support
@@ -349,7 +350,7 @@ interface FormData extends Partial<CreateRuleInput> {
   rating_level_codes?: string[];
 }
 
-export function AppraisalActionRulesManager({ companyId }: Props) {
+export function AppraisalActionRulesManager({ companyId, companyName }: Props) {
   const { templates, isLoading: templatesLoading } = useAppraisalFormTemplates(companyId);
   const { data: ratingLevels } = usePerformanceCategories(companyId);
   const { isLoading: aiLoading, suggestions: aiSuggestions, getSuggestions, clearSuggestions } = useActionRuleAI();
@@ -724,6 +725,9 @@ export function AppraisalActionRulesManager({ companyId }: Props) {
         <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editingRule ? "Edit Action Rule" : "Create Action Rule"}</DialogTitle>
+            {companyName && (
+              <p className="text-sm text-muted-foreground">{companyName}</p>
+            )}
             <DialogDescription>
               Define automated actions triggered by specific appraisal outcomes
             </DialogDescription>

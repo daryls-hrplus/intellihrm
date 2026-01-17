@@ -23,6 +23,7 @@ interface CalibrationSessionDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   companyId: string;
+  companyName?: string;
   editingSession: CalibrationSession | null;
   appraisalCycles: AppraisalCycle[];
   onSuccess: () => void;
@@ -32,6 +33,7 @@ export function CalibrationSessionDialog({
   open,
   onOpenChange,
   companyId,
+  companyName,
   editingSession,
   appraisalCycles,
   onSuccess,
@@ -144,6 +146,9 @@ export function CalibrationSessionDialog({
           <DialogTitle>
             {editingSession ? "Edit Calibration Session" : "Schedule Calibration Session"}
           </DialogTitle>
+          {companyName && (
+            <p className="text-sm text-muted-foreground">{companyName}</p>
+          )}
           <DialogDescription>
             Plan and manage rating calibration sessions for consistent evaluations
           </DialogDescription>

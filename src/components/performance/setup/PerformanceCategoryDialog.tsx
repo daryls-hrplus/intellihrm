@@ -38,6 +38,7 @@ interface PerformanceCategoryDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   companyId: string;
+  companyName?: string;
   editingCategory: PerformanceCategory | null;
 }
 
@@ -53,6 +54,7 @@ export function PerformanceCategoryDialog({
   open,
   onOpenChange,
   companyId,
+  companyName,
   editingCategory,
 }: PerformanceCategoryDialogProps) {
   const { createCategory, updateCategory } = useManagePerformanceCategories();
@@ -163,6 +165,9 @@ export function PerformanceCategoryDialog({
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{editingCategory ? "Edit" : "Add"} Performance Category</DialogTitle>
+          {companyName && (
+            <p className="text-sm text-muted-foreground">{companyName}</p>
+          )}
           <DialogDescription>
             Configure a performance level category with score thresholds and eligibility settings
           </DialogDescription>

@@ -22,6 +22,7 @@ interface OverallRatingMappingDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   companyId: string;
+  companyName?: string;
   editingMapping: RatingMapping | null;
   onSuccess: () => void;
 }
@@ -30,6 +31,7 @@ export function OverallRatingMappingDialog({
   open,
   onOpenChange,
   companyId,
+  companyName,
   editingMapping,
   onSuccess,
 }: OverallRatingMappingDialogProps) {
@@ -195,6 +197,9 @@ export function OverallRatingMappingDialog({
           <DialogTitle>
             {editingMapping ? "Edit Score Mapping" : "Create Score Mapping"}
           </DialogTitle>
+          {companyName && (
+            <p className="text-sm text-muted-foreground">{companyName}</p>
+          )}
           <DialogDescription>
             Define how component scores map to overall rating levels
           </DialogDescription>
