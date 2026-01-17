@@ -48,6 +48,7 @@ export const FeaturesBrochurePage = lazy(() => import('@/pages/admin/FeaturesBro
 export const AdminCustomFieldsPage = lazy(() => import('@/pages/admin/AdminCustomFieldsPage'));
 export const ModulesBrochurePage = lazy(() => import('@/pages/admin/ModulesBrochurePage'));
 export const CurrencyManagementPage = lazy(() => import('@/pages/admin/CurrencyManagementPage'));
+export const CompanyRelationshipsPage = lazy(() => import('@/pages/admin/CompanyRelationshipsPage'));
 export const DataManagementPage = lazy(() => import('@/pages/admin/DataManagementPage'));
 export const SubscriptionManagementPage = lazy(() => import('@/pages/admin/SubscriptionManagementPage'));
 export const MFASettingsPage = lazy(() => import('@/pages/admin/MFASettingsPage'));

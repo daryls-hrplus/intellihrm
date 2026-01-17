@@ -173,6 +173,7 @@ const App = () => (
             <Route path="/admin/pii-access" element={<ProtectedRoute requiredRoles={["admin"]}><LazyPage><Pages.AdminPiiAccessPage /></LazyPage></ProtectedRoute>} />
             <Route path="/admin/ai-security-violations" element={<ProtectedRoute requiredRoles={["admin"]}><LazyPage><Pages.AISecurityViolationsPage /></LazyPage></ProtectedRoute>} />
             <Route path="/admin/ai-governance" element={<ProtectedRoute requiredRoles={["admin"]}><LazyPage><Pages.AIGovernancePage /></LazyPage></ProtectedRoute>} />
+            <Route path="/admin/company-relationships" element={<ProtectedRoute requiredRoles={["admin"]}><LazyPage><Pages.CompanyRelationshipsPage /></LazyPage></ProtectedRoute>} />
             <Route path="/admin/settings" element={<ProtectedRoute requiredRoles={["admin"]}><LazyPage><Pages.AdminSettingsPage /></LazyPage></ProtectedRoute>} />
             <Route path="/admin/currencies" element={<ProtectedRoute requiredRoles={["admin"]}><LazyPage><Pages.CurrencyManagementPage /></LazyPage></ProtectedRoute>} />
             <Route path="/admin/color-scheme" element={<ProtectedRoute requiredRoles={["admin"]}><LazyPage><Pages.AdminColorSchemePage /></LazyPage></ProtectedRoute>} />

@@ -10673,6 +10673,75 @@ export type Database = {
           },
         ]
       }
+      company_reporting_relationships: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          effective_date: string | null
+          end_date: string | null
+          id: string
+          is_active: boolean
+          is_bidirectional: boolean
+          relationship_reason: string
+          relationship_type: string
+          source_company_id: string
+          target_company_id: string
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          effective_date?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          is_bidirectional?: boolean
+          relationship_reason?: string
+          relationship_type?: string
+          source_company_id: string
+          target_company_id: string
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          effective_date?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          is_bidirectional?: boolean
+          relationship_reason?: string
+          relationship_type?: string
+          source_company_id?: string
+          target_company_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_reporting_relationships_source_company_id_fkey"
+            columns: ["source_company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_reporting_relationships_target_company_id_fkey"
+            columns: ["target_company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       company_subscriptions: {
         Row: {
           active_employee_count: number
@@ -55423,6 +55492,77 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      position_matrix_supervisors: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          end_date: string | null
+          id: string
+          is_active: boolean
+          matrix_supervisor_position_id: string
+          position_id: string
+          relationship_label: string | null
+          relationship_type: string
+          start_date: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          matrix_supervisor_position_id: string
+          position_id: string
+          relationship_label?: string | null
+          relationship_type?: string
+          start_date?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          matrix_supervisor_position_id?: string
+          position_id?: string
+          relationship_label?: string | null
+          relationship_type?: string
+          start_date?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "position_matrix_supervisors_matrix_supervisor_position_id_fkey"
+            columns: ["matrix_supervisor_position_id"]
+            isOneToOne: false
+            referencedRelation: "position_seat_summary"
+            referencedColumns: ["position_id"]
+          },
+          {
+            foreignKeyName: "position_matrix_supervisors_matrix_supervisor_position_id_fkey"
+            columns: ["matrix_supervisor_position_id"]
+            isOneToOne: false
+            referencedRelation: "positions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "position_matrix_supervisors_position_id_fkey"
+            columns: ["position_id"]
+            isOneToOne: false
+            referencedRelation: "position_seat_summary"
+            referencedColumns: ["position_id"]
+          },
+          {
+            foreignKeyName: "position_matrix_supervisors_position_id_fkey"
+            columns: ["position_id"]
+            isOneToOne: false
+            referencedRelation: "positions"
             referencedColumns: ["id"]
           },
         ]
