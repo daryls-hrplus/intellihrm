@@ -128,15 +128,23 @@ export const ReminderRulesManager = forwardRef<ReminderRulesManagerRef, Reminder
 
   const categoriesWithRules = Object.values(categoryCoverage).filter(c => c.hasRules).length;
 
-  // Calculate draft rules that need activation
+  // Calculate draft rules that need activation (respects category filter)
   const draftRules = useMemo(() => {
     const today = new Date().toISOString().split('T')[0];
     return rules.filter(rule => {
       const hasEffectiveFrom = !!rule.effective_from;
       const isExpired = rule.effective_to && rule.effective_to < today;
-      return rule.is_active && !hasEffectiveFrom && !isExpired;
+      const isDraft = rule.is_active && !hasEffectiveFrom && !isExpired;
+      
+      // If a category is selected, only include draft rules from that category
+      if (selectedCategory) {
+        const ruleCategory = rule.event_type?.category || 'custom';
+        return isDraft && ruleCategory === selectedCategory;
+      }
+      
+      return isDraft;
     });
-  }, [rules]);
+  }, [rules, selectedCategory]);
 
   // Bulk set effective date handler
   const handleBulkSetEffectiveDate = async () => {
@@ -539,7 +547,8 @@ export const ReminderRulesManager = forwardRef<ReminderRulesManagerRef, Reminder
                 Activate Draft Rules
               </DialogTitle>
               <DialogDescription>
-                Set an effective date for {draftRules.length} draft rule{draftRules.length !== 1 ? 's' : ''} to start sending reminders
+                Set an effective date for {draftRules.length} draft rule{draftRules.length !== 1 ? 's' : ''}
+                {selectedCategory && ` in ${REMINDER_CATEGORIES.find(c => c.value === selectedCategory)?.label || selectedCategory}`} to start sending reminders
               </DialogDescription>
             </DialogHeader>
             
@@ -618,6 +627,11 @@ export const ReminderRulesManager = forwardRef<ReminderRulesManagerRef, Reminder
             <div>
               <p className="font-medium text-blue-800 dark:text-blue-200">
                 {draftRules.length} rule{draftRules.length !== 1 ? 's' : ''} pending activation
+                {selectedCategory && (
+                  <span className="font-normal text-blue-600 dark:text-blue-400">
+                    {' '}in {REMINDER_CATEGORIES.find(c => c.value === selectedCategory)?.label || selectedCategory}
+                  </span>
+                )}
               </p>
               <p className="text-sm text-blue-600 dark:text-blue-400">
                 Set effective dates to start sending reminders
