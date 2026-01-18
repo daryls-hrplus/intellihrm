@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { useCompanyRelationships } from "@/hooks/useCompanyRelationships";
+import { useUserAccessibleCompanies } from "@/hooks/useUserAccessibleCompanies";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -40,13 +40,11 @@ interface Department {
 
 export function DepartmentsOrgTab() {
   const { profile } = useAuth();
-  const { groupCompanies, isLoading: companiesLoading } = useCompanyRelationships(profile?.company_id);
+  const { companies, companyIds, isLoading: companiesLoading } = useUserAccessibleCompanies();
   const [search, setSearch] = useState("");
   const [companyFilter, setCompanyFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("active");
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
-
-  const companyIds = useMemo(() => groupCompanies.map(c => c.id), [groupCompanies]);
 
   const { data: departments = [], isLoading } = useQuery({
     queryKey: ["departments-org-reference", companyIds],
@@ -172,7 +170,7 @@ export function DepartmentsOrgTab() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Companies</SelectItem>
-              {groupCompanies.map(c => (
+              {companies.map(c => (
                 <SelectItem key={c.id} value={c.id}>
                   {c.code} {c.isCurrentCompany && "(Your Company)"}
                 </SelectItem>
@@ -198,9 +196,9 @@ export function DepartmentsOrgTab() {
               <FolderTree className="h-3 w-3" />
               {filteredDepartments.length} departments
             </Badge>
-            {groupCompanies.length > 1 && (
+            {companies.length > 1 && (
               <Badge variant="outline">
-                {groupCompanies.length} companies
+                {companies.length} companies
               </Badge>
             )}
           </div>
@@ -284,7 +282,7 @@ export function DepartmentsOrgTab() {
       </div>
 
       <p className="text-xs text-muted-foreground">
-        Departments from your company and group companies. Use department codes in bulk imports and API references.
+        Departments from companies you have access to. Use department codes in bulk imports and API references.
       </p>
     </div>
   );

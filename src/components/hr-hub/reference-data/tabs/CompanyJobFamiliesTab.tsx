@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { useCompanyRelationships } from "@/hooks/useCompanyRelationships";
+import { useUserAccessibleCompanies } from "@/hooks/useUserAccessibleCompanies";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -40,13 +40,11 @@ interface CompanyJobFamily {
 
 export function CompanyJobFamiliesTab() {
   const { profile } = useAuth();
-  const { groupCompanies, isLoading: companiesLoading } = useCompanyRelationships(profile?.company_id);
+  const { companies, companyIds, isLoading: companiesLoading } = useUserAccessibleCompanies();
   const [search, setSearch] = useState("");
   const [companyFilter, setCompanyFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("active");
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
-
-  const companyIds = useMemo(() => groupCompanies.map(c => c.id), [groupCompanies]);
 
   const { data: jobFamilies = [], isLoading } = useQuery({
     queryKey: ["company-job-families-org-reference", companyIds],
@@ -171,7 +169,7 @@ export function CompanyJobFamiliesTab() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Companies</SelectItem>
-              {groupCompanies.map(c => (
+              {companies.map(c => (
                 <SelectItem key={c.id} value={c.id}>
                   {c.code} {c.isCurrentCompany && "(Your Company)"}
                 </SelectItem>
@@ -197,9 +195,9 @@ export function CompanyJobFamiliesTab() {
               <Briefcase className="h-3 w-3" />
               {filteredJobFamilies.length} job families
             </Badge>
-            {groupCompanies.length > 1 && (
+            {companies.length > 1 && (
               <Badge variant="outline">
-                {groupCompanies.length} companies
+                {companies.length} companies
               </Badge>
             )}
           </div>
@@ -287,7 +285,7 @@ export function CompanyJobFamiliesTab() {
       </div>
 
       <p className="text-xs text-muted-foreground">
-        Company-specific job families mapped to master job family standards. Use job family codes for position classification.
+        Company-specific job families from companies you have access to. Use job family codes for position classification.
       </p>
     </div>
   );

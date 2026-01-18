@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { useCompanyRelationships } from "@/hooks/useCompanyRelationships";
+import { useUserAccessibleCompanies } from "@/hooks/useUserAccessibleCompanies";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -44,13 +44,11 @@ interface Position {
 
 export function PositionsOrgTab() {
   const { profile } = useAuth();
-  const { groupCompanies, isLoading: companiesLoading } = useCompanyRelationships(profile?.company_id);
+  const { companies, companyIds, isLoading: companiesLoading } = useUserAccessibleCompanies();
   const [search, setSearch] = useState("");
   const [companyFilter, setCompanyFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("active");
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
-
-  const companyIds = useMemo(() => groupCompanies.map(c => c.id), [groupCompanies]);
 
   const { data: positions = [], isLoading } = useQuery({
     queryKey: ["positions-org-reference", companyIds],
@@ -126,7 +124,7 @@ export function PositionsOrgTab() {
     let copyValue = code;
     
     if (companyId !== currentCompanyId) {
-      const company = groupCompanies.find(c => c.id === companyId);
+      const company = companies.find(c => c.id === companyId);
       if (company?.code) {
         copyValue = `${company.code}:${code}`;
       }
@@ -203,7 +201,7 @@ export function PositionsOrgTab() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Companies</SelectItem>
-              {groupCompanies.map(c => (
+              {companies.map(c => (
                 <SelectItem key={c.id} value={c.id}>
                   {c.code} {c.isCurrentCompany && "(Your Company)"}
                 </SelectItem>
@@ -229,9 +227,9 @@ export function PositionsOrgTab() {
               <Users className="h-3 w-3" />
               {filteredPositions.length} positions
             </Badge>
-            {groupCompanies.length > 1 && (
+            {companies.length > 1 && (
               <Badge variant="outline">
-                {groupCompanies.length} companies
+                {companies.length} companies
               </Badge>
             )}
           </div>
@@ -330,7 +328,7 @@ export function PositionsOrgTab() {
       </div>
 
       <p className="text-xs text-muted-foreground">
-        Positions from your company and group companies. For cross-company references, use the format{" "}
+        Positions from companies you have access to. For cross-company references, use the format{" "}
         <code className="px-1 bg-muted rounded">COMPANY_CODE:POSITION_CODE</code>.
       </p>
     </div>
