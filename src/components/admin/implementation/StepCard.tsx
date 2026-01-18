@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -28,6 +28,7 @@ import type { StepProgress } from "@/hooks/useStepProgress";
 import { SubTaskList } from "./SubTaskList";
 import { getSubTasksForStep } from "@/data/subTaskDefinitions";
 import type { StepRollupStatus } from "@/hooks/useSubTaskProgress";
+import { useSubTaskProgress } from "@/hooks/useSubTaskProgress";
 import { useToast } from "@/hooks/use-toast";
 import { useRouteResolver, RouteResolution } from "@/hooks/useRouteResolver";
 
@@ -65,12 +66,24 @@ export function StepCard({
   const [isExpanded, setIsExpanded] = useState(false);
   const [notes, setNotes] = useState(stepProgress?.notes || "");
   const [isSavingNotes, setIsSavingNotes] = useState(false);
-  const [subTaskRollupStatus, setSubTaskRollupStatus] = useState<StepRollupStatus>('not_started');
   const { toast } = useToast();
   const { resolve } = useRouteResolver();
   
   const subTaskDefinitions = getSubTasksForStep(phaseId, step.order);
   const hasSubTasks = subTaskDefinitions.length > 0;
+  
+  // Use the hook to get actual sub-task status from database
+  const { calculateStepStatus, subTasks, isLoading: isLoadingSubTasks } = useSubTaskProgress(
+    companyId,
+    phaseId,
+    step.order
+  );
+  
+  // Calculate rollup status from actual sub-task data
+  const subTaskRollupStatus: StepRollupStatus = useMemo(() => {
+    if (!hasSubTasks || isLoadingSubTasks) return 'not_started';
+    return calculateStepStatus();
+  }, [hasSubTasks, isLoadingSubTasks, calculateStepStatus, subTasks]);
 
   // Resolve route using Database-First approach
   const routeResolution: RouteResolution = useMemo(() => {
@@ -96,22 +109,29 @@ export function StepCard({
     await onToggleComplete(!isComplete);
   };
 
-  const handleSubTaskStatusChange = useCallback(async (status: StepRollupStatus) => {
-    setSubTaskRollupStatus(status);
+  // Auto-complete/uncomplete based on sub-task status changes
+  useEffect(() => {
+    if (!hasSubTasks || isLoadingSubTasks) return;
     
     // Auto-complete when all required sub-tasks are resolved
-    if (status === 'completed' && !isComplete) {
-      await onToggleComplete(true);
+    if (subTaskRollupStatus === 'completed' && !isComplete) {
+      onToggleComplete(true);
       toast({
         title: "Step auto-completed",
         description: "All required sub-tasks have been resolved",
       });
     }
     // Uncomplete if sub-tasks are no longer all resolved
-    else if (status !== 'completed' && isComplete && hasSubTasks) {
-      await onToggleComplete(false);
+    else if (subTaskRollupStatus !== 'completed' && isComplete && hasSubTasks) {
+      onToggleComplete(false);
     }
-  }, [isComplete, hasSubTasks, onToggleComplete, toast]);
+  }, [subTaskRollupStatus, isComplete, hasSubTasks, isLoadingSubTasks, onToggleComplete, toast]);
+
+  // Handler for SubTaskList (still needed for immediate UI updates)
+  const handleSubTaskStatusChange = useCallback(async (_status: StepRollupStatus) => {
+    // Status is now computed via the hook, no need to set state
+    // The useEffect above handles auto-complete logic
+  }, []);
 
   return (
     <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
