@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { useCompanyRelationships } from "@/hooks/useCompanyRelationships";
+import { useUserAccessibleCompanies } from "@/hooks/useUserAccessibleCompanies";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -18,19 +18,19 @@ import { Link } from "react-router-dom";
 
 export function CompaniesOrgTab() {
   const { profile } = useAuth();
-  const { groupCompanies, relationships, isLoading } = useCompanyRelationships(profile?.company_id);
+  const { companies, isLoading } = useUserAccessibleCompanies();
   const [search, setSearch] = useState("");
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
 
   const filteredCompanies = useMemo(() => {
-    if (!search.trim()) return groupCompanies;
+    if (!search.trim()) return companies;
     const lowerSearch = search.toLowerCase();
-    return groupCompanies.filter(
+    return companies.filter(
       c =>
         c.code?.toLowerCase().includes(lowerSearch) ||
         c.name?.toLowerCase().includes(lowerSearch)
     );
-  }, [groupCompanies, search]);
+  }, [companies, search]);
 
   const handleCopyCode = (code: string) => {
     navigator.clipboard.writeText(code);
@@ -40,16 +40,12 @@ export function CompaniesOrgTab() {
   };
 
   const handleDownloadCSV = () => {
-    const headers = ["company_code", "company_name", "is_your_company", "relationship_type"];
+    const headers = ["company_code", "company_name", "is_your_company"];
     const rows = filteredCompanies.map(c => {
-      const rel = relationships.find(r =>
-        r.source_company_id === c.id || r.target_company_id === c.id
-      );
       return [
         c.code || "",
         `"${(c.name || "").replace(/"/g, '""')}"`,
         c.isCurrentCompany ? "Yes" : "No",
-        rel?.relationship_type || "same_group"
       ].join(",");
     });
 
@@ -58,7 +54,7 @@ export function CompaniesOrgTab() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "group_companies.csv";
+    a.download = "accessible_companies.csv";
     a.click();
     URL.revokeObjectURL(url);
 
@@ -117,10 +113,6 @@ export function CompaniesOrgTab() {
                 </TableRow>
               ) : (
                 filteredCompanies.map((company) => {
-                  const rel = relationships.find(r =>
-                    r.source_company_id === company.id || r.target_company_id === company.id
-                  );
-
                   return (
                     <TableRow key={company.id}>
                       <TableCell>
@@ -139,12 +131,8 @@ export function CompaniesOrgTab() {
                       <TableCell className="hidden md:table-cell">
                         {company.isCurrentCompany ? (
                           <Badge variant="secondary" className="text-xs">Primary</Badge>
-                        ) : rel ? (
-                          <Badge variant="outline" className="text-xs">
-                            {rel.relationship_type?.replace(/_/g, " ")}
-                          </Badge>
                         ) : (
-                          <Badge variant="outline" className="text-xs">same group</Badge>
+                          <Badge variant="outline" className="text-xs">Accessible</Badge>
                         )}
                       </TableCell>
                       <TableCell className="text-center">
@@ -172,7 +160,7 @@ export function CompaniesOrgTab() {
 
       <div className="flex items-center justify-between pt-2">
         <p className="text-xs text-muted-foreground">
-          Companies in your corporate group. Use the company code prefix for cross-company references.
+          Companies you have access to based on your permissions. Use the company code prefix for cross-company references.
         </p>
         <Link to="/admin/company-relationships">
           <Button variant="link" size="sm" className="gap-1 text-xs">
