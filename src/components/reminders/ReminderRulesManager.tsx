@@ -266,11 +266,26 @@ export const ReminderRulesManager = forwardRef<ReminderRulesManagerRef, Reminder
       .replace(/_/g, ' ') || 'records';
     const isHighlighted = highlightedRuleId === rule.id || highlightRuleId === rule.id;
     
-    // Determine effective status
+    // Determine effective status with proper date validation
     const today = new Date().toISOString().split('T')[0];
-    const isScheduled = rule.effective_from && rule.effective_from > today;
+    const hasEffectiveFrom = !!rule.effective_from;
+    const isScheduled = hasEffectiveFrom && rule.effective_from > today;
     const isExpired = rule.effective_to && rule.effective_to < today;
-    const effectiveStatus = isExpired ? 'expired' : isScheduled ? 'scheduled' : rule.is_active ? 'active' : 'inactive';
+    const isEffectiveNow = hasEffectiveFrom && rule.effective_from <= today;
+    
+    // Status priority: expired > scheduled > active > draft > inactive
+    let effectiveStatus: 'active' | 'scheduled' | 'expired' | 'inactive' | 'draft';
+    if (isExpired) {
+      effectiveStatus = 'expired';
+    } else if (isScheduled) {
+      effectiveStatus = 'scheduled';
+    } else if (rule.is_active && isEffectiveNow) {
+      effectiveStatus = 'active';
+    } else if (rule.is_active && !hasEffectiveFrom) {
+      effectiveStatus = 'draft';
+    } else {
+      effectiveStatus = 'inactive';
+    }
     
     return (
       <TableRow 
@@ -329,22 +344,29 @@ export const ReminderRulesManager = forwardRef<ReminderRulesManagerRef, Reminder
             <Tooltip>
               <TooltipTrigger asChild>
                 <Badge 
-                  variant={effectiveStatus === 'active' ? 'default' : effectiveStatus === 'scheduled' ? 'outline' : 'secondary'}
+                  variant={effectiveStatus === 'active' ? 'default' : effectiveStatus === 'scheduled' || effectiveStatus === 'draft' ? 'outline' : 'secondary'}
                   className={cn(
                     effectiveStatus === 'scheduled' && 'border-amber-500 text-amber-600',
-                    effectiveStatus === 'expired' && 'border-destructive/50 text-destructive'
+                    effectiveStatus === 'expired' && 'border-destructive/50 text-destructive',
+                    effectiveStatus === 'draft' && 'border-blue-400 text-blue-600 bg-blue-50'
                   )}
                 >
                   {effectiveStatus === 'active' && 'Active'}
                   {effectiveStatus === 'scheduled' && 'Scheduled'}
                   {effectiveStatus === 'expired' && 'Expired'}
                   {effectiveStatus === 'inactive' && 'Inactive'}
+                  {effectiveStatus === 'draft' && 'Draft'}
                 </Badge>
               </TooltipTrigger>
               <TooltipContent>
                 {rule.effective_from && <p>Starts: {format(parseISO(rule.effective_from), 'PPP')}</p>}
                 {rule.effective_to && <p>Ends: {format(parseISO(rule.effective_to), 'PPP')}</p>}
-                {!rule.effective_from && !rule.effective_to && <p>No date restrictions</p>}
+                {effectiveStatus === 'draft' && (
+                  <p className="text-amber-600">Set an effective date to activate this rule</p>
+                )}
+                {effectiveStatus === 'active' && !rule.effective_to && (
+                  <p className="text-muted-foreground">No end date set</p>
+                )}
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
