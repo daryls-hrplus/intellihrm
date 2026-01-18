@@ -17,7 +17,8 @@ import { parsePositionCode } from "@/utils/validateReportingRelationship";
 import { detectCircularReferencesInBatch, Position } from "@/utils/detectCircularReporting";
 import { PositionReferenceDrawer } from "./PositionReferenceDrawer";
 import { CompanyReferenceDrawer } from "./CompanyReferenceDrawer";
-import { ReportingLineFieldSpecs } from "./ReportingLineFieldSpecs";
+import { ReferenceDataDownloads } from "./ReferenceDataDownloads";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Link } from "react-router-dom";
 import {
   Download, 
@@ -734,168 +735,179 @@ FIN-ANALYST-001,OLD-MGR-001,functional,remove`;
     }
   };
 
+  const companyId = profile?.company_id;
+  const [fieldSpecsOpen, setFieldSpecsOpen] = useState(false);
+
+  // Field specifications for the import
+  const fieldSpecs = reportingMode === "primary" ? [
+    { name: "position_code", required: true, description: "The position to update", example: "HR-MGR-001" },
+    { name: "reports_to_position_code", required: false, description: "New supervisor position (leave empty to clear)", example: "HR-DIR-001" },
+  ] : [
+    { name: "position_code", required: true, description: "The position to update", example: "HR-MGR-001" },
+    { name: "matrix_supervisor_code", required: true, description: "Matrix supervisor position", example: "PROJ-PM-001" },
+    { name: "relationship_type", required: true, description: "Type of relationship", example: "functional", allowedValues: ["functional", "project", "technical"] },
+    { name: "action", required: true, description: "Action to perform", example: "add", allowedValues: ["add", "remove"] },
+  ];
+
+  const tips = [
+    "Position codes must exist in the Positions module",
+    "For cross-company references, use COMPANY_CODE:POSITION_CODE format",
+    "Example cross-company: AUR-CORP:CFO-001",
+    "Leave reports_to empty to clear the current supervisor",
+    reportingMode === "primary" 
+      ? "Primary reporting affects payroll, performance, and compliance"
+      : "Matrix reporting is for functional/project relationships only"
+  ];
+
   return (
-    <div className="space-y-6">
-      <Alert>
-        <Info className="h-4 w-4" />
-        <AlertDescription>
-          Use this feature to bulk-update reporting relationships for existing positions. 
-          Supports cross-company reporting within the same corporate group or with configured relationships.
-          Use <code className="text-xs bg-muted px-1 rounded">COMPANY_CODE:POSITION_CODE</code> format for explicit cross-company references.
-        </AlertDescription>
-      </Alert>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <RefreshCw className="h-5 w-5" />
-            Update Reporting Lines
-          </CardTitle>
-          <CardDescription>
-            Bulk update which positions report to which supervisors
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {/* Reporting Mode Selection */}
-          <div className="space-y-2">
-            <h4 className="font-medium text-sm">Reporting Type</h4>
-            <Tabs value={reportingMode} onValueChange={(v) => { setReportingMode(v as ReportingMode); resetForm(); }}>
-              <TabsList>
-                <TabsTrigger value="primary" className="gap-2">
-                  <div className="w-4 h-0.5 bg-current" />
-                  Primary (Solid-Line)
-                </TabsTrigger>
-                <TabsTrigger value="matrix" className="gap-2">
-                  <div className="w-4 h-0.5 border-t-2 border-dashed border-current" />
-                  Matrix (Dotted-Line)
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
-            <p className="text-xs text-muted-foreground">
-              {reportingMode === "primary" 
-                ? "Primary reporting is for direct supervisors - used for payroll, performance reviews, and compliance."
-                : "Matrix reporting is for functional/project relationships - used for cross-functional oversight and shared services."
-              }
+    <div className="space-y-4">
+      {/* Header with Reference Data and Template */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+            <GitBranch className="h-5 w-5 text-primary" />
+          </div>
+          <div>
+            <h3 className="font-semibold">Update Reporting Lines</h3>
+            <p className="text-sm text-muted-foreground">
+              Bulk update which positions report to which supervisors
             </p>
           </div>
+        </div>
+        <div className="flex items-center gap-2">
+          {companyId && (
+            <ReferenceDataDownloads
+              companyId={companyId}
+              availableDownloads={["positions", "departments"]}
+            />
+          )}
+          <Button variant="outline" size="sm" onClick={downloadTemplate}>
+            <Download className="h-4 w-4 mr-2" />
+            Template
+          </Button>
+        </div>
+      </div>
 
-          {/* Reference Data Section */}
-          <Card className="border-dashed border-primary/30 bg-primary/5">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base flex items-center gap-2">
-                <ListOrdered className="h-4 w-4" />
-                Reference Data for This Import
-              </CardTitle>
-              <CardDescription>
-                These fields require specific codes. Click to view valid values or download as CSV.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setPositionDrawerOpen(true)}
-                  className="gap-2"
-                >
-                  <ListOrdered className="h-4 w-4" />
-                  Position Codes
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCompanyDrawerOpen(true)}
-                  className="gap-2"
-                >
-                  <Building2 className="h-4 w-4" />
-                  Companies
-                </Button>
-                <Link to="/hr-hub/reference-data">
-                  <Button variant="ghost" size="sm" className="gap-2">
-                    <ExternalLink className="h-4 w-4" />
-                    Full Reference Catalog
-                  </Button>
-                </Link>
+      {/* Field Specifications */}
+      <Collapsible open={fieldSpecsOpen} onOpenChange={setFieldSpecsOpen}>
+        <CollapsibleTrigger asChild>
+          <Button variant="ghost" className="w-full justify-between p-2 h-auto">
+            <span className="flex items-center gap-2 text-sm font-medium">
+              <ListOrdered className="h-4 w-4" />
+              Field Specifications & Tips
+            </span>
+            <Info className={`h-4 w-4 transition-transform ${fieldSpecsOpen ? "rotate-180" : ""}`} />
+          </Button>
+        </CollapsibleTrigger>
+        <CollapsibleContent className="space-y-3 pt-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+            {fieldSpecs.map(field => (
+              <div key={field.name} className="flex items-start gap-2 p-2 bg-muted/50 rounded text-xs">
+                <Badge variant={field.required ? "default" : "secondary"} className="shrink-0 text-[10px]">
+                  {field.required ? "REQ" : "OPT"}
+                </Badge>
+                <div>
+                  <span className="font-mono font-medium">{field.name}</span>
+                  <p className="text-muted-foreground">{field.description}</p>
+                  {field.allowedValues && (
+                    <p className="text-muted-foreground">Values: {field.allowedValues.join(", ")}</p>
+                  )}
+                  <p className="text-muted-foreground">Example: <code className="bg-background px-1 rounded">{field.example}</code></p>
+                </div>
               </div>
-              
-              {/* Field Specifications */}
-              <ReportingLineFieldSpecs 
-                mode={reportingMode} 
-                onViewPositions={() => setPositionDrawerOpen(true)} 
-              />
-            </CardContent>
-          </Card>
-
-          {/* Group Companies Info */}
-          {groupCompanies.length > 1 && (
-            <div className="p-3 rounded-lg border bg-muted/30">
-              <div className="flex items-center gap-2 mb-2">
-                <Building2 className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm font-medium">Corporate Group</span>
-              </div>
-              <div className="flex flex-wrap gap-1">
-                {groupCompanies.map(c => (
-                  <Badge 
-                    key={c.id} 
-                    variant={c.isCurrentCompany ? "default" : "secondary"}
-                    className="text-xs"
-                  >
-                    {c.code}
-                  </Badge>
+            ))}
+          </div>
+          <Alert>
+            <Info className="h-4 w-4" />
+            <AlertDescription>
+              <ul className="list-disc list-inside space-y-1 text-xs">
+                {tips.map((tip, i) => (
+                  <li key={i}>{tip}</li>
                 ))}
-              </div>
-              <p className="text-xs text-muted-foreground mt-2">
-                Cross-company reporting is automatically allowed between these companies.
-              </p>
-            </div>
-          )}
+              </ul>
+            </AlertDescription>
+          </Alert>
+        </CollapsibleContent>
+      </Collapsible>
 
-          {/* Step 1: Download Template */}
-          <div className="space-y-2">
-            <h4 className="font-medium text-sm">Step 1: Download Template</h4>
-            <Button variant="outline" onClick={downloadTemplate} className="gap-2">
-              <Download className="h-4 w-4" />
-              Download {reportingMode === "primary" ? "Primary" : "Matrix"} Template
-            </Button>
-            <p className="text-xs text-muted-foreground">
-              {reportingMode === "primary" 
-                ? "Template includes position_code and reports_to_position_code columns"
-                : "Template includes position_code, matrix_supervisor_code, relationship_type, and action columns"
-              }
-            </p>
+      {/* Reporting Mode Selection */}
+      <div className="space-y-2">
+        <h4 className="font-medium text-sm">Reporting Type</h4>
+        <Tabs value={reportingMode} onValueChange={(v) => { setReportingMode(v as ReportingMode); resetForm(); }}>
+          <TabsList>
+            <TabsTrigger value="primary" className="gap-2">
+              <div className="w-4 h-0.5 bg-current" />
+              Primary (Solid-Line)
+            </TabsTrigger>
+            <TabsTrigger value="matrix" className="gap-2">
+              <div className="w-4 h-0.5 border-t-2 border-dashed border-current" />
+              Matrix (Dotted-Line)
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+        <p className="text-xs text-muted-foreground">
+          {reportingMode === "primary" 
+            ? "Primary reporting is for direct supervisors - used for payroll, performance reviews, and compliance."
+            : "Matrix reporting is for functional/project relationships - used for cross-functional oversight and shared services."
+          }
+        </p>
+      </div>
+
+      {/* Group Companies Info */}
+      {groupCompanies.length > 1 && (
+        <div className="p-3 rounded-lg border bg-muted/30">
+          <div className="flex items-center gap-2 mb-2">
+            <Building2 className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm font-medium">Corporate Group</span>
           </div>
-
-          {/* Step 2: Upload File */}
-          <div className="space-y-2">
-            <h4 className="font-medium text-sm">Step 2: Upload Your File</h4>
-            <div className="flex items-center gap-4">
-              <Input
-                type="file"
-                accept=".csv"
-                onChange={handleFileChange}
-                disabled={isValidating || isUpdating || isLoadingRelationships}
-                className="max-w-md"
-              />
-              {file && (
-                <Badge variant="secondary">{file.name}</Badge>
-              )}
-            </div>
+          <div className="flex flex-wrap gap-1">
+            {groupCompanies.map(c => (
+              <Badge 
+                key={c.id} 
+                variant={c.isCurrentCompany ? "default" : "secondary"}
+                className="text-xs"
+              >
+                {c.code}
+              </Badge>
+            ))}
           </div>
+          <p className="text-xs text-muted-foreground mt-2">
+            Cross-company reporting is automatically allowed between these companies.
+          </p>
+        </div>
+      )}
 
-          {/* Validation Progress */}
-          {isValidating && (
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <Loader2 className="h-4 w-4 animate-spin" />
-              Validating positions across {groupCompanies.length} companies...
-            </div>
+      {/* File Upload */}
+      <div className="space-y-2">
+        <h4 className="font-medium text-sm">Upload CSV File</h4>
+        <div className="flex items-center gap-4">
+          <Input
+            type="file"
+            accept=".csv"
+            onChange={handleFileChange}
+            disabled={isValidating || isUpdating || isLoadingRelationships}
+            className="max-w-md"
+          />
+          {file && (
+            <Badge variant="secondary">{file.name}</Badge>
           )}
+        </div>
+      </div>
 
-          {/* Validation Results */}
-          {validationResults.length > 0 && (
-            <div className="space-y-4">
-              {/* Summary Cards */}
-              <div className="flex items-center gap-4 flex-wrap">
-                <h4 className="font-medium text-sm">Step 3: Review & Confirm</h4>
+      {/* Validation Progress */}
+      {isValidating && (
+        <div className="flex items-center gap-2 text-muted-foreground">
+          <Loader2 className="h-4 w-4 animate-spin" />
+          Validating positions across {groupCompanies.length} companies...
+        </div>
+      )}
+
+      {/* Validation Results */}
+      {validationResults.length > 0 && (
+        <div className="space-y-4">
+          {/* Summary Cards */}
+          <div className="flex items-center gap-4 flex-wrap">
+            <h4 className="font-medium text-sm">Review & Confirm</h4>
                 <div className="flex gap-2 flex-wrap">
                   {validCount > 0 && (
                     <Badge variant="default" className="bg-green-600 cursor-pointer" onClick={() => setFilterMode(filterMode === "valid" ? "all" : "valid")}>
@@ -1140,8 +1152,6 @@ FIN-ANALYST-001,OLD-MGR-001,functional,remove`;
               </div>
             </div>
           )}
-        </CardContent>
-      </Card>
 
       {/* Reference Data Drawers */}
       <PositionReferenceDrawer 
