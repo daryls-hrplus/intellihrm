@@ -430,7 +430,7 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
   const getAssignmentsForPosition = (posId: string) =>
     employeePositions.filter(ep => ep.position_id === posId);
 
-  // Vacancy status helper
+  // Vacancy status helper - counts active assignments only for accurate vacancy
   const getVacancyStatus = (position: Position) => {
     const assignments = getAssignmentsForPosition(position.id);
     const activeAssignments = assignments.filter(a => a.is_active).length;
@@ -467,8 +467,11 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
     });
   };
 
-  // Calculate overall vacancy stats
-  const vacancyStats = positions.reduce(
+  // Get all filtered positions across departments
+  const allFilteredPositions = departments.flatMap(dept => getFilteredPositionsForDept(dept.id));
+
+  // Calculate vacancy stats from filtered positions (respects current filter)
+  const vacancyStats = allFilteredPositions.reduce(
     (acc, pos) => {
       const status = getVacancyStatus(pos);
       acc.total++;
