@@ -1,9 +1,8 @@
-import { useState, useMemo, useCallback, useEffect } from "react";
+import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { countries } from "@/lib/countries";
 import { ISO_LANGUAGES } from "@/constants/languageConstants";
-import { useDebouncedCallback } from "./use-debounced-callback";
 import { useAuth } from "@/contexts/AuthContext";
 
 export interface SearchResult {
@@ -45,6 +44,7 @@ interface UseGlobalReferenceSearchReturn {
 
 const MAX_RESULTS_PER_CATEGORY = 8;
 const MIN_SEARCH_LENGTH = 2;
+const DEBOUNCE_MS = 300;
 
 export function useGlobalReferenceSearch(): UseGlobalReferenceSearchReturn {
   const { user, profile } = useAuth();
@@ -53,6 +53,7 @@ export function useGlobalReferenceSearch(): UseGlobalReferenceSearchReturn {
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [hasSearched, setHasSearched] = useState(false);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>("all");
+  const timeoutRef = useRef<ReturnType<typeof setTimeout>>();
 
   // Fetch companies the user has access to via permissions
   const { data: accessibleCompanies = [] } = useQuery({
@@ -81,16 +82,24 @@ export function useGlobalReferenceSearch(): UseGlobalReferenceSearchReturn {
 
   const companyIds = useMemo(() => accessibleCompanies.map(c => c.id), [accessibleCompanies]);
 
-  const debouncedSetQuery = useDebouncedCallback((value: string) => {
-    setDebouncedQuery(value);
-    if (value.length >= MIN_SEARCH_LENGTH) {
-      setHasSearched(true);
-    }
-  }, 300);
-
+  // Debounce effect with stable refs
   useEffect(() => {
-    debouncedSetQuery(query);
-  }, [query, debouncedSetQuery]);
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    timeoutRef.current = setTimeout(() => {
+      setDebouncedQuery(query);
+      if (query.length >= MIN_SEARCH_LENGTH) {
+        setHasSearched(true);
+      }
+    }, DEBOUNCE_MS);
+    
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, [query]);
 
   // Search static data (global, not company-specific)
   const staticResults = useMemo(() => {
