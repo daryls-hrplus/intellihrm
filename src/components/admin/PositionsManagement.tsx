@@ -47,6 +47,9 @@ import {
   DollarSign,
   TrendingUp,
   Armchair,
+  Search,
+  Filter,
+  AlertCircle,
 } from "lucide-react";
 import { EmployeePositionCompensationDrilldown } from "@/components/workforce/EmployeePositionCompensationDrilldown";
 import { PositionSeatsPanel, HeadcountChangeRequestDialog, HeadcountRequestsWorkflowPanel } from "@/components/workforce/position-seats";
@@ -202,6 +205,8 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [expandedDepts, setExpandedDepts] = useState<Set<string>>(new Set());
+  const [vacancyFilter, setVacancyFilter] = useState<"all" | "filled" | "vacant">("all");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const [paySpines, setPaySpines] = useState<PaySpine[]>([]);
   const [spinalPoints, setSpinalPoints] = useState<SpinalPoint[]>([]);
@@ -424,6 +429,73 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
 
   const getAssignmentsForPosition = (posId: string) =>
     employeePositions.filter(ep => ep.position_id === posId);
+
+  // Vacancy status helper
+  const getVacancyStatus = (position: Position) => {
+    const assignments = getAssignmentsForPosition(position.id);
+    const activeAssignments = assignments.filter(a => a.is_active).length;
+    const vacant = position.authorized_headcount - activeAssignments;
+    return {
+      filled: activeAssignments,
+      total: position.authorized_headcount,
+      vacant: Math.max(0, vacant),
+      isFullyFilled: vacant <= 0,
+      isVacant: vacant > 0,
+      isOverfilled: activeAssignments > position.authorized_headcount
+    };
+  };
+
+  // Filter positions based on vacancy filter and search
+  const getFilteredPositionsForDept = (deptId: string) => {
+    return getPositionsForDept(deptId).filter(pos => {
+      // Search filter
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        const matchesSearch = 
+          pos.title.toLowerCase().includes(query) ||
+          pos.code.toLowerCase().includes(query) ||
+          (pos.description?.toLowerCase().includes(query));
+        if (!matchesSearch) return false;
+      }
+      
+      // Vacancy filter
+      if (vacancyFilter === "all") return true;
+      const status = getVacancyStatus(pos);
+      if (vacancyFilter === "vacant") return status.isVacant;
+      if (vacancyFilter === "filled") return status.isFullyFilled;
+      return true;
+    });
+  };
+
+  // Calculate overall vacancy stats
+  const vacancyStats = positions.reduce(
+    (acc, pos) => {
+      const status = getVacancyStatus(pos);
+      acc.total++;
+      acc.totalHeadcount += status.total;
+      acc.filledHeadcount += status.filled;
+      acc.vacantHeadcount += status.vacant;
+      if (status.isVacant) acc.vacantPositions++;
+      if (status.isFullyFilled) acc.filledPositions++;
+      return acc;
+    },
+    { total: 0, vacantPositions: 0, filledPositions: 0, totalHeadcount: 0, filledHeadcount: 0, vacantHeadcount: 0 }
+  );
+
+  // Calculate department vacancy stats
+  const getDeptVacancyStats = (deptId: string) => {
+    const deptPositions = getPositionsForDept(deptId);
+    return deptPositions.reduce(
+      (acc, pos) => {
+        const status = getVacancyStatus(pos);
+        acc.total++;
+        acc.vacant += status.isVacant ? 1 : 0;
+        acc.vacantSlots += status.vacant;
+        return acc;
+      },
+      { total: 0, vacant: 0, vacantSlots: 0 }
+    );
+  };
 
   // Position CRUD
   const openCreatePosition = (deptId?: string) => {
@@ -728,6 +800,50 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
         </TabsContent>
         
         <TabsContent value="positions" className="mt-4">
+          
+          {/* Vacancy Filter Bar */}
+          <div className="mb-4 space-y-3">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-3">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    placeholder="Search positions..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-9 w-[250px]"
+                  />
+                </div>
+                <Select value={vacancyFilter} onValueChange={(val) => setVacancyFilter(val as "all" | "filled" | "vacant")}>
+                  <SelectTrigger className="w-[160px]">
+                    <Filter className="h-4 w-4 mr-2" />
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Positions</SelectItem>
+                    <SelectItem value="vacant">Vacant Only</SelectItem>
+                    <SelectItem value="filled">Filled Only</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              {/* Summary Stats */}
+              <div className="flex items-center gap-4 text-sm">
+                <span className="text-muted-foreground">
+                  <span className="font-medium text-foreground">{vacancyStats.total}</span> positions
+                </span>
+                <span className="text-muted-foreground">
+                  <span className="font-medium text-foreground">{vacancyStats.filledHeadcount}</span>/{vacancyStats.totalHeadcount} filled
+                </span>
+                {vacancyStats.vacantHeadcount > 0 && (
+                  <Badge variant="outline" className="text-amber-600 border-amber-500 bg-amber-50 dark:bg-amber-950/30">
+                    <AlertCircle className="h-3 w-3 mr-1" />
+                    {vacancyStats.vacantHeadcount} vacant
+                  </Badge>
+                )}
+              </div>
+            </div>
+          </div>
 
       {departments.length === 0 ? (
         <Card>
@@ -738,7 +854,9 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
       ) : (
         <div className="space-y-4">
           {departments.map((dept) => {
-            const deptPositions = getPositionsForDept(dept.id);
+            const deptPositions = getFilteredPositionsForDept(dept.id);
+            const deptStats = getDeptVacancyStats(dept.id);
+            const allDeptPositions = getPositionsForDept(dept.id);
             const isExpanded = expandedDepts.has(dept.id);
 
             return (
@@ -751,7 +869,12 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
                           {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
                           <CardTitle className="text-base">{dept.name}</CardTitle>
                           <Badge variant="outline">{dept.code}</Badge>
-                          <Badge variant="secondary">{deptPositions.length} positions</Badge>
+                          <Badge variant="secondary">{allDeptPositions.length} positions</Badge>
+                          {deptStats.vacantSlots > 0 && (
+                            <Badge variant="outline" className="text-amber-600 border-amber-500 bg-amber-50 dark:bg-amber-950/30">
+                              {deptStats.vacantSlots} vacant
+                            </Badge>
+                          )}
                         </div>
                         <Button
                           size="sm"
@@ -771,7 +894,9 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
                     <CardContent className="pt-0">
                       {deptPositions.length === 0 ? (
                         <p className="text-sm text-muted-foreground text-center py-4">
-                          No positions in this department
+                          {searchQuery || vacancyFilter !== "all" 
+                            ? "No positions match your filters"
+                            : "No positions in this department"}
                         </p>
                       ) : (
                         <div className="space-y-4">
@@ -779,12 +904,27 @@ export function PositionsManagement({ companyId }: PositionsManagementProps) {
                             const assignments = getAssignmentsForPosition(position.id);
                             const supervisor = getSupervisorForPosition(position.id);
                             const isSeatsExpanded = expandedPositionSeats.has(position.id);
+                            const vacancyStatus = getVacancyStatus(position);
 
                             return (
-                              <div key={position.id} className="border rounded-lg p-4">
+                              <div 
+                                key={position.id} 
+                                className={`border rounded-lg p-4 ${
+                                  vacancyStatus.isVacant 
+                                    ? "border-l-4 border-l-amber-500" 
+                                    : vacancyStatus.isOverfilled 
+                                      ? "border-l-4 border-l-red-500"
+                                      : ""
+                                }`}
+                              >
                                 <div className="flex items-start justify-between mb-3">
                                   <div>
                                     <div className="flex items-center gap-2">
+                                      {vacancyStatus.isVacant && (
+                                        <Badge variant="outline" className="text-amber-600 border-amber-500 bg-amber-50 dark:bg-amber-950/30 text-xs">
+                                          VACANT
+                                        </Badge>
+                                      )}
                                       <h4 className="font-medium">{position.title}</h4>
                                       <Badge variant="outline" className="text-xs">{position.code}</Badge>
                                       {!position.is_active && (
