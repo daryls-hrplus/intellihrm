@@ -13,6 +13,7 @@ interface ReadinessCheckItemProps {
   remediation: string;
   remediationLabel: string;
   showDetails?: boolean;
+  contextInfo?: string; // Additional context like "32 of 33 filled positions have supervisors"
 }
 
 export function ReadinessCheckItem({
@@ -24,7 +25,8 @@ export function ReadinessCheckItem({
   threshold,
   remediation,
   remediationLabel,
-  showDetails = false
+  showDetails = false,
+  contextInfo
 }: ReadinessCheckItemProps) {
   const navigate = useNavigate();
 
@@ -75,7 +77,12 @@ export function ReadinessCheckItem({
           <p className="text-xs text-muted-foreground mt-0.5 truncate">
             {description}
           </p>
-          {showDetails && !passed && (
+          {contextInfo && (
+            <p className="text-xs text-muted-foreground mt-0.5 font-medium">
+              {contextInfo}
+            </p>
+          )}
+          {showDetails && !passed && !contextInfo && (
             <p className="text-xs text-muted-foreground mt-1">
               Current: {actualValue} / Required: {threshold}
             </p>
