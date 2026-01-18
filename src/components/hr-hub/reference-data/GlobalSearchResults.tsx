@@ -226,7 +226,12 @@ export function GlobalSearchResults({
                         <span className="text-sm truncate">
                           <HighlightedText text={result.name} query={query} />
                         </span>
-                        {result.extra && (
+                        {result.companyCode && (
+                          <Badge variant="outline" className="text-xs shrink-0">
+                            {result.companyCode}
+                          </Badge>
+                        )}
+                        {result.extra && !result.companyCode && (
                           <span className="text-xs text-muted-foreground truncate">
                             • {result.extra}
                           </span>
@@ -237,9 +242,10 @@ export function GlobalSearchResults({
                           variant="ghost"
                           size="icon"
                           className="h-7 w-7 shrink-0"
-                          onClick={(e) => handleCopyCode(result.code, e)}
+                          onClick={(e) => handleCopyCode(result.companyCode ? `${result.companyCode}:${result.code}` : result.code, e)}
+                          title={result.companyCode ? `Copy as ${result.companyCode}:${result.code}` : `Copy ${result.code}`}
                         >
-                          {copiedCode === result.code ? (
+                          {copiedCode === (result.companyCode ? `${result.companyCode}:${result.code}` : result.code) ? (
                             <Check className="h-3.5 w-3.5 text-green-500" />
                           ) : (
                             <Copy className="h-3.5 w-3.5" />
