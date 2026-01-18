@@ -5290,7 +5290,7 @@
       }
     },
     "referenceDataCatalog": "Reference Data Catalog",
-    "referenceDataCatalogDesc": "Browse countries, currencies, languages, and lookup values for data imports",
+    "referenceDataCatalogDesc": "Central hub for org structure, lookup values, government IDs, skills, qualifications, payroll codes, and ISO standards",
     "referenceDataCatalogTip": "Use this catalog to find valid codes for your import files. Copy codes directly or download CSV files for Excel VLOOKUP.",
     "referenceDataCategories": "Reference Data Categories",
     "referenceDataCategoriesDesc": "Browse and download system reference data including ISO codes and configurable lookup values.",
