@@ -1,8 +1,16 @@
 import { useEffect, useRef } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, X, Command } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Search, X, Command, Building2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { CompanyOption } from "@/hooks/useGlobalReferenceSearch";
 
 interface GlobalReferenceSearchProps {
   query: string;
@@ -10,6 +18,9 @@ interface GlobalReferenceSearchProps {
   isSearching: boolean;
   totalResults: number;
   onClear: () => void;
+  companies: CompanyOption[];
+  selectedCompanyId: string;
+  onCompanyChange: (companyId: string) => void;
   className?: string;
 }
 
@@ -19,6 +30,9 @@ export function GlobalReferenceSearch({
   isSearching,
   totalResults,
   onClear,
+  companies,
+  selectedCompanyId,
+  onCompanyChange,
   className,
 }: GlobalReferenceSearchProps) {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -45,39 +59,71 @@ export function GlobalReferenceSearch({
   }, [query, onClear]);
 
   return (
-    <div className={cn("relative", className)}>
-      <div className="relative">
-        <Search className={cn(
-          "absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 transition-colors",
-          isSearching ? "text-primary animate-pulse" : "text-muted-foreground"
-        )} />
-        <Input
-          ref={inputRef}
-          type="text"
-          placeholder="Search all reference data... (codes, names, descriptions)"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          className="pl-10 pr-24 h-11 text-base"
-        />
-        <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
-          {query && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-7 w-7"
-              onClick={onClear}
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          )}
-          <div className="hidden sm:flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-muted text-muted-foreground text-xs">
-            <Command className="h-3 w-3" />
-            <span>K</span>
+    <div className={cn("space-y-3", className)}>
+      <div className="flex flex-col sm:flex-row gap-2">
+        {/* Search Input */}
+        <div className="relative flex-1">
+          <Search className={cn(
+            "absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 transition-colors",
+            isSearching ? "text-primary animate-pulse" : "text-muted-foreground"
+          )} />
+          <Input
+            ref={inputRef}
+            type="text"
+            placeholder="Search positions, codes, lookup values..."
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            className="pl-10 pr-24 h-11 text-base"
+          />
+          <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+            {query && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7"
+                onClick={onClear}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            )}
+            <div className="hidden sm:flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-muted text-muted-foreground text-xs">
+              <Command className="h-3 w-3" />
+              <span>K</span>
+            </div>
           </div>
         </div>
+
+        {/* Company Filter */}
+        {companies.length > 0 && (
+          <Select value={selectedCompanyId} onValueChange={onCompanyChange}>
+            <SelectTrigger className="w-full sm:w-[200px] h-11">
+              <Building2 className="h-4 w-4 mr-2 text-muted-foreground" />
+              <SelectValue placeholder="All Companies" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">
+                <span className="flex items-center gap-2">
+                  <span>🌐</span>
+                  <span>All Companies + Global</span>
+                </span>
+              </SelectItem>
+              {companies.map((company) => (
+                <SelectItem key={company.id} value={company.id}>
+                  <span className="flex items-center gap-2">
+                    <span>{company.code}</span>
+                    {company.isCurrentCompany && (
+                      <span className="text-xs text-muted-foreground">(Your Company)</span>
+                    )}
+                  </span>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
       </div>
+
       {query.length > 0 && query.length < 2 && (
-        <p className="absolute left-0 top-full mt-1 text-xs text-muted-foreground">
+        <p className="text-xs text-muted-foreground">
           Type at least 2 characters to search
         </p>
       )}

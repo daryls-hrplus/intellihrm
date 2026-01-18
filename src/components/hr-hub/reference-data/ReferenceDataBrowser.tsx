@@ -261,6 +261,9 @@ export function ReferenceDataBrowser() {
     totalResults,
     clearSearch,
     hasSearched,
+    companies,
+    selectedCompanyId,
+    setSelectedCompanyId,
   } = useGlobalReferenceSearch();
 
   const isSearchActive = debouncedQuery.length >= 2;
@@ -364,6 +367,9 @@ export function ReferenceDataBrowser() {
           isSearching={isSearching}
           totalResults={totalResults}
           onClear={clearSearch}
+          companies={companies}
+          selectedCompanyId={selectedCompanyId}
+          onCompanyChange={setSelectedCompanyId}
         />
 
         {/* Show search results or category browser */}
