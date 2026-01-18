@@ -2587,6 +2587,8 @@ export type Database = {
       }
       appraisal_cycles: {
         Row: {
+          activated_at: string | null
+          activated_by: string | null
           auto_activate_enabled: boolean | null
           auto_activated_at: string | null
           auto_complete_enabled: boolean | null
@@ -2638,6 +2640,8 @@ export type Database = {
           weights_override_reason: string | null
         }
         Insert: {
+          activated_at?: string | null
+          activated_by?: string | null
           auto_activate_enabled?: boolean | null
           auto_activated_at?: string | null
           auto_complete_enabled?: boolean | null
@@ -2689,6 +2693,8 @@ export type Database = {
           weights_override_reason?: string | null
         }
         Update: {
+          activated_at?: string | null
+          activated_by?: string | null
           auto_activate_enabled?: boolean | null
           auto_activated_at?: string | null
           auto_complete_enabled?: boolean | null
