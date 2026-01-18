@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCompanyRelationships } from "@/hooks/useCompanyRelationships";
+import { useUserAccessibleCompanies } from "@/hooks/useUserAccessibleCompanies";
 import { parsePositionCode } from "@/utils/validateReportingRelationship";
 import { detectCircularReferencesInBatch, Position } from "@/utils/detectCircularReporting";
 import { PositionReferenceDrawer } from "./PositionReferenceDrawer";
@@ -93,6 +94,9 @@ export function BulkReportingLineUpdate() {
     isValidReportingRelationship,
     isLoading: isLoadingRelationships 
   } = useCompanyRelationships(profile?.company_id);
+  
+  // Use permission-based company access for position lookups
+  const { companyIds: accessibleCompanyIds, isLoading: isLoadingAccessible } = useUserAccessibleCompanies();
 
   const downloadTemplate = () => {
     const template = reportingMode === "primary" 
@@ -190,10 +194,10 @@ FIN-ANALYST-001,OLD-MGR-001,functional,remove`;
     setIsValidating(true);
     
     try {
-      // Get all company IDs that we can fetch positions from
-      const validCompanyIds = groupCompanies.map(c => c.id);
+      // Use permission-based accessible companies for position lookup
+      const validCompanyIds = accessibleCompanyIds.length > 0 ? accessibleCompanyIds : [profile.company_id];
       
-      // Fetch all positions from valid companies
+      // Fetch all positions from accessible companies
       const { data: positions, error } = await supabase
         .from("positions")
         .select(`
@@ -204,7 +208,7 @@ FIN-ANALYST-001,OLD-MGR-001,functional,remove`;
           company_id,
           company:companies(id, code, name)
         `)
-        .in("company_id", validCompanyIds.length > 0 ? validCompanyIds : [profile.company_id]);
+        .in("company_id", validCompanyIds);
       
       if (error) throw error;
       
