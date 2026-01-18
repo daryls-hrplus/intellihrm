@@ -10,6 +10,7 @@ export interface ReminderEventType {
   filter_condition?: Record<string, any> | null;
   is_system: boolean;
   is_active: boolean;
+  sequence_order?: number;
   created_at: string;
   updated_at: string;
 }
