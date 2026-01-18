@@ -322,7 +322,7 @@ export default function PerformanceSetupPage() {
                   </TabsTrigger>
                   <TabsTrigger value="index-settings" className="flex items-center gap-2">
                     <TrendingUp className="h-4 w-4" />
-                    Index Settings
+                    Performance Trends
                   </TabsTrigger>
                   <TabsTrigger value="approval-workflows" className="flex items-center gap-2">
                     <GitBranch className="h-4 w-4" />

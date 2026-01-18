@@ -197,7 +197,7 @@ const phases: Phase[] = [
       { order: 1, area: "Rating Scales Configuration", description: "Define competency and behavior rating scales (1-5, 1-7)" },
       { order: 2, area: "Overall Rating Scales Setup", description: "Configure performance level ratings with labels" },
       { order: 3, area: "Skills vs Competencies Foundation", description: "Review conceptual framework for skills vs competencies and configure competency library" },
-      { order: 4, area: "Index Settings (Multi-Cycle)", description: "Configure appraisal index behavior across cycles" },
+      { order: 4, area: "Performance Trends (Multi-Cycle)", description: "Configure how performance trends are calculated across review cycles" },
       { order: 5, area: "Approval Workflows Configuration", description: "Create and test approval workflows for goals and appraisals" },
       { order: 6, area: "Performance Notification Templates", description: "Configure cycle launch, reminder, and escalation notifications" },
       // 6B: Appraisal Configuration (Company)

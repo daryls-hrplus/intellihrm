@@ -98,7 +98,7 @@ export function PerformanceIndexSettingsPanel({ companyId }: PerformanceIndexSet
 
       if (error) throw error;
 
-      toast.success("Performance index settings saved");
+      toast.success("Performance trend settings saved");
       setHasChanges(false);
       await fetchSettings();
     } catch (error) {
@@ -149,10 +149,10 @@ export function PerformanceIndexSettingsPanel({ companyId }: PerformanceIndexSet
           <div>
             <CardTitle className="flex items-center gap-2">
               <TrendingUp className="h-5 w-5" />
-              Performance Index Settings
+              Performance Trend Settings
             </CardTitle>
             <CardDescription>
-              Configure how the composite performance index is calculated across multiple appraisal cycles
+              Configure how employee performance trends are calculated and displayed across multiple review cycles
             </CardDescription>
           </div>
           <div className="flex gap-2">
@@ -172,11 +172,11 @@ export function PerformanceIndexSettingsPanel({ companyId }: PerformanceIndexSet
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <Label>Rolling Window Period</Label>
+              <Label>Lookback Period</Label>
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger><Info className="h-4 w-4 text-muted-foreground" /></TooltipTrigger>
-                  <TooltipContent>Number of months of historical data to include in index calculation</TooltipContent>
+                  <TooltipContent>How far back to look when analyzing performance patterns (e.g., last 2 years)</TooltipContent>
                 </Tooltip>
               </TooltipProvider>
             </div>
@@ -199,11 +199,11 @@ export function PerformanceIndexSettingsPanel({ companyId }: PerformanceIndexSet
 
           <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <Label>Minimum Cycles Required</Label>
+              <Label>Minimum Reviews for Trend</Label>
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger><Info className="h-4 w-4 text-muted-foreground" /></TooltipTrigger>
-                  <TooltipContent className="max-w-xs">Minimum number of completed appraisal cycles required before a performance index can be calculated. Each cycle type (Annual, Mid-Year, Quarterly) counts as one cycle.</TooltipContent>
+                  <TooltipContent className="max-w-xs">Number of completed reviews needed before showing someone's performance trend</TooltipContent>
                 </Tooltip>
               </TooltipProvider>
             </div>
@@ -228,11 +228,11 @@ export function PerformanceIndexSettingsPanel({ companyId }: PerformanceIndexSet
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Label>Recency Weight Factor</Label>
+              <Label>Recent Performance Weight</Label>
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger><Info className="h-4 w-4 text-muted-foreground" /></TooltipTrigger>
-                  <TooltipContent>How much more weight recent appraisals receive compared to older ones</TooltipContent>
+                  <TooltipContent>When someone is improving, should their recent reviews count more than older ones?</TooltipContent>
                 </Tooltip>
               </TooltipProvider>
             </div>
@@ -246,7 +246,7 @@ export function PerformanceIndexSettingsPanel({ companyId }: PerformanceIndexSet
             step={5}
           />
           <p className="text-xs text-muted-foreground">
-            Higher values give more importance to recent performance. 100% = equal weight to all cycles.
+            Slide right to give recent reviews more weight. Slide left to treat all reviews equally.
           </p>
         </div>
 
@@ -254,11 +254,11 @@ export function PerformanceIndexSettingsPanel({ companyId }: PerformanceIndexSet
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Label>Trend Sensitivity</Label>
+              <Label>Trend Impact Level</Label>
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger><Info className="h-4 w-4 text-muted-foreground" /></TooltipTrigger>
-                  <TooltipContent>How much the performance trend (improving/declining) affects the index</TooltipContent>
+                  <TooltipContent>How much should upward or downward trends affect the overall score?</TooltipContent>
                 </Tooltip>
               </TooltipProvider>
             </div>
@@ -272,15 +272,15 @@ export function PerformanceIndexSettingsPanel({ companyId }: PerformanceIndexSet
             step={10}
           />
           <p className="text-xs text-muted-foreground">
-            Higher values amplify the impact of improving or declining trends.
+            Higher values make upward or downward trends more visible in employee profiles.
           </p>
         </div>
 
         {/* Cycle Type Weights */}
         <div className="space-y-3">
-          <Label>Cycle Type Weights</Label>
+          <Label>Review Type Importance</Label>
           <p className="text-xs text-muted-foreground mb-2">
-            Relative importance of different appraisal cycle types in the index calculation
+            Set how much each review type should influence the overall trend
           </p>
           <div className="grid gap-4 md:grid-cols-3">
             {[
@@ -309,9 +309,9 @@ export function PerformanceIndexSettingsPanel({ companyId }: PerformanceIndexSet
         <div className="space-y-4 pt-4 border-t">
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <Label>Include Probation Reviews</Label>
+              <Label>Include Probationary Period</Label>
               <p className="text-xs text-muted-foreground">
-                Include probationary period reviews in the performance index
+                Count reviews from probationary periods when calculating trends
               </p>
             </div>
             <Switch
@@ -322,9 +322,9 @@ export function PerformanceIndexSettingsPanel({ companyId }: PerformanceIndexSet
 
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <Label>Enable Performance Index</Label>
+              <Label>Enable Performance Trends</Label>
               <p className="text-xs text-muted-foreground">
-                Calculate and display the composite performance index across the platform
+                Show performance trend insights on employee profiles and reports
               </p>
             </div>
             <Switch
