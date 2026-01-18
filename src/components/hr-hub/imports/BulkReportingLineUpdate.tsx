@@ -761,31 +761,18 @@ FIN-ANALYST-001,OLD-MGR-001,functional,remove`;
 
   return (
     <div className="space-y-4">
-      {/* Header with Reference Data and Template */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-            <GitBranch className="h-5 w-5 text-primary" />
-          </div>
-          <div>
-            <h3 className="font-semibold">Update Reporting Lines</h3>
-            <p className="text-sm text-muted-foreground">
-              Bulk update which positions report to which supervisors
-            </p>
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          {companyId && (
-            <ReferenceDataDownloads
-              companyId={companyId}
-              availableDownloads={["positions", "departments"]}
-            />
-          )}
-          <Button variant="outline" size="sm" onClick={downloadTemplate}>
-            <Download className="h-4 w-4 mr-2" />
-            Template
-          </Button>
-        </div>
+      {/* Action Buttons */}
+      <div className="flex items-center justify-end gap-2">
+        {companyId && (
+          <ReferenceDataDownloads
+            companyId={companyId}
+            availableDownloads={["positions", "departments"]}
+          />
+        )}
+        <Button variant="outline" size="sm" onClick={downloadTemplate}>
+          <Download className="h-4 w-4 mr-2" />
+          Template
+        </Button>
       </div>
 
       {/* Field Specifications */}

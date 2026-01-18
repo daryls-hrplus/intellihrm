@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -19,7 +18,6 @@ import {
   CheckCircle,
   XCircle,
   AlertTriangle,
-  GraduationCap,
   Info,
   ChevronDown,
   FileText,
@@ -298,39 +296,24 @@ export function BulkJobQualificationsImport() {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-              <GraduationCap className="h-5 w-5 text-primary" />
-            </div>
-            <div>
-              <CardTitle className="text-lg">Job Qualifications Import</CardTitle>
-              <CardDescription>
-                Bulk import qualification requirements (academic & professional) for jobs
-              </CardDescription>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <ReferenceDataDownloads
-              companyId={companyId}
-              availableDownloads={[
-                "jobs",
-                "education_levels",
-                "fields_of_study",
-                "qualification_types",
-                "accrediting_bodies",
-              ]}
-            />
-            <Button variant="outline" size="sm" onClick={downloadTemplate}>
-              <Download className="h-4 w-4 mr-2" />
-              Template
-            </Button>
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-4">
+    <div className="space-y-4">
+      {/* Action Buttons */}
+      <div className="flex items-center justify-end gap-2">
+        <ReferenceDataDownloads
+          companyId={companyId}
+          availableDownloads={[
+            "jobs",
+            "education_levels",
+            "fields_of_study",
+            "qualification_types",
+            "accrediting_bodies",
+          ]}
+        />
+        <Button variant="outline" size="sm" onClick={downloadTemplate}>
+          <Download className="h-4 w-4 mr-2" />
+          Template
+        </Button>
+      </div>
         {/* Field Specifications */}
         <Collapsible open={fieldSpecsOpen} onOpenChange={setFieldSpecsOpen}>
           <CollapsibleTrigger asChild>
@@ -485,7 +468,6 @@ export function BulkJobQualificationsImport() {
             )}
           </Button>
         )}
-      </CardContent>
-    </Card>
+    </div>
   );
 }
