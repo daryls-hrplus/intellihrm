@@ -67,6 +67,7 @@ import { ManagerCapabilityDashboard } from "@/components/performance/ai/ManagerC
 import { NotificationsLinkSection } from "@/components/performance/setup/NotificationsLinkSection";
 import { UnifiedCompetencyFramework } from "@/components/performance/setup/UnifiedCompetencyFramework";
 import { JobAssessmentConfigPanel } from "@/components/performance/setup/JobAssessmentConfigPanel";
+import { AppraisalReadinessPanel } from "@/components/performance/setup/AppraisalReadinessPanel";
 import { Globe, Briefcase } from "lucide-react";
 
 // Breadcrumb items
@@ -138,7 +139,7 @@ export default function PerformanceSetupPage() {
     const defaultSecondaryTabs: Record<string, string> = {
       foundation: "rating-scales",
       goals: "goal-cycles",
-      appraisals: "appraisal-cycles",
+      appraisals: "readiness",
       "360-feedback": "feedback-360",
       recognition: "recognition-categories",
     };
@@ -457,6 +458,9 @@ export default function PerformanceSetupPage() {
                     Benchmarks
                   </TabsTrigger>
                 </TabsList>
+                <TabsContent value="readiness" className="mt-4">
+                  <AppraisalReadinessPanel companyId={selectedCompany} />
+                </TabsContent>
                 <TabsContent value="job-assessment-config" className="mt-4">
                   <JobAssessmentConfigPanel companyId={selectedCompany} />
                 </TabsContent>

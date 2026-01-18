@@ -123,7 +123,8 @@ export function useAppraisalReadiness(companyId: string | null) {
       ]);
 
       // Get department names separately to avoid join issues
-      const departmentIds = [...new Set((positionsResult.data || []).map((p: any) => p.department_id).filter(Boolean))];
+      const rawDeptIds = (positionsResult.data || []).map((p: any) => String(p.department_id)).filter(Boolean);
+      const departmentIds = Array.from(new Set<string>(rawDeptIds));
       let departmentMap: Record<string, string> = {};
       
       if (departmentIds.length > 0) {
