@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
@@ -14,6 +14,10 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useCompanyRelationships } from "@/hooks/useCompanyRelationships";
 import { parsePositionCode } from "@/utils/validateReportingRelationship";
 import { detectCircularReferencesInBatch, Position } from "@/utils/detectCircularReporting";
+import { PositionReferenceDrawer } from "./PositionReferenceDrawer";
+import { CompanyReferenceDrawer } from "./CompanyReferenceDrawer";
+import { ReportingLineFieldSpecs } from "./ReportingLineFieldSpecs";
+import { Link } from "react-router-dom";
 import {
   Download, 
   Upload, 
@@ -31,7 +35,9 @@ import {
   Edit2,
   Save,
   X,
-  Copy
+  Copy,
+  ListOrdered,
+  ExternalLink
 } from "lucide-react";
 
 interface ParsedRow {
@@ -77,6 +83,10 @@ export function BulkReportingLineUpdate() {
   const [filterMode, setFilterMode] = useState<FilterMode>("all");
   const [editingRowIndex, setEditingRowIndex] = useState<number | null>(null);
   const [editedValues, setEditedValues] = useState<{ position_code: string; reports_to_position_code: string }>({ position_code: "", reports_to_position_code: "" });
+  
+  // Reference data drawers state
+  const [positionDrawerOpen, setPositionDrawerOpen] = useState(false);
+  const [companyDrawerOpen, setCompanyDrawerOpen] = useState(false);
 
   const { 
     groupCompanies, 
@@ -765,6 +775,53 @@ FIN-ANALYST-001,OLD-MGR-001,functional,remove`;
             </p>
           </div>
 
+          {/* Reference Data Section */}
+          <Card className="border-dashed border-primary/30 bg-primary/5">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base flex items-center gap-2">
+                <ListOrdered className="h-4 w-4" />
+                Reference Data for This Import
+              </CardTitle>
+              <CardDescription>
+                These fields require specific codes. Click to view valid values or download as CSV.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPositionDrawerOpen(true)}
+                  className="gap-2"
+                >
+                  <ListOrdered className="h-4 w-4" />
+                  Position Codes
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCompanyDrawerOpen(true)}
+                  className="gap-2"
+                >
+                  <Building2 className="h-4 w-4" />
+                  Companies
+                </Button>
+                <Link to="/hr-hub/reference-data">
+                  <Button variant="ghost" size="sm" className="gap-2">
+                    <ExternalLink className="h-4 w-4" />
+                    Full Reference Catalog
+                  </Button>
+                </Link>
+              </div>
+              
+              {/* Field Specifications */}
+              <ReportingLineFieldSpecs 
+                mode={reportingMode} 
+                onViewPositions={() => setPositionDrawerOpen(true)} 
+              />
+            </CardContent>
+          </Card>
+
           {/* Group Companies Info */}
           {groupCompanies.length > 1 && (
             <div className="p-3 rounded-lg border bg-muted/30">
@@ -1081,6 +1138,16 @@ FIN-ANALYST-001,OLD-MGR-001,functional,remove`;
           )}
         </CardContent>
       </Card>
+
+      {/* Reference Data Drawers */}
+      <PositionReferenceDrawer 
+        open={positionDrawerOpen} 
+        onOpenChange={setPositionDrawerOpen} 
+      />
+      <CompanyReferenceDrawer 
+        open={companyDrawerOpen} 
+        onOpenChange={setCompanyDrawerOpen} 
+      />
     </div>
   );
 }
