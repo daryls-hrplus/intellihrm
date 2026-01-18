@@ -251,6 +251,19 @@ export function ReferenceDataBrowser() {
   const { t } = useLanguage();
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [expandedGroups, setExpandedGroups] = useState<string[]>(["configurable-lookups"]);
+  
+  const {
+    query: searchQuery,
+    setQuery: setSearchQuery,
+    debouncedQuery,
+    groupedResults,
+    isSearching,
+    totalResults,
+    clearSearch,
+    hasSearched,
+  } = useGlobalReferenceSearch();
+
+  const isSearchActive = debouncedQuery.length >= 2;
 
   const selectedItem = CATEGORY_GROUPS
     .flatMap(g => g.items)
@@ -336,15 +349,39 @@ export function ReferenceDataBrowser() {
     );
   }
 
+  const handleNavigateToCategory = (categoryId: string) => {
+    clearSearch();
+    setSelectedCategory(categoryId);
+  };
+
   return (
     <TooltipProvider>
-      <div className="space-y-2">
-        <Accordion 
-          type="multiple" 
-          value={expandedGroups}
-          onValueChange={setExpandedGroups}
-          className="space-y-2"
-        >
+      <div className="space-y-4">
+        {/* Global Search Bar */}
+        <GlobalReferenceSearch
+          query={searchQuery}
+          setQuery={setSearchQuery}
+          isSearching={isSearching}
+          totalResults={totalResults}
+          onClear={clearSearch}
+        />
+
+        {/* Show search results or category browser */}
+        {isSearchActive ? (
+          <GlobalSearchResults
+            groupedResults={groupedResults}
+            query={debouncedQuery}
+            onNavigateToCategory={handleNavigateToCategory}
+            isSearching={isSearching}
+            hasSearched={hasSearched}
+          />
+        ) : (
+          <Accordion 
+            type="multiple" 
+            value={expandedGroups}
+            onValueChange={setExpandedGroups}
+            className="space-y-2"
+          >
           {CATEGORY_GROUPS.map((group) => (
             <AccordionItem 
               key={group.id} 
@@ -460,7 +497,8 @@ export function ReferenceDataBrowser() {
               </AccordionContent>
             </AccordionItem>
           ))}
-        </Accordion>
+          </Accordion>
+        )}
       </div>
     </TooltipProvider>
   );
