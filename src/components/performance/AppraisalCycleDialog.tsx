@@ -14,14 +14,14 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
-import { Users, GitMerge, FileText, AlertTriangle, Target, ClipboardList, Goal, Heart } from "lucide-react";
+import { Users, GitMerge, FileText, AlertTriangle, Target, ClipboardList, Goal, Heart, Rocket } from "lucide-react";
 import { useAppraisalFormTemplates } from "@/hooks/useAppraisalFormTemplates";
 import { format } from "date-fns";
 import { checkCycleOverlap } from "@/utils/cycleOverlapCheck";
 import { useDebouncedCallback } from "@/hooks/use-debounced-callback";
 import { formatDateForDisplay } from "@/utils/dateUtils";
 import { cn } from "@/lib/utils";
-
+import { AppraisalActivationDialog } from "./AppraisalActivationDialog";
 // Weight input component with template-aware visual state
 interface WeightInputProps {
   id: string;
@@ -139,6 +139,17 @@ export function AppraisalCycleDialog({
   // Overlap detection state
   const [overlappingCycles, setOverlappingCycles] = useState<Array<{ id: string; name: string; start_date: string; end_date: string; cycle_type: string }>>([]);
   const [overlapAcknowledged, setOverlapAcknowledged] = useState(false);
+  
+  // Activation dialog state - for activating draft cycles
+  const [showActivationDialog, setShowActivationDialog] = useState(false);
+  const [pendingActivationCycle, setPendingActivationCycle] = useState<{
+    id: string;
+    name: string;
+    start_date: string;
+    end_date: string;
+    evaluation_deadline: string | null;
+    company_id: string;
+  } | null>(null);
   
   // Determine initial cycle_type based on props for backward compatibility
   const getInitialCycleType = (): AppraisalCycleType => {
@@ -372,6 +383,7 @@ export function AppraisalCycleDialog({
   };
 
   return (
+    <>
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
@@ -493,18 +505,43 @@ export function AppraisalCycleDialog({
               <Label htmlFor="status">Status</Label>
               <Select
                 value={formData.status}
-                onValueChange={(value) => setFormData({ ...formData, status: value })}
+                onValueChange={(value) => {
+                  // If changing from draft to active on an existing cycle, use activation dialog
+                  if (cycle && cycle.status === "draft" && value === "active" && companyId) {
+                    setPendingActivationCycle({
+                      id: cycle.id,
+                      name: formData.name || cycle.name,
+                      start_date: formData.start_date || cycle.start_date,
+                      end_date: formData.end_date || cycle.end_date,
+                      evaluation_deadline: formData.evaluation_deadline || cycle.evaluation_deadline,
+                      company_id: companyId,
+                    });
+                    setShowActivationDialog(true);
+                    return;
+                  }
+                  setFormData({ ...formData, status: value });
+                }}
               >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="draft">Draft</SelectItem>
-                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="active">
+                    <span className="flex items-center gap-2">
+                      Active
+                      {cycle?.status === "draft" && <Rocket className="h-3 w-3 text-primary" />}
+                    </span>
+                  </SelectItem>
                   <SelectItem value="completed">Completed</SelectItem>
                   <SelectItem value="cancelled">Cancelled</SelectItem>
                 </SelectContent>
               </Select>
+              {cycle?.status === "draft" && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  Changing to Active will open the activation wizard
+                </p>
+              )}
             </div>
           </div>
 
@@ -715,5 +752,24 @@ export function AppraisalCycleDialog({
         </form>
       </DialogContent>
     </Dialog>
+    
+    {/* Activation Dialog for transitioning draft to active */}
+    {pendingActivationCycle && (
+      <AppraisalActivationDialog
+        open={showActivationDialog}
+        onOpenChange={(open) => {
+          setShowActivationDialog(open);
+          if (!open) setPendingActivationCycle(null);
+        }}
+        cycle={pendingActivationCycle}
+        onSuccess={() => {
+          setShowActivationDialog(false);
+          setPendingActivationCycle(null);
+          onOpenChange(false);
+          onSuccess();
+        }}
+      />
+    )}
+    </>
   );
 }

@@ -437,3 +437,6 @@ verify_jwt = false
 
 [functions.action-rule-ai-suggester]
 verify_jwt = false
+
+[functions.activate-appraisal-cycle]
+verify_jwt = false
