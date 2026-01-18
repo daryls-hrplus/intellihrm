@@ -65,7 +65,7 @@ export function useAppraisalReadiness(companyId: string | null) {
         formTemplatesResult,
         jobAssessmentResult,
         positionsResult,
-        employeePositionsResult
+        companyPositionsForEmpResult
       ] = await Promise.all([
         // Component Rating Scales (company-specific + global)
         supabase
@@ -99,12 +99,17 @@ export function useAppraisalReadiness(companyId: string | null) {
           .eq('is_active', true)
           .then(res => res),
         
-        // Job Assessment Config - use 'as any' to avoid type issues
-        supabase
-          .from('job_competency_mappings' as any)
-          .select('id', { count: 'exact', head: true })
-          .eq('company_id', companyId)
-          .then(res => res),
+        // Job Assessment Config - table may not exist, handle gracefully
+        (async () => {
+          try {
+            return await supabase
+              .from('job_competency_mappings' as any)
+              .select('id', { count: 'exact', head: true })
+              .eq('company_id', companyId);
+          } catch {
+            return { count: 0, data: null, error: null };
+          }
+        })(),
         
         // Positions - for reporting relationships (use any to avoid deep type issues)
         (supabase
@@ -113,14 +118,27 @@ export function useAppraisalReadiness(companyId: string | null) {
           .eq('company_id', companyId)
           .eq('is_active', true) as any),
         
-        // Employee Position Assignments
-        (supabase
-          .from('employee_positions' as any)
-          .select('id', { count: 'exact', head: true })
+        // Get position IDs for this company (to filter employee_positions)
+        supabase
+          .from('positions')
+          .select('id')
           .eq('company_id', companyId)
-          .eq('is_active', true) as any)
+          .eq('is_active', true)
           .then(res => res)
       ]);
+
+      // Now query employee_positions using the position IDs from this company
+      const companyPositionIds = (companyPositionsForEmpResult.data || []).map((p: any) => p.id);
+      let employeePositionsCount = 0;
+      
+      if (companyPositionIds.length > 0) {
+        const { count } = await supabase
+          .from('employee_positions')
+          .select('id', { count: 'exact', head: true })
+          .in('position_id', companyPositionIds)
+          .eq('is_active', true);
+        employeePositionsCount = count || 0;
+      }
 
       // Get department names separately to avoid join issues
       const rawDeptIds = (positionsResult.data || []).map((p: any) => String(p.department_id)).filter(Boolean);
@@ -231,8 +249,8 @@ export function useAppraisalReadiness(companyId: string | null) {
           name: 'Employee Position Assignments',
           description: 'Employees must be assigned to positions for appraisals',
           severity: 'warning',
-          passed: (employeePositionsResult.count || 0) >= 1,
-          actualValue: employeePositionsResult.count || 0,
+          passed: employeePositionsCount >= 1,
+          actualValue: employeePositionsCount,
           threshold: 1,
           remediation: '/admin/positions',
           remediationLabel: 'Manage Assignments'
