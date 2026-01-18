@@ -193,19 +193,30 @@ export function AppraisalReadinessPanel({ companyId }: AppraisalReadinessPanelPr
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-2">
-            {failedChecks.map((check) => (
-              <div key={check.id}>
-                <ReadinessCheckItem
-                  name={check.name}
-                  description={check.description}
-                  severity={check.severity}
-                  passed={check.passed}
-                  actualValue={check.actualValue}
-                  threshold={check.threshold}
-                  remediation={check.remediation}
-                  remediationLabel={check.remediationLabel}
-                  showDetails
-                />
+            {failedChecks.map((check) => {
+              // Generate context info for specific checks
+              let contextInfo: string | undefined;
+              if (check.id === 'reporting-relationships') {
+                const { configured, total } = result.reportingRelationships;
+                contextInfo = `${configured} of ${total} filled positions have supervisors assigned (${check.actualValue}% complete)`;
+              } else if (check.id === 'employee-assignments') {
+                contextInfo = `${check.actualValue} active position assignment${check.actualValue !== 1 ? 's' : ''} found`;
+              }
+              
+              return (
+                <div key={check.id}>
+                  <ReadinessCheckItem
+                    name={check.name}
+                    description={check.description}
+                    severity={check.severity}
+                    passed={check.passed}
+                    actualValue={check.actualValue}
+                    threshold={check.threshold}
+                    remediation={check.remediation}
+                    remediationLabel={check.remediationLabel}
+                    showDetails
+                    contextInfo={contextInfo}
+                  />
                 {check.id === 'reporting-relationships' && (
                   <Collapsible open={showReportingDetails} onOpenChange={setShowReportingDetails}>
                     <CollapsibleTrigger asChild>
@@ -223,7 +234,8 @@ export function AppraisalReadinessPanel({ companyId }: AppraisalReadinessPanelPr
                   </Collapsible>
                 )}
               </div>
-            ))}
+              );
+            })}
           </CardContent>
         </Card>
       )}
@@ -260,19 +272,31 @@ export function AppraisalReadinessPanel({ companyId }: AppraisalReadinessPanelPr
             </Button>
           </CollapsibleTrigger>
           <CollapsibleContent className="mt-2 space-y-2">
-            {passedChecks.map((check) => (
-              <ReadinessCheckItem
-                key={check.id}
-                name={check.name}
-                description={check.description}
-                severity={check.severity}
-                passed={check.passed}
-                actualValue={check.actualValue}
-                threshold={check.threshold}
-                remediation={check.remediation}
-                remediationLabel={check.remediationLabel}
-              />
-            ))}
+            {passedChecks.map((check) => {
+              // Generate context info for specific checks
+              let contextInfo: string | undefined;
+              if (check.id === 'reporting-relationships') {
+                const { configured, total } = result.reportingRelationships;
+                contextInfo = `${configured} of ${total} filled positions have supervisors assigned (${check.actualValue}% complete)`;
+              } else if (check.id === 'employee-assignments') {
+                contextInfo = `${check.actualValue} active position assignment${check.actualValue !== 1 ? 's' : ''} found`;
+              }
+              
+              return (
+                <ReadinessCheckItem
+                  key={check.id}
+                  name={check.name}
+                  description={check.description}
+                  severity={check.severity}
+                  passed={check.passed}
+                  actualValue={check.actualValue}
+                  threshold={check.threshold}
+                  remediation={check.remediation}
+                  remediationLabel={check.remediationLabel}
+                  contextInfo={contextInfo}
+                />
+              );
+            })}
           </CollapsibleContent>
         </Collapsible>
       )}
