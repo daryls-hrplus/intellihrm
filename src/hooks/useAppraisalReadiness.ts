@@ -27,6 +27,15 @@ export interface ReportingRelationshipsSummary {
   }[];
 }
 
+export interface JobAssessmentSummary {
+  totalJobs: number;
+  jobsWithCompetencies: number;
+  jobsWithResponsibilities: number;
+  jobsMissingConfig: number;
+  filledPositionsWithJobs: number;
+  filledPositionsTotal: number;
+}
+
 export interface AppraisalReadinessResult {
   checks: AppraisalReadinessCheck[];
   overallScore: number;
@@ -39,6 +48,7 @@ export interface AppraisalReadinessResult {
     percent: number;
   }[];
   reportingRelationships: ReportingRelationshipsSummary;
+  jobAssessment: JobAssessmentSummary;
 }
 
 export function useAppraisalReadiness(companyId: string | null) {
@@ -65,7 +75,9 @@ export function useAppraisalReadiness(companyId: string | null) {
         formTemplatesResult,
         jobAssessmentResult,
         positionsResult,
-        companyPositionsForEmpResult
+        companyPositionsForEmpResult,
+        jobsResult,
+        positionsWithJobsResult
       ] = await Promise.all([
         // Component Rating Scales (company-specific + global)
         supabase
@@ -124,6 +136,23 @@ export function useAppraisalReadiness(companyId: string | null) {
           .select('id')
           .eq('company_id', companyId)
           .eq('is_active', true)
+          .then(res => res),
+        
+        // Get jobs for this company with their assessment config
+        supabase
+          .from('jobs')
+          .select('id')
+          .eq('company_id', companyId)
+          .eq('is_active', true)
+          .then(res => res),
+        
+        // Count positions that have jobs linked
+        supabase
+          .from('positions')
+          .select('id', { count: 'exact', head: true })
+          .eq('company_id', companyId)
+          .eq('is_active', true)
+          .not('job_id', 'is', null)
           .then(res => res)
       ]);
 
@@ -139,6 +168,31 @@ export function useAppraisalReadiness(companyId: string | null) {
           .eq('is_active', true);
         employeePositionsCount = count || 0;
       }
+
+      // Get job assessment details - how many jobs have competencies/responsibilities
+      const jobIds = (jobsResult.data || []).map((j: any) => j.id);
+      let jobsWithCompetencies = 0;
+      let jobsWithResponsibilities = 0;
+      
+      if (jobIds.length > 0) {
+        // Count jobs with competencies
+        const { data: jobCompData } = await supabase
+          .from('job_competencies')
+          .select('job_id')
+          .in('job_id', jobIds);
+        jobsWithCompetencies = new Set((jobCompData || []).map((jc: any) => jc.job_id)).size;
+        
+        // Count jobs with responsibilities
+        const { data: jobRespData } = await supabase
+          .from('job_responsibilities')
+          .select('job_id')
+          .in('job_id', jobIds);
+        jobsWithResponsibilities = new Set((jobRespData || []).map((jr: any) => jr.job_id)).size;
+      }
+      
+      const totalJobs = jobIds.length;
+      const jobsMissingConfig = totalJobs - Math.min(jobsWithCompetencies, jobsWithResponsibilities);
+      const filledPositionsWithJobs = positionsWithJobsResult.count || 0;
 
       // Get department names separately to avoid join issues
       const rawDeptIds = (positionsResult.data || []).map((p: any) => String(p.department_id)).filter(Boolean);
@@ -307,6 +361,14 @@ export function useAppraisalReadiness(companyId: string | null) {
             title: p.title,
             departmentName: departmentMap[p.department_id] || 'Unknown'
           }))
+        },
+        jobAssessment: {
+          totalJobs,
+          jobsWithCompetencies,
+          jobsWithResponsibilities,
+          jobsMissingConfig,
+          filledPositionsWithJobs,
+          filledPositionsTotal: totalPositions
         }
       });
     } catch (err) {

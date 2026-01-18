@@ -196,11 +196,27 @@ export function AppraisalReadinessPanel({ companyId }: AppraisalReadinessPanelPr
             {failedChecks.map((check) => {
               // Generate context info for specific checks
               let contextInfo: string | undefined;
+              const { jobAssessment } = result;
+              
               if (check.id === 'reporting-relationships') {
                 const { configured, total } = result.reportingRelationships;
                 contextInfo = `${configured} of ${total} filled positions have supervisors assigned (${check.actualValue}% complete)`;
               } else if (check.id === 'employee-assignments') {
                 contextInfo = `${check.actualValue} active position assignment${check.actualValue !== 1 ? 's' : ''} found`;
+              } else if (check.id === 'competencies') {
+                if (jobAssessment.totalJobs > 0) {
+                  contextInfo = `${jobAssessment.totalJobs} job${jobAssessment.totalJobs !== 1 ? 's' : ''} defined, ${jobAssessment.jobsWithCompetencies} with competencies mapped`;
+                } else {
+                  contextInfo = 'No jobs configured yet';
+                }
+              } else if (check.id === 'job-assessment-config') {
+                if (jobAssessment.totalJobs > 0) {
+                  const missingComp = jobAssessment.totalJobs - jobAssessment.jobsWithCompetencies;
+                  const missingResp = jobAssessment.totalJobs - jobAssessment.jobsWithResponsibilities;
+                  contextInfo = `${jobAssessment.totalJobs} jobs: ${missingComp} missing competencies, ${missingResp} missing responsibilities`;
+                } else {
+                  contextInfo = `${jobAssessment.filledPositionsWithJobs} of ${jobAssessment.filledPositionsTotal} positions linked to jobs`;
+                }
               }
               
               return (
