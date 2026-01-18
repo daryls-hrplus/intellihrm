@@ -163,7 +163,7 @@ export function CompanyJobFamiliesTab() {
           </div>
 
           <Select value={companyFilter} onValueChange={setCompanyFilter}>
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-[220px]">
               <Building2 className="h-4 w-4 mr-2" />
               <SelectValue placeholder="Company" />
             </SelectTrigger>
@@ -171,7 +171,7 @@ export function CompanyJobFamiliesTab() {
               <SelectItem value="all">All Companies</SelectItem>
               {companies.map(c => (
                 <SelectItem key={c.id} value={c.id}>
-                  {c.code} {c.isCurrentCompany && "(Your Company)"}
+                  {c.name} {c.isCurrentCompany && "(Your Company)"}
                 </SelectItem>
               ))}
             </SelectContent>
