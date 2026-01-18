@@ -1,19 +1,26 @@
 import { useState, useEffect, forwardRef, useImperativeHandle, useRef, useMemo } from 'react';
 import { useReminders } from '@/hooks/useReminders';
 import { useReminderSourcePreview } from '@/hooks/useReminderSourcePreview';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar as CalendarComponent } from '@/components/ui/calendar';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { 
   Plus, Pencil, Trash2, Bell, Mail, BellRing, Loader2, X, Settings, HelpCircle, Zap, 
   FileText, Search, ChevronDown, ChevronRight, AlertCircle, Shield, Briefcase, 
   GraduationCap, Heart, Calendar, Trophy, MessageSquare, UserCheck, FolderOpen, 
-  CheckCircle2, Sparkles, Users
+  CheckCircle2, Sparkles, Users, CalendarIcon
 } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -69,6 +76,11 @@ export const ReminderRulesManager = forwardRef<ReminderRulesManagerRef, Reminder
   const [editingRule, setEditingRule] = useState<ReminderRule | null>(null);
   const [linkedTemplate, setLinkedTemplate] = useState<{ id: string; name: string; category: string } | null>(null);
   
+  // Bulk activation states
+  const [showBulkDateDialog, setShowBulkDateDialog] = useState(false);
+  const [bulkEffectiveDate, setBulkEffectiveDate] = useState<string | null>(null);
+  const [isBulkUpdating, setIsBulkUpdating] = useState(false);
+  
   // Category-based filtering states
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -115,6 +127,49 @@ export const ReminderRulesManager = forwardRef<ReminderRulesManagerRef, Reminder
   }, [rules]);
 
   const categoriesWithRules = Object.values(categoryCoverage).filter(c => c.hasRules).length;
+
+  // Calculate draft rules that need activation
+  const draftRules = useMemo(() => {
+    const today = new Date().toISOString().split('T')[0];
+    return rules.filter(rule => {
+      const hasEffectiveFrom = !!rule.effective_from;
+      const isExpired = rule.effective_to && rule.effective_to < today;
+      return rule.is_active && !hasEffectiveFrom && !isExpired;
+    });
+  }, [rules]);
+
+  // Bulk set effective date handler
+  const handleBulkSetEffectiveDate = async () => {
+    if (!bulkEffectiveDate || draftRules.length === 0) return;
+    
+    setIsBulkUpdating(true);
+    try {
+      const ruleIds = draftRules.map(r => r.id);
+      
+      const { error } = await supabase
+        .from('reminder_rules')
+        .update({ 
+          effective_from: bulkEffectiveDate,
+          is_active: true 
+        })
+        .in('id', ruleIds);
+      
+      if (error) throw error;
+      
+      toast.success(`${ruleIds.length} rule${ruleIds.length !== 1 ? 's' : ''} activated`, {
+        description: `Effective from ${format(parseISO(bulkEffectiveDate), 'PPP')}`,
+      });
+      
+      setShowBulkDateDialog(false);
+      setBulkEffectiveDate(null);
+      loadData();
+    } catch (error) {
+      console.error('Bulk update error:', error);
+      toast.error('Failed to update rules');
+    } finally {
+      setIsBulkUpdating(false);
+    }
+  };
 
   const toggleCategory = (category: string) => {
     setExpandedCategories(prev => {
@@ -474,7 +529,112 @@ export const ReminderRulesManager = forwardRef<ReminderRulesManagerRef, Reminder
             onRuleUpdated={loadData}
           />
         </div>
+
+        {/* Bulk Effective Date Dialog */}
+        <Dialog open={showBulkDateDialog} onOpenChange={setShowBulkDateDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <CalendarIcon className="h-5 w-5 text-primary" />
+                Activate Draft Rules
+              </DialogTitle>
+              <DialogDescription>
+                Set an effective date for {draftRules.length} draft rule{draftRules.length !== 1 ? 's' : ''} to start sending reminders
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-4 py-4">
+              {/* Date Picker */}
+              <div className="space-y-2">
+                <Label>Effective From Date</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className="w-full justify-start">
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {bulkEffectiveDate 
+                        ? format(parseISO(bulkEffectiveDate), "PPP") 
+                        : "Select date"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <CalendarComponent
+                      mode="single"
+                      selected={bulkEffectiveDate ? parseISO(bulkEffectiveDate) : undefined}
+                      onSelect={(date) => setBulkEffectiveDate(date ? format(date, 'yyyy-MM-dd') : null)}
+                      initialFocus
+                      className={cn("p-3 pointer-events-auto")}
+                    />
+                  </PopoverContent>
+                </Popover>
+                <p className="text-xs text-muted-foreground">
+                  All selected rules will become active starting from this date
+                </p>
+              </div>
+              
+              {/* Rules Preview */}
+              <div className="space-y-2">
+                <Label>Rules to Activate ({draftRules.length})</Label>
+                <ScrollArea className="h-48 border rounded-md">
+                  <div className="p-3 space-y-2">
+                    {draftRules.map(rule => (
+                      <div 
+                        key={rule.id} 
+                        className="flex items-center justify-between py-2 px-3 rounded-md bg-muted/50"
+                      >
+                        <span className="text-sm font-medium">{rule.name}</span>
+                        <Badge variant="outline" className="text-xs">
+                          {rule.event_type?.category?.replace(/_/g, ' ') || 'custom'}
+                        </Badge>
+                      </div>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </div>
+            </div>
+            
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowBulkDateDialog(false)}>
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleBulkSetEffectiveDate}
+                disabled={!bulkEffectiveDate || isBulkUpdating}
+              >
+                {isBulkUpdating && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                Activate {draftRules.length} Rule{draftRules.length !== 1 ? 's' : ''}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
+
+      {/* Draft Rules Banner */}
+      {draftRules.length > 0 && (
+        <div className="flex items-center justify-between p-4 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900">
+              <AlertCircle className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+            </div>
+            <div>
+              <p className="font-medium text-blue-800 dark:text-blue-200">
+                {draftRules.length} rule{draftRules.length !== 1 ? 's' : ''} pending activation
+              </p>
+              <p className="text-sm text-blue-600 dark:text-blue-400">
+                Set effective dates to start sending reminders
+              </p>
+            </div>
+          </div>
+          <Button 
+            variant="outline" 
+            size="sm"
+            className="border-blue-300 text-blue-700 hover:bg-blue-100 dark:border-blue-700 dark:text-blue-300 dark:hover:bg-blue-900"
+            onClick={() => setShowBulkDateDialog(true)}
+          >
+            <CalendarIcon className="h-4 w-4 mr-2" />
+            Set Dates for All
+          </Button>
+        </div>
+      )}
 
       {/* Coverage Summary */}
       <div className="flex flex-col sm:flex-row sm:items-center gap-4 p-4 bg-muted/50 rounded-lg border">

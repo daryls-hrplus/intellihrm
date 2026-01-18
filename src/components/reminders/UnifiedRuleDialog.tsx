@@ -24,8 +24,10 @@ import {
   X,
   Loader2,
   CalendarIcon,
-  CalendarRange
+  CalendarRange,
+  AlertTriangle
 } from 'lucide-react';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { PRIORITY_OPTIONS, NOTIFICATION_METHODS, REMINDER_CATEGORIES } from '@/types/reminders';
 import type { ReminderRule, ReminderEventType } from '@/types/reminders';
 import { AIAssistRuleInput } from './AIAssistRuleInput';
@@ -243,7 +245,15 @@ export const UnifiedRuleDialog = forwardRef<UnifiedRuleDialogRef, UnifiedRuleDia
             .from('reminder_rules')
             .insert({ ...saveData, company_id: companyId });
           if (error) throw error;
-          toast.success('Rule created successfully');
+          
+          // Contextual toast based on draft status
+          if (!formData.effective_from) {
+            toast.info('Rule saved as draft', {
+              description: 'Set an effective date to start sending reminders',
+            });
+          } else {
+            toast.success('Rule created successfully');
+          }
           onRuleCreated();
         }
         onOpenChange(false);
@@ -777,6 +787,18 @@ export const UnifiedRuleDialog = forwardRef<UnifiedRuleDialogRef, UnifiedRuleDia
             )}
           </div>
 
+          {/* Draft Warning */}
+          {!formData.effective_from && formData.name && formData.event_type_id && (
+            <Alert className="bg-amber-50 border-amber-200 dark:bg-amber-950/30 dark:border-amber-800">
+              <AlertTriangle className="h-4 w-4 text-amber-600" />
+              <AlertTitle className="text-amber-800 dark:text-amber-200">Rule will be saved as Draft</AlertTitle>
+              <AlertDescription className="text-amber-700 dark:text-amber-300">
+                This rule won't trigger reminders until you set an effective date. 
+                You can activate it later from the rules list.
+              </AlertDescription>
+            </Alert>
+          )}
+
           {/* Footer */}
           <DialogFooter className="pt-4 border-t">
             <Button variant="outline" onClick={() => onOpenChange(false)}>
@@ -784,7 +806,10 @@ export const UnifiedRuleDialog = forwardRef<UnifiedRuleDialogRef, UnifiedRuleDia
             </Button>
             <Button onClick={handleSave} disabled={isLoading || !formData.name || !formData.event_type_id}>
               {isLoading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-              {editingRule ? 'Update' : 'Create'}
+              {editingRule 
+                ? 'Update' 
+                : (!formData.effective_from ? 'Save as Draft' : 'Create')
+              }
             </Button>
           </DialogFooter>
         </div>
