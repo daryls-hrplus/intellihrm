@@ -610,7 +610,7 @@ export const ReminderRulesManager = forwardRef<ReminderRulesManagerRef, Reminder
 
       {/* Draft Rules Banner */}
       {draftRules.length > 0 && (
-        <div className="flex items-center justify-between p-4 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg">
+        <div className="flex items-center justify-between p-4 bg-background border border-blue-200 dark:border-blue-800 rounded-lg">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900">
               <AlertCircle className="h-4 w-4 text-blue-600 dark:text-blue-400" />
