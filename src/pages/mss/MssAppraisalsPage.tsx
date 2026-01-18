@@ -781,6 +781,8 @@ export default function MssAppraisalsPage() {
             open={participantsManagerOpen}
             onOpenChange={setParticipantsManagerOpen}
             cycle={selectedCycle}
+            companyId={company?.id || ""}
+            companyName={company?.name || ""}
             onSuccess={fetchData}
           />
         )}
