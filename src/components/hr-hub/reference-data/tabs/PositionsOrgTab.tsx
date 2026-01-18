@@ -59,31 +59,40 @@ export function PositionsOrgTab() {
         .from("positions")
         .select(`
           id, code, title, description, employment_type, employment_status, is_active, company_id,
+          reports_to_position_id,
           companies!positions_company_id_fkey(code, name),
-          departments!positions_department_id_fkey(code, name),
-          supervisor:positions!positions_reports_to_position_id_fkey(code, title)
+          departments!positions_department_id_fkey(code, name)
         `)
         .in("company_id", companyIds)
         .order("code", { ascending: true });
 
       if (error) throw error;
+
+      // Build a map for supervisor lookup (self-referential join not supported well by PostgREST)
+      const positionMap = new Map<string, { code: string; title: string }>();
+      (data || []).forEach((p: any) => {
+        positionMap.set(p.id, { code: p.code, title: p.title });
+      });
       
-      return (data || []).map((p: any) => ({
-        id: p.id,
-        code: p.code,
-        title: p.title,
-        description: p.description,
-        employment_type: p.employment_type,
-        employment_status: p.employment_status,
-        is_active: p.is_active,
-        company_id: p.company_id,
-        company_code: p.companies?.code || "",
-        company_name: p.companies?.name || "",
-        department_code: p.departments?.code || null,
-        department_name: p.departments?.name || null,
-        supervisor_code: p.supervisor?.code || null,
-        supervisor_title: p.supervisor?.title || null,
-      })) as Position[];
+      return (data || []).map((p: any) => {
+        const supervisor = p.reports_to_position_id ? positionMap.get(p.reports_to_position_id) : null;
+        return {
+          id: p.id,
+          code: p.code,
+          title: p.title,
+          description: p.description,
+          employment_type: p.employment_type,
+          employment_status: p.employment_status,
+          is_active: p.is_active,
+          company_id: p.company_id,
+          company_code: p.companies?.code || "",
+          company_name: p.companies?.name || "",
+          department_code: p.departments?.code || null,
+          department_name: p.departments?.name || null,
+          supervisor_code: supervisor?.code || null,
+          supervisor_title: supervisor?.title || null,
+        };
+      }) as Position[];
     },
     enabled: companyIds.length > 0,
   });
