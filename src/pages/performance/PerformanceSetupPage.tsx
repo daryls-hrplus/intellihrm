@@ -427,7 +427,11 @@ export default function PerformanceSetupPage() {
               </Alert>
               <Tabs value={secondaryTab} onValueChange={setSecondaryTab}>
                 <TabsList className="flex-wrap">
-                  {/* Logical order: Job Config (prerequisite) → Rating Levels → Form Templates → ... */}
+                  {/* Readiness first as entry point */}
+                  <TabsTrigger value="readiness" className="flex items-center gap-2">
+                    <Shield className="h-4 w-4" />
+                    Readiness
+                  </TabsTrigger>
                   <TabsTrigger value="job-assessment-config" className="flex items-center gap-2">
                     <Briefcase className="h-4 w-4" />
                     Job Assessment Config
