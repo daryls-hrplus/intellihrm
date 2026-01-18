@@ -5,7 +5,6 @@ import { countries } from "@/lib/countries";
 import { ISO_LANGUAGES } from "@/constants/languageConstants";
 import { useDebouncedCallback } from "./use-debounced-callback";
 import { useAuth } from "@/contexts/AuthContext";
-import { useCompanyRelationships } from "@/hooks/useCompanyRelationships";
 
 export interface SearchResult {
   id: string;
@@ -48,15 +47,39 @@ const MAX_RESULTS_PER_CATEGORY = 8;
 const MIN_SEARCH_LENGTH = 2;
 
 export function useGlobalReferenceSearch(): UseGlobalReferenceSearchReturn {
-  const { profile } = useAuth();
-  const { groupCompanies } = useCompanyRelationships(profile?.company_id);
+  const { user, profile } = useAuth();
   
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [hasSearched, setHasSearched] = useState(false);
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>("all");
 
-  const companyIds = useMemo(() => groupCompanies.map(c => c.id), [groupCompanies]);
+  // Fetch companies the user has access to via permissions
+  const { data: accessibleCompanies = [] } = useQuery({
+    queryKey: ["user-accessible-companies", user?.id],
+    queryFn: async () => {
+      if (!user?.id) return [];
+      
+      // Use the RPC function that returns companies based on user permissions
+      const { data, error } = await supabase.rpc('get_user_accessible_companies');
+      
+      if (error) {
+        console.error("Error fetching accessible companies:", error);
+        return [];
+      }
+      
+      return (data || []).map((c: any) => ({
+        id: c.id,
+        code: c.code || "",
+        name: c.name || "",
+        isCurrentCompany: c.id === profile?.company_id,
+      })) as CompanyOption[];
+    },
+    enabled: !!user?.id,
+    staleTime: 60000, // Cache for 1 minute
+  });
+
+  const companyIds = useMemo(() => accessibleCompanies.map(c => c.id), [accessibleCompanies]);
 
   const debouncedSetQuery = useDebouncedCallback((value: string) => {
     setDebouncedQuery(value);
@@ -200,7 +223,7 @@ export function useGlobalReferenceSearch(): UseGlobalReferenceSearchReturn {
 
       return results;
     },
-    enabled: debouncedQuery.length >= MIN_SEARCH_LENGTH && companyIds.length > 0,
+    enabled: debouncedQuery.length >= MIN_SEARCH_LENGTH,
     staleTime: 30000,
   });
 
@@ -231,7 +254,7 @@ export function useGlobalReferenceSearch(): UseGlobalReferenceSearchReturn {
     groupedResults, 
     clearSearch, 
     hasSearched,
-    companies: groupCompanies,
+    companies: accessibleCompanies,
     selectedCompanyId,
     setSelectedCompanyId,
   };
