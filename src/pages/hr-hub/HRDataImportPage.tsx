@@ -22,8 +22,7 @@ import { EmployeesImport } from "@/components/hr-hub/imports/EmployeesImport";
 import { NewHiresImport } from "@/components/hr-hub/imports/NewHiresImport";
 import { ImportWizard } from "@/components/hr-hub/imports/ImportWizard";
 import { ImportHistory } from "@/components/hr-hub/imports/ImportHistory";
-import { BulkReportingLineUpdate } from "@/components/hr-hub/imports/BulkReportingLineUpdate";
-import { BulkJobQualificationsImport } from "@/components/hr-hub/imports/BulkJobQualificationsImport";
+import { BulkActionsAccordion } from "@/components/hr-hub/imports/BulkActionsAccordion";
 
 export default function HRDataImportPage() {
   const { t } = useLanguage();
@@ -170,10 +169,7 @@ export default function HRDataImportPage() {
                 </TabsContent>
 
                 <TabsContent value="bulk-actions">
-                  <div className="space-y-6">
-                    <BulkReportingLineUpdate />
-                    <BulkJobQualificationsImport />
-                  </div>
+                  <BulkActionsAccordion />
                 </TabsContent>
               </Tabs>
             </CardContent>
