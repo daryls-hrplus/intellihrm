@@ -59953,6 +59953,7 @@ export type Database = {
           is_active: boolean | null
           is_system: boolean | null
           name: string
+          sequence_order: number | null
           source_table: string | null
           updated_at: string
         }
@@ -59968,6 +59969,7 @@ export type Database = {
           is_active?: boolean | null
           is_system?: boolean | null
           name: string
+          sequence_order?: number | null
           source_table?: string | null
           updated_at?: string
         }
@@ -59983,6 +59985,7 @@ export type Database = {
           is_active?: boolean | null
           is_system?: boolean | null
           name?: string
+          sequence_order?: number | null
           source_table?: string | null
           updated_at?: string
         }

@@ -20,8 +20,9 @@ import {
   Plus, Pencil, Trash2, Bell, Mail, BellRing, Loader2, X, Settings, HelpCircle, Zap, 
   FileText, Search, ChevronDown, ChevronRight, AlertCircle, Shield, Briefcase, 
   GraduationCap, Heart, Calendar, Trophy, MessageSquare, UserCheck, FolderOpen, 
-  CheckCircle2, Sparkles, Users, CalendarIcon
+  CheckCircle2, Sparkles, Users, CalendarIcon, ArrowUpDown
 } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
 import { format, parseISO } from 'date-fns';
 import { cn } from '@/lib/utils';
 import type { ReminderRule, ReminderEventType } from '@/types/reminders';
@@ -86,13 +87,61 @@ export const ReminderRulesManager = forwardRef<ReminderRulesManagerRef, Reminder
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
   
+  // Sorting states
+  const [sortField, setSortField] = useState<'sequence' | 'name' | 'priority' | 'status'>('sequence');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+
+  // Handle sorting
+  const handleSort = (field: typeof sortField) => {
+    if (sortField === field) {
+      setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
+
+  // Quick toggle handler for status
+  const handleQuickToggle = async (ruleId: string, isActive: boolean) => {
+    try {
+      const { error } = await supabase
+        .from('reminder_rules')
+        .update({ is_active: isActive })
+        .eq('id', ruleId);
+      
+      if (error) throw error;
+      toast.success(isActive ? 'Rule activated' : 'Rule deactivated');
+      loadData();
+    } catch (error) {
+      console.error('Toggle error:', error);
+      toast.error('Failed to update rule');
+    }
+  };
+
+  // Get lifecycle stage for visual indicator
+  const getLifecycleStage = (code: string) => {
+    if (code.includes('STARTING') || code.includes('KICKOFF') || code.includes('ACTIVATED') || code.includes('STARTED')) {
+      return { label: 'Start', color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' };
+    }
+    if (code.includes('DUE') || code.includes('DEADLINE') || code.includes('PROCESSING') || code.includes('SCHEDULED')) {
+      return { label: 'Active', color: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' };
+    }
+    if (code.includes('ENDING') || code.includes('OVERDUE') || code.includes('EXPIRING') || code.includes('LOW')) {
+      return { label: 'Closing', color: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' };
+    }
+    if (code.includes('FINALIZED') || code.includes('CREATED') || code.includes('COMPLETED') || code.includes('AVAILABLE')) {
+      return { label: 'Complete', color: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' };
+    }
+    return { label: 'Other', color: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400' };
+  };
+
 
   // Get rule category from event_type
   const getRuleCategory = (rule: ReminderRule): string => {
     return rule.event_type?.category || 'custom';
   };
 
-  // Group rules by category with filtering
+  // Group rules by category with filtering and sorting
   const groupedRules = useMemo(() => {
     const filtered = rules.filter(rule => {
       const matchesSearch = !searchQuery || 
@@ -103,13 +152,50 @@ export const ReminderRulesManager = forwardRef<ReminderRulesManagerRef, Reminder
       return matchesSearch && matchesCategory;
     });
     
-    return filtered.reduce((acc, rule) => {
+    // Sort filtered rules based on sortField and sortDirection
+    const sortedFiltered = [...filtered].sort((a, b) => {
+      let comparison = 0;
+      
+      switch (sortField) {
+        case 'sequence':
+          const seqA = a.event_type?.sequence_order ?? 100;
+          const seqB = b.event_type?.sequence_order ?? 100;
+          comparison = seqA - seqB;
+          break;
+        case 'name':
+          comparison = a.name.localeCompare(b.name);
+          break;
+        case 'priority':
+          const priorityOrder = { critical: 0, high: 1, medium: 2, low: 3 };
+          comparison = (priorityOrder[a.priority] ?? 4) - (priorityOrder[b.priority] ?? 4);
+          break;
+        case 'status':
+          const getStatusOrder = (rule: ReminderRule) => {
+            const today = new Date().toISOString().split('T')[0];
+            const isExpired = rule.effective_to && rule.effective_to < today;
+            const isScheduled = rule.effective_from && rule.effective_from > today;
+            const isEffectiveNow = rule.effective_from && rule.effective_from <= today;
+            if (isExpired) return 4;
+            if (!rule.is_active) return 3;
+            if (rule.is_active && !rule.effective_from) return 2;
+            if (isScheduled) return 1;
+            if (rule.is_active && isEffectiveNow) return 0;
+            return 5;
+          };
+          comparison = getStatusOrder(a) - getStatusOrder(b);
+          break;
+      }
+      
+      return sortDirection === 'asc' ? comparison : -comparison;
+    });
+    
+    return sortedFiltered.reduce((acc, rule) => {
       const category = getRuleCategory(rule);
       if (!acc[category]) acc[category] = [];
       acc[category].push(rule);
       return acc;
     }, {} as Record<string, ReminderRule[]>);
-  }, [rules, searchQuery, selectedCategory]);
+  }, [rules, searchQuery, selectedCategory, sortField, sortDirection]);
 
   // Calculate category coverage
   const categoryCoverage = useMemo(() => {
@@ -328,6 +414,7 @@ export const ReminderRulesManager = forwardRef<ReminderRulesManagerRef, Reminder
       ?.replace('employee_', '')
       .replace(/_/g, ' ') || 'records';
     const isHighlighted = highlightedRuleId === rule.id || highlightRuleId === rule.id;
+    const lifecycleStage = getLifecycleStage(rule.event_type?.code || '');
     
     // Determine effective status with proper date validation
     const today = new Date().toISOString().split('T')[0];
@@ -356,10 +443,20 @@ export const ReminderRulesManager = forwardRef<ReminderRulesManagerRef, Reminder
         ref={(el) => { ruleRowRefs.current[rule.id] = el; }}
         className={isHighlighted ? 'animate-pulse bg-primary/10 transition-colors duration-1000' : ''}
       >
-        <TableCell className="font-medium">{rule.name}</TableCell>
+        {/* Event Type - FIRST COLUMN with Lifecycle Stage */}
         <TableCell>
-          <span className="text-sm">{rule.event_type?.name || '-'}</span>
+          <div className="flex flex-col gap-1">
+            <span className="text-sm font-medium">{rule.event_type?.name || '-'}</span>
+            <Badge variant="outline" className={cn("text-xs w-fit", lifecycleStage.color)}>
+              {lifecycleStage.label}
+            </Badge>
+          </div>
         </TableCell>
+        
+        {/* Rule Name */}
+        <TableCell className="font-medium">{rule.name}</TableCell>
+        
+        {/* Affected Items */}
         <TableCell>
           {affectedData ? (
             <TooltipProvider>
@@ -383,6 +480,8 @@ export const ReminderRulesManager = forwardRef<ReminderRulesManagerRef, Reminder
             <span className="text-muted-foreground text-sm">-</span>
           )}
         </TableCell>
+        
+        {/* Intervals */}
         <TableCell>
           <div className="flex flex-wrap gap-1">
             {intervals.sort((a, b) => b - a).map((interval) => (
@@ -392,6 +491,8 @@ export const ReminderRulesManager = forwardRef<ReminderRulesManagerRef, Reminder
             ))}
           </div>
         </TableCell>
+        
+        {/* Recipients */}
         <TableCell>
           <div className="flex gap-1">
             {rule.send_to_employee && <Badge variant="outline" className="text-xs">Emp</Badge>}
@@ -399,41 +500,81 @@ export const ReminderRulesManager = forwardRef<ReminderRulesManagerRef, Reminder
             {rule.send_to_hr && <Badge variant="outline" className="text-xs">HR</Badge>}
           </div>
         </TableCell>
+        
+        {/* Priority */}
         <TableCell>
           <span className={getPriorityColor(rule.priority)}>{rule.priority}</span>
         </TableCell>
+        
+        {/* Channel - NEW COLUMN with delivery method icons */}
         <TableCell>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Badge 
-                  variant={effectiveStatus === 'active' ? 'default' : effectiveStatus === 'scheduled' || effectiveStatus === 'draft' ? 'outline' : 'secondary'}
-                  className={cn(
-                    effectiveStatus === 'scheduled' && 'border-amber-500 text-amber-600',
-                    effectiveStatus === 'expired' && 'border-destructive/50 text-destructive',
-                    effectiveStatus === 'draft' && 'border-blue-400 text-blue-600 bg-blue-50'
-                  )}
-                >
-                  {effectiveStatus === 'active' && 'Active'}
-                  {effectiveStatus === 'scheduled' && 'Scheduled'}
-                  {effectiveStatus === 'expired' && 'Expired'}
-                  {effectiveStatus === 'inactive' && 'Inactive'}
-                  {effectiveStatus === 'draft' && 'Draft'}
-                </Badge>
-              </TooltipTrigger>
-              <TooltipContent>
-                {rule.effective_from && <p>Starts: {format(parseISO(rule.effective_from), 'PPP')}</p>}
-                {rule.effective_to && <p>Ends: {format(parseISO(rule.effective_to), 'PPP')}</p>}
-                {effectiveStatus === 'draft' && (
-                  <p className="text-amber-600">Set an effective date to activate this rule</p>
-                )}
-                {effectiveStatus === 'active' && !rule.effective_to && (
-                  <p className="text-muted-foreground">No end date set</p>
-                )}
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <div className="flex gap-1.5">
+            {(rule.notification_method === 'email' || rule.notification_method === 'both') && (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Mail className="h-4 w-4 text-blue-500" />
+                  </TooltipTrigger>
+                  <TooltipContent>Email notifications</TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
+            {(rule.notification_method === 'in_app' || rule.notification_method === 'both') && (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Bell className="h-4 w-4 text-amber-500" />
+                  </TooltipTrigger>
+                  <TooltipContent>In-app notifications</TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
+          </div>
         </TableCell>
+        
+        {/* Status with Inline Toggle */}
+        <TableCell>
+          <div className="flex items-center gap-2">
+            <Switch 
+              checked={rule.is_active}
+              onCheckedChange={(checked) => handleQuickToggle(rule.id, checked)}
+              className="data-[state=checked]:bg-green-500"
+            />
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Badge 
+                    variant={effectiveStatus === 'active' ? 'default' : effectiveStatus === 'scheduled' || effectiveStatus === 'draft' ? 'outline' : 'secondary'}
+                    className={cn(
+                      "cursor-default",
+                      effectiveStatus === 'scheduled' && 'border-amber-500 text-amber-600',
+                      effectiveStatus === 'expired' && 'border-destructive/50 text-destructive',
+                      effectiveStatus === 'draft' && 'border-blue-400 text-blue-600 bg-blue-50 dark:bg-blue-950/30'
+                    )}
+                  >
+                    {effectiveStatus === 'active' && 'Active'}
+                    {effectiveStatus === 'scheduled' && 'Scheduled'}
+                    {effectiveStatus === 'expired' && 'Expired'}
+                    {effectiveStatus === 'inactive' && 'Inactive'}
+                    {effectiveStatus === 'draft' && 'Draft'}
+                  </Badge>
+                </TooltipTrigger>
+                <TooltipContent>
+                  {rule.effective_from && <p>Starts: {format(parseISO(rule.effective_from), 'PPP')}</p>}
+                  {rule.effective_to && <p>Ends: {format(parseISO(rule.effective_to), 'PPP')}</p>}
+                  {effectiveStatus === 'draft' && (
+                    <p className="text-amber-600">Set an effective date to activate this rule</p>
+                  )}
+                  {effectiveStatus === 'active' && !rule.effective_to && (
+                    <p className="text-muted-foreground">No end date set</p>
+                  )}
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+        </TableCell>
+        
+        {/* Actions */}
         <TableCell className="text-right">
           <div className="flex justify-end gap-2">
             <Button variant="ghost" size="icon" onClick={() => handleOpenDialog(rule)}>
@@ -816,13 +957,46 @@ export const ReminderRulesManager = forwardRef<ReminderRulesManagerRef, Reminder
                           <Table>
                             <TableHeader>
                               <TableRow>
-                                <TableHead>Rule Name</TableHead>
-                                <TableHead>Event Type</TableHead>
+                                <TableHead 
+                                  className="cursor-pointer hover:bg-muted/50"
+                                  onClick={() => handleSort('sequence')}
+                                >
+                                  <div className="flex items-center gap-1">
+                                    Event Type
+                                    <ArrowUpDown className={cn("h-3 w-3", sortField === 'sequence' && "text-primary")} />
+                                  </div>
+                                </TableHead>
+                                <TableHead 
+                                  className="cursor-pointer hover:bg-muted/50"
+                                  onClick={() => handleSort('name')}
+                                >
+                                  <div className="flex items-center gap-1">
+                                    Rule Name
+                                    <ArrowUpDown className={cn("h-3 w-3", sortField === 'name' && "text-primary")} />
+                                  </div>
+                                </TableHead>
                                 <TableHead>Affected Items</TableHead>
                                 <TableHead>Intervals</TableHead>
                                 <TableHead>Recipients</TableHead>
-                                <TableHead>Priority</TableHead>
-                                <TableHead>Status</TableHead>
+                                <TableHead 
+                                  className="cursor-pointer hover:bg-muted/50"
+                                  onClick={() => handleSort('priority')}
+                                >
+                                  <div className="flex items-center gap-1">
+                                    Priority
+                                    <ArrowUpDown className={cn("h-3 w-3", sortField === 'priority' && "text-primary")} />
+                                  </div>
+                                </TableHead>
+                                <TableHead>Channel</TableHead>
+                                <TableHead 
+                                  className="cursor-pointer hover:bg-muted/50"
+                                  onClick={() => handleSort('status')}
+                                >
+                                  <div className="flex items-center gap-1">
+                                    Status
+                                    <ArrowUpDown className={cn("h-3 w-3", sortField === 'status' && "text-primary")} />
+                                  </div>
+                                </TableHead>
                                 <TableHead className="text-right">Actions</TableHead>
                               </TableRow>
                             </TableHeader>
