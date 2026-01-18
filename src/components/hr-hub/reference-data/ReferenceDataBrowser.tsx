@@ -3,9 +3,9 @@ import { useLanguage } from "@/hooks/useLanguage";
 import { 
   Globe, Coins, Languages, List, Building2, 
   Briefcase, Target, FileText, IdCard, GraduationCap, 
-  Award, Calculator, CalendarDays, Users,
+  Award, Calculator, CalendarDays, Users, FolderTree,
   ChevronRight, ArrowLeft, School, FileCheck, Plane,
-  PiggyBank, Wallet, Package, Lock, Pencil, ExternalLink
+  PiggyBank, Wallet, Package, Lock, Pencil, ExternalLink, Download
 } from "lucide-react";
 import { CountriesTab } from "./tabs/CountriesTab";
 import { CurrenciesTab } from "./tabs/CurrenciesTab";
@@ -29,6 +29,11 @@ import { TravelDocumentsTab } from "./tabs/TravelDocumentsTab";
 import { SavingsProgramsTab } from "./tabs/SavingsProgramsTab";
 import { SalaryAdvanceTypesTab } from "./tabs/SalaryAdvanceTypesTab";
 import { PropertyCategoriesTab } from "./tabs/PropertyCategoriesTab";
+import { PositionsOrgTab } from "./tabs/PositionsOrgTab";
+import { CompaniesOrgTab } from "./tabs/CompaniesOrgTab";
+import { DepartmentsOrgTab } from "./tabs/DepartmentsOrgTab";
+import { CompanyJobFamiliesTab } from "./tabs/CompanyJobFamiliesTab";
+import { OrgStructureExport } from "./tabs/OrgStructureExport";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -65,6 +70,19 @@ interface CategoryGroup {
 }
 
 const CATEGORY_GROUPS: CategoryGroup[] = [
+  {
+    id: "org-structure",
+    label: "Org Structure",
+    description: "Your organization's positions, departments, and structure",
+    isEditable: true,
+    items: [
+      { id: "org-positions", label: "Positions", icon: Users, description: "All positions in your organization", isEditable: true },
+      { id: "org-companies", label: "Companies", icon: Building2, description: "Companies in your corporate group", isEditable: true },
+      { id: "org-departments", label: "Departments", icon: FolderTree, description: "Organizational departments", isEditable: true },
+      { id: "org-job-families", label: "Job Families", icon: Briefcase, description: "Company job family classifications", isEditable: true },
+      { id: "org-export", label: "Bulk Export", icon: Download, description: "Export all org structure data", isEditable: false },
+    ]
+  },
   {
     id: "configurable-lookups",
     label: "Configurable Lookup Values",
@@ -192,6 +210,11 @@ const CATEGORY_GROUPS: CategoryGroup[] = [
 ];
 
 const COMPONENT_MAP: Record<string, React.ComponentType<{ moduleFilter?: string }>> = {
+  "org-positions": PositionsOrgTab,
+  "org-companies": CompaniesOrgTab,
+  "org-departments": DepartmentsOrgTab,
+  "org-job-families": CompanyJobFamiliesTab,
+  "org-export": OrgStructureExport,
   "countries": CountriesTab,
   "currencies": CurrenciesTab,
   "languages": LanguagesTab,
