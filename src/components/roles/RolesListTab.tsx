@@ -167,7 +167,7 @@ export function RolesListTab() {
   };
 
   const handleEdit = (role: Role) => {
-    navigate(`/admin/roles/${role.id}/edit`);
+    navigate(`/admin/roles/${role.id}`);
   };
 
   const handleDuplicate = (role: Role) => {
