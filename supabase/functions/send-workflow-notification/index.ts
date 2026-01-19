@@ -311,7 +311,7 @@ serve(async (req) => {
             Authorization: `Bearer ${resendApiKey}`,
           },
           body: JSON.stringify({
-            from: "HRIS System <noreply@resend.dev>",
+            from: "HRplus Cerebra <noreply@notifications.intellihrm.net>",
             to: [recipient.email],
             subject: emailSubject,
             html: emailHtml,

@@ -330,7 +330,7 @@ async function sendSLAWarningEmail(
 
   try {
     await resend.emails.send({
-      from: "HRIS Help Desk <onboarding@resend.dev>",
+      from: "HRplus Help Desk <noreply@notifications.intellihrm.net>",
       to: [recipientEmail],
       subject,
       html,
@@ -411,7 +411,7 @@ async function sendSLABreachEmail(
 
   try {
     await resend.emails.send({
-      from: "HRIS Help Desk <onboarding@resend.dev>",
+      from: "HRplus Help Desk <noreply@notifications.intellihrm.net>",
       to: [recipientEmail],
       subject,
       html,
@@ -514,7 +514,7 @@ async function sendEscalationEmail(
 
   try {
     await resend.emails.send({
-      from: "HRIS Help Desk <onboarding@resend.dev>",
+      from: "HRplus Help Desk <noreply@notifications.intellihrm.net>",
       to: managerEmails,
       subject,
       html,
