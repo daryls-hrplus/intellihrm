@@ -74916,6 +74916,9 @@ export type Database = {
         | "system_admin"
         | "billing_admin"
         | "enablement_admin"
+        | "manager"
+        | "executive"
+        | "support_readonly"
       appraisal_action_type:
         | "create_idp"
         | "create_pip"
@@ -75295,6 +75298,9 @@ export const Constants = {
         "system_admin",
         "billing_admin",
         "enablement_admin",
+        "manager",
+        "executive",
+        "support_readonly",
       ],
       appraisal_action_type: [
         "create_idp",
