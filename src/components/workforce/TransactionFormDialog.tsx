@@ -333,7 +333,7 @@ export function TransactionFormDialog({
       // Determine which position field to check based on transaction type
       let targetPositionId: string | null = null;
       
-      if (transactionType === "TRANSFER" || transactionType === "PROMOTION") {
+      if (transactionType === "TRANSFER" || transactionType === "PROMOTION" || transactionType === "DEMOTION") {
         targetPositionId = formData.to_position_id || null;
       } else if (transactionType === "SECONDMENT") {
         targetPositionId = formData.secondment_position_id || null;
@@ -344,7 +344,7 @@ export function TransactionFormDialog({
       }
 
       // All transaction types that require seat validation
-      const seatCheckTypes = ["TRANSFER", "PROMOTION", "SECONDMENT", "ACTING", "HIRE", "REHIRE"];
+      const seatCheckTypes = ["TRANSFER", "PROMOTION", "DEMOTION", "SECONDMENT", "ACTING", "HIRE", "REHIRE"];
 
       // Reset state if no target position or not a relevant transaction type
       if (!targetPositionId || !seatCheckTypes.includes(transactionType || "")) {
@@ -575,7 +575,7 @@ export function TransactionFormDialog({
   const handleSubmit = async () => {
     // Pre-validation for TRANSFER, PROMOTION, and SECONDMENT transactions - block if no seats available
     // All transaction types that require seat validation
-    const seatCheckTypes = ["TRANSFER", "PROMOTION", "SECONDMENT", "ACTING", "HIRE", "REHIRE"];
+    const seatCheckTypes = ["TRANSFER", "PROMOTION", "DEMOTION", "SECONDMENT", "ACTING", "HIRE", "REHIRE"];
     
     if (seatCheckTypes.includes(transactionType || "")) {
       // Block if seat check is still loading
@@ -2871,7 +2871,7 @@ export function TransactionFormDialog({
               onClick={handleSubmit} 
               disabled={
                 isLoading || 
-                (["TRANSFER", "PROMOTION"].includes(transactionType || "") && (
+                (["TRANSFER", "PROMOTION", "DEMOTION"].includes(transactionType || "") && (
                   destinationSeatStatus.isLoading || 
                   (formData.to_position_id && !destinationSeatStatus.hasAvailableSeat)
                 )) ||
