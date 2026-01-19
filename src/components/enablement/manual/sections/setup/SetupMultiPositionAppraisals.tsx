@@ -227,7 +227,7 @@ export function SetupMultiPositionAppraisals() {
               <p className="text-sm text-foreground">
                 Multi-position handling is essential for: matrix organizations with dotted-line 
                 reporting, employees with split FTE across departments, project-based assignments 
-                alongside core roles, and interim or acting positions during transitions.
+                alongside core roles, and acting positions during transitions.
               </p>
             </div>
           </div>

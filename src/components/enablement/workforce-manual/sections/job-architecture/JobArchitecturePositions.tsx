@@ -106,7 +106,7 @@ const assignEmployeeSteps: Step[] = [
     title: "Configure Assignment",
     description: "Set assignment details",
     substeps: [
-      "Assignment Type: Primary, Acting, Interim, Secondary, Secondment",
+      "Assignment Type: Primary, Acting, Secondary, Secondment",
       "Start Date: When assignment begins",
       "End Date: Optional, for temporary assignments",
       "Is Primary: Whether this is the employee's main position"
@@ -134,8 +134,7 @@ const assignEmployeeSteps: Step[] = [
 
 const assignmentTypes = [
   { type: 'Primary', description: 'The employee\'s main position and reporting line' },
-  { type: 'Acting', description: 'Temporary coverage while incumbent is absent' },
-  { type: 'Interim', description: 'Filling vacancy while recruitment is in progress' },
+  { type: 'Acting', description: 'Temporary coverage while incumbent is absent or position is vacant' },
   { type: 'Secondary', description: 'Additional position (dual roles)' },
   { type: 'Secondment', description: 'Temporary assignment to another department/company' },
 ];
