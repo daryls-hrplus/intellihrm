@@ -24780,6 +24780,56 @@ export type Database = {
           },
         ]
       }
+      ess_field_permissions: {
+        Row: {
+          approval_mode: string | null
+          can_edit: boolean
+          can_view: boolean
+          company_id: string
+          created_at: string | null
+          field_label: string
+          field_name: string
+          id: string
+          module_code: string
+          requires_approval: boolean
+          updated_at: string | null
+        }
+        Insert: {
+          approval_mode?: string | null
+          can_edit?: boolean
+          can_view?: boolean
+          company_id: string
+          created_at?: string | null
+          field_label: string
+          field_name: string
+          id?: string
+          module_code: string
+          requires_approval?: boolean
+          updated_at?: string | null
+        }
+        Update: {
+          approval_mode?: string | null
+          can_edit?: boolean
+          can_view?: boolean
+          company_id?: string
+          created_at?: string | null
+          field_label?: string
+          field_name?: string
+          id?: string
+          module_code?: string
+          requires_approval?: boolean
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ess_field_permissions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ess_module_config: {
         Row: {
           company_id: string
@@ -75203,6 +75253,7 @@ export type Database = {
         | "performance"
         | "disciplinary_acknowledgement"
         | "grievance_submission"
+        | "ess_approval"
       workflow_status:
         | "draft"
         | "pending"
@@ -75604,6 +75655,7 @@ export const Constants = {
         "performance",
         "disciplinary_acknowledgement",
         "grievance_submission",
+        "ess_approval",
       ],
       workflow_status: [
         "draft",
