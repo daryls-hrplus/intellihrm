@@ -24780,6 +24780,56 @@ export type Database = {
           },
         ]
       }
+      ess_module_config: {
+        Row: {
+          company_id: string
+          created_at: string | null
+          enabled_at: string | null
+          enabled_by: string | null
+          ess_enabled: boolean
+          ess_view_only: boolean
+          feature_code: string | null
+          id: string
+          module_code: string
+          requires_approval: boolean
+          updated_at: string | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string | null
+          enabled_at?: string | null
+          enabled_by?: string | null
+          ess_enabled?: boolean
+          ess_view_only?: boolean
+          feature_code?: string | null
+          id?: string
+          module_code: string
+          requires_approval?: boolean
+          updated_at?: string | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string | null
+          enabled_at?: string | null
+          enabled_by?: string | null
+          ess_enabled?: boolean
+          ess_view_only?: boolean
+          feature_code?: string | null
+          id?: string
+          module_code?: string
+          requires_approval?: boolean
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ess_module_config_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       evidence_usage_audit: {
         Row: {
           action: string

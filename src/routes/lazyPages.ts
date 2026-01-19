@@ -68,6 +68,7 @@ export const ApprovalDelegationsPage = lazy(() => import('@/pages/admin/Approval
 export const CompanyDocumentsPage = lazy(() => import('@/pages/admin/CompanyDocumentsPage'));
 export const AdminRemindersPage = lazy(() => import('@/pages/admin/AdminRemindersPage'));
 export const AdminWorkflowTemplatesPage = lazy(() => import('@/pages/admin/AdminWorkflowTemplatesPage'));
+export const EssConfigurationPage = lazy(() => import('@/pages/admin/EssConfigurationPage'));
 
 // Demo pages
 export const DemoLoginPage = lazy(() => import('@/pages/demo/DemoLoginPage'));
