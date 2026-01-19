@@ -67,7 +67,6 @@ const TRANSACTION_CATEGORIES: TransactionCategory[] = [
       { code: "PROMOTION", name: "Promotion", description: "Move to higher-grade position", icon: TrendingUp },
       { code: "DEMOTION", name: "Demotion", description: "Move to lower-grade position", icon: TrendingDown },
       { code: "TRANSFER", name: "Transfer", description: "Change company or department", icon: Building2 },
-      { code: "BULK_TRANSFER", name: "Bulk Transfer", description: "Transfer multiple employees between companies", icon: Users },
       { code: "SECONDMENT", name: "Secondment", description: "Temporary assignment", icon: Briefcase },
       { code: "ACTING", name: "Acting Assignment", description: "Temporary higher duties", icon: Star },
     ],

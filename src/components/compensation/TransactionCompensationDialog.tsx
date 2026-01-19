@@ -53,7 +53,7 @@ const transactionTypeToChangeType: Record<TransactionType, string> = {
   STATUS_CHANGE: "adjustment",
   CONTRACT_EXTENSION: "adjustment",
   CONTRACT_CONVERSION: "adjustment",
-  BULK_TRANSFER: "adjustment",
+  
 };
 
 export function TransactionCompensationDialog({

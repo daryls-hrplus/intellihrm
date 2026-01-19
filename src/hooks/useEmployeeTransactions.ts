@@ -22,8 +22,7 @@ export type TransactionType =
   | "RATE_CHANGE"
   | "STATUS_CHANGE"
   | "CONTRACT_EXTENSION"
-  | "CONTRACT_CONVERSION"
-  | "BULK_TRANSFER";
+  | "CONTRACT_CONVERSION";
 
 export type TransactionStatus = 
   | "draft" 
