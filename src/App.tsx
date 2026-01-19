@@ -339,6 +339,7 @@ const App = () => (
             {/* Compensation Routes */}
             <Route path="/compensation" element={<ProtectedRoute moduleCode="compensation"><LazyPage><Pages.CompensationDashboardPage /></LazyPage></ProtectedRoute>} />
             <Route path="/compensation/pay-elements" element={<ProtectedRoute moduleCode="compensation"><LazyPage><Pages.PayElementsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/payroll/pay-elements" element={<ProtectedRoute moduleCode="payroll"><LazyPage><Pages.PayElementsPage /></LazyPage></ProtectedRoute>} />
             <Route path="/compensation/salary-grades" element={<ProtectedRoute moduleCode="compensation"><LazyPage><Pages.SalaryGradesPage /></LazyPage></ProtectedRoute>} />
             <Route path="/compensation/position" element={<ProtectedRoute moduleCode="compensation"><LazyPage><Pages.PositionCompensationPage /></LazyPage></ProtectedRoute>} />
             <Route path="/compensation/history" element={<ProtectedRoute moduleCode="compensation"><LazyPage><Pages.CompensationHistoryPage /></LazyPage></ProtectedRoute>} />
