@@ -68,20 +68,17 @@ const getAdminModuleSections = (
   isHRPlusInternal: boolean
 ): ModuleSection[] => {
   const allModules: Record<string, GroupedModuleItem[]> = {
-    // Section 1: Organization & Structure
+    // Section 1: Organization & Structure - Define legal structure first
     organization: [
       { title: t("admin.modules.companyGroups.title"), description: t("admin.modules.companyGroups.description"), href: "/admin/company-groups", icon: Building, color: "bg-primary/10 text-primary", tabCode: "company-groups" },
       { title: t("admin.modules.companies.title"), description: t("admin.modules.companies.description"), href: "/admin/companies", icon: Building2, color: "bg-info/10 text-info", tabCode: "companies" },
       { title: t("admin.modules.territories.title"), description: t("admin.modules.territories.description"), href: "/admin/territories", icon: Globe, color: "bg-destructive/10 text-destructive", tabCode: "territories" },
       { title: "Company Tags", description: "Group companies with tags for scoped admin access", href: "/admin/company-tags", icon: Tag, color: "bg-teal-500/10 text-teal-600", tabCode: "company-tags" },
-      { title: "Client Registry", description: "Manage demo registrations and client provisioning", href: "/admin/client-registry", icon: Network, color: "bg-gradient-to-r from-purple-500/10 to-indigo-500/10 text-indigo-600", tabCode: "client-registry" },
-      { title: "Demo Management", description: "Manage product demo experiences and video chapters", href: "/admin/demo-management", icon: Video, color: "bg-cyan-500/10 text-cyan-600", tabCode: "demo-management" },
-      { title: "Demo Analytics", description: "Track prospect engagement, lead scores, and demo performance", href: "/admin/demo-analytics", icon: TrendingUp, color: "bg-emerald-500/10 text-emerald-600", tabCode: "demo-analytics" },
+      { title: "Company Relationships", description: "Configure cross-company reporting rules for groups & JVs", href: "/admin/company-relationships", icon: GitBranch, color: "bg-blue-500/10 text-blue-600", tabCode: "company-relationships" },
     ],
-    // Section 2: Users, Roles & Access
+    // Section 2: Users, Roles & Access - Add users and permissions
     usersAccess: [
       { title: t("admin.modules.users.title"), description: t("admin.modules.users.description"), href: "/admin/users", icon: Users, color: "bg-success/10 text-success", tabCode: "users" },
-      { title: t("admin.modules.employeeDirectory.title"), description: t("admin.modules.employeeDirectory.description"), href: "/ess/directory?from=admin", icon: Users, color: "bg-cyan-500/10 text-cyan-600", tabCode: "employee-directory" },
       { title: t("admin.modules.roles.title"), description: t("admin.modules.roles.description"), href: "/admin/roles", icon: Shield, color: "bg-warning/10 text-warning", tabCode: "roles" },
       { title: t("admin.modules.permissions.title"), description: t("admin.modules.permissions.description"), href: "/admin/permissions", icon: Grid3X3, color: "bg-violet-500/10 text-violet-600", tabCode: "permissions" },
       { title: "Granular Permissions", description: "Configure module, tab, and action-level permissions", href: "/admin/granular-permissions", icon: Lock, color: "bg-indigo-500/10 text-indigo-600", tabCode: "granular-permissions" },
@@ -89,38 +86,43 @@ const getAdminModuleSections = (
       { title: t("admin.modules.accessRequests.title"), description: t("admin.modules.accessRequests.description"), href: "/admin/access-requests", icon: ClipboardList, color: "bg-emerald-500/10 text-emerald-600", tabCode: "access-requests" },
       { title: "Access Request Auto-Approval", description: "Automatically approve module access requests by role or company", href: "/admin/auto-approval", icon: Zap, color: "bg-orange-500/10 text-orange-600", tabCode: "auto-approval" },
     ],
-    // Section 3: Security & Governance
+    // Section 3: Authentication & Identity - How users prove who they are
+    authentication: [
+      { title: "SSO Settings", description: "Configure Single Sign-On providers and domain mappings", href: "/admin/sso-settings", icon: KeyRound, color: "bg-sky-500/10 text-sky-600", tabCode: "sso-settings" },
+      { title: "MFA Settings", description: "Configure multi-factor authentication requirements", href: "/admin/mfa-settings", icon: Fingerprint, color: "bg-red-500/10 text-red-600", tabCode: "mfa-settings" },
+      { title: "Password Policies", description: "Configure enterprise password security requirements", href: "/admin/password-policies", icon: Lock, color: "bg-amber-500/10 text-amber-600", tabCode: "password-policies" },
+    ],
+    // Section 4: Security & Governance - Compliance, monitoring, controls
     security: [
       { title: t("admin.modules.auditLogs.title"), description: t("admin.modules.auditLogs.description"), href: "/admin/audit-logs", icon: FileText, color: "bg-secondary/10 text-secondary-foreground", tabCode: "audit-logs" },
       { title: "Audit Coverage", description: "Monitor audit system health and coverage across modules", href: "/admin/audit-coverage", icon: BarChart2, color: "bg-teal-500/10 text-teal-600", tabCode: "audit-coverage" },
       { title: t("admin.modules.piiAccess.title"), description: t("admin.modules.piiAccess.description"), href: "/admin/pii-access", icon: Eye, color: "bg-amber-500/10 text-amber-600", tabCode: "pii-access" },
-      { title: "Company Relationships", description: "Configure cross-company reporting rules for groups & JVs", href: "/admin/company-relationships", icon: GitBranch, color: "bg-blue-500/10 text-blue-600", tabCode: "company-relationships" },
-      { title: "AI Security Violations", description: "Monitor attempted unauthorized AI access", href: "/admin/ai-security-violations", icon: ShieldAlert, color: "bg-red-500/10 text-red-600", tabCode: "ai-security-violations" },
-      { title: "AI Governance", description: "ISO 42001 AI risk management & human oversight", href: "/admin/ai-governance", icon: Brain, color: "bg-purple-500/10 text-purple-600", tabCode: "ai-governance" },
-      { title: "Agent Management Hub", description: "Registry, monitoring & orchestration of all AI agents", href: "/system/agents", icon: Bot, color: "bg-indigo-500/10 text-indigo-600", tabCode: "agent-management" },
-      { title: "MFA Settings", description: "Configure multi-factor authentication requirements", href: "/admin/mfa-settings", icon: Fingerprint, color: "bg-red-500/10 text-red-600", tabCode: "mfa-settings" },
-      { title: "SSO Settings", description: "Configure Single Sign-On providers and domain mappings", href: "/admin/sso-settings", icon: KeyRound, color: "bg-sky-500/10 text-sky-600", tabCode: "sso-settings" },
-      { title: "Password Policies", description: "Configure enterprise password security requirements", href: "/admin/password-policies", icon: Lock, color: "bg-amber-500/10 text-amber-600", tabCode: "password-policies" },
     ],
-    // Section 4: System & Platform Configuration
-    systemConfig: [
-      { title: t("admin.modules.settings.title"), description: t("admin.modules.settings.description"), href: "/admin/settings", icon: Cog, color: "bg-slate-500/10 text-slate-600", tabCode: "settings" },
+    // Section 5: AI & Automation - Intelligence layer
+    aiAutomation: [
       { title: t("admin.modules.aiUsage.title"), description: t("admin.modules.aiUsage.description"), href: "/admin/ai-usage", icon: Bot, color: "bg-purple-500/10 text-purple-600", tabCode: "ai-usage" },
+      { title: "AI Governance", description: "ISO 42001 AI risk management & human oversight", href: "/admin/ai-governance", icon: Brain, color: "bg-purple-500/10 text-purple-600", tabCode: "ai-governance" },
+      { title: "AI Security Violations", description: "Monitor attempted unauthorized AI access", href: "/admin/ai-security-violations", icon: ShieldAlert, color: "bg-red-500/10 text-red-600", tabCode: "ai-security-violations" },
+      { title: "Agent Management Hub", description: "Registry, monitoring & orchestration of all AI agents", href: "/system/agents", icon: Bot, color: "bg-indigo-500/10 text-indigo-600", tabCode: "agent-management" },
+    ],
+    // Section 6: Platform Settings - Customization and configuration
+    platformSettings: [
+      { title: t("admin.modules.settings.title"), description: t("admin.modules.settings.description"), href: "/admin/settings", icon: Cog, color: "bg-slate-500/10 text-slate-600", tabCode: "settings" },
       { title: t("admin.modules.languages.title"), description: t("admin.modules.languages.description"), href: "/admin/languages", icon: Languages, color: "bg-accent/10 text-accent-foreground", tabCode: "languages" },
       { title: "Color Scheme", description: "Customize the application's color theme with live preview", href: "/admin/color-scheme", icon: Palette, color: "bg-gradient-to-r from-pink-500/10 to-violet-500/10 text-violet-600", tabCode: "color-scheme" },
-      { title: t("admin.modules.bulkImport.title"), description: t("admin.modules.bulkImport.description"), href: "/admin/bulk-import", icon: Upload, color: "bg-cyan-500/10 text-cyan-600", tabCode: "bulk-import" },
-      { title: "API Management", description: "Manage API keys, webhooks, and integrations", href: "/system/api-management", icon: Webhook, color: "bg-indigo-500/10 text-indigo-600", tabCode: "api-management" },
-      { title: "API Management", description: "Manage API keys, webhooks, and integrations", href: "/system/api-management", icon: Webhook, color: "bg-indigo-500/10 text-indigo-600", tabCode: "api-management" },
       { title: "Custom Fields", description: "Define custom fields for forms across the application", href: "/admin/custom-fields", icon: Cog, color: "bg-pink-500/10 text-pink-600", tabCode: "custom-fields" },
+      { title: t("admin.modules.bulkImport.title"), description: t("admin.modules.bulkImport.description"), href: "/admin/bulk-import", icon: Upload, color: "bg-cyan-500/10 text-cyan-600", tabCode: "bulk-import" },
       { title: "Data Management", description: "Populate demo data or purge transactional records", href: "/admin/data-management", icon: Database, color: "bg-orange-500/10 text-orange-600", tabCode: "data-management" },
     ],
-    // Section 8: Documentation & Enablement
-    // Enablement Center is only visible to Intelli HRM internal tenants
+    // Section 7: Integrations & API - External connections
+    integrations: [
+      { title: "API Management", description: "Manage API keys, webhooks, and integrations", href: "/system/api-management", icon: Webhook, color: "bg-indigo-500/10 text-indigo-600", tabCode: "api-management" },
+    ],
+    // Section 8: Documentation & Enablement - Help and training
     documentation: [
       { title: "Implementation Handbook", description: "Step-by-step guide for configuring all modules", href: "/admin/implementation-handbook", icon: BookOpen, color: "bg-rose-500/10 text-rose-600", tabCode: "implementation-handbook" },
       { title: "Modules Brochure", description: "Comprehensive guide to all modules and features", href: "/admin/modules-brochure", icon: Layers, color: "bg-green-500/10 text-green-600", tabCode: "modules-brochure" },
       { title: "Features Brochure", description: "Marketing summary of Intelli HRM capabilities", href: "/admin/features-brochure", icon: FileSpreadsheet, color: "bg-blue-500/10 text-blue-600", tabCode: "features-brochure" },
-      // Enablement Center - only visible for Intelli HRM internal tenants
       ...(isHRPlusInternal ? [{
         title: "Enablement Center",
         description: "AI-powered documentation and training content generation",
@@ -130,28 +132,42 @@ const getAdminModuleSections = (
         tabCode: "enablement"
       }] : []),
     ],
-    // Section 9: Billing & Subscriptions
+    // Section 9: Billing & Subscriptions - Commercial management
     billing: [
       { title: "Subscriptions", description: "Manage company subscriptions and billing", href: "/admin/subscriptions", icon: CreditCard, color: "bg-emerald-500/10 text-emerald-600", tabCode: "subscriptions" },
       { title: "Upgrade Plan", description: "Add or remove modules from your subscription", href: "/subscription/upgrade", icon: ArrowUpCircle, color: "bg-gradient-to-r from-amber-500/10 to-orange-500/10 text-orange-600", tabCode: "upgrade" },
     ],
+    // Section 10: Vendor Tools - HRPlus internal only (demo/sales tools)
+    vendorTools: isHRPlusInternal ? [
+      { title: "Client Registry", description: "Manage demo registrations and client provisioning", href: "/admin/client-registry", icon: Network, color: "bg-gradient-to-r from-purple-500/10 to-indigo-500/10 text-indigo-600", tabCode: "client-registry" },
+      { title: "Demo Management", description: "Manage product demo experiences and video chapters", href: "/admin/demo-management", icon: Video, color: "bg-cyan-500/10 text-cyan-600", tabCode: "demo-management" },
+      { title: "Demo Analytics", description: "Track prospect engagement, lead scores, and demo performance", href: "/admin/demo-analytics", icon: TrendingUp, color: "bg-emerald-500/10 text-emerald-600", tabCode: "demo-analytics" },
+    ] : [],
   };
 
   // Filter modules by permission
   const filterByPermission = (items: GroupedModuleItem[]) =>
     items.filter(item => hasTabAccess("admin", item.tabCode || ""));
 
-  return [
+  const sections: ModuleSection[] = [
     { titleKey: "Organization & Structure", items: filterByPermission(allModules.organization) },
     { titleKey: "Users, Roles & Access", items: filterByPermission(allModules.usersAccess) },
+    { titleKey: "Authentication & Identity", items: filterByPermission(allModules.authentication) },
     { titleKey: "Security & Governance", items: filterByPermission(allModules.security) },
-    { titleKey: "System & Platform Configuration", items: filterByPermission(allModules.systemConfig) },
-    
-    
-    
+    { titleKey: "AI & Automation", items: filterByPermission(allModules.aiAutomation) },
+    { titleKey: "Platform Settings", items: filterByPermission(allModules.platformSettings) },
+    { titleKey: "Integrations & API", items: filterByPermission(allModules.integrations) },
     { titleKey: "Documentation & Enablement", items: filterByPermission(allModules.documentation) },
     { titleKey: "Billing & Subscriptions", items: filterByPermission(allModules.billing) },
   ];
+
+  // Only add Vendor Tools section if user is HRPlus internal and has items
+  const vendorToolsItems = filterByPermission(allModules.vendorTools);
+  if (isHRPlusInternal && vendorToolsItems.length > 0) {
+    sections.push({ titleKey: "Vendor Tools", items: vendorToolsItems });
+  }
+
+  return sections;
 };
 
 interface Stats {
