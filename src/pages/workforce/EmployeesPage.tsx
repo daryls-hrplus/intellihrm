@@ -137,28 +137,17 @@ export default function EmployeesPage() {
   const fetchEmployees = async () => {
     setLoading(true);
     try {
-      // Fetch profiles - optionally filter by company
-      let profilesQuery = supabase
-        .from('profiles')
-        .select('id, full_name, email, avatar_url, company_id');
-      
-      if (selectedCompanyId !== "all") {
-        profilesQuery = profilesQuery.eq('company_id', selectedCompanyId);
-      }
-
-      const { data: profiles, error: profilesError } = await profilesQuery;
-
-      if (profilesError) throw profilesError;
-
       // Fetch employee positions with position and department details
       const { data: positions, error: positionsError } = await supabase
-        .from('employee_positions')
-        .select(`
+        .from("employee_positions")
+        .select(
+          `
           employee_id,
           is_active,
           assignment_type,
           positions:position_id (
             title,
+            company_id,
             departments:department_id (
               name,
               company_id,
@@ -168,43 +157,83 @@ export default function EmployeesPage() {
               )
             )
           )
-        `)
-        .eq('is_active', true);
+        `
+        )
+        .eq("is_active", true);
 
       if (positionsError) throw positionsError;
 
       // Create a map of employee positions (array of positions per employee)
-      const positionMap = new Map<string, {
-        positions: EmployeePosition[];
-        location: string | null;
-      }>();
+      const positionMap = new Map<
+        string,
+        {
+          positions: EmployeePosition[];
+          location: string | null;
+        }
+      >();
+
+      const positionEmployeeIds = new Set<string>();
 
       positions?.forEach((ep: any) => {
-        if (ep.positions) {
-          const location = ep.positions.departments?.companies 
-            ? `${ep.positions.departments.companies.city || ''}, ${ep.positions.departments.companies.country || ''}`.replace(/^, |, $/g, '')
-            : null;
-          
-          const positionData: EmployeePosition = {
-            position_title: ep.positions.title,
-            department_name: ep.positions.departments?.name || null,
-            assignment_type: ep.assignment_type || 'permanent',
-          };
+        if (!ep.positions) return;
 
-          const existing = positionMap.get(ep.employee_id);
-          if (existing) {
-            existing.positions.push(positionData);
-            if (!existing.location && location) {
-              existing.location = location;
-            }
-          } else {
-            positionMap.set(ep.employee_id, {
-              positions: [positionData],
-              location: location || null,
-            });
+        const positionCompanyId: string | null =
+          ep.positions.company_id ?? ep.positions.departments?.company_id ?? null;
+
+        const includeForSelectedCompany =
+          selectedCompanyId === "all" || positionCompanyId === selectedCompanyId;
+
+        if (!includeForSelectedCompany) return;
+
+        positionEmployeeIds.add(ep.employee_id);
+
+        const location = ep.positions.departments?.companies
+          ? `${ep.positions.departments.companies.city || ""}, ${ep.positions.departments.companies.country || ""}`.replace(
+              /^, |, $/g,
+              ""
+            )
+          : null;
+
+        const positionData: EmployeePosition = {
+          position_title: ep.positions.title,
+          department_name: ep.positions.departments?.name || null,
+          assignment_type: ep.assignment_type || "permanent",
+        };
+
+        const existing = positionMap.get(ep.employee_id);
+        if (existing) {
+          existing.positions.push(positionData);
+          if (!existing.location && location) {
+            existing.location = location;
           }
+        } else {
+          positionMap.set(ep.employee_id, {
+            positions: [positionData],
+            location: location || null,
+          });
         }
       });
+
+      // Fetch profiles. For company filtering, include employees who:
+      // - belong to the company on their profile, OR
+      // - have an active position in the selected company
+      let profilesQuery = supabase
+        .from("profiles")
+        .select("id, full_name, email, avatar_url, company_id");
+
+      if (selectedCompanyId !== "all") {
+        const ids = Array.from(positionEmployeeIds);
+        if (ids.length > 0) {
+          profilesQuery = profilesQuery.or(
+            `company_id.eq.${selectedCompanyId},id.in.(${ids.join(",")})`
+          );
+        } else {
+          profilesQuery = profilesQuery.eq("company_id", selectedCompanyId);
+        }
+      }
+
+      const { data: profiles, error: profilesError } = await profilesQuery;
+      if (profilesError) throw profilesError;
 
       // Combine profiles with position data
       const employeesData: Employee[] = (profiles || []).map((profile: any) => {
@@ -222,7 +251,7 @@ export default function EmployeesPage() {
 
       setEmployees(employeesData);
     } catch (error) {
-      console.error('Error fetching employees:', error);
+      console.error("Error fetching employees:", error);
     } finally {
       setLoading(false);
     }
