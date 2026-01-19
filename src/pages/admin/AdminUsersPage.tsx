@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { useAuth } from "@/contexts/AuthContext";
@@ -12,6 +12,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Switch } from "@/components/ui/switch";
+import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
@@ -46,9 +48,7 @@ import {
   UserCog,
   User,
   MoreHorizontal,
-  Check,
   Loader2,
-  Calendar,
   Building2,
   EyeOff,
   UserPlus,
@@ -65,9 +65,19 @@ import {
   Clock,
   Filter,
   Users,
+  ChevronUp,
+  ChevronDown,
+  Check,
+  AlertCircle,
 } from "lucide-react";
+import { UserQuickView } from "@/components/admin/users/UserQuickView";
+import { UserTablePagination } from "@/components/admin/users/UserTablePagination";
+import { UserFilterPills } from "@/components/admin/users/UserFilterPills";
+import { UserEmptyState } from "@/components/admin/users/UserEmptyState";
 
 type AppRole = string;
+type SortField = "name" | "company" | "lastLogin" | "created";
+type SortDirection = "asc" | "desc";
 
 interface Company {
   id: string;
@@ -141,9 +151,20 @@ export default function AdminUsersPage() {
   const [filterRole, setFilterRole] = useState<string>("all");
   const [filterCompany, setFilterCompany] = useState<string>("all");
   
+  // Sorting
+  const [sortField, setSortField] = useState<SortField>("name");
+  const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
+  
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(25);
+  
   // Selection for bulk operations
   const [selectedUsers, setSelectedUsers] = useState<Set<string>>(new Set());
-  const [showBulkActions, setShowBulkActions] = useState(false);
+  
+  // Quick view
+  const [quickViewUser, setQuickViewUser] = useState<UserWithRoles | null>(null);
+  const [showQuickView, setShowQuickView] = useState(false);
   
   // Invite dialog state
   const [showInviteDialog, setShowInviteDialog] = useState(false);
@@ -178,6 +199,34 @@ export default function AdminUsersPage() {
   const { logView, logAction } = useAuditLog();
   const { canViewPii, maskPii } = usePiiVisibility();
   const hasLoggedView = useRef(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Focus search on "/" key
+      if (e.key === "/" && !e.ctrlKey && !e.metaKey && document.activeElement?.tagName !== "INPUT") {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      }
+      // Open invite dialog on Ctrl/Cmd + N
+      if (e.key === "n" && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        setShowInviteDialog(true);
+      }
+      // Clear selection on Escape
+      if (e.key === "Escape") {
+        setSelectedUsers(new Set());
+        setShowQuickView(false);
+        if (document.activeElement === searchInputRef.current) {
+          setSearchQuery("");
+          searchInputRef.current?.blur();
+        }
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   useEffect(() => {
     fetchData();
@@ -189,6 +238,11 @@ export default function AdminUsersPage() {
       logView('users_list', undefined, 'User Management', { user_count: users.length });
     }
   }, [users]);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, filterStatus, filterRole, filterCompany]);
 
   // Filter departments when company changes
   const filteredDepartments = departments.filter(d => 
@@ -299,8 +353,6 @@ export default function AdminUsersPage() {
   };
 
   const invokeManageUser = async (body: Record<string, unknown>) => {
-    // Let the SDK attach the freshest access token automatically.
-    // Passing a manually-captured token can cause 401s when auto-refresh rotates sessions.
     const { data, error } = await supabase.functions.invoke("manage-user", { body });
 
     if (error) {
@@ -383,6 +435,7 @@ export default function AdminUsersPage() {
     setEditSectionId(user.section_id || "");
     setEditRoles(user.roles);
     setShowEditDialog(true);
+    setShowQuickView(false);
   };
 
   const handleSaveEdit = async () => {
@@ -390,7 +443,6 @@ export default function AdminUsersPage() {
 
     setIsSavingEdit(true);
     try {
-      // Update profile
       await invokeManageUser({
         action: "update_profile",
         user_id: editUser.id,
@@ -400,7 +452,6 @@ export default function AdminUsersPage() {
         section_id: editSectionId || null,
       });
 
-      // Update roles if changed
       if (JSON.stringify(editRoles.sort()) !== JSON.stringify(editUser.roles.sort())) {
         await invokeManageUser({
           action: "update_roles",
@@ -449,6 +500,10 @@ export default function AdminUsersPage() {
 
       if (action === "enable" || action === "disable") {
         setUsers(prev => prev.map(u => u.id === userId ? { ...u, is_active: action === "enable" } : u));
+        // Update quick view user if open
+        if (quickViewUser?.id === userId) {
+          setQuickViewUser(prev => prev ? { ...prev, is_active: action === "enable" } : null);
+        }
       }
 
       const actionMessages: Record<string, string> = {
@@ -539,7 +594,7 @@ export default function AdminUsersPage() {
 
   const exportToCSV = () => {
     const headers = ["Name", "Email", "Company", "Department", "Roles", "Status", "Last Login", "Created"];
-    const rows = filteredUsers.map(u => [
+    const rows = filteredAndSortedUsers.map(u => [
       u.full_name || "",
       canViewPii ? u.email : "***@***",
       u.company_name || "",
@@ -562,8 +617,8 @@ export default function AdminUsersPage() {
     a.click();
     URL.revokeObjectURL(url);
 
-    logAction({ action: "EXPORT", entityType: "users", metadata: { count: filteredUsers.length } });
-    toast({ title: "Exported", description: `${filteredUsers.length} users exported to CSV.` });
+    logAction({ action: "EXPORT", entityType: "users", metadata: { count: filteredAndSortedUsers.length } });
+    toast({ title: "Exported", description: `${filteredAndSortedUsers.length} users exported to CSV.` });
   };
 
   const toggleUserSelection = (userId: string) => {
@@ -577,10 +632,10 @@ export default function AdminUsersPage() {
   };
 
   const toggleSelectAll = () => {
-    if (selectedUsers.size === filteredUsers.length) {
+    if (selectedUsers.size === paginatedUsers.length) {
       setSelectedUsers(new Set());
     } else {
-      setSelectedUsers(new Set(filteredUsers.map(u => u.id)));
+      setSelectedUsers(new Set(paginatedUsers.map(u => u.id)));
     }
   };
 
@@ -589,26 +644,81 @@ export default function AdminUsersPage() {
     toast({ title: "Copied" });
   };
 
-  // Apply filters
-  const filteredUsers = users.filter((user) => {
-    const matchesSearch = 
-      user.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.company_name?.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    const matchesStatus = filterStatus === "all" || 
-      (filterStatus === "active" && user.is_active) ||
-      (filterStatus === "disabled" && !user.is_active);
-    
-    const matchesRole = filterRole === "all" || user.roles.includes(filterRole);
-    
-    const matchesCompany = filterCompany === "all" || user.company_id === filterCompany;
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setSortField(field);
+      setSortDirection("asc");
+    }
+  };
 
-    return matchesSearch && matchesStatus && matchesRole && matchesCompany;
-  });
+  const handleStatClick = (filter: string, value: string) => {
+    if (filter === "status") {
+      setFilterStatus(value);
+    } else if (filter === "role") {
+      setFilterRole(value);
+    }
+  };
+
+  const clearAllFilters = () => {
+    setFilterStatus("all");
+    setFilterRole("all");
+    setFilterCompany("all");
+    setSearchQuery("");
+  };
+
+  const handleRowClick = (user: UserWithRoles) => {
+    setQuickViewUser(user);
+    setShowQuickView(true);
+  };
+
+  // Apply filters and sorting
+  const filteredAndSortedUsers = users
+    .filter((user) => {
+      const matchesSearch = 
+        user.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        user.company_name?.toLowerCase().includes(searchQuery.toLowerCase());
+      
+      const matchesStatus = filterStatus === "all" || 
+        (filterStatus === "active" && user.is_active) ||
+        (filterStatus === "disabled" && !user.is_active);
+      
+      const matchesRole = filterRole === "all" || user.roles.includes(filterRole);
+      
+      const matchesCompany = filterCompany === "all" || user.company_id === filterCompany;
+
+      return matchesSearch && matchesStatus && matchesRole && matchesCompany;
+    })
+    .sort((a, b) => {
+      let comparison = 0;
+      switch (sortField) {
+        case "name":
+          comparison = (a.full_name || "").localeCompare(b.full_name || "");
+          break;
+        case "company":
+          comparison = (a.company_name || "").localeCompare(b.company_name || "");
+          break;
+        case "lastLogin":
+          comparison = (a.last_login_at || "").localeCompare(b.last_login_at || "");
+          break;
+        case "created":
+          comparison = a.created_at.localeCompare(b.created_at);
+          break;
+      }
+      return sortDirection === "asc" ? comparison : -comparison;
+    });
+
+  // Paginated users
+  const paginatedUsers = filteredAndSortedUsers.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
 
   const activeUsers = users.filter(u => u.is_active);
   const disabledUsers = users.filter(u => !u.is_active);
+  const hasActiveFilters = filterStatus !== "all" || filterRole !== "all" || filterCompany !== "all" || searchQuery !== "";
 
   const getInitials = (name: string | null, email: string) => {
     if (name) {
@@ -616,8 +726,6 @@ export default function AdminUsersPage() {
     }
     return email.slice(0, 2).toUpperCase();
   };
-
-  const getPrimaryRole = (roles: string[]): string => roles[0] || "employee";
 
   const getRoleName = (roleCode: string): string => {
     return roleDefinitions.find(r => r.code === roleCode)?.name || roleCode;
@@ -640,6 +748,41 @@ export default function AdminUsersPage() {
       minute: "2-digit",
     });
   };
+
+  const getRelativeTime = (dateString: string | null) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) return "Just now";
+    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    if (diffDays < 7) return `${diffDays}d ago`;
+    return "";
+  };
+
+  const isRecentlyActive = (dateString: string | null) => {
+    if (!dateString) return false;
+    return (new Date().getTime() - new Date(dateString).getTime()) < 15 * 60 * 1000;
+  };
+
+  const SortableHeader = ({ field, label }: { field: SortField; label: string }) => (
+    <th 
+      className="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground cursor-pointer hover:bg-muted/50 transition-colors select-none"
+      onClick={() => handleSort(field)}
+    >
+      <div className="flex items-center gap-1">
+        {label}
+        {sortField === field && (
+          sortDirection === "asc" ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />
+        )}
+      </div>
+    </th>
+  );
 
   return (
     <AppLayout>
@@ -671,9 +814,12 @@ export default function AdminUsersPage() {
           </div>
         </div>
 
-        {/* Stats */}
+        {/* Stats - Clickable */}
         <div className="grid gap-4 sm:grid-cols-5 animate-slide-up">
-          <div className="rounded-xl border border-border bg-card p-5 shadow-card">
+          <div 
+            className="rounded-xl border border-border bg-card p-5 shadow-card cursor-pointer hover:border-primary/50 transition-colors"
+            onClick={() => clearAllFilters()}
+          >
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Total Users</p>
@@ -688,8 +834,16 @@ export default function AdminUsersPage() {
             const count = users.filter((u) => u.roles.includes(role.code)).length;
             const style = getRoleStyle(role.code);
             const Icon = style.icon;
+            const isActive = filterRole === role.code;
             return (
-              <div key={role.id} className="rounded-xl border border-border bg-card p-5 shadow-card">
+              <div 
+                key={role.id} 
+                className={cn(
+                  "rounded-xl border bg-card p-5 shadow-card cursor-pointer transition-colors",
+                  isActive ? "border-primary ring-2 ring-primary/20" : "border-border hover:border-primary/50"
+                )}
+                onClick={() => handleStatClick("role", isActive ? "all" : role.code)}
+              >
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-muted-foreground">{role.name}s</p>
@@ -702,7 +856,13 @@ export default function AdminUsersPage() {
               </div>
             );
           })}
-          <div className="rounded-xl border border-border bg-card p-5 shadow-card">
+          <div 
+            className={cn(
+              "rounded-xl border bg-card p-5 shadow-card cursor-pointer transition-colors",
+              filterStatus === "active" ? "border-success ring-2 ring-success/20" : "border-border hover:border-success/50"
+            )}
+            onClick={() => handleStatClick("status", filterStatus === "active" ? "all" : "active")}
+          >
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Active</p>
@@ -713,7 +873,13 @@ export default function AdminUsersPage() {
               </div>
             </div>
           </div>
-          <div className="rounded-xl border border-border bg-card p-5 shadow-card">
+          <div 
+            className={cn(
+              "rounded-xl border bg-card p-5 shadow-card cursor-pointer transition-colors",
+              filterStatus === "disabled" ? "border-destructive ring-2 ring-destructive/20" : "border-border hover:border-destructive/50"
+            )}
+            onClick={() => handleStatClick("status", filterStatus === "disabled" ? "all" : "disabled")}
+          >
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Disabled</p>
@@ -731,12 +897,14 @@ export default function AdminUsersPage() {
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <input
+              ref={searchInputRef}
               type="text"
               placeholder="Search users..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-11 w-full rounded-lg border border-input bg-card pl-10 pr-4 text-card-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+              className="h-11 w-full rounded-lg border border-input bg-card pl-10 pr-12 text-card-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
             />
+            <kbd className="absolute right-3 top-1/2 -translate-y-1/2 hidden sm:inline text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded font-mono">/</kbd>
           </div>
           
           <div className="flex flex-wrap items-center gap-2">
@@ -792,6 +960,19 @@ export default function AdminUsersPage() {
           </div>
         </div>
 
+        {/* Active Filter Pills */}
+        <UserFilterPills
+          filterStatus={filterStatus}
+          filterRole={filterRole}
+          filterCompany={filterCompany}
+          roleDefinitions={roleDefinitions}
+          companies={companies}
+          onClearStatus={() => setFilterStatus("all")}
+          onClearRole={() => setFilterRole("all")}
+          onClearCompany={() => setFilterCompany("all")}
+          onClearAll={clearAllFilters}
+        />
+
         {/* Bulk Actions */}
         {selectedUsers.size > 0 && (
           <div className="flex items-center gap-4 rounded-lg bg-primary/5 border border-primary/20 p-4 animate-fade-in">
@@ -817,185 +998,257 @@ export default function AdminUsersPage() {
         )}
 
         {/* Users Table */}
-        <div className="rounded-xl border border-border bg-card shadow-card animate-slide-up" style={{ animationDelay: "150ms" }}>
+        <div className="rounded-xl border border-border bg-card shadow-card animate-slide-up overflow-hidden" style={{ animationDelay: "150ms" }}>
           {isLoading ? (
             <div className="flex items-center justify-center py-12">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
-          ) : filteredUsers.length === 0 ? (
-            <div className="py-12 text-center text-muted-foreground">
-              {searchQuery || filterStatus !== "all" || filterRole !== "all" || filterCompany !== "all" 
-                ? "No users found matching your filters." 
-                : "No users found."}
-            </div>
+          ) : filteredAndSortedUsers.length === 0 ? (
+            <UserEmptyState
+              hasActiveFilters={hasActiveFilters}
+              onClearFilters={clearAllFilters}
+              onInviteUser={() => setShowInviteDialog(true)}
+            />
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-border bg-muted/30">
-                    <th className="px-4 py-4 text-left">
-                      <Checkbox 
-                        checked={selectedUsers.size === filteredUsers.length && filteredUsers.length > 0}
-                        onCheckedChange={toggleSelectAll}
-                      />
-                    </th>
-                    <th className="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                      User
-                    </th>
-                    <th className="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                      Company
-                    </th>
-                    <th className="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                      Roles
-                    </th>
-                    <th className="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                      Status
-                    </th>
-                    <th className="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                      Last Login
-                    </th>
-                    <th className="px-4 py-4 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  {filteredUsers.map((user) => {
-                    const isCurrentUser = user.id === currentUser?.id;
-                    const isLocked = user.locked_until && new Date(user.locked_until) > new Date();
+            <>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-border bg-muted/30">
+                      <th className="px-4 py-4 text-left">
+                        <Checkbox 
+                          checked={selectedUsers.size === paginatedUsers.length && paginatedUsers.length > 0}
+                          onCheckedChange={toggleSelectAll}
+                        />
+                      </th>
+                      <SortableHeader field="name" label="User" />
+                      <SortableHeader field="company" label="Company" />
+                      <th className="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                        Roles
+                      </th>
+                      <th className="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                        Status
+                      </th>
+                      <th className="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                        Invitation
+                      </th>
+                      <SortableHeader field="lastLogin" label="Last Login" />
+                      <th className="px-4 py-4 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border">
+                    {paginatedUsers.map((user) => {
+                      const isCurrentUser = user.id === currentUser?.id;
+                      const isLocked = user.locked_until && new Date(user.locked_until) > new Date();
+                      const recentlyActive = isRecentlyActive(user.last_login_at);
 
-                    return (
-                      <tr key={user.id} className={cn("transition-colors hover:bg-muted/30", !user.is_active && "opacity-60")}>
-                        <td className="px-4 py-4">
-                          <Checkbox 
-                            checked={selectedUsers.has(user.id)}
-                            onCheckedChange={() => toggleUserSelection(user.id)}
-                          />
-                        </td>
-                        <td className="px-4 py-4">
-                          <div className="flex items-center gap-3">
-                            <div className={cn(
-                              "flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold",
-                              user.is_active ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
-                            )}>
-                              {getInitials(user.full_name, user.email)}
+                      return (
+                        <tr 
+                          key={user.id} 
+                          className={cn(
+                            "transition-colors hover:bg-muted/30 cursor-pointer", 
+                            !user.is_active && "opacity-60"
+                          )}
+                          onClick={(e) => {
+                            // Don't open quick view if clicking on checkbox or action buttons
+                            if ((e.target as HTMLElement).closest('button, input, [role="checkbox"]')) return;
+                            handleRowClick(user);
+                          }}
+                        >
+                          <td className="px-4 py-4" onClick={(e) => e.stopPropagation()}>
+                            <Checkbox 
+                              checked={selectedUsers.has(user.id)}
+                              onCheckedChange={() => toggleUserSelection(user.id)}
+                            />
+                          </td>
+                          <td className="px-4 py-4">
+                            <div className="flex items-center gap-3">
+                              <div className="relative">
+                                <div className={cn(
+                                  "flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold",
+                                  user.is_active ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
+                                )}>
+                                  {getInitials(user.full_name, user.email)}
+                                </div>
+                                {recentlyActive && (
+                                  <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-success border-2 border-card" />
+                                )}
+                              </div>
+                              <div>
+                                <p className="font-medium text-card-foreground">
+                                  {user.full_name || "Unnamed User"}
+                                  {isCurrentUser && <span className="ml-2 text-xs text-muted-foreground">(You)</span>}
+                                  {isLocked && <span className="ml-2 text-xs text-destructive">(Locked)</span>}
+                                </p>
+                                <p className={cn("text-sm text-muted-foreground", !canViewPii && "font-mono text-xs")}>
+                                  {maskPii(user.email, "email")}
+                                </p>
+                              </div>
                             </div>
-                            <div>
-                              <p className="font-medium text-card-foreground">
-                                {user.full_name || "Unnamed User"}
-                                {isCurrentUser && <span className="ml-2 text-xs text-muted-foreground">(You)</span>}
-                                {isLocked && <span className="ml-2 text-xs text-destructive">(Locked)</span>}
-                              </p>
-                              <p className={cn("text-sm text-muted-foreground", !canViewPii && "font-mono text-xs")}>
-                                {maskPii(user.email, "email")}
-                              </p>
+                          </td>
+                          <td className="px-4 py-4">
+                            <div className="text-sm">
+                              <p className="text-card-foreground">{user.company_name || "—"}</p>
+                              {user.department_name && (
+                                <p className="text-xs text-muted-foreground">{user.department_name}</p>
+                              )}
                             </div>
-                          </div>
-                        </td>
-                        <td className="px-4 py-4">
-                          <div className="text-sm">
-                            <p className="text-card-foreground">{user.company_name || "—"}</p>
-                            {user.department_name && (
-                              <p className="text-xs text-muted-foreground">{user.department_name}</p>
-                            )}
-                          </div>
-                        </td>
-                        <td className="px-4 py-4">
-                          <div className="flex flex-wrap gap-1">
-                            {user.roles.map(role => {
-                              const style = getRoleStyle(role);
-                              const Icon = style.icon;
-                              return (
-                                <span key={role} className={cn("inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium", style.color)}>
-                                  <Icon className="h-3 w-3" />
-                                  {getRoleName(role)}
-                                </span>
-                              );
-                            })}
-                          </div>
-                        </td>
-                        <td className="px-4 py-4">
-                          <span className={cn(
-                            "inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium",
-                            user.is_active ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive"
-                          )}>
-                            {user.is_active ? <UserCheck className="h-3.5 w-3.5" /> : <Ban className="h-3.5 w-3.5" />}
-                            {user.is_active ? "Active" : "Disabled"}
-                          </span>
-                        </td>
-                        <td className="px-4 py-4">
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <Clock className="h-4 w-4" />
-                            {formatDateTime(user.last_login_at)}
-                          </div>
-                        </td>
-                        <td className="px-4 py-4 text-right">
-                          <DropdownMenu open={openDropdown === user.id} onOpenChange={(open) => setOpenDropdown(open ? user.id : null)}>
-                            <DropdownMenuTrigger asChild>
-                              <button disabled={updatingUserId === user.id} className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-50">
-                                {updatingUserId === user.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <MoreHorizontal className="h-4 w-4" />}
-                              </button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-56">
-                              <DropdownMenuLabel>User Actions</DropdownMenuLabel>
-                              <DropdownMenuItem onClick={() => handleEditUser(user)}>
-                                <Edit className="mr-2 h-4 w-4" />
-                                Edit User
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => handleUserAction(user.id, "resend_invite")}>
-                                <Mail className="mr-2 h-4 w-4" />
-                                Resend Invite
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => handleUserAction(user.id, "generate_temp_password")}>
-                                <Key className="mr-2 h-4 w-4" />
-                                Reset Password
-                              </DropdownMenuItem>
-                              
-                              <DropdownMenuSeparator />
-                              <DropdownMenuLabel>Security</DropdownMenuLabel>
-                              <DropdownMenuItem onClick={() => handleUserAction(user.id, "force_password_change")}>
-                                <Key className="mr-2 h-4 w-4" />
-                                Force Password Change
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => handleUserAction(user.id, "revoke_sessions")}>
-                                <LogOut className="mr-2 h-4 w-4" />
-                                Revoke Sessions
-                              </DropdownMenuItem>
-                              {(isLocked || user.failed_login_attempts > 0) && (
-                                <DropdownMenuItem onClick={() => handleUserAction(user.id, "unlock_account")}>
-                                  <Unlock className="mr-2 h-4 w-4" />
-                                  Unlock Account
-                                </DropdownMenuItem>
+                          </td>
+                          <td className="px-4 py-4">
+                            <div className="flex flex-wrap gap-1">
+                              {user.roles.map(role => {
+                                const style = getRoleStyle(role);
+                                const Icon = style.icon;
+                                return (
+                                  <span key={role} className={cn("inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium", style.color)}>
+                                    <Icon className="h-3 w-3" />
+                                    {getRoleName(role)}
+                                  </span>
+                                );
+                              })}
+                            </div>
+                          </td>
+                          <td className="px-4 py-4">
+                            <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                              <Switch
+                                checked={user.is_active}
+                                onCheckedChange={(checked) => {
+                                  if (!isCurrentUser) {
+                                    handleUserAction(user.id, checked ? "enable" : "disable");
+                                  }
+                                }}
+                                disabled={isCurrentUser || updatingUserId === user.id}
+                              />
+                              <span className={cn(
+                                "text-xs font-medium",
+                                user.is_active ? "text-success" : "text-muted-foreground"
+                              )}>
+                                {user.is_active ? "Active" : "Disabled"}
+                              </span>
+                            </div>
+                          </td>
+                          <td className="px-4 py-4">
+                            {user.invitation_status === "pending" ? (
+                              <Badge variant="outline" className="text-amber-600 border-amber-300 gap-1">
+                                <Mail className="h-3 w-3" />
+                                Pending
+                              </Badge>
+                            ) : user.invitation_status === "accepted" || user.last_login_at ? (
+                              <Badge variant="outline" className="text-success border-success/30 gap-1">
+                                <Check className="h-3 w-3" />
+                                Accepted
+                              </Badge>
+                            ) : null}
+                          </td>
+                          <td className="px-4 py-4">
+                            <div className="flex items-center gap-2 text-sm">
+                              {recentlyActive && (
+                                <span className="h-2 w-2 rounded-full bg-success animate-pulse" />
                               )}
+                              <div>
+                                <p className={cn(
+                                  user.last_login_at ? "text-card-foreground" : "text-muted-foreground"
+                                )}>
+                                  {formatDateTime(user.last_login_at)}
+                                </p>
+                                {getRelativeTime(user.last_login_at) && (
+                                  <p className="text-xs text-muted-foreground">
+                                    {getRelativeTime(user.last_login_at)}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-4 py-4 text-right" onClick={(e) => e.stopPropagation()}>
+                            <div className="flex items-center justify-end gap-1">
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button 
+                                    variant="ghost" 
+                                    size="icon" 
+                                    className="h-8 w-8"
+                                    onClick={() => handleEditUser(user)}
+                                  >
+                                    <Edit className="h-4 w-4" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>Edit user</TooltipContent>
+                              </Tooltip>
                               
-                              <DropdownMenuSeparator />
-                              {user.is_active ? (
-                                <DropdownMenuItem 
-                                  onClick={() => handleUserAction(user.id, "disable")}
-                                  disabled={isCurrentUser}
-                                  className="text-destructive focus:text-destructive"
-                                >
-                                  <UserX className="mr-2 h-4 w-4" />
-                                  Disable User
-                                </DropdownMenuItem>
-                              ) : (
-                                <DropdownMenuItem onClick={() => handleUserAction(user.id, "enable")} className="text-success focus:text-success">
-                                  <UserCheck className="mr-2 h-4 w-4" />
-                                  Enable User
-                                </DropdownMenuItem>
-                              )}
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+                              <DropdownMenu open={openDropdown === user.id} onOpenChange={(open) => setOpenDropdown(open ? user.id : null)}>
+                                <DropdownMenuTrigger asChild>
+                                  <button disabled={updatingUserId === user.id} className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-50">
+                                    {updatingUserId === user.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <MoreHorizontal className="h-4 w-4" />}
+                                  </button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="w-56">
+                                  <DropdownMenuLabel>User Actions</DropdownMenuLabel>
+                                  <DropdownMenuItem onClick={() => handleUserAction(user.id, "resend_invite")}>
+                                    <Mail className="mr-2 h-4 w-4" />
+                                    Resend Invite
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => handleUserAction(user.id, "generate_temp_password")}>
+                                    <Key className="mr-2 h-4 w-4" />
+                                    Reset Password
+                                  </DropdownMenuItem>
+                                  
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuLabel>Security</DropdownMenuLabel>
+                                  <DropdownMenuItem onClick={() => handleUserAction(user.id, "force_password_change")}>
+                                    <Key className="mr-2 h-4 w-4" />
+                                    Force Password Change
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => handleUserAction(user.id, "revoke_sessions")}>
+                                    <LogOut className="mr-2 h-4 w-4" />
+                                    Revoke Sessions
+                                  </DropdownMenuItem>
+                                  {(isLocked || user.failed_login_attempts > 0) && (
+                                    <DropdownMenuItem onClick={() => handleUserAction(user.id, "unlock_account")}>
+                                      <Unlock className="mr-2 h-4 w-4" />
+                                      Unlock Account
+                                    </DropdownMenuItem>
+                                  )}
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+              
+              {/* Pagination */}
+              <UserTablePagination
+                currentPage={currentPage}
+                pageSize={pageSize}
+                totalItems={filteredAndSortedUsers.length}
+                onPageChange={setCurrentPage}
+                onPageSizeChange={(size) => {
+                  setPageSize(size);
+                  setCurrentPage(1);
+                }}
+              />
+            </>
           )}
         </div>
       </div>
+
+      {/* Quick View Panel */}
+      <UserQuickView
+        user={quickViewUser}
+        open={showQuickView}
+        onOpenChange={setShowQuickView}
+        roleDefinitions={roleDefinitions}
+        onEdit={handleEditUser}
+        onAction={handleUserAction}
+        isCurrentUser={quickViewUser?.id === currentUser?.id}
+        canViewPii={canViewPii}
+        maskPii={maskPii}
+      />
 
       {/* Invite User Dialog */}
       <Dialog open={showInviteDialog} onOpenChange={setShowInviteDialog}>
