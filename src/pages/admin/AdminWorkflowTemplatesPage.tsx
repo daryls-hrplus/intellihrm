@@ -45,6 +45,8 @@ const WORKFLOW_CATEGORIES: { value: WorkflowCategory; label: string }[] = [
   { value: "resignation", label: "Resignation" },
   { value: "salary_change", label: "Salary Change" },
   { value: "rate_change", label: "Hourly/Daily Rate Change" },
+  // Self-Service Workflows
+  { value: "ess_approval", label: "ESS Approval" },
   // Other Workflows
   { value: "leave_request", label: "Leave Request" },
   { value: "probation_confirmation", label: "Probation Confirmation (Legacy)" },

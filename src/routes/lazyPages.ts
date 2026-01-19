@@ -548,6 +548,7 @@ export const HRCalendarPage = lazy(() => import('@/pages/hr-hub/HRCalendarPage')
 export const HRTasksPage = lazy(() => import('@/pages/hr-hub/HRTasksPage'));
 export const ESSChangeRequestsPage = lazy(() => import('@/pages/hr/ESSChangeRequestsPage'));
 export const ESSApprovalPoliciesPage = lazy(() => import('@/pages/hr-hub/ESSApprovalPoliciesPage'));
+export const ESSAdministrationPage = lazy(() => import('@/pages/admin/ESSAdministrationPage'));
 export const HRMilestonesPage = lazy(() => import('@/pages/hr-hub/HRMilestonesPage'));
 export const ComplianceTrackerPage = lazy(() => import('@/pages/hr-hub/ComplianceTrackerPage'));
 export const HRRemindersPage = lazy(() => import('@/pages/hr-hub/HRRemindersPage'));

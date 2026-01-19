@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
-export type ApprovalMode = 'auto_approve' | 'hr_review' | 'workflow';
+export type ApprovalMode = 'auto_approve' | 'manager_review' | 'hr_review' | 'workflow';
 
 export interface ESSApprovalPolicy {
   id: string;
