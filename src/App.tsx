@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { TranslationsProvider } from "@/components/TranslationsProvider";
 import { ThemeProvider } from "next-themes";
@@ -212,7 +212,8 @@ const App = () => (
             <Route path="/admin/company-announcements" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><LazyPage><Pages.CompanyAnnouncementsPage /></LazyPage></ProtectedRoute>} />
             <Route path="/admin/approval-delegations" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><LazyPage><Pages.ApprovalDelegationsPage /></LazyPage></ProtectedRoute>} />
             <Route path="/admin/company-documents" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><LazyPage><Pages.CompanyDocumentsPage /></LazyPage></ProtectedRoute>} />
-            <Route path="/admin/ess-configuration" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><LazyPage><Pages.EssConfigurationPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/admin/ess-configuration" element={<Navigate to="/admin/ess-administration" replace />} />
+            <Route path="/admin/ess-administration" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><LazyPage><Pages.ESSAdministrationPage /></LazyPage></ProtectedRoute>} />
 
             {/* Workforce Routes */}
             <Route path="/workforce" element={<ProtectedRoute><LazyPage><Pages.WorkforceDashboardPage /></LazyPage></ProtectedRoute>} />
@@ -556,7 +557,7 @@ const App = () => (
             <Route path="/hr-hub/calendar" element={<ProtectedRoute moduleCode="hr_hub"><LazyPage><Pages.HRCalendarPage /></LazyPage></ProtectedRoute>} />
             <Route path="/hr-hub/tasks" element={<ProtectedRoute moduleCode="hr_hub"><LazyPage><Pages.HRTasksPage /></LazyPage></ProtectedRoute>} />
             <Route path="/hr-hub/ess-change-requests" element={<ProtectedRoute moduleCode="hr_hub"><LazyPage><Pages.ESSChangeRequestsPage /></LazyPage></ProtectedRoute>} />
-            <Route path="/hr-hub/ess-approval-policies" element={<ProtectedRoute moduleCode="hr_hub"><LazyPage><Pages.ESSApprovalPoliciesPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/hr-hub/ess-approval-policies" element={<Navigate to="/admin/ess-administration?tab=policies" replace />} />
             <Route path="/hr-hub/milestones" element={<ProtectedRoute moduleCode="hr_hub"><LazyPage><Pages.HRMilestonesPage /></LazyPage></ProtectedRoute>} />
             <Route path="/hr-hub/compliance-tracker" element={<ProtectedRoute moduleCode="hr_hub"><LazyPage><Pages.ComplianceTrackerPage /></LazyPage></ProtectedRoute>} />
             <Route path="/hr-hub/reminders" element={<ProtectedRoute moduleCode="hr_hub"><LazyPage><Pages.HRRemindersPage /></LazyPage></ProtectedRoute>} />
