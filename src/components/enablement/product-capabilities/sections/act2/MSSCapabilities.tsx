@@ -77,7 +77,7 @@ export function MSSCapabilities() {
             <CapabilityItem>Termination requests with offboarding trigger</CapabilityItem>
             <CapabilityItem>Onboarding task management visibility</CapabilityItem>
             <CapabilityItem>Offboarding coordination and exit interviews</CapabilityItem>
-            <CapabilityItem>Acting and interim assignment management</CapabilityItem>
+            <CapabilityItem>Acting assignment management</CapabilityItem>
             <CapabilityItem>Job requisition creation and approval</CapabilityItem>
           </CapabilityCategory>
 

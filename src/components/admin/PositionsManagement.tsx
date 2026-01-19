@@ -102,7 +102,6 @@ interface Position {
 const ASSIGNMENT_TYPES = [
   { value: "primary", label: "Primary Position" },
   { value: "acting", label: "Acting Position" },
-  { value: "interim", label: "Interim Position" },
   { value: "secondary", label: "Secondary Position" },
   { value: "secondment", label: "Secondment" },
 ] as const;
