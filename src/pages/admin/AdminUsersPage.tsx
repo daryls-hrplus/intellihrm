@@ -179,11 +179,13 @@ export default function AdminUsersPage() {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [editUser, setEditUser] = useState<UserWithRoles | null>(null);
   const [editFullName, setEditFullName] = useState("");
+  const [editEmail, setEditEmail] = useState("");
   const [editCompanyId, setEditCompanyId] = useState<string>("");
   const [editDepartmentId, setEditDepartmentId] = useState<string>("");
   const [editSectionId, setEditSectionId] = useState<string>("");
   const [editRoles, setEditRoles] = useState<string[]>([]);
   const [isSavingEdit, setIsSavingEdit] = useState(false);
+  const [showEmailChangeConfirm, setShowEmailChangeConfirm] = useState(false);
   
   // Temp password dialog state
   const [showTempPasswordDialog, setShowTempPasswordDialog] = useState(false);
@@ -430,6 +432,7 @@ export default function AdminUsersPage() {
   const handleEditUser = (user: UserWithRoles) => {
     setEditUser(user);
     setEditFullName(user.full_name || "");
+    setEditEmail(user.email);
     setEditCompanyId(user.company_id || "");
     setEditDepartmentId(user.department_id || "");
     setEditSectionId(user.section_id || "");
@@ -441,8 +444,44 @@ export default function AdminUsersPage() {
   const handleSaveEdit = async () => {
     if (!editUser) return;
 
+    // Check if email is being changed and needs confirmation
+    const emailChanged = editEmail.toLowerCase().trim() !== editUser.email.toLowerCase();
+    if (emailChanged && !showEmailChangeConfirm) {
+      setShowEmailChangeConfirm(true);
+      return;
+    }
+
+    // Prevent changing own email
+    if (emailChanged && editUser.id === currentUser?.id) {
+      toast({
+        title: "Cannot change your own email",
+        description: "Use account settings to change your own email address.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsSavingEdit(true);
     try {
+      // Update email first if changed
+      if (emailChanged) {
+        await invokeManageUser({
+          action: "update_email",
+          user_id: editUser.id,
+          new_email: editEmail.toLowerCase().trim(),
+        });
+
+        logAction({
+          action: "UPDATE",
+          entityType: "user",
+          entityId: editUser.id,
+          entityName: editUser.email,
+          oldValues: { email: editUser.email },
+          newValues: { email: editEmail.toLowerCase().trim() },
+          metadata: { change_type: "email_change" },
+        });
+      }
+
       await invokeManageUser({
         action: "update_profile",
         user_id: editUser.id,
@@ -464,14 +503,18 @@ export default function AdminUsersPage() {
         action: "UPDATE",
         entityType: "user",
         entityId: editUser.id,
-        entityName: editUser.email,
+        entityName: emailChanged ? editEmail : editUser.email,
         oldValues: { full_name: editUser.full_name, roles: editUser.roles },
         newValues: { full_name: editFullName, roles: editRoles },
       });
 
       setShowEditDialog(false);
+      setShowEmailChangeConfirm(false);
       fetchData();
-      toast({ title: "User updated" });
+      toast({ 
+        title: "User updated",
+        description: emailChanged ? "Email changed. User must log in with new email." : undefined,
+      });
     } catch (error: unknown) {
       console.error("Error updating user:", error);
       toast({
@@ -1308,13 +1351,42 @@ export default function AdminUsersPage() {
       </Dialog>
 
       {/* Edit User Dialog */}
-      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+      <Dialog open={showEditDialog} onOpenChange={(open) => { setShowEditDialog(open); if (!open) setShowEmailChangeConfirm(false); }}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>Edit User</DialogTitle>
-            <DialogDescription>Update user profile and roles.</DialogDescription>
+            <DialogDescription>Update user profile, email, and roles.</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Email Address</Label>
+              <Input 
+                type="email"
+                value={editEmail} 
+                onChange={(e) => { setEditEmail(e.target.value); setShowEmailChangeConfirm(false); }}
+                className={cn(
+                  editUser && editEmail.toLowerCase().trim() !== editUser.email.toLowerCase() && "border-warning ring-1 ring-warning"
+                )}
+              />
+              {editUser && editEmail.toLowerCase().trim() !== editUser.email.toLowerCase() && (
+                <div className="rounded-md bg-warning/10 border border-warning/30 p-3 text-sm text-warning-foreground">
+                  <div className="flex items-start gap-2">
+                    <AlertCircle className="h-4 w-4 mt-0.5 shrink-0 text-warning" />
+                    <div>
+                      <p className="font-medium">Changing email address will:</p>
+                      <ul className="mt-1 list-disc list-inside text-xs space-y-0.5">
+                        <li>Log out user from all sessions</li>
+                        <li>Require password change on next login</li>
+                        <li>User must log in with new email</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              )}
+              {editUser?.id === currentUser?.id && editEmail.toLowerCase().trim() !== editUser.email.toLowerCase() && (
+                <p className="text-xs text-destructive">You cannot change your own email address here.</p>
+              )}
+            </div>
             <div className="space-y-2">
               <Label>Full Name</Label>
               <Input value={editFullName} onChange={(e) => setEditFullName(e.target.value)} />
@@ -1374,11 +1446,35 @@ export default function AdminUsersPage() {
                 ))}
               </div>
             </div>
+
+            {/* Email Change Confirmation */}
+            {showEmailChangeConfirm && (
+              <div className="rounded-md bg-destructive/10 border border-destructive/30 p-4">
+                <div className="flex items-start gap-3">
+                  <AlertCircle className="h-5 w-5 mt-0.5 shrink-0 text-destructive" />
+                  <div className="space-y-2">
+                    <p className="font-medium text-destructive">Confirm Email Change</p>
+                    <p className="text-sm text-muted-foreground">
+                      You are about to change the email from <strong>{editUser?.email}</strong> to <strong>{editEmail}</strong>.
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      The user will be logged out and must use the new email to sign in.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowEditDialog(false)}>Cancel</Button>
-            <Button onClick={handleSaveEdit} disabled={isSavingEdit}>
-              {isSavingEdit ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Saving...</> : "Save Changes"}
+            <Button variant="outline" onClick={() => { setShowEditDialog(false); setShowEmailChangeConfirm(false); }}>Cancel</Button>
+            <Button onClick={handleSaveEdit} disabled={isSavingEdit || (editUser?.id === currentUser?.id && editEmail.toLowerCase().trim() !== editUser.email.toLowerCase())}>
+              {isSavingEdit ? (
+                <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Saving...</>
+              ) : showEmailChangeConfirm ? (
+                "Confirm & Save"
+              ) : (
+                "Save Changes"
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>

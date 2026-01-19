@@ -10,8 +10,9 @@ const corsHeaders = {
 interface ManageUserRequest {
   action: "invite" | "resend_invite" | "enable" | "disable" | "generate_temp_password" | 
           "force_password_change" | "unlock_account" | "revoke_sessions" | "update_profile" | "update_roles" |
-          "bulk_enable" | "bulk_disable" | "bulk_update_roles";
+          "bulk_enable" | "bulk_disable" | "bulk_update_roles" | "update_email";
   email?: string;
+  new_email?: string;
   full_name?: string;
   company_id?: string;
   department_id?: string;
@@ -102,8 +103,8 @@ serve(async (req) => {
     }
 
     const body: ManageUserRequest = await req.json();
-    const { action, email, full_name, company_id, department_id, section_id, user_id, user_ids, roles: newRoles, force_change } = body;
-    console.log(`Processing action: ${action}`, { email, full_name, company_id, user_id, user_ids });
+    const { action, email, new_email, full_name, company_id, department_id, section_id, user_id, user_ids, roles: newRoles, force_change } = body;
+    console.log(`Processing action: ${action}`, { email, new_email, full_name, company_id, user_id, user_ids });
 
     switch (action) {
       case "invite": {
@@ -712,6 +713,161 @@ serve(async (req) => {
 
         return new Response(
           JSON.stringify({ success: true, results }),
+          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      case "update_email": {
+        if (!user_id || !new_email) {
+          return new Response(
+            JSON.stringify({ error: "User ID and new email are required" }),
+            { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+
+        // Prevent changing your own email
+        if (user_id === requestingUser.id) {
+          return new Response(
+            JSON.stringify({ error: "Cannot change your own email through this interface. Use account settings instead." }),
+            { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+
+        // Validate email format
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(new_email)) {
+          return new Response(
+            JSON.stringify({ error: "Invalid email format" }),
+            { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+
+        const normalizedNewEmail = new_email.toLowerCase().trim();
+
+        // Get current user profile
+        const { data: currentProfile, error: profileFetchError } = await supabase
+          .from("profiles")
+          .select("email, full_name")
+          .eq("id", user_id)
+          .single();
+
+        if (profileFetchError || !currentProfile) {
+          return new Response(
+            JSON.stringify({ error: "User not found" }),
+            { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+
+        const oldEmail = currentProfile.email;
+
+        // Check if new email is different
+        if (oldEmail.toLowerCase() === normalizedNewEmail) {
+          return new Response(
+            JSON.stringify({ error: "New email is the same as current email" }),
+            { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+
+        // Check if new email already exists
+        const { data: existingProfile } = await supabase
+          .from("profiles")
+          .select("id")
+          .eq("email", normalizedNewEmail)
+          .neq("id", user_id)
+          .maybeSingle();
+
+        if (existingProfile) {
+          return new Response(
+            JSON.stringify({ error: "A user with this email already exists" }),
+            { status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+
+        // Update auth.users email
+        const { error: authUpdateError } = await supabase.auth.admin.updateUserById(user_id, {
+          email: normalizedNewEmail,
+          email_confirm: true
+        });
+
+        if (authUpdateError) {
+          console.error("Auth email update error:", authUpdateError);
+          return new Response(
+            JSON.stringify({ error: authUpdateError.message }),
+            { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+
+        // Update profiles table
+        const { error: profileUpdateError } = await supabase
+          .from("profiles")
+          .update({ 
+            email: normalizedNewEmail,
+            force_password_change: true
+          })
+          .eq("id", user_id);
+
+        if (profileUpdateError) {
+          console.error("Profile email update error:", profileUpdateError);
+          // Try to revert auth email
+          await supabase.auth.admin.updateUserById(user_id, { email: oldEmail });
+          return new Response(
+            JSON.stringify({ error: profileUpdateError.message }),
+            { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+
+        // Revoke all sessions to force re-login with new email
+        await supabase.auth.admin.signOut(user_id, "global");
+
+        // Send notification emails if Resend is configured
+        if (resendApiKey) {
+          try {
+            // Notify old email
+            await sendEmail(
+              resendApiKey,
+              oldEmail,
+              "HRplus Cerebra - Your Email Address Has Been Changed",
+              `
+                <h1>Email Address Changed</h1>
+                <p>Hi ${currentProfile.full_name || "there"},</p>
+                <p>Your HRplus Cerebra account email has been changed by an administrator.</p>
+                <p><strong>Old Email:</strong> ${oldEmail}</p>
+                <p><strong>New Email:</strong> ${normalizedNewEmail}</p>
+                <p>If you did not expect this change, please contact your HR administrator immediately.</p>
+                <p>Best regards,<br>The HRplus Cerebra Team</p>
+              `
+            );
+
+            // Notify new email
+            await sendEmail(
+              resendApiKey,
+              normalizedNewEmail,
+              "HRplus Cerebra - Your Account Email Has Been Updated",
+              `
+                <h1>Account Email Updated</h1>
+                <p>Hi ${currentProfile.full_name || "there"},</p>
+                <p>Your HRplus Cerebra account email has been changed to this address.</p>
+                <p><strong>Your New Email:</strong> ${normalizedNewEmail}</p>
+                <p>You will need to log in with this new email address. A password change will be required on your next login.</p>
+                <p>If you did not expect this change, please contact your HR administrator immediately.</p>
+                <p>Best regards,<br>The HRplus Cerebra Team</p>
+              `
+            );
+            console.log("Email change notifications sent successfully");
+          } catch (emailError) {
+            console.error("Failed to send email change notifications:", emailError);
+          }
+        }
+
+        console.log(`Email updated for user ${user_id}: ${oldEmail} -> ${normalizedNewEmail}`);
+
+        return new Response(
+          JSON.stringify({ 
+            success: true, 
+            old_email: oldEmail,
+            new_email: normalizedNewEmail,
+            email_sent: !!resendApiKey
+          }),
           { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
