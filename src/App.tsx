@@ -212,6 +212,7 @@ const App = () => (
             <Route path="/admin/company-announcements" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><LazyPage><Pages.CompanyAnnouncementsPage /></LazyPage></ProtectedRoute>} />
             <Route path="/admin/approval-delegations" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><LazyPage><Pages.ApprovalDelegationsPage /></LazyPage></ProtectedRoute>} />
             <Route path="/admin/company-documents" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><LazyPage><Pages.CompanyDocumentsPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/admin/ess-configuration" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><LazyPage><Pages.EssConfigurationPage /></LazyPage></ProtectedRoute>} />
 
             {/* Workforce Routes */}
             <Route path="/workforce" element={<ProtectedRoute><LazyPage><Pages.WorkforceDashboardPage /></LazyPage></ProtectedRoute>} />
