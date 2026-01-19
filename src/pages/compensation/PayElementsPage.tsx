@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Card, CardContent } from "@/components/ui/card";
@@ -46,6 +47,8 @@ interface Company {
 
 export default function PayElementsPage() {
   const { t } = useTranslation();
+  const location = useLocation();
+  const isPayrollContext = location.pathname.startsWith("/payroll");
   const {
     isLoading,
     fetchPayElements,
@@ -205,7 +208,10 @@ export default function PayElementsPage() {
       <div className="space-y-6">
         <Breadcrumbs
           items={[
-            { label: t("compensation.title"), href: "/compensation" },
+            { 
+              label: isPayrollContext ? t("payroll.title") : t("compensation.title"), 
+              href: isPayrollContext ? "/payroll" : "/compensation" 
+            },
             { label: t("compensation.payElements.title") },
           ]}
         />
