@@ -337,10 +337,17 @@ export function TransactionFormDialog({
         targetPositionId = formData.to_position_id || null;
       } else if (transactionType === "SECONDMENT") {
         targetPositionId = formData.secondment_position_id || null;
+      } else if (transactionType === "ACTING") {
+        targetPositionId = formData.acting_position_id || null;
+      } else if (transactionType === "HIRE" || transactionType === "REHIRE") {
+        targetPositionId = formData.position_id || null;
       }
 
+      // All transaction types that require seat validation
+      const seatCheckTypes = ["TRANSFER", "PROMOTION", "SECONDMENT", "ACTING", "HIRE", "REHIRE"];
+
       // Reset state if no target position or not a relevant transaction type
-      if (!targetPositionId || !["TRANSFER", "PROMOTION", "SECONDMENT"].includes(transactionType || "")) {
+      if (!targetPositionId || !seatCheckTypes.includes(transactionType || "")) {
         setDestinationSeatStatus({ 
           isLoading: false, 
           hasAvailableSeat: true, 
@@ -376,7 +383,13 @@ export function TransactionFormDialog({
           (seat.is_shared_seat && (seat.current_occupant_count || 0) < (seat.max_occupants || 1))
         );
 
-        const transactionLabel = transactionType === "SECONDMENT" ? "secondment" : transactionType?.toLowerCase() || "transaction";
+        const transactionLabels: Record<string, string> = {
+          "SECONDMENT": "secondment",
+          "ACTING": "acting assignment",
+          "HIRE": "new hire",
+          "REHIRE": "rehire",
+        };
+        const transactionLabel = transactionLabels[transactionType || ""] || transactionType?.toLowerCase() || "transaction";
 
         setDestinationSeatStatus({
           isLoading: false,
@@ -398,7 +411,7 @@ export function TransactionFormDialog({
     };
 
     checkDestinationSeat();
-  }, [formData.to_position_id, formData.secondment_position_id, transactionType]);
+  }, [formData.to_position_id, formData.secondment_position_id, formData.acting_position_id, formData.position_id, transactionType]);
 
   useEffect(() => {
     if (existingTransaction) {
@@ -561,7 +574,10 @@ export function TransactionFormDialog({
 
   const handleSubmit = async () => {
     // Pre-validation for TRANSFER, PROMOTION, and SECONDMENT transactions - block if no seats available
-    if (["TRANSFER", "PROMOTION", "SECONDMENT"].includes(transactionType || "")) {
+    // All transaction types that require seat validation
+    const seatCheckTypes = ["TRANSFER", "PROMOTION", "SECONDMENT", "ACTING", "HIRE", "REHIRE"];
+    
+    if (seatCheckTypes.includes(transactionType || "")) {
       // Block if seat check is still loading
       if (destinationSeatStatus.isLoading) {
         toast.warning("Please wait - checking seat availability...");
@@ -569,13 +585,26 @@ export function TransactionFormDialog({
       }
       
       // Determine which position to check based on transaction type
-      const targetPositionId = transactionType === "SECONDMENT" 
-        ? formData.secondment_position_id 
-        : formData.to_position_id;
+      let targetPositionId: string | undefined;
+      if (transactionType === "SECONDMENT") {
+        targetPositionId = formData.secondment_position_id;
+      } else if (transactionType === "ACTING") {
+        targetPositionId = formData.acting_position_id;
+      } else if (transactionType === "HIRE" || transactionType === "REHIRE") {
+        targetPositionId = formData.position_id;
+      } else {
+        targetPositionId = formData.to_position_id;
+      }
       
       // Block if no seats available
       if (targetPositionId && !destinationSeatStatus.hasAvailableSeat) {
-        const transactionLabel = transactionType === "SECONDMENT" ? "secondment" : transactionType?.toLowerCase() || "transaction";
+        const transactionLabels: Record<string, string> = {
+          "SECONDMENT": "secondment",
+          "ACTING": "acting assignment",
+          "HIRE": "new hire",
+          "REHIRE": "rehire",
+        };
+        const transactionLabel = transactionLabels[transactionType || ""] || transactionType?.toLowerCase() || "transaction";
         toast.error(`Cannot process ${transactionLabel}: No available seats in the destination position.`);
         return;
       }
@@ -2849,6 +2878,14 @@ export function TransactionFormDialog({
                 (transactionType === "SECONDMENT" && (
                   destinationSeatStatus.isLoading || 
                   (formData.secondment_position_id && !destinationSeatStatus.hasAvailableSeat)
+                )) ||
+                (transactionType === "ACTING" && (
+                  destinationSeatStatus.isLoading || 
+                  (formData.acting_position_id && !destinationSeatStatus.hasAvailableSeat)
+                )) ||
+                (["HIRE", "REHIRE"].includes(transactionType || "") && (
+                  destinationSeatStatus.isLoading || 
+                  (formData.position_id && !destinationSeatStatus.hasAvailableSeat)
                 ))
               }
             >
