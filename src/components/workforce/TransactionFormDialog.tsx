@@ -38,6 +38,7 @@ import {
   EmployeeTransaction,
   LookupValue,
   TransactionType,
+  TransactionStatus,
 } from "@/hooks/useEmployeeTransactions";
 import { TransactionEmployeeCompensationDialog } from "@/components/compensation/TransactionEmployeeCompensationDialog";
 
@@ -593,8 +594,8 @@ export function TransactionFormDialog({
     const submitData = {
       ...cleanFormData,
       transaction_type_id: transactionTypeId,
-      // Set status based on centralized workflow setting
-      status: workflowRequired ? "pending_approval" : "approved",
+      // Use the user-selected approval status from the form
+      status: formData.status || "draft",
     };
 
     let success;
@@ -2769,6 +2770,23 @@ export function TransactionFormDialog({
               className="mt-4"
             />
           )}
+
+          {/* Approval Status */}
+          <div className="space-y-2">
+            <Label>{t("workforce.modules.transactions.form.approvalStatus", "Approval Status")} *</Label>
+            <Select
+              value={formData.status || "draft"}
+              onValueChange={(v) => setFormData({ ...formData, status: v as TransactionStatus })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder={t("workforce.modules.transactions.form.selectApprovalStatus", "Select approval status")} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="draft">{t("workforce.modules.transactions.status.draft", "Draft")}</SelectItem>
+                <SelectItem value="approved">{t("workforce.modules.transactions.status.approved", "Approved")}</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
           {/* Common fields continued */}
           <div className="space-y-2">
