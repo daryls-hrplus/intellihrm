@@ -298,7 +298,7 @@ const handler = async (req: Request): Promise<Response> => {
     for (const email of adminEmails) {
       try {
         await resend.emails.send({
-          from: "HRIS Reports <onboarding@resend.dev>",
+          from: "HRplus Reports <noreply@notifications.intellihrm.net>",
           to: [email],
           subject: `${periodLabel} Headcount Analytics Report - ${now.toLocaleDateString()}`,
           html: htmlContent,

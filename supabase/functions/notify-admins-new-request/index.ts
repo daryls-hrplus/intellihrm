@@ -148,7 +148,7 @@ const handler = async (req: Request): Promise<Response> => {
     for (const adminEmail of adminEmails) {
       try {
         const emailResponse = await resend.emails.send({
-          from: "HRIS System <onboarding@resend.dev>",
+          from: "HRplus Cerebra <noreply@notifications.intellihrm.net>",
           to: [adminEmail],
           subject: `New Access Request from ${userEmail}`,
           html: htmlBody,

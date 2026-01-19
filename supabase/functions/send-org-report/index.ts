@@ -436,7 +436,7 @@ serve(async (req: Request): Promise<Response> => {
     for (const email of recipients) {
       try {
         await resend.emails.send({
-          from: "HRIS Reports <onboarding@resend.dev>",
+          from: "HRplus Reports <noreply@notifications.intellihrm.net>",
           to: [email],
           subject: `📊 ${periodLabel} Org Changes Report - ${companyName} - ${now.toLocaleDateString()}`,
           html: htmlContent,

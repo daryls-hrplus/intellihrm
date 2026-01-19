@@ -81,7 +81,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send alert email
     const emailResponse = await resend.emails.send({
-      from: "HRIS Security <onboarding@resend.dev>",
+      from: "HRplus Security <noreply@notifications.intellihrm.net>",
       to: adminEmails,
       subject: `🚨 Suspicious PII Access Alert - ${alertType}`,
       html: `

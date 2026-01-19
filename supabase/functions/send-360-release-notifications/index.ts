@@ -133,7 +133,7 @@ serve(async (req: Request): Promise<Response> => {
       if (resend) {
         try {
           const emailResult = await resend.emails.send({
-            from: "HRplus <noreply@resend.dev>",
+            from: "HRplus Cerebra <noreply@notifications.intellihrm.net>",
             to: [employee.email],
             subject,
             html: body.replace(/\n/g, "<br>"),

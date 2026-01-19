@@ -145,7 +145,7 @@ const handler = async (req: Request): Promise<Response> => {
     console.log(`Sending ${notificationType} email to ${recipientEmail}`);
 
     const emailResponse = await resend.emails.send({
-      from: "HRIS Helpdesk <onboarding@resend.dev>",
+      from: "HRplus Helpdesk <noreply@notifications.intellihrm.net>",
       to: [recipientEmail],
       subject,
       html: htmlContent,

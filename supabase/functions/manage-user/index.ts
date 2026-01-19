@@ -35,7 +35,7 @@ const generatePassword = () => {
 const sendEmail = async (resendApiKey: string, to: string, subject: string, html: string) => {
   const resend = new Resend(resendApiKey);
   return await resend.emails.send({
-    from: "HRplus Cerebra <onboarding@resend.dev>",
+    from: "HRplus Cerebra <noreply@notifications.intellihrm.net>",
     to: [to],
     subject,
     html,

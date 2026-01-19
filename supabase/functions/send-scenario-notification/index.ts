@@ -76,7 +76,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send notification email
     const emailResponse = await resend.emails.send({
-      from: "HRplus Cerebra <onboarding@resend.dev>",
+      from: "HRplus Cerebra <noreply@notifications.intellihrm.net>",
       to: validEmails,
       subject: `${senderName} shared a scenario planning analysis with you`,
       html: `

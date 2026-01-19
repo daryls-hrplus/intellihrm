@@ -127,7 +127,7 @@ const handler = async (req: Request): Promise<Response> => {
     const reportHtml = generateReportHtml(metrics, startDate, endDate);
     
     const { error: emailError } = await resend.emails.send({
-      from: "HRIS Help Desk <onboarding@resend.dev>",
+      from: "HRplus Help Desk <noreply@notifications.intellihrm.net>",
       to: managerEmails,
       subject: `📊 Weekly SLA Performance Report - ${formatDate(startDate)} to ${formatDate(endDate)}`,
       html: reportHtml,

@@ -170,7 +170,7 @@ const handler = async (req: Request): Promise<Response> => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: "HRIS <onboarding@resend.dev>",
+        from: "HRplus Cerebra <noreply@notifications.intellihrm.net>",
         to: recipients,
         subject,
         html: htmlContent,
