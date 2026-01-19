@@ -3,8 +3,9 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { usePageAudit } from "@/hooks/usePageAudit";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, NavLink } from "react-router-dom";
 import { ESSModuleEnablementTab } from "@/components/admin/ess/ESSModuleEnablementTab";
 import { ESSApprovalPoliciesTab } from "@/components/admin/ess/ESSApprovalPoliciesTab";
 import { ESSFieldPermissionsTab } from "@/components/admin/ess/ESSFieldPermissionsTab";
@@ -14,7 +15,8 @@ import {
   ShieldCheck, 
   Wand2,
   Settings2,
-  FileEdit
+  FileEdit,
+  Info
 } from "lucide-react";
 
 export default function ESSAdministrationPage() {
@@ -55,6 +57,17 @@ export default function ESSAdministrationPage() {
             Setup Wizard
           </Button>
         </div>
+
+        <Alert>
+          <Info className="h-4 w-4" />
+          <AlertDescription>
+            <strong>ESS Administration</strong> controls what employees can view and update about themselves in self-service.
+            For module access approvals (when users request access to Leave, Workforce, etc.), see{" "}
+            <NavLink to="/admin/auto-approval" className="text-primary underline hover:no-underline">
+              Access Request Auto-Approval
+            </NavLink>.
+          </AlertDescription>
+        </Alert>
         
         <Tabs value={currentTab} onValueChange={handleTabChange} className="space-y-6">
           <TabsList className="grid w-full max-w-lg grid-cols-3">

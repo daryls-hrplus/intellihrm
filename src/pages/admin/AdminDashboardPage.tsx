@@ -85,8 +85,9 @@ const getAdminModuleSections = (
       { title: t("admin.modules.roles.title"), description: t("admin.modules.roles.description"), href: "/admin/roles", icon: Shield, color: "bg-warning/10 text-warning", tabCode: "roles" },
       { title: t("admin.modules.permissions.title"), description: t("admin.modules.permissions.description"), href: "/admin/permissions", icon: Grid3X3, color: "bg-violet-500/10 text-violet-600", tabCode: "permissions" },
       { title: "Granular Permissions", description: "Configure module, tab, and action-level permissions", href: "/admin/granular-permissions", icon: Lock, color: "bg-indigo-500/10 text-indigo-600", tabCode: "granular-permissions" },
+      { title: "ESS Administration", description: "Configure ESS modules, approvals, and field permissions", href: "/admin/ess-administration", icon: Users, color: "bg-teal-500/10 text-teal-600", tabCode: "ess-administration" },
       { title: t("admin.modules.accessRequests.title"), description: t("admin.modules.accessRequests.description"), href: "/admin/access-requests", icon: ClipboardList, color: "bg-emerald-500/10 text-emerald-600", tabCode: "access-requests" },
-      { title: t("admin.modules.autoApproval.title"), description: t("admin.modules.autoApproval.description"), href: "/admin/auto-approval", icon: Zap, color: "bg-orange-500/10 text-orange-600", tabCode: "auto-approval" },
+      { title: "Access Request Auto-Approval", description: "Automatically approve module access requests by role or company", href: "/admin/auto-approval", icon: Zap, color: "bg-orange-500/10 text-orange-600", tabCode: "auto-approval" },
     ],
     // Section 3: Security & Governance
     security: [
@@ -106,7 +107,6 @@ const getAdminModuleSections = (
       { title: t("admin.modules.settings.title"), description: t("admin.modules.settings.description"), href: "/admin/settings", icon: Cog, color: "bg-slate-500/10 text-slate-600", tabCode: "settings" },
       { title: t("admin.modules.aiUsage.title"), description: t("admin.modules.aiUsage.description"), href: "/admin/ai-usage", icon: Bot, color: "bg-purple-500/10 text-purple-600", tabCode: "ai-usage" },
       { title: t("admin.modules.languages.title"), description: t("admin.modules.languages.description"), href: "/admin/languages", icon: Languages, color: "bg-accent/10 text-accent-foreground", tabCode: "languages" },
-      { title: "ESS Administration", description: "Configure ESS modules, approvals, and field permissions", href: "/admin/ess-administration", icon: Users, color: "bg-teal-500/10 text-teal-600", tabCode: "ess-administration" },
       { title: "Color Scheme", description: "Customize the application's color theme with live preview", href: "/admin/color-scheme", icon: Palette, color: "bg-gradient-to-r from-pink-500/10 to-violet-500/10 text-violet-600", tabCode: "color-scheme" },
       { title: t("admin.modules.bulkImport.title"), description: t("admin.modules.bulkImport.description"), href: "/admin/bulk-import", icon: Upload, color: "bg-cyan-500/10 text-cyan-600", tabCode: "bulk-import" },
       { title: "API Management", description: "Manage API keys, webhooks, and integrations", href: "/system/api-management", icon: Webhook, color: "bg-indigo-500/10 text-indigo-600", tabCode: "api-management" },

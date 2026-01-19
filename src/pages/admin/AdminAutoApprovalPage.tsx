@@ -42,10 +42,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Loader2, Plus, Pencil, Trash2, ArrowLeft, Zap } from "lucide-react";
+import { Loader2, Plus, Pencil, Trash2, ArrowLeft, Zap, Info } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { NavLink } from "react-router-dom";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const MENU_MODULES = [
   { code: "dashboard", name: "Dashboard" },
@@ -262,7 +263,7 @@ export default function AdminAutoApprovalPage() {
         <Breadcrumbs
           items={[
             { label: "Admin", href: "/admin" },
-            { label: "Auto-Approval Rules" },
+            { label: "Access Request Auto-Approval" },
           ]}
         />
 
@@ -277,10 +278,10 @@ export default function AdminAutoApprovalPage() {
             <div>
               <h1 className="text-3xl font-bold flex items-center gap-2">
                 <Zap className="h-8 w-8 text-primary" />
-                Auto-Approval Rules
+                Access Request Auto-Approval
               </h1>
               <p className="text-muted-foreground">
-                Configure automatic approval for access requests based on roles and companies
+                Configure automatic approval for module access requests based on roles and companies
               </p>
             </div>
           </div>
@@ -289,6 +290,17 @@ export default function AdminAutoApprovalPage() {
             Add Rule
           </Button>
         </div>
+
+        <Alert>
+          <Info className="h-4 w-4" />
+          <AlertDescription>
+            This page controls <strong>module access</strong> auto-approvals (e.g., when users request access to Leave or Workforce modules).
+            For employee self-service <strong>data change</strong> approvals (address, banking, etc.), go to{" "}
+            <NavLink to="/admin/ess-administration?tab=policies" className="text-primary underline hover:no-underline">
+              ESS Administration → Approval Policies
+            </NavLink>.
+          </AlertDescription>
+        </Alert>
 
         <Card>
           <CardHeader>
