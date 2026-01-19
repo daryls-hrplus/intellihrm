@@ -565,7 +565,7 @@ const App = () => (
             <Route path="/hr-hub/reference-data" element={<ProtectedRoute moduleCode="hr_hub"><LazyPage><Pages.ReferenceDataCatalogPage /></LazyPage></ProtectedRoute>} />
             <Route path="/hr-hub/sentiment-monitoring" element={<ProtectedRoute moduleCode="hr_hub"><LazyPage><Pages.SentimentMonitoringPage /></LazyPage></ProtectedRoute>} />
             <Route path="/hr-hub/recognition-analytics" element={<ProtectedRoute moduleCode="hr_hub"><LazyPage><Pages.RecognitionAnalyticsPage /></LazyPage></ProtectedRoute>} />
-            <Route path="/hr-hub/integration-dashboard" element={<ProtectedRoute moduleCode="hr_hub"><LazyPage><Pages.IntegrationDashboardPage /></LazyPage></ProtectedRoute>} />
+            <Route path="/hr-hub/integrations" element={<ProtectedRoute moduleCode="hr_hub"><LazyPage><Pages.IntegrationDashboardPage /></LazyPage></ProtectedRoute>} />
             <Route path="/hr-hub/transaction-workflow-settings" element={<ProtectedRoute moduleCode="hr_hub"><LazyPage><Pages.TransactionWorkflowSettingsPage /></LazyPage></ProtectedRoute>} />
             <Route path="/hr-hub/intranet-admin" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><LazyPage><Pages.IntranetAdminPage /></LazyPage></ProtectedRoute>} />
             <Route path="/hr-hub/company-communications" element={<ProtectedRoute requiredRoles={["admin", "hr_manager"]}><LazyPage><Pages.CompanyCommunicationsPage /></LazyPage></ProtectedRoute>} />
