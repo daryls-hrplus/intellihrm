@@ -297,7 +297,6 @@ export function EmployeeCompetenciesTab({ employeeId }: EmployeeCompetenciesTabP
   };
 
   const totalWeight = employeeCompetencies.reduce((sum, ec) => sum + Number(ec.weighting), 0);
-  const jobTotalWeight = jobCompetencies.reduce((sum, jc) => sum + Number(jc.weighting), 0);
 
   const groupedCompetencies = useMemo(() => {
     const groups: Record<string, Competency[]> = {};
@@ -348,7 +347,9 @@ export function EmployeeCompetenciesTab({ employeeId }: EmployeeCompetenciesTabP
           <CardTitle className="text-base flex items-center gap-2">
             <Briefcase className="h-4 w-4 text-muted-foreground" />
             From Job Profile
-            <Badge variant="secondary" className="ml-2">{jobCompetencies.length} competencies • {jobTotalWeight}% weight</Badge>
+            <Badge variant="secondary" className="ml-2">
+              {jobCompetencies.length} competencies • {jobCompetencies.filter(jc => jc.assessed_level !== null).length} assessed • {jobCompetencies.filter(jc => jc.assessed_level === null).length} pending
+            </Badge>
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -363,14 +364,31 @@ export function EmployeeCompetenciesTab({ employeeId }: EmployeeCompetenciesTabP
                   <TableRow>
                     <TableHead>Competency</TableHead>
                     <TableHead>Required Level</TableHead>
+                    <TableHead>Assessed Level</TableHead>
+                    <TableHead>Gap</TableHead>
                     <TableHead>Weight %</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {jobCompetencies.map((jc) => (
                     <TableRow key={jc.competency_id}>
-                      <TableCell className="font-medium">{jc.name} {jc.code && <span className="text-muted-foreground">({jc.code})</span>}</TableCell>
+                      <TableCell className="font-medium">
+                        {jc.name} {jc.code && <span className="text-muted-foreground">({jc.code})</span>}
+                        {jc.category && <Badge variant="outline" className="ml-2 text-xs">{jc.category}</Badge>}
+                      </TableCell>
                       <TableCell><ProficiencyLevelBadge level={jc.required_level || 3} size="sm" /></TableCell>
+                      <TableCell>
+                        {jc.assessed_level !== null && jc.assessed_level !== undefined ? (
+                          <ProficiencyLevelBadge level={jc.assessed_level} size="sm" />
+                        ) : (
+                          <Badge variant="outline" className="text-muted-foreground">
+                            <Clock className="h-3 w-3 mr-1" />Pending
+                          </Badge>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <ProficiencyGapBadge required={jc.required_level || null} assessed={jc.assessed_level ?? null} />
+                      </TableCell>
                       <TableCell><Badge variant="outline">{jc.weighting}%</Badge></TableCell>
                     </TableRow>
                   ))}

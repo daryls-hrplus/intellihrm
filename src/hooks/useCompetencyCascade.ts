@@ -8,6 +8,9 @@ export interface CascadedCompetency {
   weighting: number;
   competency_level_id?: string | null;
   required_level?: number;
+  assessed_level?: number | null;
+  assessed_date?: string | null;
+  assessment_source?: string | null;
   proficiency_indicators?: Record<string, string[]>;
   source: 'job' | 'employee';
   job_id?: string;
@@ -64,12 +67,29 @@ export async function fetchCompetencyCascade(
         .in("job_id", jobIds)
         .is("end_date", null);
 
+      // Also fetch employee_competencies to get assessed levels for job competencies
+      const { data: empAssessments } = await supabase
+        .from("employee_competencies")
+        .select("competency_id, assessed_proficiency_level, assessed_date, assessment_source")
+        .eq("employee_id", employeeId)
+        .is("end_date", null);
+
+      const assessmentMap = new Map<string, { assessed_level: number | null; assessed_date: string | null; assessment_source: string | null }>();
+      (empAssessments || []).forEach((ea: any) => {
+        assessmentMap.set(ea.competency_id, {
+          assessed_level: ea.assessed_proficiency_level,
+          assessed_date: ea.assessed_date,
+          assessment_source: ea.assessment_source,
+        });
+      });
+
       if (jobComps && jobComps.length > 0) {
         // Filter only COMPETENCY type
         for (const jc of jobComps) {
           const sc = (jc as any).skills_competencies;
           if (sc && sc.type === 'COMPETENCY') {
             result.hasJobCompetencies = true;
+            const assessment = assessmentMap.get(jc.capability_id);
             result.fromJob.push({
               competency_id: jc.capability_id,
               name: sc.name,
@@ -77,6 +97,9 @@ export async function fetchCompetencyCascade(
               category: sc.category,
               weighting: jc.weighting || 0,
               required_level: jc.required_proficiency_level,
+              assessed_level: assessment?.assessed_level ?? null,
+              assessed_date: assessment?.assessed_date ?? null,
+              assessment_source: assessment?.assessment_source ?? null,
               proficiency_indicators: sc.proficiency_indicators,
               source: 'job',
               job_id: jc.job_id,
