@@ -341,7 +341,11 @@ export function AppraisalCycleDialog({
         responsibility_weight: formData.responsibility_weight,
         goal_weight: formData.goal_weight,
         values_weight: formData.values_weight,
-        include_values_assessment: formData.values_weight > 0,
+        // Sync include flags from template config
+        include_goals: categoryState.goals && formData.goal_weight > 0,
+        include_competencies: categoryState.competencies && formData.competency_weight > 0,
+        include_responsibilities: categoryState.responsibilities && formData.responsibility_weight > 0,
+        include_values_assessment: categoryState.values && formData.values_weight > 0,
         min_rating: formData.min_rating,
         max_rating: formData.max_rating,
         multi_position_mode: formData.multi_position_mode,

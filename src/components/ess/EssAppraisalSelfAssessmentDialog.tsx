@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import {
   Dialog,
   DialogContent,
@@ -11,7 +11,6 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -29,7 +28,8 @@ import {
   AlertTriangle,
   CheckCircle2,
   Target,
-  Star
+  Star,
+  Heart
 } from "lucide-react";
 import { toast } from "sonner";
 import type { MyAppraisal } from "@/hooks/useMyAppraisals";
@@ -62,37 +62,58 @@ export function EssAppraisalSelfAssessmentDialog({
   const [selfGoalRating, setSelfGoalRating] = useState<string>("");
   const [selfCompetencyRating, setSelfCompetencyRating] = useState<string>("");
   const [selfResponsibilityRating, setSelfResponsibilityRating] = useState<string>("");
+  const [selfValuesRating, setSelfValuesRating] = useState<string>("");
   const [selfReflection, setSelfReflection] = useState("");
   const [achievements, setAchievements] = useState("");
   const [challenges, setChallenges] = useState("");
   const [developmentAreas, setDevelopmentAreas] = useState("");
 
+  // Derive which categories are enabled from the cycle configuration
+  const enabledCategories = useMemo(() => ({
+    goals: appraisal.include_goals && appraisal.goal_weight > 0,
+    competencies: appraisal.include_competencies && appraisal.competency_weight > 0,
+    responsibilities: appraisal.include_responsibilities && appraisal.responsibility_weight > 0,
+    values: appraisal.include_values_assessment && appraisal.values_weight > 0,
+  }), [appraisal]);
+
+  // Count enabled categories for progress calculation
+  const enabledCategoryCount = useMemo(() => 
+    Object.values(enabledCategories).filter(Boolean).length,
+    [enabledCategories]
+  );
+
   const completionProgress = () => {
     let completed = 0;
-    const total = 4;
-    if (selfGoalRating) completed++;
-    if (selfCompetencyRating) completed++;
-    if (selfResponsibilityRating) completed++;
+    // Only count enabled rating categories
+    if (enabledCategories.goals && selfGoalRating) completed++;
+    if (enabledCategories.competencies && selfCompetencyRating) completed++;
+    if (enabledCategories.responsibilities && selfResponsibilityRating) completed++;
+    if (enabledCategories.values && selfValuesRating) completed++;
+    // Always require self-reflection
     if (selfReflection.trim()) completed++;
-    return (completed / total) * 100;
+    
+    const total = enabledCategoryCount + 1; // +1 for self-reflection
+    return total > 0 ? (completed / total) * 100 : 0;
   };
 
   const canSubmit = () => {
-    return (
-      selfGoalRating &&
-      selfCompetencyRating &&
-      selfResponsibilityRating &&
-      selfReflection.trim()
-    );
+    // Check all enabled categories have ratings
+    if (enabledCategories.goals && !selfGoalRating) return false;
+    if (enabledCategories.competencies && !selfCompetencyRating) return false;
+    if (enabledCategories.responsibilities && !selfResponsibilityRating) return false;
+    if (enabledCategories.values && !selfValuesRating) return false;
+    // Always require self-reflection
+    return selfReflection.trim().length > 0;
   };
 
   const handleSaveDraft = async () => {
     setLoading(true);
     try {
       const employeeComments = JSON.stringify({
-        selfGoalRating,
-        selfCompetencyRating,
-        selfResponsibilityRating,
+        selfGoalRating: enabledCategories.goals ? selfGoalRating : null,
+        selfCompetencyRating: enabledCategories.competencies ? selfCompetencyRating : null,
+        selfResponsibilityRating: enabledCategories.responsibilities ? selfResponsibilityRating : null,
+        selfValuesRating: enabledCategories.values ? selfValuesRating : null,
         selfReflection,
         achievements,
         challenges,
@@ -130,9 +151,10 @@ export function EssAppraisalSelfAssessmentDialog({
     setLoading(true);
     try {
       const employeeComments = JSON.stringify({
-        selfGoalRating: parseFloat(selfGoalRating),
-        selfCompetencyRating: parseFloat(selfCompetencyRating),
-        selfResponsibilityRating: parseFloat(selfResponsibilityRating),
+        selfGoalRating: enabledCategories.goals ? parseFloat(selfGoalRating) : null,
+        selfCompetencyRating: enabledCategories.competencies ? parseFloat(selfCompetencyRating) : null,
+        selfResponsibilityRating: enabledCategories.responsibilities ? parseFloat(selfResponsibilityRating) : null,
+        selfValuesRating: enabledCategories.values ? parseFloat(selfValuesRating) : null,
         selfReflection,
         achievements,
         challenges,
@@ -164,6 +186,9 @@ export function EssAppraisalSelfAssessmentDialog({
     }
   };
 
+  // Check if any rating categories are enabled
+  const hasRatingCategories = enabledCategoryCount > 0;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
@@ -185,80 +210,112 @@ export function EssAppraisalSelfAssessmentDialog({
         </div>
 
         <div className="space-y-6 py-4">
-          {/* Self-Rating Section */}
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base flex items-center gap-2">
-                <Star className="h-5 w-5 text-amber-500" />
-                Rate Your Performance
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {/* Goals Rating */}
-                <div className="space-y-2">
-                  <Label className="flex items-center gap-1">
-                    <Target className="h-4 w-4 text-pink-500" />
-                    Goals *
-                  </Label>
-                  <Select value={selfGoalRating} onValueChange={setSelfGoalRating}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select rating" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {RATING_OPTIONS.map((opt) => (
-                        <SelectItem key={opt.value} value={opt.value}>
-                          {opt.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+          {/* Self-Rating Section - Only show if any rating categories are enabled */}
+          {hasRatingCategories && (
+            <>
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <Star className="h-5 w-5 text-amber-500" />
+                    Rate Your Performance
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {/* Goals Rating - Conditional */}
+                    {enabledCategories.goals && (
+                      <div className="space-y-2">
+                        <Label className="flex items-center gap-1">
+                          <Target className="h-4 w-4 text-pink-500" />
+                          Goals ({appraisal.goal_weight}%) *
+                        </Label>
+                        <Select value={selfGoalRating} onValueChange={setSelfGoalRating}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select rating" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {RATING_OPTIONS.map((opt) => (
+                              <SelectItem key={opt.value} value={opt.value}>
+                                {opt.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
 
-                {/* Competencies Rating */}
-                <div className="space-y-2">
-                  <Label className="flex items-center gap-1">
-                    <CheckCircle2 className="h-4 w-4 text-blue-500" />
-                    Competencies *
-                  </Label>
-                  <Select value={selfCompetencyRating} onValueChange={setSelfCompetencyRating}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select rating" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {RATING_OPTIONS.map((opt) => (
-                        <SelectItem key={opt.value} value={opt.value}>
-                          {opt.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+                    {/* Competencies Rating - Conditional */}
+                    {enabledCategories.competencies && (
+                      <div className="space-y-2">
+                        <Label className="flex items-center gap-1">
+                          <CheckCircle2 className="h-4 w-4 text-blue-500" />
+                          Competencies ({appraisal.competency_weight}%) *
+                        </Label>
+                        <Select value={selfCompetencyRating} onValueChange={setSelfCompetencyRating}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select rating" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {RATING_OPTIONS.map((opt) => (
+                              <SelectItem key={opt.value} value={opt.value}>
+                                {opt.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
 
-                {/* Responsibilities Rating */}
-                <div className="space-y-2">
-                  <Label className="flex items-center gap-1">
-                    <ClipboardEdit className="h-4 w-4 text-purple-500" />
-                    Responsibilities *
-                  </Label>
-                  <Select value={selfResponsibilityRating} onValueChange={setSelfResponsibilityRating}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select rating" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {RATING_OPTIONS.map((opt) => (
-                        <SelectItem key={opt.value} value={opt.value}>
-                          {opt.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+                    {/* Responsibilities Rating - Conditional */}
+                    {enabledCategories.responsibilities && (
+                      <div className="space-y-2">
+                        <Label className="flex items-center gap-1">
+                          <ClipboardEdit className="h-4 w-4 text-purple-500" />
+                          Responsibilities ({appraisal.responsibility_weight}%) *
+                        </Label>
+                        <Select value={selfResponsibilityRating} onValueChange={setSelfResponsibilityRating}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select rating" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {RATING_OPTIONS.map((opt) => (
+                              <SelectItem key={opt.value} value={opt.value}>
+                                {opt.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
 
-          <Separator />
+                    {/* Values Rating - Conditional */}
+                    {enabledCategories.values && (
+                      <div className="space-y-2">
+                        <Label className="flex items-center gap-1">
+                          <Heart className="h-4 w-4 text-red-500" />
+                          Values ({appraisal.values_weight}%) *
+                        </Label>
+                        <Select value={selfValuesRating} onValueChange={setSelfValuesRating}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select rating" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {RATING_OPTIONS.map((opt) => (
+                              <SelectItem key={opt.value} value={opt.value}>
+                                {opt.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Separator />
+            </>
+          )}
 
           {/* Self-Reflection */}
           <div className="space-y-2">
