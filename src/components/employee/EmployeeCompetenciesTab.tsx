@@ -114,12 +114,12 @@ export function EmployeeCompetenciesTab({ employeeId }: EmployeeCompetenciesTabP
   const fetchAllCompetencies = async () => {
     setIsLoading(true);
     try {
-      // Fetch employee competencies
+      // Fetch employee competencies - join with skills_competencies
       const { data, error } = await supabase
         .from("employee_competencies")
         .select(`
           *,
-          competencies(name, code),
+          skills_competencies(id, name, code),
           competency_levels(name, code)
         `)
         .eq("employee_id", employeeId)
@@ -129,7 +129,15 @@ export function EmployeeCompetenciesTab({ employeeId }: EmployeeCompetenciesTabP
         console.error("Error fetching employee competencies:", error);
         toast.error("Failed to load competencies");
       } else {
-        setEmployeeCompetencies(data || []);
+        // Map skills_competencies to competencies for backward compatibility
+        const mapped = (data || []).map((ec: any) => ({
+          ...ec,
+          competencies: ec.skills_competencies ? {
+            name: ec.skills_competencies.name,
+            code: ec.skills_competencies.code,
+          } : ec.competencies,
+        }));
+        setEmployeeCompetencies(mapped);
       }
 
       // Fetch job competencies using cascade
@@ -153,16 +161,45 @@ export function EmployeeCompetenciesTab({ employeeId }: EmployeeCompetenciesTabP
   };
 
   const fetchCompetencies = async () => {
+    // Fetch employee's company_id first
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("company_id")
+      .eq("id", employeeId)
+      .single();
+    
+    const employeeCompanyId = profile?.company_id;
+    
+    // Fetch from unified skills_competencies table
     const { data, error } = await supabase
-      .from("competencies")
-      .select("id, name, code, company_id")
-      .eq("is_active", true)
+      .from("skills_competencies")
+      .select(`
+        id, 
+        name, 
+        code,
+        is_global,
+        company_capabilities(company_id)
+      `)
+      .eq("type", "COMPETENCY")
+      .eq("status", "active")
       .order("name");
 
     if (error) {
       console.error("Error fetching competencies:", error);
     } else {
-      setCompetencies(data || []);
+      // Filter to only include competencies that are global OR linked to employee's company
+      const filtered = (data || []).filter((c: any) => {
+        if (c.is_global) return true;
+        if (!employeeCompanyId) return false;
+        const linkedCompanies = c.company_capabilities || [];
+        return linkedCompanies.some((cc: any) => cc.company_id === employeeCompanyId);
+      });
+      setCompetencies(filtered.map((c: any) => ({
+        id: c.id,
+        name: c.name,
+        code: c.code,
+        company_id: employeeCompanyId || '',
+      })));
     }
   };
 
