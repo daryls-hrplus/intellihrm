@@ -180,7 +180,7 @@ export function useEssInbox() {
             description: cycle?.name || 'Performance Review',
             urgency: needsResponse ? 'response_required' : 'pending',
             actionLabel: needsResponse ? 'Respond' : 'View',
-            actionPath: '/ess/my-appraisals',
+            actionPath: '/ess/appraisals',
             createdAt: ap.created_at,
             dueDate: cycle?.end_date,
           });
