@@ -52,6 +52,10 @@ interface CompetencyRatingCardProps {
   hasMultiplePositions?: boolean;
   /** Skills that support this competency - informational only, NOT rated */
   supportingSkills?: SupportingSkill[];
+  /** Self-rating from employee for manager view */
+  selfRating?: number | null;
+  selfComments?: string | null;
+  isManagerView?: boolean;
 }
 
 export function CompetencyRatingCard({
@@ -69,6 +73,9 @@ export function CompetencyRatingCard({
   hasRoleChange = false,
   hasMultiplePositions = false,
   supportingSkills = [],
+  selfRating,
+  selfComments,
+  isManagerView = false,
 }: CompetencyRatingCardProps) {
   const [expandedIndicators, setExpandedIndicators] = useState(false);
   const [expandedSkills, setExpandedSkills] = useState(false);

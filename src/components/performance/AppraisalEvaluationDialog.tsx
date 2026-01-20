@@ -10,7 +10,7 @@ import { Slider } from "@/components/ui/slider";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Target, Briefcase, Award, Save, Send, ChevronDown, ChevronUp, Loader2, GitBranch, Settings2, Users, Brain, Heart, HelpCircle, Sparkles } from "lucide-react";
+import { Target, Briefcase, Award, Save, Send, ChevronDown, ChevronUp, Loader2, GitBranch, Settings2, Users, Brain, Heart, HelpCircle, Sparkles, User } from "lucide-react";
 import { useAppraisalScoreBreakdown } from "@/hooks/useAppraisalScoreBreakdown";
 import { usePerformanceCategoryByScore } from "@/hooks/usePerformanceCategories";
 import { WhyThisScorePanel } from "@/components/appraisals/WhyThisScorePanel";
@@ -46,6 +46,7 @@ import { Suggestion } from "@/hooks/useAppraisalFeedbackAssistant";
 import { DownstreamImpactPreview } from "./DownstreamImpactPreview";
 import { AppraisalIntegrationStatus } from "./AppraisalIntegrationStatus";
 import { CommentQualityHints } from "./CommentQualityHints";
+import { SelfRatingIndicator } from "./SelfRatingIndicator";
 
 interface CompetencyMetadata {
   selected_level?: number;
@@ -74,6 +75,10 @@ interface AppraisalScore {
   rating: number | null;
   weighted_score: number | null;
   comments: string;
+  // Self-rating fields for gap analysis
+  self_rating?: number | null;
+  self_comments?: string | null;
+  self_rated_at?: string | null;
   // For responsibilities with KRAs
   hasKRAs?: boolean;
   kras?: KRAWithRating[];
@@ -670,6 +675,10 @@ export function AppraisalEvaluationDialog({
               weighted_score: existing.weighted_score,
               comments: existing.comments || "",
               metadata: metadata || undefined,
+              // Include self-rating data for manager view gap analysis
+              self_rating: existingAny.self_rating ?? null,
+              self_comments: existingAny.self_comments ?? null,
+              self_rated_at: existingAny.self_rated_at ?? null,
             };
           }
           return score;
@@ -1298,6 +1307,17 @@ export function AppraisalEvaluationDialog({
                   <p className="text-sm text-muted-foreground mt-1">
                     Weighted score: {item.weighted_score.toFixed(1)}%
                   </p>
+                )}
+                {/* Self-Rating Indicator for Manager View */}
+                {!isEmployee && item.self_rating !== null && item.self_rating !== undefined && (
+                  <div className="mt-3">
+                    <SelfRatingIndicator
+                      selfRating={item.self_rating}
+                      managerRating={item.rating}
+                      selfComments={item.self_comments}
+                      showGapAlert={true}
+                    />
+                  </div>
                 )}
               </div>
               <div>

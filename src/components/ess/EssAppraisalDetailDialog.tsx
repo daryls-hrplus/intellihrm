@@ -26,6 +26,7 @@ import {
   ClipboardEdit,
   Shield,
   Sparkles,
+  GitCompare,
 } from "lucide-react";
 import type { MyAppraisal } from "@/hooks/useMyAppraisals";
 import { useAppraisalActionExecutions } from "@/hooks/useAppraisalActionRules";
@@ -37,6 +38,7 @@ import { useGroupedStrengthsGaps } from "@/hooks/useAppraisalStrengthsGaps";
 import { WhyThisScorePanel } from "@/components/appraisals/WhyThisScorePanel";
 import { StrengthsGapsSummary } from "@/components/appraisals/StrengthsGapsSummary";
 import { PerformanceCategoryBadge } from "@/components/appraisals/PerformanceCategoryBadge";
+import { AppraisalItemComparisonTab } from "./AppraisalItemComparisonTab";
 
 interface EssAppraisalDetailDialogProps {
   open: boolean;
@@ -154,8 +156,12 @@ export function EssAppraisalDetailDialog({
         )}
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="comparison" className="gap-1">
+              <GitCompare className="h-3 w-3" />
+              Item Details
+            </TabsTrigger>
             <TabsTrigger value="scores">Scores</TabsTrigger>
             <TabsTrigger value="feedback">Feedback</TabsTrigger>
             <TabsTrigger value="actions">
@@ -317,6 +323,11 @@ export function EssAppraisalDetailDialog({
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Item Comparison Tab */}
+          <TabsContent value="comparison" className="space-y-4 mt-4">
+            <AppraisalItemComparisonTab participantId={appraisal.id} />
           </TabsContent>
 
           {/* Scores Tab */}

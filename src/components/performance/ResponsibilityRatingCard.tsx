@@ -2,8 +2,14 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, User, TrendingUp, TrendingDown, Minus, MessageSquare } from "lucide-react";
 import { RESPONSIBILITY_LEVELS, requiresComment, ResponsibilityLevel } from "@/constants/responsibilityLevels";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface ResponsibilityRatingCardProps {
   itemId: string;
@@ -14,6 +20,9 @@ interface ResponsibilityRatingCardProps {
   weightedScore?: number | null;
   segmentBadge?: string;
   positionBadge?: string;
+  selfRating?: number | null;
+  selfComments?: string | null;
+  isManagerView?: boolean;
 }
 
 export function ResponsibilityRatingCard({
@@ -25,9 +34,18 @@ export function ResponsibilityRatingCard({
   weightedScore,
   segmentBadge,
   positionBadge,
+  selfRating,
+  selfComments,
+  isManagerView = false,
 }: ResponsibilityRatingCardProps) {
   const selectedLevel = rating ? RESPONSIBILITY_LEVELS.find(l => l.value === rating) : null;
   const needsComment = rating !== null && requiresComment(rating) && !comments.trim();
+  
+  // Gap calculation
+  const gap = selfRating !== null && selfRating !== undefined && rating !== null 
+    ? selfRating - rating 
+    : null;
+  const hasSignificantGap = gap !== null && Math.abs(gap) >= 1.5;
 
   return (
     <div className="space-y-4">
@@ -93,6 +111,51 @@ export function ResponsibilityRatingCard({
           <p className="text-sm text-muted-foreground mt-2">
             Weighted score: {weightedScore.toFixed(1)}%
           </p>
+        )}
+
+        {/* Self-Rating Indicator for Manager View */}
+        {isManagerView && selfRating !== null && selfRating !== undefined && (
+          <div className="mt-3 p-2 rounded-lg bg-accent/30 border border-accent/50">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="flex items-center gap-2">
+                    <User className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm text-muted-foreground">Self-Rating:</span>
+                    <span className={cn(
+                      "font-semibold",
+                      hasSignificantGap ? (gap! > 0 ? "text-amber-600" : "text-blue-600") : ""
+                    )}>
+                      {selfRating.toFixed(1)}
+                    </span>
+                    {gap !== null && Math.abs(gap) >= 0.5 && (
+                      <span className={cn(
+                        "flex items-center gap-1 text-xs",
+                        hasSignificantGap ? (gap > 0 ? "text-amber-600" : "text-blue-600") : "text-muted-foreground"
+                      )}>
+                        {gap > 0 ? <TrendingUp className="h-3 w-3" /> : gap < 0 ? <TrendingDown className="h-3 w-3" /> : <Minus className="h-3 w-3" />}
+                        {gap > 0 ? "+" : ""}{gap.toFixed(1)}
+                      </span>
+                    )}
+                    {hasSignificantGap && (
+                      <Badge variant="destructive" className="text-xs">Gap</Badge>
+                    )}
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent side="top" className="max-w-xs">
+                  <div className="space-y-2">
+                    <p className="font-medium">Employee Self-Assessment</p>
+                    <p className="text-sm">Rating: {selfRating.toFixed(1)}</p>
+                    {selfComments && (
+                      <div className="border-t pt-2 mt-2">
+                        <p className="text-xs text-muted-foreground italic">"{selfComments}"</p>
+                      </div>
+                    )}
+                  </div>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
         )}
       </div>
 
