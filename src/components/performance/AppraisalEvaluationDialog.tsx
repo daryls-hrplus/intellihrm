@@ -47,6 +47,7 @@ import { DownstreamImpactPreview } from "./DownstreamImpactPreview";
 import { AppraisalIntegrationStatus } from "./AppraisalIntegrationStatus";
 import { CommentQualityHints } from "./CommentQualityHints";
 import { SelfRatingIndicator } from "./SelfRatingIndicator";
+import { fetchCompetencyCascade } from "@/hooks/useCompetencyCascade";
 
 interface CompetencyMetadata {
   selected_level?: number;
@@ -444,18 +445,12 @@ export function AppraisalEvaluationDialog({
       return;
     }
     
-    // Standard single-position fetch
-    const { data: competencies } = await supabase
-      .from("employee_competencies")
-      .select(`
-        id,
-        weighting,
-        competency_id
-      `)
-      .eq("employee_id", employeeId)
-      .is("end_date", null);
-
-    const compIds = (competencies || []).map((c: any) => c.competency_id);
+    // Standard single-position fetch using competency cascade
+    // PRIMARY: job_competencies, SECONDARY: employee_competencies as overrides
+    const cascadeResult = await fetchCompetencyCascade(employeeId);
+    
+    // Build competency details map with supporting skills
+    const compIds = cascadeResult.competencies.map(c => c.competency_id);
     let compDetails: Record<string, { 
       name: string; 
       category?: string; 
@@ -463,32 +458,18 @@ export function AppraisalEvaluationDialog({
       supportingSkills?: SupportingSkillData[];
     }> = {};
     
+    // Initialize from cascade result
+    for (const comp of cascadeResult.competencies) {
+      compDetails[comp.competency_id] = {
+        name: comp.name,
+        category: comp.category,
+        proficiency_indicators: comp.proficiency_indicators,
+        supportingSkills: [],
+      };
+    }
+    
+    // Fetch skill mappings if we have competencies
     if (compIds.length > 0) {
-      // First try skills_competencies table (for new unified model)
-      const { data: scData } = await supabase
-        .from("skills_competencies")
-        .select("id, name, category, proficiency_indicators")
-        .in("id", compIds);
-      
-      if (scData && scData.length > 0) {
-        compDetails = Object.fromEntries(
-          scData.map((c: any) => [c.id, { 
-            name: c.name, 
-            category: c.category,
-            proficiency_indicators: c.proficiency_indicators as ProficiencyIndicators | undefined,
-            supportingSkills: [] as SupportingSkillData[],
-          }])
-        );
-      } else {
-        // Fallback to legacy competencies table
-        const { data: compData } = await supabase
-          .from("competencies")
-          .select("id, name")
-          .in("id", compIds);
-        compDetails = Object.fromEntries((compData || []).map((c: any) => [c.id, { name: c.name }]));
-      }
-      
-      // Fetch skill mappings for all competencies
       const { data: skillMappings } = await supabase
         .from("competency_skill_mappings")
         .select(`
@@ -498,8 +479,7 @@ export function AppraisalEvaluationDialog({
         `)
         .in("competency_id", compIds);
       
-      // Also fetch employee's current skill levels if available
-      // Use competency_evidence table for skill proficiency levels
+      // Fetch employee's current skill levels
       const { data: employeeSkills } = await supabase
         .from("competency_evidence")
         .select("competency_id, proficiency_level")
@@ -513,7 +493,7 @@ export function AppraisalEvaluationDialog({
         }
       });
       
-      // Group skills by competency and add to compDetails
+      // Group skills by competency
       if (skillMappings && skillMappings.length > 0) {
         for (const mapping of skillMappings as any[]) {
           const compId = mapping.competency_id;
@@ -583,8 +563,9 @@ export function AppraisalEvaluationDialog({
 
     const newScores: AppraisalScore[] = [];
 
-    (competencies || []).forEach((comp: any) => {
-      const details = compDetails[comp.competency_id] || { name: "Unknown" };
+    // Use cascade competencies instead of employee_competencies directly
+    cascadeResult.competencies.forEach((comp) => {
+      const details = compDetails[comp.competency_id] || { name: comp.name };
       newScores.push({
         item_id: comp.competency_id,
         item_name: details.name,
