@@ -114,8 +114,7 @@ export function EmployeeCompetenciesTab({ employeeId }: EmployeeCompetenciesTabP
           weighting,
           notes,
           start_date,
-          end_date,
-          skills_competencies(id, name, code, category)
+          end_date
         `)
         .eq("employee_id", employeeId)
         .is("end_date", null)
@@ -124,8 +123,30 @@ export function EmployeeCompetenciesTab({ employeeId }: EmployeeCompetenciesTabP
       if (error) {
         console.error("Error fetching employee competencies:", error);
         toast.error("Failed to load competencies");
+        setEmployeeCompetencies([]);
       } else {
-        setEmployeeCompetencies(data || []);
+        // Fetch skills_competencies separately to avoid FK relation issues
+        const competencyIds = (data || []).map(ec => ec.competency_id).filter(Boolean);
+        let skillsMap: Record<string, any> = {};
+        
+        if (competencyIds.length > 0) {
+          const { data: skills } = await supabase
+            .from("skills_competencies")
+            .select("id, name, code, category")
+            .in("id", competencyIds);
+          
+          skillsMap = (skills || []).reduce((acc, s) => {
+            acc[s.id] = s;
+            return acc;
+          }, {} as Record<string, any>);
+        }
+        
+        const enriched = (data || []).map(ec => ({
+          ...ec,
+          skills_competencies: skillsMap[ec.competency_id] || null,
+        }));
+        
+        setEmployeeCompetencies(enriched as EmployeeCompetency[]);
       }
 
       const cascadeResult = await fetchCompetencyCascade(employeeId);

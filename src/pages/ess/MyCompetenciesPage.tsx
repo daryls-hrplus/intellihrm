@@ -27,6 +27,8 @@ export default function MyCompetenciesPage() {
     queryKey: ["my-competencies", user?.id],
     queryFn: async () => {
       if (!user?.id) return [];
+      
+      // Fetch employee competencies
       const { data, error } = await supabase
         .from("employee_competencies")
         .select(`
@@ -40,15 +42,34 @@ export default function MyCompetenciesPage() {
           weighting,
           start_date,
           end_date,
-          notes,
-          skills_competencies(id, name, code, category)
+          notes
         `)
         .eq("employee_id", user.id)
         .is("end_date", null)
         .order("start_date", { ascending: false });
 
       if (error) throw error;
-      return data || [];
+      
+      // Fetch skills separately to avoid FK relation issues
+      const competencyIds = (data || []).map(ec => ec.competency_id).filter(Boolean);
+      let skillsMap: Record<string, any> = {};
+      
+      if (competencyIds.length > 0) {
+        const { data: skills } = await supabase
+          .from("skills_competencies")
+          .select("id, name, code, category")
+          .in("id", competencyIds);
+        
+        skillsMap = (skills || []).reduce((acc: Record<string, any>, s: any) => {
+          acc[s.id] = s;
+          return acc;
+        }, {});
+      }
+      
+      return (data || []).map(ec => ({
+        ...ec,
+        skills_competencies: skillsMap[ec.competency_id] || null,
+      }));
     },
     enabled: !!user?.id,
   });
