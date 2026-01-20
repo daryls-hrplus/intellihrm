@@ -31,6 +31,7 @@ import {
   Search,
 } from "lucide-react";
 import { usePerformanceEvidence, PerformanceEvidence, EvidenceType } from "@/hooks/capabilities/usePerformanceEvidence";
+import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 
 interface EvidenceQuickAttachProps {
@@ -67,7 +68,7 @@ export function EvidenceQuickAttach({
   cycleId,
   onAttached,
 }: EvidenceQuickAttachProps) {
-  const { evidence, loading, fetchEvidence, createEvidence, uploadAttachment } = usePerformanceEvidence();
+  const { evidence, loading, fetchEvidence, createEvidence, uploadAttachment, updateEvidence } = usePerformanceEvidence();
   
   const [activeTab, setActiveTab] = useState<"existing" | "new">("existing");
   const [searchQuery, setSearchQuery] = useState("");
@@ -112,10 +113,22 @@ export function EvidenceQuickAttach({
     
     setSaving(true);
     try {
-      // In a full implementation, we would update the evidence records
-      // to link them to the participant/score item
+      // Update each selected evidence to link to this participant/score item
+      for (const evidenceId of selectedIds) {
+        await supabase
+          .from("performance_evidence")
+          .update({
+            participant_id: participantId,
+            score_item_id: scoreItemId,
+            appraisal_cycle_id: cycleId,
+          })
+          .eq("id", evidenceId);
+      }
+      
       onAttached?.(selectedIds);
       onOpenChange(false);
+    } catch (error) {
+      console.error("Error attaching evidence:", error);
     } finally {
       setSaving(false);
     }
@@ -142,6 +155,8 @@ export function EvidenceQuickAttach({
       const result = await createEvidence(employeeId, {
         ...newEvidence,
         appraisal_cycle_id: cycleId,
+        participant_id: participantId,
+        score_item_id: scoreItemId,
         attachment_path: attachmentPath,
         attachment_type: attachmentType,
         attachment_size_bytes: attachmentSize,
