@@ -27,6 +27,7 @@ interface RoleCardProps {
     pii_level?: PiiLevel;
     aggregate_container_permission?: ContainerPermissionLevel;
     modules_count?: number;
+    total_modules?: number;
   };
   onView: (role: Role) => void;
   onEdit: (role: Role) => void;
@@ -48,7 +49,8 @@ export function RoleCard({
   const piiConfig = PII_LEVEL_CONFIG[piiLevel];
   const containerPermission = role.aggregate_container_permission || "none";
   const containerConfig = CONTAINER_PERMISSION_CONFIG[containerPermission];
-  const modulesCount = role.modules_count ?? role.menu_permissions?.length ?? 0;
+  const modulesCount = role.modules_count ?? 0;
+  const totalModules = role.total_modules ?? 0;
 
   return (
     <div
@@ -114,7 +116,7 @@ export function RoleCard({
         )}
         <div className="flex items-center gap-1.5 rounded-full bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground">
           <MenuIcon className="h-3 w-3" />
-          {modulesCount} modules
+          {totalModules > 0 ? `${modulesCount}/${totalModules} modules` : `${modulesCount} modules`}
         </div>
       </div>
 
