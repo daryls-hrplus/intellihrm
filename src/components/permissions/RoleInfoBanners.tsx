@@ -20,10 +20,10 @@ export function RoleInfoBanners({ role }: RoleInfoBannersProps) {
     <div className="space-y-3">
       {/* System Role Banner */}
       {isSystem && (
-        <Alert variant="destructive" className="border-red-200 bg-red-50 dark:bg-red-950/20">
-          <ShieldAlert className="h-4 w-4" />
-          <AlertTitle>System Role - Read Only</AlertTitle>
-          <AlertDescription>
+        <Alert variant="destructive" className="border-red-300 bg-white dark:bg-card">
+          <ShieldAlert className="h-4 w-4 text-red-600" />
+          <AlertTitle className="text-red-700 dark:text-red-500">System Role - Read Only</AlertTitle>
+          <AlertDescription className="text-red-600 dark:text-red-400">
             This is a protected system role used for core platform operations. 
             Permissions cannot be modified to ensure system integrity and security.
           </AlertDescription>
@@ -32,10 +32,10 @@ export function RoleInfoBanners({ role }: RoleInfoBannersProps) {
 
       {/* Template Role Banner */}
       {isSeeded && !isEmployee && (
-        <Alert className="border-violet-200 bg-violet-50 dark:bg-violet-950/20">
-          <Info className="h-4 w-4 text-violet-600 dark:text-violet-400" />
-          <AlertTitle className="text-violet-800 dark:text-violet-300">Template Role</AlertTitle>
-          <AlertDescription className="text-violet-700 dark:text-violet-400">
+        <Alert className="border-violet-300 bg-white dark:bg-card">
+          <Info className="h-4 w-4 text-violet-600" />
+          <AlertTitle className="text-violet-700 dark:text-violet-400">Template Role</AlertTitle>
+          <AlertDescription className="text-violet-600 dark:text-violet-300">
             This is a pre-configured template role. You can customize module and 
             organizational permissions, but the role name and code cannot be changed. 
             All permission changes will be saved and persist.
@@ -45,16 +45,16 @@ export function RoleInfoBanners({ role }: RoleInfoBannersProps) {
 
       {/* Employee Role Banner */}
       {isEmployee && (
-        <Alert className="border-blue-200 bg-blue-50 dark:bg-blue-950/20">
-          <Users className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-          <AlertTitle className="text-blue-800 dark:text-blue-300">Employee Self-Service Role</AlertTitle>
-          <AlertDescription className="text-blue-700 dark:text-blue-400">
+        <Alert className="border-blue-300 bg-white dark:bg-card">
+          <Users className="h-4 w-4 text-blue-600" />
+          <AlertTitle className="text-blue-700 dark:text-blue-400">Employee Self-Service Role</AlertTitle>
+          <AlertDescription className="text-blue-600 dark:text-blue-300">
             <p className="mb-2">
               This role controls which modules employees can access through self-service. 
               To configure which specific fields employees can view or edit within those modules, 
               use ESS Administration.
             </p>
-            <Button asChild variant="outline" size="sm" className="gap-2">
+            <Button asChild variant="outline" size="sm" className="gap-2 border-blue-300 text-blue-700 hover:bg-blue-50">
               <Link to="/admin/ess-administration">
                 <Settings className="h-4 w-4" />
                 Configure ESS Settings

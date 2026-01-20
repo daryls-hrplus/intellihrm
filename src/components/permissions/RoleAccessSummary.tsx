@@ -94,9 +94,9 @@ export function RoleAccessSummary({
   };
 
   return (
-    <Card className="border-2 border-dashed border-muted-foreground/20 bg-gradient-to-br from-muted/30 to-background">
-      <CardContent className="p-4">
-        <div className="flex items-center justify-between mb-4">
+    <Card className="bg-white dark:bg-card border shadow-sm">
+      <CardContent className="p-5">
+        <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-3">
             <h3 className="text-lg font-semibold">{role.name}</h3>
             {getRoleTypeBadge()}
