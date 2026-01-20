@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/layout/AppSidebar";
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Save, Shield, Lock, Eye, FileText, Settings, Users, Database, Clock } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { ArrowLeft, Save, Shield, Lock, Eye, FileText, Settings, Users, Database, Clock, Copy } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { RoleContainerPermissions } from "@/components/roles/RoleContainerPermissions";
@@ -32,13 +33,19 @@ interface RoleFormData {
 
 export default function RoleDetailPage() {
   const { id } = useParams<{ id: string }>();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const isNew = id === "new";
   
-  const [loading, setLoading] = useState(!isNew);
+  const duplicateFromId = searchParams.get("duplicate");
+  const isNew = id === "new";
+  const isDuplicate = isNew && !!duplicateFromId;
+  
+  const [loading, setLoading] = useState(!isNew || isDuplicate);
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState("identity");
+  const [sourceRoleId, setSourceRoleId] = useState<string | null>(null);
+  const [sourceRoleName, setSourceRoleName] = useState<string>("");
   
   const [role, setRole] = useState<RoleFormData>({
     name: "",
@@ -49,10 +56,44 @@ export default function RoleDetailPage() {
   });
 
   useEffect(() => {
-    if (!isNew && id) {
+    if (isDuplicate && duplicateFromId) {
+      fetchSourceRoleForDuplication(duplicateFromId);
+    } else if (!isNew && id) {
       fetchRole(id);
     }
-  }, [id, isNew]);
+  }, [id, isNew, isDuplicate, duplicateFromId]);
+
+  const fetchSourceRoleForDuplication = async (sourceId: string) => {
+    try {
+      const { data: sourceRole, error } = await supabase
+        .from("roles")
+        .select("*")
+        .eq("id", sourceId)
+        .single();
+
+      if (error) throw error;
+
+      setRole({
+        name: `Copy of ${sourceRole.name}`,
+        description: sourceRole.description,
+        role_type: "custom", // Always custom for duplicates
+        is_active: true,
+        tenant_visibility: (sourceRole.tenant_visibility as TenantVisibility) || "single",
+      });
+      
+      setSourceRoleId(sourceId);
+      setSourceRoleName(sourceRole.name);
+    } catch (error) {
+      console.error("Error fetching source role:", error);
+      toast({
+        title: "Error",
+        description: "Failed to load source role for duplication",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const fetchRole = async (roleId: string) => {
     try {
@@ -73,6 +114,72 @@ export default function RoleDetailPage() {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const copyRolePermissions = async (fromRoleId: string, toRoleId: string) => {
+    try {
+      // Copy role_permissions (granular module/tab permissions)
+      const { data: sourcePerms } = await supabase
+        .from("role_permissions")
+        .select("module_permission_id, can_view, can_create, can_edit, can_delete")
+        .eq("role_id", fromRoleId);
+
+      if (sourcePerms?.length) {
+        const newPerms = sourcePerms.map(p => ({
+          role_id: toRoleId,
+          module_permission_id: p.module_permission_id,
+          can_view: p.can_view,
+          can_create: p.can_create,
+          can_edit: p.can_edit,
+          can_delete: p.can_delete,
+        }));
+        
+        await supabase.from("role_permissions").insert(newPerms);
+      }
+
+      // Copy role_container_access
+      const { data: sourceContainers } = await supabase
+        .from("role_container_access")
+        .select("container_code, permission_level")
+        .eq("role_id", fromRoleId);
+
+      if (sourceContainers?.length) {
+        const newContainers = sourceContainers.map(c => ({
+          role_id: toRoleId,
+          container_code: c.container_code,
+          permission_level: c.permission_level,
+        }));
+        
+        await supabase.from("role_container_access").insert(newContainers);
+      }
+
+      // Copy role_pii_access
+      const { data: sourcePii } = await supabase
+        .from("role_pii_access")
+        .select("pii_level, access_compensation, access_personal_details, access_banking, access_medical, access_disciplinary, export_permission, masking_enabled, jit_access_required, approval_required_for_full")
+        .eq("role_id", fromRoleId);
+
+      if (sourcePii?.length) {
+        const newPii = sourcePii.map(p => ({
+          role_id: toRoleId,
+          pii_level: p.pii_level,
+          access_compensation: p.access_compensation,
+          access_personal_details: p.access_personal_details,
+          access_banking: p.access_banking,
+          access_medical: p.access_medical,
+          access_disciplinary: p.access_disciplinary,
+          export_permission: p.export_permission,
+          masking_enabled: p.masking_enabled,
+          jit_access_required: p.jit_access_required,
+          approval_required_for_full: p.approval_required_for_full,
+        }));
+        
+        await supabase.from("role_pii_access").insert(newPii);
+      }
+    } catch (error) {
+      console.error("Error copying permissions:", error);
+      throw error;
     }
   };
 
@@ -98,16 +205,27 @@ export default function RoleDetailPage() {
             role_type: role.role_type,
             is_active: role.is_active,
             tenant_visibility: role.tenant_visibility,
+            base_role_id: isDuplicate ? sourceRoleId : null,
           }])
           .select()
           .single();
 
         if (error) throw error;
         
-        toast({
-          title: "Success",
-          description: "Role created successfully",
-        });
+        // If duplicating, copy all permissions from source role
+        if (isDuplicate && sourceRoleId) {
+          await copyRolePermissions(sourceRoleId, data.id);
+          toast({
+            title: "Success",
+            description: "Role duplicated successfully with all permissions copied",
+          });
+        } else {
+          toast({
+            title: "Success",
+            description: "Role created successfully",
+          });
+        }
+        
         navigate(`/admin/roles/${data.id}`);
       } else {
         const { error } = await supabase
@@ -182,10 +300,18 @@ export default function RoleDetailPage() {
             </Button>
             <div>
               <h1 className="text-2xl font-bold">
-                {isNew ? "Create New Role" : role.name}
+                {isDuplicate 
+                  ? "Duplicate Role" 
+                  : isNew 
+                    ? "Create New Role" 
+                    : role.name}
               </h1>
               <p className="text-muted-foreground">
-                {isNew ? "Define a new role with permissions" : "Manage role settings and permissions"}
+                {isDuplicate 
+                  ? `Creating a copy of "${sourceRoleName}"` 
+                  : isNew 
+                    ? "Define a new role with permissions" 
+                    : "Manage role settings and permissions"}
               </p>
             </div>
           </div>
@@ -193,10 +319,21 @@ export default function RoleDetailPage() {
             {!isNew && role.role_type && getRoleTypeBadge(role.role_type as RoleType)}
             <Button onClick={handleSave} disabled={saving}>
               <Save className="h-4 w-4 mr-2" />
-              {saving ? "Saving..." : "Save Changes"}
+              {saving ? "Saving..." : isDuplicate ? "Create Duplicate" : "Save Changes"}
             </Button>
           </div>
         </div>
+
+        {/* Duplicate Mode Banner */}
+        {isDuplicate && (
+          <Alert className="border-blue-300 bg-blue-50 dark:bg-blue-950/20 dark:border-blue-800">
+            <Copy className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+            <AlertTitle className="text-blue-800 dark:text-blue-300">Duplicating Role</AlertTitle>
+            <AlertDescription className="text-blue-700 dark:text-blue-400">
+              You are creating a copy of "{sourceRoleName}". All module permissions, container access, and PII settings will be copied when you save.
+            </AlertDescription>
+          </Alert>
+        )}
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
