@@ -36,6 +36,7 @@ import { EmployeeCompetencyCard } from "./EmployeeCompetencyCard";
 import { EmployeeResponsibilityCard } from "./EmployeeResponsibilityCard";
 import { EvidenceQuickAttach } from "./EvidenceQuickAttach";
 import { useAuth } from "@/contexts/AuthContext";
+import { fetchCompetencyCascade } from "@/hooks/useCompetencyCascade";
 
 interface ScoreItem {
   id?: string;
@@ -151,38 +152,22 @@ export function EssAppraisalEvaluationDialog({
     if (!user?.id) return;
     const newScores: ScoreItem[] = [];
 
-    // Fetch competencies
+    // Fetch competencies using cascade logic (job -> employee override)
     if (enabledCategories.competencies) {
-      const { data: competencies } = await supabase
-        .from("employee_competencies")
-        .select("competency_id, weighting")
-        .eq("employee_id", user.id)
-        .is("end_date", null);
-
-      if (competencies?.length) {
-        const compIds = competencies.map(c => c.competency_id);
-        const { data: compDetails } = await supabase
-          .from("skills_competencies")
-          .select("id, name, proficiency_indicators")
-          .in("id", compIds);
-
-        const detailsMap = Object.fromEntries((compDetails || []).map(c => [c.id, c]));
-        
-        competencies.forEach(comp => {
-          const detail = detailsMap[comp.competency_id];
-          if (detail) {
-            newScores.push({
-              item_id: comp.competency_id,
-              item_name: detail.name,
-              evaluation_type: "competency",
-              weight: comp.weighting || 0,
-              self_rating: null,
-              self_comments: "",
-              proficiency_indicators: detail.proficiency_indicators as any,
-            });
-          }
+      const cascadeResult = await fetchCompetencyCascade(user.id);
+      
+      // Use merged competencies (job as primary, employee as override)
+      cascadeResult.competencies.forEach(comp => {
+        newScores.push({
+          item_id: comp.competency_id,
+          item_name: comp.name,
+          evaluation_type: "competency",
+          weight: comp.weighting || 0,
+          self_rating: null,
+          self_comments: "",
+          proficiency_indicators: comp.proficiency_indicators as any,
         });
-      }
+      });
     }
 
     // Fetch goals (from performance_goals or job_goals)
