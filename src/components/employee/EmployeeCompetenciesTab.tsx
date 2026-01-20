@@ -35,7 +35,8 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Plus, Trash2, Loader2, Award, RefreshCw, Briefcase, User, Target, ChevronsUpDown, Check, Clock } from "lucide-react";
+import { Plus, Trash2, Loader2, Award, RefreshCw, Briefcase, User, Target, ChevronsUpDown, Check, Clock, Info } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { getTodayString, formatDateForDisplay } from "@/utils/dateUtils";
 import { useAuditLog } from "@/hooks/useAuditLog";
 import { fetchCompetencyCascade, syncJobCompetenciesToEmployee, CascadedCompetency } from "@/hooks/useCompetencyCascade";
@@ -363,7 +364,19 @@ export function EmployeeCompetenciesTab({ employeeId }: EmployeeCompetenciesTabP
                 <TableHeader>
                   <TableRow>
                     <TableHead>Competency</TableHead>
-                    <TableHead>Required Level</TableHead>
+                    <TableHead>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="flex items-center gap-1 cursor-help">
+                            Required Level
+                            <Info className="h-3.5 w-3.5 text-muted-foreground" />
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent side="top" className="max-w-xs">
+                          <p className="text-sm">The proficiency level expected for this role. Hover over level badges for detailed behavioral expectations.</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TableHead>
                     <TableHead>Assessed Level</TableHead>
                     <TableHead>Gap</TableHead>
                     <TableHead>Weight %</TableHead>
@@ -373,7 +386,7 @@ export function EmployeeCompetenciesTab({ employeeId }: EmployeeCompetenciesTabP
                   {jobCompetencies.map((jc) => (
                     <TableRow key={jc.competency_id}>
                       <TableCell className="font-medium">
-                        {jc.name} {jc.code && <span className="text-muted-foreground">({jc.code})</span>}
+                        {jc.name}
                         {jc.category && <Badge variant="outline" className="ml-2 text-xs">{jc.category}</Badge>}
                       </TableCell>
                       <TableCell><ProficiencyLevelBadge level={jc.required_level || 3} size="sm" /></TableCell>
@@ -431,7 +444,6 @@ export function EmployeeCompetenciesTab({ employeeId }: EmployeeCompetenciesTabP
                     <TableRow key={ec.id}>
                       <TableCell className="font-medium">
                         {ec.skills_competencies?.name || "Unknown"}
-                        {ec.skills_competencies?.code && <span className="text-muted-foreground ml-1">({ec.skills_competencies.code})</span>}
                         {ec.skills_competencies?.category && <Badge variant="outline" className="ml-2">{ec.skills_competencies.category}</Badge>}
                       </TableCell>
                       <TableCell>{ec.required_proficiency_level ? <ProficiencyLevelBadge level={ec.required_proficiency_level} size="sm" /> : "—"}</TableCell>

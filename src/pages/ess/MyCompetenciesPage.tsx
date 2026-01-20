@@ -184,14 +184,7 @@ export default function MyCompetenciesPage() {
                     {competencies.map((ec: any) => (
                       <TableRow key={ec.id}>
                         <TableCell className="font-medium">
-                          <div>
-                            {ec.skills_competencies?.name || "Unknown"}
-                            {ec.skills_competencies?.code && (
-                              <span className="text-muted-foreground ml-1">
-                                ({ec.skills_competencies.code})
-                              </span>
-                            )}
-                          </div>
+                          <div>{ec.skills_competencies?.name || "Unknown"}</div>
                           {ec.is_required && (
                             <Badge variant="secondary" className="mt-1 text-xs">Required</Badge>
                           )}

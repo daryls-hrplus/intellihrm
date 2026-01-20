@@ -281,7 +281,7 @@ export function ProficiencyLevelBadge({
       <Tooltip>
         <TooltipTrigger asChild>
           <div className={cn(
-            "inline-flex items-center gap-1.5 rounded-md cursor-help",
+            "inline-flex items-center gap-1.5 rounded-md cursor-help group",
             levelInfo.bgColor,
             size === "sm" && "px-1.5 py-0.5 text-xs",
             size === "default" && "px-2 py-1 text-sm",
@@ -298,6 +298,12 @@ export function ProficiencyLevelBadge({
                 {levelInfo.name}
               </span>
             )}
+            <Info className={cn(
+              "text-muted-foreground/40 group-hover:text-muted-foreground transition-colors",
+              size === "sm" && "h-2.5 w-2.5",
+              size === "default" && "h-3 w-3",
+              size === "lg" && "h-3.5 w-3.5",
+            )} />
           </div>
         </TooltipTrigger>
         <TooltipContent className="max-w-xs">
