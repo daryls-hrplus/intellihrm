@@ -124,20 +124,47 @@ serve(async (req) => {
     console.log(`[resend-appraisal-notifications] Found ${participants.length} participants`);
 
     // 3. Send notifications to participants
+    const now = new Date().toISOString();
+    
     if (targetAudience === "all" || targetAudience === "participants") {
       for (const participant of participants) {
         const profile = participant.profiles as any;
         if (profile?.id) {
+          const notificationTitle = "Reminder: Appraisal Cycle Active";
+          const notificationMessage = `The appraisal cycle "${cycle.name}" is active. Please complete your self-assessment by ${cycle.evaluation_deadline || cycle.end_date}.`;
+          
           const { error: notifError } = await supabase.from("notifications").insert({
             user_id: profile.id,
-            title: "Reminder: Appraisal Cycle Active",
-            message: `The appraisal cycle "${cycle.name}" is active. Please complete your self-assessment by ${cycle.evaluation_deadline || cycle.end_date}.`,
+            title: notificationTitle,
+            message: notificationMessage,
             type: "info",
             link: "/ess/appraisals",
           });
 
           if (!notifError) {
             result.participantsNotified++;
+            
+            // Log to reminder_delivery_log for HR tracking
+            const recipientName = `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'Unknown';
+            await supabase.from("reminder_delivery_log").insert({
+              company_id: cycle.company_id,
+              employee_id: profile.id,
+              delivery_channel: 'in_app',
+              recipient_email: profile.email,
+              recipient_name: recipientName,
+              subject: notificationTitle,
+              body_preview: notificationMessage.substring(0, 200),
+              status: 'delivered',
+              sent_at: now,
+              delivered_at: now,
+              source_table: 'appraisal_cycles',
+              source_record_id: cycleId,
+              metadata: { 
+                cycle_name: cycle.name, 
+                notification_type: 'participant_reminder',
+                deadline: cycle.evaluation_deadline || cycle.end_date
+              }
+            });
           } else {
             console.error(`[resend-appraisal-notifications] Failed to send to participant ${profile.id}:`, notifError);
           }
@@ -169,16 +196,51 @@ serve(async (req) => {
           .filter(Boolean)
           .join(", ");
 
+        const managerTitle = "Reminder: Team Appraisals Pending";
+        const managerMessage = `The appraisal cycle "${cycle.name}" is active. You have ${teamMembers.length} team member(s) to evaluate: ${memberNames}. Deadline: ${cycle.evaluation_deadline || cycle.end_date}.`;
+
         const { error: managerNotifError } = await supabase.from("notifications").insert({
           user_id: evaluatorId,
-          title: "Reminder: Team Appraisals Pending",
-          message: `The appraisal cycle "${cycle.name}" is active. You have ${teamMembers.length} team member(s) to evaluate: ${memberNames}. Deadline: ${cycle.evaluation_deadline || cycle.end_date}.`,
+          title: managerTitle,
+          message: managerMessage,
           type: "action_required",
           link: "/mss/appraisals",
         });
 
         if (!managerNotifError) {
           result.managersNotified++;
+          
+          // Log to reminder_delivery_log for HR tracking
+          const { data: managerProfile } = await supabase
+            .from("profiles")
+            .select("email, first_name, last_name")
+            .eq("id", evaluatorId)
+            .single();
+          
+          const managerName = managerProfile 
+            ? `${managerProfile.first_name || ''} ${managerProfile.last_name || ''}`.trim() 
+            : 'Unknown';
+          
+          await supabase.from("reminder_delivery_log").insert({
+            company_id: cycle.company_id,
+            employee_id: evaluatorId,
+            delivery_channel: 'in_app',
+            recipient_email: managerProfile?.email,
+            recipient_name: managerName,
+            subject: managerTitle,
+            body_preview: managerMessage.substring(0, 200),
+            status: 'delivered',
+            sent_at: now,
+            delivered_at: now,
+            source_table: 'appraisal_cycles',
+            source_record_id: cycleId,
+            metadata: { 
+              cycle_name: cycle.name, 
+              notification_type: 'manager_reminder',
+              team_size: teamMembers.length,
+              deadline: cycle.evaluation_deadline || cycle.end_date
+            }
+          });
         } else {
           console.error(`[resend-appraisal-notifications] Failed to send to manager ${evaluatorId}:`, managerNotifError);
         }
