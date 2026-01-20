@@ -189,6 +189,11 @@ export async function syncJobCompetenciesToEmployee(
       .map((jc: any) => ({
         employee_id: employeeId,
         competency_id: jc.capability_id,
+        required_proficiency_level: jc.required_proficiency_level || 3,
+        assessed_proficiency_level: null, // Initially NULL until appraised
+        assessed_date: null,
+        assessment_source: 'pending',
+        is_required: jc.is_required ?? true,
         weighting: jc.weighting || 0,
         start_date: new Date().toISOString().split('T')[0],
       }));
