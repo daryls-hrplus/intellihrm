@@ -21,6 +21,7 @@ import {
 import { Eye, FileText, ExternalLink, Mail, Sparkles, History } from 'lucide-react';
 import { REMINDER_CATEGORIES } from '@/types/reminders';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { EmailTemplateRenderedPreview } from './EmailTemplateRenderedPreview';
 
 interface EmailTemplate {
   id: string;
@@ -131,20 +132,8 @@ export function TemplateSelector({
   const getCategoryLabel = (cat: string) => 
     REMINDER_CATEGORIES.find(c => c.value === cat)?.label || cat;
 
-  const previewBody = (text: string) => {
-    return text
-      .replace(/\{\{employee_first_name\}\}/gi, 'John')
-      .replace(/\{\{employee_full_name\}\}/gi, 'John Doe')
-      .replace(/\{\{manager_name\}\}/gi, 'Jane Smith')
-      .replace(/\{\{company_name\}\}/gi, companyName || 'Your Company')
-      .replace(/\{\{event_date\}\}/gi, 'January 15, 2025')
-      .replace(/\{\{event_title\}\}/gi, 'Work Permit Renewal')
-      .replace(/\{\{days_until\}\}/gi, '14')
-      .replace(/\{\{item_name\}\}/gi, 'Work Permit')
-      .replace(/\{employee_name\}/gi, 'John Doe')
-      .replace(/\{event_date\}/gi, 'January 15, 2025')
-      .replace(/\{days_until\}/gi, '14')
-      .replace(/\{item_name\}/gi, 'Work Permit');
+  const replacementOptions = {
+    companyName: companyName || 'Your Company',
   };
 
   if (!category) {
@@ -301,15 +290,12 @@ export function TemplateSelector({
             <DialogTitle>{previewTemplate?.name} - Preview</DialogTitle>
           </DialogHeader>
           {previewTemplate && (
-            <div className="space-y-4">
-              <div className="p-4 bg-muted rounded-lg">
-                <p className="text-xs text-muted-foreground mb-1">Subject</p>
-                <p className="font-medium">{previewBody(previewTemplate.subject)}</p>
-              </div>
-              <div className="p-4 bg-muted rounded-lg whitespace-pre-wrap text-sm max-h-80 overflow-y-auto">
-                {previewBody(previewTemplate.body)}
-              </div>
-            </div>
+            <EmailTemplateRenderedPreview
+              subject={previewTemplate.subject}
+              body={previewTemplate.body}
+              replacementOptions={replacementOptions}
+              maxHeight="400px"
+            />
           )}
         </DialogContent>
       </Dialog>
