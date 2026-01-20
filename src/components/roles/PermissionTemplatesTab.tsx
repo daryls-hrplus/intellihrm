@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Lock, Eye, Shield, ChevronDown, ChevronRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -19,10 +19,13 @@ import {
   CONTAINER_PERMISSION_CONFIG,
   PiiLevel,
 } from "@/types/roles";
+import { useMultipleRolePermissionStats } from "@/hooks/useRolePermissionStats";
 
 interface SeededRoleWithDetails extends Role {
   pii_level?: PiiLevel;
   container_access?: { container_code: string; permission_level: ContainerPermissionLevel }[];
+  accessible_modules?: number;
+  module_list?: string[];
 }
 
 export function PermissionTemplatesTab() {
@@ -95,6 +98,21 @@ export function PermissionTemplatesTab() {
     fetchSeededRoles();
   }, []);
 
+  // Get role IDs for permission stats
+  const roleIds = useMemo(() => seededRoles.map((r) => r.id), [seededRoles]);
+  
+  // Fetch permission stats from role_permissions table
+  const { stats: permissionStats, totalModules, isLoading: permissionsLoading } = useMultipleRolePermissionStats(roleIds);
+
+  // Merge permission stats into roles
+  const rolesWithModuleStats = useMemo(() => {
+    return seededRoles.map((role) => ({
+      ...role,
+      accessible_modules: permissionStats.get(role.id)?.accessibleModules ?? 0,
+      module_list: permissionStats.get(role.id)?.modulesList ?? [],
+    }));
+  }, [seededRoles, permissionStats]);
+
   const toggleExpanded = (roleId: string) => {
     setExpandedRoles((prev) => {
       const newSet = new Set(prev);
@@ -107,7 +125,7 @@ export function PermissionTemplatesTab() {
     });
   };
 
-  if (isLoading) {
+  if (isLoading || permissionsLoading) {
     return (
       <div className="flex items-center justify-center py-12">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -125,10 +143,12 @@ export function PermissionTemplatesTab() {
       </div>
 
       <div className="space-y-4">
-        {seededRoles.map((role) => {
+        {rolesWithModuleStats.map((role) => {
           const isExpanded = expandedRoles.has(role.id);
           const roleTypeConfig = ROLE_TYPE_CONFIG[role.role_type as RoleType] || ROLE_TYPE_CONFIG.custom;
           const piiConfig = PII_LEVEL_CONFIG[role.pii_level || "none"];
+          const moduleCount = role.accessible_modules || 0;
+          const modulesList = role.module_list || [];
 
           return (
             <Collapsible key={role.id} open={isExpanded} onOpenChange={() => toggleExpanded(role.id)}>
@@ -202,14 +222,18 @@ export function PermissionTemplatesTab() {
                     {/* Module Access */}
                     <div>
                       <h4 className="text-sm font-medium mb-2">
-                        Module Access ({role.menu_permissions.length} modules)
+                        Module Access ({moduleCount}/{totalModules} modules)
                       </h4>
                       <div className="flex flex-wrap gap-1">
-                        {role.menu_permissions.map((mod) => (
-                          <Badge key={mod} variant="secondary" className="text-xs">
-                            {mod}
-                          </Badge>
-                        ))}
+                        {modulesList.length > 0 ? (
+                          modulesList.map((mod) => (
+                            <Badge key={mod} variant="secondary" className="text-xs">
+                              {mod}
+                            </Badge>
+                          ))
+                        ) : (
+                          <span className="text-xs text-muted-foreground">No module access configured</span>
+                        )}
                       </div>
                     </div>
 

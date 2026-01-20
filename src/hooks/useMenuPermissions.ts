@@ -52,21 +52,49 @@ export function useMenuPermissions() {
 
         const roleIds = userRoles.map((r) => r.role_id).filter(Boolean);
 
-        // Fetch all roles' menu_permissions
-        const { data: roleData, error: roleError } = await supabase
-          .from("roles")
-          .select("menu_permissions")
-          .in("id", roleIds);
+        // Fetch permissions from role_permissions table (new system)
+        const { data: rolePermissions, error: permError } = await supabase
+          .from("role_permissions")
+          .select(`
+            can_view,
+            module_permissions!inner(module_code)
+          `)
+          .in("role_id", roleIds)
+          .eq("can_view", true);
 
-        if (roleError) throw roleError;
+        if (permError) {
+          console.warn("Error fetching from role_permissions, falling back to menu_permissions:", permError);
+          // Fallback to legacy menu_permissions column
+          const { data: roleData, error: roleError } = await supabase
+            .from("roles")
+            .select("menu_permissions")
+            .in("id", roleIds);
 
-        // Combine all permissions from all roles
+          if (roleError) throw roleError;
+
+          const allPermissions = new Set<string>();
+          (roleData || []).forEach((role) => {
+            const permissions = Array.isArray(role.menu_permissions)
+              ? (role.menu_permissions as string[])
+              : [];
+            permissions.forEach((p) => allPermissions.add(p));
+          });
+
+          const permissionsArray = Array.from(allPermissions);
+          setMenuPermissions(permissionsArray);
+          cachedPermissionsRef.current = permissionsArray;
+          fetchedForUserRef.current = user.id;
+          hasFetchedRef.current = true;
+          setIsLoading(false);
+          return;
+        }
+
+        // Extract unique module codes from role_permissions
         const allPermissions = new Set<string>();
-        (roleData || []).forEach((role) => {
-          const permissions = Array.isArray(role.menu_permissions)
-            ? (role.menu_permissions as string[])
-            : [];
-          permissions.forEach((p) => allPermissions.add(p));
+        (rolePermissions || []).forEach((rp: any) => {
+          if (rp.module_permissions?.module_code && rp.module_permissions.module_code !== "enablement") {
+            allPermissions.add(rp.module_permissions.module_code);
+          }
         });
 
         const permissionsArray = Array.from(allPermissions);

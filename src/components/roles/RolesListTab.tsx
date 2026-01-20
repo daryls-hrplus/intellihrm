@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Loader2, Plus, FileDown } from "lucide-react";
 import { RoleCard } from "./RoleCard";
@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Role, RoleType, PiiLevel, ContainerPermissionLevel } from "@/types/roles";
+import { useMultipleRolePermissionStats } from "@/hooks/useRolePermissionStats";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -92,7 +93,7 @@ export function RolesListTab() {
         menu_permissions: Array.isArray(r.menu_permissions) ? (r.menu_permissions as string[]) : [],
         pii_level: piiMap.get(r.id) || (r.can_view_pii ? "full" : "none"),
         aggregate_container_permission: containerMap.get(r.id) || "none",
-        modules_count: Array.isArray(r.menu_permissions) ? r.menu_permissions.length : 0,
+        modules_count: 0, // Will be updated from role_permissions
       }));
 
       setRoles(rolesWithExtras);
@@ -108,12 +109,27 @@ export function RolesListTab() {
     }
   }, [toast]);
 
+  // Get role IDs for batch permission stats
+  const roleIds = useMemo(() => roles.map((r) => r.id), [roles]);
+  
+  // Fetch permission stats from role_permissions table
+  const { stats: permissionStats, totalModules, isLoading: permissionsLoading } = useMultipleRolePermissionStats(roleIds);
+
+  // Merge permission stats into roles
+  const rolesWithModuleCounts = useMemo(() => {
+    return roles.map((role) => ({
+      ...role,
+      modules_count: permissionStats.get(role.id)?.accessibleModules ?? 0,
+      total_modules: totalModules,
+    }));
+  }, [roles, permissionStats, totalModules]);
+
   useEffect(() => {
     fetchRoles();
   }, [fetchRoles]);
 
   // Filter roles
-  const filteredRoles = roles.filter((role) => {
+  const filteredRoles = rolesWithModuleCounts.filter((role) => {
     // Search filter
     if (searchTerm) {
       const search = searchTerm.toLowerCase();
@@ -227,7 +243,7 @@ export function RolesListTab() {
     URL.revokeObjectURL(url);
   };
 
-  if (isLoading) {
+  if (isLoading || permissionsLoading) {
     return (
       <div className="flex items-center justify-center py-12">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -240,7 +256,7 @@ export function RolesListTab() {
       {/* Header Actions */}
       <div className="flex items-center justify-between gap-4">
         <div className="text-sm text-muted-foreground">
-          {filteredRoles.length} of {roles.length} roles
+          {filteredRoles.length} of {rolesWithModuleCounts.length} roles
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={handleExportRoles}>
