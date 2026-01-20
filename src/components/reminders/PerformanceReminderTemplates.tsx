@@ -35,6 +35,7 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { TEMPLATE_PLACEHOLDERS } from './templatePlaceholders';
+import { EmailTemplateRenderedPreview } from './EmailTemplateRenderedPreview';
 
 interface EmailTemplate {
   id: string;
@@ -207,15 +208,8 @@ export function PerformanceReminderTemplates({ companyId, onSaveTemplate }: Perf
     }
   };
 
-  const previewBody = (body: string) => {
-    // Replace placeholders with sample values for preview
-    return body
-      .replace(/{employee_name}/gi, 'John Doe')
-      .replace(/{manager_name}/gi, 'Jane Smith')
-      .replace(/{cycle_name}/gi, '2024 Annual Review')
-      .replace(/{response_deadline}/gi, 'January 15, 2025')
-      .replace(/{review_date}/gi, 'January 1, 2025')
-      .replace(/{days_until}/gi, '5');
+  const replacementOptions = {
+    companyName: 'Your Company',
   };
 
   const getCategoryColor = (category: string) => {
@@ -309,15 +303,12 @@ export function PerformanceReminderTemplates({ companyId, onSaveTemplate }: Perf
                       <DialogTitle>{template.name} - Preview</DialogTitle>
                       <DialogDescription>{template.description}</DialogDescription>
                     </DialogHeader>
-                    <div className="space-y-4">
-                      <div className="p-4 bg-muted rounded-lg">
-                        <Label className="text-xs text-muted-foreground">Subject</Label>
-                        <p className="font-medium">{previewBody(template.subject)}</p>
-                      </div>
-                      <div className="p-4 bg-muted rounded-lg whitespace-pre-wrap text-sm">
-                        {previewBody(template.body)}
-                      </div>
-                    </div>
+                    <EmailTemplateRenderedPreview
+                      subject={template.subject}
+                      body={template.body}
+                      replacementOptions={replacementOptions}
+                      maxHeight="400px"
+                    />
                   </DialogContent>
                 </Dialog>
 

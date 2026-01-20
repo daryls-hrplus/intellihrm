@@ -27,6 +27,7 @@ import { toast } from 'sonner';
 import { REMINDER_CATEGORIES, WORKFORCE_SUBCATEGORIES } from '@/types/reminders';
 import { TEMPLATE_PLACEHOLDERS } from './templatePlaceholders';
 import { useTemplateAI, EmailTemplateSuggestion } from '@/hooks/useTemplateAI';
+import { EmailTemplateRenderedPreview } from './EmailTemplateRenderedPreview';
 import { 
   Mail, 
   Copy, 
@@ -359,17 +360,9 @@ export function ReminderEmailTemplates({ companyId, companyName, onUseTemplate }
     }
   };
 
-  const previewBody = (text: string) => {
-    return text
-      .replace(/\{\{employee_first_name\}\}/gi, 'John')
-      .replace(/\{\{employee_full_name\}\}/gi, 'John Doe')
-      .replace(/\{\{manager_name\}\}/gi, 'Jane Smith')
-      .replace(/\{\{company_name\}\}/gi, companyName || 'Your Company')
-      .replace(/\{\{event_date\}\}/gi, 'January 15, 2025')
-      .replace(/\{\{event_title\}\}/gi, 'Work Permit Renewal')
-      .replace(/\{\{days_until\}\}/gi, '14')
-      .replace(/\{\{cycle_name\}\}/gi, '2024 Annual Review');
-  };
+  const replacementOptions = useMemo(() => ({
+    companyName: companyName || 'Your Company',
+  }), [companyName]);
 
   const toggleCategory = (category: string) => {
     const newExpanded = new Set(expandedCategories);
@@ -701,15 +694,12 @@ export function ReminderEmailTemplates({ companyId, companyName, onUseTemplate }
             </DialogDescription>
           </DialogHeader>
           {previewTemplate && (
-            <div className="space-y-4">
-              <div className="p-4 bg-muted rounded-lg">
-                <p className="text-xs text-muted-foreground mb-1">Subject</p>
-                <p className="font-medium">{previewBody(previewTemplate.subject)}</p>
-              </div>
-              <div className="p-4 bg-muted rounded-lg whitespace-pre-wrap text-sm max-h-80 overflow-y-auto">
-                {previewBody(previewTemplate.body)}
-              </div>
-            </div>
+            <EmailTemplateRenderedPreview
+              subject={previewTemplate.subject}
+              body={previewTemplate.body}
+              replacementOptions={replacementOptions}
+              maxHeight="400px"
+            />
           )}
         </DialogContent>
       </Dialog>
