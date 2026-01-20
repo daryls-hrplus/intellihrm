@@ -45,7 +45,9 @@ import {
 import { cn } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { usePageAudit } from "@/hooks/usePageAudit";
+import { Info } from "lucide-react";
 import { RoleAccessSummary } from "@/components/permissions/RoleAccessSummary";
 import { RoleInfoBanners } from "@/components/permissions/RoleInfoBanners";
 import { ModuleQuickActions } from "@/components/permissions/ModuleQuickActions";
@@ -963,41 +965,80 @@ export default function GranularPermissionsPage() {
       <div className="space-y-6">
         <Breadcrumbs items={breadcrumbItems} />
 
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Granular Permissions</h1>
-            <p className="text-muted-foreground mt-1">
-              Configure module, container, and action-level permissions for each role
-            </p>
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight">Module Access</h1>
+              <p className="text-muted-foreground mt-1">
+                Configure module, container, and action-level permissions for each role
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              <Select value={selectedRoleId} onValueChange={setSelectedRoleId}>
+                <SelectTrigger className="w-[240px]">
+                  <SelectValue placeholder="Select a role" />
+                </SelectTrigger>
+                <SelectContent>
+                  {roles.map((role) => (
+                    <SelectItem key={role.id} value={role.id}>
+                      <div className="flex items-center gap-2">
+                        <Shield className="h-4 w-4" />
+                        {role.name}
+                        {role.role_type === "system" && (
+                          <Badge variant="outline" className="ml-1 text-xs bg-red-500/10 text-red-600 dark:text-red-400">System</Badge>
+                        )}
+                        {role.role_type === "seeded" && (
+                          <Badge variant="outline" className="ml-1 text-xs bg-violet-500/10 text-violet-600 dark:text-violet-400">Template</Badge>
+                        )}
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Button onClick={savePermissions} disabled={isSaving || !hasChanges || isSystemRole}>
+                {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                <Save className="mr-2 h-4 w-4" />
+                Save Changes
+              </Button>
+            </div>
           </div>
-          <div className="flex items-center gap-3">
-            <Select value={selectedRoleId} onValueChange={setSelectedRoleId}>
-              <SelectTrigger className="w-[240px]">
-                <SelectValue placeholder="Select a role" />
-              </SelectTrigger>
-              <SelectContent>
-                {roles.map((role) => (
-                  <SelectItem key={role.id} value={role.id}>
-                    <div className="flex items-center gap-2">
-                      <Shield className="h-4 w-4" />
-                      {role.name}
-                      {role.role_type === "system" && (
-                        <Badge variant="outline" className="ml-1 text-xs bg-red-500/10 text-red-600 dark:text-red-400">System</Badge>
-                      )}
-                      {role.role_type === "seeded" && (
-                        <Badge variant="outline" className="ml-1 text-xs bg-violet-500/10 text-violet-600 dark:text-violet-400">Template</Badge>
-                      )}
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Button onClick={savePermissions} disabled={isSaving || !hasChanges || isSystemRole}>
-              {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              <Save className="mr-2 h-4 w-4" />
-              Save Changes
-            </Button>
-          </div>
+
+          {/* Prominent Role Context Header */}
+          {selectedRole && (
+            <div className="rounded-lg border-2 border-primary/20 bg-primary/5 p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Shield className="h-6 w-6 text-primary" />
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Currently Managing</p>
+                    <h2 className="text-2xl font-bold text-foreground">{selectedRole.name}</h2>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  {selectedRole.role_type === "system" && (
+                    <Badge className="bg-red-500/10 text-red-600 dark:text-red-400 border-red-200">
+                      System Role
+                    </Badge>
+                  )}
+                  {selectedRole.role_type === "seeded" && (
+                    <Badge className="bg-violet-500/10 text-violet-600 dark:text-violet-400 border-violet-200">
+                      Template Role
+                    </Badge>
+                  )}
+                  {selectedRole.role_type === "custom" && (
+                    <Badge className="bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-200">
+                      Custom Role
+                    </Badge>
+                  )}
+                  {hasChanges && (
+                    <Badge className="bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 border-yellow-200 animate-pulse">
+                      Unsaved Changes
+                    </Badge>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {selectedRole && (
@@ -1089,6 +1130,17 @@ export default function GranularPermissionsPage() {
               </TabsContent>
 
               <TabsContent value="company_access" className="space-y-4">
+                {/* Self-service role banner */}
+                {selectedRole && (selectedRole.code === 'employee' || selectedRole.name.toLowerCase().includes('employee')) && (
+                  <Alert className="bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800">
+                    <Info className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                    <AlertTitle className="text-blue-800 dark:text-blue-300">Self-Service Role Detected</AlertTitle>
+                    <AlertDescription className="text-blue-700 dark:text-blue-400">
+                      Self-service roles (like Employee) access their own data via Row-Level Security (RLS). 
+                      <strong> Leave all options unchecked</strong> — these scope settings only affect roles that access other employees' records.
+                    </AlertDescription>
+                  </Alert>
+                )}
                 <div className="grid gap-6 md:grid-cols-2">
                   {/* Direct Company Access */}
                   <Card>
@@ -1192,6 +1244,17 @@ export default function GranularPermissionsPage() {
               </TabsContent>
 
               <TabsContent value="org_access" className="space-y-4">
+                {/* Self-service role banner */}
+                {selectedRole && (selectedRole.code === 'employee' || selectedRole.name.toLowerCase().includes('employee')) && (
+                  <Alert className="bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800">
+                    <Info className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                    <AlertTitle className="text-blue-800 dark:text-blue-300">Self-Service Role Detected</AlertTitle>
+                    <AlertDescription className="text-blue-700 dark:text-blue-400">
+                      For self-service roles, organizational scope is not applicable. Employees access their own records via their profile ID. 
+                      <strong> Leave all options unchecked.</strong>
+                    </AlertDescription>
+                  </Alert>
+                )}
                 <p className="text-sm text-muted-foreground mb-4">
                   By default, roles have access to all divisions, departments, and sections. Check items below to <strong>restrict</strong> access to only the selected items.
                 </p>
@@ -1337,6 +1400,17 @@ export default function GranularPermissionsPage() {
               </TabsContent>
 
               <TabsContent value="pay_group_access" className="space-y-4">
+                {/* Self-service role banner */}
+                {selectedRole && (selectedRole.code === 'employee' || selectedRole.name.toLowerCase().includes('employee')) && (
+                  <Alert className="bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800">
+                    <Info className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                    <AlertTitle className="text-blue-800 dark:text-blue-300">Self-Service Role Detected</AlertTitle>
+                    <AlertDescription className="text-blue-700 dark:text-blue-400">
+                      Self-service roles ignore pay group restrictions. Employees see only their own payslips regardless of pay group. 
+                      <strong> Leave all options unchecked</strong> — use this for roles that process payroll across multiple employees.
+                    </AlertDescription>
+                  </Alert>
+                )}
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
@@ -1393,6 +1467,17 @@ export default function GranularPermissionsPage() {
               </TabsContent>
 
               <TabsContent value="position_type_restrictions" className="space-y-4">
+                {/* Self-service role banner */}
+                {selectedRole && (selectedRole.code === 'employee' || selectedRole.name.toLowerCase().includes('employee')) && (
+                  <Alert className="bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800">
+                    <Info className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                    <AlertTitle className="text-blue-800 dark:text-blue-300">Self-Service Role Detected</AlertTitle>
+                    <AlertDescription className="text-blue-700 dark:text-blue-400">
+                      Employment filters do not apply to self-service roles. Use this setting to exclude certain employee types (e.g., Executives, Contractors) from a role's visibility when accessing other employees' records.
+                      <strong> Leave all options unchecked.</strong>
+                    </AlertDescription>
+                  </Alert>
+                )}
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
