@@ -249,10 +249,28 @@ export function ProficiencyLevelPicker({
 }
 
 // Compact display component for showing proficiency level info
+/**
+ * ProficiencyLevelBadge - Context-aware proficiency display
+ * 
+ * SEMANTIC COLOR STANDARD:
+ * - context="reference" → Neutral/blue styling (for required/target levels)
+ * - context="assessed" → Semantic coloring based on gap vs required level
+ * 
+ * CRITICAL: Required levels should NEVER use green. They use neutral styling
+ * to avoid implying "achievement" for what is actually a reference value.
+ */
 interface ProficiencyLevelBadgeProps {
   level: number;
   showLabel?: boolean;
   size?: "sm" | "default" | "lg";
+  /** 
+   * Context mode determines styling:
+   * - "reference": For required/target levels - uses neutral styling (NEVER green)
+   * - "assessed": For assessed levels - can use semantic colors based on gap
+   */
+  context?: "reference" | "assessed";
+  /** When context="assessed", compare against this to determine semantic color */
+  comparedTo?: number | null;
   // Skill-specific context props
   skillId?: string;
   skillName?: string;
@@ -263,6 +281,8 @@ export function ProficiencyLevelBadge({
   level,
   showLabel = true,
   size = "default",
+  context = "reference", // Default to reference (neutral) styling
+  comparedTo,
   skillId,
   skillName,
   skillIndicators,
@@ -276,26 +296,69 @@ export function ProficiencyLevelBadge({
   const specificIndicators = skillIndicators?.[level.toString()] || null;
   const hasSkillContext = !!skillName && !!specificIndicators && specificIndicators.length > 0;
 
+  // Determine styling based on context
+  // REFERENCE context: Use neutral styling (slate) - NEVER green for required levels
+  // ASSESSED context: Use semantic colors based on gap
+  const getContextStyles = () => {
+    if (context === "reference") {
+      // Neutral slate styling for reference/required levels per HRMS standard
+      return {
+        bgColor: "bg-[hsl(var(--semantic-neutral-bg))]",
+        textColor: "text-[hsl(var(--semantic-neutral-text))]",
+        iconColor: "text-slate-500",
+      };
+    }
+    
+    // Assessed context - use semantic colors based on gap
+    if (comparedTo !== null && comparedTo !== undefined) {
+      if (level >= comparedTo) {
+        // Meets or exceeds - success (green)
+        return {
+          bgColor: "bg-[hsl(var(--semantic-success-bg))]",
+          textColor: "text-[hsl(var(--semantic-success-text))]",
+          iconColor: "text-success",
+        };
+      } else {
+        // Below required - warning (amber for "needs attention")
+        return {
+          bgColor: "bg-[hsl(var(--semantic-warning-bg))]",
+          textColor: "text-[hsl(var(--semantic-warning-text))]",
+          iconColor: "text-warning",
+        };
+      }
+    }
+    
+    // Assessed but no comparison target - neutral
+    return {
+      bgColor: "bg-[hsl(var(--semantic-neutral-bg))]",
+      textColor: "text-[hsl(var(--semantic-neutral-text))]",
+      iconColor: "text-slate-500",
+    };
+  };
+
+  const styles = getContextStyles();
+
   return (
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
           <div className={cn(
-            "inline-flex items-center gap-1.5 rounded-md cursor-help group",
-            levelInfo.bgColor,
+            "inline-flex items-center gap-1.5 rounded-md cursor-help group border",
+            styles.bgColor,
+            "border-[hsl(var(--semantic-neutral-border))]",
             size === "sm" && "px-1.5 py-0.5 text-xs",
             size === "default" && "px-2 py-1 text-sm",
             size === "lg" && "px-3 py-1.5 text-base",
           )}>
             <Icon className={cn(
-              levelInfo.color,
+              styles.iconColor,
               size === "sm" && "h-3 w-3",
               size === "default" && "h-4 w-4",
               size === "lg" && "h-5 w-5",
             )} />
             {showLabel && (
-              <span className={cn("font-medium", levelInfo.color)}>
-                {levelInfo.name}
+              <span className={cn("font-medium", styles.textColor)}>
+                L{level}
               </span>
             )}
             <Info className={cn(
@@ -313,6 +376,13 @@ export function ProficiencyLevelBadge({
               <p className="font-medium">Level {level} - {levelInfo.name}</p>
               <p className="text-sm text-muted-foreground">{levelInfo.shortDescription}</p>
             </div>
+            
+            {/* Context indicator */}
+            {context === "reference" && (
+              <p className="text-xs text-info italic">
+                This is the required/target proficiency level
+              </p>
+            )}
             
             {/* Skill-specific context */}
             {hasSkillContext && (

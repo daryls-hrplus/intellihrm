@@ -67,6 +67,40 @@
     --shadow-md: 0 4px 6px -1px hsl(222 47% 11% / 0.1), 0 2px 4px -2px hsl(222 47% 11% / 0.1);
     --shadow-lg: 0 10px 15px -3px hsl(222 47% 11% / 0.1), 0 4px 6px -4px hsl(222 47% 11% / 0.1);
     --shadow-glow: 0 0 20px hsl(210 61% 47% / 0.15);
+    
+    /* ========================================
+       SEMANTIC UI COLOR TOKENS (HRMS Standard)
+       ======================================== 
+       These tokens enforce enterprise-grade color semantics:
+       - info: Blue - tooltips, guidance, reference values
+       - success: Green - achievements, validated, met expectations
+       - warning: Amber - needs attention, requires action
+       - error: Red - validation failures, critical gaps
+       - neutral: Grey - pending, disabled, placeholder, not assessed
+       
+       CRITICAL: Required/target values use info OR neutral, NEVER success
+    */
+    
+    /* Semantic Background Colors (lighter for badges/pills) */
+    --semantic-info-bg: 199 89% 96%;
+    --semantic-success-bg: 168 76% 95%;
+    --semantic-warning-bg: 38 92% 95%;
+    --semantic-error-bg: 0 84% 97%;
+    --semantic-neutral-bg: 210 20% 96%;
+    
+    /* Semantic Text Colors (darker for readability) */
+    --semantic-info-text: 199 89% 35%;
+    --semantic-success-text: 168 76% 28%;
+    --semantic-warning-text: 38 80% 30%;
+    --semantic-error-text: 0 72% 40%;
+    --semantic-neutral-text: 210 16% 40%;
+    
+    /* Semantic Border Colors */
+    --semantic-info-border: 199 89% 85%;
+    --semantic-success-border: 168 76% 80%;
+    --semantic-warning-border: 38 92% 80%;
+    --semantic-error-border: 0 84% 85%;
+    --semantic-neutral-border: 210 20% 85%;
   }
 
   .dark {
