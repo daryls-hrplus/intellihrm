@@ -145,7 +145,7 @@ serve(async (req) => {
         profiles:employee_id (
           id,
           first_name,
-          last_name,
+          full_name,
           email
         )
       `)
@@ -190,7 +190,7 @@ serve(async (req) => {
             result.participantsNotified++;
             
             // Log in-app delivery
-            const recipientName = `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'Unknown';
+            const recipientName = profile.full_name || profile.first_name || 'Unknown';
             await supabase.from("reminder_delivery_log").insert({
               company_id: cycle.company_id,
               employee_id: profile.id,
@@ -248,7 +248,7 @@ serve(async (req) => {
               result.emailsSentToParticipants++;
               
               // Log email delivery
-              const recipientName = `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'Unknown';
+              const recipientName = profile.full_name || profile.first_name || 'Unknown';
               await supabase.from("reminder_delivery_log").insert({
                 company_id: cycle.company_id,
                 employee_id: profile.id,
@@ -297,7 +297,7 @@ serve(async (req) => {
         const memberNames = teamMembers
           .map(p => {
             const profile = p.profiles as any;
-            return profile ? `${profile.first_name || ''} ${profile.last_name || ''}`.trim() : 'Unknown';
+            return profile ? (profile.full_name || profile.first_name || 'Unknown') : 'Unknown';
           })
           .filter(Boolean)
           .join(", ");
@@ -317,12 +317,12 @@ serve(async (req) => {
         // Fetch manager profile for email
         const { data: managerProfile } = await supabase
           .from("profiles")
-          .select("email, first_name, last_name")
+          .select("email, first_name, full_name")
           .eq("id", evaluatorId)
           .single();
         
         const managerName = managerProfile 
-          ? `${managerProfile.first_name || ''} ${managerProfile.last_name || ''}`.trim() 
+          ? (managerProfile.full_name || managerProfile.first_name || 'Unknown')
           : 'Unknown';
         const managerFirstName = managerProfile?.first_name || 'Manager';
 
