@@ -11,6 +11,7 @@ import {
   TrendingUp,
   Shield,
   ExternalLink,
+  ClipboardList,
 } from "lucide-react";
 import { usePerformanceEvidence, EvidenceType } from "@/hooks/capabilities/usePerformanceEvidence";
 import { useCompetencyRatingHistory } from "@/hooks/capabilities/useCompetencyRatingHistory";
@@ -18,6 +19,7 @@ import { useSkillValidationConfidence } from "@/hooks/capabilities/useSkillValid
 import { PerformanceEvidenceManager, EvidencePrePopulate } from "./PerformanceEvidenceManager";
 import { CompetencyDriftChart } from "./CompetencyDriftChart";
 import { SkillValidationConfidenceIndicator } from "./SkillValidationConfidenceIndicator";
+import { AppraisalEvidenceStatusCard } from "@/components/ess/AppraisalEvidenceStatusCard";
 
 interface EvidencePortfolioSectionProps {
   employeeId: string;
@@ -115,21 +117,23 @@ export function EvidencePortfolioSection({
       </Card>
 
       {/* Portfolio Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList>
-          <TabsTrigger value="evidence" className="gap-2">
-            <FileText className="h-4 w-4" />
-            Evidence
-          </TabsTrigger>
-          <TabsTrigger value="trends" className="gap-2">
-            <TrendingUp className="h-4 w-4" />
-            Skill Trends
-          </TabsTrigger>
-          <TabsTrigger value="validation" className="gap-2">
-            <Shield className="h-4 w-4" />
-            Validation Status
-          </TabsTrigger>
-        </TabsList>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabsList>
+              <TabsTrigger value="evidence" className="gap-2">
+                <FileText className="h-4 w-4" />
+                Evidence
+              </TabsTrigger>
+              <TabsTrigger value="trends" className="gap-2">
+                <TrendingUp className="h-4 w-4" />
+                Skill Trends
+              </TabsTrigger>
+              <TabsTrigger value="validation" className="gap-2">
+                <Shield className="h-4 w-4" />
+                Validation Status
+              </TabsTrigger>
+            </TabsList>
 
         <TabsContent value="evidence" className="mt-4">
           <PerformanceEvidenceManager
@@ -186,10 +190,20 @@ export function EvidencePortfolioSection({
                   ))}
                 </div>
               )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+        </div>
+
+        {/* Appraisal Evidence Status Sidebar */}
+        <div className="lg:col-span-1">
+          <AppraisalEvidenceStatusCard
+            employeeId={employeeId}
+            companyId={companyId}
+          />
+        </div>
+      </div>
     </div>
   );
 }

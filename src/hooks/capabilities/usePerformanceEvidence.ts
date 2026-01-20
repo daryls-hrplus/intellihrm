@@ -29,6 +29,8 @@ export interface PerformanceEvidence {
   capability_id: string | null;
   responsibility_id: string | null;
   appraisal_cycle_id: string | null;
+  participant_id: string | null;
+  score_item_id: string | null;
   source_system: string | null;
   external_reference_id: string | null;
   external_url: string | null;
@@ -51,6 +53,8 @@ export interface PerformanceEvidence {
   responsibility?: { name: string } | null;
   submitter?: { full_name: string } | null;
   validator?: { full_name: string } | null;
+  appraisal_cycle?: { name: string } | null;
+  appraisal_participant?: { id: string } | null;
 }
 
 export interface CreateEvidenceData {
@@ -61,6 +65,8 @@ export interface CreateEvidenceData {
   capability_id?: string;
   responsibility_id?: string;
   appraisal_cycle_id?: string;
+  participant_id?: string;
+  score_item_id?: string;
   source_system?: string;
   external_reference_id?: string;
   external_url?: string;
@@ -83,6 +89,8 @@ export interface EvidenceFilters {
   capability_id?: string;
   responsibility_id?: string;
   appraisal_cycle_id?: string;
+  participant_id?: string;
+  score_item_id?: string;
   validation_status?: EvidenceValidationStatus;
   evidence_type?: EvidenceType;
 }
@@ -105,7 +113,9 @@ export function usePerformanceEvidence() {
           goal:performance_goals(title),
           capability:skills_competencies(name, code),
           submitter:profiles!performance_evidence_submitted_by_fkey(full_name),
-          validator:profiles!performance_evidence_validated_by_fkey(full_name)
+          validator:profiles!performance_evidence_validated_by_fkey(full_name),
+          appraisal_cycle:appraisal_cycles(name),
+          appraisal_participant:appraisal_participants(id)
         `)
         .order("submitted_at", { ascending: false });
 
@@ -123,6 +133,12 @@ export function usePerformanceEvidence() {
       }
       if (filters.appraisal_cycle_id) {
         query = query.eq("appraisal_cycle_id", filters.appraisal_cycle_id);
+      }
+      if (filters.participant_id) {
+        query = query.eq("participant_id", filters.participant_id);
+      }
+      if (filters.score_item_id) {
+        query = query.eq("score_item_id", filters.score_item_id);
       }
       if (filters.validation_status) {
         query = query.eq("validation_status", filters.validation_status);

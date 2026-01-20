@@ -67,6 +67,8 @@ interface PerformanceEvidenceManagerProps {
   capabilityId?: string;
   responsibilityId?: string;
   cycleId?: string;
+  participantId?: string;
+  scoreItemId?: string;
   canValidate?: boolean;
   readOnly?: boolean;
   prePopulate?: EvidencePrePopulate;
@@ -99,6 +101,8 @@ export function PerformanceEvidenceManager({
   capabilityId,
   responsibilityId,
   cycleId,
+  participantId,
+  scoreItemId,
   canValidate = false,
   readOnly = false,
   prePopulate,
@@ -130,13 +134,23 @@ export function PerformanceEvidenceManager({
     capability_id: capabilityId,
     responsibility_id: responsibilityId,
     appraisal_cycle_id: cycleId,
+    participant_id: participantId,
+    score_item_id: scoreItemId,
   });
   const [attachmentFile, setAttachmentFile] = useState<File | null>(null);
   const [validationNotes, setValidationNotes] = useState("");
 
   useEffect(() => {
-    fetchEvidence({ employee_id: employeeId, goal_id: goalId, capability_id: capabilityId, responsibility_id: responsibilityId, appraisal_cycle_id: cycleId });
-  }, [employeeId, goalId, capabilityId, responsibilityId, cycleId]);
+    fetchEvidence({ 
+      employee_id: employeeId, 
+      goal_id: goalId, 
+      capability_id: capabilityId, 
+      responsibility_id: responsibilityId, 
+      appraisal_cycle_id: cycleId,
+      participant_id: participantId,
+      score_item_id: scoreItemId,
+    });
+  }, [employeeId, goalId, capabilityId, responsibilityId, cycleId, participantId, scoreItemId]);
 
   const handleSubmitEvidence = async () => {
     if (!formData.title || !formData.evidence_type) {
@@ -165,6 +179,8 @@ export function PerformanceEvidenceManager({
         capability_id: capabilityId,
         responsibility_id: responsibilityId,
         appraisal_cycle_id: cycleId,
+        participant_id: participantId,
+        score_item_id: scoreItemId,
         attachment_path: attachmentPath,
         attachment_type: attachmentType,
         attachment_size_bytes: attachmentSize,
@@ -173,7 +189,15 @@ export function PerformanceEvidenceManager({
       if (result) {
         setAddDialogOpen(false);
         resetForm();
-        fetchEvidence({ employee_id: employeeId, goal_id: goalId, capability_id: capabilityId, responsibility_id: responsibilityId, appraisal_cycle_id: cycleId });
+        fetchEvidence({ 
+          employee_id: employeeId, 
+          goal_id: goalId, 
+          capability_id: capabilityId, 
+          responsibility_id: responsibilityId, 
+          appraisal_cycle_id: cycleId,
+          participant_id: participantId,
+          score_item_id: scoreItemId,
+        });
       }
     } finally {
       setUploading(false);
