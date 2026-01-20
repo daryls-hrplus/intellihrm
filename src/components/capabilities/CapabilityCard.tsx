@@ -35,6 +35,8 @@ import {
   Settings2,
   Heart,
   Award,
+  Globe,
+  Building2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format, differenceInDays, isFuture, isPast, parseISO, isValid } from "date-fns";
@@ -44,6 +46,7 @@ export interface CapabilityWithMeta extends Capability {
   job_count?: number;
   skill_count?: number;
   has_behavioral_indicators?: boolean;
+  linked_company_count?: number;
 }
 
 interface CapabilityCardProps {
@@ -246,8 +249,17 @@ export function CapabilityCard({
             <StatusIcon className="h-3 w-3" />
             {status.label}
           </Badge>
-          {capability.company_id === null && (
-            <Badge variant="secondary">Global</Badge>
+          {(capability as any).is_global && (
+            <Badge variant="secondary" className="gap-1">
+              <Globe className="h-3 w-3" />
+              Global
+            </Badge>
+          )}
+          {!((capability as any).is_global) && (capability.linked_company_count ?? 0) > 0 && (
+            <Badge variant="outline" className="gap-1">
+              <Building2 className="h-3 w-3" />
+              {capability.linked_company_count} {capability.linked_company_count === 1 ? "company" : "companies"}
+            </Badge>
           )}
           
           {/* Date-driven status badges */}
