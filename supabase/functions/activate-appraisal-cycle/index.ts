@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { Resend } from "https://esm.sh/resend@2.0.0";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -19,6 +20,8 @@ interface ActivationResult {
   cycleName: string;
   participantsNotified: number;
   managersNotified: number;
+  emailsSentToParticipants: number;
+  emailsSentToManagers: number;
   goalsLocked: number;
   tasksCreated: number;
   reminderRulesTriggered: number;
@@ -35,6 +38,14 @@ serve(async (req) => {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Initialize Resend for email sending
+    const resendApiKey = Deno.env.get("RESEND_API_KEY");
+    const resend = resendApiKey ? new Resend(resendApiKey) : null;
+    
+    if (!resend) {
+      console.warn("[activate-appraisal-cycle] RESEND_API_KEY not configured - emails will not be sent");
+    }
 
     // Get authorization header for user context
     const authHeader = req.headers.get("Authorization");
@@ -67,6 +78,8 @@ serve(async (req) => {
       cycleName: "",
       participantsNotified: 0,
       managersNotified: 0,
+      emailsSentToParticipants: 0,
+      emailsSentToManagers: 0,
       goalsLocked: 0,
       tasksCreated: 0,
       reminderRulesTriggered: 0,
@@ -109,6 +122,33 @@ serve(async (req) => {
         { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
       );
     }
+
+    // Fetch company name for email templates
+    const { data: company } = await supabase
+      .from("companies")
+      .select("name")
+      .eq("id", cycle.company_id)
+      .single();
+    const companyName = company?.name || "Your Organization";
+
+    // Fetch email templates for appraisal notifications
+    const { data: participantTemplate } = await supabase
+      .from("reminder_email_templates")
+      .select("subject, body")
+      .eq("category", "performance_appraisals")
+      .eq("name", "Review Cycle Launch")
+      .eq("is_active", true)
+      .single();
+
+    const { data: managerTemplate } = await supabase
+      .from("reminder_email_templates")
+      .select("subject, body")
+      .eq("category", "performance_appraisals")
+      .eq("name", "Manager Evaluation Submission Reminder")
+      .eq("is_active", true)
+      .single();
+
+    console.log(`[activate-appraisal-cycle] Email templates loaded: participant=${!!participantTemplate}, manager=${!!managerTemplate}`);
 
     // 2. Get all participants for this cycle
     const { data: participants, error: participantsError } = await supabase
@@ -201,7 +241,10 @@ serve(async (req) => {
         if (profile?.id) {
           const notificationTitle = "Appraisal Cycle Started";
           const notificationMessage = `The appraisal cycle "${cycle.name}" has started. Please complete your self-assessment by ${cycle.evaluation_deadline || cycle.end_date}.`;
+          const firstName = profile.first_name || profile.full_name?.split(' ')[0] || 'Team Member';
+          const deadline = cycle.evaluation_deadline || cycle.end_date;
           
+          // In-app notification
           const { error: notifError } = await supabase.from("notifications").insert({
             user_id: profile.id,
             title: notificationTitle,
@@ -213,7 +256,7 @@ serve(async (req) => {
           if (!notifError) {
             result.participantsNotified++;
             
-            // Log to reminder_delivery_log for HR tracking
+            // Log in-app delivery
             const recipientName = `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'Unknown';
             await supabase.from("reminder_delivery_log").insert({
               company_id: cycle.company_id,
@@ -231,11 +274,72 @@ serve(async (req) => {
               metadata: { 
                 cycle_name: cycle.name, 
                 notification_type: 'participant',
-                deadline: cycle.evaluation_deadline || cycle.end_date
+                deadline
               }
             });
           } else {
             console.error(`[activate-appraisal-cycle] Failed to send notification to participant ${profile.id}:`, notifError);
+          }
+
+          // Send email to participant
+          if (resend && profile.email) {
+            try {
+              let emailSubject = participantTemplate?.subject || `Performance Review Cycle Started: ${cycle.name}`;
+              let emailBody = participantTemplate?.body || 
+                `Dear ${firstName},\n\nThe performance review cycle "${cycle.name}" has been launched.\n\nPlease log in to complete your self-assessment by ${deadline}.\n\nBest regards,\n${companyName} HR Team`;
+
+              // Replace placeholders
+              emailSubject = emailSubject
+                .replace(/\{\{cycle_name\}\}/g, cycle.name)
+                .replace(/\{\{employee_first_name\}\}/g, firstName);
+              
+              emailBody = emailBody
+                .replace(/\{\{employee_first_name\}\}/g, firstName)
+                .replace(/\{\{cycle_name\}\}/g, cycle.name)
+                .replace(/\{\{end_date\}\}/g, deadline)
+                .replace(/\{\{deadline\}\}/g, deadline)
+                .replace(/\{\{company_name\}\}/g, companyName);
+
+              // Convert markdown to basic HTML
+              const htmlBody = emailBody
+                .replace(/\n/g, "<br>")
+                .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+
+              await resend.emails.send({
+                from: "HRplus Cerebra <noreply@notifications.intellihrm.net>",
+                to: [profile.email],
+                subject: emailSubject,
+                html: htmlBody,
+              });
+
+              result.emailsSentToParticipants++;
+              
+              // Log email delivery
+              const recipientName = `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'Unknown';
+              await supabase.from("reminder_delivery_log").insert({
+                company_id: cycle.company_id,
+                employee_id: profile.id,
+                delivery_channel: 'email',
+                recipient_email: profile.email,
+                recipient_name: recipientName,
+                subject: emailSubject,
+                body_preview: emailBody.substring(0, 200),
+                status: 'sent',
+                sent_at: now,
+                source_table: 'appraisal_cycles',
+                source_record_id: cycleId,
+                metadata: { 
+                  cycle_name: cycle.name, 
+                  notification_type: 'participant_email',
+                  deadline
+                }
+              });
+              
+              console.log(`[activate-appraisal-cycle] Email sent to participant: ${profile.email}`);
+            } catch (emailError) {
+              console.error(`[activate-appraisal-cycle] Failed to send email to ${profile.email}:`, emailError);
+              result.warnings.push(`Failed to send email to ${profile.email}`);
+            }
           }
         }
       }
@@ -252,7 +356,9 @@ serve(async (req) => {
 
         const managerTitle = "Team Appraisals Ready for Evaluation";
         const managerMessage = `The appraisal cycle "${cycle.name}" has started. You have ${teamMembers.length} team member(s) to evaluate: ${memberNames}. Deadline: ${cycle.evaluation_deadline || cycle.end_date}.`;
+        const deadline = cycle.evaluation_deadline || cycle.end_date;
 
+        // In-app notification
         const { error: managerNotifError } = await supabase.from("notifications").insert({
           user_id: evaluatorId,
           title: managerTitle,
@@ -261,21 +367,22 @@ serve(async (req) => {
           link: "/mss/appraisals",
         });
 
+        // Fetch manager profile for email
+        const { data: managerProfile } = await supabase
+          .from("profiles")
+          .select("email, first_name, last_name")
+          .eq("id", evaluatorId)
+          .single();
+        
+        const managerName = managerProfile 
+          ? `${managerProfile.first_name || ''} ${managerProfile.last_name || ''}`.trim() 
+          : 'Unknown';
+        const managerFirstName = managerProfile?.first_name || 'Manager';
+
         if (!managerNotifError) {
           result.managersNotified++;
           
-          // Log to reminder_delivery_log for HR tracking
-          // Fetch manager profile for logging
-          const { data: managerProfile } = await supabase
-            .from("profiles")
-            .select("email, first_name, last_name")
-            .eq("id", evaluatorId)
-            .single();
-          
-          const managerName = managerProfile 
-            ? `${managerProfile.first_name || ''} ${managerProfile.last_name || ''}`.trim() 
-            : 'Unknown';
-          
+          // Log in-app delivery
           await supabase.from("reminder_delivery_log").insert({
             company_id: cycle.company_id,
             employee_id: evaluatorId,
@@ -293,15 +400,80 @@ serve(async (req) => {
               cycle_name: cycle.name, 
               notification_type: 'manager',
               team_size: teamMembers.length,
-              deadline: cycle.evaluation_deadline || cycle.end_date
+              deadline
             }
           });
         } else {
           console.error(`[activate-appraisal-cycle] Failed to send notification to manager ${evaluatorId}:`, managerNotifError);
         }
+
+        // Send email to manager
+        if (resend && managerProfile?.email) {
+          try {
+            let emailSubject = managerTemplate?.subject || `Action Required: Evaluate Your Team for ${cycle.name}`;
+            let emailBody = managerTemplate?.body || 
+              `Dear ${managerFirstName},\n\nThe performance review cycle "${cycle.name}" is now active.\n\n**Your Team Members Requiring Evaluation:**\n${memberNames}\n\n**Deadline:** ${deadline}\n\nPlease log in to complete your evaluations before the deadline.\n\nBest regards,\n${companyName} HR Team`;
+
+            // Replace placeholders
+            emailSubject = emailSubject
+              .replace(/\{\{cycle_name\}\}/g, cycle.name)
+              .replace(/\{\{manager_name\}\}/g, managerName)
+              .replace(/\{\{manager_first_name\}\}/g, managerFirstName);
+            
+            emailBody = emailBody
+              .replace(/\{\{manager_name\}\}/g, managerName)
+              .replace(/\{\{manager_first_name\}\}/g, managerFirstName)
+              .replace(/\{\{cycle_name\}\}/g, cycle.name)
+              .replace(/\{\{team_member_list\}\}/g, memberNames)
+              .replace(/\{\{team_count\}\}/g, String(teamMembers.length))
+              .replace(/\{\{deadline\}\}/g, deadline)
+              .replace(/\{\{end_date\}\}/g, deadline)
+              .replace(/\{\{company_name\}\}/g, companyName);
+
+            // Convert markdown to basic HTML
+            const htmlBody = emailBody
+              .replace(/\n/g, "<br>")
+              .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+
+            await resend.emails.send({
+              from: "HRplus Cerebra <noreply@notifications.intellihrm.net>",
+              to: [managerProfile.email],
+              subject: emailSubject,
+              html: htmlBody,
+            });
+
+            result.emailsSentToManagers++;
+            
+            // Log email delivery
+            await supabase.from("reminder_delivery_log").insert({
+              company_id: cycle.company_id,
+              employee_id: evaluatorId,
+              delivery_channel: 'email',
+              recipient_email: managerProfile.email,
+              recipient_name: managerName,
+              subject: emailSubject,
+              body_preview: emailBody.substring(0, 200),
+              status: 'sent',
+              sent_at: now,
+              source_table: 'appraisal_cycles',
+              source_record_id: cycleId,
+              metadata: { 
+                cycle_name: cycle.name, 
+                notification_type: 'manager_email',
+                team_size: teamMembers.length,
+                deadline
+              }
+            });
+            
+            console.log(`[activate-appraisal-cycle] Email sent to manager: ${managerProfile.email}`);
+          } catch (emailError) {
+            console.error(`[activate-appraisal-cycle] Failed to send email to manager ${managerProfile.email}:`, emailError);
+            result.warnings.push(`Failed to send email to manager ${managerProfile.email}`);
+          }
+        }
       }
 
-      console.log(`[activate-appraisal-cycle] Notifications sent: ${result.participantsNotified} participants, ${result.managersNotified} managers`);
+      console.log(`[activate-appraisal-cycle] Notifications sent: ${result.participantsNotified} participants (${result.emailsSentToParticipants} emails), ${result.managersNotified} managers (${result.emailsSentToManagers} emails)`);
     }
 
     // 6. Trigger reminder rules for APPRAISAL_CYCLE_ACTIVATED event
@@ -324,9 +496,6 @@ serve(async (req) => {
       
       result.reminderRulesTriggered = activationRules.length;
       console.log(`[activate-appraisal-cycle] Found ${activationRules.length} reminder rules to trigger`);
-      
-      // The reminder rules will be processed by the existing process-reminders edge function
-      // which runs on a schedule. We just log that they exist.
     }
 
     // 7. Check for goal locking rules (on_cycle_freeze trigger)
@@ -341,7 +510,6 @@ serve(async (req) => {
       if (!lockingError && lockingRules && lockingRules.length > 0) {
         console.log(`[activate-appraisal-cycle] Found ${lockingRules.length} goal locking rules`);
         
-        // Lock goals for the cycle's performance period
         const { data: lockedGoals, error: lockError } = await supabase
           .from("goals")
           .update({
@@ -366,8 +534,8 @@ serve(async (req) => {
       }
     }
 
-    // 8. Log HR-level activation (skip notification without user_id as it's required)
-    console.log(`[activate-appraisal-cycle] HR notification skipped (requires specific user_id). Cycle ${cycle.name} activated with ${participantCount} participants.`);
+    // 8. Log HR-level activation
+    console.log(`[activate-appraisal-cycle] Cycle ${cycle.name} activated with ${participantCount} participants.`);
 
     // 9. Log the activation job
     await supabase.from("ai_scheduled_job_runs").insert({
@@ -381,6 +549,8 @@ serve(async (req) => {
         cycleName: result.cycleName,
         participantsNotified: result.participantsNotified,
         managersNotified: result.managersNotified,
+        emailsSentToParticipants: result.emailsSentToParticipants,
+        emailsSentToManagers: result.emailsSentToManagers,
         goalsLocked: result.goalsLocked,
         tasksCreated: result.tasksCreated,
         reminderRulesTriggered: result.reminderRulesTriggered,
