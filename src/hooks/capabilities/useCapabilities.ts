@@ -27,8 +27,27 @@ export function useCapabilities() {
       let query = supabase.from("skills_competencies").select("*");
 
       if (filters?.companyId) {
-        query = query.or(`company_id.eq.${filters.companyId},company_id.is.null`);
+        // First, get capability IDs linked via junction table
+        const { data: linkedData } = await supabase
+          .from("company_capabilities")
+          .select("capability_id")
+          .eq("company_id", filters.companyId);
+        
+        const linkedIds = linkedData?.map(d => d.capability_id) || [];
+        
+        // Build OR conditions: global OR junction-linked OR legacy company_id match
+        const orConditions = ["is_global.eq.true"];
+        
+        if (linkedIds.length > 0) {
+          orConditions.push(`id.in.(${linkedIds.join(",")})`);
+        }
+        
+        // Include legacy records with direct company_id match (backward compatibility)
+        orConditions.push(`company_id.eq.${filters.companyId}`);
+        
+        query = query.or(orConditions.join(","));
       }
+      
       if (filters?.type) {
         query = query.eq("type", filters.type);
       }
