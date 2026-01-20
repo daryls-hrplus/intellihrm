@@ -204,13 +204,13 @@ serve(async (req) => {
             title: "Appraisal Cycle Started",
             message: `The appraisal cycle "${cycle.name}" has started. Please complete your self-assessment by ${cycle.evaluation_deadline || cycle.end_date}.`,
             type: "info",
-            category: "performance",
-            company_id: cycle.company_id,
-            action_url: "/ess/appraisals",
+            link: "/ess/appraisals",
           });
 
           if (!notifError) {
             result.participantsNotified++;
+          } else {
+            console.error(`[activate-appraisal-cycle] Failed to send notification to participant ${profile.id}:`, notifError);
           }
         }
       }
@@ -230,13 +230,13 @@ serve(async (req) => {
           title: "Team Appraisals Ready for Evaluation",
           message: `The appraisal cycle "${cycle.name}" has started. You have ${teamMembers.length} team member(s) to evaluate: ${memberNames}. Deadline: ${cycle.evaluation_deadline || cycle.end_date}.`,
           type: "action_required",
-          category: "performance",
-          company_id: cycle.company_id,
-          action_url: "/mss/appraisals",
+          link: "/mss/appraisals",
         });
 
         if (!managerNotifError) {
           result.managersNotified++;
+        } else {
+          console.error(`[activate-appraisal-cycle] Failed to send notification to manager ${evaluatorId}:`, managerNotifError);
         }
       }
 
@@ -305,14 +305,8 @@ serve(async (req) => {
       }
     }
 
-    // 8. Create HR notification about activation
-    await supabase.from("notifications").insert({
-      title: "Appraisal Cycle Activated",
-      message: `The appraisal cycle "${cycle.name}" has been activated with ${participantCount} participants. ${result.managersNotified} managers notified.`,
-      type: "success",
-      category: "performance",
-      company_id: cycle.company_id,
-    });
+    // 8. Log HR-level activation (skip notification without user_id as it's required)
+    console.log(`[activate-appraisal-cycle] HR notification skipped (requires specific user_id). Cycle ${cycle.name} activated with ${participantCount} participants.`);
 
     // 9. Log the activation job
     await supabase.from("ai_scheduled_job_runs").insert({
