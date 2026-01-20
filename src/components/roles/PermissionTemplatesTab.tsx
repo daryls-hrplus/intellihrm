@@ -74,7 +74,7 @@ export function PermissionTemplatesTab() {
 
         const rolesWithDetails: SeededRoleWithDetails[] = (rolesData || []).map((r) => ({
           ...r,
-          role_type: (r.role_type as RoleType) || "business",
+          role_type: (["system", "seeded", "custom"].includes(r.role_type) ? r.role_type : "custom") as RoleType,
           is_seeded: true,
           base_role_id: null,
           seeded_role_code: r.seeded_role_code || null,
@@ -127,7 +127,7 @@ export function PermissionTemplatesTab() {
       <div className="space-y-4">
         {seededRoles.map((role) => {
           const isExpanded = expandedRoles.has(role.id);
-          const roleTypeConfig = ROLE_TYPE_CONFIG[role.role_type as RoleType] || ROLE_TYPE_CONFIG.business;
+          const roleTypeConfig = ROLE_TYPE_CONFIG[role.role_type as RoleType] || ROLE_TYPE_CONFIG.custom;
           const piiConfig = PII_LEVEL_CONFIG[role.pii_level || "none"];
 
           return (

@@ -1,6 +1,6 @@
 import { Json } from "@/integrations/supabase/types";
 
-export type RoleType = "system" | "seeded" | "custom" | "hr" | "business" | "commercial" | "internal";
+export type RoleType = "system" | "seeded" | "custom";
 export type TenantVisibility = "single" | "multi" | "global" | "all" | "hrplus_internal" | "client";
 export type PiiLevel = "none" | "masked" | "partial" | "limited" | "full";
 export type ExportPermission = "none" | "allowed" | "approval_required";
@@ -77,14 +77,22 @@ export interface RoleWithDetails extends Role {
 }
 
 // Role type badges configuration
-export const ROLE_TYPE_CONFIG: Record<RoleType, { label: string; color: string }> = {
-  system: { label: "System", color: "bg-red-500/10 text-red-600 dark:text-red-400" },
-  seeded: { label: "Seeded", color: "bg-violet-500/10 text-violet-600 dark:text-violet-400" },
-  custom: { label: "Custom", color: "bg-gray-500/10 text-gray-600 dark:text-gray-400" },
-  hr: { label: "HR", color: "bg-blue-500/10 text-blue-600 dark:text-blue-400" },
-  business: { label: "Business", color: "bg-green-500/10 text-green-600 dark:text-green-400" },
-  commercial: { label: "Commercial", color: "bg-purple-500/10 text-purple-600 dark:text-purple-400" },
-  internal: { label: "Internal", color: "bg-orange-500/10 text-orange-600 dark:text-orange-400" },
+export const ROLE_TYPE_CONFIG: Record<RoleType, { label: string; color: string; description: string }> = {
+  system: { 
+    label: "System", 
+    color: "bg-red-500/10 text-red-600 dark:text-red-400",
+    description: "Core platform roles. Cannot be modified or deleted."
+  },
+  seeded: { 
+    label: "Template", 
+    color: "bg-violet-500/10 text-violet-600 dark:text-violet-400",
+    description: "Pre-configured roles. Can customize permissions but cannot delete."
+  },
+  custom: { 
+    label: "Custom", 
+    color: "bg-gray-500/10 text-gray-600 dark:text-gray-400",
+    description: "Custom roles created by your organization."
+  },
 };
 
 // PII level badges configuration
