@@ -1,9 +1,16 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Users,
   Shield,
@@ -34,7 +41,21 @@ const breadcrumbItems = [
 export default function PermissionsOverviewPage() {
   usePageAudit("permissions_overview", "Admin");
   const [activeTab, setActiveTab] = useState("users");
-  const { isLoading, users, roles, essModules, essFields, stats } = usePermissionsOverview();
+  const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null);
+  const { isLoading, users, roles, essModules, essFields, stats, accessibleCompanies } = usePermissionsOverview(selectedCompanyId);
+
+  // Default to current company when accessible companies load
+  useEffect(() => {
+    if (accessibleCompanies.length > 0 && !selectedCompanyId) {
+      const currentCompany = accessibleCompanies.find(c => c.isCurrentCompany);
+      setSelectedCompanyId(currentCompany?.id || accessibleCompanies[0].id);
+    }
+  }, [accessibleCompanies, selectedCompanyId]);
+
+  const showMultiCompany = accessibleCompanies.length > 1;
+  const selectedCompanyName = selectedCompanyId === "all" 
+    ? "All Companies" 
+    : accessibleCompanies.find(c => c.id === selectedCompanyId)?.name || "Company";
 
   // Export to CSV
   const exportToCSV = () => {
@@ -102,7 +123,27 @@ export default function PermissionsOverviewPage() {
               Unified view of all access controls across users, roles, and organizations
             </p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex items-center gap-2">
+            {/* Company Selector */}
+            <Select 
+              value={selectedCompanyId || ""} 
+              onValueChange={setSelectedCompanyId}
+            >
+              <SelectTrigger className="w-[220px]">
+                <Building2 className="h-4 w-4 mr-2 text-muted-foreground" />
+                <SelectValue placeholder="Select Company" />
+              </SelectTrigger>
+              <SelectContent>
+                {showMultiCompany && (
+                  <SelectItem value="all">All Accessible Companies</SelectItem>
+                )}
+                {accessibleCompanies.map((company) => (
+                  <SelectItem key={company.id} value={company.id}>
+                    {company.code} - {company.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <Button variant="outline" onClick={exportToCSV}>
               <Download className="mr-2 h-4 w-4" />
               Export
@@ -120,7 +161,7 @@ export default function PermissionsOverviewPage() {
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-6">
           <StatCard
             icon={Users}
-            label="Total Users"
+            label={selectedCompanyId === "all" ? "All Company Users" : "Company Users"}
             value={stats.totalUsers}
             onClick={() => setActiveTab("users")}
             active={activeTab === "users"}
@@ -187,7 +228,7 @@ export default function PermissionsOverviewPage() {
           <Card>
             <CardContent className="pt-6">
               <TabsContent value="users" className="mt-0">
-                <UserAccessMatrix users={users} roles={roles} />
+                <UserAccessMatrix users={users} roles={roles} showCompanyColumn={selectedCompanyId === "all"} />
               </TabsContent>
 
               <TabsContent value="roles" className="mt-0">
