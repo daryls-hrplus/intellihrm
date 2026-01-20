@@ -89,14 +89,24 @@ export default function PerformanceSetupPage() {
   const { t } = useLanguage();
   const [searchParams, setSearchParams] = useSearchParams();
   
-  // Initialize tabs from URL params for deep linking
-  const initialPrimaryTab = searchParams.get('tab') || 'foundation';
-  const initialSecondaryTab = searchParams.get('sub') || 'rating-scales';
+  // Read tabs directly from URL params for deep linking
+  const urlTab = searchParams.get('tab') || 'foundation';
+  const urlSub = searchParams.get('sub');
   
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedCompany, setSelectedCompany] = useState<string>("");
-  const [primaryTab, setPrimaryTab] = useState(initialPrimaryTab);
-  const [secondaryTab, setSecondaryTab] = useState(initialSecondaryTab);
+  const [primaryTab, setPrimaryTab] = useState(urlTab);
+  const [secondaryTab, setSecondaryTab] = useState(urlSub || 'rating-scales');
+  
+  // Sync state with URL params when navigating (e.g., from readiness links)
+  useEffect(() => {
+    if (urlTab !== primaryTab) {
+      setPrimaryTab(urlTab);
+    }
+    if (urlSub && urlSub !== secondaryTab) {
+      setSecondaryTab(urlSub);
+    }
+  }, [urlTab, urlSub]);
   const [isLoading, setIsLoading] = useState(true);
 
   // Data states
@@ -134,8 +144,11 @@ export default function PerformanceSetupPage() {
   useEffect(() => { fetchCompanies(); }, []);
   useEffect(() => { if (selectedCompany) fetchAllData(); }, [selectedCompany]);
 
-  // Set appropriate secondary tab when primary tab changes
+  // Set appropriate secondary tab when primary tab changes (only if no URL sub param)
   useEffect(() => {
+    // Skip if URL has explicit sub param - let the URL sync effect handle it
+    if (urlSub) return;
+    
     const defaultSecondaryTabs: Record<string, string> = {
       foundation: "rating-scales",
       goals: "goal-cycles",
@@ -144,7 +157,7 @@ export default function PerformanceSetupPage() {
       recognition: "recognition-categories",
     };
     setSecondaryTab(defaultSecondaryTabs[primaryTab] || "rating-scales");
-  }, [primaryTab]);
+  }, [primaryTab, urlSub]);
 
   const fetchCompanies = async () => {
     try {
