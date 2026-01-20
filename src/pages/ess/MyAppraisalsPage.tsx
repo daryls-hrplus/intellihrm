@@ -30,6 +30,7 @@ import { useMyActiveAppraisals, type MyAppraisal } from "@/hooks/useMyAppraisals
 import { EssAppraisalDetailDialog } from "@/components/ess/EssAppraisalDetailDialog";
 import { EssPIPStatusCard } from "@/components/ess/EssPIPStatusCard";
 import { EssAppraisalSelfAssessmentDialog } from "@/components/ess/EssAppraisalSelfAssessmentDialog";
+import { EssAppraisalEvaluationDialog } from "@/components/ess/EssAppraisalEvaluationDialog";
 import { EssAppraisalAcknowledgmentDialog } from "@/components/ess/EssAppraisalAcknowledgmentDialog";
 import { EmployeeReviewResponseDialog } from "@/components/ess/performance/EmployeeReviewResponseDialog";
 import { PerformanceTrajectoryCard } from "@/components/performance/ai/PerformanceTrajectoryCard";

@@ -4223,6 +4223,10 @@ export type Database = {
           participant_id: string
           rating: number | null
           rating_date: string | null
+          self_comments: string | null
+          self_metadata: Json | null
+          self_rated_at: string | null
+          self_rating: number | null
           superseded_by: string | null
           updated_at: string
           weight: number
@@ -4249,6 +4253,10 @@ export type Database = {
           participant_id: string
           rating?: number | null
           rating_date?: string | null
+          self_comments?: string | null
+          self_metadata?: Json | null
+          self_rated_at?: string | null
+          self_rating?: number | null
           superseded_by?: string | null
           updated_at?: string
           weight?: number
@@ -4275,6 +4283,10 @@ export type Database = {
           participant_id?: string
           rating?: number | null
           rating_date?: string | null
+          self_comments?: string | null
+          self_metadata?: Json | null
+          self_rated_at?: string | null
+          self_rating?: number | null
           superseded_by?: string | null
           updated_at?: string
           weight?: number
@@ -53393,7 +53405,9 @@ export type Database = {
           id: string
           immutable_at: string | null
           is_immutable: boolean | null
+          participant_id: string | null
           responsibility_id: string | null
+          score_item_id: string | null
           source_system: string | null
           submitted_at: string
           submitted_by: string | null
@@ -53423,7 +53437,9 @@ export type Database = {
           id?: string
           immutable_at?: string | null
           is_immutable?: boolean | null
+          participant_id?: string | null
           responsibility_id?: string | null
+          score_item_id?: string | null
           source_system?: string | null
           submitted_at?: string
           submitted_by?: string | null
@@ -53453,7 +53469,9 @@ export type Database = {
           id?: string
           immutable_at?: string | null
           is_immutable?: boolean | null
+          participant_id?: string | null
           responsibility_id?: string | null
+          score_item_id?: string | null
           source_system?: string | null
           submitted_at?: string
           submitted_by?: string | null
@@ -53510,10 +53528,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "performance_evidence_participant_id_fkey"
+            columns: ["participant_id"]
+            isOneToOne: false
+            referencedRelation: "appraisal_participants"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "performance_evidence_responsibility_id_fkey"
             columns: ["responsibility_id"]
             isOneToOne: false
             referencedRelation: "job_responsibility_kras"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "performance_evidence_score_item_id_fkey"
+            columns: ["score_item_id"]
+            isOneToOne: false
+            referencedRelation: "appraisal_scores"
             referencedColumns: ["id"]
           },
           {
