@@ -81,39 +81,42 @@ export const ESS_ELIGIBLE_MODULES = [
   { code: 'immigration', name: 'Immigration', category: 'Workplace' },
 ];
 
-export function useEssEntitlement() {
+export function useEssEntitlement(overrideCompanyId?: string | null) {
   const { company, user } = useAuth();
   const { hasModuleAccess } = useSubscription();
   const queryClient = useQueryClient();
   
+  // Use override company ID if provided, otherwise fall back to auth company
+  const targetCompanyId = overrideCompanyId || company?.id;
+  
   // Fetch ESS module configurations
   const { data: essConfigs = [], isLoading: isLoadingConfigs } = useQuery({
-    queryKey: ['ess-module-config', company?.id],
+    queryKey: ['ess-module-config', targetCompanyId],
     queryFn: async () => {
-      if (!company?.id) return [];
+      if (!targetCompanyId) return [];
       const { data, error } = await supabase
         .from('ess_module_config')
         .select('*')
-        .eq('company_id', company.id);
+        .eq('company_id', targetCompanyId);
       if (error) throw error;
       return data as EssModuleConfig[];
     },
-    enabled: !!company?.id,
+    enabled: !!targetCompanyId,
   });
   
   // Fetch module implementations
   const { data: implementations = [], isLoading: isLoadingImplementations } = useQuery({
-    queryKey: ['module-implementations', company?.id],
+    queryKey: ['module-implementations', targetCompanyId],
     queryFn: async () => {
-      if (!company?.id) return [];
+      if (!targetCompanyId) return [];
       const { data, error } = await supabase
         .from('module_implementations')
         .select('*, application_modules(module_code)')
-        .eq('company_id', company.id);
+        .eq('company_id', targetCompanyId);
       if (error) throw error;
       return data;
     },
-    enabled: !!company?.id,
+    enabled: !!targetCompanyId,
   });
 
   // Mutation to update ESS config
@@ -124,7 +127,7 @@ export function useEssEntitlement() {
       ess_view_only?: boolean; 
       requires_approval?: boolean 
     }) => {
-      if (!company?.id) throw new Error("No company selected");
+      if (!targetCompanyId) throw new Error("No company selected");
       
       const existingConfig = essConfigs.find(c => c.module_code === updates.module_code);
       
@@ -144,7 +147,7 @@ export function useEssEntitlement() {
         const { error } = await supabase
           .from('ess_module_config')
           .insert({
-            company_id: company.id,
+            company_id: targetCompanyId,
             module_code: updates.module_code,
             ess_enabled: updates.ess_enabled ?? false,
             ess_view_only: updates.ess_view_only ?? false,
@@ -156,7 +159,7 @@ export function useEssEntitlement() {
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['ess-module-config', company?.id] });
+      queryClient.invalidateQueries({ queryKey: ['ess-module-config', targetCompanyId] });
       toast.success("ESS configuration updated");
     },
     onError: (error) => {
@@ -167,7 +170,7 @@ export function useEssEntitlement() {
   // Bulk update mutation
   const bulkUpdateMutation = useMutation({
     mutationFn: async (updates: { module_codes: string[]; ess_enabled: boolean }) => {
-      if (!company?.id) throw new Error("No company selected");
+      if (!targetCompanyId) throw new Error("No company selected");
       
       const promises = updates.module_codes.map(async (module_code) => {
         const existingConfig = essConfigs.find(c => c.module_code === module_code);
@@ -185,7 +188,7 @@ export function useEssEntitlement() {
           return supabase
             .from('ess_module_config')
             .insert({
-              company_id: company.id,
+              company_id: targetCompanyId,
               module_code,
               ess_enabled: updates.ess_enabled,
               ess_view_only: false,
@@ -199,7 +202,7 @@ export function useEssEntitlement() {
       await Promise.all(promises);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['ess-module-config', company?.id] });
+      queryClient.invalidateQueries({ queryKey: ['ess-module-config', targetCompanyId] });
       toast.success("ESS configurations updated");
     },
     onError: (error) => {

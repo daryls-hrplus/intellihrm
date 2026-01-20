@@ -120,7 +120,11 @@ function ModuleRow({ moduleCode, moduleName, onToggle, isUpdating, readiness, co
   );
 }
 
-export function ESSModuleEnablementTab() {
+interface ESSModuleEnablementTabProps {
+  companyId?: string | null;
+}
+
+export function ESSModuleEnablementTab({ companyId }: ESSModuleEnablementTabProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [openCategories, setOpenCategories] = useState<Set<string>>(new Set(['Profile & Personal Data']));
   
@@ -132,7 +136,7 @@ export function ESSModuleEnablementTab() {
     bulkUpdateConfig,
     isUpdating,
     isLoading 
-  } = useEssEntitlement();
+  } = useEssEntitlement(companyId);
   
   const modulesByCategory = useMemo(() => {
     const filtered = ESS_ELIGIBLE_MODULES.filter(m => 

@@ -1,11 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { usePageAudit } from "@/hooks/usePageAudit";
 import { useSearchParams, NavLink } from "react-router-dom";
+import { useUserAccessibleCompanies } from "@/hooks/useUserAccessibleCompanies";
 import { ESSModuleEnablementTab } from "@/components/admin/ess/ESSModuleEnablementTab";
 import { ESSApprovalPoliciesTab } from "@/components/admin/ess/ESSApprovalPoliciesTab";
 import { ESSFieldPermissionsTab } from "@/components/admin/ess/ESSFieldPermissionsTab";
@@ -16,15 +18,27 @@ import {
   Wand2,
   Settings2,
   FileEdit,
-  Info
+  Info,
+  Building2
 } from "lucide-react";
 
 export default function ESSAdministrationPage() {
   usePageAudit('ess_administration', 'Admin');
   const [searchParams, setSearchParams] = useSearchParams();
   const [showWizard, setShowWizard] = useState(false);
+  const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null);
+  
+  const { companies: accessibleCompanies, isLoading: companiesLoading } = useUserAccessibleCompanies();
   
   const currentTab = searchParams.get('tab') || 'modules';
+  
+  // Default to current company on load
+  useEffect(() => {
+    if (accessibleCompanies.length > 0 && !selectedCompanyId) {
+      const currentCompany = accessibleCompanies.find(c => c.isCurrentCompany);
+      setSelectedCompanyId(currentCompany?.id || accessibleCompanies[0].id);
+    }
+  }, [accessibleCompanies, selectedCompanyId]);
   
   const handleTabChange = (value: string) => {
     setSearchParams({ tab: value });
@@ -52,10 +66,31 @@ export default function ESSAdministrationPage() {
               </p>
             </div>
           </div>
-          <Button onClick={() => setShowWizard(true)} variant="outline">
-            <Wand2 className="h-4 w-4 mr-2" />
-            Setup Wizard
-          </Button>
+          <div className="flex items-center gap-3">
+            {accessibleCompanies.length > 0 && (
+              <Select 
+                value={selectedCompanyId || ""} 
+                onValueChange={setSelectedCompanyId}
+                disabled={companiesLoading}
+              >
+                <SelectTrigger className="w-[280px]">
+                  <Building2 className="h-4 w-4 mr-2" />
+                  <SelectValue placeholder="Select Company" />
+                </SelectTrigger>
+                <SelectContent>
+                  {accessibleCompanies.map((company) => (
+                    <SelectItem key={company.id} value={company.id}>
+                      {company.code} - {company.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+            <Button onClick={() => setShowWizard(true)} variant="outline">
+              <Wand2 className="h-4 w-4 mr-2" />
+              Setup Wizard
+            </Button>
+          </div>
         </div>
 
         <Alert>
@@ -86,19 +121,25 @@ export default function ESSAdministrationPage() {
           </TabsList>
           
           <TabsContent value="modules">
-            <ESSModuleEnablementTab />
+            <ESSModuleEnablementTab companyId={selectedCompanyId} />
           </TabsContent>
           
           <TabsContent value="policies">
-            <ESSApprovalPoliciesTab />
+            <ESSApprovalPoliciesTab companyId={selectedCompanyId} />
           </TabsContent>
           
           <TabsContent value="fields">
-            <ESSFieldPermissionsTab />
+            <ESSFieldPermissionsTab companyId={selectedCompanyId} />
           </TabsContent>
         </Tabs>
         
-        <ESSSetupWizard open={showWizard} onOpenChange={setShowWizard} />
+        <ESSSetupWizard 
+          open={showWizard} 
+          onOpenChange={setShowWizard}
+          selectedCompanyId={selectedCompanyId}
+          companies={accessibleCompanies}
+          onCompanyChange={setSelectedCompanyId}
+        />
       </div>
     </AppLayout>
   );

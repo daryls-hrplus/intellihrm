@@ -6,8 +6,10 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useEssEntitlement, ESS_ELIGIBLE_MODULES } from "@/hooks/useEssEntitlement";
 import { useESSApprovalPolicies } from "@/hooks/useESSApprovalPolicy";
+import { AccessibleCompany } from "@/hooks/useUserAccessibleCompanies";
 import { 
   Wand2, 
   ChevronRight, 
@@ -17,12 +19,16 @@ import {
   ShieldCheck, 
   Sparkles,
   Loader2,
-  CheckCircle2 
+  CheckCircle2,
+  Building2
 } from "lucide-react";
 
 interface ESSSetupWizardProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  selectedCompanyId?: string | null;
+  companies?: AccessibleCompany[];
+  onCompanyChange?: (companyId: string) => void;
 }
 
 const WIZARD_STEPS = [
@@ -31,14 +37,23 @@ const WIZARD_STEPS = [
   { id: 'review', title: 'Review & Activate', description: 'Confirm your settings' },
 ];
 
-export function ESSSetupWizard({ open, onOpenChange }: ESSSetupWizardProps) {
+export function ESSSetupWizard({ 
+  open, 
+  onOpenChange, 
+  selectedCompanyId, 
+  companies = [], 
+  onCompanyChange 
+}: ESSSetupWizardProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const [selectedModules, setSelectedModules] = useState<string[]>([]);
   const [isActivating, setIsActivating] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
 
-  const { getModuleReadiness, bulkUpdateConfig } = useEssEntitlement();
-  const { seedDefaultPolicies, hasNoPolicies } = useESSApprovalPolicies();
+  const { getModuleReadiness, bulkUpdateConfig } = useEssEntitlement(selectedCompanyId);
+  const { seedDefaultPolicies, hasNoPolicies } = useESSApprovalPolicies(selectedCompanyId);
+
+  // Get selected company name for display
+  const selectedCompany = companies.find(c => c.id === selectedCompanyId);
 
   // Group modules by category for selection
   const modulesByCategory = ESS_ELIGIBLE_MODULES.reduce((acc, module) => {
@@ -114,12 +129,30 @@ export function ESSSetupWizard({ open, onOpenChange }: ESSSetupWizardProps) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <div className="flex items-center gap-2">
-            <Wand2 className="h-5 w-5 text-primary" />
-            <DialogTitle>ESS Setup Wizard</DialogTitle>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Wand2 className="h-5 w-5 text-primary" />
+              <DialogTitle>ESS Setup Wizard</DialogTitle>
+            </div>
+            
+            {companies.length > 0 && (
+              <Select value={selectedCompanyId || ""} onValueChange={onCompanyChange}>
+                <SelectTrigger className="w-[220px]">
+                  <Building2 className="h-4 w-4 mr-2" />
+                  <SelectValue placeholder="Select Company" />
+                </SelectTrigger>
+                <SelectContent>
+                  {companies.map((company) => (
+                    <SelectItem key={company.id} value={company.id}>
+                      {company.code} - {company.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
           </div>
           <DialogDescription>
-            Configure Employee Self-Service in a few simple steps
+            Configure Employee Self-Service for {selectedCompany ? `${selectedCompany.code} - ${selectedCompany.name}` : 'your company'}
           </DialogDescription>
         </DialogHeader>
 
@@ -154,7 +187,7 @@ export function ESSSetupWizard({ open, onOpenChange }: ESSSetupWizardProps) {
               </div>
               <h3 className="text-xl font-semibold mb-2">ESS Setup Complete!</h3>
               <p className="text-muted-foreground mb-6 max-w-md">
-                Employee Self-Service has been configured. Employees can now access the enabled modules from their ESS portal.
+                Employee Self-Service has been configured{selectedCompany ? ` for ${selectedCompany.name}` : ''}. Employees can now access the enabled modules from their ESS portal.
               </p>
               <div className="flex gap-2">
                 <Badge variant="outline" className="bg-green-500/10">

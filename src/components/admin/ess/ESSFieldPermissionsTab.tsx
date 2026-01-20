@@ -25,7 +25,11 @@ const APPROVAL_MODE_OPTIONS: { value: FieldApprovalMode; label: string }[] = [
   { value: 'workflow', label: 'Workflow' },
 ];
 
-export function ESSFieldPermissionsTab() {
+interface ESSFieldPermissionsTabProps {
+  companyId?: string | null;
+}
+
+export function ESSFieldPermissionsTab({ companyId }: ESSFieldPermissionsTabProps) {
   const [selectedModule, setSelectedModule] = useState<string>('personal-info');
   const { 
     permissions, 
@@ -33,7 +37,7 @@ export function ESSFieldPermissionsTab() {
     updatePermission, 
     seedDefaultPermissions,
     hasNoPermissions 
-  } = useESSFieldPermissions(selectedModule);
+  } = useESSFieldPermissions(selectedModule, companyId);
 
   const handleToggleView = async (id: string, currentValue: boolean) => {
     await updatePermission.mutateAsync({ id, can_view: !currentValue });

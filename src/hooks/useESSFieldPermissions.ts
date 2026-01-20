@@ -69,17 +69,20 @@ export const DEFAULT_FIELD_DEFINITIONS: Record<string, { name: string; label: st
   ],
 };
 
-export function useESSFieldPermissions(moduleCode?: string) {
+export function useESSFieldPermissions(moduleCode?: string, overrideCompanyId?: string | null) {
   const { company } = useAuth();
   const queryClient = useQueryClient();
+  
+  // Use override company ID if provided, otherwise fall back to auth company
+  const targetCompanyId = overrideCompanyId || company?.id;
 
   const { data: permissions = [], isLoading, error } = useQuery({
-    queryKey: ["ess-field-permissions", company?.id, moduleCode],
+    queryKey: ["ess-field-permissions", targetCompanyId, moduleCode],
     queryFn: async () => {
       let query = supabase
         .from("ess_field_permissions")
         .select("*")
-        .eq("company_id", company?.id);
+        .eq("company_id", targetCompanyId);
       
       if (moduleCode) {
         query = query.eq("module_code", moduleCode);
@@ -90,7 +93,7 @@ export function useESSFieldPermissions(moduleCode?: string) {
       if (error) throw error;
       return data as ESSFieldPermission[];
     },
-    enabled: !!company?.id,
+    enabled: !!targetCompanyId,
   });
 
   const createPermission = useMutation({
@@ -99,7 +102,7 @@ export function useESSFieldPermissions(moduleCode?: string) {
         .from("ess_field_permissions")
         .insert({
           ...permission,
-          company_id: company?.id,
+          company_id: targetCompanyId,
         })
         .select()
         .single();
@@ -108,7 +111,7 @@ export function useESSFieldPermissions(moduleCode?: string) {
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["ess-field-permissions", company?.id] });
+      queryClient.invalidateQueries({ queryKey: ["ess-field-permissions", targetCompanyId] });
       toast.success("Field permission created");
     },
     onError: (error: any) => {
@@ -129,7 +132,7 @@ export function useESSFieldPermissions(moduleCode?: string) {
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["ess-field-permissions", company?.id] });
+      queryClient.invalidateQueries({ queryKey: ["ess-field-permissions", targetCompanyId] });
       toast.success("Field permission updated");
     },
     onError: (error: any) => {
@@ -147,7 +150,7 @@ export function useESSFieldPermissions(moduleCode?: string) {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["ess-field-permissions", company?.id] });
+      queryClient.invalidateQueries({ queryKey: ["ess-field-permissions", targetCompanyId] });
       toast.success("Field permission deleted");
     },
     onError: (error: any) => {
@@ -161,7 +164,7 @@ export function useESSFieldPermissions(moduleCode?: string) {
       if (!fields) throw new Error("No default fields defined for this module");
 
       const permissionsToInsert = fields.map(field => ({
-        company_id: company?.id,
+        company_id: targetCompanyId,
         module_code: targetModuleCode,
         field_name: field.name,
         field_label: field.label,
@@ -180,7 +183,7 @@ export function useESSFieldPermissions(moduleCode?: string) {
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["ess-field-permissions", company?.id] });
+      queryClient.invalidateQueries({ queryKey: ["ess-field-permissions", targetCompanyId] });
       toast.success("Default field permissions created");
     },
     onError: (error: any) => {
