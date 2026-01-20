@@ -318,6 +318,10 @@ export default function AdminUsersPage() {
       const sectionLookup: Record<string, string> = {};
       (sectionsData || []).forEach((s) => { sectionLookup[s.id] = s.name; });
 
+      // Create role ID to code lookup for custom roles
+      const roleIdToCodeMap: Record<string, string> = {};
+      (roleDefs || []).forEach((r) => { roleIdToCodeMap[r.id] = r.code; });
+
       const usersWithRoles: UserWithRoles[] = (profiles || []).map((profile) => ({
         id: profile.id,
         email: profile.email,
@@ -338,7 +342,14 @@ export default function AdminUsersPage() {
         locked_until: profile.locked_until,
         roles: (roles || [])
           .filter((r) => r.user_id === profile.id)
-          .map((r) => r.role as AppRole),
+          .map((r) => {
+            // Use role_id to get actual role code for custom roles
+            if (r.role_id && roleIdToCodeMap[r.role_id]) {
+              return roleIdToCodeMap[r.role_id];
+            }
+            // Fall back to role enum for legacy data
+            return r.role as AppRole;
+          }),
       }));
 
       setUsers(usersWithRoles);
