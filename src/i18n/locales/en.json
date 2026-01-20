@@ -55,6 +55,15 @@
       "careerDevelopment": "Career & Development",
       "workplaceResources": "Workplace Resources",
       "support": "Support"
+    },
+    "myLetters": {
+      "breadcrumb": "My Letters",
+      "title": "My Letters",
+      "subtitle": "Request and track employment letters from HR.",
+      "requestLetter": "Request Letter",
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected"
     }
   },
   "mss": {
