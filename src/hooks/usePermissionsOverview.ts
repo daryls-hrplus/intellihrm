@@ -174,14 +174,16 @@ export function usePermissionsOverview(selectedCompanyId?: string | null) {
   const [pendingRequestsCount, setPendingRequestsCount] = useState(0);
   const [companyMap, setCompanyMap] = useState<Map<string, { code: string; name: string }>>(new Map());
 
-  // Determine which companies to filter by
+  // Determine which companies to filter by - only compute when we have a selection
   const filterCompanyIds = useMemo(() => {
-    if (selectedCompanyId && selectedCompanyId !== "all") {
-      return [selectedCompanyId];
+    // Don't compute until we have a valid selection
+    if (!selectedCompanyId) return [];
+    
+    if (selectedCompanyId === "all") {
+      return accessibleCompanyIds;
     }
-    // If "all" selected or no selection, use all accessible companies
-    return accessibleCompanyIds.length > 0 ? accessibleCompanyIds : (company?.id ? [company.id] : []);
-  }, [selectedCompanyId, accessibleCompanyIds, company?.id]);
+    return [selectedCompanyId];
+  }, [selectedCompanyId, accessibleCompanyIds]);
 
   // Build company map for lookup
   useEffect(() => {
@@ -192,11 +194,12 @@ export function usePermissionsOverview(selectedCompanyId?: string | null) {
     setCompanyMap(map);
   }, [accessibleCompanies]);
 
+  // Only fetch when we have a valid selection and companies aren't loading
   useEffect(() => {
-    if (filterCompanyIds.length > 0 && !companiesLoading) {
+    if (!companiesLoading && selectedCompanyId && filterCompanyIds.length > 0) {
       fetchAllData();
     }
-  }, [filterCompanyIds, companiesLoading]);
+  }, [filterCompanyIds.join(","), companiesLoading, selectedCompanyId]);
 
   const fetchAllData = async () => {
     setIsLoading(true);
