@@ -189,7 +189,7 @@ export function EssAppraisalEvaluationDialog({
     if (enabledCategories.goals) {
       const { data: goals } = await supabase
         .from("performance_goals")
-        .select("id, title, weight")
+        .select("id, title, weighting")
         .eq("employee_id", user.id)
         .eq("status", "active");
 
@@ -198,7 +198,7 @@ export function EssAppraisalEvaluationDialog({
           item_id: goal.id,
           item_name: goal.title,
           evaluation_type: "goal",
-          weight: goal.weight || 0,
+          weight: goal.weighting || 0,
           self_rating: null,
           self_comments: "",
         });
