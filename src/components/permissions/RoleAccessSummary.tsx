@@ -96,19 +96,6 @@ export function RoleAccessSummary({
   return (
     <Card className="bg-white dark:bg-card border shadow-sm">
       <CardContent className="p-5">
-        <div className="flex items-center justify-between mb-5">
-          <div className="flex items-center gap-3">
-            <h3 className="text-lg font-semibold">{role.name}</h3>
-            {getRoleTypeBadge()}
-            {getAccessLevelBadge()}
-            {hasUnsavedChanges && (
-              <Badge variant="outline" className="bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 border-yellow-200 animate-pulse">
-                Unsaved Changes
-              </Badge>
-            )}
-          </div>
-        </div>
-
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {/* Modules Access */}
           <div className="space-y-2">
