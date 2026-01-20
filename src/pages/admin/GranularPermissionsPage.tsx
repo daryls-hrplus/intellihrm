@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
@@ -38,11 +38,25 @@ import {
   Briefcase,
   Container,
   Wallet,
+  CheckCircle2,
+  AlertCircle,
+  XCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { usePageAudit } from "@/hooks/usePageAudit";
+import { RoleAccessSummary } from "@/components/permissions/RoleAccessSummary";
+import { RoleInfoBanners } from "@/components/permissions/RoleInfoBanners";
+import { ModuleQuickActions } from "@/components/permissions/ModuleQuickActions";
+import { PermissionMatrixQuickView } from "@/components/permissions/PermissionMatrixQuickView";
+import { ModuleAccessIndicator } from "@/components/permissions/ModuleAccessIndicator";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface Role {
   id: string;
@@ -120,8 +134,8 @@ interface PayGroup {
 // Modules that use container-based hierarchy (admin now includes insights and strategic planning)
 const CONTAINER_BASED_MODULES = ["admin"];
 
-// Modules that should be hidden (now containers inside other modules)
-const HIDDEN_MODULES = ["strategic_planning", "insights"];
+// Modules that should be hidden (internal use or containers inside other modules)
+const HIDDEN_MODULES = ["strategic_planning", "insights", "enablement"];
 
 // Module display order matching main menu exactly
 const MODULE_DISPLAY_ORDER = [
@@ -139,13 +153,12 @@ const MODULE_DISPLAY_ORDER = [
   "training",
   "succession",
   "recruitment",
-  "hse",              // Health & Safety
+  "hse",
   "employee_relations",
-  "property",         // Company Property
+  "property",
   "help_center",
-  "enablement",
   "admin",
-  "profile",          // Profile at the end
+  "profile",
 ];
 
 const breadcrumbItems = [
@@ -157,6 +170,7 @@ export default function GranularPermissionsPage() {
   usePageAudit('permissions', 'Admin');
   const [searchParams] = useSearchParams();
   const roleIdFromUrl = searchParams.get("role");
+  const accordionRef = useRef<HTMLDivElement>(null);
   
   const [roles, setRoles] = useState<Role[]>([]);
   const [selectedRoleId, setSelectedRoleId] = useState<string>("");
@@ -179,6 +193,7 @@ export default function GranularPermissionsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
+  const [openAccordions, setOpenAccordions] = useState<string[]>([]);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -281,17 +296,17 @@ export default function GranularPermissionsPage() {
   };
 
   // Helper to get permission value - defaults to TRUE (all permissions on by default)
-  const getPermissionValue = (modulePermissionId: string, action: string): boolean => {
+  const getPermissionValue = useCallback((modulePermissionId: string, action: string): boolean => {
     const perm = rolePermissions[modulePermissionId];
     if (!perm) return true; // Default to ON
     return !!perm[action as keyof RolePermission];
-  };
+  }, [rolePermissions]);
 
   const togglePermission = (modulePermissionId: string, action: keyof RolePermission) => {
     setHasChanges(true);
     setRolePermissions((prev) => {
       const existing = prev[modulePermissionId];
-      const currentValue = existing ? !!existing[action as keyof RolePermission] : true; // Default is true
+      const currentValue = existing ? !!existing[action as keyof RolePermission] : true;
       
       if (existing) {
         return {
@@ -302,7 +317,6 @@ export default function GranularPermissionsPage() {
           },
         };
       } else {
-        // First time toggling - set all to true except the one being toggled (which goes to false)
         return {
           ...prev,
           [modulePermissionId]: {
@@ -483,91 +497,299 @@ export default function GranularPermissionsPage() {
   };
 
   // Group module permissions by module
-  const groupedPermissions = modulePermissions.reduce((acc, mp) => {
-    if (!acc[mp.module_code]) {
-      acc[mp.module_code] = {
-        module_code: mp.module_code,
-        module_name: mp.module_name,
-        tabs: [],
-        containers: [],
-        isContainerBased: CONTAINER_BASED_MODULES.includes(mp.module_code),
-      };
-    }
-    
-    if (mp.tab_code) {
-      if (mp.is_container) {
-        // This is a container
-        acc[mp.module_code].containers.push({
-          ...mp,
-          features: [] as ModulePermission[],
-        });
-      } else if (mp.container_code) {
-        // This is a feature within a container
-        const container = acc[mp.module_code].containers.find(
-          (c: any) => c.tab_code === mp.container_code
-        );
-        if (container) {
-          container.features.push(mp);
+  const groupedPermissions = useMemo(() => {
+    return modulePermissions.reduce((acc, mp) => {
+      if (!acc[mp.module_code]) {
+        acc[mp.module_code] = {
+          module_code: mp.module_code,
+          module_name: mp.module_name,
+          tabs: [],
+          containers: [],
+          isContainerBased: CONTAINER_BASED_MODULES.includes(mp.module_code),
+        };
+      }
+      
+      if (mp.tab_code) {
+        if (mp.is_container) {
+          acc[mp.module_code].containers.push({
+            ...mp,
+            features: [] as ModulePermission[],
+          });
+        } else if (mp.container_code) {
+          const container = acc[mp.module_code].containers.find(
+            (c: any) => c.tab_code === mp.container_code
+          );
+          if (container) {
+            container.features.push(mp);
+          } else {
+            acc[mp.module_code].tabs.push(mp);
+          }
         } else {
-          // Fallback to tabs if container not found
           acc[mp.module_code].tabs.push(mp);
         }
-      } else {
-        // Regular tab (no container hierarchy)
-        acc[mp.module_code].tabs.push(mp);
       }
-    }
-    return acc;
-  }, {} as Record<string, { 
-    module_code: string; 
-    module_name: string; 
-    tabs: ModulePermission[];
-    containers: (ModulePermission & { features: ModulePermission[] })[];
-    isContainerBased: boolean;
-  }>);
+      return acc;
+    }, {} as Record<string, { 
+      module_code: string; 
+      module_name: string; 
+      tabs: ModulePermission[];
+      containers: (ModulePermission & { features: ModulePermission[] })[];
+      isContainerBased: boolean;
+    }>);
+  }, [modulePermissions]);
+
+  // Calculate module access status
+  const getModuleAccessStatus = useCallback((moduleCode: string): { status: "full" | "partial" | "none"; accessibleTabs: number; totalTabs: number } => {
+    const group = groupedPermissions[moduleCode];
+    if (!group) return { status: "none", accessibleTabs: 0, totalTabs: 0 };
+
+    const allTabs = [...group.tabs];
+    group.containers.forEach(c => {
+      allTabs.push(c);
+      allTabs.push(...c.features);
+    });
+
+    let accessibleCount = 0;
+    let totalCount = allTabs.length;
+
+    allTabs.forEach(tab => {
+      if (getPermissionValue(tab.id, "can_view")) {
+        accessibleCount++;
+      }
+    });
+
+    if (accessibleCount === 0) return { status: "none", accessibleTabs: 0, totalTabs: totalCount };
+    if (accessibleCount === totalCount) return { status: "full", accessibleTabs: accessibleCount, totalTabs: totalCount };
+    return { status: "partial", accessibleTabs: accessibleCount, totalTabs: totalCount };
+  }, [groupedPermissions, getPermissionValue]);
+
+  // Calculate module permission summary (full/partial for each action)
+  const getModulePermissionSummary = useCallback((moduleCode: string) => {
+    const group = groupedPermissions[moduleCode];
+    if (!group) return { canView: false, canCreate: false, canEdit: false, canDelete: false };
+
+    const allTabs = [...group.tabs];
+    group.containers.forEach(c => {
+      allTabs.push(c);
+      allTabs.push(...c.features);
+    });
+
+    const totals = { view: 0, create: 0, edit: 0, delete: 0 };
+    const total = allTabs.length;
+
+    allTabs.forEach(tab => {
+      if (getPermissionValue(tab.id, "can_view")) totals.view++;
+      if (getPermissionValue(tab.id, "can_create")) totals.create++;
+      if (getPermissionValue(tab.id, "can_edit")) totals.edit++;
+      if (getPermissionValue(tab.id, "can_delete")) totals.delete++;
+    });
+
+    const getStatus = (count: number) => {
+      if (count === 0) return false;
+      if (count === total) return true;
+      return "partial" as const;
+    };
+
+    return {
+      canView: getStatus(totals.view),
+      canCreate: getStatus(totals.create),
+      canEdit: getStatus(totals.edit),
+      canDelete: getStatus(totals.delete),
+    };
+  }, [groupedPermissions, getPermissionValue]);
+
+  // Quick action handlers
+  const handleGrantAll = useCallback((moduleCode: string) => {
+    const group = groupedPermissions[moduleCode];
+    if (!group) return;
+
+    const allTabs = [...group.tabs];
+    group.containers.forEach(c => {
+      allTabs.push(c);
+      allTabs.push(...c.features);
+    });
+
+    setRolePermissions(prev => {
+      const updated = { ...prev };
+      allTabs.forEach(tab => {
+        updated[tab.id] = {
+          id: prev[tab.id]?.id || "",
+          role_id: selectedRoleId,
+          module_permission_id: tab.id,
+          can_view: true,
+          can_create: true,
+          can_edit: true,
+          can_delete: true,
+        };
+      });
+      return updated;
+    });
+    setHasChanges(true);
+    toast({ title: `All permissions granted for ${group.module_name}` });
+  }, [groupedPermissions, selectedRoleId, toast]);
+
+  const handleRevokeAll = useCallback((moduleCode: string) => {
+    const group = groupedPermissions[moduleCode];
+    if (!group) return;
+
+    const allTabs = [...group.tabs];
+    group.containers.forEach(c => {
+      allTabs.push(c);
+      allTabs.push(...c.features);
+    });
+
+    setRolePermissions(prev => {
+      const updated = { ...prev };
+      allTabs.forEach(tab => {
+        updated[tab.id] = {
+          id: prev[tab.id]?.id || "",
+          role_id: selectedRoleId,
+          module_permission_id: tab.id,
+          can_view: false,
+          can_create: false,
+          can_edit: false,
+          can_delete: false,
+        };
+      });
+      return updated;
+    });
+    setHasChanges(true);
+    toast({ title: `All permissions revoked for ${group.module_name}` });
+  }, [groupedPermissions, selectedRoleId, toast]);
+
+  const handleViewOnly = useCallback((moduleCode: string) => {
+    const group = groupedPermissions[moduleCode];
+    if (!group) return;
+
+    const allTabs = [...group.tabs];
+    group.containers.forEach(c => {
+      allTabs.push(c);
+      allTabs.push(...c.features);
+    });
+
+    setRolePermissions(prev => {
+      const updated = { ...prev };
+      allTabs.forEach(tab => {
+        updated[tab.id] = {
+          id: prev[tab.id]?.id || "",
+          role_id: selectedRoleId,
+          module_permission_id: tab.id,
+          can_view: true,
+          can_create: false,
+          can_edit: false,
+          can_delete: false,
+        };
+      });
+      return updated;
+    });
+    setHasChanges(true);
+    toast({ title: `View-only permissions set for ${group.module_name}` });
+  }, [groupedPermissions, selectedRoleId, toast]);
+
+  // Scroll to module in accordion
+  const scrollToModule = useCallback((moduleCode: string) => {
+    setOpenAccordions(prev => [...new Set([...prev, moduleCode])]);
+    setTimeout(() => {
+      const element = document.getElementById(`module-${moduleCode}`);
+      element?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 100);
+  }, []);
+
+  // Calculate stats for summary
+  const moduleStats = useMemo(() => {
+    const visibleModules = Object.values(groupedPermissions).filter(
+      g => !HIDDEN_MODULES.includes(g.module_code)
+    );
+    
+    let accessibleModules = 0;
+    let totalTabs = 0;
+    let accessibleTabs = 0;
+
+    visibleModules.forEach(group => {
+      const status = getModuleAccessStatus(group.module_code);
+      totalTabs += status.totalTabs;
+      accessibleTabs += status.accessibleTabs;
+      if (status.status !== "none") {
+        accessibleModules++;
+      }
+    });
+
+    return {
+      totalModules: visibleModules.length,
+      accessibleModules,
+      totalTabs,
+      accessibleTabs,
+    };
+  }, [groupedPermissions, getModuleAccessStatus]);
+
+  const orgScopeStats = useMemo(() => ({
+    companiesSelected: roleCompanyAccess.length,
+    tagsSelected: roleTagAccess.length,
+    totalCompanies: companies.length,
+    isAllAccess: roleCompanyAccess.length === 0 && roleTagAccess.length === 0,
+  }), [roleCompanyAccess, roleTagAccess, companies]);
+
+  // Build matrix data
+  const matrixModules = useMemo(() => {
+    return Object.values(groupedPermissions)
+      .filter(g => !HIDDEN_MODULES.includes(g.module_code))
+      .sort((a, b) => {
+        const aIndex = MODULE_DISPLAY_ORDER.indexOf(a.module_code);
+        const bIndex = MODULE_DISPLAY_ORDER.indexOf(b.module_code);
+        return (aIndex === -1 ? 999 : aIndex) - (bIndex === -1 ? 999 : bIndex);
+      })
+      .map(group => {
+        const accessStatus = getModuleAccessStatus(group.module_code);
+        const permSummary = getModulePermissionSummary(group.module_code);
+        return {
+          moduleCode: group.module_code,
+          moduleName: group.module_name,
+          tabCount: accessStatus.totalTabs,
+          accessibleTabs: accessStatus.accessibleTabs,
+          canView: permSummary.canView,
+          canCreate: permSummary.canCreate,
+          canEdit: permSummary.canEdit,
+          canDelete: permSummary.canDelete,
+          status: accessStatus.status,
+        };
+      });
+  }, [groupedPermissions, getModuleAccessStatus, getModulePermissionSummary]);
 
   const selectedRole = roles.find((r) => r.id === selectedRoleId);
-
-  // Render permission row
-  const renderPermissionRow = (item: ModulePermission, indent: number = 0) => (
-    <div
-      key={item.id}
-      className="grid grid-cols-[1fr,80px,80px,80px,80px] gap-2 px-4 py-2 border-b last:border-b-0 hover:bg-muted/20"
-    >
-      <div className="text-sm" style={{ paddingLeft: `${indent * 1.5}rem` }}>
-        {item.tab_name}
-      </div>
-      {["can_view", "can_create", "can_edit", "can_delete"].map((action) => (
-        <div key={action} className="flex justify-center">
-          <Checkbox
-            checked={getPermissionValue(item.id, action)}
-            onCheckedChange={() =>
-              togglePermission(item.id, action as keyof RolePermission)
-            }
-          />
-        </div>
-      ))}
-    </div>
-  );
+  const isSystemRole = selectedRole?.role_type === "system";
 
   // Render container-based module (admin/insights)
   const renderContainerBasedModule = (group: typeof groupedPermissions[string]) => {
     const modulePerm = modulePermissions.find(
       (mp) => mp.module_code === group.module_code && !mp.tab_code
     );
+    const accessStatus = getModuleAccessStatus(group.module_code);
 
     return (
-      <AccordionItem key={group.module_code} value={group.module_code}>
+      <AccordionItem key={group.module_code} value={group.module_code} id={`module-${group.module_code}`}>
         <AccordionTrigger className="px-4 hover:no-underline hover:bg-muted/50">
-          <div className="flex items-center gap-2">
-            <ChevronRight className="h-4 w-4 transition-transform duration-200" />
-            <span className="font-semibold">{group.module_name}</span>
-            <Badge variant="outline" className="ml-2">
-              {group.containers.length} containers
-            </Badge>
+          <div className="flex items-center justify-between w-full pr-4">
+            <div className="flex items-center gap-2">
+              <ChevronRight className="h-4 w-4 transition-transform duration-200" />
+              <span className="font-semibold">{group.module_name}</span>
+            </div>
+            <ModuleAccessIndicator
+              status={accessStatus.status}
+              tabCount={accessStatus.totalTabs}
+              accessibleTabCount={accessStatus.accessibleTabs}
+            />
           </div>
         </AccordionTrigger>
         <AccordionContent className="pb-0">
+          {/* Quick Actions */}
+          <ModuleQuickActions
+            moduleCode={group.module_code}
+            onGrantAll={handleGrantAll}
+            onRevokeAll={handleRevokeAll}
+            onViewOnly={handleViewOnly}
+            disabled={isSystemRole}
+          />
+
           {/* Module-level permission row */}
           {modulePerm && (
             <div className="grid grid-cols-[1fr,80px,80px,80px,80px] gap-2 px-4 py-2 border-b bg-muted/30">
@@ -581,6 +803,7 @@ export default function GranularPermissionsPage() {
                     onCheckedChange={() =>
                       togglePermission(modulePerm.id, action as keyof RolePermission)
                     }
+                    disabled={isSystemRole}
                   />
                 </div>
               ))}
@@ -613,6 +836,7 @@ export default function GranularPermissionsPage() {
                           onCheckedChange={() =>
                             togglePermission(container.id, action as keyof RolePermission)
                           }
+                          disabled={isSystemRole}
                         />
                       </div>
                     ))}
@@ -632,6 +856,7 @@ export default function GranularPermissionsPage() {
                             onCheckedChange={() =>
                               togglePermission(feature.id, action as keyof RolePermission)
                             }
+                            disabled={isSystemRole}
                           />
                         </div>
                       ))}
@@ -651,19 +876,33 @@ export default function GranularPermissionsPage() {
     const modulePerm = modulePermissions.find(
       (mp) => mp.module_code === group.module_code && !mp.tab_code
     );
+    const accessStatus = getModuleAccessStatus(group.module_code);
 
     return (
-      <AccordionItem key={group.module_code} value={group.module_code}>
+      <AccordionItem key={group.module_code} value={group.module_code} id={`module-${group.module_code}`}>
         <AccordionTrigger className="px-4 hover:no-underline hover:bg-muted/50">
-          <div className="flex items-center gap-2">
-            <ChevronRight className="h-4 w-4 transition-transform duration-200" />
-            <span className="font-semibold">{group.module_name}</span>
-            <Badge variant="outline" className="ml-2">
-              {group.tabs.length} tabs
-            </Badge>
+          <div className="flex items-center justify-between w-full pr-4">
+            <div className="flex items-center gap-2">
+              <ChevronRight className="h-4 w-4 transition-transform duration-200" />
+              <span className="font-semibold">{group.module_name}</span>
+            </div>
+            <ModuleAccessIndicator
+              status={accessStatus.status}
+              tabCount={accessStatus.totalTabs}
+              accessibleTabCount={accessStatus.accessibleTabs}
+            />
           </div>
         </AccordionTrigger>
         <AccordionContent className="pb-0">
+          {/* Quick Actions */}
+          <ModuleQuickActions
+            moduleCode={group.module_code}
+            onGrantAll={handleGrantAll}
+            onRevokeAll={handleRevokeAll}
+            onViewOnly={handleViewOnly}
+            disabled={isSystemRole}
+          />
+
           {/* Module-level permission row */}
           {modulePerm && (
             <div className="grid grid-cols-[1fr,80px,80px,80px,80px] gap-2 px-4 py-2 border-b bg-muted/30">
@@ -677,6 +916,7 @@ export default function GranularPermissionsPage() {
                     onCheckedChange={() =>
                       togglePermission(modulePerm.id, action as keyof RolePermission)
                     }
+                    disabled={isSystemRole}
                   />
                 </div>
               ))}
@@ -697,6 +937,7 @@ export default function GranularPermissionsPage() {
                     onCheckedChange={() =>
                       togglePermission(tab.id, action as keyof RolePermission)
                     }
+                    disabled={isSystemRole}
                   />
                 </div>
               ))}
@@ -722,7 +963,7 @@ export default function GranularPermissionsPage() {
       <div className="space-y-6">
         <Breadcrumbs items={breadcrumbItems} />
 
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Granular Permissions</h1>
             <p className="text-muted-foreground mt-1">
@@ -731,7 +972,7 @@ export default function GranularPermissionsPage() {
           </div>
           <div className="flex items-center gap-3">
             <Select value={selectedRoleId} onValueChange={setSelectedRoleId}>
-              <SelectTrigger className="w-[220px]">
+              <SelectTrigger className="w-[240px]">
                 <SelectValue placeholder="Select a role" />
               </SelectTrigger>
               <SelectContent>
@@ -751,7 +992,7 @@ export default function GranularPermissionsPage() {
                 ))}
               </SelectContent>
             </Select>
-            <Button onClick={savePermissions} disabled={isSaving || !hasChanges}>
+            <Button onClick={savePermissions} disabled={isSaving || !hasChanges || isSystemRole}>
               {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               <Save className="mr-2 h-4 w-4" />
               Save Changes
@@ -760,387 +1001,454 @@ export default function GranularPermissionsPage() {
         </div>
 
         {selectedRole && (
-          <Tabs defaultValue="permissions" className="space-y-4">
-            <TabsList>
-              <TabsTrigger value="permissions">Module Permissions</TabsTrigger>
-              <TabsTrigger value="company_access">Company Access</TabsTrigger>
-              <TabsTrigger value="org_access">Organization Access</TabsTrigger>
-              <TabsTrigger value="pay_group_access">Pay Group Access</TabsTrigger>
-              <TabsTrigger value="position_type_restrictions">Position Type Restrictions</TabsTrigger>
-            </TabsList>
+          <div className="space-y-4">
+            {/* Role Access Summary */}
+            <RoleAccessSummary
+              role={selectedRole}
+              moduleStats={moduleStats}
+              orgScopeStats={orgScopeStats}
+              hasUnsavedChanges={hasChanges}
+            />
 
-            <TabsContent value="permissions" className="space-y-4">
-              <div className="rounded-lg border bg-card">
-                <div className="grid grid-cols-[1fr,80px,80px,80px,80px] gap-2 p-4 border-b bg-muted/50 text-sm font-medium">
-                  <div>Module / Container / Feature</div>
-                  <div className="text-center"><Eye className="h-4 w-4 mx-auto" /></div>
-                  <div className="text-center"><PlusCircle className="h-4 w-4 mx-auto" /></div>
-                  <div className="text-center"><Pencil className="h-4 w-4 mx-auto" /></div>
-                  <div className="text-center"><Trash2 className="h-4 w-4 mx-auto" /></div>
+            {/* Info Banners */}
+            <RoleInfoBanners role={selectedRole} />
+
+            <Tabs defaultValue="permissions" className="space-y-4">
+              <TabsList>
+                <TabsTrigger value="permissions">Module Access</TabsTrigger>
+                <TabsTrigger value="company_access">Company Scope</TabsTrigger>
+                <TabsTrigger value="org_access">Organizational Scope</TabsTrigger>
+                <TabsTrigger value="pay_group_access">Pay Group Restrictions</TabsTrigger>
+                <TabsTrigger value="position_type_restrictions">Employment Filters</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="permissions" className="space-y-4">
+                {/* Permission Matrix Quick View */}
+                <PermissionMatrixQuickView
+                  modules={matrixModules}
+                  onModuleClick={scrollToModule}
+                />
+
+                <div className="rounded-lg border bg-card">
+                  <TooltipProvider>
+                    <div className="grid grid-cols-[1fr,80px,80px,80px,80px] gap-2 p-4 border-b bg-muted/50 text-sm font-medium">
+                      <div>Module / Container / Feature</div>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="text-center cursor-help"><Eye className="h-4 w-4 mx-auto" /></div>
+                        </TooltipTrigger>
+                        <TooltipContent>View - Can see this item</TooltipContent>
+                      </Tooltip>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="text-center cursor-help"><PlusCircle className="h-4 w-4 mx-auto" /></div>
+                        </TooltipTrigger>
+                        <TooltipContent>Create - Can add new records</TooltipContent>
+                      </Tooltip>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="text-center cursor-help"><Pencil className="h-4 w-4 mx-auto" /></div>
+                        </TooltipTrigger>
+                        <TooltipContent>Edit - Can modify existing records</TooltipContent>
+                      </Tooltip>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="text-center cursor-help"><Trash2 className="h-4 w-4 mx-auto" /></div>
+                        </TooltipTrigger>
+                        <TooltipContent>Delete - Can remove records</TooltipContent>
+                      </Tooltip>
+                    </div>
+                  </TooltipProvider>
+
+                  <ScrollArea className="h-[600px]" ref={accordionRef}>
+                    <Accordion 
+                      type="multiple" 
+                      className="w-full"
+                      value={openAccordions}
+                      onValueChange={setOpenAccordions}
+                    >
+                      {Object.values(groupedPermissions)
+                        .filter((group) => !HIDDEN_MODULES.includes(group.module_code))
+                        .sort((a, b) => {
+                          const aIndex = MODULE_DISPLAY_ORDER.indexOf(a.module_code);
+                          const bIndex = MODULE_DISPLAY_ORDER.indexOf(b.module_code);
+                          const aOrder = aIndex === -1 ? 999 : aIndex;
+                          const bOrder = bIndex === -1 ? 999 : bIndex;
+                          return aOrder - bOrder;
+                        })
+                        .map((group) => {
+                          if (group.isContainerBased && group.containers.length > 0) {
+                            return renderContainerBasedModule(group);
+                          } else {
+                            return renderRegularModule(group);
+                          }
+                        })}
+                    </Accordion>
+                  </ScrollArea>
                 </div>
+              </TabsContent>
 
-                <ScrollArea className="h-[600px]">
-                  <Accordion type="multiple" className="w-full">
-                    {Object.values(groupedPermissions)
-                      .filter((group) => !HIDDEN_MODULES.includes(group.module_code))
-                      .sort((a, b) => {
-                        const aIndex = MODULE_DISPLAY_ORDER.indexOf(a.module_code);
-                        const bIndex = MODULE_DISPLAY_ORDER.indexOf(b.module_code);
-                        // If not in order list, put at end
-                        const aOrder = aIndex === -1 ? 999 : aIndex;
-                        const bOrder = bIndex === -1 ? 999 : bIndex;
-                        return aOrder - bOrder;
-                      })
-                      .map((group) => {
-                        if (group.isContainerBased && group.containers.length > 0) {
-                          return renderContainerBasedModule(group);
-                        } else {
-                          return renderRegularModule(group);
-                        }
-                      })}
-                  </Accordion>
-                </ScrollArea>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="company_access" className="space-y-4">
-              <div className="grid gap-6 md:grid-cols-2">
-                {/* Direct Company Access */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Building2 className="h-5 w-5" />
-                      Direct Company Access
-                    </CardTitle>
-                    <CardDescription>
-                      Assign specific companies this role can manage
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <ScrollArea className="h-[300px]">
-                      <div className="space-y-2">
-                        {companies.map((company) => (
-                          <div
-                            key={company.id}
-                            className="flex items-center space-x-3 rounded-lg border p-3 hover:bg-muted/50"
-                          >
-                            <Checkbox
-                              id={`company-${company.id}`}
-                              checked={roleCompanyAccess.includes(company.id)}
-                              onCheckedChange={() => toggleCompanyAccess(company.id)}
-                            />
-                            <label
-                              htmlFor={`company-${company.id}`}
-                              className="flex-1 cursor-pointer text-sm"
-                            >
-                              {company.name}
-                            </label>
-                          </div>
-                        ))}
-                        {companies.length === 0 && (
-                          <p className="text-center text-muted-foreground py-4">
-                            No companies found
-                          </p>
-                        )}
-                      </div>
-                    </ScrollArea>
-                  </CardContent>
-                </Card>
-
-                {/* Tag-based Access */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Tag className="h-5 w-5" />
-                      Tag-based Access
-                    </CardTitle>
-                    <CardDescription>
-                      Grant access to all companies with selected tags
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <ScrollArea className="h-[300px]">
-                      <div className="space-y-2">
-                        {companyTags.map((tag) => (
-                          <div
-                            key={tag.id}
-                            className="flex items-center space-x-3 rounded-lg border p-3 hover:bg-muted/50"
-                          >
-                            <Checkbox
-                              id={`tag-${tag.id}`}
-                              checked={roleTagAccess.includes(tag.id)}
-                              onCheckedChange={() => toggleTagAccess(tag.id)}
-                            />
+              <TabsContent value="company_access" className="space-y-4">
+                <div className="grid gap-6 md:grid-cols-2">
+                  {/* Direct Company Access */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Building2 className="h-5 w-5" />
+                        Direct Company Access
+                      </CardTitle>
+                      <CardDescription>
+                        Assign specific companies this role can manage. No selection = access to all companies.
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <ScrollArea className="h-[300px]">
+                        <div className="space-y-2">
+                          {companies.map((company) => (
                             <div
-                              className="w-3 h-3 rounded-full"
-                              style={{ backgroundColor: tag.color }}
-                            />
-                            <label
-                              htmlFor={`tag-${tag.id}`}
-                              className="flex-1 cursor-pointer text-sm"
-                            >
-                              {tag.name}
-                            </label>
-                            <code className="text-xs text-muted-foreground">
-                              {tag.code}
-                            </code>
-                          </div>
-                        ))}
-                        {companyTags.length === 0 && (
-                          <p className="text-center text-muted-foreground py-4">
-                            No company tags found. Create tags first.
-                          </p>
-                        )}
-                      </div>
-                    </ScrollArea>
-                  </CardContent>
-                </Card>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="org_access" className="space-y-4">
-              <p className="text-sm text-muted-foreground mb-4">
-                By default, roles have access to all divisions, departments, and sections. Check items below to <strong>restrict</strong> access to only the selected items.
-              </p>
-              <div className="grid gap-6 md:grid-cols-3">
-                {/* Division Access */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Layers className="h-5 w-5" />
-                      Division Access
-                    </CardTitle>
-                    <CardDescription>
-                      Restrict to specific divisions (empty = all access)
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <ScrollArea className="h-[300px]">
-                      <div className="space-y-2">
-                        {divisions.map((division) => (
-                          <div
-                            key={division.id}
-                            className="flex items-center space-x-3 rounded-lg border p-3 hover:bg-muted/50"
-                          >
-                            <Checkbox
-                              id={`division-${division.id}`}
-                              checked={roleDivisionAccess.includes(division.id)}
-                              onCheckedChange={() => toggleDivisionAccess(division.id)}
-                            />
-                            <label
-                              htmlFor={`division-${division.id}`}
-                              className="flex-1 cursor-pointer text-sm"
-                            >
-                              {division.name}
-                            </label>
-                          </div>
-                        ))}
-                        {divisions.length === 0 && (
-                          <p className="text-center text-muted-foreground py-4">
-                            No divisions found
-                          </p>
-                        )}
-                      </div>
-                    </ScrollArea>
-                  </CardContent>
-                </Card>
-
-                {/* Department Access */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <GitBranch className="h-5 w-5" />
-                      Department Access
-                    </CardTitle>
-                    <CardDescription>
-                      Restrict to specific departments (empty = all access)
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <ScrollArea className="h-[300px]">
-                      <div className="space-y-2">
-                        {departments.map((department) => (
-                          <div
-                            key={department.id}
-                            className="flex items-center space-x-3 rounded-lg border p-3 hover:bg-muted/50"
-                          >
-                            <Checkbox
-                              id={`department-${department.id}`}
-                              checked={roleDepartmentAccess.includes(department.id)}
-                              onCheckedChange={() => toggleDepartmentAccess(department.id)}
-                            />
-                            <label
-                              htmlFor={`department-${department.id}`}
-                              className="flex-1 cursor-pointer text-sm"
-                            >
-                              {department.name}
-                            </label>
-                          </div>
-                        ))}
-                        {departments.length === 0 && (
-                          <p className="text-center text-muted-foreground py-4">
-                            No departments found
-                          </p>
-                        )}
-                      </div>
-                    </ScrollArea>
-                  </CardContent>
-                </Card>
-
-                {/* Section Access */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <FolderTree className="h-5 w-5" />
-                      Section Access
-                    </CardTitle>
-                    <CardDescription>
-                      Restrict to specific sections (empty = all access)
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <ScrollArea className="h-[300px]">
-                      <div className="space-y-2">
-                        {sections.map((section) => (
-                          <div
-                            key={section.id}
-                            className="flex items-center space-x-3 rounded-lg border p-3 hover:bg-muted/50"
-                          >
-                            <Checkbox
-                              id={`section-${section.id}`}
-                              checked={roleSectionAccess.includes(section.id)}
-                              onCheckedChange={() => toggleSectionAccess(section.id)}
-                            />
-                            <label
-                              htmlFor={`section-${section.id}`}
-                              className="flex-1 cursor-pointer text-sm"
-                            >
-                              {section.name}
-                            </label>
-                          </div>
-                        ))}
-                        {sections.length === 0 && (
-                          <p className="text-center text-muted-foreground py-4">
-                            No sections found
-                          </p>
-                        )}
-                      </div>
-                    </ScrollArea>
-                  </CardContent>
-                </Card>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="pay_group_access" className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Wallet className="h-5 w-5" />
-                    Pay Group Access
-                  </CardTitle>
-                  <CardDescription>
-                    By default, this role has access to all pay groups. Check pay groups below to <strong>restrict</strong> access to only the selected pay groups. This affects payroll processing and reporting visibility.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ScrollArea className="h-[400px]">
-                    <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3">
-                      {payGroups.map((payGroup) => {
-                        const company = companies.find((c) => c.id === payGroup.company_id);
-                        return (
-                          <div
-                            key={payGroup.id}
-                            className={cn(
-                              "flex items-center space-x-3 rounded-lg border p-3 hover:bg-muted/50",
-                              rolePayGroupAccess.includes(payGroup.id) && "border-primary/50 bg-primary/5"
-                            )}
-                          >
-                            <Checkbox
-                              id={`paygroup-${payGroup.id}`}
-                              checked={rolePayGroupAccess.includes(payGroup.id)}
-                              onCheckedChange={() => togglePayGroupAccess(payGroup.id)}
-                            />
-                            <label
-                              htmlFor={`paygroup-${payGroup.id}`}
-                              className="flex-1 cursor-pointer"
-                            >
-                              <div className="text-sm font-medium">{payGroup.name}</div>
-                              <div className="text-xs text-muted-foreground">
-                                {company?.name} • {payGroup.pay_frequency}
-                              </div>
-                            </label>
-                            <code className="text-xs text-muted-foreground">
-                              {payGroup.code}
-                            </code>
-                          </div>
-                        );
-                      })}
-                      {payGroups.length === 0 && (
-                        <p className="col-span-full text-center text-muted-foreground py-4">
-                          No pay groups found
-                        </p>
-                      )}
-                    </div>
-                  </ScrollArea>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="position_type_restrictions" className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Briefcase className="h-5 w-5" />
-                    Position Type Exclusions
-                  </CardTitle>
-                  <CardDescription>
-                    By default, this role can access employees in all position types. Check position types below to <strong>exclude</strong> them from this role's access. This affects employee visibility and reporting.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ScrollArea className="h-[400px]">
-                    <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3">
-                      {positionTypes.map((posType) => {
-                        const company = companies.find((c) => c.id === posType.company_id);
-                        return (
-                          <div
-                            key={posType.id}
-                            className={cn(
-                              "flex items-center space-x-3 rounded-lg border p-3 hover:bg-muted/50",
-                              rolePositionTypeExclusions.includes(posType.id) && "border-destructive/50 bg-destructive/5"
-                            )}
-                          >
-                            <Checkbox
-                              id={`postype-${posType.id}`}
-                              checked={rolePositionTypeExclusions.includes(posType.id)}
-                              onCheckedChange={() => togglePositionTypeExclusion(posType.id)}
-                            />
-                            <label
-                              htmlFor={`postype-${posType.id}`}
-                              className="flex-1 cursor-pointer"
-                            >
-                              <div className="text-sm font-medium">{posType.name}</div>
-                              {company && (
-                                <div className="text-xs text-muted-foreground">{company.name}</div>
+                              key={company.id}
+                              className={cn(
+                                "flex items-center space-x-3 rounded-lg border p-3 hover:bg-muted/50",
+                                roleCompanyAccess.includes(company.id) && "border-primary/50 bg-primary/5"
                               )}
-                            </label>
-                            <code className="text-xs text-muted-foreground">
-                              {posType.code}
-                            </code>
-                          </div>
-                        );
-                      })}
-                      {positionTypes.length === 0 && (
-                        <p className="col-span-full text-center text-muted-foreground py-4">
-                          No position types found
-                        </p>
-                      )}
-                    </div>
-                  </ScrollArea>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
+                            >
+                              <Checkbox
+                                id={`company-${company.id}`}
+                                checked={roleCompanyAccess.includes(company.id)}
+                                onCheckedChange={() => toggleCompanyAccess(company.id)}
+                                disabled={isSystemRole}
+                              />
+                              <label
+                                htmlFor={`company-${company.id}`}
+                                className="flex-1 cursor-pointer text-sm"
+                              >
+                                {company.name}
+                              </label>
+                            </div>
+                          ))}
+                          {companies.length === 0 && (
+                            <p className="text-center text-muted-foreground py-4">
+                              No companies found
+                            </p>
+                          )}
+                        </div>
+                      </ScrollArea>
+                    </CardContent>
+                  </Card>
+
+                  {/* Tag-based Access */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Tag className="h-5 w-5" />
+                        Tag-based Access
+                      </CardTitle>
+                      <CardDescription>
+                        Grant access to all companies with selected tags
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <ScrollArea className="h-[300px]">
+                        <div className="space-y-2">
+                          {companyTags.map((tag) => (
+                            <div
+                              key={tag.id}
+                              className={cn(
+                                "flex items-center space-x-3 rounded-lg border p-3 hover:bg-muted/50",
+                                roleTagAccess.includes(tag.id) && "border-primary/50 bg-primary/5"
+                              )}
+                            >
+                              <Checkbox
+                                id={`tag-${tag.id}`}
+                                checked={roleTagAccess.includes(tag.id)}
+                                onCheckedChange={() => toggleTagAccess(tag.id)}
+                                disabled={isSystemRole}
+                              />
+                              <div
+                                className="w-3 h-3 rounded-full"
+                                style={{ backgroundColor: tag.color }}
+                              />
+                              <label
+                                htmlFor={`tag-${tag.id}`}
+                                className="flex-1 cursor-pointer text-sm"
+                              >
+                                {tag.name}
+                              </label>
+                              <code className="text-xs text-muted-foreground">
+                                {tag.code}
+                              </code>
+                            </div>
+                          ))}
+                          {companyTags.length === 0 && (
+                            <p className="text-center text-muted-foreground py-4">
+                              No company tags found. Create tags first.
+                            </p>
+                          )}
+                        </div>
+                      </ScrollArea>
+                    </CardContent>
+                  </Card>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="org_access" className="space-y-4">
+                <p className="text-sm text-muted-foreground mb-4">
+                  By default, roles have access to all divisions, departments, and sections. Check items below to <strong>restrict</strong> access to only the selected items.
+                </p>
+                <div className="grid gap-6 md:grid-cols-3">
+                  {/* Divisions */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Layers className="h-5 w-5" />
+                        Division Access
+                      </CardTitle>
+                      <CardDescription>
+                        Limit access to specific divisions
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <ScrollArea className="h-[300px]">
+                        <div className="space-y-2">
+                          {divisions.map((division) => (
+                            <div
+                              key={division.id}
+                              className={cn(
+                                "flex items-center space-x-3 rounded-lg border p-3 hover:bg-muted/50",
+                                roleDivisionAccess.includes(division.id) && "border-primary/50 bg-primary/5"
+                              )}
+                            >
+                              <Checkbox
+                                id={`division-${division.id}`}
+                                checked={roleDivisionAccess.includes(division.id)}
+                                onCheckedChange={() => toggleDivisionAccess(division.id)}
+                                disabled={isSystemRole}
+                              />
+                              <label
+                                htmlFor={`division-${division.id}`}
+                                className="flex-1 cursor-pointer text-sm"
+                              >
+                                {division.name}
+                              </label>
+                            </div>
+                          ))}
+                          {divisions.length === 0 && (
+                            <p className="text-center text-muted-foreground py-4">
+                              No divisions found
+                            </p>
+                          )}
+                        </div>
+                      </ScrollArea>
+                    </CardContent>
+                  </Card>
+
+                  {/* Departments */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <GitBranch className="h-5 w-5" />
+                        Department Access
+                      </CardTitle>
+                      <CardDescription>
+                        Limit access to specific departments
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <ScrollArea className="h-[300px]">
+                        <div className="space-y-2">
+                          {departments.map((dept) => (
+                            <div
+                              key={dept.id}
+                              className={cn(
+                                "flex items-center space-x-3 rounded-lg border p-3 hover:bg-muted/50",
+                                roleDepartmentAccess.includes(dept.id) && "border-primary/50 bg-primary/5"
+                              )}
+                            >
+                              <Checkbox
+                                id={`department-${dept.id}`}
+                                checked={roleDepartmentAccess.includes(dept.id)}
+                                onCheckedChange={() => toggleDepartmentAccess(dept.id)}
+                                disabled={isSystemRole}
+                              />
+                              <label
+                                htmlFor={`department-${dept.id}`}
+                                className="flex-1 cursor-pointer text-sm"
+                              >
+                                {dept.name}
+                              </label>
+                            </div>
+                          ))}
+                          {departments.length === 0 && (
+                            <p className="text-center text-muted-foreground py-4">
+                              No departments found
+                            </p>
+                          )}
+                        </div>
+                      </ScrollArea>
+                    </CardContent>
+                  </Card>
+
+                  {/* Sections */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <FolderTree className="h-5 w-5" />
+                        Section Access
+                      </CardTitle>
+                      <CardDescription>
+                        Limit access to specific sections
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <ScrollArea className="h-[300px]">
+                        <div className="space-y-2">
+                          {sections.map((section) => (
+                            <div
+                              key={section.id}
+                              className={cn(
+                                "flex items-center space-x-3 rounded-lg border p-3 hover:bg-muted/50",
+                                roleSectionAccess.includes(section.id) && "border-primary/50 bg-primary/5"
+                              )}
+                            >
+                              <Checkbox
+                                id={`section-${section.id}`}
+                                checked={roleSectionAccess.includes(section.id)}
+                                onCheckedChange={() => toggleSectionAccess(section.id)}
+                                disabled={isSystemRole}
+                              />
+                              <label
+                                htmlFor={`section-${section.id}`}
+                                className="flex-1 cursor-pointer text-sm"
+                              >
+                                {section.name}
+                              </label>
+                            </div>
+                          ))}
+                          {sections.length === 0 && (
+                            <p className="text-center text-muted-foreground py-4">
+                              No sections found
+                            </p>
+                          )}
+                        </div>
+                      </ScrollArea>
+                    </CardContent>
+                  </Card>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="pay_group_access" className="space-y-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Wallet className="h-5 w-5" />
+                      Pay Group Access
+                    </CardTitle>
+                    <CardDescription>
+                      By default, this role has access to all pay groups. Check pay groups below to <strong>restrict</strong> access to only the selected pay groups. This affects payroll processing and reporting visibility.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <ScrollArea className="h-[400px]">
+                      <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3">
+                        {payGroups.map((payGroup) => {
+                          const company = companies.find((c) => c.id === payGroup.company_id);
+                          return (
+                            <div
+                              key={payGroup.id}
+                              className={cn(
+                                "flex items-center space-x-3 rounded-lg border p-3 hover:bg-muted/50",
+                                rolePayGroupAccess.includes(payGroup.id) && "border-primary/50 bg-primary/5"
+                              )}
+                            >
+                              <Checkbox
+                                id={`paygroup-${payGroup.id}`}
+                                checked={rolePayGroupAccess.includes(payGroup.id)}
+                                onCheckedChange={() => togglePayGroupAccess(payGroup.id)}
+                                disabled={isSystemRole}
+                              />
+                              <label
+                                htmlFor={`paygroup-${payGroup.id}`}
+                                className="flex-1 cursor-pointer"
+                              >
+                                <div className="text-sm font-medium">{payGroup.name}</div>
+                                <div className="text-xs text-muted-foreground">
+                                  {company?.name} • {payGroup.pay_frequency}
+                                </div>
+                              </label>
+                              <code className="text-xs text-muted-foreground">
+                                {payGroup.code}
+                              </code>
+                            </div>
+                          );
+                        })}
+                        {payGroups.length === 0 && (
+                          <p className="col-span-full text-center text-muted-foreground py-4">
+                            No pay groups found
+                          </p>
+                        )}
+                      </div>
+                    </ScrollArea>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="position_type_restrictions" className="space-y-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Briefcase className="h-5 w-5" />
+                      Position Type Exclusions
+                    </CardTitle>
+                    <CardDescription>
+                      By default, this role can access employees in all position types. Check position types below to <strong>exclude</strong> them from this role's access. This affects employee visibility and reporting.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <ScrollArea className="h-[400px]">
+                      <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3">
+                        {positionTypes.map((posType) => {
+                          const company = companies.find((c) => c.id === posType.company_id);
+                          return (
+                            <div
+                              key={posType.id}
+                              className={cn(
+                                "flex items-center space-x-3 rounded-lg border p-3 hover:bg-muted/50",
+                                rolePositionTypeExclusions.includes(posType.id) && "border-destructive/50 bg-destructive/5"
+                              )}
+                            >
+                              <Checkbox
+                                id={`postype-${posType.id}`}
+                                checked={rolePositionTypeExclusions.includes(posType.id)}
+                                onCheckedChange={() => togglePositionTypeExclusion(posType.id)}
+                                disabled={isSystemRole}
+                              />
+                              <label
+                                htmlFor={`postype-${posType.id}`}
+                                className="flex-1 cursor-pointer"
+                              >
+                                <div className="text-sm font-medium">{posType.name}</div>
+                                {company && (
+                                  <div className="text-xs text-muted-foreground">{company.name}</div>
+                                )}
+                              </label>
+                              <code className="text-xs text-muted-foreground">
+                                {posType.code}
+                              </code>
+                            </div>
+                          );
+                        })}
+                        {positionTypes.length === 0 && (
+                          <p className="col-span-full text-center text-muted-foreground py-4">
+                            No position types found
+                          </p>
+                        )}
+                      </div>
+                    </ScrollArea>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
+          </div>
         )}
       </div>
     </AppLayout>
