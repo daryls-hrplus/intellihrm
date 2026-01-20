@@ -2166,8 +2166,8 @@
         "description": "Configure email alerts and thresholds"
       },
       "permissions": {
-        "title": "Permissions Summary",
-        "description": "View user access across all modules"
+        "title": "Permissions Overview",
+        "description": "Unified view of all access controls"
       },
       "accessRequests": {
         "title": "Access Requests",
