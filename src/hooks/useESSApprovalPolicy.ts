@@ -51,23 +51,26 @@ const DEFAULT_POLICIES: Omit<PolicyFormData, 'company_id'>[] = [
   { request_type: 'banking', approval_mode: 'workflow', notification_only: true, requires_documentation: true },
 ];
 
-export function useESSApprovalPolicies() {
+export function useESSApprovalPolicies(overrideCompanyId?: string | null) {
   const { company } = useAuth();
   const queryClient = useQueryClient();
+  
+  // Use override company ID if provided, otherwise fall back to auth company
+  const targetCompanyId = overrideCompanyId || company?.id;
 
   const { data: policies, isLoading, error } = useQuery({
-    queryKey: ["ess-approval-policies", company?.id],
+    queryKey: ["ess-approval-policies", targetCompanyId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("ess_approval_policies")
         .select("*")
-        .eq("company_id", company?.id)
+        .eq("company_id", targetCompanyId)
         .order("request_type", { ascending: true });
       
       if (error) throw error;
       return data as ESSApprovalPolicy[];
     },
-    enabled: !!company?.id,
+    enabled: !!targetCompanyId,
   });
 
   const createPolicy = useMutation({
@@ -76,7 +79,7 @@ export function useESSApprovalPolicies() {
         .from("ess_approval_policies")
         .insert({
           ...policy,
-          company_id: company?.id,
+          company_id: targetCompanyId,
         })
         .select()
         .single();
@@ -85,7 +88,7 @@ export function useESSApprovalPolicies() {
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["ess-approval-policies", company?.id] });
+      queryClient.invalidateQueries({ queryKey: ["ess-approval-policies", targetCompanyId] });
       toast.success("Policy created successfully");
     },
     onError: (error: any) => {
@@ -107,7 +110,7 @@ export function useESSApprovalPolicies() {
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["ess-approval-policies", company?.id] });
+      queryClient.invalidateQueries({ queryKey: ["ess-approval-policies", targetCompanyId] });
       toast.success("Policy updated successfully");
     },
     onError: (error: any) => {
@@ -126,7 +129,7 @@ export function useESSApprovalPolicies() {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["ess-approval-policies", company?.id] });
+      queryClient.invalidateQueries({ queryKey: ["ess-approval-policies", targetCompanyId] });
       toast.success("Policy deleted successfully");
     },
     onError: (error: any) => {
@@ -139,7 +142,7 @@ export function useESSApprovalPolicies() {
     mutationFn: async () => {
       const policiesToInsert = DEFAULT_POLICIES.map(p => ({
         ...p,
-        company_id: company?.id,
+        company_id: targetCompanyId,
       }));
       
       const { data, error } = await supabase
@@ -151,7 +154,7 @@ export function useESSApprovalPolicies() {
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["ess-approval-policies", company?.id] });
+      queryClient.invalidateQueries({ queryKey: ["ess-approval-policies", targetCompanyId] });
       toast.success("Default policies created");
     },
     onError: (error: any) => {

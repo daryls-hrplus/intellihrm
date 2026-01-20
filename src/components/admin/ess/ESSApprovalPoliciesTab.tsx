@@ -32,8 +32,12 @@ const APPROVAL_MODES: { value: ApprovalMode; label: string; description: string 
   { value: 'workflow', label: 'Workflow', description: 'Changes go through a configured workflow process' },
 ];
 
-export function ESSApprovalPoliciesTab() {
-  const { policies, isLoading, createPolicy, updatePolicy, deletePolicy, seedDefaultPolicies, hasNoPolicies } = useESSApprovalPolicies();
+interface ESSApprovalPoliciesTabProps {
+  companyId?: string | null;
+}
+
+export function ESSApprovalPoliciesTab({ companyId }: ESSApprovalPoliciesTabProps) {
+  const { policies, isLoading, createPolicy, updatePolicy, deletePolicy, seedDefaultPolicies, hasNoPolicies } = useESSApprovalPolicies(companyId);
   
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingPolicy, setEditingPolicy] = useState<string | null>(null);
