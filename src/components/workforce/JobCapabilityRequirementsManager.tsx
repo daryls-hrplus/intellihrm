@@ -41,7 +41,8 @@ import {
 } from "@/components/ui/tooltip";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Plus, Loader2, Target, Info, ChevronsUpDown, Check, ArrowRight, Sparkles, AlertTriangle, CheckCircle2 } from "lucide-react";
+import { Plus, Loader2, Target, Info, ChevronsUpDown, Check, ArrowRight, Sparkles, AlertTriangle, CheckCircle2, Users } from "lucide-react";
+import { syncJobCompetenciesToEmployee } from "@/hooks/useCompetencyCascade";
 import { getTodayString, formatDateForDisplay } from "@/utils/dateUtils";
 import { ProficiencyLevelPicker } from "@/components/capabilities/ProficiencyLevelPicker";
 import { SkillProficiencyGuide } from "@/components/capabilities/SkillProficiencyGuide";
@@ -124,6 +125,7 @@ export function JobCapabilityRequirementsManager({
   const [editingRequirement, setEditingRequirement] = useState<JobCapabilityRequirement | null>(null);
   const [comboboxOpen, setComboboxOpen] = useState(false);
   const [jobInfo, setJobInfo] = useState<JobInfo | null>(null);
+  const [isSyncingAll, setIsSyncingAll] = useState(false);
   
   const [formData, setFormData] = useState({
     capability_id: "",
@@ -482,6 +484,69 @@ export function JobCapabilityRequirementsManager({
     fetchLinkedSkills(requirements.map(r => r.capability_id), requirements);
   };
 
+  const handleSyncToAllEmployees = async () => {
+    setIsSyncingAll(true);
+    try {
+      // 1. Find all positions linked to this job
+      const { data: positions, error: posError } = await supabase
+        .from("positions")
+        .select("id")
+        .eq("job_id", jobId);
+      
+      if (posError) {
+        toast.error("Failed to fetch positions");
+        return;
+      }
+
+      const positionIds = positions?.map(p => p.id) || [];
+      if (positionIds.length === 0) {
+        toast.info("No positions linked to this job");
+        return;
+      }
+      
+      // 2. Find all employees with active assignments to those positions
+      const { data: employees, error: empError } = await supabase
+        .from("employee_positions")
+        .select("employee_id")
+        .in("position_id", positionIds)
+        .eq("is_active", true);
+      
+      if (empError) {
+        toast.error("Failed to fetch employees");
+        return;
+      }
+
+      const employeeIds = [...new Set(employees?.map(e => e.employee_id) || [])];
+      if (employeeIds.length === 0) {
+        toast.info("No employees in positions linked to this job");
+        return;
+      }
+      
+      // 3. Sync competencies to each employee
+      let totalSynced = 0;
+      let errors: string[] = [];
+      
+      for (const empId of employeeIds) {
+        const result = await syncJobCompetenciesToEmployee(empId, jobId);
+        totalSynced += result.synced;
+        errors.push(...result.errors);
+      }
+      
+      if (errors.length > 0) {
+        toast.error(`Sync completed with errors: ${errors[0]}`);
+      } else if (totalSynced === 0) {
+        toast.info(`All ${employeeIds.length} employees already have these competencies`);
+      } else {
+        toast.success(`Synced ${totalSynced} competencies to ${employeeIds.length} employees`);
+      }
+    } catch (error: any) {
+      console.error("Error syncing to all employees:", error);
+      toast.error("Failed to sync competencies");
+    } finally {
+      setIsSyncingAll(false);
+    }
+  };
+
   const totalWeight = requirements
     .filter((r) => !r.end_date)
     .reduce((sum, r) => sum + Number(r.weighting), 0);
@@ -574,10 +639,27 @@ export function JobCapabilityRequirementsManager({
           </TooltipProvider>
           <Badge variant="outline">Total Weight: {totalWeight}%</Badge>
         </div>
-        <Button size="sm" onClick={() => handleOpenDialog()} disabled={capabilities.length === 0}>
-          <Plus className="mr-2 h-4 w-4" />
-          Add Competency
-        </Button>
+        <div className="flex items-center gap-2">
+          {requirements.length > 0 && (
+            <Button 
+              size="sm" 
+              variant="outline" 
+              onClick={handleSyncToAllEmployees} 
+              disabled={isSyncingAll}
+            >
+              {isSyncingAll ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Users className="mr-2 h-4 w-4" />
+              )}
+              Sync to All Employees
+            </Button>
+          )}
+          <Button size="sm" onClick={() => handleOpenDialog()} disabled={capabilities.length === 0}>
+            <Plus className="mr-2 h-4 w-4" />
+            Add Competency
+          </Button>
+        </div>
       </div>
 
       {/* Skill Mapping Summary */}
