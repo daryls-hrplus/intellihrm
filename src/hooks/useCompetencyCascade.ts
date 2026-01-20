@@ -48,35 +48,35 @@ export async function fetchCompetencyCascade(
       .map((p: any) => p.positions?.job_id)
       .filter(Boolean);
 
-    // Step 2: PRIMARY SOURCE - Fetch competencies from job_competencies
+    // Step 2: PRIMARY SOURCE - Fetch competencies from job_capability_requirements
     if (jobIds.length > 0) {
       const { data: jobComps } = await supabase
-        .from("job_competencies")
+        .from("job_capability_requirements")
         .select(`
-          competency_id,
+          id,
+          capability_id,
+          required_proficiency_level,
           weighting,
-          competency_level_id,
           is_required,
           job_id,
-          skills_competencies(id, name, code, category, proficiency_indicators)
+          skills_competencies!job_capability_requirements_capability_id_fkey(id, name, code, category, type, proficiency_indicators)
         `)
         .in("job_id", jobIds)
         .is("end_date", null);
 
       if (jobComps && jobComps.length > 0) {
-        result.hasJobCompetencies = true;
-
-        // Build job competencies directly from joined data
+        // Filter only COMPETENCY type
         for (const jc of jobComps) {
           const sc = (jc as any).skills_competencies;
-          if (sc) {
+          if (sc && sc.type === 'COMPETENCY') {
+            result.hasJobCompetencies = true;
             result.fromJob.push({
-              competency_id: sc.id || jc.competency_id,
+              competency_id: jc.capability_id,
               name: sc.name,
               code: sc.code,
               category: sc.category,
               weighting: jc.weighting || 0,
-              competency_level_id: jc.competency_level_id,
+              required_level: jc.required_proficiency_level,
               proficiency_indicators: sc.proficiency_indicators,
               source: 'job',
               job_id: jc.job_id,
@@ -140,7 +140,7 @@ export async function fetchCompetencyCascade(
 
 /**
  * Syncs job competencies to employee_competencies table.
- * Useful for creating initial employee competency records from job profile.
+ * Uses job_capability_requirements as the source of truth.
  */
 export async function syncJobCompetenciesToEmployee(
   employeeId: string,
@@ -149,14 +149,28 @@ export async function syncJobCompetenciesToEmployee(
   const result = { synced: 0, errors: [] as string[] };
   
   try {
-    // Get job competencies
+    // Get job capability requirements (competencies only)
     const { data: jobComps } = await supabase
-      .from("job_competencies")
-      .select("competency_id, weighting, competency_level_id")
+      .from("job_capability_requirements")
+      .select(`
+        capability_id,
+        weighting,
+        required_proficiency_level,
+        skills_competencies!job_capability_requirements_capability_id_fkey(type)
+      `)
       .eq("job_id", jobId)
       .is("end_date", null);
     
     if (!jobComps || jobComps.length === 0) {
+      return result;
+    }
+    
+    // Filter to only COMPETENCY type
+    const competencyRequirements = jobComps.filter(
+      (jc: any) => jc.skills_competencies?.type === 'COMPETENCY'
+    );
+    
+    if (competencyRequirements.length === 0) {
       return result;
     }
     
@@ -170,12 +184,11 @@ export async function syncJobCompetenciesToEmployee(
     const existingIds = new Set((existingEmpComps || []).map((ec: any) => ec.competency_id));
     
     // Insert only non-existing ones
-    const toInsert = jobComps
-      .filter((jc: any) => !existingIds.has(jc.competency_id))
+    const toInsert = competencyRequirements
+      .filter((jc: any) => !existingIds.has(jc.capability_id))
       .map((jc: any) => ({
         employee_id: employeeId,
-        competency_id: jc.competency_id,
-        competency_level_id: jc.competency_level_id,
+        competency_id: jc.capability_id,
         weighting: jc.weighting || 0,
         start_date: new Date().toISOString().split('T')[0],
       }));
