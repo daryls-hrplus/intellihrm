@@ -560,10 +560,13 @@ serve(async (req) => {
           );
         }
 
-        // Get role definitions
+        // Valid app_role enum values
+        const validAppRoles = ["admin", "hr_manager", "employee", "system_admin", "billing_admin", "enablement_admin", "manager", "executive", "support_readonly"];
+
+        // Get role definitions with seeded_role_code for mapping custom roles
         const { data: roleDefs, error: roleDefsError } = await supabase
           .from("roles")
-          .select("id, code")
+          .select("id, code, role_type, seeded_role_code, base_role_id")
           .eq("is_active", true);
 
         if (roleDefsError) {
@@ -587,15 +590,43 @@ serve(async (req) => {
           );
         }
 
+        // Helper function to resolve app_role enum value for a role
+        const resolveAppRole = (roleDef: any): string => {
+          // If the role code is already a valid app_role, use it
+          if (validAppRoles.includes(roleDef.code)) {
+            return roleDef.code;
+          }
+          
+          // For custom/seeded roles, use seeded_role_code if available
+          if (roleDef.seeded_role_code && validAppRoles.includes(roleDef.seeded_role_code)) {
+            return roleDef.seeded_role_code;
+          }
+          
+          // If there's a base role, find its code
+          if (roleDef.base_role_id) {
+            const baseRole = roleDefs?.find(r => r.id === roleDef.base_role_id);
+            if (baseRole && validAppRoles.includes(baseRole.code)) {
+              return baseRole.code;
+            }
+          }
+          
+          // Default to employee for custom roles
+          return "employee";
+        };
+
         // Insert new roles
         const roleInserts = newRoles.map(roleCode => {
           const roleDef = roleDefs?.find(r => r.code === roleCode);
+          if (!roleDef) return null;
+          
+          const appRole = resolveAppRole(roleDef);
+          
           return {
             user_id,
-            role: roleCode as "admin" | "employee" | "hr_manager",
-            role_id: roleDef?.id
+            role: appRole as "admin" | "employee" | "hr_manager" | "system_admin" | "billing_admin" | "enablement_admin" | "manager" | "executive" | "support_readonly",
+            role_id: roleDef.id
           };
-        }).filter(r => r.role_id);
+        }).filter(r => r !== null);
 
         if (roleInserts.length > 0) {
           const { error: insertError } = await supabase
@@ -671,11 +702,31 @@ serve(async (req) => {
           );
         }
 
-        // Get role definitions
-        const { data: roleDefs } = await supabase
+        // Valid app_role enum values
+        const validAppRolesBulk = ["admin", "hr_manager", "employee", "system_admin", "billing_admin", "enablement_admin", "manager", "executive", "support_readonly"];
+
+        // Get role definitions with seeded_role_code for mapping custom roles
+        const { data: roleDefsBulk } = await supabase
           .from("roles")
-          .select("id, code")
+          .select("id, code, role_type, seeded_role_code, base_role_id")
           .eq("is_active", true);
+
+        // Helper function to resolve app_role enum value for a role
+        const resolveAppRoleBulk = (roleDef: any): string => {
+          if (validAppRolesBulk.includes(roleDef.code)) {
+            return roleDef.code;
+          }
+          if (roleDef.seeded_role_code && validAppRolesBulk.includes(roleDef.seeded_role_code)) {
+            return roleDef.seeded_role_code;
+          }
+          if (roleDef.base_role_id) {
+            const baseRole = roleDefsBulk?.find(r => r.id === roleDef.base_role_id);
+            if (baseRole && validAppRolesBulk.includes(baseRole.code)) {
+              return baseRole.code;
+            }
+          }
+          return "employee";
+        };
 
         const results: { userId: string; success: boolean; error?: string }[] = [];
 
@@ -689,13 +740,17 @@ serve(async (req) => {
 
             // Insert new roles
             const roleInserts = newRoles.map(roleCode => {
-              const roleDef = roleDefs?.find(r => r.code === roleCode);
+              const roleDef = roleDefsBulk?.find(r => r.code === roleCode);
+              if (!roleDef) return null;
+              
+              const appRole = resolveAppRoleBulk(roleDef);
+              
               return {
                 user_id: userId,
-                role: roleCode as "admin" | "employee" | "hr_manager",
-                role_id: roleDef?.id
+                role: appRole as "admin" | "employee" | "hr_manager" | "system_admin" | "billing_admin" | "enablement_admin" | "manager" | "executive" | "support_readonly",
+                role_id: roleDef.id
               };
-            }).filter(r => r.role_id);
+            }).filter(r => r !== null);
 
             if (roleInserts.length > 0) {
               await supabase
