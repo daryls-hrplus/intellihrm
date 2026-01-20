@@ -29,6 +29,7 @@ import {
   ExternalLink,
   Percent,
   Shield,
+  Bell,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -54,6 +55,7 @@ import { AIAuditTrailPanel } from "@/components/ai-governance/AIAuditTrailPanel"
 import { CalendarSync } from "@/components/appraisals/CalendarSync";
 import { HRResponseEscalationPanel } from "@/components/performance/setup/HRResponseEscalationPanel";
 import { IntegrationDashboardWidget } from "@/components/performance/setup/IntegrationDashboardWidget";
+import { ResendAppraisalNotificationsDialog } from "@/components/performance/ResendAppraisalNotificationsDialog";
 
 interface AppraisalCycle {
   id: string;
@@ -114,6 +116,10 @@ export default function AppraisalsPage() {
   // AI Governance state
   const [selectedRiskForReview, setSelectedRiskForReview] = useState<any>(null);
   const [humanOverrideDialogOpen, setHumanOverrideDialogOpen] = useState(false);
+  
+  // Resend notifications state
+  const [resendNotificationsDialogOpen, setResendNotificationsDialogOpen] = useState(false);
+  const [resendNotificationsCycle, setResendNotificationsCycle] = useState<AppraisalCycle | null>(null);
 
   // Company switcher for admin/HR
   const [companies, setCompanies] = useState<{ id: string; name: string }[]>([]);
@@ -550,6 +556,19 @@ export default function AppraisalsPage() {
                             <Progress value={cycle.completion_rate} className="h-2" />
                           </div>
                           <div className="flex gap-2">
+                            {cycle.status === "active" && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  setResendNotificationsCycle(cycle);
+                                  setResendNotificationsDialogOpen(true);
+                                }}
+                              >
+                                <Bell className="mr-2 h-4 w-4" />
+                                Resend Notifications
+                              </Button>
+                            )}
                             <Button
                               variant="outline"
                               size="sm"
@@ -912,6 +931,16 @@ export default function AppraisalsPage() {
               refetchRisks();
               setSelectedRiskForReview(null);
             }}
+          />
+        )}
+
+        {/* Resend Notifications Dialog */}
+        {resendNotificationsCycle && (
+          <ResendAppraisalNotificationsDialog
+            open={resendNotificationsDialogOpen}
+            onOpenChange={setResendNotificationsDialogOpen}
+            cycleId={resendNotificationsCycle.id}
+            cycleName={resendNotificationsCycle.name}
           />
         )}
       </div>
