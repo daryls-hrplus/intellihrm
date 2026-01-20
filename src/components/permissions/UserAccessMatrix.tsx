@@ -32,12 +32,13 @@ import { UserPermissionData, RoleData, MENU_MODULES, ADMIN_CONTAINERS } from "@/
 interface UserAccessMatrixProps {
   users: UserPermissionData[];
   roles: RoleData[];
+  showCompanyColumn?: boolean;
 }
 
 type FilterType = "all" | "admin" | "pii" | "high-risk" | "no-role";
 type PiiFilter = "all" | "full" | "limited" | "masked" | "none";
 
-export function UserAccessMatrix({ users, roles }: UserAccessMatrixProps) {
+export function UserAccessMatrix({ users, roles, showCompanyColumn = false }: UserAccessMatrixProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedRole, setSelectedRole] = useState<string>("all");
   const [selectedPii, setSelectedPii] = useState<PiiFilter>("all");
@@ -151,6 +152,9 @@ export function UserAccessMatrix({ users, roles }: UserAccessMatrixProps) {
           <TableHeader>
             <TableRow className="bg-muted/50">
               <TableHead className="sticky left-0 bg-muted/50 min-w-[220px] z-10">User</TableHead>
+              {showCompanyColumn && (
+                <TableHead className="min-w-[100px]">Company</TableHead>
+              )}
               <TableHead className="min-w-[140px]">Role(s)</TableHead>
               <TableHead className="text-center w-[70px]">PII</TableHead>
               <TableHead className="text-center w-[70px]">Admin</TableHead>
@@ -169,7 +173,7 @@ export function UserAccessMatrix({ users, roles }: UserAccessMatrixProps) {
           <TableBody>
             {filteredUsers.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={MENU_MODULES.length + 5} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={MENU_MODULES.length + (showCompanyColumn ? 6 : 5)} className="text-center py-8 text-muted-foreground">
                   No users found matching your criteria
                 </TableCell>
               </TableRow>
@@ -202,6 +206,13 @@ export function UserAccessMatrix({ users, roles }: UserAccessMatrixProps) {
                           </button>
                         </CollapsibleTrigger>
                       </TableCell>
+                      {showCompanyColumn && (
+                        <TableCell>
+                          <Badge variant="outline" className="text-[10px] h-5 font-medium">
+                            {user.companyCode || "—"}
+                          </Badge>
+                        </TableCell>
+                      )}
                       <TableCell>
                         <div className="flex flex-wrap gap-1">
                           {user.isAdmin && (
@@ -245,8 +256,8 @@ export function UserAccessMatrix({ users, roles }: UserAccessMatrixProps) {
                     
                     <CollapsibleContent asChild>
                       <TableRow className="bg-muted/30">
-                        <TableCell colSpan={MENU_MODULES.length + 5} className="py-4">
-                          <UserExpandedDetail user={user} />
+                        <TableCell colSpan={MENU_MODULES.length + (showCompanyColumn ? 6 : 5)} className="py-4">
+                          <UserExpandedDetail user={user} showCompanyColumn={showCompanyColumn} />
                         </TableCell>
                       </TableRow>
                     </CollapsibleContent>
@@ -265,9 +276,20 @@ export function UserAccessMatrix({ users, roles }: UserAccessMatrixProps) {
   );
 }
 
-function UserExpandedDetail({ user }: { user: UserPermissionData }) {
+function UserExpandedDetail({ user, showCompanyColumn }: { user: UserPermissionData; showCompanyColumn?: boolean }) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 px-4">
+    <div className={cn("grid gap-6 px-4", showCompanyColumn ? "grid-cols-1 md:grid-cols-4" : "grid-cols-1 md:grid-cols-3")}>
+      {/* Company (only when viewing all companies) */}
+      {showCompanyColumn && (
+        <div>
+          <h5 className="text-sm font-medium mb-2">Company</h5>
+          <div className="space-y-1">
+            <p className="text-sm font-medium">{user.companyName || "Unknown"}</p>
+            <Badge variant="outline" className="text-xs">{user.companyCode || "—"}</Badge>
+          </div>
+        </div>
+      )}
+
       {/* Roles */}
       <div>
         <h5 className="text-sm font-medium mb-2">Assigned Roles</h5>

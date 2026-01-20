@@ -1,12 +1,16 @@
 import { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useUserAccessibleCompanies, AccessibleCompany } from "@/hooks/useUserAccessibleCompanies";
 
 export interface UserPermissionData {
   id: string;
   email: string;
   full_name: string | null;
   avatar_url: string | null;
+  companyId: string | null;
+  companyCode: string | null;
+  companyName: string | null;
   roles: RoleData[];
   effectiveModules: string[];
   piiLevel: "none" | "masked" | "limited" | "full";
@@ -159,18 +163,40 @@ function determinePiiLevel(piiAccess: PiiAccessData | null): "none" | "masked" |
   return "none";
 }
 
-export function usePermissionsOverview() {
+export function usePermissionsOverview(selectedCompanyId?: string | null) {
   const { company } = useAuth();
+  const { companies: accessibleCompanies, companyIds: accessibleCompanyIds, isLoading: companiesLoading } = useUserAccessibleCompanies();
   const [isLoading, setIsLoading] = useState(true);
   const [users, setUsers] = useState<UserPermissionData[]>([]);
   const [roles, setRoles] = useState<RoleData[]>([]);
   const [essModules, setEssModules] = useState<EssModuleData[]>([]);
   const [essFields, setEssFields] = useState<EssFieldData[]>([]);
   const [pendingRequestsCount, setPendingRequestsCount] = useState(0);
+  const [companyMap, setCompanyMap] = useState<Map<string, { code: string; name: string }>>(new Map());
+
+  // Determine which companies to filter by
+  const filterCompanyIds = useMemo(() => {
+    if (selectedCompanyId && selectedCompanyId !== "all") {
+      return [selectedCompanyId];
+    }
+    // If "all" selected or no selection, use all accessible companies
+    return accessibleCompanyIds.length > 0 ? accessibleCompanyIds : (company?.id ? [company.id] : []);
+  }, [selectedCompanyId, accessibleCompanyIds, company?.id]);
+
+  // Build company map for lookup
+  useEffect(() => {
+    const map = new Map<string, { code: string; name: string }>();
+    accessibleCompanies.forEach(c => {
+      map.set(c.id, { code: c.code, name: c.name });
+    });
+    setCompanyMap(map);
+  }, [accessibleCompanies]);
 
   useEffect(() => {
-    fetchAllData();
-  }, [company?.id]);
+    if (filterCompanyIds.length > 0 && !companiesLoading) {
+      fetchAllData();
+    }
+  }, [filterCompanyIds, companiesLoading]);
 
   const fetchAllData = async () => {
     setIsLoading(true);
@@ -247,11 +273,18 @@ export function usePermissionsOverview() {
 
     setRoles(mappedRoles);
 
-    // Fetch profiles
-    const { data: profilesData } = await supabase
+    // Fetch profiles filtered by company
+    let profilesQuery = supabase
       .from("profiles")
-      .select("id, email, full_name, avatar_url")
+      .select("id, email, full_name, avatar_url, company_id")
       .order("full_name");
+
+    // Filter by accessible companies
+    if (filterCompanyIds.length > 0) {
+      profilesQuery = profilesQuery.in("company_id", filterCompanyIds);
+    }
+
+    const { data: profilesData } = await profilesQuery;
 
     // Map users to permissions
     const roleMap = new Map(mappedRoles.map(r => [r.id, r]));
@@ -293,11 +326,17 @@ export function usePermissionsOverview() {
         adminContainerCount = ADMIN_CONTAINERS.length;
       }
 
+      // Get company info from map
+      const companyInfo = companyMap.get(profile.company_id);
+
       const userData: UserPermissionData = {
         id: profile.id,
         email: profile.email,
         full_name: profile.full_name,
         avatar_url: profile.avatar_url,
+        companyId: profile.company_id,
+        companyCode: companyInfo?.code || null,
+        companyName: companyInfo?.name || null,
         roles: userRoles,
         effectiveModules: Array.from(effectiveModules),
         piiLevel: highestPiiLevel,
@@ -370,12 +409,13 @@ export function usePermissionsOverview() {
   }), [users, pendingRequestsCount, essModules]);
 
   return {
-    isLoading,
+    isLoading: isLoading || companiesLoading,
     users,
     roles,
     essModules,
     essFields,
     stats,
+    accessibleCompanies,
     refetch: fetchAllData,
   };
 }
