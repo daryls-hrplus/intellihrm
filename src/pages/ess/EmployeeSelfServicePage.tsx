@@ -156,7 +156,7 @@ export default function EmployeeSelfServicePage() {
     {
       titleKey: "Tasks & Approvals",
       items: filterByAccess([
-        { title: "My Inbox", description: "View all your pending tasks and actions", href: "/ess/my-inbox", icon: Inbox, color: "bg-primary/10 text-primary", tabCode: "ess-inbox" },
+        { title: "My Inbox", description: "View all your pending tasks and actions", href: "/ess/inbox", icon: Inbox, color: "bg-primary/10 text-primary", tabCode: "ess-inbox" },
         allModules.approvals, 
         allModules.delegates, 
         allModules.reminders,

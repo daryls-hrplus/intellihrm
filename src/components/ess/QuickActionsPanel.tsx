@@ -202,7 +202,7 @@ export function QuickActionsPanel() {
             variant="ghost"
             size="sm"
             className="w-full mt-2 text-destructive hover:text-destructive"
-            onClick={() => navigate("/ess/my-inbox")}
+            onClick={() => navigate("/ess/inbox")}
           >
             View all {quickActions.length} action items
             <ChevronRight className="h-4 w-4 ml-1" />

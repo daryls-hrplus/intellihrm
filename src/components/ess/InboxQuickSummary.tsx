@@ -66,7 +66,7 @@ export function InboxQuickSummary() {
           
           <Button 
             variant={hasUrgent ? "default" : "outline"} 
-            onClick={() => navigate("/ess/my-inbox")}
+            onClick={() => navigate("/ess/inbox")}
           >
             View Inbox
             <ChevronRight className="h-4 w-4 ml-1" />
