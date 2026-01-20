@@ -12,7 +12,11 @@ import {
   AlertCircle,
   Clock,
   ChevronRight,
-  RefreshCw
+  RefreshCw,
+  CheckSquare,
+  FileSignature,
+  TicketCheck,
+  MessageCircle
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
@@ -25,6 +29,10 @@ const typeConfig: Record<InboxItemType, { icon: React.ElementType; label: string
   document: { icon: FileText, label: 'Document' },
   idp: { icon: GraduationCap, label: 'Development' },
   reminder: { icon: AlertCircle, label: 'Reminder' },
+  approval: { icon: CheckSquare, label: 'Approval' },
+  letter_request: { icon: FileSignature, label: 'Letter' },
+  ticket: { icon: TicketCheck, label: 'Ticket' },
+  ticket_reply: { icon: MessageCircle, label: 'Ticket Reply' },
 };
 
 interface InboxItemCardProps {
