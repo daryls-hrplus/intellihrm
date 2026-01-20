@@ -23,7 +23,8 @@ export const RoleDetailPage = lazy(() => import('@/pages/admin/RoleDetailPage'))
 export const AdminPiiAccessPage = lazy(() => import('@/pages/admin/AdminPiiAccessPage'));
 export const AISecurityViolationsPage = lazy(() => import('@/pages/admin/AISecurityViolationsPage'));
 export const AdminSettingsPage = lazy(() => import('@/pages/admin/AdminSettingsPage'));
-export const AdminPermissionsSummaryPage = lazy(() => import('@/pages/admin/AdminPermissionsSummaryPage'));
+export const AdminPermissionsSummaryPage = lazy(() => import('@/pages/admin/PermissionsOverviewPage'));
+export const PermissionsOverviewPage = lazy(() => import('@/pages/admin/PermissionsOverviewPage'));
 export const AdminAccessRequestsPage = lazy(() => import('@/pages/admin/AdminAccessRequestsPage'));
 export const AdminAutoApprovalPage = lazy(() => import('@/pages/admin/AdminAutoApprovalPage'));
 export const AdminBulkImportPage = lazy(() => import('@/pages/admin/AdminBulkImportPage'));
