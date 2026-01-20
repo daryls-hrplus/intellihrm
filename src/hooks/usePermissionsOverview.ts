@@ -106,7 +106,7 @@ export const ADMIN_CONTAINERS = [
 ];
 
 export const PII_DOMAINS = [
-  { code: "personal", label: "Personal" },
+  { code: "personal_details", label: "Personal" },
   { code: "compensation", label: "Compensation" },
   { code: "banking", label: "Banking" },
   { code: "medical", label: "Medical" },
@@ -146,7 +146,7 @@ function determinePiiLevel(piiAccess: PiiAccessData | null): "none" | "masked" |
   
   // Check domain access
   const domains = [
-    piiAccess.access_personal,
+    piiAccess.access_personal_details,
     piiAccess.access_compensation,
     piiAccess.access_banking,
     piiAccess.access_medical,
