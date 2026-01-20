@@ -49,6 +49,7 @@ interface Role {
   name: string;
   code: string;
   is_system: boolean;
+  role_type: string;
 }
 
 interface ModulePermission {
@@ -194,7 +195,7 @@ export default function GranularPermissionsPage() {
   const fetchInitialData = async () => {
     try {
       const [rolesRes, permissionsRes, companiesRes, tagsRes, divisionsRes, departmentsRes, sectionsRes, positionTypesRes, payGroupsRes] = await Promise.all([
-        supabase.from("roles").select("id, name, code, is_system").order("name"),
+        supabase.from("roles").select("id, name, code, is_system, role_type").order("name"),
         supabase.from("module_permissions").select("*").eq("is_active", true).order("display_order"),
         supabase.from("companies").select("id, name").eq("is_active", true).order("name"),
         supabase.from("company_tags").select("*").eq("is_active", true).order("name"),
@@ -739,8 +740,11 @@ export default function GranularPermissionsPage() {
                     <div className="flex items-center gap-2">
                       <Shield className="h-4 w-4" />
                       {role.name}
-                      {role.is_system && (
-                        <Badge variant="outline" className="ml-1 text-xs">System</Badge>
+                      {role.role_type === "system" && (
+                        <Badge variant="outline" className="ml-1 text-xs bg-red-500/10 text-red-600 dark:text-red-400">System</Badge>
+                      )}
+                      {role.role_type === "seeded" && (
+                        <Badge variant="outline" className="ml-1 text-xs bg-violet-500/10 text-violet-600 dark:text-violet-400">Template</Badge>
                       )}
                     </div>
                   </SelectItem>
