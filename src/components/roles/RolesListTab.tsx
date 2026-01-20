@@ -84,7 +84,7 @@ export function RolesListTab() {
 
       const rolesWithExtras: RoleWithExtras[] = (rolesData || []).map((r) => ({
         ...r,
-        role_type: (r.role_type as RoleType) || "business",
+        role_type: (["system", "seeded", "custom"].includes(r.role_type) ? r.role_type : "custom") as RoleType,
         is_seeded: r.is_seeded || false,
         base_role_id: r.base_role_id || null,
         seeded_role_code: r.seeded_role_code || null,

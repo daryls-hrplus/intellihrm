@@ -43,7 +43,7 @@ export function RoleCard({
   onDelete,
   onManagePermissions,
 }: RoleCardProps) {
-  const roleTypeConfig = ROLE_TYPE_CONFIG[role.role_type as RoleType] || ROLE_TYPE_CONFIG.business;
+  const roleTypeConfig = ROLE_TYPE_CONFIG[role.role_type as RoleType] || ROLE_TYPE_CONFIG.custom;
   const piiLevel = role.pii_level || (role.can_view_pii ? "full" : "none");
   const piiConfig = PII_LEVEL_CONFIG[piiLevel];
   const containerPermission = role.aggregate_container_permission || "none";
