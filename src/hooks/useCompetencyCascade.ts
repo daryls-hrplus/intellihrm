@@ -57,58 +57,31 @@ export async function fetchCompetencyCascade(
           weighting,
           competency_level_id,
           is_required,
-          job_id
+          job_id,
+          skills_competencies(id, name, code, category, proficiency_indicators)
         `)
         .in("job_id", jobIds)
         .is("end_date", null);
 
       if (jobComps && jobComps.length > 0) {
         result.hasJobCompetencies = true;
-        const compIds = jobComps.map((jc: any) => jc.competency_id);
 
-        // First try skills_competencies table (unified model)
-        const { data: scData } = await supabase
-          .from("skills_competencies")
-          .select("id, name, code, category, proficiency_indicators")
-          .in("id", compIds);
-
-        let compDetails: Record<string, any> = {};
-        
-        if (scData && scData.length > 0) {
-          compDetails = Object.fromEntries(
-            scData.map((c: any) => [c.id, {
-              name: c.name,
-              code: c.code,
-              category: c.category,
-              proficiency_indicators: c.proficiency_indicators,
-            }])
-          );
-        } else {
-          // Fallback to legacy competencies table
-          const { data: legacyData } = await supabase
-            .from("competencies")
-            .select("id, name, code")
-            .in("id", compIds);
-          
-          compDetails = Object.fromEntries(
-            (legacyData || []).map((c: any) => [c.id, { name: c.name, code: c.code }])
-          );
-        }
-
-        // Build job competencies
+        // Build job competencies directly from joined data
         for (const jc of jobComps) {
-          const details = compDetails[jc.competency_id] || { name: "Unknown" };
-          result.fromJob.push({
-            competency_id: jc.competency_id,
-            name: details.name,
-            code: details.code,
-            category: details.category,
-            weighting: jc.weighting || 0,
-            competency_level_id: jc.competency_level_id,
-            proficiency_indicators: details.proficiency_indicators,
-            source: 'job',
-            job_id: jc.job_id,
-          });
+          const sc = (jc as any).skills_competencies;
+          if (sc) {
+            result.fromJob.push({
+              competency_id: sc.id || jc.competency_id,
+              name: sc.name,
+              code: sc.code,
+              category: sc.category,
+              weighting: jc.weighting || 0,
+              competency_level_id: jc.competency_level_id,
+              proficiency_indicators: sc.proficiency_indicators,
+              source: 'job',
+              job_id: jc.job_id,
+            });
+          }
         }
       }
     }
@@ -116,54 +89,30 @@ export async function fetchCompetencyCascade(
     // Step 3: SECONDARY SOURCE - Fetch from employee_competencies
     const { data: empComps } = await supabase
       .from("employee_competencies")
-      .select("competency_id, weighting, competency_level_id")
+      .select(`
+        competency_id, 
+        weighting, 
+        competency_level_id,
+        skills_competencies(id, name, code, category, proficiency_indicators)
+      `)
       .eq("employee_id", employeeId)
       .is("end_date", null);
 
     if (empComps && empComps.length > 0) {
-      const empCompIds = empComps.map((ec: any) => ec.competency_id);
-      
-      // First try skills_competencies
-      const { data: scData } = await supabase
-        .from("skills_competencies")
-        .select("id, name, code, category, proficiency_indicators")
-        .in("id", empCompIds);
-
-      let compDetails: Record<string, any> = {};
-      
-      if (scData && scData.length > 0) {
-        compDetails = Object.fromEntries(
-          scData.map((c: any) => [c.id, {
-            name: c.name,
-            code: c.code,
-            category: c.category,
-            proficiency_indicators: c.proficiency_indicators,
-          }])
-        );
-      } else {
-        // Fallback to legacy competencies table
-        const { data: legacyData } = await supabase
-          .from("competencies")
-          .select("id, name, code")
-          .in("id", empCompIds);
-        
-        compDetails = Object.fromEntries(
-          (legacyData || []).map((c: any) => [c.id, { name: c.name, code: c.code }])
-        );
-      }
-
       for (const ec of empComps) {
-        const details = compDetails[ec.competency_id] || { name: "Unknown" };
-        result.fromEmployee.push({
-          competency_id: ec.competency_id,
-          name: details.name,
-          code: details.code,
-          category: details.category,
-          weighting: ec.weighting || 0,
-          competency_level_id: ec.competency_level_id,
-          proficiency_indicators: details.proficiency_indicators,
-          source: 'employee',
-        });
+        const sc = (ec as any).skills_competencies;
+        if (sc) {
+          result.fromEmployee.push({
+            competency_id: sc.id || ec.competency_id,
+            name: sc.name,
+            code: sc.code,
+            category: sc.category,
+            weighting: ec.weighting || 0,
+            competency_level_id: ec.competency_level_id,
+            proficiency_indicators: sc.proficiency_indicators,
+            source: 'employee',
+          });
+        }
       }
     }
 

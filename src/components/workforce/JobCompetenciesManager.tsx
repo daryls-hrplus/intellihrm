@@ -128,7 +128,7 @@ export function JobCompetenciesManager({ jobId, companyId }: JobCompetenciesMana
       .from("job_competencies")
       .select(`
         *,
-        competencies(name, code),
+        skills_competencies(id, name, code),
         competency_levels(name, code)
       `)
       .eq("job_id", jobId)
@@ -138,27 +138,74 @@ export function JobCompetenciesManager({ jobId, companyId }: JobCompetenciesMana
       console.error("Error fetching job competencies:", error);
       toast.error("Failed to load job competencies");
     } else {
-      setJobCompetencies(data || []);
+      // Map skills_competencies to competencies for backward compatibility
+      const mapped = (data || []).map((jc: any) => ({
+        ...jc,
+        competencies: jc.skills_competencies ? {
+          name: jc.skills_competencies.name,
+          code: jc.skills_competencies.code,
+        } : null,
+      }));
+      setJobCompetencies(mapped);
     }
     setIsLoading(false);
   };
 
   const fetchCompetencies = async () => {
+    // Fetch from unified skills_competencies table
+    // Get capabilities linked to this company OR marked as global
     const { data, error } = await supabase
-      .from("competencies")
-      .select("id, name, code")
-      .eq("company_id", companyId)
-      .eq("is_active", true)
+      .from("skills_competencies")
+      .select(`
+        id, 
+        name, 
+        code,
+        is_global,
+        company_capabilities(company_id)
+      `)
+      .eq("type", "COMPETENCY")
+      .eq("status", "active")
       .order("name");
 
     if (error) {
       console.error("Error fetching competencies:", error);
     } else {
-      setCompetencies(data || []);
+      // Filter to only include competencies that are global OR linked to this company
+      const filtered = (data || []).filter((c: any) => {
+        if (c.is_global) return true;
+        const linkedCompanies = c.company_capabilities || [];
+        return linkedCompanies.some((cc: any) => cc.company_id === companyId);
+      });
+      setCompetencies(filtered);
     }
   };
 
   const fetchCompetencyLevels = async (competencyId: string) => {
+    // Get proficiency indicators from skills_competencies as levels
+    const { data: scData } = await supabase
+      .from("skills_competencies")
+      .select("proficiency_indicators")
+      .eq("id", competencyId)
+      .single();
+    
+    if (scData?.proficiency_indicators && typeof scData.proficiency_indicators === 'object') {
+      // Convert proficiency_indicators object to level array
+      const indicators = scData.proficiency_indicators as Record<string, string[]>;
+      const levelNames = Object.keys(indicators);
+      if (levelNames.length > 0) {
+        const syntheticLevels = levelNames.map((name, index) => ({
+          id: `${competencyId}_level_${index}`,
+          competency_id: competencyId,
+          name: name,
+          code: name.substring(0, 3).toUpperCase(),
+          level_order: index + 1,
+        }));
+        setCompetencyLevels(syntheticLevels);
+        return;
+      }
+    }
+    
+    // Fallback to legacy competency_levels table
     const { data, error } = await supabase
       .from("competency_levels")
       .select("id, competency_id, name, code, level_order")
