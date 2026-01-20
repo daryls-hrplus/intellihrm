@@ -185,9 +185,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     }
     
-    // Log login event if successful
+    // Update profile and log login event if successful
     if (!error && data.user) {
       try {
+        // Update profile with login timestamp and mark invitation as accepted
+        await supabase
+          .from('profiles')
+          .update({
+            last_login_at: new Date().toISOString(),
+            invitation_status: 'accepted',
+            failed_login_attempts: 0,
+          })
+          .eq('id', data.user.id);
+
+        // Log audit event
         await supabase.from('audit_logs').insert([{
           user_id: data.user.id,
           action: 'LOGIN' as const,
@@ -195,7 +206,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           metadata: { source: 'frontend', user_agent: navigator.userAgent },
         }]);
       } catch (e) {
-        console.error('Failed to log login event:', e);
+        console.error('Failed to update login status:', e);
       }
     }
     
