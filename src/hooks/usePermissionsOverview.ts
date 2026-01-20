@@ -359,8 +359,9 @@ export function usePermissionsOverview(selectedCompanyId?: string | null) {
   const fetchEssData = async () => {
     if (!company?.id) return;
 
-    // Fetch ESS module config
-    const { data: essConfigData } = await supabase
+    // Fetch ESS module config - cast to any since table might not be in types
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: essConfigData } = await (supabase as any)
       .from("ess_module_config")
       .select("*")
       .eq("company_id", company.id);
@@ -375,8 +376,9 @@ export function usePermissionsOverview(selectedCompanyId?: string | null) {
 
     setEssModules(modules);
 
-    // Fetch ESS field permissions
-    const { data: fieldData } = await supabase
+    // Fetch ESS field permissions - cast to any since table might not be in types
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: fieldData } = await (supabase as any)
       .from("ess_field_permissions")
       .select("*")
       .eq("company_id", company.id);
