@@ -83,7 +83,39 @@ async function analyzeAppraisalGaps(supabase: any, participantId: string, employ
 
   if (!scores || scores.length === 0) {
     console.log('No competency scores found for this appraisal');
-    return { gapsCreated: 0, message: 'No competency scores to analyze' };
+    return { gapsCreated: 0, assessedUpdated: 0, message: 'No competency scores to analyze' };
+  }
+
+  // Get the manager who submitted the appraisal
+  const { data: participant } = await supabase
+    .from('appraisal_participants')
+    .select('manager_id')
+    .eq('id', participantId)
+    .single();
+
+  const managerId = participant?.manager_id || null;
+
+  // UPDATE ASSESSED PROFICIENCY LEVELS IN EMPLOYEE_COMPETENCIES
+  let assessedUpdated = 0;
+  for (const score of scores) {
+    if (score.item_id && score.rating) {
+      const { error: updateError } = await supabase
+        .from('employee_competencies')
+        .update({
+          assessed_proficiency_level: Math.round(score.rating),
+          assessed_date: new Date().toISOString().split('T')[0],
+          assessed_by: managerId,
+          assessment_source: 'appraisal',
+        })
+        .eq('employee_id', employeeId)
+        .eq('competency_id', score.item_id)
+        .is('end_date', null);
+
+      if (!updateError) {
+        assessedUpdated++;
+        console.log(`Updated assessed level for competency ${score.item_id}: ${score.rating}`);
+      }
+    }
   }
 
   // Get job competency requirements for the employee
@@ -166,8 +198,8 @@ async function analyzeAppraisalGaps(supabase: any, participantId: string, employ
     }
   }
 
-  console.log(`Created ${gapsToCreate.length} skill gaps from appraisal`);
-  return { gapsCreated: gapsToCreate.length, gaps: gapsToCreate };
+  console.log(`Created ${gapsToCreate.length} skill gaps from appraisal, updated ${assessedUpdated} assessed proficiency levels`);
+  return { gapsCreated: gapsToCreate.length, assessedUpdated, gaps: gapsToCreate };
 }
 
 async function analyzeEmployeeGaps(supabase: any, employeeId: string, companyId: string) {
