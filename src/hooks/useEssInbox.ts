@@ -10,7 +10,11 @@ export type InboxItemType =
   | 'appraisal' 
   | 'document' 
   | 'idp'
-  | 'reminder';
+  | 'reminder'
+  | 'approval'
+  | 'letter_request'
+  | 'ticket'
+  | 'ticket_reply';
 
 export type InboxCategory = 
   | 'time_absence' 
@@ -18,7 +22,8 @@ export type InboxCategory =
   | 'performance' 
   | 'tasks_approvals' 
   | 'documents' 
-  | 'learning';
+  | 'learning'
+  | 'requests_tickets';
 
 export type InboxUrgency = 'response_required' | 'pending' | 'info';
 
@@ -53,7 +58,7 @@ export function useEssInbox() {
 
       const items: InboxItem[] = [];
 
-      // Fetch leave requests (pending) with leave type info
+      // Fetch leave requests (pending)
       const { data: leaveRequests } = await supabase
         .from("leave_requests")
         .select("id, leave_type_id, start_date, end_date, status, created_at, leave_types(name)")
@@ -141,7 +146,7 @@ export function useEssInbox() {
           items.push({
             id: cr.id,
             type: 'change_request',
-            category: 'tasks_approvals',
+            category: 'requests_tickets',
             title: isInfoRequired ? 'Change Request - Info Required' : 'Change Request Pending',
             description: `${cr.request_type?.replace(/_/g, ' ') || 'Request'} • ${cr.change_action || 'Update'}`,
             urgency: isInfoRequired ? 'response_required' : 'pending',
@@ -153,16 +158,10 @@ export function useEssInbox() {
         });
       }
 
-      // Fetch appraisal participants (pending/in_progress or response pending)
+      // Fetch appraisals
       const { data: appraisals } = await supabase
         .from("appraisal_participants")
-        .select(`
-          id, 
-          status, 
-          employee_response_status, 
-          created_at,
-          appraisal_cycles(name, end_date)
-        `)
+        .select(`id, status, employee_response_status, created_at, appraisal_cycles(name, end_date)`)
         .eq("employee_id", user.id)
         .or("status.in.(pending,in_progress),employee_response_status.eq.pending")
         .order("created_at", { ascending: false });
@@ -171,7 +170,6 @@ export function useEssInbox() {
         appraisals.forEach((ap) => {
           const cycle = ap.appraisal_cycles as { name: string; end_date: string } | null;
           const needsResponse = ap.employee_response_status === 'pending';
-          
           items.push({
             id: ap.id,
             type: 'appraisal',
@@ -187,7 +185,7 @@ export function useEssInbox() {
         });
       }
 
-      // Fetch expiring documents (within 30 days)
+      // Fetch expiring documents
       const today = new Date().toISOString().split("T")[0];
       const thirtyDaysFromNow = new Date();
       thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
@@ -219,7 +217,7 @@ export function useEssInbox() {
         });
       }
 
-      // Fetch active IDP items
+      // Fetch IDP items
       const { data: idpItems } = await supabase
         .from("individual_development_plans")
         .select("id, title, status, target_completion_date, created_at")
@@ -244,7 +242,7 @@ export function useEssInbox() {
         });
       }
 
-      // Fetch upcoming reminders (next 7 days)
+      // Fetch reminders
       const sevenDaysFromNow = new Date();
       sevenDaysFromNow.setDate(sevenDaysFromNow.getDate() + 7);
       const sevenDaysStr = sevenDaysFromNow.toISOString().split("T")[0];
@@ -262,7 +260,6 @@ export function useEssInbox() {
           const reminderDate = new Date(rem.reminder_date);
           const isOverdue = reminderDate < new Date() && reminderDate.toDateString() !== new Date().toDateString();
           const isCritical = rem.priority === 'critical' || rem.priority === 'high';
-          
           items.push({
             id: rem.id,
             type: 'reminder',
@@ -278,7 +275,87 @@ export function useEssInbox() {
         });
       }
 
-      // Sort items: response_required first, then by date
+      // Fetch workflow approvals pending
+      const { data: pendingApprovals } = await supabase
+        .from("workflow_step_tracking")
+        .select(`id, started_at, deadline_at, workflow_instances(id, category, reference_type, status)`)
+        .eq("actor_id", user.id)
+        .is("completed_at", null)
+        .order("started_at", { ascending: false });
+
+      if (pendingApprovals) {
+        pendingApprovals.forEach((approval) => {
+          const instance = approval.workflow_instances as { id: string; category: string; reference_type: string; status: string } | null;
+          if (instance && instance.status === 'in_progress') {
+            const isOverdue = approval.deadline_at && new Date(approval.deadline_at) < new Date();
+            items.push({
+              id: approval.id,
+              type: 'approval',
+              category: 'tasks_approvals',
+              title: isOverdue ? 'Approval Overdue' : 'Approval Required',
+              description: `${instance.reference_type?.replace(/_/g, ' ') || instance.category}`,
+              urgency: 'response_required',
+              actionLabel: 'Approve',
+              actionPath: '/workflow/approvals',
+              createdAt: approval.started_at,
+              dueDate: approval.deadline_at || undefined,
+            });
+          }
+        });
+      }
+
+      // Fetch letter requests
+      const { data: letterRequests } = await supabase
+        .from("generated_letters")
+        .select(`id, status, created_at, letter_templates(name)`)
+        .eq("employee_id", user.id)
+        .in("status", ["pending", "processing", "approved"])
+        .order("created_at", { ascending: false });
+
+      if (letterRequests) {
+        letterRequests.forEach((lr) => {
+          const template = lr.letter_templates as { name: string } | null;
+          const isApproved = lr.status === 'approved';
+          items.push({
+            id: lr.id,
+            type: 'letter_request',
+            category: 'requests_tickets',
+            title: isApproved ? 'Letter Ready' : 'Letter Request Pending',
+            description: template?.name || 'Letter Request',
+            urgency: isApproved ? 'response_required' : 'pending',
+            actionLabel: isApproved ? 'Download' : 'View',
+            actionPath: '/ess/letters',
+            createdAt: lr.created_at,
+          });
+        });
+      }
+
+      // Fetch open tickets
+      const { data: tickets } = await supabase
+        .from("tickets")
+        .select(`id, ticket_number, subject, status, created_at, updated_at`)
+        .eq("requester_id", user.id)
+        .in("status", ["open", "in_progress", "pending"])
+        .order("updated_at", { ascending: false });
+
+      if (tickets) {
+        tickets.forEach((ticket) => {
+          const isPending = ticket.status === 'pending';
+          items.push({
+            id: ticket.id,
+            type: isPending ? 'ticket_reply' : 'ticket',
+            category: 'requests_tickets',
+            title: isPending ? 'Ticket - Response Needed' : 'Ticket In Progress',
+            description: `#${ticket.ticket_number} • ${ticket.subject}`,
+            urgency: isPending ? 'response_required' : 'pending',
+            actionLabel: isPending ? 'Reply' : 'View',
+            actionPath: `/help/tickets/${ticket.id}`,
+            createdAt: ticket.updated_at || ticket.created_at,
+          });
+        });
+      }
+
+      // Sort items
       items.sort((a, b) => {
         const urgencyOrder = { response_required: 0, pending: 1, info: 2 };
         if (urgencyOrder[a.urgency] !== urgencyOrder[b.urgency]) {
@@ -299,12 +376,13 @@ export function useEssInbox() {
           tasks_approvals: items.filter(i => i.category === 'tasks_approvals').length,
           documents: items.filter(i => i.category === 'documents').length,
           learning: items.filter(i => i.category === 'learning').length,
+          requests_tickets: items.filter(i => i.category === 'requests_tickets').length,
         },
       };
 
       return { items, counts };
     },
     enabled: !!user?.id,
-    staleTime: 1000 * 60 * 2, // 2 minutes
+    staleTime: 1000 * 60 * 2,
   });
 }

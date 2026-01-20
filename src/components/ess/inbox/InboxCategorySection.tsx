@@ -9,7 +9,8 @@ import {
   FileText, 
   GraduationCap,
   ChevronDown,
-  ChevronRight
+  ChevronRight,
+  TicketCheck
 } from "lucide-react";
 import { useState } from "react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -21,6 +22,7 @@ const categoryConfig: Record<InboxCategory, { icon: React.ElementType; label: st
   tasks_approvals: { icon: CheckSquare, label: 'Tasks & Approvals', color: 'text-amber-600' },
   documents: { icon: FileText, label: 'Documents', color: 'text-purple-600' },
   learning: { icon: GraduationCap, label: 'Learning & Development', color: 'text-indigo-600' },
+  requests_tickets: { icon: TicketCheck, label: 'Requests & Tickets', color: 'text-cyan-600' },
 };
 
 interface InboxCategorySectionProps {
