@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useLanguage } from "@/hooks/useLanguage";
 import {
   Table,
@@ -40,7 +41,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Switch } from "@/components/ui/switch";
-import { Plus, Pencil, Trash2, Target, ChevronDown, ChevronRight, Layers, ChevronLeft } from "lucide-react";
+import { Plus, Pencil, Trash2, Target, ChevronDown, ChevronRight, Layers, ChevronLeft, AlertTriangle, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 import { useAuditLog } from "@/hooks/useAuditLog";
 import { NavLink } from "react-router-dom";
@@ -429,6 +430,22 @@ export default function CompetenciesPage() {
           <ChevronLeft className="h-4 w-4 rotate-180" />
           <span className="text-foreground">{t("workforce.competencies.title")}</span>
         </div>
+
+        {/* Deprecation Banner */}
+        <Alert className="bg-amber-50 border-amber-200">
+          <AlertTriangle className="h-4 w-4 text-amber-600" />
+          <AlertTitle className="text-amber-800">Legacy Competencies Module</AlertTitle>
+          <AlertDescription className="text-amber-700">
+            Competency management has moved to the unified{" "}
+            <strong>Capability Platform</strong> which supports both Skills and Competencies with enhanced proficiency tracking.
+            <NavLink 
+              to="/workforce/capability-registry" 
+              className="inline-flex items-center gap-1 ml-2 text-amber-800 font-medium underline hover:text-amber-900"
+            >
+              Go to Capability Platform <ArrowRight className="h-3 w-3" />
+            </NavLink>
+          </AlertDescription>
+        </Alert>
 
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">

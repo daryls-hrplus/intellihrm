@@ -369,56 +369,71 @@ export default function CompetencyGapAnalysisPage() {
 
     setIsLoading(true);
     try {
-      // Fetch job competencies (requirements)
+      // Fetch job competency requirements from job_capability_requirements
       const { data: jobCompData, error: jobCompError } = await supabase
-        .from("job_competencies")
+        .from("job_capability_requirements")
         .select(`
-          competency_id,
-          competency_level_id,
+          capability_id,
+          required_proficiency_level,
           weighting,
           is_required,
-          competencies (name, code),
-          competency_levels (name, level_order)
+          skills_competencies!job_capability_requirements_capability_id_fkey(id, name, code, type)
         `)
         .eq("job_id", employeePosition.position.job_id)
-        .or("end_date.is.null,end_date.gte." + getTodayString());
+        .is("end_date", null);
 
       if (jobCompError) throw jobCompError;
 
-      const jobCompetencies: JobCompetency[] = (jobCompData || []).map((jc: any) => ({
-        competency_id: jc.competency_id,
-        competency_level_id: jc.competency_level_id,
-        competency_name: jc.competencies?.name || "Unknown",
-        competency_code: jc.competencies?.code || "",
-        required_level_name: jc.competency_levels?.name || null,
-        required_level_order: jc.competency_levels?.level_order || null,
-        weighting: jc.weighting,
-        is_required: jc.is_required,
-      }));
+      // Filter for COMPETENCY type only
+      const jobCompetencies: JobCompetency[] = (jobCompData || [])
+        .filter((jc: any) => jc.skills_competencies?.type === 'COMPETENCY')
+        .map((jc: any) => ({
+          competency_id: jc.capability_id,
+          competency_level_id: null,
+          competency_name: jc.skills_competencies?.name || "Unknown",
+          competency_code: jc.skills_competencies?.code || "",
+          required_level_name: `Level ${jc.required_proficiency_level || 3}`,
+          required_level_order: jc.required_proficiency_level || 3,
+          weighting: jc.weighting || 0,
+          is_required: jc.is_required ?? true,
+        }));
 
-      // Fetch employee competencies
+      // Fetch employee competencies with new proficiency columns
       const { data: empCompData, error: empCompError } = await supabase
         .from("employee_competencies")
         .select(`
           competency_id,
-          competency_level_id,
-          weighting,
-          competencies (name, code),
-          competency_levels (name, level_order)
+          required_proficiency_level,
+          assessed_proficiency_level,
+          weighting
         `)
         .eq("employee_id", employeePosition.employee_id)
-        .or("end_date.is.null,end_date.gte." + getTodayString());
+        .is("end_date", null);
 
       if (empCompError) throw empCompError;
 
+      // Fetch skills_competencies separately
+      const compIds = (empCompData || []).map(ec => ec.competency_id).filter(Boolean);
+      let skillsMap: Record<string, any> = {};
+      if (compIds.length > 0) {
+        const { data: skills } = await supabase
+          .from("skills_competencies")
+          .select("id, name, code")
+          .in("id", compIds);
+        skillsMap = (skills || []).reduce((acc: Record<string, any>, s: any) => {
+          acc[s.id] = s;
+          return acc;
+        }, {});
+      }
+
       const employeeCompetencies: EmployeeCompetency[] = (empCompData || []).map((ec: any) => ({
         competency_id: ec.competency_id,
-        competency_level_id: ec.competency_level_id,
-        competency_name: ec.competencies?.name || "Unknown",
-        competency_code: ec.competencies?.code || "",
-        achieved_level_name: ec.competency_levels?.name || null,
-        achieved_level_order: ec.competency_levels?.level_order || null,
-        weighting: ec.weighting,
+        competency_level_id: null,
+        competency_name: skillsMap[ec.competency_id]?.name || "Unknown",
+        competency_code: skillsMap[ec.competency_id]?.code || "",
+        achieved_level_name: ec.assessed_proficiency_level ? `Level ${ec.assessed_proficiency_level}` : null,
+        achieved_level_order: ec.assessed_proficiency_level || null,
+        weighting: ec.weighting || 0,
       }));
 
       // Perform gap analysis
@@ -432,7 +447,6 @@ export default function CompetencyGapAnalysisPage() {
 
         if (empComp) {
           if (jc.required_level_order === null) {
-            // No specific level required, having the competency is enough
             gap_status = "met";
             gap_score = 100;
           } else if (empComp.achieved_level_order !== null) {
@@ -446,7 +460,7 @@ export default function CompetencyGapAnalysisPage() {
               );
             }
           } else {
-            // Has competency but no level specified
+            // Has competency but not assessed yet
             gap_status = "partial";
             gap_score = 50;
           }
