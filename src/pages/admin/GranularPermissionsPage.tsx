@@ -297,10 +297,10 @@ export default function GranularPermissionsPage() {
     }
   };
 
-  // Helper to get permission value - defaults to TRUE (all permissions on by default)
+  // Helper to get permission value - defaults to FALSE (explicit grant required)
   const getPermissionValue = useCallback((modulePermissionId: string, action: string): boolean => {
     const perm = rolePermissions[modulePermissionId];
-    if (!perm) return true; // Default to ON
+    if (!perm) return false; // Default to OFF - explicit grant required
     return !!perm[action as keyof RolePermission];
   }, [rolePermissions]);
 
@@ -308,7 +308,7 @@ export default function GranularPermissionsPage() {
     setHasChanges(true);
     setRolePermissions((prev) => {
       const existing = prev[modulePermissionId];
-      const currentValue = existing ? !!existing[action as keyof RolePermission] : true;
+      const currentValue = existing ? !!existing[action as keyof RolePermission] : false;
       
       if (existing) {
         return {
@@ -319,16 +319,17 @@ export default function GranularPermissionsPage() {
           },
         };
       } else {
+        // Creating new permission record - toggle requested action to true, others stay false
         return {
           ...prev,
           [modulePermissionId]: {
             id: "",
             role_id: selectedRoleId,
             module_permission_id: modulePermissionId,
-            can_view: action === "can_view" ? false : true,
-            can_create: action === "can_create" ? false : true,
-            can_edit: action === "can_edit" ? false : true,
-            can_delete: action === "can_delete" ? false : true,
+            can_view: action === "can_view" ? true : false,
+            can_create: action === "can_create" ? true : false,
+            can_edit: action === "can_edit" ? true : false,
+            can_delete: action === "can_delete" ? true : false,
           },
         };
       }
