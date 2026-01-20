@@ -25,6 +25,15 @@ export interface MyAppraisal {
   evaluation_deadline: string | null;
   position_title: string | null;
   company_id: string | null;
+  // Template configuration flags
+  include_goals: boolean;
+  include_competencies: boolean;
+  include_responsibilities: boolean;
+  include_values_assessment: boolean;
+  goal_weight: number;
+  competency_weight: number;
+  responsibility_weight: number;
+  values_weight: number;
 }
 
 export function useMyAppraisals() {
@@ -58,7 +67,15 @@ export function useMyAppraisals() {
             start_date,
             end_date,
             status,
-            evaluation_deadline
+            evaluation_deadline,
+            include_goals,
+            include_competencies,
+            include_responsibilities,
+            include_values_assessment,
+            goal_weight,
+            competency_weight,
+            responsibility_weight,
+            values_weight
           )
         `)
         .eq("employee_id", user.id)
@@ -143,6 +160,15 @@ export function useMyAppraisals() {
           evaluation_deadline: cycle.evaluation_deadline,
           position_title: p.primary_position_id ? positionMap[p.primary_position_id] || null : null,
           company_id: cycle.company_id,
+          // Template configuration flags
+          include_goals: cycle.include_goals ?? true,
+          include_competencies: cycle.include_competencies ?? true,
+          include_responsibilities: cycle.include_responsibilities ?? true,
+          include_values_assessment: cycle.include_values_assessment ?? false,
+          goal_weight: cycle.goal_weight ?? 0,
+          competency_weight: cycle.competency_weight ?? 0,
+          responsibility_weight: cycle.responsibility_weight ?? 0,
+          values_weight: cycle.values_weight ?? 0,
         };
       });
     },
