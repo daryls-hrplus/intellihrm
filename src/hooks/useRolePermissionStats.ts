@@ -72,25 +72,33 @@ export function useRolePermissionStats(roleId: string | null): RolePermissionSta
     const allTabs = modulePermissions.filter((mp) => mp.tab_code);
     const totalTabs = allTabs.length;
 
-    // Create a set of permission IDs that have can_view = true
-    const viewablePermissionIds = new Set(
-      rolePermissions.filter((rp) => rp.can_view).map((rp) => rp.module_permission_id)
+    // Create a map from permission ID to role permission record
+    const rolePermissionsMap = new Map(
+      rolePermissions.map((rp) => [rp.module_permission_id, rp])
     );
+
+    // Helper function matching GranularPermissionsPage logic
+    // If no explicit record exists, default to TRUE (matches page behavior)
+    const getEffectiveCanView = (modulePermissionId: string): boolean => {
+      const rolePermission = rolePermissionsMap.get(modulePermissionId);
+      if (!rolePermission) return true; // Default to ON when missing
+      return rolePermission.can_view;
+    };
 
     // Calculate accessible modules (modules where at least one permission is viewable)
     const accessibleModulesSet = new Set<string>();
     const modulesList: string[] = [];
 
     modulePermissions.forEach((mp) => {
-      if (viewablePermissionIds.has(mp.id)) {
+      if (getEffectiveCanView(mp.id)) {
         accessibleModulesSet.add(mp.module_code);
       }
     });
 
     modulesList.push(...Array.from(accessibleModulesSet));
 
-    // Calculate accessible tabs
-    const accessibleTabs = allTabs.filter((mp) => viewablePermissionIds.has(mp.id)).length;
+    // Calculate accessible tabs using effective can_view
+    const accessibleTabs = allTabs.filter((mp) => getEffectiveCanView(mp.id)).length;
 
     return {
       totalModules,
@@ -147,17 +155,24 @@ export function useMultipleRolePermissionStats(roleIds: string[]) {
           permIdToModule.set(mp.id, mp.module_code);
         });
 
-        // Calculate stats for each role
+        // Calculate stats for each role using "default to true" logic for missing permissions
         const roleStats = new Map<string, { accessibleModules: number; modulesList: string[] }>();
 
         roleIds.forEach((roleId) => {
-          const rolePerms = rolePermissions.filter((rp) => rp.role_id === roleId && rp.can_view);
+          const rolePermsForThisRole = rolePermissions.filter((rp) => rp.role_id === roleId);
+          const permIdToRolePerm = new Map(
+            rolePermsForThisRole.map((rp) => [rp.module_permission_id, rp])
+          );
+
           const accessibleModulesSet = new Set<string>();
 
-          rolePerms.forEach((rp) => {
-            const moduleCode = permIdToModule.get(rp.module_permission_id);
-            if (moduleCode) {
-              accessibleModulesSet.add(moduleCode);
+          modulePermissions.forEach((mp) => {
+            const rolePerm = permIdToRolePerm.get(mp.id);
+            // If no explicit record exists, default to TRUE (matches page behavior)
+            const effectiveCanView = rolePerm ? rolePerm.can_view : true;
+
+            if (effectiveCanView) {
+              accessibleModulesSet.add(mp.module_code);
             }
           });
 
@@ -188,21 +203,39 @@ export async function fetchUserModuleAccess(roleIds: string[]): Promise<string[]
   if (roleIds.length === 0) return [];
 
   try {
-    const { data, error } = await supabase
+    // Fetch all module permissions (except enablement)
+    const { data: allModulePermissions, error: mpError } = await supabase
+      .from("module_permissions")
+      .select("id, module_code")
+      .neq("module_code", "enablement");
+
+    if (mpError) throw mpError;
+
+    // Fetch role permissions for these roles
+    const { data: rolePermissions, error: rpError } = await supabase
       .from("role_permissions")
-      .select(`
-        can_view,
-        module_permissions!inner(module_code)
-      `)
-      .in("role_id", roleIds)
-      .eq("can_view", true);
+      .select("module_permission_id, can_view")
+      .in("role_id", roleIds);
 
-    if (error) throw error;
+    if (rpError) throw rpError;
 
+    // Create a map of permission ID to can_view status
+    // If any role grants access, mark as true
+    const explicitPerms = new Map<string, boolean>();
+    (rolePermissions || []).forEach((rp) => {
+      if (rp.can_view) {
+        explicitPerms.set(rp.module_permission_id, true);
+      } else if (!explicitPerms.has(rp.module_permission_id)) {
+        explicitPerms.set(rp.module_permission_id, false);
+      }
+    });
+
+    // Calculate accessible modules (missing = granted by default)
     const modules = new Set<string>();
-    (data || []).forEach((row: any) => {
-      if (row.module_permissions?.module_code && row.module_permissions.module_code !== "enablement") {
-        modules.add(row.module_permissions.module_code);
+    (allModulePermissions || []).forEach((mp) => {
+      const effectiveCanView = explicitPerms.has(mp.id) ? explicitPerms.get(mp.id) : true;
+      if (effectiveCanView) {
+        modules.add(mp.module_code);
       }
     });
 
