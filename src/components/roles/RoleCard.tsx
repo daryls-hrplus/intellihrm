@@ -1,6 +1,11 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
   Shield,
   Lock,
   Eye,
@@ -122,49 +127,74 @@ export function RoleCard({
 
       {/* Actions */}
       <div className="mt-4 flex items-center justify-end gap-1 border-t pt-4">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => onView(role)}
-          className="h-8 px-2"
-        >
-          <ExternalLink className="h-3.5 w-3.5" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => onManagePermissions(role)}
-          className="h-8 px-2"
-        >
-          <Settings2 className="h-3.5 w-3.5" />
-        </Button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onView(role)}
+              className="h-8 px-2"
+            >
+              <ExternalLink className="h-3.5 w-3.5" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>View Role Details</TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onManagePermissions(role)}
+              className="h-8 px-2"
+            >
+              <Settings2 className="h-3.5 w-3.5" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Manage Permissions</TooltipContent>
+        </Tooltip>
         {!role.is_seeded && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onEdit(role)}
-            className="h-8 px-2"
-          >
-            <Pencil className="h-3.5 w-3.5" />
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onEdit(role)}
+                className="h-8 px-2"
+              >
+                <Pencil className="h-3.5 w-3.5" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Edit Role</TooltipContent>
+          </Tooltip>
         )}
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => onDuplicate(role)}
-          className="h-8 px-2"
-        >
-          <Copy className="h-3.5 w-3.5" />
-        </Button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onDuplicate(role)}
+              className="h-8 px-2"
+            >
+              <Copy className="h-3.5 w-3.5" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Duplicate Role</TooltipContent>
+        </Tooltip>
         {!role.is_seeded && !role.is_system && (
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-8 px-2 text-destructive hover:text-destructive"
-            onClick={() => onDelete(role)}
-          >
-            <Trash2 className="h-3.5 w-3.5" />
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 px-2 text-destructive hover:text-destructive"
+                onClick={() => onDelete(role)}
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Delete Role</TooltipContent>
+          </Tooltip>
         )}
       </div>
     </div>
