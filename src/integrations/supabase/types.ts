@@ -15772,45 +15772,77 @@ export type Database = {
       }
       employee_competencies: {
         Row: {
+          assessed_by: string | null
+          assessed_date: string | null
+          assessed_proficiency_level: number | null
+          assessment_source: string | null
           competency_id: string
           competency_level_id: string | null
           created_at: string
           employee_id: string
           end_date: string | null
           id: string
+          is_required: boolean | null
           notes: string | null
           proficiency_date: string | null
+          required_proficiency_level: number | null
           start_date: string
           updated_at: string
           weighting: number
         }
         Insert: {
+          assessed_by?: string | null
+          assessed_date?: string | null
+          assessed_proficiency_level?: number | null
+          assessment_source?: string | null
           competency_id: string
           competency_level_id?: string | null
           created_at?: string
           employee_id: string
           end_date?: string | null
           id?: string
+          is_required?: boolean | null
           notes?: string | null
           proficiency_date?: string | null
+          required_proficiency_level?: number | null
           start_date?: string
           updated_at?: string
           weighting?: number
         }
         Update: {
+          assessed_by?: string | null
+          assessed_date?: string | null
+          assessed_proficiency_level?: number | null
+          assessment_source?: string | null
           competency_id?: string
           competency_level_id?: string | null
           created_at?: string
           employee_id?: string
           end_date?: string | null
           id?: string
+          is_required?: boolean | null
           notes?: string | null
           proficiency_date?: string | null
+          required_proficiency_level?: number | null
           start_date?: string
           updated_at?: string
           weighting?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "employee_competencies_assessed_by_fkey"
+            columns: ["assessed_by"]
+            isOneToOne: false
+            referencedRelation: "employee_fte_summary"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "employee_competencies_assessed_by_fkey"
+            columns: ["assessed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "employee_competencies_competency_id_fkey"
             columns: ["competency_id"]

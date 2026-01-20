@@ -2,12 +2,22 @@ import { useTranslation } from "react-i18next";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { useAuth } from "@/contexts/AuthContext";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Award, Loader2 } from "lucide-react";
+import { Award, Loader2, Target, Briefcase, Clock } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { formatDateForDisplay } from "@/utils/dateUtils";
+import { ProficiencyLevelBadge } from "@/components/capabilities/ProficiencyLevelPicker";
+import { ProficiencyGapBadge, AssessmentSourceBadge } from "@/components/employee/ProficiencyGapBadge";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 export default function MyCompetenciesPage() {
   const { t } = useTranslation();
@@ -20,11 +30,21 @@ export default function MyCompetenciesPage() {
       const { data, error } = await supabase
         .from("employee_competencies")
         .select(`
-          *,
-          competencies(name, code),
-          competency_levels(name, code)
+          id,
+          competency_id,
+          required_proficiency_level,
+          assessed_proficiency_level,
+          assessed_date,
+          assessment_source,
+          is_required,
+          weighting,
+          start_date,
+          end_date,
+          notes,
+          skills_competencies(id, name, code, category)
         `)
         .eq("employee_id", user.id)
+        .is("end_date", null)
         .order("start_date", { ascending: false });
 
       if (error) throw error;
@@ -33,7 +53,13 @@ export default function MyCompetenciesPage() {
     enabled: !!user?.id,
   });
 
-  const totalWeight = competencies?.reduce((sum, ec) => sum + Number(ec.weighting), 0) || 0;
+  const totalWeight = competencies?.reduce((sum, ec) => sum + Number(ec.weighting || 0), 0) || 0;
+  const assessedCount = competencies?.filter((ec) => ec.assessed_proficiency_level !== null).length || 0;
+  const pendingCount = (competencies?.length || 0) - assessedCount;
+  const meetsRequirements = competencies?.filter((ec) => 
+    ec.assessed_proficiency_level !== null && 
+    ec.assessed_proficiency_level >= (ec.required_proficiency_level || 0)
+  ).length || 0;
 
   return (
     <AppLayout>
@@ -54,14 +80,58 @@ export default function MyCompetenciesPage() {
           </p>
         </div>
 
+        {/* Summary Cards */}
+        <div className="grid gap-4 md:grid-cols-4">
+          <Card>
+            <CardContent className="pt-4">
+              <div className="flex items-center gap-2">
+                <Target className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm text-muted-foreground">Total Competencies</span>
+              </div>
+              <div className="text-2xl font-bold mt-1">{competencies?.length || 0}</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-4">
+              <div className="flex items-center gap-2">
+                <Award className="h-4 w-4 text-emerald-500" />
+                <span className="text-sm text-muted-foreground">Meets Requirements</span>
+              </div>
+              <div className="text-2xl font-bold mt-1 text-emerald-600">{meetsRequirements}</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-4">
+              <div className="flex items-center gap-2">
+                <Clock className="h-4 w-4 text-amber-500" />
+                <span className="text-sm text-muted-foreground">Pending Assessment</span>
+              </div>
+              <div className="text-2xl font-bold mt-1 text-amber-600">{pendingCount}</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-4">
+              <div className="flex items-center gap-2">
+                <Briefcase className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm text-muted-foreground">Total Weight</span>
+              </div>
+              <div className="text-2xl font-bold mt-1">{totalWeight}%</div>
+            </CardContent>
+          </Card>
+        </div>
+
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center gap-2">
-                <Award className="h-5 w-5" />
-                Assigned Competencies
-                <Badge variant="outline">Total Weight: {totalWeight}%</Badge>
-              </CardTitle>
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <Award className="h-5 w-5" />
+                  My Competencies
+                </CardTitle>
+                <CardDescription>
+                  Required levels are from your job profile. Assessed levels are updated after performance appraisals.
+                </CardDescription>
+              </div>
             </div>
           </CardHeader>
           <CardContent>
@@ -73,62 +143,76 @@ export default function MyCompetenciesPage() {
               <div className="text-center py-8 text-muted-foreground">
                 <Award className="h-12 w-12 mx-auto mb-4 opacity-50" />
                 <p>No competencies have been assigned to you yet.</p>
+                <p className="text-sm mt-1">Competencies are typically assigned based on your job profile.</p>
               </div>
             ) : (
-              <div className="grid gap-4 md:grid-cols-2">
-                {competencies.map((ec) => (
-                  <Card key={ec.id} className="border-l-4 border-l-primary">
-                    <CardContent className="pt-4">
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <h4 className="font-semibold">
-                            {ec.competencies?.name}
-                          </h4>
-                          <p className="text-sm text-muted-foreground">
-                            Code: {ec.competencies?.code}
-                          </p>
-                        </div>
-                        <Badge variant="secondary">{ec.weighting}%</Badge>
-                      </div>
-                      <div className="mt-4 space-y-2 text-sm">
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">Level:</span>
-                          <span>
-                            {ec.competency_levels ? (
-                              <Badge variant="outline">{ec.competency_levels.name}</Badge>
-                            ) : (
-                              "—"
+              <div className="rounded-lg border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Competency</TableHead>
+                      <TableHead>Category</TableHead>
+                      <TableHead>Required Level</TableHead>
+                      <TableHead>Assessed Level</TableHead>
+                      <TableHead>Gap Status</TableHead>
+                      <TableHead>Weight</TableHead>
+                      <TableHead>Assessment Source</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {competencies.map((ec: any) => (
+                      <TableRow key={ec.id}>
+                        <TableCell className="font-medium">
+                          <div>
+                            {ec.skills_competencies?.name || "Unknown"}
+                            {ec.skills_competencies?.code && (
+                              <span className="text-muted-foreground ml-1">
+                                ({ec.skills_competencies.code})
+                              </span>
                             )}
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">Proficiency Date:</span>
-                          <span>
-                            {ec.proficiency_date
-                              ? formatDateForDisplay(ec.proficiency_date, "MMM d, yyyy")
-                              : "—"}
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">Start Date:</span>
-                          <span>{formatDateForDisplay(ec.start_date, "MMM d, yyyy")}</span>
-                        </div>
-                        {ec.end_date && (
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground">End Date:</span>
-                            <span>{formatDateForDisplay(ec.end_date, "MMM d, yyyy")}</span>
                           </div>
-                        )}
-                        {ec.notes && (
-                          <div className="mt-2 pt-2 border-t">
-                            <span className="text-muted-foreground">Notes:</span>
-                            <p className="mt-1">{ec.notes}</p>
-                          </div>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                          {ec.is_required && (
+                            <Badge variant="secondary" className="mt-1 text-xs">Required</Badge>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {ec.skills_competencies?.category && (
+                            <Badge variant="outline">{ec.skills_competencies.category}</Badge>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {ec.required_proficiency_level ? (
+                            <ProficiencyLevelBadge level={ec.required_proficiency_level} size="sm" />
+                          ) : (
+                            <span className="text-muted-foreground">—</span>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {ec.assessed_proficiency_level ? (
+                            <ProficiencyLevelBadge level={ec.assessed_proficiency_level} size="sm" />
+                          ) : (
+                            <Badge variant="outline" className="text-muted-foreground">
+                              <Clock className="h-3 w-3 mr-1" />
+                              Not assessed
+                            </Badge>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <ProficiencyGapBadge
+                            required={ec.required_proficiency_level}
+                            assessed={ec.assessed_proficiency_level}
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline">{ec.weighting}%</Badge>
+                        </TableCell>
+                        <TableCell>
+                          <AssessmentSourceBadge source={ec.assessment_source || "pending"} />
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
               </div>
             )}
           </CardContent>

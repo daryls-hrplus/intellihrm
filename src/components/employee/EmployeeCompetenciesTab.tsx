@@ -18,80 +18,74 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Plus, Trash2, Loader2, Award, RefreshCw, Briefcase, User } from "lucide-react";
+import { Plus, Trash2, Loader2, Award, RefreshCw, Briefcase, User, Target, ChevronsUpDown, Check, Clock } from "lucide-react";
 import { getTodayString, formatDateForDisplay } from "@/utils/dateUtils";
 import { useAuditLog } from "@/hooks/useAuditLog";
 import { fetchCompetencyCascade, syncJobCompetenciesToEmployee, CascadedCompetency } from "@/hooks/useCompetencyCascade";
+import { cn } from "@/lib/utils";
+import { ProficiencyLevelPicker, ProficiencyLevelBadge } from "@/components/capabilities/ProficiencyLevelPicker";
+import { ProficiencyGapBadge } from "@/components/employee/ProficiencyGapBadge";
 
 interface EmployeeCompetency {
   id: string;
   employee_id: string;
   competency_id: string;
-  competency_level_id: string | null;
+  required_proficiency_level: number | null;
+  assessed_proficiency_level: number | null;
+  assessed_date: string | null;
+  assessment_source: string | null;
+  is_required: boolean;
   weighting: number;
-  proficiency_date: string | null;
   notes: string | null;
   start_date: string;
   end_date: string | null;
-  competencies?: { name: string; code: string };
-  competency_levels?: { name: string; code: string } | null;
+  skills_competencies?: { id: string; name: string; code: string; category: string | null };
 }
 
 interface Competency {
   id: string;
   name: string;
   code: string;
+  category: string | null;
   company_id: string;
-}
-
-interface CompetencyLevel {
-  id: string;
-  competency_id: string;
-  name: string;
-  code: string;
-  level_order: number;
 }
 
 interface EmployeeCompetenciesTabProps {
   employeeId: string;
 }
 
-function datesOverlap(
-  start1: string,
-  end1: string | null,
-  start2: string,
-  end2: string | null
-): boolean {
-  const e1 = end1 || "9999-12-31";
-  const e2 = end2 || "9999-12-31";
-  return start1 <= e2 && start2 <= e1;
-}
-
 export function EmployeeCompetenciesTab({ employeeId }: EmployeeCompetenciesTabProps) {
   const [employeeCompetencies, setEmployeeCompetencies] = useState<EmployeeCompetency[]>([]);
   const [jobCompetencies, setJobCompetencies] = useState<CascadedCompetency[]>([]);
   const [competencies, setCompetencies] = useState<Competency[]>([]);
-  const [competencyLevels, setCompetencyLevels] = useState<CompetencyLevel[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [comboboxOpen, setComboboxOpen] = useState(false);
   const { logAction } = useAuditLog();
   const [formData, setFormData] = useState({
     competency_id: "",
-    competency_level_id: "",
+    required_proficiency_level: 3,
+    is_required: true,
     weighting: "10",
-    proficiency_date: "",
     notes: "",
     start_date: getTodayString(),
     end_date: "",
@@ -100,51 +94,43 @@ export function EmployeeCompetenciesTab({ employeeId }: EmployeeCompetenciesTabP
 
   useEffect(() => {
     fetchAllCompetencies();
-    fetchCompetencies();
+    fetchCompetenciesList();
   }, [employeeId]);
-
-  useEffect(() => {
-    if (formData.competency_id) {
-      fetchCompetencyLevels(formData.competency_id);
-    } else {
-      setCompetencyLevels([]);
-    }
-  }, [formData.competency_id]);
 
   const fetchAllCompetencies = async () => {
     setIsLoading(true);
     try {
-      // Fetch employee competencies - join with skills_competencies
       const { data, error } = await supabase
         .from("employee_competencies")
         .select(`
-          *,
-          skills_competencies(id, name, code),
-          competency_levels(name, code)
+          id,
+          employee_id,
+          competency_id,
+          required_proficiency_level,
+          assessed_proficiency_level,
+          assessed_date,
+          assessment_source,
+          is_required,
+          weighting,
+          notes,
+          start_date,
+          end_date,
+          skills_competencies(id, name, code, category)
         `)
         .eq("employee_id", employeeId)
+        .is("end_date", null)
         .order("start_date", { ascending: false });
 
       if (error) {
         console.error("Error fetching employee competencies:", error);
         toast.error("Failed to load competencies");
       } else {
-        // Map skills_competencies to competencies for backward compatibility
-        const mapped = (data || []).map((ec: any) => ({
-          ...ec,
-          competencies: ec.skills_competencies ? {
-            name: ec.skills_competencies.name,
-            code: ec.skills_competencies.code,
-          } : ec.competencies,
-        }));
-        setEmployeeCompetencies(mapped);
+        setEmployeeCompetencies(data || []);
       }
 
-      // Fetch job competencies using cascade
       const cascadeResult = await fetchCompetencyCascade(employeeId);
       setJobCompetencies(cascadeResult.fromJob);
       
-      // Get current job ID for sync
       const { data: positions } = await supabase
         .from("employee_positions")
         .select("positions!inner(job_id)")
@@ -160,8 +146,7 @@ export function EmployeeCompetenciesTab({ employeeId }: EmployeeCompetenciesTabP
     }
   };
 
-  const fetchCompetencies = async () => {
-    // Fetch employee's company_id first
+  const fetchCompetenciesList = async () => {
     const { data: profile } = await supabase
       .from("profiles")
       .select("company_id")
@@ -170,60 +155,36 @@ export function EmployeeCompetenciesTab({ employeeId }: EmployeeCompetenciesTabP
     
     const employeeCompanyId = profile?.company_id;
     
-    // Fetch from unified skills_competencies table
     const { data, error } = await supabase
       .from("skills_competencies")
-      .select(`
-        id, 
-        name, 
-        code,
-        is_global,
-        company_capabilities(company_id)
-      `)
+      .select(`id, name, code, category, is_global, company_capabilities(company_id)`)
       .eq("type", "COMPETENCY")
       .eq("status", "active")
+      .order("category")
       .order("name");
 
-    if (error) {
-      console.error("Error fetching competencies:", error);
-    } else {
-      // Filter to only include competencies that are global OR linked to employee's company
-      const filtered = (data || []).filter((c: any) => {
+    if (!error && data) {
+      const filtered = data.filter((c: any) => {
         if (c.is_global) return true;
         if (!employeeCompanyId) return false;
-        const linkedCompanies = c.company_capabilities || [];
-        return linkedCompanies.some((cc: any) => cc.company_id === employeeCompanyId);
+        return (c.company_capabilities || []).some((cc: any) => cc.company_id === employeeCompanyId);
       });
       setCompetencies(filtered.map((c: any) => ({
         id: c.id,
         name: c.name,
         code: c.code,
+        category: c.category,
         company_id: employeeCompanyId || '',
       })));
-    }
-  };
-
-  const fetchCompetencyLevels = async (competencyId: string) => {
-    const { data, error } = await supabase
-      .from("competency_levels")
-      .select("id, competency_id, name, code, level_order")
-      .eq("competency_id", competencyId)
-      .eq("is_active", true)
-      .order("level_order");
-
-    if (error) {
-      console.error("Error fetching competency levels:", error);
-    } else {
-      setCompetencyLevels(data || []);
     }
   };
 
   const handleOpenDialog = () => {
     setFormData({
       competency_id: "",
-      competency_level_id: "",
+      required_proficiency_level: 3,
+      is_required: true,
       weighting: "10",
-      proficiency_date: "",
       notes: "",
       start_date: getTodayString(),
       end_date: "",
@@ -231,38 +192,9 @@ export function EmployeeCompetenciesTab({ employeeId }: EmployeeCompetenciesTabP
     setDialogOpen(true);
   };
 
-  const calculateOverlappingWeight = (
-    newStartDate: string,
-    newEndDate: string | null
-  ): number => {
-    const competencyGroups = new Map<string, EmployeeCompetency[]>();
-    for (const ec of employeeCompetencies) {
-      const existing = competencyGroups.get(ec.competency_id) || [];
-      existing.push(ec);
-      competencyGroups.set(ec.competency_id, existing);
-    }
-
-    let totalWeight = 0;
-    for (const [, entries] of competencyGroups) {
-      const overlappingEntries = entries.filter((ec) =>
-        datesOverlap(newStartDate, newEndDate, ec.start_date, ec.end_date)
-      );
-      if (overlappingEntries.length > 0) {
-        const maxWeight = Math.max(...overlappingEntries.map((e) => Number(e.weighting)));
-        totalWeight += maxWeight;
-      }
-    }
-    return totalWeight;
-  };
-
   const handleSave = async () => {
     if (!formData.competency_id) {
       toast.error("Please select a competency");
-      return;
-    }
-
-    if (!formData.start_date) {
-      toast.error("Please enter a start date");
       return;
     }
 
@@ -272,25 +204,15 @@ export function EmployeeCompetenciesTab({ employeeId }: EmployeeCompetenciesTabP
       return;
     }
 
-    const currentOverlappingWeight = calculateOverlappingWeight(
-      formData.start_date,
-      formData.end_date || null
-    );
-
-    if (currentOverlappingWeight + weighting > 100) {
-      toast.error(
-        `Total weighting would exceed 100%. Current: ${currentOverlappingWeight}%, max you can add: ${100 - currentOverlappingWeight}%`
-      );
-      return;
-    }
-
     setIsSaving(true);
     const payload = {
       employee_id: employeeId,
       competency_id: formData.competency_id,
-      competency_level_id: formData.competency_level_id || null,
+      required_proficiency_level: formData.required_proficiency_level,
+      assessed_proficiency_level: null,
+      assessment_source: 'pending',
+      is_required: formData.is_required,
       weighting: weighting,
-      proficiency_date: formData.proficiency_date || null,
       notes: formData.notes.trim() || null,
       start_date: formData.start_date,
       end_date: formData.end_date || null,
@@ -304,11 +226,7 @@ export function EmployeeCompetenciesTab({ employeeId }: EmployeeCompetenciesTabP
 
     if (error) {
       console.error("Error adding employee competency:", error);
-      if (error.message?.includes("Overlapping date ranges")) {
-        toast.error("This competency already has an entry for overlapping dates");
-      } else {
-        toast.error("Failed to add competency");
-      }
+      toast.error("Failed to add competency");
     } else {
       const competency = competencies.find(c => c.id === formData.competency_id);
       await logAction({
@@ -326,21 +244,11 @@ export function EmployeeCompetenciesTab({ employeeId }: EmployeeCompetenciesTabP
   };
 
   const handleDelete = async (id: string, name: string) => {
-    const { error } = await supabase
-      .from("employee_competencies")
-      .delete()
-      .eq("id", id);
-
+    const { error } = await supabase.from("employee_competencies").delete().eq("id", id);
     if (error) {
-      console.error("Error deleting employee competency:", error);
       toast.error("Failed to remove competency");
     } else {
-      await logAction({
-        action: 'DELETE',
-        entityType: 'employee_competency',
-        entityId: id,
-        entityName: name,
-      });
+      await logAction({ action: 'DELETE', entityType: 'employee_competency', entityId: id, entityName: name });
       toast.success("Competency removed");
       fetchAllCompetencies();
     }
@@ -351,23 +259,15 @@ export function EmployeeCompetenciesTab({ employeeId }: EmployeeCompetenciesTabP
       toast.error("No job profile found for this employee");
       return;
     }
-    
     setIsSyncing(true);
     try {
       const result = await syncJobCompetenciesToEmployee(employeeId, currentJobId);
-      
       if (result.errors.length > 0) {
         toast.error(result.errors.join(", "));
       } else if (result.synced === 0) {
         toast.info("All job competencies are already assigned");
       } else {
         toast.success(`Synced ${result.synced} competencies from job profile`);
-        await logAction({
-          action: 'CREATE',
-          entityType: 'employee_competency_sync',
-          entityId: employeeId,
-          entityName: `Synced ${result.synced} competencies`,
-        });
         fetchAllCompetencies();
       }
     } finally {
@@ -375,20 +275,24 @@ export function EmployeeCompetenciesTab({ employeeId }: EmployeeCompetenciesTabP
     }
   };
 
-  // Separate employee competencies into those from job and individual additions
-  const { inheritedCompetencies, additionalCompetencies } = useMemo(() => {
-    const jobCompIds = new Set(jobCompetencies.map(jc => jc.competency_id));
-    const inherited = employeeCompetencies.filter(ec => jobCompIds.has(ec.competency_id));
-    const additional = employeeCompetencies.filter(ec => !jobCompIds.has(ec.competency_id));
-    return { inheritedCompetencies: inherited, additionalCompetencies: additional };
-  }, [employeeCompetencies, jobCompetencies]);
-
   const totalWeight = employeeCompetencies.reduce((sum, ec) => sum + Number(ec.weighting), 0);
   const jobTotalWeight = jobCompetencies.reduce((sum, jc) => sum + Number(jc.weighting), 0);
 
+  const groupedCompetencies = useMemo(() => {
+    const groups: Record<string, Competency[]> = {};
+    competencies.forEach(c => {
+      const cat = c.category || "Uncategorized";
+      if (!groups[cat]) groups[cat] = [];
+      groups[cat].push(c);
+    });
+    return groups;
+  }, [competencies]);
+
+  const assignedIds = new Set(employeeCompetencies.map(ec => ec.competency_id));
+  const selectedCompetency = competencies.find(c => c.id === formData.competency_id);
+
   return (
     <div className="space-y-6">
-      {/* Header Card */}
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
@@ -403,21 +307,12 @@ export function EmployeeCompetenciesTab({ employeeId }: EmployeeCompetenciesTabP
             </div>
             <div className="flex items-center gap-2">
               {currentJobId && (
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={handleSyncFromJob}
-                  disabled={isSyncing || jobCompetencies.length === 0}
-                >
-                  {isSyncing ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : (
-                    <RefreshCw className="mr-2 h-4 w-4" />
-                  )}
+                <Button variant="outline" size="sm" onClick={handleSyncFromJob} disabled={isSyncing}>
+                  {isSyncing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}
                   Sync from Job
                 </Button>
               )}
-              <Button size="sm" onClick={handleOpenDialog} disabled={competencies.length === 0}>
+              <Button size="sm" onClick={handleOpenDialog}>
                 <Plus className="mr-2 h-4 w-4" />
                 Add Competency
               </Button>
@@ -426,74 +321,38 @@ export function EmployeeCompetenciesTab({ employeeId }: EmployeeCompetenciesTabP
         </CardHeader>
       </Card>
 
-      {/* From Job Profile Section */}
+      {/* From Job Profile */}
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">
             <Briefcase className="h-4 w-4 text-muted-foreground" />
             From Job Profile
-            <Badge variant="secondary" className="ml-2">
-              {jobCompetencies.length} competencies • {jobTotalWeight}% weight
-            </Badge>
+            <Badge variant="secondary" className="ml-2">{jobCompetencies.length} competencies • {jobTotalWeight}% weight</Badge>
           </CardTitle>
-          <CardDescription>
-            These competencies are automatically inherited from the employee's job profile
-          </CardDescription>
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <div className="flex items-center justify-center py-8">
-              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-            </div>
+            <div className="flex items-center justify-center py-8"><Loader2 className="h-6 w-6 animate-spin" /></div>
           ) : jobCompetencies.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              <Briefcase className="h-8 w-8 mx-auto mb-2 opacity-50" />
-              <p>No competencies defined in job profile</p>
-              <p className="text-sm mt-1">Configure competencies in Workforce → Jobs</p>
-            </div>
+            <div className="text-center py-8 text-muted-foreground">No competencies defined in job profile</div>
           ) : (
             <div className="rounded-lg border">
               <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead>Competency</TableHead>
-                    <TableHead>Source</TableHead>
-                    <TableHead className="w-[100px]">Weight %</TableHead>
-                    <TableHead>Status</TableHead>
+                    <TableHead>Required Level</TableHead>
+                    <TableHead>Weight %</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {jobCompetencies.map((jc) => {
-                    const hasOverride = employeeCompetencies.some(ec => ec.competency_id === jc.competency_id);
-                    return (
-                      <TableRow key={jc.competency_id}>
-                        <TableCell className="font-medium">
-                          {jc.name} {jc.code && <span className="text-muted-foreground">({jc.code})</span>}
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className="gap-1">
-                            <Briefcase className="h-3 w-3" />
-                            Job Profile
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline">{jc.weighting}%</Badge>
-                        </TableCell>
-                        <TableCell>
-                          {hasOverride ? (
-                            <Badge variant="secondary" className="gap-1">
-                              <User className="h-3 w-3" />
-                              Overridden
-                            </Badge>
-                          ) : (
-                            <Badge variant="default" className="bg-green-100 text-green-800 hover:bg-green-100">
-                              Active
-                            </Badge>
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
+                  {jobCompetencies.map((jc) => (
+                    <TableRow key={jc.competency_id}>
+                      <TableCell className="font-medium">{jc.name} {jc.code && <span className="text-muted-foreground">({jc.code})</span>}</TableCell>
+                      <TableCell><ProficiencyLevelBadge level={jc.required_level || 3} size="sm" /></TableCell>
+                      <TableCell><Badge variant="outline">{jc.weighting}%</Badge></TableCell>
+                    </TableRow>
+                  ))}
                 </TableBody>
               </Table>
             </div>
@@ -501,19 +360,14 @@ export function EmployeeCompetenciesTab({ employeeId }: EmployeeCompetenciesTabP
         </CardContent>
       </Card>
 
-      {/* Individual Assignments Section */}
+      {/* Individual Assignments */}
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">
             <User className="h-4 w-4 text-muted-foreground" />
             Individual Assignments
-            <Badge variant="secondary" className="ml-2">
-              {employeeCompetencies.length} total • {totalWeight}% weight
-            </Badge>
+            <Badge variant="secondary" className="ml-2">{employeeCompetencies.length} total • {totalWeight}% weight</Badge>
           </CardTitle>
-          <CardDescription>
-            Additional competencies assigned directly to this employee (overrides job profile where applicable)
-          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="rounded-lg border">
@@ -521,79 +375,43 @@ export function EmployeeCompetenciesTab({ employeeId }: EmployeeCompetenciesTabP
               <TableHeader>
                 <TableRow>
                   <TableHead>Competency</TableHead>
-                  <TableHead>Level</TableHead>
-                  <TableHead>Source</TableHead>
-                  <TableHead className="w-[100px]">Weight %</TableHead>
-                  <TableHead>Proficiency Date</TableHead>
-                  <TableHead>Start Date</TableHead>
-                  <TableHead>End Date</TableHead>
-                  <TableHead className="w-[60px]">Actions</TableHead>
+                  <TableHead>Required Level</TableHead>
+                  <TableHead>Assessed Level</TableHead>
+                  <TableHead>Gap</TableHead>
+                  <TableHead>Weight</TableHead>
+                  <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {isLoading ? (
-                  <TableRow>
-                    <TableCell colSpan={8} className="text-center py-4">
-                      <Loader2 className="h-5 w-5 animate-spin mx-auto" />
-                    </TableCell>
-                  </TableRow>
+                  <TableRow><TableCell colSpan={6} className="text-center py-4"><Loader2 className="h-5 w-5 animate-spin mx-auto" /></TableCell></TableRow>
                 ) : employeeCompetencies.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={8} className="text-center py-4 text-muted-foreground">
-                      No individual competencies assigned
-                    </TableCell>
-                  </TableRow>
+                  <TableRow><TableCell colSpan={6} className="text-center py-4 text-muted-foreground">No individual competencies assigned</TableCell></TableRow>
                 ) : (
-                  employeeCompetencies.map((ec) => {
-                    const isFromJob = jobCompetencies.some(jc => jc.competency_id === ec.competency_id);
-                    return (
-                      <TableRow key={ec.id}>
-                        <TableCell className="font-medium">
-                          {ec.competencies?.name} ({ec.competencies?.code})
-                        </TableCell>
-                        <TableCell>
-                          {ec.competency_levels ? (
-                            <Badge variant="secondary">{ec.competency_levels.name}</Badge>
-                          ) : (
-                            <span className="text-muted-foreground">—</span>
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          {isFromJob ? (
-                            <Badge variant="outline" className="gap-1 text-amber-700 border-amber-300 bg-amber-50">
-                              Override
-                            </Badge>
-                          ) : (
-                            <Badge variant="outline" className="gap-1">
-                              <User className="h-3 w-3" />
-                              Individual
-                            </Badge>
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline">{ec.weighting}%</Badge>
-                        </TableCell>
-                        <TableCell>
-                          {ec.proficiency_date
-                            ? formatDateForDisplay(ec.proficiency_date, "MMM d, yyyy")
-                            : "—"}
-                        </TableCell>
-                        <TableCell>{formatDateForDisplay(ec.start_date, "MMM d, yyyy")}</TableCell>
-                        <TableCell>
-                          {ec.end_date ? formatDateForDisplay(ec.end_date, "MMM d, yyyy") : "—"}
-                        </TableCell>
-                        <TableCell>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleDelete(ec.id, ec.competencies?.name || "")}
-                          >
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })
+                  employeeCompetencies.map((ec) => (
+                    <TableRow key={ec.id}>
+                      <TableCell className="font-medium">
+                        {ec.skills_competencies?.name || "Unknown"}
+                        {ec.skills_competencies?.code && <span className="text-muted-foreground ml-1">({ec.skills_competencies.code})</span>}
+                        {ec.skills_competencies?.category && <Badge variant="outline" className="ml-2">{ec.skills_competencies.category}</Badge>}
+                      </TableCell>
+                      <TableCell>{ec.required_proficiency_level ? <ProficiencyLevelBadge level={ec.required_proficiency_level} size="sm" /> : "—"}</TableCell>
+                      <TableCell>
+                        {ec.assessed_proficiency_level ? (
+                          <ProficiencyLevelBadge level={ec.assessed_proficiency_level} size="sm" />
+                        ) : (
+                          <Badge variant="outline" className="text-muted-foreground"><Clock className="h-3 w-3 mr-1" />Pending</Badge>
+                        )}
+                      </TableCell>
+                      <TableCell><ProficiencyGapBadge required={ec.required_proficiency_level} assessed={ec.assessed_proficiency_level} /></TableCell>
+                      <TableCell><Badge variant="outline">{ec.weighting}%</Badge></TableCell>
+                      <TableCell>
+                        <Button variant="ghost" size="icon" onClick={() => handleDelete(ec.id, ec.skills_competencies?.name || "")}>
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
                 )}
               </TableBody>
             </Table>
@@ -605,110 +423,85 @@ export function EmployeeCompetenciesTab({ employeeId }: EmployeeCompetenciesTabP
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add Employee Competency</DialogTitle>
+            <DialogTitle className="flex items-center gap-2"><Target className="h-5 w-5" />Add Competency</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
               <Label>Competency *</Label>
-              <Select
-                value={formData.competency_id}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, competency_id: value, competency_level_id: "" })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select competency" />
-                </SelectTrigger>
-                <SelectContent>
-                  {competencies.map((c) => (
-                    <SelectItem key={c.id} value={c.id}>
-                      {c.name} ({c.code})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Popover open={comboboxOpen} onOpenChange={setComboboxOpen}>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" role="combobox" className="w-full justify-between">
+                    {selectedCompetency ? `${selectedCompetency.name} (${selectedCompetency.code})` : "Select competency..."}
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[400px] p-0">
+                  <Command>
+                    <CommandInput placeholder="Search competencies..." />
+                    <CommandList>
+                      <CommandEmpty>No competency found.</CommandEmpty>
+                      {Object.entries(groupedCompetencies).map(([category, items]) => (
+                        <CommandGroup key={category} heading={category}>
+                          {items.map((c) => {
+                            const isAssigned = assignedIds.has(c.id);
+                            return (
+                              <CommandItem
+                                key={c.id}
+                                value={`${c.name} ${c.code}`}
+                                disabled={isAssigned}
+                                onSelect={() => {
+                                  if (!isAssigned) {
+                                    setFormData({ ...formData, competency_id: c.id });
+                                    setComboboxOpen(false);
+                                  }
+                                }}
+                                className={cn(isAssigned && "opacity-50")}
+                              >
+                                <Check className={cn("mr-2 h-4 w-4", formData.competency_id === c.id ? "opacity-100" : "opacity-0")} />
+                                {c.name} ({c.code})
+                                {isAssigned && <Badge variant="secondary" className="ml-auto">Assigned</Badge>}
+                              </CommandItem>
+                            );
+                          })}
+                        </CommandGroup>
+                      ))}
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
             </div>
 
             <div className="space-y-2">
-              <Label>Proficiency Level</Label>
-              <Select
-                value={formData.competency_level_id}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, competency_level_id: value === "__none__" ? "" : value })
-                }
-                disabled={!formData.competency_id || competencyLevels.length === 0}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder={competencyLevels.length === 0 ? "No levels defined" : "Select level (optional)"} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="__none__">Not specified</SelectItem>
-                  {competencyLevels.map((level) => (
-                    <SelectItem key={level.id} value={level.id}>
-                      {level.name} ({level.code})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Label>Required Proficiency Level *</Label>
+              <ProficiencyLevelPicker
+                value={formData.required_proficiency_level}
+                onChange={(level) => setFormData({ ...formData, required_proficiency_level: level || 3 })}
+              />
+            </div>
+
+            <div className="flex items-center gap-3">
+              <Switch checked={formData.is_required} onCheckedChange={(checked) => setFormData({ ...formData, is_required: checked })} />
+              <Label>Required Competency</Label>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Start Date *</Label>
-                <Input
-                  type="date"
-                  value={formData.start_date}
-                  onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
-                />
+                <Label>Weight (0-100%)</Label>
+                <Input type="number" min="0" max="100" value={formData.weighting} onChange={(e) => setFormData({ ...formData, weighting: e.target.value })} />
               </div>
               <div className="space-y-2">
-                <Label>End Date</Label>
-                <Input
-                  type="date"
-                  value={formData.end_date}
-                  onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
-                />
+                <Label>Start Date</Label>
+                <Input type="date" value={formData.start_date} onChange={(e) => setFormData({ ...formData, start_date: e.target.value })} />
               </div>
             </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Weighting (0-100%) *</Label>
-                <Input
-                  type="number"
-                  min="0"
-                  max="100"
-                  value={formData.weighting}
-                  onChange={(e) => setFormData({ ...formData, weighting: e.target.value })}
-                  placeholder="e.g., 20"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Proficiency Date</Label>
-                <Input
-                  type="date"
-                  value={formData.proficiency_date}
-                  onChange={(e) => setFormData({ ...formData, proficiency_date: e.target.value })}
-                />
-              </div>
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Total weight for overlapping competencies cannot exceed 100%
-            </p>
 
             <div className="space-y-2">
               <Label>Notes</Label>
-              <Input
-                value={formData.notes}
-                onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                placeholder="Additional notes..."
-              />
+              <Input value={formData.notes} onChange={(e) => setFormData({ ...formData, notes: e.target.value })} placeholder="Optional notes..." />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDialogOpen(false)}>
-              Cancel
-            </Button>
+            <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
             <Button onClick={handleSave} disabled={isSaving}>
               {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Add Competency
