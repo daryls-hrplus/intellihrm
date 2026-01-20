@@ -103,6 +103,14 @@
       "noTransactionTypes": "未找到交易类型。请在查找值中配置交易类型。"
     }
   },
+  "admin": {
+    "modules": {
+      "permissions": {
+        "title": "权限概览",
+        "description": "查看用户、角色和组织的所有访问控制"
+      }
+    }
+  },
   "navigation": {
     "dashboard": "仪表板",
     "workforce": "员工管理",

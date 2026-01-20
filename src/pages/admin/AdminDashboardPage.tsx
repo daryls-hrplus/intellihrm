@@ -80,11 +80,11 @@ const getAdminModuleSections = (
     usersAccess: [
       { title: t("admin.modules.users.title"), description: t("admin.modules.users.description"), href: "/admin/users", icon: Users, color: "bg-success/10 text-success", tabCode: "users" },
       { title: t("admin.modules.roles.title"), description: t("admin.modules.roles.description"), href: "/admin/roles", icon: Shield, color: "bg-warning/10 text-warning", tabCode: "roles" },
-      { title: t("admin.modules.permissions.title"), description: t("admin.modules.permissions.description"), href: "/admin/permissions", icon: Grid3X3, color: "bg-violet-500/10 text-violet-600", tabCode: "permissions" },
       { title: "Granular Permissions", description: "Configure module, tab, and action-level permissions", href: "/admin/granular-permissions", icon: Lock, color: "bg-indigo-500/10 text-indigo-600", tabCode: "granular-permissions" },
       { title: "ESS Administration", description: "Configure ESS modules, approvals, and field permissions", href: "/admin/ess-administration", icon: Users, color: "bg-teal-500/10 text-teal-600", tabCode: "ess-administration" },
       { title: t("admin.modules.accessRequests.title"), description: t("admin.modules.accessRequests.description"), href: "/admin/access-requests", icon: ClipboardList, color: "bg-emerald-500/10 text-emerald-600", tabCode: "access-requests" },
       { title: "Access Request Auto-Approval", description: "Automatically approve module access requests by role or company", href: "/admin/auto-approval", icon: Zap, color: "bg-orange-500/10 text-orange-600", tabCode: "auto-approval" },
+      { title: t("admin.modules.permissions.title"), description: t("admin.modules.permissions.description"), href: "/admin/permissions", icon: Grid3X3, color: "bg-violet-500/10 text-violet-600", tabCode: "permissions" },
     ],
     // Section 3: Authentication & Identity - How users prove who they are
     authentication: [
