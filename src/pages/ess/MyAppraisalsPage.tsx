@@ -537,10 +537,11 @@ export default function MyAppraisalsPage() {
 
 
       {selfAssessmentAppraisal && (
-        <EssAppraisalSelfAssessmentDialog
+        <EssAppraisalEvaluationDialog
           open={!!selfAssessmentAppraisal}
           onOpenChange={(open) => !open && setSelfAssessmentAppraisal(null)}
           appraisal={selfAssessmentAppraisal}
+          onSuccess={() => setSelfAssessmentAppraisal(null)}
         />
       )}
 
