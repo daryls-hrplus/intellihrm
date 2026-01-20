@@ -1,5 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
-import type { BackendModule, ReadCallback, Services, InitOptions } from 'i18next';
+import i18n from 'i18next';
 
 interface TranslationRow {
   translation_key: string;
@@ -17,34 +17,12 @@ interface TranslationRow {
 type LanguageCode = 'en' | 'ar' | 'es' | 'fr' | 'nl' | 'pt' | 'de' | 'ru' | 'zh';
 
 // Cache for database translations
-const translationCache: Record<string, Record<string, string>> = {};
+let translationCache: Record<string, Record<string, string>> = {};
 let cacheTimestamp: number | null = null;
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
-// Convert flat key-value pairs to nested object
-function unflatten(data: Record<string, string>): Record<string, unknown> {
-  const result: Record<string, unknown> = {};
-  
-  for (const key in data) {
-    const keys = key.split('.');
-    let current: Record<string, unknown> = result;
-    
-    for (let i = 0; i < keys.length - 1; i++) {
-      const k = keys[i];
-      if (!(k in current)) {
-        current[k] = {};
-      }
-      current = current[k] as Record<string, unknown>;
-    }
-    
-    current[keys[keys.length - 1]] = data[key];
-  }
-  
-  return result;
-}
-
 // Fetch translations from database
-async function fetchTranslationsFromDB(language: LanguageCode): Promise<Record<string, string> | null> {
+async function fetchTranslationsFromDB(): Promise<Record<LanguageCode, Record<string, string>> | null> {
   try {
     const { data, error } = await supabase
       .from('translations')
@@ -59,12 +37,18 @@ async function fetchTranslationsFromDB(language: LanguageCode): Promise<Record<s
       return null;
     }
     
-    const translations: Record<string, string> = {};
+    const translations: Record<LanguageCode, Record<string, string>> = {
+      en: {}, ar: {}, es: {}, fr: {}, nl: {}, pt: {}, de: {}, ru: {}, zh: {}
+    };
+    
+    const languages: LanguageCode[] = ['en', 'ar', 'es', 'fr', 'nl', 'pt', 'de', 'ru', 'zh'];
     
     for (const row of data as TranslationRow[]) {
-      const value = row[language];
-      if (value) {
-        translations[row.translation_key] = value;
+      for (const lang of languages) {
+        const value = row[lang];
+        if (value) {
+          translations[lang][row.translation_key] = value;
+        }
       }
     }
     
@@ -81,54 +65,40 @@ function isCacheValid(): boolean {
   return Date.now() - cacheTimestamp < CACHE_DURATION;
 }
 
-// Database backend plugin for i18next
-const DatabaseBackend: BackendModule = {
-  type: 'backend',
-  
-  init(_services: Services, _backendOptions: object, _i18nextOptions: InitOptions) {
-    // Initialization if needed
-  },
-  
-  read(language: string, _namespace: string, callback: ReadCallback) {
-    const langCode = language as LanguageCode;
-    
-    // Check cache first
-    if (isCacheValid() && translationCache[langCode]) {
-      const nested = unflatten(translationCache[langCode]);
-      callback(null, nested);
-      return;
-    }
-    
-    // Fetch from database
-    fetchTranslationsFromDB(langCode).then((dbTranslations) => {
-      if (dbTranslations && Object.keys(dbTranslations).length > 0) {
-        // Update cache
-        translationCache[langCode] = dbTranslations;
-        cacheTimestamp = Date.now();
-        
-        const nested = unflatten(dbTranslations);
-        callback(null, nested);
-      } else {
-        // Return empty - i18next will fall back to resources
-        callback(null, {});
-      }
-    }).catch((err) => {
-      console.warn('Database translation fetch failed, using fallback:', err);
-      callback(null, {});
-    });
+// Load database overrides and add them to i18next resources
+export async function loadDatabaseOverrides(): Promise<void> {
+  if (isCacheValid()) {
+    return; // Already loaded and cache is valid
   }
-};
+  
+  const dbTranslations = await fetchTranslationsFromDB();
+  
+  if (!dbTranslations) {
+    return; // No database translations, use bundled only
+  }
+  
+  const languages: LanguageCode[] = ['en', 'ar', 'es', 'fr', 'nl', 'pt', 'de', 'ru', 'zh'];
+  
+  // Add each translation key to i18next resources (overrides bundled)
+  for (const lang of languages) {
+    const langTranslations = dbTranslations[lang];
+    for (const key in langTranslations) {
+      i18n.addResource(lang, 'translation', key, langTranslations[key]);
+    }
+    translationCache[lang] = langTranslations;
+  }
+  
+  cacheTimestamp = Date.now();
+}
 
 // Function to clear cache (useful for admin updates)
 export function clearTranslationCache(): void {
-  Object.keys(translationCache).forEach(key => delete translationCache[key]);
+  translationCache = {};
   cacheTimestamp = null;
 }
 
 // Function to refresh translations from database
 export async function refreshTranslationsFromDB(): Promise<void> {
   clearTranslationCache();
-  // The next translation request will fetch fresh data
+  await loadDatabaseOverrides();
 }
-
-export default DatabaseBackend;
