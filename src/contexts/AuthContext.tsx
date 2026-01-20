@@ -193,7 +193,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           .from('profiles')
           .update({
             last_login_at: new Date().toISOString(),
-            invitation_status: 'accepted',
+            invitation_status: 'active',
             failed_login_attempts: 0,
           })
           .eq('id', data.user.id);
