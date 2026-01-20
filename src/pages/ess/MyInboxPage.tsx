@@ -10,10 +10,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Inbox, CheckCircle } from "lucide-react";
 
 const CATEGORY_ORDER: InboxCategory[] = [
+  'tasks_approvals',
+  'requests_tickets',
   'time_absence',
   'pay_benefits', 
   'performance',
-  'tasks_approvals',
   'documents',
   'learning'
 ];
@@ -46,7 +47,7 @@ export default function MyInboxPage() {
             My Inbox
           </h1>
           <p className="text-muted-foreground mt-1">
-            See all your pending tasks and actions in one place
+            All your pending tasks, approvals, requests, and tickets in one place
           </p>
         </div>
 

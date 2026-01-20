@@ -57,8 +57,8 @@ export function InboxQuickSummary() {
               </div>
               <p className="text-sm text-muted-foreground mt-0.5">
                 {hasUrgent 
-                  ? `${counts.responseRequired} item${counts.responseRequired > 1 ? 's' : ''} require${counts.responseRequired === 1 ? 's' : ''} your response`
-                  : `${counts.pending} item${counts.pending > 1 ? 's' : ''} awaiting review`
+                  ? `${counts.responseRequired} task${counts.responseRequired > 1 ? 's' : ''} require${counts.responseRequired === 1 ? 's' : ''} your response`
+                  : `${counts.pending} task${counts.pending > 1 ? 's' : ''} awaiting review`
                 }
               </p>
             </div>
