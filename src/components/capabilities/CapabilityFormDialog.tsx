@@ -23,6 +23,8 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { X, Plus, Link2, Building2, Globe, Sparkles, Brain, Clock, Info, ShieldAlert, GitBranch, BarChart3, Heart, Award, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { CompanyScopeSelector } from "./CompanyScopeSelector";
+import { useCapabilityCompanyLinks } from "@/hooks/capabilities/useCapabilityCompanyLinks";
 import { CompetencySkillLinker } from "./CompetencySkillLinker";
 import {
   Capability,
@@ -112,8 +114,13 @@ export function CapabilityFormDialog({
   const [showVersionReport, setShowVersionReport] = useState(false);
   const [showValueQuickStart, setShowValueQuickStart] = useState(false);
   const [generatingDescription, setGeneratingDescription] = useState(false);
+  
+  // Multi-company linking state
+  const [isGlobal, setIsGlobal] = useState(false);
+  const [linkedCompanyIds, setLinkedCompanyIds] = useState<string[]>([]);
 
   const { requirements, fetchApplicability, bulkSetApplicability } = useCapabilityJobApplicability();
+  const { syncCompanyLinks, fetchLinkedCompanies } = useCapabilityCompanyLinks();
   const { loading: usageLoading, usage, checkUsage, clearUsage } = useCompetencyUsageCheck();
   const { generateValueDescription, generateBehavioralLevels, isGenerating: valueAIGenerating } = useValueAI();
 
@@ -122,6 +129,15 @@ export function CapabilityFormDialog({
       // Parse proficiency_indicators from capability metadata if it exists
       const existingIndicators = (capability as any).proficiency_indicators || {};
       setProficiencyIndicators(existingIndicators);
+      
+      // Set global flag from capability
+      const capIsGlobal = (capability as any).is_global === true;
+      setIsGlobal(capIsGlobal);
+      
+      // Fetch linked companies for this capability
+      fetchLinkedCompanies(capability.id).then((links) => {
+        setLinkedCompanyIds(links.map(l => l.company_id));
+      });
       
       setFormData({
         company_id: capability.company_id,
@@ -168,8 +184,10 @@ export function CapabilityFormDialog({
     } else {
       clearUsage();
       setProficiencyIndicators({});
+      setIsGlobal(false);
+      setLinkedCompanyIds(defaultCompanyId ? [defaultCompanyId] : []);
       setFormData({
-        company_id: defaultCompanyId,
+        company_id: null, // Don't use company_id directly anymore
         type: defaultType,
         name: "",
         code: "",
@@ -193,7 +211,7 @@ export function CapabilityFormDialog({
       });
       setSelectedJobRequirements([]);
     }
-  }, [capability, defaultType, defaultCompanyId, open, fetchApplicability]);
+  }, [capability, defaultType, defaultCompanyId, open, fetchApplicability, fetchLinkedCompanies]);
 
   const handleSubmit = async () => {
     if (!formData.name || !formData.code || !formData.category) {
@@ -202,11 +220,24 @@ export function CapabilityFormDialog({
 
     setSaving(true);
     try {
-      await onSave(formData);
+      // Prepare the data with is_global flag and null company_id (we use junction table now)
+      const saveData = {
+        ...formData,
+        company_id: null, // No longer use direct company_id
+        is_global: isGlobal,
+      };
       
-      // If editing a competency and we have job selections, update job applicability
-      if (capability && formData.type === "COMPETENCY") {
-        await bulkSetApplicability(capability.id, selectedJobRequirements);
+      await onSave(saveData as any);
+      
+      // Get the capability ID (for new ones, we need to refetch or use a different approach)
+      // For existing capabilities, sync company links
+      if (capability) {
+        await syncCompanyLinks(capability.id, linkedCompanyIds);
+        
+        // If editing a competency and we have job selections, update job applicability
+        if (formData.type === "COMPETENCY") {
+          await bulkSetApplicability(capability.id, selectedJobRequirements);
+        }
       }
       
       onOpenChange(false);
@@ -301,50 +332,35 @@ export function CapabilityFormDialog({
             {isEditing ? "Edit" : "Create"} {formData.type === "SKILL" ? "Skill" : formData.type === "VALUE" ? "Value" : "Competency"}
           </DialogTitle>
           
-          {/* Company Context Indicator - Always visible in header */}
+          {/* Company Scope Summary - shows current linking status */}
           <div className={cn(
             "flex items-center gap-2 py-2 px-3 rounded-lg border",
-            formData.company_id 
-              ? "bg-blue-50 border-blue-200 dark:bg-blue-950/20 dark:border-blue-800" 
-              : "bg-amber-50 border-amber-200 dark:bg-amber-950/20 dark:border-amber-800"
+            isGlobal 
+              ? "bg-primary/5 border-primary/30" 
+              : linkedCompanyIds.length > 0
+                ? "bg-blue-50 border-blue-200 dark:bg-blue-950/20 dark:border-blue-800" 
+                : "bg-muted/50 border-border"
           )}>
-            {formData.company_id ? (
+            {isGlobal ? (
+              <Globe className="h-4 w-4 text-primary shrink-0" />
+            ) : linkedCompanyIds.length > 0 ? (
               <Building2 className="h-4 w-4 text-blue-600 dark:text-blue-400 shrink-0" />
             ) : (
-              <Globe className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0" />
+              <Building2 className="h-4 w-4 text-muted-foreground shrink-0" />
             )}
-            <span className="text-sm text-muted-foreground shrink-0">
-              {formData.company_id ? "Company-specific:" : "Global capability:"}
+            <span className="text-sm font-medium">
+              {isGlobal 
+                ? "Global (All Companies)" 
+                : linkedCompanyIds.length > 0 
+                  ? `Linked to ${linkedCompanyIds.length} ${linkedCompanyIds.length === 1 ? "company" : "companies"}`
+                  : "No companies linked"}
             </span>
-            <Select
-              value={formData.company_id || "global"}
-              onValueChange={(value) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  company_id: value === "global" ? null : value,
-                }))
-              }
-            >
-              <SelectTrigger className="h-7 w-auto gap-2 border-none bg-transparent p-0 font-medium text-sm hover:bg-transparent focus:ring-0 focus:ring-offset-0">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="global">
-                  <div className="flex items-center gap-2">
-                    <Globe className="h-3.5 w-3.5" />
-                    <span>Global (All Companies)</span>
-                  </div>
-                </SelectItem>
-                {companies.map((company) => (
-                  <SelectItem key={company.id} value={company.id}>
-                    <div className="flex items-center gap-2">
-                      <Building2 className="h-3.5 w-3.5" />
-                      <span>{company.name}</span>
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            {linkedCompanyIds.length > 0 && !isGlobal && (
+              <span className="text-xs text-muted-foreground">
+                ({companies.filter(c => linkedCompanyIds.includes(c.id)).map(c => c.name).slice(0, 2).join(", ")}
+                {linkedCompanyIds.length > 2 && ` +${linkedCompanyIds.length - 2} more`})
+              </span>
+            )}
           </div>
           
           {isEditing && formData.name && (
@@ -582,6 +598,16 @@ export function CapabilityFormDialog({
           </TabsContent>
 
           <TabsContent value="governance" className="space-y-4 mt-4">
+            {/* Company Scope Selector - Multi-company linking */}
+            <CompanyScopeSelector
+              capabilityId={capability?.id}
+              companies={companies}
+              isGlobal={isGlobal}
+              selectedCompanyIds={linkedCompanyIds}
+              onGlobalChange={setIsGlobal}
+              onCompaniesChange={setLinkedCompanyIds}
+            />
+            
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Status</Label>

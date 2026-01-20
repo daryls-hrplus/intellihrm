@@ -45,6 +45,7 @@ export interface Capability {
   created_by: string | null;
   created_at: string;
   updated_at: string;
+  is_global?: boolean;
   proficiency_scales?: ProficiencyScale;
   parent_capability?: { id: string; name: string; code: string };
   skill_attributes?: SkillAttributes;
@@ -127,6 +128,19 @@ export function useCapabilities() {
   const fetchCapabilities = useCallback(async (filters?: CapabilityFilters) => {
     setLoading(true);
     try {
+      // If filtering by company, we need to include global + junction-linked capabilities
+      let capabilityIds: string[] | null = null;
+      
+      if (filters?.companyId && filters.companyId !== "all") {
+        // Get capability IDs linked to this company via junction table
+        const { data: linkedIds } = await supabase
+          .from("company_capabilities")
+          .select("capability_id")
+          .eq("company_id", filters.companyId);
+        
+        capabilityIds = (linkedIds || []).map(l => l.capability_id);
+      }
+
       let query = supabase
         .from("skills_competencies")
         .select(`
@@ -146,9 +160,18 @@ export function useCapabilities() {
       if (filters?.status) {
         query = query.eq("status", filters.status);
       }
+      
+      // Filter by company scope: global OR linked via junction table
       if (filters?.companyId && filters.companyId !== "all") {
-        query = query.eq("company_id", filters.companyId);
+        if (capabilityIds && capabilityIds.length > 0) {
+          // Include global capabilities OR those linked to this company
+          query = query.or(`is_global.eq.true,id.in.(${capabilityIds.join(",")})`);
+        } else {
+          // No junction links, only show global capabilities
+          query = query.eq("is_global", true);
+        }
       }
+      
       if (filters?.search) {
         query = query.or(`name.ilike.%${filters.search}%,code.ilike.%${filters.search}%,description.ilike.%${filters.search}%`);
       }
