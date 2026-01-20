@@ -1368,7 +1368,7 @@ export default function AdminUsersPage() {
             <DialogTitle>Edit User</DialogTitle>
             <DialogDescription>Update user profile, email, and roles.</DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 py-4">
+          <div className="space-y-4 py-4 max-h-[60vh] overflow-y-auto">
             <div className="space-y-2">
               <Label>Email Address</Label>
               <Input 
@@ -1380,7 +1380,7 @@ export default function AdminUsersPage() {
                 )}
               />
               {editUser && editEmail.toLowerCase().trim() !== editUser.email.toLowerCase() && (
-                <div className="rounded-md bg-warning/10 border border-warning/30 p-3 text-sm text-warning-foreground">
+                <div className="rounded-md bg-warning/10 border border-warning/30 p-3 text-sm text-gray-700">
                   <div className="flex items-start gap-2">
                     <AlertCircle className="h-4 w-4 mt-0.5 shrink-0 text-warning" />
                     <div>
