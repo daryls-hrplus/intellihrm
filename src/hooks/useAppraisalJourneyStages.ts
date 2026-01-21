@@ -7,7 +7,7 @@ import { PHASE_TYPE_PRESETS } from "@/types/appraisalFormTemplates";
 import type { LucideIcon } from "lucide-react";
 import { 
   Target, User, Users, UserCheck, BarChart, 
-  ShieldCheck, CheckCircle, FileCheck, Circle 
+  ShieldCheck, CheckCircle, FileCheck, Circle, Eye 
 } from "lucide-react";
 
 // Helper to check if calibration exists - defined outside hook to avoid type instantiation issues
@@ -73,6 +73,7 @@ const PHASE_ICONS: Record<AppraisalPhaseType, LucideIcon> = {
   manager_review: UserCheck,
   calibration: BarChart,
   hr_review: ShieldCheck,
+  rating_release: Eye,
   finalization: CheckCircle,
   employee_acknowledgment: FileCheck,
 };
@@ -85,6 +86,7 @@ const PHASE_ACTORS: Record<AppraisalPhaseType, { actor: StageActor; label: strin
   manager_review: { actor: 'manager', label: 'Manager action' },
   calibration: { actor: 'hr', label: 'HR/Leadership' },
   hr_review: { actor: 'hr', label: 'HR review' },
+  rating_release: { actor: 'hr', label: 'HR action' },
   finalization: { actor: 'system', label: 'Processing' },
   employee_acknowledgment: { actor: 'employee', label: 'Your action' },
 };
@@ -105,8 +107,10 @@ function getCompletedPhases(participantStatus: string, submittedAt: string | nul
   
   // Status-based completions
   if (participantStatus === 'acknowledged' || participantStatus === 'completed') {
-    completed.push('finalization', 'employee_acknowledgment');
-  } else if (participantStatus === 'finalized' || participantStatus === 'released') {
+    completed.push('finalization', 'rating_release', 'employee_acknowledgment');
+  } else if (participantStatus === 'released') {
+    completed.push('finalization', 'rating_release');
+  } else if (participantStatus === 'finalized') {
     completed.push('finalization');
   } else if (participantStatus === 'calibrated') {
     completed.push('calibration');

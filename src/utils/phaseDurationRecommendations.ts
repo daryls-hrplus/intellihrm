@@ -66,6 +66,13 @@ const SIZE_MULTIPLIERS: Record<AppraisalPhaseType, Record<CompanySizeTier, numbe
     large: 1.3,
     enterprise: 1.5,
   },
+  rating_release: {
+    startup: 1.0,
+    small: 1.0,
+    medium: 1.0,
+    large: 1.0,
+    enterprise: 1.0,
+  },
   finalization: {
     startup: 0.8,
     small: 1.0,
@@ -135,6 +142,13 @@ const PHASE_RATIONALES: Record<AppraisalPhaseType, Record<CompanySizeTier, strin
     medium: "Thorough HR review for mid-size organizations",
     large: "Extended review for policy compliance",
     enterprise: "Comprehensive audit and compliance verification",
+  },
+  rating_release: {
+    startup: "Quick release once approvals complete",
+    small: "Standard release process",
+    medium: "Coordinated release across teams",
+    large: "Staged release by business unit",
+    enterprise: "Enterprise-wide coordinated release",
   },
   finalization: {
     startup: "Quick finalization with fewer approvals",
