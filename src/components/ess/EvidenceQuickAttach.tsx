@@ -360,21 +360,40 @@ export function EvidenceQuickAttach({
               </div>
 
               <div className="space-y-2">
-                <Label>Attachment (Optional)</Label>
-                <div className="flex items-center gap-2">
+                <Label>Attachments (Optional - up to 10 files)</Label>
+                <div className="space-y-2">
                   <Input
                     type="file"
-                    onChange={(e) => setAttachmentFile(e.target.files?.[0] || null)}
+                    multiple
+                    onChange={handleFileChange}
                     className="flex-1"
                   />
-                  {attachmentFile && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setAttachmentFile(null)}
-                    >
-                      Clear
-                    </Button>
+                  {uploadProgress > 0 && uploadProgress < 100 && (
+                    <Progress value={uploadProgress} className="h-2" />
+                  )}
+                  {attachmentFiles.length > 0 && (
+                    <div className="space-y-1 mt-2">
+                      {attachmentFiles.map((file, idx) => (
+                        <div key={idx} className="flex items-center gap-2 p-2 bg-muted rounded text-sm">
+                          <File className="h-4 w-4 text-muted-foreground" />
+                          <span className="flex-1 truncate">{file.name}</span>
+                          <span className="text-xs text-muted-foreground">
+                            {formatBytes(file.size)}
+                          </span>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6"
+                            onClick={() => removeFile(idx)}
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      ))}
+                      <p className="text-xs text-muted-foreground">
+                        {attachmentFiles.length} file(s) selected
+                      </p>
+                    </div>
                   )}
                 </div>
               </div>
