@@ -39,6 +39,14 @@ interface VisibilityConfig {
   allow_employee_opt_out: boolean;
   opt_out_default: boolean;
   is_active: boolean;
+  min_visible_grade_id?: string | null;
+}
+
+interface SalaryGrade {
+  id: string;
+  name: string;
+  code: string;
+  grade_order: number;
 }
 
 const FIELD_ICONS: Record<string, React.ElementType> = {
@@ -79,6 +87,21 @@ export default function DirectoryPrivacyConfigPage() {
     },
   });
 
+  // Fetch salary grades for grade-based visibility
+  const { data: salaryGrades = [] } = useQuery({
+    queryKey: ["salary-grades-for-visibility", company?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("salary_grades")
+        .select("id, name, code, grade_order")
+        .eq("is_active", true)
+        .order("grade_order", { ascending: true });
+      if (error) throw error;
+      return (data || []) as SalaryGrade[];
+    },
+    enabled: !!company?.id,
+  });
+
   // Initialize edited configs when data loads
   useEffect(() => {
     if (configs.length > 0 && Object.keys(editedConfigs).length === 0) {
@@ -103,6 +126,9 @@ export default function DirectoryPrivacyConfigPage() {
             allow_employee_opt_out: config.allow_employee_opt_out,
             opt_out_default: config.opt_out_default,
             is_active: config.is_active,
+            min_visible_grade_id: config.visibility_mode === 'grade_based' 
+              ? config.min_visible_grade_id 
+              : null,
           })
           .eq("id", id);
         if (error) throw error;
@@ -286,6 +312,34 @@ export default function DirectoryPrivacyConfigPage() {
                               Visible to Managers
                             </Label>
                           </div>
+                        </div>
+                      )}
+
+                      {/* Minimum Grade - Only for grade_based */}
+                      {visibilityMode === 'grade_based' && (
+                        <div className="space-y-2 col-span-2">
+                          <Label className="text-sm">Minimum Grade to View</Label>
+                          <Select
+                            value={editedConfig.min_visible_grade_id ?? config.min_visible_grade_id ?? ''}
+                            onValueChange={(value) => updateConfig(config.id, { 
+                              min_visible_grade_id: value || null 
+                            })}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select minimum grade..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="">No minimum (visible to all)</SelectItem>
+                              {salaryGrades.map(grade => (
+                                <SelectItem key={grade.id} value={grade.id}>
+                                  {grade.name} ({grade.code})
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <p className="text-xs text-muted-foreground">
+                            Employees at this grade or higher can view this field
+                          </p>
                         </div>
                       )}
 
