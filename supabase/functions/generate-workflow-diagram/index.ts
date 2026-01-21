@@ -78,12 +78,16 @@ CRITICAL SYNTAX RULES - YOU MUST FOLLOW THESE EXACTLY:
    - Decision/conditional steps: decision1{Approve?}
 4. NEVER use parentheses () inside square brackets [] or curly braces {}
    - WRONG: step1[Submit to Manager (If Applicable)]
-   - CORRECT: step1[Submit to Manager - If Applicable]
+   - CORRECT: step1[Submit to Manager]
 5. NEVER use special characters like (), [], {}, <>, | inside node labels
 6. Use simple alphanumeric text with spaces, hyphens, and basic punctuation only
-7. Include escalation paths if defined
-8. Show the flow clearly from start to possible end states
-9. Keep labels concise but informative
+7. KEEP LABELS SHORT - Maximum 3-4 words per label. Abbreviate if needed:
+   - WRONG: step1[Employee Submits PIP Acknowledgment Form]
+   - CORRECT: step1[Submit PIP Form]
+   - WRONG: step2[System Generates PIP Letter Document]
+   - CORRECT: step2[Generate Letter]
+8. Include escalation paths if defined
+9. Show the flow clearly from start to possible end states
 10. Add styling at the end:
    - classDef startEnd fill:#10b981,stroke:#059669,color:#fff
    - classDef approval fill:#3b82f6,stroke:#2563eb,color:#fff
