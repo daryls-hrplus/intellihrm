@@ -12,6 +12,12 @@ export interface DirectoryVisibilityConfig {
   allow_employee_opt_out: boolean;
   opt_out_default: boolean;
   is_active: boolean;
+  min_visible_grade_id?: string | null;
+}
+
+interface SalaryGradeInfo {
+  id: string;
+  grade_order: number;
 }
 
 export interface EmployeePrivacySettings {
@@ -71,6 +77,55 @@ export function useDirectoryFieldVisibility(): UseDirectoryFieldVisibilityResult
     enabled: !!user?.id,
   });
 
+  // Fetch all salary grades for grade comparison
+  const { data: salaryGrades = [] } = useQuery({
+    queryKey: ["salary-grades-lookup", profile?.company_id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("salary_grades")
+        .select("id, grade_order")
+        .eq("is_active", true);
+      if (error) throw error;
+      return (data || []) as SalaryGradeInfo[];
+    },
+    enabled: !!user?.id,
+  });
+
+  // Fetch viewer's salary grade from their primary position
+  const { data: viewerGradeOrder } = useQuery({
+    queryKey: ["viewer-grade", user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      
+      // Get user's primary position with salary grade
+      const { data: empPosition, error } = await supabase
+        .from("employee_positions")
+        .select(`
+          positions!inner(
+            salary_grade_id
+          )
+        `)
+        .eq("employee_id", user.id)
+        .eq("is_primary", true)
+        .maybeSingle();
+      
+      if (error || !empPosition) return null;
+      
+      const salaryGradeId = (empPosition.positions as any)?.salary_grade_id;
+      if (!salaryGradeId) return null;
+      
+      // Get the grade order for this grade
+      const { data: gradeData } = await supabase
+        .from("salary_grades")
+        .select("grade_order")
+        .eq("id", salaryGradeId)
+        .single();
+      
+      return gradeData?.grade_order ?? null;
+    },
+    enabled: !!user?.id,
+  });
+
   // Check if user is HR or Admin
   const isHRorAdmin = userRoles.some(role => 
     ['admin', 'hr_manager', 'hr_admin', 'super_admin'].includes(role as string)
@@ -110,10 +165,21 @@ export function useDirectoryFieldVisibility(): UseDirectoryFieldVisibilityResult
         return false;
       
       case 'grade_based':
-        // For now, HR and managers can see grade-based fields
-        // Full implementation would compare viewer's grade to min_visible_grade
-        if (isHRorAdmin || isManager) return true;
-        return false;
+        // HR and Admins always have access
+        if (isHRorAdmin) return true;
+        
+        // If no minimum grade configured, default to visible
+        if (!config.min_visible_grade_id) return true;
+        
+        // If viewer has no grade assigned, hide the field (conservative approach)
+        if (viewerGradeOrder === null || viewerGradeOrder === undefined) return false;
+        
+        // Find the minimum required grade order
+        const minGrade = salaryGrades.find(g => g.id === config.min_visible_grade_id);
+        if (!minGrade) return true; // If grade not found, default to visible
+        
+        // Viewer can see if their grade_order >= minimum required grade_order
+        return viewerGradeOrder >= minGrade.grade_order;
       
       default:
         return true;

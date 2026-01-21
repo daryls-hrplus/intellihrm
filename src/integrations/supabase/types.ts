@@ -62640,6 +62640,7 @@ export type Database = {
           currency: string
           description: string | null
           end_date: string | null
+          grade_order: number | null
           id: string
           is_active: boolean
           max_salary: number | null
@@ -62656,6 +62657,7 @@ export type Database = {
           currency?: string
           description?: string | null
           end_date?: string | null
+          grade_order?: number | null
           id?: string
           is_active?: boolean
           max_salary?: number | null
@@ -62672,6 +62674,7 @@ export type Database = {
           currency?: string
           description?: string | null
           end_date?: string | null
+          grade_order?: number | null
           id?: string
           is_active?: boolean
           max_salary?: number | null
