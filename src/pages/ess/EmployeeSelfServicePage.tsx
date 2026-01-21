@@ -7,6 +7,7 @@ import { ESSAIDashboard } from "@/components/ess/ESSAIDashboard";
 import { InboxQuickSummary } from "@/components/ess/InboxQuickSummary";
 import { CompanyQuickLinksWidget } from "@/components/ess/CompanyQuickLinksWidget";
 import { HelpDeskWidget } from "@/components/ess/HelpDeskWidget";
+import { QuickActionsBar } from "@/components/ess/QuickActionsBar";
 import { useGranularPermissions } from "@/hooks/useGranularPermissions";
 import { useEssPendingActions } from "@/hooks/useEssPendingActions";
 import {
@@ -209,6 +210,9 @@ export default function EmployeeSelfServicePage() {
           <CompanyQuickLinksWidget />
           <HelpDeskWidget />
         </div>
+
+        {/* Quick Actions Bar */}
+        <QuickActionsBar />
 
         <GroupedModuleCards sections={sections} sectionBadges={sectionBadges} defaultOpen={false} showToggleButton />
       </div>
