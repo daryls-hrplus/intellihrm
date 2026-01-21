@@ -156,11 +156,13 @@ export function EvidenceQuickAttach({
         ...newEvidence,
         appraisal_cycle_id: cycleId,
         participant_id: participantId,
-        score_item_id: scoreItemId,
+        // Note: score_item_id references appraisal_scores, not the capability/goal ID
+        // It should only be set when linking to an existing appraisal score record
+        // The actual item is linked via goal_id/capability_id/responsibility_id below
         attachment_path: attachmentPath,
         attachment_type: attachmentType,
         attachment_size_bytes: attachmentSize,
-        // Link to specific item based on type
+        // Link to specific item based on type (scoreItemId here is the capability/goal/responsibility ID)
         goal_id: itemType === "goal" ? scoreItemId : undefined,
         capability_id: itemType === "competency" ? scoreItemId : undefined,
         responsibility_id: itemType === "responsibility" ? scoreItemId : undefined,
