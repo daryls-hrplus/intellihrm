@@ -119,11 +119,15 @@ export default function EmployeeDirectoryPage() {
     }
   }, [isAdminContext, accessibleCompanyIds, profile?.company_id]);
 
+  // Create stable string for dependency to prevent re-renders
+  const filterCompanyIdsKey = filterCompanyIds.join(",");
+
   useEffect(() => {
     if (profile?.company_id && !companiesLoading && filterCompanyIds.length > 0) {
       loadData();
     }
-  }, [profile?.company_id, companiesLoading, filterCompanyIds]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profile?.company_id, companiesLoading, filterCompanyIdsKey]);
 
   const loadData = async () => {
     setIsLoading(true);
