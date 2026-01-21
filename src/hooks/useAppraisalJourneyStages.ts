@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { differenceInDays, parseISO, addDays, isBefore, isAfter } from "date-fns";
+import { differenceInDays, parseISO, addDays, isBefore } from "date-fns";
 import type { AppraisalTemplatePhase, AppraisalPhaseType } from "@/types/appraisalFormTemplates";
 import { PHASE_TYPE_PRESETS } from "@/types/appraisalFormTemplates";
 import type { LucideIcon } from "lucide-react";
@@ -9,6 +9,31 @@ import {
   Target, User, Users, UserCheck, BarChart, 
   ShieldCheck, CheckCircle, FileCheck, Circle 
 } from "lucide-react";
+
+// Helper to check if calibration exists - defined outside hook to avoid type instantiation issues
+async function checkCalibrationSessionExists(cycleId: string): Promise<boolean> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const client = supabase as any;
+  const { count, error } = await client
+    .from("calibration_sessions")
+    .select("id", { count: 'exact', head: true })
+    .eq("cycle_id", cycleId);
+  return !error && (count || 0) > 0;
+}
+
+// Helper to fetch template phases - defined outside hook to avoid type instantiation issues
+async function fetchTemplatePhases(templateId: string): Promise<AppraisalTemplatePhase[]> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const client = supabase as any;
+  const { data, error } = await client
+    .from("appraisal_template_phases")
+    .select("*")
+    .eq("template_id", templateId)
+    .eq("is_active", true)
+    .order("display_order");
+  if (error) throw error;
+  return (data || []) as AppraisalTemplatePhase[];
+}
 
 // Actor types for who needs to take action
 export type StageActor = 'employee' | 'manager' | 'hr' | 'system' | 'peers';
@@ -203,19 +228,9 @@ export function useAppraisalJourneyStages({
   hasEmployeeResponse,
 }: UseAppraisalJourneyStagesParams) {
   // Fetch template phases if templateId is provided
-  const { data: phases = [], isLoading } = useQuery({
+  const { data: phases = [], isLoading } = useQuery<AppraisalTemplatePhase[]>({
     queryKey: ["journey-template-phases", templateId],
-    queryFn: async (): Promise<AppraisalTemplatePhase[]> => {
-      if (!templateId) return [];
-      const { data, error } = await supabase
-        .from("appraisal_template_phases")
-        .select("*")
-        .eq("template_id", templateId)
-        .eq("is_active", true)
-        .order("display_order");
-      if (error) throw error;
-      return (data || []) as AppraisalTemplatePhase[];
-    },
+    queryFn: () => templateId ? fetchTemplatePhases(templateId) : Promise.resolve([]),
     enabled: !!templateId,
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
   });
@@ -335,15 +350,7 @@ export function useAppraisalJourneyStages({
   // Check if calibration session exists for the cycle
   const { data: hasCalibration = false } = useQuery<boolean>({
     queryKey: ["journey-has-calibration", cycleId],
-    queryFn: async () => {
-      if (!cycleId) return false;
-      const result = await supabase
-        .from("calibration_sessions")
-        .select("id", { count: 'exact', head: true })
-        .eq("cycle_id", cycleId);
-      if (result.error) return false;
-      return (result.count || 0) > 0;
-    },
+    queryFn: () => cycleId ? checkCalibrationSessionExists(cycleId) : Promise.resolve(false),
     enabled: !!cycleId,
     staleTime: 5 * 60 * 1000,
   });
