@@ -92,6 +92,8 @@ export function EvidenceQuickAttach({
     if (open) {
       fetchEvidence({ employee_id: employeeId });
       setSelectedIds([]);
+      setAttachmentFiles([]);
+      setUploadProgress(0);
       setNewEvidence({
         title: `Evidence for: ${itemName}`,
         description: "",
