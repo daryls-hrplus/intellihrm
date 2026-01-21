@@ -14468,6 +14468,72 @@ export type Database = {
           },
         ]
       }
+      directory_visibility_config: {
+        Row: {
+          allow_employee_opt_out: boolean | null
+          company_id: string | null
+          created_at: string | null
+          field_label: string
+          field_name: string
+          id: string
+          is_active: boolean | null
+          min_visible_grade_id: string | null
+          opt_out_default: boolean | null
+          updated_at: string | null
+          visibility_mode: string | null
+          visible_to_all_hr: boolean | null
+          visible_to_managers: boolean | null
+          visible_to_role_ids: string[] | null
+        }
+        Insert: {
+          allow_employee_opt_out?: boolean | null
+          company_id?: string | null
+          created_at?: string | null
+          field_label: string
+          field_name: string
+          id?: string
+          is_active?: boolean | null
+          min_visible_grade_id?: string | null
+          opt_out_default?: boolean | null
+          updated_at?: string | null
+          visibility_mode?: string | null
+          visible_to_all_hr?: boolean | null
+          visible_to_managers?: boolean | null
+          visible_to_role_ids?: string[] | null
+        }
+        Update: {
+          allow_employee_opt_out?: boolean | null
+          company_id?: string | null
+          created_at?: string | null
+          field_label?: string
+          field_name?: string
+          id?: string
+          is_active?: boolean | null
+          min_visible_grade_id?: string | null
+          opt_out_default?: boolean | null
+          updated_at?: string | null
+          visibility_mode?: string | null
+          visible_to_all_hr?: boolean | null
+          visible_to_managers?: boolean | null
+          visible_to_role_ids?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "directory_visibility_config_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "directory_visibility_config_min_visible_grade_id_fkey"
+            columns: ["min_visible_grade_id"]
+            isOneToOne: false
+            referencedRelation: "salary_grades"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       divisions: {
         Row: {
           code: string
@@ -18595,34 +18661,49 @@ export type Database = {
       employee_privacy_settings: {
         Row: {
           created_at: string
+          directory_opt_out: boolean | null
           id: string
           share_birthday: boolean
           share_marriage: boolean
           share_new_child: boolean
           share_promotion: boolean
           share_work_anniversary: boolean
+          show_extension: boolean | null
+          show_personal_email: boolean | null
+          show_work_mobile: boolean | null
+          show_work_phone: boolean | null
           updated_at: string
           user_id: string
         }
         Insert: {
           created_at?: string
+          directory_opt_out?: boolean | null
           id?: string
           share_birthday?: boolean
           share_marriage?: boolean
           share_new_child?: boolean
           share_promotion?: boolean
           share_work_anniversary?: boolean
+          show_extension?: boolean | null
+          show_personal_email?: boolean | null
+          show_work_mobile?: boolean | null
+          show_work_phone?: boolean | null
           updated_at?: string
           user_id: string
         }
         Update: {
           created_at?: string
+          directory_opt_out?: boolean | null
           id?: string
           share_birthday?: boolean
           share_marriage?: boolean
           share_new_child?: boolean
           share_promotion?: boolean
           share_work_anniversary?: boolean
+          show_extension?: boolean | null
+          show_personal_email?: boolean | null
+          show_work_mobile?: boolean | null
+          show_work_phone?: boolean | null
           updated_at?: string
           user_id?: string
         }
@@ -21941,6 +22022,53 @@ export type Database = {
             columns: ["employee_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      employment_types: {
+        Row: {
+          badge_color: string | null
+          code: string
+          company_id: string | null
+          created_at: string | null
+          display_order: number | null
+          id: string
+          is_active: boolean | null
+          is_benefits_eligible: boolean | null
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          badge_color?: string | null
+          code: string
+          company_id?: string | null
+          created_at?: string | null
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          is_benefits_eligible?: boolean | null
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          badge_color?: string | null
+          code?: string
+          company_id?: string | null
+          created_at?: string | null
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          is_benefits_eligible?: boolean | null
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employment_types_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
             referencedColumns: ["id"]
           },
         ]
@@ -56530,14 +56658,17 @@ export type Database = {
           invitation_status: string | null
           invited_at: string | null
           is_active: boolean | null
+          is_on_leave: boolean | null
           last_hire_date: string | null
           last_login_at: string | null
           last_working_date: string | null
+          leave_return_date: string | null
           locked_until: string | null
           marital_status: string | null
           middle_name: string | null
           nationality: string | null
           preferred_language: string | null
+          probation_end_date: string | null
           retirement_date: string | null
           second_last_name: string | null
           section_id: string | null
@@ -56578,14 +56709,17 @@ export type Database = {
           invitation_status?: string | null
           invited_at?: string | null
           is_active?: boolean | null
+          is_on_leave?: boolean | null
           last_hire_date?: string | null
           last_login_at?: string | null
           last_working_date?: string | null
+          leave_return_date?: string | null
           locked_until?: string | null
           marital_status?: string | null
           middle_name?: string | null
           nationality?: string | null
           preferred_language?: string | null
+          probation_end_date?: string | null
           retirement_date?: string | null
           second_last_name?: string | null
           section_id?: string | null
@@ -56626,14 +56760,17 @@ export type Database = {
           invitation_status?: string | null
           invited_at?: string | null
           is_active?: boolean | null
+          is_on_leave?: boolean | null
           last_hire_date?: string | null
           last_login_at?: string | null
           last_working_date?: string | null
+          leave_return_date?: string | null
           locked_until?: string | null
           marital_status?: string | null
           middle_name?: string | null
           nationality?: string | null
           preferred_language?: string | null
+          probation_end_date?: string | null
           retirement_date?: string | null
           second_last_name?: string | null
           section_id?: string | null
