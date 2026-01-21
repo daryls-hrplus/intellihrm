@@ -359,18 +359,32 @@ export function EssAppraisalEvaluationDialog({
 
         if (score.id) {
           // Update existing record
-          await supabase.from("appraisal_scores").update({
+          const { error: updateError } = await supabase.from("appraisal_scores").update({
             self_rating: payload.self_rating,
             self_comments: payload.self_comments,
             self_rated_at: payload.self_rated_at,
             self_metadata: payload.self_metadata,
           }).eq("id", score.id);
+
+          if (updateError) {
+            console.error("Failed to update score:", updateError);
+            toast.error(`Failed to save ${score.item_name}. Please try again.`);
+            setSaving(false);
+            return;
+          }
         } else {
           // Insert new record - this creates the score record for evidence linking
-          const { data: inserted } = await supabase.from("appraisal_scores")
+          const { data: inserted, error: insertError } = await supabase.from("appraisal_scores")
             .insert(payload)
             .select("id")
             .single();
+
+          if (insertError) {
+            console.error("Failed to insert score:", insertError);
+            toast.error(`Failed to save ${score.item_name}. Please try again.`);
+            setSaving(false);
+            return;
+          }
           
           // Update local state with the new ID
           if (inserted) {
