@@ -347,13 +347,23 @@ export default function MyAppraisalsPage() {
                       </div>
 
                       <div className="flex flex-col gap-2">
-                        {/* Self-Assessment Button */}
-                        {!appraisal.submitted_at && (appraisal.status === "pending" || appraisal.status === "draft" || appraisal.status === "in_progress") && (
+                        {/* Self-Assessment Button - only show if not submitted */}
+                        {!appraisal.submitted_at && !["submitted", "completed", "acknowledged", "reviewed"].includes(appraisal.status) && (
                           <Button 
                             onClick={() => setSelfAssessmentAppraisal(appraisal)}
                           >
                             <ClipboardEdit className="h-4 w-4 mr-2" />
                             {appraisal.status === "in_progress" ? "Continue" : "Self-Assess"}
+                          </Button>
+                        )}
+                        {/* View Self-Assessment Button - show after submission but before manager review */}
+                        {appraisal.submitted_at && !appraisal.reviewed_at && (
+                          <Button 
+                            variant="outline"
+                            onClick={() => setSelfAssessmentAppraisal(appraisal)}
+                          >
+                            <Eye className="h-4 w-4 mr-2" />
+                            View Self-Assessment
                           </Button>
                         )}
                         {/* Acknowledge Button */}

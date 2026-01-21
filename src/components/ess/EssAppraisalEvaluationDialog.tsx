@@ -6,6 +6,16 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -26,7 +36,9 @@ import {
   CheckCircle2,
   Loader2,
   FileText,
+  Lock,
 } from "lucide-react";
+import { format } from "date-fns";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
@@ -77,6 +89,10 @@ export function EssAppraisalEvaluationDialog({
     name: string;
     type: "goal" | "competency" | "responsibility";
   } | null>(null);
+  const [confirmSubmitOpen, setConfirmSubmitOpen] = useState(false);
+
+  // Check if already submitted - form should be read-only
+  const isSubmitted = !!appraisal.submitted_at;
 
   // Enabled categories from cycle config
   const enabledCategories = useMemo(() => ({
@@ -374,14 +390,20 @@ export function EssAppraisalEvaluationDialog({
         isDraft: !submit,
       });
 
-      await supabase.from("appraisal_participants").update({
+      const { error: participantError } = await supabase.from("appraisal_participants").update({
         employee_comments: employeeComments,
         status: submit ? "submitted" : "in_progress",
         submitted_at: submit ? new Date().toISOString() : null,
       }).eq("id", appraisal.id);
 
+      if (participantError) {
+        console.error("Failed to update participant:", participantError);
+        toast.error("Failed to save. Please try again.");
+        return;
+      }
+
       if (!silent) {
-        toast.success(submit ? "Self-assessment submitted!" : "Progress saved");
+        toast.success(submit ? "Self-assessment submitted! Your manager will be notified." : "Progress saved");
       }
       queryClient.invalidateQueries({ queryKey: ["my-appraisals"] });
       
@@ -399,6 +421,15 @@ export function EssAppraisalEvaluationDialog({
     }
   };
 
+  const handleSubmitClick = () => {
+    setConfirmSubmitOpen(true);
+  };
+
+  const handleConfirmedSubmit = async () => {
+    setConfirmSubmitOpen(false);
+    await handleSave(true);
+  };
+
   const goalScores = scores.filter(s => s.evaluation_type === "goal");
   const competencyScores = scores.filter(s => s.evaluation_type === "competency");
   const responsibilityScores = scores.filter(s => s.evaluation_type === "responsibility");
@@ -414,14 +445,27 @@ export function EssAppraisalEvaluationDialog({
             </DialogTitle>
           </DialogHeader>
 
+          {/* Submitted Banner */}
+          {isSubmitted && (
+            <Alert className="border-green-200 bg-green-50 dark:bg-green-900/20">
+              <CheckCircle2 className="h-4 w-4 text-green-600" />
+              <AlertDescription className="text-green-800 dark:text-green-200">
+                <span className="font-medium">Submitted</span> on {format(new Date(appraisal.submitted_at!), "MMMM d, yyyy 'at' h:mm a")}. 
+                Your self-assessment is now with your manager for review.
+              </AlertDescription>
+            </Alert>
+          )}
+
           {/* Progress Bar */}
-          <div className="space-y-2 px-1">
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">Completion</span>
-              <span className="font-medium">{completionStats.percentage}%</span>
+          {!isSubmitted && (
+            <div className="space-y-2 px-1">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Completion</span>
+                <span className="font-medium">{completionStats.percentage}%</span>
+              </div>
+              <Progress value={completionStats.percentage} className="h-2" />
             </div>
-            <Progress value={completionStats.percentage} className="h-2" />
-          </div>
+          )}
 
           {loading ? (
             <div className="flex-1 flex items-center justify-center py-12">
@@ -548,41 +592,73 @@ export function EssAppraisalEvaluationDialog({
                     </CardHeader>
                     <CardContent className="space-y-4">
                       <div className="space-y-2">
-                        <Label>Reflect on your overall performance *</Label>
+                        <Label>Reflect on your overall performance {!isSubmitted && "*"}</Label>
                         <Textarea
                           value={selfReflection}
                           onChange={(e) => setSelfReflection(e.target.value)}
                           placeholder="Summarize your performance, key accomplishments, challenges overcome, and areas for growth..."
                           rows={6}
                           className="resize-none"
+                          disabled={isSubmitted}
                         />
                       </div>
                     </CardContent>
                   </Card>
 
-                  <Alert>
-                    <AlertTriangle className="h-4 w-4" />
-                    <AlertDescription>
-                      Once submitted, your self-assessment will be visible to your manager and cannot be edited.
-                    </AlertDescription>
-                  </Alert>
+                  {!isSubmitted && (
+                    <Alert>
+                      <AlertTriangle className="h-4 w-4" />
+                      <AlertDescription>
+                        Once submitted, your self-assessment will be visible to your manager and cannot be edited.
+                      </AlertDescription>
+                    </Alert>
+                  )}
                 </TabsContent>
               </ScrollArea>
             </Tabs>
           )}
 
-          <DialogFooter className="mt-4">
-            <Button variant="outline" onClick={() => handleSave(false)} disabled={saving}>
-              <Save className="h-4 w-4 mr-2" />
-              Save Draft
-            </Button>
-            <Button onClick={() => handleSave(true)} disabled={saving || !canSubmit}>
-              <Send className="h-4 w-4 mr-2" />
-              {saving ? "Submitting..." : "Submit"}
-            </Button>
-          </DialogFooter>
+          {/* Footer Actions */}
+          {!isSubmitted ? (
+            <DialogFooter className="mt-4">
+              <Button variant="outline" onClick={() => handleSave(false)} disabled={saving}>
+                <Save className="h-4 w-4 mr-2" />
+                Save Draft
+              </Button>
+              <Button onClick={handleSubmitClick} disabled={saving || !canSubmit}>
+                <Send className="h-4 w-4 mr-2" />
+                {saving ? "Submitting..." : "Submit"}
+              </Button>
+            </DialogFooter>
+          ) : (
+            <DialogFooter className="mt-4">
+              <Button variant="outline" onClick={() => onOpenChange(false)}>
+                <Lock className="h-4 w-4 mr-2" />
+                Close (Read-Only)
+              </Button>
+            </DialogFooter>
+          )}
         </DialogContent>
       </Dialog>
+
+      {/* Confirmation Dialog */}
+      <AlertDialog open={confirmSubmitOpen} onOpenChange={setConfirmSubmitOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Submit Self-Assessment?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Once submitted, your self-assessment will be visible to your manager 
+              and <strong>cannot be edited</strong>. Are you sure you want to continue?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmedSubmit}>
+              Yes, Submit
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Evidence Dialog */}
       {selectedItemForEvidence && user?.id && (
