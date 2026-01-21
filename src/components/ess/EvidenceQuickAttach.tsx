@@ -29,8 +29,11 @@ import {
   CheckCircle2,
   Clock,
   Search,
+  X,
+  File,
 } from "lucide-react";
-import { usePerformanceEvidence, PerformanceEvidence, EvidenceType } from "@/hooks/capabilities/usePerformanceEvidence";
+import { Progress } from "@/components/ui/progress";
+import { usePerformanceEvidence, PerformanceEvidence, EvidenceType, EvidenceAttachment } from "@/hooks/capabilities/usePerformanceEvidence";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 
@@ -68,7 +71,7 @@ export function EvidenceQuickAttach({
   cycleId,
   onAttached,
 }: EvidenceQuickAttachProps) {
-  const { evidence, loading, fetchEvidence, createEvidence, uploadAttachment, updateEvidence } = usePerformanceEvidence();
+  const { evidence, loading, fetchEvidence, createEvidence, uploadMultipleAttachments, updateEvidence } = usePerformanceEvidence();
   
   const [activeTab, setActiveTab] = useState<"existing" | "new">("existing");
   const [searchQuery, setSearchQuery] = useState("");
@@ -82,7 +85,8 @@ export function EvidenceQuickAttach({
     evidence_type: "deliverable" as EvidenceType,
     external_url: "",
   });
-  const [attachmentFile, setAttachmentFile] = useState<File | null>(null);
+  const [attachmentFiles, setAttachmentFiles] = useState<File[]>([]);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   useEffect(() => {
     if (open) {
@@ -138,31 +142,28 @@ export function EvidenceQuickAttach({
     if (!newEvidence.title) return;
 
     setSaving(true);
+    setUploadProgress(0);
     try {
-      let attachmentPath: string | undefined;
-      let attachmentType: string | undefined;
-      let attachmentSize: number | undefined;
+      let attachments: EvidenceAttachment[] = [];
 
-      if (attachmentFile) {
-        const uploadResult = await uploadAttachment(attachmentFile, employeeId);
-        if (uploadResult) {
-          attachmentPath = uploadResult.path;
-          attachmentType = uploadResult.type;
-          attachmentSize = uploadResult.size;
-        }
+      if (attachmentFiles.length > 0) {
+        attachments = await uploadMultipleAttachments(
+          attachmentFiles, 
+          employeeId,
+          (uploaded, total) => setUploadProgress(Math.round((uploaded / total) * 100))
+        );
       }
 
       const result = await createEvidence(employeeId, {
         ...newEvidence,
         appraisal_cycle_id: cycleId,
         participant_id: participantId,
-        // Note: score_item_id references appraisal_scores, not the capability/goal ID
-        // It should only be set when linking to an existing appraisal score record
-        // The actual item is linked via goal_id/capability_id/responsibility_id below
-        attachment_path: attachmentPath,
-        attachment_type: attachmentType,
-        attachment_size_bytes: attachmentSize,
-        // Link to specific item based on type (scoreItemId here is the capability/goal/responsibility ID)
+        attachments,
+        // Keep legacy single file for backward compatibility
+        attachment_path: attachments[0]?.path,
+        attachment_type: attachments[0]?.type,
+        attachment_size_bytes: attachments[0]?.size,
+        // Link to specific item based on type
         goal_id: itemType === "goal" ? scoreItemId : undefined,
         capability_id: itemType === "competency" ? scoreItemId : undefined,
         responsibility_id: itemType === "responsibility" ? scoreItemId : undefined,
@@ -174,7 +175,25 @@ export function EvidenceQuickAttach({
       }
     } finally {
       setSaving(false);
+      setUploadProgress(0);
     }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    setAttachmentFiles(prev => [...prev, ...files]);
+  };
+
+  const removeFile = (index: number) => {
+    setAttachmentFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const formatBytes = (bytes: number) => {
+    if (bytes === 0) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
   };
 
   return (

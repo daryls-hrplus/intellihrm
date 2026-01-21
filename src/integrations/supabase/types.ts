@@ -53607,6 +53607,7 @@ export type Database = {
           attachment_path: string | null
           attachment_size_bytes: number | null
           attachment_type: string | null
+          attachments: Json | null
           capability_id: string | null
           company_id: string | null
           created_at: string | null
@@ -53640,6 +53641,7 @@ export type Database = {
           attachment_path?: string | null
           attachment_size_bytes?: number | null
           attachment_type?: string | null
+          attachments?: Json | null
           capability_id?: string | null
           company_id?: string | null
           created_at?: string | null
@@ -53673,6 +53675,7 @@ export type Database = {
           attachment_path?: string | null
           attachment_size_bytes?: number | null
           attachment_type?: string | null
+          attachments?: Json | null
           capability_id?: string | null
           company_id?: string | null
           created_at?: string | null
