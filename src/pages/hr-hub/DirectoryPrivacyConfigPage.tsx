@@ -33,13 +33,14 @@ interface VisibilityConfig {
   id: string;
   field_name: string;
   field_label: string;
-  visibility_mode: 'all' | 'role_based' | 'grade_based' | 'none';
+  visibility_mode: 'all' | 'role_based' | 'grade_based' | 'level_based' | 'none';
   visible_to_all_hr: boolean;
   visible_to_managers: boolean;
   allow_employee_opt_out: boolean;
   opt_out_default: boolean;
   is_active: boolean;
   min_visible_grade_id?: string | null;
+  min_visible_job_level_id?: string | null;
 }
 
 interface SalaryGrade {
@@ -47,6 +48,13 @@ interface SalaryGrade {
   name: string;
   code: string;
   grade_order: number;
+}
+
+interface JobLevel {
+  id: string;
+  code: string;
+  name: string;
+  level_order: number;
 }
 
 const FIELD_ICONS: Record<string, React.ElementType> = {
@@ -63,7 +71,8 @@ const FIELD_ICONS: Record<string, React.ElementType> = {
 const VISIBILITY_MODE_LABELS = {
   all: { label: "Everyone", description: "Visible to all employees" },
   role_based: { label: "Role-Based", description: "Visible based on user roles" },
-  grade_based: { label: "Grade-Based", description: "Visible based on job grade" },
+  grade_based: { label: "Grade-Based", description: "Visible based on salary grade" },
+  level_based: { label: "Level-Based", description: "Visible based on job level" },
   none: { label: "Hidden", description: "Not visible in directory" },
 };
 
@@ -102,6 +111,22 @@ export default function DirectoryPrivacyConfigPage() {
     enabled: !!company?.id,
   });
 
+  // Fetch job levels for level-based visibility
+  const { data: jobLevels = [] } = useQuery({
+    queryKey: ["job-levels-for-visibility", company?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("job_levels")
+        .select("id, code, name, level_order")
+        .eq("company_id", company?.id)
+        .eq("is_active", true)
+        .order("level_order", { ascending: true });
+      if (error) throw error;
+      return (data || []) as JobLevel[];
+    },
+    enabled: !!company?.id,
+  });
+
   // Initialize edited configs when data loads
   useEffect(() => {
     if (configs.length > 0 && Object.keys(editedConfigs).length === 0) {
@@ -128,6 +153,9 @@ export default function DirectoryPrivacyConfigPage() {
             is_active: config.is_active,
             min_visible_grade_id: config.visibility_mode === 'grade_based' 
               ? config.min_visible_grade_id 
+              : null,
+            min_visible_job_level_id: config.visibility_mode === 'level_based' 
+              ? config.min_visible_job_level_id 
               : null,
           })
           .eq("id", id);
@@ -276,6 +304,7 @@ export default function DirectoryPrivacyConfigPage() {
                             <SelectItem value="all">Everyone</SelectItem>
                             <SelectItem value="role_based">Role-Based</SelectItem>
                             <SelectItem value="grade_based">Grade-Based</SelectItem>
+                            <SelectItem value="level_based">Level-Based</SelectItem>
                             <SelectItem value="none">Hidden</SelectItem>
                           </SelectContent>
                         </Select>
@@ -339,6 +368,34 @@ export default function DirectoryPrivacyConfigPage() {
                           </Select>
                           <p className="text-xs text-muted-foreground">
                             Employees at this grade or higher can view this field
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Minimum Job Level - Only for level_based */}
+                      {visibilityMode === 'level_based' && (
+                        <div className="space-y-2 col-span-2">
+                          <Label className="text-sm">Minimum Job Level to View</Label>
+                          <Select
+                            value={editedConfig.min_visible_job_level_id ?? config.min_visible_job_level_id ?? '__none__'}
+                            onValueChange={(value) => updateConfig(config.id, { 
+                              min_visible_job_level_id: value === '__none__' ? null : value 
+                            })}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select minimum job level..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="__none__">No minimum (visible to all)</SelectItem>
+                              {jobLevels.map(level => (
+                                <SelectItem key={level.id} value={level.id}>
+                                  {level.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <p className="text-xs text-muted-foreground">
+                            Employees at this job level or higher can view this field
                           </p>
                         </div>
                       )}

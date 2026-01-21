@@ -14478,6 +14478,7 @@ export type Database = {
           id: string
           is_active: boolean | null
           min_visible_grade_id: string | null
+          min_visible_job_level_id: string | null
           opt_out_default: boolean | null
           updated_at: string | null
           visibility_mode: string | null
@@ -14494,6 +14495,7 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           min_visible_grade_id?: string | null
+          min_visible_job_level_id?: string | null
           opt_out_default?: boolean | null
           updated_at?: string | null
           visibility_mode?: string | null
@@ -14510,6 +14512,7 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           min_visible_grade_id?: string | null
+          min_visible_job_level_id?: string | null
           opt_out_default?: boolean | null
           updated_at?: string | null
           visibility_mode?: string | null
@@ -14530,6 +14533,13 @@ export type Database = {
             columns: ["min_visible_grade_id"]
             isOneToOne: false
             referencedRelation: "salary_grades"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "directory_visibility_config_min_visible_job_level_id_fkey"
+            columns: ["min_visible_job_level_id"]
+            isOneToOne: false
+            referencedRelation: "job_levels"
             referencedColumns: ["id"]
           },
         ]
@@ -38702,6 +38712,50 @@ export type Database = {
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      job_levels: {
+        Row: {
+          code: string
+          company_id: string | null
+          created_at: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          level_order: number
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          code: string
+          company_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          level_order?: number
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          code?: string
+          company_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          level_order?: number
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_levels_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
             referencedColumns: ["id"]
           },
         ]
