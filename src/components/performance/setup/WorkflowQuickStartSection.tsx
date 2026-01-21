@@ -98,7 +98,7 @@ export function WorkflowQuickStartSection({
             {configuredCount}/{quickStartOptions.length} configured
           </Badge>
         </div>
-        <Link to="/hr/workflow">
+        <Link to="/hr-hub/transaction-workflow-settings">
           <Button variant="ghost" size="sm" className="text-xs">
             <Settings2 className="h-3 w-3 mr-1" />
             Advanced Workflow Settings
@@ -146,7 +146,7 @@ export function WorkflowQuickStartSection({
 
       {/* Link to core workflow module */}
       <div className="flex items-center justify-center pt-2">
-        <Link to="/hr/workflow">
+        <Link to="/hr-hub/transaction-workflow-settings">
           <Button variant="outline" size="sm">
             View All Workflows in HR Hub
             <ArrowRight className="h-4 w-4 ml-2" />
