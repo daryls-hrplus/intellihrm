@@ -52,12 +52,42 @@ export default tseslint.config(
           selector: "Literal[value=/(?:bg|text|border)-(?:green|emerald|red|rose|amber|yellow|blue|sky|cyan)-\\d+/]",
           message: "⚠️ UI Color Semantics: Use SemanticBadge, SemanticCallout, or SemanticTooltip instead of raw color classes. See /enablement/ui-color-semantics for guidelines.",
         },
-        // Catch in template literals
-        {
-          selector: "TemplateLiteral[quasis.0.value.raw=/(?:bg|text|border)-(?:green|emerald|red|rose|amber|yellow|blue|sky|cyan)-\\d+/]",
-          message: "⚠️ UI Color Semantics: Use SemanticBadge, SemanticCallout, or SemanticTooltip instead of raw color classes. See /enablement/ui-color-semantics for guidelines.",
-        },
-      ],
-    },
+      // Catch in template literals
+      {
+        selector: "TemplateLiteral[quasis.0.value.raw=/(?:bg|text|border)-(?:green|emerald|red|rose|amber|yellow|blue|sky|cyan)-\\d+/]",
+        message: "⚠️ UI Color Semantics: Use SemanticBadge, SemanticCallout, or SemanticTooltip instead of raw color classes. See /enablement/ui-color-semantics for guidelines.",
+      },
+      // Icon Color Enforcement: Info icons MUST be blue (text-info)
+      {
+        selector: "Literal[value=/Info.*text-muted-foreground|text-muted-foreground.*Info/]",
+        message: "⚠️ Icon Color Standard: Info icons MUST use text-info (blue), not text-muted-foreground. Use <InfoIcon> from semantic-tooltip.tsx or apply text-info class. See /enablement/ui-color-semantics.",
+      },
+      // Icon Color Enforcement: HelpCircle icons MUST be blue (text-info)
+      {
+        selector: "Literal[value=/HelpCircle.*text-muted-foreground|text-muted-foreground.*HelpCircle/]",
+        message: "⚠️ Icon Color Standard: HelpCircle icons MUST use text-info (blue), not text-muted-foreground. Use <InfoIcon> from semantic-tooltip.tsx or apply text-info class. See /enablement/ui-color-semantics.",
+      },
+      // Icon Color Enforcement: Lightbulb icons MUST be blue (text-info)
+      {
+        selector: "Literal[value=/Lightbulb.*text-muted-foreground|text-muted-foreground.*Lightbulb/]",
+        message: "⚠️ Icon Color Standard: Lightbulb icons MUST use text-info (blue), not text-muted-foreground. See /enablement/ui-color-semantics.",
+      },
+      // Icon Color Enforcement: Success icons (CheckCircle, Check) should use text-success
+      {
+        selector: "Literal[value=/CheckCircle.*text-muted-foreground|text-muted-foreground.*CheckCircle/]",
+        message: "⚠️ Icon Color Standard: CheckCircle icons should use text-success (green) for confirmed/completed states, not text-muted-foreground. See /enablement/ui-color-semantics.",
+      },
+      // Icon Color Enforcement: Warning icons (AlertTriangle) should use text-warning
+      {
+        selector: "Literal[value=/AlertTriangle.*text-muted-foreground|text-muted-foreground.*AlertTriangle/]",
+        message: "⚠️ Icon Color Standard: AlertTriangle icons should use text-warning (amber) for attention states, not text-muted-foreground. See /enablement/ui-color-semantics.",
+      },
+      // Icon Color Enforcement: Error icons (XCircle) should use text-destructive
+      {
+        selector: "Literal[value=/XCircle.*text-muted-foreground|text-muted-foreground.*XCircle/]",
+        message: "⚠️ Icon Color Standard: XCircle icons should use text-destructive (red) for error states, not text-muted-foreground. See /enablement/ui-color-semantics.",
+      },
+    ],
   },
+},
 );
