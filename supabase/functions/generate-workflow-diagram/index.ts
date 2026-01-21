@@ -155,25 +155,31 @@ Create a professional flowchart showing the complete approval process from submi
       .replace(/```\n?/g, '')
       .trim();
     
-    // Sanitize the code to fix common Mermaid syntax issues
-    // Replace parentheses inside square brackets with dashes
-    cleanedCode = cleanedCode.replace(/\[([^\]]*)\]/g, (_match: string, content: string) => {
-      const sanitized = content
+    // Helper function to sanitize content inside node labels
+    const sanitizeLabel = (content: string): string => {
+      return content
         .replace(/\(/g, ' - ')
         .replace(/\)/g, '')
+        .replace(/\[/g, '')
+        .replace(/\]/g, '')
+        .replace(/\{/g, '')
+        .replace(/\}/g, '')
+        .replace(/</g, '')
+        .replace(/>/g, '')
+        .replace(/"/g, "'")
+        .replace(/\|/g, ' ')
         .replace(/\s+/g, ' ')
         .trim();
-      return `[${sanitized}]`;
+    };
+    
+    // Sanitize content inside square brackets [...]
+    cleanedCode = cleanedCode.replace(/\[([^\]]*)\]/g, (_match: string, content: string) => {
+      return `[${sanitizeLabel(content)}]`;
     });
     
-    // Replace parentheses inside curly braces with dashes
+    // Sanitize content inside curly braces {...}
     cleanedCode = cleanedCode.replace(/\{([^}]*)\}/g, (_match: string, content: string) => {
-      const sanitized = content
-        .replace(/\(/g, ' - ')
-        .replace(/\)/g, '')
-        .replace(/\s+/g, ' ')
-        .trim();
-      return `{${sanitized}}`;
+      return `{${sanitizeLabel(content)}}`;
     });
 
     console.log('Generated Mermaid code:', cleanedCode.substring(0, 200) + '...');
