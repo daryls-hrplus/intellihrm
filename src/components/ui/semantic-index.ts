@@ -74,3 +74,12 @@ export {
   MutedLink,
   type SemanticLinkProps,
 } from "./semantic-link";
+
+// Entity Status Badges
+export {
+  EntityStatusBadge,
+  ActiveInactiveBadge,
+  getEntityStatus,
+  type EntityStatus,
+  type EntityStatusBadgeProps,
+} from "./entity-status-badge";

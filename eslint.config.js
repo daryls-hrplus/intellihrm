@@ -12,6 +12,7 @@ const SEMANTIC_COMPONENT_FILES = [
   "**/components/ui/semantic-text.tsx",
   "**/components/ui/semantic-link.tsx",
   "**/components/ui/semantic-index.ts",
+  "**/components/ui/entity-status-badge.tsx",
   "**/index.css",
   "**/tailwind.config.ts",
   // Legacy components being migrated
@@ -86,6 +87,11 @@ export default tseslint.config(
       {
         selector: "Literal[value=/XCircle.*text-muted-foreground|text-muted-foreground.*XCircle/]",
         message: "⚠️ Icon Color Standard: XCircle icons should use text-destructive (red) for error states, not text-muted-foreground. See /enablement/ui-color-semantics.",
+      },
+      // Entity Status Badge Enforcement: Catch is_active with variant="default" (blue)
+      {
+        selector: "Literal[value=/is_active.*variant.*default|variant.*default.*Active/]",
+        message: "⚠️ Entity Status Standard: Use <EntityStatusBadge status='active' /> or <ActiveInactiveBadge isActive={...} /> instead. Blue 'default' variant is NOT for entity state. Active must be green. See /enablement/ui-color-semantics.",
       },
     ],
   },

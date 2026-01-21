@@ -4,7 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { SemanticBadge, SemanticCallout, SemanticTooltip } from "@/components/ui/semantic-index";
+import { SemanticBadge, SemanticCallout, SemanticTooltip, EntityStatusBadge } from "@/components/ui/semantic-index";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { 
   Palette, 
   Info, 
@@ -17,7 +18,8 @@ import {
   Shield,
   Eye,
   EyeOff,
-  Lightbulb
+  Lightbulb,
+  Tags
 } from "lucide-react";
 
 export default function UIColorSemanticsGuidePage() {
@@ -65,8 +67,9 @@ export default function UIColorSemanticsGuidePage() {
         </SemanticCallout>
 
         <Tabs defaultValue="definitions" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="definitions">Definitions</TabsTrigger>
+            <TabsTrigger value="entity-state">Entity State</TabsTrigger>
             <TabsTrigger value="rules">HRMS Rules</TabsTrigger>
             <TabsTrigger value="components">Components</TabsTrigger>
             <TabsTrigger value="examples">Do/Don't</TabsTrigger>
@@ -184,6 +187,185 @@ export default function UIColorSemanticsGuidePage() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Entity State Badges */}
+          <TabsContent value="entity-state">
+            <div className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Tags className="h-5 w-5" />
+                    Entity State Badge Standard
+                  </CardTitle>
+                  <CardDescription>
+                    Canonical color mapping for Admin & Configuration screens
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {/* Entity State Table */}
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Entity State</TableHead>
+                        <TableHead>Badge</TableHead>
+                        <TableHead>Semantic Intent</TableHead>
+                        <TableHead>Color</TableHead>
+                        <TableHead>Usage Notes</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      <TableRow>
+                        <TableCell className="font-medium">Active</TableCell>
+                        <TableCell><EntityStatusBadge status="active" /></TableCell>
+                        <TableCell>Success</TableCell>
+                        <TableCell>Green</TableCell>
+                        <TableCell className="text-muted-foreground">Enabled, usable, valid</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="font-medium">Inactive</TableCell>
+                        <TableCell><EntityStatusBadge status="inactive" /></TableCell>
+                        <TableCell>Neutral</TableCell>
+                        <TableCell>Grey</TableCell>
+                        <TableCell className="text-muted-foreground">Disabled but not an error</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="font-medium">Draft</TableCell>
+                        <TableCell><EntityStatusBadge status="draft" /></TableCell>
+                        <TableCell>Neutral</TableCell>
+                        <TableCell>Grey</TableCell>
+                        <TableCell className="text-muted-foreground">Not yet live</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="font-medium">Pending</TableCell>
+                        <TableCell><EntityStatusBadge status="pending" /></TableCell>
+                        <TableCell>Neutral</TableCell>
+                        <TableCell>Grey</TableCell>
+                        <TableCell className="text-muted-foreground">Awaiting action</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="font-medium">Needs Review</TableCell>
+                        <TableCell><EntityStatusBadge status="needs_review" /></TableCell>
+                        <TableCell>Warning</TableCell>
+                        <TableCell>Amber</TableCell>
+                        <TableCell className="text-muted-foreground">Attention required</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="font-medium">Suspended</TableCell>
+                        <TableCell><EntityStatusBadge status="suspended" /></TableCell>
+                        <TableCell>Warning</TableCell>
+                        <TableCell>Amber</TableCell>
+                        <TableCell className="text-muted-foreground">Temporarily restricted</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="font-medium">Rejected</TableCell>
+                        <TableCell><EntityStatusBadge status="rejected" /></TableCell>
+                        <TableCell>Error</TableCell>
+                        <TableCell>Red</TableCell>
+                        <TableCell className="text-muted-foreground">Explicit failure</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="font-medium">Blocked</TableCell>
+                        <TableCell><EntityStatusBadge status="blocked" /></TableCell>
+                        <TableCell>Error</TableCell>
+                        <TableCell>Red</TableCell>
+                        <TableCell className="text-muted-foreground">Hard stop</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="font-medium">Archived</TableCell>
+                        <TableCell><EntityStatusBadge status="archived" /></TableCell>
+                        <TableCell>Neutral</TableCell>
+                        <TableCell>Grey</TableCell>
+                        <TableCell className="text-muted-foreground">Historical, read-only</TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+
+                  {/* Hard Rules */}
+                  <SemanticCallout intent="error" title="Hard Rules — Entity State vs Informational">
+                    <ul className="space-y-2 text-sm">
+                      <li>• <strong>Same label = same color everywhere</strong></li>
+                      <li>• <strong>Blue is NEVER used for entity state</strong> — Blue is reserved for guidance, help, tooltips, and reference content only</li>
+                      <li>• <strong>Green is reserved for "Active / Enabled / Achieved"</strong></li>
+                      <li>• <strong>Inactive is not red</strong> unless it represents an error or compliance breach</li>
+                    </ul>
+                  </SemanticCallout>
+
+                  {/* Usage Examples */}
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div className="p-4 rounded-lg border border-semantic-success/30 bg-semantic-success/5">
+                      <h4 className="font-medium text-semantic-success flex items-center gap-2 mb-3">
+                        <CheckCircle2 className="h-4 w-4" />
+                        ✓ Correct Usage
+                      </h4>
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2 text-sm">
+                          <span className="text-muted-foreground">Job Families:</span>
+                          <EntityStatusBadge status="active" size="sm" />
+                        </div>
+                        <div className="flex items-center gap-2 text-sm">
+                          <span className="text-muted-foreground">Master Job Families:</span>
+                          <EntityStatusBadge status="active" size="sm" />
+                        </div>
+                        <div className="flex items-center gap-2 text-sm">
+                          <span className="text-muted-foreground">Leave Types:</span>
+                          <EntityStatusBadge status="active" size="sm" />
+                        </div>
+                      </div>
+                    </div>
+                    <div className="p-4 rounded-lg border border-semantic-error/30 bg-semantic-error/5">
+                      <h4 className="font-medium text-semantic-error flex items-center gap-2 mb-3">
+                        <XCircle className="h-4 w-4" />
+                        ✗ Incorrect Usage
+                      </h4>
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2 text-sm">
+                          <span className="text-muted-foreground">Master Job Families:</span>
+                          <Badge variant="default" className="text-xs">Active</Badge>
+                          <span className="text-semantic-error text-xs">(Blue!)</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm">
+                          <span className="text-muted-foreground">Different screens:</span>
+                          <span className="text-semantic-error text-xs">Different colors for same label</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Component Usage */}
+                  <Card className="bg-muted/30">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-base flex items-center gap-2">
+                        <Code className="h-4 w-4" />
+                        How to Use EntityStatusBadge
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <pre className="text-xs bg-background p-3 rounded-md overflow-x-auto border">
+{`import { EntityStatusBadge, ActiveInactiveBadge } from "@/components/ui/semantic-index";
+
+// For explicit status control
+<EntityStatusBadge status="active" />
+<EntityStatusBadge status="inactive" />
+<EntityStatusBadge status="pending" />
+<EntityStatusBadge status="needs_review" />
+<EntityStatusBadge status="suspended" />
+<EntityStatusBadge status="rejected" />
+<EntityStatusBadge status="blocked" />
+<EntityStatusBadge status="archived" />
+
+// For common boolean is_active pattern
+<ActiveInactiveBadge isActive={entity.is_active} />
+
+// With options
+<EntityStatusBadge status="active" size="sm" showIcon={false} />
+<EntityStatusBadge status="active" customLabel="Enabled" />`}
+                      </pre>
+                    </CardContent>
+                  </Card>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
 
           {/* HRMS-Specific Rules */}
