@@ -26,7 +26,7 @@ export function CompanyQuickLinksWidget() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => navigate("/admin/employee-directory")}
+              onClick={() => navigate("/ess/employee-directory")}
             >
               <Users className="h-4 w-4 mr-1.5" />
               Directory
