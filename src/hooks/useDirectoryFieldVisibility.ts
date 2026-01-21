@@ -6,18 +6,24 @@ export interface DirectoryVisibilityConfig {
   id: string;
   field_name: string;
   field_label: string;
-  visibility_mode: 'all' | 'role_based' | 'grade_based' | 'none';
+  visibility_mode: 'all' | 'role_based' | 'grade_based' | 'level_based' | 'none';
   visible_to_all_hr: boolean;
   visible_to_managers: boolean;
   allow_employee_opt_out: boolean;
   opt_out_default: boolean;
   is_active: boolean;
   min_visible_grade_id?: string | null;
+  min_visible_job_level_id?: string | null;
 }
 
 interface SalaryGradeInfo {
   id: string;
   grade_order: number;
+}
+
+interface JobLevelInfo {
+  id: string;
+  level_order: number;
 }
 
 export interface EmployeePrivacySettings {
@@ -91,6 +97,20 @@ export function useDirectoryFieldVisibility(): UseDirectoryFieldVisibilityResult
     enabled: !!user?.id,
   });
 
+  // Fetch all job levels for level comparison
+  const { data: jobLevels = [] } = useQuery({
+    queryKey: ["job-levels-lookup", profile?.company_id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("job_levels")
+        .select("id, level_order")
+        .eq("is_active", true);
+      if (error) throw error;
+      return (data || []) as JobLevelInfo[];
+    },
+    enabled: !!user?.id,
+  });
+
   // Fetch viewer's salary grade from their primary position
   const { data: viewerGradeOrder } = useQuery({
     queryKey: ["viewer-grade", user?.id],
@@ -122,6 +142,43 @@ export function useDirectoryFieldVisibility(): UseDirectoryFieldVisibilityResult
         .single();
       
       return gradeData?.grade_order ?? null;
+    },
+    enabled: !!user?.id,
+  });
+
+  // Fetch viewer's job level from their primary position
+  const { data: viewerJobLevelOrder } = useQuery({
+    queryKey: ["viewer-job-level", user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      
+      // Get user's primary position with job info
+      const { data: empPosition, error } = await supabase
+        .from("employee_positions")
+        .select(`
+          positions!inner(
+            jobs!inner(
+              job_level
+            )
+          )
+        `)
+        .eq("employee_id", user.id)
+        .eq("is_primary", true)
+        .maybeSingle();
+      
+      if (error || !empPosition) return null;
+      
+      const jobLevelCode = (empPosition.positions as any)?.jobs?.job_level;
+      if (!jobLevelCode) return null;
+      
+      // Get the level_order for this job level
+      const { data: levelData } = await supabase
+        .from("job_levels")
+        .select("level_order")
+        .eq("code", jobLevelCode)
+        .maybeSingle();
+      
+      return levelData?.level_order ?? null;
     },
     enabled: !!user?.id,
   });
@@ -180,6 +237,23 @@ export function useDirectoryFieldVisibility(): UseDirectoryFieldVisibilityResult
         
         // Viewer can see if their grade_order >= minimum required grade_order
         return viewerGradeOrder >= minGrade.grade_order;
+      
+      case 'level_based':
+        // HR and Admins always have access
+        if (isHRorAdmin) return true;
+        
+        // If no minimum level configured, default to visible
+        if (!config.min_visible_job_level_id) return true;
+        
+        // If viewer has no job level assigned, hide the field (conservative approach)
+        if (viewerJobLevelOrder === null || viewerJobLevelOrder === undefined) return false;
+        
+        // Find the minimum required level order
+        const minLevel = jobLevels.find(l => l.id === config.min_visible_job_level_id);
+        if (!minLevel) return true; // If level not found, default to visible
+        
+        // Viewer can see if their level_order >= minimum required level_order
+        return viewerJobLevelOrder >= minLevel.level_order;
       
       default:
         return true;
