@@ -159,9 +159,9 @@ Create a professional flowchart showing the complete approval process from submi
       .replace(/```\n?/g, '')
       .trim();
     
-    // Helper function to sanitize content inside node labels
+    // Helper function to sanitize and truncate content inside node labels
     const sanitizeLabel = (content: string): string => {
-      return content
+      let sanitized = content
         .replace(/\(/g, ' - ')
         .replace(/\)/g, '')
         .replace(/\[/g, '')
@@ -172,18 +172,37 @@ Create a professional flowchart showing the complete approval process from submi
         .replace(/>/g, '')
         .replace(/"/g, "'")
         .replace(/\|/g, ' ')
+        .replace(/\?/g, '') // Remove question marks that can cause issues
+        .replace(/;/g, '') // Remove semicolons
+        .replace(/:/g, ' ') // Replace colons with spaces
         .replace(/\s+/g, ' ')
         .trim();
+      
+      // Truncate to max 25 characters to prevent overflow
+      if (sanitized.length > 25) {
+        sanitized = sanitized.substring(0, 22) + '...';
+      }
+      
+      return sanitized;
     };
     
-    // Sanitize content inside square brackets [...]
+    // Sanitize content inside square brackets [...] - regular steps
     cleanedCode = cleanedCode.replace(/\[([^\]]*)\]/g, (_match: string, content: string) => {
       return `[${sanitizeLabel(content)}]`;
     });
     
-    // Sanitize content inside curly braces {...}
+    // Sanitize content inside curly braces {...} - decision nodes
     cleanedCode = cleanedCode.replace(/\{([^}]*)\}/g, (_match: string, content: string) => {
-      return `{${sanitizeLabel(content)}}`;
+      // For decision nodes, keep it very short and add ? back at end
+      let label = sanitizeLabel(content);
+      if (label.length > 15) {
+        label = label.substring(0, 12) + '...';
+      }
+      // Add ? for decision clarity if not already present
+      if (!label.endsWith('?') && !label.endsWith('...')) {
+        label += '?';
+      }
+      return `{${label}}`;
     });
 
     console.log('Generated Mermaid code:', cleanedCode.substring(0, 200) + '...');
