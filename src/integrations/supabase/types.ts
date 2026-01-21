@@ -2587,12 +2587,14 @@ export type Database = {
       }
       appraisal_cycles: {
         Row: {
+          acknowledgment_deadline: string | null
           activated_at: string | null
           activated_by: string | null
           auto_activate_enabled: boolean | null
           auto_activated_at: string | null
           auto_complete_enabled: boolean | null
           auto_completed_at: string | null
+          calibration_deadline: string | null
           company_id: string
           competency_weight: number
           component_scale_id: string | null
@@ -2603,7 +2605,9 @@ export type Database = {
           description_en: string | null
           end_date: string
           evaluation_deadline: string | null
+          feedback_360_deadline: string | null
           feedback_360_weight: number | null
+          finalization_deadline: string | null
           goal_weight: number
           grace_period_days: number | null
           id: string
@@ -2620,6 +2624,7 @@ export type Database = {
           lock_360_insights_at: string | null
           locked_at: string | null
           locked_by: string | null
+          manager_review_deadline: string | null
           max_rating: number
           min_rating: number
           multi_position_mode: string | null
@@ -2629,6 +2634,7 @@ export type Database = {
           performance_period_end: string | null
           performance_period_start: string | null
           responsibility_weight: number
+          self_assessment_deadline: string | null
           start_date: string
           status: string
           template_id: string | null
@@ -2640,12 +2646,14 @@ export type Database = {
           weights_override_reason: string | null
         }
         Insert: {
+          acknowledgment_deadline?: string | null
           activated_at?: string | null
           activated_by?: string | null
           auto_activate_enabled?: boolean | null
           auto_activated_at?: string | null
           auto_complete_enabled?: boolean | null
           auto_completed_at?: string | null
+          calibration_deadline?: string | null
           company_id: string
           competency_weight?: number
           component_scale_id?: string | null
@@ -2656,7 +2664,9 @@ export type Database = {
           description_en?: string | null
           end_date: string
           evaluation_deadline?: string | null
+          feedback_360_deadline?: string | null
           feedback_360_weight?: number | null
+          finalization_deadline?: string | null
           goal_weight?: number
           grace_period_days?: number | null
           id?: string
@@ -2673,6 +2683,7 @@ export type Database = {
           lock_360_insights_at?: string | null
           locked_at?: string | null
           locked_by?: string | null
+          manager_review_deadline?: string | null
           max_rating?: number
           min_rating?: number
           multi_position_mode?: string | null
@@ -2682,6 +2693,7 @@ export type Database = {
           performance_period_end?: string | null
           performance_period_start?: string | null
           responsibility_weight?: number
+          self_assessment_deadline?: string | null
           start_date: string
           status?: string
           template_id?: string | null
@@ -2693,12 +2705,14 @@ export type Database = {
           weights_override_reason?: string | null
         }
         Update: {
+          acknowledgment_deadline?: string | null
           activated_at?: string | null
           activated_by?: string | null
           auto_activate_enabled?: boolean | null
           auto_activated_at?: string | null
           auto_complete_enabled?: boolean | null
           auto_completed_at?: string | null
+          calibration_deadline?: string | null
           company_id?: string
           competency_weight?: number
           component_scale_id?: string | null
@@ -2709,7 +2723,9 @@ export type Database = {
           description_en?: string | null
           end_date?: string
           evaluation_deadline?: string | null
+          feedback_360_deadline?: string | null
           feedback_360_weight?: number | null
+          finalization_deadline?: string | null
           goal_weight?: number
           grace_period_days?: number | null
           id?: string
@@ -2726,6 +2742,7 @@ export type Database = {
           lock_360_insights_at?: string | null
           locked_at?: string | null
           locked_by?: string | null
+          manager_review_deadline?: string | null
           max_rating?: number
           min_rating?: number
           multi_position_mode?: string | null
@@ -2735,6 +2752,7 @@ export type Database = {
           performance_period_end?: string | null
           performance_period_start?: string | null
           responsibility_weight?: number
+          self_assessment_deadline?: string | null
           start_date?: string
           status?: string
           template_id?: string | null
