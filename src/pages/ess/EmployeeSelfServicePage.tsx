@@ -5,7 +5,7 @@ import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { GroupedModuleCards, ModuleSection, GroupedModuleItem } from "@/components/ui/GroupedModuleCards";
 import { ESSAIDashboard } from "@/components/ess/ESSAIDashboard";
 import { InboxQuickSummary } from "@/components/ess/InboxQuickSummary";
-import { AnnouncementsWidget } from "@/components/ess/AnnouncementsWidget";
+import { CompanyQuickLinksWidget } from "@/components/ess/CompanyQuickLinksWidget";
 import { HelpDeskWidget } from "@/components/ess/HelpDeskWidget";
 import { useGranularPermissions } from "@/hooks/useGranularPermissions";
 import { useEssPendingActions } from "@/hooks/useEssPendingActions";
@@ -206,7 +206,7 @@ export default function EmployeeSelfServicePage() {
         {/* Dashboard Widgets Grid - 3 columns */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <InboxQuickSummary />
-          <AnnouncementsWidget />
+          <CompanyQuickLinksWidget />
           <HelpDeskWidget />
         </div>
 
