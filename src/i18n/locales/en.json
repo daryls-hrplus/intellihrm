@@ -5142,6 +5142,8 @@
     "employeeServices": "Employee Services",
     "employeeDirectory": "Employee Directory",
     "employeeDirectoryDesc": "Find and connect with colleagues across the organization",
+    "directoryPrivacy": "Directory Privacy",
+    "directoryPrivacyDesc": "Configure field visibility and employee opt-out settings",
     "helpDesk": "HR Help Desk",
     "helpDeskDesc": "Manage employee tickets and support requests",
     "announcements": "Announcements",

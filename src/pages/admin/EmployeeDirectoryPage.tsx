@@ -18,6 +18,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useTranslation } from "react-i18next";
 import { format, formatDistanceToNow } from "date-fns";
+import { EmploymentTypeBadge, EmploymentStatusBadge, AssignmentTypeBadge, isOnProbation } from "@/components/ui/employment-badge";
+import { useDirectoryFieldVisibility } from "@/hooks/useDirectoryFieldVisibility";
 
 interface EmployeePosition {
   title: string;
@@ -49,6 +51,11 @@ interface Employee {
   manager?: ManagerInfo | null;
   work_location?: string | null;
   hire_date?: string | null;
+  // Employment type/status fields
+  employment_type?: string | null;
+  employment_status?: string | null;
+  probation_end_date?: string | null;
+  is_on_leave?: boolean;
 }
 
 interface Department {
@@ -95,7 +102,7 @@ export default function EmployeeDirectoryPage() {
     try {
       // Build employee query
       let empQuery = query("profiles")
-        .select("id, full_name, email, avatar_url, department_id, company_id, first_hire_date")
+        .select("id, full_name, email, avatar_url, department_id, company_id, first_hire_date, employment_status, probation_end_date, is_on_leave")
         .eq("is_active", true)
         .order("full_name");
 
@@ -104,14 +111,15 @@ export default function EmployeeDirectoryPage() {
       }
 
       // Fetch all data in parallel for efficiency
-      const [empRes, deptRes, companyRes, positionsRes, empPositionsRes, contactsRes, locationsRes]: any[] = await Promise.all([
+      const [empRes, deptRes, companyRes, positionsRes, empPositionsRes, contactsRes, locationsRes, employmentTypesRes]: any[] = await Promise.all([
         empQuery,
         query("departments").select("id, name").order("name"),
         query("companies").select("id, name").eq("is_active", true).order("name"),
-        query("positions").select("id, title, department_id, reports_to_position_id"),
+        query("positions").select("id, title, department_id, reports_to_position_id, employment_type"),
         query("employee_positions").select("employee_id, position_id, assignment_type, is_primary").eq("is_active", true),
         query("employee_contacts").select("employee_id, contact_type, contact_value, is_primary").in("contact_type", ["work_phone", "work_mobile", "extension"]),
         query("company_branch_locations").select("id, name, company_id").eq("is_active", true).order("name"),
+        query("employment_types").select("code, name").eq("is_active", true),
       ]);
 
       const empData = empRes.data || [];
@@ -195,6 +203,10 @@ export default function EmployeeDirectoryPage() {
         // Get contacts
         const contacts = contactsByEmployee.get(emp.id) || {};
 
+        // Get employment type from primary position
+        const primaryPos = positions.find(p => p.is_primary);
+        const positionData = primaryPos?.position_id ? positionMap.get(primaryPos.position_id) : null;
+
         return {
           id: emp.id,
           full_name: emp.full_name || "",
@@ -208,6 +220,10 @@ export default function EmployeeDirectoryPage() {
           extension: contacts.extension || null,
           manager,
           hire_date: emp.first_hire_date || null,
+          employment_type: positionData?.employment_type || null,
+          employment_status: emp.employment_status || null,
+          probation_end_date: emp.probation_end_date || null,
+          is_on_leave: emp.is_on_leave || false,
         };
       });
 
