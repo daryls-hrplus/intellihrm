@@ -35,8 +35,9 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Plus, Trash2, Loader2, Award, RefreshCw, Briefcase, User, Target, ChevronsUpDown, Check, Clock, Info } from "lucide-react";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Plus, Trash2, Loader2, Award, RefreshCw, Briefcase, User, Target, ChevronsUpDown, Check } from "lucide-react";
+import { TooltipInfoPair } from "@/components/ui/semantic-tooltip";
+import { PendingBadge } from "@/components/ui/semantic-badge";
 import { getTodayString, formatDateForDisplay } from "@/utils/dateUtils";
 import { useAuditLog } from "@/hooks/useAuditLog";
 import { fetchCompetencyCascade, syncJobCompetenciesToEmployee, CascadedCompetency } from "@/hooks/useCompetencyCascade";
@@ -365,17 +366,11 @@ export function EmployeeCompetenciesTab({ employeeId }: EmployeeCompetenciesTabP
                   <TableRow>
                     <TableHead>Competency</TableHead>
                     <TableHead>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <div className="flex items-center gap-1 cursor-help">
-                            Required Level
-                            <Info className="h-3.5 w-3.5 text-muted-foreground" />
-                          </div>
-                        </TooltipTrigger>
-                        <TooltipContent side="top" className="max-w-xs">
-                          <p className="text-sm">The proficiency level expected for this role. Hover over level badges for detailed behavioral expectations.</p>
-                        </TooltipContent>
-                      </Tooltip>
+                      <TooltipInfoPair 
+                        label="Required Level" 
+                        tooltip="The proficiency level expected for this role. Hover over level badges for detailed behavioral expectations."
+                        iconSize="sm"
+                      />
                     </TableHead>
                     <TableHead>Assessed Level</TableHead>
                     <TableHead>Gap</TableHead>
@@ -409,9 +404,7 @@ export function EmployeeCompetenciesTab({ employeeId }: EmployeeCompetenciesTabP
                             skillIndicators={jc.proficiency_indicators}
                           />
                         ) : (
-                          <Badge variant="outline" className="text-muted-foreground">
-                            <Clock className="h-3 w-3 mr-1" />Pending
-                          </Badge>
+                          <PendingBadge size="sm" />
                         )}
                       </TableCell>
                       <TableCell>
@@ -466,7 +459,7 @@ export function EmployeeCompetenciesTab({ employeeId }: EmployeeCompetenciesTabP
                         {ec.assessed_proficiency_level ? (
                           <ProficiencyLevelBadge level={ec.assessed_proficiency_level} context="assessed" comparedTo={ec.required_proficiency_level || 3} size="sm" />
                         ) : (
-                          <Badge variant="outline" className="text-muted-foreground"><Clock className="h-3 w-3 mr-1" />Pending</Badge>
+                          <PendingBadge size="sm" />
                         )}
                       </TableCell>
                       <TableCell><ProficiencyGapBadge required={ec.required_proficiency_level} assessed={ec.assessed_proficiency_level} /></TableCell>
