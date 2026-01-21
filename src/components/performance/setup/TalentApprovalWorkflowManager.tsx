@@ -49,6 +49,8 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { WorkflowSetupGuidanceCard, type IndustryTemplate } from "./WorkflowSetupGuidanceCard";
+import { WorkflowQuickStartSection } from "./WorkflowQuickStartSection";
 
 interface ApprovalRule {
   id: string;
@@ -350,13 +352,77 @@ export function TalentApprovalWorkflowManager({ companyId }: TalentApprovalWorkf
     return <div className="text-center py-8 text-muted-foreground">Loading approval workflows...</div>;
   }
 
+  const handleApplyTemplate = async (template: IndustryTemplate) => {
+    if (!companyId) return;
+
+    try {
+      // Create the rule
+      const { data: ruleData, error: ruleError } = await supabase
+        .from("goal_approval_rules")
+        .insert([{
+          company_id: companyId,
+          name: template.name,
+          goal_level: template.scopeLevel,
+          approval_type: template.steps.length > 1 ? "multi_level" : "single_level",
+          requires_hr_approval: template.steps.some(s => s.approverType === "hr"),
+          max_approval_days: Math.ceil(template.steps.reduce((sum, s) => sum + s.slaHours, 0) / 24),
+          is_active: true,
+        }])
+        .select()
+        .single();
+
+      if (ruleError) throw ruleError;
+
+      // Create the steps
+      const stepsToInsert = template.steps.map((step, idx) => ({
+        rule_id: ruleData.id,
+        step_order: idx + 1,
+        approver_type: step.approverType,
+        approver_user_id: null,
+        is_optional: false,
+        sla_hours: step.slaHours,
+      }));
+
+      const { error: stepsError } = await supabase
+        .from("goal_approval_chain")
+        .insert(stepsToInsert);
+
+      if (stepsError) throw stepsError;
+
+      toast.success(`Applied "${template.name}" template successfully`);
+      fetchRules();
+    } catch (error) {
+      console.error("Error applying template:", error);
+      toast.error("Failed to apply template");
+    }
+  };
+
+  const handleQuickSetup = (processType: string) => {
+    setFilterProcessType(processType);
+    // Scroll to guidance section which will show templates for that process
+  };
+
+  const existingProcessTypes = [...new Set(rules.map(r => r.process_type))];
+
   return (
     <div className="space-y-6">
+      {/* AI Guidance Section */}
+      <WorkflowSetupGuidanceCard
+        onApplyTemplate={handleApplyTemplate}
+        existingProcessTypes={existingProcessTypes}
+      />
+
+      {/* Quick Start Section */}
+      <WorkflowQuickStartSection
+        onQuickSetup={handleQuickSetup}
+        existingProcessTypes={existingProcessTypes}
+      />
+
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-semibold">Talent Approval Workflows</h3>
+          <h3 className="text-lg font-semibold">Configured Approval Workflows</h3>
           <p className="text-sm text-muted-foreground">
-            Configure approval workflows for Goals, Appraisals, 360 Feedback, and other talent processes
+            Manage approval chains for Goals, Appraisals, 360 Feedback, and other talent processes
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -390,10 +456,13 @@ export function TalentApprovalWorkflowManager({ companyId }: TalentApprovalWorkf
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <Settings2 className="h-12 w-12 text-muted-foreground mb-4" />
-            <p className="text-muted-foreground mb-4">No approval workflows configured</p>
+            <p className="text-lg font-medium mb-2">No approval workflows configured yet</p>
+            <p className="text-muted-foreground mb-4 text-center max-w-md">
+              Use the AI-powered guidance above to apply industry-standard templates, or create a custom workflow.
+            </p>
             <Button onClick={() => setDialogOpen(true)}>
               <Plus className="mr-2 h-4 w-4" />
-              Create First Workflow
+              Create Custom Workflow
             </Button>
           </CardContent>
         </Card>
