@@ -267,8 +267,9 @@ export function usePerformanceEvidence() {
     setUploading(true);
     try {
       const fileExt = file.name.split(".").pop();
-      const fileName = `${employeeId}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-      const filePath = `evidence/${fileName}`;
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+      // Path must be user.id/filename for RLS policy to work (foldername[1] = auth.uid())
+      const filePath = `${user.id}/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
         .from("performance-evidence")
