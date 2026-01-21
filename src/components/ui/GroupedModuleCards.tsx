@@ -57,6 +57,7 @@ interface GroupedModuleCardsProps {
 
 // Map section titles to icons
 const sectionIcons: Record<string, LucideIcon> = {
+  "Company": Building2,
   "My Profile": User,
   "Skills and Competencies": Sparkles,
   "Career": Compass,
