@@ -401,6 +401,19 @@ export default function EnablementHubPage() {
         },
       ],
     },
+    {
+      titleKey: "Product Standards",
+      items: [
+        {
+          title: "UI Color Semantics Standard",
+          description: "Enterprise-grade color usage rules for HRMS interfaces",
+          href: "/enablement/ui-color-semantics",
+          icon: Eye,
+          color: "bg-primary/10 text-primary",
+          badge: "Governance",
+        },
+      ],
+    },
   ], []);
 
   // Sync tab state with URL

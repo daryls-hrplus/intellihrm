@@ -88,6 +88,7 @@ export const ReleaseCalendarPage = lazy(() => import('@/pages/enablement/Release
 export const EnablementSettingsPage = lazy(() => import('@/pages/enablement/EnablementSettingsPage'));
 export const EnablementAIToolsPage = lazy(() => import('@/pages/enablement/EnablementAIToolsPage'));
 export const EnablementGuidePage = lazy(() => import('@/pages/enablement/EnablementGuidePage'));
+export const UIColorSemanticsGuidePage = lazy(() => import('@/pages/enablement/UIColorSemanticsGuidePage'));
 export const EnablementArtifactsPage = lazy(() => import('@/pages/enablement/EnablementArtifactsPage'));
 export const ArtifactEditorPage = lazy(() => import('@/pages/enablement/ArtifactEditorPage'));
 export const ArtifactDetailPage = lazy(() => import('@/pages/enablement/ArtifactDetailPage'));
