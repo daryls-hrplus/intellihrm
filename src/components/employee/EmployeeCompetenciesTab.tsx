@@ -389,10 +389,10 @@ export function EmployeeCompetenciesTab({ employeeId }: EmployeeCompetenciesTabP
                         {jc.name}
                         {jc.category && <Badge variant="outline" className="ml-2 text-xs">{jc.category}</Badge>}
                       </TableCell>
-                      <TableCell><ProficiencyLevelBadge level={jc.required_level || 3} size="sm" /></TableCell>
+                      <TableCell><ProficiencyLevelBadge level={jc.required_level || 3} context="reference" size="sm" /></TableCell>
                       <TableCell>
                         {jc.assessed_level !== null && jc.assessed_level !== undefined ? (
-                          <ProficiencyLevelBadge level={jc.assessed_level} size="sm" />
+                          <ProficiencyLevelBadge level={jc.assessed_level} context="assessed" comparedTo={jc.required_level || 3} size="sm" />
                         ) : (
                           <Badge variant="outline" className="text-muted-foreground">
                             <Clock className="h-3 w-3 mr-1" />Pending
@@ -446,10 +446,10 @@ export function EmployeeCompetenciesTab({ employeeId }: EmployeeCompetenciesTabP
                         {ec.skills_competencies?.name || "Unknown"}
                         {ec.skills_competencies?.category && <Badge variant="outline" className="ml-2">{ec.skills_competencies.category}</Badge>}
                       </TableCell>
-                      <TableCell>{ec.required_proficiency_level ? <ProficiencyLevelBadge level={ec.required_proficiency_level} size="sm" /> : "—"}</TableCell>
+                      <TableCell>{ec.required_proficiency_level ? <ProficiencyLevelBadge level={ec.required_proficiency_level} context="reference" size="sm" /> : "—"}</TableCell>
                       <TableCell>
                         {ec.assessed_proficiency_level ? (
-                          <ProficiencyLevelBadge level={ec.assessed_proficiency_level} size="sm" />
+                          <ProficiencyLevelBadge level={ec.assessed_proficiency_level} context="assessed" comparedTo={ec.required_proficiency_level || 3} size="sm" />
                         ) : (
                           <Badge variant="outline" className="text-muted-foreground"><Clock className="h-3 w-3 mr-1" />Pending</Badge>
                         )}
