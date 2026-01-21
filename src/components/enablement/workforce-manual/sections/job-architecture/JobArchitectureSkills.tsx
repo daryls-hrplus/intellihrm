@@ -9,6 +9,7 @@ import {
   ScreenshotPlaceholder,
   type Step
 } from '../../../manual/components';
+import { DEFAULT_PROFICIENCY_LEVELS } from '@/components/capabilities/ProficiencyLevelPicker';
 
 const createCapabilitySteps: Step[] = [
   {
@@ -37,11 +38,11 @@ const createCapabilitySteps: Step[] = [
     title: "Define Proficiency Indicators",
     description: "For each proficiency level (1-5), describe observable behaviors",
     substeps: [
-      "Level 1 (Foundational): Basic awareness and limited application",
-      "Level 2 (Developing): Growing capability with guidance needed",
-      "Level 3 (Proficient): Independent and consistent application",
-      "Level 4 (Advanced): Expert level, mentors others",
-      "Level 5 (Master): Organizational authority, shapes strategy"
+      "Level 1 (Novice): Basic awareness and limited application",
+      "Level 2 (Beginner): Growing capability with guidance needed",
+      "Level 3 (Competent): Independent and consistent application",
+      "Level 4 (Proficient): Expert level, mentors others",
+      "Level 5 (Expert): Organizational authority, shapes strategy"
     ],
     expectedResult: "Clear indicators enable consistent assessment"
   },
@@ -101,13 +102,12 @@ const capabilityTypes = [
   },
 ];
 
-const proficiencyLevels = [
-  { level: 1, name: 'Foundational', description: 'Basic awareness, learning stage' },
-  { level: 2, name: 'Developing', description: 'Growing capability, needs guidance' },
-  { level: 3, name: 'Proficient', description: 'Independent, consistent performance' },
-  { level: 4, name: 'Advanced', description: 'Expert, mentors others' },
-  { level: 5, name: 'Master', description: 'Authority, shapes strategy' },
-];
+// Use canonical proficiency levels from single source of truth
+const proficiencyLevels = DEFAULT_PROFICIENCY_LEVELS.map(l => ({
+  level: l.level,
+  name: l.name,
+  description: l.shortDescription,
+}));
 
 export function JobArchitectureSkills() {
   return (

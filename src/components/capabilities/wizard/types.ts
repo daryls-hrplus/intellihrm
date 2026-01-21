@@ -116,10 +116,23 @@ export const JOB_LEVELS = [
   { value: "executive", label: "Executive" },
 ];
 
-export const PROFICIENCY_LEVELS = [
-  { value: "foundation", label: "Foundation", color: "bg-slate-500" },
-  { value: "developing", label: "Developing", color: "bg-blue-500" },
-  { value: "proficient", label: "Proficient", color: "bg-green-500" },
-  { value: "advanced", label: "Advanced", color: "bg-purple-500" },
-  { value: "expert", label: "Expert", color: "bg-amber-500" },
-];
+// Re-export from single source of truth for wizard compatibility
+export { DEFAULT_PROFICIENCY_LEVELS } from "@/components/capabilities/ProficiencyLevelPicker";
+
+// Legacy format for dropdown selects in wizard (derived from canonical source)
+import { DEFAULT_PROFICIENCY_LEVELS as _LEVELS } from "@/components/capabilities/ProficiencyLevelPicker";
+
+// Map level names to value strings for wizard dropdowns
+const levelValueMap: Record<number, string> = {
+  1: "novice",
+  2: "beginner", 
+  3: "competent",
+  4: "proficient",
+  5: "expert",
+};
+
+export const PROFICIENCY_LEVELS = _LEVELS.map(l => ({
+  value: levelValueMap[l.level] || String(l.level),
+  label: l.name,
+  color: l.bgColor,
+}));

@@ -57,7 +57,7 @@ export default function MyCompetenciesPage() {
       if (competencyIds.length > 0) {
         const { data: skills } = await supabase
           .from("skills_competencies")
-          .select("id, name, code, category")
+          .select("id, name, code, category, proficiency_indicators")
           .in("id", competencyIds);
         
         skillsMap = (skills || []).reduce((acc: Record<string, any>, s: any) => {
@@ -196,14 +196,27 @@ export default function MyCompetenciesPage() {
                         </TableCell>
                         <TableCell>
                           {ec.required_proficiency_level ? (
-                            <ProficiencyLevelBadge level={ec.required_proficiency_level} size="sm" />
+                            <ProficiencyLevelBadge 
+                              level={ec.required_proficiency_level} 
+                              size="sm"
+                              context="reference"
+                              skillName={ec.skills_competencies?.name}
+                              skillIndicators={ec.skills_competencies?.proficiency_indicators}
+                            />
                           ) : (
                             <span className="text-muted-foreground">—</span>
                           )}
                         </TableCell>
                         <TableCell>
                           {ec.assessed_proficiency_level ? (
-                            <ProficiencyLevelBadge level={ec.assessed_proficiency_level} size="sm" />
+                            <ProficiencyLevelBadge 
+                              level={ec.assessed_proficiency_level} 
+                              size="sm"
+                              context="assessed"
+                              comparedTo={ec.required_proficiency_level}
+                              skillName={ec.skills_competencies?.name}
+                              skillIndicators={ec.skills_competencies?.proficiency_indicators}
+                            />
                           ) : (
                             <Badge variant="outline" className="text-muted-foreground">
                               <Clock className="h-3 w-3 mr-1" />
