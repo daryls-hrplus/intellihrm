@@ -2,7 +2,7 @@ import { useTranslation } from "react-i18next";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { usePageAudit } from "@/hooks/usePageAudit";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
-import { GroupedModuleCards, ModuleSection, GroupedModuleItem } from "@/components/ui/GroupedModuleCards";
+import { GroupedModuleCards, ModuleSection, GroupedModuleItem, ActionBadge } from "@/components/ui/GroupedModuleCards";
 import { ESSAIDashboard } from "@/components/ess/ESSAIDashboard";
 import { InboxQuickSummary } from "@/components/ess/InboxQuickSummary";
 import { CompanyQuickLinksWidget } from "@/components/ess/CompanyQuickLinksWidget";
@@ -10,6 +10,7 @@ import { HelpDeskWidget } from "@/components/ess/HelpDeskWidget";
 import { QuickActionsBar } from "@/components/ess/QuickActionsBar";
 import { useGranularPermissions } from "@/hooks/useGranularPermissions";
 import { useEssPendingActions } from "@/hooks/useEssPendingActions";
+import { useEssItemBadges } from "@/hooks/useEssItemBadges";
 import {
   User,
   Calendar,
@@ -58,6 +59,13 @@ export default function EmployeeSelfServicePage() {
   const { t } = useTranslation();
   const { hasTabAccess } = useGranularPermissions();
   const { data: sectionBadges = {} } = useEssPendingActions();
+  const { data: itemBadges = {} } = useEssItemBadges();
+
+  // Helper to attach actionBadge to module
+  const withBadge = (module: GroupedModuleItem): GroupedModuleItem => {
+    const badge = module.tabCode ? itemBadges[module.tabCode] : null;
+    return badge ? { ...module, actionBadge: badge } : module;
+  };
 
   const allModules = {
     profile: { title: t("ess.modules.profile.title"), description: t("ess.modules.profile.description"), href: "/profile", icon: User, color: "bg-blue-500/10 text-blue-600", tabCode: "ess-profile" },
@@ -116,7 +124,9 @@ export default function EmployeeSelfServicePage() {
   };
 
   const filterByAccess = (modules: GroupedModuleItem[]) =>
-    modules.filter(m => !m.tabCode || hasTabAccess("ess", m.tabCode));
+    modules
+      .filter(m => !m.tabCode || hasTabAccess("ess", m.tabCode))
+      .map(withBadge);
 
   // Industry-standard "Me-First, Then Outward" section ordering
   const sections: ModuleSection[] = [

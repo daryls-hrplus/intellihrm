@@ -21,6 +21,12 @@ import {
   ChevronsUpDown
 } from "lucide-react";
 
+export interface ActionBadge {
+  count: number;
+  label: string;
+  variant: "default" | "warning" | "destructive";
+}
+
 export interface GroupedModuleItem {
   title: string;
   description: string;
@@ -28,6 +34,8 @@ export interface GroupedModuleItem {
   icon: LucideIcon;
   color: string;
   tabCode?: string;
+  badge?: string; // Static label (e.g., "New", "Recommended")
+  actionBadge?: ActionBadge; // Dynamic pending action badge
 }
 
 export interface SectionBadge {
@@ -204,9 +212,24 @@ export const GroupedModuleCards = forwardRef<GroupedModuleCardsHandle, GroupedMo
                         <item.icon className="h-5 w-5" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-medium text-sm group-hover:text-primary transition-colors">
-                          {item.title}
-                        </h3>
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-medium text-sm group-hover:text-primary transition-colors">
+                            {item.title}
+                          </h3>
+                          {item.badge && (
+                            <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 font-medium">
+                              {item.badge}
+                            </Badge>
+                          )}
+                          {item.actionBadge && (
+                            <Badge 
+                              variant="outline" 
+                              className={`text-[10px] px-1.5 py-0 h-4 font-medium ${getBadgeVariantClass(item.actionBadge.variant)}`}
+                            >
+                              {item.actionBadge.label}
+                            </Badge>
+                          )}
+                        </div>
                         <p className="text-xs text-muted-foreground line-clamp-2">
                           {item.description}
                         </p>
