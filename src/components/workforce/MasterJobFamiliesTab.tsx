@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { ActiveInactiveBadge } from "@/components/ui/entity-status-badge";
 import {
   Table,
   TableBody,
@@ -209,9 +210,7 @@ export function MasterJobFamiliesTab() {
                     {family.description || "-"}
                   </TableCell>
                   <TableCell>
-                    <Badge variant={family.is_active ? "default" : "secondary"}>
-                      {family.is_active ? "Active" : "Inactive"}
-                    </Badge>
+                    <ActiveInactiveBadge isActive={family.is_active} />
                   </TableCell>
                   <TableCell>
                     <Button
