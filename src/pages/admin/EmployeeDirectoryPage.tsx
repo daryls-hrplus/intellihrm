@@ -1,10 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 
 // Helper to avoid deep type instantiation
 const query = (table: string) => supabase.from(table as any);
 import { useAuth } from "@/contexts/AuthContext";
+import { useUserAccessibleCompanies } from "@/hooks/useUserAccessibleCompanies";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Input } from "@/components/ui/input";
@@ -80,9 +81,15 @@ export default function EmployeeDirectoryPage() {
   const fromHrHub = searchParams.get("from") === "hr-hub";
   const fromAdmin = searchParams.get("from") === "admin";
   
+  // Get role-based company access
+  const { companies: accessibleCompanies, companyIds: accessibleCompanyIds, isLoading: companiesLoading } = useUserAccessibleCompanies();
+  
+  // Determine if this is an admin/HR context (multi-company) or ESS context (single company)
+  const isAdminContext = fromHrHub || fromAdmin;
+  
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
-  const [companies, setCompanies] = useState<Company[]>([]);
+  const [allCompanies, setAllCompanies] = useState<Company[]>([]);
   const [locations, setLocations] = useState<Location[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -91,11 +98,32 @@ export default function EmployeeDirectoryPage() {
   const [selectedLocation, setSelectedLocation] = useState<string>("all");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
+  // For ESS context: only user's own company; For Admin context: role-based accessible companies
+  const availableCompanies = useMemo(() => {
+    if (isAdminContext) {
+      // Filter to only companies the role has access to
+      return allCompanies.filter(c => accessibleCompanyIds.includes(c.id));
+    } else {
+      // ESS: only user's own company
+      return allCompanies.filter(c => c.id === profile?.company_id);
+    }
+  }, [isAdminContext, allCompanies, accessibleCompanyIds, profile?.company_id]);
+
+  // Get company IDs to filter employees by
+  const filterCompanyIds = useMemo(() => {
+    if (isAdminContext) {
+      return accessibleCompanyIds;
+    } else {
+      // ESS: only user's own company
+      return profile?.company_id ? [profile.company_id] : [];
+    }
+  }, [isAdminContext, accessibleCompanyIds, profile?.company_id]);
+
   useEffect(() => {
-    if (profile?.company_id) {
+    if (profile?.company_id && !companiesLoading && filterCompanyIds.length > 0) {
       loadData();
     }
-  }, [profile?.company_id, fromHrHub]);
+  }, [profile?.company_id, companiesLoading, filterCompanyIds]);
 
   const loadData = async () => {
     setIsLoading(true);
@@ -106,19 +134,20 @@ export default function EmployeeDirectoryPage() {
         .eq("is_active", true)
         .order("full_name");
 
-      if (!fromHrHub && profile?.company_id) {
-        empQuery = empQuery.eq("company_id", profile.company_id);
+      // Always filter by accessible companies (role-based for admin, own company for ESS)
+      if (filterCompanyIds.length > 0) {
+        empQuery = empQuery.in("company_id", filterCompanyIds);
       }
 
       // Fetch all data in parallel for efficiency
       const [empRes, deptRes, companyRes, positionsRes, empPositionsRes, contactsRes, locationsRes, employmentTypesRes]: any[] = await Promise.all([
         empQuery,
-        query("departments").select("id, name").order("name"),
+        query("departments").select("id, name, company_id").in("company_id", filterCompanyIds).order("name"),
         query("companies").select("id, name").eq("is_active", true).order("name"),
         query("positions").select("id, title, department_id, reports_to_position_id, employment_type"),
         query("employee_positions").select("employee_id, position_id, assignment_type, is_primary").eq("is_active", true),
         query("employee_contacts").select("employee_id, contact_type, contact_value, is_primary").in("contact_type", ["work_phone", "work_mobile", "extension"]),
-        query("company_branch_locations").select("id, name, company_id").eq("is_active", true).order("name"),
+        query("company_branch_locations").select("id, name, company_id").eq("is_active", true).in("company_id", filterCompanyIds).order("name"),
         query("employment_types").select("code, name").eq("is_active", true),
       ]);
 
@@ -231,7 +260,7 @@ export default function EmployeeDirectoryPage() {
 
       setEmployees(employeesWithDetails);
       setDepartments(deptData as Department[]);
-      setCompanies(companyData as Company[]);
+      setAllCompanies(companyData as Company[]);
       setLocations(locationsData as Location[]);
     } catch (error) {
       console.error("Error loading data:", error);
@@ -346,20 +375,23 @@ export default function EmployeeDirectoryPage() {
               className="pl-10"
             />
           </div>
-          <Select value={selectedCompany} onValueChange={setSelectedCompany}>
-            <SelectTrigger className="w-full md:w-[200px]">
-              <Building2 className="h-4 w-4 mr-2" />
-              <SelectValue placeholder="All Companies" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Companies</SelectItem>
-              {companies.map((comp) => (
-                <SelectItem key={comp.id} value={comp.id}>
-                  {comp.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          {/* Only show company selector if multiple companies are available */}
+          {availableCompanies.length > 1 && (
+            <Select value={selectedCompany} onValueChange={setSelectedCompany}>
+              <SelectTrigger className="w-full md:w-[200px]">
+                <Building2 className="h-4 w-4 mr-2" />
+                <SelectValue placeholder="All Companies" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Companies</SelectItem>
+                {availableCompanies.map((comp) => (
+                  <SelectItem key={comp.id} value={comp.id}>
+                    {comp.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
           <Select value={selectedDepartment} onValueChange={setSelectedDepartment}>
             <SelectTrigger className="w-full md:w-[200px]">
               <Building className="h-4 w-4 mr-2" />
