@@ -12,6 +12,7 @@ import {
   Shield,
   ExternalLink,
   ClipboardList,
+  History,
 } from "lucide-react";
 import { usePerformanceEvidence, EvidenceType } from "@/hooks/capabilities/usePerformanceEvidence";
 import { useCompetencyRatingHistory } from "@/hooks/capabilities/useCompetencyRatingHistory";
@@ -20,6 +21,8 @@ import { PerformanceEvidenceManager, EvidencePrePopulate } from "./PerformanceEv
 import { CompetencyDriftChart } from "./CompetencyDriftChart";
 import { SkillValidationConfidenceIndicator } from "./SkillValidationConfidenceIndicator";
 import { AppraisalEvidenceStatusCard } from "@/components/ess/AppraisalEvidenceStatusCard";
+import { EvidenceAuditTimeline } from "@/components/evidence/EvidenceAuditTimeline";
+import { EvidenceAuditSummaryCard } from "@/components/evidence/EvidenceAuditSummaryCard";
 
 interface EvidencePortfolioSectionProps {
   employeeId: string;
@@ -129,11 +132,15 @@ export function EvidencePortfolioSection({
                 <TrendingUp className="h-4 w-4" />
                 Skill Trends
               </TabsTrigger>
-              <TabsTrigger value="validation" className="gap-2">
-                <Shield className="h-4 w-4" />
-                Validation Status
-              </TabsTrigger>
-            </TabsList>
+            <TabsTrigger value="validation" className="gap-2">
+              <Shield className="h-4 w-4" />
+              Validation Status
+            </TabsTrigger>
+            <TabsTrigger value="audit" className="gap-2">
+              <History className="h-4 w-4" />
+              Audit Trail
+            </TabsTrigger>
+          </TabsList>
 
         <TabsContent value="evidence" className="mt-4">
           <PerformanceEvidenceManager
@@ -192,6 +199,15 @@ export function EvidencePortfolioSection({
               )}
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="audit" className="mt-4 space-y-4">
+            <EvidenceAuditSummaryCard employeeId={employeeId} periodDays={30} />
+            <EvidenceAuditTimeline
+              employeeId={employeeId}
+              showFilters={true}
+              compact={false}
+            />
           </TabsContent>
         </Tabs>
         </div>
