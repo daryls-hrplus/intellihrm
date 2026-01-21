@@ -33,6 +33,7 @@ export type AppraisalPhaseType =
   | '360_collection' 
   | 'calibration' 
   | 'hr_review'
+  | 'rating_release'
   | 'finalization' 
   | 'employee_acknowledgment';
 
@@ -399,6 +400,12 @@ export const PHASE_TYPE_PRESETS: Record<AppraisalPhaseType, {
     icon: 'ShieldCheck',
     defaultDurationDays: 5,
     description: 'HR reviews and approves evaluations before finalization (optional checkpoint)',
+  },
+  rating_release: {
+    label: 'Rating Release',
+    icon: 'Eye',
+    defaultDurationDays: 1,
+    description: 'HR releases finalized ratings to employees for viewing',
   },
   finalization: {
     label: 'Finalization',

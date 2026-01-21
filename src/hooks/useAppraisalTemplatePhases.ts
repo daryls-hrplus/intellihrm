@@ -17,8 +17,9 @@ export const PHASE_ORDER_PRIORITY: Record<string, number> = {
   manager_review: 4,
   calibration: 5,
   hr_review: 6,
-  finalization: 7,
-  employee_acknowledgment: 8,
+  rating_release: 7,
+  finalization: 8,
+  employee_acknowledgment: 9,
 };
 
 // Get suggested phase order based on industry standards
@@ -57,6 +58,94 @@ export function generatePhasePresets(
     
     return phase;
   });
+}
+
+// Template configuration interface for conditional phase logic
+interface TemplateConfig {
+  include_goals?: boolean;
+  include_360_feedback?: boolean;
+  include_calibration?: boolean;
+  include_hr_review?: boolean;
+  include_rating_release?: boolean;
+}
+
+// Get required phases based on template configuration
+export function getRequiredPhases(templateConfig: TemplateConfig): string[] {
+  const requiredPhases: string[] = ['self_assessment', 'manager_review', 'finalization', 'employee_acknowledgment'];
+  
+  // Goal Setting is required when goals are included
+  if (templateConfig.include_goals) {
+    requiredPhases.unshift('goal_setting');
+  }
+  
+  // 360 Collection is required when 360 feedback is included
+  if (templateConfig.include_360_feedback) {
+    // Insert after self_assessment
+    const selfAssessmentIndex = requiredPhases.indexOf('self_assessment');
+    requiredPhases.splice(selfAssessmentIndex + 1, 0, '360_collection');
+  }
+  
+  // Calibration is typically included for annual reviews
+  if (templateConfig.include_calibration !== false) {
+    // Insert after manager_review
+    const managerReviewIndex = requiredPhases.indexOf('manager_review');
+    if (managerReviewIndex !== -1) {
+      requiredPhases.splice(managerReviewIndex + 1, 0, 'calibration');
+    }
+  }
+  
+  // HR Review is optional (checkpoint before finalization)
+  if (templateConfig.include_hr_review) {
+    const finalizationIndex = requiredPhases.indexOf('finalization');
+    if (finalizationIndex !== -1) {
+      requiredPhases.splice(finalizationIndex, 0, 'hr_review');
+    }
+  }
+  
+  // Rating Release phase (explicit release to employees)
+  if (templateConfig.include_rating_release) {
+    const finalizationIndex = requiredPhases.indexOf('finalization');
+    if (finalizationIndex !== -1) {
+      requiredPhases.splice(finalizationIndex + 1, 0, 'rating_release');
+    }
+  }
+  
+  return requiredPhases;
+}
+
+// Generate phases with conditional inclusion based on template settings
+export function generateConditionalPhasePresets(
+  cycleType: AppraisalCycleType,
+  templateId: string,
+  templateConfig: TemplateConfig
+): CreateTemplatePhaseInput[] {
+  const requiredPhaseTypes = getRequiredPhases(templateConfig);
+  let currentOffset = 0;
+  
+  return requiredPhaseTypes.map((phaseType, index) => {
+    const phasePreset = PHASE_TYPE_PRESETS[phaseType as keyof typeof PHASE_TYPE_PRESETS];
+    if (!phasePreset) {
+      console.warn(`Unknown phase type: ${phaseType}`);
+      return null;
+    }
+    
+    const phase: CreateTemplatePhaseInput = {
+      template_id: templateId,
+      phase_type: phaseType as any,
+      phase_name: phasePreset.label,
+      display_order: index,
+      start_offset_days: currentOffset,
+      duration_days: phasePreset.defaultDurationDays,
+      is_mandatory: true,
+      notify_on_start: true,
+      notify_on_deadline: true,
+    };
+    
+    // Advance offset for next phase
+    currentOffset += phasePreset.defaultDurationDays;
+    
+    return phase;
+  }).filter((p): p is CreateTemplatePhaseInput => p !== null);
 }
 
 export function useAppraisalTemplatePhases(templateId: string | undefined) {
