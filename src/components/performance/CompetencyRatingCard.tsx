@@ -13,7 +13,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { DEFAULT_PROFICIENCY_LEVELS } from "@/components/capabilities/CompetencyBehavioralLevelsEditor";
+import { DEFAULT_PROFICIENCY_LEVELS } from "@/components/capabilities/ProficiencyLevelPicker";
 
 interface ProficiencyIndicators {
   [level: string]: string[];
@@ -229,7 +229,7 @@ export function CompetencyRatingCard({
                     ${!hasLevelIndicators ? 'opacity-80' : ''}
                   `}
                 >
-                  <span className="text-xl block mb-1">{levelDef.icon}</span>
+                  {(() => { const Icon = levelDef.icon; return <Icon className={`h-5 w-5 mx-auto mb-1 ${levelDef.color}`} />; })()}
                   <span className={`text-xs font-medium block ${isSelected ? 'text-primary' : ''}`}>
                     L{levelDef.level}
                   </span>
@@ -248,14 +248,14 @@ export function CompetencyRatingCard({
           
           {/* Selected level description */}
           {selectedLevelDef && (
-            <div className={`mt-3 p-3 rounded-lg ${selectedLevelDef.color} border`}>
+            <div className={`mt-3 p-3 rounded-lg ${selectedLevelDef.bgColor} border`}>
               <div className="flex items-center gap-2">
-                <span className="text-lg">{selectedLevelDef.icon}</span>
+                {(() => { const Icon = selectedLevelDef.icon; return <Icon className={`h-5 w-5 ${selectedLevelDef.color}`} />; })()}
                 <div>
                   <p className="text-sm font-medium">
                     Level {selectedLevelDef.level}: {selectedLevelDef.name}
                   </p>
-                  <p className="text-xs opacity-80">{selectedLevelDef.description}</p>
+                  <p className="text-xs opacity-80">{selectedLevelDef.shortDescription}</p>
                 </div>
                 {!meetsRequirement && requiredLevel && (
                   <div className="ml-auto flex items-center gap-1 text-destructive">

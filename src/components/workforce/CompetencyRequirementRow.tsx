@@ -75,6 +75,7 @@ export interface CompetencyRequirement {
     type: string;
     category: string;
     description?: string;
+    proficiency_indicators?: Record<string, string[]> | null;
   };
 }
 
@@ -232,7 +233,13 @@ export function CompetencyRequirementRow({
           </span>
         </TableCell>
         <TableCell>
-          <ProficiencyLevelBadge level={requirement.required_proficiency_level} size="sm" />
+          <ProficiencyLevelBadge 
+            level={requirement.required_proficiency_level} 
+            size="sm" 
+            context="reference"
+            skillName={requirement.skills_competencies?.name}
+            skillIndicators={requirement.skills_competencies?.proficiency_indicators}
+          />
         </TableCell>
         <TableCell>
           <Badge variant="outline">{requirement.weighting}%</Badge>

@@ -67,6 +67,7 @@ interface JobCapabilityRequirement {
     type: string;
     category: string;
     description?: string;
+    proficiency_indicators?: Record<string, string[]> | null;
   };
 }
 
@@ -162,7 +163,7 @@ export function JobCapabilityRequirementsManager({
       .from("job_capability_requirements")
       .select(`
         *,
-        skills_competencies(name, code, type, category, description)
+        skills_competencies(name, code, type, category, description, proficiency_indicators)
       `)
       .eq("job_id", jobId)
       .order("weighting", { ascending: false });
@@ -174,12 +175,12 @@ export function JobCapabilityRequirementsManager({
       // Filter to only competencies for the primary view
       const competencyReqs = (data || []).filter(
         (r) => r.skills_competencies?.type === "COMPETENCY"
-      );
+      ) as JobCapabilityRequirement[];
       setRequirements(competencyReqs);
       
       // Fetch linked skills for all competencies
       if (competencyReqs.length > 0) {
-        fetchLinkedSkills(competencyReqs.map((r) => r.capability_id), competencyReqs);
+        fetchLinkedSkills(competencyReqs.map((r) => r.capability_id), competencyReqs as JobCapabilityRequirement[]);
       }
     }
     setIsLoading(false);
