@@ -53619,6 +53619,7 @@ export type Database = {
           id: string
           immutable_at: string | null
           is_immutable: boolean | null
+          kra_snapshot_id: string | null
           participant_id: string | null
           responsibility_id: string | null
           score_item_id: string | null
@@ -53651,6 +53652,7 @@ export type Database = {
           id?: string
           immutable_at?: string | null
           is_immutable?: boolean | null
+          kra_snapshot_id?: string | null
           participant_id?: string | null
           responsibility_id?: string | null
           score_item_id?: string | null
@@ -53683,6 +53685,7 @@ export type Database = {
           id?: string
           immutable_at?: string | null
           is_immutable?: boolean | null
+          kra_snapshot_id?: string | null
           participant_id?: string | null
           responsibility_id?: string | null
           score_item_id?: string | null
@@ -53742,6 +53745,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "performance_evidence_kra_snapshot_id_fkey"
+            columns: ["kra_snapshot_id"]
+            isOneToOne: false
+            referencedRelation: "appraisal_kra_snapshots"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "performance_evidence_participant_id_fkey"
             columns: ["participant_id"]
             isOneToOne: false
@@ -53752,7 +53762,7 @@ export type Database = {
             foreignKeyName: "performance_evidence_responsibility_id_fkey"
             columns: ["responsibility_id"]
             isOneToOne: false
-            referencedRelation: "job_responsibility_kras"
+            referencedRelation: "responsibilities"
             referencedColumns: ["id"]
           },
           {
