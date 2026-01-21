@@ -53802,6 +53802,88 @@ export type Database = {
           },
         ]
       }
+      performance_evidence_audit: {
+        Row: {
+          action: string
+          appraisal_cycle_id: string | null
+          change_reason: string | null
+          company_id: string | null
+          evidence_id: string
+          id: string
+          ip_address: string | null
+          item_id: string | null
+          item_name: string | null
+          item_type: string | null
+          new_values: Json | null
+          old_values: Json | null
+          participant_id: string | null
+          performed_at: string
+          performed_by: string | null
+          session_id: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          action: string
+          appraisal_cycle_id?: string | null
+          change_reason?: string | null
+          company_id?: string | null
+          evidence_id: string
+          id?: string
+          ip_address?: string | null
+          item_id?: string | null
+          item_name?: string | null
+          item_type?: string | null
+          new_values?: Json | null
+          old_values?: Json | null
+          participant_id?: string | null
+          performed_at?: string
+          performed_by?: string | null
+          session_id?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          action?: string
+          appraisal_cycle_id?: string | null
+          change_reason?: string | null
+          company_id?: string | null
+          evidence_id?: string
+          id?: string
+          ip_address?: string | null
+          item_id?: string | null
+          item_name?: string | null
+          item_type?: string | null
+          new_values?: Json | null
+          old_values?: Json | null
+          participant_id?: string | null
+          performed_at?: string
+          performed_by?: string | null
+          session_id?: string | null
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "performance_evidence_audit_appraisal_cycle_id_fkey"
+            columns: ["appraisal_cycle_id"]
+            isOneToOne: false
+            referencedRelation: "appraisal_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "performance_evidence_audit_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "performance_evidence_audit_participant_id_fkey"
+            columns: ["participant_id"]
+            isOneToOne: false
+            referencedRelation: "appraisal_participants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       performance_goals: {
         Row: {
           achievable: string | null
