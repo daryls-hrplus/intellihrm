@@ -145,7 +145,6 @@ export default function HRHubDashboardPage() {
       titleKey: "hrHub.communicationSupportCenter",
       items: [
         { titleKey: "hrHub.employeeDirectory", descKey: "hrHub.employeeDirectoryDesc", icon: Users, href: "/admin/employee-directory?from=hr-hub", badge: null },
-        { titleKey: "hrHub.directoryPrivacy", descKey: "hrHub.directoryPrivacyDesc", icon: Shield, href: "/hr-hub/directory-privacy", badge: null },
         { titleKey: "hrHub.communicationsReminders", descKey: "hrHub.communicationsRemindersDesc", icon: Mail, href: "/hr-hub/reminders", badge: null },
         { titleKey: "hrHub.companyComms.title", descKey: "hrHub.companyComms.description", icon: Megaphone, href: "/hr-hub/company-communications", badge: null },
         { titleKey: "hrHub.knowledgeBase", descKey: "hrHub.knowledgeBaseDesc", icon: BookOpen, href: "/admin/knowledge-base", badge: null },
@@ -166,6 +165,7 @@ export default function HRHubDashboardPage() {
       titleKey: "hrHub.complianceGovernance",
       items: [
         { titleKey: "hrHub.compliance", descKey: "hrHub.complianceDesc", icon: ShieldCheck, href: "/hr-hub/compliance-tracker", badge: null, pendingCount: expiringComplianceCount },
+        { titleKey: "hrHub.directoryPrivacy", descKey: "hrHub.directoryPrivacyDesc", icon: Shield, href: "/hr-hub/directory-privacy", badge: null },
         { titleKey: "hrHub.integrationHub", descKey: "hrHub.integrationHubDesc", icon: GitBranch, href: "/hr-hub/integrations", badge: null },
       ],
     },
