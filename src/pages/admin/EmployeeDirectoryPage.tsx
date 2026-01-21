@@ -133,7 +133,9 @@ export default function EmployeeDirectoryPage() {
       // Build lookup maps for O(1) access
       const deptMap = new Map(deptData.map((d: any) => [d.id, d.name]));
       const companyMap = new Map(companyData.map((c: any) => [c.id, c.name]));
-      const positionMap = new Map(positionsData.map((p: any) => [p.id, p]));
+      const positionMap = new Map<string, { id: string; title: string; department_id: string | null; reports_to_position_id: string | null; employment_type?: string }>(
+        positionsData.map((p: any) => [p.id, p])
+      );
       const locationMap = new Map(locationsData.map((l: any) => [l.id, l.name]));
 
       // Group employee positions by employee_id
