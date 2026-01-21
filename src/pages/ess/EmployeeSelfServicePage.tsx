@@ -122,12 +122,12 @@ export default function EmployeeSelfServicePage() {
     // 1. Personal Identity - "Who am I"
     {
       titleKey: "My Profile",
-      items: filterByAccess([allModules.profile, allModules.personalInfo, allModules.dependents, allModules.documents, allModules.letters, allModules.medicalInfo]),
+      items: filterByAccess([allModules.profile, allModules.personalInfo, allModules.dependents, allModules.documents, allModules.letters, allModules.medicalInfo, allModules.governmentIds, allModules.transactions]),
     },
     // 2. Compensation - "What I earn" (high frequency)
     {
       titleKey: "Pay & Benefits",
-      items: filterByAccess([allModules.payslips, allModules.compensation, allModules.benefits, allModules.expenses, allModules.banking, allModules.governmentIds]),
+      items: filterByAccess([allModules.payslips, allModules.compensation, allModules.benefits, allModules.expenses, allModules.banking]),
     },
     // 3. Time Management - "How I spend my time" (high frequency)
     {
@@ -141,13 +141,13 @@ export default function EmployeeSelfServicePage() {
     },
     // 5. Skills - "My capabilities"
     {
-      titleKey: "Skills and Competencies",
+      titleKey: "My Skills",
       items: filterByAccess([allModules.competencies, allModules.qualifications, allModules.skillGaps, allModules.interests]),
     },
     // 6. Career - "Where I'm going"
     {
       titleKey: "Career",
-      items: filterByAccess([allModules.professionalInfo, allModules.careerPlan, allModules.careerPaths, allModules.mentorship, allModules.jobs, allModules.milestones, allModules.transactions]),
+      items: filterByAccess([allModules.professionalInfo, allModules.careerPlan, allModules.careerPaths, allModules.mentorship, allModules.jobs, allModules.milestones]),
     },
     // 7. Learning - "How I develop"
     {
@@ -156,13 +156,13 @@ export default function EmployeeSelfServicePage() {
     },
     // 8. Lifecycle - "Employment transitions"
     {
-      titleKey: "Employee Lifecycle",
-      items: filterByAccess([allModules.onboarding, allModules.offboarding]),
+      titleKey: "My Journey",
+      items: filterByAccess([allModules.onboarding, allModules.offboarding, allModules.relations]),
     },
     // 9. Workplace - "My work environment"
     {
-      titleKey: "Workplace",
-      items: filterByAccess([allModules.property, allModules.relations, allModules.hse, allModules.immigration]),
+      titleKey: "Work Environment",
+      items: filterByAccess([allModules.property, allModules.hse, allModules.immigration]),
     },
     // 10. Company - "The organization" (outward-facing)
     {
