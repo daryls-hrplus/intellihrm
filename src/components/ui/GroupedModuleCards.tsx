@@ -59,14 +59,14 @@ interface GroupedModuleCardsProps {
 const sectionIcons: Record<string, LucideIcon> = {
   "Company": Building2,
   "My Profile": User,
-  "Skills and Competencies": Sparkles,
+  "My Skills": Sparkles,
   "Career": Compass,
   "Time & Absence": Clock,
   "Pay & Benefits": CreditCard,
   "Performance": Target,
   "Learning & Development": GraduationCap,
-  "Employee Lifecycle": Rocket,
-  "Workplace": Building2,
+  "My Journey": Rocket,
+  "Work Environment": Building2,
   "Tasks & Approvals": CheckSquare,
   "Help & Settings": HelpCircle,
 };
