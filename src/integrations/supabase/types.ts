@@ -2633,6 +2633,8 @@ export type Database = {
           overall_scale_id: string | null
           performance_period_end: string | null
           performance_period_start: string | null
+          ratings_released_at: string | null
+          ratings_released_by: string | null
           responsibility_weight: number
           self_assessment_deadline: string | null
           start_date: string
@@ -2692,6 +2694,8 @@ export type Database = {
           overall_scale_id?: string | null
           performance_period_end?: string | null
           performance_period_start?: string | null
+          ratings_released_at?: string | null
+          ratings_released_by?: string | null
           responsibility_weight?: number
           self_assessment_deadline?: string | null
           start_date: string
@@ -2751,6 +2755,8 @@ export type Database = {
           overall_scale_id?: string | null
           performance_period_end?: string | null
           performance_period_start?: string | null
+          ratings_released_at?: string | null
+          ratings_released_by?: string | null
           responsibility_weight?: number
           self_assessment_deadline?: string | null
           start_date?: string
@@ -3763,6 +3769,8 @@ export type Database = {
           rating_period_start: string | null
           reflection_completed_at: string | null
           reflection_template_id: string | null
+          released_at: string | null
+          released_by: string | null
           responsibility_score: number | null
           reviewed_at: string | null
           role_segments: Json | null
@@ -3798,6 +3806,8 @@ export type Database = {
           rating_period_start?: string | null
           reflection_completed_at?: string | null
           reflection_template_id?: string | null
+          released_at?: string | null
+          released_by?: string | null
           responsibility_score?: number | null
           reviewed_at?: string | null
           role_segments?: Json | null
@@ -3833,6 +3843,8 @@ export type Database = {
           rating_period_start?: string | null
           reflection_completed_at?: string | null
           reflection_template_id?: string | null
+          released_at?: string | null
+          released_by?: string | null
           responsibility_score?: number | null
           reviewed_at?: string | null
           role_segments?: Json | null
