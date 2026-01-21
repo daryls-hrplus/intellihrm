@@ -108,6 +108,21 @@ export function EssAppraisalEvaluationDialog({
         .select("*")
         .eq("participant_id", appraisal.id);
 
+      // Fetch evidence counts for all items
+      const { data: evidenceData } = await supabase
+        .from("performance_evidence")
+        .select("goal_id, capability_id, responsibility_id")
+        .eq("participant_id", appraisal.id);
+
+      // Create evidence count map
+      const evidenceCountMap: Record<string, number> = {};
+      (evidenceData || []).forEach((e: any) => {
+        const itemId = e.goal_id || e.capability_id || e.responsibility_id;
+        if (itemId) {
+          evidenceCountMap[itemId] = (evidenceCountMap[itemId] || 0) + 1;
+        }
+      });
+
       if (existingScores && existingScores.length > 0) {
         setScores(existingScores.map((s: any) => ({
           id: s.id,
@@ -119,10 +134,11 @@ export function EssAppraisalEvaluationDialog({
           self_comments: s.self_comments || "",
           self_metadata: s.self_metadata || {},
           proficiency_indicators: s.metadata?.proficiency_indicators,
+          evidence_count: evidenceCountMap[s.item_id] || 0,
         })));
       } else {
         // Fetch items for this employee to create score entries
-        await fetchEmployeeItems();
+        await fetchEmployeeItems(evidenceCountMap);
       }
 
       // Load existing self-reflection from employee_comments
@@ -148,7 +164,7 @@ export function EssAppraisalEvaluationDialog({
     }
   };
 
-  const fetchEmployeeItems = async () => {
+  const fetchEmployeeItems = async (evidenceCountMap: Record<string, number> = {}) => {
     if (!user?.id) return;
     const newScores: ScoreItem[] = [];
 
@@ -166,6 +182,7 @@ export function EssAppraisalEvaluationDialog({
           self_rating: null,
           self_comments: "",
           proficiency_indicators: comp.proficiency_indicators as any,
+          evidence_count: evidenceCountMap[comp.competency_id] || 0,
         });
       });
     }
@@ -186,6 +203,7 @@ export function EssAppraisalEvaluationDialog({
           weight: goal.weighting || 0,
           self_rating: null,
           self_comments: "",
+          evidence_count: evidenceCountMap[goal.id] || 0,
         });
       });
     }
@@ -216,6 +234,7 @@ export function EssAppraisalEvaluationDialog({
                 weight: jr.weighting || 0,
                 self_rating: null,
                 self_comments: "",
+                evidence_count: evidenceCountMap[jr.responsibility_id] || 0,
               });
             }
           });
@@ -255,6 +274,40 @@ export function EssAppraisalEvaluationDialog({
     setEvidenceDialogOpen(true);
   };
 
+  // Handle evidence attached - refresh count and auto-save
+  const handleEvidenceAttached = async () => {
+    if (!selectedItemForEvidence) {
+      setEvidenceDialogOpen(false);
+      return;
+    }
+
+    // Refetch evidence count for the specific item
+    const columnName = selectedItemForEvidence.type === "goal" 
+      ? "goal_id" 
+      : selectedItemForEvidence.type === "competency" 
+        ? "capability_id" 
+        : "responsibility_id";
+    
+    const { count } = await supabase
+      .from("performance_evidence")
+      .select("id", { count: "exact", head: true })
+      .eq("participant_id", appraisal.id)
+      .eq(columnName, selectedItemForEvidence.id);
+
+    // Update local state with new count
+    setScores(prev => prev.map(s => 
+      s.item_id === selectedItemForEvidence.id
+        ? { ...s, evidence_count: count || 0 }
+        : s
+    ));
+
+    setEvidenceDialogOpen(false);
+    
+    // Auto-save draft to persist the score record (ensures evidence link works)
+    await handleSave(false);
+    toast.success("Evidence attached and draft saved");
+  };
+
   // Completion stats
   const completionStats = useMemo(() => {
     const byType = { goal: { total: 0, done: 0 }, competency: { total: 0, done: 0 }, responsibility: { total: 0, done: 0 } };
@@ -271,33 +324,45 @@ export function EssAppraisalEvaluationDialog({
 
   const canSubmit = completionStats.percentage === 100;
 
-  const handleSave = async (submit = false) => {
+  const handleSave = async (submit = false, silent = false) => {
     setSaving(true);
     try {
-      // Save each score
+      // Save ALL scores (including unrated ones) to ensure evidence links work
       for (const score of scores) {
-        if (score.self_rating !== null) {
-          const payload: any = {
-            participant_id: appraisal.id,
-            evaluation_type: score.evaluation_type,
-            item_id: score.item_id,
-            item_name: score.item_name,
-            weight: score.weight,
-            self_rating: score.self_rating,
-            self_comments: score.self_comments || null,
-            self_rated_at: new Date().toISOString(),
-            self_metadata: score.self_metadata || {},
-          };
+        const payload: any = {
+          participant_id: appraisal.id,
+          evaluation_type: score.evaluation_type,
+          item_id: score.item_id,
+          item_name: score.item_name,
+          weight: score.weight,
+          self_rating: score.self_rating,
+          self_comments: score.self_comments || null,
+          self_rated_at: score.self_rating !== null ? new Date().toISOString() : null,
+          self_metadata: score.self_metadata || {},
+        };
 
-          if (score.id) {
-            await supabase.from("appraisal_scores").update({
-              self_rating: payload.self_rating,
-              self_comments: payload.self_comments,
-              self_rated_at: payload.self_rated_at,
-              self_metadata: payload.self_metadata,
-            }).eq("id", score.id);
-          } else {
-            await supabase.from("appraisal_scores").insert(payload);
+        if (score.id) {
+          // Update existing record
+          await supabase.from("appraisal_scores").update({
+            self_rating: payload.self_rating,
+            self_comments: payload.self_comments,
+            self_rated_at: payload.self_rated_at,
+            self_metadata: payload.self_metadata,
+          }).eq("id", score.id);
+        } else {
+          // Insert new record - this creates the score record for evidence linking
+          const { data: inserted } = await supabase.from("appraisal_scores")
+            .insert(payload)
+            .select("id")
+            .single();
+          
+          // Update local state with the new ID
+          if (inserted) {
+            setScores(prev => prev.map(s => 
+              s.item_id === score.item_id && s.evaluation_type === score.evaluation_type
+                ? { ...s, id: inserted.id }
+                : s
+            ));
           }
         }
       }
@@ -315,7 +380,9 @@ export function EssAppraisalEvaluationDialog({
         submitted_at: submit ? new Date().toISOString() : null,
       }).eq("id", appraisal.id);
 
-      toast.success(submit ? "Self-assessment submitted!" : "Progress saved");
+      if (!silent) {
+        toast.success(submit ? "Self-assessment submitted!" : "Progress saved");
+      }
       queryClient.invalidateQueries({ queryKey: ["my-appraisals"] });
       
       if (submit) {
@@ -324,7 +391,9 @@ export function EssAppraisalEvaluationDialog({
       }
     } catch (error: any) {
       console.error("Error saving:", error);
-      toast.error(error.message || "Failed to save");
+      if (!silent) {
+        toast.error(error.message || "Failed to save");
+      }
     } finally {
       setSaving(false);
     }
@@ -526,7 +595,7 @@ export function EssAppraisalEvaluationDialog({
           itemName={selectedItemForEvidence.name}
           itemType={selectedItemForEvidence.type}
           cycleId={appraisal.cycle_id}
-          onAttached={() => setEvidenceDialogOpen(false)}
+          onAttached={handleEvidenceAttached}
         />
       )}
     </>
