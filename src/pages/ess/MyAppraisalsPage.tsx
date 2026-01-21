@@ -27,6 +27,7 @@ import {
   Monitor
 } from "lucide-react";
 import { useMyActiveAppraisals, type MyAppraisal } from "@/hooks/useMyAppraisals";
+import { AppraisalJourneyTracker } from "@/components/ess/performance/AppraisalJourneyTracker";
 import { EssAppraisalDetailDialog } from "@/components/ess/EssAppraisalDetailDialog";
 import { EssPIPStatusCard } from "@/components/ess/EssPIPStatusCard";
 import { EssAppraisalSelfAssessmentDialog } from "@/components/ess/EssAppraisalSelfAssessmentDialog";
@@ -335,15 +336,19 @@ export default function MyAppraisalsPage() {
                           </div>
                         )}
 
-                        {/* Progress indicator for self-assessment */}
-                        {!appraisal.submitted_at && (
-                          <div className="mt-4">
-                            <p className="text-sm text-amber-600 flex items-center gap-1">
-                              <AlertTriangle className="h-4 w-4" />
-                              Self-assessment not submitted
-                            </p>
-                          </div>
-                        )}
+                        {/* Appraisal Journey Tracker */}
+                        <div className="mt-4">
+                          <AppraisalJourneyTracker
+                            participantId={appraisal.id}
+                            cycleId={appraisal.cycle_id}
+                            participantStatus={appraisal.status}
+                            submittedAt={appraisal.submitted_at}
+                            reviewedAt={appraisal.reviewed_at}
+                            variant="horizontal"
+                            showDeadlineWarnings
+                            showActorLabels
+                          />
+                        </div>
                       </div>
 
                       <div className="flex flex-col gap-2">
