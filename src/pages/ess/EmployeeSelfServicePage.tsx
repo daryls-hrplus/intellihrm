@@ -117,47 +117,59 @@ export default function EmployeeSelfServicePage() {
   const filterByAccess = (modules: GroupedModuleItem[]) =>
     modules.filter(m => !m.tabCode || hasTabAccess("ess", m.tabCode));
 
+  // Industry-standard "Me-First, Then Outward" section ordering
   const sections: ModuleSection[] = [
-    {
-      titleKey: "Company",
-      items: filterByAccess([allModules.employeeDirectory, allModules.announcements]),
-    },
+    // 1. Personal Identity - "Who am I"
     {
       titleKey: "My Profile",
       items: filterByAccess([allModules.profile, allModules.personalInfo, allModules.dependents, allModules.documents, allModules.letters, allModules.medicalInfo]),
     },
+    // 2. Compensation - "What I earn" (high frequency)
     {
       titleKey: "Pay & Benefits",
       items: filterByAccess([allModules.payslips, allModules.compensation, allModules.benefits, allModules.expenses, allModules.banking, allModules.governmentIds]),
     },
+    // 3. Time Management - "How I spend my time" (high frequency)
     {
       titleKey: "Time & Absence",
       items: filterByAccess([allModules.leave, allModules.myCalendar, allModules.teamCalendar, allModules.timeAttendance, allModules.timesheets]),
     },
-    {
-      titleKey: "Skills and Competencies",
-      items: filterByAccess([allModules.competencies, allModules.qualifications, allModules.skillGaps, allModules.interests]),
-    },
+    // 4. Performance - "How I'm evaluated"
     {
       titleKey: "Performance",
       items: filterByAccess([allModules.myAppraisals, allModules.goals, allModules.evidencePortfolio, allModules.feedback, allModules.goalInterviews, allModules.appraisalInterviews, allModules.recognition]),
     },
+    // 5. Skills - "My capabilities"
+    {
+      titleKey: "Skills and Competencies",
+      items: filterByAccess([allModules.competencies, allModules.qualifications, allModules.skillGaps, allModules.interests]),
+    },
+    // 6. Career - "Where I'm going"
     {
       titleKey: "Career",
       items: filterByAccess([allModules.professionalInfo, allModules.careerPlan, allModules.careerPaths, allModules.mentorship, allModules.jobs, allModules.milestones, allModules.transactions]),
     },
+    // 7. Learning - "How I develop"
     {
       titleKey: "Learning & Development",
       items: filterByAccess([allModules.development, allModules.developmentThemes, allModules.training]),
     },
+    // 8. Lifecycle - "Employment transitions"
     {
       titleKey: "Employee Lifecycle",
       items: filterByAccess([allModules.onboarding, allModules.offboarding]),
     },
+    // 9. Workplace - "My work environment"
     {
       titleKey: "Workplace",
       items: filterByAccess([allModules.property, allModules.relations, allModules.hse, allModules.immigration]),
     },
+    // 10. Company - "The organization" (outward-facing)
+    {
+      titleKey: "Company",
+      items: filterByAccess([allModules.employeeDirectory, allModules.announcements]),
+    },
+    // 11. Tasks - "Workflow actions"
     {
       titleKey: "Tasks & Approvals",
       items: filterByAccess([
