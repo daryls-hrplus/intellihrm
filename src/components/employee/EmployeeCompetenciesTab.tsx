@@ -389,10 +389,25 @@ export function EmployeeCompetenciesTab({ employeeId }: EmployeeCompetenciesTabP
                         {jc.name}
                         {jc.category && <Badge variant="outline" className="ml-2 text-xs">{jc.category}</Badge>}
                       </TableCell>
-                      <TableCell><ProficiencyLevelBadge level={jc.required_level || 3} context="reference" size="sm" /></TableCell>
+                      <TableCell>
+                        <ProficiencyLevelBadge 
+                          level={jc.required_level || 3} 
+                          context="reference" 
+                          size="sm" 
+                          skillName={jc.name}
+                          skillIndicators={jc.proficiency_indicators}
+                        />
+                      </TableCell>
                       <TableCell>
                         {jc.assessed_level !== null && jc.assessed_level !== undefined ? (
-                          <ProficiencyLevelBadge level={jc.assessed_level} context="assessed" comparedTo={jc.required_level || 3} size="sm" />
+                          <ProficiencyLevelBadge 
+                            level={jc.assessed_level} 
+                            context="assessed" 
+                            comparedTo={jc.required_level || 3} 
+                            size="sm"
+                            skillName={jc.name}
+                            skillIndicators={jc.proficiency_indicators}
+                          />
                         ) : (
                           <Badge variant="outline" className="text-muted-foreground">
                             <Clock className="h-3 w-3 mr-1" />Pending

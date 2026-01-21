@@ -53,8 +53,8 @@ export const DEFAULT_PROFICIENCY_LEVELS = [
   },
   {
     level: 3,
-    name: "Intermediate",
-    shortDescription: "Competent, works independently on routine tasks",
+    name: "Competent",
+    shortDescription: "Works independently, applies good judgment",
     fullDescription: "Works independently on routine tasks. Uses guidelines flexibly. Solves standard problems without assistance.",
     behavioralIndicators: [
       "Completes most work without supervision",
@@ -69,7 +69,7 @@ export const DEFAULT_PROFICIENCY_LEVELS = [
   },
   {
     level: 4,
-    name: "Advanced",
+    name: "Proficient",
     shortDescription: "Expert level, can guide others, handles complex situations",
     fullDescription: "Sees situations holistically. Mentors others. Handles complex and unusual cases. Recognized as a go-to resource.",
     behavioralIndicators: [
@@ -85,7 +85,7 @@ export const DEFAULT_PROFICIENCY_LEVELS = [
   },
   {
     level: 5,
-    name: "Master",
+    name: "Expert",
     shortDescription: "Thought leader, innovates, sets standards",
     fullDescription: "Works from intuition. Innovates and creates new approaches. Sets standards for others. Industry-level expertise.",
     behavioralIndicators: [

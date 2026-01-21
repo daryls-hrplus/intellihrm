@@ -14,45 +14,20 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { DEFAULT_PROFICIENCY_LEVELS } from "./ProficiencyLevelPicker";
 
-// Default proficiency level definitions matching industry standards
-export const DEFAULT_PROFICIENCY_LEVELS = [
-  {
-    level: 1,
-    name: "Novice",
-    description: "Limited knowledge, requires close supervision",
-    icon: "🌱",
-    color: "bg-slate-100 border-slate-300 text-slate-700",
-  },
-  {
-    level: 2,
-    name: "Beginner",
-    description: "Basic understanding, handles routine tasks",
-    icon: "📚",
-    color: "bg-blue-100 border-blue-300 text-blue-700",
-  },
-  {
-    level: 3,
-    name: "Competent",
-    description: "Works independently, applies good judgment",
-    icon: "⚡",
-    color: "bg-green-100 border-green-300 text-green-700",
-  },
-  {
-    level: 4,
-    name: "Proficient",
-    description: "Handles complex situations, mentors others",
-    icon: "🎯",
-    color: "bg-purple-100 border-purple-300 text-purple-700",
-  },
-  {
-    level: 5,
-    name: "Expert",
-    description: "Recognized authority, innovates and sets standards",
-    icon: "🏆",
-    color: "bg-amber-100 border-amber-300 text-amber-700",
-  },
-];
+// Map DEFAULT_PROFICIENCY_LEVELS to the format needed by this editor
+const PROFICIENCY_LEVELS_FOR_EDITOR = DEFAULT_PROFICIENCY_LEVELS.map((level) => ({
+  level: level.level,
+  name: level.name,
+  description: level.shortDescription,
+  icon: level.level === 1 ? "🌱" : level.level === 2 ? "📚" : level.level === 3 ? "⚡" : level.level === 4 ? "🎯" : "🏆",
+  color: level.level === 1 ? "bg-slate-100 border-slate-300 text-slate-700" 
+       : level.level === 2 ? "bg-blue-100 border-blue-300 text-blue-700"
+       : level.level === 3 ? "bg-green-100 border-green-300 text-green-700"
+       : level.level === 4 ? "bg-purple-100 border-purple-300 text-purple-700"
+       : "bg-amber-100 border-amber-300 text-amber-700",
+}));
 
 export interface ProficiencyIndicators {
   [level: string]: string[];
@@ -222,7 +197,7 @@ export function CompetencyBehavioralLevelsEditor({
       </div>
 
       <div className="space-y-3">
-        {DEFAULT_PROFICIENCY_LEVELS.map((levelDef) => {
+        {PROFICIENCY_LEVELS_FOR_EDITOR.map((levelDef) => {
           const levelIndicators = getIndicatorsForLevel(levelDef.level);
           const isExpanded = expandedLevels.has(levelDef.level);
 

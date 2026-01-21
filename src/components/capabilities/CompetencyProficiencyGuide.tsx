@@ -12,7 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { HelpCircle, AlertTriangle, CheckCircle, Lightbulb } from "lucide-react";
-import { DEFAULT_PROFICIENCY_LEVELS } from "./CompetencyBehavioralLevelsEditor";
+import { DEFAULT_PROFICIENCY_LEVELS } from "./ProficiencyLevelPicker";
 
 interface CompetencyProficiencyGuideProps {
   trigger?: React.ReactNode;
@@ -56,16 +56,18 @@ export function CompetencyProficiencyGuide({
               </p>
 
               <div className="space-y-3">
-                {DEFAULT_PROFICIENCY_LEVELS.map((level) => (
-                  <Card key={level.level} className={`${level.color} border`}>
-                    <CardHeader className="py-3 px-4">
-                      <CardTitle className="text-sm flex items-center gap-2">
-                        <span className="text-lg">{level.icon}</span>
-                        Level {level.level}: {level.name}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="py-2 px-4">
-                      <p className="text-sm opacity-90">{level.description}</p>
+                {DEFAULT_PROFICIENCY_LEVELS.map((level) => {
+                  const Icon = level.icon;
+                  return (
+                    <Card key={level.level} className={`${level.bgColor} border`}>
+                      <CardHeader className="py-3 px-4">
+                        <CardTitle className="text-sm flex items-center gap-2">
+                          <Icon className={`h-5 w-5 ${level.color}`} />
+                          Level {level.level}: {level.name}
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="py-2 px-4">
+                        <p className="text-sm opacity-90">{level.shortDescription}</p>
                       <div className="mt-2 text-xs opacity-75">
                         <strong>Typical characteristics:</strong>
                         <ul className="list-disc ml-4 mt-1 space-y-0.5">
@@ -108,7 +110,8 @@ export function CompetencyProficiencyGuide({
                       </div>
                     </CardContent>
                   </Card>
-                ))}
+                  );
+                })}
               </div>
             </section>
 
