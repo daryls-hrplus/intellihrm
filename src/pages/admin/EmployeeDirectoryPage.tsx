@@ -547,28 +547,42 @@ export default function EmployeeDirectoryPage() {
                         </a>
                       </div>
 
-                      {/* Phone + Extension */}
-                      {phoneDisplay && (
-                        <div className="flex items-center gap-2 text-muted-foreground">
-                          <Phone className="h-4 w-4 flex-shrink-0" />
+                      {/* Phone + Extension - Always Show */}
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <Phone className="h-4 w-4 flex-shrink-0" />
+                        {phoneDisplay ? (
                           <a href={`tel:${emp.work_phone || emp.work_mobile}`} className="truncate hover:text-primary">
                             {phoneDisplay}
                           </a>
-                        </div>
-                      )}
+                        ) : (
+                          <span className="text-muted-foreground/50">—</span>
+                        )}
+                      </div>
 
-                      {/* Department */}
-                      {emp.positions.length > 0 && emp.positions[0].department_name && (
-                        <div className="flex items-center gap-2 text-muted-foreground">
-                          <Building className="h-4 w-4 flex-shrink-0" />
+                      {/* Department - Always Show */}
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <Building className="h-4 w-4 flex-shrink-0" />
+                        {emp.positions.length > 0 && emp.positions[0].department_name ? (
                           <span className="truncate">{emp.positions[0].department_name}</span>
-                        </div>
-                      )}
+                        ) : (
+                          <span className="text-muted-foreground/50">—</span>
+                        )}
+                      </div>
 
-                      {/* Manager */}
-                      {emp.manager && (
-                        <div className="flex items-center gap-2 text-muted-foreground">
-                          <Users className="h-4 w-4 flex-shrink-0" />
+                      {/* Work Location - Always Show */}
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <MapPin className="h-4 w-4 flex-shrink-0" />
+                        {emp.company?.name ? (
+                          <span className="truncate">{emp.company.name}</span>
+                        ) : (
+                          <span className="text-muted-foreground/50">—</span>
+                        )}
+                      </div>
+
+                      {/* Manager - Always Show */}
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <Users className="h-4 w-4 flex-shrink-0" />
+                        {emp.manager ? (
                           <span className="truncate">
                             Reports to:{" "}
                             <Link 
@@ -578,21 +592,25 @@ export default function EmployeeDirectoryPage() {
                               {emp.manager.full_name}
                             </Link>
                           </span>
-                        </div>
-                      )}
+                        ) : (
+                          <span className="text-muted-foreground/50">—</span>
+                        )}
+                      </div>
 
-                      {/* Tenure */}
-                      {emp.hire_date && (
-                        <div className="flex items-center gap-2 text-muted-foreground">
-                          <Calendar className="h-4 w-4 flex-shrink-0" />
+                      {/* Tenure - Always Show */}
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <Calendar className="h-4 w-4 flex-shrink-0" />
+                        {emp.hire_date ? (
                           <span className="truncate text-xs">
                             Joined {format(new Date(emp.hire_date), "MMM yyyy")} · {formatTenure(emp.hire_date)}
                           </span>
-                        </div>
-                      )}
+                        ) : (
+                          <span className="text-muted-foreground/50">—</span>
+                        )}
+                      </div>
                     </div>
 
-                    {/* Quick Actions Footer */}
+                    {/* Quick Actions Footer - Always Show All */}
                     <div className="mt-4 pt-3 border-t flex justify-between items-center">
                       <div className="flex gap-1">
                         <Tooltip>
@@ -606,18 +624,24 @@ export default function EmployeeDirectoryPage() {
                           <TooltipContent>Send Email</TooltipContent>
                         </Tooltip>
                         
-                        {(emp.work_phone || emp.work_mobile) && (
-                          <Tooltip>
-                            <TooltipTrigger asChild>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            {(emp.work_phone || emp.work_mobile) ? (
                               <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
                                 <a href={`tel:${emp.work_phone || emp.work_mobile}`}>
                                   <Phone className="h-4 w-4" />
                                 </a>
                               </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>Call</TooltipContent>
-                          </Tooltip>
-                        )}
+                            ) : (
+                              <Button variant="ghost" size="icon" className="h-8 w-8" disabled>
+                                <Phone className="h-4 w-4 opacity-40" />
+                              </Button>
+                            )}
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            {(emp.work_phone || emp.work_mobile) ? "Call" : "No phone number"}
+                          </TooltipContent>
+                        </Tooltip>
                       </div>
                       
                       <Button variant="ghost" size="sm" asChild>
