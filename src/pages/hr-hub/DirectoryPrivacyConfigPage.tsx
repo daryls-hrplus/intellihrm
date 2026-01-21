@@ -320,16 +320,16 @@ export default function DirectoryPrivacyConfigPage() {
                         <div className="space-y-2 col-span-2">
                           <Label className="text-sm">Minimum Grade to View</Label>
                           <Select
-                            value={editedConfig.min_visible_grade_id ?? config.min_visible_grade_id ?? ''}
+                            value={editedConfig.min_visible_grade_id ?? config.min_visible_grade_id ?? '__none__'}
                             onValueChange={(value) => updateConfig(config.id, { 
-                              min_visible_grade_id: value || null 
+                              min_visible_grade_id: value === '__none__' ? null : value 
                             })}
                           >
                             <SelectTrigger>
                               <SelectValue placeholder="Select minimum grade..." />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="">No minimum (visible to all)</SelectItem>
+                              <SelectItem value="__none__">No minimum (visible to all)</SelectItem>
                               {salaryGrades.map(grade => (
                                 <SelectItem key={grade.id} value={grade.id}>
                                   {grade.name} ({grade.code})
