@@ -2,6 +2,7 @@ import { useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
+import type { Json } from "@/integrations/supabase/types";
 
 export type EvidenceType = 
   | 'project' 
@@ -17,6 +18,15 @@ export type EvidenceType =
   | 'metric_achievement';
 
 export type EvidenceValidationStatus = 'pending' | 'validated' | 'rejected' | 'disputed';
+
+// Multi-file attachment structure
+export interface EvidenceAttachment {
+  path: string;
+  type: string;
+  size: number;
+  uploaded_at: string;
+  filename: string;
+}
 
 export interface PerformanceEvidence {
   id: string;
@@ -34,9 +44,12 @@ export interface PerformanceEvidence {
   source_system: string | null;
   external_reference_id: string | null;
   external_url: string | null;
+  // Legacy single attachment fields (kept for backward compatibility)
   attachment_path: string | null;
   attachment_type: string | null;
   attachment_size_bytes: number | null;
+  // New multi-file attachments array
+  attachments: EvidenceAttachment[];
   submitted_by: string | null;
   submitted_at: string;
   validation_status: EvidenceValidationStatus;
@@ -70,9 +83,12 @@ export interface CreateEvidenceData {
   source_system?: string;
   external_reference_id?: string;
   external_url?: string;
+  // Legacy single file
   attachment_path?: string;
   attachment_type?: string;
   attachment_size_bytes?: number;
+  // Multi-file attachments
+  attachments?: EvidenceAttachment[];
 }
 
 export interface UpdateEvidenceData {
@@ -150,8 +166,13 @@ export function usePerformanceEvidence() {
       const { data, error } = await query;
 
       if (error) throw error;
-      setEvidence((data || []) as PerformanceEvidence[]);
-      return data as PerformanceEvidence[];
+      // Parse JSONB attachments field from database
+      const parsed = (data || []).map(item => ({
+        ...item,
+        attachments: (item.attachments || []) as unknown as EvidenceAttachment[],
+      })) as PerformanceEvidence[];
+      setEvidence(parsed);
+      return parsed;
     } catch (error: any) {
       console.error("Error fetching evidence:", error);
       toast.error("Failed to load evidence");
@@ -174,7 +195,22 @@ export function usePerformanceEvidence() {
           company_id: profile.company_id,
           employee_id: employeeId,
           submitted_by: user.id,
-          ...data,
+          evidence_type: data.evidence_type,
+          title: data.title,
+          description: data.description,
+          goal_id: data.goal_id,
+          capability_id: data.capability_id,
+          responsibility_id: data.responsibility_id,
+          appraisal_cycle_id: data.appraisal_cycle_id,
+          participant_id: data.participant_id,
+          score_item_id: data.score_item_id,
+          source_system: data.source_system,
+          external_reference_id: data.external_reference_id,
+          external_url: data.external_url,
+          attachment_path: data.attachment_path,
+          attachment_type: data.attachment_type,
+          attachment_size_bytes: data.attachment_size_bytes,
+          attachments: (data.attachments || []) as unknown as Json,
         })
         .select()
         .single();
@@ -182,7 +218,10 @@ export function usePerformanceEvidence() {
       if (error) throw error;
       
       toast.success("Evidence submitted successfully");
-      return newEvidence as PerformanceEvidence;
+      return {
+        ...newEvidence,
+        attachments: (newEvidence.attachments || []) as unknown as EvidenceAttachment[],
+      } as PerformanceEvidence;
     } catch (error: any) {
       console.error("Error creating evidence:", error);
       toast.error("Failed to submit evidence");
@@ -261,7 +300,7 @@ export function usePerformanceEvidence() {
   const uploadAttachment = useCallback(async (
     file: File,
     employeeId: string
-  ): Promise<{ path: string; type: string; size: number } | null> => {
+  ): Promise<EvidenceAttachment | null> => {
     if (!user) return null;
 
     setUploading(true);
@@ -281,6 +320,8 @@ export function usePerformanceEvidence() {
         path: filePath,
         type: file.type,
         size: file.size,
+        uploaded_at: new Date().toISOString(),
+        filename: file.name,
       };
     } catch (error: any) {
       console.error("Error uploading attachment:", error);
@@ -290,6 +331,114 @@ export function usePerformanceEvidence() {
       setUploading(false);
     }
   }, [user]);
+
+  // Upload multiple files and return array of attachments
+  const uploadMultipleAttachments = useCallback(async (
+    files: File[],
+    employeeId: string,
+    onProgress?: (uploaded: number, total: number) => void
+  ): Promise<EvidenceAttachment[]> => {
+    if (!user || files.length === 0) return [];
+
+    const attachments: EvidenceAttachment[] = [];
+    
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const result = await uploadAttachment(file, employeeId);
+      if (result) {
+        attachments.push(result);
+      }
+      onProgress?.(i + 1, files.length);
+    }
+
+    return attachments;
+  }, [user, uploadAttachment]);
+
+  // Add attachment to existing evidence record
+  const addAttachmentToEvidence = useCallback(async (
+    evidenceId: string,
+    file: File,
+    employeeId: string
+  ): Promise<boolean> => {
+    if (!user) return false;
+
+    try {
+      // First get current attachments
+      const { data: currentEvidence, error: fetchError } = await supabase
+        .from("performance_evidence")
+        .select("attachments")
+        .eq("id", evidenceId)
+        .single();
+
+      if (fetchError) throw fetchError;
+
+      // Upload new file
+      const newAttachment = await uploadAttachment(file, employeeId);
+      if (!newAttachment) return false;
+
+      // Merge attachments
+      const existingAttachments = (currentEvidence?.attachments || []) as unknown as EvidenceAttachment[];
+      const updatedAttachments = [...existingAttachments, newAttachment];
+
+      // Update record
+      const { error: updateError } = await supabase
+        .from("performance_evidence")
+        .update({ attachments: updatedAttachments as unknown as Json[] })
+        .eq("id", evidenceId);
+
+      if (updateError) throw updateError;
+
+      toast.success("Attachment added");
+      return true;
+    } catch (error: any) {
+      console.error("Error adding attachment:", error);
+      toast.error("Failed to add attachment");
+      return false;
+    }
+  }, [user, uploadAttachment]);
+
+  // Remove attachment from evidence record
+  const removeAttachmentFromEvidence = useCallback(async (
+    evidenceId: string,
+    attachmentPath: string
+  ): Promise<boolean> => {
+    try {
+      // Get current attachments
+      const { data: currentEvidence, error: fetchError } = await supabase
+        .from("performance_evidence")
+        .select("attachments, is_immutable")
+        .eq("id", evidenceId)
+        .single();
+
+      if (fetchError) throw fetchError;
+      if (currentEvidence?.is_immutable) {
+        toast.error("Cannot modify locked evidence");
+        return false;
+      }
+
+      // Filter out the attachment
+      const existingAttachments = (currentEvidence?.attachments || []) as unknown as EvidenceAttachment[];
+      const updatedAttachments = existingAttachments.filter(a => a.path !== attachmentPath);
+
+      // Update record
+      const { error: updateError } = await supabase
+        .from("performance_evidence")
+        .update({ attachments: updatedAttachments as unknown as Json[] })
+        .eq("id", evidenceId);
+
+      if (updateError) throw updateError;
+
+      // Delete from storage
+      await supabase.storage.from("performance-evidence").remove([attachmentPath]);
+
+      toast.success("Attachment removed");
+      return true;
+    } catch (error: any) {
+      console.error("Error removing attachment:", error);
+      toast.error("Failed to remove attachment");
+      return false;
+    }
+  }, []);
 
   const getAttachmentUrl = useCallback(async (path: string): Promise<string | null> => {
     try {
@@ -303,6 +452,22 @@ export function usePerformanceEvidence() {
       return null;
     }
   }, []);
+
+  // Get all attachment URLs for an evidence record
+  const getAllAttachmentUrls = useCallback(async (
+    attachments: EvidenceAttachment[]
+  ): Promise<{ attachment: EvidenceAttachment; url: string }[]> => {
+    const results: { attachment: EvidenceAttachment; url: string }[] = [];
+    
+    for (const attachment of attachments) {
+      const url = await getAttachmentUrl(attachment.path);
+      if (url) {
+        results.push({ attachment, url });
+      }
+    }
+    
+    return results;
+  }, [getAttachmentUrl]);
 
   const fetchEvidenceForGoal = useCallback(async (goalId: string) => {
     return fetchEvidence({ goal_id: goalId });
@@ -352,7 +517,11 @@ export function usePerformanceEvidence() {
     validateEvidence,
     markImmutable,
     uploadAttachment,
+    uploadMultipleAttachments,
+    addAttachmentToEvidence,
+    removeAttachmentFromEvidence,
     getAttachmentUrl,
+    getAllAttachmentUrls,
     getEvidenceStats,
   };
 }
