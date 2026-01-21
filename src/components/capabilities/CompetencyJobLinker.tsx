@@ -149,7 +149,7 @@ export function CompetencyJobLinker({
                         <div className="min-w-0">
                           <p className="text-sm font-medium truncate">{req.job?.name || "Unknown Job"}</p>
                           <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                            <ProficiencyLevelBadge level={req.required_proficiency_level} size="sm" />
+                            <ProficiencyLevelBadge level={req.required_proficiency_level} size="sm" context="reference" />
                             <span>Weight: {req.weighting}%</span>
                           </div>
                         </div>

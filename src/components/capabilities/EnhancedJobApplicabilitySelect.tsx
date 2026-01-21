@@ -24,13 +24,13 @@ interface EnhancedJobApplicabilitySelectProps {
   existingRequirements?: { job_id: string; required_proficiency_level: number; weighting: number | null; is_required: boolean }[];
 }
 
-const PROFICIENCY_LEVELS = [
-  { value: 1, label: "1 - Basic" },
-  { value: 2, label: "2 - Developing" },
-  { value: 3, label: "3 - Proficient" },
-  { value: 4, label: "4 - Advanced" },
-  { value: 5, label: "5 - Expert" },
-];
+import { DEFAULT_PROFICIENCY_LEVELS } from "@/components/capabilities/ProficiencyLevelPicker";
+
+// Derived from canonical source for dropdown format
+const PROFICIENCY_LEVELS = DEFAULT_PROFICIENCY_LEVELS.map((l) => ({
+  value: l.level,
+  label: `${l.level} - ${l.name}`,
+}));
 
 export function EnhancedJobApplicabilitySelect({
   selectedRequirements,
