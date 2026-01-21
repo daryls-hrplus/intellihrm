@@ -14,7 +14,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
-import { Users, GitMerge, FileText, AlertTriangle, Target, ClipboardList, Goal, Heart, Rocket } from "lucide-react";
+import { Users, GitMerge, FileText, AlertTriangle, Target, ClipboardList, Goal, Heart, Rocket, Clock } from "lucide-react";
 import { useAppraisalFormTemplates } from "@/hooks/useAppraisalFormTemplates";
 import { format } from "date-fns";
 import { checkCycleOverlap } from "@/utils/cycleOverlapCheck";
@@ -97,6 +97,13 @@ interface AppraisalCycle {
   start_date: string;
   end_date: string;
   evaluation_deadline: string | null;
+  // Phase-specific deadlines (optional)
+  self_assessment_deadline?: string | null;
+  feedback_360_deadline?: string | null;
+  manager_review_deadline?: string | null;
+  calibration_deadline?: string | null;
+  finalization_deadline?: string | null;
+  acknowledgment_deadline?: string | null;
   status: string;
   competency_weight: number;
   responsibility_weight: number;
@@ -164,6 +171,13 @@ export function AppraisalCycleDialog({
     start_date: "",
     end_date: "",
     evaluation_deadline: "",
+    // Phase-specific deadlines
+    self_assessment_deadline: "",
+    feedback_360_deadline: "",
+    manager_review_deadline: "",
+    calibration_deadline: "",
+    finalization_deadline: "",
+    acknowledgment_deadline: "",
     status: "draft",
     competency_weight: 40,
     responsibility_weight: 30,
@@ -184,6 +198,12 @@ export function AppraisalCycleDialog({
         start_date: cycle.start_date,
         end_date: cycle.end_date,
         evaluation_deadline: cycle.evaluation_deadline || "",
+        self_assessment_deadline: cycle.self_assessment_deadline || "",
+        feedback_360_deadline: cycle.feedback_360_deadline || "",
+        manager_review_deadline: cycle.manager_review_deadline || "",
+        calibration_deadline: cycle.calibration_deadline || "",
+        finalization_deadline: cycle.finalization_deadline || "",
+        acknowledgment_deadline: cycle.acknowledgment_deadline || "",
         status: cycle.status,
         competency_weight: cycle.competency_weight,
         responsibility_weight: cycle.responsibility_weight,
@@ -204,6 +224,12 @@ export function AppraisalCycleDialog({
         start_date: "",
         end_date: "",
         evaluation_deadline: "",
+        self_assessment_deadline: "",
+        feedback_360_deadline: "",
+        manager_review_deadline: "",
+        calibration_deadline: "",
+        finalization_deadline: "",
+        acknowledgment_deadline: "",
         status: "draft",
         competency_weight: defaultTemplate?.competencies_weight ?? 40,
         responsibility_weight: defaultTemplate?.responsibilities_weight ?? 30,
@@ -336,6 +362,13 @@ export function AppraisalCycleDialog({
         start_date: formData.start_date,
         end_date: formData.end_date,
         evaluation_deadline: formData.evaluation_deadline || null,
+        // Phase-specific deadlines
+        self_assessment_deadline: formData.self_assessment_deadline || null,
+        feedback_360_deadline: formData.feedback_360_deadline || null,
+        manager_review_deadline: formData.manager_review_deadline || null,
+        calibration_deadline: formData.calibration_deadline || null,
+        finalization_deadline: formData.finalization_deadline || null,
+        acknowledgment_deadline: formData.acknowledgment_deadline || null,
         status: formData.status,
         competency_weight: formData.competency_weight,
         responsibility_weight: formData.responsibility_weight,
@@ -548,6 +581,69 @@ export function AppraisalCycleDialog({
               )}
             </div>
           </div>
+
+          {/* Phase-Specific Deadlines */}
+          <Card className="border-muted">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm flex items-center gap-2">
+                <Clock className="h-4 w-4" />
+                Phase Deadlines
+              </CardTitle>
+              <CardDescription className="text-xs">
+                Configure specific deadlines for each phase of the appraisal journey
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="grid gap-4 md:grid-cols-3">
+              <div>
+                <Label className="text-xs">Self-Assessment</Label>
+                <DatePicker
+                  value={formData.self_assessment_deadline}
+                  onChange={(date) => setFormData({ ...formData, self_assessment_deadline: date ? format(date, "yyyy-MM-dd") : "" })}
+                  placeholder="Optional"
+                />
+              </div>
+              <div>
+                <Label className="text-xs">360° Feedback</Label>
+                <DatePicker
+                  value={formData.feedback_360_deadline}
+                  onChange={(date) => setFormData({ ...formData, feedback_360_deadline: date ? format(date, "yyyy-MM-dd") : "" })}
+                  placeholder="Optional"
+                />
+              </div>
+              <div>
+                <Label className="text-xs">Manager Review</Label>
+                <DatePicker
+                  value={formData.manager_review_deadline}
+                  onChange={(date) => setFormData({ ...formData, manager_review_deadline: date ? format(date, "yyyy-MM-dd") : "" })}
+                  placeholder="Optional"
+                />
+              </div>
+              <div>
+                <Label className="text-xs">Calibration</Label>
+                <DatePicker
+                  value={formData.calibration_deadline}
+                  onChange={(date) => setFormData({ ...formData, calibration_deadline: date ? format(date, "yyyy-MM-dd") : "" })}
+                  placeholder="Optional"
+                />
+              </div>
+              <div>
+                <Label className="text-xs">Finalization</Label>
+                <DatePicker
+                  value={formData.finalization_deadline}
+                  onChange={(date) => setFormData({ ...formData, finalization_deadline: date ? format(date, "yyyy-MM-dd") : "" })}
+                  placeholder="Optional"
+                />
+              </div>
+              <div>
+                <Label className="text-xs">Acknowledgment</Label>
+                <DatePicker
+                  value={formData.acknowledgment_deadline}
+                  onChange={(date) => setFormData({ ...formData, acknowledgment_deadline: date ? format(date, "yyyy-MM-dd") : "" })}
+                  placeholder="Optional"
+                />
+              </div>
+            </CardContent>
+          </Card>
 
           {/* Form Template Selector */}
           <Card className="border-primary/20">
