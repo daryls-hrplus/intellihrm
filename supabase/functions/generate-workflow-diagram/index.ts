@@ -68,18 +68,23 @@ serve(async (req) => {
     const systemPrompt = `You are an expert at creating Mermaid.js flowchart diagrams for business workflows.
 Generate a clear, professional Mermaid flowchart diagram based on the workflow template provided.
 
-Rules:
+CRITICAL SYNTAX RULES - YOU MUST FOLLOW THESE EXACTLY:
 1. Use the 'flowchart TD' (top-down) direction
 2. Use descriptive node IDs like 'start', 'step1', 'decision1', 'end_approve', 'end_reject'
-3. Style the nodes appropriately:
-   - Start node: Use ((Start)) for circle
-   - End nodes: Use ((Approved)) or ((Rejected)) for circles
-   - Regular steps: Use [Step Name] for rectangles
-   - Decision/conditional steps: Use {Condition?} for diamonds
-4. Include escalation paths if defined
-5. Show the flow clearly from start to possible end states
-6. Keep labels concise but informative
-7. Add styling at the end for visual appeal:
+3. Node syntax:
+   - Start node: start((Start))
+   - End nodes: end_approve((Approved)) or end_reject((Rejected))
+   - Regular steps: step1[Step Name]
+   - Decision/conditional steps: decision1{Approve?}
+4. NEVER use parentheses () inside square brackets [] or curly braces {}
+   - WRONG: step1[Submit to Manager (If Applicable)]
+   - CORRECT: step1[Submit to Manager - If Applicable]
+5. NEVER use special characters like (), [], {}, <>, | inside node labels
+6. Use simple alphanumeric text with spaces, hyphens, and basic punctuation only
+7. Include escalation paths if defined
+8. Show the flow clearly from start to possible end states
+9. Keep labels concise but informative
+10. Add styling at the end:
    - classDef startEnd fill:#10b981,stroke:#059669,color:#fff
    - classDef approval fill:#3b82f6,stroke:#2563eb,color:#fff
    - classDef decision fill:#f59e0b,stroke:#d97706,color:#fff
@@ -145,10 +150,31 @@ Create a professional flowchart showing the complete approval process from submi
     }
 
     // Clean up the response - remove any markdown code blocks if present
-    const cleanedCode = mermaidCode
+    let cleanedCode = mermaidCode
       .replace(/```mermaid\n?/g, '')
       .replace(/```\n?/g, '')
       .trim();
+    
+    // Sanitize the code to fix common Mermaid syntax issues
+    // Replace parentheses inside square brackets with dashes
+    cleanedCode = cleanedCode.replace(/\[([^\]]*)\]/g, (_match: string, content: string) => {
+      const sanitized = content
+        .replace(/\(/g, ' - ')
+        .replace(/\)/g, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+      return `[${sanitized}]`;
+    });
+    
+    // Replace parentheses inside curly braces with dashes
+    cleanedCode = cleanedCode.replace(/\{([^}]*)\}/g, (_match: string, content: string) => {
+      const sanitized = content
+        .replace(/\(/g, ' - ')
+        .replace(/\)/g, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+      return `{${sanitized}}`;
+    });
 
     console.log('Generated Mermaid code:', cleanedCode.substring(0, 200) + '...');
 
