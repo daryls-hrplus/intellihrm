@@ -30,6 +30,7 @@ import {
   Percent,
   Shield,
   Bell,
+  Eye,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -56,6 +57,7 @@ import { CalendarSync } from "@/components/appraisals/CalendarSync";
 import { HRResponseEscalationPanel } from "@/components/performance/setup/HRResponseEscalationPanel";
 import { IntegrationDashboardWidget } from "@/components/performance/setup/IntegrationDashboardWidget";
 import { ResendAppraisalNotificationsDialog } from "@/components/performance/ResendAppraisalNotificationsDialog";
+import { ReleaseRatingsDialog } from "@/components/performance/ReleaseRatingsDialog";
 
 interface AppraisalCycle {
   id: string;
@@ -120,6 +122,10 @@ export default function AppraisalsPage() {
   // Resend notifications state
   const [resendNotificationsDialogOpen, setResendNotificationsDialogOpen] = useState(false);
   const [resendNotificationsCycle, setResendNotificationsCycle] = useState<AppraisalCycle | null>(null);
+  
+  // Release ratings state
+  const [releaseRatingsDialogOpen, setReleaseRatingsDialogOpen] = useState(false);
+  const [releaseRatingsCycle, setReleaseRatingsCycle] = useState<AppraisalCycle | null>(null);
 
   // Company switcher for admin/HR
   const [companies, setCompanies] = useState<{ id: string; name: string }[]>([]);
@@ -555,7 +561,21 @@ export default function AppraisalsPage() {
                             </div>
                             <Progress value={cycle.completion_rate} className="h-2" />
                           </div>
-                          <div className="flex gap-2">
+                          <div className="flex gap-2 flex-wrap">
+                            {/* Release Ratings button - show for active cycles with finalized participants */}
+                            {(cycle.status === "active" || cycle.status === "in_progress") && (cycle.completed_count || 0) > 0 && (
+                              <Button
+                                variant="default"
+                                size="sm"
+                                onClick={() => {
+                                  setReleaseRatingsCycle(cycle);
+                                  setReleaseRatingsDialogOpen(true);
+                                }}
+                              >
+                                <Eye className="mr-2 h-4 w-4" />
+                                Release Ratings
+                              </Button>
+                            )}
                             {cycle.status === "active" && (
                               <Button
                                 variant="outline"
@@ -941,6 +961,17 @@ export default function AppraisalsPage() {
             onOpenChange={setResendNotificationsDialogOpen}
             cycleId={resendNotificationsCycle.id}
             cycleName={resendNotificationsCycle.name}
+          />
+        )}
+
+        {/* Release Ratings Dialog */}
+        {releaseRatingsCycle && (
+          <ReleaseRatingsDialog
+            open={releaseRatingsDialogOpen}
+            onOpenChange={setReleaseRatingsDialogOpen}
+            cycleId={releaseRatingsCycle.id}
+            cycleName={releaseRatingsCycle.name}
+            onSuccess={fetchData}
           />
         )}
       </div>
