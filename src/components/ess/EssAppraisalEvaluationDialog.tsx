@@ -560,10 +560,10 @@ export function EssAppraisalEvaluationDialog({
                 </TabsTrigger>
               </TabsList>
 
-              <div className="flex-1 mt-4 overflow-y-auto pb-8 border-2 border-blue-500">
+              <div className="flex-1 mt-4 overflow-y-auto pb-8">
                 {/* Goals Tab */}
                 {enabledCategories.goals && (
-                  <TabsContent value="goals" className="space-y-3 m-0 border-2 border-green-500">
+                  <TabsContent value="goals" className="space-y-3 m-0">
                     {goalScores.length === 0 ? (
                       <Card><CardContent className="py-8 text-center text-muted-foreground">No goals assigned</CardContent></Card>
                     ) : (
@@ -589,7 +589,7 @@ export function EssAppraisalEvaluationDialog({
 
                 {/* Competencies Tab */}
                 {enabledCategories.competencies && (
-                  <TabsContent value="competencies" className="space-y-3 m-0 border-2 border-green-500">
+                  <TabsContent value="competencies" className="space-y-3 m-0">
                     {competencyScores.length === 0 ? (
                       <Card><CardContent className="py-8 text-center text-muted-foreground">No competencies assigned</CardContent></Card>
                     ) : (
@@ -622,7 +622,7 @@ export function EssAppraisalEvaluationDialog({
 
                 {/* Responsibilities Tab */}
                 {enabledCategories.responsibilities && (
-                  <TabsContent value="responsibilities" className="space-y-3 m-0 border-2 border-green-500">
+                  <TabsContent value="responsibilities" className="space-y-3 m-0">
                     {responsibilityScores.length === 0 ? (
                       <Card><CardContent className="py-8 text-center text-muted-foreground">No responsibilities assigned</CardContent></Card>
                     ) : (
@@ -647,7 +647,7 @@ export function EssAppraisalEvaluationDialog({
                 )}
 
                 {/* Reflection Tab */}
-                <TabsContent value="reflection" className="space-y-4 m-0 border-2 border-green-500">
+                <TabsContent value="reflection" className="space-y-4 m-0">
                   <Card>
                     <CardHeader>
                       <CardTitle className="text-base">Overall Self-Reflection</CardTitle>
