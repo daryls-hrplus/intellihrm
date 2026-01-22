@@ -14,6 +14,24 @@ interface SkillGapInput {
   cycleId?: string;
 }
 
+interface ConversionRule {
+  performance_rating: number;
+  proficiency_change: number;
+  condition: "if_below_max" | "if_above_min" | "maintain" | "always";
+  label: string;
+}
+
+interface ProficiencyHistoryEntry {
+  date: string;
+  old_level: number;
+  new_level: number;
+  source: string;
+  source_id: string;
+  performance_rating: number;
+  changed_by: string | null;
+  reason: string;
+}
+
 serve(async (req) => {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
@@ -60,6 +78,98 @@ serve(async (req) => {
   }
 });
 
+/**
+ * Fetches conversion rules for a company, falling back to defaults
+ */
+async function getConversionRules(supabase: any, companyId: string): Promise<ConversionRule[]> {
+  // Try company-specific rules first
+  const { data: companyRules } = await supabase
+    .from('rating_proficiency_conversion_rules')
+    .select('rules')
+    .eq('company_id', companyId)
+    .eq('is_active', true)
+    .maybeSingle();
+
+  if (companyRules?.rules && Array.isArray(companyRules.rules)) {
+    return companyRules.rules as ConversionRule[];
+  }
+
+  // Fall back to default rules
+  const { data: defaultRules } = await supabase
+    .from('rating_proficiency_conversion_rules')
+    .select('rules')
+    .eq('is_default', true)
+    .eq('is_active', true)
+    .maybeSingle();
+
+  if (defaultRules?.rules && Array.isArray(defaultRules.rules)) {
+    return defaultRules.rules as ConversionRule[];
+  }
+
+  // Ultimate fallback: industry-standard defaults
+  return [
+    { performance_rating: 5, proficiency_change: 1, condition: "if_below_max", label: "Exceptional - Proficiency Increased" },
+    { performance_rating: 4, proficiency_change: 0, condition: "maintain", label: "Exceeds - Proficiency Maintained" },
+    { performance_rating: 3, proficiency_change: 0, condition: "maintain", label: "Meets - Proficiency Maintained" },
+    { performance_rating: 2, proficiency_change: -1, condition: "if_above_min", label: "Needs Improvement - May Decrease" },
+    { performance_rating: 1, proficiency_change: -1, condition: "always", label: "Unsatisfactory - Proficiency Decreased" },
+  ];
+}
+
+/**
+ * Converts a performance rating to a proficiency level change using conversion rules
+ */
+function convertRatingToProficiency(
+  rules: ConversionRule[],
+  performanceRating: number,
+  currentProficiency: number
+): { newLevel: number; change: number; reason: string } {
+  const roundedRating = Math.round(performanceRating);
+  const rule = rules.find(r => r.performance_rating === roundedRating);
+
+  if (!rule) {
+    // No rule found, maintain current level
+    return {
+      newLevel: currentProficiency,
+      change: 0,
+      reason: 'No conversion rule found - maintaining current level'
+    };
+  }
+
+  let change = rule.proficiency_change;
+  let reason = rule.label;
+
+  // Apply conditions
+  switch (rule.condition) {
+    case 'if_below_max':
+      if (currentProficiency >= 5) {
+        change = 0;
+        reason = `${rule.label} (already at maximum)`;
+      }
+      break;
+    case 'if_above_min':
+      if (currentProficiency <= 1) {
+        change = 0;
+        reason = `${rule.label} (already at minimum)`;
+      }
+      break;
+    case 'maintain':
+      change = 0;
+      break;
+    case 'always':
+      // Apply the change regardless
+      break;
+  }
+
+  const newLevel = Math.max(1, Math.min(5, currentProficiency + change));
+
+  return {
+    newLevel,
+    change: newLevel - currentProficiency,
+    reason
+  };
+}
+
 async function analyzeAppraisalGaps(supabase: any, participantId: string, employeeId: string) {
   console.log(`Analyzing appraisal gaps for participant: ${participantId}`);
 
@@ -74,6 +184,10 @@ async function analyzeAppraisalGaps(supabase: any, participantId: string, employ
     throw new Error('Employee not found');
   }
 
+  // Fetch conversion rules for this company
+  const conversionRules = await getConversionRules(supabase, employee.company_id);
+  console.log(`Using ${conversionRules.length} conversion rules`);
+
   // Get appraisal scores for competencies
   const { data: scores } = await supabase
     .from('appraisal_scores')
@@ -83,7 +197,7 @@ async function analyzeAppraisalGaps(supabase: any, participantId: string, employ
 
   if (!scores || scores.length === 0) {
     console.log('No competency scores found for this appraisal');
-    return { gapsCreated: 0, assessedUpdated: 0, message: 'No competency scores to analyze' };
+    return { gapsCreated: 0, assessedUpdated: 0, proficiencyUpdates: [], message: 'No competency scores to analyze' };
   }
 
   // Get the manager who submitted the appraisal
@@ -95,17 +209,59 @@ async function analyzeAppraisalGaps(supabase: any, participantId: string, employ
 
   const managerId = participant?.manager_id || null;
 
-  // UPDATE ASSESSED PROFICIENCY LEVELS IN EMPLOYEE_COMPETENCIES
+  // Get current proficiency levels for all competencies
+  const competencyIds = scores.map((s: any) => s.item_id).filter(Boolean);
+  const { data: currentCompetencies } = await supabase
+    .from('employee_competencies')
+    .select('competency_id, assessed_proficiency_level, proficiency_history')
+    .eq('employee_id', employeeId)
+    .in('competency_id', competencyIds)
+    .is('end_date', null);
+
+  const currentLevels: Record<string, { level: number; history: any[] }> = {};
+  for (const ec of currentCompetencies || []) {
+    currentLevels[ec.competency_id] = {
+      level: ec.assessed_proficiency_level || 3,
+      history: ec.proficiency_history || []
+    };
+  }
+
+  // UPDATE PROFICIENCY LEVELS USING CONVERSION LOGIC
   let assessedUpdated = 0;
+  const proficiencyUpdates: any[] = [];
+
   for (const score of scores) {
     if (score.item_id && score.rating) {
+      const current = currentLevels[score.item_id] || { level: 3, history: [] };
+      const conversion = convertRatingToProficiency(
+        conversionRules,
+        score.rating,
+        current.level
+      );
+
+      // Create history entry
+      const historyEntry: ProficiencyHistoryEntry = {
+        date: new Date().toISOString().split('T')[0],
+        old_level: current.level,
+        new_level: conversion.newLevel,
+        source: 'appraisal',
+        source_id: participantId,
+        performance_rating: score.rating,
+        changed_by: managerId,
+        reason: conversion.reason
+      };
+
+      // Update with new proficiency and history
+      const newHistory = [...current.history, historyEntry];
+
       const { error: updateError } = await supabase
         .from('employee_competencies')
         .update({
-          assessed_proficiency_level: Math.round(score.rating),
+          assessed_proficiency_level: conversion.newLevel,
           assessed_date: new Date().toISOString().split('T')[0],
           assessed_by: managerId,
           assessment_source: 'appraisal',
+          proficiency_history: newHistory
         })
         .eq('employee_id', employeeId)
         .eq('competency_id', score.item_id)
@@ -113,7 +269,16 @@ async function analyzeAppraisalGaps(supabase: any, participantId: string, employ
 
       if (!updateError) {
         assessedUpdated++;
-        console.log(`Updated assessed level for competency ${score.item_id}: ${score.rating}`);
+        proficiencyUpdates.push({
+          competencyId: score.item_id,
+          competencyName: score.item_name,
+          performanceRating: score.rating,
+          oldLevel: current.level,
+          newLevel: conversion.newLevel,
+          change: conversion.change,
+          reason: conversion.reason
+        });
+        console.log(`Updated proficiency for ${score.item_name}: ${current.level} → ${conversion.newLevel} (rating: ${score.rating})`);
       }
     }
   }
@@ -153,12 +318,12 @@ async function analyzeAppraisalGaps(supabase: any, participantId: string, employ
     }
   }
 
-  // Analyze gaps
+  // Analyze gaps based on NEW proficiency levels (after conversion)
   const gapsToCreate = [];
   
-  for (const score of scores) {
-    const required = requiredLevels[score.item_id];
-    const currentLevel = score.rating || 0;
+  for (const update of proficiencyUpdates) {
+    const required = requiredLevels[update.competencyId];
+    const currentLevel = update.newLevel;
     
     // If we have a requirement, check for gap
     if (required && currentLevel < required.level) {
@@ -173,14 +338,14 @@ async function analyzeAppraisalGaps(supabase: any, participantId: string, employ
       gapsToCreate.push({
         employee_id: employeeId,
         company_id: employee.company_id,
-        capability_id: score.item_id,
-        capability_name: score.item_name || required.name,
+        capability_id: update.competencyId,
+        capability_name: update.competencyName || required.name,
         required_level: required.level,
-        current_level: Math.round(currentLevel),
+        current_level: currentLevel,
         priority,
         source: 'appraisal',
         source_reference_id: participantId,
-        recommended_actions: generateRecommendations(score.item_name, gapScore),
+        recommended_actions: generateRecommendations(update.competencyName, gapScore),
         status: 'open'
       });
     }
@@ -198,8 +363,13 @@ async function analyzeAppraisalGaps(supabase: any, participantId: string, employ
     }
   }
 
-  console.log(`Created ${gapsToCreate.length} skill gaps from appraisal, updated ${assessedUpdated} assessed proficiency levels`);
-  return { gapsCreated: gapsToCreate.length, assessedUpdated, gaps: gapsToCreate };
+  console.log(`Created ${gapsToCreate.length} skill gaps, updated ${assessedUpdated} proficiency levels with history`);
+  return { 
+    gapsCreated: gapsToCreate.length, 
+    assessedUpdated, 
+    proficiencyUpdates,
+    gaps: gapsToCreate 
+  };
 }
 
 async function analyzeEmployeeGaps(supabase: any, employeeId: string, companyId: string) {
@@ -342,12 +512,14 @@ async function bulkProcessCycle(supabase: any, cycleId: string, companyId: strin
   }
 
   let totalGaps = 0;
+  let totalProficiencyUpdates = 0;
   const errors = [];
 
   for (const participant of participants) {
     try {
       const result = await analyzeAppraisalGaps(supabase, participant.id, participant.employee_id);
       totalGaps += result.gapsCreated;
+      totalProficiencyUpdates += result.assessedUpdated;
     } catch (error: any) {
       console.error(`Error processing participant ${participant.id}:`, error);
       errors.push({ participantId: participant.id, error: error?.message || 'Unknown error' });
@@ -357,6 +529,7 @@ async function bulkProcessCycle(supabase: any, cycleId: string, companyId: strin
   return {
     processed: participants.length,
     gapsCreated: totalGaps,
+    proficiencyUpdates: totalProficiencyUpdates,
     errors: errors.length > 0 ? errors : undefined
   };
 }
