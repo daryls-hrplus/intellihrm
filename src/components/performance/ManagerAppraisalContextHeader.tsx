@@ -1,48 +1,40 @@
 import { format, differenceInDays, parseISO } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { WarningCallout } from "@/components/ui/semantic-callout";
 import { 
   User, 
   Briefcase, 
   Building2, 
   Calendar, 
   Clock, 
-  AlertTriangle,
-  UserCheck,
-  Info
+  CheckCircle2,
+  AlertCircle,
+  FileCheck
 } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
 
-interface AppraisalContextHeaderProps {
-  employeeName: string | null;
+interface ManagerAppraisalContextHeaderProps {
+  employeeName: string;
   positionTitle: string | null;
   departmentName: string | null;
-  evaluatorName: string | null;
   performancePeriodStart: string | null;
   performancePeriodEnd: string | null;
-  selfAssessmentDeadline: string | null;
-  cycleName: string;
+  evaluationDeadline: string | null;
+  selfAssessmentSubmittedAt: string | null;
 }
 
-export function AppraisalContextHeader({
+export function ManagerAppraisalContextHeader({
   employeeName,
   positionTitle,
   departmentName,
-  evaluatorName,
   performancePeriodStart,
   performancePeriodEnd,
-  selfAssessmentDeadline,
-  cycleName,
-}: AppraisalContextHeaderProps) {
-  const { user } = useAuth();
-
-  // Fallback for employee name: use auth profile email if no name
-  const displayEmployeeName = employeeName || user?.email?.split("@")[0] || "Employee";
-  // Calculate days until deadline
+  evaluationDeadline,
+  selfAssessmentSubmittedAt,
+}: ManagerAppraisalContextHeaderProps) {
+  // Calculate days until manager deadline
   const getDaysRemaining = () => {
-    if (!selfAssessmentDeadline) return null;
-    const deadline = parseISO(selfAssessmentDeadline);
+    if (!evaluationDeadline) return null;
+    const deadline = parseISO(evaluationDeadline);
     const today = new Date();
     return differenceInDays(deadline, today);
   };
@@ -68,10 +60,10 @@ export function AppraisalContextHeader({
     return `${start} – ${end}`;
   };
 
-  // Format deadline with relative indicator
+  // Format deadline
   const formatDeadline = () => {
-    if (!selfAssessmentDeadline) return null;
-    return format(parseISO(selfAssessmentDeadline), "MMMM d, yyyy");
+    if (!evaluationDeadline) return null;
+    return format(parseISO(evaluationDeadline), "MMMM d, yyyy");
   };
 
   const getDeadlineBadge = () => {
@@ -80,7 +72,7 @@ export function AppraisalContextHeader({
     if (daysRemaining < 0) {
       return (
         <Badge className="bg-destructive/20 text-destructive border-destructive/30">
-          <AlertTriangle className="h-3 w-3 mr-1" />
+          <AlertCircle className="h-3 w-3 mr-1" />
           {Math.abs(daysRemaining)} day{Math.abs(daysRemaining) !== 1 ? "s" : ""} overdue
         </Badge>
       );
@@ -125,81 +117,67 @@ export function AppraisalContextHeader({
   const deadline = formatDeadline();
 
   return (
-    <Card className="border-border bg-muted/20">
+    <Card className="border-border bg-muted/20 mb-4">
       <CardContent className="p-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Left Column - Employee Information */}
           <div className="space-y-2">
-            {/* Always show employee name with fallback */}
             <div className="flex items-center gap-2 text-sm">
               <User className="h-4 w-4 text-muted-foreground shrink-0" />
               <span className="text-muted-foreground">Employee:</span>
-              <span className="font-medium text-foreground">{displayEmployeeName}</span>
+              <span className="font-medium text-foreground">{employeeName}</span>
             </div>
             
-            {positionTitle ? (
+            {positionTitle && (
               <div className="flex items-center gap-2 text-sm">
                 <Briefcase className="h-4 w-4 text-muted-foreground shrink-0" />
                 <span className="text-muted-foreground">Position:</span>
                 <span className="font-medium text-foreground">{positionTitle}</span>
               </div>
-            ) : (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Briefcase className="h-4 w-4 shrink-0" />
-                <span>Position:</span>
-                <span className="italic">Not assigned</span>
-              </div>
             )}
             
-            {departmentName ? (
+            {departmentName && (
               <div className="flex items-center gap-2 text-sm">
                 <Building2 className="h-4 w-4 text-muted-foreground shrink-0" />
                 <span className="text-muted-foreground">Department:</span>
                 <span className="font-medium text-foreground">{departmentName}</span>
               </div>
-            ) : (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Building2 className="h-4 w-4 shrink-0" />
-                <span>Department:</span>
-                <span className="italic">Not assigned</span>
-              </div>
             )}
-            
-            {evaluatorName ? (
-              <div className="flex items-center gap-2 text-sm">
-                <UserCheck className="h-4 w-4 text-muted-foreground shrink-0" />
-                <span className="text-muted-foreground">Manager:</span>
-                <span className="font-medium text-foreground">{evaluatorName}</span>
-              </div>
-            ) : (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <UserCheck className="h-4 w-4 shrink-0" />
-                <span>Manager:</span>
-                <span className="italic">Not assigned</span>
-              </div>
-            )}
+
+            {/* Self-Assessment Status */}
+            <div className="flex items-center gap-2 text-sm">
+              <FileCheck className="h-4 w-4 text-muted-foreground shrink-0" />
+              <span className="text-muted-foreground">Self-Assessment:</span>
+              {selfAssessmentSubmittedAt ? (
+                <div className="flex items-center gap-1.5">
+                  <CheckCircle2 className="h-3.5 w-3.5 text-success" />
+                  <span className="font-medium text-success">
+                    Submitted {format(parseISO(selfAssessmentSubmittedAt), "MMM d, yyyy")}
+                  </span>
+                </div>
+              ) : (
+                <Badge variant="outline" className="text-warning border-warning/30">
+                  <Clock className="h-3 w-3 mr-1" />
+                  Pending
+                </Badge>
+              )}
+            </div>
           </div>
           
           {/* Right Column - Period & Deadline */}
           <div className="space-y-2 md:text-right">
-            {performancePeriod ? (
+            {performancePeriod && (
               <div className="flex items-center gap-2 text-sm md:justify-end">
                 <Calendar className="h-4 w-4 text-muted-foreground shrink-0" />
                 <span className="text-muted-foreground">Performance Period:</span>
                 <span className="font-medium text-foreground">{performancePeriod}</span>
               </div>
-            ) : (
-              <div className="flex items-center gap-2 text-sm md:justify-end text-muted-foreground">
-                <Calendar className="h-4 w-4 shrink-0" />
-                <span>Performance Period:</span>
-                <span className="italic">Not specified</span>
-              </div>
             )}
             
-            {deadline ? (
+            {deadline && (
               <div className="flex items-center gap-2 text-sm md:justify-end flex-wrap">
                 <Clock className="h-4 w-4 text-muted-foreground shrink-0" />
-                <span className="text-muted-foreground">Due:</span>
+                <span className="text-muted-foreground">Evaluation Due:</span>
                 <span className={`font-medium ${
                   deadlineStatus === "overdue" || deadlineStatus === "critical" 
                     ? "text-destructive" 
@@ -211,27 +189,9 @@ export function AppraisalContextHeader({
                 </span>
                 {getDeadlineBadge()}
               </div>
-            ) : (
-              <div className="flex items-center gap-2 text-sm md:justify-end text-muted-foreground">
-                <Info className="h-4 w-4 shrink-0" />
-                <span>Deadline:</span>
-                <span className="italic">No deadline set</span>
-              </div>
             )}
           </div>
         </div>
-
-        {/* Urgency Warning */}
-        {(deadlineStatus === "critical" || deadlineStatus === "overdue") && (
-          <div className="mt-3 pt-3 border-t border-border">
-            <WarningCallout className="my-0 text-sm">
-              {deadlineStatus === "overdue" 
-                ? "Your self-assessment is overdue. Please complete it as soon as possible."
-                : "Your self-assessment deadline is approaching. Complete your assessment before the deadline."
-              }
-            </WarningCallout>
-          </div>
-        )}
       </CardContent>
     </Card>
   );
