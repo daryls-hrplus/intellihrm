@@ -49,10 +49,15 @@ import { EmployeeCompetencyCard } from "./EmployeeCompetencyCard";
 import { EmployeeResponsibilityCard } from "./EmployeeResponsibilityCard";
 import { EvidenceQuickAttach } from "./EvidenceQuickAttach";
 import { AppraisalContextHeader } from "./AppraisalContextHeader";
+import { AppraisalScoreSummaryCards } from "./AppraisalScoreSummaryCards";
 import { useAuth } from "@/contexts/AuthContext";
 import { fetchCompetencyCascade } from "@/hooks/useCompetencyCascade";
 import { useRatingScale, getLabelsMap } from "@/hooks/useRatingScale";
 import { RatingScaleInfoBanner } from "./RatingScaleInfoBanner";
+import { useEmployeeLevelExpectations } from "@/hooks/useEmployeeLevelExpectations";
+import { JobLevelExpectationsPanel } from "@/components/performance/JobLevelExpectationsPanel";
+import { PerformanceCategoryBadge } from "@/components/appraisals/PerformanceCategoryBadge";
+import { usePerformanceCategoryByScore } from "@/hooks/usePerformanceCategories";
 
 interface ScoreItem {
   id?: string;
@@ -117,6 +122,54 @@ export function EssAppraisalEvaluationDialog({
     responsibilities: appraisal.include_responsibilities && appraisal.responsibility_weight > 0,
     values: appraisal.include_values_assessment && appraisal.values_weight > 0,
   }), [appraisal]);
+
+  // Calculate current scores for display and level expectations
+  const currentScores = useMemo(() => {
+    const calcCategoryScore = (type: string) => {
+      const items = scores.filter(s => s.evaluation_type === type && s.self_rating !== null);
+      if (items.length === 0) return null;
+      const totalWeight = items.reduce((sum, s) => sum + s.weight, 0);
+      if (totalWeight === 0) return null;
+      const weighted = items.reduce((sum, s) => sum + (s.self_rating || 0) * (s.weight / totalWeight), 0);
+      return (weighted / 5) * 100; // Normalize to percentage
+    };
+    
+    const comp = calcCategoryScore("competency");
+    const resp = calcCategoryScore("responsibility");
+    const goal = calcCategoryScore("goal");
+    
+    // Calculate overall
+    let overall = null;
+    const weights = {
+      competency: appraisal.competency_weight,
+      responsibility: appraisal.responsibility_weight,
+      goal: appraisal.goal_weight,
+    };
+    const totalWeight = weights.competency + weights.responsibility + weights.goal;
+    if (totalWeight > 0) {
+      let weightedSum = 0;
+      let usedWeight = 0;
+      if (comp !== null) { weightedSum += comp * weights.competency; usedWeight += weights.competency; }
+      if (resp !== null) { weightedSum += resp * weights.responsibility; usedWeight += weights.responsibility; }
+      if (goal !== null) { weightedSum += goal * weights.goal; usedWeight += weights.goal; }
+      if (usedWeight > 0) overall = weightedSum / usedWeight;
+    }
+    
+    return { competency: comp, responsibility: resp, goal, overall };
+  }, [scores, appraisal]);
+
+  // Performance category based on overall score
+  const performanceCategory = usePerformanceCategoryByScore(
+    currentScores.overall,
+    appraisal.company_id || undefined
+  );
+
+  // Job level expectations
+  const { expectation: levelExpectation, employeeInfo: levelEmployeeInfo, loading: levelExpectationsLoading } = 
+    useEmployeeLevelExpectations(user?.id || null, appraisal.company_id || null, {
+      competencyScore: currentScores.competency ? (currentScores.competency / 100) * 5 : null,
+      goalScore: currentScores.goal,
+    });
 
   // Set initial tab based on enabled categories
   useEffect(() => {
@@ -504,6 +557,47 @@ export function EssAppraisalEvaluationDialog({
               performancePeriodEnd={appraisal.performance_period_end || appraisal.cycle_end_date}
               selfAssessmentDeadline={appraisal.self_assessment_deadline}
               cycleName={appraisal.cycle_name}
+            />
+          )}
+
+          {/* Score Summary Cards - Industry Standard */}
+          {isSubmitted && currentScores.overall !== null && (
+            <div className="space-y-3">
+              <AppraisalScoreSummaryCards
+                competencyScore={currentScores.competency}
+                responsibilityScore={currentScores.responsibility}
+                goalScore={currentScores.goal}
+                overallScore={currentScores.overall}
+                weights={{
+                  competency: appraisal.competency_weight,
+                  responsibility: appraisal.responsibility_weight,
+                  goal: appraisal.goal_weight,
+                }}
+              />
+              {performanceCategory && (
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground">Rating:</span>
+                  <PerformanceCategoryBadge 
+                    category={performanceCategory} 
+                    score={currentScores.overall}
+                    showEligibility={false}
+                  />
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Job Level Expectations Panel - Read-only for employees */}
+          {!levelExpectationsLoading && levelExpectation && (
+            <JobLevelExpectationsPanel
+              expectation={levelExpectation}
+              employeeInfo={levelEmployeeInfo}
+              gapAnalysis={null}
+              currentScores={{
+                competencyScore: currentScores.competency ? (currentScores.competency / 100) * 5 : 0,
+                goalScore: currentScores.goal ?? 0,
+              }}
+              maxRating={5}
             />
           )}
 
