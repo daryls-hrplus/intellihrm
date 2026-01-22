@@ -398,15 +398,28 @@ export function useAppraisalJourneyStages({
   };
 }
 
+// Configuration for default journey stages
+interface DefaultJourneyConfig {
+  includeGoals?: boolean;
+  include360?: boolean;
+}
+
 // Helper to get default phases when no template is selected
-export function getDefaultJourneyStages(): JourneyStage[] {
-  const defaultPhases: AppraisalPhaseType[] = [
-    'goal_setting',
+export function getDefaultJourneyStages(config?: DefaultJourneyConfig): JourneyStage[] {
+  const defaultPhases: AppraisalPhaseType[] = [];
+  
+  // Only add goal_setting if goals are included (default true for backward compat)
+  if (config?.includeGoals !== false) {
+    defaultPhases.push('goal_setting');
+  }
+  
+  // Always include core phases
+  defaultPhases.push(
     'self_assessment',
     'manager_review',
     'finalization',
     'employee_acknowledgment',
-  ];
+  );
   
   return defaultPhases.map((phaseType, index) => ({
     key: `default-${phaseType}`,

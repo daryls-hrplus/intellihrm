@@ -25,6 +25,7 @@ export interface MyAppraisal {
   evaluation_deadline: string | null;
   position_title: string | null;
   company_id: string | null;
+  template_id: string | null;
   // Template configuration flags
   include_goals: boolean;
   include_competencies: boolean;
@@ -64,6 +65,7 @@ export function useMyAppraisals() {
             id,
             name,
             company_id,
+            template_id,
             start_date,
             end_date,
             status,
@@ -160,6 +162,7 @@ export function useMyAppraisals() {
           evaluation_deadline: cycle.evaluation_deadline,
           position_title: p.primary_position_id ? positionMap[p.primary_position_id] || null : null,
           company_id: cycle.company_id,
+          template_id: cycle.template_id ?? null,
           // Template configuration flags
           include_goals: cycle.include_goals ?? true,
           include_competencies: cycle.include_competencies ?? true,
