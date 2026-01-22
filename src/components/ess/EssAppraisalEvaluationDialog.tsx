@@ -64,6 +64,9 @@ interface ScoreItem {
   self_metadata?: Record<string, any>;
   proficiency_indicators?: Record<string, string[]>;
   evidence_count?: number;
+  // Role expectation fields (competencies only)
+  required_level?: number;
+  assessed_level?: number | null;
 }
 
 interface EssAppraisalEvaluationDialogProps {
@@ -152,6 +155,18 @@ export function EssAppraisalEvaluationDialog({
       });
 
       if (existingScores && existingScores.length > 0) {
+        // Fetch cascade data to enrich with required/assessed levels
+        let requiredLevelMap = new Map<string, number>();
+        let assessedLevelMap = new Map<string, number | null>();
+        
+        if (user?.id) {
+          const cascadeResult = await fetchCompetencyCascade(user.id);
+          cascadeResult.competencies.forEach(comp => {
+            if (comp.required_level) requiredLevelMap.set(comp.competency_id, comp.required_level);
+            assessedLevelMap.set(comp.competency_id, comp.assessed_level ?? null);
+          });
+        }
+        
         setScores(existingScores.map((s: any) => ({
           id: s.id,
           item_id: s.item_id,
@@ -163,6 +178,9 @@ export function EssAppraisalEvaluationDialog({
           self_metadata: s.self_metadata || {},
           proficiency_indicators: s.metadata?.proficiency_indicators,
           evidence_count: evidenceCountMap[s.item_id] || 0,
+          // Enrich competencies with role expectation data
+          required_level: s.evaluation_type === 'competency' ? requiredLevelMap.get(s.item_id) : undefined,
+          assessed_level: s.evaluation_type === 'competency' ? assessedLevelMap.get(s.item_id) : undefined,
         })));
       } else {
         // Fetch items for this employee to create score entries
@@ -211,6 +229,9 @@ export function EssAppraisalEvaluationDialog({
           self_comments: "",
           proficiency_indicators: comp.proficiency_indicators as any,
           evidence_count: evidenceCountMap[comp.competency_id] || 0,
+          // Role expectation data
+          required_level: comp.required_level,
+          assessed_level: comp.assessed_level,
         });
       });
     }
@@ -583,6 +604,8 @@ export function EssAppraisalEvaluationDialog({
                           selectedBehaviors={score.self_metadata?.demonstrated_behaviors || []}
                           proficiencyIndicators={score.proficiency_indicators}
                           evidenceCount={score.evidence_count}
+                          requiredLevel={score.required_level}
+                          currentAssessedLevel={score.assessed_level}
                           onRatingChange={(r) => handleRatingChange(score.item_id, "competency", r)}
                           onCommentsChange={(c) => handleCommentsChange(score.item_id, "competency", c)}
                           onBehaviorsChange={(b) => handleBehaviorsChange(score.item_id, b)}
@@ -590,6 +613,7 @@ export function EssAppraisalEvaluationDialog({
                           ratingLabels={ratingLabelsMap}
                           usePerformanceScale={true}
                           ratingLabel="Performance Rating"
+                          showRoleExpectation={true}
                         />
                       ))
                     )}
