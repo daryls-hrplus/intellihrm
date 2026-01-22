@@ -36,6 +36,12 @@ export interface MyAppraisal {
   competency_weight: number;
   responsibility_weight: number;
   values_weight: number;
+  // Industry-standard context fields
+  self_assessment_deadline: string | null;
+  performance_period_start: string | null;
+  performance_period_end: string | null;
+  employee_name: string | null;
+  department_name: string | null;
 }
 
 export function useMyAppraisals() {
@@ -51,6 +57,7 @@ export function useMyAppraisals() {
         .from("appraisal_participants")
         .select(`
           id,
+          employee_id,
           status,
           overall_score,
           goal_score,
@@ -72,6 +79,9 @@ export function useMyAppraisals() {
             end_date,
             status,
             evaluation_deadline,
+            self_assessment_deadline,
+            performance_period_start,
+            performance_period_end,
             include_goals,
             include_competencies,
             include_responsibilities,
@@ -103,18 +113,41 @@ export function useMyAppraisals() {
         }
       }
 
-      // Get position titles
+      // Get position titles and department info
       const positionIds = [...new Set(participations.map(p => p.primary_position_id).filter(Boolean))];
-      let positionMap: Record<string, string> = {};
+      let positionMap: Record<string, { title: string; department_name: string | null }> = {};
       
       if (positionIds.length > 0) {
         const { data: positions } = await supabase
           .from("positions")
-          .select("id, title")
+          .select("id, title, department:departments(name)")
           .in("id", positionIds as string[]);
         
         if (positions) {
-          positionMap = Object.fromEntries(positions.map(p => [p.id, p.title || ""]));
+          positionMap = Object.fromEntries(
+            positions.map(p => [
+              p.id, 
+              { 
+                title: p.title || "", 
+                department_name: (p.department as any)?.name || null 
+              }
+            ])
+          );
+        }
+      }
+
+      // Get employee profile info (name)
+      const employeeIds = [...new Set(participations.map(p => p.employee_id).filter(Boolean))];
+      let employeeMap: Record<string, string> = {};
+      
+      if (employeeIds.length > 0) {
+        const { data: employees } = await supabase
+          .from("profiles")
+          .select("id, full_name")
+          .in("id", employeeIds as string[]);
+        
+        if (employees) {
+          employeeMap = Object.fromEntries(employees.map(e => [e.id, e.full_name || ""]));
         }
       }
 
@@ -141,6 +174,7 @@ export function useMyAppraisals() {
 
       return participations.map((p): MyAppraisal => {
         const cycle = p.cycle as any;
+        const positionInfo = p.primary_position_id ? positionMap[p.primary_position_id] : null;
         return {
           id: p.id,
           cycle_id: cycle.id,
@@ -162,7 +196,7 @@ export function useMyAppraisals() {
           pending_actions_count: actionCounts[p.id]?.total || 0,
           mandatory_actions_count: actionCounts[p.id]?.mandatory || 0,
           evaluation_deadline: cycle.evaluation_deadline,
-          position_title: p.primary_position_id ? positionMap[p.primary_position_id] || null : null,
+          position_title: positionInfo?.title || null,
           company_id: cycle.company_id,
           template_id: cycle.template_id ?? null,
           component_scale_id: cycle.component_scale_id ?? null,
@@ -175,6 +209,12 @@ export function useMyAppraisals() {
           competency_weight: cycle.competency_weight ?? 0,
           responsibility_weight: cycle.responsibility_weight ?? 0,
           values_weight: cycle.values_weight ?? 0,
+          // Industry-standard context fields
+          self_assessment_deadline: cycle.self_assessment_deadline ?? null,
+          performance_period_start: cycle.performance_period_start ?? null,
+          performance_period_end: cycle.performance_period_end ?? null,
+          employee_name: p.employee_id ? employeeMap[p.employee_id] || null : null,
+          department_name: positionInfo?.department_name || null,
         };
       });
     },
