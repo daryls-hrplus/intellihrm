@@ -560,8 +560,8 @@ export function EssAppraisalEvaluationDialog({
             />
           )}
 
-          {/* Score Summary Cards - Industry Standard */}
-          {isSubmitted && currentScores.overall !== null && (
+          {/* Score Summary Cards - Real-time visibility during self-assessment (industry standard) */}
+          {currentScores.overall !== null && (
             <div className="space-y-3">
               <AppraisalScoreSummaryCards
                 competencyScore={currentScores.competency}
@@ -574,9 +574,34 @@ export function EssAppraisalEvaluationDialog({
                   goal: appraisal.goal_weight,
                 }}
               />
-              {performanceCategory && (
+              
+              {/* How score is calculated - transparency for employees */}
+              {!isSubmitted && (
+                <Card className="bg-muted/30 border-muted">
+                  <CardContent className="p-3 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Info className="h-4 w-4" />
+                      <span className="font-medium text-foreground">How your score is calculated</span>
+                    </div>
+                    <div className="text-xs space-y-1">
+                      {enabledCategories.competencies && appraisal.competency_weight > 0 && (
+                        <p>Competencies ({appraisal.competency_weight}%): {currentScores.competency?.toFixed(0) ?? '—'}%</p>
+                      )}
+                      {enabledCategories.responsibilities && appraisal.responsibility_weight > 0 && (
+                        <p>Responsibilities ({appraisal.responsibility_weight}%): {currentScores.responsibility?.toFixed(0) ?? '—'}%</p>
+                      )}
+                      {enabledCategories.goals && appraisal.goal_weight > 0 && (
+                        <p>Goals ({appraisal.goal_weight}%): {currentScores.goal?.toFixed(0) ?? '—'}%</p>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+              
+              {/* Performance Category Badge - only after manager completes review */}
+              {isSubmitted && appraisal.status === "completed" && performanceCategory && (
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground">Rating:</span>
+                  <span className="text-sm text-muted-foreground">Final Rating:</span>
                   <PerformanceCategoryBadge 
                     category={performanceCategory} 
                     score={currentScores.overall}
