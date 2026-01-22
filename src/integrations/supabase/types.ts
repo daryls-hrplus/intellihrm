@@ -75648,6 +75648,9 @@ export type Database = {
         | "learning_approval"
         | "pip_acknowledgment"
         | "rating_release_approval"
+        | "goal_approval_individual"
+        | "goal_approval_team"
+        | "goal_approval_department"
       workflow_status:
         | "draft"
         | "pending"
@@ -76058,6 +76061,9 @@ export const Constants = {
         "learning_approval",
         "pip_acknowledgment",
         "rating_release_approval",
+        "goal_approval_individual",
+        "goal_approval_team",
+        "goal_approval_department",
       ],
       workflow_status: [
         "draft",
