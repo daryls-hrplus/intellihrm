@@ -83,14 +83,45 @@ export function UnifiedWorkflowCard({
   const selectedTemplateId = setting?.workflow_template_id;
   const selectedTemplate = availableTemplates.find(t => t.id === selectedTemplateId);
 
-  // Filter templates by workflow category or general
-  // Match by exact code, or by category prefix (for goal_approval variants), or general templates
-  const filteredTemplates = availableTemplates.filter(
-    t => t.category === workflow.code || 
-         (workflow.code && t.code?.toLowerCase().includes(workflow.code.toLowerCase())) ||
-         t.category === "general" || 
-         !t.category
-  );
+  // Legacy category mapping for backward compatibility
+  const legacyMapping: Record<string, string[]> = {
+    'rating_approval': ['performance', 'appraisal', 'rating', 'calibration'],
+    'pip_acknowledgment': ['performance', 'pip'],
+    'rating_release_approval': ['performance', 'release'],
+    'feedback_360_approval': ['360', 'feedback'],
+    'succession_approval': ['succession'],
+    'goal_approval_individual': ['goal', 'goal_approval'],
+    'goal_approval_team': ['goal', 'goal_approval'],
+    'goal_approval_department': ['goal', 'goal_approval'],
+  };
+
+  // Filter templates by workflow category with flexible matching
+  const filteredTemplates = availableTemplates.filter(t => {
+    // Exact category match
+    if (t.category === workflow.code) return true;
+    
+    // Partial code match (case-insensitive)
+    if (workflow.code && t.code?.toLowerCase().includes(workflow.code.toLowerCase())) return true;
+    
+    // Match transaction type code pattern in template code
+    if (workflow.transactionTypeCode && 
+        t.code?.toUpperCase().includes(workflow.transactionTypeCode.replace('PERF_', ''))) return true;
+    
+    // Legacy category mapping
+    if (workflow.code && legacyMapping[workflow.code]) {
+      const matches = legacyMapping[workflow.code].some(legacy => 
+        t.category?.toLowerCase().includes(legacy) || 
+        t.code?.toLowerCase().includes(legacy) ||
+        t.name?.toLowerCase().includes(legacy)
+      );
+      if (matches) return true;
+    }
+    
+    // General templates available for all
+    if (t.category === "general" || !t.category) return true;
+    
+    return false;
+  });
 
   // If no category-specific templates, show all templates
   const templatesToShow = filteredTemplates.length > 0 ? filteredTemplates : availableTemplates;
