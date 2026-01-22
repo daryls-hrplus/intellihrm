@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,13 +7,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
-import { Plus, Pencil, Trash2, Loader2, GitBranch, ArrowRight, Clock, Settings, Users, FileImage, Settings2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Loader2, GitBranch, ArrowRight, Clock, Settings, Users, FileImage, Settings2, Info, ExternalLink } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -54,6 +56,8 @@ const WORKFLOW_CATEGORIES: { value: WorkflowCategory; label: string }[] = [
   { value: "calibration_approval", label: "Calibration Sign-off" },
   { value: "succession_approval", label: "Succession Plan Approval" },
   { value: "learning_approval", label: "Training Request Approval" },
+  { value: "pip_acknowledgment", label: "PIP Acknowledgment" },
+  { value: "rating_release_approval", label: "Rating Release Approval" },
   // Other Workflows
   { value: "leave_request", label: "Leave Request" },
   { value: "probation_confirmation", label: "Probation Confirmation (Legacy)" },
@@ -304,6 +308,22 @@ export default function AdminWorkflowTemplatesPage() {
             </p>
           </div>
         </div>
+
+        {/* Performance Workflow Quick Access Hint */}
+        <Alert className="border-primary/20 bg-primary/5">
+          <Info className="h-4 w-4 text-primary" />
+          <AlertDescription className="flex items-center justify-between">
+            <span className="text-sm">
+              <strong>Performance workflows</strong> (Goals, Appraisals, 360 Feedback, Succession) can be quickly configured via Performance Setup with AI-powered guidance and industry templates.
+            </span>
+            <Button variant="outline" size="sm" asChild>
+              <Link to="/performance/setup?tab=foundation&sub=approval-workflows">
+                <ExternalLink className="mr-2 h-4 w-4" />
+                Quick Setup
+              </Link>
+            </Button>
+          </AlertDescription>
+        </Alert>
 
         <Tabs value={activeMainTab} onValueChange={setActiveMainTab}>
           <TabsList className="flex-wrap">

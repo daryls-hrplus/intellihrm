@@ -92,6 +92,8 @@ const PERFORMANCE_CATEGORIES: WorkflowCategory[] = [
   'calibration_approval',
   'succession_approval',
   'learning_approval',
+  'pip_acknowledgment',
+  'rating_release_approval',
 ];
 
 const categoryToProcessType: Record<string, string> = {
@@ -101,6 +103,8 @@ const categoryToProcessType: Record<string, string> = {
   learning_approval: 'learning',
   succession_approval: 'succession',
   calibration_approval: 'appraisals',
+  pip_acknowledgment: 'appraisals',
+  rating_release_approval: 'appraisals',
 };
 
 const processTypeToCategory: Record<string, WorkflowCategory> = {

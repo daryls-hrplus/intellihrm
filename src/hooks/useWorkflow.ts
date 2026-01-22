@@ -5,7 +5,7 @@ import { toast } from "sonner";
 
 export type WorkflowStatus = 'draft' | 'pending' | 'in_progress' | 'approved' | 'rejected' | 'cancelled' | 'escalated' | 'returned' | 'auto_terminated';
 export type WorkflowAction = 'approve' | 'reject' | 'return' | 'escalate' | 'delegate' | 'comment';
-export type WorkflowCategory = 'leave_request' | 'probation_confirmation' | 'headcount_request' | 'training_request' | 'promotion' | 'transfer' | 'resignation' | 'termination' | 'expense_claim' | 'letter_request' | 'general' | 'qualification' | 'hire' | 'rehire' | 'confirmation' | 'probation_extension' | 'acting' | 'secondment' | 'salary_change' | 'rate_change' | 'performance' | 'disciplinary_acknowledgement' | 'grievance_submission' | 'ess_approval' | 'goal_approval' | 'rating_approval' | 'feedback_360_approval' | 'calibration_approval' | 'succession_approval' | 'learning_approval';
+export type WorkflowCategory = 'leave_request' | 'probation_confirmation' | 'headcount_request' | 'training_request' | 'promotion' | 'transfer' | 'resignation' | 'termination' | 'expense_claim' | 'letter_request' | 'general' | 'qualification' | 'hire' | 'rehire' | 'confirmation' | 'probation_extension' | 'acting' | 'secondment' | 'salary_change' | 'rate_change' | 'performance' | 'disciplinary_acknowledgement' | 'grievance_submission' | 'ess_approval' | 'goal_approval' | 'rating_approval' | 'feedback_360_approval' | 'calibration_approval' | 'succession_approval' | 'learning_approval' | 'pip_acknowledgment' | 'rating_release_approval';
 
 export interface WorkflowTemplate {
   id: string;
