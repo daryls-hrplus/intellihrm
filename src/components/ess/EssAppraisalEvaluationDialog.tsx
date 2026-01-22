@@ -524,7 +524,7 @@ export function EssAppraisalEvaluationDialog({
               <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
             </div>
           ) : (
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col min-h-0">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col min-h-0 overflow-hidden">
               <TabsList className="grid w-full grid-cols-4">
                 {enabledCategories.goals && (
                   <TabsTrigger value="goals" className="gap-1">
@@ -560,7 +560,7 @@ export function EssAppraisalEvaluationDialog({
                 </TabsTrigger>
               </TabsList>
 
-              <ScrollArea className="flex-1 mt-4">
+              <ScrollArea className="flex-1 mt-4 min-h-0">
                 {/* Goals Tab */}
                 {enabledCategories.goals && (
                   <TabsContent value="goals" className="space-y-3 m-0">
