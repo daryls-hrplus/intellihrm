@@ -198,7 +198,7 @@ export function EmployeeCompetencyCard({
         </CollapsibleTrigger>
 
         <CollapsibleContent>
-          <CardContent className="pt-0 pb-4 border-t">
+          <CardContent className="pt-0 pb-4 border-t overflow-auto max-h-[60vh]">
             <div className="space-y-4 pt-4">
               {/* Role Expectation Info - Industry Standard Transparency */}
               {showRoleExpectation && requiredLevel && (
@@ -283,7 +283,7 @@ export function EmployeeCompetencyCard({
                       (Select all that apply)
                     </span>
                   </Label>
-                  <ScrollArea className="h-40 rounded-md border p-3">
+                  <ScrollArea className="h-64 max-h-[40vh] rounded-md border p-3">
                     <div className="space-y-2">
                       {Object.entries(proficiencyIndicators).map(([level, behaviors]) => (
                         <div key={level} className="space-y-1">
