@@ -75640,6 +75640,12 @@ export type Database = {
         | "disciplinary_acknowledgement"
         | "grievance_submission"
         | "ess_approval"
+        | "goal_approval"
+        | "rating_approval"
+        | "feedback_360_approval"
+        | "calibration_approval"
+        | "succession_approval"
+        | "learning_approval"
       workflow_status:
         | "draft"
         | "pending"
@@ -76042,6 +76048,12 @@ export const Constants = {
         "disciplinary_acknowledgement",
         "grievance_submission",
         "ess_approval",
+        "goal_approval",
+        "rating_approval",
+        "feedback_360_approval",
+        "calibration_approval",
+        "succession_approval",
+        "learning_approval",
       ],
       workflow_status: [
         "draft",
