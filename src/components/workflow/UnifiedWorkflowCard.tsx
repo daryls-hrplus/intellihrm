@@ -84,8 +84,12 @@ export function UnifiedWorkflowCard({
   const selectedTemplate = availableTemplates.find(t => t.id === selectedTemplateId);
 
   // Filter templates by workflow category or general
+  // Match by exact code, or by category prefix (for goal_approval variants), or general templates
   const filteredTemplates = availableTemplates.filter(
-    t => t.category === workflow.code || t.category === "general" || !t.category
+    t => t.category === workflow.code || 
+         (workflow.code && t.code?.toLowerCase().includes(workflow.code.toLowerCase())) ||
+         t.category === "general" || 
+         !t.category
   );
 
   // If no category-specific templates, show all templates
