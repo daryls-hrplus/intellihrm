@@ -158,7 +158,7 @@ function HorizontalTracker({
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <div className="flex flex-col items-center min-w-[80px]">
+                  <div className="flex flex-col items-center min-w-[90px]">
                     {/* Node */}
                     <div 
                       className={cn(
@@ -176,9 +176,9 @@ function HorizontalTracker({
                       )}
                     </div>
                     
-                    {/* Label */}
+                    {/* Label - full text, wrapped if needed */}
                     <span className={cn(
-                      "text-xs font-medium mt-1 text-center max-w-[70px] truncate",
+                      "text-xs font-medium mt-1 text-center leading-tight",
                       colors.text
                     )}>
                       {stage.label}
