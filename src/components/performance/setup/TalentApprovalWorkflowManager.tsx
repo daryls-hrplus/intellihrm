@@ -98,6 +98,9 @@ const PERFORMANCE_CATEGORIES: WorkflowCategory[] = [
 
 const categoryToProcessType: Record<string, string> = {
   goal_approval: 'goals',
+  goal_approval_individual: 'goals',
+  goal_approval_team: 'goals',
+  goal_approval_department: 'goals',
   rating_approval: 'appraisals',
   feedback_360_approval: '360_feedback',
   learning_approval: 'learning',
@@ -113,6 +116,19 @@ const processTypeToCategory: Record<string, WorkflowCategory> = {
   '360_feedback': 'feedback_360_approval',
   learning: 'learning_approval',
   succession: 'succession_approval',
+};
+
+// Map workflow categories to transaction type codes for HR Hub sync
+const categoryToTransactionCode: Record<string, string> = {
+  rating_approval: 'PERF_RATING_APPROVAL',
+  pip_acknowledgment: 'PERF_PIP_ACKNOWLEDGMENT',
+  rating_release_approval: 'PERF_RATING_RELEASE',
+  goal_approval: 'PERF_GOAL_APPROVAL_INDIVIDUAL',
+  goal_approval_individual: 'PERF_GOAL_APPROVAL_INDIVIDUAL',
+  goal_approval_team: 'PERF_GOAL_APPROVAL_TEAM',
+  goal_approval_department: 'PERF_GOAL_APPROVAL_DEPARTMENT',
+  feedback_360_approval: 'PERF_360_RELEASE',
+  succession_approval: 'PERF_SUCCESSION_APPROVAL',
 };
 
 const processTypeConfig = {
@@ -275,12 +291,24 @@ export function TalentApprovalWorkflowManager({ companyId }: TalentApprovalWorkf
           })
           .eq("id", selectedTemplate.id);
         if (error) throw error;
+        
+        // Sync to HR Hub
+        await syncToHRHub(selectedTemplate.id, selectedTemplate.category, templateForm.scope_level);
+        
         toast.success("Approval workflow updated");
       } else {
-        const { error } = await supabase
+        const { data: newTemplate, error } = await supabase
           .from("workflow_templates")
-          .insert([templateData]);
+          .insert([templateData])
+          .select()
+          .single();
         if (error) throw error;
+        
+        // Sync to HR Hub
+        if (newTemplate) {
+          await syncToHRHub(newTemplate.id, category, templateForm.scope_level);
+        }
+        
         toast.success("Approval workflow created");
       }
 
@@ -418,6 +446,64 @@ export function TalentApprovalWorkflowManager({ companyId }: TalentApprovalWorkf
     return acc;
   }, {} as Record<string, WorkflowTemplate[]>);
 
+  // Sync workflow template to HR Hub by creating/updating company_transaction_workflow_settings
+  const syncToHRHub = async (templateId: string, category: string, scopeLevel: string) => {
+    if (!companyId) return;
+
+    // Determine the correct transaction code based on category and scope
+    let transactionCode = categoryToTransactionCode[category];
+    
+    // For goals, use scope-specific codes
+    if (category === 'goal_approval') {
+      if (scopeLevel === 'team') {
+        transactionCode = 'PERF_GOAL_APPROVAL_TEAM';
+      } else if (scopeLevel === 'department' || scopeLevel === 'company') {
+        transactionCode = 'PERF_GOAL_APPROVAL_DEPARTMENT';
+      } else {
+        transactionCode = 'PERF_GOAL_APPROVAL_INDIVIDUAL';
+      }
+    }
+
+    if (!transactionCode) {
+      console.log("No transaction code mapping for category:", category);
+      return;
+    }
+
+    // Find the transaction type ID
+    const { data: transactionType } = await supabase
+      .from("lookup_values")
+      .select("id")
+      .eq("category", "transaction_type" as never)
+      .eq("code", transactionCode)
+      .single();
+
+    if (!transactionType) {
+      console.log("Transaction type not found:", transactionCode);
+      return;
+    }
+
+    // Upsert the workflow setting
+    const { error } = await supabase
+      .from("company_transaction_workflow_settings")
+      .upsert({
+        company_id: companyId,
+        transaction_type_id: transactionType.id,
+        workflow_enabled: true,
+        workflow_template_id: templateId,
+        auto_start_workflow: true,
+        requires_approval_before_effective: false,
+        is_active: true,
+      }, {
+        onConflict: 'company_id,transaction_type_id',
+      });
+
+    if (error) {
+      console.error("Error syncing to HR Hub:", error);
+    } else {
+      console.log("Successfully synced template to HR Hub:", transactionCode);
+    }
+  };
+
   // Handle applying templates from WorkflowSetupGuidanceCard
   const handleApplyTemplate = async (template: IndustryTemplate) => {
     if (!companyId) return;
@@ -495,6 +581,9 @@ export function TalentApprovalWorkflowManager({ companyId }: TalentApprovalWorkf
         .insert(stepsToInsert);
 
       if (stepsError) throw stepsError;
+
+      // Sync to HR Hub so the workflow shows as enabled there
+      await syncToHRHub(newTemplate.id, category, template.scopeLevel);
 
       toast.success(`Applied "${template.name}" template successfully`);
       fetchTemplates();
