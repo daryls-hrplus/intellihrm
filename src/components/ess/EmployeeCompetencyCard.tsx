@@ -8,7 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Award, ChevronDown, ChevronUp, Paperclip, CheckCircle2, Info } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Award, ChevronDown, ChevronUp, Paperclip, CheckCircle2, Info, Target, TrendingUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   Tooltip,
@@ -31,6 +32,7 @@ interface EmployeeCompetencyCardProps {
   selectedBehaviors?: string[];
   proficiencyIndicators?: ProficiencyIndicators;
   requiredLevel?: number;
+  currentAssessedLevel?: number | null;
   evidenceCount?: number;
   maxRating?: number;
   minRating?: number;
@@ -43,6 +45,7 @@ interface EmployeeCompetencyCardProps {
   ratingLabels?: Record<number, string>;
   usePerformanceScale?: boolean;
   ratingLabel?: string; // e.g. "Performance Rating" vs "Proficiency Level"
+  showRoleExpectation?: boolean;
 }
 
 // Default proficiency labels (Dreyfus model - used for competency profiles)
@@ -73,6 +76,7 @@ export function EmployeeCompetencyCard({
   selectedBehaviors = [],
   proficiencyIndicators,
   requiredLevel,
+  currentAssessedLevel,
   evidenceCount = 0,
   maxRating = 5,
   minRating = 1,
@@ -84,12 +88,24 @@ export function EmployeeCompetencyCard({
   ratingLabels,
   usePerformanceScale = false,
   ratingLabel,
+  showRoleExpectation = false,
 }: EmployeeCompetencyCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
   // Determine which labels to use based on context
   const displayLabels = ratingLabels || (usePerformanceScale ? PERFORMANCE_LABELS : PROFICIENCY_LABELS);
   const fieldLabel = ratingLabel || (usePerformanceScale ? "Your Performance Rating" : "Your Proficiency Level");
+  
+  // Get proficiency gap status for role expectation display
+  const getProficiencyGapStatus = () => {
+    if (!requiredLevel || !currentAssessedLevel) return null;
+    const gap = currentAssessedLevel - requiredLevel;
+    if (gap >= 0) return { status: "meets", label: "Meets/Exceeds", color: "text-green-600" };
+    if (gap === -1) return { status: "close", label: "Close to target", color: "text-amber-600" };
+    return { status: "gap", label: "Development needed", color: "text-red-600" };
+  };
+  
+  const gapStatus = getProficiencyGapStatus();
 
   const getRatingColor = (rating: number | null) => {
     if (rating === null) return "text-muted-foreground";
@@ -137,11 +153,14 @@ export function EmployeeCompetencyCard({
                 </div>
                 <div className="flex-1 min-w-0">
                   <h4 className="font-medium text-sm truncate">{competencyName}</h4>
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground flex-wrap">
                     {category && <Badge variant="outline" className="text-xs">{category}</Badge>}
                     <span>Weight: {weight}%</span>
-                    {requiredLevel && (
-                      <span className="text-primary">Required: L{requiredLevel}</span>
+                    {showRoleExpectation && requiredLevel && (
+                      <Badge variant="outline" className="text-xs bg-blue-50 border-blue-200 dark:bg-blue-950 dark:border-blue-800">
+                        <Target className="h-3 w-3 mr-1" />
+                        Role: L{requiredLevel} ({PROFICIENCY_LABELS[requiredLevel]})
+                      </Badge>
                     )}
                     {evidenceCount > 0 && (
                       <Badge variant="secondary" className="text-xs">
@@ -177,6 +196,29 @@ export function EmployeeCompetencyCard({
         <CollapsibleContent>
           <CardContent className="pt-0 pb-4 border-t">
             <div className="space-y-4 pt-4">
+              {/* Role Expectation Info - Industry Standard Transparency */}
+              {showRoleExpectation && requiredLevel && (
+                <Alert className="bg-blue-50 border-blue-200 dark:bg-blue-950/50 dark:border-blue-800">
+                  <Target className="h-4 w-4 text-blue-600" />
+                  <AlertDescription className="text-sm">
+                    <span className="font-medium">Role Expectation:</span>{" "}
+                    <span className="text-blue-700 dark:text-blue-300 font-semibold">
+                      {PROFICIENCY_LABELS[requiredLevel]} (Level {requiredLevel})
+                    </span>
+                    {currentAssessedLevel !== null && currentAssessedLevel !== undefined && (
+                      <span className="block mt-1 text-muted-foreground">
+                        Your current proficiency: {PROFICIENCY_LABELS[currentAssessedLevel]} (L{currentAssessedLevel})
+                        {gapStatus && (
+                          <span className={cn("ml-2 font-medium", gapStatus.color)}>
+                            • {gapStatus.label}
+                          </span>
+                        )}
+                      </span>
+                    )}
+                  </AlertDescription>
+                </Alert>
+              )}
+
               {/* Rating Slider */}
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
@@ -217,6 +259,14 @@ export function EmployeeCompetencyCard({
                       <span>{displayLabels[maxRating] || maxRating}</span>
                     </div>
                   </>
+                )}
+
+                {/* Proficiency Impact Hint */}
+                {usePerformanceScale && showRoleExpectation && (
+                  <p className="text-xs text-muted-foreground flex items-center gap-1">
+                    <TrendingUp className="h-3 w-3" />
+                    Exceptional ratings may increase your proficiency level after manager review.
+                  </p>
                 )}
               </div>
 
