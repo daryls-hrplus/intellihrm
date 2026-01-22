@@ -47,6 +47,13 @@ const WORKFLOW_CATEGORIES: { value: WorkflowCategory; label: string }[] = [
   { value: "rate_change", label: "Hourly/Daily Rate Change" },
   // Self-Service Workflows
   { value: "ess_approval", label: "ESS Approval" },
+  // Performance Workflows
+  { value: "goal_approval", label: "Goal Approval" },
+  { value: "rating_approval", label: "Performance Rating Approval" },
+  { value: "feedback_360_approval", label: "360 Feedback Release" },
+  { value: "calibration_approval", label: "Calibration Sign-off" },
+  { value: "succession_approval", label: "Succession Plan Approval" },
+  { value: "learning_approval", label: "Training Request Approval" },
   // Other Workflows
   { value: "leave_request", label: "Leave Request" },
   { value: "probation_confirmation", label: "Probation Confirmation (Legacy)" },
