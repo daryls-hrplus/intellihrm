@@ -48,6 +48,7 @@ import { EmployeeGoalRatingCard } from "./EmployeeGoalRatingCard";
 import { EmployeeCompetencyCard } from "./EmployeeCompetencyCard";
 import { EmployeeResponsibilityCard } from "./EmployeeResponsibilityCard";
 import { EvidenceQuickAttach } from "./EvidenceQuickAttach";
+import { AppraisalContextHeader } from "./AppraisalContextHeader";
 import { useAuth } from "@/contexts/AuthContext";
 import { fetchCompetencyCascade } from "@/hooks/useCompetencyCascade";
 import { useRatingScale, getLabelsMap } from "@/hooks/useRatingScale";
@@ -484,13 +485,27 @@ export function EssAppraisalEvaluationDialog({
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col border-2 border-red-500">
+        <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <FileText className="h-5 w-5 text-primary" />
               Self-Assessment: {appraisal.cycle_name}
             </DialogTitle>
           </DialogHeader>
+
+          {/* Appraisal Context Header - Industry Standard */}
+          {!isSubmitted && (
+            <AppraisalContextHeader
+              employeeName={appraisal.employee_name}
+              positionTitle={appraisal.position_title}
+              departmentName={appraisal.department_name}
+              evaluatorName={appraisal.evaluator_name}
+              performancePeriodStart={appraisal.performance_period_start || appraisal.cycle_start_date}
+              performancePeriodEnd={appraisal.performance_period_end || appraisal.cycle_end_date}
+              selfAssessmentDeadline={appraisal.self_assessment_deadline}
+              cycleName={appraisal.cycle_name}
+            />
+          )}
 
           {/* Submitted Banner */}
           {isSubmitted && (
