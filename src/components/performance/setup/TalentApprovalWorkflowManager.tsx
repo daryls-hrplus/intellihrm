@@ -444,6 +444,13 @@ export function TalentApprovalWorkflowManager({ companyId }: TalentApprovalWorkf
   };
 
   const existingProcessTypes = [...new Set(rules.map(r => r.process_type))];
+  
+  // Track which specific templates have been applied
+  const appliedTemplates = rules.map(r => ({
+    processType: r.process_type,
+    scopeLevel: r.scope_level,
+    name: r.name,
+  }));
 
   return (
     <div className="space-y-6">
@@ -451,6 +458,7 @@ export function TalentApprovalWorkflowManager({ companyId }: TalentApprovalWorkf
       <WorkflowSetupGuidanceCard
         onApplyTemplate={handleApplyTemplate}
         existingProcessTypes={existingProcessTypes}
+        appliedTemplates={appliedTemplates}
       />
 
       {/* Quick Start Section */}
