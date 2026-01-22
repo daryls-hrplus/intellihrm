@@ -484,7 +484,7 @@ export function EssAppraisalEvaluationDialog({
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col">
+        <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col border-2 border-red-500">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <FileText className="h-5 w-5 text-primary" />
@@ -560,10 +560,10 @@ export function EssAppraisalEvaluationDialog({
                 </TabsTrigger>
               </TabsList>
 
-              <ScrollArea className="flex-1 mt-4 min-h-0 h-0">
+              <ScrollArea className="flex-1 mt-4 min-h-0 h-0 border-2 border-blue-500">
                 {/* Goals Tab */}
                 {enabledCategories.goals && (
-                  <TabsContent value="goals" className="space-y-3 m-0">
+                  <TabsContent value="goals" className="space-y-3 m-0 border-2 border-green-500">
                     {goalScores.length === 0 ? (
                       <Card><CardContent className="py-8 text-center text-muted-foreground">No goals assigned</CardContent></Card>
                     ) : (
@@ -589,7 +589,7 @@ export function EssAppraisalEvaluationDialog({
 
                 {/* Competencies Tab */}
                 {enabledCategories.competencies && (
-                  <TabsContent value="competencies" className="space-y-3 m-0">
+                  <TabsContent value="competencies" className="space-y-3 m-0 border-2 border-green-500">
                     {competencyScores.length === 0 ? (
                       <Card><CardContent className="py-8 text-center text-muted-foreground">No competencies assigned</CardContent></Card>
                     ) : (
@@ -622,7 +622,7 @@ export function EssAppraisalEvaluationDialog({
 
                 {/* Responsibilities Tab */}
                 {enabledCategories.responsibilities && (
-                  <TabsContent value="responsibilities" className="space-y-3 m-0">
+                  <TabsContent value="responsibilities" className="space-y-3 m-0 border-2 border-green-500">
                     {responsibilityScores.length === 0 ? (
                       <Card><CardContent className="py-8 text-center text-muted-foreground">No responsibilities assigned</CardContent></Card>
                     ) : (
@@ -647,7 +647,7 @@ export function EssAppraisalEvaluationDialog({
                 )}
 
                 {/* Reflection Tab */}
-                <TabsContent value="reflection" className="space-y-4 m-0">
+                <TabsContent value="reflection" className="space-y-4 m-0 border-2 border-green-500">
                   <Card>
                     <CardHeader>
                       <CardTitle className="text-base">Overall Self-Reflection</CardTitle>
