@@ -68,6 +68,7 @@ import { NotificationsLinkSection } from "@/components/performance/setup/Notific
 import { UnifiedCompetencyFramework } from "@/components/performance/setup/UnifiedCompetencyFramework";
 import { JobAssessmentConfigPanel } from "@/components/performance/setup/JobAssessmentConfigPanel";
 import { AppraisalReadinessPanel } from "@/components/performance/setup/AppraisalReadinessPanel";
+import { RatingConversionRulesEditor } from "@/components/performance/setup/RatingConversionRulesEditor";
 import { Globe, Briefcase } from "lucide-react";
 
 // Breadcrumb items
@@ -329,12 +330,16 @@ export default function PerformanceSetupPage() {
                     <Layers className="h-4 w-4" />
                     Overall Scales
                   </TabsTrigger>
+                  <TabsTrigger value="proficiency-conversion" className="flex items-center gap-2">
+                    <TrendingUp className="h-4 w-4" />
+                    Proficiency Conversion
+                  </TabsTrigger>
                   <TabsTrigger value="competencies" className="flex items-center gap-2">
                     <BookOpen className="h-4 w-4" />
                     Competencies
                   </TabsTrigger>
                   <TabsTrigger value="index-settings" className="flex items-center gap-2">
-                    <TrendingUp className="h-4 w-4" />
+                    <BarChart3 className="h-4 w-4" />
                     Performance Trends
                   </TabsTrigger>
                   <TabsTrigger value="approval-workflows" className="flex items-center gap-2">
@@ -351,6 +356,9 @@ export default function PerformanceSetupPage() {
                 </TabsContent>
                 <TabsContent value="overall-scales" className="mt-4">
                   <OverallScalesContent scales={overallScales} isLoading={overallScalesLoading} onAdd={() => { setEditingOverallScale(null); setOverallScaleDialogOpen(true); }} onEdit={(s: OverallRatingScale) => { setEditingOverallScale(s); setOverallScaleDialogOpen(true); }} onDelete={handleDeleteOverallScale} t={t} />
+                </TabsContent>
+                <TabsContent value="proficiency-conversion" className="mt-4">
+                  <RatingConversionRulesEditor companyId={selectedCompany} />
                 </TabsContent>
                 <TabsContent value="competencies" className="mt-4">
                   <UnifiedCompetencyFramework 
