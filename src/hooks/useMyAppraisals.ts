@@ -165,6 +165,7 @@ export function useMyAppraisals() {
           position_title: p.primary_position_id ? positionMap[p.primary_position_id] || null : null,
           company_id: cycle.company_id,
           template_id: cycle.template_id ?? null,
+          component_scale_id: cycle.component_scale_id ?? null,
           // Template configuration flags
           include_goals: cycle.include_goals ?? true,
           include_competencies: cycle.include_competencies ?? true,
