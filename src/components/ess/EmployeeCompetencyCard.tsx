@@ -97,22 +97,24 @@ export function EmployeeCompetencyCard({
   const fieldLabel = ratingLabel || (usePerformanceScale ? "Your Performance Rating" : "Your Proficiency Level");
   
   // Get proficiency gap status for role expectation display
+  // Uses semantic CSS variables per UI Color Semantics Standard
   const getProficiencyGapStatus = () => {
     if (!requiredLevel || !currentAssessedLevel) return null;
     const gap = currentAssessedLevel - requiredLevel;
-    if (gap >= 0) return { status: "meets", label: "Meets/Exceeds", color: "text-green-600" };
-    if (gap === -1) return { status: "close", label: "Close to target", color: "text-amber-600" };
-    return { status: "gap", label: "Development needed", color: "text-red-600" };
+    if (gap >= 0) return { status: "meets", label: "Meets/Exceeds", color: "text-success" };
+    if (gap === -1) return { status: "close", label: "Close to target", color: "text-warning" };
+    return { status: "gap", label: "Development needed", color: "text-destructive" };
   };
   
   const gapStatus = getProficiencyGapStatus();
 
+  // Rating color uses semantic CSS variables per UI Color Semantics Standard
   const getRatingColor = (rating: number | null) => {
     if (rating === null) return "text-muted-foreground";
-    if (rating >= 4) return "text-green-600";
-    if (rating >= 3) return "text-blue-600";
-    if (rating >= 2) return "text-amber-600";
-    return "text-red-600";
+    if (rating >= 4) return "text-success";      // Achievement - green
+    if (rating >= 3) return "text-info";         // Meets expectations - blue
+    if (rating >= 2) return "text-warning";      // Needs attention - amber
+    return "text-destructive";                   // Below expectations - red
   };
 
   const isComplete = currentRating !== null;

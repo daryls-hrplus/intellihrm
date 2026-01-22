@@ -83,3 +83,8 @@ export {
   type EntityStatus,
   type EntityStatusBadgeProps,
 } from "./entity-status-badge";
+
+// Specialized Semantic Badges
+export { RequiredLevelBadge } from "./required-level-badge";
+export { RatingScoreBadge } from "./rating-score-badge";
+export { ProficiencyGapStatusBadge } from "./proficiency-gap-status-badge";
