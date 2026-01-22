@@ -560,7 +560,7 @@ export function EssAppraisalEvaluationDialog({
                 </TabsTrigger>
               </TabsList>
 
-              <ScrollArea className="flex-1 mt-4 min-h-0">
+              <ScrollArea className="flex-1 mt-4 min-h-0 h-0">
                 {/* Goals Tab */}
                 {enabledCategories.goals && (
                   <TabsContent value="goals" className="space-y-3 m-0">
