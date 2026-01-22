@@ -283,7 +283,7 @@ export function EmployeeCompetencyCard({
                       (Select all that apply)
                     </span>
                   </Label>
-                  <div className="rounded-md border p-3 max-h-[50vh] overflow-y-auto">
+                  <div className="rounded-md border p-3">
                     <div className="space-y-2">
                       {Object.entries(proficiencyIndicators).map(([level, behaviors]) => (
                         <div key={level} className="space-y-1">
