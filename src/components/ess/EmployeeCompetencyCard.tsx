@@ -136,7 +136,7 @@ export function EmployeeCompetencyCard({
   return (
     <Card className={cn(
       "transition-all",
-      isComplete && "border-blue-200 bg-blue-50/30 dark:border-blue-900 dark:bg-blue-950/20"
+      isComplete && "border-success/20 bg-success/5"
     )}>
       <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
         <CollapsibleTrigger asChild>
@@ -145,12 +145,12 @@ export function EmployeeCompetencyCard({
               <div className="flex items-center gap-3 flex-1 min-w-0">
                 <div className={cn(
                   "p-2 rounded-lg",
-                  isComplete ? "bg-green-100 dark:bg-green-900/30" : "bg-blue-100 dark:bg-blue-900/30"
+                  isComplete ? "bg-success/10" : "bg-info/10"
                 )}>
                   {isComplete ? (
-                    <CheckCircle2 className="h-4 w-4 text-green-600" />
+                    <CheckCircle2 className="h-4 w-4 text-success" />
                   ) : (
-                    <Award className="h-4 w-4 text-blue-600" />
+                    <Award className="h-4 w-4 text-info" />
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -159,8 +159,8 @@ export function EmployeeCompetencyCard({
                     {category && <Badge variant="outline" className="text-xs">{category}</Badge>}
                     <span>Weight: {weight}%</span>
                     {showRoleExpectation && requiredLevel && (
-                      <Badge variant="outline" className="text-xs bg-blue-50 border-blue-200 dark:bg-blue-950 dark:border-blue-800">
-                        <Target className="h-3 w-3 mr-1" />
+                      <Badge variant="outline" className="text-xs bg-info/10 border-info/20 text-info-foreground">
+                        <Target className="h-3 w-3 mr-1 text-info" />
                         Role: L{requiredLevel} ({PROFICIENCY_LABELS[requiredLevel]})
                       </Badge>
                     )}
@@ -200,11 +200,11 @@ export function EmployeeCompetencyCard({
             <div className="space-y-4 pt-4">
               {/* Role Expectation Info - Industry Standard Transparency */}
               {showRoleExpectation && requiredLevel && (
-                <Alert className="bg-blue-50 border-blue-200 dark:bg-blue-950/50 dark:border-blue-800">
-                  <Target className="h-4 w-4 text-blue-600" />
+                <Alert className="bg-info/5 border-info/20">
+                  <Target className="h-4 w-4 text-info" />
                   <AlertDescription className="text-sm">
                     <span className="font-medium">Role Expectation:</span>{" "}
-                    <span className="text-blue-700 dark:text-blue-300 font-semibold">
+                    <span className="text-info font-semibold">
                       {PROFICIENCY_LABELS[requiredLevel]} (Level {requiredLevel})
                     </span>
                     {currentAssessedLevel !== null && currentAssessedLevel !== undefined && (
