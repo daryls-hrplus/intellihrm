@@ -363,6 +363,7 @@ export function TalentApprovalWorkflowManager({ companyId }: TalentApprovalWorkf
         .from("goal_approval_rules")
         .select("id, name")
         .eq("company_id", companyId)
+        .eq("process_type", template.processType)
         .eq("goal_level", template.scopeLevel) as { data: { id: string; name: string }[] | null };
 
       if (existingRules && existingRules.length > 0) {
