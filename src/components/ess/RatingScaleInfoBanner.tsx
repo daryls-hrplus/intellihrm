@@ -1,4 +1,5 @@
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { WarningCallout } from "@/components/ui/semantic-callout";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -30,12 +31,9 @@ export function RatingScaleInfoBanner({
 }: RatingScaleInfoBannerProps) {
   if (!ratingScale) {
     return (
-      <Alert className="bg-amber-50 border-amber-200 dark:bg-amber-950/20 dark:border-amber-800">
-        <Info className="h-4 w-4 text-amber-600" />
-        <AlertDescription className="text-amber-800 dark:text-amber-200 text-sm">
-          Using default rating scale. Contact HR to configure a custom scale for this appraisal cycle.
-        </AlertDescription>
-      </Alert>
+      <WarningCallout className="my-0">
+        Using default rating scale. Contact HR to configure a custom scale for this appraisal cycle.
+      </WarningCallout>
     );
   }
 
