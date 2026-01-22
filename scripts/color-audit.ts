@@ -21,6 +21,22 @@ const RAW_COLOR_PATTERNS = [
   /(?:bg|text|border)-(?:blue|sky|cyan)-\d+/g,
 ];
 
+// Patterns that indicate potential contrast violations (foreground on light backgrounds)
+const FOREGROUND_MISMATCH_PATTERNS = [
+  /text-info-foreground/g,
+  /text-success-foreground/g,
+  /text-warning-foreground/g,
+  /text-destructive-foreground/g,
+];
+
+// Component replacement suggestions
+const COMPONENT_SUGGESTIONS: Record<string, string> = {
+  'text-info-foreground': 'Use RequiredLevelBadge, InfoBadge, or text-info for light backgrounds',
+  'text-success-foreground': 'Use SuccessBadge, RatingScoreBadge, or text-success for light backgrounds',
+  'text-warning-foreground': 'Use WarningBadge or text-warning for light backgrounds',
+  'text-destructive-foreground': 'Use ErrorBadge or text-destructive for light backgrounds',
+};
+
 // Files/directories to exclude from scanning
 const EXCLUDE_PATTERNS = [
   'node_modules',

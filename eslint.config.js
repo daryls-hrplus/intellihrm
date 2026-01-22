@@ -43,37 +43,60 @@ const COLOR_SEMANTICS_RULES = [
     selector: "TemplateLiteral[quasis.0.value.raw=/(?:bg|text|border)-(?:green|emerald|red|rose|amber|yellow|blue|sky|cyan)-\\d+/]",
     message: "⚠️ UI Color Semantics: Use SemanticBadge, SemanticCallout, or SemanticTooltip instead of raw color classes. See /enablement/ui-color-semantics for guidelines.",
   },
-  // Icon Color Enforcement: Info icons MUST be blue (text-info)
+  
+  // ===== CONTRAST VIOLATION DETECTION =====
+  // Catch light backgrounds with white foreground text (accessibility violation)
+  {
+    selector: "Literal[value=/bg-info\\/10.*text-info-foreground|text-info-foreground.*bg-info\\/10/]",
+    message: "⚠️ Contrast Violation: text-info-foreground (white) on bg-info/10 (light blue) is unreadable. Use RequiredLevelBadge, InfoBadge, or text-info class instead.",
+  },
+  {
+    selector: "Literal[value=/bg-success\\/10.*text-success-foreground|text-success-foreground.*bg-success\\/10/]",
+    message: "⚠️ Contrast Violation: text-success-foreground on light background is unreadable. Use SuccessBadge or text-success class instead.",
+  },
+  {
+    selector: "Literal[value=/bg-warning\\/10.*text-warning-foreground|text-warning-foreground.*bg-warning\\/10/]",
+    message: "⚠️ Contrast Violation: text-warning-foreground on light background may have contrast issues. Use WarningBadge or text-warning class instead.",
+  },
+  {
+    selector: "Literal[value=/bg-destructive\\/10.*text-destructive-foreground|text-destructive-foreground.*bg-destructive\\/10/]",
+    message: "⚠️ Contrast Violation: text-destructive-foreground on light background is unreadable. Use ErrorBadge or text-destructive class instead.",
+  },
+  
+  // ===== ICON COLOR ENFORCEMENT =====
+  // Info icons MUST be blue (text-info)
   {
     selector: "Literal[value=/Info.*text-muted-foreground|text-muted-foreground.*Info/]",
     message: "⚠️ Icon Color Standard: Info icons MUST use text-info (blue), not text-muted-foreground. Use <InfoIcon> from semantic-tooltip.tsx or apply text-info class. See /enablement/ui-color-semantics.",
   },
-  // Icon Color Enforcement: HelpCircle icons MUST be blue (text-info)
+  // HelpCircle icons MUST be blue (text-info)
   {
     selector: "Literal[value=/HelpCircle.*text-muted-foreground|text-muted-foreground.*HelpCircle/]",
     message: "⚠️ Icon Color Standard: HelpCircle icons MUST use text-info (blue), not text-muted-foreground. Use <InfoIcon> from semantic-tooltip.tsx or apply text-info class. See /enablement/ui-color-semantics.",
   },
-  // Icon Color Enforcement: Lightbulb icons MUST be blue (text-info)
+  // Lightbulb icons MUST be blue (text-info)
   {
     selector: "Literal[value=/Lightbulb.*text-muted-foreground|text-muted-foreground.*Lightbulb/]",
     message: "⚠️ Icon Color Standard: Lightbulb icons MUST use text-info (blue), not text-muted-foreground. See /enablement/ui-color-semantics.",
   },
-  // Icon Color Enforcement: Success icons (CheckCircle, Check) should use text-success
+  // Success icons (CheckCircle, Check) should use text-success
   {
     selector: "Literal[value=/CheckCircle.*text-muted-foreground|text-muted-foreground.*CheckCircle/]",
     message: "⚠️ Icon Color Standard: CheckCircle icons should use text-success (green) for confirmed/completed states, not text-muted-foreground. See /enablement/ui-color-semantics.",
   },
-  // Icon Color Enforcement: Warning icons (AlertTriangle) should use text-warning
+  // Warning icons (AlertTriangle) should use text-warning
   {
     selector: "Literal[value=/AlertTriangle.*text-muted-foreground|text-muted-foreground.*AlertTriangle/]",
     message: "⚠️ Icon Color Standard: AlertTriangle icons should use text-warning (amber) for attention states, not text-muted-foreground. See /enablement/ui-color-semantics.",
   },
-  // Icon Color Enforcement: Error icons (XCircle) should use text-destructive
+  // Error icons (XCircle) should use text-destructive
   {
     selector: "Literal[value=/XCircle.*text-muted-foreground|text-muted-foreground.*XCircle/]",
     message: "⚠️ Icon Color Standard: XCircle icons should use text-destructive (red) for error states, not text-muted-foreground. See /enablement/ui-color-semantics.",
   },
-  // Entity Status Badge Enforcement: Catch is_active with variant="default" (blue)
+  
+  // ===== ENTITY STATUS BADGE ENFORCEMENT =====
+  // Catch is_active with variant="default" (blue)
   {
     selector: "Literal[value=/is_active.*variant.*default|variant.*default.*Active/]",
     message: "⚠️ Entity Status Standard: Use <EntityStatusBadge status='active' /> or <ActiveInactiveBadge isActive={...} /> instead. Blue 'default' variant is NOT for entity state. Active must be green. See /enablement/ui-color-semantics.",
